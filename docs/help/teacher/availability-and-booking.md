@@ -35,6 +35,12 @@ Removing a block later gives those days back and lets students book them again. 
 2. Select an available time to book on the student’s behalf, or open a class and choose **Cancel**.
 3. Give a reason when cancelling and confirm.
 
+### Change the date or time of a class
+
+1. Open the class and choose **Manage class → Change date and time**.
+2. Pick a new day and time. Only times that fit your hours, blocks, buffer and existing classes are offered, and the class’s current time is not one of them.
+3. Confirm. The class moves, your student is told the new time, and the change is recorded in the class history.
+
 [Screenshot: Teacher availability calendar]
 
 ## Tips
@@ -54,6 +60,10 @@ Removing a block later gives those days back and lets students book them again. 
 **Can I connect Google Calendar?** Yes. In **Settings → Calendar**, connect your Google account. Busy events help prevent conflicting bookings.
 
 **Can I cancel a completed or no-show class?** Yes. Choose Cancel and provide the required reason; the class credit is returned.
+
+**Can I move a class that starts in less than 24 hours?** Yes. The 24-hour rule applies to your student, not to you — and moving a class does not use up any of the schedule changes included with the package.
+
+**Can I move a class that has already happened?** No. A completed, cancelled or no-show class cannot be moved. Cancel it, or restore it first, then book the new time.
 
 ## Related articles
 

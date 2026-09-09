@@ -1885,6 +1885,45 @@ export const fr = {
     "Ce créneau n'est pas disponible — il est en dehors de vos horaires, bloqué ou déjà pris.",
   "teacherBook.error.slot-taken": "Ce créneau vient d'être réservé par quelqu'un d'autre.",
   "teacherBook.error.invalid": "Cette sélection n'est pas valide. Choisissez un créneau à nouveau.",
+
+  // Report côté enseignante — « changer la date et l'heure ».
+  // Des codes, pas des phrases : l'action renvoie un code et c'est ici qu'il est
+  // rédigé (voir lib/cancellation/teacher-reschedule-errors.ts).
+  "teacherReschedule.overrideReason":
+    "L'enseignante a déplacé cette classe à une autre date et heure.",
+  "teacherReschedule.confirmAsk.title": "Déplacer cette classe ?",
+  "teacherReschedule.confirmAsk.cta": "Déplacer la classe",
+  "teacherReschedule.pending": "Déplacement…",
+  "teacherReschedule.error.invalid":
+    "Cette sélection n'est pas valide. Choisissez un créneau à nouveau.",
+  "teacherReschedule.error.booking-not-found": "Nous n'avons pas trouvé cette classe.",
+  "teacherReschedule.error.not-scheduled":
+    "Cette classe a déjà eu lieu ou a été annulée : elle ne peut plus être déplacée.",
+  "teacherReschedule.error.past-slot": "Choisissez un créneau à venir.",
+  "teacherReschedule.error.same-slot": "C'est l'horaire que cette classe a déjà.",
+  "teacherReschedule.error.package-expired":
+    "Ce créneau tombe après l'expiration du forfait. Prolongez le forfait, puis déplacez la classe.",
+  "teacherReschedule.error.package-not-found":
+    "Ce forfait de classes n'est plus disponible. Actualisez et réessayez.",
+  "teacherReschedule.error.slot-unavailable": "Ce créneau n'est plus disponible.",
+  "teacherReschedule.error.slot-taken": "Ce créneau vient d'être pris par une autre classe.",
+  "web.dashboard.classes.reschedule.title": "Changer la date et l'heure",
+  "web.dashboard.classes.reschedule.subtitle":
+    "Cette classe a lieu le {when}. Choisissez un nouveau créneau.",
+  "web.dashboard.classes.reschedule.previousDay": "Jour précédent",
+  "web.dashboard.classes.reschedule.nextDay": "Jour suivant",
+  "web.dashboard.classes.reschedule.noTimesAvailable":
+    "Aucun créneau libre ce jour-là. Essayez une autre date.",
+  "web.dashboard.classes.reschedule.goToNextAvailableDay": "Aller au prochain jour libre · {date}",
+  "web.dashboard.classes.reschedule.noTimesLeftInWindow":
+    "Plus aucun créneau libre dans votre fenêtre de réservation.",
+  "web.dashboard.classes.reschedule.moveToLabel": "Déplacer vers {label}",
+  "web.dashboard.classes.reschedule.hint":
+    "Seuls les créneaux laissés libres par vos disponibilités, votre marge entre classes et vos dates bloquées s'affichent. Votre élève est prévenu·e du changement et conserve les changements d'horaire inclus dans le forfait.",
+  "web.dashboard.classes.reschedule.backToClass": "Revenir à la classe",
+  "web.dashboard.classes.detail.changeDateTime": "Changer la date et l'heure",
+  "web.dashboard.classes.detail.overrideLog.teacherRescheduleClass":
+    "Classe déplacée par l'enseignante",
   "onboarding.templates.name": "Nom",
   "onboarding.templates.subject": "Matière (facultatif)",
   "onboarding.templates.subjectHint":

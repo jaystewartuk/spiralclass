@@ -1897,6 +1897,42 @@ export const en = {
   "teacherBook.error.slot-taken": "That slot was just booked by someone else.",
   "teacherBook.error.invalid": "That selection wasn't valid. Pick a time again.",
 
+  // Teacher-initiated reschedule â "change the date and time of a class".
+  // Codes, not sentences: the action returns a code and this side words it,
+  // so a teacher who is not English reads her own language (see
+  // lib/cancellation/teacher-reschedule-errors.ts).
+  "teacherReschedule.overrideReason": "The teacher moved this class to a new date and time.",
+  "teacherReschedule.confirmAsk.title": "Move this class?",
+  "teacherReschedule.confirmAsk.cta": "Move the class",
+  "teacherReschedule.pending": "Moving…",
+  "teacherReschedule.error.invalid": "That selection wasn't valid. Pick a time again.",
+  "teacherReschedule.error.booking-not-found": "We couldn't find that class.",
+  "teacherReschedule.error.not-scheduled":
+    "This class has already happened or was cancelled, so it can't be moved.",
+  "teacherReschedule.error.past-slot": "Pick a time in the future.",
+  "teacherReschedule.error.same-slot": "That's the time this class already has.",
+  "teacherReschedule.error.package-expired":
+    "That time is after this package expires. Extend the package first, then move the class.",
+  "teacherReschedule.error.package-not-found":
+    "This class package is no longer available. Refresh and try again.",
+  "teacherReschedule.error.slot-unavailable": "That time is no longer available.",
+  "teacherReschedule.error.slot-taken": "That time was just taken by another class.",
+  "web.dashboard.classes.reschedule.title": "Change date and time",
+  "web.dashboard.classes.reschedule.subtitle": "This class is on {when}. Pick a new time.",
+  "web.dashboard.classes.reschedule.previousDay": "Previous day",
+  "web.dashboard.classes.reschedule.nextDay": "Next day",
+  "web.dashboard.classes.reschedule.noTimesAvailable":
+    "No open times on this day. Try another date.",
+  "web.dashboard.classes.reschedule.goToNextAvailableDay": "Go to next open day · {date}",
+  "web.dashboard.classes.reschedule.noTimesLeftInWindow":
+    "No open times left in your booking window.",
+  "web.dashboard.classes.reschedule.moveToLabel": "Move to {label}",
+  "web.dashboard.classes.reschedule.hint":
+    "Only times your availability, your buffer and your blocked dates leave open are shown. Your student is told the class moved, and keeps the schedule changes included with the package.",
+  "web.dashboard.classes.reschedule.backToClass": "Back to the class",
+  "web.dashboard.classes.detail.changeDateTime": "Change date and time",
+  "web.dashboard.classes.detail.overrideLog.teacherRescheduleClass": "Class moved by the teacher",
+
   "onboarding.templates.name": "Name",
   "onboarding.templates.subject": "Subject (optional)",
   "onboarding.templates.subjectHint":

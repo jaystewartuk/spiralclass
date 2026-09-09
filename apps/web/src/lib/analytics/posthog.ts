@@ -426,6 +426,13 @@ export type ServerEvent = WithSessionId<
         teacherId: string;
         oldBookingId: string;
         newBookingId: string;
+        // Who moved the class. A student rescheduling herself and a teacher
+        // moving the class from her dashboard are the same event to the
+        // funnel — "this class changed time" — and differ only here, so the
+        // two are one event with a dimension rather than two events nobody
+        // remembers to add together. Optional: the student call site predates
+        // the teacher one and omitting it means "student".
+        actor?: "student" | "teacher";
       };
     }
   | {

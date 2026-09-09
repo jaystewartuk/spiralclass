@@ -17,6 +17,7 @@ export function overrideActionLabel(action: string, t: TFunction): string {
   const map: Record<string, string> = {
     teacher_book_class: t("web.dashboard.classes.detail.overrideLog.teacherBookClass"),
     teacher_cancel: t("web.dashboard.classes.detail.overrideLog.teacherCancel"),
+    teacher_reschedule_class: t("web.dashboard.classes.detail.overrideLog.teacherRescheduleClass"),
     mark_complete: t("web.dashboard.classes.detail.overrideLog.markComplete"),
     mark_no_show: t("web.dashboard.classes.detail.overrideLog.markNoShow"),
     restore_class: t("web.dashboard.classes.detail.overrideLog.restoreClass"),

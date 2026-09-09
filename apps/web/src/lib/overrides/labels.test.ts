@@ -15,6 +15,7 @@ describe("overrideActionLabel", () => {
     for (const action of [
       "teacher_book_class",
       "teacher_cancel",
+      "teacher_reschedule_class",
       "mark_complete",
       "mark_no_show",
       "restore_class",

@@ -184,6 +184,25 @@ true`), netting to zero. It **does** spend one schedule-change unit (a
     deleted out from under the operation reports `package-not-found`
     distinctly (not mis-reported as a slot conflict).
 
+**Teacher-initiated moves.** A teacher can move a class too
+(`actions/teacher-reschedule.ts`), through the same handler and therefore
+under rules 25–28 unchanged. She is exempt from exactly the two rules that bound what a _student_ may do
+unilaterally: the `≥24h` window (rule 24c), and the pooled schedule-change
+budget, which her move does **not** spend (`spendScheduleChange: false`) — the
+same exemption the teacher-cancel path already takes when it refunds without
+charging it. She is **not** exempt from anything that describes reality:
+availability windows, blocked dates, Google busy blocks, buffer, collisions,
+her max-advance horizon and the package's expiration all still bind. The
+single generator input she bypasses is her own `minAdvanceH`, exactly as in
+self-serve booking (rule 13). Only a `scheduled` booking can be moved.
+
+The move is **audited and announced**: an `Override` row
+(`teacher_reschedule_class`, before/after `scheduledStart`) is written inside
+the same transaction, and the student gets the ordinary `reschedule_confirm`
+notification carrying the old time. The teacher's own mirror
+(`reschedule_confirm_teacher`) is skipped — she made the move — matching
+`notifyTeacher: false` in self-serve booking.
+
 ### Auto-completion (`lib/cancellation/auto-complete.ts`, §6.5)
 
 29. Once `scheduledEnd` passes, a still-`scheduled` booking is flipped to
@@ -266,7 +285,15 @@ true`), netting to zero. It **does** spend one schedule-change unit (a
    only.
 2. Teacher can cancel any of her own bookings (`scheduled`, `completed`, or
    `no_show`) with a required reason — refunds the class, logs an `Override`.
-3. Teacher can block a date range from her calendar settings; any colliding
+3. Teacher can **change the date and time** of a `scheduled` class from
+   "Manage class" → "Change date and time"
+   (`dashboard/classes/[bookingId]/reschedule`), which is the self-serve
+   booking screen's picker over the reschedule window: her own day nav, the
+   morning/afternoon/evening bands, both clocks on every slot, and the
+   class's current slot excluded. Committing runs
+   `actions/teacher-reschedule.ts` → the shared `applyReschedule` (rules
+   28a–28b).
+4. Teacher can block a date range from her calendar settings; any colliding
    scheduled classes are auto-cancelled and refunded per rule 31.
 
 ### Why `next-available-slots.ts` is its own module
@@ -342,17 +369,23 @@ testing without a page around it.
 - `booking-not-scheduled` — reschedule eligibility: booking isn't in
   `scheduled` status.
 - `lt24h` — reschedule eligibility: less than 24h before class start.
+  Student-only; a teacher move is not subject to it.
+- `not-scheduled` / `same-slot` / `past-slot` — teacher reschedule: the class
+  is not `scheduled`, the chosen time is the one it already has, or the chosen
+  time is in the past. (The teacher surface returns codes, not sentences —
+  `lib/cancellation/teacher-reschedule-errors.ts` — so the wording is resolved
+  in the reader's own locale.)
 
 ## Permissions
 
-| Action                         | Student (own booking)                                       | Student (other's) | Teacher (own student's booking)                                           | Teacher (other's) | Admin                |
-| ------------------------------ | ----------------------------------------------------------- | ----------------- | ------------------------------------------------------------------------- | ----------------- | -------------------- |
-| View                           | Yes                                                         | No                | Yes                                                                       | No                | Yes (via `/admin`)   |
-| Create (book a slot)           | Yes                                                         | —                 | Yes (self-serve, on the student's behalf)                                 | No                | —                    |
-| Cancel                         | Yes (subject to 24h/budget rule)                            | No                | Yes (any status in `scheduled`/`completed`/`no_show`, always full refund) | No                | Via override tooling |
-| Reschedule                     | Yes (subject to eligibility)                                | No                | Not a distinct teacher action (teacher instead cancels + re-books)        | No                | —                    |
-| Block dates (cascades cancels) | No                                                          | No                | Yes (own calendar only)                                                   | No                | —                    |
-| Approve                        | N/A — no approval step; a valid slot pick is self-approving |                   |                                                                           |                   |                      |
+| Action                         | Student (own booking)                                       | Student (other's) | Teacher (own student's booking)                                             | Teacher (other's) | Admin                |
+| ------------------------------ | ----------------------------------------------------------- | ----------------- | --------------------------------------------------------------------------- | ----------------- | -------------------- |
+| View                           | Yes                                                         | No                | Yes                                                                         | No                | Yes (via `/admin`)   |
+| Create (book a slot)           | Yes                                                         | —                 | Yes (self-serve, on the student's behalf)                                   | No                | —                    |
+| Cancel                         | Yes (subject to 24h/budget rule)                            | No                | Yes (any status in `scheduled`/`completed`/`no_show`, always full refund)   | No                | Via override tooling |
+| Reschedule                     | Yes (subject to eligibility)                                | No                | Yes (`scheduled` only; exempt from the 24h rule, does not spend the budget) | No                | —                    |
+| Block dates (cascades cancels) | No                                                          | No                | Yes (own calendar only)                                                     | No                | —                    |
+| Approve                        | N/A — no approval step; a valid slot pick is self-approving |                   |                                                                             |                   |                      |
 
 ## Open Questions
 

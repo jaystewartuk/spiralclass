@@ -394,6 +394,12 @@ Removing a block later gives those days back and lets students book them again. 
 2. Select an available time to book on the student’s behalf, or open a class and choose **Cancel**.
 3. Give a reason when cancelling and confirm.
 
+### Change the date or time of a class
+
+1. Open the class and choose **Manage class → Change date and time**.
+2. Pick a new day and time. Only times that fit your hours, blocks, buffer and existing classes are offered, and the class’s current time is not one of them.
+3. Confirm. The class moves, your student is told the new time, and the change is recorded in the class history.
+
 
 
 ## Tips
@@ -413,6 +419,10 @@ Removing a block later gives those days back and lets students book them again. 
 **Can I connect Google Calendar?** Yes. In **Settings → Calendar**, connect your Google account. Busy events help prevent conflicting bookings.
 
 **Can I cancel a completed or no-show class?** Yes. Choose Cancel and provide the required reason; the class credit is returned.
+
+**Can I move a class that starts in less than 24 hours?** Yes. The 24-hour rule applies to your student, not to you — and moving a class does not use up any of the schedule changes included with the package.
+
+**Can I move a class that has already happened?** No. A completed, cancelled or no-show class cannot be moved. Cancel it, or restore it first, then book the new time.
 `,
       "es-MX": `## Propósito
 
@@ -449,6 +459,12 @@ Quitar un bloqueo después devuelve esos días y los alumnos pueden reservarlos 
 2. Selecciona un horario disponible para reservar en nombre del alumno, o abre una clase y elige **Cancelar**.
 3. Indica un motivo al cancelar y confirma.
 
+### Cambiar la fecha o la hora de una clase
+
+1. Abre la clase y elige **Gestionar clase → Cambiar fecha y hora**.
+2. Elige un día y un horario nuevos. Solo aparecen los horarios que respetan tus horas, bloqueos, descansos y clases ya reservadas, y el horario actual de la clase no es uno de ellos.
+3. Confirma. La clase se mueve, tu alumno recibe aviso del nuevo horario y el cambio queda registrado en el historial de la clase.
+
 
 
 ## Consejos
@@ -468,6 +484,10 @@ Quitar un bloqueo después devuelve esos días y los alumnos pueden reservarlos 
 **¿Puedo conectar Google Calendar?** Sí. En **Configuración → Calendario**, conecta tu cuenta de Google. Los eventos marcados como ocupado ayudan a evitar reservas en conflicto.
 
 **¿Puedo cancelar una clase completada o una ausencia?** Sí. Elige Cancelar e indica el motivo requerido; el crédito de la clase se devuelve.
+
+**¿Puedo mover una clase que empieza en menos de 24 horas?** Sí. La regla de 24 horas es para tu alumno, no para ti — y mover una clase no consume los cambios de horario incluidos en el paquete.
+
+**¿Puedo mover una clase que ya ocurrió?** No. Una clase completada, cancelada o con ausencia no se puede mover. Cancélala, o restitúyela primero y luego reserva el horario nuevo.
 `,
     },
     publicFaq: true,
