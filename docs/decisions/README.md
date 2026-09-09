@@ -298,9 +298,10 @@ has broken production.
 | #                   | Decision                                                                                   |
 | ------------------- | ------------------------------------------------------------------------------------------ |
 | [D-52](./D-52.md)   | One shared key-based catalog, completeness as a type error, plus a ratchet and a lint rule |
-| [D-72](./D-72.md)   | **Language-first**: one 234-entry registry generated from CLDR, `asr` a capability flag    |
+| [D-72](./D-72.md)   | One 234-entry registry from CLDR; language-first framing widened by D-171                  |
 | [D-81](./D-81.md)   | A third UI language, on a registry where adding one is two steps                           |
 | [D-112](./D-112.md) | Ask for the teaching language at onboarding — an unset value silently seeds the wrong pack |
+| [D-171](./D-171.md) | Teachers of **any subject** — the copy widened, the language-shaped schema did not         |
 
 ### Design and layout
 
@@ -436,7 +437,7 @@ records removed before publication — see [What is not here](#what-is-not-here)
 | [D-66](./D-66.md)   | Infisical replaces a plaintext secrets file                           | Active                               |
 | [D-69](./D-69.md)   | `ClassContent`/`ClassMaterial` merge into `LibraryMaterial`           | Active                               |
 | [D-70](./D-70.md)   | Full exit from Supabase and Vercel; history squashed                  | Executed — see D-89                  |
-| [D-72](./D-72.md)   | Language-first: one registry, `target_language` as BCP-47             | Active                               |
+| [D-72](./D-72.md)   | One registry, `target_language` as BCP-47                             | Active (positioning → D-171)         |
 | [D-73](./D-73.md)   | Self-hosted teacher intro video + AI intro coach                      | Active (model choice → D-87)         |
 | [D-75](./D-75.md)   | Waiting-room presence and an on-demand nudge                          | Active (transport replaced)          |
 | [D-76](./D-76.md)   | Cross-app maintenance mode behind one env var                         | Active                               |
@@ -510,6 +511,7 @@ records removed before publication — see [What is not here](#what-is-not-here)
 | [D-168](./D-168.md) | Migration history rebaselined into a generated + a hand-authored file | Active                               |
 | [D-169](./D-169.md) | One wrapper owns every Infisical call; deploys make none              | Active                               |
 | [D-170](./D-170.md) | The Codespaces path is deleted, not repaired                          | Active                               |
+| [D-171](./D-171.md) | Any subject in the copy; the schema stays language-shaped             | Active                               |
 
 ---
 
