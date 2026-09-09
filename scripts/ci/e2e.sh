@@ -275,6 +275,11 @@ E2E_STATUS=$?
 #
 #   VISUAL_UPDATE_SNAPSHOTS=booking bash scripts/ci/e2e.sh
 #
+# — which since [D-171] only runs on Linux, so in practice you reach it through
+# `gh workflow run heavy.yml -f update_visual_baselines=booking`. The env var is
+# still what the workflow sets, and the paragraphs below are still why the value
+# is a filter rather than a flag.
+#
 # Both halves of that are load-bearing, and each was learned the hard way while
 # regenerating for D-144:
 #
@@ -296,19 +301,23 @@ E2E_STATUS=$?
 # radius); anything else is a Playwright -g pattern matched against test titles,
 # which are "<route name> matches its baseline".
 #
-# ⚠️ THERE ARE TWO BASELINE SETS AND THIS SCRIPT ONLY EVER WRITES ONE OF THEM.
-# Playwright suffixes a snapshot with `process.platform`, so the committed
-# images are `-darwin.png` (120 of them) AND `-linux.png` (120 more, added by
-# [D-161] so the browser suites could leave the laptop). A regeneration run
-# rewrites the set belonging to the machine it runs on and cannot see the
-# other, which makes the failure mode concrete and worth naming: regenerate on
-# the laptop, commit, and the runner goes red on the same 120 routes it was
-# always going to go red on — because nothing regenerated ITS set.
+# ⚠️ THERE IS ONE BASELINE SET AND ONLY ubuntu-latest MAY WRITE IT ([D-171]).
+# Playwright suffixes a snapshot with `process.platform`, so [D-161] committed
+# two sets — `-darwin.png` for the laptop and `-linux.png` for the runner — and
+# a regeneration run could only ever see its own half. That cost was worth
+# paying while the laptop still certified releases; [D-162] ended that, so
+# D-171 deleted the macOS set and regression.spec.ts now skips anywhere but
+# Linux.
 #
-# So a change to what a page LOOKS LIKE needs both, and the supported way to
-# get the Linux half is not to run this script under emulation (arm64 Linux
-# rasterises text differently from the amd64 runner, so those images would be
-# wrong in a way that passes locally and fails in CI). It is:
+# Which means a regeneration started HERE, on a Mac, would either photograph
+# nothing (the suite skips) or, with the skip bypassed, write macOS pixels into
+# the set the runner asserts. So this script refuses instead — the check is a
+# few lines below. Running it under emulation is refused for the same reason
+# once removed: arm64 Linux rasterises text differently from the amd64 runner,
+# so those images would be wrong in the worst available shape, passing on the
+# machine that made them and failing in CI.
+#
+# The supported way, and the only one:
 #
 #   gh workflow run heavy.yml -f update_visual_baselines=all --ref <branch>
 #
@@ -317,6 +326,21 @@ E2E_STATUS=$?
 # workflow header spells out the download step.
 VISUAL_UPDATE=()
 if [ -n "${VISUAL_UPDATE_SNAPSHOTS:-}" ]; then
+  if [ "$(uname -s)" != "Linux" ]; then
+    echo "" >&2
+    echo "VISUAL_UPDATE_SNAPSHOTS is set, but this is $(uname -s), not Linux." >&2
+    echo "" >&2
+    echo "The visual baselines are -linux.png and are asserted on ubuntu-latest" >&2
+    echo "only (D-171). Regenerating them anywhere else writes pixels that no" >&2
+    echo "machine asserts, or overwrites the set the gate reads with this one's" >&2
+    echo "font rendering. Dispatch it instead:" >&2
+    echo "" >&2
+    echo "  gh workflow run heavy.yml -f update_visual_baselines=${VISUAL_UPDATE_SNAPSHOTS} --ref <branch>" >&2
+    echo "" >&2
+    echo "To look at a page as it renders on this machine, run capture.spec.ts —" >&2
+    echo "it writes a gallery rather than asserting against one." >&2
+    exit 1
+  fi
   VISUAL_UPDATE=(--update-snapshots=all)
   if [ "$VISUAL_UPDATE_SNAPSHOTS" != "all" ]; then
     VISUAL_UPDATE+=(-g "$VISUAL_UPDATE_SNAPSHOTS")

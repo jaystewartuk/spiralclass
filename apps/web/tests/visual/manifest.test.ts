@@ -149,81 +149,73 @@ describe("visual baseline manifest", () => {
 });
 
 /**
- * The two baseline sets, kept in lockstep ([D-161]).
+ * ONE baseline set, and it belongs to `ubuntu-latest` ([D-171]).
  *
- * Playwright suffixes a snapshot with `process.platform`, so a repository whose
- * browser suites run on two operating systems commits two images per capture:
- * `<route>-<viewport>-<theme>-darwin.png` for the laptop and `-linux.png` for
- * `ubuntu-latest`. Before D-161 there was one set and the suites were
- * laptop-only; D-157 named exactly that as the single blocker to moving them.
+ * Playwright suffixes a snapshot with `process.platform`, so [D-161] committed
+ * each capture twice — `-darwin.png` for the laptop, `-linux.png` for the
+ * runner — and this block existed to keep the two halves in lockstep. [D-162]
+ * removed the macOS half's last consumer by making the runners, not a local
+ * receipt, what certifies a release; D-171 deleted it and made
+ * regression.spec.ts skip anywhere but Linux.
  *
- * WHAT THIS CATCHES, and it is not hypothetical — it is the standing cost of
- * having two sets at all. `VISUAL_UPDATE_SNAPSHOTS=all bash scripts/ci/e2e.sh`
- * rewrites the set belonging to whichever machine it runs on and CANNOT see the
- * other. So the natural mistake is: restyle a page, regenerate on the laptop,
- * review the diffs, merge — and the runner goes red on exactly the routes just
- * fixed, because nothing regenerated its half.
+ * WHAT THIS STILL CATCHES is the dangerous half of the old pair, and it is the
+ * reason this block did not go with the set it was watching. Playwright
+ * defaults to `updateSnapshots: 'missing'`: a capture with no committed image
+ * gets one WRITTEN from whatever rendered, on a runner whose disk is thrown
+ * away, and the leg reports green. A capture with no baseline is not partly
+ * covered — it is uncovered, and it looks covered. This is the only thing that
+ * says so, it runs in the FAST tier, and it fails within seconds of the push.
  *
- * The other direction is worse, because it is silent. Add a route, get a darwin
- * baseline from a local run, and the runner finds no linux baseline, WRITES one
- * from whatever the page rendered that day, and reports green. A capture with
- * one baseline is not half-covered; it is uncovered, and it looks covered.
- *
- * Regenerating the Linux half is a documented one-liner — see the header of
+ * Regenerating is a documented dispatch — see the header of
  * .github/workflows/heavy.yml.
  */
-describe("visual baselines cover both platforms", () => {
+describe("visual baselines", () => {
   const SNAPSHOT_DIR = resolve(__dirname, "regression.spec.ts-snapshots");
 
-  /** `landing-390-light-darwin.png` -> `landing-390-light`. */
-  const stems = (platform: string) => {
-    const suffix = `-${platform}.png`;
-    return readdirSync(SNAPSHOT_DIR)
-      .filter((f) => f.endsWith(suffix))
-      .map((f) => f.slice(0, -suffix.length))
+  const files = () => readdirSync(SNAPSHOT_DIR);
+
+  /** `landing-390-light-linux.png` -> `landing-390-light`. */
+  const stems = () =>
+    files()
+      .filter((f) => f.endsWith("-linux.png"))
+      .map((f) => f.slice(0, -"-linux.png".length))
       .sort();
-  };
 
-  it("has a darwin set and a linux set", () => {
-    // Non-empty on both counts, so the equality below cannot pass by both being
-    // empty — which is what a deleted snapshot directory looks like.
-    expect(stems("darwin").length, "no -darwin.png baselines").toBeGreaterThan(0);
-    expect(stems("linux").length, "no -linux.png baselines").toBeGreaterThan(0);
-  });
-
-  it("names exactly the same captures in each", () => {
-    const darwin = stems("darwin");
-    const linux = stems("linux");
-    const onlyDarwin = darwin.filter((s) => !linux.includes(s));
-    const onlyLinux = linux.filter((s) => !darwin.includes(s));
-
-    expect(
-      onlyDarwin,
-      `${onlyDarwin.length} capture(s) have a macOS baseline and no Linux one, so the ` +
-        "runner will write its own on first sight and assert nothing. Regenerate with: " +
-        "gh workflow run heavy.yml -f update_visual_baselines=all --ref <branch>",
-    ).toEqual([]);
-    expect(
-      onlyLinux,
-      `${onlyLinux.length} capture(s) have a Linux baseline and no macOS one, so ` +
-        "pnpm gate:full on the laptop will assert nothing. Regenerate with: " +
-        "VISUAL_UPDATE_SNAPSHOTS=all bash scripts/ci/e2e.sh",
-    ).toEqual([]);
+  it("has a linux set at all", () => {
+    // What a deleted snapshot directory looks like, asserted separately so the
+    // per-route check below cannot pass vacuously.
+    expect(stems().length, "no -linux.png baselines").toBeGreaterThan(0);
   });
 
   it("photographs every route the sweep actually captures", () => {
-    // The two tests above only prove the sets AGREE, which two equally stale
-    // sets also do. This is the one that notices a route was added to the
-    // manifest and never photographed. Mirrors regression.spec.ts's own
-    // selection, because that is the list the images come from.
-    const darwin = stems("darwin");
+    // Mirrors regression.spec.ts's own selection, because that is the list the
+    // images come from. A route added to the manifest and never photographed
+    // fails here rather than teaching the runner to write its own.
+    const committed = stems();
     const captured = capturable("public").filter((route) => route.portfolio);
     expect(captured.length, "the sweep captures no routes at all").toBeGreaterThan(0);
     for (const route of captured) {
       expect(
-        darwin.some((stem) => stem.startsWith(`${route.name}-`)),
-        `the sweep captures "${route.name}" and no baseline photographs it`,
+        committed.some((stem) => stem.startsWith(`${route.name}-`)),
+        `the sweep captures "${route.name}" and no baseline photographs it. Regenerate: ` +
+          `gh workflow run heavy.yml -f update_visual_baselines=${route.name} --ref <branch>`,
       ).toBe(true);
     }
+  });
+
+  it("keeps the second platform's set from growing back", () => {
+    // D-171's own guard, retired in the same change as the thing it guards
+    // would otherwise be — the mistake the mobile route tree taught. A
+    // `-darwin.png` here means someone ran the suite on a Mac with the skip
+    // removed or bypassed, and Playwright wrote a set nothing asserts and
+    // nothing regenerates: the exact bookkeeping D-171 deleted, growing back
+    // one image at a time.
+    const strays = files().filter((f) => f.endsWith(".png") && !f.endsWith("-linux.png"));
+    expect(
+      strays,
+      `Baselines for a platform that no longer asserts anything (D-171). The visual ` +
+        `sweep runs on ubuntu-latest only; delete these rather than committing them:\n` +
+        strays.join("\n"),
+    ).toEqual([]);
   });
 });

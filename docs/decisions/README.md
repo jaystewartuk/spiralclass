@@ -363,6 +363,7 @@ a hook — is a caller.
 | [D-162](./D-162.md) | The runners certify the release; a local receipt was a self-attestation                        |
 | [D-163](./D-163.md) | One home for a deploy value — and the same-day reversal of the mechanism, with the reason      |
 | [D-164](./D-164.md) | **A runbook for infrastructure that does not exist is deleted, not banner-ed**                 |
+| [D-171](./D-171.md) | One visual baseline set, owned by the machine that gates the merge — the macOS half is deleted |
 
 ### Privacy, governance and publication
 
@@ -503,13 +504,14 @@ records removed before publication — see [What is not here](#what-is-not-here)
 | [D-158](./D-158.md) | Publish the shape, never the account                                  | Active                               |
 | [D-159](./D-159.md) | Publish what was built, not the operator's position                   | Active                               |
 | [D-160](./D-160.md) | The gate runs the shared packages' suites                             | Active                               |
-| [D-161](./D-161.md) | The heavy tier leaves the laptop; two baseline sets                   | Active                               |
+| [D-161](./D-161.md) | The heavy tier leaves the laptop; two baseline sets                   | Active (second set → D-171)          |
 | [D-162](./D-162.md) | The runners certify the release                                       | Active                               |
 | [D-163](./D-163.md) | One home for a deploy value — mechanism reversed by its own addendum  | Active                               |
 | [D-164](./D-164.md) | Dead runbooks are deleted, not banner-ed                              | Active                               |
 | [D-168](./D-168.md) | Migration history rebaselined into a generated + a hand-authored file | Active                               |
 | [D-169](./D-169.md) | One wrapper owns every Infisical call; deploys make none              | Active                               |
 | [D-170](./D-170.md) | The Codespaces path is deleted, not repaired                          | Active                               |
+| [D-171](./D-171.md) | One visual baseline set, owned by ubuntu-latest                       | Active                               |
 
 ---
 

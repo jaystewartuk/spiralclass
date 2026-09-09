@@ -73,7 +73,7 @@ appears in it.</sub>
 It is published as an honest record of how one engineer builds and runs a
 payments-handling, video-carrying SaaS product alone: the architecture, the
 decisions, the things that went wrong, and the mechanisms built so they would
-not go wrong twice. The 118 decision records in
+not go wrong twice. The 119 decision records in
 [`docs/decisions/`](docs/decisions/README.md) are the most useful thing here —
 several of them reverse an earlier one and say why.
 
@@ -450,9 +450,10 @@ request and every push to `main`. It reads the tier out of the same registry
 rather than listing jobs: one step asks `gate.mjs --tier heavy --list --json`
 and the matrix fans out over the answer, so a suite added to `steps.mjs` gets a
 runner in the same commit and there is no YAML to remember to widen. The browser
-suites carry two committed baseline sets, `-darwin.png` and `-linux.png`,
-because Playwright names a snapshot after the platform that took it and both
-machines have to be able to assert.
+suites carry one committed baseline set, `-linux.png`, and the visual sweep
+skips on any other platform: Playwright names a snapshot after the machine that
+took it, and the machine that asserts is the one whose verdict a release is
+certified by ([D-171](docs/decisions/D-171.md)).
 
 **The workflows list no steps of their own, and that is the point.** For three
 months this repository had no GitHub Actions at all: `.github/workflows/` was
@@ -614,7 +615,7 @@ in [`docs/deployment/ORACLE_LIVEKIT_PRODUCTION.md`](docs/deployment/ORACLE_LIVEK
 | Where                                      | What                                                                                   |
 | ------------------------------------------ | -------------------------------------------------------------------------------------- |
 | [`docs/architecture/`](docs/architecture/) | System design, the data model, how a purchase and a booking flow                       |
-| [`docs/decisions/`](docs/decisions/)       | **118 decision records.** Current policy, not history — several reverse an earlier one |
+| [`docs/decisions/`](docs/decisions/)       | **119 decision records.** Current policy, not history — several reverse an earlier one |
 | [`docs/features/`](docs/features/)         | Canonical product behaviour, one document per feature                                  |
 | [`docs/development/`](docs/development/)   | Setup, testing, the change workflow, i18n, analytics                                   |
 | [`docs/deployment/`](docs/deployment/)     | Release, incident response, backup and restore, infrastructure runbooks                |
