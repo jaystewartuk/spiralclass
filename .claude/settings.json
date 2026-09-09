@@ -1,0 +1,111 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/session-start.sh"
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/guard-bash.sh"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/format-edited.sh"
+          }
+        ]
+      }
+    ]
+  },
+  "permissions": {
+    "allow": [
+      "Bash(git status:*)",
+      "Bash(git diff:*)",
+      "Bash(git log:*)",
+      "Bash(git show:*)",
+      "Bash(git blame:*)",
+      "Bash(git branch:*)",
+      "Bash(git ls-files:*)",
+      "Bash(git grep:*)",
+      "Bash(git remote -v)",
+      "Bash(pnpm typecheck:*)",
+      "Bash(pnpm lint:*)",
+      "Bash(pnpm test:*)",
+      "Bash(pnpm --filter:*)",
+      "Bash(pnpm format:*)",
+      "Bash(pnpm check:*)",
+      "Bash(pnpm gate --allow-dirty:*)",
+      "Bash(pnpm gate:lock)",
+      "Bash(pnpm release:status)",
+      "Bash(pnpm local:status)",
+      "Bash(node scripts/readme-counts.mjs:*)",
+      "Bash(node scripts/check-leaks.mjs:*)",
+      "Bash(rg:*)",
+      "Bash(grep:*)",
+      "Bash(find:*)",
+      "Bash(ls:*)",
+      "Bash(cat:*)",
+      "Bash(head:*)",
+      "Bash(tail:*)",
+      "Bash(wc:*)",
+      "Bash(just --list)",
+      "Bash(gh pr view:*)",
+      "Bash(gh pr list:*)",
+      "Bash(gh pr checks:*)",
+      "Bash(gh run list:*)",
+      "Bash(gh run view:*)",
+      "Bash(fly status:*)"
+    ],
+    "deny": [
+      "Bash(pnpm promote:*)",
+      "Bash(pnpm ship:preview:*)",
+      "Bash(pnpm deploy:preview:*)",
+      "Bash(gh pr merge:*)",
+      "Bash(gh release:*)",
+      "Bash(scripts/fly-deploy.sh:*)",
+      "Bash(bash scripts/fly-deploy.sh:*)",
+      "Bash(./scripts/fly-deploy.sh:*)",
+      "Bash(scripts/local/backup-prod-db.sh:*)",
+      "Bash(pnpm --filter spiralclass-web migrate:prod:*)",
+      "Bash(pnpm --filter spiralclass-web run migrate:prod:*)",
+      "Bash(just db-migrate prod)",
+      "Bash(pnpm test:e2e:*)",
+      "Bash(infisical:*)",
+      "Bash(* infisical *)",
+      "Bash(git push --force:*)",
+      "Bash(git push -f:*)",
+      "Bash(git reset --hard:*)",
+      "Bash(fly deploy:*)",
+      "Bash(fly secrets:*)",
+      "Bash(fly ssh:*)",
+      "Bash(neon:*)",
+      "Bash(psql:*)",
+      "Read(./config/env/*.local.env)",
+      "Read(./**/.env)",
+      "Read(./**/.env.local)",
+      "Read(./**/.env.test)",
+      "Read(./**/.env.test.local)",
+      "Read(./**/.env.production.local)",
+      "Read(./infra/**/terraform.tfvars)",
+      "Read(./infra/**/backend.hcl)",
+      "Read(./apps/web/.auth/**)"
+    ]
+  }
+}

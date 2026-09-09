@@ -1,0 +1,122 @@
+# fly.toml — PRODUCTION config for the promoted `agendaprofe` app.
+#
+# This is the D-70 cutover config (docs/decisions/D-89.md, Phase 3).
+# It supersedes the preview-scoped root fly.toml. At the production deploy step
+# it is deployed with `fly deploy -c fly.production.toml -a agendaprofe`; once
+# the cutover is verified and soaked, this becomes the root fly.toml and the
+# GitHub auto-deploy integration is reconfigured (Phase 5).
+#
+# Differences from preview, all deliberate — the non-secret ones now live in
+# config/env/production.{runtime,build}.env (D-85), compare against
+# config/env/preview.* rather than looking below in this file:
+#   - ALL Supabase vars dropped: getStorageProvider() is unconditionally R2
+#     (createR2Provider), so SUPABASE_URL/ANON_KEY/NEXT_PUBLIC_SUPABASE_* are
+#     dead at runtime. Supabase-storage rollback needs a code edit anyway.
+#   - Legal-gated flags (LESSON_INSIGHTS_TRANSCRIPTION / LIVE_CAPTIONS /
+#     CLASS_RECORDING) are ON in production. They were OFF at the
+#     2026-07-14 decision pending D-21/D-22 sign-off, and this comment
+#     claimed that for over a month after it stopped being true: D-94
+#     (2026-07-21) overrode the gate for production, and CLASS_RECORDING
+#     followed with D-131. All three are `=1` in
+#     config/env/production.runtime.env, which is the authoritative file and
+#     carries the full record — read it rather than this summary. The
+#     per-student D-22 insights-consent check in lib/lesson-notes/consent.ts is
+#     unaffected by the override and still gates who is actually captured.
+#   - Sentry DSN + PostHog key SHARED with preview (decision 2026-07-14);
+#     R2 buckets are SEPARATE (production buckets, new tokens — Pre-flight 5a).
+#   - APP_URL/BETTER_AUTH_URL → https://spiralclass.com.
+#   - Stripe live UK-entity keys (Infisical) + recreated Price IDs
+#     (config/env/production.runtime.env).
+
+app = 'agendaprofe'
+# `ord` (Chicago), NOT `dfw` — colocation with the DATABASE beats colocation
+# with users here. Neon lives in `aws-us-east-2` (Ohio — see
+# infra/database/neon/README.md, which picked it as "closest Neon-supported
+# region to Fly's dfw"; this is the other half of that decision). From dfw
+# that was a ~27ms round trip, and Prisma spends FOUR round trips on every
+# single query (BEGIN → query → COMMIT → DEALLOCATE ALL), so ~110ms of pure
+# latency was charged per query no matter how trivial the query was. Sentry
+# measured `BEGIN` — a statement that does no work whatsoever — at 27.5ms
+# avg, which is RTT and nothing else. A class-detail request issues ~7
+# queries, so ~800ms of a 1.7s response was round trips to Ohio.
+#
+# ord is ~450km from us-east-2 vs dfw's ~1500km. The trade: Mexican users
+# (the launch market) sit ~10ms further from Chicago than Dallas, paid ONCE
+# per request, to save ~20ms x 4 round trips x ~7 queries — an order of
+# magnitude larger. Revisit only if Neon's region changes.
+#
+# NOTE: editing primary_region does NOT relocate running machines. See
+# docs/deployment/RELEASE_AND_STAGING.md for the one-time migration step.
+primary_region = 'ord'
+
+# Non-secret config lives in config/env/ now (D-85), NOT here — see that dir's
+# README. [build.args] (NEXT_PUBLIC_*) moved to config/env/production.build.env
+# (fed to the build by scripts/env-build-args.mjs); runtime non-secret [env]
+# moved to config/env/production.runtime.env (sourced at boot by
+# scripts/docker-entrypoint.sh, selected by APP_ENV below). Only the three
+# platform-owned vars stay here.
+[env]
+  NODE_ENV = 'production'
+  PORT = '3000'
+  # Selects which config/env/<APP_ENV>.runtime.env the entrypoint sources.
+  APP_ENV = 'production'
+
+[http_service]
+  internal_port = 3000
+  force_https = true
+  auto_stop_machines = 'stop'
+  auto_start_machines = true
+  # PRODUCTION scaling — decide with production's own budget, do NOT inherit
+  # preview's scale-to-1/0 blindly. min=2 (~$6.54/mo) gives no single point
+  # of failure and a healthy machine always serves during a rolling deploy;
+  # min=1 (~$3.27/mo) drops that property but keeps one machine always warm,
+  # so there is still no cold start on a cold visitor.
+  #
+  # Dropped from 2 to 1 on 2026-08-19 (cost-minimization pass, pre-revenue):
+  # the site's two acquisition surfaces (`/`, `/b/[slug]`) are both
+  # cookie-read/DB-backed and can't be edge-cached, so a COLD (min=0) machine
+  # would put a 10-15s stall in front of promoted Facebook traffic — ruled
+  # out. min=1 avoids that entirely; the only cost is losing the no-SPOF/
+  # zero-downtime-deploy property, acceptable since brief deploy downtime is
+  # explicitly fine pre-revenue. Revisit back to 2 once there's real
+  # concurrent load or the no-downtime-deploy property matters again.
+  min_machines_running = 1
+  processes = ['app']
+
+  [[http_service.checks]]
+    interval = '15s'
+    # /api/health/live, not /api/health: this check has no DB query, so its
+    # 15s interval doesn't keep resetting Neon's ~5min idle-suspend timer.
+    # Real DB-down detection stays on /api/health via UptimeRobot/BetterStack
+    # + synthetic.yml, at a period that lets the compute actually suspend
+    # (diagnosed 2026-08-07 — the primary Neon branch on both prod and
+    # preview had been active 100% of the billing period because of this).
+    # timeout 8s + grace_period 30s so the ~8s boot finishes before checks
+    # start (ported from #518).
+    timeout = '8s'
+    grace_period = '30s'
+    method = 'GET'
+    path = '/api/health/live'
+
+[[vm]]
+  # 1024mb. Was 512mb ("matches the proven preview config") until 2026-08-26,
+  # when that note's own contingency came true: production wedged in a 503 loop
+  # for hours. It never OOM-killed, which is why nothing alerted — /proc/meminfo
+  # on the live machine read MemFree 6MB, SwapTotal 0, and Committed_AS 534MB
+  # against a MemTotal of 470MB. The app had committed more memory than the box
+  # physically had, so Node sat at the ceiling GC-thrashing, stalling the event
+  # loop past the 8s health-check timeout below. The check then flapped
+  # passing/failing every ~20-40s and Fly's proxy, with min_machines_running = 1
+  # and no healthy candidate, returned 503 for every request.
+  #
+  # Committed_AS measured ~541MB after the bump — essentially unchanged — which
+  # is the evidence this was under-provisioning and not a leak or a traffic
+  # spike: real demand was always ~535-540MB and 512mb could never cover it.
+  # 1024mb leaves ~44% headroom, and with SwapTotal still 0 that headroom is the
+  # entire margin. Do NOT drop this back to 512mb to save ~$3/mo.
+  #
+  # Keep this in sync with the live machine. `fly scale vm` is a live override
+  # that this file silently reverts on the next `pnpm promote`, which is how a
+  # hand-scaled fix turns back into the same outage a week later.
+  size = 'shared-cpu-1x'
+  memory = '1024mb'

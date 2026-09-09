@@ -1,0 +1,118 @@
+site_name: SpiralClass Docs
+site_description: Architecture, decisions and runbooks for SpiralClass.
+docs_dir: docs
+# Trailing-slash URLs so links survive folder renames; docs/README.md becomes the
+# site homepage automatically (MkDocs treats README.md as a directory index).
+use_directory_urls: true
+
+theme:
+  name: material
+  language: en
+  favicon: assets/favicon.svg
+  icon:
+    logo: material/calendar-check-outline
+    repo: fontawesome/brands/github
+    admonition:
+      note: material/pencil-circle
+      tip: material/lightbulb-on
+      warning: material/alert
+      danger: material/skull
+  features:
+    - navigation.instant # SPA-style page swaps — fast browsing
+    - navigation.instant.progress
+    - navigation.tracking
+    - navigation.sections
+    - navigation.top
+    - navigation.indexes # a folder's README.md is its section landing page
+    - navigation.footer # prev/next links at the bottom of every page
+    - toc.follow
+    - search.suggest
+    - search.highlight
+    - search.share
+    - content.code.copy
+    - content.code.annotate
+    - content.tabs.link
+    - content.tooltips
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: indigo
+      accent: amber
+      toggle:
+        icon: material/weather-night
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: indigo
+      accent: amber
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to light mode
+
+extra_css:
+  - assets/stylesheets/extra.css
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com
+  generator: false
+
+plugins:
+  - search # Material's built-in, offline, client-side search
+  - tags # per-page tags surfaced on a browsable /tags/ index
+  - awesome-nav # nav mirrors the docs/ folder tree, no manual list
+  - git-revision-date-localized:
+      enable_creation_date: true
+      fallback_to_build_date: true # never fail the build on a shallow git clone
+  - redirects:
+      # Keep old bookmarks alive after a file moves. Map is old-path: new-path,
+      # both relative to docs_dir.
+      #
+      # ⚠️ ONLY LIVE TARGETS BELONG HERE. A redirect to a deleted page is a 404
+      # with extra steps, which is why the 2026-08-08 backlog reset pruned every
+      # entry pointing at an audit, plan or archived document. When you DELETE a
+      # document, delete its redirect too; when you MOVE one, add a line.
+      redirect_maps:
+        # Phase-2 IA reorg, 2026-07-21.
+        engineering/ERD.md: architecture/ERD.md
+        engineering/multi-teacher-students.md: architecture/multi-teacher-students.md
+        # Documentation pass, 2026-09-06: development/ went lowercase-kebab and
+        # the two-file testing/ section folded into it.
+        development/WORKFLOW.md: development/workflow.md
+        development/DOCUMENTATION_STANDARDS.md: development/documentation.md
+        development/WEB_I18N_MIGRATION.md: development/i18n.md
+        development/ANALYTICS.md: development/analytics.md
+        testing/README.md: development/testing.md
+        testing/E2E.md: development/testing.md
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - md_in_html
+  - tables
+  - footnotes
+  - toc:
+      permalink: true
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.details
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+
+# Cross-links that point outside docs/ (e.g. apps/web/content/PRD_ES.md) are
+# expected; keep link checking on 'warn' so the build never fails on them.
+validation:
+  links:
+    absolute_links: relative_to_docs
+    unrecognized_links: warn
+    anchors: warn

@@ -1,0 +1,153 @@
+#!/usr/bin/env sh
+# pre-push: run the gate on this machine, then let the push through. Always the
+# FAST tier, on every branch — see the tier-selection block below for why the
+# Tier 2 escalation that used to live here is gone (D-146, and see [D-162]).
+#
+# The run waits its turn. Several Claude Code sessions work this repo at once,
+# each in its own worktree, and they share one laptop, one test-database
+# container and one port 3000; the gate takes a machine-wide lock so that two
+# pushes queue instead of thrashing. A push that seems to hang is usually
+# waiting, and says so — `pnpm gate:lock` prints who holds the machine.
+#
+# This is where CI lives (D-119). As of [D-157] it is no longer the ONLY place:
+# .github/workflows/gate.yml runs the same scripts/ci/gate.mjs, from the same
+# scripts/ci/steps.mjs registry, on a GitHub-hosted runner. That is a second
+# RUNNER, not a second definition — and this hook is still the reason the
+# checks happen BEFORE the push rather than after it, which is the failure mode
+# it was written for.
+#
+# The merge gate is the `local-gate` commit status. This hook runs
+# scripts/ci/gate.mjs (format · typecheck · lint · unit+coverage on web and
+# audit) against the commit being pushed, and on success hands the SHA to
+# scripts/ci/status.mjs, which waits for the push to land and posts it. The
+# workflow's own `status` job posts the same context; whichever reports last
+# for a given SHA wins, and they cannot disagree about anything but timing.
+#
+# Why a hook rather than "remember to run pnpm verify:push": the standing rule
+# was always to run the checks immediately before every push, and the failure
+# mode was always the same — an edit after a green run, pushed without
+# re-checking (confirmed 2026-07-20, which burned a billed CI dispatch on a type
+# error). The hook runs at the only moment that can't be forgotten. Turbo caches
+# typecheck/lint, so a re-push with no source change is seconds.
+#
+# This replaces the format-only hook (2026-08-02), which was format-only because
+# the 8GB dev laptop OOM'd on vitest + tsc across the monorepo. That machine is
+# retired (D-116) and the checks it couldn't run are no longer duplicated on
+# GitHub, so there is nothing left to be redundant with.
+#
+# The hook also prints the maintenance nag (D-129): the time-bomb sweep has no
+# scheduler of any kind, so `pnpm gate` says when it is overdue. That output
+# comes from the gate, not from here — and the gate deliberately suppresses it
+# on a runner, where there is no operator at a keyboard to read it. The
+# production probes are no longer on that list: they run in
+# .github/workflows/deploy-production.yml, immediately after the deploy that
+# could have broken them ([D-157]).
+#
+# Escape hatches:
+#   GATE_TIER=full git push  opt in to the full tier on any branch — integration
+#                            and E2E now, rather than on the PR's runner. Needs
+#                            Docker, holds the machine for 20-40 minutes, and
+#                            every other session's push queues behind it.
+#   SKIP_GATE=1 git push     run the checks nowhere and post nothing from here.
+#                            On a branch with an open PR the Gate workflow still
+#                            runs the same tier and posts the status; on a
+#                            branch without one, nothing does until you run
+#                            `pnpm gate`.
+#   git push --no-verify     skip this hook entirely, same consequence
+#
+# In an environment with no `gh` (a cloud session, a fresh machine) the checks
+# still run and this hook posts nothing; status.mjs prints the fallback, and on
+# a PR the Gate workflow posts the status instead.
+
+if [ "${SKIP_GATE:-0}" = "1" ]; then
+  echo "pre-push: SKIP_GATE=1 — no checks run, no local-gate status will be posted."
+  exit 0
+fi
+
+# Nothing to compare against (fresh clone with no origin/main yet) — stay out of
+# the way rather than failing a push on a missing ref.
+if ! git rev-parse --verify --quiet origin/main >/dev/null 2>&1; then
+  exit 0
+fi
+
+# stdin gives one line per ref being pushed: <local ref> <local sha> <remote ref>
+# <remote sha>. Deletions push the all-zero sha and have nothing to check.
+PUSHED_SHA=""
+while read -r _local_ref local_sha remote_ref _remote_sha; do
+  case "$local_sha" in
+    "" | 0000000000000000000000000000000000000000) continue ;;
+  esac
+  # The promote fast-forward. `pnpm promote` already ran the FULL tier against
+  # this exact commit seconds ago; re-running the fast tier here would only
+  # delay the deploy.
+  if [ "$remote_ref" = "refs/heads/production" ]; then
+    echo "pre-push: production fast-forward — gated by pnpm promote, not re-running."
+    exit 0
+  fi
+  PUSHED_SHA="$local_sha"
+done
+
+if [ -z "$PUSHED_SHA" ]; then
+  exit 0
+fi
+
+if [ "$PUSHED_SHA" != "$(git rev-parse HEAD)" ]; then
+  # Pushing something other than what's checked out (`git push origin <sha>:ref`).
+  # The gate can only certify the tree it can see, so don't pretend otherwise.
+  echo "pre-push: pushing $(git rev-parse --short "$PUSHED_SHA"), which isn't HEAD — skipping the gate."
+  exit 0
+fi
+
+# Push time runs the FAST tier. Always, on every branch (D-146).
+#
+# This hook used to escalate to the full tier whenever a branch touched a
+# production-risk ("Tier 2") path, on the reasoning that integration and E2E
+# otherwise run only at promote, and for money, auth and schema that is too late
+# to be comfortable. The reasoning was right; the placement was wrong, for a
+# reason that had nothing to do with risk and everything to do with the machine.
+#
+# This repo is worked on by several Claude Code sessions at once, each in its
+# own worktree, and when this was written the laptop was the only runner the
+# HEAVY tier had: the browser suite's visual baselines were macOS-rendered, so
+# the full tier could not go green on Linux ([D-157]). [D-161] added a
+# `-linux.png` set and moved that half to .github/workflows/heavy.yml, which is
+# where it runs for every PR now — but the escalation below still holds THIS
+# machine, so the reasoning it records is unchanged. A
+# Tier 2 push therefore fired a 20-40 minute run — two `next build`s at a 6GB
+# heap ceiling, a Postgres container, a fleet of Chromium workers — at an
+# arbitrary moment, in an arbitrary checkout, with no idea what the other six
+# sessions were doing. Everything now queues behind the machine lock (see
+# scripts/ci/lock.mjs), so an escalated push does not thrash any more; it just
+# holds the machine for forty minutes and every other session waits for it.
+#
+# The full tier did not go away — it moved to where the batching already lives.
+# `.github/workflows/heavy.yml` runs the heavy suites on every PR and on every
+# push to `main` ([D-161], [D-162]), so the answer this escalation buys is one a
+# runner is already computing, without holding this machine for forty minutes.
+#
+# What it still buys is TIMING. The runner answers about a commit you have
+# already pushed; this answers before the push. For a change to money, auth or
+# schema — where finding the problem after it is on a PR means an amend, a
+# force-push and a second full run — that difference is worth the hold. For
+# anything else it is forty minutes spent to learn something you would otherwise
+# be told for free a few minutes later.
+TIER="${GATE_TIER:-fast}"
+
+# The gate posts its own status, but only once the commit is actually on origin —
+# which hasn't happened yet at pre-push time. So run the checks now, and hand the
+# posting to a detached process that waits for the push to land.
+if ! node scripts/ci/gate.mjs --tier "$TIER" --no-post --quiet-header; then
+  echo ""
+  echo "pre-push: the $TIER gate failed (see above) — nothing pushed."
+  echo "  Re-run one step:  pnpm gate --only <step>"
+  if [ "$TIER" = "full" ]; then
+    echo "  Fast tier only:   GATE_TIER=fast git push   (still posts a local-gate status)"
+  fi
+  echo "  Push anyway:      SKIP_GATE=1 git push   (leaves the PR without a local-gate status)"
+  exit 1
+fi
+
+node scripts/ci/status.mjs --sha "$PUSHED_SHA" --wait >/dev/null 2>&1 &
+
+echo "pre-push: gate green — posting the local-gate status once the push lands."
+exit 0

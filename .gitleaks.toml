@@ -1,0 +1,83 @@
+# gitleaks config for the `secret-scan` gate step (scripts/ci/steps.mjs).
+#
+# WHY A SECOND SCANNER, WHEN scripts/check-leaks.mjs ALREADY RUNS.
+# They are good at different halves and neither subsumes the other.
+#
+#   check-leaks.mjs is hand-written and repo-specific. It knows what a Neon
+#   project id looks like, that an OCID names this operator's tenancy, that a
+#   free-mail address in a fixture is a person — none of which a general
+#   scanner has any concept of. It is the only thing covering the account
+#   identifier and personal-data classes.
+#
+#   gitleaks is general and deterministic. It carries ~170 curated provider
+#   rules plus entropy analysis, maintained by people who watch credential
+#   formats change. That is the half a repo-specific regex list is worst at,
+#   and the half where "I looked and did not see one" is weakest evidence —
+#   the 2026-09-06 audit's credential pass was a model reading greps, which is
+#   non-deterministic exactly where high-entropy strings are concerned.
+#
+# So: check-leaks.mjs owns identifiers and people, gitleaks owns credentials,
+# and both run in the fast tier. Do not delete one because the other is green.
+#
+# ⚠️ NOT installed by pnpm. The `gitleaks` npm package is unrelated to this
+# tool — a personal v1.0.0 by a third party, against the real project's 8.x —
+# and taking a CREDENTIAL SCANNER from an unofficial package is the exact
+# supply-chain shape this file exists to catch. It is a prerequisite instead
+# (`needs: ["gitleaks"]`), so the gate refuses with an install instruction
+# rather than skipping quietly. `brew install gitleaks` locally; gate.yml
+# installs a version-pinned, checksum-verified release.
+
+[extend]
+useDefault = true
+
+[[allowlists]]
+description = """
+Vendored, generated, and binary trees. Not source, and scanning them buries a
+real finding under third-party test fixtures — the Python venv under
+.venv-docs/ alone produces Box, Netlify, Unsplash and Accuweather hits from
+pydantic and urllib3 URL-parsing fixtures.
+"""
+paths = [
+  '''(^|/)node_modules/''',
+  '''(^|/)\.next/''',
+  '''(^|/)\.turbo/''',
+  '''(^|/)\.venv-docs/''',
+  '''(^|/)coverage/''',
+  '''(^|/)pnpm-lock\.yaml$''',
+  # 688 MB of screenshots and 244 committed visual baselines. gitleaks does not
+  # parse image data, so this only saves the walk — but see docs/security.md:
+  # NOTHING scans image CONTENT, and that is a stated residual, not a gap this
+  # file closes.
+  '''(^|/)docs/design/gallery/''',
+  '''(^|/)\.claude/worktrees/''',
+]
+
+# ── Justified exceptions ───────────────────────────────────────────────────
+# Both were found by the first gitleaks run over this tree, on 2026-09-06, and
+# both are false positives that were demonstrated rather than assumed. Keep this
+# list short and keep the reasons: an unexplained allowlist entry in a
+# credential scanner is indistinguishable from a leak somebody silenced.
+
+[[allowlists]]
+description = """
+apps/web/.env.example — the generic-api-key rule matches ACROSS the newline on
+a run of empty assignments, taking the NEXT line's key NAME as the secret
+(`MATERIAL_PODCASTS_R2_ACCESS_KEY=` followed by `MATERIAL_PODCASTS_R2_SECRET=`).
+Every assignment in that file is either empty or a non-secret literal —
+localhost, `auto`, `us` — which is what makes it a template. Scoped to the one
+rule so a real value pasted into this file, matched by any provider rule, still
+fails.
+"""
+paths = ['''(^|/)apps/web/\.env\.example$''']
+regexTarget = "match"
+regexes = ['''[A-Z0-9_]*(ACCESS_KEY|SECRET|TOKEN|KEY)=\s*$''']
+
+[[allowlists]]
+description = """
+The Stripe webhook-signature fixture. A real signing secret is `whsec_` plus 32+
+base64 characters; this is the literal words `test-secret` followed by the
+alphabet and 0-9 in order. The tests sign and verify a body with it, so it has
+to be a syntactically plausible secret and cannot be `<redacted>`.
+"""
+paths = ['''(^|/)apps/web/tests/payments/signature\.test\.ts$''']
+regexes = ['''whsec_test-secret-abcdef1234567890''']

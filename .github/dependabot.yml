@@ -1,0 +1,87 @@
+# Dependabot config — see the security plan §11.12 / §16.
+#
+# Three ecosystems: workspace npm (every package.json in the monorepo),
+# github-actions, and docker.
+#
+# `github-actions` was removed by D-129, when there was nothing left to pin,
+# and comes back with the workflows ([D-157]). It is not decoration: this
+# repository requires every action to be pinned to a full 40-character commit
+# SHA (`sha_pinning_required` is on, so `@v4` is REJECTED by policy, not merely
+# frowned at), and a SHA pin is a pin to a specific version forever. Without
+# Dependabot watching them, "supply-chain hygiene" becomes four actions frozen
+# at whatever was current the day they were written, including their
+# vulnerabilities. Dependabot rewrites the SHA and the trailing `# vX.Y.Z`
+# comment together.
+#
+# Grouped updates keep the noise low; security advisories ignore the group and
+# always open a dedicated PR.
+
+# `docker` watches the `FROM` in the root Dockerfile, which is pinned to an
+# immutable @sha256 digest (M-7). ⚠️ THE PIN IS WHY THIS ENTRY EXISTS. An
+# unpinned `node:24-slim` at least drifts onto the current patched image on
+# every rebuild; a pinned one is frozen at the day it was written, so without
+# something moving it the pin trades a supply-chain risk for a stale-CVE one.
+# Dependabot rewrites the digest and opens a PR against it. Do not remove this
+# entry while the FROM carries a digest, and do not unpin the FROM to avoid
+# needing it.
+
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    # Monthly cadence. A dependency PR runs the Gate workflow like any other,
+    # so the audit step sees it before it merges. Security advisories ignore
+    # this schedule and open a dedicated PR immediately (GitHub default).
+    schedule:
+      interval: monthly
+      time: "06:00"
+      timezone: America/Mexico_City
+    open-pull-requests-limit: 5
+    labels:
+      - dependencies
+    groups:
+      prod-minor-patch:
+        update-types: [minor, patch]
+        exclude-patterns:
+          - "next"
+          - "react"
+          - "react-dom"
+          - "@prisma/*"
+          - "prisma"
+      dev-minor-patch:
+        dependency-type: development
+        update-types: [minor, patch]
+    ignore:
+      # Pinned via root pnpm-workspace.yaml's overrides; bumping here causes lockfile thrash.
+      - dependency-name: "@types/react"
+      - dependency-name: "@types/react-dom"
+
+  - package-ecosystem: github-actions
+    directory: /
+    # Quarterly would be too slow for a supply-chain surface and weekly is
+    # noise for four actions; monthly matches npm above so both land together.
+    schedule:
+      interval: monthly
+      time: "06:00"
+      timezone: America/Mexico_City
+    open-pull-requests-limit: 3
+    labels:
+      - dependencies
+      - ci
+    groups:
+      actions:
+        update-types: [minor, patch]
+
+  - package-ecosystem: docker
+    directory: /
+    # Monthly, matching the two above so a base-image bump lands in the same
+    # sweep rather than as a lone surprise PR. A security advisory against the
+    # base image ignores this schedule, like everywhere else.
+    schedule:
+      interval: monthly
+      time: "06:00"
+      timezone: America/Mexico_City
+    open-pull-requests-limit: 2
+    labels:
+      - dependencies
+      - ci

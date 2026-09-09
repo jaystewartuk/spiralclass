@@ -1,0 +1,199 @@
+packages:
+  - "apps/*"
+  - "packages/*"
+
+# Moved from .npmrc: pnpm 11 only reads auth/registry settings from .npmrc, everything
+# else must live here (pnpm/pnpm#11189).
+engineStrict: false
+nodeLinker: hoisted
+
+overrides:
+  "@types/react": 19.2.17
+  "@types/react-dom": 19.2.3
+  # Pinned to what a since-deleted workspace vendored, which stopped being a
+  # constraint when that workspace went. Left pinned deliberately: unpinning is
+  # a react bump across the whole web app, which is its own change with its own
+  # testing, not a side effect of removing an app.
+  #
+  # ⚠️ THESE FOUR VALUES ARE THE ONES THAT DECIDE, and the manifests must be
+  # kept in step with them by hand. A bump to `react-dom` in
+  # apps/web/package.json resolves to whatever is written HERE, so the two can
+  # disagree silently — #1104 merged such a bump on 2026-09-06 and changed
+  # nothing except to leave the manifest claiming 19.2.8 while the installed
+  # tree stayed 19.2.3. `pnpm install --frozen-lockfile` does not catch it:
+  # pnpm records the OVERRIDDEN specifier in the lockfile, so there is no
+  # mismatch to detect. Dependabot will keep proposing those bumps; they are
+  # inert, and merging one only makes the manifest lie.
+  react: 19.2.3
+  react-dom: 19.2.3
+  # All dev-toolchain-only transitive deps (eslint/expo-cli), with a real
+  # patched line available — bumped rather than added to ignoreGhsas below,
+  # per that list's own "no available fix path" criterion.
+  brace-expansion@>=3.0.0 <5.0.9: "5.0.9" # GHSA-3jxr-9vmj-r5cp, GHSA-rgw5-rvv9-x895
+  js-yaml@>=4.0.0 <4.3.0: ">=4.3.0" # GHSA-52cp-r559-cp3m
+  "eslint>js-yaml": "5.2.2" # GHSA-pm4m-ph32-ghv5
+  "@eslint/eslintrc>js-yaml": "5.2.2" # GHSA-pm4m-ph32-ghv5
+  "js-yaml@5.2.1": "5.2.2" # GHSA-pm4m-ph32-ghv5
+  "js-yaml@5.2.0": "5.2.2" # GHSA-pm4m-ph32-ghv5
+  shell-quote@<1.8.5: ">=1.8.5" # GHSA-395f-4hp3-45gv
+  # 2026-07-20 high-severity audit sweep: these previously sat in ignoreGhsas
+  # as "no available fix path" — that had gone stale, patched lines now exist.
+  # Exact-version pins (not open-ended ranges) — an unbounded ">=" replacement
+  # let pnpm's dedup reuse an already-resolved, still-vulnerable version from
+  # a sibling dependent instead of actually bumping to the patched line.
+  "@grpc/grpc-js@>=1.14.0 <1.14.4": "1.14.4" # GHSA-5375-pq7m-f5r2, GHSA-99f4-grh7-6pcq
+  protobufjs@>=8.0.0 <8.4.1: "8.7.1" # GHSA-66ff-xgx4-vchm, GHSA-75px-5xx7-5xc7, GHSA-jvwf-75h9-cwgg, GHSA-685m-2w69-288q, GHSA-wcpc-wj8m-hjx6
+  protobufjs@<=7.6.0: "7.6.5" # GHSA-wcpc-wj8m-hjx6 (grpc/proto-loader's protobufjs 7.x line)
+  undici@>=7.0.0 <7.29.0: "7.29.0" # GHSA-hm92-r4w5-c3mj, GHSA-vmh5-mc38-953g, GHSA-vxpw-j846-p89q, GHSA-4cwx-7wf7-3272
+  ws@>=8.0.0 <8.21.0: "8.21.1" # GHSA-96hv-2xvq-fx4p
+  ws@>=7.0.0 <7.5.11: "7.5.13" # GHSA-96hv-2xvq-fx4p
+  vite@<=6.4.2: "6.4.3" # GHSA-fx2h-pf6j-xcff (better-auth's optional vitest peer chain)
+  # 2026-07-21 high-severity audit sweep: transitive-only findings, no direct
+  # workspace dependency involved — same fix mechanism as the 2026-07-20 sweep.
+  "@opentelemetry/propagator-jaeger@<2.9.0": "2.10.0" # GHSA-45rx-2jwx-cxfr
+  # Re-bumped 2026-09-02, 3.1.5 -> 3.1.6, for four NEW advisories against an
+  # unchanged lockfile — the same shape as the nanoid re-bump documented at the
+  # bottom of this block: `pnpm audit` reads the live DB, the advisory ranges
+  # here reach `<3.1.6`, so the pin added on 2026-07-21 became vulnerable where
+  # it stood and the gate's audit step went red on every branch. Reproduces
+  # identically on origin/main. Reached only through @sentry/nextjs >
+  # @sentry/webpack-plugin > webpack > schema-utils > ajv, i.e. build tooling,
+  # but the gate does not grade on reachability.
+  fast-uri@>=3.0.0 <3.1.6: "3.1.6" # GHSA-4c8g-83qw-93j6, GHSA-v2hh-gcrm-f6hx, GHSA-7p8r-x3mc-p8w7, GHSA-5jgf-p345-68v8, GHSA-jqff-g426-hqxp
+  # 2026-09-08: the pin below WAS `sharp@<0.35.0: "0.35.3"`, and 0.35.3 is now
+  # itself the vulnerable version — GHSA-rgj7-g3m4-5g8c (libheif, high) reaches
+  # `<0.35.4`. Same shape as the nanoid and fast-uri re-bumps above: a new
+  # advisory against an unchanged lockfile, red on origin/main too. Widened to
+  # `<0.35.4` rather than left alongside a second entry, so there is one rule
+  # per package and no chance of a narrower stale pin winning. apps/web already
+  # depends on 0.35.4 directly; this only drags next's own optional copy up to
+  # meet it (`pnpm why sharp` showed 0.35.3 and 0.35.4 side by side).
+  sharp@<0.35.4: "0.35.4" # GHSA-rgj7-g3m4-5g8c, GHSA-f88m-g3jw-g9cj
+  # 2026-08-03 high-severity audit sweep (GHSA-rgw5-rvv9-x895 bypasses the
+  # CVE-2026-14257 mitigation, so it re-breaks lines the earlier
+  # brace-expansion override had already patched — hence the <5.0.7 -> <5.0.9
+  # widening above). The 2.x line gets its OWN patched release, 2.1.4, which
+  # is what makes it overridable at all: 2.1.4 still has
+  # `module.exports = expandTop`, the CJS default export minimatch@9's
+  # compiled `__importDefault(...).default(...)` requires. That is exactly
+  # what forcing the 5.x line onto this chain broke (see the ignoreGhsas note
+  # below), so pin INSIDE 2.x rather than reaching for 5.x again.
+  brace-expansion@>=2.0.0 <2.1.4: "2.1.4" # GHSA-rgw5-rvv9-x895
+  # 2026-07-24 dependency maintenance pass overrides
+  cross-spawn@>=7.0.0 <7.0.5: "7.0.5" # GHSA-3xgq-45jj-v275
+  tmp@<0.2.7: "0.2.7" # GHSA-52f5-9888-hmc6, GHSA-ph9p-34f9-6g65, GHSA-7c78-jf6q-g5cm
+  uuid@<11.1.1: "11.1.1" # GHSA-w5hq-g745-h8pq
+  "@babel/core@<=7.29.0": "7.29.6" # GHSA-4x5r-pxfx-6jf8
+  postcss@<=8.5.17: "8.5.22" # GHSA-6g55-p6wh-862q, GHSA-r28c-9q8g-f849
+  # 2026-08-17: the one high-severity finding left failing `pnpm audit --prod
+  # --audit-level high`, i.e. the gate's audit step, on every branch. Reached
+  # only through the Prisma CLI chain (@prisma/client > prisma > @prisma/…),
+  # never by shipped app code, but the gate does not grade on reachability.
+  # A patched line exists (8.0.0), so it gets an override rather than a seat
+  # on ignoreGhsas, per that list's own "no available fix path" criterion.
+  # Exact pin, not an open-ended ">=", for the dedup reason the 2026-07-20
+  # sweep documents above.
+  deepmerge-ts@<8.0.0: "8.0.1" # GHSA-ggr8-5vv4-36mx
+  # 2026-07-26: that same maintenance pass bumped @radix-ui/react-slot to
+  # 1.3.1, which added a top-level `createContext` call with no "use client"
+  # directive — a real upstream RSC regression (radix-ui/primitives#4072),
+  # not anything in this repo's own code. Every component using Radix's
+  # `asChild` (shadcn's Button, and every Radix primitive built on Slot —
+  # Dialog, Select, Tabs, Tooltip, Checkbox) pulls Slot in transitively, so
+  # this broke `next build --turbopack`'s static page-data collection for
+  # ANY route reachable from the root layout, including `/_not-found` —
+  # every push to main failed `fly-deploy.yml`'s preview build from
+  # 2026-07-24 (f83504de) through 2026-07-26. Force every consumer (direct
+  # + every other @radix-ui/* package's own transitive dependency) onto
+  # 1.3.3, where upstream reverted the createContext addition entirely
+  # (confirmed: 1.3.3's dist has zero createContext calls) rather than
+  # gating it behind "use client" — an exact pin, not an open range, so a
+  # future react-slot release can't silently reintroduce the same class of
+  # regression without a deliberate bump here.
+  "@radix-ui/react-slot": "1.3.3" # radix-ui/primitives#4072
+  # 2026-08-08 high-severity audit sweep. Both findings are new advisories
+  # against an UNCHANGED lockfile — `pnpm audit` queries the live advisory DB,
+  # so CI went red on 2026-08-08 with the same dependency tree that was green
+  # on 2026-07-07. Only nanoid has a fix path; see ignoreGhsas below for
+  # image-size. Exact pin, not ">=3.3.18", per the 2026-07-20 note above.
+  #
+  # Re-bumped 2026-08-13, 3.3.17 -> 3.3.18. Same GHSA, no new dependency and no
+  # lockfile change of our own: the advisory's own range was WIDENED upstream
+  # (was `<3.3.17`, now `<3.3.18`), so the pin added five days ago became
+  # vulnerable where it stood. `pnpm audit` reads the live DB, so this went red
+  # on an untouched tree — it reproduces identically on origin/main, and is not
+  # a consequence of anything in this branch.
+  nanoid@<3.3.18: "3.3.18" # GHSA-2v37-7h3g-55p8
+  # 2026-09-02, same shape as the nanoid entry above and for the same reason:
+  # four new fast-uri advisories against an UNCHANGED lockfile. `pnpm audit`
+  # reads the live DB, so the fast tier went red on a tree whose package.json
+  # and pnpm-lock.yaml this branch does not touch — it reproduces identically
+  # on origin/main and is not a consequence of anything in this branch.
+  #
+  # A fix path exists (3.1.6 patches all four), so it is an override rather
+  # than an ignoreGhsas entry, per that list's own criterion. Exact pin, not
+  # ">=3.1.6", per the 2026-07-20 note above.
+  #
+  # Exposure is build-time only: fast-uri is ajv's URI parser, reached through
+  # schema-utils > webpack > @sentry/webpack-plugin > @sentry/nextjs. It is
+  # never on a request path and never ships to a browser.
+  fast-uri@<3.1.6: "3.1.6" # GHSA-jqff-g426-hqxp, GHSA-5jgf-p345-68v8, GHSA-f65p-4m7j-42xc, GHSA-fph4-wmhf-6fwf
+  # 2026-09-06, arrived with the Prisma 7 upgrade. Prisma 7 moved `prisma` into
+  # @prisma/client's own dependencies, and `prisma` depends on BOTH database
+  # drivers — so a Postgres-only application acquired mysql2 in its PRODUCTION
+  # tree, carrying a high-severity advisory (auth-plugin downgrade to
+  # mysql_clear_password, leaking credentials in plaintext).
+  #
+  # An override rather than an ignoreGhsas entry, per that list's own criterion:
+  # 3.22.0 patches it and nothing here calls mysql2, so forcing it forward
+  # cannot regress a code path this repo has. Exact pin, not ">=3.22.0", per the
+  # 2026-07-20 note above.
+  mysql2@<3.22.0: "3.24.3" # GHSA-3f6p-5ww8-9rcr
+
+# auditConfig.ignoreGhsas emptied 2026-07-20: the prior 45-entry high+
+# baseline (docs/security.md) is now fully resolved via the
+# overrides above (next 15.5.20, vitest 3.2.7, grpc-js/protobufjs/undici/ws/
+# vite pins) — `pnpm audit --prod --audit-level high` is green with the ignore
+# list removed entirely. Re-add entries here only for a genuinely unfixable
+# high+ advisory, with a comment explaining why no override exists.
+#
+# Emptied AGAIN 2026-08-03. The single entry it had held since 2026-07-25
+# (GHSA-mh99-v99m-4gvg, brace-expansion via glob@10.5.0 > minimatch@9.0.9)
+# was there because the only patched release at the time was 5.0.8, which
+# dropped the CJS default export minimatch@9 requires — so no override could
+# fix it without breaking minimatch at runtime. brace-expansion 2.1.4 closed
+# that gap: it patches the 2.x line in place, keeping `module.exports =
+# expandTop`. Verified genuinely resolved, not merely below the gate — with
+# this list empty, `pnpm audit --prod --audit-level moderate` no longer
+# reports GHSA-mh99-v99m-4gvg at all.
+#
+# Re-emptied 2026-09-04. Its two entries were image-size advisories reached
+# ONLY through a bundler that a since-deleted workspace pulled in. That
+# workspace is gone, so the bundler is out of the tree and there is nothing
+# left to ignore. If `pnpm
+# audit --prod --audit-level high` reddens on image-size again, something has
+# pulled metro back in — find that, do not re-add the entry.
+auditConfig:
+  ignoreGhsas: []
+
+# pnpm 11 replaced onlyBuiltDependencies/ignoredBuiltDependencies with this single
+# allow/deny map (name -> boolean). Kept in parity with the old onlyBuiltDependencies
+# list: only these five ran install scripts before the pnpm 10 -> 11 bump, everything
+# else was silently skipped — the false entries below are packages pnpm 11 newly
+# surfaced as needing a decision, denied to preserve that same behavior.
+allowBuilds:
+  "@prisma/client": true
+  "@prisma/engines": true
+  "@sentry/cli": false
+  core-js: false
+  esbuild: true
+  prisma: true
+  protobufjs: false
+  sharp: true
+  unrs-resolver: false
+
+minimumReleaseAgeExclude:
+  - elkjs@0.12.0
+  - "@opentelemetry/core@2.10.0"
+  - "@opentelemetry/propagator-jaeger@2.10.0"
+  - js-yaml@5.2.2

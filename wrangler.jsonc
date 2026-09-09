@@ -1,0 +1,13 @@
+{
+  // Serves the MkDocs-built docs/ site as a static-assets-only Worker (no
+  // Worker script). Cloudflare builds it via `mkdocs build` and deploys with
+  // `npx wrangler deploy`. See docs/deployment/DOCS_SITE.md.
+  "name": "agendaprofe",
+  "compatibility_date": "2025-06-01",
+  "assets": {
+    "directory": "./site",
+    // MkDocs (use_directory_urls) emits foo/index.html; the default
+    // auto-trailing-slash handling serves those. Serve MkDocs' 404.html on miss.
+    "not_found_handling": "404-page",
+  },
+}

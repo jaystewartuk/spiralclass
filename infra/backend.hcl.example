@@ -1,0 +1,32 @@
+# Shared partial S3-backend config (bucket + R2 account endpoint) for every
+# infra/* module whose state lives in the agendaprofe-tofu-state R2 bucket
+# via bare AWS_ACCESS_KEY_ID/AWS_SECRET_ACCESS_KEY env-var auth — currently
+# infra/cloudflare-r2 (see infra/README.md — infra/database/supabase
+# also did, until it was retired, D-89; infra/hetzner-runner also did, until
+# it was replaced by a standalone infrastructure repo). Each
+# module's own backend "s3" block in its main.tf
+# still sets `key` (its own state-file path) — that part can't be shared,
+# Tofu backend blocks don't support variables/interpolation.
+#
+# NOT secret — this is a bucket name + an R2 account id, not a credential;
+# the real secret (the R2 API token behind AWS_ACCESS_KEY_ID/
+# AWS_SECRET_ACCESS_KEY) is never in this file.
+#
+# ⚠ It was committed with real values until 2026-09-04, deliberately, so no
+# module needed a copy-and-fill-in step. That convenience is withdrawn
+# ahead of the repository going public: the account id names a real Cloudflare
+# account, and "not a credential" is not the same as "worth publishing". The
+# cost is one copy step, once, for one file:
+#
+#   cp infra/backend.hcl.example infra/backend.hcl   # then fill in the account id
+#
+# `infra/backend.hcl` is gitignored. The account id is the hex string in any
+# R2 endpoint URL in the Cloudflare dashboard.
+#
+# infra/aws-ses is the one deliberate exception — it needs an extra
+# `profile` key (a named AWS CLI profile, not bare env vars) to avoid
+# colliding with its own provider "aws" block's real-AWS credentials; it
+# keeps its own separate backend.hcl.example rather than using this file.
+
+bucket    = "agendaprofe-tofu-state"
+endpoints = { s3 = "https://<CLOUDFLARE_ACCOUNT_ID>.r2.cloudflarestorage.com" }

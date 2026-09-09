@@ -1,0 +1,389 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Brand: warm terracotta + gold accent on a papery cream ground.
+       Hues hold a warm bias (yellow-orange family) so the whole
+       interface reads as one temperature.
+
+       Every colour token below is the HSL mirror of the canonical hex in
+       packages/shared/src/tokens.ts (the `palette` object). A machine parity
+       test (src/lib/theme-parity.test.ts) converts these back to hex and fails
+       on drift, so DO NOT hand-tune a value here without changing the shared
+       hex too — they are one source of truth split across two formats.
+
+       Surfaces form a deliberate three-tier elevation scale rather than a flat
+       sheet: the page background is the lowest, mid surfaces (secondary/muted)
+       are deeper cream tints, and raised cards/popovers are pure white — the
+       brightest. That daylight between the tiers is what lifts a card off the
+       page. */
+    --background: 228 26% 96%;
+    --foreground: 227 10% 18%;
+    /* Raised tier: pure white, the brightest surface — lifts cleanly off the
+       cream page (mirrors shared `surface` #FFFFFF). */
+    --card: 180 100% 100%;
+    --card-foreground: 227 10% 18%;
+    --popover: 180 100% 100%;
+    --popover-foreground: 227 10% 18%;
+    --primary: 229 42% 50%;
+    --primary-hover: 228 39% 45%;
+    --primary-foreground: 228 29% 97%;
+    /* Neutral button surface — a step deeper than `muted` so a secondary
+       button reads as a control, not a chip (mirrors shared `secondary`). */
+    --secondary: 222 20% 90%;
+    --secondary-foreground: 227 10% 18%;
+    /* Neutral warm fill: table heads, inactive tabs, chips, skeletons. */
+    --muted: 223 21% 94%;
+    --muted-foreground: 226 8% 34%;
+    /* Vivid gold — the brand's SECOND colour (highlights, selected states,
+       secondary emphasis). Distinct hue from the terracotta primary so the UI
+       isn't one colour doing every job (mirrors shared `accent`/`gold`). */
+    --accent: 46 70% 59%;
+    --accent-foreground: 222 21% 9%;
+    --destructive: 0 48% 43%;
+    --destructive-foreground: 228 29% 97%;
+    --success: 138 51% 29%;
+    --success-foreground: 228 29% 97%;
+    --warning: 32 99% 29%;
+    --warning-foreground: 228 29% 97%;
+    --info: 195 100% 27%;
+    --info-foreground: 228 29% 97%;
+    /* Earthy chip accents in the terracotta family — `clay` (scheduled) and
+       `sage` (has materials). Warm counterparts to the cold info/success so
+       the class-card pills stay on-temperature with the brand. Mirror of the
+       shared `clay`/`sage` hex in packages/shared/src/tokens.ts. */
+    --clay: 7 48% 41%;
+    --sage: 98 41% 30%;
+    /* Borders sit a touch deeper so edges read against the lighter surfaces. */
+    --border: 225 9% 75%;
+    --input: 225 9% 75%;
+    --ring: 229 47% 55%;
+    /* Shadow tint: a warm brown (mirrors shared `shadowTint.light` #3A2A20) so
+       elevation sits in the terracotta temperature instead of a cold grey.
+       Consumed by the `shadow-brand-*` box-shadow scale in tailwind.config.ts. */
+    --shadow-color: 24 29% 18%;
+    --radius: 0.625rem;
+    /* Chart-only categorical palette (admin metrics bar/pie fills). Deliberately
+       separate from the status tokens above (--success/--warning/--destructive/
+       --info) — those are reserved for state and never doubled as "series 4".
+       Validated as a set (lightness band, chroma floor, CVD adjacent-pair
+       separation, contrast) per docs/engineering — see dataviz skill. */
+    --chart-1: 217 53% 43%;
+    --chart-2: 11 61% 45%;
+    --chart-3: 148 51% 37%;
+    --chart-4: 272 34% 53%;
+    /* The tinted grounds the Badge and Alert variants sit on. These existed
+       in the shared palette from the start and were never mirrored here, so
+       every variant reached for `bg-success/15` instead — a different colour,
+       composited against the page, which the contrast test was not checking
+       and axe caught failing on the dashboard. */
+    --success-bg: 131 56% 88%;
+    --warning-bg: 28 100% 89%;
+    --danger-bg: 6 100% 92%;
+    --info-bg: 198 100% 90%;
+    --clay-bg: 11 100% 91%;
+    --sage-bg: 100 48% 88%;
+    /* The faintest text that still clears AA. It existed in the shared
+       palette and was never mirrored here either, so components reached for
+       `text-subtle` — an opacity that drops it BELOW AA, which
+       axe caught on four screens. */
+    --foreground-subtle: 226 6% 41%;
+  }
+
+  .dark {
+    /* Dark mode: deep warm night tones that keep the terracotta brand alive.
+
+       The surface ladder is widened HARD so cards lift clearly off a near-black
+       page (the light-mode "everything's the same brown" blend is worst here):
+       page L8% < mid muted L14% < secondary L16% < raised card L19%. Lighter =
+       higher, mirroring Material's elevation overlays. Previously the mid tier
+       was *brighter* than the card (an inverted ladder) — fixed. All values
+       mirror packages/shared/src/tokens.ts `paletteDark`; the parity test
+       guards the sync. */
+    --background: 218 20% 8%;
+    --foreground: 220 22% 89%;
+    /* Raised tier: cards/popovers, the brightest surface, read clearly above
+       the page and the mid fills. */
+    --card: 220 15% 19%;
+    --card-foreground: 220 22% 89%;
+    --popover: 220 15% 19%;
+    --popover-foreground: 220 22% 89%;
+    /* RAISED 2026-09-01, from L61%. `primary` does two jobs — it is the button
+       FILL and it is `text-primary`, the link/emphasis colour at 50 call sites
+       including the default Badge — and only the first was ever verified
+       (`primaryText` on `primary`, in palette-contrast.test.ts). As text it
+       measured 3.49:1 on the raised card, 3.68 on `secondary` and 4.18 on
+       `muted`: below AA on three of the four dark surfaces, and axe never saw
+       it because the a11y sweep ran light mode only. L70% is the smallest
+       whole-percent step clearing AA on ALL four, and it clears the hardest
+       (the raised card) at 5.01 — the same rounding headroom the palette test
+       budgets, since this HSL mirror is what the browser actually paints.
+       Lightening also improves the fill: `primary-foreground` is near-black in
+       this theme, so it goes 4.63 → 6.66 on the button. */
+    --primary: 228 53% 70%;
+    /* Dark hover goes LIGHTER, so it has to clear the new primary. */
+    --primary-hover: 228 53% 77%;
+    --primary-foreground: 222 21% 9%;
+    /* Neutral button surface, a step above the muted fill. */
+    --secondary: 224 12% 17%;
+    --secondary-foreground: 220 22% 89%;
+    /* Mid neutral fill, sits between the page and the raised card. */
+    --muted: 222 15% 13%;
+    /* Secondary text token (labels, descriptions, captions, placeholders).
+       Held at L69% so it keeps ~7:1 against the raised card surface —
+       comfortably readable rather than sitting at the WCAG AA floor. Warmth
+       retained to stay on-brand. */
+    --muted-foreground: 220 9% 67%;
+    /* Vivid gold accent, lifted for the dark ground (mirror of paletteDark). */
+    --accent: 46 67% 56%;
+    --accent-foreground: 222 21% 9%;
+    --destructive: 3 77% 70%;
+    --destructive-foreground: 222 21% 9%;
+    --success: 133 32% 55%;
+    --success-foreground: 222 21% 9%;
+    --warning: 27 63% 58%;
+    --warning-foreground: 222 21% 9%;
+    --info: 197 56% 56%;
+    --info-foreground: 222 21% 9%;
+    /* Lifted earthy chip accents (mirror of shared paletteDark clay/sage). */
+    --clay: 8 65% 67%;
+    --sage: 98 28% 55%;
+    /* Borders lifted so elevation edges are visible on the darker surfaces. */
+    --border: 220 6% 28%;
+    --input: 220 6% 28%;
+    /* Tracks `--primary` (which moved to L70% above) — the focus ring is drawn
+       in the brand colour, and leaving it at the old lightness would have kept
+       the least-visible value in the theme on the one affordance a keyboard
+       user navigates by. */
+    --ring: 228 53% 70%;
+    /* Dark shadows are plain black at higher opacity — a warm-brown blur all
+       but vanishes on a dark surface (mirrors shared `shadowTint.dark`). */
+    --shadow-color: 0 0% 0%;
+    /* Same four chart slots, restepped for the dark surface (OKLCH-ish L band,
+       kept ≥3:1 against --background). */
+    --chart-1: 212 60% 60%;
+    --chart-2: 17 53% 55%;
+    --chart-3: 146 37% 49%;
+    --chart-4: 273 41% 63%;
+    /* The tinted grounds the Badge and Alert variants sit on. These existed
+       in the shared palette from the start and were never mirrored here, so
+       every variant reached for `bg-success/15` instead — a different colour,
+       composited against the page, which the contrast test was not checking
+       and axe caught failing on the dashboard. */
+    --success-bg: 136 39% 15%;
+    --warning-bg: 27 72% 15%;
+    --danger-bg: 1 46% 20%;
+    --info-bg: 197 69% 15%;
+    --clay-bg: 8 45% 19%;
+    --sage-bg: 97 34% 15%;
+    /* The faintest text that still clears AA. It existed in the shared
+       palette and was never mirrored here either, so components reached for
+       `text-subtle` — an opacity that drops it BELOW AA, which
+       axe caught on four screens. */
+    --foreground-subtle: 223 7% 60%;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  /* The focus ring, applied once to everything that can take focus.
+   *
+   * D-140 §59 asks for 3px focus rings. The primitives used `ring-2` (there was
+   * no `ring-3` to write until now), and 110 of the 113 raw <button> elements
+   * in the app declared no focus style at all — so most controls fell back to
+   * whatever outline the browser drew, in the browser's own colour, which is
+   * not guaranteed to clear contrast on either of our grounds.
+   *
+   * Doing it here rather than per-component is what makes it true of the raw
+   * elements too: a drag handle or a video-stage control is still something a
+   * keyboard user lands on, and it should not matter whether whoever wrote it
+   * remembered. Components that need a different treatment still override it.
+   *
+   * `:focus-visible`, not `:focus`, so a mouse click does not draw it. */
+  :focus-visible {
+    outline: 3px solid hsl(var(--ring));
+    outline-offset: 2px;
+  }
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-feature-settings:
+      "rlig" 1,
+      "calt" 1,
+      "ss01" 1;
+  }
+  /* No display face, and no negative tracking. Both were working against the
+     reader: a high-contrast serif landed at 17px inside dashboard cards, and
+     tightened letter-spacing is the opposite of what helps a dyslexic reader.
+     Hierarchy comes from scale, the ink depth ramp and space (D-140). */
+  h1,
+  h2,
+  h3 {
+    letter-spacing: 0.005em;
+    text-wrap: balance;
+  }
+
+  /* Reading defaults. Opened letter and word spacing has better support in the
+     literature than any font substitution, and both are overridable per reader
+     — the custom properties are set from the saved preference. */
+  html {
+    /* Composes with the browser's own font-size setting rather than replacing
+       it: 100% is whatever the reader already chose, and the multiplier scales
+       from there. Nothing here pins a pixel value. */
+    font-size: calc(100% * var(--reading-scale, 1));
+  }
+
+  body {
+    line-height: var(--reading-leading, 1.6);
+    letter-spacing: var(--reading-tracking, 0.012em);
+    word-spacing: var(--reading-word, 0.04em);
+    /* The warm tint. Reported as helpful by some readers and unhelpful by
+       others, which is exactly why it is a choice rather than a default. */
+    background-image: linear-gradient(
+      0deg,
+      rgb(214 176 92 / calc(var(--reading-tint, 0) * 0.14)),
+      rgb(214 176 92 / calc(var(--reading-tint, 0) * 0.14))
+    );
+    background-attachment: fixed;
+  }
+
+  /* Slanted text measurably slows dyslexic readers; emphasis is weight. */
+  em,
+  i {
+    font-style: normal;
+    font-weight: 700;
+  }
+}
+
+@layer utilities {
+  /* Blinking fake caret for the OTP input's active box (components/ui/otp-input.tsx). */
+  @keyframes caret-blink {
+    0%,
+    70%,
+    100% {
+      opacity: 1;
+    }
+    20%,
+    50% {
+      opacity: 0;
+    }
+  }
+
+  .animate-caret-blink {
+    animation: caret-blink 1.25s ease-out infinite;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .animate-caret-blink {
+      animation: none;
+    }
+  }
+
+  /* Subtle entrance for page/section mounts. Honors reduced-motion. */
+  @keyframes fade-in-up {
+    from {
+      opacity: 0;
+      transform: translateY(0.5rem);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .animate-fade-in-up {
+    animation: fade-in-up 0.32s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  /* The device's bottom safe area (an iPhone's home indicator). Needed by any
+     control docked to the bottom of a `100dvh` column — the chat composer is
+     the only one today. Written here rather than as `pb-[env(…)]` at the call
+     site so it stays out of the arbitrary-value ratchet and so there is one
+     spelling of it. */
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .animate-fade-in-up {
+      animation: none;
+    }
+  }
+
+  /* Responsive tables: below md, a `.table-stack` table collapses each row
+     into a labelled card (column header surfaced via the cell's data-label)
+     instead of forcing a wide horizontal scroll. The header row is kept in
+     the DOM (visually hidden) for assistive tech.
+
+     The bound is read from the scale rather than hardcoded: this rule and
+     TableShell's `lg:overflow-hidden lg:rounded-md lg:border` (ui/table.tsx)
+     are two halves of ONE switch, and a hardcoded pixel here is how they drift
+     apart — leaving a band of widths that draws the desktop frame around
+     already-stacked cards. `not all and (min-width: …)` is "below md"; a
+     `max-width` of the same number would overlap it by a pixel. */
+  @media not all and (min-width: theme("screens.lg")) {
+    table.table-stack thead {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+    table.table-stack tr {
+      display: block;
+      border: 1px solid hsl(var(--border));
+      border-radius: var(--radius);
+      padding: 0.5rem 0.875rem;
+      margin-bottom: 0.625rem;
+    }
+    /* Each cell stacks as plain block flow — the column label as a small
+       caption above its value — rather than a flex row. A flex row turned
+       every child of a cell (a name div + email div, or several text nodes)
+       into separate items on one line, which cramped and clipped rich cells
+       like the audit log's teacher/target columns. Block flow + overflow-wrap
+       lets long emails and IDs wrap and can't break on any cell shape. */
+    table.table-stack td {
+      display: block;
+      padding: 0.5rem 0;
+      text-align: left;
+      overflow-wrap: anywhere;
+    }
+    table.table-stack td:not(:last-child) {
+      border-bottom: 1px solid hsl(var(--border) / 0.5);
+    }
+    table.table-stack td::before {
+      content: attr(data-label);
+      display: block;
+      margin-bottom: 0.125rem;
+      font-size: 0.6875rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: hsl(var(--muted-foreground));
+    }
+    table.table-stack td[data-label=""]::before,
+    table.table-stack td:not([data-label])::before {
+      content: none;
+    }
+  }
+}
+
+@layer base {
+  /* WebKit draws its own clear button inside `input[type="search"]`. Where the
+     app supplies one of its own — the help centre's search field — the two sit
+     side by side and read as a rendering bug, so the native one is suppressed
+     for exactly that case. Opt in per field rather than globally: an admin
+     filter input that has NO clear button of its own is better off keeping the
+     browser's. Firefox draws nothing here and needs no counterpart rule. */
+  input[type="search"].no-native-clear::-webkit-search-cancel-button,
+  input[type="search"].no-native-clear::-webkit-search-decoration {
+    -webkit-appearance: none;
+    appearance: none;
+  }
+}

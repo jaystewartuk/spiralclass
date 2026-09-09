@@ -1,0 +1,278 @@
+name: Gate
+
+# The merge gate, run on a GitHub-hosted runner ([D-157]).
+#
+# ⚠️ READ THIS BEFORE ADDING A STEP. This workflow deliberately does NOT know
+# what "green" means. `scripts/ci/steps.mjs` is the single registry of the
+# checks, `scripts/ci/gate.mjs` runs them, and the job below invokes that with
+# a tier name and nothing else. D-119 moved CI onto the operator's laptop and
+# bought exactly one thing worth keeping when it moved back: ONE definition of
+# the tier. A `run: pnpm typecheck` added here would be a second one — it would
+# agree with the registry on the day it was written and diverge silently after.
+#
+# If a check needs adding, moving or splitting, it happens in steps.mjs and
+# both machines inherit it in the same commit. If a job genuinely needs
+# splitting across runners for speed, that capability belongs in gate.mjs
+# (which already has `--only`), not in a hand-maintained list here.
+#
+# WHY THIS EXISTS AGAIN AT ALL, given D-129 deleted every workflow: Actions
+# minutes are metered on a private repository and free on a public one, and
+# this repository is public. The whole cost argument that produced D-120 and
+# D-129 was arithmetic against a 2,000-minute allowance that no longer applies.
+# See [D-157] for what happens if that premise reverses.
+#
+# TWO PRODUCERS, ONE PROGRAM. `.githooks/pre-push` still runs the same gate on
+# the laptop and still posts the same `local-gate` commit status. That is not
+# duplication to be tidied away: the hook is what makes the checks run before a
+# push rather than after, and this workflow is what makes a laptop-less day —
+# a Claude Code cloud session, a borrowed machine — a complete substitute
+# rather than a stranded PR. They cannot disagree about anything but timing,
+# because they run the same registry.
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# Start from nothing and elevate per job. The default token is far broader than
+# any job here needs: the gate reads a checkout and runs tests, and only the
+# status job writes anything at all.
+permissions:
+  contents: read
+
+concurrency:
+  # Per PR, or per branch on a push. `cancel-in-progress` is safe here and only
+  # here — superseding a PR's own earlier run wastes nothing, because the answer
+  # it was computing is about a commit nobody is asking about any more. The two
+  # deploy workflows set this to false, for reasons their headers give.
+  group: gate-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  gate:
+    name: Format, typecheck, lint, unit tests and audit
+    runs-on: ubuntu-latest
+    # ⚠️ `ubuntu-latest` and nothing else. Larger runners are billed by the
+    # minute even on a public repository, which would quietly reintroduce the
+    # exact meter D-120 and D-129 were arguing with.
+    # apps/web/tests/config/local-gate.test.ts asserts no workflow asks for one.
+    timeout-minutes: 25
+    env:
+      # Turborepo remote cache (Vercel). TURBO_TEAM is a team slug, not a
+      # secret. Absent either value turbo falls back to local caching, so this
+      # is additive and never required — which also means a fork PR, which gets
+      # no secrets, still runs a correct gate, just a colder one.
+      TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+      # A repository `vars` entry, not a literal: the slug names the operator's
+      # own Vercel account and this repository is public. Unset, turbo caches
+      # locally — which is the same fallback TURBO_TOKEN already has.
+      TURBO_TEAM: ${{ vars.TURBO_TEAM }}
+      # A COLD `spiralclass-web:typecheck` OOMs on Node's ~2GB default heap
+      # (exit 134, "Reached heap limit"). It hides most of the time because the
+      # remote cache short-circuits typecheck on the average PR, so it only
+      # bites on a change wide enough to miss — and then reads as a flake
+      # rather than as the capacity problem it is. ubuntu-latest has 16GB.
+      NODE_OPTIONS: "--max-old-space-size=6144"
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          # One step in the fast tier diffs against a merge base:
+          # apps/web/scripts/diff-coverage.mjs. A merge base only exists if
+          # both sides have history, and two depth-1 tips share no ancestor —
+          # that is what `fatal: no merge base` means.
+          # (format-check used to be the second. It is whole-tree now and needs
+          # no base at all; see scripts/format-check.mjs's header for why the
+          # ratchet was retired.)
+          fetch-depth: 0
+          # This job pushes nothing. Leaving the token in .git/config would
+          # hand every test, every lint plugin and every transitive dependency
+          # a credential they have no reason to hold.
+          persist-credentials: false
+
+      - name: Make the base branch resolvable
+        # diff-coverage defaults to `origin/main`, which is the same thing it
+        # means on the operator's laptop. On a `pull_request` actions/checkout
+        # builds the merge ref and leaves no `origin/main` behind, so point one
+        # at the base commit rather than overriding the scripts with a
+        # workflow-only base — a base that differs between the two machines is
+        # a gate that answers differently on each.
+        #
+        # ⚠️ `git update-ref`, NOT `git fetch`. `persist-credentials: false`
+        # above leaves no credential in .git/config, so a fetch from a private
+        # repository dies with "could not read Username for https://github.com"
+        # — which is the setting working, not a problem to solve by undoing it.
+        # `fetch-depth: 0` already brought the base branch's objects down with
+        # the merge commit, so nothing needs fetching: the commit is here, it
+        # just has no name.
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: |
+          set -euo pipefail
+          if git rev-parse --verify --quiet origin/main >/dev/null; then
+            echo "origin/main already resolves — nothing to do."
+            exit 0
+          fi
+          if [ -n "${BASE_SHA:-}" ] && git cat-file -e "${BASE_SHA}^{commit}" 2>/dev/null; then
+            git update-ref refs/remotes/origin/main "$BASE_SHA"
+            echo "origin/main -> $BASE_SHA (this PR's base)."
+            exit 0
+          fi
+          # Fail loudly. Silently leaving origin/main unresolvable would make
+          # diff-coverage skip with a warning nobody reads, and a ratchet that
+          # skips is a ratchet that has stopped.
+          echo "Could not resolve a base commit for origin/main." >&2
+          exit 1
+
+      - name: Pick the diff base for a push to main
+        # On a PR, `origin/main` is the right base and nothing here runs. On a
+        # push it is the commit just built, so the diff is empty and the
+        # remaining ratchet (diff coverage) would pass vacuously. The push's own
+        # before-SHA is the honest base. It is all-zeros on a first push or
+        # after a force-push; there the fetch above already left `origin/main`
+        # as the only thing that resolves, so leave it alone.
+        if: ${{ github.event_name == 'push' }}
+        env:
+          BEFORE: ${{ github.event.before }}
+        run: |
+          set -euo pipefail
+          if [ -z "$BEFORE" ] || [ "$BEFORE" = "0000000000000000000000000000000000000000" ]; then
+            echo "No usable before-SHA; leaving the base at origin/main."
+            exit 0
+          fi
+          if ! git cat-file -e "${BEFORE}^{commit}" 2>/dev/null; then
+            echo "before-SHA ${BEFORE} is not in this clone; leaving the base at origin/main."
+            exit 0
+          fi
+          echo "DIFF_COVERAGE_BASE=$BEFORE" >> "$GITHUB_ENV"
+          echo "Diffing against $BEFORE — the commit this push moved main from."
+
+      - uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
+        # No `version:` — pnpm/action-setup reads `packageManager` from
+        # package.json. The repository states its own tool versions and the
+        # workflow does not get a second opinion; two places to bump is one
+        # place to forget.
+        with:
+          dest: ~/setup-pnpm
+
+      - name: Read the Node major the app actually ships on
+        # From the Dockerfile, because that is what production runs — not from
+        # `engines.node`, which is a floor (">=24.15.0") and would let a runner
+        # resolve a major the image has never seen. Derived rather than
+        # restated, the same way scripts/fly-deploy.sh reads the app name out
+        # of fly.<env>.toml: bump the Dockerfile and CI follows in the same
+        # commit. Fails loudly if the FROM line stops matching, rather than
+        # falling back to a guess.
+        run: |
+          set -euo pipefail
+          major="$(sed -n 's/^FROM node:\([0-9][0-9]*\)-slim.*/\1/p' Dockerfile | head -1)"
+          if [ -z "$major" ]; then
+            echo "Could not read a Node major from the Dockerfile's FROM line." >&2
+            exit 1
+          fi
+          echo "NODE_VERSION=$major" >> "$GITHUB_ENV"
+          echo "Node $major, from the Dockerfile."
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          # Round-trips the pnpm store through the Actions cache. On a
+          # persistent machine this is pure added latency; on an ephemeral VM
+          # that is wiped every run it is the whole point.
+          cache: pnpm
+
+      - name: Restore the turbo cache
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          # scripts/turbo.mjs puts the cache here so every worktree on the
+          # laptop shares one. A runner has one checkout, but pointing at the
+          # same path means the wrapper needs no runner-specific branch.
+          path: ~/.cache/turbo/spiralclass
+          # Keyed on the lockfile AND the tool versions, because turbo's own
+          # cache key is a content hash over inputs that include neither. A key
+          # too loose is worse than no cache: it restores a stale answer and
+          # the run reports it as fresh.
+          key: turbo-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml', 'package.json', 'turbo.json', 'Dockerfile') }}-${{ github.sha }}
+          restore-keys: |
+            turbo-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml', 'package.json', 'turbo.json', 'Dockerfile') }}-
+
+      - name: Install gitleaks
+        # TOOLING SETUP, not a check — the scan itself is a registry step
+        # (`secret-scan`) and this workflow never restates one. The same
+        # distinction as setup-node and pnpm/action-setup above.
+        #
+        # ⚠️ NOT `gitleaks/gitleaks-action`. That action RUNS the scan, which
+        # would put a second definition of the check in a workflow file — the
+        # exact drift D-119 removed and D-157 came back on the condition of not
+        # reintroducing. And ⚠️ NOT `pnpm add gitleaks`: the npm package of
+        # that name is a third party's, unrelated to this tool, and taking a
+        # CREDENTIAL SCANNER from an unofficial package is the supply-chain
+        # shape the scanner exists to catch.
+        #
+        # So: the official release, pinned by version and verified against the
+        # checksum published with it. An unpinned installer piped into a shell
+        # would be a worse supply-chain edge than either thing rejected above.
+        env:
+          GITLEAKS_VERSION: 8.30.1
+          # From gitleaks_${VERSION}_checksums.txt in the same release. Bump
+          # both together; a version bump with a stale checksum fails closed.
+          GITLEAKS_SHA256: 551f6fc83ea457d62a0d98237cbad105af8d557003051f41f3e7ca7b3f2470eb
+        run: |
+          set -euo pipefail
+          tarball="gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz"
+          curl -fsSL --retry 3 -o "$tarball" \
+            "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/${tarball}"
+          echo "${GITLEAKS_SHA256}  ${tarball}" | sha256sum -c -
+          tar -xzf "$tarball" gitleaks
+          sudo install -m 0755 gitleaks /usr/local/bin/gitleaks
+          rm -f "$tarball" gitleaks
+          gitleaks version
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Run the fast tier
+        # The whole workflow, in one line. --no-lock because the machine lock
+        # (D-146) serializes the seven worktrees on one laptop and a runner is
+        # a fresh VM with one job on it. --no-post because posting the status
+        # is the next job's business: on a pull_request the commit that matters
+        # is the PR head, not the merge commit this job is standing on.
+        run: node scripts/ci/gate.mjs --tier fast --no-lock --no-post
+
+  status:
+    name: Post the local-gate status
+    needs: [gate]
+    # `always()` so a red gate posts a red status rather than leaving the PR
+    # waiting forever for a check that already decided.
+    if: ${{ always() && github.event_name == 'pull_request' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      # The only write this workflow performs, isolated in the only job that
+      # needs it. Note a fork PR gets a read-only token and no secrets, so no
+      # status is posted there — correct, rather than a gap: nothing about a
+      # fork's code should be able to certify itself.
+      statuses: write
+    steps:
+      - name: Post it against the PR head commit
+        env:
+          GH_TOKEN: ${{ github.token }}
+          # Never interpolated into the script body. `${{ }}` inside a `run:`
+          # is substituted before bash ever sees it, so a value containing a
+          # quote or a `$(…)` executes; through `env:` it is data.
+          RESULT: ${{ needs.gate.result }}
+          # The PR HEAD, not github.sha — that is the ephemeral merge commit,
+          # and a status on it is invisible to the PR. A commit status is bound
+          # to one SHA, which is the property that stops a green result
+          # drifting onto later work.
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          set -euo pipefail
+          if [ "$RESULT" = "success" ]; then STATE=success; else STATE=failure; fi
+          gh api -X POST "repos/${GITHUB_REPOSITORY}/statuses/${HEAD_SHA}" \
+            -f "state=${STATE}" \
+            -f "context=local-gate" \
+            -f "description=fast tier · GitHub Actions" \
+            -f "target_url=${RUN_URL}"
+          echo "Posted local-gate=${STATE} on ${HEAD_SHA}."

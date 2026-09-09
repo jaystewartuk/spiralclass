@@ -1,0 +1,20 @@
+# Copy to terraform.tfvars (gitignored) and fill in. None of these are
+# secret (the AWS admin key + Cloudflare API token are passed via env vars,
+# never here).
+
+# Confirmed 2026-07-13 via the Resend dashboard — production and preview
+# are SEPARATE Resend accounts, each with its own verified domain. Both
+# currently have ZERO live DNS records despite showing "verified" in
+# Resend — see variables.tf's ses_domains description and
+# infra/aws-ses/README.md before applying for real.
+# ses_domains = ["updates.spiralclass.com", "updates.staging.spiralclass.com"]  # this IS the variables.tf default; override only if it changes
+
+# Cloudflare dashboard → spiralclass.com → Overview → right sidebar → API
+# section → "Zone ID".
+cloudflare_zone_id = "your-zone-id"
+
+# Optional overrides (defaults shown):
+# aws_region          = "us-east-1"
+# ses_user_name       = "agendaprofe-ses-sender"
+# manage_dns          = true
+# resend_spf_include  = "_spf.resend.com"  # UNVERIFIED, see variables.tf
