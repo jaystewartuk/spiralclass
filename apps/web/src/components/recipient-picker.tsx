@@ -6,6 +6,7 @@ import { PageHeader } from "@/components/ui/page-header";
 import Link from "next/link";
 import { ChevronLeft, Search } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
+import { PersonAvatar } from "@/components/teacher-identity";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 
@@ -93,9 +94,13 @@ export function RecipientPicker({
                           i === filtered.length - 1 && "rounded-b-lg",
                         )}
                       >
-                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-sm font-semibold text-primary">
-                          {r.name.charAt(0).toUpperCase()}
-                        </div>
+                        {/* The shared avatar, which this row was a third copy
+                            of — same monogram, same 40px, and the same
+                            `bg-primary/10 text-primary` tint PersonAvatar and
+                            the Badge variants were migrated off. Two initials
+                            rather than one now, because that is what every
+                            other avatar in the app shows a name as. */}
+                        <PersonAvatar name={r.name} />
                         <span className="truncate text-sm font-medium">{r.name}</span>
                       </Link>
                     </li>
