@@ -46,10 +46,21 @@ type PackageRow = {
   classesTotal: number;
 };
 
+type OverrideRow = {
+  teacherId: string;
+  targetType: string;
+  targetId: string;
+  action: string;
+  reason: string;
+  beforeJson: unknown;
+  afterJson: unknown;
+};
+
 type FakeState = {
   bookings: Map<string, BookingRow>;
   packages: Map<string, PackageRow>;
   notifications: NotificationRow[];
+  overrides: OverrideRow[];
   nextBookingId: { value: number };
 };
 
@@ -78,6 +89,7 @@ function freshState(): FakeState {
     ]),
     packages: new Map([[PACKAGE_ID, { id: PACKAGE_ID, scheduleChangesUsed: 0, classesTotal: 8 }]]),
     notifications: [],
+    overrides: [],
     nextBookingId: { value: 1 },
   };
 }
@@ -153,6 +165,21 @@ function buildDeps(
         return { count: 1 };
       }),
     },
+    override: {
+      create: vi.fn(async ({ data }: any) => {
+        const row: OverrideRow = {
+          teacherId: data.teacherId,
+          targetType: data.targetType,
+          targetId: data.targetId,
+          action: data.action,
+          reason: data.reason,
+          beforeJson: data.beforeJson ?? null,
+          afterJson: data.afterJson ?? null,
+        };
+        state.overrides.push(row);
+        return { id: `override-${state.overrides.length}`, ...row };
+      }),
+    },
     notification: {
       create: vi.fn(async ({ data, select }: any) => {
         const id = `notif-${state.notifications.length + 1}`;
@@ -175,6 +202,7 @@ function buildDeps(
     booking: tx.booking,
     package: tx.package,
     notification: tx.notification,
+    override: tx.override,
     // Model real transaction rollback: snapshot the mutable state before the
     // callback and restore it if the callback throws, so assertions about "the
     // whole tx rolls back on a conflict" are faithful regardless of the order
@@ -184,6 +212,7 @@ function buildDeps(
         bookings: new Map([...state.bookings].map(([k, v]) => [k, { ...v }])),
         packages: new Map([...state.packages].map(([k, v]) => [k, { ...v }])),
         notifications: state.notifications.map((n) => ({ ...n })),
+        overrides: state.overrides.map((o) => ({ ...o })),
         nextBookingId: state.nextBookingId.value,
       };
       try {
@@ -193,6 +222,8 @@ function buildDeps(
         state.packages = snapshot.packages;
         state.notifications.length = 0;
         state.notifications.push(...snapshot.notifications);
+        state.overrides.length = 0;
+        state.overrides.push(...snapshot.overrides);
         state.nextBookingId.value = snapshot.nextBookingId;
         throw err;
       }
@@ -482,5 +513,130 @@ describe("applyReschedule", () => {
 
     const created = state.bookings.get(outcome.newBookingId);
     expect(created?.rescheduleCount).toBe(4);
+  });
+});
+
+// The teacher-initiated shape (teacher "change date and time"). The class
+// still moves the same way; what differs is who pays for the move, who gets
+// told, and that the intervention is audited.
+describe("applyReschedule — teacher-initiated", () => {
+  let state: FakeState;
+
+  const teacherInput = {
+    oldBookingId: OLD_BOOKING_ID,
+    teacherId: TEACHER_ID,
+    studentId: STUDENT_ID,
+    packageId: PACKAGE_ID,
+    oldScheduledStart: OLD_START,
+    oldRescheduleCount: 0,
+    newStartUtc: NEW_START,
+    newEndUtc: NEW_END,
+    bufferMin: 10,
+    spendScheduleChange: false,
+    notifyTeacher: false,
+    override: { action: "teacher_reschedule_class", reason: "She moved the class." },
+  };
+
+  beforeEach(() => {
+    state = freshState();
+  });
+
+  it("does not spend the student's pooled schedule-change budget", async () => {
+    const { deps } = buildDeps(state);
+
+    const outcome = await applyReschedule(deps, teacherInput);
+
+    expect(outcome.code).toBe("ok");
+    // The budget caps what the STUDENT can do unilaterally. A move she did not
+    // ask for must not consume the one she has left — the same exemption
+    // handleTeacherCancel takes when it refunds without charging it.
+    expect(state.packages.get(PACKAGE_ID)?.scheduleChangesUsed).toBe(0);
+    // The class still moved.
+    expect(state.bookings.get(OLD_BOOKING_ID)?.status).toBe("rescheduled");
+  });
+
+  it("moves the class even when the package's budget is fully spent", async () => {
+    // The case that made the exemption necessary rather than merely tidy: a
+    // student who has used every schedule change still has a teacher who needs
+    // to move Tuesday's class.
+    state.packages.get(PACKAGE_ID)!.scheduleChangesUsed = 8; // classesTotal
+    const { deps } = buildDeps(state);
+
+    const outcome = await applyReschedule(deps, teacherInput);
+
+    expect(outcome.code).toBe("ok");
+    expect(state.packages.get(PACKAGE_ID)?.scheduleChangesUsed).toBe(8);
+  });
+
+  it("still tells the student, and does not mirror it back to the teacher", async () => {
+    const { deps, emitted } = buildDeps(state);
+
+    const outcome = await applyReschedule(deps, teacherInput);
+
+    expect(outcome.code).toBe("ok");
+    if (outcome.code !== "ok") throw new Error();
+    // A class must never move under the student silently.
+    const student = state.notifications.filter((n) => n.templateName === "reschedule_confirm");
+    expect(student).toHaveLength(1);
+    expect(student[0].recipientType).toBe("student");
+    expect(student[0].metadata).toEqual({ oldScheduledStart: OLD_START.toISOString() });
+    // She made the move; telling her about it is noise.
+    expect(
+      state.notifications.filter((n) => n.templateName === "reschedule_confirm_teacher"),
+    ).toHaveLength(0);
+    expect(outcome.teacherNotificationId).toBeNull();
+    // ...and no trigger is emitted for a notification that does not exist.
+    expect(emitted.filter((e) => e.name === "notification.queued")).toHaveLength(1);
+  });
+
+  it("audits the move against the old booking, with both times", async () => {
+    const { deps } = buildDeps(state);
+
+    const outcome = await applyReschedule(deps, teacherInput);
+    expect(outcome.code).toBe("ok");
+    if (outcome.code !== "ok") throw new Error();
+
+    expect(state.overrides).toHaveLength(1);
+    const row = state.overrides[0];
+    expect(row.action).toBe("teacher_reschedule_class");
+    expect(row.teacherId).toBe(TEACHER_ID);
+    // Against the OLD row: that is the class she acted on, and the row the
+    // student's class history already links its override log to.
+    expect(row.targetType).toBe("booking");
+    expect(row.targetId).toBe(OLD_BOOKING_ID);
+    expect(row.beforeJson).toEqual({ scheduledStart: OLD_START.toISOString() });
+    expect(row.afterJson).toEqual({
+      scheduledStart: NEW_START.toISOString(),
+      newBookingId: outcome.newBookingId,
+    });
+  });
+
+  it("writes no audit row when the move loses the race", async () => {
+    // The whole transaction rolls back, audit included — a log that records
+    // moves that did not happen is worse than no log.
+    state.bookings.get(OLD_BOOKING_ID)!.status = "canceled_by_student";
+    const { deps } = buildDeps(state);
+
+    const outcome = await applyReschedule(deps, teacherInput);
+
+    expect(outcome.code).toBe("slot-conflict");
+    expect(state.overrides).toHaveLength(0);
+  });
+
+  it("leaves the student flow's defaults alone — budget spent, teacher mirrored, nothing audited", async () => {
+    const { deps } = buildDeps(state);
+
+    const outcome = await applyReschedule(deps, {
+      ...teacherInput,
+      spendScheduleChange: undefined,
+      notifyTeacher: undefined,
+      override: undefined,
+    });
+
+    expect(outcome.code).toBe("ok");
+    if (outcome.code !== "ok") throw new Error();
+    expect(state.packages.get(PACKAGE_ID)?.scheduleChangesUsed).toBe(1);
+    expect(outcome.teacherNotificationId).not.toBeNull();
+    expect(state.overrides).toHaveLength(0);
   });
 });

@@ -133,7 +133,7 @@ graph TB
     WEB["Next.js 15 web app<br/>teacher · student · public booking · admin"]
 
     subgraph app["apps/web — the only server"]
-        RSC["Server Components<br/>+ 70 server-action modules"]
+        RSC["Server Components<br/>+ 71 server-action modules"]
         API["57 route handlers<br/>by audience: teacher · student · public · internal"]
         MW["middleware.ts<br/>CSP nonce · session gate · ?ref= attribution"]
         LIB["src/lib/** — one folder per bounded concern<br/>payments · booking · cancellation · subscriptions<br/>auth · notifications · chat · homework · video"]
@@ -509,7 +509,7 @@ pnpm test:e2e                # Playwright
 pnpm gate --allow-dirty      # everything the pre-push hook will check
 ```
 
-There are 770 test files across five layers — unit, real-database integration,
+There are 772 test files across five layers — unit, real-database integration,
 Playwright end-to-end, visual regression and accessibility — plus a mutation
 spot-check that measures whether the unit suite would actually catch a defect,
 and a per-PR diff-coverage floor on new code.

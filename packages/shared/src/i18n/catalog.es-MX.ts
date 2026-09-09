@@ -1925,6 +1925,41 @@ export const esMX = {
   "teacherBook.error.slot-taken": "Ese horario ya fue reservado por alguien más.",
   "teacherBook.error.invalid": "Esa selección no es válida. Elige otra vez un horario.",
 
+  // Reagendar desde el lado de la profe — "cambiar la fecha y la hora".
+  // Códigos, no frases: la acción devuelve un código y este lado lo redacta
+  // (ver lib/cancellation/teacher-reschedule-errors.ts).
+  "teacherReschedule.overrideReason": "La profe movió esta clase a otra fecha y hora.",
+  "teacherReschedule.confirmAsk.title": "¿Mover esta clase?",
+  "teacherReschedule.confirmAsk.cta": "Mover la clase",
+  "teacherReschedule.pending": "Moviendo…",
+  "teacherReschedule.error.invalid": "Esa selección no es válida. Elige otra vez un horario.",
+  "teacherReschedule.error.booking-not-found": "No encontramos esa clase.",
+  "teacherReschedule.error.not-scheduled":
+    "Esta clase ya ocurrió o se canceló, así que ya no se puede mover.",
+  "teacherReschedule.error.past-slot": "Elige un horario futuro.",
+  "teacherReschedule.error.same-slot": "Ese es el horario que ya tiene la clase.",
+  "teacherReschedule.error.package-expired":
+    "Ese horario es después de que vence el paquete. Extiende el paquete y luego mueve la clase.",
+  "teacherReschedule.error.package-not-found":
+    "Este paquete de clases ya no está disponible. Actualiza e inténtalo de nuevo.",
+  "teacherReschedule.error.slot-unavailable": "Ese horario ya no está disponible.",
+  "teacherReschedule.error.slot-taken": "Ese horario acaba de ocuparlo otra clase.",
+  "web.dashboard.classes.reschedule.title": "Cambiar fecha y hora",
+  "web.dashboard.classes.reschedule.subtitle": "Esta clase es el {when}. Elige un horario nuevo.",
+  "web.dashboard.classes.reschedule.previousDay": "Día anterior",
+  "web.dashboard.classes.reschedule.nextDay": "Día siguiente",
+  "web.dashboard.classes.reschedule.noTimesAvailable":
+    "No hay horarios libres este día. Prueba con otra fecha.",
+  "web.dashboard.classes.reschedule.goToNextAvailableDay": "Ir al siguiente día libre · {date}",
+  "web.dashboard.classes.reschedule.noTimesLeftInWindow":
+    "Ya no hay horarios libres en tu ventana de reservas.",
+  "web.dashboard.classes.reschedule.moveToLabel": "Mover a {label}",
+  "web.dashboard.classes.reschedule.hint":
+    "Solo aparecen los horarios que dejan libres tu disponibilidad, tu margen entre clases y tus fechas bloqueadas. Tu alumno recibe aviso de que la clase cambió y conserva los cambios de horario incluidos en el paquete.",
+  "web.dashboard.classes.reschedule.backToClass": "Volver a la clase",
+  "web.dashboard.classes.detail.changeDateTime": "Cambiar fecha y hora",
+  "web.dashboard.classes.detail.overrideLog.teacherRescheduleClass": "Clase movida por la profe",
+
   "onboarding.templates.name": "Nombre",
   "onboarding.templates.subject": "Materia (opcional)",
   "onboarding.templates.subjectHint":

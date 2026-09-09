@@ -19,17 +19,20 @@ class RescheduleRaceError extends Error {}
 // as its own outcome so it isn't mis-reported as "slot-conflict".
 class RescheduleMissingPackageError extends Error {}
 
-// Reschedule data layer. Caller has already validated:
-//   * booking is `scheduled`, package has schedule-change budget left, ≥24h ahead
-// * new slot is in the same Mon–Sun calendar week (teacher tz, server-authoritative)
-// * new slot survives the generator
+// Reschedule data layer, shared by BOTH surfaces that move a class: the
+// student's own reschedule flow and the teacher's "change date and time"
+// action. Caller has already validated:
+//   * booking is `scheduled` and the new slot survives the generator
+//   * whatever eligibility its own actor is subject to (the student's ≥24h
+//     rule and pooled budget; the teacher is exempt from both — see below)
 //
 // This handler owns:
 //   * Insert new booking (rescheduleOfBookingId = old.id, count = old.count+1)
 //   * Mark old booking `rescheduled` (its reminder/auto-complete sleepers
 //     short-circuit on the status change — see auto-complete.ts)
-//   * Spend one schedule-change unit on the package (the shared budget a ≥24h
-//     cancel also draws from — see classify.ts)
+//   * Spend one schedule-change unit on the package, unless the caller opts
+//     out (the shared budget a ≥24h cancel also draws from — see classify.ts)
+//   * Optionally write an Override audit row, for a teacher-initiated move
 //   * Enqueue reschedule_confirm notification carrying oldScheduledStart
 //   * Post-commit emit booking.rescheduled + a fresh booking.created so
 //     Slice 4 sleepers fan out for the new row against the new start.
@@ -40,6 +43,14 @@ class RescheduleMissingPackageError extends Error {}
 // (set false below), so the aggregate nets to zero. schedule_changes_used,
 // though, does move: a move is a move whether done by reschedule or by
 // cancel+rebook, and both spend from the same pool.
+//
+// WHO PAYS FOR THE MOVE. The budget caps churn the STUDENT can create on her
+// own; it was never a charge for the class being moved. So a teacher moving
+// her own class passes `spendScheduleChange: false` and the student's
+// allowance is untouched — exactly as `handleTeacherCancel` refunds without
+// charging the budget. Leaving the default on for a teacher move would have
+// spent the student's last change on a change she did not ask for, and then
+// refused her own reschedule later.
 
 export type RescheduleEventEmitter = (
   event:
@@ -68,7 +79,7 @@ export type RescheduleEventEmitter = (
 ) => Promise<void>;
 
 export type RescheduleDeps = {
-  prisma: Pick<PrismaClient, "booking" | "package" | "notification" | "$transaction">;
+  prisma: Pick<PrismaClient, "booking" | "package" | "notification" | "override" | "$transaction">;
   emit?: RescheduleEventEmitter;
 };
 
@@ -77,7 +88,8 @@ export type RescheduleOutcome =
       code: "ok";
       newBookingId: string;
       notificationId: string;
-      teacherNotificationId: string;
+      /** Null when the caller asked for no teacher mirror (she made the move herself). */
+      teacherNotificationId: string | null;
     }
   | { code: "slot-conflict" }
   | { code: "package-not-found" };
@@ -98,11 +110,32 @@ export async function applyReschedule(
     // enforce it race-proof (see the schema column doc comment). The caller
     // already loads this for its own slot re-validation.
     bufferMin: number;
+    /**
+     * Spend one unit of the package's pooled schedule-change budget.
+     * Defaults to true (the student flow). A teacher-initiated move passes
+     * false: see "WHO PAYS FOR THE MOVE" above.
+     */
+    spendScheduleChange?: boolean;
+    /**
+     * Enqueue the teacher's own mirror of the confirmation. Defaults to true
+     * (the student moved it, so the teacher needs telling). A teacher
+     * rescheduling from her own dashboard passes false — the same rule
+     * `bookPackageSlot`'s `notifyTeacher` applies to a teacher self-booking.
+     * The STUDENT is notified either way; nobody can move a class out from
+     * under her silently.
+     */
+    notifyTeacher?: boolean;
+    /**
+     * When set, write an Override audit row inside the same transaction, so a
+     * teacher's intervention on a student's class appears in the class history
+     * the student can read — like every other teacher override.
+     */
+    override?: { action: string; reason: string } | null;
   },
 ): Promise<RescheduleOutcome> {
   let newBookingId: string;
   let notificationId: string;
-  let teacherNotificationId: string;
+  let teacherNotificationId: string | null;
   try {
     const result = await deps.prisma.$transaction(async (tx) => {
       // Release the OLD booking BEFORE inserting the replacement. Both DB slot
@@ -138,14 +171,16 @@ export async function applyReschedule(
       // from `classesTotal ?? 0` (budget 0), which would always trip the
       // updateMany guard and be mis-reported as a slot-conflict.
       if (!pkg) throw new RescheduleMissingPackageError();
-      const spent = await tx.package.updateMany({
-        where: {
-          id: input.packageId,
-          scheduleChangesUsed: { lt: scheduleChangeBudget(pkg.classesTotal) },
-        },
-        data: { scheduleChangesUsed: { increment: 1 } },
-      });
-      if (spent.count === 0) throw new RescheduleRaceError();
+      if (input.spendScheduleChange !== false) {
+        const spent = await tx.package.updateMany({
+          where: {
+            id: input.packageId,
+            scheduleChangesUsed: { lt: scheduleChangeBudget(pkg.classesTotal) },
+          },
+          data: { scheduleChangesUsed: { increment: 1 } },
+        });
+        if (spent.count === 0) throw new RescheduleRaceError();
+      }
       // Now that the old row is out of the active set, insert the replacement.
       const created = await tx.booking.create({
         data: {
@@ -168,11 +203,33 @@ export async function applyReschedule(
         bookingId: created.id,
         oldScheduledStart: input.oldScheduledStart,
       });
-      const teacherNotifId = await enqueueRescheduleConfirmTeacher(tx, {
-        teacherId: input.teacherId,
-        bookingId: created.id,
-        oldScheduledStart: input.oldScheduledStart,
-      });
+      const teacherNotifId =
+        input.notifyTeacher === false
+          ? null
+          : await enqueueRescheduleConfirmTeacher(tx, {
+              teacherId: input.teacherId,
+              bookingId: created.id,
+              oldScheduledStart: input.oldScheduledStart,
+            });
+      if (input.override) {
+        // Audited against the OLD booking id: that row is the class the
+        // teacher acted on, and it is the one the student's class history
+        // already links its override log to.
+        await tx.override.create({
+          data: {
+            teacherId: input.teacherId,
+            targetType: "booking",
+            targetId: input.oldBookingId,
+            action: input.override.action,
+            reason: input.override.reason,
+            beforeJson: { scheduledStart: input.oldScheduledStart.toISOString() },
+            afterJson: {
+              scheduledStart: input.newStartUtc.toISOString(),
+              newBookingId: created.id,
+            },
+          },
+        });
+      }
       return { newBookingId: created.id, notifId, teacherNotifId };
     });
     newBookingId = result.newBookingId;
@@ -208,10 +265,12 @@ export async function applyReschedule(
         name: "notification.queued",
         data: { notificationId, teacherId: input.teacherId },
       });
-      await emit({
-        name: "notification.queued",
-        data: { notificationId: teacherNotificationId, teacherId: input.teacherId },
-      });
+      if (teacherNotificationId) {
+        await emit({
+          name: "notification.queued",
+          data: { notificationId: teacherNotificationId, teacherId: input.teacherId },
+        });
+      }
     } catch (err) {
       log.error("notification emission failed", err);
     }

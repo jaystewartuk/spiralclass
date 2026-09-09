@@ -188,6 +188,12 @@ export const TEACHER_ROUTES: Route[] = [
     portfolio: true,
   },
   {
+    path: "/dashboard/classes/:bookingId/reschedule",
+    name: "classes-reschedule",
+    tier: "teacher",
+    resolve: "bookingId",
+  },
+  {
     path: "/dashboard/classes/:bookingId/content",
     name: "class-content",
     tier: "teacher",

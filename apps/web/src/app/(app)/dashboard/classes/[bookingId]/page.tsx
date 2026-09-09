@@ -445,6 +445,17 @@ export default async function TeacherClassDetailPage({
               />
             )}
             {status === "scheduled" && (
+              // A move, not a cancellation. It is a link rather than an
+              // OverrideAction because choosing the new time needs the slot
+              // picker — the audit row and the student's notification are
+              // written by the action behind it, exactly like the others here.
+              <Button asChild variant="outline">
+                <Link href={`/dashboard/classes/${booking.id}/reschedule`}>
+                  {t("web.dashboard.classes.detail.changeDateTime")}
+                </Link>
+              </Button>
+            )}
+            {status === "scheduled" && (
               <OverrideAction
                 action={cancelBookingAsTeacher}
                 triggerLabel={t("web.dashboard.classes.detail.cancelClass")}
