@@ -137,6 +137,26 @@ describe("visual baseline manifest", () => {
     expect(ADMIN_STEPUP_COOKIE).toBe(app.ADMIN_STEPUP_COOKIE);
   });
 
+  it("puts every `a11y` route somewhere the authenticated sweep can reach it", () => {
+    // The flag only does anything to routes tests/a11y/authenticated-routes.spec.ts
+    // actually selects: an authenticated tier, capturable, and free of `:params`
+    // (it has no resolver). Set anywhere else it reads as coverage and buys
+    // none — a public route would need the other sweep's hand-written list, and
+    // an excluded one is never visited at all.
+    const unreachable = ALL_ROUTES.filter((r) => r.a11y).flatMap((r) => {
+      if (r.tier === "public")
+        return [`${r.path} — public; add it to tests/a11y/public-routes.spec.ts instead`];
+      if (r.excluded) return [`${r.path} — excluded: "${r.excluded}", so it is never visited`];
+      if (r.path.includes(":")) return [`${r.path} — parameterised; the sweep skips those`];
+      return [];
+    });
+    expect(
+      unreachable,
+      `These routes are flagged \`a11y\` but the sweep does not select them, so the ` +
+        `flag asserts nothing:\n${unreachable.join("\n")}`,
+    ).toEqual([]);
+  });
+
   it("captures the whole public surface a stranger can reach", () => {
     // The portfolio case rests on these specifically, so they are asserted by
     // name rather than left to the disk comparison — a refactor that moved one
