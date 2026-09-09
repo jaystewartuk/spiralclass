@@ -1,0 +1,47 @@
+/* SpiralClass docs — visual polish on top of Material's indigo/amber palette. */
+
+:root {
+  --md-admonition-icon--decision: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 2 2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>');
+}
+
+/* Slightly larger radius + softer shadow on cards/tables/code blocks reads as
+   more "designed" than Material's stock square edges. */
+.md-typeset table:not([class]),
+.md-typeset .admonition,
+.md-typeset pre,
+.md-typeset code {
+  border-radius: 8px;
+}
+
+.md-typeset table:not([class]) {
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+/* Homepage category cards (used via `grid cards` blocks in docs/README.md) */
+.md-typeset .grid.cards > ul > li {
+  border-radius: 10px;
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.md-typeset .grid.cards > ul > li:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+/* Give the top-level site title a touch more weight in the header */
+.md-header__title {
+  font-weight: 600;
+}
+
+/* Tighten nav item spacing so deep trees (ADRs, audits) scan faster */
+.md-nav__item {
+  line-height: 1.35;
+}
+
+/* Tag chips (tags plugin) — make them read as pills, not plain links */
+.md-typeset .md-tag {
+  border-radius: 999px;
+  padding: 0.1em 0.8em;
+}

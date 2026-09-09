@@ -1,0 +1,11 @@
+# Blank issues are off on purpose. This repository holds no backlog — every open
+# action lives on a private board (D-110) — so an issue here is either a bug
+# report or a question, and anything else will be closed rather than tracked.
+blank_issues_enabled: false
+contact_links:
+  - name: Security vulnerability
+    url: https://github.com/jaystewartuk/spiralclass/security/advisories/new
+    about: Never report a security problem in a public issue. Use the private advisory flow, or the address in SECURITY.md.
+  - name: How contributions work
+    url: https://github.com/jaystewartuk/spiralclass/blob/main/CONTRIBUTING.md
+    about: "Outside code is not being merged, and CONTRIBUTING.md says why: it is about relicensing rights, not quality. Bug reports and questions are welcome as issues; a fork is the right answer for anything else."

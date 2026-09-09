@@ -1,0 +1,299 @@
+name: Heavy
+
+# The heavy half of the gate — the mutation spot-check, the real-DB integration
+# suite and the three browser suites — on GitHub-hosted runners ([D-161]).
+#
+# ⚠️ READ THIS BEFORE ADDING A STEP. Like gate.yml, this workflow does not know
+# what "green" means and must not learn. `scripts/ci/steps.mjs` is the single
+# registry, `scripts/ci/gate.mjs` runs it, and the only thing below that names
+# any work is `--only "$STEP_ID"`, where STEP_ID came out of the registry two
+# jobs earlier. A `run: bash scripts/ci/e2e.sh` added here would be a second
+# definition of the tier — the exact hazard D-119 removed and D-157 re-admitted
+# Actions on the condition of never reintroducing.
+#
+# WHY THE MATRIX IS DERIVED AND NOT TYPED. The obvious version of this file
+# lists three legs by name. That list agrees with steps.mjs the day it is
+# written and silently stops agreeing the first time a heavy step is added:
+# the new step runs in `pnpm gate:full` on the laptop, runs in no job here, and
+# nothing anywhere says so. So the `plan` job asks the registry
+# (`gate.mjs --tier heavy --list --json`) and the `heavy` job fans out over the
+# answer. Add a heavy step to steps.mjs and it gets a runner in the same
+# commit.
+#
+# WHY THIS EXISTS AT ALL. Until D-161 these three suites were laptop-only, for
+# one concrete reason: the visual baselines were `-darwin.png`, so the browser
+# suites could not go green on Linux. D-161 committed a second set of
+# `-linux.png` baselines and the reason expired. What it buys is not free
+# minutes — it is the 20-40 minutes those suites held the operator's machine,
+# with every other session's push queued behind the machine lock (D-146), and
+# the fact that they ran AFTER a merge rather than before one.
+#
+# REGENERATING THE LINUX BASELINES. The `-linux.png` set can only honestly be
+# produced here, on the same amd64 runner that asserts against it — arm64 Linux
+# under emulation rasterises text differently, so baselines made that way pass
+# locally and fail in CI. Run:
+#
+#   gh workflow run heavy.yml -f update_visual_baselines=all --ref <branch>
+#   gh run watch <id>
+#   gh run download <id> -n visual-baselines-linux \
+#     -D apps/web/tests/visual/regression.spec.ts-snapshots/
+#
+# then review the images and commit them. `all` rewrites every route; anything
+# else is a Playwright -g pattern. scripts/ci/e2e.sh's header explains why the
+# choice between them is load-bearing.
+
+on:
+  pull_request:
+    branches: [main]
+  # And on the merged tree. A `pull_request` run tests HEAD merged with base AS
+  # OF THAT MOMENT, so if `main` moves between the last green run and the merge,
+  # the tree that landed is not the tree that was tested. Two changes that are
+  # each green alone can be broken together, and that combination is precisely
+  # what the heavy suites see and the fast tier does not.
+  #
+  # `pnpm ship-pr` used to close that gap by running the full tier on the laptop
+  # after each batch of merges. [D-162] deleted it: this is the same check, on a
+  # runner, with nothing to remember to run.
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      update_visual_baselines:
+        description: "Rewrite the -linux.png baselines instead of asserting them: 'all', or a -g route pattern. Leave empty to run the suites normally."
+        required: false
+        default: ""
+
+permissions:
+  contents: read
+
+concurrency:
+  # Per PR, or per branch on a push or dispatch. Superseding a PR's own earlier
+  # run wastes nothing: the answer it was computing is about a commit nobody is
+  # asking about any more.
+  #
+  # ⚠️ On `main` this cancels the previous push's run, which is deliberate and
+  # worth being precise about: `pnpm promote` requires a green Heavy run for the
+  # EXACT commit it is promoting, so a cancelled run does not certify anything
+  # and cannot be mistaken for one. The answer that matters is always about the
+  # newest commit, which is the one that would ship.
+  group: heavy-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  plan:
+    name: Ask the registry what the heavy tier is
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      steps: ${{ steps.registry.outputs.steps }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Read the heavy tier out of steps.mjs
+        id: registry
+        # No pnpm, no install, no Node version pinning: gate.mjs and everything
+        # it imports are plain .mjs over node: built-ins only, so the runner's
+        # stock Node can read the registry. Keeping this job dependency-free is
+        # what makes it twenty seconds rather than three minutes.
+        run: |
+          set -euo pipefail
+          steps="$(node scripts/ci/gate.mjs --tier heavy --list --json)"
+          echo "steps=$steps" >> "$GITHUB_OUTPUT"
+          echo "Heavy tier: $steps"
+
+  heavy:
+    name: ${{ matrix.step.title }}
+    needs: [plan]
+    runs-on: ubuntu-latest
+    # The browser leg is the long one: two production builds, a Postgres
+    # container and a fleet of Chromium workers on a four-core runner. The
+    # laptop does the whole tier in 20-40 minutes and a runner is several times
+    # slower per core, so this is deliberately generous — but it is not six
+    # hours, which is what a job with no timeout gets.
+    timeout-minutes: 75
+    strategy:
+      # Each leg is an independent verdict. Cancelling the browser suites
+      # because the mutation spot-check went red would throw away the answer
+      # that takes longest to get and is hardest to reproduce by hand.
+      fail-fast: false
+      matrix:
+        step: ${{ fromJSON(needs.plan.outputs.steps) }}
+    env:
+      # Turborepo remote cache (Vercel). TURBO_TEAM is a team slug, not a
+      # secret. Absent either value turbo falls back to local caching, so this
+      # is additive and never required — a fork PR, which gets no secrets,
+      # still runs a correct suite, just a colder one.
+      TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+      # A repository `vars` entry, not a literal: the slug names the operator's
+      # own Vercel account and this repository is public. Unset, turbo caches
+      # locally — which is the same fallback TURBO_TOKEN already has.
+      TURBO_TEAM: ${{ vars.TURBO_TEAM }}
+      # Both `next build`s in this tier peak around 3.5GB under Turbopack, and
+      # the browser leg runs a second one after the integration leg's.
+      # ubuntu-latest has 16GB; Node's ~2GB default heap is what OOMs at exit
+      # 134, and it hides until a change is wide enough to miss the cache.
+      NODE_OPTIONS: "--max-old-space-size=6144"
+      # Empty on a pull_request, because `inputs` only exists on a dispatch.
+      # scripts/ci/e2e.sh tests it with `-n`, so empty means "assert the
+      # baselines" — the normal path — and no branch is needed here.
+      VISUAL_UPDATE_SNAPSHOTS: ${{ inputs.update_visual_baselines }}
+      # Through `env:`, never into a `run:` body. A `${{ }}` inside a script is
+      # substituted before bash sees it; here it is data.
+      STEP_ID: ${{ matrix.step.id }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          # This job pushes nothing. Leaving the token in .git/config would hand
+          # every test, every lint plugin and every transitive dependency a
+          # credential they have no reason to hold — and this tier runs more
+          # third-party code than any other in the repository.
+          persist-credentials: false
+
+      - name: Let the browser resolve preview.localhost
+        # scripts/ci/e2e.sh drives Chromium at http://preview.localhost:3000
+        # because prod-vs-preview is decided by APP_URL (D-89 Phase 5), so the
+        # app must see a preview-shaped origin. macOS resolves *.localhost
+        # through mDNSResponder and needs nothing; glibc does not resolve it at
+        # all. The script's own probe fails with this exact instruction, so
+        # this is that fix applied ahead of it rather than a second opinion
+        # about what the suite needs.
+        run: |
+          set -euo pipefail
+          echo "127.0.0.1 preview.localhost" | sudo tee -a /etc/hosts >/dev/null
+          echo "preview.localhost -> 127.0.0.1"
+
+      - uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
+        # No `version:` — the action reads `packageManager` from package.json.
+        # The repository states its own tool versions and the workflow does not
+        # get a second opinion; two places to bump is one place to forget.
+        with:
+          dest: ~/setup-pnpm
+
+      - name: Read the Node major the app actually ships on
+        # From the Dockerfile, because that is what production runs — not from
+        # `engines.node`, which is a floor and would let a runner resolve a
+        # major the image has never seen. Same derivation as gate.yml, for the
+        # same reason: bump the Dockerfile and CI follows in that commit.
+        run: |
+          set -euo pipefail
+          major="$(sed -n 's/^FROM node:\([0-9][0-9]*\)-slim.*/\1/p' Dockerfile | head -1)"
+          if [ -z "$major" ]; then
+            echo "Could not read a Node major from the Dockerfile's FROM line." >&2
+            exit 1
+          fi
+          echo "NODE_VERSION=$major" >> "$GITHUB_ENV"
+          echo "Node $major, from the Dockerfile."
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          # Round-trips the pnpm store through the Actions cache. On an
+          # ephemeral VM wiped every run, that is the whole point.
+          cache: pnpm
+
+      - name: Restore the turbo cache
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          # scripts/turbo.mjs puts the cache here so every worktree on the
+          # laptop shares one. A runner has one checkout, but pointing at the
+          # same path means the wrapper needs no runner-specific branch.
+          path: ~/.cache/turbo/spiralclass
+          # Keyed per leg as well as per lockfile: the three do different work,
+          # and one shared key would have them overwrite each other's answer on
+          # every run. A key too loose is worse than no cache — it restores a
+          # stale answer and the run reports it as fresh.
+          key: turbo-heavy-${{ matrix.step.id }}-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml', 'package.json', 'turbo.json', 'Dockerfile') }}-${{ github.sha }}
+          restore-keys: |
+            turbo-heavy-${{ matrix.step.id }}-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml', 'package.json', 'turbo.json', 'Dockerfile') }}-
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Run the step
+        # The whole job, in one line, and the only place any work is named.
+        # --no-lock because the machine lock (D-146) serializes seven worktrees
+        # on one laptop and a runner is a fresh VM with one job on it.
+        # --no-post because a single step is not a tier and must never certify
+        # a commit: gate.mjs already refuses to post for a partial run, and
+        # this says so at the call site too.
+        run: node scripts/ci/gate.mjs --only "$STEP_ID" --no-lock --no-post
+
+      - name: Keep what a red run needs to be diagnosed
+        # A runner's filesystem is thrown away, so a browser failure with no
+        # trace and no screenshot is a failure that has to be reproduced on the
+        # laptop before it can even be read — which is most of what moving the
+        # suites off the laptop was supposed to save.
+        #
+        # The snapshot directory rides along for one specific case: Playwright
+        # defaults to `updateSnapshots: 'missing'`, so a capture with no
+        # `-linux.png` yet gets one WRITTEN from whatever rendered, and the
+        # image only exists on this disposable disk. Uploading it is what makes
+        # the very first run of this workflow able to produce the baseline set
+        # it is about to start asserting — and it is also how a route added
+        # later gets its Linux half without a separate dispatch.
+        #
+        # ⚠️ A written baseline is NOT a passing test. It asserts nothing, it
+        # can photograph a bug perfectly, and on a retry it compares against
+        # itself and goes green. What stops that reaching main is
+        # apps/web/tests/visual/manifest.test.ts, which runs in the FAST tier
+        # and fails while the two sets disagree. Look at the images.
+        if: ${{ always() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: heavy-${{ matrix.step.id }}-output
+          path: |
+            apps/web/playwright-report/
+            apps/web/test-results/
+            apps/web/tests/visual/regression.spec.ts-snapshots/*-linux.png
+            .gate/logs/
+          if-no-files-found: ignore
+          retention-days: 7
+
+      - name: Collect the regenerated Linux baselines
+        # Only on a dispatch that asked for them. The images are written into
+        # the checkout by scripts/ci/e2e.sh, and a runner's filesystem is thrown
+        # away — so this is the only way they reach a commit. Reviewing them
+        # image by image before committing IS the guard; nothing here merges
+        # them for you, deliberately.
+        if: ${{ always() && inputs.update_visual_baselines != '' }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: visual-baselines-linux
+          path: apps/web/tests/visual/regression.spec.ts-snapshots/*-linux.png
+          if-no-files-found: ignore
+          retention-days: 7
+
+  complete:
+    # ONE stable name for "the heavy tier passed", which the matrix cannot
+    # provide: its jobs are named from the registry (`matrix.step.title`), so
+    # they appear and disappear as steps are added, and a required check or an
+    # external query cannot depend on a name that moves.
+    #
+    # `pnpm promote` reads exactly this ([D-162]). Before it fast-forwards
+    # `production` it asks GitHub whether the Gate and Heavy workflows both
+    # concluded green for the precise commit being promoted — the certification
+    # that used to be a local receipt written by `pnpm ship-pr`.
+    name: Heavy tier
+    needs: [plan, heavy]
+    # `always()` so a red or cancelled leg still produces a verdict rather than
+    # leaving anything waiting forever on a job that has already decided.
+    if: ${{ always() }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Fail unless every leg passed
+        env:
+          # A matrix job's `result` is the aggregate: `success` only when every
+          # leg succeeded. Through `env:`, never into the script body.
+          PLAN: ${{ needs.plan.result }}
+          LEGS: ${{ needs.heavy.result }}
+        run: |
+          set -euo pipefail
+          echo "plan=${PLAN}  legs=${LEGS}"
+          if [ "$PLAN" != "success" ] || [ "$LEGS" != "success" ]; then
+            echo "" >&2
+            echo "The heavy tier did not pass — see the individual legs above." >&2
+            exit 1
+          fi
+          echo "Every heavy leg passed."

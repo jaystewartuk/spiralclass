@@ -1,0 +1,57 @@
+# TLS termination and reverse proxy for everything on the box.
+#
+# ⚠️ Copied here by scripts/oracle-deploy.sh. The previous box's Caddyfile was
+# hand-edited over SSH with `.bak` copies beside it as the only history, and
+# `docker exec livekit-caddy caddy reload` applied it. Editing the copy on the
+# box now means the next deploy overwrites you.
+
+# ── LiveKit signalling ────────────────────────────────────────────────────
+#
+# ✅ This is the ONLY hostname whose certificate survives the rebuild. The
+# `caddy_data` volume — the ACME account key and the issued certificates — was
+# captured off the old box and is restored by the deploy script, so this cert
+# carries over intact, valid to 2026-11-27, with no re-issuance and no
+# rate-limit exposure.
+livekit.spiralclass.com {
+	reverse_proxy 127.0.0.1:7880
+}
+
+# ── The preview web app ───────────────────────────────────────────────────
+#
+# ⚠️ NEW TO CADDY. There is no certificate for this name in the restored
+# volume, so Caddy must obtain one at cutover — and tls-alpn-01 cannot work
+# through Cloudflare's proxy (the challenge handshake terminates at the edge),
+# so http-01 is the only path.
+#
+# ⚠️ That makes D-134's invariant govern this hostname too: **"Always Use
+# HTTPS" must be OFF and SSL mode must be Full**, or the edge answers the ACME
+# challenge with a redirect, issuance fails, and the name has no certificate at
+# all. Issue while grey-clouded, verify on the box, then re-proxy.
+#
+# Preview is deliberately reachable on a real public hostname rather than
+# tailnet-only, because it is what a tester uses for UAT — it has to work
+# from her machine, not just from the tailnet.
+preview.spiralclass.com {
+	reverse_proxy 127.0.0.1:3001
+}
+
+# ── Not configured here, on purpose ───────────────────────────────────────
+#
+# ⚠️ `spiralclass.com` IS NOT HERE, and must not be added. The production web
+# app stays on Fly (D-150's second addendum, 2026-09-04) and the apex A record
+# keeps pointing there. Adding it here would take a name Caddy cannot serve
+# and give it a certificate renewal that fails silently, on the one box whose
+# renewals already matter.
+#
+# `livekit.agendaprofe.com` was dropped on 2026-08-29, completing the D-138
+# rename. The old certificate is still in `caddy_data` until it expires
+# 2026-10-19, so a fallback before then needs no re-issuance — but it also
+# needs the Cloudflare A record re-created and this hostname re-added. Do not
+# add it back speculatively; an unused hostname in here is a renewal that can
+# fail silently.
+#
+# Real client IPs: Cloudflare proxies all three names, so Caddy sees edge
+# addresses and the app must read `CF-Connecting-IP`. Caddy is NOT configured
+# with `trusted_proxies` here, because doing it properly means pinning
+# Cloudflare's published ranges and keeping them current — a stale list is
+# worse than none. Worth doing deliberately, not as part of a migration.

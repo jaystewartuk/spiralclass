@@ -1,0 +1,8 @@
+{
+  "apps/web/tests/redirects/email-opt-out-handler.test.ts": 3,
+  "apps/web/tests/students/compliance.integration.test.ts": 3,
+  "apps/web/tests/students/duplicates.test.ts": 7,
+  "apps/web/tests/students/find-or-create.integration.test.ts": 7,
+  "apps/web/tests/students/merge.integration.test.ts": 7,
+  "packages/shared/src/email-suggest.test.ts": 10
+}

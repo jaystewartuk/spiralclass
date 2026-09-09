@@ -1,0 +1,192 @@
+name: Deploy preview
+
+# Preview deploys on every push to `main` that can actually change what preview
+# serves ([D-157]).
+#
+# ⚠️ This workflow does not deploy anything. `scripts/fly-deploy.sh` does, and
+# it is the same script `pnpm deploy:preview` runs on the laptop. Seven ordered
+# steps — Neon checkpoint, migrations, build, push, deploy, ledger, Inngest
+# sync — are not re-typed here. The last time those steps existed in two
+# places, the copy that got re-typed was the one missing the checkpoint; see
+# that script's header.
+#
+# WHAT THIS REVERSES. D-120 took the push trigger off `fly-deploy.yml` because
+# the deploy was ~744 billable minutes a month, ~45% of a 2,000-minute
+# allowance, and the single largest line in it. Preview then went stale by
+# default — D-120 called that "the sharpest edge of the change" and it was.
+# On a public repository the arithmetic is gone, and the build is a NATIVE
+# amd64 build rather than the 20-30 minute QEMU cross-build an arm64 laptop is
+# stuck with. So merging to `main` deploys preview again.
+#
+# `pnpm deploy:preview` and `pnpm ship:preview` still work and are unchanged.
+# This is an addition to how preview gets fresh, not a replacement.
+#
+# ⚠️ SUSPENDED 2026-09-04, THE DAY AFTER IT WAS WRITTEN — see D-157's addenda.
+# PREVIEW is the half of that suspension that stands: preview's web app and
+# preview's database move to the Oracle A1 box (D-150 and its second addendum),
+# and until that box is serving there is nowhere for this workflow to ship to.
+# Leaving the push trigger on would fire a failing deploy at a retired target
+# on every merge. ⚠️ Production's workflow is NOT suspended — production stays
+# on Fly, and its trigger is live.
+#
+# So `workflow_dispatch` is all that remains here. That is a SUSPENSION, not
+# the re-manualization D-120 forbids: a deploy you have to remember is a bug
+# when there is a live target and a reason to ship, and here the target is
+# being retired and shipping to it is the thing not wanted. Keep that
+# distinction straight, because the fix when Oracle lands is to RESTORE this
+# trigger against the new target — not to leave a dispatch step in place and
+# call it done. That is precisely how `production` ended up 96 commits behind
+# live on 2026-07-19.
+#
+# ⚠️ WHEN IT IS RESTORED, THREE THINGS CHANGE WITH IT, and none is a detail:
+# the job runs on `ubuntu-24.04-arm` (the box is aarch64, and the `runs-on`
+# guard in apps/web/tests/config/local-gate.test.ts must be INVERTED, not
+# deleted); it calls `scripts/oracle-deploy.sh` rather than
+# `scripts/fly-deploy.sh`; and it needs a Tailscale OAuth client to reach a box
+# whose `:22` is closed to the internet, plus an Infisical machine identity,
+# because a runner has no operator session to borrow.
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-preview
+  # ⚠️ NEVER true on a deploy. A cancelled run here is a half-migrated database
+  # or an image pushed with nothing deployed against it — cancelling a
+  # half-finished deploy is how you get a half-deployed app. Runs queue instead.
+  cancel-in-progress: false
+
+jobs:
+  relevance:
+    name: Can this push change what preview serves?
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      web: ${{ steps.check.outputs.web }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - id: check
+        name: Ask scripts/ci/relevance.mjs
+        # NOT `on.push.paths` globs. `scripts/ci/relevance.mjs` already answers
+        # "can this change reach a built artifact", it is pure, it is
+        # table-tested (apps/web/tests/config/relevance.test.ts), and
+        # `pnpm ship:preview` already asks it. A glob list here would be a
+        # second answer that drifts from that one silently and is covered by
+        # no test at all.
+        #
+        # It fails OPEN: an undiffable range answers `web=true`. A redundant
+        # deploy costs minutes; a skipped one ships nothing and looks like it
+        # shipped.
+        env:
+          BEFORE: ${{ github.event.before }}
+        run: |
+          set -euo pipefail
+          # A dispatch has no before-SHA and no diff to reason about, so deploy.
+          if [ "${GITHUB_EVENT_NAME}" != "push" ]; then
+            echo "web=true" >> "$GITHUB_OUTPUT"
+            echo "Manual dispatch — deploying without asking."
+            exit 0
+          fi
+          node scripts/ci/relevance.mjs "$BEFORE" "$GITHUB_SHA"
+
+  deploy:
+    name: Migrate, build amd64 and deploy to preview
+    needs: [relevance]
+    if: ${{ needs.relevance.outputs.web == 'true' }}
+    runs-on: ubuntu-latest # ⚠️ Never a larger runner — those are billed even on a public repo.
+    timeout-minutes: 40
+    # Scopes every secret below to preview. Production's live in their own
+    # environment behind a required reviewer, so nothing in this job can reach
+    # the production database or the production Fly app even by typo.
+    environment:
+      name: preview
+      url: https://preview.spiralclass.com
+    env:
+      FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+      # Read straight through by scripts/fly-deploy.sh, which prefers the
+      # environment over Infisical (the laptop's source) — see its header.
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      DIRECT_URL: ${{ secrets.DIRECT_URL }}
+      # The `__LOCAL__` values in config/env/preview.build.env. They name Jay's
+      # own accounts, so they are not committed; scripts/env-config.mjs
+      # resolves them from the process environment BEFORE it looks for the
+      # gitignored overlay file, which is exactly so a runner can supply them
+      # with no file involved. That path was built for this on 2026-09-04 and
+      # needs no change here.
+      #
+      # A missing one is not a silent failure: resolveEnvFile throws and names
+      # every unsatisfied key, so a half-configured environment cannot bake a
+      # broken client bundle and ship it.
+      NEXT_PUBLIC_TEACHER_PHOTOS_R2_PUBLIC_URL: ${{ secrets.NEXT_PUBLIC_TEACHER_PHOTOS_R2_PUBLIC_URL }}
+      NEXT_PUBLIC_TEACHER_VIDEOS_R2_PUBLIC_URL: ${{ secrets.NEXT_PUBLIC_TEACHER_VIDEOS_R2_PUBLIC_URL }}
+      NEXT_PUBLIC_SUPPORT_WHATSAPP: ${{ secrets.NEXT_PUBLIC_SUPPORT_WHATSAPP }}
+      NEXT_PUBLIC_SENTRY_DSN: ${{ secrets.NEXT_PUBLIC_SENTRY_DSN }}
+      NEXT_PUBLIC_POSTHOG_KEY: ${{ secrets.NEXT_PUBLIC_POSTHOG_KEY }}
+      NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
+        with:
+          dest: ~/setup-pnpm
+
+      - name: Read the Node major the app actually ships on
+        # Same derivation as gate.yml — from the Dockerfile, which is what the
+        # image runs, rather than from `engines.node`, which is only a floor.
+        run: |
+          set -euo pipefail
+          major="$(sed -n 's/^FROM node:\([0-9][0-9]*\)-slim.*/\1/p' Dockerfile | head -1)"
+          if [ -z "$major" ]; then
+            echo "Could not read a Node major from the Dockerfile's FROM line." >&2
+            exit 1
+          fi
+          echo "NODE_VERSION=$major" >> "$GITHUB_ENV"
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      - uses: superfly/flyctl-actions/setup-flyctl@ed8efb33836e8b2096c7fd3ba1c8afe303ebbff1 # v1.6
+        # The one third-party action in this job. Preferred over
+        # `curl https://fly.io/install.sh | sh` in a `run:` step: piping an
+        # unpinned installer into a shell is a worse supply-chain edge than a
+        # SHA-pinned action, not a better one.
+
+      - name: Deploy
+        # One line, on purpose. Every step of the deploy lives in the script,
+        # which is also what `pnpm deploy:preview` runs — so a preview shipped
+        # from here and a preview shipped from the laptop are the same deploy.
+        #
+        # No QEMU: this runner is amd64 and Fly wants an amd64 image, so the
+        # `next build --turbopack` inside the Docker build is native. That is
+        # the practical win of moving the deploy here, over and above the bill.
+        run: bash scripts/fly-deploy.sh preview
+
+      - name: Say what shipped
+        if: ${{ always() }}
+        env:
+          OUTCOME: ${{ job.status }}
+        run: |
+          set -euo pipefail
+          {
+            echo "## Preview · ${OUTCOME}"
+            echo
+            echo "| | |"
+            echo "| --- | --- |"
+            echo "| Commit | \`${GITHUB_SHA}\` |"
+            echo "| App | https://preview.spiralclass.com |"
+            echo "| Image | \`registry.fly.io/agendaprofe-preview:${GITHUB_SHA}\` |"
+            echo
+            echo "Deployed by \`scripts/fly-deploy.sh preview\` — the same script"
+            echo "\`pnpm deploy:preview\` runs on the operator's laptop."
+          } >> "$GITHUB_STEP_SUMMARY"

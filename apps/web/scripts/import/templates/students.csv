@@ -1,0 +1,3 @@
+student_ref,name,email,phone,timezone,locale
+maria-h,María Hernández,maria@example.com,+5215555000001,America/Mexico_City,es-MX
+carlos-r,Carlos Ruiz,,+5215555000002,America/Mexico_City,es-MX

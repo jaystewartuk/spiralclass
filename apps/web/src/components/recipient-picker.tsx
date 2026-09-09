@@ -1,0 +1,111 @@
+"use client";
+
+import { useMemo, useState } from "react";
+import { PageShell } from "@/components/ui/page-shell";
+import { PageHeader } from "@/components/ui/page-header";
+import Link from "next/link";
+import { ChevronLeft, Search } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { cn } from "@/lib/utils";
+
+export type Recipient = { id: string; name: string };
+
+// Client picker for starting a new conversation from the Messages tab. The
+// server page resolves the roster (teacher → students, or student → teachers)
+// and hands it here; each row links into the existing conversation route, which
+// already renders fine with zero messages. Search filters client-side so a
+// teacher with a long roster can find someone fast.
+export function RecipientPicker({
+  title,
+  subtitle,
+  backHref,
+  hrefBase,
+  recipients,
+  searchPlaceholder,
+  emptyLabel,
+  noMatchLabel,
+}: {
+  title: string;
+  subtitle: string;
+  backHref: string;
+  /** Conversation route prefix; the row links to `${hrefBase}/${id}`. */
+  hrefBase: string;
+  recipients: Recipient[];
+  searchPlaceholder: string;
+  emptyLabel: string;
+  noMatchLabel: string;
+}) {
+  const [query, setQuery] = useState("");
+  const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    if (!q) return recipients;
+    return recipients.filter((r) => r.name.toLowerCase().includes(q));
+  }, [query, recipients]);
+
+  return (
+    <PageShell width="reading">
+      <div className="space-y-1">
+        <Link
+          href={backHref}
+          className="inline-flex items-center gap-1 text-sm text-muted-foreground transition-colors hover:text-foreground"
+        >
+          <ChevronLeft className="h-4 w-4" />
+          {title}
+        </Link>
+        <PageHeader title={title} />
+        <p className="text-sm text-muted-foreground">{subtitle}</p>
+      </div>
+
+      {recipients.length === 0 ? (
+        <Card>
+          <CardContent className="py-16 text-center text-sm text-muted-foreground">
+            {emptyLabel}
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="space-y-4">
+          <div className="relative">
+            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              type="search"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder={searchPlaceholder}
+              className="pl-9"
+              aria-label={searchPlaceholder}
+            />
+          </div>
+
+          {filtered.length === 0 ? (
+            <p className="py-8 text-center text-sm text-muted-foreground">{noMatchLabel}</p>
+          ) : (
+            <Card>
+              <CardContent className="p-0">
+                <ul className="divide-y divide-border">
+                  {filtered.map((r, i) => (
+                    <li key={r.id}>
+                      <Link
+                        href={`${hrefBase}/${r.id}`}
+                        className={cn(
+                          "flex items-center gap-3 px-4 py-3.5 transition-colors hover:bg-muted/50",
+                          i === 0 && "rounded-t-lg",
+                          i === filtered.length - 1 && "rounded-b-lg",
+                        )}
+                      >
+                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-sm font-semibold text-primary">
+                          {r.name.charAt(0).toUpperCase()}
+                        </div>
+                        <span className="truncate text-sm font-medium">{r.name}</span>
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </CardContent>
+            </Card>
+          )}
+        </div>
+      )}
+    </PageShell>
+  );
+}

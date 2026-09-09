@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["esnext"],
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "strict": true,
+    "noEmit": true,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    // `lib` is esnext only, so TextEncoder/TextDecoder/URL and the `node:`
+    // builtins come from @types/node — declared, as they are in the sibling
+    // livekit-captions-agent, rather than arriving by accident. They did
+    // arrive by accident until the vitest 5 bump: vitest 3's own types carried
+    // a `/// <reference types="node" />`, so this package compiled on a
+    // reference it never asked for and vitest 5 no longer emits.
+    "types": ["node"]
+  },
+  "include": ["src/**/*.ts"]
+}

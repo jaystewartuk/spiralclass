@@ -1,0 +1,187 @@
+{
+  "app/(app)/dashboard/classes/[bookingId]/materials-panel.tsx": {
+    "rawButton": 2
+  },
+  "app/(app)/dashboard/classes/[bookingId]/replay/replay-viewer.tsx": {
+    "arbitraryValue": 1,
+    "rawButton": 2
+  },
+  "app/(app)/dashboard/get-students/communities/social-preview-panel.tsx": {
+    "arbitraryValue": 1,
+    "rawButton": 1
+  },
+  "app/(app)/dashboard/students/invitations/invitations-table.tsx": {
+    "rawButton": 1
+  },
+  "app/(app)/dashboard/students/invitations/nuevo/invite-form.tsx": {
+    "rawButton": 1
+  },
+  "app/(app)/onboarding/availability/availability-form.tsx": {
+    "rawButton": 1
+  },
+  "app/(app)/settings/booking-page/booking-slug-form.tsx": {
+    "rawButton": 1
+  },
+  "app/(app)/settings/booking-page/intro-video-form.tsx": {
+    "rawButton": 1
+  },
+  "app/(app)/settings/class-content-templates/class-content-templates-form.tsx": {
+    "rawButton": 3
+  },
+  "app/(app)/settings/focus-tags/tags-manager.tsx": {
+    "rawButton": 3
+  },
+  "app/(student)/my-classes/progress/vocab-review.tsx": {
+    "rawButton": 1
+  },
+  "app/admin/admin-quick-search.tsx": {
+    "rawButton": 2
+  },
+  "app/admin/admin-sidebar.tsx": {
+    "rawButton": 1
+  },
+  "app/admin/database/details-panel.tsx": {
+    "rawButton": 3
+  },
+  "app/admin/database/erd-viewer.tsx": {
+    "rawButton": 2
+  },
+  "app/admin/database/table-node.tsx": {
+    "arbitraryValue": 1,
+    "rawButton": 1
+  },
+  "app/admin/live-calls/live-calls-view.tsx": {
+    "arbitraryValue": 1
+  },
+  "app/admin/staff/invite-form.tsx": {
+    "arbitraryValue": 1
+  },
+  "app/admin/storage/storage-browser.tsx": {
+    "rawButton": 3
+  },
+  "app/admin/uat/uat-runbook.tsx": {
+    "arbitraryValue": 2,
+    "rawButton": 4
+  },
+  "app/api/og/social-preview/[id]/route.tsx": {
+    "rawColorFn": 5,
+    "rawHex": 3
+  },
+  "app/b/[slug]/buy/checkout-form.tsx": {
+    "rawButton": 2
+  },
+  "app/b/[slug]/buy/class-slot-picker.tsx": {
+    "rawButton": 1
+  },
+  "app/b/[slug]/intro-video-card.tsx": {
+    "arbitraryValue": 2,
+    "rawButton": 1
+  },
+  "app/b/[slug]/lead-form.tsx": {
+    "arbitraryValue": 1
+  },
+  "app/global-error.tsx": {
+    "rawButton": 1
+  },
+  "app/m/login/page.tsx": {
+    "inlineStyle": 6
+  },
+  "app/page.tsx": {
+    "arbitraryValue": 5
+  },
+  "app/privacy-notice/page.tsx": {
+    "arbitraryValue": 1
+  },
+  "app/r/email-uns/[token]/route.ts": {
+    "rawButton": 1
+  },
+  "components/account-badge.tsx": {
+    "rawButton": 1
+  },
+  "components/account-menu.tsx": {
+    "arbitraryValue": 1,
+    "rawButton": 1
+  },
+  "components/account/notification-prefs-form.tsx": {
+    "rawButton": 1
+  },
+  "components/focus-tags/focus-tag-select.tsx": {
+    "rawButton": 2
+  },
+  "components/help-tip.tsx": {
+    "rawButton": 1
+  },
+  "components/marketing/captions-demo.tsx": {
+    "arbitraryValue": 1,
+    "rawButton": 1
+  },
+  "components/marketing/cta-band.tsx": {
+    "inlineStyle": 1
+  },
+  "components/materials/block-editor.tsx": {
+    "rawButton": 3
+  },
+  "components/materials/material-document.tsx": {
+    "arbitraryValue": 12,
+    "rawButton": 1
+  },
+  "components/materials/material-editor.tsx": {
+    "rawButton": 1
+  },
+  "components/materials/material-form.tsx": {
+    "rawButton": 2
+  },
+  "components/materials/method-picker.tsx": {
+    "rawButton": 3
+  },
+  "components/mobile-nav-panel.tsx": {
+    "arbitraryValue": 1,
+    "rawButton": 2
+  },
+  "components/packages/package-details-sheet.tsx": {
+    "rawButton": 1
+  },
+  "components/page-menu.tsx": {
+    "rawButton": 1
+  },
+  "components/phone-number-field.tsx": {
+    "arbitraryValue": 1
+  },
+  "components/report-problem-button.tsx": {
+    "rawButton": 1
+  },
+  "components/theme-toggle.tsx": {
+    "rawButton": 1
+  },
+  "components/ui/collapsible.tsx": {
+    "rawButton": 1
+  },
+  "components/ui/combobox.tsx": {
+    "rawButton": 1
+  },
+  "components/ui/data-table.tsx": {
+    "rawButton": 1
+  },
+  "components/video/call-controls-drawer.tsx": {
+    "arbitraryValue": 1,
+    "rawButton": 1
+  },
+  "components/video/call-library-browser.tsx": {
+    "rawButton": 4
+  },
+  "components/video/call-materials-panel.tsx": {
+    "rawButton": 10
+  },
+  "components/video/caption-band.tsx": {
+    "rawButton": 3
+  },
+  "components/video/class-call.tsx": {
+    "inlineStyle": 4,
+    "rawButton": 12,
+    "rawColorFn": 2,
+    "rawHex": 3
+  },
+  "components/whatsapp-support-button.tsx": {
+    "rawButton": 1
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "name": "@spiralclass/livekit-activity-cli",
+  "version": "0.1.0",
+  "private": true,
+  "license": "AGPL-3.0-only",
+  "type": "module",
+  "description": "Prototype: an Ink (React for CLIs) live dashboard for the self-hosted LiveKit box's room/participant activity — see docs/deployment/ORACLE_LIVEKIT_PRODUCTION.md. Talks to livekit-server-sdk directly (no `lk` CLI / `watch` shell-out).",
+  "scripts": {
+    "start": "tsx src/cli.tsx",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@inkjs/ui": "^2.0.0",
+    "ink": "^7.1.1",
+    "livekit-server-sdk": "^2.18.0",
+    "react": "19.2.3"
+  },
+  "devDependencies": {
+    "@types/node": "^22.20.1",
+    "@types/react": "19.2.14",
+    "tsx": "^4.23.13",
+    "typescript": "^6.0.3"
+  }
+}

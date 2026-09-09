@@ -1,0 +1,28 @@
+{
+  "name": "@spiralclass/livekit-captions-agent",
+  "version": "0.1.0",
+  "private": true,
+  "license": "AGPL-3.0-only",
+  "type": "module",
+  "description": "Server-side LiveKit worker for live class captions — joins each class-call room, subscribes to participant mic tracks, runs Deepgram STT, calls back to the web app for consent/language config and Anthropic translation, and publishes translated caption lines. Replaces the client-driven pipeline (see D-106). Deployed as a docker-compose service on the self-hosted LiveKit box, not imported by the web app.",
+  "scripts": {
+    "start": "tsx src/index.ts",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "@spiralclass/shared": "workspace:*",
+    "@anthropic-ai/sdk": "^0.123.0",
+    "@livekit/rtc-node": "^0.13.34",
+    "livekit-server-sdk": "^2.18.0",
+    "ws": "^8.21.3"
+  },
+  "devDependencies": {
+    "@types/node": "^22.20.1",
+    "@types/ws": "^8.18.1",
+    "tsx": "^4.23.13",
+    "typescript": "^6.0.3",
+    "vitest": "^5.0.0"
+  }
+}

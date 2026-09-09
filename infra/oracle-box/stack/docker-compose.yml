@@ -1,0 +1,238 @@
+# The whole box, in one file.
+#
+# Everything SpiralClass runs ON ORACLE lives here: the self-hosted LiveKit
+# stack that carries live classes, the preview web app, and preview's
+# Postgres.
+#
+# ⚠️ PRODUCTION IS NOT HERE, and that is the 2026-09-04 decision, not an
+# omission. The production web app stays on Fly and production's database
+# stays on Neon; Oracle carries everything else. See D-150's second addendum.
+# Two consequences follow and both are load-bearing below: this box runs ONE
+# web app, and the captions agent's callback to production leaves the box.
+#
+# ⚠️ THIS FILE IS NOT EDITED ON THE BOX. It is copied there by
+# scripts/oracle-deploy.sh. The box this replaced was hand-maintained, and a
+# set of `.bak` files beside the live config was the only change history it
+# had — which is how two URLs on it went stale through the D-138 rename and
+# took captions and webhooks down for a real class. Change it here, deploy it,
+# or it rots again.
+
+# ── Networking, and why it is split ──────────────────────────────────────
+#
+# LiveKit is on HOST networking and must stay there: livekit-server needs
+# unmediated access to its RTC UDP range and Docker's bridge NAT breaks ICE.
+# Caddy is on host too, because it owns :80 and :443.
+#
+# Everything else — both apps and preview's Postgres — is on a bridge network
+# and publishes ONLY to 127.0.0.1. On host networking, Postgres would sit on
+# :5432 of the box's public address with nothing but iptables between it and
+# the internet. It does not need to be there.
+networks:
+  app:
+    driver: bridge
+
+services:
+  # ── The LiveKit stack ──────────────────────────────────────────────────
+  #
+  # ⚠️ Every image below is PINNED BY DIGEST to what was actually running on
+  # oracle-a1-runner when it was replaced on 2026-09-04. They were all on
+  # `:latest` or a floating tag, which means a rebuild would have pulled that
+  # day's versions instead — silently upgrading livekit-server, egress, Caddy
+  # and Redis, all at once, on the same night the machine changed. If a class
+  # then failed, nothing could separate the rebuild from four upgrades.
+  #
+  # Upgrading is fine. Upgrading by accident, during a migration, is not.
+  # Bump these deliberately, one at a time, with a class tested after each.
+
+  caddy:
+    image: caddy@sha256:844f60b64e4724a5aa8245e019dace0d3f199f7433ce6c57676cb30a920dbad9
+    container_name: livekit-caddy
+    restart: unless-stopped
+    network_mode: host
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+
+  redis:
+    image: redis@sha256:6ab0b6e7381779332f97b8ca76193e45b0756f38d4c0dcda72dbb3c32061ab99
+    container_name: livekit-redis
+    restart: unless-stopped
+    network_mode: host
+    # Loopback only. livekit-server and egress share this network namespace.
+    command: redis-server --bind 127.0.0.1 --port 6379 --save 60 1
+    volumes:
+      - redis_data:/data
+
+  livekit:
+    image: livekit/livekit-server@sha256:189f7c81b704a36642bc5c7e2d3e1ae83744627c11978a23a251bf19fbec64e0
+    container_name: livekit-server
+    restart: unless-stopped
+    network_mode: host
+    command: --config /etc/livekit.yaml
+    volumes:
+      - ./livekit.yaml:/etc/livekit.yaml:ro
+    depends_on:
+      - redis
+
+  egress:
+    image: livekit/egress@sha256:980ff439431df2c773573721ab6da19e15bdc1f049ab7cb80e87470bf174c12f
+    container_name: livekit-egress
+    restart: unless-stopped
+    network_mode: host
+    environment:
+      - EGRESS_CONFIG_FILE=/etc/egress.yaml
+    volumes:
+      - ./egress.yaml:/etc/egress.yaml:ro
+      - egress_tmp:/tmp
+    # Room-composite egress renders through a headless Chrome; it needs a real
+    # shm size and SYS_ADMIN for its sandbox, per LiveKit's own docs. D-135
+    # made recordings audio-only, which is why a 2-OCPU box can carry this at
+    # all — do not restore video compositing here without re-reading it.
+    shm_size: "2gb"
+    cap_add:
+      - SYS_ADMIN
+    depends_on:
+      - redis
+      - livekit
+
+  captions-agent:
+    # ⚠️ PULLED, NOT BUILT. The old box built this from a 192 MB source copy
+    # at /home/ubuntu/agendaprofe, which meant a 3.43 GB image built on two
+    # OCPUs that also carry live classes — the cost D-108 named. The image is
+    # built off-box now and loaded or pulled; the source copy is gone.
+    image: ${CAPTIONS_AGENT_IMAGE}
+    container_name: livekit-captions-agent
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    network_mode: host
+    environment:
+      - LIVEKIT_URL=ws://127.0.0.1:7880
+      - LIVEKIT_API_KEY=${LIVEKIT_API_KEY}
+      - LIVEKIT_API_SECRET=${LIVEKIT_API_SECRET}
+      - DEEPGRAM_API_KEY=${DEEPGRAM_API_KEY}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - CAPTIONS_AGENT_SHARED_SECRET=${CAPTIONS_AGENT_SHARED_SECRET}
+      # ⚠️ THIS LEAVES THE BOX. The production app is on Fly, so the agent
+      # posts to `https://spiralclass.com` through Cloudflare — the same path
+      # that broke on 2026-08-30. Read that outage precisely, because the
+      # mitigation depends on which half caused it: the D-138 rename left this
+      # value on `agendaprofe.com`, the 301 turned the agent's POST into a
+      # GET, it got a 405, discovery.ts started no RoomWorker, and one real
+      # class ran with captions silently dead. livekit-server's webhooks
+      # failed identically while its own log kept saying `sent webhook`. The
+      # fault was a STALE HOSTNAME nothing owned, not the hop itself.
+      #
+      # So two things replace the loopback that a box-hosted app would have
+      # given, and neither is optional:
+      #
+      #   1. This value is RENDERED, from scripts/oracle-render-livekit.sh,
+      #      and never hand-edited on the box. That is what makes a rename
+      #      sweep able to reach it.
+      #   2. scripts/oracle-deploy.sh PROBES it after every deploy and FAILS
+      #      on any 3xx. A redirect is invisible from every other angle — it
+      #      looks like a delivered webhook — so this probe is the only thing
+      #      standing between a rename and a silent repeat.
+      - APP_INTERNAL_BASE_URL=${APP_INTERNAL_BASE_URL}
+    depends_on:
+      - livekit
+
+  # ── The web app ────────────────────────────────────────────────────────
+  #
+  # One, not two. Production runs on Fly.
+
+  app-preview:
+    # The only web app on this box. Production's image is never pulled here, so
+    # the old hazard — preview silently falling back to the production image —
+    # is gone with it, and oracle-deploy.sh now REQUIRES this variable rather
+    # than defaulting it.
+    #
+    # ⚠️ It must still be a preview BUILD, not a preview tag on a production
+    # build. Every NEXT_PUBLIC_* is baked at BUILD time (Dockerfile ARG →
+    # scripts/env-build-args.mjs), so a production image carries
+    # NEXT_PUBLIC_DEPLOY_ENV=production, and next.config.ts feeds that to
+    # buildSecurityHeaders, which emits `X-Robots-Tag: noindex, nofollow`
+    # ONLY for a non-production deploy. Run one here and
+    # preview.spiralclass.com — seeded teachers and all — is publicly
+    # indexable, with production's Stripe publishable key, Sentry DSN and
+    # PostHog key in preview's browser bundle.
+    image: ${APP_IMAGE_PREVIEW}
+    container_name: spiralclass-preview
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    networks: [app]
+    ports:
+      - "127.0.0.1:3001:3000"
+    environment:
+      - APP_ENV=preview
+      - PORT=3000
+    env_file:
+      - ./preview.app.env
+    # ⚠️ CAPPED, and this is the whole safeguard of putting preview here at
+    # all. Preview shares two OCPUs with every live class. Production's web
+    # app is no longer on this box to be starved, but LiveKit, egress and the
+    # captions agent are — and starving those drops someone mid-lesson, which
+    # is worse. Nothing else stops a runaway preview request, a reseed or a
+    # migration from doing it. These numbers are a ceiling, not a measurement
+    # — raise them deliberately, never to "fix" a slow preview.
+    mem_limit: 1500m
+    cpus: 0.5
+    # Long form, on the healthcheck below — the short form waits only for the
+    # container to be created, and Postgres takes 5-15s to accept connections
+    # on a first init. Without this every cold start logs a burst of
+    # connection-refused from preview before `restart: unless-stopped`
+    # reconverges it, which is noise in exactly the logs you read during a
+    # rebuild.
+    depends_on:
+      postgres-preview:
+        condition: service_healthy
+
+  postgres-preview:
+    # ⚠️ PINNED BY DIGEST for the same reason as the LiveKit stack above, and
+    # said here because the block comment up there names only that stack. A
+    # floating `17-alpine` re-pulls a different 17.x on any deploy that prunes
+    # it, and a minor-version or base-image change under a data directory that
+    # already exists is exactly the "upgrade by accident, during a migration"
+    # this file refuses everywhere else. `postgres:17-alpine` as of 2026-09-04.
+    image: postgres@sha256:18cfe3ef5e6815560c98237d6216d1e5119702fb0f3894c8785dd58b8bbe5d73
+    container_name: spiralclass-preview-db
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    networks: [app]
+    ports:
+      - "127.0.0.1:5432:5432"
+    environment:
+      - POSTGRES_USER=${PREVIEW_DB_USER}
+      - POSTGRES_PASSWORD=${PREVIEW_DB_PASSWORD}
+      - POSTGRES_DB=${PREVIEW_DB_NAME}
+    volumes:
+      - preview_db:/var/lib/postgresql/data
+    # Capped for the same reason as app-preview above.
+    mem_limit: 1g
+    cpus: 0.5
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 20s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  caddy_data:
+  caddy_config:
+  redis_data:
+  egress_tmp:
+  # ⚠️ Deliberately NOT backed up. Preview's data is seeded and disposable —
+  # `infra/infisical/seed-preview.sh` regenerates it — and that disposability
+  # is the entire reason D-150's objection to colocating Postgres does not
+  # apply here. If this volume ever holds something a person would miss, that
+  # reasoning has broken and the decision needs re-opening.
+  preview_db:

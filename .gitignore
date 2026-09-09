@@ -1,0 +1,179 @@
+# Claude Code agent worktrees (ephemeral, never project code)
+.claude/worktrees/
+# Claude Code per-machine settings. Holds an `env` block that can carry
+# per-machine credentials (it used to expand the Neon agent API keys for
+# `.mcp.json`; that MCP setup is gone — agents use the Neon CLI now, see
+# infra/database/neon/README.md's "Agent access" section — but the file is
+# still a credential-bearing surface), so it must never be committed. Claude
+# Code also ignores this path via the user's GLOBAL git excludes
+# (~/.config/git/ignore) — but that's machine-local, so a fresh clone or a
+# second machine wouldn't inherit it. This line makes the guarantee travel
+# with the repo.
+.claude/settings.local.json
+
+# deps
+node_modules
+.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+
+# build
+.next
+out
+dist
+build
+
+# env
+.env
+.env.local
+.env.development.local
+.env.test
+.env.test.local
+.env.production.local
+
+# logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# testing
+coverage
+playwright-report
+test-results
+.nyc_output
+.playwright-mcp/
+
+# scratch browser-debugging screenshots
+/*.png
+
+# Visual-baseline captures (pnpm test:visual). The full sweep is ~1,200 PNGs
+# and roughly 600 MB — build output, not source, and it would be twenty times
+# the size of the whole repository.
+#
+# The curated evidence set under docs/design/evidence/ used to be committed as
+# optimised JPEGs. It is not any more, and only its checksum manifests are:
+# every capture of an authenticated surface or a booking page renders the seed
+# teacher, who is a real person, under her real name — and no text scanner
+# reads a JPEG, so nothing would ever have flagged it. See docs/design/README.md
+# § What is committed, and what is not.
+docs/design/gallery/
+docs/design/evidence/**/*.jpg
+docs/design/evidence/**/*.png
+# .webp too: the capture tool emits PNG and the optimiser emitted JPEG, so only
+# those two were listed — but the rule is about WHAT the image shows, not what
+# encoded it, and a third format would have slipped through silently.
+docs/design/evidence/**/*.webp
+
+# editor / OS
+.DS_Store
+.idea
+.vscode/*
+!.vscode/extensions.json
+*.swp
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+
+# misc
+.vercel
+.turbo
+
+# teacher roster import working data — real student PII, never commit.
+# Operators copy templates/ here per the import README; only templates/ ships.
+apps/web/scripts/import/data/
+.env*
+
+# MkDocs docs site: local build output + throwaway Python venv.
+# The site is built by Cloudflare Pages from mkdocs.yml; see docs/deployment/DOCS_SITE.md.
+/site/
+.venv-docs/
+
+# Terraform (infra/) — never commit state, filled tfvars, or filled backend
+# config; the *.example files ship.
+**/.terraform/*
+*.tfstate
+*.tfstate.*
+crash.log
+crash.*.log
+infra/**/terraform.tfvars
+infra/**/*.auto.tfvars
+infra/**/backend.hcl
+# Exception 1: infra/backend.hcl is the ONE shared, committed
+# bucket+endpoint partial-backend config for every module whose state lives
+# in agendaprofe-tofu-state via bare AWS_* env-var auth (cloudflare-r2) —
+# non-secret (account_id + R2 endpoint only), committed so no module needs
+# its own copy-and-fill-in step. See infra/README.md. infra/aws-ses is the
+# deliberate exception (needs an extra `profile` key) and keeps its own
+# separate, still-gitignored backend.hcl.
+!infra/backend.hcl
+
+# Real values for the __LOCAL__ entries in config/env/*.env — the committed
+# files declare the keys and document them; these supply the values.
+config/env/*.local.env
+# Exception 2: cloudflare-r2's terraform.tfvars is non-secret (bucket
+# names/tokens config, not a backend concern) and committed so every
+# checkout/worktree can run tofu without re-assembling it. Kept narrow on
+# purpose — other modules' tfvars (e.g. infra/cloudflare) carry values like
+# allowed_emails, so stay ignored.
+!infra/cloudflare-r2/terraform.tfvars
+
+# Infisical CLI's project link file (project ID only, no secrets).
+infra/**/.infisical.json
+# Filled-in Tofu backend config — templated 2026-09-04 ahead of the repo going
+# public. infra/backend.hcl.example is committed; the copy with the real
+# account id is not.
+infra/backend.hcl
+
+# Real values for the __LOCAL__ entries in config/env/*.env — the committed
+# files declare the keys and document them; these supply the values.
+config/env/*.local.env
+
+# ⚠️ An earlier convenience committed infra/infisical/.infisical.json as the ONE
+# shared project link. D-158 reverses that half: the file holds a project id,
+# which is an account identifier, and this repository is public. It stays the
+# one shared link — every other module still points at it via
+# `--project-config-dir=../infisical` — but it is now GENERATED, not committed:
+# `cp infra/infisical/.infisical.json.example infra/infisical/.infisical.json`
+# and fill it in, or run `infisical init` there. The .example is committed.
+# See infra/README.md and docs/decisions/D-158.md.
+
+# Neon CLI's local org-link file (org id only, no secrets)
+.neon
+
+# Local gate receipts (D-119). Per-machine, per-commit run state — never
+# shared.
+.gate/
+
+# Stray vitest JSON-reporter output written to the repo root instead of a
+# temp/output dir by a local integration run — per-machine, never shared.
+apps/web/integration-results.json
+
+# Playwright storage state for the visual sweep — real session cookies.
+apps/web/.auth/
+
+# Stripe agent skills (installed via `npx skills add https://docs.stripe.com`).
+# Listed individually, NOT as a blanket `.claude/skills/` — that directory also
+# holds tracked project skills (e.g. pr) and future ones must not be
+# silently ignored.
+.agents/
+skills-lock.json
+.claude/skills/connect-recommend
+.claude/skills/connect-required-verification-information
+.claude/skills/stripe-apps
+.claude/skills/stripe-best-practices
+.claude/skills/stripe-directory
+.claude/skills/stripe-docs
+.claude/skills/stripe-projects
+.claude/skills/upgrade-stripe
+
+# Working notes for a review or audit pass — findings, transcripts and drafts
+# that exist while the work is in flight and are not part of the project. Kept
+# out of the tree rather than deleted at the end, so a pass can be picked up
+# where it stopped without its scratch reaching a reader.
+.polish/
