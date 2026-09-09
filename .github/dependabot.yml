@@ -1,7 +1,15 @@
 # Dependabot config — see the security plan §11.12 / §16.
 #
-# Three ecosystems: workspace npm (every package.json in the monorepo),
-# github-actions, and docker.
+# Four ecosystems: workspace npm (every package.json in the monorepo),
+# github-actions, docker, and pip (the docs site's requirements.txt).
+#
+# ⚠️ EVERY LABEL NAMED BELOW MUST ALREADY EXIST ON THE REPOSITORY. Dependabot
+# does not create one. It leaves a comment on the pull request — "The following
+# labels could not be found ... Please create them before Dependabot can add
+# them to a pull request" — and carries on unlabelled. That is a bot comment on
+# a PR nobody is watching, not a failed check, which is why the names here are
+# guarded by apps/web/tests/config/github-labels.test.ts. Adding one is two
+# things in the same change: the name below, and `gh label create`.
 #
 # `github-actions` was removed by D-129, when there was nothing left to pin,
 # and comes back with the workflows ([D-157]). It is not decoration: this
@@ -85,3 +93,30 @@ updates:
     labels:
       - dependencies
       - ci
+
+  - package-ecosystem: pip
+    directory: /
+    # The docs site (MkDocs Material), built by Cloudflare Pages — the only
+    # Python in this repository. Every line of requirements.txt is an exact
+    # `==` pin, so the argument made for `docker` above applies here word for
+    # word: a pin with nothing moving it is frozen at the day it was written,
+    # its vulnerabilities included.
+    #
+    # ⚠️ THIS ENTRY IS NOT WHAT PATCHES A VULNERABLE mkdocs-material. Security
+    # advisories ignore the `updates:` list entirely and open a PR against
+    # anything in the dependency graph, which is how this manifest got patched
+    # while sitting outside this file altogether. What was missing is the
+    # routine half: a pin that is merely old, and not yet vulnerable, was never
+    # bumped at all. Monthly, matching the three above, so the sweep lands
+    # together.
+    schedule:
+      interval: monthly
+      time: "06:00"
+      timezone: America/Mexico_City
+    open-pull-requests-limit: 2
+    labels:
+      - dependencies
+      - documentation
+    groups:
+      docs-site:
+        update-types: [minor, patch]
