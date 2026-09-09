@@ -39,6 +39,15 @@ export function CalendarSyncPanel({
           readOnly
           value={feedUrl}
           onFocus={(e) => e.currentTarget.select()}
+          // Named for a screen reader, which otherwise announces "edit text"
+          // and reads out a 100-character token URL with nothing saying what it
+          // is for. axe rates an unlabelled form field `critical`, and it was
+          // one on both pages this panel serves until /my-classes/account
+          // entered the a11y sweep. The nearest visible text is the section
+          // heading, which says only "Calendar" — enough for someone who can
+          // see the Copy button beside the field, and not enough for someone
+          // who cannot.
+          aria-label={t("web.calendarSync.feedUrlLabel")}
           className="font-mono text-xs"
         />
         <Button type="button" variant="outline" onClick={copy} className="shrink-0">

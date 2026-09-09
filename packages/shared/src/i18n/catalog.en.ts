@@ -5195,6 +5195,7 @@ export const en = {
   "web.calendar.dayCellLabel": "{day} — {classes}",
   "web.calendar.currentTime": "Current time",
   "web.calendar.legendTitle": "Colour key",
+  "web.calendarSync.feedUrlLabel": "Your subscription link",
   "web.calendarSync.howTo.title": "How to subscribe",
   "web.calendarSync.howTo.google": "Google Calendar → Other calendars → From URL → paste.",
   "web.calendarSync.howTo.apple": "Apple Calendar → File → New Calendar Subscription → paste.",

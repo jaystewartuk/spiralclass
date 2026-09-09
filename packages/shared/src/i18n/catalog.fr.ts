@@ -5171,6 +5171,7 @@ export const fr = {
   "web.calendar.dayCellLabel": "{day} — {classes}",
   "web.calendar.currentTime": "Heure actuelle",
   "web.calendar.legendTitle": "Légende des couleurs",
+  "web.calendarSync.feedUrlLabel": "Votre lien d'abonnement",
   "web.calendarSync.howTo.title": "Comment vous abonner",
   "web.calendarSync.howTo.google": "Google Calendar → Autres agendas → À partir de l'URL → collez.",
   "web.calendarSync.howTo.apple":
