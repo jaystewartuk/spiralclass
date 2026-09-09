@@ -1,7 +1,7 @@
 # Docs site (MkDocs Material) — built by Cloudflare Pages, previewed locally with
 # `mkdocs serve`. This is the ONLY Python dependency set in the repo; it is not
 # part of the pnpm web/mobile build. See docs/deployment/DOCS_SITE.md.
-mkdocs-material==9.7.6
+mkdocs-material==9.7.7
 mkdocs-awesome-nav==3.3.0
 mkdocs-git-revision-date-localized-plugin==1.5.3
 mkdocs-redirects==1.2.2
