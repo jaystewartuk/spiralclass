@@ -33,6 +33,10 @@ const REPO_LABELS = new Set([
   "accessibility",
   "ci",
   "dependencies",
+  // Created by Dependabot itself, unasked, the first time a security advisory
+  // opened a pip PR. It creates its own ecosystem labels; it will not create
+  // the ones dependabot.yml asks for, which is the whole point of this file.
+  "python",
 ]);
 
 const repoRoot = resolve(process.cwd(), "..", "..");

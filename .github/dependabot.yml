@@ -4,12 +4,19 @@
 # github-actions, docker, and pip (the docs site's requirements.txt).
 #
 # ⚠️ EVERY LABEL NAMED BELOW MUST ALREADY EXIST ON THE REPOSITORY. Dependabot
-# does not create one. It leaves a comment on the pull request — "The following
-# labels could not be found ... Please create them before Dependabot can add
-# them to a pull request" — and carries on unlabelled. That is a bot comment on
-# a PR nobody is watching, not a failed check, which is why the names here are
-# guarded by apps/web/tests/config/github-labels.test.ts. Adding one is two
-# things in the same change: the name below, and `gh label create`.
+# will not create the ones it is ASKED for. It leaves a comment on the pull
+# request — "The following labels could not be found ... Please create them
+# before Dependabot can add them to a pull request" — and carries on
+# unlabelled. That is a bot comment on a PR nobody is watching, not a failed
+# check, which is why the names here are guarded by
+# apps/web/tests/config/github-labels.test.ts. Adding one is two things in the
+# same change: the name below, and `gh label create`.
+#
+# Do not read a label appearing on its own as evidence against this. Dependabot
+# creates its OWN ecosystem labels unasked — `python` appeared on the repo the
+# first time a security advisory opened a pip PR, having never been named here
+# or created by hand. It is the `labels:` keys below, and only those, that it
+# declines to create.
 #
 # `github-actions` was removed by D-129, when there was nothing left to pin,
 # and comes back with the workflows ([D-157]). It is not decoration: this
