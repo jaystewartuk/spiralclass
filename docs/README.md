@@ -23,7 +23,7 @@ README](../README.md) is the front door; this is the map behind it.
 - **[architecture/](architecture/README.md)** — durable system design: the
   components and their boundaries, the data model, the identity model, how a
   purchase and a booking actually flow, and what was reversed along the way.
-- **[decisions/](decisions/README.md)** — 119 decision records. **Current
+- **[decisions/](decisions/README.md)** — 120 decision records. **Current
   policy, not history**: before reversing anything a decision constrains, read
   its record first. Several reverse an earlier one and say why.
 - **[features/](features/)** — the single source of truth for application
@@ -58,9 +58,9 @@ second source of truth to keep in step.
 
 **Documents describe the present.** This repository holds no backlog, no
 roadmap, no plans directory and no dated audit that ends in a findings list.
-Open work lives on the maintainer's private board. If work falls out of a
-document you are writing, put the work on the board and keep the document to
-what is true now.
+Open work lives in [the issues](https://github.com/jaystewartuk/spiralclass/issues)
+([D-172](decisions/D-172.md)). If work falls out of a document you are writing,
+file it there and keep the document to what is true now.
 
 **A superseded document is deleted, not archived.** The decision records are
 where the reasoning trail lives; a stale document beside a current one is a

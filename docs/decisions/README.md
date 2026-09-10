@@ -372,6 +372,7 @@ a hook — is a caller.
 | [D-05](./D-05.md)   | _(tombstone)_ An early privacy framing, superseded by D-128 and removed before publication                           |
 | [D-48](./D-48.md)   | **A setting is only configuration if every consumer reads the config** — one hardcoded reader makes it a code change |
 | [D-110](./D-110.md) | One board, off this repository: 100 documents that were really queues of work are deleted                            |
+| [D-172](./D-172.md) | The board moves into this repository's Issues — the queue stays out of the tree, and stops being private             |
 | [D-128](./D-128.md) | The privacy layer becomes UK GDPR, and **the supplier register becomes code with a guard test**                      |
 | [D-147](./D-147.md) | _(tombstone)_ The regulatory position, kept privately — with the one engineering finding                             |
 | [D-158](./D-158.md) | Publish the shape, never the account — a third gate on the credential scanner                                        |
@@ -461,7 +462,7 @@ records removed before publication — see [What is not here](#what-is-not-here)
 | [D-106](./D-106.md) | Captions move to a server-side LiveKit agent                          | Active                               |
 | [D-107](./D-107.md) | Materials opens on a level picker                                     | Active                               |
 | [D-108](./D-108.md) | The captions agent ships from a checkout on the box                   | Active (interim)                     |
-| [D-110](./D-110.md) | One board in `hq`; this repository carries no backlog                 | Active                               |
+| [D-110](./D-110.md) | One board in `hq`; this repository carries no backlog                 | Active (location → D-172)            |
 | [D-111](./D-111.md) | Package guest booking is "pick your first class"                      | Decided; not built                   |
 | [D-112](./D-112.md) | Teaching language asked at onboarding                                 | Active                               |
 | [D-113](./D-113.md) | Generalise the manual rail rather than adding a sibling               | Built; extended by D-124             |
@@ -512,6 +513,7 @@ records removed before publication — see [What is not here](#what-is-not-here)
 | [D-169](./D-169.md) | One wrapper owns every Infisical call; deploys make none              | Active                               |
 | [D-170](./D-170.md) | The Codespaces path is deleted, not repaired                          | Active                               |
 | [D-171](./D-171.md) | One visual baseline set, owned by ubuntu-latest                       | Active                               |
+| [D-172](./D-172.md) | The backlog is this repository's Issues, not a private board          | Active                               |
 
 ---
 

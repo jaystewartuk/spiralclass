@@ -2,17 +2,17 @@
 
 Keep documentation small, current, and single-purpose.
 
-| Document purpose                                            | Location                               |
-| ----------------------------------------------------------- | -------------------------------------- |
-| Application behaviour, roles, business rules, and workflows | `docs/features/`                       |
-| Customer-facing instructions                                | `docs/help/<audience>/`                |
-| Stable technical design                                     | `docs/architecture/`                   |
-| Decision rationale and trade-offs                           | `docs/decisions/`                      |
-| Contributor workflow, setup, testing, conventions           | `docs/development/`                    |
-| Production and release runbook                              | `docs/deployment/`                     |
-| Go-to-market and commercial strategy                        | **not this repo**                      |
-| **Work not yet done, of any kind**                          | **a private board, never this repo**   |
-| Replaced, concluded, or dated material                      | delete it — git history is the archive |
+| Document purpose                                            | Location                                |
+| ----------------------------------------------------------- | --------------------------------------- |
+| Application behaviour, roles, business rules, and workflows | `docs/features/`                        |
+| Customer-facing instructions                                | `docs/help/<audience>/`                 |
+| Stable technical design                                     | `docs/architecture/`                    |
+| Decision rationale and trade-offs                           | `docs/decisions/`                       |
+| Contributor workflow, setup, testing, conventions           | `docs/development/`                     |
+| Production and release runbook                              | `docs/deployment/`                      |
+| Go-to-market and commercial strategy                        | **not this repo**                       |
+| **Work not yet done, of any kind**                          | **an issue, never a file in this repo** |
+| Replaced, concluded, or dated material                      | delete it — git history is the archive  |
 
 ## Behaviour is defined once
 
@@ -36,8 +36,10 @@ plus a Supabase upgrade item that D-89 had made meaningless.
 
 So:
 
-- **Work owed goes on the board** in the maintainer's private planning repository,
-  tagged to the `spiralclass` stream. Not in a markdown list here.
+- **Work owed is an issue** on this repository ([D-172](../decisions/D-172.md)),
+  carrying what is wrong and a **Done when** line, so a pull request can close it
+  and the closing is the only bookkeeping. Not a markdown list here, and — the
+  planning board's own rule — an undated idea is an issue, never a board row.
 - **Do not add** a `TODO.md`, `BACKLOG.md`, `LAUNCH_BLOCKERS.md`, a `plans/`
   directory, or an audit whose last section is a list of things to fix. If an
   investigation produces work, the finding goes on the board and the document
