@@ -73,7 +73,7 @@ appears in it.</sub>
 It is published as an honest record of how one engineer builds and runs a
 payments-handling, video-carrying SaaS product alone: the architecture, the
 decisions, the things that went wrong, and the mechanisms built so they would
-not go wrong twice. The 124 decision records in
+not go wrong twice. The 125 decision records in
 [`docs/decisions/`](docs/decisions/README.md) are the most useful thing here —
 several of them reverse an earlier one and say why.
 
@@ -510,7 +510,7 @@ pnpm test:e2e                # Playwright
 pnpm gate --allow-dirty      # everything the pre-push hook will check
 ```
 
-There are 788 test files across five layers — unit, real-database integration,
+There are 793 test files across five layers — unit, real-database integration,
 Playwright end-to-end, visual regression and accessibility — plus a mutation
 spot-check that measures whether the unit suite would actually catch a defect,
 and a per-PR diff-coverage floor on new code.
@@ -615,7 +615,7 @@ in [`docs/deployment/ORACLE_LIVEKIT_PRODUCTION.md`](docs/deployment/ORACLE_LIVEK
 | Where                                      | What                                                                                   |
 | ------------------------------------------ | -------------------------------------------------------------------------------------- |
 | [`docs/architecture/`](docs/architecture/) | System design, the data model, how a purchase and a booking flow                       |
-| [`docs/decisions/`](docs/decisions/)       | **124 decision records.** Current policy, not history — several reverse an earlier one |
+| [`docs/decisions/`](docs/decisions/)       | **125 decision records.** Current policy, not history — several reverse an earlier one |
 | [`docs/features/`](docs/features/)         | Canonical product behaviour, one document per feature                                  |
 | [`docs/development/`](docs/development/)   | Setup, testing, the change workflow, i18n, analytics                                   |
 | [`docs/deployment/`](docs/deployment/)     | Release, incident response, backup and restore, infrastructure runbooks                |
