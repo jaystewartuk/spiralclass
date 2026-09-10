@@ -77,8 +77,8 @@ name: Deploy production
 # own OIDC token, authenticate as the identity, and read whatever that identity
 # could read, no matter how narrow this workflow's own request was.
 #
-# With the values pushed, a compromised dependency gets these eleven and has no
-# way to ask for a twelfth. The blast radius is bounded by what is here rather
+# With the values pushed, a compromised dependency gets these twelve and has no
+# way to ask for a thirteenth. The blast radius is bounded by what is here rather
 # than by an access policy somewhere else. `apps/web/tests/config/local-gate.test.ts`
 # asserts the `id-token` permission stays absent.
 #
@@ -124,7 +124,7 @@ jobs:
     runs-on: ubuntu-latest # ⚠️ Never a larger runner — those are billed even on a public repo.
     timeout-minutes: 45
     # The approval gate and the credential boundary, in one declaration. These
-    # eleven exist ONLY in this environment, so no other workflow here can read
+    # twelve exist ONLY in this environment, so no other workflow here can read
     # them even by typo — and because they are pushed rather than fetched,
     # there is no identity behind them that could be talked into handing over
     # anything else.
@@ -146,11 +146,23 @@ jobs:
       # stay true. A migration is the one thing redeploying the previous image
       # cannot undo.
       NEON_API_KEY: ${{ secrets.NEON_API_KEY }}
-      # Not a secret and never was: it is already in
-      # infra/database/neon/README.md, and fly-deploy.sh defaults it. A `vars`
-      # entry rather than a secret so it is readable in a run log, which is
-      # where you want it when a checkpoint went to the wrong project.
-      NEON_PROJECT_ID: ${{ vars.NEON_PROJECT_ID }}
+      # A SECRET, though it is an identifier rather than a credential, and it
+      # was a `vars` entry until 2026-09-10. Three things that made it one are
+      # no longer true: the value is not in infra/database/neon/README.md (the
+      # publication sweep replaced it with `see neonctl projects list`),
+      # fly-deploy.sh does not default it (the same sweep removed the literal,
+      # and neon-checkpoint-retention.test.ts now asserts no default), and
+      # "readable in a run log" became the argument against rather than for —
+      # this repository is public, and the audit that removed the literal said
+      # why: it names the exact Neon project holding real student data, which
+      # is the reconnaissance surface D-158 exists to remove. `check-leaks.mjs`
+      # gates the whole tree on this identifier's shape; a plaintext `vars`
+      # entry reaching a public run log walks around that gate.
+      #
+      # Masked, so a failing deploy prints `***` here. The branch names and the
+      # app name in the same log say which deploy it was. See D-163's second
+      # addendum.
+      NEON_PROJECT_ID: ${{ secrets.NEON_PROJECT_ID }}
       # config/env/production.build.env's `__LOCAL__` values, resolved from the
       # process environment by scripts/env-config.mjs. Baked irreversibly into
       # the client bundle at build time, which is why they are environment-scoped
