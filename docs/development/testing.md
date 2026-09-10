@@ -50,12 +50,18 @@ Postgres, seeded fixtures, and an in-memory Stripe stub. No secrets, no network,
 no Stripe account. See [below](#end-to-end-in-detail).
 
 **Visual regression** captures every route in `apps/web/tests/visual/routes.ts`
-at six viewports in both themes. Baselines are committed **twice** —
-`-darwin.png` and `-linux.png` — because Playwright names a snapshot after the
-platform that took it, and both the maintainer's laptop and a Linux runner have
-to be able to assert. ⚠️ A page whose look changes needs **both** sets
-regenerated; the header of `scripts/ci/e2e.sh` says how, and the Linux set can
-only honestly be produced on the runner that asserts against it.
+at six viewports in both themes. Playwright names a snapshot after the platform
+that took it, and there is one set — `-linux.png`, asserted on `ubuntu-latest`
+and nowhere else ([D-171](../decisions/D-171.md)). The suite **skips** on a Mac
+and says so, `scripts/ci/e2e.sh` refuses to regenerate there, and a page whose
+look changes is re-baselined by dispatch:
+
+```bash
+gh workflow run heavy.yml -f update_visual_baselines=<route> --ref <branch>
+```
+
+To see how a page renders on your own machine, run `capture.spec.ts` — it writes
+a gallery instead of asserting against one, so it needs no committed image.
 
 **Mutation** is a spot-check, not a full run: it perturbs code and asserts the
 suite notices, so the unit tests are measured on whether they would actually

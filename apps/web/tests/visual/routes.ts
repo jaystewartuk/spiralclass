@@ -52,6 +52,21 @@ export type Route = {
    * visual-regression baselines first.
    */
   portfolio?: true;
+  /**
+   * Marks an authenticated route for the accessibility sweep
+   * (tests/a11y/authenticated-routes.spec.ts) that `portfolio` does not
+   * already carry there.
+   *
+   * The sweep used to select on `portfolio` alone, which worked because the
+   * everyday screens and the presentable ones mostly coincide. They are not
+   * the same claim, and the gap had a cost: `/settings/account` and the two
+   * new-message pickers are places a person is all the time and a stranger
+   * never, so nothing audited them — and both carried a monogram that failed
+   * AA in dark mode for as long as they existed, found only when the same
+   * component broke on a page a stranger DOES reach. A flag that says which
+   * question it answers is what stops the next one hiding there.
+   */
+  a11y?: true;
 };
 
 /**
@@ -219,7 +234,7 @@ export const TEACHER_ROUTES: Route[] = [
   { path: "/dashboard/students/invitations/nuevo", name: "invitation-new", tier: "teacher" },
 
   { path: "/dashboard/messages", name: "messages", tier: "teacher" },
-  { path: "/dashboard/messages/new", name: "message-new", tier: "teacher" },
+  { path: "/dashboard/messages/new", name: "message-new", tier: "teacher", a11y: true },
   {
     path: "/dashboard/messages/:studentId",
     name: "message-thread",
@@ -263,7 +278,7 @@ export const TEACHER_ROUTES: Route[] = [
   // scoped to the public tier — so this adds accessibility coverage only.
   { path: "/notifications", name: "notifications", tier: "teacher", portfolio: true },
 
-  { path: "/settings/account", name: "settings-account", tier: "teacher" },
+  { path: "/settings/account", name: "settings-account", tier: "teacher", a11y: true },
   {
     path: "/settings/booking-page",
     name: "settings-booking-page",
@@ -357,7 +372,7 @@ export const STUDENT_ROUTES: Route[] = [
   { path: "/my-classes/materials", name: "student-materials", tier: "student" },
   { path: "/my-classes/progress", name: "student-progress", tier: "student", portfolio: true },
   { path: "/my-classes/messages", name: "student-messages", tier: "student" },
-  { path: "/my-classes/messages/new", name: "student-message-new", tier: "student" },
+  { path: "/my-classes/messages/new", name: "student-message-new", tier: "student", a11y: true },
   {
     path: "/my-classes/messages/:teacherId",
     name: "student-message-thread",
@@ -371,7 +386,7 @@ export const STUDENT_ROUTES: Route[] = [
     tier: "student",
     resolve: "teacherId",
   },
-  { path: "/my-classes/account", name: "student-account", tier: "student" },
+  { path: "/my-classes/account", name: "student-account", tier: "student", a11y: true },
 
   {
     path: "/my-classes/:bookingId/call",

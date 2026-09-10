@@ -17,14 +17,18 @@ import { capturable } from "./routes";
  * The clock is pinned and animations disabled for the same reason.
  *
  * ASSERTING is what the gate does, inside scripts/ci/e2e.sh, against a seeded
- * database and a production build that script boots itself.
+ * database and a production build that script boots itself — on Linux only,
+ * for the reason in the skip below.
  *
- * REGENERATING has to use the same stack, and the way to do that is:
+ * REGENERATING has to use the same stack, and since [D-171] it also has to use
+ * the same machine, so it is a dispatch rather than a local command:
  *
- *   VISUAL_UPDATE_SNAPSHOTS=booking bash scripts/ci/e2e.sh
+ *   gh workflow run heavy.yml -f update_visual_baselines=booking --ref <branch>
  *
  * where the value is a filter on the route names you actually changed (`all`
- * rewrites everything, which you rarely want — see the script for why).
+ * rewrites everything, which you rarely want — see scripts/ci/e2e.sh for why).
+ * That workflow's header has the download step; e2e.sh refuses to regenerate
+ * anywhere else rather than quietly writing macOS pixels into a Linux set.
  *
  * NOT `pnpm test:visual:regression --update-snapshots`, which this comment
  * recommended until it was found to be a trap: playwright.visual.config.ts
@@ -33,6 +37,11 @@ import { capturable } from "./routes";
  * baselines of the old code, and the next gate run fails against them for
  * reasons that look nothing like the cause. Point VISUAL_BASE_URL at a local
  * server if you want to drive Playwright directly.
+ *
+ * TO SEE YOUR CHANGE ON THIS MACHINE — which is what the laptop gave up when
+ * its own baseline set went — use capture.spec.ts. It WRITES a gallery instead
+ * of asserting against one, so it needs no committed image and is bound to no
+ * platform.
  *
  * Then LOOK at the images. `git status` should name only the routes you
  * changed; a route you did not touch appearing in that list is the finding.
@@ -57,6 +66,35 @@ const PINNED_NOW = new Date("2026-09-01T15:00:00.000Z");
 const ROUTES = capturable("public").filter((route) => route.portfolio);
 
 test.describe("visual regression", () => {
+  /**
+   * ONE baseline set, belonging to the machine that gates the merge ([D-171]).
+   *
+   * Playwright suffixes a snapshot with `process.platform`, so this suite used
+   * to commit every capture twice — `-darwin.png` for the laptop, `-linux.png`
+   * for `ubuntu-latest` ([D-161]). [D-162] then took the laptop out of the
+   * release path altogether: `pnpm promote` reads the runners' verdict for the
+   * exact commit it ships, so nothing that reaches production depends on the
+   * macOS set. What was left of it was the bookkeeping D-161 predicted —
+   * restyle a page, regenerate one set, and the other machine goes red on
+   * exactly the routes you just fixed.
+   *
+   * So the assertion runs where the images were made, and skips out loud
+   * everywhere else. This is not a softened check: heavy.yml runs this leg on
+   * every pull request and every push to `main`, which is earlier than the
+   * laptop ever ran it.
+   *
+   * ⚠️ Do NOT "fix" the skip by widening `maxDiffPixelRatio` until macOS and
+   * Linux rasterisation both fit inside it. D-161 rejected that and the reason
+   * is unchanged: the tolerance already cannot see two lines of grey text
+   * swapping places, and one that spans two font stacks is decorative.
+   */
+  test.skip(
+    process.platform !== "linux",
+    `The visual baselines are -linux.png and are asserted on ubuntu-latest only (D-171); ` +
+      `this machine is ${process.platform}. To see how a page renders here, run ` +
+      `capture.spec.ts — it writes a gallery rather than asserting against one.`,
+  );
+
   for (const route of ROUTES) {
     test(`${route.name} matches its baseline`, async ({ page }) => {
       await page.clock.setFixedTime(PINNED_NOW);
