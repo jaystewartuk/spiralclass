@@ -77,8 +77,12 @@ export default async function AboutPage() {
     },
   ];
 
+  // The rhythm between this page's top-level sections is declared once, on the
+  // shell, rather than as the same top margin repeated on every one of them.
+  // `space-y-14` overrides PageShell's default `space-y-6` through the shell's
+  // own cn(), so no child has to out-specify the container to be spaced.
   return (
-    <PageShell width="wide">
+    <PageShell width="wide" className="space-y-14">
       <header className="text-center">
         <p className="bg-muted/30 text-muted-foreground inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-medium">
           <Sparkles className="h-3.5 w-3.5" aria-hidden />
@@ -93,7 +97,7 @@ export default async function AboutPage() {
       </header>
 
       {/* Founders */}
-      <section className="mt-14">
+      <section>
         <Heading level={2} className="text-center">
           {t("web.about.whoBuiltIt")}
         </Heading>
@@ -124,7 +128,7 @@ export default async function AboutPage() {
       </section>
 
       {/* Why / mission */}
-      <section className="bg-muted/20 mt-14 rounded-3xl border p-8 lg:p-10">
+      <section className="bg-muted/20 rounded-3xl border p-8 lg:p-10">
         <div className="max-w-reading mx-auto flex flex-col items-center gap-3 text-center">
           <Heart className="text-primary h-6 w-6" aria-hidden />
           <Heading level={2}>{t("web.about.ourWhy.title")}</Heading>
@@ -133,7 +137,7 @@ export default async function AboutPage() {
       </section>
 
       {/* Trust */}
-      <section className="mt-14">
+      <section>
         <Heading level={2} className="text-center">
           {t("web.about.whyTrust")}
         </Heading>
@@ -165,7 +169,7 @@ export default async function AboutPage() {
         </div>
       </section>
 
-      <div className="bg-primary text-primary-foreground mt-14 rounded-3xl px-6 py-14 text-center">
+      <div className="bg-primary text-primary-foreground rounded-3xl px-6 py-14 text-center">
         <Heading level={2}>{t("web.trialBand.title")}</Heading>
         <p className="text-primary-foreground mt-3">{t("web.trialBand.noCard")}</p>
         <div className="mt-7 flex flex-col items-center gap-3 lg:flex-row lg:justify-center">
