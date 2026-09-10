@@ -94,7 +94,7 @@ function SegmentedLinks<T extends string>({
               href={hrefFor(option)}
               aria-current={active ? "true" : undefined}
               className={cn(
-                "focus-visible:ring-ring inline-flex min-h-9 items-center rounded px-3 text-sm font-medium transition-colors focus-visible:ring-3 focus-visible:outline-none",
+                "focus-visible:ring-ring inline-flex min-h-9 items-center rounded px-3 text-sm font-medium transition-colors focus-visible:ring-3 focus-visible:outline-hidden",
                 active
                   ? "bg-background text-foreground shadow-brand-sm"
                   : "text-muted-foreground hover:text-foreground",

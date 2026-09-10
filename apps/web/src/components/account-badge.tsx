@@ -73,7 +73,7 @@ export function AccountBadge({
       // Purely an info reveal — the label already names the account, so
       // there's no action to take. cursor-default signals that.
       className={cn(
-        "text-foreground focus-visible:ring-ring inline-flex max-w-64 cursor-default items-center gap-2 rounded-full py-0.5 pr-2 pl-0.5 text-sm focus-visible:ring-3 focus-visible:outline-none",
+        "text-foreground focus-visible:ring-ring inline-flex max-w-64 cursor-default items-center gap-2 rounded-full py-0.5 pr-2 pl-0.5 text-sm focus-visible:ring-3 focus-visible:outline-hidden",
         className,
       )}
       aria-label={`${signedInAs} ${label}${aside ? ` (${aside})` : ""}`}

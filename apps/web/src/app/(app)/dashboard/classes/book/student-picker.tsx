@@ -135,7 +135,7 @@ function StudentRow({ entry, date, t }: { entry: RosterEntry; date?: string; t: 
   return (
     <Link
       href={href}
-      className="min-h-target hover:bg-muted/40 focus-visible:ring-ring flex items-center gap-3 px-4 py-3 transition-colors focus-visible:ring-3 focus-visible:outline-none focus-visible:ring-inset lg:px-6"
+      className="min-h-target hover:bg-muted/40 focus-visible:ring-ring flex items-center gap-3 px-4 py-3 transition-colors focus-visible:ring-3 focus-visible:outline-hidden focus-visible:ring-inset lg:px-6"
     >
       {/* Decorative: the name is right beside it, and a screen reader
           announcing "MR" before "Marcela Ruiz" is the same word twice. */}

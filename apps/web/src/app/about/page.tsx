@@ -99,7 +99,7 @@ export default async function AboutPage() {
         </Heading>
         <div className="max-w-reading mx-auto mt-8 grid gap-6">
           {FOUNDERS.map((f) => (
-            <div key={f.nameEn} className="bg-card rounded-2xl border p-6 shadow-sm">
+            <div key={f.nameEn} className="bg-card rounded-2xl border p-6 shadow-xs">
               <div className="flex items-center gap-4">
                 {/* The shared avatar, not a copy of it. The copy that used to
                     live here painted its monogram fallback as `text-primary` on
@@ -143,7 +143,7 @@ export default async function AboutPage() {
           {TRUST_POINTS.map((p) => {
             const Icon = p.icon;
             return (
-              <div key={p.title} className="bg-card rounded-2xl border p-6 shadow-sm">
+              <div key={p.title} className="bg-card rounded-2xl border p-6 shadow-xs">
                 <div className="bg-primary/10 text-primary flex h-11 w-11 items-center justify-center rounded-xl">
                   <Icon className="h-5 w-5" aria-hidden />
                 </div>

@@ -33,7 +33,7 @@ export function BookingCard({
   return (
     <Link
       href={href}
-      className="bg-card hover:bg-muted/40 block rounded-lg border px-4 py-3 shadow-sm transition-colors"
+      className="bg-card hover:bg-muted/40 block rounded-lg border px-4 py-3 shadow-xs transition-colors"
     >
       <div className="flex items-start justify-between gap-3">
         <span className="font-display min-w-0 truncate text-base font-semibold">{title}</span>

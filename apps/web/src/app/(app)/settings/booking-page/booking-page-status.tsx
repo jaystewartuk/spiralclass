@@ -172,7 +172,7 @@ export async function BookingPageStatus({
                 <li key={item.key}>
                   <Link
                     href={REQUIREMENT_HREF[item.key]}
-                    className="hover:bg-muted focus-visible:ring-ring -mx-2 flex min-h-11 items-center gap-2.5 rounded-md px-2 text-sm focus-visible:ring-3 focus-visible:outline-none"
+                    className="hover:bg-muted focus-visible:ring-ring -mx-2 flex min-h-11 items-center gap-2.5 rounded-md px-2 text-sm focus-visible:ring-3 focus-visible:outline-hidden"
                   >
                     <Circle className="text-muted-foreground h-4 w-4 shrink-0" aria-hidden />
                     <span className="min-w-0 flex-1">{requirementLabel(item.key, t)}</span>
@@ -192,7 +192,7 @@ export async function BookingPageStatus({
                 <li key={item.key}>
                   <Link
                     href={SUGGESTION_HREF[item.key]}
-                    className="hover:bg-muted focus-visible:ring-ring -mx-2 flex min-h-11 items-center gap-2.5 rounded-md px-2 text-sm focus-visible:ring-3 focus-visible:outline-none"
+                    className="hover:bg-muted focus-visible:ring-ring -mx-2 flex min-h-11 items-center gap-2.5 rounded-md px-2 text-sm focus-visible:ring-3 focus-visible:outline-hidden"
                   >
                     <Circle className="text-muted-foreground h-4 w-4 shrink-0" aria-hidden />
                     <span className="min-w-0 flex-1">{suggestionLabel(item.key, t)}</span>

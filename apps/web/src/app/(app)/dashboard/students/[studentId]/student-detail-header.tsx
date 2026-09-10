@@ -292,7 +292,7 @@ export function StudentTabNav({
                   // 44px of height, per D-140's target floor, and the underline
                   // rather than a pill so the row reads as one control strip
                   // sitting on the content it switches.
-                  "focus-visible:ring-ring inline-flex min-h-11 items-center rounded-t-md border-b-2 px-3 text-sm font-medium whitespace-nowrap transition-colors focus-visible:ring-3 focus-visible:outline-none",
+                  "focus-visible:ring-ring inline-flex min-h-11 items-center rounded-t-md border-b-2 px-3 text-sm font-medium whitespace-nowrap transition-colors focus-visible:ring-3 focus-visible:outline-hidden",
                   current
                     ? "border-primary text-foreground"
                     : "text-muted-foreground hover:border-border hover:text-foreground border-transparent",

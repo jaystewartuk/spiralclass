@@ -195,7 +195,7 @@ export function CaptionBand({
         className={cn(
           // Tighter on a phone. Every one of these steps is vertical space
           // taken off the video on the screen that has least of it.
-          "bg-scrim-3 flex flex-col items-center gap-1.5 rounded-xl px-3 py-2 shadow-lg backdrop-blur-sm",
+          "bg-scrim-3 flex flex-col items-center gap-1.5 rounded-xl px-3 py-2 shadow-lg backdrop-blur-xs",
           "lg:gap-2.5 lg:rounded-2xl lg:px-5 lg:py-3",
           // Full width once there is text, so successive lines do not make
           // the panel jump about as sentences change length. But the

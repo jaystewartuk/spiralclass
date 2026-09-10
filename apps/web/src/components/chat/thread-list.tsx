@@ -147,7 +147,7 @@ export function ThreadList({
                     onClick={() => markRead(thread.studentId)}
                     aria-current={active ? "page" : undefined}
                     className={cn(
-                      "focus-visible:ring-ring flex items-center gap-3 px-3 py-3 transition-colors focus-visible:ring-3 focus-visible:outline-none",
+                      "focus-visible:ring-ring flex items-center gap-3 px-3 py-3 transition-colors focus-visible:ring-3 focus-visible:outline-hidden",
                       // The active row is a filled surface, not a left rule:
                       // at rail width the rule sat outside the row's own
                       // padding and read as a divider rather than a selection.

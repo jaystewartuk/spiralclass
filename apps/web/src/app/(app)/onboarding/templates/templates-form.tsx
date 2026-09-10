@@ -1203,7 +1203,7 @@ function WisePriceCalculator({
   const canApply = !disabled && Number.isFinite(targetPesos) && targetPesos > 0;
   return (
     <details className="text-xs">
-      <summary className="text-muted-foreground hover:text-foreground focus-visible:ring-ring cursor-pointer rounded-sm focus-visible:ring-3 focus-visible:outline-none">
+      <summary className="text-muted-foreground hover:text-foreground focus-visible:ring-ring cursor-pointer rounded-sm focus-visible:ring-3 focus-visible:outline-hidden">
         {t("onboarding.templates.wiseCalculatorToggle")}
       </summary>
       <div className="mt-3 flex flex-wrap items-end gap-2">

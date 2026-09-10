@@ -125,7 +125,7 @@ export default async function RootLayout({
                   <div
                     id="main-content"
                     tabIndex={-1}
-                    className="animate-fade-in-up focus:outline-none"
+                    className="animate-fade-in-up focus:outline-hidden"
                   >
                     {children}
                   </div>

@@ -6,9 +6,9 @@ import { join } from "node:path";
  * Nothing may be painted over the transcript panel's close button.
  *
  * WHY. `CaptionTranscript` is a sibling of the stage's floating controls at
- * `absolute right-0 top-0 z-30`, and its close button sits in that panel's
+ * `absolute top-0 right-0 z-30`, and its close button sits in that panel's
  * header at the top-right inset. The stage's own floating controls live at
- * `right-4 top-4 z-30` (minimize) and `right-16 top-4 z-30` (pop-out) — the
+ * `top-4 right-4 z-30` (minimize) and `top-4 right-16 z-30` (pop-out) — the
  * SAME stacking context and the SAME z-index — and they render LATER in the
  * file, so they paint on top of the panel's header.
  *
@@ -34,7 +34,19 @@ const SOURCE = join(__dirname, "../../src/components/video/class-call.tsx");
 
 // A floating control pinned to the stage's top-right at the transcript's own
 // layer. `top-4` and `z-30` together are what put it in the panel's header.
-const TOP_RIGHT_CONTROL = /className=.*\babsolute right-\S+ top-4 z-30\b/;
+//
+// Matched token by token rather than as one phrase. This used to read
+// `/absolute right-\S+ top-4 z-30/`, and the Tailwind 4 bump — which reorders
+// every className through prettier-plugin-tailwindcss — turned `right-4 top-4`
+// into `top-4 right-4` and matched nothing at all. The vacuity check below is
+// what caught it; without that assertion this file would still be green and
+// would have stopped guarding anything.
+const TOP_RIGHT_CONTROL = (line: string) =>
+  /className=/.test(line) &&
+  /\babsolute\b/.test(line) &&
+  /\btop-4\b/.test(line) &&
+  /\bright-\S+/.test(line) &&
+  /\bz-30\b/.test(line);
 
 // The line that opens a conditionally-rendered JSX block: `{a && b && (`.
 const RENDER_CONDITION = /^\s*\{[^}]*&&\s*\($/;
@@ -44,7 +56,7 @@ describe("the transcript's close button", () => {
 
   const controls = lines
     .map((line, i) => ({ line, i }))
-    .filter(({ line }) => TOP_RIGHT_CONTROL.test(line));
+    .filter(({ line }) => TOP_RIGHT_CONTROL(line));
 
   it("has controls in the corner it shares, so the guard below is not vacuous", () => {
     // If a refactor moves these elsewhere this test must be re-read, not

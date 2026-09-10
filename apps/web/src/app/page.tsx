@@ -303,7 +303,7 @@ export default async function LandingPage({
               {t("web.landing.wedge.marketplace.value")}
             </p>
           </div>
-          <div className="border-primary bg-card rounded-2xl border-2 p-6 text-center shadow-sm">
+          <div className="border-primary bg-card rounded-2xl border-2 p-6 text-center shadow-xs">
             <p className="text-primary text-sm font-medium">{t("web.landing.wedge.us.label")}</p>
             <p className="font-display mt-2 text-2xl font-semibold">
               {t("web.landing.wedge.us.value")}
@@ -382,7 +382,7 @@ export default async function LandingPage({
       <Section title={t("web.landing.social.title")} description={t("web.landing.social.body")}>
         <dl className="grid gap-6 lg:grid-cols-3">
           {socialStats.map((stat) => (
-            <div key={stat.value} className="bg-card rounded-2xl border p-6 text-center shadow-sm">
+            <div key={stat.value} className="bg-card rounded-2xl border p-6 text-center shadow-xs">
               <dt className="font-display text-primary text-2xl font-semibold">{stat.value}</dt>
               <dd className="text-muted-foreground mt-1 text-sm">{stat.label}</dd>
             </div>

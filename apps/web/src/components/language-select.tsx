@@ -58,7 +58,7 @@ export function LanguageSelect({
         aria-label={t("settings.language")}
         onChange={() => formRef.current?.requestSubmit()}
         className={cn(
-          "border-input bg-background focus-visible:ring-ring cursor-pointer rounded-md border focus-visible:ring-3 focus-visible:outline-none",
+          "border-input bg-background focus-visible:ring-ring cursor-pointer rounded-md border focus-visible:ring-3 focus-visible:outline-hidden",
           field
             ? "text-foreground h-11 w-full px-3 text-sm lg:h-10"
             : "text-muted-foreground hover:text-foreground px-2 py-1 text-xs",

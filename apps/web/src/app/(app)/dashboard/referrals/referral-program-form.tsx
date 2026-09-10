@@ -170,7 +170,7 @@ function RewardFields({
                 value={option.kind}
                 checked={state.kind === option.kind}
                 onChange={() => onChange({ ...state, kind: option.kind })}
-                className="focus-visible:ring-ring absolute inset-0 h-full w-full cursor-pointer appearance-none rounded-sm focus-visible:ring-3 focus-visible:outline-none"
+                className="focus-visible:ring-ring absolute inset-0 h-full w-full cursor-pointer appearance-none rounded-sm focus-visible:ring-3 focus-visible:outline-hidden"
               />
               <span>{option.label}</span>
             </label>

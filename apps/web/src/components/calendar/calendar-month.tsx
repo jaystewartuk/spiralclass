@@ -140,7 +140,7 @@ export async function CalendarMonth({
                   // cell's box — which is what `outline-offset: 2px` asks for —
                   // is cut off on every edge cell, and no z-index fixes that.
                   // Same 3px, same colour, painted where it can be seen.
-                  "focus-visible:ring-ring focus-visible:z-10 focus-visible:ring-3 focus-visible:outline-none focus-visible:ring-inset",
+                  "focus-visible:ring-ring focus-visible:z-10 focus-visible:ring-3 focus-visible:outline-hidden focus-visible:ring-inset",
                   // OPAQUE, all three of them. The 1px rules between cells are
                   // the container's `bg-border` showing through a `gap-px`, so
                   // a translucent cell fill does not composite over the card

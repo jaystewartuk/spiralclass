@@ -124,7 +124,7 @@ export function AppNav({
       aria-label={notifLabel}
       aria-current={notificationsActive ? "page" : undefined}
       className={cn(
-        "focus-visible:ring-ring relative inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-md transition-colors focus-visible:ring-3 focus-visible:outline-none lg:h-10 lg:w-10",
+        "focus-visible:ring-ring relative inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-md transition-colors focus-visible:ring-3 focus-visible:outline-hidden lg:h-10 lg:w-10",
         notificationsActive
           ? "bg-muted text-foreground"
           : "text-muted-foreground hover:bg-muted/60 hover:text-foreground",

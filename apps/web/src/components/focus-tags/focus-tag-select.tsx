@@ -136,8 +136,8 @@ export function FocusTagSelect({
         aria-haspopup="listbox"
         onClick={() => setOpen((o) => !o)}
         className={cn(
-          "border-input flex h-9 w-full items-center justify-between rounded-md border bg-transparent px-3 py-1 text-sm shadow-sm transition-colors",
-          "focus-visible:ring-ring focus-visible:ring-1 focus-visible:outline-none",
+          "border-input flex h-9 w-full items-center justify-between rounded-md border bg-transparent px-3 py-1 text-sm shadow-xs transition-colors",
+          "focus-visible:ring-ring focus-visible:ring-1 focus-visible:outline-hidden",
           selected.size === 0 && "text-muted-foreground",
         )}
       >
@@ -156,7 +156,7 @@ export function FocusTagSelect({
               placeholder={t("classContent.author.focusSearch")}
               aria-label={t("classContent.author.focusSearch")}
               autoComplete="off"
-              className="placeholder:text-muted-foreground flex h-8 w-full rounded-sm bg-transparent px-2 text-sm outline-none"
+              className="placeholder:text-muted-foreground flex h-8 w-full rounded-sm bg-transparent px-2 text-sm outline-hidden"
             />
           </div>
           <ul

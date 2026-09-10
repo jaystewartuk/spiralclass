@@ -239,7 +239,7 @@ export function IntroVideoCard({
   return (
     <div
       ref={frameRef}
-      className="relative mx-auto aspect-[9/16] w-full max-w-xs overflow-hidden rounded-2xl border bg-black shadow-sm"
+      className="relative mx-auto aspect-[9/16] w-full max-w-xs overflow-hidden rounded-2xl border bg-black shadow-xs"
     >
       <video
         ref={videoRef}
@@ -305,7 +305,7 @@ export function IntroVideoCard({
             frameReady
               ? "from-primary/85 via-primary/60 to-primary/80"
               : "from-primary to-primary/70"
-          } text-primary-foreground focus-visible:ring-ring absolute inset-0 flex flex-col items-center justify-center gap-3 bg-gradient-to-br transition-all duration-500 outline-none hover:opacity-90 focus-visible:ring-3 focus-visible:ring-offset-2 disabled:cursor-default disabled:hover:opacity-100`}
+          } text-primary-foreground focus-visible:ring-ring absolute inset-0 flex flex-col items-center justify-center gap-3 bg-gradient-to-br outline-hidden transition-all duration-500 hover:opacity-90 focus-visible:ring-3 focus-visible:ring-offset-2 disabled:cursor-default disabled:hover:opacity-100`}
         >
           {errored ? (
             <>

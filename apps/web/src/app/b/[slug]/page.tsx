@@ -537,7 +537,7 @@ export default async function BookingLandingPage({
               alt={teacher.name}
               width={320}
               height={320}
-              className="mx-auto h-56 w-56 rounded-2xl border object-cover shadow-sm lg:h-72 lg:w-72"
+              className="mx-auto h-56 w-56 rounded-2xl border object-cover shadow-xs lg:h-72 lg:w-72"
               priority
             />
           ) : (
@@ -545,7 +545,7 @@ export default async function BookingLandingPage({
             // and looks intentional to a student, instead of the column collapsing.
             <div
               aria-hidden
-              className="bg-muted mx-auto flex h-56 w-56 items-center justify-center rounded-2xl border shadow-sm lg:h-72 lg:w-72"
+              className="bg-muted mx-auto flex h-56 w-56 items-center justify-center rounded-2xl border shadow-xs lg:h-72 lg:w-72"
             >
               <span className="font-display text-muted-foreground text-6xl font-semibold lg:text-7xl">
                 {initials}

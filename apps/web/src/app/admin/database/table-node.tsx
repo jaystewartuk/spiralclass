@@ -33,7 +33,7 @@ function TableNodeComponent({ data, selected }: NodeProps<TableNode>) {
     <div
       style={{ width: NODE_WIDTH }}
       className={cn(
-        "bg-card text-card-foreground rounded-lg border shadow-sm transition-[opacity,box-shadow,border-color]",
+        "bg-card text-card-foreground rounded-lg border shadow-xs transition-[opacity,box-shadow,border-color]",
         dimmed ? "opacity-35" : "opacity-100",
         highlight === "primary" || selected
           ? "border-primary ring-primary/50 ring-2"

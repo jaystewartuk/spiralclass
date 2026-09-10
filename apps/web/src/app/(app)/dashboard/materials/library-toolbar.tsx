@@ -49,7 +49,7 @@ function Chip({
       // a toggle that survives the click, which is not what happens here.
       aria-current={selected ? "true" : undefined}
       className={cn(
-        "focus-visible:ring-ring rounded-full border px-3 py-1 text-xs transition-colors focus-visible:ring-3 focus-visible:outline-none",
+        "focus-visible:ring-ring rounded-full border px-3 py-1 text-xs transition-colors focus-visible:ring-3 focus-visible:outline-hidden",
         selected
           ? "bg-foreground text-background border-transparent"
           : "text-muted-foreground hover:bg-muted hover:text-foreground",
@@ -130,7 +130,7 @@ export async function LibraryToolbar({
               anyone navigating by landmark. */}
           <Link
             href={materialsHubHref()}
-            className="text-muted-foreground hover:text-foreground focus-visible:ring-ring -ml-1 inline-flex items-center gap-1 rounded-sm py-1 pr-2 pl-1 text-sm transition-colors focus-visible:ring-3 focus-visible:outline-none"
+            className="text-muted-foreground hover:text-foreground focus-visible:ring-ring -ml-1 inline-flex items-center gap-1 rounded-sm py-1 pr-2 pl-1 text-sm transition-colors focus-visible:ring-3 focus-visible:outline-hidden"
           >
             <ChevronLeft className="size-4" aria-hidden />
             {t("web.materials.backToLevels")}
@@ -169,7 +169,7 @@ export async function LibraryToolbar({
                   href={href({ view: v })}
                   aria-current={urlState.view === v ? "page" : undefined}
                   className={cn(
-                    "focus-visible:ring-ring rounded-full px-3 py-1 text-xs font-medium transition-colors focus-visible:ring-3 focus-visible:outline-none",
+                    "focus-visible:ring-ring rounded-full px-3 py-1 text-xs font-medium transition-colors focus-visible:ring-3 focus-visible:outline-hidden",
                     urlState.view === v
                       ? "bg-foreground text-background"
                       : "text-muted-foreground hover:bg-muted hover:text-foreground",
@@ -246,7 +246,7 @@ export async function LibraryToolbar({
             <div className="flex justify-end">
               <Link
                 href={materialsClearFiltersHref(urlState)}
-                className="text-muted-foreground hover:text-foreground focus-visible:ring-ring inline-flex items-center gap-1 rounded-sm px-1 py-1 text-xs font-medium transition-colors focus-visible:ring-3 focus-visible:outline-none"
+                className="text-muted-foreground hover:text-foreground focus-visible:ring-ring inline-flex items-center gap-1 rounded-sm px-1 py-1 text-xs font-medium transition-colors focus-visible:ring-3 focus-visible:outline-hidden"
               >
                 <X className="size-3.5" aria-hidden />
                 {t("web.materials.clearFilters")}

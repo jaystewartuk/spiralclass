@@ -1909,7 +1909,7 @@ export function ClassCall({
               // since the call itself keeps running behind it.
               <div
                 role="status"
-                className="w-dialog-inset bg-scrim-3 absolute top-1/2 left-1/2 z-30 flex max-w-sm -translate-x-1/2 -translate-y-1/2 flex-col items-center gap-2 rounded-2xl px-5 py-4 text-center shadow-lg backdrop-blur-sm"
+                className="w-dialog-inset bg-scrim-3 absolute top-1/2 left-1/2 z-30 flex max-w-sm -translate-x-1/2 -translate-y-1/2 flex-col items-center gap-2 rounded-2xl px-5 py-4 text-center shadow-lg backdrop-blur-xs"
               >
                 <p className="text-base font-semibold text-white">
                   {t("call.captionsNoticeTitle")}
@@ -1952,8 +1952,8 @@ export function ClassCall({
 
             ALSO HIDDEN WHILE THE TRANSCRIPT IS OPEN, and that condition is
             load-bearing rather than tidy. The transcript panel is a sibling
-            of this button at `right-0 top-0 z-30`, and this button sits at
-            `right-4 top-4 z-30`: same stacking context, same z-index, and
+            of this button at `top-0 right-0 z-30`, and this button sits at
+            `top-4 right-4 z-30`: same stacking context, same z-index, and
             this button is LATER in the DOM, so it paints on top. Where it
             lands is exactly the transcript's own close button, which sits in
             that panel's header at the same inset. The reader taps the × she

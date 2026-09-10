@@ -78,7 +78,7 @@ export default function GlobalError({ error }: { error: Error & { digest?: strin
             onClick={() => {
               window.location.href = "/";
             }}
-            className="bg-primary text-primary-foreground hover:bg-primary-hover focus-visible:ring-ring inline-flex h-11 items-center justify-center rounded-md px-8 text-sm font-medium transition-colors focus-visible:ring-3 focus-visible:ring-offset-2 focus-visible:outline-none"
+            className="bg-primary text-primary-foreground hover:bg-primary-hover focus-visible:ring-ring inline-flex h-11 items-center justify-center rounded-md px-8 text-sm font-medium transition-colors focus-visible:ring-3 focus-visible:ring-offset-2 focus-visible:outline-hidden"
           >
             {copy.home}
           </button>

@@ -109,7 +109,7 @@ export function AdminQuickSearch() {
             onChange={(e) => setQuery(e.target.value)}
             onKeyDown={onKeyDown}
             placeholder={t("web.admin.quickSearch.placeholder")}
-            className="placeholder:text-muted-foreground h-9 w-56 bg-transparent text-sm outline-none"
+            className="placeholder:text-muted-foreground h-9 w-56 bg-transparent text-sm outline-hidden"
           />
           <button
             type="button"

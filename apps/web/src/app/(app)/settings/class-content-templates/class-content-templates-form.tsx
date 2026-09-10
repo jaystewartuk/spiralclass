@@ -613,7 +613,7 @@ function TemplateRow({
             {...attributes}
             {...listeners}
             aria-label={t("web.settings.classContentTemplates.dragHandleAria", { name })}
-            className="text-muted-foreground hover:text-foreground focus-visible:ring-ring flex size-10 shrink-0 cursor-grab touch-none items-center justify-center rounded-md focus-visible:ring-3 focus-visible:outline-none active:cursor-grabbing lg:size-8"
+            className="text-muted-foreground hover:text-foreground focus-visible:ring-ring flex size-10 shrink-0 cursor-grab touch-none items-center justify-center rounded-md focus-visible:ring-3 focus-visible:outline-hidden active:cursor-grabbing lg:size-8"
           >
             <GripVertical className="size-4" aria-hidden />
           </button>
@@ -625,7 +625,7 @@ function TemplateRow({
             aria-expanded={open}
             aria-controls={panelId}
             aria-label={t("web.settings.classContentTemplates.rowToggleAria", { name })}
-            className="hover:bg-muted/60 focus-visible:ring-ring flex min-w-0 flex-1 items-center gap-3 rounded-md px-2 py-1.5 text-left focus-visible:ring-3 focus-visible:outline-none"
+            className="hover:bg-muted/60 focus-visible:ring-ring flex min-w-0 flex-1 items-center gap-3 rounded-md px-2 py-1.5 text-left focus-visible:ring-3 focus-visible:outline-hidden"
           >
             <span className="min-w-0 flex-1">
               <span className="flex items-center gap-2">
@@ -834,9 +834,9 @@ function ModeButton({
       aria-pressed={pressed}
       onClick={onClick}
       className={cn(
-        "focus-visible:ring-ring rounded-sm px-2.5 py-1 text-xs font-medium transition-colors focus-visible:ring-3 focus-visible:outline-none",
+        "focus-visible:ring-ring rounded-sm px-2.5 py-1 text-xs font-medium transition-colors focus-visible:ring-3 focus-visible:outline-hidden",
         pressed
-          ? "bg-background text-foreground shadow-sm"
+          ? "bg-background text-foreground shadow-xs"
           : "text-muted-foreground hover:text-foreground",
       )}
     >

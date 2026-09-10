@@ -1167,7 +1167,7 @@ function CategoryCard({
               {...attributes}
               {...listeners}
               aria-label={t("focusTags.manager.dragHandleAria", { name: category.label })}
-              className="text-subtle ring-offset-background hover:bg-secondary hover:text-foreground focus-visible:ring-ring desktop:block hidden shrink-0 cursor-grab touch-none rounded-md p-1 transition-colors focus-visible:ring-3 focus-visible:ring-offset-2 focus-visible:outline-none active:cursor-grabbing"
+              className="text-subtle ring-offset-background hover:bg-secondary hover:text-foreground focus-visible:ring-ring desktop:block hidden shrink-0 cursor-grab touch-none rounded-md p-1 transition-colors focus-visible:ring-3 focus-visible:ring-offset-2 focus-visible:outline-hidden active:cursor-grabbing"
             >
               <GripVertical className="size-4" aria-hidden />
             </button>
@@ -1264,7 +1264,7 @@ function TagPill({
   // both would say the wrong one is focused half the time. `focus-visible:z-10`
   // keeps a ring from being painted over by the next chip in the row.
   const half =
-    "focus-visible:ring-ring ring-offset-background relative transition-colors focus-visible:z-10 focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-offset-2";
+    "focus-visible:ring-ring ring-offset-background relative transition-colors focus-visible:z-10 focus-visible:outline-hidden focus-visible:ring-3 focus-visible:ring-offset-2";
 
   return (
     <li

@@ -306,7 +306,7 @@ function EditableBlock({
           onEnterEdit();
         }
       }}
-      className="group/readblock hover:bg-muted/30 focus-visible:ring-ring relative cursor-pointer rounded-md px-2 py-1 focus-visible:ring-1 focus-visible:outline-none"
+      className="group/readblock hover:bg-muted/30 focus-visible:ring-ring relative cursor-pointer rounded-md px-2 py-1 focus-visible:ring-1 focus-visible:outline-hidden"
     >
       <MaterialDocument body={serializeBlock(block)} />
       <span className="absolute top-1 right-1 opacity-0 transition-opacity group-hover/readblock:opacity-100 focus-within:opacity-100">

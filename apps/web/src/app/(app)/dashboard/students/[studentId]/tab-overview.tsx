@@ -81,7 +81,7 @@ function ClassRow({
     <li>
       <Link
         href={`/dashboard/classes/${item.id}`}
-        className="hover:bg-muted/40 focus-visible:ring-ring flex min-h-11 items-center justify-between gap-3 px-4 py-3 transition-colors focus-visible:ring-3 focus-visible:outline-none focus-visible:ring-inset lg:px-6"
+        className="hover:bg-muted/40 focus-visible:ring-ring flex min-h-11 items-center justify-between gap-3 px-4 py-3 transition-colors focus-visible:ring-3 focus-visible:outline-hidden focus-visible:ring-inset lg:px-6"
       >
         <span className="min-w-0">
           <span className="block truncate font-medium">

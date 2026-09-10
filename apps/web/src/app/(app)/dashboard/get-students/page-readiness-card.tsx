@@ -87,7 +87,7 @@ export async function PageReadinessCard({
               <li key={gap.code}>
                 <Link
                   href={gap.href}
-                  className="min-h-target hover:bg-muted/50 focus-visible:ring-ring flex items-center gap-3 px-6 py-3 transition-colors focus-visible:ring-3 focus-visible:outline-none"
+                  className="min-h-target hover:bg-muted/50 focus-visible:ring-ring flex items-center gap-3 px-6 py-3 transition-colors focus-visible:ring-3 focus-visible:outline-hidden"
                 >
                   <span className="min-w-0 flex-1 text-sm">{t(GAP_KEY[gap.code])}</span>
                   {severityKey ? (

@@ -43,7 +43,7 @@ export function navRowClasses({
 } = {}): string {
   return cn(
     "group relative flex w-full items-center gap-3 rounded-md px-3 py-2 text-left transition-colors",
-    "focus-visible:ring-ring focus-visible:ring-3 focus-visible:outline-none",
+    "focus-visible:ring-ring focus-visible:ring-3 focus-visible:outline-hidden",
     density === "comfortable" ? "min-h-target text-base" : "min-h-10 text-sm",
     active
       ? "bg-muted text-foreground font-semibold"
@@ -161,7 +161,7 @@ export function NavBarLink({
       prefetch={prefetch}
       aria-current={active ? "page" : undefined}
       className={cn(
-        "focus-visible:ring-ring rounded-md px-3 py-2 text-sm whitespace-nowrap transition-colors focus-visible:ring-3 focus-visible:outline-none",
+        "focus-visible:ring-ring rounded-md px-3 py-2 text-sm whitespace-nowrap transition-colors focus-visible:ring-3 focus-visible:outline-hidden",
         active
           ? "bg-muted text-foreground font-semibold"
           : "text-muted-foreground hover:bg-muted/60 hover:text-foreground font-medium",

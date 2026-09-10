@@ -68,7 +68,7 @@ export function SectionNav({ sections, label }: { sections: AccountSection[]; la
                 href={`#${section.id}`}
                 aria-current={current ? "true" : undefined}
                 className={cn(
-                  "min-h-target focus-visible:ring-ring desktop:min-h-0 flex items-center rounded-md px-3 py-1.5 text-sm whitespace-nowrap transition-colors focus-visible:ring-3 focus-visible:outline-none",
+                  "min-h-target focus-visible:ring-ring desktop:min-h-0 flex items-center rounded-md px-3 py-1.5 text-sm whitespace-nowrap transition-colors focus-visible:ring-3 focus-visible:outline-hidden",
                   current
                     ? "bg-muted text-foreground font-medium"
                     : "text-muted-foreground hover:bg-muted/60 hover:text-foreground",

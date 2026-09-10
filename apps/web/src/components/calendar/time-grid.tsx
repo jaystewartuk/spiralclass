@@ -192,7 +192,7 @@ export function TimeGrid({
                           width: `calc(${widthPct}% - 4px)`,
                         }}
                         className={cn(
-                          "hover:shadow-brand-md absolute z-10 overflow-hidden rounded-md border border-l-4 px-1.5 py-0.5 text-sm leading-snug shadow-sm transition-shadow",
+                          "hover:shadow-brand-md absolute z-10 overflow-hidden rounded-md border border-l-4 px-1.5 py-0.5 text-sm leading-snug shadow-xs transition-shadow",
                           styleFor(l.ev.status).block,
                           // Too short for two lines: run them together so the
                           // student's name is still there rather than clipped
