@@ -1,6 +1,8 @@
 import type { PrismaClient } from "@prisma/client";
 import {
   contentKindLabel,
+  DEFAULT_LOCALE,
+  isAppLocale,
   isMarketingContentKind,
   MINUTES_PER_ACTION,
   platformLabel,
@@ -92,8 +94,10 @@ export async function sendWeeklyPlanNudges(
       continue;
     }
 
-    const locale: AppLocale =
-      teacher.locale === "en" ? "en" : teacher.locale === "fr" ? "fr" : "es-MX";
+    // `teachers.locale` is a plain string column, so an unrecognised value has
+    // to land somewhere, and DEFAULT_LOCALE is what "we don't know" resolves
+    // to everywhere else.
+    const locale: AppLocale = isAppLocale(teacher.locale) ? teacher.locale : DEFAULT_LOCALE;
     const first = pending[0];
     const firstAction = [
       isMarketingContentKind(first.kind) ? contentKindLabel(first.kind, locale) : first.kind,

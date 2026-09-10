@@ -12,6 +12,7 @@ import { maybeEmitFirstBooking } from "@/lib/analytics/first-events";
 import { bookPackageSlot, type BookingEventEmitter } from "@/lib/booking/book-package-slot";
 import type { TeacherBookingError } from "@/lib/booking/teacher-booking-errors";
 import { revalidateAfterAction } from "@/lib/revalidate";
+import { usesEnglishCopy } from "@spiralclass/shared";
 
 // Item 10 — teacher self-serve booking. Teachers take bookings over WhatsApp
 // constantly; this lets a teacher put a class on her own calendar against one
@@ -57,7 +58,7 @@ export async function createTeacherBooking(
   formData: FormData,
 ): Promise<TeacherBookingState> {
   const locale = await getPreferredLocale();
-  const en = locale === "en";
+  const en = usesEnglishCopy(locale);
   const parsed = teacherBookingSchema.safeParse({
     packageId: formData.get("packageId"),
     startUtc: formData.get("startUtc"),

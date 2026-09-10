@@ -8,6 +8,7 @@ import {
   isConnectCountrySupported,
   majorToMinorUnits,
   type StringKey,
+  usesEnglishCopy,
 } from "@spiralclass/shared";
 import { prisma } from "@/lib/prisma";
 import { requireTeacher } from "@/lib/auth";
@@ -84,7 +85,7 @@ export async function saveTimezoneAction(
 ): Promise<OnboardingState> {
   const teacher = await requireTeacher();
   const locale = await getPreferredLocale();
-  const en = locale === "en";
+  const en = usesEnglishCopy(locale);
   const parsed = timezoneSchema(locale).safeParse({
     timezone: formData.get("timezone"),
     phoneE164: formData.get("phoneE164"),
@@ -217,7 +218,7 @@ export async function saveAvailabilityAction(
 ): Promise<OnboardingState> {
   const teacher = await requireTeacher();
   const locale = await getPreferredLocale();
-  const en = locale === "en";
+  const en = usesEnglishCopy(locale);
 
   // Ranges come as parallel arrays: ranges[i][weekday], ranges[i][startTime], ranges[i][endTime].
   const weekdays = formData.getAll("range_weekday") as string[];

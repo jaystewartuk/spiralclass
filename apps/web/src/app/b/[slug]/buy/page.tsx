@@ -1,4 +1,5 @@
 import { Heading } from "@/components/ui/heading";
+import { cancellationPolicyPath } from "@/lib/terms-anchors";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -96,7 +97,7 @@ export default async function PurchasePage({
   // Terms link follows the funnel's own language, not the browser's — sending
   // an English checkout's cancellation-policy link to the Spanish terms is
   // exactly the split this pinning exists to remove.
-  const termsHref = "/terms?lang=en#cancelaciones";
+  const termsHref = cancellationPolicyPath(false);
   const teacherName = teacher.name.trim();
 
   const stripeReady = Boolean(teacher.stripeAccountId && teacher.stripeChargesEnabled);

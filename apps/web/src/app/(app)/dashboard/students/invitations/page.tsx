@@ -43,7 +43,7 @@ export default async function InvitationsPage() {
           <p className="text-sm text-muted-foreground">{t("web.dashboard.invitations.subtitle")}</p>
         </div>
         <Button asChild size="sm" className="shrink-0">
-          <Link href="/dashboard/students/invitations/nuevo">
+          <Link href="/dashboard/students/invitations/new">
             {t("web.dashboard.invitations.inviteCta")}
           </Link>
         </Button>

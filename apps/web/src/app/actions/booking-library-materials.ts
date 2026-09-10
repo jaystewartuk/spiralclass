@@ -11,6 +11,7 @@ import { emitNotificationQueued } from "@/lib/notifications/events";
 import { gateProFeature, upgradeNudge } from "@/lib/subscriptions/enforce";
 import { logger } from "@/lib/logger";
 import { revalidateAfterAction } from "@/lib/revalidate";
+import { usesEnglishCopy } from "@spiralclass/shared";
 
 const log = logger({ surface: "booking-library-materials" });
 
@@ -31,7 +32,7 @@ export async function attachLibraryMaterialToBookingAction(
 ): Promise<AttachLibraryMaterialState> {
   const teacher = await requireOnboardedTeacher();
   const locale = await getPreferredLocale();
-  const en = locale === "en";
+  const en = usesEnglishCopy(locale);
 
   // Same Pro gate as a fresh per-class upload (app/actions/materials.ts) —
   // attaching rides the identical delivery pipeline.

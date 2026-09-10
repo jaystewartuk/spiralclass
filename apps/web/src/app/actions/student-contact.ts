@@ -1,7 +1,7 @@
 "use server";
 
 import { z } from "zod";
-import { isCaptionLanguage } from "@spiralclass/shared";
+import { usesEnglishCopy, isCaptionLanguage } from "@spiralclass/shared";
 import { requireOnboardedTeacher, requireStudent } from "@/lib/auth";
 import { getPreferredLocale } from "@/lib/i18n";
 import { prisma } from "@/lib/prisma";
@@ -40,7 +40,7 @@ export async function updateMyContactInfoAction(
 ): Promise<ContactFormState> {
   const student = await requireStudent();
   const locale = await getPreferredLocale();
-  const en = locale === "en";
+  const en = usesEnglishCopy(locale);
 
   const parsed = studentContactSchema(locale).safeParse({
     name: formData.get("name"),
@@ -81,7 +81,7 @@ export async function updateStudentContactAsTeacherAction(
 ): Promise<ContactFormState> {
   const teacher = await requireOnboardedTeacher();
   const locale = await getPreferredLocale();
-  const en = locale === "en";
+  const en = usesEnglishCopy(locale);
 
   const parsed = teacherEditStudentContactSchema(locale).safeParse({
     studentId: formData.get("studentId"),
@@ -126,7 +126,7 @@ export async function requestEmailChangeAction(
 ): Promise<EmailChangeFormState> {
   const student = await requireStudent();
   const locale = await getPreferredLocale();
-  const en = locale === "en";
+  const en = usesEnglishCopy(locale);
 
   // requireStudent doesn't gate moderation; don't hand a moderated account
   // an identity-moving tool (mirrors the checkout / magic-link refusals).
@@ -202,7 +202,7 @@ export async function verifyEmailChangeAction(
 ): Promise<EmailChangeFormState> {
   const student = await requireStudent();
   const locale = await getPreferredLocale();
-  const en = locale === "en";
+  const en = usesEnglishCopy(locale);
 
   if (student.disabledAt) {
     return { error: en ? "This account is disabled." : "Esta cuenta está deshabilitada." };
@@ -256,7 +256,7 @@ export async function saveNativeLanguageAction(
 ): Promise<ContactFormState> {
   const student = await requireStudent();
   const locale = await getPreferredLocale();
-  const en = locale === "en";
+  const en = usesEnglishCopy(locale);
 
   const nativeLanguage = (formData.get("nativeLanguage") ?? "").toString().trim();
   if (!isCaptionLanguage(nativeLanguage)) {

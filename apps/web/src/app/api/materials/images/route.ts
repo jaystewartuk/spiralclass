@@ -3,6 +3,7 @@ import { getCurrentTeacher } from "@/lib/auth";
 import { getPreferredLocale } from "@/lib/i18n";
 import { gateProFeature, upgradeNudge } from "@/lib/subscriptions/enforce";
 import { uploadMaterialImage } from "@/lib/storage/material-images";
+import { usesEnglishCopy } from "@spiralclass/shared";
 
 // Uploads one image for embedding in a material body, from the WEB block
 // editor. Returns the `material-image:` src the editor writes into the block —
@@ -23,7 +24,7 @@ export async function POST(req: Request): Promise<Response> {
   }
 
   const locale = await getPreferredLocale();
-  const en = locale === "en";
+  const en = usesEnglishCopy(locale);
 
   const gate = await gateProFeature(teacher.id, "class_content");
   if (!gate.ok) {

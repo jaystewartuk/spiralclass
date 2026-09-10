@@ -4,6 +4,8 @@ import { prisma } from "@/lib/prisma";
 import { serverEnv } from "@/lib/env";
 import { mintServerSideOtpSession } from "@/lib/auth/server-otp";
 import { logger, correlationIdFrom } from "@/lib/logger";
+import { getPreferredLocale, getT } from "@/lib/i18n";
+import { escapeHtml } from "@/lib/html-escape";
 
 // Rebook redirect router (D-40). When a teacher cancels a class, the
 // dispatcher sends the student a `teacher_cancel` (or
@@ -34,7 +36,7 @@ export async function GET(
     },
   });
   if (!booking || !booking.student.email) {
-    return notFoundHtml();
+    return await notFoundHtml();
   }
 
   try {
@@ -49,11 +51,20 @@ export async function GET(
   return NextResponse.redirect(url, { status: 302 });
 }
 
-function notFoundHtml(): Response {
+// See the twin in /r/ml: rendered when the link in the email has stopped
+// working, to a reader with no session, in whatever language the request asks
+// for.
+//
+// The link out is its own sentence rather than an <a> spliced into the middle
+// of the prose — a sentence wrapped around markup can only be translated by
+// translating the markup with it, which is a shape the catalog cannot hold.
+async function notFoundHtml(): Promise<Response> {
+  const locale = await getPreferredLocale();
+  const t = await getT();
   return new NextResponse(
-    `<!doctype html><html lang="es-MX"><head><meta charset="utf-8"><title>Enlace expirado</title>
+    `<!doctype html><html lang="${locale}"><head><meta charset="utf-8"><title>${escapeHtml(t("web.expiredLink.title"))}</title>
 <style>body{font-family:system-ui,sans-serif;max-width:32rem;margin:4rem auto;padding:0 1rem;line-height:1.5}</style>
-</head><body><h1>Este enlace ya no funciona</h1><p>El enlace para reagendar tu clase ya no está disponible. Inicia sesión en <a href="/my-classes">tus clases</a> para reservar una nueva.</p></body></html>`,
+</head><body><h1>${escapeHtml(t("web.expiredLink.heading"))}</h1><p>${escapeHtml(t("web.expiredLink.reschedule"))}</p><p><a href="/my-classes">${escapeHtml(t("web.expiredLink.rescheduleAction"))}</a></p></body></html>`,
     { status: 404, headers: { "Content-Type": "text/html; charset=utf-8" } },
   );
 }

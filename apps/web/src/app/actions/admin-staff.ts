@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { isBootstrapActor, requireAdmin } from "@/lib/admin";
 import { getPreferredLocale } from "@/lib/i18n";
 import { revalidateAfterAction } from "@/lib/revalidate";
+import { usesEnglishCopy } from "@spiralclass/shared";
 
 export type AdminStaffActionState = { error?: string; ok?: boolean } | undefined;
 
@@ -30,7 +31,7 @@ export async function inviteAdminAction(
 ): Promise<AdminStaffActionState> {
   const actor = await requireAdmin("superadmin");
   const locale = await getPreferredLocale();
-  const en = locale === "en";
+  const en = usesEnglishCopy(locale);
   const parsed = inviteSchema.safeParse({
     email: formData.get("email"),
     role: formData.get("role"),
@@ -71,7 +72,7 @@ export async function updateAdminRoleAction(
 ): Promise<AdminStaffActionState> {
   const actor = await requireAdmin("superadmin");
   const locale = await getPreferredLocale();
-  const en = locale === "en";
+  const en = usesEnglishCopy(locale);
   const parsed = updateSchema.safeParse({
     adminId: formData.get("adminId"),
     role: formData.get("role"),
@@ -131,7 +132,7 @@ export async function toggleAdminDisabledAction(
 ): Promise<AdminStaffActionState> {
   const actor = await requireAdmin("superadmin");
   const locale = await getPreferredLocale();
-  const en = locale === "en";
+  const en = usesEnglishCopy(locale);
   const parsed = toggleSchema.safeParse({
     adminId: formData.get("adminId"),
     disable: formData.get("disable"),

@@ -8,6 +8,7 @@ import { getPreferredLocale } from "@/lib/i18n";
 import { emitNotificationQueued } from "@/lib/notifications/events";
 import { getEmailClient } from "@/lib/email";
 import { revalidateAfterAction } from "@/lib/revalidate";
+import { usesEnglishCopy } from "@spiralclass/shared";
 
 export type AdminNotificationActionState =
   { error?: string; ok?: boolean; info?: string } | undefined;
@@ -27,7 +28,7 @@ export async function retryNotificationAction(
 ): Promise<AdminNotificationActionState> {
   await requireAdmin("support");
   const locale = await getPreferredLocale();
-  const en = locale === "en";
+  const en = usesEnglishCopy(locale);
   const parsed = retrySchema.safeParse({
     notificationId: formData.get("notificationId"),
   });
@@ -93,7 +94,7 @@ export async function sendAdminBroadcastAction(
 ): Promise<AdminNotificationActionState> {
   const actor = await requireAdmin("superadmin");
   const locale = await getPreferredLocale();
-  const en = locale === "en";
+  const en = usesEnglishCopy(locale);
   const parsed = broadcastSchema.safeParse({
     audience: formData.get("audience"),
     subject: formData.get("subject"),

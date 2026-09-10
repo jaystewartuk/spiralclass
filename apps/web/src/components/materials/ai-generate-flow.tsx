@@ -7,6 +7,7 @@ import {
   hasFieldErrors,
   materialFieldMessages,
   validateMaterialFields,
+  usesEnglishCopy,
 } from "@spiralclass/shared";
 import { useFieldErrors } from "@/hooks/use-field-errors";
 import { Button } from "@/components/ui/button";
@@ -71,7 +72,7 @@ export function AiGenerateFlow({
   const [levelId, setLevelId] = useState<string>(levels[0]?.id ?? "");
   const [focusTagIds, setFocusTagIds] = useState<Set<string>>(new Set());
   const [genTemplateId, setGenTemplateId] = useState<string>(templates[0]?.id ?? "none");
-  const [language, setLanguage] = useState<string>(locale === "en" ? "en" : "es");
+  const [language, setLanguage] = useState<string>(usesEnglishCopy(locale) ? "en" : "es");
   const toggleFocusTag = (id: string) =>
     setFocusTagIds((prev) => {
       const next = new Set(prev);

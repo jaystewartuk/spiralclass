@@ -119,7 +119,7 @@ function RowActions({ row }: { row: InvitationDashboardRow }) {
   if (row.state === "not_invited") {
     return (
       <Button asChild size="sm" variant="outline">
-        <Link href={`/dashboard/students/invitations/nuevo?student=${row.studentId}`}>
+        <Link href={`/dashboard/students/invitations/new?student=${row.studentId}`}>
           {t("web.dashboard.invitations.action.invite")}
         </Link>
       </Button>

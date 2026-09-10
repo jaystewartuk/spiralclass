@@ -7,6 +7,7 @@ import { writeOverride } from "@/lib/audit";
 import { getPreferredLocale } from "@/lib/i18n";
 import { addMonths } from "@/lib/dates";
 import { revalidateAfterAction } from "@/lib/revalidate";
+import { usesEnglishCopy } from "@spiralclass/shared";
 
 export type AdminPackageActionState = { error?: string; ok?: boolean } | undefined;
 
@@ -28,7 +29,7 @@ export async function cancelPackageAction(
 ): Promise<AdminPackageActionState> {
   const actor = await requireAdmin("support");
   const locale = await getPreferredLocale();
-  const en = locale === "en";
+  const en = usesEnglishCopy(locale);
   const parsed = cancelSchema.safeParse({
     packageId: formData.get("packageId"),
     reason: formData.get("reason"),
@@ -83,7 +84,7 @@ export async function extendPackageExpirationAction(
 ): Promise<AdminPackageActionState> {
   const actor = await requireAdmin("support");
   const locale = await getPreferredLocale();
-  const en = locale === "en";
+  const en = usesEnglishCopy(locale);
   const parsed = extendSchema.safeParse({
     packageId: formData.get("packageId"),
     months: formData.get("months"),

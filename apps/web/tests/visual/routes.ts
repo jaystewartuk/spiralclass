@@ -222,7 +222,7 @@ export const TEACHER_ROUTES: Route[] = [
   },
 
   { path: "/dashboard/students", name: "students", tier: "teacher", portfolio: true },
-  { path: "/dashboard/students/nuevo", name: "student-new", tier: "teacher" },
+  { path: "/dashboard/students/new", name: "student-new", tier: "teacher" },
   {
     path: "/dashboard/students/:studentId",
     name: "student-detail",
@@ -231,7 +231,7 @@ export const TEACHER_ROUTES: Route[] = [
     portfolio: true,
   },
   { path: "/dashboard/students/invitations", name: "invitations", tier: "teacher" },
-  { path: "/dashboard/students/invitations/nuevo", name: "invitation-new", tier: "teacher" },
+  { path: "/dashboard/students/invitations/new", name: "invitation-new", tier: "teacher" },
 
   { path: "/dashboard/messages", name: "messages", tier: "teacher" },
   { path: "/dashboard/messages/new", name: "message-new", tier: "teacher", a11y: true },

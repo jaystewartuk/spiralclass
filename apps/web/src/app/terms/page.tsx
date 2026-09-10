@@ -5,19 +5,54 @@ import { SUPPORT_EMAIL } from "@/lib/support";
 import { Logo } from "@/components/brand/logo";
 import { hasStripeCreds } from "@/lib/env";
 import { createT } from "@/lib/i18n-translate";
+import { CANCELLATION_POLICY_ANCHOR, LEGACY_CANCELLATION_ANCHOR } from "@/lib/terms-anchors";
 
 const CONTACT_EMAIL = SUPPORT_EMAIL;
 
+/**
+ * Which of the two authored variants the bare URL serves.
+ *
+ * The bare URL is English, matching `DEFAULT_LOCALE` — the reader arriving at
+ * /terms cold, from the footer or from Stripe's billing portal, is the one
+ * with no stated language, and this is the document they get. `?lang=es`
+ * selects Spanish; `?lang=en` also resolves to English, since links carrying
+ * it are out in sent email and cannot be edited.
+ *
+ * Both documents are human-authored and stay so: legal copy is never
+ * machine-translated (D-81). This picks which is offered first, not what
+ * either says.
+ */
+function isSpanishRequested(lang: string | undefined): boolean {
+  return lang === "es" || lang === "es-MX";
+}
+
+/**
+ * The cancellation clause's previous fragment, kept addressable.
+ *
+ * A URL fragment never reaches the server, so nothing can redirect one — a
+ * renamed id is only ever a link that silently lands at the top of a long
+ * legal page. Cancellation and deduction emails carry this one and are already
+ * in people's inboxes, so it stays reachable as an empty target rather than
+ * being carried by the section itself: an element has one id, and the one it
+ * announces should be the current one.
+ *
+ * Both ids appear in both language variants, so a link works whichever
+ * document the reader lands on.
+ */
+function LegacyCancellationAnchor() {
+  return <span id={LEGACY_CANCELLATION_ANCHOR} aria-hidden="true" />;
+}
+
 // Metadata follows the ?lang param (which picks the rendered variant), not the
-// locale cookie. The canonical points both variants at the bare URL so
-// /terms?lang=en never competes with /terms in the index.
+// locale cookie. The canonical points both variants at the bare URL so neither
+// competes with /terms in the index.
 export async function generateMetadata({
   searchParams,
 }: {
   searchParams: Promise<{ lang?: string }>;
 }): Promise<Metadata> {
   const { lang } = await searchParams;
-  const t = createT(lang === "en" ? "en" : "es-MX");
+  const t = createT(isSpanishRequested(lang) ? "es-MX" : "en");
   return {
     title: t("web.terms.meta.title"),
     description: t("web.terms.meta.description"),
@@ -31,7 +66,7 @@ export default async function TermsPage({
   searchParams: Promise<{ lang?: string }>;
 }) {
   const { lang } = await searchParams;
-  const isEnglish = lang === "en";
+  const isEnglish = !isSpanishRequested(lang);
   const stripeAvailable = hasStripeCreds();
   return (
     <main className="container space-y-6 py-10 text-sm leading-relaxed lg:max-w-2xl">
@@ -56,7 +91,7 @@ function SpanishTerms({ stripeAvailable }: { stripeAvailable: boolean }) {
         </Heading>
         <p className="text-xs text-muted-foreground">
           Última actualización: 10 de julio de 2026 ·{" "}
-          <Link className="underline" href="/terms?lang=en">
+          <Link className="underline" href="/terms">
             English
           </Link>
         </p>
@@ -121,9 +156,8 @@ function SpanishTerms({ stripeAvailable }: { stripeAvailable: boolean }) {
         </p>
       </section>
 
-      {/* id shared with the English render: deduction emails deep-link to
-          /terms#cancelaciones regardless of language. */}
-      <section id="cancelaciones" className="space-y-2">
+      <LegacyCancellationAnchor />
+      <section id={CANCELLATION_POLICY_ANCHOR} className="space-y-2">
         <Heading level={4} as="h2">
           5. Cancelaciones y reembolsos
         </Heading>
@@ -269,7 +303,7 @@ function EnglishTerms({ stripeAvailable }: { stripeAvailable: boolean }) {
         </Heading>
         <p className="text-xs text-muted-foreground">
           Last updated: July 10, 2026 ·{" "}
-          <Link className="underline" href="/terms">
+          <Link className="underline" href="/terms?lang=es">
             Español
           </Link>
         </p>
@@ -332,7 +366,8 @@ function EnglishTerms({ stripeAvailable }: { stripeAvailable: boolean }) {
         </p>
       </section>
 
-      <section id="cancelaciones" className="space-y-2">
+      <LegacyCancellationAnchor />
+      <section id={CANCELLATION_POLICY_ANCHOR} className="space-y-2">
         <Heading level={4} as="h2">
           5. Cancellations and refunds
         </Heading>

@@ -87,20 +87,41 @@ describe("synthesizeWithGoogle", () => {
     if (res.ok) {
       expect(res.contentType).toBe("audio/mpeg");
       expect(Array.from(res.audio)).toEqual([1, 2, 3, 4]);
-      expect(res.voiceId).toBe("es-US-Neural2-A"); // default (Spanish) voice
+      // No locale and no language passed, so this is the unforced default —
+      // DEFAULT_LOCALE's voice, the same answer every other surface gives a
+      // reader who has stated nothing.
+      expect(res.voiceId).toBe("en-US-Neural2-C");
     }
     const [url, init] = (fetch as ReturnType<typeof vi.fn>).mock.calls[0];
     expect(url).toContain("texttospeech.googleapis.com/v1/text:synthesize");
     expect((init.headers as Record<string, string>)["x-goog-api-key"]).toBe("g-test-key");
     const body = JSON.parse(init.body as string);
     expect(body.input.text).toBe("Welcome to the show.");
-    expect(body.voice).toEqual({ languageCode: "es-US", name: "es-US-Neural2-A" });
+    expect(body.voice).toEqual({ languageCode: "en-US", name: "en-US-Neural2-C" });
     expect(body.audioConfig.audioEncoding).toBe("MP3");
   });
 
   it("maps the en locale to an English voice", async () => {
     (fetch as ReturnType<typeof vi.fn>).mockResolvedValue(ttsResponse([9]));
     await synthesizeWithGoogle("Hi there.", { locale: "en" });
+    const body = JSON.parse((fetch as ReturnType<typeof vi.fn>).mock.calls[0][1].body as string);
+    expect(body.voice).toEqual({ languageCode: "en-US", name: "en-US-Neural2-C" });
+  });
+
+  it("maps the es-MX locale to a Spanish voice", async () => {
+    (fetch as ReturnType<typeof vi.fn>).mockResolvedValue(ttsResponse([9]));
+    await synthesizeWithGoogle("Hola.", { locale: "es-MX" });
+    const body = JSON.parse((fetch as ReturnType<typeof vi.fn>).mock.calls[0][1].body as string);
+    expect(body.voice).toEqual({ languageCode: "es-US", name: "es-US-Neural2-A" });
+  });
+
+  // The locale that separates "is she Spanish-reading" from "is she
+  // English-reading": a French teacher gets the English voice, which is
+  // DEFAULT_LOCALE, rather than a Spanish one she did not ask for. (An explicit
+  // `language: "French"` still wins — LANGUAGE_VOICES carries fr-FR.)
+  it("gives the fr locale the default voice, not the Spanish one", async () => {
+    (fetch as ReturnType<typeof vi.fn>).mockResolvedValue(ttsResponse([9]));
+    await synthesizeWithGoogle("Bonjour.", { locale: "fr" });
     const body = JSON.parse((fetch as ReturnType<typeof vi.fn>).mock.calls[0][1].body as string);
     expect(body.voice).toEqual({ languageCode: "en-US", name: "en-US-Neural2-C" });
   });

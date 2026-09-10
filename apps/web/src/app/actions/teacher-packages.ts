@@ -3,7 +3,7 @@
 import { z } from "zod";
 import { Prisma } from "@prisma/client";
 import { fromZonedTime, formatInTimeZone } from "date-fns-tz";
-import { currencyForTeacher, majorToMinorUnits } from "@spiralclass/shared";
+import { usesEnglishCopy, currencyForTeacher, majorToMinorUnits } from "@spiralclass/shared";
 import { prisma } from "@/lib/prisma";
 import { requireOnboardedTeacher } from "@/lib/auth";
 import { getPreferredLocale } from "@/lib/i18n";
@@ -64,7 +64,7 @@ export async function createManualPackageAction(
   formData: FormData,
 ): Promise<ManualPackageState> {
   const locale = await getPreferredLocale();
-  const en = locale === "en";
+  const en = usesEnglishCopy(locale);
 
   const parsed = manualPackageSchema.safeParse({
     studentId: formData.get("studentId"),
@@ -237,7 +237,7 @@ export async function editManualPackageAction(
   formData: FormData,
 ): Promise<ManualPackageState> {
   const locale = await getPreferredLocale();
-  const en = locale === "en";
+  const en = usesEnglishCopy(locale);
 
   const parsed = editPackageSchema.safeParse({
     packageId: formData.get("packageId"),
@@ -415,7 +415,7 @@ export async function deleteManualPackageAction(
   _prev: ManualPackageState,
   formData: FormData,
 ): Promise<ManualPackageState> {
-  const en = (await getPreferredLocale()) === "en";
+  const en = usesEnglishCopy(await getPreferredLocale());
 
   const parsed = deletePackageSchema.safeParse({
     packageId: formData.get("packageId"),

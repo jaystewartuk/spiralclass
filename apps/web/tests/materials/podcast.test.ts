@@ -39,11 +39,11 @@ vi.mock("@/lib/focus-tags", () => ({
   ]),
 }));
 vi.mock("@spiralclass/shared", async (importOriginal) => ({
+  ...((await importOriginal()) as typeof import("@spiralclass/shared")),
   languageName: (c: string) => (c === "fr" ? "French" : c),
-  // REAL, not a stub: the answer-key strip below is the assertion, and a
-  // stubbed pass-through would make it pass while the leak was still there.
-  stripAnswerKeyMarkdown: ((await importOriginal()) as typeof import("@spiralclass/shared"))
-    .stripAnswerKeyMarkdown,
+  // stripAnswerKeyMarkdown and usesEnglishCopy stay REAL (they come through the
+  // spread): the answer-key strip below is the assertion, and a stubbed
+  // pass-through would make it pass while the leak was still there.
 }));
 vi.mock("@/lib/storage/material-podcast", () => ({
   mintMaterialPodcastSignedUrl: vi.fn(async () => "https://signed/podcast.mp3"),

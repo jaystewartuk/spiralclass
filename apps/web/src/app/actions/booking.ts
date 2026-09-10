@@ -12,6 +12,7 @@ import { flushAnalytics, trackServerEvent } from "@/lib/analytics/posthog";
 import { maybeEmitFirstBooking } from "@/lib/analytics/first-events";
 import { bookPackageSlot, type BookingEventEmitter } from "@/lib/booking/book-package-slot";
 import { revalidateAfterAction } from "@/lib/revalidate";
+import { usesEnglishCopy } from "@spiralclass/shared";
 
 export type ActionState = { error?: string; ok?: string } | undefined;
 
@@ -30,7 +31,7 @@ const emitViaInngest: BookingEventEmitter = async (event) => {
 // a friendly error.
 export async function createBooking(_prev: ActionState, formData: FormData): Promise<ActionState> {
   const locale = await getPreferredLocale();
-  const en = locale === "en";
+  const en = usesEnglishCopy(locale);
   const parsed = bookingRequestSchema.safeParse({
     packageId: formData.get("packageId"),
     startUtc: formData.get("startUtc"),

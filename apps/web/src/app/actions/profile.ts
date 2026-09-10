@@ -26,6 +26,7 @@ import {
   isCaptionLanguage,
   isLanguageCode,
   materialStyleSchema,
+  usesEnglishCopy,
 } from "@spiralclass/shared";
 import { teacherPublicWhatsappSchema } from "@/lib/validators";
 import { normalizeE164 } from "@/lib/phone";
@@ -65,7 +66,7 @@ export async function saveBookingSlugAction(
 ): Promise<SlugState> {
   const teacher = await requireTeacher();
   const locale = await getPreferredLocale();
-  const en = locale === "en";
+  const en = usesEnglishCopy(locale);
 
   const raw = (formData.get("bookingSlug") ?? "").toString();
   const result = validateBookingSlug(raw);
@@ -130,7 +131,7 @@ export async function saveTargetLanguageAction(
 ): Promise<ProfileState> {
   const teacher = await requireTeacher();
   const locale = await getPreferredLocale();
-  const en = locale === "en";
+  const en = usesEnglishCopy(locale);
 
   const raw = (formData.get("targetLanguage") ?? "").toString().trim();
   const targetLanguage = raw === "" ? null : raw;
@@ -175,7 +176,7 @@ export async function saveTeachingLanguageAction(
 ): Promise<ProfileState> {
   const teacher = await requireTeacher();
   const locale = await getPreferredLocale();
-  const en = locale === "en";
+  const en = usesEnglishCopy(locale);
 
   const teachingLanguage = (formData.get("teachingLanguage") ?? "").toString().trim();
   if (!isCaptionLanguage(teachingLanguage)) {
@@ -207,7 +208,7 @@ export async function saveBookingPageLocaleAction(
 ): Promise<ProfileState> {
   const teacher = await requireTeacher();
   const locale = await getPreferredLocale();
-  const en = locale === "en";
+  const en = usesEnglishCopy(locale);
 
   const raw = (formData.get("bookingPageLocale") ?? "").toString().trim();
   if (raw !== "" && !isAppLocale(raw)) {
@@ -294,7 +295,7 @@ export async function saveHeadlineAction(
 ): Promise<ProfileState> {
   const teacher = await requireTeacher();
   const locale = await getPreferredLocale();
-  const en = locale === "en";
+  const en = usesEnglishCopy(locale);
 
   const raw = (formData.get("headline") ?? "").toString().trim();
   if (raw.length > HEADLINE_MAX_LENGTH) {
@@ -322,7 +323,7 @@ export async function saveBioAction(
 ): Promise<ProfileState> {
   const teacher = await requireTeacher();
   const locale = await getPreferredLocale();
-  const en = locale === "en";
+  const en = usesEnglishCopy(locale);
 
   const raw = (formData.get("bio") ?? "").toString().trim();
   if (raw.length > BIO_MAX_LENGTH) {
@@ -357,7 +358,7 @@ export async function saveBookingPageWhatsappAction(
 ): Promise<ProfileState> {
   const teacher = await requireTeacher();
   const locale = await getPreferredLocale();
-  const en = locale === "en";
+  const en = usesEnglishCopy(locale);
 
   const parsed = teacherPublicWhatsappSchema(locale).safeParse({
     whatsapp: formData.get("whatsapp"),
@@ -414,7 +415,8 @@ export async function saveMaterialStyleAction(
   if (!parsed.success) {
     return {
       error:
-        parsed.error.issues[0]?.message ?? (locale === "en" ? "Invalid input" : "Entrada inválida"),
+        parsed.error.issues[0]?.message ??
+        (usesEnglishCopy(locale) ? "Invalid input" : "Entrada inválida"),
     };
   }
   const { tone, learnerAge, vocabulary, languageVariety, customInstructions } = parsed.data;
@@ -458,7 +460,7 @@ export async function saveTeacherPhotoAction(
 ): Promise<ProfileState> {
   const teacher = await requireTeacher();
   const locale = await getPreferredLocale();
-  const en = locale === "en";
+  const en = usesEnglishCopy(locale);
 
   const file = formData.get("photo");
   if (!(file instanceof File) || file.size === 0) {
@@ -528,7 +530,7 @@ export type PresignState =
 export async function presignIntroVideoUploadAction(contentType: string): Promise<PresignState> {
   const teacher = await requireTeacher();
   const locale = await getPreferredLocale();
-  const en = locale === "en";
+  const en = usesEnglishCopy(locale);
 
   const presigned = presignTeacherVideoUpload(teacher.id, contentType);
   if ("error" in presigned) {
@@ -560,7 +562,7 @@ export async function finalizeIntroVideoAction(
 ): Promise<ProfileState> {
   const teacher = await requireTeacher();
   const locale = await getPreferredLocale();
-  const en = locale === "en";
+  const en = usesEnglishCopy(locale);
 
   const key = teacherVideoStorageKey(teacher.id);
   const size = await headTeacherVideoObject(key);
@@ -661,7 +663,7 @@ export async function getIntroVideoAnalysisStateAction(): Promise<IntroVideoAnal
 export async function retryIntroVideoAnalysisAction(): Promise<ProfileState> {
   const teacher = await requireTeacher();
   const locale = await getPreferredLocale();
-  const en = locale === "en";
+  const en = usesEnglishCopy(locale);
   if (!teacher.introVideoPath) {
     return { error: en ? "There's no video to analyze." : "No hay un video para analizar." };
   }

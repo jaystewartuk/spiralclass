@@ -13,6 +13,7 @@ import {
   type PlanReason,
   type PromotionRules,
   type PromoPolicy,
+  usesEnglishCopy,
 } from "@spiralclass/shared";
 import { serverEnv, socialPreviewAiEnabled } from "@/lib/env";
 import { logger } from "@/lib/logger";
@@ -360,7 +361,7 @@ export async function prepareActivity(input: {
     // learners of the teacher's subject) — but a post going into a Spanish
     // community should be Spanish. The community's own audience decides, and
     // the teacher's locale is the best available proxy.
-    outputLanguage: context.locale === "en" ? "English" : "Spanish",
+    outputLanguage: usesEnglishCopy(context.locale) ? "English" : "Spanish",
   });
 
   if (!generated.ok) return { ok: false, reason: generated.reason };

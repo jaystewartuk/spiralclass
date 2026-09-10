@@ -7,6 +7,7 @@ import {
   SOCIAL_PREVIEW_CAPTION_MAX_CHARS,
   SOCIAL_PREVIEW_TOPIC_MAX_CHARS,
   type SocialPreviewAngle,
+  usesEnglishCopy,
 } from "@spiralclass/shared";
 import { requireOnboardedTeacher } from "@/lib/auth";
 import { trackServerEvent } from "@/lib/analytics/posthog";
@@ -106,7 +107,7 @@ export async function generateSocialPreview(
   _prev: SocialPreviewState,
   formData: FormData,
 ): Promise<SocialPreviewState> {
-  const en = (await getPreferredLocale()) === "en";
+  const en = usesEnglishCopy(await getPreferredLocale());
   const parsed = generateSchema.safeParse({
     angle: formData.get("angle"),
     topic: formData.get("topic") ?? undefined,
@@ -157,7 +158,7 @@ export async function uploadSocialPreview(
   _prev: SocialPreviewState,
   formData: FormData,
 ): Promise<SocialPreviewState> {
-  const en = (await getPreferredLocale()) === "en";
+  const en = usesEnglishCopy(await getPreferredLocale());
   const file = formData.get("file");
   if (!(file instanceof File)) {
     return { error: en ? "Choose an image to upload." : "Elige una imagen para subir." };
@@ -188,7 +189,7 @@ export async function useSocialPreview(
   _prev: SocialPreviewState,
   formData: FormData,
 ): Promise<SocialPreviewState> {
-  const en = (await getPreferredLocale()) === "en";
+  const en = usesEnglishCopy(await getPreferredLocale());
   const parsed = selectSchema.safeParse({
     imageId: formData.get("imageId"),
     shareGroupId: formData.get("shareGroupId") ?? "",
@@ -235,7 +236,7 @@ export async function removeSocialPreview(
   _prev: SocialPreviewState,
   formData: FormData,
 ): Promise<SocialPreviewState> {
-  const en = (await getPreferredLocale()) === "en";
+  const en = usesEnglishCopy(await getPreferredLocale());
   const parsed = clearSchema.safeParse({ previewId: formData.get("previewId") });
   if (!parsed.success) {
     return { error: en ? "We couldn't reset that preview." : "No pudimos restablecer esa vista." };
@@ -263,7 +264,7 @@ export async function renameSocialPreviewImageAction(
   _prev: SocialPreviewState,
   formData: FormData,
 ): Promise<SocialPreviewState> {
-  const en = (await getPreferredLocale()) === "en";
+  const en = usesEnglishCopy(await getPreferredLocale());
   const parsed = renameSchema.safeParse({
     imageId: formData.get("imageId"),
     topic: formData.get("topic") ?? "",
@@ -300,7 +301,7 @@ export async function deleteSocialPreviewImageAction(
   _prev: SocialPreviewState,
   formData: FormData,
 ): Promise<SocialPreviewState> {
-  const en = (await getPreferredLocale()) === "en";
+  const en = usesEnglishCopy(await getPreferredLocale());
   const parsed = deleteSchema.safeParse({ imageId: formData.get("imageId") });
   if (!parsed.success) {
     return { error: en ? "We couldn't delete that image." : "No pudimos borrar esa imagen." };

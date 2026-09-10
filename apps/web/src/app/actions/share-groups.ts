@@ -10,6 +10,7 @@ import {
   updateShareGroup as updateShareGroupCore,
 } from "@/lib/share-groups/store";
 import { revalidateAfterAction } from "@/lib/revalidate";
+import { usesEnglishCopy } from "@spiralclass/shared";
 
 // Legacy entry point for the community CRUD, kept for any caller that still
 // imports it. The rules moved to lib/marketing/communities
@@ -39,7 +40,7 @@ export async function addShareGroup(
   _prev: ShareGroupState,
   formData: FormData,
 ): Promise<ShareGroupState> {
-  const en = (await getPreferredLocale()) === "en";
+  const en = usesEnglishCopy(await getPreferredLocale());
   const parsed = shareGroupInputSchema.safeParse({
     name: formData.get("name"),
     url: formData.get("url"),
@@ -61,7 +62,7 @@ export async function updateShareGroup(
   _prev: ShareGroupState,
   formData: FormData,
 ): Promise<ShareGroupState> {
-  const en = (await getPreferredLocale()) === "en";
+  const en = usesEnglishCopy(await getPreferredLocale());
   const parsed = updateSchema.safeParse({
     id: formData.get("id"),
     name: formData.get("name"),
@@ -86,7 +87,7 @@ export async function deleteShareGroup(
   _prev: ShareGroupState,
   formData: FormData,
 ): Promise<ShareGroupState> {
-  const en = (await getPreferredLocale()) === "en";
+  const en = usesEnglishCopy(await getPreferredLocale());
   const parsed = deleteSchema.safeParse({ id: formData.get("id") });
   if (!parsed.success) return invalid(en);
 

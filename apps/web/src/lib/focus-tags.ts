@@ -10,6 +10,7 @@ import {
   FOCUS_TAG_LABEL_MAX_CHARS,
   FOCUS_TAG_MAX_PER_TEACHER,
 } from "@/lib/focus-tag-editing";
+import { usesEnglishCopy } from "@spiralclass/shared";
 
 // Focus tags — the teacher's "what to work on" taxonomy that seeds AI
 // class-content compose (docs/features/classes-lesson-content.md, D-20).
@@ -68,7 +69,7 @@ export async function ensureTeacherFocusCategories(
   locale: AppLocale,
   db: Db = defaultPrisma,
 ): Promise<void> {
-  const en = locale === "en";
+  const en = usesEnglishCopy(locale);
   await db.focusTagCategory.createMany({
     data: FOCUS_TAG_BUILTIN_CATEGORIES.map((c, i) => ({
       teacherId,
@@ -133,7 +134,7 @@ export async function ensureTeacherFocusTags(
     ...seeds.map((s) => ({ ...s, pack })),
     ...FORMAT_TAG_SEEDS.map((s) => ({
       key: s.key,
-      label: locale === "en" ? s.labelEn : s.labelEs,
+      label: usesEnglishCopy(locale) ? s.labelEn : s.labelEs,
       category: "format" as const,
       pack: "format",
     })),
@@ -352,7 +353,7 @@ export async function saveFocusTagsForTeacher(
   },
   db: Db = defaultPrisma,
 ): Promise<SaveFocusTagsResult> {
-  const en = input.locale === "en";
+  const en = usesEnglishCopy(input.locale);
 
   // Pass `db` through so this reuses the caller's transaction connection
   // instead of opening a second one on the global client — with a
@@ -486,7 +487,7 @@ export async function saveFocusCategoriesForTeacher(
   },
   db: Db = defaultPrisma,
 ): Promise<SaveFocusTagCategoriesResult> {
-  const en = input.locale === "en";
+  const en = usesEnglishCopy(input.locale);
 
   // Pass `db` through so this reuses the caller's transaction connection
   // instead of opening a second one on the global client — with a

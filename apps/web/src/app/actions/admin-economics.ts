@@ -6,7 +6,12 @@ import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/admin";
 import { writeOverride } from "@/lib/audit";
 import { getPreferredLocale } from "@/lib/i18n";
-import { INTEGRATION_CATEGORIES, USAGE_METRICS, pricingModelSchema } from "@spiralclass/shared";
+import {
+  usesEnglishCopy,
+  INTEGRATION_CATEGORIES,
+  USAGE_METRICS,
+  pricingModelSchema,
+} from "@spiralclass/shared";
 import { revalidateAfterAction } from "@/lib/revalidate";
 
 // Financial Intelligence estimate layer (D-86, S4) — the write side of
@@ -113,7 +118,7 @@ export async function createIntegrationAction(
 ): Promise<AdminEconomicsActionState> {
   const actor = await requireAdmin("finance");
   const locale = await getPreferredLocale();
-  const en = locale === "en";
+  const en = usesEnglishCopy(locale);
   const parsed = baseIntegrationSchema.safeParse(readIntegrationFields(formData));
   if (!parsed.success) {
     return { error: parsed.error.issues[0]?.message ?? (en ? "Invalid data" : "Datos inválidos") };
@@ -167,7 +172,7 @@ export async function updateIntegrationAction(
 ): Promise<AdminEconomicsActionState> {
   const actor = await requireAdmin("finance");
   const locale = await getPreferredLocale();
-  const en = locale === "en";
+  const en = usesEnglishCopy(locale);
   const parsed = updateIntegrationSchema.safeParse({
     id: formData.get("id"),
     ...readIntegrationFields(formData),
@@ -232,7 +237,7 @@ export async function toggleIntegrationActiveAction(
 ): Promise<AdminEconomicsActionState> {
   const actor = await requireAdmin("finance");
   const locale = await getPreferredLocale();
-  const en = locale === "en";
+  const en = usesEnglishCopy(locale);
   const parsed = toggleIntegrationActiveSchema.safeParse({
     id: formData.get("id"),
     active: formData.get("active"),
@@ -269,7 +274,7 @@ export async function deleteIntegrationAction(
 ): Promise<AdminEconomicsActionState> {
   const actor = await requireAdmin("finance");
   const locale = await getPreferredLocale();
-  const en = locale === "en";
+  const en = usesEnglishCopy(locale);
   const parsed = deleteIntegrationSchema.safeParse({ id: formData.get("id") });
   if (!parsed.success) return { error: en ? "Invalid data" : "Datos inválidos" };
 
@@ -306,7 +311,7 @@ export async function upsertUsageInputAction(
 ): Promise<AdminEconomicsActionState> {
   const actor = await requireAdmin("finance");
   const locale = await getPreferredLocale();
-  const en = locale === "en";
+  const en = usesEnglishCopy(locale);
   const parsed = usageInputSchema.safeParse({
     metric: formData.get("metric"),
     periodMonth: formData.get("periodMonth"),
@@ -359,7 +364,7 @@ export async function deleteUsageInputAction(
 ): Promise<AdminEconomicsActionState> {
   const actor = await requireAdmin("finance");
   const locale = await getPreferredLocale();
-  const en = locale === "en";
+  const en = usesEnglishCopy(locale);
   const parsed = deleteUsageInputSchema.safeParse({ id: formData.get("id") });
   if (!parsed.success) return { error: en ? "Invalid data" : "Datos inválidos" };
 
@@ -400,7 +405,7 @@ export async function updateAssumptionsAction(
 ): Promise<AdminEconomicsActionState> {
   const actor = await requireAdmin("finance");
   const locale = await getPreferredLocale();
-  const en = locale === "en";
+  const en = usesEnglishCopy(locale);
   const parsed = assumptionsSchema.safeParse({
     fxUsdToGbp: formData.get("fxUsdToGbp"),
     fxMxnToGbp: formData.get("fxMxnToGbp"),

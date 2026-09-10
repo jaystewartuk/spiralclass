@@ -28,7 +28,7 @@ describe("formatBothZones", () => {
     const out = formatBothZones(d, "America/Mexico_City", "America/New_York");
     expect(out).toMatch(/10:00/);
     expect(out).toMatch(/12:00/);
-    expect(out).toContain("(tu zona)");
+    expect(out).toContain("(your zone)");
     expect(out.split("·")).toHaveLength(2);
   });
 

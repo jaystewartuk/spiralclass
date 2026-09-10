@@ -16,6 +16,7 @@ import { nudgeFromStudent } from "@/app/actions/call-nudge";
 import { Button } from "@/components/ui/button";
 import { CallSessionBootstrap } from "@/components/video/call-session-bootstrap";
 import { InstructionsOverlay } from "./instructions-overlay";
+import { usesEnglishCopy } from "@spiralclass/shared";
 
 // Student's in-class video call (live-notes-panel.md step 3, D-16). Mirrors the
 // teacher side: gated only by the *teacher's* Pro plan (a student of a Free
@@ -34,7 +35,7 @@ export default async function StudentCallPage({
   const student = await requireStudent();
   const t = await getT();
   const locale = await getPreferredLocale();
-  const en = locale === "en";
+  const en = usesEnglishCopy(locale);
   const backHref = `/my-classes/${bookingId}`;
 
   const booking = await prisma.booking.findFirst({

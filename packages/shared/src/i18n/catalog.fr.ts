@@ -6802,4 +6802,30 @@ export const fr = {
   "web.getStudents.postNoKinds":
     "Il n'y a encore rien que nous puissions publier ici honnêtement. Vérifiez le réglage de promotion de cette communauté, ou ajoutez une formule, une photo ou un témoignage à votre page.",
   "web.getStudents.copyPostAndLink": "Copier la publication",
+
+  // Les pages HTML autonomes servies par les routeurs /r/* et le gestionnaire
+  // de désabonnement. Elles s'affichent hors du shell de l'application — sans
+  // layout ni LocaleProvider — donc elles construisent leur propre balisage et
+  // résolvent la langue depuis la requête.
+  "web.expiredLink.title": "Lien expiré",
+  "web.expiredLink.heading": "Ce lien ne fonctionne plus",
+  "web.expiredLink.signIn": "Demandez à votre professeur un nouveau lien de connexion.",
+  "web.expiredLink.reschedule": "Le lien pour reprogrammer votre cours n'est plus disponible.",
+  "web.expiredLink.rescheduleAction": "Aller à vos cours",
+  "web.unsubscribe.confirm.title": "Se désabonner",
+  "web.unsubscribe.confirm.heading": "Arrêter ces e-mails ?",
+  "web.unsubscribe.confirm.body":
+    "Confirmez que vous ne souhaitez plus recevoir d'e-mails de SpiralClass.",
+  "web.unsubscribe.confirm.push":
+    "Vous pourriez continuer à recevoir les avis importants par notification push dans l'application.",
+  "web.unsubscribe.confirm.cta": "Oui, arrêter mes e-mails",
+  "web.unsubscribe.done.title": "Désabonnement effectué",
+  "web.unsubscribe.done.heading": "C'est fait",
+  "web.unsubscribe.done.body": "Nous ne vous enverrons plus d'e-mails.",
+  "web.unsubscribe.done.push":
+    "Vous pourriez continuer à recevoir les avis importants par notification push dans l'application ; vous pouvez les régler depuis l'application.",
+  "web.unsubscribe.error.title": "Lien invalide",
+  "web.unsubscribe.error.heading": "Lien invalide",
+  "web.unsubscribe.error.body": "Nous n'avons pas pu traiter votre demande ({reason}).",
+  "web.unsubscribe.error.help": "Si vous avez besoin d'aide, contactez votre professeur.",
 } as const;

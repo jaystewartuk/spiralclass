@@ -1,6 +1,6 @@
 import { execFileSync } from "node:child_process";
 import { existsSync, readFileSync } from "node:fs";
-import { resolve } from "node:path";
+import { relative, resolve, sep } from "node:path";
 
 import { describe, expect, it } from "vitest";
 
@@ -52,11 +52,40 @@ const suppressions = (): Suppressions =>
 describe("eslint bulk suppressions", () => {
   it("is committed, so the runner and the laptop suppress the same set", () => {
     expect(existsSync(suppressionsPath)).toBe(true);
-    const tracked = execFileSync("git", ["ls-files", "--", "eslint-suppressions.json"], {
-      cwd: webRoot,
-      encoding: "utf8",
-    }).trim();
-    expect(tracked).toBe("eslint-suppressions.json");
+
+    // This test runs inside `git push`, which is not the same git context as
+    // a terminal, and the pre-push hook is the run that matters — it is what
+    // posts the local-gate status.
+    //
+    // git exports GIT_DIR to its hooks and leaves GIT_WORK_TREE unset. A git
+    // command inheriting that pair skips repository discovery and treats the
+    // CURRENT DIRECTORY as the work-tree root — so from apps/web,
+    // `rev-parse --show-toplevel` answers apps/web, and a lookup for
+    // `eslint-suppressions.json` at the root of HEAD's tree matches nothing
+    // and reports a committed file as missing. Quietly: an empty result is not
+    // an error. It passed everywhere else, CI included, because nothing else
+    // sets the variable.
+    //
+    // Dropping the inherited pair puts discovery back, so cwd means what it
+    // means in a terminal. Any check that shells out to git from inside a hook
+    // needs this.
+    const { GIT_DIR: _dir, GIT_WORK_TREE: _tree, GIT_INDEX_FILE: _index, ...env } = process.env;
+    const git = (...args: string[]) =>
+      execFileSync("git", args, { cwd: webRoot, encoding: "utf8", env }).trim();
+
+    const repoRoot = git("rev-parse", "--show-toplevel");
+    const fromRoot = relative(repoRoot, suppressionsPath).split(sep).join("/");
+
+    // `--full-tree`, because `ls-tree` anchors its pathspec at the CURRENT
+    // DIRECTORY otherwise — from apps/web it would look for
+    // apps/web/apps/web/… and match nothing, in the same silent way.
+    expect(
+      git("ls-tree", "--full-tree", "--name-only", "HEAD", "--", fromRoot),
+      `eslint-suppressions.json is not in HEAD.\n` +
+        `  looked for: ${fromRoot}\n` +
+        `  repo root:  ${repoRoot}\n` +
+        `  cwd:        ${webRoot}`,
+    ).toBe(fromRoot);
   });
 
   it("suppresses only the React Compiler rules the Next 16 bump turned on", () => {

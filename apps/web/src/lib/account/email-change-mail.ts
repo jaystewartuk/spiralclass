@@ -4,6 +4,7 @@ import { renderBrandedEmailHtml } from "@/lib/email/html-shell";
 import { SUPPORT_EMAIL } from "@/lib/support";
 import { logger } from "@/lib/logger";
 import type { AppLocale } from "@/lib/i18n";
+import { usesEnglishCopy } from "@spiralclass/shared";
 
 // Shared transactional mail for the verified email-change flow. The
 // confirmation CODE to the new address is sent by better-auth's own
@@ -27,7 +28,7 @@ export async function sendEmailChangedNotice(input: {
   // callers/tests are unaffected.
   disconnectedGoogle?: boolean;
 }): Promise<void> {
-  const en = input.locale === "en";
+  const en = usesEnglishCopy(input.locale);
   const heading = en ? "Your sign-in email changed" : "Tu correo de acceso cambió";
   const subject = en
     ? "Your SpiralClass sign-in email was changed"

@@ -12,6 +12,7 @@ import { normalizeE164 } from "@/lib/phone";
 import { gateAddStudent, upgradeNudge } from "@/lib/subscriptions/enforce";
 import { defaultNewStudentNotificationPrefs } from "@/lib/notifications/preferences";
 import { revalidateAfterAction } from "@/lib/revalidate";
+import { usesEnglishCopy } from "@spiralclass/shared";
 
 // Silent onboarding (gradual go-live). A teacher can stage a student on her
 // roster by hand — replacing the paper notebook — before that student knows
@@ -32,7 +33,7 @@ export async function createStudentAction(
   formData: FormData,
 ): Promise<RosterActionState> {
   const locale = await getPreferredLocale();
-  const en = locale === "en";
+  const en = usesEnglishCopy(locale);
 
   const parsed = teacherCreateStudentSchema(locale).safeParse({
     name: formData.get("name"),
@@ -103,9 +104,13 @@ export async function createStudentAction(
       data: {
         name,
         email: email ?? null,
-        // Locale matches the funnel's find-or-create default; the teacher can
-        // change it later from the contact card if needed.
-        locale: "es-MX",
+        // No explicit locale — the column default applies, as it does on the
+        // other two paths that mint a student (lib/students/find-or-create.ts,
+        // lib/invitations/manage.ts). This value is not a display default the
+        // next render can correct: it is stamped on the row and addresses
+        // every lifecycle email that student ever receives, so guessing it
+        // here is worse than letting the column answer. The teacher can set it
+        // from the contact card.
         phoneE164,
         notificationPrefs: defaultNewStudentNotificationPrefs(),
         teacherStudents: {
@@ -156,7 +161,7 @@ export async function setStudentLiveAction(
   formData: FormData,
 ): Promise<RosterActionState> {
   const locale = await getPreferredLocale();
-  const en = locale === "en";
+  const en = usesEnglishCopy(locale);
   const parsed = goLiveSchema.safeParse({ studentId: formData.get("studentId") });
   if (!parsed.success) {
     return { error: en ? "Invalid data." : "Datos inválidos." };
