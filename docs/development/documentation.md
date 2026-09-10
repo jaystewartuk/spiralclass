@@ -22,14 +22,14 @@ runbook, decision, or guide. Link to the relevant feature document instead;
 describe only the technical implementation or operational concern that the
 reader needs.
 
-## Documents describe the present; the board holds the future
+## Documents describe the present; the issues hold the future
 
 Every document in this tree states what is true now. Nothing here is a queue.
 
 This was not always so: until 2026-08-08 the repository also carried
 launch-blocker lists, a post-launch backlog, dated audits ending in findings,
 a `docs/development/plans/` roadmap, and a 72-file archive. They were deleted
-outright, not migrated. A second copy of a commitment rots while the board
+outright, not migrated. A second copy of a commitment rots while the queue
 moves on — the post-launch backlog was last refreshed 2026-06-07 and by August
 cited 11 documentation paths that had not existed since the 2026-07-24 reorg,
 plus a Supabase upgrade item that D-89 had made meaningless.
@@ -42,7 +42,7 @@ So:
   planning board's own rule — an undated idea is an issue, never a board row.
 - **Do not add** a `TODO.md`, `BACKLOG.md`, `LAUNCH_BLOCKERS.md`, a `plans/`
   directory, or an audit whose last section is a list of things to fix. If an
-  investigation produces work, the finding goes on the board and the document
+  investigation produces work, the finding becomes an issue and the document
   keeps only what it established.
 - **Do not archive — delete.** Git history is the archive, and unlike a
   directory it cannot be mistaken for current policy.
