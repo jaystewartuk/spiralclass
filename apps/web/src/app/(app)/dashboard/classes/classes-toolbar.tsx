@@ -47,7 +47,7 @@ export function ClassesToolbar({
           translation or a raised text size makes them not. */}
       <nav
         aria-label={t("web.dashboard.classes.list.viewsLabel")}
-        className="bg-muted -mx-1 flex gap-1 self-start overflow-x-auto rounded-md p-1"
+        className="-mx-1 flex gap-1 self-start overflow-x-auto rounded-md bg-muted p-1"
       >
         {CLASSES_SCOPES.map((value) => {
           const active = value === scope;
@@ -82,7 +82,7 @@ export function ClassesToolbar({
         {scope !== "upcoming" && <input type="hidden" name="show" value={scope} />}
         <div className="relative min-w-0 flex-1 lg:w-56 lg:flex-none">
           <Search
-            className="text-muted-foreground pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2"
+            className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground"
             aria-hidden
           />
           <Input

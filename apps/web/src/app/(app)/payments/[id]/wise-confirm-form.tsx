@@ -28,7 +28,7 @@ export function WiseConfirmForm({
     <form className="space-y-3 rounded-md border p-4" onSubmit={() => setPending(true)}>
       <input type="hidden" name="paymentId" value={paymentId} />
       <h2 className="font-semibold">{t("web.payments.transferConfirm.title")}</h2>
-      <p className="text-muted-foreground text-sm">
+      <p className="text-sm text-muted-foreground">
         {reference ? (
           <>
             {t("web.payments.transferConfirm.bodyWithReferencePrefix")}{" "}

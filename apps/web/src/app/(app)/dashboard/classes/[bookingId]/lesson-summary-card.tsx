@@ -35,13 +35,13 @@ export function LessonSummaryCard({
           <>
             {/* Notes can hold newlines; preserve them. */}
             <p className="text-sm whitespace-pre-wrap">{summary.body}</p>
-            <p className="text-muted-foreground text-xs">
+            <p className="text-xs text-muted-foreground">
               {t("web.dashboard.classes.summary.generated")}
               {summary.generatedAt}
             </p>
           </>
         ) : (
-          <p className="text-muted-foreground text-sm">
+          <p className="text-sm text-muted-foreground">
             {hasNotes
               ? t("web.dashboard.classes.summary.none")
               : t("web.dashboard.classes.summary.needsNotes")}
@@ -50,7 +50,7 @@ export function LessonSummaryCard({
 
         <form action={formAction}>
           <input type="hidden" name="bookingId" value={bookingId} />
-          {state?.error && <p className="text-destructive mb-2 text-sm">{state.error}</p>}
+          {state?.error && <p className="mb-2 text-sm text-destructive">{state.error}</p>}
           <Button type="submit" size="sm" variant="secondary" disabled={pending || !hasNotes}>
             {pending
               ? t("web.dashboard.classes.summary.generating")

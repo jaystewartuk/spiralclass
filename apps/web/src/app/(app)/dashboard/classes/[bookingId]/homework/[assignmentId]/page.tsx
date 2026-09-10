@@ -49,7 +49,7 @@ export default async function HomeworkReviewPage({
           )}
         </CardHeader>
         {assignment.dueAt && (
-          <CardContent className="text-muted-foreground text-sm">
+          <CardContent className="text-sm text-muted-foreground">
             {t("homework.due", {
               date: formatZonedDateTime(assignment.dueAt, teacher.timezone, locale),
             })}
@@ -58,7 +58,7 @@ export default async function HomeworkReviewPage({
       </Card>
 
       {attempts.length === 0 ? (
-        <p className="text-muted-foreground text-sm">{t("homework.teacher.review.noAttempts")}</p>
+        <p className="text-sm text-muted-foreground">{t("homework.teacher.review.noAttempts")}</p>
       ) : (
         <div className="space-y-4">
           {attempts.map((attempt, i) => (

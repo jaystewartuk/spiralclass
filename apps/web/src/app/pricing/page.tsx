@@ -73,7 +73,7 @@ export default async function PricingPage() {
       <JsonLd data={pricingJsonLd(seoBaseUrl(), offerPlans, PLATFORM_MONEY_CURRENCY)} />
       <header className="text-center">
         <Heading level={1}>{t("web.pricing.headline")}</Heading>
-        <p className="text-muted-foreground mt-2">{t("web.pricing.sub", { days: TRIAL_DAYS })}</p>
+        <p className="mt-2 text-muted-foreground">{t("web.pricing.sub", { days: TRIAL_DAYS })}</p>
       </header>
 
       <div className="mt-10 grid gap-6 lg:grid-cols-3">
@@ -81,12 +81,12 @@ export default async function PricingPage() {
         <Card>
           <CardHeader>
             <CardTitle as="h2">{planLabel("free", locale)}</CardTitle>
-            <CardDescription className="text-foreground text-2xl font-semibold">
+            <CardDescription className="text-2xl font-semibold text-foreground">
               {planPriceLabel("free", locale)}
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <ul className="text-muted-foreground list-inside list-disc space-y-1 text-sm">
+            <ul className="list-inside list-disc space-y-1 text-sm text-muted-foreground">
               {freePerks.map((p) => (
                 <li key={p}>{p}</li>
               ))}
@@ -107,19 +107,19 @@ export default async function PricingPage() {
                 </Badge>
               )}
             </CardTitle>
-            <CardDescription className="text-foreground text-2xl font-semibold">
+            <CardDescription className="text-2xl font-semibold text-foreground">
               {planPriceLabel("monthly", locale)}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
             <p className="text-sm font-medium">{t("web.pricing.everythingInFreePlus")}</p>
-            <ul className="text-muted-foreground list-inside list-disc space-y-1 text-sm">
+            <ul className="list-inside list-disc space-y-1 text-sm text-muted-foreground">
               {proPerks.map((p) => (
                 <li key={p}>{p}</li>
               ))}
             </ul>
             {cohort.isOpen && (
-              <p className="text-warning text-xs">
+              <p className="text-xs text-warning">
                 {t("web.pricing.foundingLockedNote", {
                   price: planPriceLabel("founding", locale),
                   cap: cohort.cap,
@@ -133,12 +133,12 @@ export default async function PricingPage() {
         <Card>
           <CardHeader>
             <CardTitle as="h2">{planLabel("annual", locale)}</CardTitle>
-            <CardDescription className="text-foreground text-2xl font-semibold">
+            <CardDescription className="text-2xl font-semibold text-foreground">
               {planPriceLabel("annual", locale)}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
-            <p className="text-muted-foreground text-sm">{t("web.pricing.annualNote")}</p>
+            <p className="text-sm text-muted-foreground">{t("web.pricing.annualNote")}</p>
           </CardContent>
         </Card>
       </div>
@@ -155,7 +155,7 @@ export default async function PricingPage() {
         <Heading level={2} className="text-center">
           {t("web.pricing.fees.title")}
         </Heading>
-        <p className="text-muted-foreground mt-2 text-center">{t("web.pricing.fees.intro")}</p>
+        <p className="mt-2 text-center text-muted-foreground">{t("web.pricing.fees.intro")}</p>
         <div className="mt-6 grid gap-4 lg:grid-cols-3">
           <Card>
             <CardHeader>
@@ -164,7 +164,7 @@ export default async function PricingPage() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-muted-foreground text-sm leading-relaxed">
+              <p className="text-sm leading-relaxed text-muted-foreground">
                 {t("web.pricing.fees.platformBody")}
               </p>
             </CardContent>
@@ -176,11 +176,11 @@ export default async function PricingPage() {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-2">
-              <p className="text-muted-foreground text-sm leading-relaxed">
+              <p className="text-sm leading-relaxed text-muted-foreground">
                 {t("web.pricing.fees.processorBody")}
               </p>
               <a
-                className="text-primary text-sm underline underline-offset-4"
+                className="text-sm text-primary underline underline-offset-4"
                 href={STRIPE_PRICING_URL}
                 target="_blank"
                 rel="noopener noreferrer"
@@ -196,7 +196,7 @@ export default async function PricingPage() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-muted-foreground text-sm leading-relaxed">
+              <p className="text-sm leading-relaxed text-muted-foreground">
                 {t("web.pricing.fees.transferBody")}
               </p>
             </CardContent>

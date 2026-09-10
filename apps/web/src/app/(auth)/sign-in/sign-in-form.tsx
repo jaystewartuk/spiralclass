@@ -113,14 +113,14 @@ export function SignInForm({
       </CardHeader>
       {urlErrorMessage && (
         <CardContent className="pt-0">
-          <p role="alert" aria-live="polite" className="text-destructive text-sm">
+          <p role="alert" aria-live="polite" className="text-sm text-destructive">
             {urlErrorMessage}
           </p>
         </CardContent>
       )}
       {!urlErrorMessage && urlNoticeMessage && (
         <CardContent className="pt-0">
-          <p role="status" aria-live="polite" className="text-muted-foreground text-sm">
+          <p role="status" aria-live="polite" className="text-sm text-muted-foreground">
             {urlNoticeMessage}
           </p>
         </CardContent>
@@ -171,7 +171,7 @@ export function SignInForm({
               id="sign-in-error"
               role="alert"
               aria-live="polite"
-              className="text-destructive text-sm"
+              className="text-sm text-destructive"
             >
               {state.error}
             </p>
@@ -182,13 +182,13 @@ export function SignInForm({
             {pending ? t("web.signIn.sending") : t("web.signIn.sendCode")}
           </Button>
           {googleEnabled && <GoogleSignInButton next={next || undefined} />}
-          <p className="text-muted-foreground text-sm">
+          <p className="text-sm text-muted-foreground">
             {t("web.signIn.noAccount")}{" "}
             <Link href="/sign-up" className="underline">
               {t("web.signIn.createOne")}
             </Link>
           </p>
-          <p className="text-muted-foreground text-xs">
+          <p className="text-xs text-muted-foreground">
             {t("web.signIn.terms")}{" "}
             <Link href="/privacy-notice" className="underline">
               {t("web.signUp.privacyNotice")}

@@ -166,7 +166,7 @@ export default async function LeadsPage({
           description={t("web.dashboard.leads.noneYet")}
           action={
             <div className="flex w-full max-w-prose flex-col items-center gap-3">
-              <div className="bg-muted/40 w-full rounded-md border px-3 py-2 font-mono text-xs break-all">
+              <div className="w-full rounded-md border bg-muted/40 px-3 py-2 font-mono text-xs break-all">
                 {bookingUrl}
               </div>
               <div className="flex flex-wrap items-center justify-center gap-2">
@@ -217,7 +217,7 @@ export default async function LeadsPage({
           )}
 
           {hasMore && (
-            <p className="text-muted-foreground text-sm">
+            <p className="text-sm text-muted-foreground">
               {t("web.dashboard.leads.showingRecent", { count: LIST_LIMIT })}
             </p>
           )}
@@ -253,7 +253,7 @@ export default async function LeadsPage({
                   measurement rather than a coin flip — see
                   CONVERSION_RATE_MIN_LEADS. */}
               {rate !== null && (
-                <p className="text-muted-foreground border-t pt-3 text-sm">
+                <p className="border-t pt-3 text-sm text-muted-foreground">
                   {t("web.dashboard.leads.funnelRate", { percent: rate })}
                 </p>
               )}
@@ -268,7 +268,7 @@ export default async function LeadsPage({
               <CardDescription>{t("web.dashboard.leads.shareBody")}</CardDescription>
             </CardHeader>
             <CardContent className="space-y-3">
-              <div className="bg-muted/40 rounded-md border px-3 py-2 font-mono text-xs break-all">
+              <div className="rounded-md border bg-muted/40 px-3 py-2 font-mono text-xs break-all">
                 {bookingUrl}
               </div>
               <div className="flex flex-wrap items-center gap-2">
@@ -299,12 +299,12 @@ function FunnelRow({
 }) {
   return (
     <div className="flex items-baseline justify-between gap-3">
-      <dt className="text-muted-foreground text-sm">
-        <Link href={href} className="hover:text-foreground underline-offset-4 hover:underline">
+      <dt className="text-sm text-muted-foreground">
+        <Link href={href} className="underline-offset-4 hover:text-foreground hover:underline">
           {label}
         </Link>
       </dt>
-      <dd className={tone === "attention" ? "text-primary font-semibold" : "font-semibold"}>
+      <dd className={tone === "attention" ? "font-semibold text-primary" : "font-semibold"}>
         {value}
       </dd>
     </div>

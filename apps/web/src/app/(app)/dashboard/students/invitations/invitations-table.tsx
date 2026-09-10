@@ -53,8 +53,8 @@ export function InvitationsTable({ rows }: { rows: InvitationDashboardRow[] }) {
             aria-pressed={filter === f}
             className={
               filter === f
-                ? "bg-primary text-primary-foreground rounded-full px-3 py-1 text-xs font-medium"
-                : "bg-muted text-muted-foreground hover:bg-muted/70 rounded-full px-3 py-1 text-xs font-medium"
+                ? "rounded-full bg-primary px-3 py-1 text-xs font-medium text-primary-foreground"
+                : "rounded-full bg-muted px-3 py-1 text-xs font-medium text-muted-foreground hover:bg-muted/70"
             }
           >
             {f === "all"
@@ -72,7 +72,7 @@ export function InvitationsTable({ rows }: { rows: InvitationDashboardRow[] }) {
           >
             <div className="min-w-0">
               <div className="truncate font-medium">{row.studentName}</div>
-              <div className="text-muted-foreground truncate text-xs">
+              <div className="truncate text-xs text-muted-foreground">
                 {row.email ?? t("web.dashboard.invitations.noEmail")}
               </div>
             </div>

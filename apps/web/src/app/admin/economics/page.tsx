@@ -63,7 +63,7 @@ export default async function AdminEconomicsPage() {
     <div className="space-y-6">
       <header>
         <PageHeader title={t("web.admin.economics.title")} />
-        <p className="text-muted-foreground text-sm">{t("web.admin.economics.intro")}</p>
+        <p className="text-sm text-muted-foreground">{t("web.admin.economics.intro")}</p>
       </header>
 
       <Alert variant="warning">

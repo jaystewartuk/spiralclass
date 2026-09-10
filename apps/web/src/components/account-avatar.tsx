@@ -65,7 +65,7 @@ export function AccountAvatar({
     <span
       aria-hidden
       className={cn(
-        "bg-secondary text-secondary-foreground inline-flex shrink-0 items-center justify-center rounded-full font-medium select-none",
+        "inline-flex shrink-0 items-center justify-center rounded-full bg-secondary font-medium text-secondary-foreground select-none",
         box,
         text,
         className,

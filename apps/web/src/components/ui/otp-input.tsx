@@ -127,7 +127,7 @@ const OtpInput = React.forwardRef<HTMLInputElement, OtpInputProps>(
             {groups.map((group, gi) => (
               <React.Fragment key={gi}>
                 {gi > 0 && (
-                  <span aria-hidden="true" className="text-muted-foreground mx-0.5">
+                  <span aria-hidden="true" className="mx-0.5 text-muted-foreground">
                     –
                   </span>
                 )}
@@ -167,8 +167,8 @@ function OtpSlot({ index, invalid }: { index: number; invalid?: boolean }) {
   return (
     <div
       className={cn(
-        "border-input bg-background ring-offset-background relative flex h-14 w-12 items-center justify-center rounded-lg border text-xl font-medium tabular-nums lg:h-12 lg:w-10 lg:text-lg",
-        isActive && "ring-ring z-10 ring-2 ring-offset-2",
+        "relative flex h-14 w-12 items-center justify-center rounded-lg border border-input bg-background text-xl font-medium tabular-nums ring-offset-background lg:h-12 lg:w-10 lg:text-lg",
+        isActive && "z-10 ring-2 ring-ring ring-offset-2",
         invalid && "border-destructive",
         invalid && isActive && "ring-destructive",
       )}
@@ -176,7 +176,7 @@ function OtpSlot({ index, invalid }: { index: number; invalid?: boolean }) {
       {char}
       {hasFakeCaret && (
         <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-          <div className="animate-caret-blink bg-foreground h-4 w-px duration-1000" />
+          <div className="animate-caret-blink h-4 w-px bg-foreground duration-1000" />
         </div>
       )}
     </div>

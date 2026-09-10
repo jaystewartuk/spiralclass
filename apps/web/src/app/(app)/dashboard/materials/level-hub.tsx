@@ -36,7 +36,7 @@ export async function LevelHub({
     <div className="space-y-4">
       <div>
         <h2 className="text-lg font-medium">{t("web.materials.hubTitle")}</h2>
-        <p className="text-muted-foreground text-sm">{t("web.materials.hubDescription")}</p>
+        <p className="text-sm text-muted-foreground">{t("web.materials.hubDescription")}</p>
       </div>
 
       {/* Four across on a wide screen rather than three: the six CEFR levels
@@ -49,9 +49,9 @@ export async function LevelHub({
             <Link
               href={materialsLevelHref(level.id)}
               aria-label={t("web.materials.openLevel", { level: level.label })}
-              className="group bg-card hover:border-foreground/30 hover:bg-muted/50 focus-visible:ring-ring flex h-full items-center gap-3 rounded-lg border p-4 shadow-xs transition-colors focus-visible:ring-3 focus-visible:outline-hidden"
+              className="group flex h-full items-center gap-3 rounded-lg border bg-card p-4 shadow-xs transition-colors hover:border-foreground/30 hover:bg-muted/50 focus-visible:ring-3 focus-visible:ring-ring focus-visible:outline-hidden"
             >
-              <span className="bg-info-bg text-info flex size-9 shrink-0 items-center justify-center rounded-md">
+              <span className="flex size-9 shrink-0 items-center justify-center rounded-md bg-info-bg text-info">
                 <Layers className="size-4" aria-hidden />
               </span>
               <span className="min-w-0 flex-1 text-base font-medium">{level.label}</span>
@@ -59,7 +59,7 @@ export async function LevelHub({
                   already says "Open level A2". This only tells a sighted
                   teacher that the card goes somewhere. */}
               <ArrowRight
-                className="text-muted-foreground/50 size-4 shrink-0 transition-transform group-hover:translate-x-0.5"
+                className="size-4 shrink-0 text-muted-foreground/50 transition-transform group-hover:translate-x-0.5"
                 aria-hidden
               />
             </Link>
@@ -70,17 +70,17 @@ export async function LevelHub({
       {showAllLevels && (
         <Link
           href={materialsAllLevelsHref()}
-          className="group hover:border-foreground/30 hover:bg-muted/50 focus-visible:ring-ring flex items-center gap-3 rounded-lg border border-dashed p-4 transition-colors focus-visible:ring-3 focus-visible:outline-hidden"
+          className="group flex items-center gap-3 rounded-lg border border-dashed p-4 transition-colors hover:border-foreground/30 hover:bg-muted/50 focus-visible:ring-3 focus-visible:ring-ring focus-visible:outline-hidden"
         >
-          <Library className="text-muted-foreground size-5 shrink-0" aria-hidden />
+          <Library className="size-5 shrink-0 text-muted-foreground" aria-hidden />
           <span className="min-w-0 flex-1">
             <span className="block text-sm font-medium">{t("web.materials.allLevels")}</span>
-            <span className="text-muted-foreground block text-xs">
+            <span className="block text-xs text-muted-foreground">
               {t("web.materials.allLevelsHint")}
             </span>
           </span>
           <ArrowRight
-            className="text-muted-foreground/50 size-4 shrink-0 transition-transform group-hover:translate-x-0.5"
+            className="size-4 shrink-0 text-muted-foreground/50 transition-transform group-hover:translate-x-0.5"
             aria-hidden
           />
         </Link>

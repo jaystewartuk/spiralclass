@@ -99,7 +99,7 @@ export function SectionNav({
   return (
     <div
       className={cn(
-        "border-border/60 bg-background/95 supports-[backdrop-filter]:bg-background/80 sticky top-14 z-30 -mx-4 border-b px-4 py-2 backdrop-blur lg:mx-0 lg:rounded-md lg:border",
+        "sticky top-14 z-30 -mx-4 border-b border-border/60 bg-background/95 px-4 py-2 backdrop-blur supports-[backdrop-filter]:bg-background/80 lg:mx-0 lg:rounded-md lg:border",
         className,
       )}
     >
@@ -117,9 +117,9 @@ export function SectionNav({
             // by a fill and a weight, neither of which reaches a screen reader.
             aria-current={activeId === s.id ? "true" : undefined}
             className={cn(
-              "focus-visible:ring-ring flex shrink-0 items-center rounded-full px-3 py-1.5 text-sm whitespace-nowrap transition-colors focus-visible:ring-3 focus-visible:outline-hidden",
+              "flex shrink-0 items-center rounded-full px-3 py-1.5 text-sm whitespace-nowrap transition-colors focus-visible:ring-3 focus-visible:ring-ring focus-visible:outline-hidden",
               activeId === s.id
-                ? "bg-muted text-foreground font-medium"
+                ? "bg-muted font-medium text-foreground"
                 : "text-muted-foreground hover:bg-muted/60 hover:text-foreground",
             )}
           >

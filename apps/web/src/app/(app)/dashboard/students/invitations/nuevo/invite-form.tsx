@@ -108,8 +108,8 @@ export function InviteForm({
             aria-pressed={tab === tk}
             className={
               tab === tk
-                ? "bg-primary text-primary-foreground rounded-md px-3 py-1.5 text-sm font-medium"
-                : "bg-muted text-muted-foreground hover:bg-muted/70 rounded-md px-3 py-1.5 text-sm font-medium"
+                ? "rounded-md bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground"
+                : "rounded-md bg-muted px-3 py-1.5 text-sm font-medium text-muted-foreground hover:bg-muted/70"
             }
           >
             {t(
@@ -152,7 +152,7 @@ export function InviteForm({
             onChange={(e) => setList(e.target.value)}
             placeholder={t("web.dashboard.invitations.form.pastePlaceholder")}
           />
-          <p className="text-muted-foreground text-xs">
+          <p className="text-xs text-muted-foreground">
             {t("web.dashboard.invitations.form.pasteHint")}
           </p>
         </div>
@@ -181,7 +181,7 @@ function RosterPicker({
   const t = useT();
   if (eligible.length === 0) {
     return (
-      <p className="text-muted-foreground text-sm">
+      <p className="text-sm text-muted-foreground">
         {t("web.dashboard.invitations.form.rosterEmpty")}
       </p>
     );
@@ -194,13 +194,13 @@ function RosterPicker({
   };
   return (
     <div className="space-y-2">
-      <p className="text-muted-foreground text-xs">
+      <p className="text-xs text-muted-foreground">
         {t("web.dashboard.invitations.form.rosterHint")}
       </p>
       <ul className="max-h-72 divide-y overflow-y-auto rounded-md border">
         {eligible.map((s) => (
           <li key={s.id}>
-            <label className="hover:bg-muted/40 flex cursor-pointer items-center gap-3 px-3 py-2">
+            <label className="flex cursor-pointer items-center gap-3 px-3 py-2 hover:bg-muted/40">
               <input
                 type="checkbox"
                 checked={selected.has(s.id)}
@@ -209,7 +209,7 @@ function RosterPicker({
               />
               <span className="min-w-0">
                 <span className="block truncate text-sm font-medium">{s.name}</span>
-                <span className="text-muted-foreground block truncate text-xs">{s.email}</span>
+                <span className="block truncate text-xs text-muted-foreground">{s.email}</span>
               </span>
             </label>
           </li>
@@ -244,20 +244,20 @@ function ConfirmScreen({
         <Heading level={3} as="h2">
           {t("web.dashboard.invitations.form.confirmTitle")}
         </Heading>
-        <p className="text-muted-foreground text-sm">
+        <p className="text-sm text-muted-foreground">
           {t("web.dashboard.invitations.form.willSend", { count: String(preview.sendableCount) })}
         </p>
       </div>
 
       {preview.invalidCount > 0 && (
-        <p className="text-muted-foreground text-sm">
+        <p className="text-sm text-muted-foreground">
           {t("web.dashboard.invitations.form.invalidCount", {
             count: String(preview.invalidCount),
           })}
         </p>
       )}
       {preview.truncated && (
-        <p className="text-muted-foreground text-sm">
+        <p className="text-sm text-muted-foreground">
           {t("web.dashboard.invitations.form.truncated")}
         </p>
       )}
@@ -268,7 +268,7 @@ function ConfirmScreen({
             <span className="min-w-0">
               <span className="block truncate text-sm font-medium">{r.name ?? r.email}</span>
               {r.name && (
-                <span className="text-muted-foreground block truncate text-xs">{r.email}</span>
+                <span className="block truncate text-xs text-muted-foreground">{r.email}</span>
               )}
             </span>
             <Badge variant={dispVariant[r.disposition] ?? "outline"}>

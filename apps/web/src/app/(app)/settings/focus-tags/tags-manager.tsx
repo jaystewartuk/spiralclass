@@ -565,7 +565,7 @@ export function TagsManager({
                   {t("focusTags.manager.searchLabel")}
                 </Label>
                 <Search
-                  className="text-muted-foreground pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2"
+                  className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground"
                   aria-hidden
                 />
                 <Input
@@ -616,7 +616,7 @@ export function TagsManager({
           <div
             role="status"
             aria-live="polite"
-            className="text-muted-foreground flex min-h-5 flex-wrap items-center gap-x-2 gap-y-1 text-sm"
+            className="flex min-h-5 flex-wrap items-center gap-x-2 gap-y-1 text-sm text-muted-foreground"
           >
             {searching ? (
               <span>{t("focusTags.manager.searchMatches", { count: matches })}</span>
@@ -636,7 +636,7 @@ export function TagsManager({
                 {t("web.settings.bookingPage.saving")}
               </span>
             ) : everSaved ? (
-              <span className="text-success flex items-center gap-1.5">
+              <span className="flex items-center gap-1.5 text-success">
                 <span className="text-muted-foreground" aria-hidden>
                   ·
                 </span>
@@ -647,7 +647,7 @@ export function TagsManager({
           </div>
 
           {searching && visibleGroups.length > 0 && (
-            <p className="text-subtle text-sm">{t("focusTags.manager.searchReorderPaused")}</p>
+            <p className="text-sm text-subtle">{t("focusTags.manager.searchReorderPaused")}</p>
           )}
         </div>
       )}
@@ -993,10 +993,10 @@ function ReorderControls({
   const atEnd = position >= total - 1;
 
   return (
-    <div className="border-border space-y-2 border-t pt-4">
+    <div className="space-y-2 border-t border-border pt-4">
       <div className="flex flex-wrap items-baseline justify-between gap-2">
         <p className="text-sm font-semibold">{t("focusTags.manager.reorderLegend")}</p>
-        <p className="text-muted-foreground text-sm tabular-nums" aria-live="polite">
+        <p className="text-sm text-muted-foreground tabular-nums" aria-live="polite">
           {t("focusTags.manager.position", { position: position + 1, total })}
         </p>
       </div>
@@ -1083,7 +1083,7 @@ function DialogActions({
   if (confirming) {
     return (
       <DialogFooter className="flex-col gap-3 lg:flex-col">
-        <p className="text-subtle w-full max-w-prose text-sm">{deletePrompt}</p>
+        <p className="w-full max-w-prose text-sm text-subtle">{deletePrompt}</p>
         <div className="flex w-full flex-col-reverse gap-2 lg:flex-row lg:justify-end">
           <Button type="button" variant="ghost" onClick={onCancelDelete}>
             {t("common.cancel")}
@@ -1099,7 +1099,7 @@ function DialogActions({
   return (
     <DialogFooter className="lg:justify-between">
       {deletable && deleteBlockedReason ? (
-        <p className="text-subtle max-w-prose text-sm">{deleteBlockedReason}</p>
+        <p className="max-w-prose text-sm text-subtle">{deleteBlockedReason}</p>
       ) : deletable ? (
         <Button
           type="button"
@@ -1167,7 +1167,7 @@ function CategoryCard({
               {...attributes}
               {...listeners}
               aria-label={t("focusTags.manager.dragHandleAria", { name: category.label })}
-              className="text-subtle ring-offset-background hover:bg-secondary hover:text-foreground focus-visible:ring-ring desktop:block hidden shrink-0 cursor-grab touch-none rounded-md p-1 transition-colors focus-visible:ring-3 focus-visible:ring-offset-2 focus-visible:outline-hidden active:cursor-grabbing"
+              className="hidden shrink-0 cursor-grab touch-none rounded-md p-1 text-subtle ring-offset-background transition-colors hover:bg-secondary hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-hidden active:cursor-grabbing desktop:block"
             >
               <GripVertical className="size-4" aria-hidden />
             </button>
@@ -1197,7 +1197,7 @@ function CategoryCard({
 
         <CardContent className="p-4 pt-0">
           {tags.length === 0 && (
-            <p className="text-subtle mb-2 text-sm">
+            <p className="mb-2 text-sm text-subtle">
               {pending
                 ? t("focusTags.manager.categoryPending")
                 : t("focusTags.manager.emptyCategory")}
@@ -1228,7 +1228,7 @@ function CategoryCard({
                     aria-label={t("web.settings.focusTags.addTagAria", {
                       category: category.label,
                     })}
-                    className="min-h-target text-muted-foreground hover:text-foreground desktop:min-h-9 h-auto gap-1.5 rounded-full border-dashed px-3 py-1.5 font-normal lg:h-auto"
+                    className="h-auto min-h-target gap-1.5 rounded-full border-dashed px-3 py-1.5 font-normal text-muted-foreground hover:text-foreground lg:h-auto desktop:min-h-9"
                   >
                     <Plus className="size-4" aria-hidden />
                     {t("focusTags.editor.add")}
@@ -1274,7 +1274,7 @@ function TagPill({
     >
       <div
         className={cn(
-          "min-h-target border-input bg-muted desktop:min-h-9 flex items-center rounded-full border",
+          "flex min-h-target items-center rounded-full border border-input bg-muted desktop:min-h-9",
           isDragging && "shadow-brand-md",
         )}
       >
@@ -1286,7 +1286,7 @@ function TagPill({
             aria-label={t("focusTags.manager.dragHandleAria", { name: tag.label })}
             className={cn(
               half,
-              "text-subtle hover:bg-secondary hover:text-foreground desktop:flex desktop:items-center hidden cursor-grab touch-none self-stretch rounded-l-full pr-1 pl-2.5 active:cursor-grabbing",
+              "hidden cursor-grab touch-none self-stretch rounded-l-full pr-1 pl-2.5 text-subtle hover:bg-secondary hover:text-foreground active:cursor-grabbing desktop:flex desktop:items-center",
             )}
           >
             <GripVertical className="size-3.5" aria-hidden />
@@ -1297,7 +1297,7 @@ function TagPill({
           onClick={onEdit}
           className={cn(
             half,
-            "hover:bg-secondary desktop:rounded-l-none desktop:pl-1.5 self-stretch rounded-full px-3 text-sm",
+            "self-stretch rounded-full px-3 text-sm hover:bg-secondary desktop:rounded-l-none desktop:pl-1.5",
             filtering && "desktop:rounded-l-full desktop:pl-3",
           )}
         >

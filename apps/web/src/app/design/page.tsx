@@ -35,11 +35,11 @@ const SURFACES = ["background", "surface", "muted", "secondary"] as const;
 
 function Swatch({ name, hex }: { name: string; hex: string }) {
   return (
-    <div className="border-border overflow-hidden rounded-md border">
+    <div className="overflow-hidden rounded-md border border-border">
       <div className="h-14 w-full" style={{ background: hex }} />
       <div className="flex flex-col gap-0.5 p-2">
         <span className="text-sm font-bold">{name}</span>
-        <span className="text-muted-foreground font-mono text-xs">{hex}</span>
+        <span className="font-mono text-xs text-muted-foreground">{hex}</span>
       </div>
     </div>
   );
@@ -89,7 +89,7 @@ export default function DesignSystemPage() {
           {[24, 32, 48, 64, 96].map((size) => (
             <div key={size} className="flex flex-col items-center gap-2">
               <LogoMark size={size} />
-              <span className="text-muted-foreground font-mono text-xs">{size}px</span>
+              <span className="font-mono text-xs text-muted-foreground">{size}px</span>
             </div>
           ))}
         </div>
@@ -135,7 +135,7 @@ export default function DesignSystemPage() {
         <div className="overflow-x-auto">
           <table className="w-full text-left">
             <thead>
-              <tr className="text-muted-foreground text-xs font-bold">
+              <tr className="text-xs font-bold text-muted-foreground">
                 <th className="py-1">Pairing</th>
                 <th className="py-1 text-right">Ratio</th>
                 <th className="py-1 text-right">Needs</th>
@@ -159,7 +159,7 @@ export default function DesignSystemPage() {
             </tbody>
           </table>
         </div>
-        <p className="text-muted-foreground text-sm">
+        <p className="text-sm text-muted-foreground">
           The dark theme is solved independently and asserted by
           <span className="font-mono"> src/lib/palette-contrast.test.ts</span>, which also requires
           body text to stay <em>under</em> 16:1 — black on white is 21:1 and is the pairing most
@@ -234,7 +234,7 @@ export default function DesignSystemPage() {
             <CardTitle>A card</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-muted-foreground text-sm">
+            <p className="text-sm text-muted-foreground">
               A raised object among objects. A Panel — what every section on this page uses — is a
               region of the screen you are already on.
             </p>

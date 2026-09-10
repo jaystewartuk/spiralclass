@@ -56,9 +56,9 @@ function RecordingBar({
     <div className="flex items-center gap-3" role="status">
       <span
         aria-hidden
-        className="bg-destructive h-2.5 w-2.5 shrink-0 animate-pulse rounded-full motion-reduce:animate-none"
+        className="h-2.5 w-2.5 shrink-0 animate-pulse rounded-full bg-destructive motion-reduce:animate-none"
       />
-      <span className="text-foreground flex-1 text-sm font-medium">
+      <span className="flex-1 text-sm font-medium text-foreground">
         {label} <span className="tabular-nums">{formatElapsed(elapsedMs)}</span>
       </span>
       <Button type="button" variant="ghost" size="icon" onClick={onCancel} aria-label={cancelLabel}>
@@ -87,13 +87,13 @@ function ContextStrip({
   cancelLabel: string;
 }) {
   return (
-    <div className="border-border bg-muted mb-2 flex items-center gap-2.5 rounded-md border px-3 py-2">
-      <span className="text-primary shrink-0" aria-hidden>
+    <div className="mb-2 flex items-center gap-2.5 rounded-md border border-border bg-muted px-3 py-2">
+      <span className="shrink-0 text-primary" aria-hidden>
         {icon}
       </span>
       <span className="min-w-0 flex-1">
-        <span className="text-foreground block text-sm font-medium">{title}</span>
-        <span className="text-muted-foreground block truncate text-sm">{preview}</span>
+        <span className="block text-sm font-medium text-foreground">{title}</span>
+        <span className="block truncate text-sm text-muted-foreground">{preview}</span>
       </span>
       <Button
         type="button"
@@ -188,9 +188,9 @@ export function ChatComposer({
   const showHint = focused || hasDraft;
 
   return (
-    <div className="pb-safe border-border bg-background shrink-0 border-t">
+    <div className="pb-safe shrink-0 border-t border-border bg-background">
       {video.recording && (
-        <div className="border-border bg-scrim-3 flex shrink-0 justify-center border-b p-2">
+        <div className="flex shrink-0 justify-center border-b border-border bg-scrim-3 p-2">
           {/* Mirrored, because a selfie preview that is not mirrored reads as
               someone else's face. */}
           <video
@@ -316,7 +316,7 @@ export function ChatComposer({
                     size="icon"
                     onClick={onOpenEmoji}
                     aria-label={t("web.chatRoom.emojiPicker")}
-                    className="text-muted-foreground hover:text-foreground hidden shrink-0 lg:inline-flex"
+                    className="hidden shrink-0 text-muted-foreground hover:text-foreground lg:inline-flex"
                   >
                     <Smile className="h-5 w-5" />
                   </Button>
@@ -365,7 +365,7 @@ export function ChatComposer({
               )}
             </div>
 
-            <p className="text-muted-foreground mt-2 hidden min-h-5 text-sm lg:block">
+            <p className="mt-2 hidden min-h-5 text-sm text-muted-foreground lg:block">
               {showHint ? t("chat.composer.hint") : null}
             </p>
           </>

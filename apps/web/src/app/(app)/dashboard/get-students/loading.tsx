@@ -65,7 +65,7 @@ export default function GetStudentsLoading() {
           {/* "The rest of this week" — heading plus the divided list */}
           <div className="space-y-3">
             <Skeleton className="h-5 w-44" />
-            <div className="divide-border divide-y rounded-lg border">
+            <div className="divide-y divide-border rounded-lg border">
               {Array.from({ length: 3 }).map((_, i) => (
                 <div key={i} className="flex items-center gap-3 px-6 py-3">
                   <div className="flex-1 space-y-2">

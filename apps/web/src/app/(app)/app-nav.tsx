@@ -124,7 +124,7 @@ export function AppNav({
       aria-label={notifLabel}
       aria-current={notificationsActive ? "page" : undefined}
       className={cn(
-        "focus-visible:ring-ring relative inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-md transition-colors focus-visible:ring-3 focus-visible:outline-hidden lg:h-10 lg:w-10",
+        "relative inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-md transition-colors focus-visible:ring-3 focus-visible:ring-ring focus-visible:outline-hidden lg:h-10 lg:w-10",
         notificationsActive
           ? "bg-muted text-foreground"
           : "text-muted-foreground hover:bg-muted/60 hover:text-foreground",
@@ -137,7 +137,7 @@ export function AppNav({
 
   return (
     <>
-      <header className="border-border/60 bg-background/95 supports-[backdrop-filter]:bg-background/80 sticky top-0 z-40 border-b backdrop-blur">
+      <header className="sticky top-0 z-40 border-b border-border/60 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
         <div className="container flex h-14 items-center justify-between gap-4">
           <Link href="/dashboard" aria-label={t("common.brandName")} className="shrink-0">
             <Logo size="sm" />
@@ -146,7 +146,7 @@ export function AppNav({
           {/* Desktop (1280px+, mouse): inline horizontal nav. Tablet widths get
           the persistent sidebar below instead — this bar would have nowhere
           good to put four groups' worth of links — and phones get the drawer. */}
-          <nav aria-label={navLabel} className="desktop-wide:flex hidden flex-1 items-center gap-1">
+          <nav aria-label={navLabel} className="hidden flex-1 items-center gap-1 desktop-wide:flex">
             {primary.map((item) => (
               <NavBarLink
                 key={item.key}
@@ -163,7 +163,7 @@ export function AppNav({
           a primary affordance, not something to bury in the menu. */}
           <div className="flex shrink-0 items-center gap-1">
             {bell}
-            <div className="desktop:block hidden">
+            <div className="hidden desktop:block">
               <AccountMenu
                 account={account}
                 accountHref={ACCOUNT_HREF}

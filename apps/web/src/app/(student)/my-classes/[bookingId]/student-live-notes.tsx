@@ -44,7 +44,7 @@ export function StudentLiveNotes({
       <CardContent>
         <ul className="space-y-2 text-sm">
           {notes.map((n) => (
-            <li key={n.id} className="bg-background rounded-md border px-3 py-2">
+            <li key={n.id} className="rounded-md border bg-background px-3 py-2">
               {n.body}
             </li>
           ))}

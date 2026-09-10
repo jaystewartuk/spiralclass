@@ -54,7 +54,7 @@ export default async function StudentMessagesPage() {
       ) : (
         <Card>
           <CardContent className="p-0">
-            <ul className="divide-border divide-y">
+            <ul className="divide-y divide-border">
               {threads.map((thread, i) => {
                 const lastMsg = thread.lastMessage;
                 // The preview and the timestamp come from the same helpers the
@@ -68,7 +68,7 @@ export default async function StudentMessagesPage() {
                     <Link
                       href={`/my-classes/messages/${thread.teacherId}`}
                       className={cn(
-                        "hover:bg-muted/50 flex items-center gap-3 px-4 py-3.5 transition-colors",
+                        "flex items-center gap-3 px-4 py-3.5 transition-colors hover:bg-muted/50",
                         i === 0 && "rounded-t-lg",
                         i === threads.length - 1 && "rounded-b-lg",
                       )}
@@ -85,7 +85,7 @@ export default async function StudentMessagesPage() {
                             {thread.teacherName}
                           </span>
                           {lastMsg && (
-                            <span className="text-muted-foreground shrink-0 text-xs">
+                            <span className="shrink-0 text-xs text-muted-foreground">
                               {formatThreadTimestamp(lastMsg.createdAt, locale, viewerTz, t)}
                             </span>
                           )}
@@ -95,7 +95,7 @@ export default async function StudentMessagesPage() {
                             <p
                               className={cn(
                                 "flex-1 truncate text-xs",
-                                hasUnread ? "text-foreground font-medium" : "text-muted-foreground",
+                                hasUnread ? "font-medium text-foreground" : "text-muted-foreground",
                               )}
                             >
                               {lastMsg?.senderRole === "student"

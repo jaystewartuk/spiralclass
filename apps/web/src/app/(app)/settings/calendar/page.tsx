@@ -42,7 +42,7 @@ export default async function CalendarSettingsPage({
     <div className="space-y-6">
       <header>
         <PageHeader title={t("web.settings.calendar.title")} />
-        <p className="text-muted-foreground text-sm">{t("web.settings.calendar.subtitle")}</p>
+        <p className="text-sm text-muted-foreground">{t("web.settings.calendar.subtitle")}</p>
       </header>
 
       <Card>
@@ -65,12 +65,12 @@ export default async function CalendarSettingsPage({
           </CardHeader>
           <CardContent className="space-y-4">
             {googleStatus === "denied" && (
-              <p className="border-warning/30 bg-warning-bg text-warning rounded-md border px-3 py-2 text-xs">
+              <p className="rounded-md border border-warning/30 bg-warning-bg px-3 py-2 text-xs text-warning">
                 {t("web.settings.calendar.connectionCancelled")}
               </p>
             )}
             {googleStatus === "error" && (
-              <p className="border-destructive/30 bg-destructive-bg text-destructive rounded-md border px-3 py-2 text-xs">
+              <p className="rounded-md border border-destructive/30 bg-destructive-bg px-3 py-2 text-xs text-destructive">
                 {t("web.settings.calendar.connectionError")}
               </p>
             )}

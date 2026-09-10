@@ -68,7 +68,7 @@ export function AddStudentForm({ defaultPhoneCountry }: { defaultPhoneCountry: s
       <div className="space-y-1">
         <Label htmlFor="new-student-email">{t("web.dashboard.students.emailOptional")}</Label>
         <Input id="new-student-email" name="email" type="email" />
-        <p className="text-muted-foreground text-xs">{t("web.dashboard.students.new.emailHint")}</p>
+        <p className="text-xs text-muted-foreground">{t("web.dashboard.students.new.emailHint")}</p>
       </div>
 
       <PhoneNumberField
@@ -94,7 +94,7 @@ export function AddStudentForm({ defaultPhoneCountry }: { defaultPhoneCountry: s
       </Button>
 
       {state?.error && (
-        <p role="alert" className="text-destructive text-sm">
+        <p role="alert" className="text-sm text-destructive">
           {state.error}
         </p>
       )}

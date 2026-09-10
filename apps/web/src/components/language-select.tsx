@@ -46,7 +46,7 @@ export function LanguageSelect({
       className={cn(field ? "flex min-w-0 flex-col gap-2" : "inline-flex")}
     >
       <label
-        className={cn(field ? "text-foreground text-xs font-bold" : "sr-only")}
+        className={cn(field ? "text-xs font-bold text-foreground" : "sr-only")}
         htmlFor={selectId}
       >
         {t("settings.language")}
@@ -58,10 +58,10 @@ export function LanguageSelect({
         aria-label={t("settings.language")}
         onChange={() => formRef.current?.requestSubmit()}
         className={cn(
-          "border-input bg-background focus-visible:ring-ring cursor-pointer rounded-md border focus-visible:ring-3 focus-visible:outline-hidden",
+          "cursor-pointer rounded-md border border-input bg-background focus-visible:ring-3 focus-visible:ring-ring focus-visible:outline-hidden",
           field
-            ? "text-foreground h-11 w-full px-3 text-sm lg:h-10"
-            : "text-muted-foreground hover:text-foreground px-2 py-1 text-xs",
+            ? "h-11 w-full px-3 text-sm text-foreground lg:h-10"
+            : "px-2 py-1 text-xs text-muted-foreground hover:text-foreground",
         )}
       >
         {options.map((o) => (

@@ -97,7 +97,7 @@ export function AccountDeletionForm({ subjectType, pending }: Props) {
         <div className="space-y-1">
           <Label htmlFor="confirm">
             {t("web.settings.accountDeletion.confirmLabel")}
-            <code className="bg-muted rounded px-1 py-0.5">{CONFIRM_PHRASE}</code>
+            <code className="rounded bg-muted px-1 py-0.5">{CONFIRM_PHRASE}</code>
           </Label>
           <Input
             id="confirm"
@@ -109,7 +109,7 @@ export function AccountDeletionForm({ subjectType, pending }: Props) {
           />
         </div>
         {requestState?.error ? (
-          <p role="alert" aria-live="polite" className="text-destructive text-sm">
+          <p role="alert" aria-live="polite" className="text-sm text-destructive">
             {requestState.error}
           </p>
         ) : null}

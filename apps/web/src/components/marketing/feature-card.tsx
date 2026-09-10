@@ -34,15 +34,15 @@ export function FeatureCard({
   return (
     <div
       className={cn(
-        "bg-card rounded-2xl border p-6 text-left shadow-xs transition-shadow hover:shadow-md",
+        "rounded-2xl border bg-card p-6 text-left shadow-xs transition-shadow hover:shadow-md",
         className,
       )}
     >
-      <div className="bg-primary/10 text-primary flex h-11 w-11 items-center justify-center rounded-xl">
+      <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10 text-primary">
         <Icon className="h-5 w-5" aria-hidden />
       </div>
-      <Title className="font-display text-h3 mt-4 font-semibold">{title}</Title>
-      <p className="text-muted-foreground mt-2 text-sm leading-relaxed">{body}</p>
+      <Title className="mt-4 font-display text-h3 font-semibold">{title}</Title>
+      <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{body}</p>
     </div>
   );
 }

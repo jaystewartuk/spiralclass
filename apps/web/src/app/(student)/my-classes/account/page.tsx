@@ -254,7 +254,7 @@ export default async function StudentAccountPage({
             the last thing anyone came here to do. */}
         <SettingsRow>
           <Collapsible title={t("web.myClasses.account.schedule.title")} defaultOpen={false}>
-            <p className="text-muted-foreground text-sm">
+            <p className="text-sm text-muted-foreground">
               {t("web.myClasses.account.schedule.description")}
             </p>
             <NotificationSchedule audience="student" prefs={studentPrefs} />

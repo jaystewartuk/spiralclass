@@ -95,7 +95,7 @@ export function AdminMfaForm({ alreadyEnrolled = false }: { alreadyEnrolled?: bo
   if (alreadyEnrolled) {
     return (
       <form ref={stepUpFormRef} action={stepUpAction} className="space-y-2">
-        <p className="text-muted-foreground text-sm">{t("web.admin.mfa.stepUpPrompt")}</p>
+        <p className="text-sm text-muted-foreground">{t("web.admin.mfa.stepUpPrompt")}</p>
         <Label htmlFor="code">{t("web.admin.mfa.codeLabel")}</Label>
         <OtpInput
           id="code"
@@ -107,7 +107,7 @@ export function AdminMfaForm({ alreadyEnrolled = false }: { alreadyEnrolled?: bo
           }}
         />
         {stepUpState?.error ? (
-          <p role="alert" aria-live="polite" className="text-destructive text-sm">
+          <p role="alert" aria-live="polite" className="text-sm text-destructive">
             {stepUpState.error}
           </p>
         ) : null}
@@ -129,14 +129,14 @@ export function AdminMfaForm({ alreadyEnrolled = false }: { alreadyEnrolled?: bo
             alt={t("web.admin.mfa.qrAlt")}
             width={200}
             height={200}
-            className="border-border rounded border bg-white p-2"
+            className="rounded border border-border bg-white p-2"
           />
         ) : null}
         <details className="text-sm" open={!qrDataUrl}>
-          <summary className="text-muted-foreground cursor-pointer">
+          <summary className="cursor-pointer text-muted-foreground">
             {t("web.admin.mfa.manualEntry")}
           </summary>
-          <p className="bg-muted mt-2 rounded px-2 py-1 font-mono text-xs break-all">
+          <p className="mt-2 rounded bg-muted px-2 py-1 font-mono text-xs break-all">
             {startState.enrolled.secret}
           </p>
         </details>
@@ -144,7 +144,7 @@ export function AdminMfaForm({ alreadyEnrolled = false }: { alreadyEnrolled?: bo
           <Label htmlFor="code">{t("web.admin.mfa.codeLabel")}</Label>
           {codeInput}
           {enrollVerifyState?.error ? (
-            <p role="alert" aria-live="polite" className="text-destructive text-sm">
+            <p role="alert" aria-live="polite" className="text-sm text-destructive">
               {enrollVerifyState.error}
             </p>
           ) : null}
@@ -158,12 +158,12 @@ export function AdminMfaForm({ alreadyEnrolled = false }: { alreadyEnrolled?: bo
 
   return (
     <form action={startAction} className="space-y-2">
-      <p className="text-muted-foreground text-sm">{t("web.admin.mfa.setupPrompt")}</p>
+      <p className="text-sm text-muted-foreground">{t("web.admin.mfa.setupPrompt")}</p>
       <Button type="submit" disabled={starting}>
         {t("web.admin.mfa.setupButton")}
       </Button>
       {startState?.error ? (
-        <p role="alert" aria-live="polite" className="text-destructive mt-2 text-sm">
+        <p role="alert" aria-live="polite" className="mt-2 text-sm text-destructive">
           {startState.error}
         </p>
       ) : null}

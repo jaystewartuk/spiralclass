@@ -84,7 +84,7 @@ export function OtpVerifyCard({
           />
           <div className="min-h-5" aria-live="polite">
             {verifyPending && (
-              <p className="text-muted-foreground flex items-center gap-1.5 text-sm">
+              <p className="flex items-center gap-1.5 text-sm text-muted-foreground">
                 <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
                 {t("web.signIn.verifying")}
               </p>
@@ -95,7 +95,7 @@ export function OtpVerifyCard({
               id="verify-code-error"
               role="alert"
               aria-live="polite"
-              className="text-destructive text-center text-sm"
+              className="text-center text-sm text-destructive"
             >
               {verifyState.error}
             </p>
@@ -112,7 +112,7 @@ export function OtpVerifyCard({
             </Button>
           )}
         </form>
-        <p className="text-muted-foreground text-center text-xs">{t("web.auth.noCodeHint")}</p>
+        <p className="text-center text-xs text-muted-foreground">{t("web.auth.noCodeHint")}</p>
         {resend}
       </CardContent>
     </Card>

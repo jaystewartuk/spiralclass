@@ -88,7 +88,7 @@ export function ToggleSetting({
             {label}
           </Label>
           {hint ? (
-            <p id={`${id}-hint`} className="text-muted-foreground text-sm">
+            <p id={`${id}-hint`} className="text-sm text-muted-foreground">
               {hint}
             </p>
           ) : null}

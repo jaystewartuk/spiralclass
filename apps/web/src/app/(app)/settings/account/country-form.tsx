@@ -42,7 +42,7 @@ export function CountryForm({
     return (
       <div className="space-y-2">
         <p className="font-medium">{countryLabel(initialCountry, locale)}</p>
-        <p className="text-muted-foreground flex items-start gap-2 text-sm">
+        <p className="flex items-start gap-2 text-sm text-muted-foreground">
           <Lock className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
           <span>{t("web.settings.country.lockedNote")}</span>
         </p>
@@ -66,7 +66,7 @@ export function CountryForm({
             aria-label={t("web.settings.country.label")}
           />
         </div>
-        <p className="text-muted-foreground text-sm">{t("web.settings.country.hint")}</p>
+        <p className="text-sm text-muted-foreground">{t("web.settings.country.hint")}</p>
       </div>
       <div className="flex items-center gap-3">
         <Button type="submit" disabled={pending}>

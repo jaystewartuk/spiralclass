@@ -105,7 +105,7 @@ export default async function DemoPage() {
           banner was centred on the VIEWPORT while the screen under it was
           centred in the content container, so the two disagreed by a visible
           margin at every width above the container's cap. */}
-      <div className="lg:max-w-content container pt-8">
+      <div className="container pt-8 lg:max-w-content">
         <Alert variant="info">
           <AlertTitle>{t("web.demo.banner.title")}</AlertTitle>
           <AlertDescription className="space-y-2">

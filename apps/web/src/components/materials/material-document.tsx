@@ -114,7 +114,7 @@ function Inlines({ nodes }: { nodes: InlineNode[] }): ReactNode {
         return <span key={i}>{node.value}</span>;
       case "strong":
         return (
-          <strong key={i} className="text-foreground font-semibold">
+          <strong key={i} className="font-semibold text-foreground">
             <Inlines nodes={node.children} />
           </strong>
         );
@@ -128,7 +128,7 @@ function Inlines({ nodes }: { nodes: InlineNode[] }): ReactNode {
         return (
           <code
             key={i}
-            className="bg-muted text-foreground rounded px-1.5 py-0.5 font-mono text-[0.85em]"
+            className="rounded bg-muted px-1.5 py-0.5 font-mono text-[0.85em] text-foreground"
           >
             {node.value}
           </code>
@@ -147,7 +147,7 @@ function Inlines({ nodes }: { nodes: InlineNode[] }): ReactNode {
             href={node.href}
             target="_blank"
             rel="noreferrer"
-            className="text-primary decoration-primary/40 hover:decoration-primary font-medium underline underline-offset-2 transition-colors"
+            className="font-medium text-primary underline decoration-primary/40 underline-offset-2 transition-colors hover:decoration-primary"
           >
             <Inlines nodes={node.children} />
           </a>
@@ -171,16 +171,16 @@ function ListItemRow({
   const marker =
     item.checked !== null ? (
       item.checked ? (
-        <SquareCheck className="text-primary mt-0.5 size-[1.05em] shrink-0" aria-hidden />
+        <SquareCheck className="mt-0.5 size-[1.05em] shrink-0 text-primary" aria-hidden />
       ) : (
-        <Square className="text-muted-foreground mt-0.5 size-[1.05em] shrink-0" aria-hidden />
+        <Square className="mt-0.5 size-[1.05em] shrink-0 text-muted-foreground" aria-hidden />
       )
     ) : ordered ? (
-      <span className="font-display text-primary mt-px shrink-0 text-[0.95em] font-semibold tabular-nums">
+      <span className="mt-px shrink-0 font-display text-[0.95em] font-semibold text-primary tabular-nums">
         {index + 1}.
       </span>
     ) : (
-      <span aria-hidden className="bg-primary/60 mt-[0.5em] size-1.5 shrink-0 rounded-full" />
+      <span aria-hidden className="mt-[0.5em] size-1.5 shrink-0 rounded-full bg-primary/60" />
     );
 
   return (
@@ -219,7 +219,7 @@ function Callout({
 
   return (
     <div
-      className="shadow-brand-sm my-4 rounded-xl border border-l-4 px-4 py-3"
+      className="my-4 rounded-xl border border-l-4 px-4 py-3 shadow-brand-sm"
       style={styles.wrap}
       role="note"
     >
@@ -238,7 +238,7 @@ function Callout({
         )}
       </div>
       {(!collapsible || open) && (
-        <div className="text-foreground/90 mt-1.5 text-[0.95em] leading-relaxed [&>*:first-child]:mt-0 [&>*:last-child]:mb-0">
+        <div className="mt-1.5 text-[0.95em] leading-relaxed text-foreground/90 [&>*:first-child]:mt-0 [&>*:last-child]:mb-0">
           {children}
         </div>
       )}
@@ -284,7 +284,7 @@ function Block({ block }: { block: MaterialBlock }): ReactNode {
       );
     case "quote":
       return (
-        <blockquote className="border-accent bg-accent/5 text-foreground/80 my-4 rounded-r-lg border-l-[3px] py-2 pr-3 pl-4">
+        <blockquote className="my-4 rounded-r-lg border-l-[3px] border-accent bg-accent/5 py-2 pr-3 pl-4 text-foreground/80">
           <div className="[&>*:first-child]:mt-0 [&>*:last-child]:mb-0">
             <Blocks blocks={block.blocks} />
           </div>
@@ -292,20 +292,20 @@ function Block({ block }: { block: MaterialBlock }): ReactNode {
       );
     case "code":
       return (
-        <pre className="border-border bg-muted/60 text-foreground my-4 overflow-x-auto rounded-lg border p-3.5 font-mono text-sm leading-relaxed">
+        <pre className="my-4 overflow-x-auto rounded-lg border border-border bg-muted/60 p-3.5 font-mono text-sm leading-relaxed text-foreground">
           <code>{block.text}</code>
         </pre>
       );
     case "table":
       return (
-        <div className="border-border shadow-brand-sm my-4 overflow-x-auto rounded-xl border">
+        <div className="my-4 overflow-x-auto rounded-xl border border-border shadow-brand-sm">
           <table className="w-full border-collapse text-sm">
             <thead>
               <tr className="bg-muted">
                 {block.header.map((cell, i) => (
                   <th
                     key={i}
-                    className="border-border font-display text-foreground border-b px-3.5 py-2.5 font-semibold"
+                    className="border-b border-border px-3.5 py-2.5 font-display font-semibold text-foreground"
                     style={{ textAlign: block.align[i] ?? "left" }}
                   >
                     <Inlines nodes={cell} />
@@ -315,11 +315,11 @@ function Block({ block }: { block: MaterialBlock }): ReactNode {
             </thead>
             <tbody>
               {block.rows.map((row, ri) => (
-                <tr key={ri} className="even:bg-muted/30 odd:bg-transparent">
+                <tr key={ri} className="odd:bg-transparent even:bg-muted/30">
                   {block.header.map((_, ci) => (
                     <td
                       key={ci}
-                      className="border-border/60 text-foreground/90 border-b px-3.5 py-2.5 leading-relaxed"
+                      className="border-b border-border/60 px-3.5 py-2.5 leading-relaxed text-foreground/90"
                       style={{ textAlign: block.align[ci] ?? "left" }}
                     >
                       <Inlines nodes={row[ci] ?? []} />
@@ -336,7 +336,7 @@ function Block({ block }: { block: MaterialBlock }): ReactNode {
     case "timeline":
       return <MaterialTimeline block={block} />;
     case "divider":
-      return <hr className="border-border my-8 border-0 border-t" />;
+      return <hr className="my-8 border-0 border-t border-border" />;
   }
 }
 
@@ -354,7 +354,7 @@ function Block({ block }: { block: MaterialBlock }): ReactNode {
 function MaterialImage({ src, alt }: { src: string; alt: string }) {
   const ref = resolveMaterialImageSrc(src);
   if (!ref) {
-    return alt ? <p className="text-muted-foreground my-3 text-sm">{alt}</p> : null;
+    return alt ? <p className="my-3 text-sm text-muted-foreground">{alt}</p> : null;
   }
   const url = ref.kind === "stored" ? materialImageRoutePath(ref.key) : ref.url;
 
@@ -369,10 +369,10 @@ function MaterialImage({ src, alt }: { src: string; alt: string }) {
         // `referrerPolicy` only bites on the external-https case, where it
         // keeps the material's own URL out of a third-party host's logs.
         referrerPolicy="no-referrer"
-        className="border-border bg-muted/30 mx-auto max-h-[70vh] w-auto max-w-full rounded-xl border object-contain"
+        className="mx-auto max-h-[70vh] w-auto max-w-full rounded-xl border border-border bg-muted/30 object-contain"
       />
       {alt && (
-        <figcaption className="text-muted-foreground mt-2 text-center text-sm">{alt}</figcaption>
+        <figcaption className="mt-2 text-center text-sm text-muted-foreground">{alt}</figcaption>
       )}
     </figure>
   );
@@ -403,7 +403,7 @@ function MaterialTimeline({ block }: { block: TimelineBlock }) {
   ];
 
   return (
-    <figure className="border-border bg-muted/20 my-5 rounded-xl border px-4 py-3">
+    <figure className="my-5 rounded-xl border border-border bg-muted/20 px-4 py-3">
       <svg
         viewBox={`0 0 ${geo.width} ${geo.height}`}
         className="h-auto w-full"
@@ -453,13 +453,13 @@ function MaterialTimeline({ block }: { block: TimelineBlock }) {
           />
         ))}
       </svg>
-      <div className="text-muted-foreground mt-1 flex text-xs">
+      <div className="mt-1 flex text-xs text-muted-foreground">
         <span className="flex-1 text-left">{block.labels.past}</span>
-        <span className="text-foreground flex-1 text-center font-medium">{block.labels.now}</span>
+        <span className="flex-1 text-center font-medium text-foreground">{block.labels.now}</span>
         <span className="flex-1 text-right">{block.labels.future}</span>
       </div>
       {legend.length > 0 && (
-        <ul className="text-foreground/90 mt-2.5 space-y-1 text-sm">
+        <ul className="mt-2.5 space-y-1 text-sm text-foreground/90">
           {legend.map((entry, i) => (
             <li key={i} className="flex items-center gap-2">
               <span
@@ -467,8 +467,8 @@ function MaterialTimeline({ block }: { block: TimelineBlock }) {
                 className={cn(
                   "shrink-0",
                   entry.kind === "span"
-                    ? "border-primary bg-primary/20 h-2 w-5 rounded-full border"
-                    : "bg-primary size-2 rounded-full",
+                    ? "h-2 w-5 rounded-full border border-primary bg-primary/20"
+                    : "size-2 rounded-full bg-primary",
                 )}
               />
               {entry.label}
@@ -504,7 +504,7 @@ export function MaterialDocument({ body, readingWidth = false, className }: Mate
   return (
     <div
       className={cn(
-        "material-document text-foreground/90 text-base",
+        "material-document text-base text-foreground/90",
         readingWidth && "mx-auto max-w-[70ch]",
         className,
       )}

@@ -68,7 +68,7 @@ export default async function HelpAudienceIndexPage({ params }: { params: Promis
       <HelpPageHeader backHref={BACK_HREF[typedAudience]} backLabel={t(BACK_KEY[typedAudience])} />
 
       <header>
-        <p className="text-primary text-sm font-semibold">{t(AUDIENCE_LABEL_KEY[typedAudience])}</p>
+        <p className="text-sm font-semibold text-primary">{t(AUDIENCE_LABEL_KEY[typedAudience])}</p>
         <Heading level={1} as="h1" className="mt-1 text-balance">
           {t("web.help.title")}
         </Heading>
@@ -82,18 +82,18 @@ export default async function HelpAudienceIndexPage({ params }: { params: Promis
           <li key={doc.slug}>
             <Link
               href={`/help/${typedAudience}/${doc.slug}`}
-              className="group border-border bg-card hover:border-primary/40 hover:shadow-brand-sm flex items-start gap-4 rounded-xl border p-4 transition-[border-color,box-shadow]"
+              className="group flex items-start gap-4 rounded-xl border border-border bg-card p-4 transition-[border-color,box-shadow] hover:border-primary/40 hover:shadow-brand-sm"
             >
               <span className="min-w-0 flex-1">
-                <span className="text-foreground block font-semibold">
+                <span className="block font-semibold text-foreground">
                   {localize(doc.title, locale)}
                 </span>
-                <span className="text-muted-foreground mt-1 block text-sm text-pretty">
+                <span className="mt-1 block text-sm text-pretty text-muted-foreground">
                   {localize(doc.summary, locale)}
                 </span>
               </span>
               <ArrowRight
-                className="text-muted-foreground group-hover:text-foreground mt-1 h-4 w-4 shrink-0 transition-colors"
+                className="mt-1 h-4 w-4 shrink-0 text-muted-foreground transition-colors group-hover:text-foreground"
                 aria-hidden
               />
             </Link>

@@ -29,12 +29,12 @@ export function GoLiveButton({ studentId }: { studentId: string }) {
         {pending ? "…" : t("web.dashboard.students.goLive.button")}
       </Button>
       {state?.error && (
-        <p role="alert" className="text-destructive text-sm">
+        <p role="alert" className="text-sm text-destructive">
           {state.error}
         </p>
       )}
       {state?.ok && (
-        <p role="status" className="text-success text-sm">
+        <p role="status" className="text-sm text-success">
           {state.ok}
         </p>
       )}

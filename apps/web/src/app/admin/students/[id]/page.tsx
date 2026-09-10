@@ -57,7 +57,7 @@ export default async function AdminStudentDetailPage({
 
       <header>
         <PageHeader title={student.name} />
-        <p className="text-muted-foreground text-sm">
+        <p className="text-sm text-muted-foreground">
           {student.email ?? t("web.admin.students.noEmail")} · {student._count.bookings}{" "}
           {t("web.admin.students.bookingsLabel")} · {student._count.packages}{" "}
           {t("web.admin.students.packagesLabel")}
@@ -87,14 +87,14 @@ export default async function AdminStudentDetailPage({
           {t("web.admin.students.rostersTitle")}
         </Heading>
         {student.teacherStudents.length === 0 ? (
-          <p className="text-muted-foreground text-sm">{t("web.admin.none")}</p>
+          <p className="text-sm text-muted-foreground">{t("web.admin.none")}</p>
         ) : (
           <ul className="divide-y overflow-hidden rounded-md border">
             {student.teacherStudents.map((ts) => (
               <li key={ts.teacherId} className="p-3 text-sm">
                 <Link href={`/admin/teachers/${ts.teacher.id}`} className="hover:underline">
                   <div className="font-medium">{ts.teacher.name}</div>
-                  <div className="text-muted-foreground text-xs">{ts.teacher.email}</div>
+                  <div className="text-xs text-muted-foreground">{ts.teacher.email}</div>
                 </Link>
               </li>
             ))}
@@ -116,14 +116,14 @@ export default async function AdminStudentDetailPage({
           {t("web.admin.recentNotifications")}
         </Heading>
         {recentNotifications.length === 0 ? (
-          <p className="text-muted-foreground text-sm">{t("web.admin.none")}</p>
+          <p className="text-sm text-muted-foreground">{t("web.admin.none")}</p>
         ) : (
           <ul className="divide-y overflow-hidden rounded-md border">
             {recentNotifications.map((n) => (
               <li key={n.id} className="flex items-center justify-between p-3 text-sm">
                 <div>
                   <div className="font-medium">{n.templateName}</div>
-                  <div className="text-muted-foreground text-xs">
+                  <div className="text-xs text-muted-foreground">
                     {new Date(n.createdAt).toLocaleString()} · {n.channel}
                   </div>
                 </div>

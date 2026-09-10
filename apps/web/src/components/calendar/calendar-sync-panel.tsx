@@ -56,8 +56,8 @@ export function CalendarSyncPanel({
         </Button>
       </div>
 
-      <div className="bg-muted/30 text-muted-foreground rounded-md border p-3 text-xs">
-        <p className="text-foreground mb-1 font-medium">{t("web.calendarSync.howTo.title")}</p>
+      <div className="rounded-md border bg-muted/30 p-3 text-xs text-muted-foreground">
+        <p className="mb-1 font-medium text-foreground">{t("web.calendarSync.howTo.title")}</p>
         <ul className="list-disc space-y-0.5 pl-4">
           <li>{t("web.calendarSync.howTo.google")}</li>
           <li>{t("web.calendarSync.howTo.apple")}</li>

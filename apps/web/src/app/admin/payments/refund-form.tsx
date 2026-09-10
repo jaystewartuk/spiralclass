@@ -40,7 +40,7 @@ export function RefundButton({ paymentId, disabled }: { paymentId: string; disab
 
   if (state?.ok) {
     return (
-      <span className="text-success text-xs">
+      <span className="text-xs text-success">
         {t("web.admin.payments.refundedToast", { id: state.refundId?.slice(0, 12) ?? "" })}
       </span>
     );
@@ -83,7 +83,7 @@ export function RefundButton({ paymentId, disabled }: { paymentId: string; disab
           placeholder={t("web.admin.payments.reasonForRefund")}
           className="h-8 text-xs"
         />
-        {state?.error && <span className="text-destructive text-xs">{state.error}</span>}
+        {state?.error && <span className="text-xs text-destructive">{state.error}</span>}
       </form>
     </ConfirmDialog>
   );

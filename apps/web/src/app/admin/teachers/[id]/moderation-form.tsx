@@ -56,11 +56,11 @@ export function TeacherModerationForm({
       {disabled ? (
         <form action={enableAction} className="rounded-md border p-4">
           <input type="hidden" name="teacherId" value={teacherId} />
-          <p className="text-muted-foreground mb-3 text-sm">
+          <p className="mb-3 text-sm text-muted-foreground">
             {t("web.admin.teachers.moderation.reenableHint")}
           </p>
           {enableState?.error && (
-            <p className="text-destructive mb-3 text-sm">{enableState.error}</p>
+            <p className="mb-3 text-sm text-destructive">{enableState.error}</p>
           )}
           <Button type="submit" disabled={enablePending}>
             {enablePending
@@ -114,7 +114,7 @@ export function TeacherModerationForm({
                 />
               </div>
               {disableState?.error && (
-                <p className="text-destructive text-sm">{disableState.error}</p>
+                <p className="text-sm text-destructive">{disableState.error}</p>
               )}
             </form>
           </ConfirmDialog>
@@ -123,11 +123,11 @@ export function TeacherModerationForm({
 
       <form action={resendAction} className="rounded-md border p-4">
         <input type="hidden" name="teacherId" value={teacherId} />
-        <p className="text-muted-foreground mb-3 text-sm">
+        <p className="mb-3 text-sm text-muted-foreground">
           {t("web.admin.teachers.moderation.resendHint")}
         </p>
-        {resendState?.error && <p className="text-destructive mb-3 text-sm">{resendState.error}</p>}
-        {resendState?.info && <p className="text-success mb-3 text-sm">{resendState.info}</p>}
+        {resendState?.error && <p className="mb-3 text-sm text-destructive">{resendState.error}</p>}
+        {resendState?.info && <p className="mb-3 text-sm text-success">{resendState.info}</p>}
         <Button type="submit" variant="outline" disabled={resendPending}>
           {resendPending
             ? t("web.admin.teachers.moderation.sending")

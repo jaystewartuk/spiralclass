@@ -34,7 +34,7 @@ function Segmented<T extends string | number | boolean>({
 }: Group<T>) {
   return (
     <fieldset className="flex flex-col gap-2">
-      <legend className="text-foreground mb-2 font-bold">{label}</legend>
+      <legend className="mb-2 font-bold text-foreground">{label}</legend>
       <div className="flex flex-wrap gap-2">
         {options.map((option) => {
           const selected = option.value === value;
@@ -117,7 +117,7 @@ export function ReadingControls({
         ]}
         onChange={(tint) => update({ ...prefs, tint })}
       />
-      <p className="text-muted-foreground text-sm">{t("web.reading.browserNote")}</p>
+      <p className="text-sm text-muted-foreground">{t("web.reading.browserNote")}</p>
     </div>
   );
 }

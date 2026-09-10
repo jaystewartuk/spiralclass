@@ -154,8 +154,8 @@ export default async function AdminLessonInsightsPage() {
           stores a transcript, and the consent gate (D-22) is the only thing
           scoping it. Easy to forget the flag is on. */}
       {txLive && (
-        <div className="border-warning/50 bg-warning-bg rounded-lg border px-4 py-3 text-sm">
-          <span className="text-warning font-semibold">
+        <div className="rounded-lg border border-warning/50 bg-warning-bg px-4 py-3 text-sm">
+          <span className="font-semibold text-warning">
             {t("web.admin.lessonInsights.liveWarning.title")}
           </span>{" "}
           {t("web.admin.lessonInsights.liveWarning.pre")}{" "}
@@ -163,14 +163,14 @@ export default async function AdminLessonInsightsPage() {
           {t("web.admin.lessonInsights.liveWarning.mid")}{" "}
           <em>{t("web.admin.lessonInsights.liveWarning.em")}</em>{" "}
           {t("web.admin.lessonInsights.liveWarning.midEnd")}{" "}
-          <code className="bg-muted rounded px-1">LESSON_INSIGHTS_TRANSCRIPTION_ENABLED</code>{" "}
+          <code className="rounded bg-muted px-1">LESSON_INSIGHTS_TRANSCRIPTION_ENABLED</code>{" "}
           {t("web.admin.lessonInsights.liveWarning.post")}
         </div>
       )}
 
       <header>
         <PageHeader title={t("web.admin.lessonInsights.title")} />
-        <p className="text-muted-foreground text-sm">{t("web.admin.lessonInsights.subtitle")}</p>
+        <p className="text-sm text-muted-foreground">{t("web.admin.lessonInsights.subtitle")}</p>
       </header>
 
       {/* Health callouts first — the things that mean something is wrong. */}
@@ -271,7 +271,7 @@ export default async function AdminLessonInsightsPage() {
         </CardHeader>
         <CardContent>
           {recent.length === 0 ? (
-            <p className="text-muted-foreground text-sm">
+            <p className="text-sm text-muted-foreground">
               {t("web.admin.lessonInsights.noCaptures")}
             </p>
           ) : (
@@ -300,10 +300,10 @@ export default async function AdminLessonInsightsPage() {
                       <TableCell>
                         <Badge variant={statusVariant(r.status)}>{r.status}</Badge>
                       </TableCell>
-                      <TableCell className="text-muted-foreground text-right text-xs">
+                      <TableCell className="text-right text-xs text-muted-foreground">
                         {r.durationMs != null ? `${Math.round(r.durationMs / 1000)}s` : "—"}
                       </TableCell>
-                      <TableCell className="text-muted-foreground text-right text-xs">
+                      <TableCell className="text-right text-xs text-muted-foreground">
                         {r.createdAt.toLocaleString()}
                       </TableCell>
                     </TableRow>
@@ -339,11 +339,11 @@ function Stat({
   return (
     <Card>
       <CardContent className="pt-6">
-        <div className="text-muted-foreground text-xs">{label}</div>
+        <div className="text-xs text-muted-foreground">{label}</div>
         <div className={`mt-1 text-2xl font-semibold ${danger ? "text-destructive" : ""}`}>
           {value}
         </div>
-        {hint ? <div className="text-muted-foreground mt-1 text-xs">{hint}</div> : null}
+        {hint ? <div className="mt-1 text-xs text-muted-foreground">{hint}</div> : null}
       </CardContent>
     </Card>
   );

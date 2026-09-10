@@ -39,7 +39,7 @@ export function DeleteMaterialButton({ materialId, name }: { materialId: string;
           // but "Delete" alone is ambiguous in a screen reader's element list,
           // where every row contributes one.
           aria-label={t("web.materials.deleteNamed", { name })}
-          className="text-destructive hover:bg-destructive-bg hover:text-destructive gap-1.5"
+          className="gap-1.5 text-destructive hover:bg-destructive-bg hover:text-destructive"
         >
           <Trash2 className="size-4" aria-hidden />
           {t("common.delete")}

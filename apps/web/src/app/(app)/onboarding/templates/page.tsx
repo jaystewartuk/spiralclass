@@ -22,7 +22,7 @@ export default async function TemplatesStepPage() {
     <div className="space-y-6">
       <div>
         <PageHeader title={t("onboarding.templates.title")} />
-        <p className="text-muted-foreground mt-1 text-sm">
+        <p className="mt-1 text-sm text-muted-foreground">
           {t("web.onboarding.templates.starterHint")}
         </p>
       </div>

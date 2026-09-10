@@ -146,7 +146,7 @@ export default async function ResultadoPage({
         {/* Name only. The email address belongs in the sentence that tells her
             we sent a sign-in link TO it — printed twice, three lines apart, it
             stops being the thing she checks for a typo and becomes chrome. */}
-        <p className="text-muted-foreground mt-3 text-sm">{pkg.student.name}</p>
+        <p className="mt-3 text-sm text-muted-foreground">{pkg.student.name}</p>
       </header>
 
       <StatusBody
@@ -183,8 +183,8 @@ export default async function ResultadoPage({
           is copyable rather than transcribable — an unbroken 36-character UUID
           is the format people most reliably read back wrong. */}
       <footer className="space-y-2 border-t pt-6">
-        <p className="text-muted-foreground text-xs">{t("buy.wise.reference")}</p>
-        <div className="bg-muted/40 rounded-md border px-3 py-2 font-mono text-xs break-all select-all">
+        <p className="text-xs text-muted-foreground">{t("buy.wise.reference")}</p>
+        <div className="rounded-md border bg-muted/40 px-3 py-2 font-mono text-xs break-all select-all">
           {payment.externalReference}
         </div>
         <div className="flex flex-wrap items-center gap-3">
@@ -193,7 +193,7 @@ export default async function ResultadoPage({
             label={t("web.wiseInstructions.copyReference")}
             toastMessage={t("web.wiseInstructions.referenceCopied")}
           />
-          <p className="text-muted-foreground text-xs">{t("web.buyResult.referenceHint")}</p>
+          <p className="text-xs text-muted-foreground">{t("web.buyResult.referenceHint")}</p>
         </div>
       </footer>
     </main>
@@ -306,7 +306,7 @@ function FirstClassCard({
           {firstClass.booked ? (
             <>
               <p className="text-base font-medium">{when}</p>
-              <p className="text-muted-foreground text-xs">
+              <p className="text-xs text-muted-foreground">
                 {t("web.buyResult.firstClassZone", { timezone: firstClass.timezone })}
               </p>
             </>
@@ -317,7 +317,7 @@ function FirstClassCard({
             // A refunded/failed payment books nothing at all, so the promise
             // that it will be booked "as soon as the payment is confirmed" is
             // withdrawn rather than left standing.
-            <p className="text-muted-foreground text-sm">
+            <p className="text-sm text-muted-foreground">
               {status === "failed" || status === "refunded"
                 ? t("web.buyResult.firstClassNotBooked", { when })
                 : t("web.buyResult.firstClassPending", { when })}
@@ -360,7 +360,7 @@ function PurchaseSummary({
         <div className="space-y-1">
           {/* Sentence case, no tracking: D-140 withdrew all-caps labels,
               and a guard test (tests/config/d140-rules.test.ts) enforces it. */}
-          <h2 className="text-muted-foreground text-sm font-medium">
+          <h2 className="text-sm font-medium text-muted-foreground">
             {t("web.buyResult.summaryTitle")}
           </h2>
           {/* The package's own name leads the card rather than sitting in a
@@ -415,7 +415,7 @@ function PurchaseSummary({
 function SummaryRow({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex items-baseline justify-between gap-4">
-      <dt className="text-muted-foreground shrink-0">{label}</dt>
+      <dt className="shrink-0 text-muted-foreground">{label}</dt>
       <dd className="min-w-0 text-right font-medium">{value}</dd>
     </div>
   );
@@ -506,14 +506,14 @@ function StatusBody({
             pick a first class and it landed, the default copy would be the
             wrong way round (one is scheduled), so the follow-up points at the
             rest instead. */}
-        <p className="text-muted-foreground text-center text-sm">
+        <p className="text-center text-sm text-muted-foreground">
           {firstClass?.booked
             ? t("web.buyResult.nextStepAfterFirstClass")
             : t("web.buyResult.nextStepBook")}
         </p>
         {studentEmail && (
-          <div className="bg-muted/40 flex flex-col items-center gap-3 rounded-md border p-4">
-            <p className="text-muted-foreground text-center text-sm">
+          <div className="flex flex-col items-center gap-3 rounded-md border bg-muted/40 p-4">
+            <p className="text-center text-sm text-muted-foreground">
               {t("web.buyResult.resendHint")}
             </p>
             <ResendSignInLink email={studentEmail} />

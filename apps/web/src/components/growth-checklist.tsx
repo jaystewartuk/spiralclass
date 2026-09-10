@@ -87,7 +87,7 @@ export function GrowthChecklist({
           <CardTitle className="text-lg" as="h2">
             {growthTitle(locale)}
           </CardTitle>
-          <span className="text-muted-foreground text-sm font-medium tabular-nums">
+          <span className="text-sm font-medium text-muted-foreground tabular-nums">
             {growthProgressLabel(checklist.doneCount, checklist.total, locale)}
           </span>
         </div>
@@ -99,7 +99,7 @@ export function GrowthChecklist({
             checklists) that pulls a teacher back to finish, beyond a bare
             item list. */}
         <div
-          className="bg-muted mt-1 h-1.5 w-full overflow-hidden rounded-full"
+          className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-muted"
           role="progressbar"
           aria-label={t("web.growthChecklist.progressLabel")}
           aria-valuenow={checklist.percent}
@@ -107,7 +107,7 @@ export function GrowthChecklist({
           aria-valuemax={100}
         >
           <div
-            className="bg-primary h-full rounded-full transition-all"
+            className="h-full rounded-full bg-primary transition-all"
             style={{ width: `${checklist.percent}%` }}
           />
         </div>
@@ -116,9 +116,9 @@ export function GrowthChecklist({
         {checklist.steps.map((step) => (
           <div key={step.key} className="flex items-start gap-3">
             {step.done ? (
-              <CheckCircle2 className="text-success mt-0.5 h-5 w-5 shrink-0" aria-hidden />
+              <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-success" aria-hidden />
             ) : (
-              <Circle className="text-muted-foreground/50 mt-0.5 h-5 w-5 shrink-0" aria-hidden />
+              <Circle className="mt-0.5 h-5 w-5 shrink-0 text-muted-foreground/50" aria-hidden />
             )}
             <div className="min-w-0 flex-1">
               <div className="flex items-center gap-2">
@@ -126,12 +126,12 @@ export function GrowthChecklist({
                   {step.title}
                 </span>
                 {step.count ? (
-                  <span className="bg-primary text-primary-foreground inline-flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-xs font-semibold">
+                  <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1.5 text-xs font-semibold text-primary-foreground">
                     {step.count}
                   </span>
                 ) : null}
               </div>
-              <p className="text-muted-foreground text-sm">{step.body}</p>
+              <p className="text-sm text-muted-foreground">{step.body}</p>
               <div className="mt-2 flex flex-wrap gap-2">
                 {step.action.kind === "share" ? (
                   step.action.channels.map((channel) => (
@@ -165,7 +165,7 @@ export function GrowthChecklist({
                     size="sm"
                     className={
                       step.done
-                        ? "text-muted-foreground px-0 underline underline-offset-4 hover:bg-transparent"
+                        ? "px-0 text-muted-foreground underline underline-offset-4 hover:bg-transparent"
                         : undefined
                     }
                   >

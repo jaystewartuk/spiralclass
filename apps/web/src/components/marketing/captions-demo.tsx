@@ -62,15 +62,15 @@ export function CaptionsDemo({
 
   return (
     <div className="mx-auto max-w-xl">
-      <div className="bg-card overflow-hidden rounded-2xl border shadow-xs">
+      <div className="overflow-hidden rounded-2xl border bg-card shadow-xs">
         {/* Fake in-call header */}
-        <div className="bg-secondary/40 flex items-center justify-between border-b px-4 py-2.5">
+        <div className="flex items-center justify-between border-b bg-secondary/40 px-4 py-2.5">
           <span className="inline-flex items-center gap-2 text-sm font-medium">
-            <Captions className="text-primary h-4 w-4" aria-hidden />
+            <Captions className="h-4 w-4 text-primary" aria-hidden />
             {speakerLabel}
           </span>
-          <span className="bg-destructive-bg text-destructive inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium">
-            <span className="bg-destructive h-1.5 w-1.5 rounded-full" aria-hidden />
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-destructive-bg px-2.5 py-1 text-xs font-medium text-destructive">
+            <span className="h-1.5 w-1.5 rounded-full bg-destructive" aria-hidden />
             {badge}
           </span>
         </div>
@@ -79,9 +79,9 @@ export function CaptionsDemo({
         <ul className="flex min-h-[15rem] flex-col justify-end gap-3 p-4" aria-hidden>
           {CAPTION_LINES.slice(0, visible).map((line, i) => (
             <li key={`${runId}-${i}`} className="animate-fade-in-up">
-              <p className="text-foreground text-sm font-medium">{line.es}</p>
-              <p className="text-muted-foreground mt-0.5 text-sm">
-                <span className="text-primary mr-1.5 align-middle text-sm font-semibold">
+              <p className="text-sm font-medium text-foreground">{line.es}</p>
+              <p className="mt-0.5 text-sm text-muted-foreground">
+                <span className="mr-1.5 align-middle text-sm font-semibold text-primary">
                   {translationLabel}
                 </span>
                 {line.en}
@@ -104,7 +104,7 @@ export function CaptionsDemo({
           type="button"
           onClick={() => setRunId((n) => n + 1)}
           disabled={!done}
-          className="text-muted-foreground hover:text-foreground inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium transition-colors disabled:opacity-40"
+          className="inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground disabled:opacity-40"
         >
           <RotateCcw className="h-3.5 w-3.5" aria-hidden />
           {replayLabel}

@@ -81,7 +81,7 @@ function PlatformSelect({ id, defaultValue }: { id: string; defaultValue?: Marke
       id={id}
       name="platform"
       defaultValue={defaultValue ?? "facebook_group"}
-      className="border-input bg-background h-9 w-full rounded-md border px-3 text-sm"
+      className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm"
     >
       {MARKETING_PLATFORMS.map((p) => (
         <option key={p} value={p}>
@@ -112,11 +112,11 @@ function PromotionRulesFields({ idPrefix, rules }: { idPrefix: string; rules: Pr
   const labels = weekdayLabels(locale);
 
   return (
-    <div className="bg-muted/30 space-y-4 rounded-md border p-3 sm:col-span-2">
+    <div className="space-y-4 rounded-md border bg-muted/30 p-3 sm:col-span-2">
       <input type="hidden" name="promoRulesPresent" value="1" />
       <div className="space-y-1">
         <p className="text-sm font-medium">{t("web.getStudents.rulesSectionTitle")}</p>
-        <p className="text-muted-foreground text-xs">{t("web.getStudents.rulesSectionHelp")}</p>
+        <p className="text-xs text-muted-foreground">{t("web.getStudents.rulesSectionHelp")}</p>
       </div>
 
       <fieldset className="space-y-2">
@@ -136,7 +136,7 @@ function PromotionRulesFields({ idPrefix, rules }: { idPrefix: string; rules: Pr
             </div>
           ))}
         </div>
-        <p className="text-muted-foreground text-xs">{t("web.getStudents.promoDaysHelp")}</p>
+        <p className="text-xs text-muted-foreground">{t("web.getStudents.promoDaysHelp")}</p>
       </fieldset>
 
       <div className="grid gap-4 sm:grid-cols-2">
@@ -153,11 +153,11 @@ function PromotionRulesFields({ idPrefix, rules }: { idPrefix: string; rules: Pr
               className="max-w-24"
               defaultValue={rules.everyDays ?? ""}
             />
-            <span className="text-muted-foreground text-sm">
+            <span className="text-sm text-muted-foreground">
               {t("web.getStudents.promoEveryDaysUnit")}
             </span>
           </div>
-          <p className="text-muted-foreground text-xs">{t("web.getStudents.promoEveryDaysHelp")}</p>
+          <p className="text-xs text-muted-foreground">{t("web.getStudents.promoEveryDaysHelp")}</p>
         </div>
 
         <div className="space-y-1">
@@ -168,13 +168,13 @@ function PromotionRulesFields({ idPrefix, rules }: { idPrefix: string; rules: Pr
             defaultValue={
               rules.linksAllowed === null ? "default" : rules.linksAllowed ? "yes" : "no"
             }
-            className="border-input bg-background h-9 w-full rounded-md border px-3 text-sm"
+            className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm"
           >
             <option value="default">{t("web.getStudents.promoLinksDefault")}</option>
             <option value="yes">{t("web.getStudents.promoLinksYes")}</option>
             <option value="no">{t("web.getStudents.promoLinksNo")}</option>
           </select>
-          <p className="text-muted-foreground text-xs">{t("web.getStudents.promoLinksHelp")}</p>
+          <p className="text-xs text-muted-foreground">{t("web.getStudents.promoLinksHelp")}</p>
         </div>
       </div>
 
@@ -192,7 +192,7 @@ function PromotionRulesFields({ idPrefix, rules }: { idPrefix: string; rules: Pr
             context for the writer, not a rule the app can enforce, and a
             teacher who believes otherwise will trust it with something that
             matters. */}
-        <p className="text-muted-foreground text-xs">{t("web.getStudents.promoNotesHelp")}</p>
+        <p className="text-xs text-muted-foreground">{t("web.getStudents.promoNotesHelp")}</p>
       </div>
     </div>
   );
@@ -222,7 +222,7 @@ function PolicyFields({
           name="promoPolicy"
           value={policy}
           onChange={(e) => setPolicy(e.target.value as PromoPolicy)}
-          className="border-input bg-background h-9 w-full rounded-md border px-3 text-sm"
+          className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm"
         >
           {PROMO_POLICIES.map((p) => (
             <option key={p} value={p}>
@@ -230,7 +230,7 @@ function PolicyFields({
             </option>
           ))}
         </select>
-        <p className="text-muted-foreground text-xs">
+        <p className="text-xs text-muted-foreground">
           {t(`web.getStudents.communityPolicyEffect.${policy}`)}
         </p>
       </div>
@@ -304,7 +304,7 @@ function CommunityFields({ idPrefix, item }: { idPrefix: string; item?: Communit
           defaultValue={item?.memeBrief ?? ""}
           placeholder={t("socialPreview.communityBriefPlaceholder")}
         />
-        <p className="text-muted-foreground text-xs">{t("socialPreview.communityBriefHelp")}</p>
+        <p className="text-xs text-muted-foreground">{t("socialPreview.communityBriefHelp")}</p>
       </div>
     </div>
   );
@@ -349,7 +349,7 @@ export function AddCommunityPanel({ hasCommunities }: { hasCommunities: boolean 
           {t("web.getStudents.addCommunity")}
         </CardTitle>
         {!hasCommunities && (
-          <p className="text-muted-foreground text-sm">
+          <p className="text-sm text-muted-foreground">
             {t("web.getStudents.communitiesEmptyBody")}
           </p>
         )}
@@ -357,7 +357,7 @@ export function AddCommunityPanel({ hasCommunities }: { hasCommunities: boolean 
       <CardContent>
         <form action={action} className="space-y-4">
           <CommunityFields idPrefix="add" />
-          <p className="text-muted-foreground text-xs">
+          <p className="text-xs text-muted-foreground">
             {t("web.getStudents.communityPolicyHelp")}
           </p>
           <FormStatus state={state} savedMessage={t("web.getStudents.communityAdded")} />
@@ -383,7 +383,7 @@ function WindowNotice({ window: w }: { window: CommunityWindow }) {
   const t = useT();
   if (w.allowed) return null;
   return (
-    <p className="text-muted-foreground flex items-start gap-2 text-sm">
+    <p className="flex items-start gap-2 text-sm text-muted-foreground">
       <CalendarClock className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
       <span>
         {w.reason === "frequency"
@@ -454,7 +454,7 @@ export function CommunityCard({
               {promoPolicyLabel(item.promoPolicy, locale)}
             </Badge>
           </div>
-          <p className="text-muted-foreground text-sm">
+          <p className="text-sm text-muted-foreground">
             {t(`web.getStudents.communityPolicyEffect.${item.promoPolicy}`)}
           </p>
           {ruleChips.length > 0 && (
@@ -482,7 +482,7 @@ export function CommunityCard({
       {/* The link that makes this community's students traceable back to it.
           It is the one thing on the card that is never folded away. */}
       {bookingUrl && (
-        <div className="bg-muted/40 mt-4 space-y-2 rounded-md border p-3">
+        <div className="mt-4 space-y-2 rounded-md border bg-muted/40 p-3">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <p className="flex items-center gap-2 text-sm font-medium">
               <LinkIcon className="h-4 w-4" aria-hidden="true" />
@@ -490,10 +490,10 @@ export function CommunityCard({
             </p>
             <CopyLinkButton value={taggedUrl} />
           </div>
-          <p className="text-muted-foreground text-xs">
+          <p className="text-xs text-muted-foreground">
             {t("web.dashboard.shareGroups.linkForThisGroupHelp")}
           </p>
-          <p className="text-muted-foreground truncate font-mono text-xs" title={taggedUrl}>
+          <p className="truncate font-mono text-xs text-muted-foreground" title={taggedUrl}>
             {taggedUrl}
           </p>
         </div>
@@ -506,7 +506,7 @@ export function CommunityCard({
             defaultOpen={false}
             headerRight={postSummary}
           >
-            <p className="text-muted-foreground text-xs">{t("web.getStudents.postSectionHelp")}</p>
+            <p className="text-xs text-muted-foreground">{t("web.getStudents.postSectionHelp")}</p>
             {post}
           </Collapsible>
         </div>
@@ -519,7 +519,7 @@ export function CommunityCard({
             defaultOpen={false}
             headerRight={previewSummary}
           >
-            <p className="text-muted-foreground text-xs">{t("socialPreview.subtitle")}</p>
+            <p className="text-xs text-muted-foreground">{t("socialPreview.subtitle")}</p>
             {preview}
           </Collapsible>
         </div>
@@ -566,7 +566,7 @@ export function ArchivedCommunityRow({ item }: { item: CommunityItem }) {
   return (
     <div className="flex flex-wrap items-center justify-between gap-2 rounded-md border px-3 py-2">
       <div className="flex min-w-0 flex-wrap items-center gap-2">
-        <span className="text-muted-foreground truncate text-sm">{item.name}</span>
+        <span className="truncate text-sm text-muted-foreground">{item.name}</span>
         <Badge variant="secondary">{platformLabel(item.platform, locale)}</Badge>
       </div>
       <form action={restore}>

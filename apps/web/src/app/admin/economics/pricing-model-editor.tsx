@@ -51,10 +51,10 @@ export function PricingModelEditor({
         className="font-mono text-xs"
         required
       />
-      <p className="text-muted-foreground text-xs">
+      <p className="text-xs text-muted-foreground">
         {t("web.admin.economics.integrations.pricingModelHint")}
       </p>
-      {error ? <p className="text-destructive text-xs">{error}</p> : null}
+      {error ? <p className="text-xs text-destructive">{error}</p> : null}
     </div>
   );
 }

@@ -24,15 +24,15 @@ export function CallCta({
   return (
     <div
       className={cn(
-        "border-primary bg-primary/10 flex flex-col items-stretch gap-3 rounded-lg border px-5 py-4 lg:flex-row lg:items-center lg:justify-between",
+        "flex flex-col items-stretch gap-3 rounded-lg border border-primary bg-primary/10 px-5 py-4 lg:flex-row lg:items-center lg:justify-between",
         className,
       )}
     >
       <div className="flex min-w-0 items-center gap-3">
-        <Video className="text-primary size-6 shrink-0" aria-hidden="true" />
+        <Video className="size-6 shrink-0 text-primary" aria-hidden="true" />
         <div className="min-w-0">
           <p className="truncate font-semibold">{title}</p>
-          {subtitle && <p className="text-muted-foreground truncate text-sm">{subtitle}</p>}
+          {subtitle && <p className="truncate text-sm text-muted-foreground">{subtitle}</p>}
         </div>
       </div>
       <Button asChild size="lg" className="shrink-0">

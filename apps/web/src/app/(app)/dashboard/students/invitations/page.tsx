@@ -35,12 +35,12 @@ export default async function InvitationsPage() {
         <div>
           <Link
             href="/dashboard/students"
-            className="text-muted-foreground hover:text-foreground text-xs"
+            className="text-xs text-muted-foreground hover:text-foreground"
           >
             {t("web.dashboard.invitations.backToStudents")}
           </Link>
           <PageHeader title={t("web.dashboard.invitations.title")} />
-          <p className="text-muted-foreground text-sm">{t("web.dashboard.invitations.subtitle")}</p>
+          <p className="text-sm text-muted-foreground">{t("web.dashboard.invitations.subtitle")}</p>
         </div>
         <Button asChild size="sm" className="shrink-0">
           <Link href="/dashboard/students/invitations/nuevo">
@@ -51,15 +51,15 @@ export default async function InvitationsPage() {
 
       <section className="grid grid-cols-3 gap-2 lg:grid-cols-6">
         {statTiles.map((tile) => (
-          <div key={tile.key} className="bg-muted/40 rounded-md border px-3 py-2 text-center">
+          <div key={tile.key} className="rounded-md border bg-muted/40 px-3 py-2 text-center">
             <div className="text-lg font-semibold tabular-nums">{tile.value}</div>
-            <div className="text-muted-foreground text-sm leading-tight">{tile.label}</div>
+            <div className="text-sm leading-tight text-muted-foreground">{tile.label}</div>
           </div>
         ))}
       </section>
 
       {rows.length === 0 ? (
-        <p className="text-muted-foreground text-sm">{t("web.dashboard.invitations.empty")}</p>
+        <p className="text-sm text-muted-foreground">{t("web.dashboard.invitations.empty")}</p>
       ) : (
         <InvitationsTable rows={rows} />
       )}

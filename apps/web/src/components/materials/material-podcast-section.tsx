@@ -125,9 +125,9 @@ export function MaterialPodcastSection({
   const isBusy = pending || status === "pending";
 
   return (
-    <div className="bg-muted/40 space-y-2 rounded-md border p-3">
+    <div className="space-y-2 rounded-md border bg-muted/40 p-3">
       <div className="flex items-center gap-1.5">
-        <Mic className="text-primary size-4" aria-hidden />
+        <Mic className="size-4 text-primary" aria-hidden />
         <Label>{t("classContent.podcast.title")}</Label>
       </div>
 
@@ -137,7 +137,7 @@ export function MaterialPodcastSection({
             <track kind="captions" />
           </audio>
           <div className="flex items-center gap-2">
-            <span className="text-muted-foreground text-xs">
+            <span className="text-xs text-muted-foreground">
               {t("classContent.podcast.ready")}
               {duration ? ` · ${duration}` : ""}
             </span>
@@ -148,7 +148,7 @@ export function MaterialPodcastSection({
           </div>
         </div>
       ) : status === "pending" ? (
-        <p className="text-muted-foreground flex items-center gap-1.5 text-sm" aria-live="polite">
+        <p className="flex items-center gap-1.5 text-sm text-muted-foreground" aria-live="polite">
           <Loader2 className="size-4 animate-spin" aria-hidden />
           {t("classContent.podcast.pending")}
         </p>
@@ -158,11 +158,11 @@ export function MaterialPodcastSection({
             <Mic className="mr-1 size-4" aria-hidden />
             {isBusy ? t("classContent.podcast.generating") : t("classContent.podcast.generate")}
           </Button>
-          <p className="text-muted-foreground text-xs">{t("classContent.podcast.help")}</p>
+          <p className="text-xs text-muted-foreground">{t("classContent.podcast.help")}</p>
         </div>
       )}
 
-      {error && <p className="text-destructive text-sm">{error}</p>}
+      {error && <p className="text-sm text-destructive">{error}</p>}
     </div>
   );
 }

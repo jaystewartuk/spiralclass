@@ -276,7 +276,7 @@ export function AiGenerateFlow({
 
           {templates.length > 0 && (
             <div className="space-y-1">
-              <p className="text-muted-foreground text-xs font-medium">
+              <p className="text-xs font-medium text-muted-foreground">
                 {t("classContent.author.structureLabel")}
               </p>
               <Select value={genTemplateId} onValueChange={setGenTemplateId}>
@@ -297,7 +297,7 @@ export function AiGenerateFlow({
 
           {focusGroups.length > 0 && (
             <div className="space-y-2">
-              <p className="text-muted-foreground text-xs font-medium">
+              <p className="text-xs font-medium text-muted-foreground">
                 {t("classContent.author.focusLabel")}
               </p>
               <FocusTagSelect
@@ -321,36 +321,36 @@ export function AiGenerateFlow({
         <div className="space-y-4">
           {streaming ? (
             <div className="min-h-40 rounded-md border px-3 py-3" aria-live="polite" aria-busy>
-              <p className="text-muted-foreground mb-2 flex items-center gap-1.5 text-xs">
-                <Sparkles className="text-primary size-3.5 animate-pulse" aria-hidden />
+              <p className="mb-2 flex items-center gap-1.5 text-xs text-muted-foreground">
+                <Sparkles className="size-3.5 animate-pulse text-primary" aria-hidden />
                 {t("classContent.author.writing")}
               </p>
               {body.trim() ? <ClassContentMarkdown body={body} /> : null}
               <span
-                className="bg-foreground ml-0.5 inline-block h-4 w-1.5 animate-pulse align-text-bottom"
+                className="ml-0.5 inline-block h-4 w-1.5 animate-pulse bg-foreground align-text-bottom"
                 aria-hidden
               />
             </div>
           ) : (
             <>
-              {streamError && <p className="text-destructive text-sm">{streamError}</p>}
+              {streamError && <p className="text-sm text-destructive">{streamError}</p>}
               {body.trim() && (
                 <div className="space-y-3">
-                  <p className="text-muted-foreground flex items-center gap-1.5 text-xs font-medium">
-                    <Sparkles className="text-primary size-3.5" aria-hidden />
+                  <p className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
+                    <Sparkles className="size-3.5 text-primary" aria-hidden />
                     {t("web.materials.reviewBanner")}
                   </p>
                   <div className="min-h-32 rounded-md border px-3 py-2">
                     <ClassContentMarkdown body={body} />
                   </div>
-                  <div className="bg-muted/40 space-y-2 rounded-md border p-3">
+                  <div className="space-y-2 rounded-md border bg-muted/40 p-3">
                     <div className="flex items-center gap-1.5">
-                      <Sparkles className="text-primary size-4" aria-hidden />
+                      <Sparkles className="size-4 text-primary" aria-hidden />
                       <Label htmlFor="ai-refine-instruction">
                         {t("classContent.author.editWithAi")}
                       </Label>
                     </div>
-                    <p className="text-muted-foreground text-xs">
+                    <p className="text-xs text-muted-foreground">
                       {t("classContent.author.refineHint")}
                     </p>
                     <div className="flex gap-2">
@@ -380,7 +380,7 @@ export function AiGenerateFlow({
                     </div>
                     {!isPro && <ProLockNote message={t("classContent.author.proRequired")} />}
                     {refineState?.error && (
-                      <p className="text-destructive text-sm">{refineState.error}</p>
+                      <p className="text-sm text-destructive">{refineState.error}</p>
                     )}
                   </div>
                 </div>
@@ -417,7 +417,7 @@ export function AiGenerateFlow({
                 />
 
                 <FieldError id="ai-review-content-error" message={errors.content} />
-                {saveState?.error && <p className="text-destructive text-sm">{saveState.error}</p>}
+                {saveState?.error && <p className="text-sm text-destructive">{saveState.error}</p>}
                 <Button type="submit" disabled={saving}>
                   {saving ? t("web.materials.adding") : t("web.materials.saveMaterial")}
                 </Button>

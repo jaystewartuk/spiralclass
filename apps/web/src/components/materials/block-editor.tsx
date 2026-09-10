@@ -306,7 +306,7 @@ function EditableBlock({
           onEnterEdit();
         }
       }}
-      className="group/readblock hover:bg-muted/30 focus-visible:ring-ring relative cursor-pointer rounded-md px-2 py-1 focus-visible:ring-1 focus-visible:outline-hidden"
+      className="group/readblock relative cursor-pointer rounded-md px-2 py-1 hover:bg-muted/30 focus-visible:ring-1 focus-visible:ring-ring focus-visible:outline-hidden"
     >
       <MaterialDocument body={serializeBlock(block)} />
       <span className="absolute top-1 right-1 opacity-0 transition-opacity group-hover/readblock:opacity-100 focus-within:opacity-100">
@@ -402,8 +402,8 @@ function BlockChrome({
   const t = useT();
   return (
     <div className="rounded-md border">
-      <div className="bg-muted/30 flex items-center gap-1 border-b px-2 py-1">
-        <span className="text-muted-foreground flex-1 text-xs font-medium">{label}</span>
+      <div className="flex items-center gap-1 border-b bg-muted/30 px-2 py-1">
+        <span className="flex-1 text-xs font-medium text-muted-foreground">{label}</span>
         <Button type="button" variant="ghost" size="sm" onClick={onDone}>
           {t("material.editor.block.done")}
         </Button>
@@ -449,7 +449,7 @@ function RawTextBlockEditor({
         className={block.type === "code" ? "font-mono text-sm" : undefined}
       />
       {field.value.trim() && (
-        <div className="bg-muted/20 mt-2 rounded-md border px-3 py-2">
+        <div className="mt-2 rounded-md border bg-muted/20 px-3 py-2">
           <MaterialDocument body={field.value} />
         </div>
       )}
@@ -582,8 +582,8 @@ function CalloutBlockEditor({
 
   return (
     <div className="rounded-md border">
-      <div className="bg-muted/30 flex items-center gap-2 border-b px-2 py-1.5">
-        <Icon className="text-muted-foreground size-4 shrink-0" aria-hidden />
+      <div className="flex items-center gap-2 border-b bg-muted/30 px-2 py-1.5">
+        <Icon className="size-4 shrink-0 text-muted-foreground" aria-hidden />
         <Select
           value={block.variant}
           onValueChange={(value) => onChange(updateCalloutVariant(block, value as CalloutVariant))}
@@ -811,7 +811,7 @@ function ImageUploadButton({
         className="hidden"
         onChange={pick}
       />
-      {error && <span className="text-destructive text-xs">{error}</span>}
+      {error && <span className="text-xs text-destructive">{error}</span>}
     </span>
   );
 }
@@ -857,7 +857,7 @@ function TimelineBlockEditor({
         <MaterialDocument body={serializeBlock(block)} />
 
         <fieldset className="space-y-1.5">
-          <legend className="text-muted-foreground text-xs font-medium">
+          <legend className="text-xs font-medium text-muted-foreground">
             {t("material.editor.block.timelineAxis")}
           </legend>
           <div className="flex gap-1.5">
@@ -883,7 +883,7 @@ function TimelineBlockEditor({
         </fieldset>
 
         <fieldset className="space-y-1.5">
-          <legend className="text-muted-foreground text-xs font-medium">
+          <legend className="text-xs font-medium text-muted-foreground">
             {t("material.editor.block.timelineSpan")}
           </legend>
           {block.span ? (
@@ -936,7 +936,7 @@ function TimelineBlockEditor({
         </fieldset>
 
         <fieldset className="space-y-1.5">
-          <legend className="text-muted-foreground text-xs font-medium">
+          <legend className="text-xs font-medium text-muted-foreground">
             {t("material.editor.block.timelinePoints")}
           </legend>
           {block.points.map((point, i) => (
@@ -1080,23 +1080,23 @@ function AddBlockRow({
             "opacity-0 transition-opacity group-hover/blocklist:opacity-100 focus-within:opacity-100",
         )}
       >
-        <span className="bg-border h-px flex-1 opacity-30 transition-opacity group-hover:opacity-100" />
+        <span className="h-px flex-1 bg-border opacity-30 transition-opacity group-hover:opacity-100" />
         <button
           type="button"
           onClick={() => setOpen(true)}
           aria-label={t("material.editor.block.addHere")}
-          className="text-muted-foreground hover:bg-accent flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs opacity-50 transition-opacity hover:opacity-100"
+          className="flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs text-muted-foreground opacity-50 transition-opacity hover:bg-accent hover:opacity-100"
         >
           <Plus className="size-3 shrink-0" aria-hidden />
           {t("material.editor.block.add")}
         </button>
-        <span className="bg-border h-px flex-1 opacity-30 transition-opacity group-hover:opacity-100" />
+        <span className="h-px flex-1 bg-border opacity-30 transition-opacity group-hover:opacity-100" />
       </div>
     );
   }
 
   return (
-    <div className="bg-muted/20 flex flex-wrap items-center gap-1.5 rounded-md border p-1.5">
+    <div className="flex flex-wrap items-center gap-1.5 rounded-md border bg-muted/20 p-1.5">
       <Chip onClick={() => choose(newParagraphBlock(t("material.editor.block.newParagraphText")))}>
         <Type className="size-3.5" aria-hidden />
         {t("material.editor.block.type.paragraph")}
@@ -1147,7 +1147,7 @@ function AddBlockRow({
         type="button"
         onClick={close}
         aria-label={t("common.cancel")}
-        className="text-muted-foreground hover:bg-accent ml-auto rounded-full p-1"
+        className="ml-auto rounded-full p-1 text-muted-foreground hover:bg-accent"
       >
         <X className="size-3.5" aria-hidden />
       </button>
@@ -1174,7 +1174,7 @@ function Chip({ onClick, children }: { onClick: () => void; children: ReactNode 
     <button
       type="button"
       onClick={onClick}
-      className="bg-background text-foreground hover:bg-accent inline-flex items-center gap-1 rounded-full border px-2 py-1 text-xs"
+      className="inline-flex items-center gap-1 rounded-full border bg-background px-2 py-1 text-xs text-foreground hover:bg-accent"
     >
       {children}
     </button>

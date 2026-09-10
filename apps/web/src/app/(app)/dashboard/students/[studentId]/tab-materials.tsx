@@ -82,10 +82,10 @@ function SegmentedLinks<T extends string>({
 }) {
   return (
     <div className="space-y-1.5">
-      <p className="text-muted-foreground text-sm" id={id}>
+      <p className="text-sm text-muted-foreground" id={id}>
         {label}
       </p>
-      <div role="group" aria-labelledby={id} className="bg-muted flex rounded-md p-1">
+      <div role="group" aria-labelledby={id} className="flex rounded-md bg-muted p-1">
         {options.map((option) => {
           const active = option === current;
           return (
@@ -94,7 +94,7 @@ function SegmentedLinks<T extends string>({
               href={hrefFor(option)}
               aria-current={active ? "true" : undefined}
               className={cn(
-                "focus-visible:ring-ring inline-flex min-h-9 items-center rounded px-3 text-sm font-medium transition-colors focus-visible:ring-3 focus-visible:outline-hidden",
+                "inline-flex min-h-9 items-center rounded px-3 text-sm font-medium transition-colors focus-visible:ring-3 focus-visible:ring-ring focus-visible:outline-hidden",
                 active
                   ? "bg-background text-foreground shadow-brand-sm"
                   : "text-muted-foreground hover:text-foreground",
@@ -219,7 +219,7 @@ export async function MaterialsTab({
           <CardTitle className="flex flex-wrap items-baseline gap-x-2 text-lg" as="h2">
             {t("web.dashboard.students.material.assignedTitle")}
             {assignments.length > 0 && (
-              <span className="text-muted-foreground text-sm font-normal tabular-nums">
+              <span className="text-sm font-normal text-muted-foreground tabular-nums">
                 {t("web.dashboard.students.material.coveredCount", {
                   covered: String(coveredCount),
                   total: String(assignments.length),
@@ -250,7 +250,7 @@ export async function MaterialsTab({
                     <div className="min-w-0">
                       <p className="font-medium">{materialTitle(a.material)}</p>
                       {a.material.levelId && (
-                        <p className="text-muted-foreground text-sm">
+                        <p className="text-sm text-muted-foreground">
                           {levelLabelById.get(a.material.levelId) ?? ""}
                         </p>
                       )}
@@ -287,7 +287,7 @@ export async function MaterialsTab({
           )}
 
           {libraryMaterials.length === 0 ? (
-            <p className="text-muted-foreground text-sm">
+            <p className="text-sm text-muted-foreground">
               {t("web.dashboard.students.material.addFirstPrefix")}{" "}
               <Link href="/dashboard/materials" className="underline underline-offset-4">
                 {t("web.dashboard.students.material.materialsLinkLabel")}
@@ -338,7 +338,7 @@ export async function MaterialsTab({
           </div>
 
           {groups.length === 0 ? (
-            <p className="text-muted-foreground text-sm">
+            <p className="text-sm text-muted-foreground">
               {filter === "sent"
                 ? t("web.dashboard.students.classMaterials.noneSentYet")
                 : filter === "used"
@@ -351,7 +351,7 @@ export async function MaterialsTab({
                 <section key={group.key} className="space-y-2">
                   <h3
                     data-class-material-group
-                    className="text-muted-foreground border-b pb-1 text-sm font-semibold"
+                    className="border-b pb-1 text-sm font-semibold text-muted-foreground"
                   >
                     {groupLabel(group)}
                   </h3>
@@ -371,14 +371,14 @@ export async function MaterialsTab({
                             <a
                               href={m.viewUrl ?? m.href}
                               {...(m.viewUrl ? { target: "_blank", rel: "noreferrer" } : {})}
-                              className="hover:text-primary inline-flex items-center gap-1.5 font-medium underline underline-offset-4"
+                              className="inline-flex items-center gap-1.5 font-medium underline underline-offset-4 hover:text-primary"
                             >
                               {title}
                               {m.viewUrl && (
                                 <ExternalLink className="size-3.5 shrink-0" aria-hidden />
                               )}
                             </a>
-                            <p className="text-muted-foreground text-sm">
+                            <p className="text-sm text-muted-foreground">
                               {formatZonedDateTime(m.classStart, teacher.timezone, locale)}
                               {m.sendTiming ? ` · ${timingLabelsByKey[m.sendTiming]}` : ""}
                               {m.origin === "library"

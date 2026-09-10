@@ -81,7 +81,7 @@ export function HelpSearch({ entries }: { entries: HelpSearchEntry[] }) {
         {t("web.help.search.label")}
       </label>
       <Search
-        className="text-muted-foreground pointer-events-none absolute top-1/2 left-4 h-5 w-5 -translate-y-1/2"
+        className="pointer-events-none absolute top-1/2 left-4 h-5 w-5 -translate-y-1/2 text-muted-foreground"
         aria-hidden
       />
       <Input
@@ -138,11 +138,11 @@ export function HelpSearch({ entries }: { entries: HelpSearchEntry[] }) {
       {open && (
         <div
           className={cn(
-            "bg-popover shadow-brand-lg absolute top-full right-0 left-0 z-30 mt-2 overflow-hidden rounded-2xl border text-left",
+            "absolute top-full right-0 left-0 z-30 mt-2 overflow-hidden rounded-2xl border bg-popover text-left shadow-brand-lg",
           )}
         >
           {results.length === 0 ? (
-            <p className="text-muted-foreground px-5 py-6 text-sm">
+            <p className="px-5 py-6 text-sm text-muted-foreground">
               {t("web.help.search.noResults", { query: trimmed })}
             </p>
           ) : (
@@ -167,15 +167,15 @@ export function HelpSearch({ entries }: { entries: HelpSearchEntry[] }) {
                           clear();
                         }
                       }}
-                      className="hover:bg-muted focus-visible:bg-muted flex items-start gap-3 px-5 py-3"
+                      className="flex items-start gap-3 px-5 py-3 hover:bg-muted focus-visible:bg-muted"
                     >
-                      <Icon className="text-muted-foreground mt-0.5 h-4 w-4 shrink-0" aria-hidden />
+                      <Icon className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" aria-hidden />
                       <span className="min-w-0">
-                        <span className="text-foreground block text-sm font-semibold">
+                        <span className="block text-sm font-semibold text-foreground">
                           {result.label}
                         </span>
                         {result.context && (
-                          <span className="text-subtle block text-xs">{result.context}</span>
+                          <span className="block text-xs text-subtle">{result.context}</span>
                         )}
                         {/* `line-clamp-*` sets `display: -webkit-box`, so the
                             snippet must NOT also carry `block` — the later
@@ -184,7 +184,7 @@ export function HelpSearch({ entries }: { entries: HelpSearchEntry[] }) {
                             right result, not so much that eight results stop
                             being a list. */}
                         {result.snippet && (
-                          <span className="text-muted-foreground mt-0.5 line-clamp-2 text-xs">
+                          <span className="mt-0.5 line-clamp-2 text-xs text-muted-foreground">
                             {result.snippet}
                           </span>
                         )}

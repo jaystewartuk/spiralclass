@@ -1570,7 +1570,7 @@ export function ClassCall({
           {minimized && (
             <div
               aria-hidden
-              className="bg-overlay-3 pointer-events-none absolute top-1.5 left-1/2 z-30 h-1 w-7 -translate-x-1/2 rounded-full"
+              className="pointer-events-none absolute top-1.5 left-1/2 z-30 h-1 w-7 -translate-x-1/2 rounded-full bg-overlay-3"
             />
           )}
 
@@ -1604,7 +1604,7 @@ export function ClassCall({
                 remoteRole === "big" ? "[&>video]:object-contain" : "[&>video]:object-cover",
                 remoteRole !== "big" &&
                   remoteRole !== "hidden" &&
-                  "border-overlay-1 rounded-lg border shadow-lg",
+                  "rounded-lg border border-overlay-1 shadow-lg",
               )}
               // Dragging and tap-to-swap share one pointer-event path: a
               // release that barely moved swaps (matching the previous
@@ -1724,7 +1724,7 @@ export function ClassCall({
             )}
 
             {status === "connecting" && !minimized && (
-              <div className="text-on-dark-muted absolute inset-0 flex flex-col items-center justify-center gap-4 px-8 text-center text-lg">
+              <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 px-8 text-center text-lg text-on-dark-muted">
                 {t("call.connecting")}
                 {/* Appears only once the join is visibly stalled, so an ordinary
                 fast connect never flashes buttons mid-join. Before this the
@@ -1734,13 +1734,13 @@ export function ClassCall({
                   <div className="flex gap-3 text-base">
                     <button
                       onClick={retry}
-                      className="bg-overlay-1 hover:bg-overlay-2 rounded-lg px-5 py-3 font-medium text-white"
+                      className="rounded-lg bg-overlay-1 px-5 py-3 font-medium text-white hover:bg-overlay-2"
                     >
                       {t("call.retry")}
                     </button>
                     <button
                       onClick={leave}
-                      className="bg-overlay-1 hover:bg-overlay-2 rounded-lg px-5 py-3 font-medium text-white"
+                      className="rounded-lg bg-overlay-1 px-5 py-3 font-medium text-white hover:bg-overlay-2"
                     >
                       {t("call.leave")}
                     </button>
@@ -1751,10 +1751,10 @@ export function ClassCall({
 
             {waitingForOther && !activeMaterial && !minimized && (
               <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 px-8 text-center">
-                <p className="text-on-dark-faint text-lg">{t("call.waiting")}</p>
+                <p className="text-lg text-on-dark-faint">{t("call.waiting")}</p>
                 {onNudge && (
                   <>
-                    <p className="text-on-dark-faint max-w-xs text-sm">{t("call.nudgeHint")}</p>
+                    <p className="max-w-xs text-sm text-on-dark-faint">{t("call.nudgeHint")}</p>
                     <button
                       onClick={nudge}
                       disabled={
@@ -1762,7 +1762,7 @@ export function ClassCall({
                         nudgeState === "sent" ||
                         nudgeState === "cooldown"
                       }
-                      className="bg-overlay-1 hover:bg-overlay-2 rounded-lg px-5 py-3 text-base font-medium disabled:opacity-60"
+                      className="rounded-lg bg-overlay-1 px-5 py-3 text-base font-medium hover:bg-overlay-2 disabled:opacity-60"
                     >
                       {nudgeState === "idle"
                         ? t("call.nudge")
@@ -1781,17 +1781,17 @@ export function ClassCall({
 
             {status === "error" && !minimized && (
               <div className="absolute inset-0 z-30 flex flex-col items-center justify-center gap-4 bg-black px-8 text-center">
-                <p className="text-on-dark-muted text-lg">{t("call.connectError")}</p>
+                <p className="text-lg text-on-dark-muted">{t("call.connectError")}</p>
                 <div className="flex gap-3">
                   <button
                     onClick={retry}
-                    className="bg-overlay-1 hover:bg-overlay-2 rounded-lg px-5 py-3 font-medium"
+                    className="rounded-lg bg-overlay-1 px-5 py-3 font-medium hover:bg-overlay-2"
                   >
                     {t("call.retry")}
                   </button>
                   <button
                     onClick={leave}
-                    className="bg-overlay-1 hover:bg-overlay-2 rounded-lg px-5 py-3 font-medium"
+                    className="rounded-lg bg-overlay-1 px-5 py-3 font-medium hover:bg-overlay-2"
                   >
                     {t("call.leave")}
                   </button>
@@ -1826,7 +1826,7 @@ export function ClassCall({
                 localRole === "hidden" && "invisible",
                 localRole !== "big" &&
                   localRole !== "hidden" &&
-                  "border-overlay-1 rounded-lg border shadow-lg",
+                  "rounded-lg border border-overlay-1 shadow-lg",
               )}
               // See remoteRef's pointer handlers above — same drag/tap-to-swap
               // path, mirrored for this tile.
@@ -1909,18 +1909,18 @@ export function ClassCall({
               // since the call itself keeps running behind it.
               <div
                 role="status"
-                className="w-dialog-inset bg-scrim-3 absolute top-1/2 left-1/2 z-30 flex max-w-sm -translate-x-1/2 -translate-y-1/2 flex-col items-center gap-2 rounded-2xl px-5 py-4 text-center shadow-lg backdrop-blur-xs"
+                className="absolute top-1/2 left-1/2 z-30 flex w-dialog-inset max-w-sm -translate-x-1/2 -translate-y-1/2 flex-col items-center gap-2 rounded-2xl bg-scrim-3 px-5 py-4 text-center shadow-lg backdrop-blur-xs"
               >
                 <p className="text-base font-semibold text-white">
                   {t("call.captionsNoticeTitle")}
                 </p>
-                <p className="text-on-dark-muted text-sm leading-snug">
+                <p className="text-sm leading-snug text-on-dark-muted">
                   {t("call.captionsDisclosure")}
                 </p>
                 <button
                   type="button"
                   onClick={dismissCaptionsNotice}
-                  className="min-h-target bg-overlay-4 text-scrim-3 hover:bg-overlay-3 mt-1 rounded-full px-5 text-sm font-semibold"
+                  className="mt-1 min-h-target rounded-full bg-overlay-4 px-5 text-sm font-semibold text-scrim-3 hover:bg-overlay-3"
                 >
                   {t("call.captionsNoticeDismiss")}
                 </button>
@@ -1939,7 +1939,7 @@ export function ClassCall({
             An empty wrapper is 0-height and paints nothing, so it neither shows
             nor blocks the video underneath. */}
             {overlay && !minimized && (
-              <div className="max-h-over-stage absolute top-4 left-4 z-20 w-72 overflow-y-auto">
+              <div className="absolute top-4 left-4 z-20 max-h-over-stage w-72 overflow-y-auto">
                 {overlay}
               </div>
             )}
@@ -1970,7 +1970,7 @@ export function ClassCall({
                 onClick={() => setMinimized(true)}
                 aria-label={t("call.minimize")}
                 title={t("call.minimize")}
-                className="bg-overlay-1 hover:bg-overlay-2 absolute top-4 right-4 z-30 flex h-9 w-9 items-center justify-center rounded-full text-white backdrop-blur-md"
+                className="absolute top-4 right-4 z-30 flex h-9 w-9 items-center justify-center rounded-full bg-overlay-1 text-white backdrop-blur-md hover:bg-overlay-2"
               >
                 <Minimize2 className="h-4 w-4" aria-hidden />
               </button>
@@ -1995,7 +1995,7 @@ export function ClassCall({
                 }}
                 aria-label={t("call.popOut")}
                 title={t("call.popOut")}
-                className="bg-overlay-1 hover:bg-overlay-2 absolute top-4 right-16 z-30 flex h-9 w-9 items-center justify-center rounded-full text-white backdrop-blur-md"
+                className="absolute top-4 right-16 z-30 flex h-9 w-9 items-center justify-center rounded-full bg-overlay-1 text-white backdrop-blur-md hover:bg-overlay-2"
               >
                 <PictureInPicture2 className="h-4 w-4" aria-hidden />
               </button>
@@ -2017,7 +2017,7 @@ export function ClassCall({
               }}
               aria-label={t("call.leave")}
               title={t("call.leave")}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90 absolute top-1.5 right-1.5 z-30 flex h-7 w-7 items-center justify-center rounded-full"
+              className="absolute top-1.5 right-1.5 z-30 flex h-7 w-7 items-center justify-center rounded-full bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
               <PhoneOff className="h-3.5 w-3.5" aria-hidden />
             </button>
@@ -2031,10 +2031,10 @@ export function ClassCall({
             <div ref={controlsRef}>
               {/* Record/Stop error, surfaced so a rejected toggle isn't a silent no-op. */}
               {recordError && (
-                <p className="text-destructive px-3 pb-1 text-center text-sm">{recordError}</p>
+                <p className="px-3 pb-1 text-center text-sm text-destructive">{recordError}</p>
               )}
               {bookmarkError && (
-                <p className="text-destructive px-3 pb-1 text-center text-sm">{bookmarkError}</p>
+                <p className="px-3 pb-1 text-center text-sm text-destructive">{bookmarkError}</p>
               )}
 
               {/* Controls: a floating row of glass icon buttons (redesign item 3 —
@@ -2461,12 +2461,12 @@ function CallButton({
             ? "bg-destructive text-destructive-foreground hover:bg-destructive/90"
             : active
               ? "bg-overlay-4 text-scrim-3 hover:bg-overlay-4"
-              : "bg-overlay-1 hover:bg-overlay-2 text-white backdrop-blur-md",
+              : "bg-overlay-1 text-white backdrop-blur-md hover:bg-overlay-2",
         )}
       >
         <Icon className="h-5 w-5" aria-hidden />
       </span>
-      <span className="text-on-dark-muted text-center text-sm leading-tight">{label}</span>
+      <span className="text-center text-sm leading-tight text-on-dark-muted">{label}</span>
     </button>
   );
 }

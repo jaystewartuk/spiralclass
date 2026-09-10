@@ -55,7 +55,7 @@ export function TeachingLanguageForm({ initialLanguage }: { initialLanguage: str
             ))}
           </SelectContent>
         </Select>
-        <p className="text-muted-foreground text-xs">{t("web.settings.teachingLanguage.hint")}</p>
+        <p className="text-xs text-muted-foreground">{t("web.settings.teachingLanguage.hint")}</p>
       </div>
       <FormStatus
         state={state}

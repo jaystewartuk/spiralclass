@@ -97,7 +97,7 @@ export async function ReferralShare({ studentIds }: { studentIds: string[] }) {
               <span className="font-medium">{c.label}</span>
               {t("web.studentHome.referral.offClassesWith", { teacherName: c.teacherName })}
             </p>
-            <div className="bg-muted/40 rounded-md border px-3 py-2 font-mono text-xs break-all">
+            <div className="rounded-md border bg-muted/40 px-3 py-2 font-mono text-xs break-all">
               {c.url}
             </div>
             <div className="flex flex-wrap items-center gap-2">

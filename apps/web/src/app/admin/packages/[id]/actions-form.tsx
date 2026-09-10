@@ -30,19 +30,19 @@ export function CancelPackageForm({
   }, [state, t]);
   if (alreadyRefunded) {
     return (
-      <p className="text-muted-foreground text-sm">{t("web.admin.packages.alreadyRefunded")}</p>
+      <p className="text-sm text-muted-foreground">{t("web.admin.packages.alreadyRefunded")}</p>
     );
   }
-  if (state?.ok) return <p className="text-success text-sm">{t("web.admin.packages.canceled")}</p>;
+  if (state?.ok) return <p className="text-sm text-success">{t("web.admin.packages.canceled")}</p>;
   return (
     <form action={action} className="space-y-3">
       <input type="hidden" name="packageId" value={packageId} />
-      <p className="text-muted-foreground text-sm">{t("web.admin.packages.cancelDescription")}</p>
+      <p className="text-sm text-muted-foreground">{t("web.admin.packages.cancelDescription")}</p>
       <div className="space-y-2">
         <Label htmlFor="cancel-reason">{t("web.admin.packages.reasonKeptOnRecord")}</Label>
         <Input id="cancel-reason" name="reason" required maxLength={280} />
       </div>
-      {state?.error && <p className="text-destructive text-sm">{state.error}</p>}
+      {state?.error && <p className="text-sm text-destructive">{state.error}</p>}
       <Button type="submit" variant="destructive" disabled={pending}>
         {pending ? t("web.admin.packages.canceling") : t("web.admin.packages.cancelPackage")}
       </Button>
@@ -67,14 +67,14 @@ export function ExtendPackageForm({
     else if (state?.error) toast.error(state.error);
   }, [state, t]);
   if (!hasExpiry) {
-    return <p className="text-muted-foreground text-sm">{t("web.admin.packages.noExpiration")}</p>;
+    return <p className="text-sm text-muted-foreground">{t("web.admin.packages.noExpiration")}</p>;
   }
   if (state?.ok)
-    return <p className="text-success text-sm">{t("web.admin.packages.expirationExtended")}</p>;
+    return <p className="text-sm text-success">{t("web.admin.packages.expirationExtended")}</p>;
   return (
     <form action={action} className="space-y-3">
       <input type="hidden" name="packageId" value={packageId} />
-      <p className="text-muted-foreground text-sm">{t("web.admin.packages.extendDescription")}</p>
+      <p className="text-sm text-muted-foreground">{t("web.admin.packages.extendDescription")}</p>
       <div className="grid gap-3 lg:grid-cols-2">
         <div className="space-y-2">
           <Label htmlFor="extend-months">{t("web.admin.packages.monthsToExtend")}</Label>
@@ -93,7 +93,7 @@ export function ExtendPackageForm({
           <Input id="extend-reason" name="reason" required maxLength={280} />
         </div>
       </div>
-      {state?.error && <p className="text-destructive text-sm">{state.error}</p>}
+      {state?.error && <p className="text-sm text-destructive">{state.error}</p>}
       <Button type="submit" disabled={pending}>
         {pending ? t("web.admin.packages.extending") : t("web.admin.packages.extendExpiration")}
       </Button>

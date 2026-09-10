@@ -36,10 +36,10 @@ export function DetailsPanel({
   const t = useT();
 
   return (
-    <aside className="max-w-sheet border-border/60 bg-background/95 absolute top-0 right-0 z-10 flex h-full w-80 flex-col border-l shadow-xl backdrop-blur">
-      <header className="border-border/60 flex items-center justify-between gap-2 border-b px-4 py-3">
+    <aside className="absolute top-0 right-0 z-10 flex h-full w-80 max-w-sheet flex-col border-l border-border/60 bg-background/95 shadow-xl backdrop-blur">
+      <header className="flex items-center justify-between gap-2 border-b border-border/60 px-4 py-3">
         <div className="min-w-0">
-          <p className="text-subtle text-sm font-semibold">
+          <p className="text-sm font-semibold text-subtle">
             {selection.kind === "table"
               ? t("web.admin.erd.panel.tableHeading")
               : t("web.admin.erd.panel.relationshipHeading")}
@@ -54,7 +54,7 @@ export function DetailsPanel({
           type="button"
           onClick={onClose}
           aria-label={t("web.admin.erd.panel.close")}
-          className="text-muted-foreground hover:bg-muted hover:text-foreground inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-md"
+          className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground"
         >
           <X className="h-4 w-4" />
         </button>
@@ -94,12 +94,12 @@ function TableDetails({
 
   return (
     <div className="space-y-5">
-      {table.note ? <p className="text-muted-foreground text-xs">{table.note}</p> : null}
+      {table.note ? <p className="text-xs text-muted-foreground">{table.note}</p> : null}
 
       {adminRoute ? (
         <Link
           href={adminRoute}
-          className="border-border hover:bg-muted inline-flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-xs font-medium"
+          className="inline-flex items-center gap-1.5 rounded-md border border-border px-3 py-1.5 text-xs font-medium hover:bg-muted"
         >
           <ExternalLink className="h-3.5 w-3.5" />
           {t("web.admin.erd.panel.openInAdmin")}
@@ -112,13 +112,13 @@ function TableDetails({
             <li key={col.name} className="flex items-center gap-2 font-mono text-xs">
               <span className="flex w-4 shrink-0 justify-center">
                 {col.isPrimaryKey ? (
-                  <KeyRound className="text-warning h-3.5 w-3.5" />
+                  <KeyRound className="h-3.5 w-3.5 text-warning" />
                 ) : col.isForeignKey ? (
-                  <Link2 className="text-info h-3.5 w-3.5" />
+                  <Link2 className="h-3.5 w-3.5 text-info" />
                 ) : null}
               </span>
               <span className="min-w-0 flex-1 truncate">{col.name}</span>
-              <span className="text-muted-foreground shrink-0 truncate">{col.type}</span>
+              <span className="shrink-0 truncate text-muted-foreground">{col.type}</span>
             </li>
           ))}
         </ul>
@@ -190,9 +190,9 @@ function RelationshipList({
             <button
               type="button"
               onClick={() => onSelectTable(other.table)}
-              className="hover:bg-muted flex w-full items-center gap-1.5 rounded px-1 py-0.5 text-left font-mono text-xs"
+              className="flex w-full items-center gap-1.5 rounded px-1 py-0.5 text-left font-mono text-xs hover:bg-muted"
             >
-              <span className="text-muted-foreground truncate">{own.columns.join(", ")}</span>
+              <span className="truncate text-muted-foreground">{own.columns.join(", ")}</span>
               <span aria-hidden>→</span>
               <span className="min-w-0 flex-1 truncate font-medium">{tableName(other.table)}</span>
             </button>
@@ -224,13 +224,13 @@ function RelationshipDetails({
 
   return (
     <div className="space-y-5">
-      <div className="border-border/60 bg-muted/40 rounded-md border p-3 font-mono text-xs">
+      <div className="rounded-md border border-border/60 bg-muted/40 p-3 font-mono text-xs">
         <EndpointRow
           label={t("web.admin.erd.rel.from")}
           endpoint={relationship.source}
           onSelectTable={onSelectTable}
         />
-        <div className="text-muted-foreground my-1 pl-1" aria-hidden>
+        <div className="my-1 pl-1 text-muted-foreground" aria-hidden>
           ↓
         </div>
         <EndpointRow
@@ -243,7 +243,7 @@ function RelationshipDetails({
       <dl className="space-y-2">
         {rows.map((row) => (
           <div key={row.label} className="flex items-center justify-between gap-3">
-            <dt className="text-muted-foreground text-xs">{row.label}</dt>
+            <dt className="text-xs text-muted-foreground">{row.label}</dt>
             <dd className="font-mono text-xs font-medium">{row.value}</dd>
           </div>
         ))}
@@ -263,7 +263,7 @@ function EndpointRow({
 }) {
   return (
     <div className="flex items-baseline gap-2">
-      <span className="text-subtle w-10 shrink-0 text-sm">{label}</span>
+      <span className="w-10 shrink-0 text-sm text-subtle">{label}</span>
       <button
         type="button"
         onClick={() => onSelectTable(endpoint.table)}
@@ -287,9 +287,9 @@ function Section({
 }) {
   return (
     <section>
-      <h3 className={cn("text-subtle mb-2 text-sm font-semibold")}>
+      <h3 className={cn("mb-2 text-sm font-semibold text-subtle")}>
         {title}
-        {count != null ? <span className="text-muted-foreground/50 ml-1">({count})</span> : null}
+        {count != null ? <span className="ml-1 text-muted-foreground/50">({count})</span> : null}
       </h3>
       {children}
     </section>

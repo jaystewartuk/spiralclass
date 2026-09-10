@@ -42,7 +42,7 @@ export function CaptionsConsentToggle({ initialConsented }: { initialConsented: 
           ? t("web.myClasses.account.captionsConsent.recorded")
           : t("web.myClasses.account.captionsConsent.record")}
       </Button>
-      {error && <p className="text-destructive text-xs">{error}</p>}
+      {error && <p className="text-xs text-destructive">{error}</p>}
     </div>
   );
 }

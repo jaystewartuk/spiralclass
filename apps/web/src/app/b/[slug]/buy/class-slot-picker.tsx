@@ -170,7 +170,7 @@ export function ClassSlotPicker({
         {optional ? t("web.buyFlow.pickFirstClass") : t("buy.pickTime")}
       </legend>
       {optional && (
-        <p className="text-muted-foreground text-xs">{t("web.buyFlow.pickFirstClassOptional")}</p>
+        <p className="text-xs text-muted-foreground">{t("web.buyFlow.pickFirstClassOptional")}</p>
       )}
       <div className="space-y-1">
         <Label htmlFor="class-slot-date">{t("book.chooseDate")}</Label>
@@ -185,8 +185,8 @@ export function ClassSlotPicker({
             onChange(null); // clear the chosen time when the day changes
           }}
         />
-        <p className="text-foreground/80 text-xs font-medium">{longDate}</p>
-        <p className="text-muted-foreground text-xs">
+        <p className="text-xs font-medium text-foreground/80">{longDate}</p>
+        <p className="text-xs text-muted-foreground">
           {viewerZone
             ? t("web.buyFlow.timesInYourZone", {
                 timezone: viewerZone,
@@ -197,7 +197,7 @@ export function ClassSlotPicker({
       </div>
 
       {slots.length === 0 ? (
-        <p className="border-border/60 bg-muted/30 text-muted-foreground rounded-md border p-3 text-center text-sm">
+        <p className="rounded-md border border-border/60 bg-muted/30 p-3 text-center text-sm text-muted-foreground">
           {t("web.buyFlow.noSlotsTryAnother")}
         </p>
       ) : (

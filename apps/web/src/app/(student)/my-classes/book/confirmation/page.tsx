@@ -76,12 +76,12 @@ export default async function ConfirmacionPage({
           </p>
           <p className="text-muted-foreground">{when.whenSecondary}</p>
           <div className="pt-2">
-            <p className="text-muted-foreground mb-2 text-xs font-medium">
+            <p className="mb-2 text-xs font-medium text-muted-foreground">
               {t("web.myClasses.confirmation.addToCalendar")}
             </p>
             <AddToCalendar googleUrl={calendar.googleUrl} icsContent={calendar.ics} />
           </div>
-          <p className="text-muted-foreground pt-2 text-xs">
+          <p className="pt-2 text-xs text-muted-foreground">
             {t("book.confirm.cancellationNote")}{" "}
             <Link href={termsHref} className="underline">
               {t("terms.linkLabel")}

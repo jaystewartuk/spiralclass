@@ -85,17 +85,17 @@ export default async function HelpPage() {
             absolutely positioned and has to escape the hero. */}
         <div className="relative">
           <div aria-hidden className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
-            <div className="bg-primary/10 absolute top-0 left-1/2 h-96 w-96 -translate-x-1/2 rounded-full blur-3xl" />
+            <div className="absolute top-0 left-1/2 h-96 w-96 -translate-x-1/2 rounded-full bg-primary/10 blur-3xl" />
           </div>
           <div className="container flex flex-col items-center gap-5 py-14 text-center lg:py-20">
             <Badge variant="secondary" className="gap-1.5 px-3 py-1">
               <LifeBuoy className="h-3.5 w-3.5" aria-hidden />
               {t("web.help.hero.eyebrow")}
             </Badge>
-            <Heading level={1} className="max-w-reading lg:text-display text-balance">
+            <Heading level={1} className="max-w-reading text-balance lg:text-display">
               {t("web.help.hero.title")}
             </Heading>
-            <p className="max-w-reading text-muted-foreground text-lg text-pretty">
+            <p className="max-w-reading text-lg text-pretty text-muted-foreground">
               {t("web.help.hero.sub")}
             </p>
             <div className="mt-2 w-full max-w-xl">
@@ -109,8 +109,8 @@ export default async function HelpPage() {
         {/* Contents rail — desktop only. The phone gets the jump pills below,
             which are the same idea at one level of depth. */}
         <aside className="hidden w-64 shrink-0 lg:block">
-          <div className="max-h-rail sticky top-8 overflow-y-auto">
-            <Heading level={4} as="p" className="text-foreground mb-3">
+          <div className="sticky top-8 max-h-rail overflow-y-auto">
+            <Heading level={4} as="p" className="mb-3 text-foreground">
               {t("web.help.onThisPage")}
             </Heading>
             <HelpToc
@@ -142,7 +142,7 @@ export default async function HelpPage() {
                 // A rule between guides rather than only space: four articles
                 // of six sections each need a boundary that survives being
                 // scrolled past at speed.
-                className="border-border scroll-mt-8 border-t pt-14 first:border-t-0 first:pt-0"
+                className="scroll-mt-8 border-t border-border pt-14 first:border-t-0 first:pt-0"
               >
                 {/* 30px against the sections' 22px and the body's 17px. The
                     guide title used to sit at 22px, one step from its own
@@ -155,7 +155,7 @@ export default async function HelpPage() {
                   label={guide.title}
                   linkLabel={t("web.help.anchorLinkTo", { section: guide.title })}
                 />
-                <p className="max-w-reading text-muted-foreground mt-3 text-lg text-pretty">
+                <p className="mt-3 max-w-reading text-lg text-pretty text-muted-foreground">
                   {guide.summary}
                 </p>
 
@@ -171,7 +171,7 @@ export default async function HelpPage() {
                         as="h3"
                         label={section.heading}
                         linkLabel={t("web.help.anchorLinkTo", { section: section.heading })}
-                        className="border-border text-foreground mb-4 border-b pb-2"
+                        className="mb-4 border-b border-border pb-2 text-foreground"
                       />
                       {/* The article's own `##` became the `<h3>` above, so
                           everything inside it drops one level: a `###` here is
@@ -189,12 +189,12 @@ export default async function HelpPage() {
       {/* The rest of the help centre is per-audience and behind a session —
           say so plainly rather than letting a reader discover it at a sign-in
           redirect. */}
-      <section className="bg-secondary/40 border-y">
+      <section className="border-y bg-secondary/40">
         <div className="container py-14">
           <Heading level={2} as="h2" className="max-w-reading text-balance">
             {t("web.help.inApp.title")}
           </Heading>
-          <p className="max-w-reading text-muted-foreground mt-2 text-pretty">
+          <p className="mt-2 max-w-reading text-pretty text-muted-foreground">
             {t("web.help.inApp.sub")}
           </p>
           <div className="mt-8 grid gap-4 lg:grid-cols-2">
@@ -214,7 +214,7 @@ export default async function HelpPage() {
             ].map((item) => (
               <Card key={item.href} className="flex flex-col">
                 <CardHeader>
-                  <div className="bg-primary/10 text-primary flex h-11 w-11 items-center justify-center rounded-xl">
+                  <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10 text-primary">
                     <item.icon className="h-5 w-5" aria-hidden />
                   </div>
                   {/* `text-lg` (19px), not `text-h3`: both resolve to the same

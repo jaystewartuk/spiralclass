@@ -112,7 +112,7 @@ export function PaymentRow({
       <Link
         href={`/payments/${payment.id}`}
         className={cn(
-          "grid-cols-ledger hover:bg-muted/40 grid items-center gap-x-4 gap-y-1 px-4 py-3 transition-colors",
+          "grid grid-cols-ledger items-center gap-x-4 gap-y-1 px-4 py-3 transition-colors hover:bg-muted/40",
           "lg:grid-cols-ledger-wide lg:gap-y-0",
         )}
       >
@@ -120,7 +120,7 @@ export function PaymentRow({
           {payment.studentName}
         </span>
 
-        <span className="text-muted-foreground col-start-1 row-start-2 min-w-0 truncate text-xs lg:col-start-2 lg:row-start-1 lg:text-sm">
+        <span className="col-start-1 row-start-2 min-w-0 truncate text-xs text-muted-foreground lg:col-start-2 lg:row-start-1 lg:text-sm">
           {meta}
         </span>
 
@@ -190,12 +190,12 @@ export function PaymentLedger({
   });
 
   return (
-    <div className="divide-border bg-card divide-y overflow-hidden rounded-lg border">
+    <div className="divide-y divide-border overflow-hidden rounded-lg border bg-card">
       {months.map((month) => {
         const totals = received.get(month.key) ?? [];
         return (
           <section key={month.key} aria-labelledby={`month-${month.key}`}>
-            <div className="border-border bg-muted/50 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 border-b px-4 py-2">
+            <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 border-b border-border bg-muted/50 px-4 py-2">
               {/* `capitalize` because ICU lower-cases month names in Spanish and
                   French ("septiembre 2026"), and a heading should not. */}
               <Heading
@@ -207,7 +207,7 @@ export function PaymentLedger({
                 {monthHeading.format(month.date)}
               </Heading>
               {totals.length > 0 && (
-                <p className="text-muted-foreground text-sm tabular-nums">
+                <p className="text-sm text-muted-foreground tabular-nums">
                   {totals
                     .map((total) =>
                       t("web.payments.ledger.received", {
@@ -218,7 +218,7 @@ export function PaymentLedger({
                 </p>
               )}
             </div>
-            <ul className="divide-border divide-y">
+            <ul className="divide-y divide-border">
               {month.entries.map((payment) => (
                 <PaymentRow key={payment.id} payment={payment} day={day} t={t} />
               ))}
@@ -280,7 +280,7 @@ export function ConfirmQueue({
         <CardDescription>{t("web.payments.confirm.body")}</CardDescription>
       </CardHeader>
       <CardContent className="p-0">
-        <ul className="divide-border divide-y border-t">
+        <ul className="divide-y divide-border border-t">
           {payments.map((payment) => {
             const state = transferState(payment.studentMarkedSentAt, now);
             const wait = transferWaitLabel(state);
@@ -288,15 +288,15 @@ export function ConfirmQueue({
               <li key={payment.id}>
                 <Link
                   href={`/payments/${payment.id}`}
-                  className="grid-cols-ledger hover:bg-muted/40 grid items-center gap-x-4 gap-y-1 px-6 py-3 transition-colors"
+                  className="grid grid-cols-ledger items-center gap-x-4 gap-y-1 px-6 py-3 transition-colors hover:bg-muted/40"
                 >
                   <span className="col-start-1 row-start-1 min-w-0 truncate font-medium">
                     {payment.studentName}
                   </span>
 
-                  <span className="text-muted-foreground col-start-1 row-start-2 min-w-0 truncate text-xs">
+                  <span className="col-start-1 row-start-2 min-w-0 truncate text-xs text-muted-foreground">
                     {wait && (
-                      <span className={cn(state.state === "overdue" && "text-warning font-medium")}>
+                      <span className={cn(state.state === "overdue" && "font-medium text-warning")}>
                         {t(wait.key, wait.vars)}
                       </span>
                     )}
@@ -318,7 +318,7 @@ export function ConfirmQueue({
                     {formatMinorUnits(payment.amountMinorUnits, payment.currency)}
                   </span>
 
-                  <span className="text-muted-foreground col-start-2 row-start-2 justify-self-end text-xs">
+                  <span className="col-start-2 row-start-2 justify-self-end text-xs text-muted-foreground">
                     {day.format(payment.createdAt)}
                   </span>
                 </Link>

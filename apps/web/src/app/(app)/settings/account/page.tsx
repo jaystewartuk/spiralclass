@@ -136,9 +136,9 @@ export default async function AccountSettingsPage({
         />
         <div className="min-w-0 flex-1">
           <p className="truncate font-semibold">{teacher.name}</p>
-          <p className="text-muted-foreground truncate text-sm">{teacher.email}</p>
+          <p className="truncate text-sm text-muted-foreground">{teacher.email}</p>
         </div>
-        <p className="text-muted-foreground text-sm">
+        <p className="text-sm text-muted-foreground">
           {t("web.settings.account.memberSince", { date: memberSince })}
         </p>
       </Card>

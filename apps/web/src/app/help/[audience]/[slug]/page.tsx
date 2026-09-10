@@ -96,9 +96,9 @@ export default async function HelpDocPage({ params }: { params: Promise<PagePara
 
       <nav
         aria-label={t("web.help.title")}
-        className="text-muted-foreground flex items-center gap-1 text-xs"
+        className="flex items-center gap-1 text-xs text-muted-foreground"
       >
-        <Link href={`/help/${typedAudience}`} className="hover:text-foreground rounded-sm">
+        <Link href={`/help/${typedAudience}`} className="rounded-sm hover:text-foreground">
           {t(AUDIENCE_LABEL_KEY[typedAudience])}
         </Link>
         <ChevronRight className="h-3.5 w-3.5" aria-hidden />
@@ -109,7 +109,7 @@ export default async function HelpDocPage({ params }: { params: Promise<PagePara
         <Heading level={1} as="h1" className="text-balance">
           {guide.title}
         </Heading>
-        <p className="text-muted-foreground mt-2 text-pretty">{guide.summary}</p>
+        <p className="mt-2 text-pretty text-muted-foreground">{guide.summary}</p>
 
         <div className="mt-8 space-y-10">
           {guide.sections.map((section) => (
@@ -120,7 +120,7 @@ export default async function HelpDocPage({ params }: { params: Promise<PagePara
                 as="h2"
                 label={section.heading}
                 linkLabel={t("web.help.anchorLinkTo", { section: section.heading })}
-                className="border-border text-foreground mb-4 border-b pb-2"
+                className="mb-4 border-b border-border pb-2 text-foreground"
               />
               <MarkdownArticle content={section.body} headingOffset={1} />
             </section>

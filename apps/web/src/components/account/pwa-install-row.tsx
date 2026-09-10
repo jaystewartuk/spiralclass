@@ -76,7 +76,7 @@ export function PwaInstallRow() {
           {/* The row carries a WORD for the installed state rather than simply
               disappearing: a control that vanishes reads as a rendering bug
               instead of as the thing having worked (D-140). */}
-          <p className="text-muted-foreground text-sm" role="status" aria-live="polite">
+          <p className="text-sm text-muted-foreground" role="status" aria-live="polite">
             {state === "installed" ? t("web.pwaInstall.installedHelp") : t("web.pwaInstall.help")}
           </p>
         </div>

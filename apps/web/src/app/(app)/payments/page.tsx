@@ -231,10 +231,10 @@ export default async function PaymentsListPage({
             <CardDescription>{t("web.payments.emptyBody")}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
-            <p className="text-muted-foreground text-xs font-medium">
+            <p className="text-xs font-medium text-muted-foreground">
               {t("web.payments.emptyShareLead")}
             </p>
-            <div className="bg-muted/40 rounded-md border px-3 py-2 font-mono text-xs break-all">
+            <div className="rounded-md border bg-muted/40 px-3 py-2 font-mono text-xs break-all">
               {bookingUrl}
             </div>
             <CopyLinkButton value={bookingUrl} />

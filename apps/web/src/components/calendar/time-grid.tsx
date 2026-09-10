@@ -83,13 +83,13 @@ export function TimeGrid({
   const showDayHeaders = days.length > 1;
 
   return (
-    <div className="bg-card shadow-brand-sm overflow-x-auto rounded-lg border">
+    <div className="overflow-x-auto rounded-lg border bg-card shadow-brand-sm">
       {/* The floor is for SEVEN columns. A one-column day grid already fits
           any viewport, and forcing 36rem on it would make the day view scroll
           sideways inside its own (narrower) column on a wide screen. */}
       <div className={cn("flex", days.length > 1 && "min-w-table")}>
         {/* Hour gutter */}
-        <div className="bg-muted/30 w-16 shrink-0 border-r">
+        <div className="w-16 shrink-0 border-r bg-muted/30">
           {showDayHeaders && <div className="h-14 border-b" />}
           <div style={{ height: gridHeight }} className="relative">
             {hours.map((h, i) => (
@@ -101,7 +101,7 @@ export function TimeGrid({
                 // be blanked, which left the topmost hour — often the one
                 // holding the first class of the day — as the only unlabelled
                 // row on the axis.
-                className="text-muted-foreground absolute right-2 pt-1 text-sm tabular-nums"
+                className="absolute right-2 pt-1 text-sm text-muted-foreground tabular-nums"
               >
                 {String(h).padStart(2, "0")}:00
               </div>
@@ -131,7 +131,7 @@ export function TimeGrid({
                   <Link
                     href={dayHref(day.ymd)}
                     className={cn(
-                      "hover:bg-muted flex h-14 flex-col items-center justify-center gap-0.5 border-b transition-colors",
+                      "flex h-14 flex-col items-center justify-center gap-0.5 border-b transition-colors hover:bg-muted",
                       isToday ? "bg-primary/10" : "text-muted-foreground",
                     )}
                   >
@@ -157,7 +157,7 @@ export function TimeGrid({
                     <div
                       key={h}
                       style={{ top: i * HOUR_PX }}
-                      className="border-border/60 absolute inset-x-0 border-t"
+                      className="absolute inset-x-0 border-t border-border/60"
                     />
                   ))}
 
@@ -192,7 +192,7 @@ export function TimeGrid({
                           width: `calc(${widthPct}% - 4px)`,
                         }}
                         className={cn(
-                          "hover:shadow-brand-md absolute z-10 overflow-hidden rounded-md border border-l-4 px-1.5 py-0.5 text-sm leading-snug shadow-xs transition-shadow",
+                          "absolute z-10 overflow-hidden rounded-md border border-l-4 px-1.5 py-0.5 text-sm leading-snug shadow-xs transition-shadow hover:shadow-brand-md",
                           styleFor(l.ev.status).block,
                           // Too short for two lines: run them together so the
                           // student's name is still there rather than clipped

@@ -61,7 +61,7 @@ export function StudentEmailForm({
     >
       <div>
         <h2 className="text-sm font-semibold">{t("web.admin.students.emailForm.title")}</h2>
-        <p className="text-muted-foreground text-sm">
+        <p className="text-sm text-muted-foreground">
           {hasLogin
             ? t("web.admin.students.emailForm.hintHasLogin")
             : t("web.admin.students.emailForm.hintNoLogin")}
@@ -84,7 +84,7 @@ export function StudentEmailForm({
         />
         <FieldError id="admin-new-email-error" message={errors.newEmail} />
       </div>
-      {state?.error && <p className="text-destructive text-sm">{state.error}</p>}
+      {state?.error && <p className="text-sm text-destructive">{state.error}</p>}
       <Button type="submit" disabled={pending}>
         {pending
           ? t("web.admin.students.emailForm.updating")

@@ -59,7 +59,7 @@ export default async function ActivityPage({
             <Badge variant="outline">{t("web.getStudents.skipped")}</Badge>
           )}
         </div>
-        <p className="text-muted-foreground text-sm">{contentKindSummary(activity.kind, locale)}</p>
+        <p className="text-sm text-muted-foreground">{contentKindSummary(activity.kind, locale)}</p>
         {activity.reason && (
           <div className="space-y-1 pt-2">
             <div className="text-sm font-medium">{t("web.getStudents.whyThis")}</div>
@@ -98,17 +98,17 @@ export default async function ActivityPage({
           <CardContent>
             <dl className="grid grid-cols-3 gap-4">
               <div className="min-w-0">
-                <dt className="text-muted-foreground text-xs">{t("web.getStudents.visits")}</dt>
+                <dt className="text-xs text-muted-foreground">{t("web.getStudents.visits")}</dt>
                 <dd className="text-2xl font-semibold tabular-nums">{activity.results.visits}</dd>
               </div>
               <div className="min-w-0">
-                <dt className="text-muted-foreground text-xs">{t("web.getStudents.enquiries")}</dt>
+                <dt className="text-xs text-muted-foreground">{t("web.getStudents.enquiries")}</dt>
                 <dd className="text-2xl font-semibold tabular-nums">
                   {activity.results.enquiries}
                 </dd>
               </div>
               <div className="min-w-0">
-                <dt className="text-muted-foreground text-xs">
+                <dt className="text-xs text-muted-foreground">
                   {t("web.getStudents.newStudents")}
                 </dt>
                 <dd className="text-2xl font-semibold tabular-nums">{activity.results.students}</dd>

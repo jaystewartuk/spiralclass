@@ -118,11 +118,11 @@ export function SocialPreviewPanel({
           rendering it, so the teacher can always tell "I haven't changed this"
           apart from "I chose something". */}
       <div className="space-y-2">
-        <p className="text-muted-foreground text-xs font-medium">{t("socialPreview.current")}</p>
+        <p className="text-xs font-medium text-muted-foreground">{t("socialPreview.current")}</p>
         {preview?.image.url ? (
           <PreviewThumb url={preview.image.url} caption={preview.caption} />
         ) : (
-          <p className="bg-muted/40 text-muted-foreground rounded-md border px-3 py-2 text-xs">
+          <p className="rounded-md border bg-muted/40 px-3 py-2 text-xs text-muted-foreground">
             {t("socialPreview.standard")}
           </p>
         )}
@@ -161,7 +161,7 @@ export function SocialPreviewPanel({
               maxLength={SOCIAL_PREVIEW_TOPIC_MAX_CHARS}
               placeholder={t("socialPreview.topicPlaceholder")}
             />
-            <p className="text-muted-foreground text-xs">{t("socialPreview.topicHelp")}</p>
+            <p className="text-xs text-muted-foreground">{t("socialPreview.topicHelp")}</p>
           </div>
 
           <BriefSummary
@@ -179,20 +179,20 @@ export function SocialPreviewPanel({
                   ? t("socialPreview.generateAnother")
                   : t("socialPreview.generate")}
             </Button>
-            <span className="text-muted-foreground text-xs">
+            <span className="text-xs text-muted-foreground">
               {outOfQuota
                 ? t("socialPreview.quotaSpent")
                 : t("socialPreview.quota", { used: quota.used, cap: quota.cap })}
             </span>
           </div>
           {generating && (
-            <p role="status" className="text-muted-foreground text-xs">
+            <p role="status" className="text-xs text-muted-foreground">
               {t("socialPreview.generatingHelp")}
             </p>
           )}
         </form>
       ) : (
-        <p className="text-muted-foreground text-xs">{t("socialPreview.aiUnavailable")}</p>
+        <p className="text-xs text-muted-foreground">{t("socialPreview.aiUnavailable")}</p>
       )}
 
       {/* --- Upload. A peer of generation, never a fallback: a teacher who
@@ -218,13 +218,13 @@ export function SocialPreviewPanel({
           <input type="hidden" name="imageId" value={activeImageId ?? ""} />
 
           <div className="space-y-2">
-            <p className="text-muted-foreground text-xs font-medium">
+            <p className="text-xs font-medium text-muted-foreground">
               {t("socialPreview.library")}
             </p>
             {/* The library is ONE library, shown under every community. Said
                 out loud, because seeing the same thumbnails under each one
                 otherwise reads as "these images belong to this community". */}
-            <p className="text-muted-foreground text-xs">{t("socialPreview.libraryHelp")}</p>
+            <p className="text-xs text-muted-foreground">{t("socialPreview.libraryHelp")}</p>
             <div className="flex flex-wrap gap-2">
               {images.map((image) => (
                 <button
@@ -264,7 +264,7 @@ export function SocialPreviewPanel({
               maxLength={SOCIAL_PREVIEW_CAPTION_MAX_CHARS}
               placeholder={t("socialPreview.captionPlaceholder")}
             />
-            <p className="text-muted-foreground text-xs">{t("socialPreview.captionHelp")}</p>
+            <p className="text-xs text-muted-foreground">{t("socialPreview.captionHelp")}</p>
           </div>
 
           {activeImage?.url && <PreviewThumb url={activeImage.url} caption={caption} />}
@@ -287,7 +287,7 @@ export function SocialPreviewPanel({
       )}
 
       {error && (
-        <p role="alert" className="text-destructive text-sm">
+        <p role="alert" className="text-sm text-destructive">
           {error}
         </p>
       )}
@@ -295,7 +295,7 @@ export function SocialPreviewPanel({
       {/* Sets the expectation the crawler caches create: without this, a
           teacher who changes her image and sees the old one on an existing post
           concludes the feature is broken. */}
-      <p className="text-muted-foreground text-xs">{t("socialPreview.cacheNote")}</p>
+      <p className="text-xs text-muted-foreground">{t("socialPreview.cacheNote")}</p>
     </div>
   );
 }
@@ -332,20 +332,20 @@ function BriefSummary({
           </div>
           <div>
             <dt className="font-medium">{t("socialPreview.generalBrief")}</dt>
-            <dd className="text-muted-foreground whitespace-pre-wrap">
+            <dd className="whitespace-pre-wrap text-muted-foreground">
               {teacherBrief?.trim() || t("socialPreview.generalBriefEmpty")}
             </dd>
           </div>
           <div>
             <dt className="font-medium">{t("socialPreview.communityBrief")}</dt>
-            <dd className="text-muted-foreground whitespace-pre-wrap">
+            <dd className="whitespace-pre-wrap text-muted-foreground">
               {communityBrief?.trim() || t("socialPreview.communityBriefEmpty")}
             </dd>
           </div>
           <div>
             <dt className="font-medium">{t("socialPreview.alwaysTitle")}</dt>
             <dd>
-              <ul className="text-muted-foreground list-inside list-disc">
+              <ul className="list-inside list-disc text-muted-foreground">
                 {MEME_FIXED_RULES[locale].map((rule) => (
                   <li key={rule}>{rule}</li>
                 ))}
@@ -364,10 +364,10 @@ function BriefSummary({
  * legibility and framing. */
 function PreviewThumb({ url, caption }: { url: string; caption: string }) {
   return (
-    <div className="aspect-social relative w-full max-w-sm overflow-hidden rounded-md border">
+    <div className="relative aspect-social w-full max-w-sm overflow-hidden rounded-md border">
       <Image src={url} alt="" fill sizes="384px" className="object-cover" unoptimized />
       {caption.trim().length > 0 && (
-        <div className="bg-scrim-1 absolute inset-0 flex items-center justify-center p-4">
+        <div className="absolute inset-0 flex items-center justify-center bg-scrim-1 p-4">
           <span className="text-center text-sm leading-tight font-bold text-white drop-shadow">
             {caption}
           </span>

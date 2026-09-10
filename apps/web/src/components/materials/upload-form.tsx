@@ -132,7 +132,7 @@ export function UploadForm({
       </div>
 
       <FieldError id="upload-content-error" message={errors.content} />
-      {saveState?.error && <p className="text-destructive text-sm">{saveState.error}</p>}
+      {saveState?.error && <p className="text-sm text-destructive">{saveState.error}</p>}
       <Button type="submit" disabled={saving}>
         {saving ? t("web.materials.adding") : t("web.materials.saveMaterial")}
       </Button>

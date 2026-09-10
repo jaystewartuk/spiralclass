@@ -61,22 +61,22 @@ export default async function PaymentDetailPage({
       <BackLink href="/payments" label={t("web.payments.title")} />
 
       {sp.refunded === "1" && (
-        <div className="border-success/30 bg-success-bg text-success rounded-md border px-4 py-3 text-sm">
+        <div className="rounded-md border border-success/30 bg-success-bg px-4 py-3 text-sm text-success">
           {t("web.payments.detail.refundProcessed")}
         </div>
       )}
       {sp.wise_confirmed === "1" && (
-        <div className="border-success/30 bg-success-bg text-success rounded-md border px-4 py-3 text-sm">
+        <div className="rounded-md border border-success/30 bg-success-bg px-4 py-3 text-sm text-success">
           {t("web.payments.detail.wiseConfirmed")}
         </div>
       )}
       {sp.wise_failed === "1" && (
-        <div className="border-warning/30 bg-warning-bg text-warning rounded-md border px-4 py-3 text-sm">
+        <div className="rounded-md border border-warning/30 bg-warning-bg px-4 py-3 text-sm text-warning">
           {t("web.payments.detail.wiseFailed")}
         </div>
       )}
       {sp.error && (
-        <div className="border-destructive/30 bg-destructive-bg text-destructive rounded-md border px-4 py-3 text-sm">
+        <div className="rounded-md border border-destructive/30 bg-destructive-bg px-4 py-3 text-sm text-destructive">
           {refundError(sp.error, t)}
         </div>
       )}

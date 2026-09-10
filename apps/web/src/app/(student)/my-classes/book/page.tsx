@@ -80,7 +80,7 @@ export default async function ReservarPage({
             <CardDescription>{t("web.myClasses.book.needActivePackage")}</CardDescription>
           </CardHeader>
           <CardContent>
-            <p className="text-muted-foreground text-sm">
+            <p className="text-sm text-muted-foreground">
               {t("web.myClasses.book.onceActiveHint")}
             </p>
           </CardContent>
@@ -260,7 +260,7 @@ export default async function ReservarPage({
             </div>
           )}
 
-          <p className="text-muted-foreground text-sm">
+          <p className="text-sm text-muted-foreground">
             {selectedPool.classesLeft === 1
               ? t("web.myClasses.book.classLeftOneWith", { name: teacher.name })
               : t("web.myClasses.book.classesLeftWith", {
@@ -294,8 +294,8 @@ export default async function ReservarPage({
             </p>
 
             {selectedSlots.length === 0 ? (
-              <div className="border-border/60 bg-muted/30 space-y-3 rounded-md border p-4 text-center">
-                <p className="text-muted-foreground text-sm">{t("book.empty")}</p>
+              <div className="space-y-3 rounded-md border border-border/60 bg-muted/30 p-4 text-center">
+                <p className="text-sm text-muted-foreground">{t("book.empty")}</p>
                 {nextAvailableDate ? (
                   <Button
                     asChild
@@ -308,7 +308,7 @@ export default async function ReservarPage({
                     </HardLink>
                   </Button>
                 ) : (
-                  <p className="text-muted-foreground text-sm">
+                  <p className="text-sm text-muted-foreground">
                     {t("web.myClasses.book.noTimesLeftThisMonth")}
                   </p>
                 )}

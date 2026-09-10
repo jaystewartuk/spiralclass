@@ -42,7 +42,7 @@ export function DeletePackageButton({ packageId }: { packageId: string }) {
       footer={(close) => (
         <div className="flex w-full flex-col gap-2">
           {state?.error && (
-            <p role="alert" className="text-destructive text-sm">
+            <p role="alert" className="text-sm text-destructive">
               {state.error}
             </p>
           )}

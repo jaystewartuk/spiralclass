@@ -33,7 +33,7 @@ export function BackLink({
         }
       }}
       className={cn(
-        "text-muted-foreground hover:text-foreground -ml-2 inline-flex min-h-11 items-center gap-1 rounded-md px-2 text-sm font-medium transition-colors",
+        "-ml-2 inline-flex min-h-11 items-center gap-1 rounded-md px-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground",
         className,
       )}
     >

@@ -19,7 +19,7 @@ export { CHART_CATEGORY_COLORS, CHART_SERIES_COLOR } from "./chart-tokens";
 function ChartSkeleton({ className }: { className?: string }) {
   return (
     <div
-      className={cn("h-chart bg-muted/30 w-full animate-pulse rounded-md", className)}
+      className={cn("h-chart w-full animate-pulse rounded-md bg-muted/30", className)}
       aria-hidden
     />
   );

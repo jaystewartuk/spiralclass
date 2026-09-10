@@ -49,12 +49,12 @@ export function LocalClocks({ parties, locale }: { parties: ClockParty[]; locale
         const clock = clocks[i] ?? party.initial;
         return (
           <div key={`${party.label}-${party.tz}`} className="min-w-0">
-            <dt className="text-muted-foreground truncate text-sm">{party.label}</dt>
+            <dt className="truncate text-sm text-muted-foreground">{party.label}</dt>
             <dd className="mt-1">
               {/* Tabular figures, so the minute ticking over cannot shuffle the
                   line under a reader who is looking at something else. */}
               <span className="text-h2 font-semibold tabular-nums">{clock.time}</span>
-              <span className="text-muted-foreground mt-0.5 block truncate text-sm">
+              <span className="mt-0.5 block truncate text-sm text-muted-foreground">
                 {differentDays ? `${clock.date} · ${clock.city}` : clock.city}
               </span>
             </dd>

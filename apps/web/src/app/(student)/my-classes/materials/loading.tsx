@@ -9,7 +9,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 function RowSkeleton() {
   return (
-    <div className="border-border bg-card flex items-start gap-3 rounded-lg border p-3">
+    <div className="flex items-start gap-3 rounded-lg border border-border bg-card p-3">
       <Skeleton className="size-10 shrink-0 rounded-md" />
       <div className="min-w-0 flex-1 space-y-2">
         <Skeleton className="h-5 w-3/5" />
@@ -42,7 +42,7 @@ export default function StudentMaterialsLoading() {
       </div>
 
       <div
-        className="border-border flex flex-col gap-3 border-t pt-5"
+        className="flex flex-col gap-3 border-t border-border pt-5"
         role="status"
         aria-busy="true"
       >

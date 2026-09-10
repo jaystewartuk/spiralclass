@@ -138,7 +138,7 @@ export function LeadRow({ lead, ctx }: { lead: LeadItem; ctx: LeadContext }) {
             right, so a screen reader announcing it would say the name twice. */}
         <span
           aria-hidden
-          className="bg-muted text-muted-foreground flex size-9 shrink-0 items-center justify-center rounded-full text-sm font-semibold"
+          className="flex size-9 shrink-0 items-center justify-center rounded-full bg-muted text-sm font-semibold text-muted-foreground"
         >
           {initialsFrom(lead.name, lead.email)}
         </span>
@@ -151,7 +151,7 @@ export function LeadRow({ lead, ctx }: { lead: LeadItem; ctx: LeadContext }) {
             <Badge variant={STATUS_VARIANT[lead.status]}>{statusLabel(lead.status, t)}</Badge>
             <WaitingBadge elapsed={elapsed} urgency={urgency} t={t} />
           </div>
-          <p className="text-muted-foreground text-sm break-words">
+          <p className="text-sm break-words text-muted-foreground">
             {lead.email}
             {lead.phoneE164 ? ` · ${lead.phoneE164}` : ""}
           </p>
@@ -161,7 +161,7 @@ export function LeadRow({ lead, ctx }: { lead: LeadItem; ctx: LeadContext }) {
             the visible text is the useful approximation. */}
         <time
           dateTime={lead.createdAt.toISOString()}
-          className="text-muted-foreground shrink-0 text-xs"
+          className="shrink-0 text-xs text-muted-foreground"
         >
           {arrivedLabel(elapsed, lead.createdAt, ctx)}
         </time>
@@ -215,7 +215,7 @@ export function LeadGroup({
         </CardHeader>
       ) : null}
       <CardContent className={cn("p-0", title && "border-t")}>
-        <ul className="divide-border divide-y">
+        <ul className="divide-y divide-border">
           {leads.map((lead) => (
             <li key={lead.id}>
               <LeadRow lead={lead} ctx={ctx} />

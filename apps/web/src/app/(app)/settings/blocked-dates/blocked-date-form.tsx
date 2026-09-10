@@ -169,7 +169,7 @@ export function BlockedDateForm({
           disabled={pending}
           aria-describedby="reason-hint"
         />
-        <p id="reason-hint" className="text-muted-foreground text-xs">
+        <p id="reason-hint" className="text-xs text-muted-foreground">
           {t("web.settings.blockedDates.reasonHint")}
         </p>
       </div>

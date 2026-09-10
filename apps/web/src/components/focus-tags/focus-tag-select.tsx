@@ -136,8 +136,8 @@ export function FocusTagSelect({
         aria-haspopup="listbox"
         onClick={() => setOpen((o) => !o)}
         className={cn(
-          "border-input flex h-9 w-full items-center justify-between rounded-md border bg-transparent px-3 py-1 text-sm shadow-xs transition-colors",
-          "focus-visible:ring-ring focus-visible:ring-1 focus-visible:outline-hidden",
+          "flex h-9 w-full items-center justify-between rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs transition-colors",
+          "focus-visible:ring-1 focus-visible:ring-ring focus-visible:outline-hidden",
           selected.size === 0 && "text-muted-foreground",
         )}
       >
@@ -146,7 +146,7 @@ export function FocusTagSelect({
       </button>
 
       {open && (
-        <div className="bg-popover text-popover-foreground absolute z-50 mt-1 w-full min-w-64 rounded-md border shadow-md">
+        <div className="absolute z-50 mt-1 w-full min-w-64 rounded-md border bg-popover text-popover-foreground shadow-md">
           <div className="p-1">
             <input
               ref={inputRef}
@@ -156,7 +156,7 @@ export function FocusTagSelect({
               placeholder={t("classContent.author.focusSearch")}
               aria-label={t("classContent.author.focusSearch")}
               autoComplete="off"
-              className="placeholder:text-muted-foreground flex h-8 w-full rounded-sm bg-transparent px-2 text-sm outline-hidden"
+              className="flex h-8 w-full rounded-sm bg-transparent px-2 text-sm outline-hidden placeholder:text-muted-foreground"
             />
           </div>
           <ul
@@ -166,13 +166,13 @@ export function FocusTagSelect({
             className="max-h-60 overflow-y-auto p-1"
           >
             {filtered.length === 0 ? (
-              <li className="text-muted-foreground px-2 py-1.5 text-sm">
+              <li className="px-2 py-1.5 text-sm text-muted-foreground">
                 {t("classContent.author.focusEmpty")}
               </li>
             ) : (
               filteredGroups.map((group) => (
                 <li key={group.categoryId} role="presentation">
-                  <p className="text-muted-foreground px-2 pt-1.5 pb-0.5 text-sm">
+                  <p className="px-2 pt-1.5 pb-0.5 text-sm text-muted-foreground">
                     {group.categoryLabel}
                   </p>
                   <ul role="presentation">
@@ -214,7 +214,7 @@ export function FocusTagSelect({
               type="button"
               onClick={() => onToggle(tag.id)}
               aria-label={t("classContent.author.focusRemove", { label: tag.label })}
-              className="border-primary bg-primary text-primary-foreground inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-xs transition-colors hover:opacity-90"
+              className="inline-flex items-center gap-1 rounded-full border border-primary bg-primary px-2.5 py-1 text-xs text-primary-foreground transition-colors hover:opacity-90"
             >
               {tag.label}
               <X className="h-3 w-3 shrink-0" aria-hidden="true" />

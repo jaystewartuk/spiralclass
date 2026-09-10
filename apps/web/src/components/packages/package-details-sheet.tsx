@@ -92,7 +92,7 @@ export function PackageDetailsSheet({
         <button
           type="button"
           className={cn(
-            "hover:bg-muted/40 block w-full rounded-lg text-left transition-colors",
+            "block w-full rounded-lg text-left transition-colors hover:bg-muted/40",
             className,
           )}
         >
@@ -109,12 +109,12 @@ export function PackageDetailsSheet({
 
         {status === "loading" && (
           <div className="flex items-center justify-center py-10">
-            <Loader2 className="text-muted-foreground h-6 w-6 animate-spin" aria-hidden />
+            <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" aria-hidden />
           </div>
         )}
 
         {status === "error" && (
-          <p className="text-destructive text-sm">{t("web.packageDetails.loadError")}</p>
+          <p className="text-sm text-destructive">{t("web.packageDetails.loadError")}</p>
         )}
 
         {data && status !== "loading" && (
@@ -189,7 +189,7 @@ export function PackageDetailsSheet({
 function Stat({ label, value }: { label: string; value: string }) {
   return (
     <div className="rounded-lg border p-3">
-      <p className="text-muted-foreground text-xs">{label}</p>
+      <p className="text-xs text-muted-foreground">{label}</p>
       <p className="text-lg font-semibold">{value}</p>
     </div>
   );

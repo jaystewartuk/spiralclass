@@ -49,9 +49,9 @@ function Chip({
       // a toggle that survives the click, which is not what happens here.
       aria-current={selected ? "true" : undefined}
       className={cn(
-        "focus-visible:ring-ring rounded-full border px-3 py-1 text-xs transition-colors focus-visible:ring-3 focus-visible:outline-hidden",
+        "rounded-full border px-3 py-1 text-xs transition-colors focus-visible:ring-3 focus-visible:ring-ring focus-visible:outline-hidden",
         selected
-          ? "bg-foreground text-background border-transparent"
+          ? "border-transparent bg-foreground text-background"
           : "text-muted-foreground hover:bg-muted hover:text-foreground",
       )}
     >
@@ -71,7 +71,7 @@ function ChipRow({
 }) {
   return (
     <div className="flex flex-wrap items-center gap-2" role="group" aria-labelledby={id}>
-      <span id={id} className="text-muted-foreground w-20 shrink-0 text-xs font-semibold">
+      <span id={id} className="w-20 shrink-0 text-xs font-semibold text-muted-foreground">
         {label}
       </span>
       {children}
@@ -130,7 +130,7 @@ export async function LibraryToolbar({
               anyone navigating by landmark. */}
           <Link
             href={materialsHubHref()}
-            className="text-muted-foreground hover:text-foreground focus-visible:ring-ring -ml-1 inline-flex items-center gap-1 rounded-sm py-1 pr-2 pl-1 text-sm transition-colors focus-visible:ring-3 focus-visible:outline-hidden"
+            className="-ml-1 inline-flex items-center gap-1 rounded-sm py-1 pr-2 pl-1 text-sm text-muted-foreground transition-colors hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring focus-visible:outline-hidden"
           >
             <ChevronLeft className="size-4" aria-hidden />
             {t("web.materials.backToLevels")}
@@ -153,10 +153,10 @@ export async function LibraryToolbar({
       )}
 
       {showFilters && (
-        <div className="bg-muted/30 space-y-3 rounded-lg border p-3">
+        <div className="space-y-3 rounded-lg border bg-muted/30 p-3">
           <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
             <div
-              className="bg-background flex items-center gap-1 rounded-full border p-0.5"
+              className="flex items-center gap-1 rounded-full border bg-background p-0.5"
               role="group"
               // "Shelf", not "Filters": these two are different sets of rows,
               // the way the level row is a different set of rows. The three
@@ -169,7 +169,7 @@ export async function LibraryToolbar({
                   href={href({ view: v })}
                   aria-current={urlState.view === v ? "page" : undefined}
                   className={cn(
-                    "focus-visible:ring-ring rounded-full px-3 py-1 text-xs font-medium transition-colors focus-visible:ring-3 focus-visible:outline-hidden",
+                    "rounded-full px-3 py-1 text-xs font-medium transition-colors focus-visible:ring-3 focus-visible:ring-ring focus-visible:outline-hidden",
                     urlState.view === v
                       ? "bg-foreground text-background"
                       : "text-muted-foreground hover:bg-muted hover:text-foreground",
@@ -188,12 +188,12 @@ export async function LibraryToolbar({
               bottom, below a screenful of rows. `aria-live` because a search
               keystroke re-renders this without moving focus — the count is the
               only signal a screen-reader user gets that the list changed. */}
-            <p className="text-muted-foreground text-xs font-medium" aria-live="polite">
+            <p className="text-xs font-medium text-muted-foreground" aria-live="polite">
               {t("web.materials.resultCount", { count: total })}
             </p>
 
             <div className="ml-auto flex items-center gap-2">
-              <span className="text-muted-foreground hidden text-xs font-semibold sm:inline">
+              <span className="hidden text-xs font-semibold text-muted-foreground sm:inline">
                 {t("web.materials.sortLabel")}
               </span>
               <MaterialsSort />
@@ -246,7 +246,7 @@ export async function LibraryToolbar({
             <div className="flex justify-end">
               <Link
                 href={materialsClearFiltersHref(urlState)}
-                className="text-muted-foreground hover:text-foreground focus-visible:ring-ring inline-flex items-center gap-1 rounded-sm px-1 py-1 text-xs font-medium transition-colors focus-visible:ring-3 focus-visible:outline-hidden"
+                className="inline-flex items-center gap-1 rounded-sm px-1 py-1 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring focus-visible:outline-hidden"
               >
                 <X className="size-3.5" aria-hidden />
                 {t("web.materials.clearFilters")}

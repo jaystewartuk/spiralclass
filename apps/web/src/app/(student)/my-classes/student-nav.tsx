@@ -69,21 +69,21 @@ export function StudentNav({
   const sections: MobileNavSection[] = [{ rows: [...primary, ...accountLinks].map(toRow) }];
 
   return (
-    <header className="border-border/60 bg-background/95 supports-[backdrop-filter]:bg-background/80 sticky top-0 z-40 border-b backdrop-blur">
+    <header className="sticky top-0 z-40 border-b border-border/60 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
       <div className="container flex h-14 max-w-3xl items-center justify-between gap-4">
         <Link href="/my-classes" aria-label={t("common.brandName")} className="shrink-0">
           <Logo size="sm" />
         </Link>
 
         {/* Desktop: inline horizontal nav. Replaced by the drawer on mobile. */}
-        <nav aria-label={navLabel} className="desktop:flex hidden flex-1 items-center gap-1">
+        <nav aria-label={navLabel} className="hidden flex-1 items-center gap-1 desktop:flex">
           {primary.map((link) => (
             <NavBarLink key={link.key} href={link.href} label={link.label} active={link.active} />
           ))}
         </nav>
 
         {/* Desktop: account, language, appearance and sign out in one menu. */}
-        <div className="desktop:flex hidden shrink-0 items-center">
+        <div className="hidden shrink-0 items-center desktop:flex">
           <AccountMenu
             account={account}
             accountHref={STUDENT_ACCOUNT_HREF}

@@ -114,7 +114,7 @@ export async function BookingPageStatus({
                 </Badge>
               )}
             </div>
-            <p className="text-muted-foreground text-sm">
+            <p className="text-sm text-muted-foreground">
               {live
                 ? t("web.settings.bookingPage.status.liveBody")
                 : t("web.settings.bookingPage.status.draftBody")}
@@ -135,7 +135,7 @@ export async function BookingPageStatus({
         <div
           role="group"
           aria-label={t("bookingLink.label")}
-          className="bg-muted/40 flex items-center gap-2 rounded-md border px-3 py-2"
+          className="flex items-center gap-2 rounded-md border bg-muted/40 px-3 py-2"
         >
           <span className="flex-1 font-mono text-sm break-all">{displayUrl}</span>
           <CopyLinkButton value={fullUrl} iconOnly />
@@ -147,7 +147,7 @@ export async function BookingPageStatus({
               <p className="text-sm font-medium">
                 {t("web.settings.bookingPage.status.checklistTitle")}
               </p>
-              <p className="text-muted-foreground text-sm tabular-nums">
+              <p className="text-sm text-muted-foreground tabular-nums">
                 {t("web.settings.bookingPage.status.progress", {
                   done: requirementsDone,
                   total: requirementTotal,
@@ -155,7 +155,7 @@ export async function BookingPageStatus({
               </p>
             </div>
             <div
-              className="bg-muted h-1.5 w-full overflow-hidden rounded-full"
+              className="h-1.5 w-full overflow-hidden rounded-full bg-muted"
               role="progressbar"
               aria-label={t("web.settings.bookingPage.status.checklistTitle")}
               aria-valuenow={percent}
@@ -163,7 +163,7 @@ export async function BookingPageStatus({
               aria-valuemax={100}
             >
               <div
-                className="bg-primary h-full rounded-full transition-all"
+                className="h-full rounded-full bg-primary transition-all"
                 style={{ width: `${percent}%` }}
               />
             </div>
@@ -172,11 +172,11 @@ export async function BookingPageStatus({
                 <li key={item.key}>
                   <Link
                     href={REQUIREMENT_HREF[item.key]}
-                    className="hover:bg-muted focus-visible:ring-ring -mx-2 flex min-h-11 items-center gap-2.5 rounded-md px-2 text-sm focus-visible:ring-3 focus-visible:outline-hidden"
+                    className="-mx-2 flex min-h-11 items-center gap-2.5 rounded-md px-2 text-sm hover:bg-muted focus-visible:ring-3 focus-visible:ring-ring focus-visible:outline-hidden"
                   >
-                    <Circle className="text-muted-foreground h-4 w-4 shrink-0" aria-hidden />
+                    <Circle className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden />
                     <span className="min-w-0 flex-1">{requirementLabel(item.key, t)}</span>
-                    <ArrowUpRight className="text-muted-foreground h-4 w-4 shrink-0" aria-hidden />
+                    <ArrowUpRight className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden />
                   </Link>
                 </li>
               ))}
@@ -192,11 +192,11 @@ export async function BookingPageStatus({
                 <li key={item.key}>
                   <Link
                     href={SUGGESTION_HREF[item.key]}
-                    className="hover:bg-muted focus-visible:ring-ring -mx-2 flex min-h-11 items-center gap-2.5 rounded-md px-2 text-sm focus-visible:ring-3 focus-visible:outline-hidden"
+                    className="-mx-2 flex min-h-11 items-center gap-2.5 rounded-md px-2 text-sm hover:bg-muted focus-visible:ring-3 focus-visible:ring-ring focus-visible:outline-hidden"
                   >
-                    <Circle className="text-muted-foreground h-4 w-4 shrink-0" aria-hidden />
+                    <Circle className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden />
                     <span className="min-w-0 flex-1">{suggestionLabel(item.key, t)}</span>
-                    <ArrowUpRight className="text-muted-foreground h-4 w-4 shrink-0" aria-hidden />
+                    <ArrowUpRight className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden />
                   </Link>
                 </li>
               ))}
@@ -205,7 +205,7 @@ export async function BookingPageStatus({
         )}
 
         {live && openSuggestions.length === 0 && (
-          <p className="text-success flex items-center gap-1.5 border-t pt-4 text-sm">
+          <p className="flex items-center gap-1.5 border-t pt-4 text-sm text-success">
             <CheckCircle2 className="h-4 w-4 shrink-0" aria-hidden />
             {t("web.settings.bookingPage.status.allDone")}
           </p>

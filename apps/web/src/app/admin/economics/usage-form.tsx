@@ -54,7 +54,7 @@ export function UsageForm({ initial, onDone }: { initial: UsageFormValues; onDon
   }, [state]);
 
   return (
-    <form action={action} className="bg-muted/30 space-y-3 rounded-md border p-4">
+    <form action={action} className="space-y-3 rounded-md border bg-muted/30 p-4">
       <div className="grid gap-3 lg:grid-cols-2 xl:grid-cols-4">
         <div className="space-y-1">
           <Label htmlFor="usage-metric">{t("web.admin.economics.usage.metric")}</Label>
@@ -63,7 +63,7 @@ export function UsageForm({ initial, onDone }: { initial: UsageFormValues; onDon
             name="metric"
             required
             defaultValue={initial.metric}
-            className="bg-background h-9 w-full rounded-md border px-2 text-sm"
+            className="h-9 w-full rounded-md border bg-background px-2 text-sm"
           >
             {USAGE_METRICS.map((m) => (
               <option key={m} value={m}>
@@ -109,7 +109,7 @@ export function UsageForm({ initial, onDone }: { initial: UsageFormValues; onDon
           </Button>
         ) : null}
       </div>
-      {state?.error && <p className="text-destructive text-sm">{state.error}</p>}
+      {state?.error && <p className="text-sm text-destructive">{state.error}</p>}
     </form>
   );
 }

@@ -97,9 +97,9 @@ export function PlanButtons({ options }: { options: PlanOption[] }) {
             <form
               action={action}
               className={cn(
-                "bg-card flex h-full flex-col rounded-lg border p-4",
+                "flex h-full flex-col rounded-lg border bg-card p-4",
                 opt.recommended
-                  ? "border-primary shadow-brand-sm ring-primary/30 ring-1"
+                  ? "border-primary shadow-brand-sm ring-1 ring-primary/30"
                   : "border-border",
               )}
             >
@@ -114,24 +114,24 @@ export function PlanButtons({ options }: { options: PlanOption[] }) {
               </div>
               <p className="mt-2 flex flex-wrap items-baseline gap-x-1.5">
                 <span className="text-h3 font-semibold tabular-nums">{opt.priceLabel}</span>
-                <span className="text-muted-foreground text-sm">{opt.intervalLabel}</span>
+                <span className="text-sm text-muted-foreground">{opt.intervalLabel}</span>
               </p>
               {/* Directly under the price, because it IS the price — the one
                   figure that makes an annual charge comparable to a monthly
                   one without the reader doing the division. */}
               {opt.equivalentLabel && (
-                <p className="text-muted-foreground mt-0.5 text-sm tabular-nums">
+                <p className="mt-0.5 text-sm text-muted-foreground tabular-nums">
                   {opt.equivalentLabel}
                 </p>
               )}
-              <p className="text-muted-foreground mt-1 text-sm">{opt.subtitle}</p>
+              <p className="mt-1 text-sm text-muted-foreground">{opt.subtitle}</p>
               {opt.highlight && (
                 <p className="mt-2">
                   <Badge variant={opt.highlightTone ?? "info"}>{opt.highlight}</Badge>
                 </p>
               )}
               {opt.footnote && (
-                <p className="text-muted-foreground mt-1.5 text-sm">{opt.footnote}</p>
+                <p className="mt-1.5 text-sm text-muted-foreground">{opt.footnote}</p>
               )}
               {/* `mt-auto` on the wrapper pins every button to the bottom of
                   its card, so the founding card's two extra lines do not push
@@ -148,7 +148,7 @@ export function PlanButtons({ options }: { options: PlanOption[] }) {
           </li>
         ))}
       </ul>
-      <p className="text-muted-foreground text-sm">{t("web.settings.billing.stripeNote")}</p>
+      <p className="text-sm text-muted-foreground">{t("web.settings.billing.stripeNote")}</p>
     </div>
   );
 }

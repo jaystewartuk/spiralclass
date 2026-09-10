@@ -43,7 +43,7 @@ export function SubscriptionForm({ teacherId }: { teacherId: string }) {
         <h3 className="text-sm font-semibold">
           {t("web.admin.teachers.subscriptionForm.compTitle")}
         </h3>
-        <p className="text-muted-foreground text-xs">
+        <p className="text-xs text-muted-foreground">
           {t("web.admin.teachers.subscriptionForm.compHint")}
         </p>
         <input type="hidden" name="teacherId" value={teacherId} />
@@ -53,7 +53,7 @@ export function SubscriptionForm({ teacherId }: { teacherId: string }) {
             id="comp-plan"
             name="plan"
             defaultValue="founding"
-            className="bg-background h-9 w-full rounded-md border px-2 text-sm"
+            className="h-9 w-full rounded-md border bg-background px-2 text-sm"
           >
             {PLANS.map((p) => (
               <option key={p} value={p}>
@@ -66,7 +66,7 @@ export function SubscriptionForm({ teacherId }: { teacherId: string }) {
           <Label htmlFor="comp-reason">{t("web.admin.moderation.reasonLabel")}</Label>
           <Input id="comp-reason" name="reason" maxLength={280} />
         </div>
-        {compState?.error && <p className="text-destructive text-sm">{compState.error}</p>}
+        {compState?.error && <p className="text-sm text-destructive">{compState.error}</p>}
         <Button type="submit" disabled={compPending}>
           {compPending ? "…" : t("web.admin.teachers.subscriptionForm.compSubmit")}
         </Button>
@@ -76,7 +76,7 @@ export function SubscriptionForm({ teacherId }: { teacherId: string }) {
         <h3 className="text-sm font-semibold">
           {t("web.admin.teachers.subscriptionForm.paidTitle")}
         </h3>
-        <p className="text-muted-foreground text-xs">
+        <p className="text-xs text-muted-foreground">
           {t("web.admin.teachers.subscriptionForm.paidHint")}
         </p>
         <input type="hidden" name="teacherId" value={teacherId} />
@@ -86,7 +86,7 @@ export function SubscriptionForm({ teacherId }: { teacherId: string }) {
             id="paid-plan"
             name="plan"
             defaultValue="monthly"
-            className="bg-background h-9 w-full rounded-md border px-2 text-sm"
+            className="h-9 w-full rounded-md border bg-background px-2 text-sm"
           >
             {PLANS.map((p) => (
               <option key={p} value={p}>
@@ -109,7 +109,7 @@ export function SubscriptionForm({ teacherId }: { teacherId: string }) {
           <Label htmlFor="paid-reason">{t("web.admin.moderation.reasonLabel")}</Label>
           <Input id="paid-reason" name="reason" maxLength={280} />
         </div>
-        {paidState?.error && <p className="text-destructive text-sm">{paidState.error}</p>}
+        {paidState?.error && <p className="text-sm text-destructive">{paidState.error}</p>}
         <Button type="submit" disabled={paidPending}>
           {paidPending ? "…" : t("web.admin.teachers.subscriptionForm.paidSubmit")}
         </Button>

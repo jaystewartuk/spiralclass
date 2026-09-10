@@ -163,7 +163,7 @@ export default async function BookingPageSettings() {
                   1280px landscape tablet teachers work from. */}
               <div className="lg:col-span-2">
                 <div className="space-y-2 lg:sticky lg:top-20">
-                  <p className="text-muted-foreground text-sm font-medium">
+                  <p className="text-sm font-medium text-muted-foreground">
                     {t("web.settings.bookingPage.preview.title")}
                   </p>
                   <BookingPagePreview
@@ -254,7 +254,7 @@ export default async function BookingPageSettings() {
                 <h3 className="text-sm font-semibold">
                   {t("web.settings.bookingPage.whatsappTitle")}
                 </h3>
-                <p className="text-muted-foreground text-sm">
+                <p className="text-sm text-muted-foreground">
                   {t("web.settings.bookingPage.whatsappCardHelp")}
                 </p>
               </div>

@@ -216,7 +216,7 @@ export function MaterialStyleForm({
         labelledBy={`${ids}-${key}`}
         describedBy={`${ids}-${key}-effect`}
       />
-      <p id={`${ids}-${key}-effect`} className="text-muted-foreground text-sm">
+      <p id={`${ids}-${key}-effect`} className="text-sm text-muted-foreground">
         {t(effectKeyFor(options, shown))}
       </p>
     </div>
@@ -231,7 +231,7 @@ export function MaterialStyleForm({
           </CardTitle>
           <CardDescription>{t("web.settings.materialStyle.cardDescription")}</CardDescription>
         </CardHeader>
-        <CardContent className="divide-border divide-y">
+        <CardContent className="divide-y divide-border">
           <div className="pb-6">
             {dial("tone", TONE_OPTIONS, "web.settings.materialStyle.tone.label", draft.tone)}
           </div>
@@ -255,7 +255,7 @@ export function MaterialStyleForm({
                 deliberately NOT the CEFR level, and a per-class choice beats
                 it. Said once, below, rather than inside the effect line that
                 changes with every click. */}
-            <p className="text-subtle text-sm">{t("web.settings.materialStyle.vocab.hint")}</p>
+            <p className="text-sm text-subtle">{t("web.settings.materialStyle.vocab.hint")}</p>
           </div>
         </CardContent>
       </Card>
@@ -267,7 +267,7 @@ export function MaterialStyleForm({
           </CardTitle>
           <CardDescription>{t("web.settings.materialStyle.words.description")}</CardDescription>
         </CardHeader>
-        <CardContent className="divide-border divide-y">
+        <CardContent className="divide-y divide-border">
           <div className="space-y-2.5 pb-6">
             <label htmlFor="languageVariety" className="block text-sm font-medium">
               {t("web.settings.materialStyle.variety.label")}
@@ -281,7 +281,7 @@ export function MaterialStyleForm({
               placeholder={t("web.settings.materialStyle.variety.placeholder")}
               aria-describedby={`${ids}-variety-hint`}
             />
-            <p id={`${ids}-variety-hint`} className="text-muted-foreground text-sm">
+            <p id={`${ids}-variety-hint`} className="text-sm text-muted-foreground">
               {varietyHint}
             </p>
           </div>
@@ -301,7 +301,7 @@ export function MaterialStyleForm({
               aria-describedby={`${ids}-custom-hint ${ids}-custom-count`}
             />
             <div className="flex items-start justify-between gap-3">
-              <p id={`${ids}-custom-hint`} className="text-muted-foreground text-sm">
+              <p id={`${ids}-custom-hint`} className="text-sm text-muted-foreground">
                 {t("web.settings.materialStyle.custom.hint")}
               </p>
               <CharacterCounter
@@ -320,16 +320,16 @@ export function MaterialStyleForm({
           a Save button in flow sat below the fold of the last question. Sticky
           keeps its flow space, so nothing needs extra padding; z-30 is under the
           app nav (z-40) and Radix portals (z-50). */}
-      <div className="border-border/60 bg-background/95 pb-safe-bottom supports-[backdrop-filter]:bg-background/80 sticky bottom-0 z-30 flex flex-wrap items-center justify-between gap-3 border-t py-3 backdrop-blur">
+      <div className="sticky bottom-0 z-30 flex flex-wrap items-center justify-between gap-3 border-t border-border/60 bg-background/95 py-3 pb-safe-bottom backdrop-blur supports-[backdrop-filter]:bg-background/80">
         <div className="min-w-0 flex-1">
           {dirty ? (
-            <p className="text-warning text-sm" aria-live="polite">
+            <p className="text-sm text-warning" aria-live="polite">
               {t("web.settings.materialStyle.unsaved")}
             </p>
           ) : (
             <FormStatus state={state} savedMessage={t("web.settings.materialStyle.savedMessage")} />
           )}
-          {dirty && state?.error ? <p className="text-destructive text-sm">{state.error}</p> : null}
+          {dirty && state?.error ? <p className="text-sm text-destructive">{state.error}</p> : null}
         </div>
         <div className="flex shrink-0 items-center gap-2">
           {dirty ? (

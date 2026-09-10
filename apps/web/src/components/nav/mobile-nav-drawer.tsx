@@ -92,7 +92,7 @@ export function MobileNavToggle({
       aria-controls={controls}
       aria-label={open ? closeLabel : openLabel}
       onClick={onToggle}
-      className="text-foreground desktop:hidden shrink-0"
+      className="shrink-0 text-foreground desktop:hidden"
     >
       {open ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
     </Button>
@@ -168,7 +168,7 @@ function DrawerSection({ section }: { section: MobileNavSection }) {
           aria-expanded={open}
           aria-controls={listId}
           onClick={() => setOpen((v) => !v)}
-          className="text-muted-foreground hover:text-foreground w-full justify-between px-3 text-xs font-bold"
+          className="w-full justify-between px-3 text-xs font-bold text-muted-foreground hover:text-foreground"
         >
           {section.label}
           <ChevronDown
@@ -217,7 +217,7 @@ function MobileNavContent({
               className="min-w-0 flex-1"
             />
             <span className="sr-only">{t("web.nav.viewAccount")}</span>
-            <ChevronRight aria-hidden className="text-muted-foreground h-5 w-5 shrink-0" />
+            <ChevronRight aria-hidden className="h-5 w-5 shrink-0 text-muted-foreground" />
           </Link>
           <NavDivider />
         </>
@@ -279,15 +279,15 @@ export function MobileNavDrawer({
   return (
     <DialogPrimitive.Root open={open} onOpenChange={onOpenChange}>
       <DialogPrimitive.Portal>
-        <DialogPrimitive.Overlay className="bg-foreground/40 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 fixed inset-0 z-50 backdrop-blur-xs motion-reduce:animate-none" />
+        <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-foreground/40 backdrop-blur-xs data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:animate-in data-[state=open]:fade-in-0 motion-reduce:animate-none" />
         <DialogPrimitive.Content
           id={id}
           // The drawer's only content is navigation, which needs no prose
           // description; without this Radix warns for a missing one.
           aria-describedby={undefined}
-          className="max-w-sheet border-border bg-card text-card-foreground shadow-brand-lg data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:slide-out-to-right data-[state=open]:slide-in-from-right fixed inset-y-0 right-0 z-50 flex w-full flex-col border-l duration-300 motion-reduce:animate-none sm:max-w-sm"
+          className="fixed inset-y-0 right-0 z-50 flex w-full max-w-sheet flex-col border-l border-border bg-card text-card-foreground shadow-brand-lg duration-300 data-[state=closed]:animate-out data-[state=closed]:slide-out-to-right data-[state=open]:animate-in data-[state=open]:slide-in-from-right motion-reduce:animate-none sm:max-w-sm"
         >
-          <div className="border-border/60 flex h-14 shrink-0 items-center justify-between gap-3 border-b pr-2 pl-4">
+          <div className="flex h-14 shrink-0 items-center justify-between gap-3 border-b border-border/60 pr-2 pl-4">
             <DialogPrimitive.Title className="sr-only">{t("web.nav.menu")}</DialogPrimitive.Title>
             <Logo size="sm" />
             <DialogPrimitive.Close asChild>
@@ -296,7 +296,7 @@ export function MobileNavDrawer({
                 variant="ghost"
                 size="icon"
                 aria-label={t("common.close")}
-                className="text-foreground shrink-0"
+                className="shrink-0 text-foreground"
               >
                 <X className="h-6 w-6" />
               </Button>

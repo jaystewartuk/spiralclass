@@ -143,7 +143,7 @@ export function IntroVideoCoachPanel({
         {coach.overall && <p>{coach.overall}</p>}
         {coach.strengths.length > 0 && (
           <div>
-            <p className="text-muted-foreground text-xs font-medium">
+            <p className="text-xs font-medium text-muted-foreground">
               {t("web.settings.bookingPage.video.coachStrengths")}
             </p>
             <ul className="list-disc pl-5">
@@ -155,7 +155,7 @@ export function IntroVideoCoachPanel({
         )}
         {coach.improvements.length > 0 && (
           <div>
-            <p className="text-muted-foreground text-xs font-medium">
+            <p className="text-xs font-medium text-muted-foreground">
               {t("web.settings.bookingPage.video.coachImprovements")}
             </p>
             <ul className="list-disc pl-5">

@@ -39,7 +39,7 @@ export default async function AvailabilitySettingsPage({
     <div className="space-y-6">
       <div className="space-y-2">
         <PageHeader title={t("web.settings.availability.title")} />
-        <p className="text-muted-foreground text-sm">{t("web.settings.availability.body")}</p>
+        <p className="text-sm text-muted-foreground">{t("web.settings.availability.body")}</p>
         <p className="text-sm">
           {t("web.settings.availability.holidayPrompt")}{" "}
           <Link href="/settings/blocked-dates" className="underline">
@@ -56,7 +56,7 @@ export default async function AvailabilitySettingsPage({
             const active = activeWeekdays.has(weekday);
             return (
               <div key={weekday} className="flex flex-col items-center gap-1">
-                <span className="text-muted-foreground text-sm">{weekdayLabels[weekday]}</span>
+                <span className="text-sm text-muted-foreground">{weekdayLabels[weekday]}</span>
                 <span
                   className={cn("h-2.5 w-2.5 rounded-full", active ? "bg-primary" : "bg-muted")}
                   aria-hidden

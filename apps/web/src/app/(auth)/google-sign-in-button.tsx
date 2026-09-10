@@ -52,9 +52,9 @@ export function GoogleSignInButton({
   return (
     <div className="flex w-full flex-col gap-3">
       <div className="flex items-center gap-3" aria-hidden="true">
-        <span className="bg-border h-px flex-1" />
-        <span className="text-muted-foreground text-xs">o</span>
-        <span className="bg-border h-px flex-1" />
+        <span className="h-px flex-1 bg-border" />
+        <span className="text-xs text-muted-foreground">o</span>
+        <span className="h-px flex-1 bg-border" />
       </div>
       <Button
         type="button"

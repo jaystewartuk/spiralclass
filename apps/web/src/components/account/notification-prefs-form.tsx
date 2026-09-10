@@ -273,7 +273,7 @@ export function NotificationPrefsForm({
         >
           <span
             id={`${formId}-${c}-deliver`}
-            className={cn("text-muted-foreground text-sm", !enabled && "opacity-60")}
+            className={cn("text-sm text-muted-foreground", !enabled && "opacity-60")}
           >
             {t("web.notificationPrefs.deliverBy")}
           </span>
@@ -294,7 +294,7 @@ export function NotificationPrefsForm({
                   category: categoryLabel,
                 })}
                 className={cn(
-                  "focus-visible:ring-ring inline-flex h-11 items-center gap-1.5 rounded-full border-2 px-4 text-sm font-medium transition-colors focus-visible:ring-3 focus-visible:outline-hidden",
+                  "inline-flex h-11 items-center gap-1.5 rounded-full border-2 px-4 text-sm font-medium transition-colors focus-visible:ring-3 focus-visible:ring-ring focus-visible:outline-hidden",
                   on
                     ? "border-primary bg-primary text-primary-foreground"
                     : "border-border text-muted-foreground hover:border-primary/50 hover:text-foreground",
@@ -332,7 +332,7 @@ export function NotificationPrefsForm({
             <Heading level={4} as="h3" id={`${formId}-reach`}>
               {t("web.notificationPrefs.reach.title")}
             </Heading>
-            <p className="text-muted-foreground text-sm">
+            <p className="text-sm text-muted-foreground">
               {t("web.notificationPrefs.reach.description")}
             </p>
           </div>
@@ -351,7 +351,7 @@ export function NotificationPrefsForm({
             </Alert>
           )}
 
-          <div className="divide-border space-y-0 divide-y">
+          <div className="space-y-0 divide-y divide-border">
             <div className="py-4 first:pt-0">
               <ToggleField
                 name="emailOptIn"
@@ -376,7 +376,7 @@ export function NotificationPrefsForm({
               />
               {/* Directly under the switch it unblocks, rather than on another
                   card that the hint above described as "below". */}
-              {deviceSlot ? <div className="border-border border-t pt-4">{deviceSlot}</div> : null}
+              {deviceSlot ? <div className="border-t border-border pt-4">{deviceSlot}</div> : null}
             </div>
           </div>
         </section>
@@ -387,7 +387,7 @@ export function NotificationPrefsForm({
           <Heading level={4} as="h3" id={`${formId}-what`}>
             {t("web.notificationPrefs.whichNotifications")}
           </Heading>
-          <p className="text-muted-foreground text-sm">
+          <p className="text-sm text-muted-foreground">
             {t("web.notificationPrefs.categories.description")}
           </p>
         </div>
@@ -395,38 +395,38 @@ export function NotificationPrefsForm({
         {/* A chip that says "Email" while email is off account-wide is a lie of
             omission. Said once per section rather than once per row. */}
         {channels && !emailLive && (
-          <p className="text-muted-foreground text-sm">{t("web.notificationPrefs.emailOffNote")}</p>
+          <p className="text-sm text-muted-foreground">{t("web.notificationPrefs.emailOffNote")}</p>
         )}
         {channels && !pushLive && (
-          <p className="text-muted-foreground text-sm">{t("web.notificationPrefs.pushOffNote")}</p>
+          <p className="text-sm text-muted-foreground">{t("web.notificationPrefs.pushOffNote")}</p>
         )}
 
         {role === "student" ? (
           <div className="space-y-6">
             <div>
-              <p className="text-muted-foreground mb-2 text-sm font-semibold">
+              <p className="mb-2 text-sm font-semibold text-muted-foreground">
                 {t("web.notificationPrefs.group.essential")}
               </p>
-              <div className="divide-border divide-y">
+              <div className="divide-y divide-border">
                 {essentialCategories.map(renderCategoryRow)}
               </div>
             </div>
             {optionalCategories.length > 0 && (
               <div>
-                <p className="text-muted-foreground mb-2 text-sm font-semibold">
+                <p className="mb-2 text-sm font-semibold text-muted-foreground">
                   {t("web.notificationPrefs.group.optional")}
                 </p>
-                <div className="divide-border divide-y">
+                <div className="divide-y divide-border">
                   {optionalCategories.map(renderCategoryRow)}
                 </div>
               </div>
             )}
           </div>
         ) : (
-          <div className="divide-border divide-y">{categories.map(renderCategoryRow)}</div>
+          <div className="divide-y divide-border">{categories.map(renderCategoryRow)}</div>
         )}
 
-        <p className="text-muted-foreground text-sm">
+        <p className="text-sm text-muted-foreground">
           {role === "teacher"
             ? t("web.notificationPrefs.alwaysSent.teacher")
             : t("web.notificationPrefs.alwaysSent.student")}
@@ -441,7 +441,7 @@ export function NotificationPrefsForm({
           overflow (the student page's section card sets `overflow-hidden`,
           which turns off stickiness) it degrades to a static footer — the same
           bar, in the same place, just not pinned. */}
-      <div className="border-border bg-card/95 shadow-brand-md supports-[backdrop-filter]:bg-card/85 sticky bottom-4 z-10 flex flex-wrap items-center gap-x-3 gap-y-2 rounded-lg border px-4 py-3 backdrop-blur">
+      <div className="sticky bottom-4 z-10 flex flex-wrap items-center gap-x-3 gap-y-2 rounded-lg border border-border bg-card/95 px-4 py-3 shadow-brand-md backdrop-blur supports-[backdrop-filter]:bg-card/85">
         <Button type="submit" disabled={pending || !dirty}>
           {pending ? t("web.notificationPrefs.saving") : t("web.notificationPrefs.savePreferences")}
         </Button>
@@ -453,7 +453,7 @@ export function NotificationPrefsForm({
         {/* Live region either way: "you have edits" is as worth announcing as
             "they saved". */}
         {dirty && !pending ? (
-          <p role="status" className="text-muted-foreground text-sm">
+          <p role="status" className="text-sm text-muted-foreground">
             {t("web.notificationPrefs.unsavedChanges")}
           </p>
         ) : (

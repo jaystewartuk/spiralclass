@@ -81,16 +81,16 @@ function ClassRow({
     <li>
       <Link
         href={`/dashboard/classes/${item.id}`}
-        className="hover:bg-muted/40 focus-visible:ring-ring flex min-h-11 items-center justify-between gap-3 px-4 py-3 transition-colors focus-visible:ring-3 focus-visible:outline-hidden focus-visible:ring-inset lg:px-6"
+        className="flex min-h-11 items-center justify-between gap-3 px-4 py-3 transition-colors hover:bg-muted/40 focus-visible:ring-3 focus-visible:ring-ring focus-visible:outline-hidden focus-visible:ring-inset lg:px-6"
       >
         <span className="min-w-0">
           <span className="block truncate font-medium">
             {dz.viewer.dateLabel}
-            <span className="text-muted-foreground font-normal"> · </span>
+            <span className="font-normal text-muted-foreground"> · </span>
             <span className="tabular-nums">{dz.viewer.timeLabel}</span>
           </span>
           {!dz.sameWallClock && (
-            <span className="text-muted-foreground block text-sm">
+            <span className="block text-sm text-muted-foreground">
               {t("web.dashboard.students.header.theirTime", {
                 time: dz.other.timeLabel,
                 city: timezoneCityLabel(dz.other.tz),
@@ -103,7 +103,7 @@ function ClassRow({
             {status.label}
           </Badge>
         ) : (
-          <ArrowRight className="text-muted-foreground size-4 shrink-0" aria-hidden />
+          <ArrowRight className="size-4 shrink-0 text-muted-foreground" aria-hidden />
         )}
       </Link>
     </li>
@@ -138,7 +138,7 @@ function ClassListCard({
       </CardHeader>
       <CardContent className="p-0">
         {items.length === 0 ? (
-          <p className="text-muted-foreground px-6 pb-6 text-sm">{emptyLabel}</p>
+          <p className="px-6 pb-6 text-sm text-muted-foreground">{emptyLabel}</p>
         ) : (
           <ul className="divide-y border-t">
             {items.map((item) => (
@@ -163,7 +163,7 @@ function BriefingRow({
 }) {
   return (
     <div className="space-y-0.5">
-      <dt className="text-muted-foreground text-sm">{label}</dt>
+      <dt className="text-sm text-muted-foreground">{label}</dt>
       <dd className={cn("text-sm", !value && "text-muted-foreground")}>{value || empty}</dd>
     </div>
   );
@@ -335,12 +335,12 @@ export async function OverviewTab({
                 empty={t("web.dashboard.students.overview.notSetYet")}
               />
               <div className="space-y-1">
-                <dt className="text-muted-foreground text-sm">
+                <dt className="text-sm text-muted-foreground">
                   {t("web.dashboard.students.overview.focusAreas")}
                 </dt>
                 <dd>
                   {focusSkills.length === 0 ? (
-                    <p className="text-muted-foreground text-sm">
+                    <p className="text-sm text-muted-foreground">
                       {t("web.dashboard.students.overview.noFocusYet")}
                     </p>
                   ) : (

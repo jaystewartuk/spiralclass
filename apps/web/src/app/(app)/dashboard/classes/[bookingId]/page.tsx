@@ -420,15 +420,15 @@ export default async function TeacherClassDetailPage({
           <Heading level={2} as="h1" className="truncate">
             {booking.student.name}
           </Heading>
-          <p className="text-muted-foreground text-sm">
+          <p className="text-sm text-muted-foreground">
             {classWhen.when} · <BookingStatusLabel status={status} t={t} />
           </p>
-          <p className="text-muted-foreground text-xs">{classWhen.whenSecondary}</p>
+          <p className="text-xs text-muted-foreground">{classWhen.whenSecondary}</p>
         </div>
         {canManageClass && (
           <ManageClassMenu>
             {canRecordNoShow && (
-              <p className="text-muted-foreground text-sm">
+              <p className="text-sm text-muted-foreground">
                 {t("web.dashboard.classes.detail.noShowHelp")}
               </p>
             )}
@@ -522,7 +522,7 @@ export default async function TeacherClassDetailPage({
       </header>
 
       {studentArchived && (
-        <div className="border-warning/30 bg-warning-bg text-warning rounded-md border px-4 py-3 text-sm">
+        <div className="rounded-md border border-warning/30 bg-warning-bg px-4 py-3 text-sm text-warning">
           <strong>
             {t("web.dashboard.classes.detail.archivedStrong", { name: booking.student.name })}
           </strong>{" "}
@@ -731,7 +731,7 @@ export default async function TeacherClassDetailPage({
               <div key={o.id} className="rounded-md border px-3 py-2 text-sm">
                 <div className="flex items-center justify-between">
                   <span className="font-medium">{overrideActionLabel(o.action, t)}</span>
-                  <span className="text-muted-foreground text-xs">
+                  <span className="text-xs text-muted-foreground">
                     {formatZonedDateTime(o.createdAt, teacher.timezone, locale)}
                   </span>
                 </div>

@@ -202,14 +202,14 @@ export function CallLibraryBrowser({ onSelect }: { onSelect: (m: CallMaterial) =
       <button
         type="button"
         onClick={() => setFiltersOpen((v) => !v)}
-        className="text-muted-foreground text-xs underline underline-offset-2"
+        className="text-xs text-muted-foreground underline underline-offset-2"
         data-testid="call-library-filters-toggle"
       >
         {t("web.materials.filtersToggle")}
       </button>
 
       {filtersOpen && (
-        <div className="bg-muted/30 space-y-2 rounded-md border p-2">
+        <div className="space-y-2 rounded-md border bg-muted/30 p-2">
           <ChipRow
             label={t("web.materials.sortLabel")}
             options={[
@@ -274,16 +274,16 @@ export function CallLibraryBrowser({ onSelect }: { onSelect: (m: CallMaterial) =
       )}
 
       {loading && items.length === 0 ? (
-        <p className="text-muted-foreground text-sm">{t("common.loading")}</p>
+        <p className="text-sm text-muted-foreground">{t("common.loading")}</p>
       ) : error && items.length === 0 ? (
         <div className="space-y-2">
-          <p className="text-destructive text-sm">{t("common.error")}</p>
+          <p className="text-sm text-destructive">{t("common.error")}</p>
           <Button type="button" variant="outline" size="sm" onClick={() => void fetchReset()}>
             {t("common.retry")}
           </Button>
         </div>
       ) : items.length === 0 ? (
-        <p className="text-muted-foreground text-sm">
+        <p className="text-sm text-muted-foreground">
           {anyFilter ? t("web.materials.noResults") : t("web.materials.noMaterialsYet")}
         </p>
       ) : (
@@ -295,7 +295,7 @@ export function CallLibraryBrowser({ onSelect }: { onSelect: (m: CallMaterial) =
                   type="button"
                   data-testid={`call-library-item-${m.id}`}
                   onClick={() => onSelect(toCallMaterial(m))}
-                  className="border-border hover:bg-muted flex w-full flex-col items-start gap-0.5 rounded-lg border px-3 py-2 text-left"
+                  className="flex w-full flex-col items-start gap-0.5 rounded-lg border border-border px-3 py-2 text-left hover:bg-muted"
                 >
                   <span className="text-sm font-medium">
                     {m.label ??
@@ -307,7 +307,7 @@ export function CallLibraryBrowser({ onSelect }: { onSelect: (m: CallMaterial) =
                             : "web.materials.classContent",
                       )}
                   </span>
-                  <span className="text-muted-foreground text-xs">{m.levelLabel}</span>
+                  <span className="text-xs text-muted-foreground">{m.levelLabel}</span>
                 </button>
               </li>
             ))}
@@ -350,7 +350,7 @@ function ChipRow({
 }) {
   return (
     <div className="flex flex-wrap items-center gap-1.5">
-      <span className="text-muted-foreground w-16 shrink-0 text-sm font-semibold">{label}</span>
+      <span className="w-16 shrink-0 text-sm font-semibold text-muted-foreground">{label}</span>
       {allowClear && allLabel && (
         <button type="button" onClick={() => onSelect(null)} className={chipClass(active === null)}>
           {allLabel}

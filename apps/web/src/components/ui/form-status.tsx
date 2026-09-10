@@ -55,7 +55,7 @@ export function FormStatus({
       <p
         role="status"
         aria-live="polite"
-        className={cn("text-muted-foreground text-sm", className)}
+        className={cn("text-sm text-muted-foreground", className)}
       >
         {savingMessage}
       </p>
@@ -68,7 +68,7 @@ export function FormStatus({
         id={errorId}
         role="alert"
         aria-live="polite"
-        className={cn("text-destructive text-sm", className)}
+        className={cn("text-sm text-destructive", className)}
       >
         {state.error}
       </p>
@@ -85,7 +85,7 @@ export function FormStatus({
     <p
       role="status"
       aria-live="polite"
-      className={cn("text-success flex items-center gap-1.5 text-sm", className)}
+      className={cn("flex items-center gap-1.5 text-sm text-success", className)}
     >
       <Check className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
       {message}

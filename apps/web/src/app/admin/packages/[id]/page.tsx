@@ -73,7 +73,7 @@ export default async function AdminPackageDetailPage({
           <Heading level={2} as="h1">
             {pkg.template?.name ?? t("web.admin.packages.customPackage")}
           </Heading>
-          <p className="text-muted-foreground text-sm">
+          <p className="text-sm text-muted-foreground">
             <Link className="hover:underline" href={`/admin/teachers/${pkg.teacher.id}`}>
               {pkg.teacher.name}
             </Link>
@@ -125,7 +125,7 @@ export default async function AdminPackageDetailPage({
           {t("web.admin.payments.title")}
         </Heading>
         {pkg.payments.length === 0 ? (
-          <p className="text-muted-foreground text-sm">{t("web.admin.packages.noPayments")}</p>
+          <p className="text-sm text-muted-foreground">{t("web.admin.packages.noPayments")}</p>
         ) : (
           <TableShell>
             <Table className="table-stack">
@@ -144,7 +144,7 @@ export default async function AdminPackageDetailPage({
                     <TableRow key={p.id}>
                       <TableCell
                         data-label={t("web.admin.common.date")}
-                        className="text-muted-foreground text-xs"
+                        className="text-xs text-muted-foreground"
                       >
                         {new Date(p.createdAt).toLocaleString()}
                       </TableCell>
@@ -183,7 +183,7 @@ export default async function AdminPackageDetailPage({
           {t("web.admin.packages.bookings")}
         </Heading>
         {pkg.bookings.length === 0 ? (
-          <p className="text-muted-foreground text-sm">{t("web.admin.packages.noBookings")}</p>
+          <p className="text-sm text-muted-foreground">{t("web.admin.packages.noBookings")}</p>
         ) : (
           <TableShell>
             <Table className="table-stack">
@@ -198,7 +198,7 @@ export default async function AdminPackageDetailPage({
                   <TableRow key={b.id}>
                     <TableCell
                       data-label={t("web.admin.common.start")}
-                      className="text-muted-foreground text-xs"
+                      className="text-xs text-muted-foreground"
                     >
                       {new Date(b.scheduledStart).toLocaleString()}
                     </TableCell>
@@ -217,7 +217,7 @@ export default async function AdminPackageDetailPage({
 function Stat({ label, value }: { label: string; value: string | number }) {
   return (
     <div className="rounded-md border p-3">
-      <div className="text-muted-foreground text-xs">{label}</div>
+      <div className="text-xs text-muted-foreground">{label}</div>
       <div className="mt-1 text-xl font-semibold">{value}</div>
     </div>
   );

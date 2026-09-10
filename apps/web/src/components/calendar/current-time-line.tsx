@@ -61,9 +61,9 @@ export function CurrentTimeLine({
       role="img"
       aria-label={label}
       style={{ top }}
-      className="bg-destructive absolute inset-x-0 z-20 h-0.5"
+      className="absolute inset-x-0 z-20 h-0.5 bg-destructive"
     >
-      <span className="bg-destructive absolute -top-1 -left-1 h-2.5 w-2.5 rounded-full" />
+      <span className="absolute -top-1 -left-1 h-2.5 w-2.5 rounded-full bg-destructive" />
     </div>
   );
 }

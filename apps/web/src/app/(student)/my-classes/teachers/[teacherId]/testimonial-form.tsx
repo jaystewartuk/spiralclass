@@ -46,7 +46,7 @@ export function StudentTestimonialForm({
 
   return (
     <div className="space-y-3">
-      <p className="text-muted-foreground text-sm">
+      <p className="text-sm text-muted-foreground">
         {hasExisting
           ? t("web.myTeachers.testimonial.control", { name: teacherName })
           : t("web.myTeachers.testimonial.prompt", { name: teacherName })}
@@ -81,14 +81,14 @@ export function StudentTestimonialForm({
                 : t("web.myTeachers.testimonial.publish")}
           </Button>
           {state?.ok && (
-            <span className="text-muted-foreground flex items-center gap-1 text-sm">
+            <span className="flex items-center gap-1 text-sm text-muted-foreground">
               <ShieldCheck className="h-4 w-4" aria-hidden />
               {t("web.myTeachers.testimonial.saved")}
             </span>
           )}
         </div>
         {state?.error && (
-          <p className="text-destructive text-sm" role="alert">
+          <p className="text-sm text-destructive" role="alert">
             {state.error}
           </p>
         )}
@@ -110,12 +110,12 @@ export function StudentTestimonialForm({
             {t("web.myTeachers.testimonial.remove")}
           </Button>
           {removeState?.ok && (
-            <span className="text-muted-foreground ml-2 text-sm">
+            <span className="ml-2 text-sm text-muted-foreground">
               {t("web.myTeachers.testimonial.removed")}
             </span>
           )}
           {removeState?.error && (
-            <p className="text-destructive text-sm" role="alert">
+            <p className="text-sm text-destructive" role="alert">
               {removeState.error}
             </p>
           )}

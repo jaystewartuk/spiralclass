@@ -33,14 +33,14 @@ function TableNodeComponent({ data, selected }: NodeProps<TableNode>) {
     <div
       style={{ width: NODE_WIDTH }}
       className={cn(
-        "bg-card text-card-foreground rounded-lg border shadow-xs transition-[opacity,box-shadow,border-color]",
+        "rounded-lg border bg-card text-card-foreground shadow-xs transition-[opacity,box-shadow,border-color]",
         dimmed ? "opacity-35" : "opacity-100",
         highlight === "primary" || selected
-          ? "border-primary ring-primary/50 ring-2"
+          ? "border-primary ring-2 ring-primary/50"
           : highlight === "connected"
-            ? "border-info ring-info/40 ring-1"
+            ? "border-info ring-1 ring-info/40"
             : matched
-              ? "border-warning ring-warning/50 ring-1"
+              ? "border-warning ring-1 ring-warning/50"
               : "border-border",
       )}
     >
@@ -69,14 +69,14 @@ function TableNodeComponent({ data, selected }: NodeProps<TableNode>) {
         }
       >
         {expanded ? (
-          <ChevronDown className="text-muted-foreground h-4 w-4 shrink-0" />
+          <ChevronDown className="h-4 w-4 shrink-0 text-muted-foreground" />
         ) : (
-          <ChevronRight className="text-muted-foreground h-4 w-4 shrink-0" />
+          <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground" />
         )}
         <span className="min-w-0 flex-1 truncate font-mono text-sm font-semibold">
           {table.name}
         </span>
-        <span className="bg-background/70 text-muted-foreground shrink-0 rounded px-1.5 py-0.5 text-sm font-medium">
+        <span className="shrink-0 rounded bg-background/70 px-1.5 py-0.5 text-sm font-medium text-muted-foreground">
           {table.columns.length}
         </span>
       </button>
@@ -91,12 +91,12 @@ function TableNodeComponent({ data, selected }: NodeProps<TableNode>) {
               <span className="flex w-4 shrink-0 justify-center">
                 {col.isPrimaryKey ? (
                   <KeyRound
-                    className="text-warning h-3.5 w-3.5"
+                    className="h-3.5 w-3.5 text-warning"
                     aria-label={t("web.admin.erd.legend.pk")}
                   />
                 ) : col.isForeignKey ? (
                   <Link2
-                    className="text-info h-3.5 w-3.5"
+                    className="h-3.5 w-3.5 text-info"
                     aria-label={t("web.admin.erd.legend.fk")}
                   />
                 ) : null}
@@ -117,20 +117,20 @@ function TableNodeComponent({ data, selected }: NodeProps<TableNode>) {
               </span>
               {col.isUnique ? (
                 <span
-                  className="bg-success-bg text-success shrink-0 rounded px-1 text-sm font-semibold"
+                  className="shrink-0 rounded bg-success-bg px-1 text-sm font-semibold text-success"
                   title={t("web.admin.erd.legend.unique")}
                 >
                   {t("web.admin.erd.badge.unique")}
                 </span>
               ) : null}
-              <span className="text-muted-foreground max-w-[45%] shrink-0 truncate">
+              <span className="max-w-[45%] shrink-0 truncate text-muted-foreground">
                 {col.type}
               </span>
             </li>
           ))}
         </ul>
       ) : (
-        <div className="text-muted-foreground flex items-center justify-between px-3 py-2 text-sm">
+        <div className="flex items-center justify-between px-3 py-2 text-sm text-muted-foreground">
           <span>{t("web.admin.erd.node.columnCount", { count: table.columns.length })}</span>
           {table.indexes.length > 0 ? (
             <span>{t("web.admin.erd.node.indexCount", { count: table.indexes.length })}</span>

@@ -67,7 +67,7 @@ export function OverrideAction(props: OverrideActionProps) {
         footer={(close) => (
           <div className="flex w-full flex-col gap-2">
             {errorMsg && (
-              <p role="alert" className="text-destructive text-sm">
+              <p role="alert" className="text-sm text-destructive">
                 {errorMsg}
               </p>
             )}
@@ -110,7 +110,7 @@ export function OverrideAction(props: OverrideActionProps) {
         </form>
       </ConfirmDialog>
       {successMsg && (
-        <p role="status" className="text-success text-sm">
+        <p role="status" className="text-sm text-success">
           {successMsg}
         </p>
       )}

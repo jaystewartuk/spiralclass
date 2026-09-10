@@ -195,7 +195,7 @@ export function CaptionBand({
         className={cn(
           // Tighter on a phone. Every one of these steps is vertical space
           // taken off the video on the screen that has least of it.
-          "bg-scrim-3 flex flex-col items-center gap-1.5 rounded-xl px-3 py-2 shadow-lg backdrop-blur-xs",
+          "flex flex-col items-center gap-1.5 rounded-xl bg-scrim-3 px-3 py-2 shadow-lg backdrop-blur-xs",
           "lg:gap-2.5 lg:rounded-2xl lg:px-5 lg:py-3",
           // Full width once there is text, so successive lines do not make
           // the panel jump about as sentences change length. But the
@@ -307,7 +307,7 @@ function CaptionLineView({
       )}
     >
       {label && showSpeaker && (
-        <p className="text-on-dark-faint mb-0.5 text-center text-sm font-semibold">{label}</p>
+        <p className="mb-0.5 text-center text-sm font-semibold text-on-dark-faint">{label}</p>
       )}
       {showOriginal && (
         <p
@@ -352,12 +352,12 @@ function ListeningLine({ label }: { label: string }) {
         {[0, 1, 2].map((i) => (
           <span
             key={i}
-            className="bg-on-dark-muted h-1.5 w-1.5 rounded-full motion-safe:animate-pulse"
+            className="h-1.5 w-1.5 rounded-full bg-on-dark-muted motion-safe:animate-pulse"
             style={{ animationDelay: `${i * 160}ms` }}
           />
         ))}
       </span>
-      <span className="text-on-dark-muted text-sm">{label}</span>
+      <span className="text-sm text-on-dark-muted">{label}</span>
     </div>
   );
 }
@@ -385,7 +385,7 @@ function BandButton({
       title={label}
       aria-expanded={expanded}
       aria-controls={controls}
-      className="bg-scrim-2 hover:bg-scrim-3 flex h-7 w-7 items-center justify-center rounded-full text-white opacity-60 backdrop-blur-md transition hover:opacity-100 focus-visible:opacity-100 lg:h-8 lg:w-8"
+      className="flex h-7 w-7 items-center justify-center rounded-full bg-scrim-2 text-white opacity-60 backdrop-blur-md transition hover:bg-scrim-3 hover:opacity-100 focus-visible:opacity-100 lg:h-8 lg:w-8"
     >
       {icon}
     </button>
@@ -493,10 +493,10 @@ function CaptionSettings({
       // visible as you make it. Both rows are segmented (three across, not
       // three stacked) to keep it to ~150px; the cap is the backstop for a
       // locale whose labels wrap.
-      className="max-h-over-controls bg-scrim-3 absolute top-10 right-0 z-30 w-64 overflow-y-auto rounded-2xl p-3 text-left shadow-lg backdrop-blur-md"
+      className="absolute top-10 right-0 z-30 max-h-over-controls w-64 overflow-y-auto rounded-2xl bg-scrim-3 p-3 text-left shadow-lg backdrop-blur-md"
     >
       <fieldset>
-        <legend className="text-on-dark-faint mb-1.5 text-sm font-semibold">
+        <legend className="mb-1.5 text-sm font-semibold text-on-dark-faint">
           {t("call.captionsDisplayLegend")}
         </legend>
         <div className="flex gap-1.5">
@@ -512,7 +512,7 @@ function CaptionSettings({
         </div>
       </fieldset>
       <fieldset className="mt-3">
-        <legend className="text-on-dark-faint mb-1.5 flex items-center gap-1.5 text-sm font-semibold">
+        <legend className="mb-1.5 flex items-center gap-1.5 text-sm font-semibold text-on-dark-faint">
           <Type className="h-3.5 w-3.5" aria-hidden />
           {t("call.captionsSizeLegend")}
         </legend>
@@ -557,7 +557,7 @@ function SegmentButton({
         // Height was never what made this popover too tall — three of these
         // stacked was.
         "min-h-target flex-1 rounded-lg px-1.5 text-center text-sm leading-tight font-medium transition",
-        selected ? "bg-overlay-4 text-scrim-3" : "bg-overlay-1 hover:bg-overlay-2 text-white",
+        selected ? "bg-overlay-4 text-scrim-3" : "bg-overlay-1 text-white hover:bg-overlay-2",
       )}
     >
       {label}
@@ -628,14 +628,14 @@ export function CaptionTranscript({
       role="dialog"
       aria-modal="false"
       aria-label={t("call.captionsTranscript")}
-      className="bg-scrim-3 absolute top-0 right-0 bottom-0 z-30 flex w-full max-w-sm flex-col shadow-lg backdrop-blur-md"
+      className="absolute top-0 right-0 bottom-0 z-30 flex w-full max-w-sm flex-col bg-scrim-3 shadow-lg backdrop-blur-md"
     >
       {/* The title and the close button share a row; the privacy line sits
       BELOW them at full width. Nested under the title it wrapped to two
       lines against the close button and made the header look cramped — and
       it is the sentence that tells a student nobody is keeping a record of
       her lesson, so it should not be the thing that gets squeezed. */}
-      <div className="border-overlay-1 border-b px-4 py-3">
+      <div className="border-b border-overlay-1 px-4 py-3">
         <div className="flex items-center justify-between gap-2">
           <h2 className="text-base font-semibold text-white">{t("call.captionsTranscript")}</h2>
           <button
@@ -643,12 +643,12 @@ export function CaptionTranscript({
             onClick={onClose}
             aria-label={t("call.materialsClose")}
             title={t("call.materialsClose")}
-            className="bg-overlay-1 hover:bg-overlay-2 flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-white"
+            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-overlay-1 text-white hover:bg-overlay-2"
           >
             <X className="h-4 w-4" aria-hidden />
           </button>
         </div>
-        <p className="text-on-dark-faint mt-1 text-sm">{t("call.captionsTranscriptPrivacy")}</p>
+        <p className="mt-1 text-sm text-on-dark-faint">{t("call.captionsTranscriptPrivacy")}</p>
       </div>
 
       <div
@@ -660,22 +660,22 @@ export function CaptionTranscript({
         className="flex-1 space-y-3 overflow-y-auto px-4 py-3"
       >
         {entries.length === 0 ? (
-          <p className="text-on-dark-faint text-sm">{t("call.captionsTranscriptEmpty")}</p>
+          <p className="text-sm text-on-dark-faint">{t("call.captionsTranscriptEmpty")}</p>
         ) : (
           entries.map((entry) => {
             const name = entry.from ? speakerName(entry.from) : null;
             return (
               <div key={entry.id} className="text-sm">
-                <p className="text-on-dark-faint flex items-center gap-2 text-sm">
+                <p className="flex items-center gap-2 text-sm text-on-dark-faint">
                   <span className="font-mono">{clock(entry.at)}</span>
                   {name && <span className="font-medium">{name}</span>}
                 </p>
                 {entry.src && (
-                  <p lang={entry.srcLang} className="text-on-dark leading-snug font-medium">
+                  <p lang={entry.srcLang} className="leading-snug font-medium text-on-dark">
                     {entry.src}
                   </p>
                 )}
-                <p lang={entry.lang} className="text-on-dark-muted leading-snug">
+                <p lang={entry.lang} className="leading-snug text-on-dark-muted">
                   {entry.text}
                 </p>
               </div>

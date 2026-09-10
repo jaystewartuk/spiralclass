@@ -36,7 +36,7 @@ export function AppearanceControl() {
 
   return (
     <fieldset className="min-w-0">
-      <legend className="text-foreground mb-2 text-xs font-bold">{t("web.nav.appearance")}</legend>
+      <legend className="mb-2 text-xs font-bold text-foreground">{t("web.nav.appearance")}</legend>
       <div className="grid grid-cols-3 gap-1.5">
         {OPTIONS.map((option) => {
           const selected = mounted && theme === option.value;

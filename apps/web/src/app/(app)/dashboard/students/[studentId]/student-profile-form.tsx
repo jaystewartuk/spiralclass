@@ -53,7 +53,7 @@ export function StudentProfileForm({
           maxLength={STUDENT_PROFILE_MAX_CHARS}
           placeholder={t("web.studentProfileForm.interestsPlaceholder")}
         />
-        <p className="text-muted-foreground text-xs">{t("web.studentProfileForm.hint")}</p>
+        <p className="text-xs text-muted-foreground">{t("web.studentProfileForm.hint")}</p>
       </div>
 
       <Button type="submit" disabled={pending}>
@@ -61,12 +61,12 @@ export function StudentProfileForm({
       </Button>
 
       {state?.error && (
-        <p role="alert" className="text-destructive text-sm">
+        <p role="alert" className="text-sm text-destructive">
           {state.error}
         </p>
       )}
       {state?.ok && (
-        <p role="status" className="text-success text-sm">
+        <p role="status" className="text-sm text-success">
           {state.ok}
         </p>
       )}

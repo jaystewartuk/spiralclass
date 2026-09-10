@@ -40,7 +40,7 @@ export function GlanceRow({
 
   return (
     <div className="flex items-baseline justify-between gap-3">
-      <dt className="text-muted-foreground text-sm">{label}</dt>
+      <dt className="text-sm text-muted-foreground">{label}</dt>
       <dd>
         {/* Underlined rather than colour-only: the figure beside it is already
             coloured to mean "this one is a job", so hue cannot also be what

@@ -91,7 +91,7 @@ export function ThreadList({
 
   return (
     <div className={cn("flex min-h-0 flex-col", className)}>
-      <div className="border-border flex shrink-0 items-center gap-2 border-b px-3 py-3">
+      <div className="flex shrink-0 items-center gap-2 border-b border-border px-3 py-3">
         {/* At the inbox root this list IS the page, so its heading is the
             page's `h1`; beside an open conversation the conversation owns
             that, and this is the section heading above it. The SIZE does not
@@ -109,9 +109,9 @@ export function ThreadList({
       </div>
 
       {showSearch && (
-        <div className="border-border relative shrink-0 border-b px-3 py-2">
+        <div className="relative shrink-0 border-b border-border px-3 py-2">
           <Search
-            className="text-muted-foreground pointer-events-none absolute top-1/2 left-6 h-4 w-4 -translate-y-1/2"
+            className="pointer-events-none absolute top-1/2 left-6 h-4 w-4 -translate-y-1/2 text-muted-foreground"
             aria-hidden
           />
           <Input
@@ -126,7 +126,7 @@ export function ThreadList({
       )}
 
       {filtered.length === 0 ? (
-        <p className="text-muted-foreground px-4 py-6 text-sm">
+        <p className="px-4 py-6 text-sm text-muted-foreground">
           {query.trim() ? t("web.messages.noStudentsMatch") : t("web.messages.noConversationsYet")}
         </p>
       ) : (
@@ -147,7 +147,7 @@ export function ThreadList({
                     onClick={() => markRead(thread.studentId)}
                     aria-current={active ? "page" : undefined}
                     className={cn(
-                      "focus-visible:ring-ring flex items-center gap-3 px-3 py-3 transition-colors focus-visible:ring-3 focus-visible:outline-hidden",
+                      "flex items-center gap-3 px-3 py-3 transition-colors focus-visible:ring-3 focus-visible:ring-ring focus-visible:outline-hidden",
                       // The active row is a filled surface, not a left rule:
                       // at rail width the rule sat outside the row's own
                       // padding and read as a divider rather than a selection.
@@ -175,7 +175,7 @@ export function ThreadList({
                             dateTime={thread.lastMessage.createdAt}
                             className={cn(
                               "shrink-0 text-sm",
-                              hasUnread ? "text-foreground font-semibold" : "text-muted-foreground",
+                              hasUnread ? "font-semibold text-foreground" : "text-muted-foreground",
                             )}
                           >
                             {formatThreadTimestamp(
@@ -191,7 +191,7 @@ export function ThreadList({
                         <span
                           className={cn(
                             "min-w-0 flex-1 truncate text-sm",
-                            hasUnread ? "text-foreground font-medium" : "text-muted-foreground",
+                            hasUnread ? "font-medium text-foreground" : "text-muted-foreground",
                           )}
                         >
                           {preview

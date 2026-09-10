@@ -29,19 +29,19 @@ export default async function AdminDatabaseErdPage() {
       <header className="shrink-0">
         <div className="flex flex-wrap items-baseline justify-between gap-2">
           <PageHeader title={t("web.admin.erd.title")} />
-          <p className="text-muted-foreground text-sm">
+          <p className="text-sm text-muted-foreground">
             {t("web.admin.erd.stats", {
               tables: graph.tables.length,
               relationships: graph.relationships.length,
             })}
           </p>
         </div>
-        <p className="text-muted-foreground text-sm">{t("web.admin.erd.subtitle")}</p>
+        <p className="text-sm text-muted-foreground">{t("web.admin.erd.subtitle")}</p>
       </header>
 
       {/* The canvas needs a bounded height to fill; the admin main scroll area
           is the parent, so pin it to the remaining viewport. */}
-      <div className="border-border/60 min-h-0 flex-1 overflow-hidden rounded-lg border">
+      <div className="min-h-0 flex-1 overflow-hidden rounded-lg border border-border/60">
         <ErdViewer graph={graph} />
       </div>
     </div>

@@ -67,7 +67,7 @@ export function InsightsConsentControl({
 
   return (
     <div className="space-y-2">
-      <label className="text-muted-foreground flex items-center gap-2 text-xs">
+      <label className="flex items-center gap-2 text-xs text-muted-foreground">
         <Checkbox
           checked={isMinor}
           disabled={pending}
@@ -98,10 +98,10 @@ export function InsightsConsentControl({
               : t("web.captionsConsent.record")}
           </Button>
         ) : (
-          <p className="text-muted-foreground text-xs">{t("web.captionsConsent.adultNote")}</p>
+          <p className="text-xs text-muted-foreground">{t("web.captionsConsent.adultNote")}</p>
         )}
       </div>
-      {error && <p className="text-destructive text-xs">{error}</p>}
+      {error && <p className="text-xs text-destructive">{error}</p>}
     </div>
   );
 }

@@ -98,7 +98,7 @@ export function BillingHistory({
                       {formatDateInZone(shown, timezone, locale)}
                     </time>
                   </TableCell>
-                  <TableCell className="text-muted-foreground hidden whitespace-nowrap sm:table-cell">
+                  <TableCell className="hidden whitespace-nowrap text-muted-foreground sm:table-cell">
                     {t("web.settings.billing.historyRange", {
                       start: formatDateInZone(entry.periodStart, timezone, locale),
                       end: formatDateInZone(entry.periodEnd, timezone, locale),
@@ -122,7 +122,7 @@ export function BillingHistory({
             Stripe customer, so this note would be sending her to a door that
             does not open for her. */}
         {hasPortal && (
-          <p className="text-muted-foreground text-xs">{t("web.settings.billing.historyNote")}</p>
+          <p className="text-xs text-muted-foreground">{t("web.settings.billing.historyNote")}</p>
         )}
       </CardContent>
     </Card>

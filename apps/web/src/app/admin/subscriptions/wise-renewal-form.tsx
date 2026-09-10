@@ -47,9 +47,9 @@ export function WiseRenewalForm({
       >
         {pending ? t("common.loading") : t("web.admin.subscriptions.markPaid")}
       </Button>
-      {state?.error && <span className="text-destructive text-xs">{state.error}</span>}
+      {state?.error && <span className="text-xs text-destructive">{state.error}</span>}
       {state?.ok && (
-        <span className="text-success text-xs">{t("web.admin.subscriptions.recorded")}</span>
+        <span className="text-xs text-success">{t("web.admin.subscriptions.recorded")}</span>
       )}
     </form>
   );

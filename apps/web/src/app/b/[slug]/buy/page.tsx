@@ -154,7 +154,7 @@ export default async function PurchasePage({
       <div className="mx-auto max-w-lg space-y-6">
         <Link
           href={`/b/${slug}`}
-          className="text-muted-foreground hover:text-foreground inline-flex items-center gap-1 text-sm transition-colors"
+          className="inline-flex items-center gap-1 text-sm text-muted-foreground transition-colors hover:text-foreground"
         >
           <ArrowLeft className="h-3.5 w-3.5" aria-hidden />
           {t("book.backToProfile", { name: teacherName })}
@@ -165,7 +165,7 @@ export default async function PurchasePage({
             <Heading level={2} as="h1" className="lg:text-3xl">
               {t("book.packagesWith", { name: teacherName })}
             </Heading>
-            <p className="text-muted-foreground text-sm">{t("publicProfile.noPackages")}</p>
+            <p className="text-sm text-muted-foreground">{t("publicProfile.noPackages")}</p>
           </>
         ) : (
           <PurchaseFlow
@@ -186,7 +186,7 @@ export default async function PurchasePage({
         {/* The seller-of-record (CFDI) disclaimer now renders inside
             CheckoutForm, rail-aware — it needs to know the selected payment
             method, which only exists inside <PurchaseFlow>. */}
-        <footer className="text-muted-foreground space-y-2 border-t pt-4 text-xs">
+        <footer className="space-y-2 border-t pt-4 text-xs text-muted-foreground">
           <p>
             {t("book.byPaying")}{" "}
             <Link href={termsHref} className="underline">

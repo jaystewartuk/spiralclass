@@ -167,7 +167,7 @@ export default async function PaymentsSettingsPage({
             ) : isLinked ? (
               <>
                 <SettingRow title={t("web.settings.payments.accountStatusTitle")}>
-                  <dl className="divide-border divide-y text-sm">
+                  <dl className="divide-y divide-border text-sm">
                     <StatusRow label={t("web.settings.payments.accountIdLabel")}>
                       {/* `break-all` because an `acct_` id is 21 unbroken
                           characters and a phone is 320px wide; the old markup
@@ -247,7 +247,7 @@ export default async function PaymentsSettingsPage({
               </>
             ) : (
               <SettingRow>
-                <p className="text-muted-foreground text-sm">
+                <p className="text-sm text-muted-foreground">
                   {t("web.settings.payments.stripeOnboardingHelp")}
                 </p>
                 {embedded && publishableKey ? (

@@ -28,7 +28,7 @@ export default async function AdminUatPage() {
     <div className="space-y-6">
       <header>
         <PageHeader title={t("web.admin.uat.title")} />
-        <p className="text-muted-foreground text-sm">{t("web.admin.uat.subtitle")}</p>
+        <p className="text-sm text-muted-foreground">{t("web.admin.uat.subtitle")}</p>
       </header>
       <UatRunbook initialChecked={initialChecked} isProdDeployment={isProductionDeployment()} />
     </div>

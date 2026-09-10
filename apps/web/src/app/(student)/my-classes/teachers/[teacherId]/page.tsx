@@ -156,7 +156,7 @@ export default async function StudentTeacherProfilePage({
             </Heading>
           </div>
 
-          {teacher.headline && <p className="text-muted-foreground text-sm">{teacher.headline}</p>}
+          {teacher.headline && <p className="text-sm text-muted-foreground">{teacher.headline}</p>}
 
           {(subject || instructionLanguage) && (
             <div className="flex flex-wrap gap-2">
@@ -177,19 +177,19 @@ export default async function StudentTeacherProfilePage({
         <CardContent className="space-y-5">
           <section
             aria-labelledby="teacher-right-now"
-            className="border-border bg-muted rounded-md border p-4"
+            className="rounded-md border border-border bg-muted p-4"
           >
             <Heading
               level={4}
               as="h2"
               id="teacher-right-now"
-              className="text-muted-foreground mb-3 text-sm"
+              className="mb-3 text-sm text-muted-foreground"
             >
               {t("web.myTeachers.rightNow")}
             </Heading>
             <LocalClocks parties={clocks} locale={locale} />
             {sharesTeacherClock && (
-              <p className="text-muted-foreground mt-3 text-sm">
+              <p className="mt-3 text-sm text-muted-foreground">
                 {t("web.myTeachers.sameTimeAsYou")}
               </p>
             )}
@@ -219,14 +219,14 @@ export default async function StudentTeacherProfilePage({
         <Card>
           <Link
             href={`/my-classes/${nextClass.id}`}
-            className="hover:bg-muted/50 flex items-center gap-3 rounded-lg p-6 transition-colors"
+            className="flex items-center gap-3 rounded-lg p-6 transition-colors hover:bg-muted/50"
           >
             <div className="min-w-0 flex-1 space-y-1">
-              <p className="text-muted-foreground text-sm">{t("web.myTeachers.nextClass")}</p>
+              <p className="text-sm text-muted-foreground">{t("web.myTeachers.nextClass")}</p>
               <p className="font-semibold">{nextClassWhen.when}</p>
-              <p className="text-muted-foreground text-sm">{nextClassWhen.whenSecondary}</p>
+              <p className="text-sm text-muted-foreground">{nextClassWhen.whenSecondary}</p>
             </div>
-            <ChevronRight className="text-muted-foreground h-5 w-5 shrink-0" aria-hidden />
+            <ChevronRight className="h-5 w-5 shrink-0 text-muted-foreground" aria-hidden />
           </Link>
         </Card>
       )}
@@ -253,7 +253,7 @@ export default async function StudentTeacherProfilePage({
           </Heading>
         </CardHeader>
         <CardContent>
-          <dl className="divide-border divide-y">
+          <dl className="divide-y divide-border">
             <ContactRow
               label={t("web.myTeachers.email")}
               value={teacher.email}
@@ -295,7 +295,7 @@ export default async function StudentTeacherProfilePage({
               existingBody={existingTestimonial?.body ?? null}
             />
           ) : (
-            <p className="text-muted-foreground text-sm">
+            <p className="text-sm text-muted-foreground">
               {t("web.myTeachers.testimonial.notYet", { name: teacher.name })}
             </p>
           )}
@@ -310,7 +310,7 @@ export default async function StudentTeacherProfilePage({
             <span className="sr-only">{`, ${t("common.opensInNewTab")}`}</span>
           </a>
         </Button>
-        <p className="text-muted-foreground text-sm">{t("web.myTeachers.bookingPageHint")}</p>
+        <p className="text-sm text-muted-foreground">{t("web.myTeachers.bookingPageHint")}</p>
       </div>
     </PageShell>
   );
@@ -339,7 +339,7 @@ function ContactRow({
 }) {
   return (
     <div className="py-2 first:pt-0 last:pb-0">
-      <dt className="text-muted-foreground text-sm">{label}</dt>
+      <dt className="text-sm text-muted-foreground">{label}</dt>
       <dd className="flex items-center gap-2">
         {/* `min-h-11` because this is a discrete tap target in a list, not a
             link inside a sentence — D-140's 44px minimum applies. */}

@@ -74,7 +74,7 @@ export default async function AdminAuditPage({ searchParams }: { searchParams: P
     <div className="space-y-6">
       <header>
         <PageHeader title={t("web.admin.audit.title")} />
-        <p className="text-muted-foreground text-sm">{t("web.admin.audit.subtitle")}</p>
+        <p className="text-sm text-muted-foreground">{t("web.admin.audit.subtitle")}</p>
       </header>
 
       <AuditTable

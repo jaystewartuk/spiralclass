@@ -37,24 +37,24 @@ export function GoogleCalendarPanel({
   if (!connected) {
     return (
       <div className="space-y-3">
-        <p className="text-muted-foreground text-sm">{t("web.calendarSync.google.connectHelp")}</p>
+        <p className="text-sm text-muted-foreground">{t("web.calendarSync.google.connectHelp")}</p>
         <Button asChild>
           <a href="/api/calendar/google/start">{t("calendarSync.google.connect")}</a>
         </Button>
-        <p className="text-muted-foreground text-xs">{t("web.calendarSync.google.readOnlyNote")}</p>
+        <p className="text-xs text-muted-foreground">{t("web.calendarSync.google.readOnlyNote")}</p>
       </div>
     );
   }
 
   return (
     <div className="space-y-4">
-      <div className="bg-muted/30 flex flex-wrap items-center justify-between gap-2 rounded-md border px-3 py-2">
+      <div className="flex flex-wrap items-center justify-between gap-2 rounded-md border bg-muted/30 px-3 py-2">
         <div className="min-w-0 text-sm">
           <p className="font-medium">
             {t("calendarSync.google.connected")}
             {googleEmail ? ` · ${googleEmail}` : ""}
           </p>
-          <p className="text-muted-foreground text-xs">
+          <p className="text-xs text-muted-foreground">
             {syncEnabled
               ? lastSyncedLabel
                 ? t("calendarSync.google.lastSynced", { when: lastSyncedLabel })
@@ -72,7 +72,7 @@ export function GoogleCalendarPanel({
       </div>
 
       {lastSyncError && syncEnabled && (
-        <p className="border-warning/30 bg-warning-bg text-warning rounded-md border px-3 py-2 text-xs">
+        <p className="rounded-md border border-warning/30 bg-warning-bg px-3 py-2 text-xs text-warning">
           {t("web.calendarSync.google.syncError")}
         </p>
       )}

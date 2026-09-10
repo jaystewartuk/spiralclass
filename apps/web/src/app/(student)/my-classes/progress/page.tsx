@@ -95,7 +95,7 @@ export default async function ProgressPage() {
 
       {!hasAnything && (
         <Card>
-          <CardContent className="text-muted-foreground py-6 text-sm">
+          <CardContent className="py-6 text-sm text-muted-foreground">
             {t("progress.empty")}
           </CardContent>
         </Card>

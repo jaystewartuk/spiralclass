@@ -266,7 +266,7 @@ function UpcomingClasses({ vm, t, readOnly }: SectionProps) {
 
       {next ? (
         <CardContent className="p-0">
-          <ul className="divide-border divide-y border-t">
+          <ul className="divide-y divide-border border-t">
             <li>
               <ClassRow booking={next} vm={vm} t={t} readOnly={readOnly} featured />
             </li>
@@ -289,10 +289,10 @@ function UpcomingClasses({ vm, t, readOnly }: SectionProps) {
       ) : (
         <CardContent>
           <div className="flex items-start gap-3">
-            <CalendarDays className="text-muted-foreground mt-0.5 h-5 w-5 shrink-0" aria-hidden />
+            <CalendarDays className="mt-0.5 h-5 w-5 shrink-0 text-muted-foreground" aria-hidden />
             <div className="space-y-1">
               <p className="font-medium">{t("web.dashboard.home.schedule.none")}</p>
-              <p className="text-muted-foreground text-sm">
+              <p className="text-sm text-muted-foreground">
                 {vm.hasNoActivityYet
                   ? t("web.dashboard.home.schedule.noneHelpNewTeacher")
                   : t("web.dashboard.home.schedule.noneHelp")}
@@ -348,7 +348,7 @@ function ClassRow({
           featured size is already close to the column, and a reader who has
           turned the text scale up would otherwise get a two-line clock. */}
       <div className="w-24 shrink-0 whitespace-nowrap">
-        <div className="text-muted-foreground text-sm">{zoned.viewer.dateLabel}</div>
+        <div className="text-sm text-muted-foreground">{zoned.viewer.dateLabel}</div>
         <div className={`font-semibold tabular-nums ${featured ? "text-h3" : ""}`}>
           {zoned.viewer.timeLabel}
         </div>
@@ -371,7 +371,7 @@ function ClassRow({
             get from anywhere else on the row. From `sm` up the width is there
             and one clean line is better. */}
         {meta.length > 0 && (
-          <div className="text-muted-foreground text-sm sm:truncate">
+          <div className="text-sm text-muted-foreground sm:truncate">
             {meta.map((item, i) => (
               <span key={item}>
                 {/* The separator is decoration; it is not part of what the row
@@ -397,7 +397,7 @@ function ClassRow({
             time: …" — the label with the answer cut off, which is worse than
             no line at all. It wraps instead. */}
         {!zoned.sameWallClock && (
-          <div className="text-subtle text-sm sm:truncate">
+          <div className="text-sm text-subtle sm:truncate">
             {t("web.dualZone.otherPartyTime", {
               name: zoned.other.label,
               time: `${zoned.other.timeLabel} (${zoned.other.tzDisplay})`,
@@ -405,7 +405,7 @@ function ClassRow({
           </div>
         )}
       </div>
-      <ChevronRight className="text-muted-foreground h-5 w-5 shrink-0" aria-hidden />
+      <ChevronRight className="h-5 w-5 shrink-0 text-muted-foreground" aria-hidden />
     </>
   );
 
@@ -458,11 +458,11 @@ function BookingLinkCard({ vm, t, readOnly }: SectionProps) {
             before then would send students to a page that can't take
             payment. This note makes the gap visible instead of silent. */}
         {!vm.marketplaceReady && (
-          <p className="text-warning text-sm font-medium">
+          <p className="text-sm font-medium text-warning">
             {t("web.dashboard.home.bookingLinkNotPublicYetWarning")}
           </p>
         )}
-        <div className="bg-muted/40 rounded-md border px-3 py-2 font-mono text-sm break-all">
+        <div className="rounded-md border bg-muted/40 px-3 py-2 font-mono text-sm break-all">
           {vm.bookingUrl}
         </div>
         <div className="flex flex-wrap items-center gap-2">
@@ -517,13 +517,13 @@ function PaymentsStatus({ vm, t, readOnly }: SectionProps) {
 
   if (rails.length > 0) {
     return (
-      <div className="bg-muted/20 space-y-2 rounded-lg border px-4 py-3">
+      <div className="space-y-2 rounded-lg border bg-muted/20 px-4 py-3">
         <div className="flex flex-wrap items-center gap-2">
           <Badge variant="success">
             <CheckCircle2 className="h-3.5 w-3.5" aria-hidden />
             {t("home.paymentsActive")}
           </Badge>
-          <span className="text-muted-foreground text-sm">{rails.join(" + ")}</span>
+          <span className="text-sm text-muted-foreground">{rails.join(" + ")}</span>
         </div>
         {/* Underline rather than `text-primary`. The primary token measures
             3.48:1 against the raised card in dark mode — it is verified as a
@@ -588,7 +588,7 @@ function ShortcutGrid({ vm, t, readOnly }: SectionProps) {
           <Heading level={3} as="h2" id="dashboard-shortcuts">
             {t("home.dayToDay")}
           </Heading>
-          <p className="text-muted-foreground text-sm">
+          <p className="text-sm text-muted-foreground">
             {t("web.dashboard.home.shortcutsSubtitle")}
           </p>
         </div>
@@ -666,18 +666,18 @@ function NavTile({
     "bg-card min-h-target flex items-start gap-3 rounded-md border p-3 transition-colors";
   const inner = (
     <>
-      {Icon && <Icon className="text-muted-foreground mt-0.5 h-5 w-5 shrink-0" aria-hidden />}
+      {Icon && <Icon className="mt-0.5 h-5 w-5 shrink-0 text-muted-foreground" aria-hidden />}
       <div className="min-w-0">
         <div className="flex items-center gap-2 font-medium">
           {item.label}
           {badge > 0 && (
-            <span className="bg-primary text-primary-foreground inline-flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-xs font-semibold">
+            <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1.5 text-xs font-semibold text-primary-foreground">
               {badge}
             </span>
           )}
         </div>
         {item.description && (
-          <div className="text-muted-foreground text-sm">{item.description}</div>
+          <div className="text-sm text-muted-foreground">{item.description}</div>
         )}
       </div>
     </>

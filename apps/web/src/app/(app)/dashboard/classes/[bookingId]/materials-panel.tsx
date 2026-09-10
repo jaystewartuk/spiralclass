@@ -202,7 +202,7 @@ export function MaterialsPanel({
       <CardContent className="space-y-4">
         <div className="space-y-2">
           <div className="flex items-center justify-between gap-3">
-            <p className="text-muted-foreground text-xs font-medium">
+            <p className="text-xs font-medium text-muted-foreground">
               {t("web.dashboard.classes.detail.contentPreviewTitle")}
             </p>
             <div className="flex items-center gap-3">
@@ -240,7 +240,7 @@ export function MaterialsPanel({
           {content?.body ? (
             <ClassContentMarkdown body={content.body} />
           ) : (
-            <p className="text-muted-foreground text-sm">
+            <p className="text-sm text-muted-foreground">
               {t("web.dashboard.classes.detail.noContentYet")}
             </p>
           )}
@@ -265,7 +265,7 @@ export function MaterialsPanel({
 
         <div className="space-y-4 border-t pt-4">
           {displayRows.length === 0 ? (
-            <p className="text-muted-foreground text-sm">
+            <p className="text-sm text-muted-foreground">
               {t("web.dashboard.classes.materials.noneYet")}
             </p>
           ) : displayRows.length > MATERIALS_COLLAPSE_THRESHOLD ? (
@@ -291,7 +291,7 @@ export function MaterialsPanel({
         </div>
 
         {availableToAttach.length > 0 && (
-          <form action={attachAction} className="bg-muted/40 space-y-3 rounded-md border p-3">
+          <form action={attachAction} className="space-y-3 rounded-md border bg-muted/40 p-3">
             <input type="hidden" name="bookingId" value={bookingId} />
             <Label>{t("web.dashboard.classes.materials.attachFromLibrary")}</Label>
             {/* Level narrowing. Only worth showing when there's more than one
@@ -320,18 +320,18 @@ export function MaterialsPanel({
             )}
             {/* Multi-select: check any number of library items, across levels;
                 one hidden libraryMaterialId is submitted per checked item. */}
-            <div className="bg-background max-h-56 space-y-2 overflow-y-auto rounded-md border p-2">
+            <div className="max-h-56 space-y-2 overflow-y-auto rounded-md border bg-background p-2">
               {visibleLevels.map((g) => (
                 <div key={g.levelId ?? "none"} className="space-y-1">
                   {/* The heading carries the level, so the row no longer needs
                       to repeat it as a "· A2" suffix on every single line. */}
-                  <p className="bg-background text-muted-foreground sticky top-0 px-2 py-0.5 text-xs font-semibold">
+                  <p className="sticky top-0 bg-background px-2 py-0.5 text-xs font-semibold text-muted-foreground">
                     {g.levelLabel}
                   </p>
                   {g.items.map((o) => (
                     <label
                       key={o.id}
-                      className="hover:bg-muted flex cursor-pointer items-center gap-2 rounded px-2 py-1 text-sm"
+                      className="flex cursor-pointer items-center gap-2 rounded px-2 py-1 text-sm hover:bg-muted"
                     >
                       <input
                         type="checkbox"
@@ -369,7 +369,7 @@ export function MaterialsPanel({
                   ? t("web.dashboard.classes.materials.attachCount", { count: attachIds.size })
                   : t("web.dashboard.classes.materials.attachFromLibrary")}
             </Button>
-            {attachState?.error && <p className="text-destructive text-sm">{attachState.error}</p>}
+            {attachState?.error && <p className="text-sm text-destructive">{attachState.error}</p>}
           </form>
         )}
       </CardContent>
@@ -394,7 +394,7 @@ function MaterialGroupList({
     <>
       {groups.map((g) => (
         <div key={g.categoryId ?? "__other__"} className="space-y-2">
-          <p className="text-muted-foreground text-xs font-semibold">
+          <p className="text-xs font-semibold text-muted-foreground">
             {g.categoryId === null ? t("library.otherCategory") : g.categoryLabel}
           </p>
           <ul className="space-y-2 text-sm">
@@ -419,11 +419,11 @@ function MaterialGroupList({
                         {m.label ?? fallback}
                       </a>
                     ) : (
-                      <span className="text-muted-foreground font-medium">
+                      <span className="font-medium text-muted-foreground">
                         {m.label ?? fallback}
                       </span>
                     )}
-                    <p className="text-muted-foreground text-xs">
+                    <p className="text-xs text-muted-foreground">
                       {m.source === "library"
                         ? `${t("web.dashboard.classes.materials.fromLibrary")} · ${timingLabel(m.sendTiming)}`
                         : timingLabel(m.sendTiming)}
@@ -433,7 +433,7 @@ function MaterialGroupList({
                         {m.tags.map((tag) => (
                           <span
                             key={tag.id}
-                            className="text-muted-foreground rounded-full border px-2 py-0.5 text-sm"
+                            className="rounded-full border px-2 py-0.5 text-sm text-muted-foreground"
                           >
                             {tag.label}
                           </span>
@@ -452,7 +452,7 @@ function MaterialGroupList({
                     )}
                     {m.source === "library" && m.body && (
                       <details className="group">
-                        <summary className="text-muted-foreground cursor-pointer text-xs">
+                        <summary className="cursor-pointer text-xs text-muted-foreground">
                           {t("web.materials.previewContent")}
                         </summary>
                         <div className="mt-2 border-t pt-2">

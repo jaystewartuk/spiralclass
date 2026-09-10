@@ -188,7 +188,7 @@ export default async function NotificationsPage({
 
       {/* Why the list ends where it does. Without this the window reads as a
           bug — notifications she remembers receiving are simply not here. */}
-      <p className="text-muted-foreground text-sm">
+      <p className="text-sm text-muted-foreground">
         {t("web.notifications.retention", { days: INBOX_RETENTION_DAYS })}
       </p>
     </PageShell>
@@ -222,7 +222,7 @@ function InboxViews({
   return (
     <nav
       aria-label={t("web.notifications.viewsLabel")}
-      className="bg-muted flex w-fit max-w-full gap-1 overflow-x-auto rounded-md p-1"
+      className="flex w-fit max-w-full gap-1 overflow-x-auto rounded-md bg-muted p-1"
     >
       {INBOX_FILTERS.map((value) => {
         const active = value === filter;

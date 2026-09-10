@@ -27,10 +27,10 @@ function buildComponents(offset: number): Components {
 
   return {
     h1: ({ children }) => (
-      <H1 className="text-foreground mt-10 mb-4 text-3xl font-bold">{children}</H1>
+      <H1 className="mt-10 mb-4 text-3xl font-bold text-foreground">{children}</H1>
     ),
     h2: ({ children }) => (
-      <H2 className="border-border text-foreground mt-10 mb-3 border-b pb-2 text-2xl font-semibold">
+      <H2 className="mt-10 mb-3 border-b border-border pb-2 text-2xl font-semibold text-foreground">
         {children}
       </H2>
     ),
@@ -39,19 +39,19 @@ function buildComponents(offset: number): Components {
       // of the paragraph under it is not a heading, and `###` is where these
       // documents keep their real structure — every "Steps" section in
       // docs/help is a list of them.
-      <Heading level={3} as={H3} className="text-foreground mt-6 mb-2">
+      <Heading level={3} as={H3} className="mt-6 mb-2 text-foreground">
         {children}
       </Heading>
     ),
-    p: ({ children }) => <p className="text-muted-foreground mb-4 leading-relaxed">{children}</p>,
+    p: ({ children }) => <p className="mb-4 leading-relaxed text-muted-foreground">{children}</p>,
     ul: ({ children }) => (
-      <ul className="text-muted-foreground mb-4 list-disc space-y-1 pl-6">{children}</ul>
+      <ul className="mb-4 list-disc space-y-1 pl-6 text-muted-foreground">{children}</ul>
     ),
     ol: ({ children }) => (
-      <ol className="text-muted-foreground mb-4 list-decimal space-y-1 pl-6">{children}</ol>
+      <ol className="mb-4 list-decimal space-y-1 pl-6 text-muted-foreground">{children}</ol>
     ),
     li: ({ children }) => <li className="leading-relaxed">{children}</li>,
-    strong: ({ children }) => <strong className="text-foreground font-semibold">{children}</strong>,
+    strong: ({ children }) => <strong className="font-semibold text-foreground">{children}</strong>,
     em: ({ children }) => <em className="italic">{children}</em>,
     a: ({ href, children }) => {
       // An off-site link opens in a new tab and says so to a screen reader.
@@ -62,20 +62,20 @@ function buildComponents(offset: number): Components {
         <a
           href={href}
           {...(external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
-          className="text-primary hover:text-foreground rounded-sm underline underline-offset-2"
+          className="rounded-sm text-primary underline underline-offset-2 hover:text-foreground"
         >
           {children}
         </a>
       );
     },
-    hr: () => <hr className="border-border my-8" />,
+    hr: () => <hr className="my-8 border-border" />,
     blockquote: ({ children }) => (
-      <blockquote className="border-border text-muted-foreground my-4 border-l-4 pl-4">
+      <blockquote className="my-4 border-l-4 border-border pl-4 text-muted-foreground">
         {children}
       </blockquote>
     ),
     code: ({ children }) => (
-      <code className="bg-muted rounded px-1 py-0.5 font-mono text-xs">{children}</code>
+      <code className="rounded bg-muted px-1 py-0.5 font-mono text-xs">{children}</code>
     ),
     table: ({ children }) => (
       <div className="mb-6 overflow-x-auto">
@@ -84,12 +84,12 @@ function buildComponents(offset: number): Components {
     ),
     thead: ({ children }) => <thead className="bg-muted">{children}</thead>,
     th: ({ children }) => (
-      <th className="border-border text-foreground border px-4 py-2 text-left font-medium">
+      <th className="border border-border px-4 py-2 text-left font-medium text-foreground">
         {children}
       </th>
     ),
     td: ({ children }) => (
-      <td className="border-border text-muted-foreground border px-4 py-2 leading-relaxed">
+      <td className="border border-border px-4 py-2 leading-relaxed text-muted-foreground">
         {children}
       </td>
     ),

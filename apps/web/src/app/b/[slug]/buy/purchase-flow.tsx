@@ -289,12 +289,12 @@ export function PurchaseFlow({
                           value={tpl.id}
                           checked={checked}
                           onChange={() => selectTemplate(tpl.id)}
-                          className="accent-foreground mt-1 size-4 cursor-pointer"
+                          className="mt-1 size-4 cursor-pointer accent-foreground"
                         />
                       )}
                       <div>
                         <div className="font-medium">{tpl.name}</div>
-                        <div className="text-muted-foreground text-xs">{describe(tpl, t)}</div>
+                        <div className="text-xs text-muted-foreground">{describe(tpl, t)}</div>
                       </div>
                     </div>
                     <div className="text-right">
@@ -302,7 +302,7 @@ export function PurchaseFlow({
                         {formatPriceForBuyer(price, tpl.currency, locale)}
                       </div>
                       {tpl.approxUsdCents !== null && (
-                        <div className="text-muted-foreground text-xs tabular-nums">
+                        <div className="text-xs text-muted-foreground tabular-nums">
                           {t("web.buyFlow.approxPrice", {
                             price: formatPriceForBuyer(tpl.approxUsdCents, "USD", locale),
                           })}
@@ -317,7 +317,7 @@ export function PurchaseFlow({
             <div className="flex items-start justify-between gap-3 border-t pt-4">
               <div className="min-w-0">
                 <div className="font-medium">{selected.name}</div>
-                <div className="text-muted-foreground text-xs">{describe(selected, t)}</div>
+                <div className="text-xs text-muted-foreground">{describe(selected, t)}</div>
                 <Button
                   type="button"
                   variant="link"
@@ -331,7 +331,7 @@ export function PurchaseFlow({
               <div className="shrink-0 text-right">
                 <div className="text-lg font-semibold tabular-nums">{money(selectedPrice)}</div>
                 {selected.approxUsdCents !== null && (
-                  <div className="text-muted-foreground text-xs tabular-nums">
+                  <div className="text-xs text-muted-foreground tabular-nums">
                     {t("web.buyFlow.approxPrice", {
                       price: formatPriceForBuyer(selected.approxUsdCents, "USD", locale),
                     })}
@@ -377,17 +377,17 @@ export function PurchaseFlow({
       {/* 3 — The reassurance that was previously only on the landing page. The
           moment of maximum doubt was the one screen carrying none of it. */}
       <div className="space-y-3">
-        <p className="text-muted-foreground flex items-start gap-2 text-xs">
+        <p className="flex items-start gap-2 text-xs text-muted-foreground">
           <ShieldCheck className="mt-0.5 h-3.5 w-3.5 shrink-0" aria-hidden />
           {t("web.bookingLanding.included.reschedule.body")}
         </p>
         {testimonial && (
-          <figure className="bg-muted/30 space-y-2 rounded-lg border p-4">
-            <Quote className="text-primary/60 h-4 w-4" aria-hidden />
-            <blockquote className="text-foreground/80 text-xs leading-relaxed whitespace-pre-line">
+          <figure className="space-y-2 rounded-lg border bg-muted/30 p-4">
+            <Quote className="h-4 w-4 text-primary/60" aria-hidden />
+            <blockquote className="text-xs leading-relaxed whitespace-pre-line text-foreground/80">
               {testimonial.body}
             </blockquote>
-            <figcaption className="text-muted-foreground text-xs">
+            <figcaption className="text-xs text-muted-foreground">
               {testimonial.authorName}
               {testimonial.authorNote ? ` · ${testimonial.authorNote}` : ""}
             </figcaption>
@@ -404,13 +404,13 @@ export function PurchaseFlow({
                 {t("web.buyFlow.otherWaysToPay")}
               </span>
               {transferSaving > 0 && (
-                <span className="text-success ml-2">
+                <span className="ml-2 text-success">
                   {t("web.buyFlow.youSave", { amount: money(transferSaving) })}
                 </span>
               )}
             </summary>
             <div className="mt-3 space-y-2">
-              <p className="text-muted-foreground flex items-center gap-1 text-xs">
+              <p className="flex items-center gap-1 text-xs text-muted-foreground">
                 {t("buy.method.title")}
                 <HelpTip
                   text={t("web.help.hint.studentPayments.text")}
@@ -424,7 +424,7 @@ export function PurchaseFlow({
           </details>
         ) : (
           <fieldset className="space-y-2 rounded-lg border p-4">
-            <legend className="text-muted-foreground flex items-center gap-1 px-1 text-xs">
+            <legend className="flex items-center gap-1 px-1 text-xs text-muted-foreground">
               {t("buy.method.title")}
               <HelpTip
                 text={t("web.help.hint.studentPayments.text")}
@@ -467,7 +467,7 @@ function MethodOption({
         name="method-toggle"
         checked={checked}
         onChange={onSelect}
-        className="accent-foreground size-4 cursor-pointer"
+        className="size-4 cursor-pointer accent-foreground"
       />
       <span className="font-medium">{label}</span>
     </label>

@@ -20,7 +20,7 @@ export function CalendarLegend({
   t: TFunction;
 }) {
   return (
-    <div className="text-muted-foreground flex flex-wrap items-center gap-x-4 gap-y-1.5 text-sm">
+    <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-sm text-muted-foreground">
       <span className="sr-only">{t("web.calendar.legendTitle")}</span>
       {LEGEND_STATUSES.map((status) => (
         <span key={status} className="inline-flex items-center gap-1.5">

@@ -33,7 +33,7 @@ export default function AdminError({
         <Heading level={1}>{t("common.error")}</Heading>
         <p className="text-muted-foreground">{t("web.admin.errorBoundary.body")}</p>
         {error.digest && (
-          <p className="text-muted-foreground text-xs">
+          <p className="text-xs text-muted-foreground">
             {t("web.errorBoundary.reference")}: <code>{error.digest}</code>
           </p>
         )}

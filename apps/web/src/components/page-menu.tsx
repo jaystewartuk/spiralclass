@@ -42,14 +42,14 @@ export function PageMenu({ links, label }: { links: WebNavLink[]; label: string 
         className={cn(
           "gap-1 font-medium whitespace-nowrap",
           anyActive || open
-            ? "bg-muted text-foreground font-semibold"
+            ? "bg-muted font-semibold text-foreground"
             : "text-muted-foreground hover:text-foreground",
         )}
       >
         {label}
         <ChevronDown
           aria-hidden
-          className={cn("text-muted-foreground h-4 w-4 transition-transform", open && "rotate-180")}
+          className={cn("h-4 w-4 text-muted-foreground transition-transform", open && "rotate-180")}
         />
       </Button>
 
@@ -59,7 +59,7 @@ export function PageMenu({ links, label }: { links: WebNavLink[]; label: string 
           ref={panelRef}
           onKeyDown={onPanelKeyDown}
           aria-label={label}
-          className="max-h-menu border-border bg-popover text-popover-foreground absolute left-0 z-50 mt-2 w-72 overflow-y-auto rounded-md border p-1 shadow-lg"
+          className="absolute left-0 z-50 mt-2 max-h-menu w-72 overflow-y-auto rounded-md border border-border bg-popover p-1 text-popover-foreground shadow-lg"
         >
           {links.map((link) => {
             const active = isWebNavActive(link, pathname);
@@ -75,7 +75,7 @@ export function PageMenu({ links, label }: { links: WebNavLink[]; label: string 
                   <>
                     <span className="block">{link.label}</span>
                     {link.description && (
-                      <span className="text-muted-foreground block text-xs font-normal">
+                      <span className="block text-xs font-normal text-muted-foreground">
                         {link.description}
                       </span>
                     )}

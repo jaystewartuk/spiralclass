@@ -76,7 +76,7 @@ export default async function ReferralsPage() {
             <li key={step} className="flex gap-3">
               <span
                 aria-hidden
-                className="bg-muted text-muted-foreground flex h-9 w-9 shrink-0 items-center justify-center rounded-full"
+                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-muted text-muted-foreground"
               >
                 <Icon className="h-4 w-4" />
               </span>
@@ -87,14 +87,14 @@ export default async function ReferralsPage() {
                 <p className="font-semibold">
                   {index + 1}. {t(`web.dashboard.referrals.how.${step}`)}
                 </p>
-                <p className="text-muted-foreground text-sm">
+                <p className="text-sm text-muted-foreground">
                   {t(`web.dashboard.referrals.how.${step}Body`)}
                 </p>
               </div>
             </li>
           ))}
         </ol>
-        <p className="text-muted-foreground border-t pt-4 text-sm">
+        <p className="border-t pt-4 text-sm text-muted-foreground">
           {t("web.dashboard.referrals.how.cost")}
         </p>
       </CardContent>
@@ -162,12 +162,12 @@ export default async function ReferralsPage() {
               ].map((tile) => (
                 <div key={tile.key} className="space-y-1">
                   <div className="text-2xl font-semibold tabular-nums">{tile.value}</div>
-                  <div className="text-muted-foreground text-sm">{tile.label}</div>
+                  <div className="text-sm text-muted-foreground">{tile.label}</div>
                 </div>
               ))}
               {/* What the top-line number cost, said plainly rather than left
                   for her to work out from her own price list. */}
-              <p className="text-muted-foreground col-span-2 text-left text-sm lg:col-span-4">
+              <p className="col-span-2 text-left text-sm text-muted-foreground lg:col-span-4">
                 {t("web.dashboard.referrals.results.cost", {
                   amount: formatMinorUnits(stats.discountMinorUnits, dashboard.currency),
                 })}
@@ -212,7 +212,7 @@ export default async function ReferralsPage() {
                       <p className="truncate font-medium">
                         {row.friendName ?? t("web.dashboard.referrals.activity.unknownStudent")}
                       </p>
-                      <p className="text-muted-foreground text-sm">
+                      <p className="text-sm text-muted-foreground">
                         {t("web.dashboard.referrals.activity.referredBy", {
                           referrer:
                             row.referrerName ??
@@ -223,7 +223,7 @@ export default async function ReferralsPage() {
                       </p>
                     </div>
                     <div className="flex shrink-0 items-center gap-2">
-                      <span className="text-muted-foreground text-sm tabular-nums">
+                      <span className="text-sm text-muted-foreground tabular-nums">
                         {t("web.dashboard.referrals.activity.discountGiven", {
                           amount: formatMinorUnits(row.discountMinorUnits, row.currency),
                         })}

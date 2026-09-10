@@ -305,19 +305,19 @@ export function IntroVideoCard({
             frameReady
               ? "from-primary/85 via-primary/60 to-primary/80"
               : "from-primary to-primary/70"
-          } text-primary-foreground focus-visible:ring-ring absolute inset-0 flex flex-col items-center justify-center gap-3 bg-gradient-to-br outline-hidden transition-all duration-500 hover:opacity-90 focus-visible:ring-3 focus-visible:ring-offset-2 disabled:cursor-default disabled:hover:opacity-100`}
+          } absolute inset-0 flex flex-col items-center justify-center gap-3 bg-gradient-to-br text-primary-foreground outline-hidden transition-all duration-500 hover:opacity-90 focus-visible:ring-3 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-default disabled:hover:opacity-100`}
         >
           {errored ? (
             <>
               <LogoMark variant="inverted" size={36} />
-              <span className="text-primary-foreground max-w-[80%] text-center text-sm">
+              <span className="max-w-[80%] text-center text-sm text-primary-foreground">
                 {t("bookingPage.videoUnavailable")}
               </span>
             </>
           ) : (
             <>
               <LogoMark variant="inverted" size={36} />
-              <span className="bg-overlay-4 text-primary flex h-14 w-14 items-center justify-center rounded-full shadow">
+              <span className="flex h-14 w-14 items-center justify-center rounded-full bg-overlay-4 text-primary shadow">
                 {buffering ? (
                   <Loader2 className="h-6 w-6 animate-spin" aria-hidden />
                 ) : (

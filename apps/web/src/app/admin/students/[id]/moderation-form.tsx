@@ -46,10 +46,10 @@ export function StudentModerationForm({
     return (
       <form action={enableAction} className="rounded-md border p-4">
         <input type="hidden" name="studentId" value={studentId} />
-        <p className="text-muted-foreground mb-3 text-sm">
+        <p className="mb-3 text-sm text-muted-foreground">
           {t("web.admin.students.moderation.reenableHint")}
         </p>
-        {enableState?.error && <p className="text-destructive mb-3 text-sm">{enableState.error}</p>}
+        {enableState?.error && <p className="mb-3 text-sm text-destructive">{enableState.error}</p>}
         <Button type="submit" disabled={enablePending}>
           {enablePending
             ? t("web.admin.students.moderation.enabling")
@@ -100,7 +100,7 @@ export function StudentModerationForm({
               placeholder={t("web.admin.students.moderation.reasonPlaceholder")}
             />
           </div>
-          {disableState?.error && <p className="text-destructive text-sm">{disableState.error}</p>}
+          {disableState?.error && <p className="text-sm text-destructive">{disableState.error}</p>}
         </form>
       </ConfirmDialog>
     </div>

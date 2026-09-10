@@ -132,7 +132,7 @@ export default async function FeaturesPage() {
         <Heading level={1} className="lg:text-display">
           {t("web.features.headline")}
         </Heading>
-        <p className="max-w-reading text-muted-foreground mx-auto mt-4 text-lg text-pretty">
+        <p className="mx-auto mt-4 max-w-reading text-lg text-pretty text-muted-foreground">
           {t("web.features.sub")}
         </p>
       </header>
@@ -143,9 +143,9 @@ export default async function FeaturesPage() {
         ))}
       </div>
 
-      <div className="bg-primary text-primary-foreground mt-14 rounded-3xl px-6 py-14 text-center">
+      <div className="mt-14 rounded-3xl bg-primary px-6 py-14 text-center text-primary-foreground">
         <Heading level={2}>{t("web.trialBand.title")}</Heading>
-        <p className="text-primary-foreground mt-3">{t("web.trialBand.noCard")}</p>
+        <p className="mt-3 text-primary-foreground">{t("web.trialBand.noCard")}</p>
         <div className="mt-7 flex flex-col items-center gap-3 lg:flex-row lg:justify-center">
           <Button asChild size="lg" variant="secondary">
             <Link href="/sign-up">{t("web.trialBand.createAccount")}</Link>

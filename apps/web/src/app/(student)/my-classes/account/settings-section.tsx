@@ -42,9 +42,9 @@ export function SettingsSection({
         <Heading level={3} as="h2" id={headingId}>
           {title}
         </Heading>
-        {description ? <p className="text-muted-foreground text-sm">{description}</p> : null}
+        {description ? <p className="text-sm text-muted-foreground">{description}</p> : null}
       </div>
-      <Card className="divide-border divide-y overflow-hidden">{children}</Card>
+      <Card className="divide-y divide-border overflow-hidden">{children}</Card>
     </section>
   );
 }
@@ -79,7 +79,7 @@ export function SettingsRow({
               {title}
             </Heading>
           ) : null}
-          {description ? <p className="text-muted-foreground text-sm">{description}</p> : null}
+          {description ? <p className="text-sm text-muted-foreground">{description}</p> : null}
         </div>
       ) : null}
       {children}

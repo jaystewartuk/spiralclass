@@ -398,15 +398,15 @@ export function IntroVideoForm({
           script: a read-aloud script is the thing that makes an intro sound
           rehearsed, which is the exact failure the AI coach then flags. */}
       {!recorded && (
-        <div className="bg-muted/40 rounded-lg border p-3">
+        <div className="rounded-lg border bg-muted/40 p-3">
           <p className="text-sm font-medium">{t("web.settings.bookingPage.video.scriptTitle")}</p>
-          <ol className="text-muted-foreground mt-1 list-decimal space-y-0.5 pl-5 text-sm">
+          <ol className="mt-1 list-decimal space-y-0.5 pl-5 text-sm text-muted-foreground">
             <li>{t("web.settings.bookingPage.video.scriptBeat1")}</li>
             <li>{t("web.settings.bookingPage.video.scriptBeat2")}</li>
             <li>{t("web.settings.bookingPage.video.scriptBeat3")}</li>
             <li>{t("web.settings.bookingPage.video.scriptBeat4")}</li>
           </ol>
-          <p className="text-muted-foreground mt-2 text-xs">
+          <p className="mt-2 text-xs text-muted-foreground">
             {t("web.settings.bookingPage.video.scriptHint")}
           </p>
         </div>
@@ -432,7 +432,7 @@ export function IntroVideoForm({
               />
             ) : null}
             {recording && (
-              <span className="bg-destructive text-destructive-foreground absolute top-2 left-2 rounded px-2 py-0.5 text-xs font-medium">
+              <span className="absolute top-2 left-2 rounded bg-destructive px-2 py-0.5 text-xs font-medium text-destructive-foreground">
                 {`● ${secs}s`}
               </span>
             )}
@@ -444,7 +444,7 @@ export function IntroVideoForm({
             which point the clip is already public. This costs nothing and
             reaches every teacher while a retake is still one tap away. */}
         {recorded && !recording && lengthVerdict !== "ideal" && (
-          <p className="text-muted-foreground text-sm">
+          <p className="text-sm text-muted-foreground">
             {lengthVerdict === "too-short"
               ? t("web.settings.bookingPage.video.lengthTooShort", {
                   min: INTRO_VIDEO_IDEAL_MIN_SEC,
@@ -474,7 +474,7 @@ export function IntroVideoForm({
             </Button>
           )}
         </div>
-        {recorderError && <p className="text-destructive text-sm">{recorderError}</p>}
+        {recorderError && <p className="text-sm text-destructive">{recorderError}</p>}
       </div>
 
       {/* Upload — the secondary path. A quiet disclosure rather than a co-equal
@@ -493,7 +493,7 @@ export function IntroVideoForm({
                 track("intro_video_upload_revealed");
                 setShowUpload(true);
               }}
-              className="text-muted-foreground hover:text-foreground text-sm underline underline-offset-2"
+              className="text-sm text-muted-foreground underline underline-offset-2 hover:text-foreground"
             >
               {t("web.settings.bookingPage.video.haveVideoAlready")}
             </button>
@@ -507,9 +507,9 @@ export function IntroVideoForm({
                 type="file"
                 accept="video/mp4,video/webm,video/quicktime"
                 disabled={uploading}
-                className="text-muted-foreground file:border-input file:bg-background hover:file:bg-accent block w-full text-sm file:mr-3 file:rounded-md file:border file:px-3 file:py-1.5 file:text-sm file:font-medium"
+                className="block w-full text-sm text-muted-foreground file:mr-3 file:rounded-md file:border file:border-input file:bg-background file:px-3 file:py-1.5 file:text-sm file:font-medium hover:file:bg-accent"
               />
-              <p className="text-muted-foreground text-xs">
+              <p className="text-xs text-muted-foreground">
                 {t("web.settings.bookingPage.video.uploadHelp")}
               </p>
               <Button

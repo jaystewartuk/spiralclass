@@ -33,17 +33,17 @@ export function BookingCard({
   return (
     <Link
       href={href}
-      className="bg-card hover:bg-muted/40 block rounded-lg border px-4 py-3 shadow-xs transition-colors"
+      className="block rounded-lg border bg-card px-4 py-3 shadow-xs transition-colors hover:bg-muted/40"
     >
       <div className="flex items-start justify-between gap-3">
-        <span className="font-display min-w-0 truncate text-base font-semibold">{title}</span>
+        <span className="min-w-0 truncate font-display text-base font-semibold">{title}</span>
         {status}
       </div>
-      <p className="text-muted-foreground mt-1 text-sm">{when}</p>
-      {whenSecondary && <p className="text-subtle text-xs">{whenSecondary}</p>}
+      <p className="mt-1 text-sm text-muted-foreground">{when}</p>
+      {whenSecondary && <p className="text-xs text-subtle">{whenSecondary}</p>}
       {(meta || materials) && (
         <div className="mt-2 flex items-center justify-between gap-2">
-          {meta ? <span className="text-muted-foreground text-xs">{meta}</span> : <span />}
+          {meta ? <span className="text-xs text-muted-foreground">{meta}</span> : <span />}
           {materials}
         </div>
       )}

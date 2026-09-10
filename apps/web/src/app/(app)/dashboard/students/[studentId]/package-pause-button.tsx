@@ -34,7 +34,7 @@ export function PackagePauseButton({
         {pending ? "..." : label}
       </Button>
       {state?.error && (
-        <span role="alert" className="text-destructive text-xs">
+        <span role="alert" className="text-xs text-destructive">
           {state.error}
         </span>
       )}

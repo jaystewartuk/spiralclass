@@ -61,7 +61,7 @@ export default async function PrivacyNoticePage() {
       <article lang="en" className="space-y-8">
         <header className="space-y-2">
           <PageHeader title={PRIVACY_POLICY_TITLE} />
-          <p className="text-muted-foreground text-xs">
+          <p className="text-xs text-muted-foreground">
             {PRIVACY_LABELS.lastUpdated} {PRIVACY_POLICY_LAST_UPDATED}
           </p>
           <p>{PRIVACY_POLICY_INTRO}</p>
@@ -107,7 +107,7 @@ function Block({ block }: { block: PolicyBlock }) {
         // Wide content scrolls inside its own container, so the page body never
         // scrolls horizontally on a phone.
         <div className="overflow-x-auto">
-          <table className="min-w-table w-full border-collapse text-left">
+          <table className="w-full min-w-table border-collapse text-left">
             <thead>
               <tr className="border-b">
                 <th className="py-2 pr-4 font-semibold">{PRIVACY_LABELS.basisPurpose}</th>
@@ -119,11 +119,11 @@ function Block({ block }: { block: PolicyBlock }) {
               {block.rows.map((row) => (
                 <tr key={row.purpose} className="border-b align-top last:border-0">
                   <td className="py-2 pr-4">{row.purpose}</td>
-                  <td className="text-muted-foreground py-2 pr-4">{row.data}</td>
+                  <td className="py-2 pr-4 text-muted-foreground">{row.data}</td>
                   <td className="py-2">
                     {row.basis}
                     {row.interest ? (
-                      <span className="text-muted-foreground block text-xs">{row.interest}</span>
+                      <span className="block text-xs text-muted-foreground">{row.interest}</span>
                     ) : null}
                   </td>
                 </tr>
@@ -147,7 +147,7 @@ function Block({ block }: { block: PolicyBlock }) {
               {block.rows.map((row) => (
                 <tr key={row.what} className="border-b align-top last:border-0">
                   <td className="py-2 pr-4">{row.what}</td>
-                  <td className="text-muted-foreground py-2">{row.howLong}</td>
+                  <td className="py-2 text-muted-foreground">{row.howLong}</td>
                 </tr>
               ))}
             </tbody>
@@ -160,7 +160,7 @@ function Block({ block }: { block: PolicyBlock }) {
         <div className="space-y-4">
           <SubprocessorTable caption={PRIVACY_LABELS.suppliersCore} rows={coreSubprocessors()} />
           <SubprocessorTable caption={PRIVACY_LABELS.suppliersGated} rows={gatedSubprocessors()} />
-          <p className="text-muted-foreground text-xs">
+          <p className="text-xs text-muted-foreground">
             {PRIVACY_LABELS.suppliersReviewed} {SUBPROCESSORS_REVIEWED}
           </p>
         </div>
@@ -172,7 +172,7 @@ function Block({ block }: { block: PolicyBlock }) {
           <a className="underline" href={`mailto:${PRIVACY_CONTACT_EMAIL}`}>
             {PRIVACY_CONTACT_EMAIL}
           </a>
-          <span className="text-muted-foreground block text-xs">
+          <span className="block text-xs text-muted-foreground">
             {PRIVACY_LABELS.controllerLine}: {CONTROLLER.name}, {CONTROLLER.establishment}
           </span>
         </p>
@@ -183,8 +183,8 @@ function Block({ block }: { block: PolicyBlock }) {
 function SubprocessorTable({ caption, rows }: { caption: string; rows: readonly Subprocessor[] }) {
   return (
     <div className="overflow-x-auto">
-      <table className="min-w-table w-full border-collapse text-left">
-        <caption className="text-muted-foreground pb-2 text-left text-xs">{caption}</caption>
+      <table className="w-full min-w-table border-collapse text-left">
+        <caption className="pb-2 text-left text-xs text-muted-foreground">{caption}</caption>
         <thead>
           <tr className="border-b">
             <th className="py-2 pr-4 font-semibold">{PRIVACY_LABELS.supplierName}</th>
@@ -197,8 +197,8 @@ function SubprocessorTable({ caption, rows }: { caption: string; rows: readonly 
           {rows.map((row) => (
             <tr key={row.id} className="border-b align-top last:border-0">
               <td className="py-2 pr-4 font-medium">{row.name}</td>
-              <td className="text-muted-foreground py-2 pr-4">{row.purpose}</td>
-              <td className="text-muted-foreground py-2 pr-4">{row.dataShared}</td>
+              <td className="py-2 pr-4 text-muted-foreground">{row.purpose}</td>
+              <td className="py-2 pr-4 text-muted-foreground">{row.dataShared}</td>
               <td className="py-2">{row.location}</td>
             </tr>
           ))}

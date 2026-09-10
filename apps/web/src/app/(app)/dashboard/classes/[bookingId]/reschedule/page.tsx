@@ -230,8 +230,8 @@ export default async function TeacherReschedulePage({
           </div>
 
           {slots.length === 0 ? (
-            <div className="border-border/60 bg-muted/30 space-y-3 rounded-md border p-4 text-center">
-              <p className="text-muted-foreground text-sm">
+            <div className="space-y-3 rounded-md border border-border/60 bg-muted/30 p-4 text-center">
+              <p className="text-sm text-muted-foreground">
                 {t("web.dashboard.classes.reschedule.noTimesAvailable")}
               </p>
               {nextAvailableDate ? (
@@ -246,7 +246,7 @@ export default async function TeacherReschedulePage({
                   </HardLink>
                 </Button>
               ) : (
-                <p className="text-muted-foreground text-sm">
+                <p className="text-sm text-muted-foreground">
                   {t("web.dashboard.classes.reschedule.noTimesLeftInWindow")}
                 </p>
               )}
@@ -265,7 +265,7 @@ export default async function TeacherReschedulePage({
             />
           )}
 
-          <p className="text-muted-foreground text-xs">
+          <p className="text-xs text-muted-foreground">
             {t("web.dashboard.classes.reschedule.hint")}
           </p>
         </CardContent>
@@ -320,7 +320,7 @@ function SlotGrid({
         <section key={part} aria-labelledby={`reschedule-part-${part}`}>
           <h3
             id={`reschedule-part-${part}`}
-            className="text-muted-foreground mb-2 text-sm font-semibold"
+            className="mb-2 text-sm font-semibold text-muted-foreground"
           >
             {DAY_PART_LABEL[part]}
           </h3>

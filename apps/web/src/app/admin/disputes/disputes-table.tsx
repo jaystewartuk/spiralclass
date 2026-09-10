@@ -97,7 +97,7 @@ export function DisputesTable({
               {row.original.payment.package.teacher.name}
             </Link>
           ) : (
-            <span className="text-muted-foreground text-xs">
+            <span className="text-xs text-muted-foreground">
               {t("web.admin.disputes.unmatched")}
             </span>
           ),
@@ -123,7 +123,7 @@ export function DisputesTable({
           const d = row.original;
           const label = d.status.replace(/_/g, " ");
           if (d.status === "needs_response") return <Badge variant="destructive">{label}</Badge>;
-          if (d.isFinal) return <span className="text-muted-foreground text-xs">{label}</span>;
+          if (d.isFinal) return <span className="text-xs text-muted-foreground">{label}</span>;
           return <Badge variant="warning">{label}</Badge>;
         },
       },
@@ -172,7 +172,7 @@ export function DisputesTable({
       </FilterBar>
 
       {visibleDisputes.length === 0 ? (
-        <p className="text-muted-foreground text-sm">
+        <p className="text-sm text-muted-foreground">
           {t("web.admin.disputes.none.pre")} <code>{t("web.admin.disputes.webhookEvent")}</code>{" "}
           {t("web.admin.disputes.none.mid")}{" "}
           <Link href="/admin/integrations" className="underline">

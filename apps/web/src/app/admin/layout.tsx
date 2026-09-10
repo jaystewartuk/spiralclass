@@ -143,7 +143,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     .filter((section) => section.items.length > 0);
 
   return (
-    <div className="bg-background min-h-screen">
+    <div className="min-h-screen bg-background">
       {/* role:"admin" so staff sessions can be filtered OUT of product
           analytics. Matches the server-side identify in requireAdmin. */}
       <PostHogIdentify distinctId={actor.id} email={actor.email} role="admin" />

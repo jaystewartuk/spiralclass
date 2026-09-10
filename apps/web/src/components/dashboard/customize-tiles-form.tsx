@@ -85,7 +85,7 @@ export function CustomizeDashboardTilesForm({
               <Label
                 htmlFor={`tile-${tile.key}`}
                 className={
-                  tile.hidden ? "text-muted-foreground flex-1 font-normal" : "flex-1 font-normal"
+                  tile.hidden ? "flex-1 font-normal text-muted-foreground" : "flex-1 font-normal"
                 }
               >
                 {navLabel(item, locale)}
@@ -96,7 +96,7 @@ export function CustomizeDashboardTilesForm({
                   checked={!tile.hidden}
                   onCheckedChange={() => toggleHidden(tile.key)}
                 />
-                <span className="text-muted-foreground text-xs">
+                <span className="text-xs text-muted-foreground">
                   {tile.hidden ? t("web.customizeTiles.hidden") : t("web.customizeTiles.shown")}
                 </span>
               </div>

@@ -96,7 +96,7 @@ export function AcceptInvitationView(props: Props) {
             <Heading level={2} as="h1" className="font-serif">
               {t("invitation.accept.title")}
             </Heading>
-            <p className="text-muted-foreground text-sm">
+            <p className="text-sm text-muted-foreground">
               {t("invitation.accept.invitedBy", { teacher: props.teacherName })}
             </p>
           </div>
@@ -104,13 +104,13 @@ export function AcceptInvitationView(props: Props) {
           <p className="text-sm">{t("invitation.accept.intro", { teacher: props.teacherName })}</p>
 
           <div className="space-y-2">
-            <p className="text-muted-foreground text-xs font-semibold">
+            <p className="text-xs font-semibold text-muted-foreground">
               {t("invitation.accept.whatYouGet")}
             </p>
             <ul className="space-y-1.5">
               {CORE_BENEFIT_KEYS.map((key) => (
                 <li key={key} className="flex items-start gap-2 text-sm">
-                  <span aria-hidden className="text-primary mt-0.5">
+                  <span aria-hidden className="mt-0.5 text-primary">
                     ✓
                   </span>
                   <span>{t(benefitCatalogKey(key))}</span>
@@ -120,7 +120,7 @@ export function AcceptInvitationView(props: Props) {
           </div>
 
           {actionError && (
-            <p role="alert" className="text-destructive text-sm">
+            <p role="alert" className="text-sm text-destructive">
               {actionError}
             </p>
           )}
@@ -139,7 +139,7 @@ export function AcceptInvitationView(props: Props) {
             </form>
           ) : props.isAuthed && !props.emailMatches ? (
             <div className="space-y-2">
-              <p className="text-muted-foreground text-sm">
+              <p className="text-sm text-muted-foreground">
                 {t("invitation.accept.mismatchBody", { email: props.invitedEmail })}
               </p>
               <Button asChild variant="outline" className="w-full">
@@ -148,7 +148,7 @@ export function AcceptInvitationView(props: Props) {
             </div>
           ) : (
             <div className="space-y-2">
-              <p className="text-muted-foreground text-center text-sm">
+              <p className="text-center text-sm text-muted-foreground">
                 {t("invitation.accept.signInPrompt", { email: props.invitedEmail })}
               </p>
               <Button asChild className="w-full" data-testid="invitation-continue">
@@ -198,7 +198,7 @@ function Shell({
   children: React.ReactNode;
 }) {
   return (
-    <main className="min-h-viewport bg-background flex items-center justify-center p-4">
+    <main className="flex min-h-viewport items-center justify-center bg-background p-4">
       <div className="w-full max-w-md space-y-4">
         {photo && (
           <div className="flex justify-center">
@@ -207,7 +207,7 @@ function Shell({
               alt={name}
               width={72}
               height={72}
-              className="border-border h-18 w-18 rounded-full border-2 object-cover"
+              className="h-18 w-18 rounded-full border-2 border-border object-cover"
               unoptimized
             />
           </div>
@@ -231,7 +231,7 @@ function StatusCard({
     <Card>
       <CardContent className="space-y-4 p-6 text-center">
         <h1 className="font-serif text-xl font-semibold">{title}</h1>
-        <p className="text-muted-foreground text-sm">{body}</p>
+        <p className="text-sm text-muted-foreground">{body}</p>
         {cta && (
           <Button asChild className="w-full">
             <Link href={cta.href}>{cta.label}</Link>

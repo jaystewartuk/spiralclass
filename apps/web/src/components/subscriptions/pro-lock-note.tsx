@@ -13,12 +13,12 @@ import { useT } from "@/components/locale-provider";
 export function ProLockNote({ message }: { message: string }) {
   const t = useT();
   return (
-    <p className="text-muted-foreground flex flex-wrap items-center gap-1.5 text-xs">
+    <p className="flex flex-wrap items-center gap-1.5 text-xs text-muted-foreground">
       <Lock className="size-3.5 shrink-0" aria-hidden />
       <span>{message}</span>
       <Link
         href="/settings/billing"
-        className="text-primary font-medium underline underline-offset-2"
+        className="font-medium text-primary underline underline-offset-2"
       >
         {t("settings.billing.upgrade")}
       </Link>

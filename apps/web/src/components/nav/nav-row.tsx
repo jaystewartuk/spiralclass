@@ -60,7 +60,7 @@ export function navRowClasses({
  */
 export function NavRowIndicator({ active }: { active?: boolean }) {
   if (!active) return null;
-  return <span aria-hidden className="bg-primary absolute inset-y-2 left-0 w-1 rounded-full" />;
+  return <span aria-hidden className="absolute inset-y-2 left-0 w-1 rounded-full bg-primary" />;
 }
 
 export function NavRowIcon({
@@ -136,7 +136,7 @@ export function NavRow({
  * thing the layout takes back — which is exactly where a menu is long enough
  * to need dividers. */
 export function NavDivider() {
-  return <div aria-hidden className="bg-border/60 mx-3 my-2 h-px shrink-0" />;
+  return <div aria-hidden className="mx-3 my-2 h-px shrink-0 bg-border/60" />;
 }
 
 /**
@@ -161,10 +161,10 @@ export function NavBarLink({
       prefetch={prefetch}
       aria-current={active ? "page" : undefined}
       className={cn(
-        "focus-visible:ring-ring rounded-md px-3 py-2 text-sm whitespace-nowrap transition-colors focus-visible:ring-3 focus-visible:outline-hidden",
+        "rounded-md px-3 py-2 text-sm whitespace-nowrap transition-colors focus-visible:ring-3 focus-visible:ring-ring focus-visible:outline-hidden",
         active
-          ? "bg-muted text-foreground font-semibold"
-          : "text-muted-foreground hover:bg-muted/60 hover:text-foreground font-medium",
+          ? "bg-muted font-semibold text-foreground"
+          : "font-medium text-muted-foreground hover:bg-muted/60 hover:text-foreground",
       )}
     >
       {label}
@@ -186,7 +186,7 @@ export function NavSectionHeading({
   className?: string;
 }) {
   return (
-    <h3 className={cn("text-muted-foreground px-3 pt-4 pb-1 text-xs font-bold", className)}>
+    <h3 className={cn("px-3 pt-4 pb-1 text-xs font-bold text-muted-foreground", className)}>
       {children}
     </h3>
   );

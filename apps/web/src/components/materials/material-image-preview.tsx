@@ -48,7 +48,7 @@ export function MaterialImagePreview({
       rel="noreferrer"
       aria-label={name ? undefined : t("common.image")}
       className={cn(
-        "border-border bg-muted/30 block overflow-hidden rounded-lg border transition-opacity hover:opacity-90",
+        "block overflow-hidden rounded-lg border border-border bg-muted/30 transition-opacity hover:opacity-90",
         className,
       )}
     >

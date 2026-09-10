@@ -160,7 +160,7 @@ export function PlanSummary({
             {price ?? t("web.settings.billing.freePrice")}
           </span>
           {price && interval !== "none" && (
-            <span className="text-muted-foreground text-sm">
+            <span className="text-sm text-muted-foreground">
               {interval === "year"
                 ? t("web.settings.billing.interval.annual")
                 : t("web.settings.billing.interval.monthly")}
@@ -185,7 +185,7 @@ export function PlanSummary({
       </CardContent>
 
       {(hasPortal || plansHref) && (
-        <div className="border-border flex flex-wrap items-center gap-x-4 gap-y-2 border-t px-6 py-4">
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-2 border-t border-border px-6 py-4">
           {plansHref && (
             <Button asChild>
               <a href={plansHref}>{t("web.settings.billing.seePlans")}</a>
@@ -198,7 +198,7 @@ export function PlanSummary({
                   {portalLabel}
                 </Button>
               </form>
-              <p className="text-muted-foreground min-w-48 flex-1 text-xs">
+              <p className="min-w-48 flex-1 text-xs text-muted-foreground">
                 {t("web.settings.billing.portalHint")}
               </p>
             </>

@@ -40,7 +40,7 @@ export default async function NotificationSettingsLinkPage({
         <Heading level={2} as="h1">
           {t("web.notifSettingsLink.invalidTitle")}
         </Heading>
-        <p className="text-muted-foreground mt-2 text-sm">
+        <p className="mt-2 text-sm text-muted-foreground">
           {t("web.notifSettingsLink.invalidBody")}
         </p>
       </main>

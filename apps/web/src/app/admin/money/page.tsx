@@ -109,7 +109,7 @@ export default async function AdminMoneyPage() {
         <Heading level={2} as="h1" className="flex items-center gap-1.5">
           {t("web.admin.money.title")}
         </Heading>
-        <p className="text-muted-foreground text-sm">
+        <p className="text-sm text-muted-foreground">
           {t("web.admin.money.intro.pre")}{" "}
           <strong>{t("web.admin.money.intro.subscriptions")}</strong>
           {t("web.admin.money.intro.post")}
@@ -160,7 +160,7 @@ export default async function AdminMoneyPage() {
             <CardTitle className="text-lg">{t("web.admin.money.revenueChartTitle")}</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-muted-foreground mb-3 text-sm">
+            <p className="mb-3 text-sm text-muted-foreground">
               {t("web.admin.money.revenueChartBody", {
                 months: WINDOW_MONTHS,
                 amount: formatMinorUnits(collectedWindowNet, PLATFORM_MONEY_CURRENCY),
@@ -177,7 +177,7 @@ export default async function AdminMoneyPage() {
             <CardTitle className="text-lg">{t("web.admin.money.gmvChartTitle")}</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-muted-foreground mb-3 text-sm">
+            <p className="mb-3 text-sm text-muted-foreground">
               {t("web.admin.money.gmvChartBody", {
                 months: WINDOW_MONTHS,
                 amount: formatMinorUnits(gmvWindowTotal),
@@ -204,7 +204,7 @@ export default async function AdminMoneyPage() {
             <CardTitle className="text-lg">{t("web.admin.money.paidMixTitle")}</CardTitle>
             <Link
               href="/admin/subscriptions"
-              className="text-muted-foreground text-xs underline underline-offset-2"
+              className="text-xs text-muted-foreground underline underline-offset-2"
             >
               {t("web.admin.money.fullDetail")}
             </Link>
@@ -245,7 +245,7 @@ export default async function AdminMoneyPage() {
             {deferred.byCurrency.map((slice) => (
               <div key={slice.currency} className="space-y-1">
                 {deferred.byCurrency.length > 1 && (
-                  <h3 className="text-muted-foreground text-xs font-medium">
+                  <h3 className="text-xs font-medium text-muted-foreground">
                     {t("web.cashflow.inCurrency", { currency: slice.currency })}
                   </h3>
                 )}

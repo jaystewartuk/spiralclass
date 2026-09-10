@@ -43,7 +43,7 @@ export function NotificationsToggle({
             </span>
           </p>
           {!enabled && (
-            <p className="text-muted-foreground text-xs">
+            <p className="text-xs text-muted-foreground">
               {t("web.dashboard.students.notifications.offHint")}
             </p>
           )}

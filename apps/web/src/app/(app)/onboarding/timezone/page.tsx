@@ -13,7 +13,7 @@ export default async function TimezoneStepPage() {
     <div className="space-y-6">
       <div>
         <PageHeader title={t("web.onboarding.timezone.confirmTitle")} />
-        <p className="text-muted-foreground mt-1 text-sm">
+        <p className="mt-1 text-sm text-muted-foreground">
           {t("web.onboarding.timezone.confirmSubtitle")}
         </p>
       </div>

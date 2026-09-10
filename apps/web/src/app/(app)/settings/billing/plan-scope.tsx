@@ -126,7 +126,7 @@ function FeatureGroup({
   t: TFunction;
 }) {
   return (
-    <div className="border-border border-t pt-5">
+    <div className="border-t border-border pt-5">
       <Heading level={4} as="h3" id={`${id}-heading`} className="text-muted-foreground">
         {title}
       </Heading>
@@ -137,9 +137,9 @@ function FeatureGroup({
                 screen reader, because a check and a padlock are the same
                 shape to one and colour alone is not a signal. */}
             {feature.included ? (
-              <Check className="text-success mt-0.5 h-4 w-4 shrink-0" aria-hidden />
+              <Check className="mt-0.5 h-4 w-4 shrink-0 text-success" aria-hidden />
             ) : (
-              <Lock className="text-muted-foreground mt-0.5 h-4 w-4 shrink-0" aria-hidden />
+              <Lock className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" aria-hidden />
             )}
             <span className={feature.included ? undefined : "text-muted-foreground"}>
               {feature.label}
@@ -164,8 +164,8 @@ function UsageRow({ label, usage, t }: { label: string; usage: ResourceUsage; t:
     return (
       <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-0.5">
         <span className="text-sm font-medium">{label}</span>
-        <span className="text-muted-foreground text-sm">
-          <span className="text-foreground font-medium">
+        <span className="text-sm text-muted-foreground">
+          <span className="font-medium text-foreground">
             {t("web.settings.billing.scopeUnlimited")}
           </span>
           {usage.used > 0 && (
@@ -198,7 +198,7 @@ function UsageRow({ label, usage, t }: { label: string; usage: ResourceUsage; t:
         </span>
       </div>
       <div
-        className="bg-muted h-1.5 w-full overflow-hidden rounded-full"
+        className="h-1.5 w-full overflow-hidden rounded-full bg-muted"
         role="progressbar"
         aria-label={t("web.settings.billing.scopeMeterLabel", {
           used: usage.used,

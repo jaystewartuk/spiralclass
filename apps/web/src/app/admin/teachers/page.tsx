@@ -159,7 +159,7 @@ export default async function AdminTeachersPage({
       <header className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <PageHeader title={t("web.admin.teachers.title")} />
-          <p className="text-muted-foreground text-sm">
+          <p className="text-sm text-muted-foreground">
             {t("web.admin.teachers.matchingCount", { count: total.toLocaleString() })}
           </p>
         </div>
@@ -179,7 +179,7 @@ export default async function AdminTeachersPage({
       {stalledCount > 0 && (
         <a
           href="?stalled=yes"
-          className="border-warning/30 bg-warning-bg text-warning block rounded-md border px-4 py-3 text-sm hover:underline"
+          className="block rounded-md border border-warning/30 bg-warning-bg px-4 py-3 text-sm text-warning hover:underline"
         >
           {t("web.admin.teachers.stalledCallout", {
             count: stalledCount.toLocaleString(),

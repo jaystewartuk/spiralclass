@@ -78,11 +78,11 @@ function formatInline(text: string): ReactNode[] {
     const token = match[0];
     parts.push(
       token.startsWith("**") ? (
-        <strong key={key++} className="text-foreground font-semibold">
+        <strong key={key++} className="font-semibold text-foreground">
           {token.slice(2, -2)}
         </strong>
       ) : (
-        <code key={key++} className="bg-muted rounded px-1.5 py-0.5 font-mono text-[0.9em]">
+        <code key={key++} className="rounded bg-muted px-1.5 py-0.5 font-mono text-[0.9em]">
           {token.slice(1, -1)}
         </code>
       ),
@@ -130,14 +130,14 @@ function CopyChip({ label, value }: { label: string; value: string }) {
         setTimeout(() => setCopied(false), 1500);
       }}
       title={t("web.admin.uat.copyLabel", { label })}
-      className="min-h-target border-border bg-muted/50 active:bg-muted inline-flex items-center gap-2 rounded-xl border-2 px-3 py-2 font-mono text-base transition-colors"
+      className="inline-flex min-h-target items-center gap-2 rounded-xl border-2 border-border bg-muted/50 px-3 py-2 font-mono text-base transition-colors active:bg-muted"
     >
-      <span className="text-muted-foreground font-sans text-sm">{label}:</span>
+      <span className="font-sans text-sm text-muted-foreground">{label}:</span>
       <span>{value}</span>
       {copied ? (
-        <Check className="text-success h-4 w-4" />
+        <Check className="h-4 w-4 text-success" />
       ) : (
-        <Copy className="text-muted-foreground h-4 w-4" />
+        <Copy className="h-4 w-4 text-muted-foreground" />
       )}
     </button>
   );
@@ -339,7 +339,7 @@ export function UatRunbook({
           </div>
 
           {isProdDeployment ? (
-            <p className="text-muted-foreground border-t pt-4 text-sm">
+            <p className="border-t pt-4 text-sm text-muted-foreground">
               {t("web.admin.uat.reseedUnavailable")}
             </p>
           ) : (
@@ -386,7 +386,7 @@ export function UatRunbook({
                   </Button>
                 </form>
                 {reseedState?.error ? (
-                  <span className="text-destructive text-sm">{reseedState.error}</span>
+                  <span className="text-sm text-destructive">{reseedState.error}</span>
                 ) : null}
               </div>
 
@@ -404,7 +404,7 @@ export function UatRunbook({
                   ) : (
                     <div className="flex items-start gap-2">
                       <Badge variant="destructive">{t("web.admin.uat.failed")}</Badge>
-                      <span className="text-destructive text-sm">{reseedStatus.error}</span>
+                      <span className="text-sm text-destructive">{reseedStatus.error}</span>
                     </div>
                   )}
                 </div>
@@ -418,15 +418,15 @@ export function UatRunbook({
         <>
           {/* Progress. */}
           <div className="space-y-1.5">
-            <div className="text-muted-foreground flex items-center justify-between text-sm">
+            <div className="flex items-center justify-between text-sm text-muted-foreground">
               <span>
                 {t("web.admin.uat.stepOf", { current: stepIndex + 1, total: steps.length })}
               </span>
               <span>{t("web.admin.uat.stepsDone", { done: doneInView, total: totalInView })}</span>
             </div>
-            <div className="bg-muted h-2 w-full overflow-hidden rounded-full">
+            <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
               <div
-                className="bg-primary h-full rounded-full transition-all"
+                className="h-full rounded-full bg-primary transition-all"
                 style={{ width: `${steps.length ? ((stepIndex + 1) / steps.length) * 100 : 0}%` }}
               />
             </div>
@@ -449,7 +449,7 @@ export function UatRunbook({
                   </div>
 
                   {step.section.note ? (
-                    <p className="border-border bg-muted/30 text-muted-foreground rounded-xl border-l-4 p-4 text-base">
+                    <p className="rounded-xl border-l-4 border-border bg-muted/30 p-4 text-base text-muted-foreground">
                       {formatInline(step.section.note)}
                     </p>
                   ) : null}
@@ -480,7 +480,7 @@ export function UatRunbook({
                           ? `✗ ${t("web.admin.uat.noGo")}`
                           : `◐ ${t("web.admin.uat.incomplete")}`}
                     </p>
-                    <p className="text-muted-foreground mt-1 text-sm">
+                    <p className="mt-1 text-sm text-muted-foreground">
                       {verdict === "GO"
                         ? t("web.admin.uat.verdictGoBody")
                         : verdict === "NO_GO"
@@ -536,10 +536,10 @@ export function UatRunbook({
                   ) : null}
 
                   <div>
-                    <p className="text-muted-foreground mb-2 text-sm font-medium">
+                    <p className="mb-2 text-sm font-medium text-muted-foreground">
                       {t("web.admin.uat.notBlocking")}
                     </p>
-                    <ul className="text-muted-foreground space-y-1.5 text-sm">
+                    <ul className="space-y-1.5 text-sm text-muted-foreground">
                       {GO_NO_GO.notBlocking.map((line) => (
                         <li key={line}>• {line}</li>
                       ))}
@@ -551,8 +551,8 @@ export function UatRunbook({
               {step.kind === "item" ? (
                 <>
                   {step.item.loginAs ? (
-                    <div className="bg-primary/10 rounded-xl p-4">
-                      <p className="text-muted-foreground mb-1.5 text-xs font-semibold">
+                    <div className="rounded-xl bg-primary/10 p-4">
+                      <p className="mb-1.5 text-xs font-semibold text-muted-foreground">
                         {t("web.admin.uat.signedInAs")}
                       </p>
                       <p className="mb-2 font-medium">{step.item.loginAs.name}</p>
@@ -571,17 +571,17 @@ export function UatRunbook({
                   ) : null}
 
                   {step.item.expect ? (
-                    <p className="text-muted-foreground text-base">
+                    <p className="text-base text-muted-foreground">
                       ✅ {formatInline(step.item.expect)}
                     </p>
                   ) : null}
 
-                  <label className="border-border active:bg-muted/50 flex min-h-[3.5rem] cursor-pointer items-center gap-3 rounded-xl border-2 p-4">
+                  <label className="flex min-h-[3.5rem] cursor-pointer items-center gap-3 rounded-xl border-2 border-border p-4 active:bg-muted/50">
                     <input
                       type="checkbox"
                       checked={checked[env].has(step.item.id)}
                       onChange={(e) => toggleItem(step.item.id, e.target.checked)}
-                      className="accent-primary h-6 w-6 shrink-0"
+                      className="h-6 w-6 shrink-0 accent-primary"
                     />
                     <span className="text-base font-medium">{t("web.admin.uat.done")}</span>
                   </label>
@@ -599,7 +599,7 @@ export function UatRunbook({
                     </Button>
                   </form>
                   {probeState?.error ? (
-                    <p className="text-destructive text-sm">{probeState.error}</p>
+                    <p className="text-sm text-destructive">{probeState.error}</p>
                   ) : null}
                   <ResultBadges result={probeState?.result} />
                 </div>
@@ -616,7 +616,7 @@ export function UatRunbook({
                     </Button>
                   </form>
                   {postHogState?.error ? (
-                    <p className="text-destructive text-sm">{postHogState.error}</p>
+                    <p className="text-sm text-destructive">{postHogState.error}</p>
                   ) : null}
                   <ResultBadges result={postHogState?.result} />
                 </div>
@@ -640,7 +640,7 @@ export function UatRunbook({
                     </Button>
                   </form>
                   {stripeBState?.error ? (
-                    <p className="text-destructive text-sm">{stripeBState.error}</p>
+                    <p className="text-sm text-destructive">{stripeBState.error}</p>
                   ) : null}
                   <ResultBadges result={stripeBState?.result} />
                 </div>
@@ -666,7 +666,7 @@ export function UatRunbook({
                     </Button>
                   </form>
                   {stripeGState?.error ? (
-                    <p className="text-destructive text-sm">{stripeGState.error}</p>
+                    <p className="text-sm text-destructive">{stripeGState.error}</p>
                   ) : null}
                   <ResultBadges result={stripeGState?.result} />
                 </div>
@@ -701,7 +701,7 @@ export function UatRunbook({
         </>
       ) : (
         <Card>
-          <CardContent className="text-muted-foreground pt-6 text-center">
+          <CardContent className="pt-6 text-center text-muted-foreground">
             {t("web.admin.uat.pickCategory")}
           </CardContent>
         </Card>

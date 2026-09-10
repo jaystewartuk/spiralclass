@@ -24,7 +24,7 @@ export async function HelpPageHeader({
       </Link>
       <Link
         href={backHref}
-        className="text-muted-foreground hover:text-foreground rounded-sm text-xs hover:underline"
+        className="rounded-sm text-xs text-muted-foreground hover:text-foreground hover:underline"
       >
         {backLabel}
       </Link>

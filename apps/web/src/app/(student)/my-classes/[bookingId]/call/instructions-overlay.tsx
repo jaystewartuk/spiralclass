@@ -39,8 +39,8 @@ export function InstructionsOverlay({
 
   if (notes.length === 0) return null;
   return (
-    <div className="bg-background/90 text-foreground space-y-2 rounded-lg p-3 shadow-lg backdrop-blur">
-      <h3 className="text-muted-foreground text-sm font-medium">
+    <div className="space-y-2 rounded-lg bg-background/90 p-3 text-foreground shadow-lg backdrop-blur">
+      <h3 className="text-sm font-medium text-muted-foreground">
         {en ? "During your class" : "Durante tu clase"}
       </h3>
       <ul className="space-y-1 text-sm">

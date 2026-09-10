@@ -49,7 +49,7 @@ export function PersonAvatar({
       aria-hidden
       style={{ width: size, height: size }}
       className={cn(
-        "bg-secondary text-secondary-foreground inline-flex shrink-0 items-center justify-center rounded-full font-semibold select-none",
+        "inline-flex shrink-0 items-center justify-center rounded-full bg-secondary font-semibold text-secondary-foreground select-none",
         textSizeClass,
         className,
       )}

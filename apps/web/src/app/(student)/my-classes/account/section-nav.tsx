@@ -55,7 +55,7 @@ export function SectionNav({ sections, label }: { sections: AccountSection[]; la
       // of sticky chrome and these chips are 44px touch targets — together a
       // seventh of a phone viewport spent on navigation. There the row rides at
       // the top of the page as a contents list and scrolls away with it.
-      className="bg-background/95 supports-[backdrop-filter]:bg-background/80 desktop:sticky desktop:top-14 z-30 -mx-4 border-y px-4 backdrop-blur"
+      className="z-30 -mx-4 border-y bg-background/95 px-4 backdrop-blur supports-[backdrop-filter]:bg-background/80 desktop:sticky desktop:top-14"
     >
       {/* The row scrolls sideways when the labels outrun the column — six
           chips fit at `reading` width in English, and not in every language. */}
@@ -68,9 +68,9 @@ export function SectionNav({ sections, label }: { sections: AccountSection[]; la
                 href={`#${section.id}`}
                 aria-current={current ? "true" : undefined}
                 className={cn(
-                  "min-h-target focus-visible:ring-ring desktop:min-h-0 flex items-center rounded-md px-3 py-1.5 text-sm whitespace-nowrap transition-colors focus-visible:ring-3 focus-visible:outline-hidden",
+                  "flex min-h-target items-center rounded-md px-3 py-1.5 text-sm whitespace-nowrap transition-colors focus-visible:ring-3 focus-visible:ring-ring focus-visible:outline-hidden desktop:min-h-0",
                   current
-                    ? "bg-muted text-foreground font-medium"
+                    ? "bg-muted font-medium text-foreground"
                     : "text-muted-foreground hover:bg-muted/60 hover:text-foreground",
                 )}
               >

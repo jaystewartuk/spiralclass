@@ -174,7 +174,7 @@ export default async function BillingSettingsPage({
                 options={planOptions({ t, locale, cohort, timezone: teacher.timezone })}
               />
             ) : (
-              <p className="text-muted-foreground text-sm">
+              <p className="text-sm text-muted-foreground">
                 {t("web.settings.billing.notEnabled")}
               </p>
             )}
@@ -198,7 +198,7 @@ export default async function BillingSettingsPage({
           this says so where she is already looking at a bill. */}
       <Card className="bg-muted/40 shadow-none">
         <CardContent className="flex gap-3 pt-6">
-          <Info className="text-muted-foreground mt-0.5 h-5 w-5 shrink-0" aria-hidden />
+          <Info className="mt-0.5 h-5 w-5 shrink-0 text-muted-foreground" aria-hidden />
           <div className="min-w-0 space-y-2">
             {/* At the section size, not the page's: this is a disclosure the
                 reader needs to find, not a fifth thing competing with her plan
@@ -209,9 +209,9 @@ export default async function BillingSettingsPage({
             <Heading level={4} as="h2">
               {t("web.settings.billing.feesTitle")}
             </Heading>
-            <p className="text-muted-foreground text-sm">{t("web.settings.billing.feesBody")}</p>
+            <p className="text-sm text-muted-foreground">{t("web.settings.billing.feesBody")}</p>
             <a
-              className="text-primary inline-block text-sm underline underline-offset-4"
+              className="inline-block text-sm text-primary underline underline-offset-4"
               href={STRIPE_PRICING_URL}
               target="_blank"
               rel="noopener noreferrer"

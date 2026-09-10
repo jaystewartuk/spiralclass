@@ -49,7 +49,7 @@ export default async function TeacherClassContentPrintPage({
         <Heading level={2} as="h1">
           {t("classContent.title")}
         </Heading>
-        <p className="text-muted-foreground text-sm">
+        <p className="text-sm text-muted-foreground">
           {booking.student.name} ·{" "}
           {formatZonedDateTime(booking.scheduledStart, teacher.timezone, locale)}
         </p>

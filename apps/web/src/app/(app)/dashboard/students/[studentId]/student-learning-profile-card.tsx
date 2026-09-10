@@ -103,12 +103,12 @@ export function StudentLearningProfileCard({
                 {focus.map((f) => (
                   <li
                     key={`${f.category}-${f.skill}`}
-                    className="border-muted flex items-start justify-between gap-3 border-l-2 pl-3"
+                    className="flex items-start justify-between gap-3 border-l-2 border-muted pl-3"
                   >
                     <div>
                       <p className="font-medium">
                         {skillLabel(t, f.skill)}{" "}
-                        <span className="text-muted-foreground font-normal">
+                        <span className="font-normal text-muted-foreground">
                           · {catLabel(t, f.category)}
                         </span>
                       </p>
@@ -120,7 +120,7 @@ export function StudentLearningProfileCard({
                       <Badge variant={TREND_KEY[f.trend].variant}>
                         {t(TREND_KEY[f.trend].key)}
                       </Badge>
-                      <span className="text-muted-foreground text-xs">×{f.recurrenceCount}</span>
+                      <span className="text-xs text-muted-foreground">×{f.recurrenceCount}</span>
                     </div>
                   </li>
                 ))}
@@ -129,7 +129,7 @@ export function StudentLearningProfileCard({
 
             {vocab.length > 0 && (
               <div className="space-y-1">
-                <h4 className="text-muted-foreground text-sm font-medium">
+                <h4 className="text-sm font-medium text-muted-foreground">
                   {t("web.studentProfile.vocabTitle")}
                 </h4>
                 <div className="flex flex-wrap gap-1.5">
@@ -151,14 +151,14 @@ export function StudentLearningProfileCard({
             isMinor={isMinor}
             captionsGuardianConsented={captionsGuardianConsented}
           />
-          <p className="text-muted-foreground mt-1 text-xs">
+          <p className="mt-1 text-xs text-muted-foreground">
             {t("web.studentProfile.consentNote")}
           </p>
         </div>
 
         <div className="border-t pt-3">
           <ShareProgressToggle studentId={studentId} shared={shareProgress} />
-          <p className="text-muted-foreground mt-1 text-xs">{t("web.studentProfile.shareNote")}</p>
+          <p className="mt-1 text-xs text-muted-foreground">{t("web.studentProfile.shareNote")}</p>
         </div>
       </CardContent>
     </Card>

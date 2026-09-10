@@ -241,30 +241,30 @@ function ErdFlow({ graph }: { graph: ErdSchemaGraph }) {
         />
 
         <Panel position="top-left" className="!m-3 w-64">
-          <div className="border-border/60 bg-background/95 rounded-lg border p-2 shadow-xs backdrop-blur">
+          <div className="rounded-lg border border-border/60 bg-background/95 p-2 shadow-xs backdrop-blur">
             <div className="relative">
-              <Search className="text-muted-foreground pointer-events-none absolute top-1/2 left-2.5 h-4 w-4 -translate-y-1/2" />
+              <Search className="pointer-events-none absolute top-1/2 left-2.5 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <input
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && runSearch()}
                 placeholder={t("web.admin.erd.searchPlaceholder")}
                 aria-label={t("web.admin.erd.searchAria")}
-                className="border-input bg-background ring-offset-background placeholder:text-muted-foreground focus-visible:ring-ring h-9 w-full rounded-md border pr-8 pl-8 text-sm focus-visible:ring-3 focus-visible:outline-hidden"
+                className="h-9 w-full rounded-md border border-input bg-background pr-8 pl-8 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:ring-3 focus-visible:ring-ring focus-visible:outline-hidden"
               />
               {query ? (
                 <button
                   type="button"
                   onClick={() => setQuery("")}
                   aria-label={t("web.admin.erd.searchClear")}
-                  className="text-muted-foreground hover:text-foreground absolute top-1/2 right-2 -translate-y-1/2 rounded"
+                  className="absolute top-1/2 right-2 -translate-y-1/2 rounded text-muted-foreground hover:text-foreground"
                 >
                   <X className="h-4 w-4" />
                 </button>
               ) : null}
             </div>
             {query && matched.size > 0 ? (
-              <p className="text-muted-foreground mt-1 px-1 text-sm">
+              <p className="mt-1 px-1 text-sm text-muted-foreground">
                 {t("web.admin.erd.searchResults", { count: matched.size })}
               </p>
             ) : null}
@@ -272,7 +272,7 @@ function ErdFlow({ graph }: { graph: ErdSchemaGraph }) {
         </Panel>
 
         <Panel position="top-right" className="!m-3">
-          <div className="border-border/60 bg-background/95 flex items-center gap-1 rounded-lg border p-1 shadow-xs backdrop-blur">
+          <div className="flex items-center gap-1 rounded-lg border border-border/60 bg-background/95 p-1 shadow-xs backdrop-blur">
             <ToolbarButton
               label={t("web.admin.erd.fit")}
               onClick={() => fitView({ padding: 0.2, duration: 400 })}
@@ -326,7 +326,7 @@ function ToolbarButton({
       onClick={onClick}
       title={label}
       aria-label={label}
-      className="text-muted-foreground hover:bg-muted hover:text-foreground inline-flex h-8 w-8 items-center justify-center rounded-md transition-colors"
+      className="inline-flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
     >
       {children}
     </button>
@@ -341,7 +341,7 @@ function Legend() {
     { className: "bg-success", label: t("web.admin.erd.legend.unique") },
   ];
   return (
-    <div className="border-border/60 bg-background/95 text-muted-foreground flex items-center gap-3 rounded-full border px-3 py-1.5 text-sm shadow-xs backdrop-blur">
+    <div className="flex items-center gap-3 rounded-full border border-border/60 bg-background/95 px-3 py-1.5 text-sm text-muted-foreground shadow-xs backdrop-blur">
       {items.map((item) => (
         <span key={item.label} className="flex items-center gap-1.5">
           <span className={cn("h-2 w-2 rounded-full", item.className)} aria-hidden />
@@ -383,7 +383,7 @@ export function ErdViewer({ graph }: { graph: ErdSchemaGraph }) {
   const t = useT();
   if (graph.tables.length === 0) {
     return (
-      <div className="border-border/60 bg-muted/40 text-muted-foreground flex h-full items-center justify-center rounded-lg border text-sm">
+      <div className="flex h-full items-center justify-center rounded-lg border border-border/60 bg-muted/40 text-sm text-muted-foreground">
         {t("web.admin.erd.empty")}
       </div>
     );

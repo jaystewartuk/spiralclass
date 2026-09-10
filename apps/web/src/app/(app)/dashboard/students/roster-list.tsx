@@ -42,7 +42,7 @@ export function RosterList({
   t: TFunction;
 }) {
   return (
-    <ul className="divide-border divide-y">
+    <ul className="divide-y divide-border">
       {students.map((student) => (
         <li key={student.studentId}>
           <RosterRow student={student} now={now} timezone={timezone} t={t} />
@@ -71,7 +71,7 @@ function RosterRow({
     <Link
       href={`/dashboard/students/${student.studentId}`}
       className={cn(
-        "min-h-target hover:bg-muted/50 flex items-start gap-3 px-4 py-3 transition-colors lg:px-6",
+        "flex min-h-target items-start gap-3 px-4 py-3 transition-colors hover:bg-muted/50 lg:px-6",
         // Archived rows are de-emphasised by REMOVING colour, not by adding
         // transparency. The old `opacity-70` on the whole section multiplied
         // through the muted text underneath it and dropped it below AA — the
@@ -83,14 +83,14 @@ function RosterRow({
           announcing "AL" before it is noise, not information. */}
       <span
         aria-hidden
-        className="bg-secondary text-secondary-foreground mt-0.5 inline-flex size-9 shrink-0 items-center justify-center rounded-full text-sm font-medium select-none"
+        className="mt-0.5 inline-flex size-9 shrink-0 items-center justify-center rounded-full bg-secondary text-sm font-medium text-secondary-foreground select-none"
       >
         {initialsFrom(student.name, student.email)}
       </span>
 
       <div className="min-w-0 flex-1">
         <p className="truncate font-semibold">{student.name}</p>
-        <p className="text-muted-foreground truncate text-sm">
+        <p className="truncate text-sm text-muted-foreground">
           {student.email ?? student.phoneE164 ?? t("web.dashboard.students.noEmail")}
         </p>
         <RowChips student={student} note={note} t={t} />
@@ -128,19 +128,19 @@ function RosterRow({
                   })}
                 </span>
               </p>
-              <p aria-hidden className="text-subtle text-sm tabular-nums">
+              <p aria-hidden className="text-sm text-subtle tabular-nums">
                 {t("web.dashboard.students.roster.ofTotal", { total: pkg.total })}
               </p>
             </>
           ) : (
-            <p className="text-muted-foreground text-sm">
+            <p className="text-sm text-muted-foreground">
               {t("web.dashboard.students.noActivePackage")}
             </p>
           )}
         </div>
         {/* The affordance that says the whole row opens something. Hidden from
             the accessibility tree — the link's own text is the label. */}
-        <ChevronRight className="text-muted-foreground/50 mt-1.5 size-4 shrink-0" aria-hidden />
+        <ChevronRight className="mt-1.5 size-4 shrink-0 text-muted-foreground/50" aria-hidden />
       </div>
     </Link>
   );

@@ -35,7 +35,7 @@ export async function ResultsSummaryCard({ headline }: { headline: FunnelTotals 
         <dl className="grid grid-cols-3 gap-3">
           {stats.map((stat) => (
             <div key={stat.key} className="min-w-0">
-              <dt className="text-muted-foreground text-xs">{stat.label}</dt>
+              <dt className="text-xs text-muted-foreground">{stat.label}</dt>
               <dd className="text-2xl font-semibold tabular-nums">{stat.value}</dd>
             </div>
           ))}
@@ -43,7 +43,7 @@ export async function ResultsSummaryCard({ headline }: { headline: FunnelTotals 
         {/* Says what the visit number is, because it visibly dropped when
             crawlers stopped counting and an unexplained fall in her own
             numbers reads as the product breaking. */}
-        <p className="text-muted-foreground text-xs">{t("web.getStudents.realPeopleOnly")}</p>
+        <p className="text-xs text-muted-foreground">{t("web.getStudents.realPeopleOnly")}</p>
         <Button asChild variant="outline" size="sm">
           <Link href="/dashboard/get-students/results">{t("web.getStudents.seeAllResults")}</Link>
         </Button>

@@ -89,7 +89,7 @@ export function HelpToc({ guides, ariaLabel }: { guides: TocGuide[]; ariaLabel: 
                   none of the repeated labels says which article it belongs to.
                   Collapsed, the rail is four titles and one open article. */}
               {withinGuide && (
-                <ul className="border-border mt-1 space-y-0.5 border-l">
+                <ul className="mt-1 space-y-0.5 border-l border-border">
                   {guide.sections.map((section) => (
                     <li key={section.id}>
                       <a
@@ -101,8 +101,8 @@ export function HelpToc({ guides, ariaLabel }: { guides: TocGuide[]; ariaLabel: 
                         className={cn(
                           "-ml-px block border-l py-1 pl-3 text-xs transition-colors",
                           activeId === section.id
-                            ? "border-primary text-foreground font-medium"
-                            : "text-muted-foreground hover:border-border hover:text-foreground border-transparent",
+                            ? "border-primary font-medium text-foreground"
+                            : "border-transparent text-muted-foreground hover:border-border hover:text-foreground",
                         )}
                       >
                         {section.label}

@@ -121,7 +121,7 @@ function IconTile({ e }: { e: StudentMaterialEntry }) {
   const Icon = iconFor(e);
   return (
     <span
-      className="bg-muted text-muted-foreground grid size-10 shrink-0 place-items-center rounded-md"
+      className="grid size-10 shrink-0 place-items-center rounded-md bg-muted text-muted-foreground"
       aria-hidden
     >
       <Icon className="size-5" />
@@ -188,7 +188,7 @@ function StatusBadges({
 function MetaLine({ parts }: { parts: string[] }) {
   if (parts.length === 0) return null;
   return (
-    <span className="text-muted-foreground block text-sm">
+    <span className="block text-sm text-muted-foreground">
       {parts.map((part, i) => (
         <span key={`${part}-${i}`}>
           {i > 0 ? <span aria-hidden> · </span> : null}
@@ -224,8 +224,8 @@ function PodcastBlock({
   if (!e.podcastUrl) return null;
   const duration = formatMediaDuration(e.podcastDurationSec);
   return (
-    <div className={cn("bg-muted/40 space-y-2 rounded-lg p-3", className)}>
-      <p className="text-muted-foreground flex items-center gap-2 text-sm font-medium">
+    <div className={cn("space-y-2 rounded-lg bg-muted/40 p-3", className)}>
+      <p className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
         <AudioLines className="size-4 shrink-0" aria-hidden />
         {t("web.studentMaterials.audioVersion")}
         {duration ? (
@@ -301,7 +301,7 @@ function OpenableRow({
     <li
       className={cn(
         ROW_SHELL,
-        "min-h-target hover:bg-muted/40 relative flex items-start gap-3 p-3",
+        "relative flex min-h-target items-start gap-3 p-3 hover:bg-muted/40",
       )}
     >
       <IconTile e={e} />
@@ -335,7 +335,7 @@ function OpenableRow({
       {/* The affordance, not the target: the whole row already opens it. */}
       {e.viewUrl ? (
         <ExternalLink
-          className="text-muted-foreground/60 group-hover:text-foreground mt-2.5 size-4 shrink-0 transition-colors"
+          className="mt-2.5 size-4 shrink-0 text-muted-foreground/60 transition-colors group-hover:text-foreground"
           aria-hidden
         />
       ) : null}
@@ -369,7 +369,7 @@ function ReadableRow({
         materialId={e.id}
         className={cn(ROW_SHELL, "[&_summary::-webkit-details-marker]:hidden")}
         summary={
-          <summary className="min-h-target hover:bg-muted/40 flex cursor-pointer list-none items-start gap-3 rounded-lg p-3 transition-colors">
+          <summary className="flex min-h-target cursor-pointer list-none items-start gap-3 rounded-lg p-3 transition-colors hover:bg-muted/40">
             <IconTile e={e} />
             <span className="min-w-0 flex-1 space-y-1.5">
               <span className="block leading-snug font-semibold">{item.title}</span>
@@ -377,13 +377,13 @@ function ReadableRow({
               <MetaLine parts={metaPartsFor(item, t)} />
             </span>
             <ChevronDown
-              className="text-muted-foreground mt-2.5 size-5 shrink-0 transition-transform group-open:rotate-180"
+              className="mt-2.5 size-5 shrink-0 text-muted-foreground transition-transform group-open:rotate-180"
               aria-hidden
             />
           </summary>
         }
       >
-        <div className="border-border space-y-4 border-t p-4">
+        <div className="space-y-4 border-t border-border p-4">
           <PodcastBlock e={e} t={t} />
           <ClassContentMarkdown body={e.body ?? ""} />
           {e.isImage && e.fileUrl ? (
@@ -445,7 +445,7 @@ function SourceFilters({
       role="group"
       aria-labelledby="materials-filter-legend"
     >
-      <span id="materials-filter-legend" className="text-muted-foreground text-sm font-semibold">
+      <span id="materials-filter-legend" className="text-sm font-semibold text-muted-foreground">
         {t("web.studentMaterials.filterLegend")}
       </span>
       {(["all", ...buckets] as const).map((key) => {
@@ -456,9 +456,9 @@ function SourceFilters({
             href={filterHref(key, q)}
             aria-current={selected ? "true" : undefined}
             className={cn(
-              "min-h-target inline-flex items-center gap-2 rounded-full border px-4 text-sm transition-colors",
+              "inline-flex min-h-target items-center gap-2 rounded-full border px-4 text-sm transition-colors",
               selected
-                ? "border-primary bg-primary text-primary-foreground font-semibold"
+                ? "border-primary bg-primary font-semibold text-primary-foreground"
                 : "border-border text-muted-foreground hover:bg-muted hover:text-foreground",
             )}
           >
@@ -588,7 +588,7 @@ export default async function StudentMaterialsPage({
           <UrlSearchInput placeholder={t("web.studentMaterials.searchPlaceholder")} />
           <SourceFilters active={show} counts={counts} q={q} t={t} />
           {filtered && shown > 0 ? (
-            <p className="text-muted-foreground text-sm" role="status">
+            <p className="text-sm text-muted-foreground" role="status">
               {t("web.studentMaterials.count", { count: shown })}
             </p>
           ) : null}
@@ -616,7 +616,7 @@ export default async function StudentMaterialsPage({
             key={section.key}
             title={section.label}
             actions={
-              <span className="text-muted-foreground text-sm">
+              <span className="text-sm text-muted-foreground">
                 {t("web.studentMaterials.count", { count: section.items.length })}
               </span>
             }

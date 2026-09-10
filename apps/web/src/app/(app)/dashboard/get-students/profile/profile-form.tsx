@@ -35,7 +35,7 @@ export function MarketingProfileForm({ values }: { values: ProfileFormValues }) 
       <div className="space-y-1">
         <Label htmlFor="audiences">{t("web.getStudents.audiences")}</Label>
         <Input id="audiences" name="audiences" defaultValue={values.audiences.join(", ")} />
-        <p className="text-muted-foreground text-xs">{t("web.getStudents.audiencesHelp")}</p>
+        <p className="text-xs text-muted-foreground">{t("web.getStudents.audiencesHelp")}</p>
       </div>
 
       <div className="space-y-1">
@@ -61,7 +61,7 @@ export function MarketingProfileForm({ values }: { values: ProfileFormValues }) 
           maxLength={240}
           defaultValue={values.differentiator ?? ""}
         />
-        <p className="text-muted-foreground text-xs">{t("web.getStudents.differentiatorHelp")}</p>
+        <p className="text-xs text-muted-foreground">{t("web.getStudents.differentiatorHelp")}</p>
       </div>
 
       <div className="grid gap-3 lg:grid-cols-2">
@@ -76,7 +76,7 @@ export function MarketingProfileForm({ values }: { values: ProfileFormValues }) 
             step={15}
             defaultValue={values.weeklyMinutes}
           />
-          <p className="text-muted-foreground text-xs">{t("web.getStudents.weeklyMinutesHelp")}</p>
+          <p className="text-xs text-muted-foreground">{t("web.getStudents.weeklyMinutesHelp")}</p>
         </div>
         <div className="space-y-1">
           <Label htmlFor="goalNewStudentsPerMonth">{t("web.getStudents.goal")}</Label>
@@ -92,12 +92,12 @@ export function MarketingProfileForm({ values }: { values: ProfileFormValues }) 
       </div>
 
       {state?.error && (
-        <p role="alert" className="text-destructive text-sm">
+        <p role="alert" className="text-sm text-destructive">
           {state.error}
         </p>
       )}
       {state?.ok && (
-        <p className="text-muted-foreground text-sm">{t("web.getStudents.profileSaved")}</p>
+        <p className="text-sm text-muted-foreground">{t("web.getStudents.profileSaved")}</p>
       )}
       <Button type="submit" disabled={pending}>
         {t("web.getStudents.saveProfile")}

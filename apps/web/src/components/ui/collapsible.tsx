@@ -48,7 +48,7 @@ export function Collapsible({
           onClick={() => setOpen(!open)}
           aria-expanded={open}
           aria-controls={regionId}
-          className="focus-visible:ring-ring flex items-center gap-1 rounded-sm text-sm font-medium focus-visible:ring-1 focus-visible:outline-hidden"
+          className="flex items-center gap-1 rounded-sm text-sm font-medium focus-visible:ring-1 focus-visible:ring-ring focus-visible:outline-hidden"
         >
           <ChevronDown
             className={cn("size-4 shrink-0 transition-transform", open ? "" : "-rotate-90")}

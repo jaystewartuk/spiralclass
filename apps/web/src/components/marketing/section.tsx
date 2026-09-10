@@ -48,26 +48,26 @@ export function Section({
 }) {
   const hasHeader = Boolean(eyebrow || title || description);
   return (
-    <section className={cn(variant === "band" && "bg-secondary/40 border-y", className)}>
+    <section className={cn(variant === "band" && "border-y bg-secondary/40", className)}>
       <div className="container py-16">
         {hasHeader && (
           // The header always sits in the reading column even when the content
           // below it is wide: a centred title stretched to 1280px is two eye
           // movements per line for no gain.
-          <div className="max-w-reading mx-auto text-center">
+          <div className="mx-auto max-w-reading text-center">
             {eyebrow && (
               // NOT uppercase, and not letter-spaced. D-140 reversed that from
               // its own earlier draft: capitals remove the word-shape cue and
               // tracking opens letter spacing without opening word spacing,
               // which is the pairing that makes words run together.
-              <p className="text-primary text-sm font-semibold">{eyebrow}</p>
+              <p className="text-sm font-semibold text-primary">{eyebrow}</p>
             )}
             {title && (
-              <Heading className="font-display text-h2 mt-2 font-semibold text-balance">
+              <Heading className="mt-2 font-display text-h2 font-semibold text-balance">
                 {title}
               </Heading>
             )}
-            {description && <p className="text-muted-foreground mt-3 text-pretty">{description}</p>}
+            {description && <p className="mt-3 text-pretty text-muted-foreground">{description}</p>}
           </div>
         )}
         {children && (

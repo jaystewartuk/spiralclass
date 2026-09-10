@@ -25,7 +25,7 @@ export default function AdminNotificationsLoading() {
         <Skeleton className="h-6 w-44" />
 
         {/* Filter bar */}
-        <div className="bg-muted/30 space-y-3 rounded-md border p-4">
+        <div className="space-y-3 rounded-md border bg-muted/30 p-4">
           <div className="grid gap-3 lg:grid-cols-4">
             <div className="space-y-1 lg:col-span-2">
               <Skeleton className="h-3 w-28" />

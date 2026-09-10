@@ -54,7 +54,7 @@ export default async function ResultsPage({
 
   const renderRows = (rows: PerformanceRow[]) =>
     rows.length === 0 ? (
-      <p className="text-muted-foreground text-sm">{t("web.getStudents.noResultsYet")}</p>
+      <p className="text-sm text-muted-foreground">{t("web.getStudents.noResultsYet")}</p>
     ) : (
       <div className="space-y-2">
         {rows.map((row) => (
@@ -63,7 +63,7 @@ export default async function ResultsPage({
             className="flex flex-wrap items-center justify-between gap-2 border-b pb-2 last:border-0"
           >
             <span className="min-w-0 truncate font-medium">{row.label}</span>
-            <span className="text-muted-foreground text-sm">
+            <span className="text-sm text-muted-foreground">
               {`${row.visits} ${t("web.getStudents.visits")} · ${row.enquiries} ${t(
                 "web.getStudents.enquiries",
               )} · ${row.students} ${t("web.getStudents.newStudents")}`}
@@ -107,26 +107,26 @@ export default async function ResultsPage({
         <CardContent className="grid grid-cols-2 gap-4 py-6 text-center lg:grid-cols-4">
           <div>
             <div className="text-2xl font-semibold">{report.overall.visits}</div>
-            <div className="text-muted-foreground text-xs">{t("web.getStudents.visits")}</div>
+            <div className="text-xs text-muted-foreground">{t("web.getStudents.visits")}</div>
           </div>
           <div>
             <div className="text-2xl font-semibold">{report.overall.enquiries}</div>
-            <div className="text-muted-foreground text-xs">{t("web.getStudents.enquiries")}</div>
+            <div className="text-xs text-muted-foreground">{t("web.getStudents.enquiries")}</div>
           </div>
           <div>
             <div className="text-2xl font-semibold">{report.overall.students}</div>
-            <div className="text-muted-foreground text-xs">{t("web.getStudents.newStudents")}</div>
+            <div className="text-xs text-muted-foreground">{t("web.getStudents.newStudents")}</div>
           </div>
           <div>
             <div className="text-2xl font-semibold">
               {rate === null ? "—" : `${(rate * 100).toFixed(1)}%`}
             </div>
-            <div className="text-muted-foreground text-xs">{t("web.getStudents.conversion")}</div>
+            <div className="text-xs text-muted-foreground">{t("web.getStudents.conversion")}</div>
           </div>
         </CardContent>
       </Card>
 
-      <p className="text-muted-foreground text-xs">{t("web.getStudents.realPeopleOnly")}</p>
+      <p className="text-xs text-muted-foreground">{t("web.getStudents.realPeopleOnly")}</p>
 
       {/* The funnel, above the observations that interpret it. Three flat
           numbers cannot say WHERE a page loses people; this can, which is the
@@ -139,7 +139,7 @@ export default async function ResultsPage({
           {steps.map((step, i) => (
             <div key={step.key}>
               {i > 0 && step.lostFromPrevious > 0 && (
-                <p className="text-muted-foreground pb-2 text-xs">
+                <p className="pb-2 text-xs text-muted-foreground">
                   {t("web.getStudents.stepLost", { count: step.lostFromPrevious })}
                 </p>
               )}
@@ -161,7 +161,7 @@ export default async function ResultsPage({
                   blur "this is a control" into "this is data". chart-tokens is
                   the recharts-free module, imported exactly so a caller that
                   needs only a colour never pulls the chart chunk. */}
-              <div className="bg-muted mt-1 h-2 w-full overflow-hidden rounded">
+              <div className="mt-1 h-2 w-full overflow-hidden rounded bg-muted">
                 <div
                   className="h-2 rounded"
                   style={{
@@ -172,7 +172,7 @@ export default async function ResultsPage({
               </div>
             </div>
           ))}
-          <p className="text-muted-foreground text-xs">{t("web.getStudents.enquiriesAside")}</p>
+          <p className="text-xs text-muted-foreground">{t("web.getStudents.enquiriesAside")}</p>
         </CardContent>
       </Card>
 
@@ -214,7 +214,7 @@ export default async function ResultsPage({
       </Card>
 
       {report.overall.revenueMinorUnits > 0 && (
-        <p className="text-muted-foreground text-sm">
+        <p className="text-sm text-muted-foreground">
           {`${t("web.getStudents.revenue")}: ${formatMinorUnits(
             report.overall.revenueMinorUnits,
             teacher.pricingCurrency,

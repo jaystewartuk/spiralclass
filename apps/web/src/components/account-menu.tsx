@@ -92,7 +92,7 @@ export function AccountMenu({
         <span className="hidden max-w-48 truncate xl:block">{triggerName}</span>
         <ChevronDown
           aria-hidden
-          className={cn("text-muted-foreground h-4 w-4 transition-transform", open && "rotate-180")}
+          className={cn("h-4 w-4 text-muted-foreground transition-transform", open && "rotate-180")}
         />
       </Button>
 
@@ -102,7 +102,7 @@ export function AccountMenu({
           ref={panelRef}
           onKeyDown={onPanelKeyDown}
           aria-label={menuLabel}
-          className="max-h-menu border-border bg-popover text-popover-foreground absolute right-0 z-50 mt-2 w-72 overflow-y-auto rounded-md border p-1 shadow-lg"
+          className="absolute right-0 z-50 mt-2 max-h-menu w-72 overflow-y-auto rounded-md border border-border bg-popover p-1 text-popover-foreground shadow-lg"
         >
           {account && accountHref && (
             <>
@@ -118,7 +118,7 @@ export function AccountMenu({
                   className="min-w-0 flex-1"
                 />
                 <span className="sr-only">{t("web.nav.viewAccount")}</span>
-                <ChevronRight aria-hidden className="text-muted-foreground h-4 w-4 shrink-0" />
+                <ChevronRight aria-hidden className="h-4 w-4 shrink-0 text-muted-foreground" />
               </Link>
               <NavDivider />
             </>

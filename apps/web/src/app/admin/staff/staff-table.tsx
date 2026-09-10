@@ -119,7 +119,7 @@ export function StaffTable({
       <InviteForm />
 
       {admins.length === 0 ? (
-        <p className="text-muted-foreground text-sm">{t("web.admin.staff.noRows")}</p>
+        <p className="text-sm text-muted-foreground">{t("web.admin.staff.noRows")}</p>
       ) : (
         <TableShell>
           <DataTable

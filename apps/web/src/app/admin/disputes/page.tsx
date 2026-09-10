@@ -115,7 +115,7 @@ export default async function AdminDisputesPage({
     <div className="space-y-6">
       <header>
         <PageHeader title={t("web.admin.disputes.title")} />
-        <p className="text-muted-foreground text-sm">
+        <p className="text-sm text-muted-foreground">
           {t("web.admin.disputes.intro.pre")} <code>charge.dispute.*</code>{" "}
           {t("web.admin.disputes.intro.post")}
         </p>
@@ -141,7 +141,7 @@ export default async function AdminDisputesPage({
 
       {filteredTotal > 0 ? <Pagination state={pageState} params={params} /> : null}
 
-      <p className="text-muted-foreground text-xs">{t("web.admin.disputes.footer")}</p>
+      <p className="text-xs text-muted-foreground">{t("web.admin.disputes.footer")}</p>
     </div>
   );
 }

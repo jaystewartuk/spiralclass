@@ -74,7 +74,7 @@ export function ConfirmSlotButton({
           // (D-140) that dropping the fixed height would otherwise remove.
           className={cn(
             "w-full",
-            secondaryLabel && "min-h-target h-auto flex-col gap-0.5 py-2 leading-tight",
+            secondaryLabel && "h-auto min-h-target flex-col gap-0.5 py-2 leading-tight",
           )}
           aria-label={triggerAriaLabel}
         >
@@ -82,7 +82,7 @@ export function ConfirmSlotButton({
           {/* Hierarchy by colour and weight, not size: the type scale floors
               supporting text at 15px, which is where this line already is. */}
           {secondaryLabel ? (
-            <span className="text-muted-foreground text-xs font-normal">{secondaryLabel}</span>
+            <span className="text-xs font-normal text-muted-foreground">{secondaryLabel}</span>
           ) : null}
         </Button>
       }
@@ -90,7 +90,7 @@ export function ConfirmSlotButton({
       footer={() => (
         <div className="flex w-full flex-col gap-2">
           {error && (
-            <p role="alert" className="text-destructive text-sm">
+            <p role="alert" className="text-sm text-destructive">
               {error}
             </p>
           )}
@@ -105,9 +105,9 @@ export function ConfirmSlotButton({
         </div>
       )}
     >
-      <div className="bg-muted/30 rounded-md border px-3 py-2">
+      <div className="rounded-md border bg-muted/30 px-3 py-2">
         <p className="font-medium">{summary}</p>
-        {subtitle && <p className="text-muted-foreground text-sm">{subtitle}</p>}
+        {subtitle && <p className="text-sm text-muted-foreground">{subtitle}</p>}
       </div>
       <form id={formId} action={formAction} className="hidden">
         {Object.entries(hiddenInputs).map(([k, v]) => (

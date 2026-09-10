@@ -555,7 +555,7 @@ export function TemplatesForm({
         </p>
       )}
       {showErrors ? (
-        <p role="alert" className="text-destructive text-sm">
+        <p role="alert" className="text-sm text-destructive">
           {t("web.packages.fixErrors")}
         </p>
       ) : (
@@ -574,7 +574,7 @@ export function TemplatesForm({
       {redirectTo && <input type="hidden" name="redirectTo" value={redirectTo} />}
 
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <p className="text-muted-foreground text-sm tabular-nums" aria-live="polite">
+        <p className="text-sm text-muted-foreground tabular-nums" aria-live="polite">
           {t("web.packages.count", { count: visible.length })}
         </p>
         <Button
@@ -591,7 +591,7 @@ export function TemplatesForm({
       </div>
 
       {atCap && cap !== null && (
-        <p className="text-muted-foreground text-sm">
+        <p className="text-sm text-muted-foreground">
           {t("web.packages.capReached", { max: cap })}{" "}
           <Link
             href="/settings/billing"
@@ -660,10 +660,10 @@ export function TemplatesForm({
                 <Card className="border-dashed shadow-none">
                   <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 px-4 py-3">
                     <div className="min-w-0">
-                      <p className="text-muted-foreground truncate text-sm line-through">
+                      <p className="truncate text-sm text-muted-foreground line-through">
                         {row.name || t("web.packages.untitled")}
                       </p>
-                      <p className="text-muted-foreground text-xs">
+                      <p className="text-xs text-muted-foreground">
                         {t("web.packages.removed")}
                         {sold > 0 && ` ${t("web.packages.removedSold", { count: sold })}`}
                       </p>
@@ -702,7 +702,7 @@ export function TemplatesForm({
           id="templates-error"
           role="alert"
           aria-live="polite"
-          className="text-destructive text-sm"
+          className="text-sm text-destructive"
         >
           {state.error}
         </p>
@@ -711,7 +711,7 @@ export function TemplatesForm({
       {stickyActions ? (
         showBar && (
           <div
-            className="bg-background/95 pb-safe-bottom supports-[backdrop-filter]:bg-background/80 sticky bottom-0 z-20 -mx-4 flex flex-wrap items-center justify-between gap-x-4 gap-y-2 border-t px-4 py-3 backdrop-blur"
+            className="sticky bottom-0 z-20 -mx-4 flex flex-wrap items-center justify-between gap-x-4 gap-y-2 border-t bg-background/95 px-4 py-3 pb-safe-bottom backdrop-blur supports-[backdrop-filter]:bg-background/80"
             role="region"
             aria-label={t("settings.templates.title")}
           >
@@ -821,7 +821,7 @@ function PackageCard({
           >
             <ChevronDown
               className={cn(
-                "text-muted-foreground mt-1 size-4 shrink-0 transition-transform",
+                "mt-1 size-4 shrink-0 text-muted-foreground transition-transform",
                 open && "rotate-180",
               )}
               aria-hidden
@@ -831,7 +831,7 @@ function PackageCard({
                 <span
                   className={cn(
                     "truncate font-semibold",
-                    !row.name.trim() && "text-muted-foreground font-normal italic",
+                    !row.name.trim() && "font-normal text-muted-foreground italic",
                   )}
                 >
                   {name}
@@ -848,14 +848,14 @@ function PackageCard({
                   </Badge>
                 )}
               </span>
-              <span className="text-muted-foreground mt-1 block truncate text-xs">{meta}</span>
+              <span className="mt-1 block truncate text-xs text-muted-foreground">{meta}</span>
             </span>
             <span className="shrink-0 text-right">
               <span className="block text-sm font-semibold tabular-nums">
                 {formatMinorUnits(row.priceMinorUnits, currency)}
               </span>
               {perClass !== null && (
-                <span className="text-muted-foreground block text-xs tabular-nums">
+                <span className="block text-xs text-muted-foreground tabular-nums">
                   {t("web.packages.perClass", { amount: formatMinorUnits(perClass, currency) })}
                 </span>
               )}
@@ -865,7 +865,7 @@ function PackageCard({
             type="button"
             variant="ghost"
             size="icon"
-            className="text-muted-foreground hover:text-destructive mt-0.5 shrink-0"
+            className="mt-0.5 shrink-0 text-muted-foreground hover:text-destructive"
             onClick={onRemove}
             aria-label={t("web.packages.removeAria", { name })}
           >
@@ -906,14 +906,14 @@ function PackageCard({
                     placeholder={t("web.onboarding.templates.subjectPlaceholder")}
                     aria-describedby={`subject-hint-${key}`}
                   />
-                  <p id={`subject-hint-${key}`} className="text-muted-foreground text-xs">
+                  <p id={`subject-hint-${key}`} className="text-xs text-muted-foreground">
                     {t("web.onboarding.templates.subjectHint")}
                   </p>
                 </div>
               )}
             </div>
 
-            <div className="bg-muted/30 flex items-start gap-3 rounded-md border p-3">
+            <div className="flex items-start gap-3 rounded-md border bg-muted/30 p-3">
               <Checkbox
                 id={`single-${key}`}
                 checked={row.singleClass}
@@ -924,7 +924,7 @@ function PackageCard({
                 <Label htmlFor={`single-${key}`} className="text-sm">
                   {t("onboarding.templates.singleClass")}
                 </Label>
-                <p className="text-muted-foreground text-xs">
+                <p className="text-xs text-muted-foreground">
                   {t("onboarding.templates.singleClassHint")}
                 </p>
                 {/* The one state where "is this one class?" and "does paying
@@ -937,7 +937,7 @@ function PackageCard({
                     Saying so here is cheaper than her finding out from a
                     student. */}
                 {isOneClassSoldAsCredit(row) && (
-                  <p className="text-warning text-xs">
+                  <p className="text-xs text-warning">
                     {t("onboarding.templates.oneClassAsCreditHint")}
                   </p>
                 )}
@@ -1040,7 +1040,7 @@ function PackageCard({
                 {issue === "price-negative" ? (
                   <FieldError id={errorId} message={t(ISSUE_KEY[issue])} />
                 ) : (
-                  <p id={`price-hint-${key}`} className="text-muted-foreground text-xs">
+                  <p id={`price-hint-${key}`} className="text-xs text-muted-foreground">
                     {t("onboarding.templates.priceHint", { currency })}
                     {perClass !== null &&
                       ` ${t("web.packages.perClass", {
@@ -1052,7 +1052,7 @@ function PackageCard({
             </div>
 
             {payoutCountrySupported && (
-              <div className="bg-muted/30 space-y-3 rounded-md border p-3">
+              <div className="space-y-3 rounded-md border bg-muted/30 p-3">
                 <div className="flex items-start gap-3">
                   <Checkbox
                     id={`wise-discount-${key}`}
@@ -1068,7 +1068,7 @@ function PackageCard({
                         the discount, so the number in the sentence can never
                         drift from the arithmetic — and the copy attributes it
                         to US as an estimate, not to Stripe as its rate. */}
-                    <p className="text-muted-foreground text-xs">
+                    <p className="text-xs text-muted-foreground">
                       {t("onboarding.templates.wiseDiscountHint", {
                         rate: stripeWorstCaseRatePercent(),
                       })}
@@ -1093,7 +1093,7 @@ function PackageCard({
                           className="w-44 max-w-full"
                         />
                         {wiseSavings > 0 && (
-                          <span className="text-success text-xs tabular-nums">
+                          <span className="text-xs text-success tabular-nums">
                             {t("onboarding.templates.wiseSavings", {
                               amount: formatMinorUnits(wiseSavings, currency),
                             })}
@@ -1101,7 +1101,7 @@ function PackageCard({
                         )}
                       </div>
                       {notADiscount && (
-                        <p id={`wise-warn-${key}`} className="text-warning text-xs">
+                        <p id={`wise-warn-${key}`} className="text-xs text-warning">
                           {t("web.packages.warnTransferNotDiscount")}
                         </p>
                       )}
@@ -1181,7 +1181,7 @@ function MoneyInput({
       />
       <span
         aria-hidden
-        className="text-muted-foreground pointer-events-none absolute inset-y-0 right-3 flex items-center text-xs font-medium"
+        className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-xs font-medium text-muted-foreground"
       >
         {currency}
       </span>
@@ -1203,7 +1203,7 @@ function WisePriceCalculator({
   const canApply = !disabled && Number.isFinite(targetPesos) && targetPesos > 0;
   return (
     <details className="text-xs">
-      <summary className="text-muted-foreground hover:text-foreground focus-visible:ring-ring cursor-pointer rounded-sm focus-visible:ring-3 focus-visible:outline-hidden">
+      <summary className="cursor-pointer rounded-sm text-muted-foreground hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring focus-visible:outline-hidden">
         {t("onboarding.templates.wiseCalculatorToggle")}
       </summary>
       <div className="mt-3 flex flex-wrap items-end gap-2">
@@ -1236,7 +1236,7 @@ function WisePriceCalculator({
           {t("onboarding.templates.wiseCalculatorButton")}
         </Button>
       </div>
-      <p className="text-muted-foreground mt-2">{t("onboarding.templates.wiseCalculatorHint")}</p>
+      <p className="mt-2 text-muted-foreground">{t("onboarding.templates.wiseCalculatorHint")}</p>
     </details>
   );
 }

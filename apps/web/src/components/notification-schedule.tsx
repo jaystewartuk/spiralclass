@@ -346,7 +346,7 @@ export async function NotificationSchedule({
                 definition. It was two sibling <span>s in an <li>, which reads
                 to a screen reader as one run-on line with no relationship
                 between the halves. */}
-            <dl className="divide-border divide-y rounded-md border">
+            <dl className="divide-y divide-border rounded-md border">
               {groupRows.map((row) => (
                 <div
                   key={row.key}
@@ -360,7 +360,7 @@ export async function NotificationSchedule({
           </section>
         );
       })}
-      <p className="text-muted-foreground text-sm">{channelNote}</p>
+      <p className="text-sm text-muted-foreground">{channelNote}</p>
     </div>
   );
 }

@@ -71,7 +71,7 @@ function DeleteIntegrationButton({ id }: { id: string }) {
     >
       <form id={`delete-integration-${id}`} action={action}>
         <input type="hidden" name="id" value={id} />
-        {state?.error && <p className="text-destructive text-sm">{state.error}</p>}
+        {state?.error && <p className="text-sm text-destructive">{state.error}</p>}
       </form>
     </ConfirmDialog>
   );
@@ -97,7 +97,7 @@ export function IntegrationsTable({
         cell: ({ row }) => (
           <div>
             <div className="font-medium">{row.original.name}</div>
-            <div className="text-muted-foreground text-xs">{row.original.key}</div>
+            <div className="text-xs text-muted-foreground">{row.original.key}</div>
           </div>
         ),
       },
@@ -157,7 +157,7 @@ export function IntegrationsTable({
 
   if (rows.length === 0) {
     return (
-      <p className="text-muted-foreground text-sm">
+      <p className="text-sm text-muted-foreground">
         {t("web.admin.economics.integrations.noEntries")}
       </p>
     );

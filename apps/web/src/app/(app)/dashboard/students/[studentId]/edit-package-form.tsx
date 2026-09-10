@@ -89,13 +89,13 @@ export function EditPackageForm({
       action={formAction}
       onSubmit={handleSubmit}
       noValidate
-      className="bg-muted/30 space-y-3 rounded-md border p-3"
+      className="space-y-3 rounded-md border bg-muted/30 p-3"
     >
       <input type="hidden" name="packageId" value={packageId} />
 
       <p className="text-sm font-medium">{t("web.dashboard.students.package.editPackage")}</p>
       {committedBookings > 0 && (
-        <p className="text-muted-foreground text-xs">
+        <p className="text-xs text-muted-foreground">
           {t("web.dashboard.students.package.committedHint", {
             count: String(committedBookings),
             max: String(Math.max(maxRemaining, 0)),

@@ -110,7 +110,7 @@ export default async function AdminPaymentsPage({
       <header className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <PageHeader title={t("web.admin.payments.title")} />
-          <p className="text-muted-foreground text-sm">
+          <p className="text-sm text-muted-foreground">
             {t("web.admin.payments.matchingCount", { count: totalCount.toLocaleString() })}
           </p>
           <p className="mt-2 text-sm">

@@ -86,7 +86,7 @@ export function EmailChangeForm({
       <div className="space-y-1">
         <Label htmlFor="current-email">{t("web.emailChangeForm.currentEmail")}</Label>
         <Input id="current-email" type="email" value={currentEmail ?? ""} disabled readOnly />
-        <p className="text-muted-foreground text-xs">{t("web.emailChangeForm.currentEmailHint")}</p>
+        <p className="text-xs text-muted-foreground">{t("web.emailChangeForm.currentEmailHint")}</p>
       </div>
 
       {!done && sentTo ? (
@@ -107,7 +107,7 @@ export function EmailChangeForm({
             />
           </div>
           {verifyState?.error && (
-            <p role="alert" className="text-destructive text-sm">
+            <p role="alert" className="text-sm text-destructive">
               {verifyState.error}
             </p>
           )}
@@ -131,7 +131,7 @@ export function EmailChangeForm({
               onChange={() => clearError("newEmail")}
             />
             <FieldError id="new-email-error" message={errors.newEmail} />
-            <p className="text-muted-foreground text-xs">{t("web.emailChangeForm.newEmailHint")}</p>
+            <p className="text-xs text-muted-foreground">{t("web.emailChangeForm.newEmailHint")}</p>
           </div>
           {hasGoogleLinked && (
             <Alert variant="warning" className="space-y-2">
@@ -151,7 +151,7 @@ export function EmailChangeForm({
             {pending ? t("web.emailChangeForm.sending") : t("web.emailChangeForm.sendCode")}
           </Button>
           {state?.error && (
-            <p role="alert" className="text-destructive text-sm">
+            <p role="alert" className="text-sm text-destructive">
               {state.error}
             </p>
           )}

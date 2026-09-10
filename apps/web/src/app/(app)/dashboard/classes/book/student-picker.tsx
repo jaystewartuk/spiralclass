@@ -73,7 +73,7 @@ export function StudentPicker({
           {date && <input type="hidden" name="date" value={date} />}
           <div className="relative min-w-0 flex-1 lg:w-72 lg:flex-none">
             <Search
-              className="text-muted-foreground pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2"
+              className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground"
               aria-hidden
             />
             <Input
@@ -110,7 +110,7 @@ export function StudentPicker({
       ) : (
         <Card>
           <CardContent className="p-0">
-            <ul className="divide-border divide-y">
+            <ul className="divide-y divide-border">
               {entries.map((entry) => (
                 <li key={entry.studentId}>
                   <StudentRow entry={entry} date={date} t={t} />
@@ -135,20 +135,20 @@ function StudentRow({ entry, date, t }: { entry: RosterEntry; date?: string; t: 
   return (
     <Link
       href={href}
-      className="min-h-target hover:bg-muted/40 focus-visible:ring-ring flex items-center gap-3 px-4 py-3 transition-colors focus-visible:ring-3 focus-visible:outline-hidden focus-visible:ring-inset lg:px-6"
+      className="flex min-h-target items-center gap-3 px-4 py-3 transition-colors hover:bg-muted/40 focus-visible:ring-3 focus-visible:ring-ring focus-visible:outline-hidden focus-visible:ring-inset lg:px-6"
     >
       {/* Decorative: the name is right beside it, and a screen reader
           announcing "MR" before "Marcela Ruiz" is the same word twice. */}
       <span
         aria-hidden
-        className="bg-secondary text-secondary-foreground inline-flex size-9 shrink-0 items-center justify-center rounded-full text-sm font-semibold select-none"
+        className="inline-flex size-9 shrink-0 items-center justify-center rounded-full bg-secondary text-sm font-semibold text-secondary-foreground select-none"
       >
         {initialsFrom(entry.name, entry.email)}
       </span>
 
       <span className="min-w-0 flex-1">
         <span className="block truncate font-semibold">{entry.name}</span>
-        <span className="text-muted-foreground block truncate text-sm">
+        <span className="block truncate text-sm text-muted-foreground">
           {entry.email ?? t("web.dashboard.classes.noEmail")}
         </span>
       </span>
@@ -162,12 +162,12 @@ function StudentRow({ entry, date, t }: { entry: RosterEntry; date?: string; t: 
           {t("web.dashboard.classes.book.available", { count: entry.classesAvailable })}
         </Badge>
       ) : (
-        <Badge variant="outline" className="text-muted-foreground shrink-0">
+        <Badge variant="outline" className="shrink-0 text-muted-foreground">
           {t("web.dashboard.classes.book.noPackage")}
         </Badge>
       )}
 
-      <ChevronRight className="text-muted-foreground size-4 shrink-0" aria-hidden />
+      <ChevronRight className="size-4 shrink-0 text-muted-foreground" aria-hidden />
     </Link>
   );
 }

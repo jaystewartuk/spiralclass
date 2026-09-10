@@ -36,7 +36,7 @@ export default function RouteError({
         <Heading level={1}>{t("common.error")}</Heading>
         <p className="text-muted-foreground">{t("web.errorBoundary.root.body")}</p>
         {error.digest && (
-          <p className="text-muted-foreground text-xs">
+          <p className="text-xs text-muted-foreground">
             {t("web.errorBoundary.reference")}: <code>{error.digest}</code>
           </p>
         )}

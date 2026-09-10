@@ -43,7 +43,7 @@ export function NativeLanguageForm({ initialLanguage }: { initialLanguage: strin
             ))}
           </SelectContent>
         </Select>
-        <p className="text-muted-foreground text-xs">
+        <p className="text-xs text-muted-foreground">
           {t("web.myClasses.account.nativeLanguage.hint")}
         </p>
       </div>
