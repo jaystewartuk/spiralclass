@@ -676,6 +676,8 @@ export const fr = {
   "call.screenShareError": "Impossible de partager l'écran. Réessayez.",
   "call.flipCamera": "Changer de caméra",
   "call.flipCameraError": "Impossible de changer de caméra",
+  "call.audioBlocked":
+    "Vous n'entendez pas l'autre personne : votre navigateur a bloqué le son. Touchez ici pour l'activer.",
   "call.swapToMain": "Afficher ma caméra en plein écran",
   "call.swapToPip": "Afficher l'autre personne en plein écran",
   "call.swapView": "Changer de vue",

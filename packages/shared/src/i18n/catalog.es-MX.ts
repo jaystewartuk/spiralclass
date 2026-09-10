@@ -691,6 +691,8 @@ export const esMX = {
   "call.screenShareError": "No se pudo compartir la pantalla. Inténtalo de nuevo.",
   "call.flipCamera": "Cambiar cámara",
   "call.flipCameraError": "No se pudo cambiar la cámara",
+  "call.audioBlocked":
+    "No puedes escuchar a la otra persona: tu navegador bloqueó el sonido. Toca aquí para activarlo.",
   "call.swapToMain": "Mostrar mi cámara en pantalla completa",
   "call.swapToPip": "Mostrar a la otra persona en pantalla completa",
   "call.swapView": "Cambiar vista",

@@ -41,6 +41,8 @@ import {
   CallConnectTimeoutError,
   CONNECTING_ESCAPE_HATCH_MS,
 } from "@/lib/video/call-connection";
+import { Button } from "@/components/ui/button";
+import { guardAudioPlaybackResume } from "@/lib/video/audio-playback";
 import { startCallRecording, stopCallRecording } from "@/app/actions/call-recording";
 import { useCaptionFeed, useRoomCaptionsEnabled } from "@/lib/captions/use-caption-feed";
 import { useCaptionPreferences } from "@/lib/captions/use-caption-preferences";
@@ -264,6 +266,14 @@ export function ClassCall({
   // mobile networks). We surface a banner instead of leaving the call frozen
   // and silent; LiveKit fires Disconnected (→ the error UI) only if it gives up.
   const [reconnecting, setReconnecting] = useState(false);
+  // The browser is refusing to play the other person's audio — she is in a
+  // lesson that has gone silent on her side only. iOS blocks playback until the
+  // page has earned the right to make sound, and re-blocks it when a hidden tab
+  // comes back; livekit surfaces exactly that as canPlaybackAudio +
+  // AudioPlaybackStatusChanged. Before this the app never read either, so the
+  // one thing that fixes it — a tap — was never asked for, and the failure
+  // reached us only as an unhandled AbortError (lib/video/audio-playback.ts).
+  const [audioBlocked, setAudioBlocked] = useState(false);
   // Teacher's subtitles toggle (D-27). Ephemeral like the mic/record controls —
   // turning it on starts captioning her speech for the student; off clears it.
   const [captionsOn, setCaptionsOn] = useState(false);
@@ -506,6 +516,10 @@ export function ClassCall({
     // element and leaving it transparent. adaptiveStream stays on (it's a
     // subscriber-side optimisation and pauses remote video when the tab is hidden).
     const room = new Room({ adaptiveStream: true, dynacast: false });
+    // Before connect(), not after: that is when livekit binds its own
+    // audio-unblock retry, and binding order is what decides whether the
+    // retry's rejection can escape as an unhandled error. See the module.
+    guardAudioPlaybackResume(room);
     roomRef.current = room;
     let cancelled = false;
     // Each connection attempt starts out "not deliberately leaving". Without
@@ -588,6 +602,22 @@ export function ClassCall({
       .on(RoomEvent.ParticipantDisconnected, syncRemoteCount)
       .on(RoomEvent.RecordingStatusChanged, (active: boolean) => {
         if (!cancelled) setRecording(active);
+      })
+      // Whether the browser will play the other person's audio at all. Flips to
+      // blocked when an autoplay attempt is refused (iOS, before the page has
+      // made any sound of its own) and back when a retry lands — livekit retries
+      // on its own each time the tab becomes visible again, so this can change
+      // long after a healthy join, which is exactly the case that used to go
+      // unreported. Read from the room rather than trusting the event's
+      // argument: `canPlaybackAudio` is the state the Room actually settled on.
+      .on(RoomEvent.AudioPlaybackStatusChanged, () => {
+        if (cancelled) return;
+        const blocked = !room.canPlaybackAudio;
+        setAudioBlocked(blocked);
+        posthog?.capture(
+          blocked ? "call_audio_playback_blocked" : "call_audio_playback_resumed",
+          analyticsProps(),
+        );
       })
       // Covers BOTH how a local screen share can start/stop: our own toggle
       // button, and the browser's native "stop sharing" bar/toolbar (which
@@ -703,6 +733,10 @@ export function ClassCall({
       setRoom(room);
       syncRemoteCount();
       setRecording(room.isRecording);
+      // Seed from the room: a join whose very first autoplay was already
+      // refused settles `canPlaybackAudio` false before this component has a
+      // listener attached, and only an event would ever move it again.
+      setAudioBlocked(!room.canPlaybackAudio);
       connectedAtRef.current = Date.now();
       const msToConnect = connectStartedAtRef.current
         ? connectedAtRef.current - connectStartedAtRef.current
@@ -1284,7 +1318,21 @@ export function ClassCall({
   const retry = useCallback(() => {
     setStatus("connecting");
     setReconnecting(false);
+    // A fresh Room decides this again from scratch; carrying the old answer
+    // over would show "tap to turn the sound on" over a call that has no audio
+    // to play yet.
+    setAudioBlocked(false);
     setRetryKey((k) => k + 1);
+  }, []);
+
+  // The tap iOS is waiting for. `startAudio()` only unblocks playback when it
+  // runs inside a real user gesture, which is why this is a button and not
+  // something the AudioPlaybackStatusChanged handler could just do itself.
+  // Guarded (lib/video/audio-playback.ts), so it settles either way; the room
+  // re-emits AudioPlaybackStatusChanged with the outcome, which is what clears
+  // this row — never an optimistic flip here.
+  const restoreAudio = useCallback(() => {
+    void roomRef.current?.startAudio();
   }, []);
 
   // Teacher toggles recording; the actual `recording` flag flips when LiveKit
@@ -1681,10 +1729,27 @@ export function ClassCall({
             Ordered most-actionable first — a message the user must act on
             (allow the camera, give consent) sits above one that is purely
             informational (something is being recorded). Note pointer-events
-            stay off the column so it never blocks the video beneath it; no
-            row here is interactive. */}
+            stay off the COLUMN so it never blocks the video beneath it; a row
+            that is itself a control turns them back on for its own box, and
+            nothing else. */}
             {!minimized && (
               <div className="pointer-events-none absolute inset-x-4 top-4 z-20 flex flex-col items-center gap-2">
+                {/* The browser is refusing to play the other person's audio —
+                the lesson is silent on this side and on no other. Top of the
+                stack because it is the one row that is both the most damaging
+                (a lesson you cannot hear) and the cheapest to fix: the tap
+                that dismisses it is the tap that fixes it. Held back until
+                someone is actually there to be inaudible: the block often
+                lands during a solo join, where "you can't hear them" names a
+                problem the user does not have yet. The flag itself is not
+                cleared by that — it surfaces the moment they arrive. */}
+                {audioBlocked && remoteCount > 0 && (
+                  <StatusPill
+                    tone="attention"
+                    label={t("call.audioBlocked")}
+                    onActivate={restoreAudio}
+                  />
+                )}
                 {/* Connected but neither camera nor mic is on — the "I just
                 see a blank screen" case. Almost always a mobile browser that
                 would not auto-start media; the fix is to tap a control. */}
@@ -2371,14 +2436,23 @@ function PhoneOffGlyph() {
 // `pulse` is for a state that is ONGOING rather than a one-off notice — a
 // recording light, a live share. It is motion-safe: a dot that never stops
 // blinking is exactly the thing a reduced-motion setting is asking about.
+//
+// `onActivate` makes the row a real <button> rather than a notice: for the
+// states whose fix IS a tap (a browser that will only unblock audio inside a
+// user gesture), the sentence and the control have to be the same object, or
+// the message names an action the user has nowhere to perform. It also turns
+// pointer events back on for this row alone — the column above stays
+// transparent to the video behind it.
 function StatusPill({
   tone,
   label,
   pulse,
+  onActivate,
 }: {
   tone: "attention" | "warning" | "recording" | "info";
   label: string;
   pulse?: boolean;
+  onActivate?: () => void;
 }) {
   const toneClass = {
     // "attention" is the light-on-dark inversion — it is the loudest thing
@@ -2389,18 +2463,18 @@ function StatusPill({
     recording: "bg-destructive text-destructive-foreground",
     info: "bg-info text-info-foreground",
   }[tone];
-  return (
-    <div
-      // Announced once when it appears. Not aria-live="assertive": none of
-      // these is urgent enough to cut across what the user is doing, and the
-      // recording pill in particular is persistent, which assertive would
-      // turn into a repeated interruption.
-      role="status"
-      className={cn(
-        "flex max-w-md items-center gap-2 rounded-full px-3.5 py-1.5 text-center text-sm font-medium shadow-lg",
-        toneClass,
-      )}
-    >
+  // Only the interactive variant needs these. <Button variant="ghost"> brings
+  // its own neutral hover fill, which would repaint a coloured pill grey the
+  // moment a pointer touched it, so each tone states how IT reacts instead of
+  // inheriting a hover meant for a page-background control.
+  const toneInteractiveClass = {
+    attention: "hover:bg-background/90 hover:text-foreground active:bg-background/80",
+    warning: "hover:bg-warning/90 hover:text-warning-foreground active:bg-warning/80",
+    recording: "hover:bg-destructive/90 hover:text-destructive-foreground active:bg-destructive/80",
+    info: "hover:bg-info/90 hover:text-info-foreground active:bg-info/80",
+  }[tone];
+  const body = (
+    <>
       {pulse && (
         <span
           aria-hidden
@@ -2408,6 +2482,49 @@ function StatusPill({
         />
       )}
       {label}
+    </>
+  );
+  const shape = cn(
+    "flex max-w-md items-center gap-2 rounded-full px-3.5 py-1.5 text-center text-sm font-medium shadow-lg",
+    toneClass,
+  );
+  if (onActivate) {
+    // A button, not a role="status" div: the label is the accessible name of
+    // the thing that fixes it, so a screen-reader user gets one object to act
+    // on instead of an announcement about a control that isn't there. The ui/
+    // primitive rather than a bare <button> so the focus ring is the app's —
+    // a keyboard user on a black stage has nothing else to go on. `h-auto` and
+    // `whitespace-normal` undo the primitive's fixed control height and single
+    // line, which a sentence-length pill needs.
+    return (
+      <Button
+        type="button"
+        variant="ghost"
+        onClick={onActivate}
+        className={cn(
+          shape,
+          toneInteractiveClass,
+          // `lg:h-auto` as well as `h-auto`: the primitive's size sets a
+          // breakpoint height too, and only a matching breakpoint class
+          // displaces it — plain `h-auto` would leave the pill snapping to a
+          // control's height on a laptop and hugging its text on a phone.
+          "pointer-events-auto h-auto whitespace-normal lg:h-auto",
+        )}
+      >
+        {body}
+      </Button>
+    );
+  }
+  return (
+    <div
+      // Announced once when it appears. Not aria-live="assertive": none of
+      // these is urgent enough to cut across what the user is doing, and the
+      // recording pill in particular is persistent, which assertive would
+      // turn into a repeated interruption.
+      role="status"
+      className={shape}
+    >
+      {body}
     </div>
   );
 }
