@@ -121,7 +121,22 @@ pnpm --filter @spiralclass/shared test -- src/money.test.ts
 `pnpm ship:preview`, `pnpm deploy:preview`, `scripts/fly-deploy.sh`, anything
 matching `migrate:prod`, and `infisical`. These are denied in
 `.claude/settings.json` and by a `PreToolUse` hook, so you will be stopped
-rather than trusted to remember.
+rather than trusted to remember — **but only while the session is running in
+this checkout.**
+
+⚠️ **The guards are bound to this directory, and the rules are not.** A session
+working on this repository from somewhere else — another repo's worktree,
+driving `gh` and the contents API — loads none of this: not
+`.claude/settings.json`, not the `PreToolUse` hook, and not the pre-push gate,
+which is a git hook and so is skipped entirely by a commit written through the
+contents API. Nothing stops it, and it will not notice that nothing did.
+**The four rules above bind any session that touches this repository, wherever
+it is running.** In particular: **open the pull request and stop.** On
+2026-09-10 a session running from another repository merged #78 here on that
+repository's rules, having never read this file; CI caught a formatting error
+the pre-push gate would have caught first, which is the whole margin that was
+left. When you are working on this repository from outside it, CI is the only
+gate you have — so do not merge on it, and say which run you actually saw.
 
 ---
 
