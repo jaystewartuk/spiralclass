@@ -192,9 +192,12 @@ if [ "$ENVIRONMENT" = "production" ]; then
   # set in this shell but never exported would not reach it.
   [ -z "${NEON_API_KEY:-}" ] || export NEON_API_KEY
 
-  # Supplied as the `NEON_PROJECT_ID` repository variable, which
+  # Supplied as the `NEON_PROJECT_ID` environment SECRET, which
   # deploy-production.yml passes through ([D-157]), or exported by hand for a
-  # laptop deploy: `NEON_PROJECT_ID=$(neonctl projects list) …`.
+  # laptop deploy: `NEON_PROJECT_ID=$(neonctl projects list) …`. It was a
+  # repository variable until 2026-09-10; the reasoning below is what moved it,
+  # and it applies to a plaintext run log as much as to this file ([D-163]'s
+  # second addendum).
   #
   # ⚠️ NO DEFAULT, and this is deliberate. It used to fall back to the
   # production project id written out in full right here — not a credential, so
@@ -208,7 +211,7 @@ if [ "$ENVIRONMENT" = "production" ]; then
   # so a missing value costs a re-run, not a half-deployed production.
   if [ -z "${NEON_PROJECT_ID:-}" ]; then
     echo "fly-deploy: NEON_PROJECT_ID is unset — the pre-migration Neon checkpoint cannot run." >&2
-    echo "  Set the NEON_PROJECT_ID repository variable, or export it for this run." >&2
+    echo "  Set the NEON_PROJECT_ID environment secret, or export it for this run." >&2
     echo "  Find it with: neonctl projects list" >&2
     exit 2
   fi
