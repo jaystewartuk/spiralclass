@@ -267,6 +267,13 @@ Source: `apps/web/src/lib/video/*`, `apps/web/src/lib/captions/*`,
 - Both parties try to screen-share near-simultaneously: whoever's toggle
   lands first wins; the other party's control is disabled while the first
   share is active.
+- The browser refuses to play the other party's audio (iOS blocks playback
+  until the page has made sound of its own, and blocks it again when a hidden
+  tab comes back): the call surface says so and offers the tap that unblocks
+  it — the message IS the button, because the browser only lifts the block
+  inside a real user gesture. It clears on the room's own playback status,
+  never optimistically, so it cannot dismiss itself over a call that is still
+  silent.
 
 ## Error States
 
@@ -283,6 +290,11 @@ Source: `apps/web/src/lib/video/*`, `apps/web/src/lib/captions/*`,
   refused (cooldown).
 - Nudge attempted when the recipient (or anyone) is already in the room:
   refused (`already-present`).
+- A browser's refusal to play audio is not an application error and is never
+  reported as one: it is room state (LiveKit's own playback status) driving a
+  visible, tappable row, not an exception. The library's internal retries of
+  that unblock are prevented from escaping as unhandled rejections, which is
+  the only form this failure used to take.
 
 ## Permissions
 
