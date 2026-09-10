@@ -683,6 +683,8 @@ export const en = {
   "call.screenShareError": "Couldn't share your screen. Try again.",
   "call.flipCamera": "Flip camera",
   "call.flipCameraError": "Couldn't switch camera",
+  "call.audioBlocked":
+    "You can't hear the other person — your browser blocked the sound. Tap here to turn it on.",
   "call.swapToMain": "Show my camera full screen",
   "call.swapToPip": "Show the other person full screen",
   "call.swapView": "Swap view",
