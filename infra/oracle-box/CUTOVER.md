@@ -306,17 +306,20 @@ pnpm --filter spiralclass-web exec prisma migrate deploy
 
 Then reseed. ⚠️ `SEED_OPERATOR_EMAIL` and `SEED_PILOT_TEACHER_EMAIL` must be
 set in preview's Infisical **first** — a reseed without them loses the tester's
-UAT account, which is a separate item already on the board.
+UAT account, which is a separate item already on the board. Both scripts now
+export them (`infra/infisical/seed-env.sh`) and say on stderr which ones they
+did not find, so a reseed that would cost the account announces itself before
+it runs.
 
 > [!CAUTION]
 > **`pnpm seed:preview` and `pnpm reset:preview` still point at NEON, and
 > nothing in this migration changed that.**
 >
 > Both scripts (`infra/infisical/seed-preview.sh`,
-> `infra/infisical/reset-preview.sh`) call `infisical_export_secrets
-DATABASE_URL DIRECT_URL` against Infisical's `preview` environment, which
-> still holds the Neon URL. Only the CONTAINER was repointed, by
-> `preview-db.env` appended to `preview.app.env`.
+> `infra/infisical/reset-preview.sh`) take `DATABASE_URL`/`DIRECT_URL` from
+> Infisical's `preview` environment (via `infisical_export_seed_secrets`, in
+> `infra/infisical/seed-env.sh`), which still holds the Neon URL. Only the
+> CONTAINER was repointed, by `preview-db.env` appended to `preview.app.env`.
 >
 > So after the cutover those two commands exit 0 having done nothing useful:
 > `seed:preview` writes rows into an orphaned Neon database the app no longer

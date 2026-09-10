@@ -25,15 +25,19 @@
 #     would mean splitting every such script in two.
 #
 # Naming the secrets explicitly (rather than tagging) is the RIGHT call at
-# these call sites: seed-preview.sh needs exactly DATABASE_URL and DIRECT_URL
-# because seed.ts reads those two. That is a code dependency, not a policy —
-# visible in the diff, and it cannot silently widen when someone adds a secret
-# to a tag in the dashboard.
+# these call sites: seed-env.sh names exactly what seed.ts reads. That is a code
+# dependency, not a policy — visible in the diff, and it cannot silently widen
+# when someone adds a secret to a tag in the dashboard. Being a code dependency
+# is also what lets a test hold the two lists to each other, which
+# apps/web/tests/config/seed-env-contract.test.ts does.
 #
 # ⚠️ THIS FILE NO LONGER SETS `set -euo pipefail`. It is sourced, so doing so
 # changed the caller's shell for every line after it — an interactive terminal
-# included. All six scripts that source this set their own options first, which
-# is what made removing it safe rather than a guess.
+# included. That is safe because every script that ends up sourcing this sets
+# its own options first: the four that source it directly and run
+# (`backup-prod-db.sh`, `notify.sh`, the two LiveKit activity probes), and the
+# two seed scripts, which reach it through seed-env.sh — itself sourced, and so
+# rightly setting no options of its own either.
 
 # shellcheck source=./infisical.sh
 source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/infisical.sh"
