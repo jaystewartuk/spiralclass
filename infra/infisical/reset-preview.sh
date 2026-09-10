@@ -1,8 +1,12 @@
 #!/usr/bin/env bash
 # Reset + reseed the preview DB without ever writing secrets to disk. Pulls
-# DATABASE_URL/DIRECT_URL from Infisical (env=preview) the same way
+# what the seed reads from Infisical (env=preview) the same way
 # scripts/fly-deploy.sh and seed-preview.sh reach preview — never via
-# apps/web/.env.preview.local, which this deliberately doesn't need.
+# apps/web/.env.preview.local, which this deliberately doesn't need. Step 2
+# below runs the same seed script seed-preview.sh does, so it takes the same
+# environment contract from seed-env.sh rather than a shorter copy of it: a
+# reseed that quietly dropped the operator/pilot addresses would cost the
+# tester's UAT account.
 #
 # Two steps:
 #   1. `prisma migrate reset --force` against the DIRECT connection — drops
@@ -24,9 +28,9 @@
 set -euo pipefail
 REPO_ROOT="$(git rev-parse --show-toplevel)"
 
-# shellcheck source=./with-secret.sh
-source "$REPO_ROOT/infra/infisical/with-secret.sh"
-infisical_export_secrets DATABASE_URL DIRECT_URL
+# shellcheck source=./seed-env.sh
+source "$REPO_ROOT/infra/infisical/seed-env.sh"
+infisical_export_seed_secrets
 
 echo "› Resetting preview DB (drops ALL data, reapplies every migration)…"
 (

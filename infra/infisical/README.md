@@ -29,7 +29,12 @@ are genuinely _about_ Infisical/secrets management (`push-fly-secrets.sh`,
 this helper) rather than task scripts that merely consume one secret.
 
 Every script that pulls `DATABASE_URL`/etc. is on the helper now —
-`seed-preview.sh` is what is left of that list. The three `maestro-test*.sh`
+`seed-env.sh` is what is left of that list, and `seed-preview.sh` /
+`reset-preview.sh` reach the helper through it rather than each naming their own
+secrets. That indirection is deliberate: both run the same
+`apps/web/scripts/seed.ts`, so the set of values the seed needs is one list with
+one home, held to what the seed actually reads by
+`apps/web/tests/config/seed-env-contract.test.ts`. The three `maestro-test*.sh`
 wrappers were on it too, and went with the app they tested. The gotcha they
 documented is worth
 keeping in mind for any future caller: `infisical_export_secrets` _exports_ the
