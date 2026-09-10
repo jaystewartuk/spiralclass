@@ -202,16 +202,17 @@ someone worked out what they actually cost a student.
 A student can belong to several teachers, which is the single most consequential
 modelling decision in the product and shapes every query in the student tree.
 
-| #                   | Decision                                                                                         |
-| ------------------- | ------------------------------------------------------------------------------------------------ |
-| [D-25](./D-25.md)   | Superadmin hardened: mandatory MFA, append-only audit at the database, attributed impersonation  |
-| [D-38](./D-38.md)   | Teacher and Student are mutually exclusive per auth identity — a payee is not a payer            |
-| [D-40](./D-40.md)   | **Replace Supabase Auth with better-auth on our own tables** — auth travels with the database    |
-| [D-55](./D-55.md)   | An admin capability layer beneath the rank ladder, and a runbook that is a page, not a doc       |
-| [D-56](./D-56.md)   | `/sign-in` never auto-provisions a teacher; intent comes from the page, never from a miss        |
-| [D-83](./D-83.md)   | Teacher → student invitations: hashed tokens, one pending per pair, idempotent acceptance        |
-| [D-104](./D-104.md) | Public listing gates on Marketplace Ready, not on having submitted the wizard                    |
-| [D-175](./D-175.md) | **Tenant scoping is checked by a parser, not by a reader** — a ratchet, and five decoys it fails |
+| #                   | Decision                                                                                                  |
+| ------------------- | --------------------------------------------------------------------------------------------------------- |
+| [D-25](./D-25.md)   | Superadmin hardened: mandatory MFA, append-only audit at the database, attributed impersonation           |
+| [D-38](./D-38.md)   | Teacher and Student are mutually exclusive per auth identity — a payee is not a payer                     |
+| [D-40](./D-40.md)   | **Replace Supabase Auth with better-auth on our own tables** — auth travels with the database             |
+| [D-55](./D-55.md)   | An admin capability layer beneath the rank ladder, and a runbook that is a page, not a doc                |
+| [D-56](./D-56.md)   | `/sign-in` never auto-provisions a teacher; intent comes from the page, never from a miss                 |
+| [D-83](./D-83.md)   | Teacher → student invitations: hashed tokens, one pending per pair, idempotent acceptance                 |
+| [D-104](./D-104.md) | Public listing gates on Marketplace Ready, not on having submitted the wizard                             |
+| [D-175](./D-175.md) | **Tenant scoping is checked by a parser, not by a reader** — a ratchet, and five decoys it fails          |
+| [D-176](./D-176.md) | **The tenant a request is entitled to is carried, not inferred** — the query cannot supply its own answer |
 
 ### Video and real time
 
@@ -521,6 +522,7 @@ records removed before publication — see [What is not here](#what-is-not-here)
 | [D-173](./D-173.md) | Any subject in the copy; the schema stays language-shaped             | Active                               |
 | [D-174](./D-174.md) | A server action revalidates exactly one path                          | Active                               |
 | [D-175](./D-175.md) | Tenant scoping is checked by a parser, not by a reader                | Active                               |
+| [D-176](./D-176.md) | The tenant is carried from the auth gate, not taken from the query    | Active                               |
 | [D-177](./D-177.md) | Vercel is a second production target; it holds no domain              | Decided; built, never served         |
 
 ---

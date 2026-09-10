@@ -5,6 +5,8 @@ import * as Sentry from "@sentry/nextjs";
 import { FALLBACK_TIMEZONE } from "@spiralclass/shared";
 import { auth } from "@/lib/auth/server";
 import { Prisma } from "@prisma/client";
+
+import { enterTeacherScope } from "@/lib/tenancy/context";
 import { prisma } from "@/lib/prisma";
 import { generateBookingSlug } from "@/lib/slug";
 import { starterAvailabilityFor, starterTemplatesFor } from "@/lib/starter-templates";
@@ -33,6 +35,12 @@ function attachActorToObservability(
 ): void {
   Sentry.setUser({ id: actor.id, ...(actor.email ? { email: actor.email } : {}) });
   identifyServerUser(actor.id, { email: actor.email, role });
+  // The one moment this request's tenant is known. Everything downstream is
+  // handed rows and ids and has no way to tell whose they are, which is why the
+  // tenancy guard (lib/tenancy/) reads it from here rather than from a
+  // parameter. A teacher's own id IS the tenant (D-40: Teacher.id shares the
+  // auth user's PK); the student portal is a second axis and is not wired yet.
+  if (role === "teacher") enterTeacherScope(actor.id);
 }
 
 // Request-memoized via React `cache`: layouts nest (e.g. the student group

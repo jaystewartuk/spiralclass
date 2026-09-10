@@ -33,6 +33,12 @@ const serverSchema = z.object({
   BETTER_AUTH_SECRET: blankAsAbsent(z.string().min(32).optional()),
   BETTER_AUTH_URL: blankAsAbsent(z.string().url().optional()),
   NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
+  // How the tenancy guard (lib/tenancy/guard.ts) reacts to a query that names
+  // a tenant other than the one being served. Unset means "report" in
+  // production and "enforce" everywhere else — see `guardMode()`, which reads
+  // process.env directly because it sits on the import path of lib/prisma.ts
+  // and cannot afford to require a complete environment.
+  TENANCY_GUARD: z.enum(["off", "report", "enforce"]).optional(),
   // Stripe (Slice 8) — optional in dev so the slice builds and tests
   // against the stub client. Production requires both; enforced at
   // runtime by `hasStripeCreds()` below. See the pre-launch spec.

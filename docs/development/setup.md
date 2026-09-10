@@ -52,7 +52,7 @@ there. Committing them means a fresh checkout works with no per-developer file
 to drift, to be missing, or to quietly hold a preview URL.
 
 Copy `apps/web/.env.example` to `apps/web/.env.local` only when you want to
-enable a specific integration. All 135 variables are documented there
+enable a specific integration. All 136 variables are documented there
 individually, each next to the module that reads it, and `src/lib/env.ts` is the
 authoritative runtime contract behind them.
 
