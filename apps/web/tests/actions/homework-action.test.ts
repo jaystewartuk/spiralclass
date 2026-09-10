@@ -304,7 +304,10 @@ describe("createHomeworkFeedbackAction", () => {
 
   it("revalidates both the review page and the class-detail page on success", async () => {
     await createHomeworkFeedbackAction(undefined, feedbackForm({}));
-    expect(revalidatePathMock).toHaveBeenCalledWith(`/dashboard/classes/${BOOKING_ID}/homework/a1`);
-    expect(revalidatePathMock).toHaveBeenCalledWith(`/dashboard/classes/${BOOKING_ID}`);
+    // The review page is the one the feedback form is on, so it is the one the
+    // response has to carry fresh (D-174) — and the only one revalidated.
+    expect(revalidatePathMock.mock.calls.map((c) => c[0])).toEqual([
+      `/dashboard/classes/${BOOKING_ID}/homework/a1`,
+    ]);
   });
 });

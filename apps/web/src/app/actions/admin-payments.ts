@@ -1,6 +1,5 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/admin";
@@ -9,6 +8,7 @@ import { getPreferredLocale } from "@/lib/i18n";
 import { getStripeClient } from "@/lib/stripe";
 import { applyRefund } from "@/lib/payments/refund";
 import { logger } from "@/lib/logger";
+import { revalidateAfterAction } from "@/lib/revalidate";
 
 const log = logger({ surface: "admin-refund" });
 
@@ -126,7 +126,6 @@ export async function adminRefundPaymentAction(
       }),
   });
 
-  revalidatePath("/admin/payments");
-  revalidatePath(`/admin/teachers/${payment.package.teacherId}`);
+  revalidateAfterAction("/admin/payments");
   return { ok: true, refundId: refundProviderId };
 }

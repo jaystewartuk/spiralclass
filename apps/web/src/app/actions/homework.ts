@@ -1,6 +1,5 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { fromZonedTime } from "date-fns-tz";
 import { HOMEWORK_FEEDBACK_MAX_SCORE } from "@spiralclass/shared";
@@ -15,6 +14,7 @@ import { HOMEWORK_AI_REVIEW_INSTRUCTIONS_MAX_CHARS } from "@/lib/homework/config
 import { ApiAuthError } from "@/lib/api/auth";
 import { deleteSubmissionObject } from "@/lib/storage/homework-file";
 import { logger } from "@/lib/logger";
+import { revalidateAfterAction } from "@/lib/revalidate";
 
 const log = logger({ surface: "web-homework" });
 
@@ -92,7 +92,7 @@ export async function createAssignmentAction(
   });
   await flushAnalytics();
 
-  revalidatePath(`/dashboard/classes/${booking.id}`);
+  revalidateAfterAction(`/dashboard/classes/${booking.id}`);
   return { ok: true };
 }
 
@@ -133,7 +133,7 @@ export async function deleteAssignmentAction(formData: FormData): Promise<void> 
   });
   await flushAnalytics();
 
-  revalidatePath(`/dashboard/classes/${bookingId || assignment.bookingId}`);
+  revalidateAfterAction(`/dashboard/classes/${bookingId || assignment.bookingId}`);
 }
 
 // Teacher feedback on an attempt — the lib/homework/feedback.ts business
@@ -190,8 +190,7 @@ export async function createHomeworkFeedbackAction(
   }
   await flushAnalytics();
 
-  revalidatePath(`/dashboard/classes/${bookingId}/homework/${assignmentId}`);
-  revalidatePath(`/dashboard/classes/${bookingId}`);
+  revalidateAfterAction(`/dashboard/classes/${bookingId}/homework/${assignmentId}`);
   return { ok: true };
 }
 
@@ -228,6 +227,6 @@ export async function requestAiReviewAction(
   if (!result.ok) return { error: result.message };
   await flushAnalytics();
 
-  revalidatePath(`/dashboard/classes/${bookingId}/homework/${assignmentId}`);
+  revalidateAfterAction(`/dashboard/classes/${bookingId}/homework/${assignmentId}`);
   return { ok: true };
 }

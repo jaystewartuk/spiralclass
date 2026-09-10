@@ -1,12 +1,12 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireOnboardedTeacher } from "@/lib/auth";
 import { getPreferredLocale } from "@/lib/i18n";
 import { flushAnalytics, trackServerEvent } from "@/lib/analytics/posthog";
 import { STUDENT_PROFILE_MAX_CHARS, type StudentProfileState } from "@/lib/student-profile-fields";
+import { revalidateAfterAction } from "@/lib/revalidate";
 
 // Durable student profile — interests + goals (docs/product/roadmap/
 // CLASS_CONTENT_INPUTS.md, D-20, Layer 1).
@@ -80,6 +80,6 @@ export async function setStudentProfile(
   });
   await flushAnalytics();
 
-  revalidatePath(`/dashboard/students/${studentId}`);
+  revalidateAfterAction(`/dashboard/students/${studentId}`);
   return { ok: en ? "Profile saved." : "Perfil guardado." };
 }

@@ -1,7 +1,5 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
-
 import { prisma } from "@/lib/prisma";
 import { requireOnboardedTeacher } from "@/lib/auth";
 import { getPreferredLocale } from "@/lib/i18n";
@@ -15,6 +13,7 @@ import {
   type EditInsightInput,
   type AddInsightInput,
 } from "@/lib/lesson-notes/insight-actions";
+import { revalidateAfterAction } from "@/lib/revalidate";
 
 // Phase E teacher validation loop (the Phase E design,
 // D-19). Web server-action wrappers around the shared core
@@ -48,8 +47,8 @@ function message(reason: "not-found" | "invalid" | "save-failed", en: boolean): 
 // teacher pages (the booking review card + the student profile).
 function settle(res: InsightOpResult, en: boolean): LessonInsightActionState {
   if (!res.ok) return { error: message(res.reason, en) };
-  revalidatePath(`/dashboard/classes/${res.bookingId}`);
-  revalidatePath(`/dashboard/students/${res.studentId}`);
+  revalidateAfterAction(`/dashboard/classes/${res.bookingId}`);
+  revalidateAfterAction(`/dashboard/students/${res.studentId}`);
   return { ok: true };
 }
 

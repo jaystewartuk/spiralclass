@@ -1,6 +1,5 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { requireOnboardedTeacher } from "@/lib/auth";
 import { getT } from "@/lib/i18n";
@@ -12,6 +11,7 @@ import {
   deleteDiscountCode as deleteDiscountCodeCore,
   setDiscountCodeActive as setDiscountCodeActiveCore,
 } from "@/lib/discounts/manage";
+import { revalidateAfterAction } from "@/lib/revalidate";
 
 // Teacher CRUD for the discount-code primitive (slice 2a). Codes are
 // teacher-funded promos. The business rules (create / activate / delete, and
@@ -129,7 +129,7 @@ export async function createDiscountCode(
     return { error: t("web.dashboard.discounts.errors.duplicate"), field: "code" };
   }
 
-  revalidatePath("/dashboard/discounts");
+  revalidateAfterAction("/dashboard/discounts");
   // The normalized form, because that is the code students will type and the
   // one the new row shows — echoing back her lower-case draft would make the
   // confirmation disagree with the list it just appeared in.
@@ -151,7 +151,7 @@ export async function setDiscountCodeActive(
   if (!ok) {
     return { error: t("web.dashboard.discounts.errors.notFound") };
   }
-  revalidatePath("/dashboard/discounts");
+  revalidateAfterAction("/dashboard/discounts");
   return { ok: true };
 }
 
@@ -173,6 +173,6 @@ export async function deleteDiscountCode(
           : t("web.dashboard.discounts.errors.notFound"),
     };
   }
-  revalidatePath("/dashboard/discounts");
+  revalidateAfterAction("/dashboard/discounts");
   return { ok: true };
 }

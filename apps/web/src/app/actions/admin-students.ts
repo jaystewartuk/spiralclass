@@ -1,6 +1,5 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { isBootstrapActor, requireAdmin } from "@/lib/admin";
@@ -8,6 +7,7 @@ import { writeOverride } from "@/lib/audit";
 import { getPreferredLocale } from "@/lib/i18n";
 import { adminSetStudentEmail } from "@/lib/students/email-change";
 import { flushAnalytics } from "@/lib/analytics/posthog";
+import { revalidateAfterAction } from "@/lib/revalidate";
 
 export type AdminStudentActionState = { error?: string; ok?: boolean } | undefined;
 
@@ -76,8 +76,7 @@ export async function disableStudentAction(
     }
   });
 
-  revalidatePath("/admin/students");
-  revalidatePath(`/admin/students/${parsed.data.studentId}`);
+  revalidateAfterAction(`/admin/students/${parsed.data.studentId}`);
   return { ok: true };
 }
 
@@ -138,8 +137,7 @@ export async function adminChangeStudentEmailAction(
   // the action returns / lambda freezes.
   await flushAnalytics();
 
-  revalidatePath("/admin/students");
-  revalidatePath(`/admin/students/${parsed.data.studentId}`);
+  revalidateAfterAction(`/admin/students/${parsed.data.studentId}`);
   return { ok: true };
 }
 
@@ -185,7 +183,6 @@ export async function enableStudentAction(
     }
   });
 
-  revalidatePath("/admin/students");
-  revalidatePath(`/admin/students/${parsed.data.studentId}`);
+  revalidateAfterAction(`/admin/students/${parsed.data.studentId}`);
   return { ok: true };
 }

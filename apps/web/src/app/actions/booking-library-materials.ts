@@ -1,6 +1,5 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireOnboardedTeacher } from "@/lib/auth";
@@ -10,8 +9,8 @@ import { materialSendTimeElapsed } from "@/lib/materials/timing";
 import { enqueueMaterialsSend } from "@/lib/notifications/enqueue";
 import { emitNotificationQueued } from "@/lib/notifications/events";
 import { gateProFeature, upgradeNudge } from "@/lib/subscriptions/enforce";
-import { revalidateClassMaterialLists } from "@/lib/materials/revalidate";
 import { logger } from "@/lib/logger";
+import { revalidateAfterAction } from "@/lib/revalidate";
 
 const log = logger({ surface: "booking-library-materials" });
 
@@ -125,9 +124,8 @@ export async function attachLibraryMaterialToBookingAction(
   }
   await flushAnalytics();
 
-  revalidatePath(`/dashboard/classes/${booking.id}`);
+  revalidateAfterAction(`/dashboard/classes/${booking.id}`);
   // The class-list "Has Materials" chip must reflect this new attachment too.
-  revalidateClassMaterialLists();
   return { ok: true };
 }
 
@@ -149,7 +147,6 @@ export async function detachLibraryMaterialFromBookingAction(formData: FormData)
   await prisma.bookingLibraryMaterial.deleteMany({
     where: { bookingId, libraryMaterialId, booking: { teacherId: teacher.id } },
   });
-  revalidatePath(`/dashboard/classes/${bookingId}`);
+  revalidateAfterAction(`/dashboard/classes/${bookingId}`);
   // Detaching the last library material may flip the class-list chip off.
-  revalidateClassMaterialLists();
 }

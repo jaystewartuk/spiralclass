@@ -1,7 +1,6 @@
 "use server";
 
 import { cookies } from "next/headers";
-import { revalidatePath } from "next/cache";
 import { getAuthUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import {
@@ -11,6 +10,7 @@ import {
   encodeReading,
   type ReadingPreferences,
 } from "@/lib/reading";
+import { revalidateAfterAction } from "@/lib/revalidate";
 
 /**
  * Saves a reader's text scale, spacing and tint (D-140).
@@ -61,5 +61,5 @@ export async function saveReadingPreferences(prefs: ReadingPreferences): Promise
     // this device. Losing the cross-device copy is not worth failing the action.
   });
 
-  revalidatePath("/", "layout");
+  revalidateAfterAction("/", "layout");
 }

@@ -1,6 +1,5 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
 import { prisma } from "@/lib/prisma";
@@ -13,6 +12,7 @@ import {
   studentTestimonialInputSchema,
   upsertStudentTestimonial,
 } from "@/lib/testimonials/store";
+import { revalidateAfterAction } from "@/lib/revalidate";
 
 // The student's own half of the testimonial feature — the half that makes the
 // verified badge mean anything.
@@ -80,7 +80,7 @@ export async function saveStudentTestimonial(
 
   await upsertStudentTestimonial(teacherId, eligibility.studentId, authorName, { body });
 
-  await revalidateFor(teacherId);
+  revalidateFor(teacherId);
   return { ok: true };
 }
 
@@ -108,19 +108,18 @@ export async function removeStudentTestimonial(
   // describing something other than consent.
   await deleteStudentTestimonial(parsed.data.teacherId, eligibility.studentId);
 
-  await revalidateFor(parsed.data.teacherId);
+  revalidateFor(parsed.data.teacherId);
   return { ok: true };
 }
 
 // The student's own page, the teacher's editor, and the public booking page all
-// render this row. The last of the three is the one that matters and the one
-// easiest to forget, so the slug lookup lives here rather than at each caller.
-async function revalidateFor(teacherId: string) {
-  const teacher = await prisma.teacher.findUnique({
-    where: { id: teacherId },
-    select: { bookingSlug: true },
-  });
-  revalidatePath(`/my-classes/teachers/${teacherId}`);
-  revalidatePath("/dashboard/testimonials");
-  if (teacher?.bookingSlug) revalidatePath(`/b/${teacher.bookingSlug}`);
+// render this row.
+//
+// The student writes a testimonial from her own teacher page, so that is the
+// page whose response has to carry the new state. Her teacher's public
+// /b/<slug> shows it too, but it is a dynamic route with nothing prerendered
+// to invalidate, and a second revalidation here would cost this form its
+// result outright — see @/lib/revalidate.
+function revalidateFor(teacherId: string) {
+  revalidateAfterAction(`/my-classes/teachers/${teacherId}`);
 }

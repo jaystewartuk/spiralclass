@@ -1,10 +1,10 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireOnboardedTeacher } from "@/lib/auth";
 import { getPreferredLocale } from "@/lib/i18n";
+import { revalidateAfterAction } from "@/lib/revalidate";
 
 export type PackagePauseState = { error?: string; ok?: boolean } | undefined;
 
@@ -60,6 +60,6 @@ export async function togglePackagePauseAction(
     data: { status: parsed.data.intent === "pause" ? "paused" : "active" },
   });
 
-  revalidatePath(`/dashboard/students/${pkg.studentId}`);
+  revalidateAfterAction(`/dashboard/students/${pkg.studentId}`);
   return { ok: true };
 }

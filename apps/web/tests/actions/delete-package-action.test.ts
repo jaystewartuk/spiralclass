@@ -133,7 +133,8 @@ describe("deleteManualPackageAction", () => {
     expect(state.overrides).toHaveLength(1);
     expect(state.overrides[0].action).toBe("delete_manual_package");
     expect(state.overrides[0].after).toBeNull();
-    expect(revalidatePath).toHaveBeenCalledWith("/dashboard/students/s1");
-    expect(revalidatePath).toHaveBeenCalledWith("/dashboard/students");
+    // One revalidation, for the student page this action is invoked from
+    // (D-174); the roster list refetches on navigation.
+    expect(revalidatePath.mock.calls.map((c) => c[0])).toEqual(["/dashboard/students/s1"]);
   });
 });

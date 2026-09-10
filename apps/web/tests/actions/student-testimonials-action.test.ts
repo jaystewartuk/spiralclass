@@ -146,11 +146,9 @@ describe("saveStudentTestimonial", () => {
     expect(upsertStudentTestimonial).not.toHaveBeenCalled();
   });
 
-  it("revalidates the public booking page, not just the two private ones", async () => {
+  it("revalidates only the page the student wrote it from (D-174)", async () => {
     await saveStudentTestimonial(undefined, form({ teacherId: TEACHER, body: "Great classes." }));
-    expect(revalidatePath).toHaveBeenCalledWith("/b/mira");
-    expect(revalidatePath).toHaveBeenCalledWith(`/my-classes/teachers/${TEACHER}`);
-    expect(revalidatePath).toHaveBeenCalledWith("/dashboard/testimonials");
+    expect(revalidatePath.mock.calls.map((c) => c[0])).toEqual([`/my-classes/teachers/${TEACHER}`]);
   });
 });
 

@@ -1,12 +1,11 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
-
 import { prisma } from "@/lib/prisma";
 import { requireOnboardedTeacher } from "@/lib/auth";
 import { getPreferredLocale } from "@/lib/i18n";
 import { gateProFeature, upgradeNudge } from "@/lib/subscriptions/enforce";
 import { setInsightsConsentFor } from "@/lib/lesson-notes/student-prefs";
+import { revalidateAfterAction } from "@/lib/revalidate";
 
 // Lesson-insights consent gate (D-22). Web wrapper around the shared core
 // (lib/lesson-notes/student-prefs.ts), which owns the consent-timestamp rule
@@ -41,6 +40,6 @@ export async function setInsightsConsent(
     };
   }
 
-  revalidatePath(`/dashboard/students/${studentId}`);
+  revalidateAfterAction(`/dashboard/students/${studentId}`);
   return { ok: true };
 }

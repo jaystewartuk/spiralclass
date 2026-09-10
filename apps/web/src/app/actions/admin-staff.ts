@@ -1,10 +1,10 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { isBootstrapActor, requireAdmin } from "@/lib/admin";
 import { getPreferredLocale } from "@/lib/i18n";
+import { revalidateAfterAction } from "@/lib/revalidate";
 
 export type AdminStaffActionState = { error?: string; ok?: boolean } | undefined;
 
@@ -56,7 +56,7 @@ export async function inviteAdminAction(
     throw err;
   }
 
-  revalidatePath("/admin/staff");
+  revalidateAfterAction("/admin/staff");
   return { ok: true };
 }
 
@@ -116,7 +116,7 @@ export async function updateAdminRoleAction(
     where: { id: parsed.data.adminId },
     data: { role: parsed.data.role },
   });
-  revalidatePath("/admin/staff");
+  revalidateAfterAction("/admin/staff");
   return { ok: true };
 }
 
@@ -177,6 +177,6 @@ export async function toggleAdminDisabledAction(
     where: { id: parsed.data.adminId },
     data: { disabledAt: parsed.data.disable === "true" ? new Date() : null },
   });
-  revalidatePath("/admin/staff");
+  revalidateAfterAction("/admin/staff");
   return { ok: true };
 }

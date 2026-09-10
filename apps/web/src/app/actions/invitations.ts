@@ -1,6 +1,5 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
 import { getAuthUser, requireOnboardedTeacher } from "@/lib/auth";
 import { acceptInvitation } from "@/lib/invitations/accept";
 import { getPreferredLocale } from "@/lib/i18n";
@@ -21,6 +20,7 @@ import {
 import { teacherPhotoPublicUrl } from "@/lib/storage/teacher-photo";
 import { messagingBenefitEnabled } from "@/lib/invitations/service";
 import type { InviteeDisposition } from "@/lib/invitations/bulk";
+import { revalidateAfterAction } from "@/lib/revalidate";
 
 // Server actions for the teacher-facing invitation flow. Every action is
 // teacher-scoped (requireOnboardedTeacher gates + scopes) and audited via the
@@ -150,7 +150,7 @@ export async function sendInvitesAction(
     });
   }
   await flushAnalytics();
-  revalidatePath(DASH);
+  revalidateAfterAction(DASH);
 
   const failedNote =
     summary.failed > 0
@@ -241,7 +241,7 @@ export async function resendInvitationAction(
     properties: { teacherId: teacher.id, invitationId: rotated.invitation.id },
   });
   await flushAnalytics();
-  revalidatePath(DASH);
+  revalidateAfterAction(DASH);
   return { ok: en ? "Invitation resent." : "Invitación reenviada." };
 }
 
@@ -270,7 +270,7 @@ export async function cancelInvitationAction(
     properties: { teacherId: teacher.id, invitationId: parsed.data.invitationId },
   });
   await flushAnalytics();
-  revalidatePath(DASH);
+  revalidateAfterAction(DASH);
   return { ok: en ? "Invitation cancelled." : "Invitación cancelada." };
 }
 

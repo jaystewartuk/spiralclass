@@ -1,6 +1,5 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireStudent, requireOnboardedTeacher } from "@/lib/auth";
@@ -14,6 +13,7 @@ import {
 } from "@/lib/cancellation/cancel-handler";
 import { studentIdentityIds } from "@/lib/students/identity";
 import { flushAnalytics, trackServerEvent } from "@/lib/analytics/posthog";
+import { revalidateAfterAction } from "@/lib/revalidate";
 
 export type CancelState = { error?: string; ok?: string } | undefined;
 
@@ -87,8 +87,7 @@ export async function cancelBookingAsStudent(
   });
   await flushAnalytics();
 
-  revalidatePath("/my-classes");
-  revalidatePath(`/my-classes/${outcome.bookingId}`);
+  revalidateAfterAction(`/my-classes/${outcome.bookingId}`);
   return {
     ok: en
       ? outcome.timing === "lt24h"
@@ -156,8 +155,7 @@ export async function cancelBookingAsTeacher(
   });
   await flushAnalytics();
 
-  revalidatePath("/dashboard/classes");
-  revalidatePath(`/dashboard/classes/${outcome.bookingId}`);
+  revalidateAfterAction(`/dashboard/classes/${outcome.bookingId}`);
   return {
     ok: en
       ? "Class canceled and restored to the student's package."

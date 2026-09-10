@@ -1,6 +1,5 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
@@ -17,6 +16,7 @@ import {
 } from "@/lib/cancellation/reschedule-handler";
 import { studentIdentityIds } from "@/lib/students/identity";
 import { flushAnalytics, trackServerEvent } from "@/lib/analytics/posthog";
+import { revalidateAfterAction } from "@/lib/revalidate";
 
 export type RescheduleState = { error?: string } | undefined;
 
@@ -181,8 +181,7 @@ export async function rescheduleBooking(
   });
   await flushAnalytics();
 
-  revalidatePath("/my-classes");
-  revalidatePath(`/my-classes/${old.id}`);
+  revalidateAfterAction(`/my-classes/${old.id}`);
   redirect(`/my-classes/${outcome.newBookingId}`);
 }
 
