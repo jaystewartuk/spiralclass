@@ -94,7 +94,7 @@ function SegmentedLinks<T extends string>({
               href={hrefFor(option)}
               aria-current={active ? "true" : undefined}
               className={cn(
-                "inline-flex min-h-9 items-center rounded px-3 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring",
+                "inline-flex min-h-9 items-center rounded px-3 text-sm font-medium transition-colors focus-visible:ring-3 focus-visible:ring-ring focus-visible:outline-hidden",
                 active
                   ? "bg-background text-foreground shadow-brand-sm"
                   : "text-muted-foreground hover:text-foreground",
@@ -219,7 +219,7 @@ export async function MaterialsTab({
           <CardTitle className="flex flex-wrap items-baseline gap-x-2 text-lg" as="h2">
             {t("web.dashboard.students.material.assignedTitle")}
             {assignments.length > 0 && (
-              <span className="text-sm font-normal tabular-nums text-muted-foreground">
+              <span className="text-sm font-normal text-muted-foreground tabular-nums">
                 {t("web.dashboard.students.material.coveredCount", {
                   covered: String(coveredCount),
                   total: String(assignments.length),

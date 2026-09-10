@@ -140,7 +140,7 @@ export async function CalendarMonth({
                   // cell's box — which is what `outline-offset: 2px` asks for —
                   // is cut off on every edge cell, and no z-index fixes that.
                   // Same 3px, same colour, painted where it can be seen.
-                  "focus-visible:z-10 focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-inset focus-visible:ring-ring",
+                  "focus-visible:z-10 focus-visible:ring-3 focus-visible:ring-ring focus-visible:outline-hidden focus-visible:ring-inset",
                   // OPAQUE, all three of them. The 1px rules between cells are
                   // the container's `bg-border` showing through a `gap-px`, so
                   // a translucent cell fill does not composite over the card
@@ -150,7 +150,7 @@ export async function CalendarMonth({
                   g.inCurrentMonth ? "bg-card" : "bg-background",
                   "hover:bg-muted",
                   // Selection is the ring, not a tint, for the same reason.
-                  isSelected && "z-10 ring-2 ring-inset ring-primary",
+                  isSelected && "z-10 ring-2 ring-primary ring-inset",
                 )}
               >
                 <DayCell
@@ -183,7 +183,7 @@ export async function CalendarMonth({
             {selectedLabel}
           </h3>
           {selectedEvents.length > 0 && (
-            <span className="text-sm tabular-nums text-muted-foreground">
+            <span className="text-sm text-muted-foreground tabular-nums">
               {t("web.calendar.classCount", { count: selectedEvents.length })}
             </span>
           )}

@@ -347,7 +347,7 @@ export function ReportProblemDialog({
                 negative margin keeps focus rings from being clipped by it. */}
             <div className="-mx-1 flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto px-1">
               <fieldset className="flex flex-col gap-2" disabled={sending}>
-                <legend className="text-sm font-medium leading-none">
+                <legend className="text-sm leading-none font-medium">
                   {t("feedback.topicLabel")}
                 </legend>
                 <div className="flex flex-wrap gap-2 pt-1">
@@ -366,7 +366,7 @@ export function ReportProblemDialog({
                           "border-border text-muted-foreground hover:border-foreground/30 hover:text-foreground",
                           "peer-checked:border-primary peer-checked:bg-primary/10 peer-checked:font-medium peer-checked:text-foreground",
                           "peer-focus-visible:ring-3 peer-focus-visible:ring-ring peer-focus-visible:ring-offset-2 peer-focus-visible:ring-offset-background",
-                          "inline-flex h-8 select-none items-center rounded-full border px-3 text-sm transition-colors",
+                          "inline-flex h-8 items-center rounded-full border px-3 text-sm transition-colors select-none",
                         )}
                       >
                         {t(option.labelKey)}

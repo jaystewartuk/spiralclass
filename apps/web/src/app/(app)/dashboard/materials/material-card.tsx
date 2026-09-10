@@ -123,7 +123,7 @@ export async function MaterialCard({
     // scrollport, and a scrollport that never scrolls means the edit form's
     // sticky Save bar could never stick. The footer div carries its own
     // rounded-b-lg instead.
-    <li className="rounded-lg border bg-card shadow-sm transition-colors hover:border-foreground/20">
+    <li className="rounded-lg border bg-card shadow-xs transition-colors hover:border-foreground/20">
       <div className="flex gap-3 p-4">
         <span
           className={`flex size-9 shrink-0 items-center justify-center rounded-md ${KIND_TINT[kind]}`}
@@ -146,7 +146,7 @@ export async function MaterialCard({
                   href={m.viewUrl}
                   target="_blank"
                   rel="noreferrer"
-                  className="rounded-sm underline decoration-transparent underline-offset-4 transition-colors hover:text-primary hover:decoration-current focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring"
+                  className="rounded-sm underline decoration-transparent underline-offset-4 transition-colors hover:text-primary hover:decoration-current focus-visible:ring-3 focus-visible:ring-ring focus-visible:outline-hidden"
                 >
                   {title}
                   <span className="sr-only"> ({t("web.materials.opensInNewTab")})</span>
@@ -209,7 +209,7 @@ export async function MaterialCard({
 
           {view === "active" && m.body && (
             <details className="group [&_summary::-webkit-details-marker]:hidden">
-              <summary className="inline-flex cursor-pointer list-none items-center gap-1 rounded-sm text-xs text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring">
+              <summary className="inline-flex cursor-pointer list-none items-center gap-1 rounded-sm text-xs text-muted-foreground transition-colors hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring focus-visible:outline-hidden">
                 <ChevronRight
                   className="size-3.5 transition-transform group-open:rotate-90"
                   aria-hidden

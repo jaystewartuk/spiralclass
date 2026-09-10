@@ -145,13 +145,13 @@ export function LeadRow({ lead, ctx }: { lead: LeadItem; ctx: LeadContext }) {
 
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-            <h3 id={headingId} className="min-w-0 break-words font-semibold">
+            <h3 id={headingId} className="min-w-0 font-semibold break-words">
               {lead.name}
             </h3>
             <Badge variant={STATUS_VARIANT[lead.status]}>{statusLabel(lead.status, t)}</Badge>
             <WaitingBadge elapsed={elapsed} urgency={urgency} t={t} />
           </div>
-          <p className="break-words text-sm text-muted-foreground">
+          <p className="text-sm break-words text-muted-foreground">
             {lead.email}
             {lead.phoneE164 ? ` · ${lead.phoneE164}` : ""}
           </p>

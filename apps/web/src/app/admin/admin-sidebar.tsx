@@ -66,7 +66,7 @@ export function AdminSidebar({
       >
         <span>{item.label}</span>
         {count > 0 ? (
-          <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-destructive px-1.5 text-sm font-semibold leading-none text-destructive-foreground">
+          <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-destructive px-1.5 text-sm leading-none font-semibold text-destructive-foreground">
             {count > 99 ? "99+" : count}
           </span>
         ) : null}
@@ -83,7 +83,7 @@ export function AdminSidebar({
         {/* Not a link — deliberately lighter/looser than the nav items below
             it (no hover state, faded color, wide tracking) so it reads as a
             group label rather than another row in the list. */}
-        <div className="select-none px-3 pb-1 text-sm font-semibold text-subtle">
+        <div className="px-3 pb-1 text-sm font-semibold text-subtle select-none">
           {section.label}
         </div>
         {section.items.map((item) => renderLink(item, mobile))}
@@ -154,7 +154,7 @@ export function AdminSidebar({
             />
             <div
               id="admin-mobile-sidebar"
-              className="absolute left-0 top-0 flex h-full w-72 max-w-sheet flex-col overflow-y-auto border-r border-border/60 bg-background p-3"
+              className="absolute top-0 left-0 flex h-full w-72 max-w-sheet flex-col overflow-y-auto border-r border-border/60 bg-background p-3"
             >
               <nav aria-label={t("web.admin.nav.ariaLabel")} className="flex-1 space-y-1">
                 {renderSections(true)}

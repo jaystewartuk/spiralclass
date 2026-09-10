@@ -198,7 +198,7 @@ export function CommunityPostPanel(props: CommunityPostPanelProps) {
           {hasBody && (
             <div className="space-y-3 rounded-md border bg-muted/40 p-3">
               <p className="text-xs font-medium">{t("web.getStudents.postPreview")}</p>
-              <p className="whitespace-pre-wrap text-sm">{composed}</p>
+              <p className="text-sm whitespace-pre-wrap">{composed}</p>
               {props.draft.imageUrl && (
                 <div className="relative aspect-social w-full max-w-sm overflow-hidden rounded-md border">
                   <Image

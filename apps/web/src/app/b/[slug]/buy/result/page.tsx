@@ -184,7 +184,7 @@ export default async function ResultadoPage({
           is the format people most reliably read back wrong. */}
       <footer className="space-y-2 border-t pt-6">
         <p className="text-xs text-muted-foreground">{t("buy.wise.reference")}</p>
-        <div className="select-all break-all rounded-md border bg-muted/40 px-3 py-2 font-mono text-xs">
+        <div className="rounded-md border bg-muted/40 px-3 py-2 font-mono text-xs break-all select-all">
           {payment.externalReference}
         </div>
         <div className="flex flex-wrap items-center gap-3">

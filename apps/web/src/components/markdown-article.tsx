@@ -27,10 +27,10 @@ function buildComponents(offset: number): Components {
 
   return {
     h1: ({ children }) => (
-      <H1 className="mb-4 mt-10 text-3xl font-bold text-foreground">{children}</H1>
+      <H1 className="mt-10 mb-4 text-3xl font-bold text-foreground">{children}</H1>
     ),
     h2: ({ children }) => (
-      <H2 className="mb-3 mt-10 border-b border-border pb-2 text-2xl font-semibold text-foreground">
+      <H2 className="mt-10 mb-3 border-b border-border pb-2 text-2xl font-semibold text-foreground">
         {children}
       </H2>
     ),
@@ -39,7 +39,7 @@ function buildComponents(offset: number): Components {
       // of the paragraph under it is not a heading, and `###` is where these
       // documents keep their real structure — every "Steps" section in
       // docs/help is a list of them.
-      <Heading level={3} as={H3} className="mb-2 mt-6 text-foreground">
+      <Heading level={3} as={H3} className="mt-6 mb-2 text-foreground">
         {children}
       </Heading>
     ),

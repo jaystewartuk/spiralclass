@@ -136,7 +136,7 @@ export function AdminMfaForm({ alreadyEnrolled = false }: { alreadyEnrolled?: bo
           <summary className="cursor-pointer text-muted-foreground">
             {t("web.admin.mfa.manualEntry")}
           </summary>
-          <p className="mt-2 break-all rounded bg-muted px-2 py-1 font-mono text-xs">
+          <p className="mt-2 rounded bg-muted px-2 py-1 font-mono text-xs break-all">
             {startState.enrolled.secret}
           </p>
         </details>

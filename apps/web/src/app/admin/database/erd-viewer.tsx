@@ -241,23 +241,23 @@ function ErdFlow({ graph }: { graph: ErdSchemaGraph }) {
         />
 
         <Panel position="top-left" className="!m-3 w-64">
-          <div className="rounded-lg border border-border/60 bg-background/95 p-2 shadow-sm backdrop-blur">
+          <div className="rounded-lg border border-border/60 bg-background/95 p-2 shadow-xs backdrop-blur">
             <div className="relative">
-              <Search className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Search className="pointer-events-none absolute top-1/2 left-2.5 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <input
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && runSearch()}
                 placeholder={t("web.admin.erd.searchPlaceholder")}
                 aria-label={t("web.admin.erd.searchAria")}
-                className="h-9 w-full rounded-md border border-input bg-background pl-8 pr-8 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring"
+                className="h-9 w-full rounded-md border border-input bg-background pr-8 pl-8 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:ring-3 focus-visible:ring-ring focus-visible:outline-hidden"
               />
               {query ? (
                 <button
                   type="button"
                   onClick={() => setQuery("")}
                   aria-label={t("web.admin.erd.searchClear")}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 rounded text-muted-foreground hover:text-foreground"
+                  className="absolute top-1/2 right-2 -translate-y-1/2 rounded text-muted-foreground hover:text-foreground"
                 >
                   <X className="h-4 w-4" />
                 </button>
@@ -272,7 +272,7 @@ function ErdFlow({ graph }: { graph: ErdSchemaGraph }) {
         </Panel>
 
         <Panel position="top-right" className="!m-3">
-          <div className="flex items-center gap-1 rounded-lg border border-border/60 bg-background/95 p-1 shadow-sm backdrop-blur">
+          <div className="flex items-center gap-1 rounded-lg border border-border/60 bg-background/95 p-1 shadow-xs backdrop-blur">
             <ToolbarButton
               label={t("web.admin.erd.fit")}
               onClick={() => fitView({ padding: 0.2, duration: 400 })}
@@ -341,7 +341,7 @@ function Legend() {
     { className: "bg-success", label: t("web.admin.erd.legend.unique") },
   ];
   return (
-    <div className="flex items-center gap-3 rounded-full border border-border/60 bg-background/95 px-3 py-1.5 text-sm text-muted-foreground shadow-sm backdrop-blur">
+    <div className="flex items-center gap-3 rounded-full border border-border/60 bg-background/95 px-3 py-1.5 text-sm text-muted-foreground shadow-xs backdrop-blur">
       {items.map((item) => (
         <span key={item.label} className="flex items-center gap-1.5">
           <span className={cn("h-2 w-2 rounded-full", item.className)} aria-hidden />

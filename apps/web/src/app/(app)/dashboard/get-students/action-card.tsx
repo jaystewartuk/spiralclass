@@ -186,7 +186,7 @@ export function ActionRow({ item }: { item: ActionCardItem }) {
       <div className="flex items-stretch">
         <Link
           href={`/dashboard/get-students/${item.id}`}
-          className="flex min-h-target min-w-0 flex-1 items-center gap-3 py-3 pl-6 pr-2 transition-colors hover:bg-muted/50 focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring"
+          className="flex min-h-target min-w-0 flex-1 items-center gap-3 py-3 pr-2 pl-6 transition-colors hover:bg-muted/50 focus-visible:ring-3 focus-visible:ring-ring focus-visible:outline-hidden"
         >
           <span className="min-w-0 flex-1">
             <span className="flex flex-wrap items-center gap-2">
@@ -233,7 +233,7 @@ export function DoneRow({ item }: { item: ActionCardItem }) {
     <li>
       <Link
         href={`/dashboard/get-students/${item.id}`}
-        className="flex min-h-target flex-wrap items-center justify-between gap-x-3 gap-y-1 px-6 py-3 transition-colors hover:bg-muted/50 focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring"
+        className="flex min-h-target flex-wrap items-center justify-between gap-x-3 gap-y-1 px-6 py-3 transition-colors hover:bg-muted/50 focus-visible:ring-3 focus-visible:ring-ring focus-visible:outline-hidden"
       >
         <span className="flex min-w-0 items-center gap-2">
           {/* Decoration beside a word that already says it — D-140: never state

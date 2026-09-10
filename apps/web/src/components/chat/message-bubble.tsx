@@ -404,7 +404,7 @@ export const MessageBubble = memo(function MessageBubble({
     content = (
       <p
         className={cn(
-          "whitespace-pre-wrap break-words",
+          "break-words whitespace-pre-wrap",
           jumboEmoji ? "text-4xl leading-tight" : "text-base",
         )}
       >
@@ -427,7 +427,7 @@ export const MessageBubble = memo(function MessageBubble({
       {selectionMode && !fromMe && checkbox}
       {fromMe && actions}
       <div
-        className={cn("min-w-0 max-w-bubble", selectionMode && "cursor-pointer")}
+        className={cn("max-w-bubble min-w-0", selectionMode && "cursor-pointer")}
         onClick={rowClick}
       >
         {startsRun && <p className="sr-only">{fromMe ? t("chat.you") : peerName}</p>}

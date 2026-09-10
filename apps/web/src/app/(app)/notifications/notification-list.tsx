@@ -185,7 +185,7 @@ function NotificationRow({
           // A row, not a control: full width, left aligned, top aligned, and
           // free to grow with its own copy. The primitive still carries the
           // focus ring, the press state and the minimum touch target.
-          className="flex h-auto min-h-target w-full items-start justify-start gap-3 whitespace-normal rounded-none px-4 py-3 text-left text-base font-normal lg:h-auto lg:gap-4 lg:px-5"
+          className="flex h-auto min-h-target w-full items-start justify-start gap-3 rounded-none px-4 py-3 text-left text-base font-normal whitespace-normal lg:h-auto lg:gap-4 lg:px-5"
         >
           <span
             aria-hidden
@@ -209,7 +209,7 @@ function NotificationRow({
               <time
                 dateTime={item.createdAt.toISOString()}
                 title={formatZonedDateTime(item.createdAt, timezone, locale)}
-                className="shrink-0 text-sm tabular-nums text-muted-foreground"
+                className="shrink-0 text-sm text-muted-foreground tabular-nums"
               >
                 {formatZonedTime(item.createdAt, timezone, locale)}
               </time>

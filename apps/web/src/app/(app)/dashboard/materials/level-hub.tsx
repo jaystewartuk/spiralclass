@@ -49,7 +49,7 @@ export async function LevelHub({
             <Link
               href={materialsLevelHref(level.id)}
               aria-label={t("web.materials.openLevel", { level: level.label })}
-              className="group flex h-full items-center gap-3 rounded-lg border bg-card p-4 shadow-sm transition-colors hover:border-foreground/30 hover:bg-muted/50 focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring"
+              className="group flex h-full items-center gap-3 rounded-lg border bg-card p-4 shadow-xs transition-colors hover:border-foreground/30 hover:bg-muted/50 focus-visible:ring-3 focus-visible:ring-ring focus-visible:outline-hidden"
             >
               <span className="flex size-9 shrink-0 items-center justify-center rounded-md bg-info-bg text-info">
                 <Layers className="size-4" aria-hidden />
@@ -70,7 +70,7 @@ export async function LevelHub({
       {showAllLevels && (
         <Link
           href={materialsAllLevelsHref()}
-          className="group flex items-center gap-3 rounded-lg border border-dashed p-4 transition-colors hover:border-foreground/30 hover:bg-muted/50 focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring"
+          className="group flex items-center gap-3 rounded-lg border border-dashed p-4 transition-colors hover:border-foreground/30 hover:bg-muted/50 focus-visible:ring-3 focus-visible:ring-ring focus-visible:outline-hidden"
         >
           <Library className="size-5 shrink-0 text-muted-foreground" aria-hidden />
           <span className="min-w-0 flex-1">

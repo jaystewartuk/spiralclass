@@ -176,7 +176,7 @@ function ListItemRow({
         <Square className="mt-0.5 size-[1.05em] shrink-0 text-muted-foreground" aria-hidden />
       )
     ) : ordered ? (
-      <span className="mt-px shrink-0 font-display text-[0.95em] font-semibold tabular-nums text-primary">
+      <span className="mt-px shrink-0 font-display text-[0.95em] font-semibold text-primary tabular-nums">
         {index + 1}.
       </span>
     ) : (
@@ -284,7 +284,7 @@ function Block({ block }: { block: MaterialBlock }): ReactNode {
       );
     case "quote":
       return (
-        <blockquote className="my-4 rounded-r-lg border-l-[3px] border-accent bg-accent/5 py-2 pl-4 pr-3 text-foreground/80">
+        <blockquote className="my-4 rounded-r-lg border-l-[3px] border-accent bg-accent/5 py-2 pr-3 pl-4 text-foreground/80">
           <div className="[&>*:first-child]:mt-0 [&>*:last-child]:mb-0">
             <Blocks blocks={block.blocks} />
           </div>

@@ -51,7 +51,7 @@ export function LeadMessage({ message }: { message: string }) {
           aria-expanded={expanded}
           aria-controls={id}
           onClick={() => setExpanded((open) => !open)}
-          className="-ml-3 mt-1 h-auto px-3 py-1 text-xs text-muted-foreground hover:text-foreground"
+          className="mt-1 -ml-3 h-auto px-3 py-1 text-xs text-muted-foreground hover:text-foreground"
         >
           <ChevronDown className={cn("size-3", expanded && "rotate-180")} aria-hidden />
           {expanded

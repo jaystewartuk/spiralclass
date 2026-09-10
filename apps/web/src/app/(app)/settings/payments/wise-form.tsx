@@ -69,7 +69,7 @@ export function WiseForm(props: WiseFormProps) {
           className="mt-0.5"
         />
         <div className="min-w-0 space-y-1">
-          <Label htmlFor="wise-enabled" className="text-sm font-medium leading-snug">
+          <Label htmlFor="wise-enabled" className="text-sm leading-snug font-medium">
             {t("web.settings.payments.wiseEnableLabel")}
           </Label>
           <p id="wise-enabled-hint" className="text-sm text-muted-foreground">
@@ -103,7 +103,7 @@ export function WiseForm(props: WiseFormProps) {
         <p id={previewId} className="rounded-md bg-muted/60 px-3 py-2 text-xs">
           {trimmed && handleValid ? (
             <a
-              className="inline-flex items-center gap-1.5 break-all font-mono text-primary underline underline-offset-4"
+              className="inline-flex items-center gap-1.5 font-mono break-all text-primary underline underline-offset-4"
               href={`${WISE_PAY_BASE_URL}${encodeURIComponent(trimmed)}`}
               target="_blank"
               rel="noopener noreferrer"
@@ -117,7 +117,7 @@ export function WiseForm(props: WiseFormProps) {
             // trip, rather than only as the server's error after Save.
             <span className="text-warning">{t("web.settings.payments.wisetagInvalid")}</span>
           ) : (
-            <span className="break-all font-mono text-muted-foreground">{WISE_PAY_BASE_URL}</span>
+            <span className="font-mono break-all text-muted-foreground">{WISE_PAY_BASE_URL}</span>
           )}
         </p>
       </div>

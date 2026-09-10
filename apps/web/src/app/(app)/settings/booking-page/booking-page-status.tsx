@@ -137,7 +137,7 @@ export async function BookingPageStatus({
           aria-label={t("bookingLink.label")}
           className="flex items-center gap-2 rounded-md border bg-muted/40 px-3 py-2"
         >
-          <span className="flex-1 break-all font-mono text-sm">{displayUrl}</span>
+          <span className="flex-1 font-mono text-sm break-all">{displayUrl}</span>
           <CopyLinkButton value={fullUrl} iconOnly />
         </div>
 
@@ -147,7 +147,7 @@ export async function BookingPageStatus({
               <p className="text-sm font-medium">
                 {t("web.settings.bookingPage.status.checklistTitle")}
               </p>
-              <p className="text-sm tabular-nums text-muted-foreground">
+              <p className="text-sm text-muted-foreground tabular-nums">
                 {t("web.settings.bookingPage.status.progress", {
                   done: requirementsDone,
                   total: requirementTotal,
@@ -172,7 +172,7 @@ export async function BookingPageStatus({
                 <li key={item.key}>
                   <Link
                     href={REQUIREMENT_HREF[item.key]}
-                    className="-mx-2 flex min-h-11 items-center gap-2.5 rounded-md px-2 text-sm hover:bg-muted focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring"
+                    className="-mx-2 flex min-h-11 items-center gap-2.5 rounded-md px-2 text-sm hover:bg-muted focus-visible:ring-3 focus-visible:ring-ring focus-visible:outline-hidden"
                   >
                     <Circle className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden />
                     <span className="min-w-0 flex-1">{requirementLabel(item.key, t)}</span>
@@ -192,7 +192,7 @@ export async function BookingPageStatus({
                 <li key={item.key}>
                   <Link
                     href={SUGGESTION_HREF[item.key]}
-                    className="-mx-2 flex min-h-11 items-center gap-2.5 rounded-md px-2 text-sm hover:bg-muted focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring"
+                    className="-mx-2 flex min-h-11 items-center gap-2.5 rounded-md px-2 text-sm hover:bg-muted focus-visible:ring-3 focus-visible:ring-ring focus-visible:outline-hidden"
                   >
                     <Circle className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden />
                     <span className="min-w-0 flex-1">{suggestionLabel(item.key, t)}</span>

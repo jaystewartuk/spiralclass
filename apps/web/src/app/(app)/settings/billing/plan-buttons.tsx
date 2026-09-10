@@ -120,7 +120,7 @@ export function PlanButtons({ options }: { options: PlanOption[] }) {
                   figure that makes an annual charge comparable to a monthly
                   one without the reader doing the division. */}
               {opt.equivalentLabel && (
-                <p className="mt-0.5 text-sm tabular-nums text-muted-foreground">
+                <p className="mt-0.5 text-sm text-muted-foreground tabular-nums">
                   {opt.equivalentLabel}
                 </p>
               )}

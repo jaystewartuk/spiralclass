@@ -140,7 +140,7 @@ export function DataTable<T>({
                     <button
                       type="button"
                       onClick={() => onSortChange({ key: header.column.id, dir: nextDir })}
-                      className="group inline-flex items-center gap-1 rounded transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring"
+                      className="group inline-flex items-center gap-1 rounded transition-colors hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring focus-visible:outline-hidden"
                     >
                       {flexRender(header.column.columnDef.header, header.getContext())}
                       <SortArrow active={active} dir={sort.dir} />

@@ -143,7 +143,7 @@ export function ReplayViewer({
                   >
                     <span>{b.label}</span>
                     {b.atMs !== null && (
-                      <span className="tabular-nums text-muted-foreground">{formatMs(b.atMs)}</span>
+                      <span className="text-muted-foreground tabular-nums">{formatMs(b.atMs)}</span>
                     )}
                   </button>
                 </li>
@@ -188,7 +188,7 @@ export function ReplayViewer({
                         ? t("web.dashboard.classes.replay.speakerTeacher")
                         : t("web.dashboard.classes.replay.speakerStudent")}
                     </Badge>
-                    <span className="shrink-0 text-xs tabular-nums text-muted-foreground">
+                    <span className="shrink-0 text-xs text-muted-foreground tabular-nums">
                       {formatMs(u.startMs)}
                     </span>
                     <span className="min-w-0 flex-1">

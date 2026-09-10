@@ -33,7 +33,7 @@ function StudentMonogram({ name, email }: { name: string; email: string | null }
   return (
     <span
       aria-hidden
-      className="flex h-14 w-14 shrink-0 select-none items-center justify-center rounded-full border border-border bg-secondary text-lg font-semibold text-secondary-foreground"
+      className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full border border-border bg-secondary text-lg font-semibold text-secondary-foreground select-none"
     >
       {initialsFrom(name, email)}
     </span>
@@ -280,7 +280,7 @@ export function StudentTabNav({
 }) {
   return (
     <nav aria-label={t("web.dashboard.students.tab.navLabel")} className="border-b">
-      <ul className="-mb-px flex gap-1 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+      <ul className="-mb-px flex [scrollbar-width:none] gap-1 overflow-x-auto [&::-webkit-scrollbar]:hidden">
         {STUDENT_TABS.map((tab) => {
           const current = tab === active;
           return (
@@ -292,7 +292,7 @@ export function StudentTabNav({
                   // 44px of height, per D-140's target floor, and the underline
                   // rather than a pill so the row reads as one control strip
                   // sitting on the content it switches.
-                  "inline-flex min-h-11 items-center whitespace-nowrap rounded-t-md border-b-2 px-3 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring",
+                  "inline-flex min-h-11 items-center rounded-t-md border-b-2 px-3 text-sm font-medium whitespace-nowrap transition-colors focus-visible:ring-3 focus-visible:ring-ring focus-visible:outline-hidden",
                   current
                     ? "border-primary text-foreground"
                     : "border-transparent text-muted-foreground hover:border-border hover:text-foreground",

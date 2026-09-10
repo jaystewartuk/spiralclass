@@ -87,7 +87,7 @@ export function ToggleField({
           />
           <span
             aria-hidden
-            className="pointer-events-none absolute left-0.5 top-1/2 h-5 w-5 -translate-y-1/2 rounded-full bg-background shadow-brand-sm transition-transform peer-checked:translate-x-5 peer-disabled:opacity-50"
+            className="pointer-events-none absolute top-1/2 left-0.5 h-5 w-5 -translate-y-1/2 rounded-full bg-background shadow-brand-sm transition-transform peer-checked:translate-x-5 peer-disabled:opacity-50"
           />
         </label>
       </div>

@@ -43,7 +43,7 @@ export function navRowClasses({
 } = {}): string {
   return cn(
     "group relative flex w-full items-center gap-3 rounded-md px-3 py-2 text-left transition-colors",
-    "focus-visible:ring-ring focus-visible:ring-3 focus-visible:outline-none",
+    "focus-visible:ring-ring focus-visible:ring-3 focus-visible:outline-hidden",
     density === "comfortable" ? "min-h-target text-base" : "min-h-10 text-sm",
     active
       ? "bg-muted text-foreground font-semibold"
@@ -161,7 +161,7 @@ export function NavBarLink({
       prefetch={prefetch}
       aria-current={active ? "page" : undefined}
       className={cn(
-        "whitespace-nowrap rounded-md px-3 py-2 text-sm transition-colors focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring",
+        "rounded-md px-3 py-2 text-sm whitespace-nowrap transition-colors focus-visible:ring-3 focus-visible:ring-ring focus-visible:outline-hidden",
         active
           ? "bg-muted font-semibold text-foreground"
           : "font-medium text-muted-foreground hover:bg-muted/60 hover:text-foreground",
@@ -186,7 +186,7 @@ export function NavSectionHeading({
   className?: string;
 }) {
   return (
-    <h3 className={cn("px-3 pb-1 pt-4 text-xs font-bold text-muted-foreground", className)}>
+    <h3 className={cn("px-3 pt-4 pb-1 text-xs font-bold text-muted-foreground", className)}>
       {children}
     </h3>
   );

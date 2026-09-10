@@ -40,7 +40,7 @@ export function CalendarRangeHeader({
     <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
       <div className="flex min-w-0 flex-wrap items-baseline gap-x-3 gap-y-1">
         <h2 className={cn("min-w-0 truncate text-h3 font-semibold", titleClassName)}>{title}</h2>
-        <span className="text-sm tabular-nums text-muted-foreground">
+        <span className="text-sm text-muted-foreground tabular-nums">
           {count === 0 ? t("web.calendar.noClasses") : t("web.calendar.classCount", { count })}
         </span>
       </div>

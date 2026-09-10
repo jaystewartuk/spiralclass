@@ -120,7 +120,7 @@ export default async function StudentHomeworkPage({
         {assignment.instructions?.trim() && (
           <CardContent className="space-y-2">
             <p className="text-sm font-medium">{t("homework.detail.instructions")}</p>
-            <p className="whitespace-pre-line text-sm text-muted-foreground">
+            <p className="text-sm whitespace-pre-line text-muted-foreground">
               {assignment.instructions.trim()}
             </p>
           </CardContent>
@@ -154,7 +154,7 @@ export default async function StudentHomeworkPage({
                   )}
                   <span className="text-xs text-muted-foreground">{a.feedback!.createdAt}</span>
                 </div>
-                <p className="whitespace-pre-line text-sm">{a.feedback!.content}</p>
+                <p className="text-sm whitespace-pre-line">{a.feedback!.content}</p>
               </div>
             ))}
           </CardContent>

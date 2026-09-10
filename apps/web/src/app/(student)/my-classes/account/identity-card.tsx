@@ -61,7 +61,7 @@ export function AccountIdentityCard({
           <Heading level={3} as="h2" className="break-words">
             {name}
           </Heading>
-          {email ? <p className="break-all text-sm text-muted-foreground">{email}</p> : null}
+          {email ? <p className="text-sm break-all text-muted-foreground">{email}</p> : null}
           {meta.length > 0 ? (
             <p className="flex flex-wrap items-center gap-x-2 text-sm text-muted-foreground">
               {meta.map((item, index) => (

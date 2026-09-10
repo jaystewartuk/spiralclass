@@ -62,7 +62,7 @@ export function CaptionsDemo({
 
   return (
     <div className="mx-auto max-w-xl">
-      <div className="overflow-hidden rounded-2xl border bg-card shadow-sm">
+      <div className="overflow-hidden rounded-2xl border bg-card shadow-xs">
         {/* Fake in-call header */}
         <div className="flex items-center justify-between border-b bg-secondary/40 px-4 py-2.5">
           <span className="inline-flex items-center gap-2 text-sm font-medium">

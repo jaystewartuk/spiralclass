@@ -565,7 +565,7 @@ export function TagsManager({
                   {t("focusTags.manager.searchLabel")}
                 </Label>
                 <Search
-                  className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
+                  className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground"
                   aria-hidden
                 />
                 <Input
@@ -581,7 +581,7 @@ export function TagsManager({
                   }}
                   placeholder={t("focusTags.manager.searchPlaceholder")}
                   autoComplete="off"
-                  className="pl-9 pr-10"
+                  className="pr-10 pl-9"
                 />
                 {searching && (
                   <Button
@@ -595,7 +595,7 @@ export function TagsManager({
                     // a full-size target would cover the text it clears, and the
                     // field's own padding gives it that much slop anyway.
                     // Escape in the field does the same thing for a keyboard.
-                    className="absolute right-1 top-1/2 h-9 w-9 -translate-y-1/2 rounded-full lg:h-9 lg:w-9"
+                    className="absolute top-1/2 right-1 h-9 w-9 -translate-y-1/2 rounded-full lg:h-9 lg:w-9"
                   >
                     <X className="size-4" aria-hidden />
                   </Button>
@@ -996,7 +996,7 @@ function ReorderControls({
     <div className="space-y-2 border-t border-border pt-4">
       <div className="flex flex-wrap items-baseline justify-between gap-2">
         <p className="text-sm font-semibold">{t("focusTags.manager.reorderLegend")}</p>
-        <p className="text-sm tabular-nums text-muted-foreground" aria-live="polite">
+        <p className="text-sm text-muted-foreground tabular-nums" aria-live="polite">
           {t("focusTags.manager.position", { position: position + 1, total })}
         </p>
       </div>
@@ -1167,7 +1167,7 @@ function CategoryCard({
               {...attributes}
               {...listeners}
               aria-label={t("focusTags.manager.dragHandleAria", { name: category.label })}
-              className="hidden shrink-0 cursor-grab touch-none rounded-md p-1 text-subtle ring-offset-background transition-colors hover:bg-secondary hover:text-foreground focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring focus-visible:ring-offset-2 active:cursor-grabbing desktop:block"
+              className="hidden shrink-0 cursor-grab touch-none rounded-md p-1 text-subtle ring-offset-background transition-colors hover:bg-secondary hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-hidden active:cursor-grabbing desktop:block"
             >
               <GripVertical className="size-4" aria-hidden />
             </button>
@@ -1264,7 +1264,7 @@ function TagPill({
   // both would say the wrong one is focused half the time. `focus-visible:z-10`
   // keeps a ring from being painted over by the next chip in the row.
   const half =
-    "focus-visible:ring-ring ring-offset-background relative transition-colors focus-visible:z-10 focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-offset-2";
+    "focus-visible:ring-ring ring-offset-background relative transition-colors focus-visible:z-10 focus-visible:outline-hidden focus-visible:ring-3 focus-visible:ring-offset-2";
 
   return (
     <li
@@ -1286,7 +1286,7 @@ function TagPill({
             aria-label={t("focusTags.manager.dragHandleAria", { name: tag.label })}
             className={cn(
               half,
-              "hidden cursor-grab touch-none self-stretch rounded-l-full pl-2.5 pr-1 text-subtle hover:bg-secondary hover:text-foreground active:cursor-grabbing desktop:flex desktop:items-center",
+              "hidden cursor-grab touch-none self-stretch rounded-l-full pr-1 pl-2.5 text-subtle hover:bg-secondary hover:text-foreground active:cursor-grabbing desktop:flex desktop:items-center",
             )}
           >
             <GripVertical className="size-3.5" aria-hidden />

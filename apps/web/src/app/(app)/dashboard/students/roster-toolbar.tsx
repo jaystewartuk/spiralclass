@@ -65,7 +65,7 @@ export function RosterToolbar({
               href={studentsHref(value, { search, sort })}
               aria-current={active ? "page" : undefined}
               className={cn(
-                "flex items-center gap-2 whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium transition-colors",
+                "flex items-center gap-2 rounded-sm px-3 py-1.5 text-sm font-medium whitespace-nowrap transition-colors",
                 active
                   ? "bg-background text-foreground shadow-brand-sm"
                   : "text-muted-foreground hover:text-foreground",
@@ -91,7 +91,7 @@ export function RosterToolbar({
         {sort !== DEFAULT_STUDENT_SORT && <input type="hidden" name="sort" value={sort} />}
         <div className="relative min-w-0 flex-1 lg:w-64 lg:flex-none">
           <Search
-            className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
+            className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground"
             aria-hidden
           />
           <Input

@@ -247,7 +247,7 @@ function MobileNavContent({
 
       <NavDivider />
 
-      <NavPreferences localeToggle={localeToggle} className="px-3 pb-4 pt-1" />
+      <NavPreferences localeToggle={localeToggle} className="px-3 pt-1 pb-4" />
 
       <SignOutButton label={t("common.signOut")} className="w-full" />
     </div>
@@ -279,15 +279,15 @@ export function MobileNavDrawer({
   return (
     <DialogPrimitive.Root open={open} onOpenChange={onOpenChange}>
       <DialogPrimitive.Portal>
-        <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-foreground/40 backdrop-blur-sm data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 motion-reduce:animate-none" />
+        <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-foreground/40 backdrop-blur-xs data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:animate-in data-[state=open]:fade-in-0 motion-reduce:animate-none" />
         <DialogPrimitive.Content
           id={id}
           // The drawer's only content is navigation, which needs no prose
           // description; without this Radix warns for a missing one.
           aria-describedby={undefined}
-          className="fixed inset-y-0 right-0 z-50 flex w-full max-w-sheet flex-col border-l border-border bg-card text-card-foreground shadow-brand-lg duration-300 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:slide-out-to-right data-[state=open]:slide-in-from-right motion-reduce:animate-none sm:max-w-sm"
+          className="fixed inset-y-0 right-0 z-50 flex w-full max-w-sheet flex-col border-l border-border bg-card text-card-foreground shadow-brand-lg duration-300 data-[state=closed]:animate-out data-[state=closed]:slide-out-to-right data-[state=open]:animate-in data-[state=open]:slide-in-from-right motion-reduce:animate-none sm:max-w-sm"
         >
-          <div className="flex h-14 shrink-0 items-center justify-between gap-3 border-b border-border/60 pl-4 pr-2">
+          <div className="flex h-14 shrink-0 items-center justify-between gap-3 border-b border-border/60 pr-2 pl-4">
             <DialogPrimitive.Title className="sr-only">{t("web.nav.menu")}</DialogPrimitive.Title>
             <Logo size="sm" />
             <DialogPrimitive.Close asChild>

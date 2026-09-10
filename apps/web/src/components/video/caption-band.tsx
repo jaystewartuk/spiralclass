@@ -195,7 +195,7 @@ export function CaptionBand({
         className={cn(
           // Tighter on a phone. Every one of these steps is vertical space
           // taken off the video on the screen that has least of it.
-          "flex flex-col items-center gap-1.5 rounded-xl bg-scrim-3 px-3 py-2 shadow-lg backdrop-blur-sm",
+          "flex flex-col items-center gap-1.5 rounded-xl bg-scrim-3 px-3 py-2 shadow-lg backdrop-blur-xs",
           "lg:gap-2.5 lg:rounded-2xl lg:px-5 lg:py-3",
           // Full width once there is text, so successive lines do not make
           // the panel jump about as sentences change length. But the
@@ -316,7 +316,7 @@ function CaptionLineView({
           // Spanish with an English phoneme set — unintelligible, on the
           // feature most likely to be used by someone relying on it.
           lang={entry.srcLang}
-          className={cn(sizes.primary, "font-medium leading-snug")}
+          className={cn(sizes.primary, "leading-snug font-medium")}
         >
           {original}
         </p>
@@ -331,8 +331,8 @@ function CaptionLineView({
           // exactly where it mattered least and confused most.
           className={cn(
             primaryIsOriginal
-              ? cn(sizes.secondary, "mt-1 font-normal leading-snug opacity-80")
-              : cn(sizes.primary, "font-medium leading-snug"),
+              ? cn(sizes.secondary, "mt-1 leading-snug font-normal opacity-80")
+              : cn(sizes.primary, "leading-snug font-medium"),
           )}
         >
           {entry.text}
@@ -493,7 +493,7 @@ function CaptionSettings({
       // visible as you make it. Both rows are segmented (three across, not
       // three stacked) to keep it to ~150px; the cap is the backstop for a
       // locale whose labels wrap.
-      className="absolute right-0 top-10 z-30 max-h-over-controls w-64 overflow-y-auto rounded-2xl bg-scrim-3 p-3 text-left shadow-lg backdrop-blur-md"
+      className="absolute top-10 right-0 z-30 max-h-over-controls w-64 overflow-y-auto rounded-2xl bg-scrim-3 p-3 text-left shadow-lg backdrop-blur-md"
     >
       <fieldset>
         <legend className="mb-1.5 text-sm font-semibold text-on-dark-faint">
@@ -556,7 +556,7 @@ function SegmentButton({
         // control someone taps mid-lesson on a phone as much as anywhere.
         // Height was never what made this popover too tall — three of these
         // stacked was.
-        "min-h-target flex-1 rounded-lg px-1.5 text-center text-sm font-medium leading-tight transition",
+        "min-h-target flex-1 rounded-lg px-1.5 text-center text-sm leading-tight font-medium transition",
         selected ? "bg-overlay-4 text-scrim-3" : "bg-overlay-1 text-white hover:bg-overlay-2",
       )}
     >
@@ -628,7 +628,7 @@ export function CaptionTranscript({
       role="dialog"
       aria-modal="false"
       aria-label={t("call.captionsTranscript")}
-      className="absolute bottom-0 right-0 top-0 z-30 flex w-full max-w-sm flex-col bg-scrim-3 shadow-lg backdrop-blur-md"
+      className="absolute top-0 right-0 bottom-0 z-30 flex w-full max-w-sm flex-col bg-scrim-3 shadow-lg backdrop-blur-md"
     >
       {/* The title and the close button share a row; the privacy line sits
       BELOW them at full width. Nested under the title it wrapped to two
@@ -671,7 +671,7 @@ export function CaptionTranscript({
                   {name && <span className="font-medium">{name}</span>}
                 </p>
                 {entry.src && (
-                  <p lang={entry.srcLang} className="font-medium leading-snug text-on-dark">
+                  <p lang={entry.srcLang} className="leading-snug font-medium text-on-dark">
                     {entry.src}
                   </p>
                 )}

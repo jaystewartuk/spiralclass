@@ -69,14 +69,22 @@ export default async function PricingPage() {
   }));
 
   return (
-    <PageShell width="wide">
+    // One rhythm between top-level sections, declared once on the shell — the
+    // same 56px the other marketing pages use. It was three different numbers
+    // across these pages (40, 48, 56) because none of them rendered under
+    // Tailwind 3: `space-y-6` on PageShell out-specified every one of them, so
+    // the values drifted with nobody able to see it. The page header now
+    // separates from the content at least as strongly as a section break does,
+    // which at 390px it did not: 40px sat only 16px clear of the 24px gap
+    // BETWEEN the cards below it.
+    <PageShell width="wide" className="space-y-14">
       <JsonLd data={pricingJsonLd(seoBaseUrl(), offerPlans, PLATFORM_MONEY_CURRENCY)} />
       <header className="text-center">
         <Heading level={1}>{t("web.pricing.headline")}</Heading>
         <p className="mt-2 text-muted-foreground">{t("web.pricing.sub", { days: TRIAL_DAYS })}</p>
       </header>
 
-      <div className="mt-10 grid gap-6 lg:grid-cols-3">
+      <div className="grid gap-6 lg:grid-cols-3">
         {/* Free */}
         <Card>
           <CardHeader>
@@ -151,12 +159,16 @@ export default async function PricingPage() {
           is Stripe's, per country and per card, and a number we cannot stand
           behind beside a "0% commission" claim is what would make this
           misleading rather than honest. */}
-      <section className="mt-14">
+      <section>
         <Heading level={2} className="text-center">
           {t("web.pricing.fees.title")}
         </Heading>
         <p className="mt-2 text-center text-muted-foreground">{t("web.pricing.fees.intro")}</p>
-        <div className="mt-6 grid gap-4 lg:grid-cols-3">
+        {/* mt-8 and gap-6, matching every other section heading and card grid in
+            the marketing pages. This section had 24px and 16px — the only
+            3-up grid in the product with a different gutter from the one
+            directly above it on the same page. */}
+        <div className="mt-8 grid gap-6 lg:grid-cols-3">
           <Card>
             <CardHeader>
               <CardTitle as="h3" className="text-base">
@@ -204,7 +216,7 @@ export default async function PricingPage() {
         </div>
       </section>
 
-      <div className="mt-10 text-center">
+      <div className="text-center">
         <Button asChild>
           <Link href="/sign-up">{t("web.pricing.startTrial")}</Link>
         </Button>

@@ -24,7 +24,7 @@ type CardTitleProps = React.HTMLAttributes<HTMLHeadingElement> & {
 };
 const CardTitle = React.forwardRef<HTMLHeadingElement, CardTitleProps>(
   ({ className, as: Comp = "h3", ...props }, ref) => (
-    <Comp ref={ref} className={cn("text-2xl font-semibold leading-none", className)} {...props} />
+    <Comp ref={ref} className={cn("text-2xl leading-none font-semibold", className)} {...props} />
   ),
 );
 CardTitle.displayName = "CardTitle";

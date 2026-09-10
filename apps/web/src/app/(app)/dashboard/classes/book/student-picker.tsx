@@ -73,7 +73,7 @@ export function StudentPicker({
           {date && <input type="hidden" name="date" value={date} />}
           <div className="relative min-w-0 flex-1 lg:w-72 lg:flex-none">
             <Search
-              className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
+              className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground"
               aria-hidden
             />
             <Input
@@ -135,13 +135,13 @@ function StudentRow({ entry, date, t }: { entry: RosterEntry; date?: string; t: 
   return (
     <Link
       href={href}
-      className="flex min-h-target items-center gap-3 px-4 py-3 transition-colors hover:bg-muted/40 focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-inset focus-visible:ring-ring lg:px-6"
+      className="flex min-h-target items-center gap-3 px-4 py-3 transition-colors hover:bg-muted/40 focus-visible:ring-3 focus-visible:ring-ring focus-visible:outline-hidden focus-visible:ring-inset lg:px-6"
     >
       {/* Decorative: the name is right beside it, and a screen reader
           announcing "MR" before "Marcela Ruiz" is the same word twice. */}
       <span
         aria-hidden
-        className="inline-flex size-9 shrink-0 select-none items-center justify-center rounded-full bg-secondary text-sm font-semibold text-secondary-foreground"
+        className="inline-flex size-9 shrink-0 items-center justify-center rounded-full bg-secondary text-sm font-semibold text-secondary-foreground select-none"
       >
         {initialsFrom(entry.name, entry.email)}
       </span>

@@ -342,7 +342,7 @@ export function ClassContentTemplatesForm({ initial }: { initial: TemplateDraft[
   return (
     <form action={formAction} onSubmit={handleSubmit} noValidate className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <p className="text-sm tabular-nums text-muted-foreground" aria-live="polite">
+        <p className="text-sm text-muted-foreground tabular-nums" aria-live="polite">
           {t("web.settings.classContentTemplates.count", { count: visible.length })}
         </p>
         <Button
@@ -613,7 +613,7 @@ function TemplateRow({
             {...attributes}
             {...listeners}
             aria-label={t("web.settings.classContentTemplates.dragHandleAria", { name })}
-            className="flex size-10 shrink-0 cursor-grab touch-none items-center justify-center rounded-md text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring active:cursor-grabbing lg:size-8"
+            className="flex size-10 shrink-0 cursor-grab touch-none items-center justify-center rounded-md text-muted-foreground hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring focus-visible:outline-hidden active:cursor-grabbing lg:size-8"
           >
             <GripVertical className="size-4" aria-hidden />
           </button>
@@ -625,20 +625,20 @@ function TemplateRow({
             aria-expanded={open}
             aria-controls={panelId}
             aria-label={t("web.settings.classContentTemplates.rowToggleAria", { name })}
-            className="flex min-w-0 flex-1 items-center gap-3 rounded-md px-2 py-1.5 text-left hover:bg-muted/60 focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring"
+            className="flex min-w-0 flex-1 items-center gap-3 rounded-md px-2 py-1.5 text-left hover:bg-muted/60 focus-visible:ring-3 focus-visible:ring-ring focus-visible:outline-hidden"
           >
             <span className="min-w-0 flex-1">
               <span className="flex items-center gap-2">
                 <span
                   className={cn(
                     "truncate font-semibold",
-                    !row.label.trim() && "font-normal italic text-muted-foreground",
+                    !row.label.trim() && "font-normal text-muted-foreground italic",
                   )}
                 >
                   {name}
                 </span>
                 {status && (
-                  <span className="shrink-0 rounded-full border border-border px-1.5 py-0.5 text-xs font-medium leading-none text-muted-foreground">
+                  <span className="shrink-0 rounded-full border border-border px-1.5 py-0.5 text-xs leading-none font-medium text-muted-foreground">
                     {status === "new"
                       ? t("web.settings.classContentTemplates.statusNew")
                       : t("web.settings.classContentTemplates.statusEdited")}
@@ -655,7 +655,7 @@ function TemplateRow({
               // Only ever a count of something. At zero the summary line
               // already says "no sections yet", and a "0 sections" chip beside
               // it would be the same fact twice in two different phrasings.
-              <span className="hidden shrink-0 text-xs tabular-nums text-muted-foreground lg:block">
+              <span className="hidden shrink-0 text-xs text-muted-foreground tabular-nums lg:block">
                 {t("web.settings.classContentTemplates.sections", { count: outline.length })}
               </span>
             )}
@@ -834,9 +834,9 @@ function ModeButton({
       aria-pressed={pressed}
       onClick={onClick}
       className={cn(
-        "rounded-sm px-2.5 py-1 text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring",
+        "rounded-sm px-2.5 py-1 text-xs font-medium transition-colors focus-visible:ring-3 focus-visible:ring-ring focus-visible:outline-hidden",
         pressed
-          ? "bg-background text-foreground shadow-sm"
+          ? "bg-background text-foreground shadow-xs"
           : "text-muted-foreground hover:text-foreground",
       )}
     >

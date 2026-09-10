@@ -40,7 +40,7 @@ export function PageMenu({ links, label }: { links: WebNavLink[]; label: string 
         aria-controls={menuId}
         onClick={toggle}
         className={cn(
-          "gap-1 whitespace-nowrap font-medium",
+          "gap-1 font-medium whitespace-nowrap",
           anyActive || open
             ? "bg-muted font-semibold text-foreground"
             : "text-muted-foreground hover:text-foreground",

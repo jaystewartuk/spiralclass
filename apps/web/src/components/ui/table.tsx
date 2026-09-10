@@ -174,7 +174,7 @@ function SortableHead({
       <Link
         href={sortHref(params, column, nextDir)}
         scroll={false}
-        className="group inline-flex items-center gap-1 rounded transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring"
+        className="group inline-flex items-center gap-1 rounded transition-colors hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring focus-visible:outline-hidden"
       >
         {label}
         <SortArrow active={active} dir={sort.dir} />
@@ -196,7 +196,7 @@ function RowLink({ className, ...props }: React.ComponentProps<typeof Link>) {
   return (
     <Link
       className={cn(
-        "after:absolute after:inset-0 after:content-[''] hover:underline focus-visible:underline focus-visible:outline-none",
+        "after:absolute after:inset-0 after:content-[''] hover:underline focus-visible:underline focus-visible:outline-hidden",
         className,
       )}
       {...props}

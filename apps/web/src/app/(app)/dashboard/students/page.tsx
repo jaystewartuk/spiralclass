@@ -308,7 +308,7 @@ export default async function TeacherStudentsPage({
               <p className="text-sm text-muted-foreground">
                 {t("web.dashboard.students.roster.shareLinkLabel")}
               </p>
-              <div className="w-full break-all rounded-md border bg-muted/40 px-3 py-2 font-mono text-sm">
+              <div className="w-full rounded-md border bg-muted/40 px-3 py-2 font-mono text-sm break-all">
                 {bookingUrl}
               </div>
               <CopyLinkButton value={bookingUrl} />

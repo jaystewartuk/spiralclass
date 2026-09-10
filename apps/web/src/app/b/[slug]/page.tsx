@@ -537,7 +537,7 @@ export default async function BookingLandingPage({
               alt={teacher.name}
               width={320}
               height={320}
-              className="mx-auto h-56 w-56 rounded-2xl border object-cover shadow-sm lg:h-72 lg:w-72"
+              className="mx-auto h-56 w-56 rounded-2xl border object-cover shadow-xs lg:h-72 lg:w-72"
               priority
             />
           ) : (
@@ -545,7 +545,7 @@ export default async function BookingLandingPage({
             // and looks intentional to a student, instead of the column collapsing.
             <div
               aria-hidden
-              className="mx-auto flex h-56 w-56 items-center justify-center rounded-2xl border bg-muted shadow-sm lg:h-72 lg:w-72"
+              className="mx-auto flex h-56 w-56 items-center justify-center rounded-2xl border bg-muted shadow-xs lg:h-72 lg:w-72"
             >
               <span className="font-display text-6xl font-semibold text-muted-foreground lg:text-7xl">
                 {initials}
@@ -607,7 +607,7 @@ export default async function BookingLandingPage({
             />
           )}
           {teacher.bio?.trim() && (
-            <p className="mx-auto max-w-prose whitespace-pre-line text-base text-foreground/80">
+            <p className="mx-auto max-w-prose text-base whitespace-pre-line text-foreground/80">
               {teacher.bio.trim()}
             </p>
           )}
@@ -694,7 +694,7 @@ export default async function BookingLandingPage({
                                   })}
                             </span>
                           </span>
-                          <span className="shrink-0 whitespace-nowrap text-right">
+                          <span className="shrink-0 text-right whitespace-nowrap">
                             <span className="block font-semibold tabular-nums">
                               {formatPriceForBuyer(pkg.priceMinorUnits, pkg.currency, funnelLocale)}
                             </span>
@@ -712,7 +712,7 @@ export default async function BookingLandingPage({
                                 approximation has to touch the number it
                                 approximates. */}
                             {approxUsdCentsFor(pkg.priceMinorUnits, pkg.currency) !== null && (
-                              <span className="block text-xs tabular-nums text-muted-foreground">
+                              <span className="block text-xs text-muted-foreground tabular-nums">
                                 {t("web.buyFlow.approxPrice", {
                                   price: formatPriceForBuyer(
                                     approxUsdCentsFor(pkg.priceMinorUnits, pkg.currency)!,
@@ -727,7 +727,7 @@ export default async function BookingLandingPage({
                                 student compare two packages without doing the
                                 division herself. */}
                             {pkg.classCount > 1 && (
-                              <span className="block text-xs tabular-nums text-muted-foreground">
+                              <span className="block text-xs text-muted-foreground tabular-nums">
                                 {t("web.bookingLanding.perClass", {
                                   price: formatPriceForBuyer(
                                     Math.round(pkg.priceMinorUnits / pkg.classCount),

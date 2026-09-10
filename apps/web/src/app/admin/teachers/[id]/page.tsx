@@ -371,7 +371,7 @@ function Field({ label, value, hint }: { label: string; value: string; hint?: st
   return (
     <div className="rounded-md border p-3">
       <div className="text-xs text-muted-foreground">{label}</div>
-      <div className="mt-1 break-all font-medium">{value}</div>
+      <div className="mt-1 font-medium break-all">{value}</div>
       {hint ? <div className="mt-1 text-xs text-muted-foreground">{hint}</div> : null}
     </div>
   );

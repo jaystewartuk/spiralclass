@@ -327,7 +327,7 @@ export function RecentRow({ item, ctx }: { item: ClassListItem; ctx: ListContext
         <span className="min-w-0 truncate font-medium">{item.studentName}</span>
         <BookingStatusBadge status={item.status} viewer="teacher" />
       </div>
-      <span className="text-sm tabular-nums text-muted-foreground">
+      <span className="text-sm text-muted-foreground tabular-nums">
         {zoned.viewer.dateLabel}, {zoned.viewer.timeLabel}
       </span>
     </Link>

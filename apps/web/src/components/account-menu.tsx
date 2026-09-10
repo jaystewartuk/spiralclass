@@ -81,7 +81,7 @@ export function AccountMenu({
         aria-controls={menuId}
         aria-label={menuLabel}
         onClick={toggle}
-        className={cn("gap-2 rounded-full pl-1 pr-2", open && "bg-muted/60")}
+        className={cn("gap-2 rounded-full pr-2 pl-1", open && "bg-muted/60")}
       >
         <AccountAvatar
           name={account?.name}
@@ -158,7 +158,7 @@ export function AccountMenu({
 
           <NavDivider />
 
-          <NavPreferences localeToggle={localeToggle} className="px-3 pb-3 pt-0" />
+          <NavPreferences localeToggle={localeToggle} className="px-3 pt-0 pb-3" />
 
           <SignOutButton label={t("common.signOut")} className="px-1 pb-1" />
         </div>

@@ -302,7 +302,7 @@ export function PurchaseFlow({
                         {formatPriceForBuyer(price, tpl.currency, locale)}
                       </div>
                       {tpl.approxUsdCents !== null && (
-                        <div className="text-xs tabular-nums text-muted-foreground">
+                        <div className="text-xs text-muted-foreground tabular-nums">
                           {t("web.buyFlow.approxPrice", {
                             price: formatPriceForBuyer(tpl.approxUsdCents, "USD", locale),
                           })}
@@ -331,7 +331,7 @@ export function PurchaseFlow({
               <div className="shrink-0 text-right">
                 <div className="text-lg font-semibold tabular-nums">{money(selectedPrice)}</div>
                 {selected.approxUsdCents !== null && (
-                  <div className="text-xs tabular-nums text-muted-foreground">
+                  <div className="text-xs text-muted-foreground tabular-nums">
                     {t("web.buyFlow.approxPrice", {
                       price: formatPriceForBuyer(selected.approxUsdCents, "USD", locale),
                     })}
@@ -384,7 +384,7 @@ export function PurchaseFlow({
         {testimonial && (
           <figure className="space-y-2 rounded-lg border bg-muted/30 p-4">
             <Quote className="h-4 w-4 text-primary/60" aria-hidden />
-            <blockquote className="whitespace-pre-line text-xs leading-relaxed text-foreground/80">
+            <blockquote className="text-xs leading-relaxed whitespace-pre-line text-foreground/80">
               {testimonial.body}
             </blockquote>
             <figcaption className="text-xs text-muted-foreground">

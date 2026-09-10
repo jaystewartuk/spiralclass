@@ -38,7 +38,7 @@ type AlertTitleProps = React.HTMLAttributes<HTMLHeadingElement> & {
  */
 const AlertTitle = React.forwardRef<HTMLParagraphElement, AlertTitleProps>(
   ({ className, as: Comp = "h5", ...props }, ref) => (
-    <Comp ref={ref} className={cn("mb-1 font-medium leading-none", className)} {...props} />
+    <Comp ref={ref} className={cn("mb-1 leading-none font-medium", className)} {...props} />
   ),
 );
 AlertTitle.displayName = "AlertTitle";

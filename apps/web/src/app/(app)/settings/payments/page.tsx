@@ -172,7 +172,7 @@ export default async function PaymentsSettingsPage({
                       {/* `break-all` because an `acct_` id is 21 unbroken
                           characters and a phone is 320px wide; the old markup
                           let it push the card's own layout sideways. */}
-                      <span className="break-all font-mono text-xs">{teacher.stripeAccountId}</span>
+                      <span className="font-mono text-xs break-all">{teacher.stripeAccountId}</span>
                     </StatusRow>
                     <StatusRow label={t("web.settings.payments.chargesLabel")}>
                       <Badge variant={canCharge ? "success" : "warning"}>

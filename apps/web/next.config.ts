@@ -37,6 +37,24 @@ const deploymentId = process.env.NEXT_DEPLOYMENT_ID || undefined;
 
 const config: NextConfig = {
   reactStrictMode: true,
+  // Stop `next dev` writing AGENTS.md and CLAUDE.md into apps/web/.
+  //
+  // Next 16 generates them when it detects an AI coding agent, and re-adds the
+  // block on every dev-server start, so deleting them just makes the tree dirty
+  // again — which is exactly how they reached a commit here in the first place,
+  // swept up by a `git add -A` during unrelated work.
+  //
+  // Off rather than committed, because agent instructions in this repo are
+  // curated: the root CLAUDE.md is deliberately small, has a context budget,
+  // and is held to the tree by tests/config/claude-md.test.ts. A second
+  // CLAUDE.md under apps/web, whose contents an upstream package rewrites on
+  // any `next dev` without anyone reviewing the change, is not that. The advice
+  // in the block is reasonable — read node_modules/next/dist/docs/ before
+  // assuming Next 16 matches your training data — and if we want it, it belongs
+  // in the root file where it is reviewed and cannot change underneath us.
+  //
+  // Guarded by tests/config/next-agent-files.test.ts.
+  agentRules: false,
   deploymentId,
   outputFileTracingRoot: monorepoRoot,
   // Self-hosted Docker builds (Fly.io spike, docs/decisions/D-70.md) need a

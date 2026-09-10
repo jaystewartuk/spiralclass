@@ -202,12 +202,12 @@ export function PaymentLedger({
                 level={4}
                 as="h3"
                 id={`month-${month.key}`}
-                className="capitalize text-muted-foreground"
+                className="text-muted-foreground capitalize"
               >
                 {monthHeading.format(month.date)}
               </Heading>
               {totals.length > 0 && (
-                <p className="text-sm tabular-nums text-muted-foreground">
+                <p className="text-sm text-muted-foreground tabular-nums">
                   {totals
                     .map((total) =>
                       t("web.payments.ledger.received", {

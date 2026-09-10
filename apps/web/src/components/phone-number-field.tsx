@@ -67,7 +67,7 @@ export function PhoneNumberField({
           below the field, outside the clip box) — so on web the searchable
           country list never appeared. The two inner controls instead round
           their own outer corners to sit flush inside the rounded border. */}
-      <div className="flex rounded-md border border-input bg-transparent shadow-sm focus-within:ring-1 focus-within:ring-ring">
+      <div className="flex rounded-md border border-input bg-transparent shadow-xs focus-within:ring-1 focus-within:ring-ring">
         <Combobox
           name={countryName}
           value={country}

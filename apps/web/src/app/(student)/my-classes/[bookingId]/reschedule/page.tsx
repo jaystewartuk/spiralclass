@@ -252,7 +252,7 @@ export default async function ReschedulePage({
               {nextAvailableDate ? (
                 <Button
                   asChild
-                  className="h-auto min-h-11 max-w-full whitespace-normal py-2 text-center lg:min-h-10"
+                  className="h-auto min-h-11 max-w-full py-2 text-center whitespace-normal lg:min-h-10"
                 >
                   <HardLink href={`/my-classes/${old.id}/reschedule?date=${nextAvailableDate}`}>
                     {t("web.myClasses.reschedule.goToNextAvailableDay", {

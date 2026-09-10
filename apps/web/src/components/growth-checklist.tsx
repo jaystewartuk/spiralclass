@@ -87,7 +87,7 @@ export function GrowthChecklist({
           <CardTitle className="text-lg" as="h2">
             {growthTitle(locale)}
           </CardTitle>
-          <span className="text-sm font-medium tabular-nums text-muted-foreground">
+          <span className="text-sm font-medium text-muted-foreground tabular-nums">
             {growthProgressLabel(checklist.doneCount, checklist.total, locale)}
           </span>
         </div>

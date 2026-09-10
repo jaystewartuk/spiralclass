@@ -135,7 +135,7 @@ export async function BookingMonthCalendar({
               className={cn(
                 base,
                 "text-muted-foreground/40",
-                isToday && "ring-1 ring-inset ring-border",
+                isToday && "ring-1 ring-border ring-inset",
               )}
             >
               {dayNum}

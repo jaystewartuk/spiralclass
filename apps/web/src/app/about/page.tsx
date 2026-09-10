@@ -77,8 +77,12 @@ export default async function AboutPage() {
     },
   ];
 
+  // The rhythm between this page's top-level sections is declared once, on the
+  // shell, rather than as the same top margin repeated on every one of them.
+  // `space-y-14` overrides PageShell's default `space-y-6` through the shell's
+  // own cn(), so no child has to out-specify the container to be spaced.
   return (
-    <PageShell width="wide">
+    <PageShell width="wide" className="space-y-14">
       <header className="text-center">
         <p className="inline-flex items-center gap-1.5 rounded-full border bg-muted/30 px-3 py-1 text-xs font-medium text-muted-foreground">
           <Sparkles className="h-3.5 w-3.5" aria-hidden />
@@ -87,19 +91,19 @@ export default async function AboutPage() {
         <Heading level={1} className="mt-4 lg:text-display">
           {t("web.about.headline")}
         </Heading>
-        <p className="mx-auto mt-4 max-w-reading text-pretty text-lg text-muted-foreground">
+        <p className="mx-auto mt-4 max-w-reading text-lg text-pretty text-muted-foreground">
           {t("web.about.sub")}
         </p>
       </header>
 
       {/* Founders */}
-      <section className="mt-14">
+      <section>
         <Heading level={2} className="text-center">
           {t("web.about.whoBuiltIt")}
         </Heading>
         <div className="mx-auto mt-8 grid max-w-reading gap-6">
           {FOUNDERS.map((f) => (
-            <div key={f.nameEn} className="rounded-2xl border bg-card p-6 shadow-sm">
+            <div key={f.nameEn} className="rounded-2xl border bg-card p-6 shadow-xs">
               <div className="flex items-center gap-4">
                 {/* The shared avatar, not a copy of it. The copy that used to
                     live here painted its monogram fallback as `text-primary` on
@@ -124,7 +128,7 @@ export default async function AboutPage() {
       </section>
 
       {/* Why / mission */}
-      <section className="mt-14 rounded-3xl border bg-muted/20 p-8 lg:p-10">
+      <section className="rounded-3xl border bg-muted/20 p-8 lg:p-10">
         <div className="mx-auto flex max-w-reading flex-col items-center gap-3 text-center">
           <Heart className="h-6 w-6 text-primary" aria-hidden />
           <Heading level={2}>{t("web.about.ourWhy.title")}</Heading>
@@ -133,7 +137,7 @@ export default async function AboutPage() {
       </section>
 
       {/* Trust */}
-      <section className="mt-14">
+      <section>
         <Heading level={2} className="text-center">
           {t("web.about.whyTrust")}
         </Heading>
@@ -143,7 +147,7 @@ export default async function AboutPage() {
           {TRUST_POINTS.map((p) => {
             const Icon = p.icon;
             return (
-              <div key={p.title} className="rounded-2xl border bg-card p-6 shadow-sm">
+              <div key={p.title} className="rounded-2xl border bg-card p-6 shadow-xs">
                 <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10 text-primary">
                   <Icon className="h-5 w-5" aria-hidden />
                 </div>
@@ -165,7 +169,7 @@ export default async function AboutPage() {
         </div>
       </section>
 
-      <div className="mt-14 rounded-3xl bg-primary px-6 py-14 text-center text-primary-foreground">
+      <div className="rounded-3xl bg-primary px-6 py-14 text-center text-primary-foreground">
         <Heading level={2}>{t("web.trialBand.title")}</Heading>
         <p className="mt-3 text-primary-foreground">{t("web.trialBand.noCard")}</p>
         <div className="mt-7 flex flex-col items-center gap-3 lg:flex-row lg:justify-center">

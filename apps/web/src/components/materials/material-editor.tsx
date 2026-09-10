@@ -172,7 +172,7 @@ function AddSectionRow({ onAdd }: { onAdd: () => void }) {
         type="button"
         onClick={onAdd}
         aria-label={t("material.editor.addSectionHere")}
-        className="flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs text-muted-foreground opacity-60 transition-opacity hover:bg-accent hover:text-foreground group-hover:opacity-100"
+        className="flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs text-muted-foreground opacity-60 transition-opacity group-hover:opacity-100 hover:bg-accent hover:text-foreground"
       >
         <Plus className="size-3.5" aria-hidden />
         {t("material.editor.addSection")}

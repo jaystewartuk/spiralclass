@@ -30,7 +30,7 @@ export function HelpTip({
           <button
             type="button"
             aria-label={label}
-            className="inline-flex h-6 w-6 items-center justify-center rounded-full text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring"
+            className="inline-flex h-6 w-6 items-center justify-center rounded-full text-muted-foreground hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring focus-visible:outline-hidden"
           >
             <HelpCircle className="h-3.5 w-3.5" />
           </button>

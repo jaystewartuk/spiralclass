@@ -93,7 +93,7 @@ export function BillingHistory({
               const shown = entry.paidAt ?? entry.periodStart;
               return (
                 <TableRow key={entry.id}>
-                  <TableCell className="whitespace-nowrap font-medium">
+                  <TableCell className="font-medium whitespace-nowrap">
                     <time dateTime={toYMD(shown, timezone)}>
                       {formatDateInZone(shown, timezone, locale)}
                     </time>

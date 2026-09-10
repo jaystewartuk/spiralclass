@@ -96,7 +96,7 @@ export function BookingPagePreview({
 
       <div className="space-y-4 bg-background p-5 text-center">
         <div className="space-y-1.5">
-          <p className="text-balance text-lg font-semibold">
+          <p className="text-lg font-semibold text-balance">
             {headline || pt("web.bookingLanding.classesWith", { name })}
           </p>
           <p className="text-xs text-muted-foreground">{pt("web.bookingLanding.tagline")}</p>
@@ -158,7 +158,7 @@ export function BookingPagePreview({
         )}
 
         {bio ? (
-          <p className="mx-auto max-w-prose whitespace-pre-line text-sm text-foreground/80">
+          <p className="mx-auto max-w-prose text-sm whitespace-pre-line text-foreground/80">
             {bio}
           </p>
         ) : (

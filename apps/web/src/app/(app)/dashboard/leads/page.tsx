@@ -166,7 +166,7 @@ export default async function LeadsPage({
           description={t("web.dashboard.leads.noneYet")}
           action={
             <div className="flex w-full max-w-prose flex-col items-center gap-3">
-              <div className="w-full break-all rounded-md border bg-muted/40 px-3 py-2 font-mono text-xs">
+              <div className="w-full rounded-md border bg-muted/40 px-3 py-2 font-mono text-xs break-all">
                 {bookingUrl}
               </div>
               <div className="flex flex-wrap items-center justify-center gap-2">
@@ -268,7 +268,7 @@ export default async function LeadsPage({
               <CardDescription>{t("web.dashboard.leads.shareBody")}</CardDescription>
             </CardHeader>
             <CardContent className="space-y-3">
-              <div className="break-all rounded-md border bg-muted/40 px-3 py-2 font-mono text-xs">
+              <div className="rounded-md border bg-muted/40 px-3 py-2 font-mono text-xs break-all">
                 {bookingUrl}
               </div>
               <div className="flex flex-wrap items-center gap-2">

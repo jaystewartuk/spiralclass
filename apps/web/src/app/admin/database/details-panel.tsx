@@ -36,7 +36,7 @@ export function DetailsPanel({
   const t = useT();
 
   return (
-    <aside className="absolute right-0 top-0 z-10 flex h-full w-80 max-w-sheet flex-col border-l border-border/60 bg-background/95 shadow-xl backdrop-blur">
+    <aside className="absolute top-0 right-0 z-10 flex h-full w-80 max-w-sheet flex-col border-l border-border/60 bg-background/95 shadow-xl backdrop-blur">
       <header className="flex items-center justify-between gap-2 border-b border-border/60 px-4 py-3">
         <div className="min-w-0">
           <p className="text-sm font-semibold text-subtle">

@@ -112,7 +112,7 @@ export default async function RootLayout({
       <body className="min-h-dvh bg-background font-sans text-foreground">
         <a
           href="#main-content"
-          className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:bg-primary focus:px-4 focus:py-2 focus:text-sm focus:font-medium focus:text-primary-foreground focus:shadow"
+          className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:rounded-md focus:bg-primary focus:px-4 focus:py-2 focus:text-sm focus:font-medium focus:text-primary-foreground focus:shadow"
         >
           {t("web.layout.skipToContent")}
         </a>
@@ -125,7 +125,7 @@ export default async function RootLayout({
                   <div
                     id="main-content"
                     tabIndex={-1}
-                    className="animate-fade-in-up focus:outline-none"
+                    className="animate-fade-in-up focus:outline-hidden"
                   >
                     {children}
                   </div>

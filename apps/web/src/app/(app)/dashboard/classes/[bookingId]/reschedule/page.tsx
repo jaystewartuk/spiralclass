@@ -237,7 +237,7 @@ export default async function TeacherReschedulePage({
               {nextAvailableDate ? (
                 <Button
                   asChild
-                  className="h-auto min-h-11 max-w-full whitespace-normal py-2 text-center lg:min-h-10"
+                  className="h-auto min-h-11 max-w-full py-2 text-center whitespace-normal lg:min-h-10"
                 >
                   <HardLink href={dayHref(nextAvailableDate)}>
                     {t("web.dashboard.classes.reschedule.goToNextAvailableDay", {

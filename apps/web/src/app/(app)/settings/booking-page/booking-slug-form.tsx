@@ -126,12 +126,12 @@ export function BookingSlugForm({
         </Label>
         {showFullLink && (
           <div className="flex items-center gap-2 rounded-md border bg-muted/40 px-3 py-2">
-            <span className="flex-1 break-all font-mono text-sm">{fullUrl}</span>
+            <span className="flex-1 font-mono text-sm break-all">{fullUrl}</span>
             <CopyLinkButton value={fullUrl} iconOnly />
           </div>
         )}
         <div className="flex items-stretch overflow-hidden rounded-md border ring-offset-background focus-within:ring-3 focus-within:ring-ring focus-within:ring-offset-2">
-          <span className="flex select-none items-center whitespace-nowrap bg-muted px-3 font-mono text-xs text-muted-foreground">
+          <span className="flex items-center bg-muted px-3 font-mono text-xs whitespace-nowrap text-muted-foreground select-none">
             {prefix}
           </span>
           <Input

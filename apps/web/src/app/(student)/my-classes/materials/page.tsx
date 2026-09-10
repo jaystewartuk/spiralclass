@@ -310,13 +310,13 @@ function OpenableRow({
           <MaterialOpenLink
             materialId={e.id}
             href={e.viewUrl}
-            className="block rounded-sm font-semibold leading-snug after:absolute after:inset-0 after:content-['']"
+            className="block rounded-sm leading-snug font-semibold after:absolute after:inset-0 after:content-['']"
           >
             {item.title}
             <span className="sr-only"> ({t("common.opensInNewTab")})</span>
           </MaterialOpenLink>
         ) : (
-          <span className="block font-semibold leading-snug">{item.title}</span>
+          <span className="block leading-snug font-semibold">{item.title}</span>
         )}
         <StatusBadges e={e} t={t} locale={locale} tz={tz} />
         <MetaLine parts={metaPartsFor(item, t)} />
@@ -372,7 +372,7 @@ function ReadableRow({
           <summary className="flex min-h-target cursor-pointer list-none items-start gap-3 rounded-lg p-3 transition-colors hover:bg-muted/40">
             <IconTile e={e} />
             <span className="min-w-0 flex-1 space-y-1.5">
-              <span className="block font-semibold leading-snug">{item.title}</span>
+              <span className="block leading-snug font-semibold">{item.title}</span>
               <StatusBadges e={e} t={t} locale={locale} tz={tz} />
               <MetaLine parts={metaPartsFor(item, t)} />
             </span>

@@ -29,7 +29,7 @@ export function PersonAvatar({
         aria-hidden
         width={size}
         height={size}
-        className={cn("shrink-0 select-none rounded-full object-cover", className)}
+        className={cn("shrink-0 rounded-full object-cover select-none", className)}
       />
     );
   }
@@ -49,7 +49,7 @@ export function PersonAvatar({
       aria-hidden
       style={{ width: size, height: size }}
       className={cn(
-        "inline-flex shrink-0 select-none items-center justify-center rounded-full bg-secondary font-semibold text-secondary-foreground",
+        "inline-flex shrink-0 items-center justify-center rounded-full bg-secondary font-semibold text-secondary-foreground select-none",
         textSizeClass,
         className,
       )}

@@ -109,7 +109,7 @@ export function AdminQuickSearch() {
             onChange={(e) => setQuery(e.target.value)}
             onKeyDown={onKeyDown}
             placeholder={t("web.admin.quickSearch.placeholder")}
-            className="h-9 w-56 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
+            className="h-9 w-56 bg-transparent text-sm outline-hidden placeholder:text-muted-foreground"
           />
           <button
             type="button"
@@ -135,7 +135,7 @@ export function AdminQuickSearch() {
       )}
 
       {open && query.trim() ? (
-        <div className="absolute right-0 top-full z-20 mt-2 w-72 rounded-md border bg-popover p-2 text-popover-foreground shadow-md">
+        <div className="absolute top-full right-0 z-20 mt-2 w-72 rounded-md border bg-popover p-2 text-popover-foreground shadow-md">
           {loading ? (
             <p className="px-2 py-1.5 text-xs text-muted-foreground">
               {t("web.admin.quickSearch.searching")}

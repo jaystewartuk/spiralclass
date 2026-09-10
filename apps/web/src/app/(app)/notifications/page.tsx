@@ -232,7 +232,7 @@ function InboxViews({
             href={inboxHref(value)}
             aria-current={active ? "page" : undefined}
             className={cn(
-              "flex items-center gap-2 whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium transition-colors",
+              "flex items-center gap-2 rounded-sm px-3 py-1.5 text-sm font-medium whitespace-nowrap transition-colors",
               active
                 ? "bg-background text-foreground shadow-brand-sm"
                 : "text-muted-foreground hover:text-foreground",

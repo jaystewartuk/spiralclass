@@ -124,14 +124,14 @@ export function AppNav({
       aria-label={notifLabel}
       aria-current={notificationsActive ? "page" : undefined}
       className={cn(
-        "relative inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-md transition-colors focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring lg:h-10 lg:w-10",
+        "relative inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-md transition-colors focus-visible:ring-3 focus-visible:ring-ring focus-visible:outline-hidden lg:h-10 lg:w-10",
         notificationsActive
           ? "bg-muted text-foreground"
           : "text-muted-foreground hover:bg-muted/60 hover:text-foreground",
       )}
     >
       <Bell className="h-5 w-5" />
-      <UnreadBadge count={unreadCount} className="absolute -right-0.5 -top-0.5" />
+      <UnreadBadge count={unreadCount} className="absolute -top-0.5 -right-0.5" />
     </Link>
   );
 

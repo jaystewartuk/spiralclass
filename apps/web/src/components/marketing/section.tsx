@@ -63,7 +63,7 @@ export function Section({
               <p className="text-sm font-semibold text-primary">{eyebrow}</p>
             )}
             {title && (
-              <Heading className="mt-2 text-balance font-display text-h2 font-semibold">
+              <Heading className="mt-2 font-display text-h2 font-semibold text-balance">
                 {title}
               </Heading>
             )}

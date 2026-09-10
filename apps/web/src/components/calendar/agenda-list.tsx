@@ -53,7 +53,7 @@ export function AgendaList({
                 </div>
                 <div className="truncate">{e.title}</div>
               </div>
-              <span className="shrink-0 text-sm tabular-nums text-muted-foreground">
+              <span className="shrink-0 text-sm text-muted-foreground tabular-nums">
                 {t("web.dashboard.home.schedule.durationMin", { count: e.durationMinutes })}
               </span>
               <ChevronRight

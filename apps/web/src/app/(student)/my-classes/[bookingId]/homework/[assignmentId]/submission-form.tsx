@@ -183,7 +183,7 @@ export function SubmissionForm({
         {!canEdit ? (
           <>
             <p className="text-sm text-muted-foreground">{t("homework.detail.locked")}</p>
-            {text.trim() && <p className="whitespace-pre-line text-sm">{text}</p>}
+            {text.trim() && <p className="text-sm whitespace-pre-line">{text}</p>}
           </>
         ) : (
           <div className="space-y-2">

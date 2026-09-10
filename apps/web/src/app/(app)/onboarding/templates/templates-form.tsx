@@ -574,7 +574,7 @@ export function TemplatesForm({
       {redirectTo && <input type="hidden" name="redirectTo" value={redirectTo} />}
 
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <p className="text-sm tabular-nums text-muted-foreground" aria-live="polite">
+        <p className="text-sm text-muted-foreground tabular-nums" aria-live="polite">
           {t("web.packages.count", { count: visible.length })}
         </p>
         <Button
@@ -817,7 +817,7 @@ function PackageCard({
             // the button's accessible name, and the summary is the content —
             // a screen-reader user would lose the price, the shape and the
             // per-class figure that a sighted reader gets for free.
-            className="h-auto min-w-0 flex-1 items-start justify-start gap-3 whitespace-normal px-2 py-2 text-left font-normal"
+            className="h-auto min-w-0 flex-1 items-start justify-start gap-3 px-2 py-2 text-left font-normal whitespace-normal"
           >
             <ChevronDown
               className={cn(
@@ -831,7 +831,7 @@ function PackageCard({
                 <span
                   className={cn(
                     "truncate font-semibold",
-                    !row.name.trim() && "font-normal italic text-muted-foreground",
+                    !row.name.trim() && "font-normal text-muted-foreground italic",
                   )}
                 >
                   {name}
@@ -855,7 +855,7 @@ function PackageCard({
                 {formatMinorUnits(row.priceMinorUnits, currency)}
               </span>
               {perClass !== null && (
-                <span className="block text-xs tabular-nums text-muted-foreground">
+                <span className="block text-xs text-muted-foreground tabular-nums">
                   {t("web.packages.perClass", { amount: formatMinorUnits(perClass, currency) })}
                 </span>
               )}
@@ -1093,7 +1093,7 @@ function PackageCard({
                           className="w-44 max-w-full"
                         />
                         {wiseSavings > 0 && (
-                          <span className="text-xs tabular-nums text-success">
+                          <span className="text-xs text-success tabular-nums">
                             {t("onboarding.templates.wiseSavings", {
                               amount: formatMinorUnits(wiseSavings, currency),
                             })}
@@ -1203,7 +1203,7 @@ function WisePriceCalculator({
   const canApply = !disabled && Number.isFinite(targetPesos) && targetPesos > 0;
   return (
     <details className="text-xs">
-      <summary className="cursor-pointer rounded-sm text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring">
+      <summary className="cursor-pointer rounded-sm text-muted-foreground hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring focus-visible:outline-hidden">
         {t("onboarding.templates.wiseCalculatorToggle")}
       </summary>
       <div className="mt-3 flex flex-wrap items-end gap-2">

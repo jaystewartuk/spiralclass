@@ -88,7 +88,7 @@ export default async function HelpAudienceIndexPage({ params }: { params: Promis
                 <span className="block font-semibold text-foreground">
                   {localize(doc.title, locale)}
                 </span>
-                <span className="mt-1 block text-pretty text-sm text-muted-foreground">
+                <span className="mt-1 block text-sm text-pretty text-muted-foreground">
                   {localize(doc.summary, locale)}
                 </span>
               </span>

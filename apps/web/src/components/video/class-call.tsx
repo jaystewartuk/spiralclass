@@ -1618,7 +1618,7 @@ export function ClassCall({
           {minimized && (
             <div
               aria-hidden
-              className="pointer-events-none absolute left-1/2 top-1.5 z-30 h-1 w-7 -translate-x-1/2 rounded-full bg-overlay-3"
+              className="pointer-events-none absolute top-1.5 left-1/2 z-30 h-1 w-7 -translate-x-1/2 rounded-full bg-overlay-3"
             />
           )}
 
@@ -1974,7 +1974,7 @@ export function ClassCall({
               // since the call itself keeps running behind it.
               <div
                 role="status"
-                className="absolute left-1/2 top-1/2 z-30 flex w-dialog-inset max-w-sm -translate-x-1/2 -translate-y-1/2 flex-col items-center gap-2 rounded-2xl bg-scrim-3 px-5 py-4 text-center shadow-lg backdrop-blur-sm"
+                className="absolute top-1/2 left-1/2 z-30 flex w-dialog-inset max-w-sm -translate-x-1/2 -translate-y-1/2 flex-col items-center gap-2 rounded-2xl bg-scrim-3 px-5 py-4 text-center shadow-lg backdrop-blur-xs"
               >
                 <p className="text-base font-semibold text-white">
                   {t("call.captionsNoticeTitle")}
@@ -2004,7 +2004,7 @@ export function ClassCall({
             An empty wrapper is 0-height and paints nothing, so it neither shows
             nor blocks the video underneath. */}
             {overlay && !minimized && (
-              <div className="absolute left-4 top-4 z-20 max-h-over-stage w-72 overflow-y-auto">
+              <div className="absolute top-4 left-4 z-20 max-h-over-stage w-72 overflow-y-auto">
                 {overlay}
               </div>
             )}
@@ -2017,8 +2017,8 @@ export function ClassCall({
 
             ALSO HIDDEN WHILE THE TRANSCRIPT IS OPEN, and that condition is
             load-bearing rather than tidy. The transcript panel is a sibling
-            of this button at `right-0 top-0 z-30`, and this button sits at
-            `right-4 top-4 z-30`: same stacking context, same z-index, and
+            of this button at `top-0 right-0 z-30`, and this button sits at
+            `top-4 right-4 z-30`: same stacking context, same z-index, and
             this button is LATER in the DOM, so it paints on top. Where it
             lands is exactly the transcript's own close button, which sits in
             that panel's header at the same inset. The reader taps the × she
@@ -2035,7 +2035,7 @@ export function ClassCall({
                 onClick={() => setMinimized(true)}
                 aria-label={t("call.minimize")}
                 title={t("call.minimize")}
-                className="absolute right-4 top-4 z-30 flex h-9 w-9 items-center justify-center rounded-full bg-overlay-1 text-white backdrop-blur-md hover:bg-overlay-2"
+                className="absolute top-4 right-4 z-30 flex h-9 w-9 items-center justify-center rounded-full bg-overlay-1 text-white backdrop-blur-md hover:bg-overlay-2"
               >
                 <Minimize2 className="h-4 w-4" aria-hidden />
               </button>
@@ -2060,7 +2060,7 @@ export function ClassCall({
                 }}
                 aria-label={t("call.popOut")}
                 title={t("call.popOut")}
-                className="absolute right-16 top-4 z-30 flex h-9 w-9 items-center justify-center rounded-full bg-overlay-1 text-white backdrop-blur-md hover:bg-overlay-2"
+                className="absolute top-4 right-16 z-30 flex h-9 w-9 items-center justify-center rounded-full bg-overlay-1 text-white backdrop-blur-md hover:bg-overlay-2"
               >
                 <PictureInPicture2 className="h-4 w-4" aria-hidden />
               </button>
@@ -2082,7 +2082,7 @@ export function ClassCall({
               }}
               aria-label={t("call.leave")}
               title={t("call.leave")}
-              className="absolute right-1.5 top-1.5 z-30 flex h-7 w-7 items-center justify-center rounded-full bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              className="absolute top-1.5 right-1.5 z-30 flex h-7 w-7 items-center justify-center rounded-full bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
               <PhoneOff className="h-3.5 w-3.5" aria-hidden />
             </button>

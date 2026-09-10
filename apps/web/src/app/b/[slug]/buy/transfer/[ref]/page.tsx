@@ -212,7 +212,7 @@ export default async function TransferInstructionsPage({
             {instructions.fields.map((field) => (
               <div key={field.labelKey}>
                 <p className="mb-1 text-xs text-muted-foreground">{t(field.labelKey)}</p>
-                <div className="select-all break-all rounded-md border bg-muted/40 px-3 py-2 font-mono text-sm lg:text-base">
+                <div className="rounded-md border bg-muted/40 px-3 py-2 font-mono text-sm break-all select-all lg:text-base">
                   {field.display}
                 </div>
               </div>
@@ -237,7 +237,7 @@ export default async function TransferInstructionsPage({
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-2">
-          <div className="select-all break-all rounded-md border bg-muted/40 px-3 py-2 font-mono text-sm lg:text-base">
+          <div className="rounded-md border bg-muted/40 px-3 py-2 font-mono text-sm break-all select-all lg:text-base">
             {payment.paymentReference}
           </div>
           <CopyLinkButton

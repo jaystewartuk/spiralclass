@@ -66,7 +66,7 @@ export function HomeworkAttemptCard({
       </CardHeader>
       <CardContent className="space-y-3">
         {attempt.textResponse && (
-          <p className="whitespace-pre-wrap text-sm">{attempt.textResponse}</p>
+          <p className="text-sm whitespace-pre-wrap">{attempt.textResponse}</p>
         )}
         {attempt.files.length > 0 && (
           <ul className="space-y-1 text-sm">

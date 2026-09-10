@@ -39,7 +39,7 @@ export function EmojiPickerDialog({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="flex max-h-over-stage flex-col gap-0 overflow-hidden p-0">
-        <DialogHeader className="border-b border-border px-5 pb-4 pt-5">
+        <DialogHeader className="border-b border-border px-5 pt-5 pb-4">
           <DialogTitle>{t("chat.emoji.open")}</DialogTitle>
           <DialogDescription>{t("chat.react.more")}</DialogDescription>
         </DialogHeader>

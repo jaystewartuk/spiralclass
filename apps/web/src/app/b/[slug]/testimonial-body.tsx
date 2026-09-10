@@ -54,7 +54,7 @@ export function TestimonialBody({
       <p
         id={id}
         className={cn(
-          "whitespace-pre-line text-sm text-foreground/80",
+          "text-sm whitespace-pre-line text-foreground/80",
           clampable && !expanded && "line-clamp-5",
         )}
       >

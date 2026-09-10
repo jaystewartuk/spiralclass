@@ -34,7 +34,7 @@ export function LessonSummaryCard({
         {summary ? (
           <>
             {/* Notes can hold newlines; preserve them. */}
-            <p className="whitespace-pre-wrap text-sm">{summary.body}</p>
+            <p className="text-sm whitespace-pre-wrap">{summary.body}</p>
             <p className="text-xs text-muted-foreground">
               {t("web.dashboard.classes.summary.generated")}
               {summary.generatedAt}

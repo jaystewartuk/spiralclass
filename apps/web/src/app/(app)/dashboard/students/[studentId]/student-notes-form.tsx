@@ -143,7 +143,7 @@ function StudentNoteItem({ note }: { note: StudentNoteView }) {
 
   return (
     <div className="rounded-md border px-3 py-2 text-sm">
-      <p className="whitespace-pre-wrap break-words">{note.body}</p>
+      <p className="break-words whitespace-pre-wrap">{note.body}</p>
       <div className="mt-2 flex items-center justify-between gap-2 text-xs text-muted-foreground">
         <span>
           {note.timestampLabel}

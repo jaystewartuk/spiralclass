@@ -84,7 +84,7 @@ export function ToggleSetting({
           className="mt-1"
         />
         <div className="min-w-0 space-y-1">
-          <Label htmlFor={id} className="font-medium leading-snug">
+          <Label htmlFor={id} className="leading-snug font-medium">
             {label}
           </Label>
           {hint ? (

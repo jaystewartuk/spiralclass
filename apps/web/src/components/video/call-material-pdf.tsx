@@ -147,7 +147,7 @@ export function CallMaterialPdf({ url }: { url: string }) {
           // ratio above bought.
           canvas.style.width = "100%";
           canvas.style.height = "auto";
-          canvas.className = "mb-4 rounded-lg bg-white shadow-sm";
+          canvas.className = "mb-4 rounded-lg bg-white shadow-xs";
           canvas.setAttribute("role", "img");
           canvas.setAttribute(
             "aria-label",

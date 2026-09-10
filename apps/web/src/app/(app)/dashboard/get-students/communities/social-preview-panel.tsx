@@ -368,7 +368,7 @@ function PreviewThumb({ url, caption }: { url: string; caption: string }) {
       <Image src={url} alt="" fill sizes="384px" className="object-cover" unoptimized />
       {caption.trim().length > 0 && (
         <div className="absolute inset-0 flex items-center justify-center bg-scrim-1 p-4">
-          <span className="text-center text-sm font-bold leading-tight text-white drop-shadow">
+          <span className="text-center text-sm leading-tight font-bold text-white drop-shadow">
             {caption}
           </span>
         </div>

@@ -432,7 +432,7 @@ export function IntroVideoForm({
               />
             ) : null}
             {recording && (
-              <span className="absolute left-2 top-2 rounded bg-destructive px-2 py-0.5 text-xs font-medium text-destructive-foreground">
+              <span className="absolute top-2 left-2 rounded bg-destructive px-2 py-0.5 text-xs font-medium text-destructive-foreground">
                 {`● ${secs}s`}
               </span>
             )}

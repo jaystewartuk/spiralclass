@@ -63,7 +63,7 @@ export function CurrentTimeLine({
       style={{ top }}
       className="absolute inset-x-0 z-20 h-0.5 bg-destructive"
     >
-      <span className="absolute -left-1 -top-1 h-2.5 w-2.5 rounded-full bg-destructive" />
+      <span className="absolute -top-1 -left-1 h-2.5 w-2.5 rounded-full bg-destructive" />
     </div>
   );
 }

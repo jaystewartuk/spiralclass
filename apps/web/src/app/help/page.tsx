@@ -85,7 +85,7 @@ export default async function HelpPage() {
             absolutely positioned and has to escape the hero. */}
         <div className="relative">
           <div aria-hidden className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
-            <div className="absolute left-1/2 top-0 h-96 w-96 -translate-x-1/2 rounded-full bg-primary/10 blur-3xl" />
+            <div className="absolute top-0 left-1/2 h-96 w-96 -translate-x-1/2 rounded-full bg-primary/10 blur-3xl" />
           </div>
           <div className="container flex flex-col items-center gap-5 py-14 text-center lg:py-20">
             <Badge variant="secondary" className="gap-1.5 px-3 py-1">
@@ -95,7 +95,7 @@ export default async function HelpPage() {
             <Heading level={1} className="max-w-reading text-balance lg:text-display">
               {t("web.help.hero.title")}
             </Heading>
-            <p className="max-w-reading text-pretty text-lg text-muted-foreground">
+            <p className="max-w-reading text-lg text-pretty text-muted-foreground">
               {t("web.help.hero.sub")}
             </p>
             <div className="mt-2 w-full max-w-xl">
@@ -155,7 +155,7 @@ export default async function HelpPage() {
                   label={guide.title}
                   linkLabel={t("web.help.anchorLinkTo", { section: guide.title })}
                 />
-                <p className="mt-3 max-w-reading text-pretty text-lg text-muted-foreground">
+                <p className="mt-3 max-w-reading text-lg text-pretty text-muted-foreground">
                   {guide.summary}
                 </p>
 

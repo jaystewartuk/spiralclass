@@ -234,7 +234,7 @@ export default async function PaymentsListPage({
             <p className="text-xs font-medium text-muted-foreground">
               {t("web.payments.emptyShareLead")}
             </p>
-            <div className="break-all rounded-md border bg-muted/40 px-3 py-2 font-mono text-xs">
+            <div className="rounded-md border bg-muted/40 px-3 py-2 font-mono text-xs break-all">
               {bookingUrl}
             </div>
             <CopyLinkButton value={bookingUrl} />

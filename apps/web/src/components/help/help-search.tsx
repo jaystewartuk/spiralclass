@@ -81,7 +81,7 @@ export function HelpSearch({ entries }: { entries: HelpSearchEntry[] }) {
         {t("web.help.search.label")}
       </label>
       <Search
-        className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground"
+        className="pointer-events-none absolute top-1/2 left-4 h-5 w-5 -translate-y-1/2 text-muted-foreground"
         aria-hidden
       />
       <Input
@@ -113,7 +113,7 @@ export function HelpSearch({ entries }: { entries: HelpSearchEntry[] }) {
         // `no-native-clear` (globals.css) suppresses WebKit's own clear
         // button; this field supplies one of its own and two of them side by
         // side reads as a rendering fault.
-        className="no-native-clear h-12 rounded-full pl-12 pr-12 text-base lg:h-12 lg:text-base"
+        className="no-native-clear h-12 rounded-full pr-12 pl-12 text-base lg:h-12 lg:text-base"
       />
       {searching && (
         <Button
@@ -121,7 +121,7 @@ export function HelpSearch({ entries }: { entries: HelpSearchEntry[] }) {
           variant="ghost"
           size="icon"
           onClick={clear}
-          className="absolute right-1 top-1/2 h-10 w-10 -translate-y-1/2 rounded-full"
+          className="absolute top-1/2 right-1 h-10 w-10 -translate-y-1/2 rounded-full"
         >
           <X className="h-4 w-4" aria-hidden />
           <span className="sr-only">{t("web.help.search.clear")}</span>
@@ -138,7 +138,7 @@ export function HelpSearch({ entries }: { entries: HelpSearchEntry[] }) {
       {open && (
         <div
           className={cn(
-            "absolute left-0 right-0 top-full z-30 mt-2 overflow-hidden rounded-2xl border bg-popover text-left shadow-brand-lg",
+            "absolute top-full right-0 left-0 z-30 mt-2 overflow-hidden rounded-2xl border bg-popover text-left shadow-brand-lg",
           )}
         >
           {results.length === 0 ? (

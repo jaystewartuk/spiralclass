@@ -144,7 +144,7 @@ export async function SafeToSpendTile({ cashFlow }: { cashFlow: CashFlow }) {
           </div>
           <div className="flex items-baseline justify-between gap-3">
             <dt className="text-muted-foreground">{t("web.cashflow.held")}</dt>
-            <dd className="font-medium tabular-nums text-warning">
+            <dd className="font-medium text-warning tabular-nums">
               {formatMinorUnits(summary.heldCents, summary.currency)}
             </dd>
           </div>

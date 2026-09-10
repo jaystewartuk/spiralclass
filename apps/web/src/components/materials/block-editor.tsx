@@ -306,10 +306,10 @@ function EditableBlock({
           onEnterEdit();
         }
       }}
-      className="group/readblock relative cursor-pointer rounded-md px-2 py-1 hover:bg-muted/30 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+      className="group/readblock relative cursor-pointer rounded-md px-2 py-1 hover:bg-muted/30 focus-visible:ring-1 focus-visible:ring-ring focus-visible:outline-hidden"
     >
       <MaterialDocument body={serializeBlock(block)} />
-      <span className="absolute right-1 top-1 opacity-0 transition-opacity focus-within:opacity-100 group-hover/readblock:opacity-100">
+      <span className="absolute top-1 right-1 opacity-0 transition-opacity group-hover/readblock:opacity-100 focus-within:opacity-100">
         <IconButton
           label={t("material.editor.block.delete")}
           destructive
@@ -1077,7 +1077,7 @@ function AddBlockRow({
         className={cn(
           "group flex items-center gap-2 py-0.5",
           subdued &&
-            "opacity-0 transition-opacity focus-within:opacity-100 group-hover/blocklist:opacity-100",
+            "opacity-0 transition-opacity group-hover/blocklist:opacity-100 focus-within:opacity-100",
         )}
       >
         <span className="h-px flex-1 bg-border opacity-30 transition-opacity group-hover:opacity-100" />

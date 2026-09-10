@@ -462,7 +462,7 @@ function BookingLinkCard({ vm, t, readOnly }: SectionProps) {
             {t("web.dashboard.home.bookingLinkNotPublicYetWarning")}
           </p>
         )}
-        <div className="break-all rounded-md border bg-muted/40 px-3 py-2 font-mono text-sm">
+        <div className="rounded-md border bg-muted/40 px-3 py-2 font-mono text-sm break-all">
           {vm.bookingUrl}
         </div>
         <div className="flex flex-wrap items-center gap-2">

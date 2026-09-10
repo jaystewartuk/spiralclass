@@ -101,7 +101,7 @@ export function TimeGrid({
                 // be blanked, which left the topmost hour — often the one
                 // holding the first class of the day — as the only unlabelled
                 // row on the axis.
-                className="absolute right-2 pt-1 text-sm tabular-nums text-muted-foreground"
+                className="absolute right-2 pt-1 text-sm text-muted-foreground tabular-nums"
               >
                 {String(h).padStart(2, "0")}:00
               </div>
@@ -135,12 +135,12 @@ export function TimeGrid({
                       isToday ? "bg-primary/10" : "text-muted-foreground",
                     )}
                   >
-                    <span className="text-sm capitalize leading-none">
+                    <span className="text-sm leading-none capitalize">
                       {weekdayFmt.format(dayDate)}
                     </span>
                     <span
                       className={cn(
-                        "flex h-7 w-7 items-center justify-center rounded-full text-sm font-semibold tabular-nums leading-none",
+                        "flex h-7 w-7 items-center justify-center rounded-full text-sm leading-none font-semibold tabular-nums",
                         isToday ? "bg-primary text-primary-foreground" : "text-foreground",
                       )}
                     >
@@ -192,7 +192,7 @@ export function TimeGrid({
                           width: `calc(${widthPct}% - 4px)`,
                         }}
                         className={cn(
-                          "absolute z-10 overflow-hidden rounded-md border border-l-4 px-1.5 py-0.5 text-sm leading-snug shadow-sm transition-shadow hover:shadow-brand-md",
+                          "absolute z-10 overflow-hidden rounded-md border border-l-4 px-1.5 py-0.5 text-sm leading-snug shadow-xs transition-shadow hover:shadow-brand-md",
                           styleFor(l.ev.status).block,
                           // Too short for two lines: run them together so the
                           // student's name is still there rather than clipped

@@ -486,7 +486,7 @@ export function TestimonialCard({
             one thing those elements are for. */}
         <figure className="mt-4 space-y-3">
           <Quote className="h-5 w-5 text-primary/60" aria-hidden />
-          <blockquote className="whitespace-pre-line text-sm text-foreground/80">
+          <blockquote className="text-sm whitespace-pre-line text-foreground/80">
             {item.body}
           </blockquote>
           <figcaption className="flex items-center gap-2 text-sm font-medium">

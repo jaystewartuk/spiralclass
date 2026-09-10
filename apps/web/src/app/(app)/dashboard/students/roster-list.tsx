@@ -83,7 +83,7 @@ function RosterRow({
           announcing "AL" before it is noise, not information. */}
       <span
         aria-hidden
-        className="mt-0.5 inline-flex size-9 shrink-0 select-none items-center justify-center rounded-full bg-secondary text-sm font-medium text-secondary-foreground"
+        className="mt-0.5 inline-flex size-9 shrink-0 items-center justify-center rounded-full bg-secondary text-sm font-medium text-secondary-foreground select-none"
       >
         {initialsFrom(student.name, student.email)}
       </span>
@@ -128,7 +128,7 @@ function RosterRow({
                   })}
                 </span>
               </p>
-              <p aria-hidden className="text-sm tabular-nums text-subtle">
+              <p aria-hidden className="text-sm text-subtle tabular-nums">
                 {t("web.dashboard.students.roster.ofTotal", { total: pkg.total })}
               </p>
             </>

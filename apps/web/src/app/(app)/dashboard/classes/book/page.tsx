@@ -378,7 +378,7 @@ export default async function TeacherBookPage({
 
           <section
             aria-labelledby="book-times"
-            className="border-t border-border p-4 lg:col-span-3 lg:border-l lg:border-t-0 lg:p-6"
+            className="border-t border-border p-4 lg:col-span-3 lg:border-t-0 lg:border-l lg:p-6"
           >
             <div className="mb-1 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
               {/* Capitalised in JS, not by `capitalize`: that utility
@@ -524,7 +524,7 @@ function BookingContext({
         <div className="flex flex-wrap items-center gap-3">
           <span
             aria-hidden
-            className="inline-flex size-10 shrink-0 select-none items-center justify-center rounded-full bg-secondary font-semibold text-secondary-foreground"
+            className="inline-flex size-10 shrink-0 items-center justify-center rounded-full bg-secondary font-semibold text-secondary-foreground select-none"
           >
             {initialsFrom(studentName, studentEmail)}
           </span>
@@ -728,7 +728,7 @@ function EmptyDay({
       {nextAvailableDate && nextAvailableHref ? (
         <Button
           asChild
-          className="mt-4 h-auto min-h-target max-w-full whitespace-normal py-2 text-center"
+          className="mt-4 h-auto min-h-target max-w-full py-2 text-center whitespace-normal"
         >
           <HardLink href={nextAvailableHref}>
             {t("web.dashboard.classes.goToNextAvailableDay", { date: nextAvailableLabel })}

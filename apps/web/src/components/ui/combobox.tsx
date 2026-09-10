@@ -110,8 +110,8 @@ export function Combobox({
         onClick={() => setOpen((o) => !o)}
         {...aria}
         className={cn(
-          "flex h-9 w-full items-center justify-between rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors",
-          "focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50",
+          "flex h-9 w-full items-center justify-between rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs transition-colors",
+          "focus-visible:ring-1 focus-visible:ring-ring focus-visible:outline-hidden disabled:cursor-not-allowed disabled:opacity-50",
           !selected && "text-muted-foreground",
           className,
         )}
@@ -137,7 +137,7 @@ export function Combobox({
               placeholder={searchPlaceholder}
               aria-label={searchPlaceholder}
               autoComplete="off"
-              className="flex h-8 w-full rounded-sm bg-transparent px-2 text-sm outline-none placeholder:text-muted-foreground"
+              className="flex h-8 w-full rounded-sm bg-transparent px-2 text-sm outline-hidden placeholder:text-muted-foreground"
             />
           </div>
           <ul id={listId} role="listbox" className="max-h-60 overflow-y-auto p-1">

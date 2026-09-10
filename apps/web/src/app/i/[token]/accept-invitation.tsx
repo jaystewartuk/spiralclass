@@ -198,7 +198,7 @@ function Shell({
   children: React.ReactNode;
 }) {
   return (
-    <main className="min-h-viewport flex items-center justify-center bg-background p-4">
+    <main className="flex min-h-viewport items-center justify-center bg-background p-4">
       <div className="w-full max-w-md space-y-4">
         {photo && (
           <div className="flex justify-center">

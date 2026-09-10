@@ -223,7 +223,7 @@ export default async function ReferralsPage() {
                       </p>
                     </div>
                     <div className="flex shrink-0 items-center gap-2">
-                      <span className="text-sm tabular-nums text-muted-foreground">
+                      <span className="text-sm text-muted-foreground tabular-nums">
                         {t("web.dashboard.referrals.activity.discountGiven", {
                           amount: formatMinorUnits(row.discountMinorUnits, row.currency),
                         })}
