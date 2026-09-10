@@ -311,8 +311,9 @@ authored per language, `<slug>.es-MX.md` beside `<slug>.md`.
 - **Add a `run:` step to a workflow that performs a check** — see the gate,
   above.
 - **Add a `TODO.md`, a backlog, a plans directory, or a dated audit whose last
-  section is a findings list** (D-110). This repository holds no
-  forward-looking work; it lives on the maintainer's private board.
+  section is a findings list** (D-110). No queue lives in the tree — work owed
+  is an issue on this repository ([D-172](docs/decisions/D-172.md)), where a
+  pull request can close it.
 - **Archive a superseded document** — delete it. Git history is the archive,
   and unlike a directory it cannot be mistaken for current policy.
 - **State a number in the front-door documents without adding it to

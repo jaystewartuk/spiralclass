@@ -17,10 +17,24 @@ import { statePath, type AuthedTier } from "../visual/session";
  * keeping a second list — a route added to one is covered by both, and there is
  * no second thing to forget to update.
  *
- * Scope: the portfolio-tier authenticated routes. Not every one of the 86,
- * because axe is slow and a sweep nobody waits for is a sweep nobody runs; the
- * screens chosen are the ones a teacher and a student are actually in every
- * day.
+ * Scope: the authenticated routes flagged `portfolio` or `a11y`. Not every one
+ * of the 86, because axe is slow and a sweep nobody waits for is a sweep nobody
+ * runs; the screens chosen are the ones a teacher and a student are actually in
+ * every day.
+ *
+ * ⚠️ WHY TWO FLAGS RATHER THAN ONE. This selected on `portfolio` alone, and
+ * that was a proxy standing in for a claim it does not make: `portfolio` marks
+ * what a stranger evaluating the product reaches, which is not the same set as
+ * what a person uses daily. Where the two diverge is exactly where an
+ * accessibility defect is cheapest to keep — nobody presentable is looking.
+ *
+ * It had already happened when `a11y` was added. `/settings/account` renders
+ * the account monogram at 80px, `/dashboard/messages/new` and its student twin
+ * render the same monogram in a picker, and all three painted `text-primary` on
+ * `bg-primary/10` — 4.24:1 in dark mode, below AA. None was in this sweep. What
+ * found it was the identical component failing on /about, a page a stranger
+ * DOES reach, which is to say: luck, plus a public page happening to share a
+ * component with a private one.
  */
 
 const WCAG_TAGS = ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"];
@@ -29,7 +43,7 @@ const WCAG_TAGS = ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"];
 const TIERS: AuthedTier[] = ["teacher", "student"];
 
 const ROUTES: Route[] = TIERS.flatMap((tier) =>
-  capturable(tier).filter((route) => route.portfolio && !route.path.includes(":")),
+  capturable(tier).filter((route) => (route.portfolio || route.a11y) && !route.path.includes(":")),
 );
 
 test.describe("axe — signed in", () => {

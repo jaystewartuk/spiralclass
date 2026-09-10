@@ -55,10 +55,17 @@ export function AccountAvatar({
   }
 
   return (
+    // A SOLID neutral fill, for the reason written out in full at
+    // components/teacher-identity.tsx and components/ui/badge.tsx: a 10% wash
+    // composited against whatever surface it lands on, written on in `primary`,
+    // is a colour no token names and palette-contrast.test.ts cannot assert.
+    // This was the last monogram still painting one — the `xl` size renders it
+    // at 80px on the account page's raised card, which is the darkest ground
+    // the same pairing measured 4.24:1 against on /about.
     <span
       aria-hidden
       className={cn(
-        "inline-flex shrink-0 select-none items-center justify-center rounded-full bg-primary/10 font-medium text-primary",
+        "inline-flex shrink-0 select-none items-center justify-center rounded-full bg-secondary font-medium text-secondary-foreground",
         box,
         text,
         className,

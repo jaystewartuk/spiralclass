@@ -27,15 +27,15 @@
 //           laptop before it fast-forwards `production`, and it is the tier
 //           whose receipt certifies the commit that ships.
 //
-// ⚠️ THE HEAVY HALF IS NO LONGER LAPTOP-ONLY. D-157 recorded one concrete
-// blocker — the visual baselines under apps/web/tests/visual were `-darwin.png`
-// only, so `e2e` could not go green on Linux — and [D-161] removed it by
-// committing a SECOND set of baselines, `-linux.png`, generated on
-// `ubuntu-latest`. Both sets are live and neither is authoritative over the
-// other: Playwright picks by `process.platform`, so the laptop asserts against
-// darwin and the runner against linux. A route added or restyled needs BOTH
-// regenerated, which is the standing cost this bought — see the header of
-// scripts/ci/e2e.sh for how.
+// ⚠️ THE HEAVY HALF IS NO LONGER LAPTOP-ONLY, AND THE `e2e` STEP NOW ASSERTS
+// LESS HERE THAN IT DOES ON A RUNNER. D-157 recorded one concrete blocker — the
+// visual baselines under apps/web/tests/visual were `-darwin.png` only, so
+// `e2e` could not go green on Linux — and [D-161] removed it by committing a
+// second set, `-linux.png`. [D-171] then deleted the macOS set: [D-162] had
+// already made the runners, not a local receipt, what certifies a release, so
+// the second set was bookkeeping nothing depended on. The visual sweep now
+// skips anywhere but Linux and says so, which is worth knowing before reading
+// a local `gate:full` as the same answer a runner gives.
 //
 // Order matters. Steps run sequentially, cheapest-and-most-likely-to-fail
 // first, so a formatting slip fails in seconds instead of after the E2E suite.

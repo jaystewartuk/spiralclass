@@ -28,10 +28,18 @@ name: Heavy
 # with every other session's push queued behind the machine lock (D-146), and
 # the fact that they ran AFTER a merge rather than before one.
 #
-# REGENERATING THE LINUX BASELINES. The `-linux.png` set can only honestly be
-# produced here, on the same amd64 runner that asserts against it — arm64 Linux
-# under emulation rasterises text differently, so baselines made that way pass
-# locally and fail in CI. Run:
+# THIS RUNNER NOW OWNS THE ONLY BASELINE SET ([D-171]). The macOS half is
+# deleted and regression.spec.ts skips anywhere but Linux, because [D-162] left
+# it certifying nothing: what ships is certified by the verdict THIS workflow
+# posts for the exact commit. So a red visual leg here is the finding, not a
+# second opinion about one, and the dispatch below is the only way to move a
+# baseline.
+#
+# REGENERATING THE BASELINES. They can only honestly be produced here, on the
+# same amd64 runner that asserts against them — arm64 Linux under emulation
+# rasterises text differently, so baselines made that way pass locally and fail
+# in CI. scripts/ci/e2e.sh refuses to write them off a Linux machine at all.
+# Run:
 #
 #   gh workflow run heavy.yml -f update_visual_baselines=all --ref <branch>
 #   gh run watch <id>
@@ -228,16 +236,16 @@ jobs:
         # The snapshot directory rides along for one specific case: Playwright
         # defaults to `updateSnapshots: 'missing'`, so a capture with no
         # `-linux.png` yet gets one WRITTEN from whatever rendered, and the
-        # image only exists on this disposable disk. Uploading it is what makes
-        # the very first run of this workflow able to produce the baseline set
-        # it is about to start asserting — and it is also how a route added
-        # later gets its Linux half without a separate dispatch.
+        # image only exists on this disposable disk. Uploading it is how a route
+        # added since the last regeneration gets its baseline without a separate
+        # dispatch.
         #
         # ⚠️ A written baseline is NOT a passing test. It asserts nothing, it
         # can photograph a bug perfectly, and on a retry it compares against
         # itself and goes green. What stops that reaching main is
         # apps/web/tests/visual/manifest.test.ts, which runs in the FAST tier
-        # and fails while the two sets disagree. Look at the images.
+        # and fails while a captured route has no committed image. Look at the
+        # images.
         if: ${{ always() }}
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
