@@ -16,6 +16,7 @@ import {
   CALLOUT_VARIANTS,
   DEFAULT_LESSON_FORMAT,
   DEFAULT_MATERIAL_VOCABULARY,
+  usesEnglishCopy,
 } from "@spiralclass/shared";
 import type {
   LessonFormat,
@@ -214,7 +215,7 @@ export type MaterialPrompt = { system: string; user: string };
 // Markdown (the canonical material format); the model is told to return
 // content only, no preamble, no surrounding code fence.
 export function buildMaterialPrompt(input: MaterialPromptInput): MaterialPrompt {
-  const en = input.locale === "en";
+  const en = usesEnglishCopy(input.locale);
   // An explicit output language wins; otherwise fall back to the UI locale. The
   // fallback must be a plain registry name ("Spanish", not "Mexican Spanish
   // (es-MX)") because it is compared against targetLanguage below — a regional
@@ -411,7 +412,7 @@ export type MaterialRefinePromptInput = {
 };
 
 export function buildMaterialRefinePrompt(input: MaterialRefinePromptInput): MaterialPrompt {
-  const en = input.locale === "en";
+  const en = usesEnglishCopy(input.locale);
   // Mirror buildMaterialPrompt's resolution so a refine keeps the material in
   // the same language it was written in — and, for a language teacher, keeps
   // instructions and target-language content on their respective axes.

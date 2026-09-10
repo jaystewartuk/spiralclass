@@ -13,6 +13,7 @@ import {
   requestStudentDeletionAction,
   cancelStudentDeletionAction,
 } from "@/app/actions/account-deletion";
+import { usesEnglishCopy } from "@spiralclass/shared";
 
 // Two states: no pending request → show "Delete" button with a typed
 // confirmation; pending request → show "Cancel deletion" with the
@@ -27,7 +28,7 @@ type Props = {
 export function AccountDeletionForm({ subjectType, pending }: Props) {
   const t = useT();
   const locale = useLocale();
-  const en = locale === "en";
+  const en = usesEnglishCopy(locale);
   const isPending = pending !== null;
   const requestAction =
     subjectType === "teacher" ? requestTeacherDeletionAction : requestStudentDeletionAction;

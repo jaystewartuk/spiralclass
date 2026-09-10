@@ -9,6 +9,7 @@ import { getStripeClient } from "@/lib/stripe";
 import { applyRefund } from "@/lib/payments/refund";
 import { logger } from "@/lib/logger";
 import { revalidateAfterAction } from "@/lib/revalidate";
+import { usesEnglishCopy } from "@spiralclass/shared";
 
 const log = logger({ surface: "admin-refund" });
 
@@ -34,7 +35,7 @@ export async function adminRefundPaymentAction(
 ): Promise<AdminPaymentActionState> {
   const actor = await requireAdmin("finance");
   const locale = await getPreferredLocale();
-  const en = locale === "en";
+  const en = usesEnglishCopy(locale);
   const parsed = refundSchema.safeParse({
     paymentId: formData.get("paymentId"),
     reason: formData.get("reason"),

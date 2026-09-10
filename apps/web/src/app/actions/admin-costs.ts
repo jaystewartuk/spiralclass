@@ -9,6 +9,7 @@ import {
   KNOWN_EXPENSE_VENDORS,
   EXPENSE_CATEGORIES,
   type ExpenseVendor,
+  usesEnglishCopy,
 } from "@spiralclass/shared";
 import { revalidateAfterAction } from "@/lib/revalidate";
 
@@ -64,7 +65,7 @@ export async function createExpenseAction(
 ): Promise<AdminCostsActionState> {
   await requireAdmin("finance");
   const locale = await getPreferredLocale();
-  const en = locale === "en";
+  const en = usesEnglishCopy(locale);
   const parsed = baseExpenseSchema.safeParse(readExpenseFields(formData));
   if (!parsed.success) {
     return { error: parsed.error.issues[0]?.message ?? (en ? "Invalid data" : "Datos inválidos") };
@@ -96,7 +97,7 @@ export async function updateExpenseAction(
 ): Promise<AdminCostsActionState> {
   await requireAdmin("finance");
   const locale = await getPreferredLocale();
-  const en = locale === "en";
+  const en = usesEnglishCopy(locale);
   const parsed = updateExpenseSchema.safeParse({
     id: formData.get("id"),
     ...readExpenseFields(formData),
@@ -137,7 +138,7 @@ export async function deleteExpenseAction(
 ): Promise<AdminCostsActionState> {
   await requireAdmin("finance");
   const locale = await getPreferredLocale();
-  const en = locale === "en";
+  const en = usesEnglishCopy(locale);
   const parsed = deleteExpenseSchema.safeParse({ id: formData.get("id") });
   if (!parsed.success) {
     return { error: en ? "Invalid data" : "Datos inválidos" };

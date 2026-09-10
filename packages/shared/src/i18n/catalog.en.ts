@@ -6770,4 +6770,29 @@ export const en = {
   "web.getStudents.postNoKinds":
     "There is nothing we can honestly post here yet. Check this community's promotion setting, or add a package, a photo or a testimonial to your page.",
   "web.getStudents.copyPostAndLink": "Copy post",
+
+  // The standalone HTML pages served by the /r/* redirect routers and the
+  // unsubscribe handler. These render outside the app shell — no layout, no
+  // LocaleProvider — so they build their own markup and resolve the locale
+  // from the request themselves.
+  "web.expiredLink.title": "Link expired",
+  "web.expiredLink.heading": "This link no longer works",
+  "web.expiredLink.signIn": "Ask your teacher for a new sign-in link.",
+  "web.expiredLink.reschedule": "The link to rebook your class is no longer available.",
+  "web.expiredLink.rescheduleAction": "Go to your classes",
+  "web.unsubscribe.confirm.title": "Unsubscribe",
+  "web.unsubscribe.confirm.heading": "Stop these emails?",
+  "web.unsubscribe.confirm.body": "Confirm you no longer want emails from SpiralClass.",
+  "web.unsubscribe.confirm.push":
+    "You may still get important notices as push notifications in the app.",
+  "web.unsubscribe.confirm.cta": "Yes, stop my emails",
+  "web.unsubscribe.done.title": "Unsubscribed",
+  "web.unsubscribe.done.heading": "Done",
+  "web.unsubscribe.done.body": "We won't send you emails again.",
+  "web.unsubscribe.done.push":
+    "You may still get important notices as push notifications in the app; you can adjust those from the app.",
+  "web.unsubscribe.error.title": "Invalid link",
+  "web.unsubscribe.error.heading": "Invalid link",
+  "web.unsubscribe.error.body": "We couldn't process your request ({reason}).",
+  "web.unsubscribe.error.help": "If you need help, contact your teacher.",
 } as const;

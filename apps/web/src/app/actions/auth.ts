@@ -11,6 +11,7 @@ import { safeNextPath } from "@/lib/auth/safe-next";
 import { logger } from "@/lib/logger";
 import { allowRateLimitBypass } from "@/lib/env";
 import { revalidateAfterAction } from "@/lib/revalidate";
+import { usesEnglishCopy } from "@spiralclass/shared";
 
 const log = logger({ surface: "auth" });
 
@@ -39,7 +40,7 @@ export async function requestSignInCodeAction(
   formData: FormData,
 ): Promise<ActionState> {
   const locale = await getPreferredLocale();
-  const en = locale === "en";
+  const en = usesEnglishCopy(locale);
   const bypass = allowRateLimitBypass();
 
   const ip = await clientIp();
@@ -83,7 +84,7 @@ export async function requestTeacherSignupCodeAction(
   formData: FormData,
 ): Promise<ActionState> {
   const locale = await getPreferredLocale();
-  const en = locale === "en";
+  const en = usesEnglishCopy(locale);
   const ip = await clientIp();
   const rl = await rateLimit(ip, { scope: "sign-up", limit: 6, windowMs: 60_000 });
   if (!rl.ok) return { error: tooMany(en), retryAfterMs: rl.retryAfterMs };
@@ -120,7 +121,7 @@ export async function verifySignInCodeAction(
   formData: FormData,
 ): Promise<ActionState> {
   const locale = await getPreferredLocale();
-  const en = locale === "en";
+  const en = usesEnglishCopy(locale);
   const ip = await clientIp();
   const rl = allowRateLimitBypass()
     ? { ok: true, retryAfterMs: 0 }

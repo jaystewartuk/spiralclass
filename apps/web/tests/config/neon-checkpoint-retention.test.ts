@@ -118,7 +118,7 @@ describe("neon checkpoint retention", () => {
     expect(
       found?.[0],
       `scripts/fly-deploy.sh names a Neon project id (${found?.[0]}). ` +
-        "Supply it as the NEON_PROJECT_ID repository variable instead — see D-158.",
+        "Supply it as the NEON_PROJECT_ID environment secret instead — see D-158.",
     ).toBeUndefined();
   });
 

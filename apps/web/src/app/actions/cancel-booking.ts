@@ -14,6 +14,7 @@ import {
 import { studentIdentityIds } from "@/lib/students/identity";
 import { flushAnalytics, trackServerEvent } from "@/lib/analytics/posthog";
 import { revalidateAfterAction } from "@/lib/revalidate";
+import { usesEnglishCopy } from "@spiralclass/shared";
 
 export type CancelState = { error?: string; ok?: string } | undefined;
 
@@ -42,7 +43,7 @@ export async function cancelBookingAsStudent(
   formData: FormData,
 ): Promise<CancelState> {
   const locale = await getPreferredLocale();
-  const en = locale === "en";
+  const en = usesEnglishCopy(locale);
   const parsed = cancelInputSchema.safeParse({
     bookingId: formData.get("bookingId"),
     reason: formData.get("reason") || undefined,
@@ -109,7 +110,7 @@ export async function cancelBookingAsTeacher(
   formData: FormData,
 ): Promise<CancelState> {
   const locale = await getPreferredLocale();
-  const en = locale === "en";
+  const en = usesEnglishCopy(locale);
   const parsed = teacherCancelSchema.safeParse({
     bookingId: formData.get("bookingId"),
     reason: formData.get("reason"),

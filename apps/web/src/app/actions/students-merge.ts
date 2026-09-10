@@ -7,6 +7,7 @@ import { mergeRosterStudents as mergeCore, type MergeRefusal } from "@/lib/stude
 import { flushAnalytics, trackServerEvent } from "@/lib/analytics/posthog";
 import type { OverrideState } from "./overrides";
 import { revalidateAfterAction } from "@/lib/revalidate";
+import { usesEnglishCopy } from "@spiralclass/shared";
 
 // Teacher-facing duplicate merge (see lib/students/merge.ts for the rules
 // and the full list of what moves). This wrapper owns auth, input parsing,
@@ -55,7 +56,7 @@ export async function mergeRosterStudents(
   formData: FormData,
 ): Promise<OverrideState> {
   const locale = await getPreferredLocale();
-  const en = locale === "en";
+  const en = usesEnglishCopy(locale);
   const parsed = mergeSchema.safeParse({
     keepStudentId: formData.get("keepStudentId"),
     mergeStudentId: formData.get("mergeStudentId"),

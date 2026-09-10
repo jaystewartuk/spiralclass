@@ -20,6 +20,7 @@ import {
   DEFAULT_DASHBOARD_TILE_KEYS,
   resolveDashboardTiles,
   type DashboardTilePref,
+  usesEnglishCopy,
 } from "@spiralclass/shared";
 import { revalidateAfterAction } from "@/lib/revalidate";
 
@@ -38,7 +39,7 @@ export async function updateMyTeacherContactAction(
 ): Promise<TeacherContactFormState> {
   const teacher = await requireTeacher();
   const locale = await getPreferredLocale();
-  const en = locale === "en";
+  const en = usesEnglishCopy(locale);
 
   const parsed = teacherContactSchema(locale).safeParse({
     name: formData.get("name"),
@@ -119,7 +120,7 @@ export async function updateMyTeacherCountryAction(
 ): Promise<TeacherCountryFormState> {
   const teacher = await requireTeacher();
   const locale = await getPreferredLocale();
-  const en = locale === "en";
+  const en = usesEnglishCopy(locale);
 
   if (teacher.stripeAccountId) {
     return {
@@ -166,7 +167,7 @@ export async function requestTeacherEmailChangeAction(
 ): Promise<TeacherEmailChangeFormState> {
   const teacher = await requireTeacher();
   const locale = await getPreferredLocale();
-  const en = locale === "en";
+  const en = usesEnglishCopy(locale);
 
   // requireTeacher already redirects disabled teachers, but guard explicitly:
   // never hand a moderated account an identity-moving tool.
@@ -236,7 +237,7 @@ export async function verifyTeacherEmailChangeAction(
 ): Promise<TeacherEmailChangeFormState> {
   const teacher = await requireTeacher();
   const locale = await getPreferredLocale();
-  const en = locale === "en";
+  const en = usesEnglishCopy(locale);
 
   if (teacher.disabledAt) {
     return { error: en ? "This account is disabled." : "Esta cuenta está deshabilitada." };
@@ -340,7 +341,7 @@ export async function saveDashboardTilesAction(
 ): Promise<TeacherPrefsActionState> {
   const teacher = await requireTeacher();
   const locale = await getPreferredLocale();
-  const en = locale === "en";
+  const en = usesEnglishCopy(locale);
 
   const raw = formData.get("tiles");
   if (typeof raw !== "string") {

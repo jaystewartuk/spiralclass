@@ -8,6 +8,7 @@ import {
   PROMO_POLICIES,
   type MarketingPlatform,
   type PromoPolicy,
+  usesEnglishCopy,
 } from "@spiralclass/shared";
 import { requireOnboardedTeacher } from "@/lib/auth";
 import { getPreferredLocale } from "@/lib/i18n";
@@ -115,7 +116,7 @@ export async function addCommunityAction(
   _prev: MarketingState,
   formData: FormData,
 ): Promise<MarketingState> {
-  const en = (await getPreferredLocale()) === "en";
+  const en = usesEnglishCopy(await getPreferredLocale());
   const parsed = communityFromForm(formData);
   if (!parsed.success) {
     return {
@@ -134,7 +135,7 @@ export async function updateCommunityAction(
   _prev: MarketingState,
   formData: FormData,
 ): Promise<MarketingState> {
-  const en = (await getPreferredLocale()) === "en";
+  const en = usesEnglishCopy(await getPreferredLocale());
   const id = z.string().uuid().safeParse(formData.get("id"));
   const parsed = communityFromForm(formData);
   if (!id.success || !parsed.success) return failed(en);
@@ -149,7 +150,7 @@ export async function archiveCommunityAction(
   _prev: MarketingState,
   formData: FormData,
 ): Promise<MarketingState> {
-  const en = (await getPreferredLocale()) === "en";
+  const en = usesEnglishCopy(await getPreferredLocale());
   const id = z.string().uuid().safeParse(formData.get("id"));
   if (!id.success) return failed(en);
   const teacher = await requireOnboardedTeacher();
@@ -165,7 +166,7 @@ export async function restoreCommunityAction(
   _prev: MarketingState,
   formData: FormData,
 ): Promise<MarketingState> {
-  const en = (await getPreferredLocale()) === "en";
+  const en = usesEnglishCopy(await getPreferredLocale());
   const id = z.string().uuid().safeParse(formData.get("id"));
   if (!id.success) return failed(en);
   const teacher = await requireOnboardedTeacher();
@@ -179,7 +180,7 @@ export async function deleteCommunityAction(
   _prev: MarketingState,
   formData: FormData,
 ): Promise<MarketingState> {
-  const en = (await getPreferredLocale()) === "en";
+  const en = usesEnglishCopy(await getPreferredLocale());
   const id = z.string().uuid().safeParse(formData.get("id"));
   if (!id.success) return failed(en);
   const teacher = await requireOnboardedTeacher();
@@ -205,7 +206,7 @@ export async function saveMarketingProfileAction(
   _prev: MarketingState,
   formData: FormData,
 ): Promise<MarketingState> {
-  const en = (await getPreferredLocale()) === "en";
+  const en = usesEnglishCopy(await getPreferredLocale());
   const parsed = marketingProfileInputSchema.safeParse({
     audiences: listFromForm(formData.get("audiences")),
     learnerLocations: listFromForm(formData.get("learnerLocations")),
@@ -229,7 +230,7 @@ export async function prepareActivityAction(
   _prev: PrepareState,
   formData: FormData,
 ): Promise<PrepareState> {
-  const en = (await getPreferredLocale()) === "en";
+  const en = usesEnglishCopy(await getPreferredLocale());
   const id = z.string().uuid().safeParse(formData.get("id"));
   if (!id.success) return failed(en);
   const teacher = await requireOnboardedTeacher();
@@ -253,7 +254,7 @@ export async function markActivityDoneAction(
   _prev: MarketingState,
   formData: FormData,
 ): Promise<MarketingState> {
-  const en = (await getPreferredLocale()) === "en";
+  const en = usesEnglishCopy(await getPreferredLocale());
   const id = z.string().uuid().safeParse(formData.get("id"));
   if (!id.success) return failed(en);
   const teacher = await requireOnboardedTeacher();
@@ -267,7 +268,7 @@ export async function skipActivityAction(
   _prev: MarketingState,
   formData: FormData,
 ): Promise<MarketingState> {
-  const en = (await getPreferredLocale()) === "en";
+  const en = usesEnglishCopy(await getPreferredLocale());
   const id = z.string().uuid().safeParse(formData.get("id"));
   if (!id.success) return failed(en);
   const teacher = await requireOnboardedTeacher();
@@ -281,7 +282,7 @@ export async function saveActivityBodyAction(
   _prev: MarketingState,
   formData: FormData,
 ): Promise<MarketingState> {
-  const en = (await getPreferredLocale()) === "en";
+  const en = usesEnglishCopy(await getPreferredLocale());
   const id = z.string().uuid().safeParse(formData.get("id"));
   const body = z.string().trim().min(1).max(5000).safeParse(formData.get("body"));
   if (!id.success || !body.success) return failed(en);
@@ -307,7 +308,7 @@ export async function addActivityAction(
   _prev: MarketingState,
   formData: FormData,
 ): Promise<MarketingState> {
-  const en = (await getPreferredLocale()) === "en";
+  const en = usesEnglishCopy(await getPreferredLocale());
   const kind = formData.get("kind");
   const platform = formData.get("platform");
   const communityId = formData.get("communityId");
@@ -337,7 +338,7 @@ export async function saveMemeSettingsAction(
   _prev: MarketingState,
   formData: FormData,
 ): Promise<MarketingState> {
-  const en = (await getPreferredLocale()) === "en";
+  const en = usesEnglishCopy(await getPreferredLocale());
   const parsed = memeSettingsInputSchema.safeParse({
     memeBrief: optionalField(formData, "memeBrief") ?? "",
     memeStyle: optionalField(formData, "memeStyle"),
@@ -366,7 +367,7 @@ export async function generateCommunityPostAction(
   _prev: PrepareState,
   formData: FormData,
 ): Promise<PrepareState> {
-  const en = (await getPreferredLocale()) === "en";
+  const en = usesEnglishCopy(await getPreferredLocale());
   const communityId = z.string().uuid().safeParse(formData.get("communityId"));
   const kind = formData.get("kind");
   const platform = formData.get("platform");

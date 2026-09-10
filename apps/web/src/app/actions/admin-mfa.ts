@@ -8,6 +8,7 @@ import { getAuthUser } from "@/lib/auth";
 import { enrollAdminTotp, verifyAdminTotpEnrollment } from "@/lib/auth/admin-mfa";
 import { setAdminStepUp } from "@/lib/auth/admin-stepup";
 import { getPreferredLocale } from "@/lib/i18n";
+import { usesEnglishCopy } from "@spiralclass/shared";
 
 // TOTP enrolment + per-session step-up for ADMIN sessions
 // (docs/decisions/D-25.md, narrowed by D-40 to TOTP-only, no
@@ -30,7 +31,7 @@ export type AdminMfaState =
 
 export async function startAdminMfaEnrollmentAction(_prev: AdminMfaState): Promise<AdminMfaState> {
   await resolveAdminActor();
-  const en = (await getPreferredLocale()) === "en";
+  const en = usesEnglishCopy(await getPreferredLocale());
   try {
     const r = await enrollAdminTotp();
     // The `secret=` query param on an otpauth:// URI is the manual-entry key
@@ -50,7 +51,7 @@ export async function verifyAdminMfaEnrollmentAction(
   formData: FormData,
 ): Promise<AdminMfaState> {
   await resolveAdminActor();
-  const en = (await getPreferredLocale()) === "en";
+  const en = usesEnglishCopy(await getPreferredLocale());
   const code = String(formData.get("code") ?? "").trim();
   if (!/^\d{6}$/.test(code)) {
     return {
@@ -76,7 +77,7 @@ export async function verifyAdminMfaStepUpAction(
   formData: FormData,
 ): Promise<AdminMfaState> {
   await resolveAdminActor();
-  const en = (await getPreferredLocale()) === "en";
+  const en = usesEnglishCopy(await getPreferredLocale());
   const code = String(formData.get("code") ?? "").trim();
   if (!/^\d{6}$/.test(code)) {
     return {

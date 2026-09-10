@@ -2,7 +2,7 @@
 
 import { z } from "zod";
 import { fromZonedTime } from "date-fns-tz";
-import { HOMEWORK_FEEDBACK_MAX_SCORE } from "@spiralclass/shared";
+import { usesEnglishCopy, HOMEWORK_FEEDBACK_MAX_SCORE } from "@spiralclass/shared";
 import { prisma } from "@/lib/prisma";
 import { requireOnboardedTeacher } from "@/lib/auth";
 import { getPreferredLocale } from "@/lib/i18n";
@@ -43,7 +43,7 @@ export async function createAssignmentAction(
 ): Promise<CreateAssignmentState> {
   const teacher = await requireOnboardedTeacher();
   const locale = await getPreferredLocale();
-  const en = locale === "en";
+  const en = usesEnglishCopy(locale);
 
   const bookingId = String(formData.get("bookingId") ?? "");
   const booking = await prisma.booking.findFirst({
@@ -153,7 +153,7 @@ export async function createHomeworkFeedbackAction(
 ): Promise<CreateFeedbackState> {
   const teacher = await requireOnboardedTeacher();
   const locale = await getPreferredLocale();
-  const en = locale === "en";
+  const en = usesEnglishCopy(locale);
 
   const attemptId = String(formData.get("attemptId") ?? "");
   const bookingId = String(formData.get("bookingId") ?? "");
@@ -220,7 +220,9 @@ export async function requestAiReviewAction(
     result = await requestHomeworkAiReview(teacher, attemptId, { instructions }, locale);
   } catch (err) {
     if (err instanceof ApiAuthError) {
-      return { error: locale === "en" ? "Submission not found." : "Entrega no encontrada." };
+      return {
+        error: usesEnglishCopy(locale) ? "Submission not found." : "Entrega no encontrada.",
+      };
     }
     throw err;
   }

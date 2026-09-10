@@ -9,6 +9,7 @@ import {
   materialFieldMessages,
   materialSaveStatus,
   validateMaterialFields,
+  usesEnglishCopy,
 } from "@spiralclass/shared";
 import { useFieldErrors } from "@/hooks/use-field-errors";
 import { Combobox } from "@/components/ui/combobox";
@@ -342,7 +343,7 @@ export function MaterialForm({
   // Shared by both branches below: every AI compose surface offers it, streamed
   // or not. Defaults from the UI locale, which is only a guess at what she
   // writes in; `teachers.teaching_language` would be the better default.
-  const [language, setLanguage] = useState<string>(locale === "en" ? "en" : "es");
+  const [language, setLanguage] = useState<string>(usesEnglishCopy(locale) ? "en" : "es");
   // `generatableOnly`: this picker feeds a Claude prompt, and the registry spans
   // every ISO 639-1 language — including extinct ones (Avestan) and very
   // low-resource ones the model would produce unusable material in. Teaching
@@ -727,10 +728,11 @@ export function MaterialForm({
                         <span className="min-w-0">
                           <span className="block font-medium">
                             {c.label?.trim() ||
-                              new Date(c.scheduledStart).toLocaleDateString(
-                                locale === "en" ? "en" : "es-MX",
-                                { year: "numeric", month: "short", day: "numeric" },
-                              )}
+                              new Date(c.scheduledStart).toLocaleDateString(locale, {
+                                year: "numeric",
+                                month: "short",
+                                day: "numeric",
+                              })}
                           </span>
                           {c.preview && (
                             <span className="line-clamp-1 block text-xs text-muted-foreground">

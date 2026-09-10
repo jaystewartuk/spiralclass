@@ -13,7 +13,7 @@
   "app/(app)/dashboard/students/invitations/invitations-table.tsx": {
     "rawButton": 1
   },
-  "app/(app)/dashboard/students/invitations/nuevo/invite-form.tsx": {
+  "app/(app)/dashboard/students/invitations/new/invite-form.tsx": {
     "rawButton": 1
   },
   "app/(app)/onboarding/availability/availability-form.tsx": {

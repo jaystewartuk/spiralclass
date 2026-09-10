@@ -30,10 +30,10 @@ export const LOCALE_COOKIE = "locale";
 export { translate } from "@/lib/i18n-translate";
 
 // `fallback` is what we return when neither the cookie nor Accept-Language
-// resolve to a known locale — DEFAULT_LOCALE ("en") for virtually every
-// caller. Starter-template seeding (src/lib/starter-templates.ts) passes
-// "es-MX" instead: teacher-facing product copy defaults to Spanish, so an
-// unmatched request should still seed Spanish package names, not English.
+// resolve to a known locale. It is DEFAULT_LOCALE for every caller — the
+// parameter exists only so a caller can be explicit about that — and a caller
+// wanting some other language for an unmatched request is a caller deciding on
+// the reader's behalf, which is the thing DEFAULT_LOCALE exists to prevent.
 export async function getPreferredLocale(fallback: AppLocale = DEFAULT_LOCALE): Promise<AppLocale> {
   try {
     const cookieStore = await cookies();

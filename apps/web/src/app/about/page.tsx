@@ -4,7 +4,7 @@ import { PersonAvatar } from "@/components/teacher-identity";
 import Link from "next/link";
 import type { Metadata } from "next";
 import { Code2, GraduationCap, Globe, Heart, ShieldCheck, Sparkles, Wallet } from "lucide-react";
-import { SOURCE_CODE_LICENCE, SOURCE_CODE_URL } from "@spiralclass/shared";
+import { usesEnglishCopy, SOURCE_CODE_LICENCE, SOURCE_CODE_URL } from "@spiralclass/shared";
 import { Button } from "@/components/ui/button";
 import { getPreferredLocale, getT } from "@/lib/i18n";
 import type { StringKey } from "@/lib/i18n-translate";
@@ -39,7 +39,7 @@ const FOUNDERS: Array<{
 
 export default async function AboutPage() {
   const locale = await getPreferredLocale();
-  const en = locale === "en";
+  const en = usesEnglishCopy(locale);
   const t = await getT();
 
   const TRUST_POINTS = [

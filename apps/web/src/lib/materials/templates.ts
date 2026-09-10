@@ -7,6 +7,7 @@ import {
   CLASS_CONTENT_TEMPLATE_MAX_PER_TEACHER,
   validateClassContentBody,
 } from "@/lib/materials/config";
+import { usesEnglishCopy } from "@spiralclass/shared";
 
 type Db = PrismaClient | Prisma.TransactionClient;
 
@@ -59,7 +60,7 @@ export async function saveClassContentTemplate(input: {
   body: string;
   locale: AppLocale;
 }): Promise<SaveClassContentTemplateResult> {
-  const en = input.locale === "en";
+  const en = usesEnglishCopy(input.locale);
 
   const gate = await gateProFeature(input.teacherId, "class_content");
   if (!gate.ok)
@@ -147,7 +148,7 @@ export async function saveClassContentTemplatesForTeacher(
   },
   db: Db = prisma,
 ): Promise<SaveClassContentTemplatesResult> {
-  const en = input.locale === "en";
+  const en = usesEnglishCopy(input.locale);
 
   // Pass `db` through so this reuses the caller's transaction connection
   // instead of opening a second one on the global client — with a

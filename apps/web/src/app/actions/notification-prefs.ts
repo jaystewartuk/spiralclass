@@ -12,6 +12,7 @@ import {
   type NotificationChannel,
 } from "@/lib/notifications/preferences";
 import { revalidateAfterAction } from "@/lib/revalidate";
+import { usesEnglishCopy } from "@spiralclass/shared";
 
 export type PrefsActionState = { ok?: boolean; error?: string } | undefined;
 export type NotificationsToggleFormState = { ok?: string; error?: string } | undefined;
@@ -86,7 +87,7 @@ export async function setStudentNotificationsAsTeacherAction(
 ): Promise<NotificationsToggleFormState> {
   const teacher = await requireOnboardedTeacher();
   const locale = await getPreferredLocale();
-  const en = locale === "en";
+  const en = usesEnglishCopy(locale);
 
   const studentId = String(formData.get("studentId") ?? "");
   const enabled = formData.get("enabled") === "true";

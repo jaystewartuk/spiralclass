@@ -2,7 +2,7 @@
 
 import { z } from "zod";
 import { fromZonedTime } from "date-fns-tz";
-import { currencyForTeacher, isCaptionLanguage } from "@spiralclass/shared";
+import { usesEnglishCopy, currencyForTeacher, isCaptionLanguage } from "@spiralclass/shared";
 import { prisma } from "@/lib/prisma";
 import { requireOnboardedTeacher } from "@/lib/auth";
 import { getPreferredLocale } from "@/lib/i18n";
@@ -56,7 +56,7 @@ export async function markBookingComplete(
   formData: FormData,
 ): Promise<OverrideState> {
   const locale = await getPreferredLocale();
-  const en = locale === "en";
+  const en = usesEnglishCopy(locale);
   const parsed = markCompleteSchema.safeParse({
     bookingId: formData.get("bookingId"),
     reason: formData.get("reason"),
@@ -157,7 +157,7 @@ export async function markBookingNoShow(
   formData: FormData,
 ): Promise<OverrideState> {
   const locale = await getPreferredLocale();
-  const en = locale === "en";
+  const en = usesEnglishCopy(locale);
   const parsed = markNoShowSchema.safeParse({
     bookingId: formData.get("bookingId"),
     reason: formData.get("reason"),
@@ -264,7 +264,7 @@ export async function restoreClass(
   formData: FormData,
 ): Promise<OverrideState> {
   const locale = await getPreferredLocale();
-  const en = locale === "en";
+  const en = usesEnglishCopy(locale);
   const parsed = restoreSchema.safeParse({
     bookingId: formData.get("bookingId"),
     reason: formData.get("reason"),
@@ -450,7 +450,7 @@ export async function waiveCancellation(
   formData: FormData,
 ): Promise<OverrideState> {
   const locale = await getPreferredLocale();
-  const en = locale === "en";
+  const en = usesEnglishCopy(locale);
   const parsed = waiveSchema.safeParse({
     bookingId: formData.get("bookingId"),
     reason: formData.get("reason"),
@@ -582,7 +582,7 @@ export async function extendPackageExpiration(
   formData: FormData,
 ): Promise<OverrideState> {
   const locale = await getPreferredLocale();
-  const en = locale === "en";
+  const en = usesEnglishCopy(locale);
   const parsed = extendSchema.safeParse({
     packageId: formData.get("packageId"),
     newExpiresAt: formData.get("newExpiresAt"),
@@ -689,7 +689,7 @@ export async function setStudentCustomPrice(
   formData: FormData,
 ): Promise<OverrideState> {
   const locale = await getPreferredLocale();
-  const en = locale === "en";
+  const en = usesEnglishCopy(locale);
   const parsed = customPriceSchema.safeParse({
     studentId: formData.get("studentId"),
     prices: parsePricesJson(formData.get("pricesJson")),
@@ -852,7 +852,7 @@ export async function toggleStudentArchive(
   formData: FormData,
 ): Promise<OverrideState> {
   const locale = await getPreferredLocale();
-  const en = locale === "en";
+  const en = usesEnglishCopy(locale);
   const parsed = archiveSchema.safeParse({
     studentId: formData.get("studentId"),
     intent: formData.get("intent"),
@@ -968,7 +968,7 @@ export async function updateBookingLanguageOverrideAction(
   formData: FormData,
 ): Promise<OverrideState> {
   const locale = await getPreferredLocale();
-  const en = locale === "en";
+  const en = usesEnglishCopy(locale);
   const parsed = languageOverrideSchema.safeParse({
     bookingId: formData.get("bookingId"),
     teacherLanguage: formData.get("teacherLanguage"),

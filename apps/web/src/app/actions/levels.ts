@@ -7,6 +7,7 @@ import { getPreferredLocale } from "@/lib/i18n";
 import { flushAnalytics, trackServerEvent } from "@/lib/analytics/posthog";
 import { ensureTeacherLevels } from "@/lib/levels";
 import { revalidateAfterAction } from "@/lib/revalidate";
+import { usesEnglishCopy } from "@spiralclass/shared";
 
 // Level-gated material library — docs/features/library-materials.md.
 //
@@ -28,7 +29,7 @@ export async function setStudentLevel(
   formData: FormData,
 ): Promise<LevelFormState> {
   const locale = await getPreferredLocale();
-  const en = locale === "en";
+  const en = usesEnglishCopy(locale);
   const parsed = setStudentLevelSchema.safeParse({
     studentId: formData.get("studentId"),
     levelId: formData.get("levelId") ?? "",

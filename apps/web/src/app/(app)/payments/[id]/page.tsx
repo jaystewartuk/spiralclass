@@ -10,6 +10,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { RefundForm } from "./refund-form";
 import { WiseConfirmForm } from "./wise-confirm-form";
 import { PackageDetailsSheet } from "@/components/packages/package-details-sheet";
+import { usesEnglishCopy } from "@spiralclass/shared";
 
 export default async function PaymentDetailPage({
   params,
@@ -26,7 +27,7 @@ export default async function PaymentDetailPage({
   const { id } = await params;
   const teacher = await requireOnboardedTeacher();
   const locale = await getPreferredLocale();
-  const en = locale === "en";
+  const en = usesEnglishCopy(locale);
   const t = await getT();
   const sp = await searchParams;
 

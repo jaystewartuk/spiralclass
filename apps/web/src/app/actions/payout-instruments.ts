@@ -1,7 +1,7 @@
 "use server";
 
 import { redirect } from "next/navigation";
-import { wiseInstrumentSchema } from "@spiralclass/shared";
+import { wiseInstrumentSchema, usesEnglishCopy } from "@spiralclass/shared";
 import { requireOnboardedTeacher } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { getPreferredLocale } from "@/lib/i18n";
@@ -43,7 +43,8 @@ export async function updateWiseInstrument(
   if (!parsed.success) {
     return {
       error:
-        parsed.error.issues[0]?.message ?? (locale === "en" ? "Invalid data" : "Datos inválidos"),
+        parsed.error.issues[0]?.message ??
+        (usesEnglishCopy(locale) ? "Invalid data" : "Datos inválidos"),
     };
   }
 

@@ -70,6 +70,34 @@ export function isAppLocale(value: unknown): value is AppLocale {
   return typeof value === "string" && (LOCALE_TAGS as string[]).includes(value);
 }
 
+/**
+ * Whether a string that exists in only English and Spanish renders its ENGLISH
+ * half for this reader.
+ *
+ * Plenty of copy is still written as a two-armed conditional at the call site
+ * rather than as a catalog key, and the question such a conditional has to ask
+ * is **"is this a Spanish reader?"** — never "is this an English reader?".
+ *
+ * The two look equivalent and are not. With two locales they agree. With three
+ * they diverge in the worst direction: `"fr" === "en"` is false, so a French
+ * reader falls into the SPANISH arm and is handed a language she neither reads
+ * nor chose — while the arm she should get, English, is `DEFAULT_LOCALE` and
+ * the fallback every other part of the system would have given her. Adding a
+ * locale is what triggers it, which is exactly when nobody is reading these
+ * call sites.
+ *
+ * So the predicate is written once, here, and the call sites ask it rather than
+ * comparing tags themselves. `apps/web/tests/i18n/english-branch.test.ts` fails
+ * on a new `=== "en"` used this way.
+ *
+ * This is about which of two authored strings to show. It is not a locale for
+ * `Intl` — pass the locale itself there, so a French reader gets French dates
+ * rather than either of these two.
+ */
+export function usesEnglishCopy(locale: string | null | undefined): boolean {
+  return locale !== "es-MX";
+}
+
 /** Resolve an Accept-Language header (or a device's BCP-47 languageTag) to a
  * supported locale, or null when none of the registered locales match (the
  * caller then falls back to its default). */

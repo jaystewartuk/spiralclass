@@ -1,7 +1,7 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { z } from "zod";
 import type { InsightCategory } from "@prisma/client";
-import { languageName } from "@spiralclass/shared";
+import { languageName, usesEnglishCopy } from "@spiralclass/shared";
 import { anthropicApiKey } from "@/lib/env";
 
 // AI lesson insights — Phase C (the Phase C design,
@@ -91,16 +91,12 @@ export class InsightsUnavailableError extends Error {}
  * will ship more. So the question this answers is "is she a Spanish reader",
  * and everyone else falls back to English, which is `DEFAULT_LOCALE`.
  *
- * It was written the other way round until 2026-08-31 (`locale === "en"`), which
- * looks equivalent and is not: with two locales the two predicates agree, and
- * with three they diverge in the worst direction. A French-reading teacher was
- * not getting the English fallback — `fr !== "en"` is false, so she dropped into
- * the SPANISH branch and got findings in a language she had not chosen and the
- * app was not showing her. Adding a locale to the catalog is what triggers it,
- * which is exactly when nobody is looking at this file.
+ * Kept as a named export because the prompt reads better for it, but the rule
+ * itself is `usesEnglishCopy` in @spiralclass/shared — see that function for
+ * why the predicate has to be written this way round.
  */
 export function writesEnglishInsights(locale: string): boolean {
-  return locale !== "es-MX";
+  return usesEnglishCopy(locale);
 }
 
 // ---------------------------------------------------------------------------

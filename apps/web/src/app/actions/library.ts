@@ -33,6 +33,7 @@ import {
 import { removeUnreferencedMaterialImages } from "@/lib/materials/image-cleanup";
 import { syncLibraryMaterialFocusTags } from "@/lib/materials/tags";
 import { revalidateAfterAction } from "@/lib/revalidate";
+import { usesEnglishCopy } from "@spiralclass/shared";
 
 // The material library (docs/features/library-materials.md;
 // merged with per-class materials at D-69, docs/features/library-materials.md).
@@ -89,7 +90,7 @@ export async function saveMaterialAttachmentAction(
 ): Promise<MaterialsState> {
   const teacher = await requireOnboardedTeacher();
   const locale = await getPreferredLocale();
-  const en = locale === "en";
+  const en = usesEnglishCopy(locale);
 
   const bookingId = String(formData.get("bookingId") ?? "") || null;
   const levelId = String(formData.get("levelId") ?? "") || null;
@@ -182,7 +183,7 @@ export async function saveMaterialContentAction(
 ): Promise<SaveMaterialContentState> {
   const teacher = await requireOnboardedTeacher();
   const locale = await getPreferredLocale();
-  const en = locale === "en";
+  const en = usesEnglishCopy(locale);
 
   const bookingId = String(formData.get("bookingId") ?? "") || null;
   const materialId = String(formData.get("materialId") ?? "") || null;
@@ -572,7 +573,7 @@ export async function saveContentToLibraryAction(
 ): Promise<LibraryState> {
   const teacher = await requireOnboardedTeacher();
   const locale = await getPreferredLocale();
-  const en = locale === "en";
+  const en = usesEnglishCopy(locale);
 
   const gate = await gateProFeature(teacher.id, "class_content");
   if (!gate.ok) return { error: upgradeNudge(gate.limit, locale) };
@@ -646,7 +647,7 @@ export async function updateLibraryMaterialAction(
 ): Promise<LibraryState> {
   const teacher = await requireOnboardedTeacher();
   const locale = await getPreferredLocale();
-  const en = locale === "en";
+  const en = usesEnglishCopy(locale);
 
   const id = String(formData.get("materialId") ?? "");
   const levelId = String(formData.get("levelId") ?? "");
@@ -832,7 +833,7 @@ export async function assignLibraryMaterialAction(
 ): Promise<AssignMaterialState> {
   const teacher = await requireOnboardedTeacher();
   const locale = await getPreferredLocale();
-  const en = locale === "en";
+  const en = usesEnglishCopy(locale);
   const studentId = String(formData.get("studentId") ?? "");
   const materialId = String(formData.get("materialId") ?? "");
   // Every failure surfaces — this action used to return silently, which

@@ -101,6 +101,45 @@ describe("GET /r/re/[bookingId] — 404 paths", () => {
     expect(res.status).toBe(404);
     expect(state.mintCalls).toHaveLength(0);
   });
+
+  // Twin of the /r/ml page — see that suite for what the two cases mean.
+  it("renders the expired-link page in the locale the request asks for", async () => {
+    const [req, ctx] = makeReq("missing-id");
+    const res = await GET(req, ctx as any);
+    const html = await res.text();
+    expect(html).toContain('lang="es-MX"');
+    expect(html).toContain("El enlace para reagendar tu clase ya no está disponible.");
+  });
+
+  it("renders it in English when the request asks for nothing in particular", async () => {
+    vi.doMock("next/headers", () => ({
+      cookies: async () => ({ get: () => undefined }),
+      headers: async () => ({ get: () => null }),
+    }));
+    vi.resetModules();
+    const { GET: freshGET } = await import("@/app/r/re/[bookingId]/route");
+    const [req, ctx] = makeReq("missing-id");
+    const res = await freshGET(req, ctx as any);
+    const html = await res.text();
+    expect(html).toContain('lang="en"');
+    expect(html).toContain("The link to rebook your class is no longer available.");
+    // Restore rather than doUnmock — see the note in magic-link-redeem.test.ts.
+    vi.doMock("next/headers", () => ({
+      cookies: async () => ({
+        get: (name: string) => (name === "locale" ? { value: "es-MX" } : undefined),
+      }),
+      headers: async () => ({ get: () => null }),
+    }));
+    vi.resetModules();
+  });
+
+  // The link out is its own element rather than an <a> inside the sentence,
+  // so the sentence can live in the catalog. It still points where it should.
+  it("keeps the way back to /my-classes", async () => {
+    const [req, ctx] = makeReq("missing-id");
+    const res = await GET(req, ctx as any);
+    expect(await res.text()).toContain('href="/my-classes"');
+  });
 });
 
 describe("GET /r/re/[bookingId] — 503 path", () => {

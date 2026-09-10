@@ -28,7 +28,7 @@ migration runs.
 so it is what every production deploy runs. It requires `NEON_PROJECT_ID` and
 does **not** default it — the default used to be the production project id
 written out in full, which a public repository cannot carry ([D-158]); supply it
-as the repository variable, or export it for a laptop deploy
+as the `production` environment secret, or export it for a laptop deploy
 (`neonctl projects list`). It fetches no key: `neonctl` authenticates with
 the credential `neonctl auth` stores on this machine, or with `NEON_API_KEY` if
 one happens to be exported (2026-08-31 — see `ensure_neon_auth` in

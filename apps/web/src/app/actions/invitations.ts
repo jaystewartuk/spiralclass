@@ -21,6 +21,7 @@ import { teacherPhotoPublicUrl } from "@/lib/storage/teacher-photo";
 import { messagingBenefitEnabled } from "@/lib/invitations/service";
 import type { InviteeDisposition } from "@/lib/invitations/bulk";
 import { revalidateAfterAction } from "@/lib/revalidate";
+import { usesEnglishCopy } from "@spiralclass/shared";
 
 // Server actions for the teacher-facing invitation flow. Every action is
 // teacher-scoped (requireOnboardedTeacher gates + scopes) and audited via the
@@ -57,7 +58,7 @@ export async function previewInvitesAction(
   formData: FormData,
 ): Promise<InviteFormState> {
   const locale = await getPreferredLocale();
-  const en = locale === "en";
+  const en = usesEnglishCopy(locale);
   const teacher = await requireOnboardedTeacher();
 
   const parsed = bulkInviteSchema(locale).safeParse({
@@ -97,7 +98,7 @@ export async function sendInvitesAction(
   formData: FormData,
 ): Promise<InviteFormState> {
   const locale = await getPreferredLocale();
-  const en = locale === "en";
+  const en = usesEnglishCopy(locale);
   const teacher = await requireOnboardedTeacher();
 
   const parsed = bulkInviteSchema(locale).safeParse({
@@ -173,7 +174,7 @@ export async function inviteSingleAction(
   formData: FormData,
 ): Promise<InviteFormState> {
   const locale = await getPreferredLocale();
-  const en = locale === "en";
+  const en = usesEnglishCopy(locale);
   const parsed = singleInviteSchema(locale).safeParse({
     email: formData.get("email"),
     name: formData.get("name") ?? undefined,
@@ -199,7 +200,7 @@ export async function resendInvitationAction(
   formData: FormData,
 ): Promise<RosterActionState> {
   const locale = await getPreferredLocale();
-  const en = locale === "en";
+  const en = usesEnglishCopy(locale);
   const parsed = invitationActionSchema.safeParse({ invitationId: formData.get("invitationId") });
   if (!parsed.success) return { error: en ? "Invalid data." : "Datos inválidos." };
 
@@ -250,7 +251,7 @@ export async function cancelInvitationAction(
   formData: FormData,
 ): Promise<RosterActionState> {
   const locale = await getPreferredLocale();
-  const en = locale === "en";
+  const en = usesEnglishCopy(locale);
   const parsed = invitationActionSchema.safeParse({ invitationId: formData.get("invitationId") });
   if (!parsed.success) return { error: en ? "Invalid data." : "Datos inválidos." };
 
@@ -282,7 +283,7 @@ export async function copyInvitationLinkAction(
   formData: FormData,
 ): Promise<RosterActionState> {
   const locale = await getPreferredLocale();
-  const en = locale === "en";
+  const en = usesEnglishCopy(locale);
   const parsed = invitationActionSchema.safeParse({ invitationId: formData.get("invitationId") });
   if (!parsed.success) return { error: en ? "Invalid data." : "Datos inválidos." };
 

@@ -8,6 +8,7 @@ import { getPreferredLocale } from "@/lib/i18n";
 import { adminSetStudentEmail } from "@/lib/students/email-change";
 import { flushAnalytics } from "@/lib/analytics/posthog";
 import { revalidateAfterAction } from "@/lib/revalidate";
+import { usesEnglishCopy } from "@spiralclass/shared";
 
 export type AdminStudentActionState = { error?: string; ok?: boolean } | undefined;
 
@@ -39,7 +40,7 @@ export async function disableStudentAction(
 ): Promise<AdminStudentActionState> {
   const actor = await requireAdmin("support");
   const locale = await getPreferredLocale();
-  const en = locale === "en";
+  const en = usesEnglishCopy(locale);
   const parsed = disableSchema.safeParse({
     studentId: formData.get("studentId"),
     reason: formData.get("reason"),
@@ -96,7 +97,7 @@ export async function adminChangeStudentEmailAction(
 ): Promise<AdminStudentActionState> {
   const actor = await requireAdmin("support");
   const locale = await getPreferredLocale();
-  const en = locale === "en";
+  const en = usesEnglishCopy(locale);
   const parsed = changeEmailSchema.safeParse({
     studentId: formData.get("studentId"),
     newEmail: formData.get("newEmail"),
@@ -147,7 +148,7 @@ export async function enableStudentAction(
 ): Promise<AdminStudentActionState> {
   const actor = await requireAdmin("support");
   const locale = await getPreferredLocale();
-  const en = locale === "en";
+  const en = usesEnglishCopy(locale);
   const parsed = enableSchema.safeParse({
     studentId: formData.get("studentId"),
   });

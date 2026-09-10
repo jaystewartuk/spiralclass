@@ -403,7 +403,7 @@ describe("the workflows call the registry, and never restate it (D-157)", () => 
 
   it("no workflow can mint a token for a secret store", () => {
     // The deploy's values are PUSHED into its environment, so its job needs
-    // exactly the eleven it declares and no way to ask for a twelfth.
+    // exactly the twelve it declares and no way to ask for a thirteenth.
     //
     // `id-token: write` would be that way, and it cannot be contained. It is
     // granted per JOB, not per step, so GitHub puts
