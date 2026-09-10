@@ -1,11 +1,17 @@
-import { FlatCompat } from "@eslint/eslintrc";
+// eslint-config-next ships flat config natively from 16.x — these two entry
+// points ARE `Linter.Config[]`, so they are spread straight in. Before 16 they
+// were eslintrc-shaped and had to come through @eslint/eslintrc's FlatCompat;
+// feeding the 16 exports back through that shim throws "Converting circular
+// structure to JSON" out of the eslintrc schema validator, which names neither
+// ESLint nor Next and reads like a bug in this file.
+import nextCoreWebVitals from "eslint-config-next/core-web-vitals";
+import nextTypescript from "eslint-config-next/typescript";
 import noLiteralString from "./eslint-rules/no-literal-string.mjs";
 import designTokens from "./eslint-rules/design-tokens.mjs";
 
-const compat = new FlatCompat({ baseDirectory: import.meta.dirname });
-
 export default [
-  ...compat.extends("next/core-web-vitals", "next/typescript"),
+  ...nextCoreWebVitals,
+  ...nextTypescript,
   {
     ignores: ["node_modules", ".next", "dist", "prisma/generated"],
   },
