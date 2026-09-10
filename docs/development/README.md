@@ -21,5 +21,6 @@ Everything a contributor needs, in the order you need it.
 For product behaviour use [features/](../features/), not this section. For
 system design use [architecture/](../architecture/README.md).
 
-> This repository holds no backlog and no plans directory. Forward-looking work
-> lives on a private board — see [docs/README.md](../README.md#conventions).
+> This repository holds no backlog file and no plans directory. Work owed is an
+> issue — see [docs/README.md](../README.md#conventions) and
+> [D-172](../decisions/D-172.md).

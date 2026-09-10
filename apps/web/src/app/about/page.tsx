@@ -1,7 +1,7 @@
 import { Heading } from "@/components/ui/heading";
 import { PageShell } from "@/components/ui/page-shell";
+import { PersonAvatar } from "@/components/teacher-identity";
 import Link from "next/link";
-import Image from "next/image";
 import type { Metadata } from "next";
 import { Code2, GraduationCap, Globe, Heart, ShieldCheck, Sparkles, Wallet } from "lucide-react";
 import { SOURCE_CODE_LICENCE, SOURCE_CODE_URL } from "@spiralclass/shared";
@@ -19,7 +19,6 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 const FOUNDERS: Array<{
-  initials: string;
   photo: string;
   nameEs: string;
   nameEn: string;
@@ -27,10 +26,9 @@ const FOUNDERS: Array<{
   bioKey: StringKey;
 }> = [
   {
-    initials: "JS",
     // No photograph is committed here — a real person's photograph is not
     // something a public repository should carry, and the card falls back to
-    // initials. Set a URL if a deployment wants one.
+    // a monogram. Set a URL if a deployment wants one.
     photo: "",
     nameEs: "Jay Stewart",
     nameEn: "Jay Stewart",
@@ -101,24 +99,19 @@ export default async function AboutPage() {
         </Heading>
         <div className="mx-auto mt-8 grid max-w-reading gap-6">
           {FOUNDERS.map((f) => (
-            <div key={f.initials} className="rounded-2xl border bg-card p-6 shadow-sm">
+            <div key={f.nameEn} className="rounded-2xl border bg-card p-6 shadow-sm">
               <div className="flex items-center gap-4">
-                {f.photo ? (
-                  <Image
-                    src={f.photo}
-                    alt={en ? f.nameEn : f.nameEs}
-                    width={112}
-                    height={112}
-                    className="h-14 w-14 shrink-0 rounded-full border object-cover"
-                  />
-                ) : (
-                  <div
-                    aria-hidden
-                    className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-primary/10 font-display text-lg font-semibold text-primary"
-                  >
-                    {f.initials}
-                  </div>
-                )}
+                {/* The shared avatar, not a copy of it. The copy that used to
+                    live here painted its monogram fallback as `text-primary` on
+                    `bg-primary/10` — the composited tint PersonAvatar and the
+                    Badge variants were both migrated off, because a 10% wash
+                    over whatever surface it lands on is a colour no token names
+                    and palette-contrast.test.ts therefore cannot assert. On the
+                    dark card it measured 4.24:1 and axe found it. It only
+                    started rendering when the founder photograph came out of
+                    this file, which is the general shape worth keeping: a
+                    fallback nobody exercises is a fallback nobody has checked. */}
+                <PersonAvatar name={en ? f.nameEn : f.nameEs} photoUrl={f.photo} size={56} />
                 <div>
                   <h3 className="font-display text-lg font-semibold">{en ? f.nameEn : f.nameEs}</h3>
                   <p className="text-sm text-muted-foreground">{t(f.roleKey)}</p>

@@ -209,8 +209,8 @@ timeline teaches is expressible by moving the markers instead.
 
 The same shape covers a vocabulary card grid, a clock face for telling the time,
 a comparison matrix, and a word map. Those are **not** a commitment to build, and
-not a queue: open work belongs on the board
-([D-110](../decisions/D-110.md)), not in this repo.
+not a queue: open work belongs in an issue
+([D-172](../decisions/D-172.md)), not in a document here.
 
 **Generation does not emit timelines yet.** A teacher inserts one by hand from
 the add-block menu on either client. Teaching the generation prompt to produce

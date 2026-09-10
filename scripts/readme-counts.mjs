@@ -176,15 +176,16 @@ const CLAIMS = [
   },
   {
     // Distinct ROUTES under the visual baselines, not files: each route is
-    // captured at six widths, in two themes, on two platforms, so the 240
-    // committed PNGs are 10 surfaces. Counting files would state a number
-    // twenty-four times larger than the thing the sentence is about, and it
-    // would move when a breakpoint was added rather than when a page was.
+    // captured at six widths in two themes, so the 120 committed PNGs are 10
+    // surfaces. (240 until [D-171] deleted the second platform's set.) Counting
+    // files would state a number twelve times larger than the thing the
+    // sentence is about, and it would move when a breakpoint was added rather
+    // than when a page was.
     id: "public surfaces with a visual baseline",
     actual: () =>
       new Set(
         git("ls-files", "apps/web/tests/visual/regression.spec.ts-snapshots").map((f) =>
-          f.replace(/^.*\//, "").replace(/-\d+-(light|dark)-(darwin|linux)\.png$/, ""),
+          f.replace(/^.*\//, "").replace(/-\d+-(light|dark)-linux\.png$/, ""),
         ),
       ).size,
     pattern: /(\d[\d,]*) public surfaces held to committed visual baselines/g,
