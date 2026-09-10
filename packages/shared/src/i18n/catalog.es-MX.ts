@@ -5201,6 +5201,7 @@ export const esMX = {
   "web.calendar.dayCellLabel": "{day} — {classes}",
   "web.calendar.currentTime": "Hora actual",
   "web.calendar.legendTitle": "Clave de colores",
+  "web.calendarSync.feedUrlLabel": "Tu enlace de suscripción",
   "web.calendarSync.howTo.title": "Cómo suscribirte",
   "web.calendarSync.howTo.google": "Google Calendar → Otros calendarios → Desde URL → pega.",
   "web.calendarSync.howTo.apple": "Apple Calendar → Archivo → Nueva suscripción → pega.",
