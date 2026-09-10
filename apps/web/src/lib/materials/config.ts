@@ -7,6 +7,7 @@
 // nothing drifts.
 
 import type { AppLocale } from "@/lib/i18n";
+import { usesEnglishCopy } from "@spiralclass/shared";
 
 // How a material's body was authored — typed by the teacher, or drafted by
 // the AI compose action and reviewed/edited before saving (provenance only).
@@ -119,7 +120,7 @@ export type ClassContentValidation = { ok: true; body: string } | { ok: false; e
 // body. Trims, rejects empty, and enforces the ceiling. The body is never
 // rendered as raw HTML, so this is a length/empty gate, not an HTML sanitizer.
 export function validateClassContentBody(raw: string, locale: AppLocale): ClassContentValidation {
-  const en = locale === "en";
+  const en = usesEnglishCopy(locale);
   const body = raw.replace(/\r\n/g, "\n").trim();
   if (body.length === 0) {
     return {

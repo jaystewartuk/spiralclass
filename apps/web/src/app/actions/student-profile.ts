@@ -7,6 +7,7 @@ import { getPreferredLocale } from "@/lib/i18n";
 import { flushAnalytics, trackServerEvent } from "@/lib/analytics/posthog";
 import { STUDENT_PROFILE_MAX_CHARS, type StudentProfileState } from "@/lib/student-profile-fields";
 import { revalidateAfterAction } from "@/lib/revalidate";
+import { usesEnglishCopy } from "@spiralclass/shared";
 
 // Durable student profile — interests + goals (docs/product/roadmap/
 // CLASS_CONTENT_INPUTS.md, D-20, Layer 1).
@@ -38,7 +39,7 @@ export async function setStudentProfile(
   formData: FormData,
 ): Promise<StudentProfileState> {
   const locale = await getPreferredLocale();
-  const en = locale === "en";
+  const en = usesEnglishCopy(locale);
   const parsed = schema.safeParse({
     studentId: formData.get("studentId"),
     interests: formData.get("interests") ?? "",

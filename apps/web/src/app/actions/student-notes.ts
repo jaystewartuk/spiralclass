@@ -6,6 +6,7 @@ import { requireOnboardedTeacher } from "@/lib/auth";
 import { getPreferredLocale } from "@/lib/i18n";
 import { flushAnalytics, trackServerEvent } from "@/lib/analytics/posthog";
 import { revalidateAfterAction } from "@/lib/revalidate";
+import { usesEnglishCopy } from "@spiralclass/shared";
 
 // Teacher-private notes about a student. Scoped to (teacher, student) and never
 // shown to the student. Deliberately NOT routed through the Override audit
@@ -35,7 +36,7 @@ export async function addStudentNote(
   _prev: StudentNoteState,
   formData: FormData,
 ): Promise<StudentNoteState> {
-  const en = (await getPreferredLocale()) === "en";
+  const en = usesEnglishCopy(await getPreferredLocale());
   const parsed = addSchema.safeParse({
     studentId: formData.get("studentId"),
     body: formData.get("body"),
@@ -78,7 +79,7 @@ export async function updateStudentNote(
   _prev: StudentNoteState,
   formData: FormData,
 ): Promise<StudentNoteState> {
-  const en = (await getPreferredLocale()) === "en";
+  const en = usesEnglishCopy(await getPreferredLocale());
   const parsed = updateSchema.safeParse({
     noteId: formData.get("noteId"),
     body: formData.get("body"),
@@ -124,7 +125,7 @@ export async function deleteStudentNote(
   _prev: StudentNoteState,
   formData: FormData,
 ): Promise<StudentNoteState> {
-  const en = (await getPreferredLocale()) === "en";
+  const en = usesEnglishCopy(await getPreferredLocale());
   const parsed = deleteSchema.safeParse({ noteId: formData.get("noteId") });
   if (!parsed.success) {
     return { error: en ? "Invalid data." : "Datos inválidos." };

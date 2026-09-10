@@ -3,7 +3,7 @@
 // of truth instead of each implementing their own Intl/date-fns-tz wrappers.
 
 import { fromZonedTime } from "date-fns-tz";
-import { timeOptionsFor } from "@spiralclass/shared";
+import { DEFAULT_LOCALE, timeOptionsFor } from "@spiralclass/shared";
 
 /** Build a UTC Date for (YYYY-MM-DD, HH:MM) in the given IANA zone. Handles DST. */
 export function zonedWallClockToUtc(ymd: string, hhmm: string, tz: string): Date {
@@ -60,7 +60,7 @@ export function intervalsOverlap(aStart: Date, aEnd: Date, bStart: Date, bEnd: D
  * local timezone and locale. Defaults to es-MX (Mexico City) when no locale
  * is supplied, which matches the MVP teacher base.
  */
-export function formatDateTimeInZone(d: Date, tz: string, locale = "es-MX"): string {
+export function formatDateTimeInZone(d: Date, tz: string, locale: string = DEFAULT_LOCALE): string {
   return new Intl.DateTimeFormat(locale, {
     timeZone: tz,
     weekday: "long",
@@ -81,7 +81,7 @@ export function formatDateTimeInZone(d: Date, tz: string, locale = "es-MX"): str
  * or a paid invoice is routinely more than a few months from today, which is
  * exactly where a bare day-and-month becomes ambiguous.
  */
-export function formatDateInZone(d: Date, tz: string, locale = "es-MX"): string {
+export function formatDateInZone(d: Date, tz: string, locale: string = DEFAULT_LOCALE): string {
   return new Intl.DateTimeFormat(locale, {
     timeZone: tz,
     day: "numeric",

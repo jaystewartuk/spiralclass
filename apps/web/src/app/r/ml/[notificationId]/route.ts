@@ -5,6 +5,8 @@ import { serverEnv } from "@/lib/env";
 import { mintServerSideOtpSession } from "@/lib/auth/server-otp";
 import { resolveLinkedStudent } from "@/lib/auth/student-link";
 import { logger, correlationIdFrom } from "@/lib/logger";
+import { getPreferredLocale, getT } from "@/lib/i18n";
+import { escapeHtml } from "@/lib/html-escape";
 
 // Refunds notification auto-login redirect router (D-40). The dispatcher's
 // `magic_link` template pushes `/r/ml/<notificationId>` through Meta's
@@ -34,7 +36,7 @@ export async function GET(
     },
   });
   if (!notification || notification.recipientType !== "student") {
-    return notFoundHtml();
+    return await notFoundHtml();
   }
 
   const student = await prisma.student.findFirst({
@@ -45,7 +47,7 @@ export async function GET(
     select: { email: true },
   });
   if (!student?.email) {
-    return notFoundHtml();
+    return await notFoundHtml();
   }
 
   let session: Awaited<ReturnType<typeof mintServerSideOtpSession>>;
@@ -97,11 +99,19 @@ export async function GET(
   return NextResponse.redirect(url, { status: 302 });
 }
 
-function notFoundHtml(): Response {
+// Rendered to a student whose sign-in link has expired, so there is no session
+// and no stored preference to read a language from. The locale comes from the
+// request exactly as it does for a first-time visitor: the `locale` cookie if
+// this browser has been here, otherwise Accept-Language, otherwise
+// DEFAULT_LOCALE. This page's whole job is telling somebody what to do next,
+// so it has to be in a language they asked for.
+async function notFoundHtml(): Promise<Response> {
+  const locale = await getPreferredLocale();
+  const t = await getT();
   return new NextResponse(
-    `<!doctype html><html lang="es-MX"><head><meta charset="utf-8"><title>Enlace expirado</title>
+    `<!doctype html><html lang="${locale}"><head><meta charset="utf-8"><title>${escapeHtml(t("web.expiredLink.title"))}</title>
 <style>body{font-family:system-ui,sans-serif;max-width:32rem;margin:4rem auto;padding:0 1rem;line-height:1.5}</style>
-</head><body><h1>Este enlace ya no funciona</h1><p>Pide a tu profe un nuevo enlace de inicio de sesión.</p></body></html>`,
+</head><body><h1>${escapeHtml(t("web.expiredLink.heading"))}</h1><p>${escapeHtml(t("web.expiredLink.signIn"))}</p></body></html>`,
     { status: 404, headers: { "Content-Type": "text/html; charset=utf-8" } },
   );
 }

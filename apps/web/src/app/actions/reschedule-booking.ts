@@ -17,6 +17,7 @@ import {
 import { studentIdentityIds } from "@/lib/students/identity";
 import { flushAnalytics, trackServerEvent } from "@/lib/analytics/posthog";
 import { revalidateAfterAction } from "@/lib/revalidate";
+import { usesEnglishCopy } from "@spiralclass/shared";
 
 export type RescheduleState = { error?: string } | undefined;
 
@@ -42,7 +43,7 @@ export async function rescheduleBooking(
   formData: FormData,
 ): Promise<RescheduleState> {
   const locale = await getPreferredLocale();
-  const en = locale === "en";
+  const en = usesEnglishCopy(locale);
   const parsed = rescheduleInputSchema.safeParse({
     bookingId: formData.get("bookingId"),
     startUtc: formData.get("startUtc"),
@@ -186,7 +187,7 @@ export async function rescheduleBooking(
 }
 
 function rejectReason(reason: string, locale: AppLocale): string {
-  const en = locale === "en";
+  const en = usesEnglishCopy(locale);
   switch (reason) {
     case "booking-not-scheduled":
       return en

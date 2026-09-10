@@ -20,6 +20,7 @@ import {
   studentsHaveUnusedActivePackages,
 } from "@/lib/account-deletion/requests";
 import { revalidateAfterAction } from "@/lib/revalidate";
+import { usesEnglishCopy } from "@spiralclass/shared";
 
 // docs/security.md.
 //
@@ -50,7 +51,7 @@ export async function requestTeacherDeletionAction(
 ): Promise<AccountDeletionState> {
   const teacher = await requireTeacher();
   const locale = await getPreferredLocale();
-  const en = locale === "en";
+  const en = usesEnglishCopy(locale);
 
   // Block deletion if the teacher has any active package with classes
   // remaining. Students would lose paid-for sessions; refund the
@@ -97,7 +98,7 @@ export async function requestStudentDeletionAction(
 ): Promise<AccountDeletionState> {
   const student = await requireStudent();
   const locale = await getPreferredLocale();
-  const en = locale === "en";
+  const en = usesEnglishCopy(locale);
   if (!student.email) {
     return {
       error: en

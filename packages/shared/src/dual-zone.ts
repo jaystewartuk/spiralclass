@@ -9,6 +9,7 @@
 // resolution (incl. DST) is handled by the JS engine's ICU data.
 
 import { formatTimeInZone, timeOptionsFor } from "./time-format";
+import { DEFAULT_LOCALE } from "./i18n/locales";
 
 // The zone to render an instant in when nothing better is known: no stored
 // zone on the row, no device zone to read, nothing the viewer has chosen.
@@ -143,7 +144,7 @@ export function getDualZoneTime(
   d: Date,
   viewer: TimeZoneParty,
   other: TimeZoneParty,
-  locale = "es-MX",
+  locale: string = DEFAULT_LOCALE,
   now: Date = new Date(),
 ): DualZoneTime {
   const viewerMoment = zonedMoment(d, viewer.tz, locale, now);
@@ -172,7 +173,7 @@ export function formatDualZoneText(
   d: Date,
   viewer: TimeZoneParty,
   other: TimeZoneParty,
-  locale = "es-MX",
+  locale: string = DEFAULT_LOCALE,
   now: Date = new Date(),
 ): string {
   const dz = getDualZoneTime(d, viewer, other, locale, now);

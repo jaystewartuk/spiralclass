@@ -181,6 +181,18 @@ describe("createStudentAction", () => {
     const data = studentCreate.mock.calls[0][0].data;
     expect(data.phoneE164).toBeNull();
   });
+
+  // `students.locale` is what addresses every lifecycle email that student
+  // ever receives, and nothing later corrects a wrong guess — unlike a display
+  // default, which the next render fixes. So all three paths that mint a
+  // student (here, lib/students/find-or-create.ts, lib/invitations/manage.ts)
+  // leave it to the column rather than choosing a language on behalf of
+  // somebody who has not been asked yet.
+  it("writes no locale, leaving the column default to answer", async () => {
+    await redirectOf(() => createStudentAction(undefined, form({ name: "Sofía", phone: "" })));
+    const data = studentCreate.mock.calls[0][0].data;
+    expect(data).not.toHaveProperty("locale");
+  });
 });
 
 describe("setStudentLiveAction", () => {

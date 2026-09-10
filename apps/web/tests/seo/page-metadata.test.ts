@@ -111,18 +111,29 @@ describe("marketing pages — localized metadata + canonicals", () => {
 });
 
 describe("legal pages — metadata and canonical on the bare URL", () => {
-  it("terms: Spanish by default, English under ?lang=en, same canonical", async () => {
+  it("terms: English by default, Spanish under ?lang=es, same canonical", async () => {
     const { generateMetadata } = await import("@/app/terms/page");
-    const es = await generateMetadata({ searchParams: Promise.resolve({}) });
+    // The bare URL is the English document, matching DEFAULT_LOCALE: the
+    // reader arriving cold from the footer or from Stripe's billing portal is
+    // the one who has stated no language.
+    const bare = await generateMetadata({ searchParams: Promise.resolve({}) });
+    expect(bare.title).toBe("Terms of Service");
+    expect(bare.alternates?.canonical).toBe("/terms");
+
+    const es = await generateMetadata({
+      searchParams: Promise.resolve({ lang: "es" }),
+    });
     expect(es.title).toBe("Términos y condiciones");
+    // Both variants canonicalize to the bare URL so neither competes with
+    // /terms in the index.
     expect(es.alternates?.canonical).toBe("/terms");
 
+    // `?lang=en` is in sent email and on pages already crawled, so it keeps
+    // resolving to English rather than 404ing or silently flipping to Spanish.
     const en = await generateMetadata({
       searchParams: Promise.resolve({ lang: "en" }),
     });
     expect(en.title).toBe("Terms of Service");
-    // The English variant canonicalizes to the bare URL so /terms?lang=en
-    // never competes with /terms in the index.
     expect(en.alternates?.canonical).toBe("/terms");
   });
 

@@ -4,7 +4,7 @@ import { getEmailClient, getEmailClientKind } from "@/lib/email";
 import { renderBrandedEmailHtml } from "@/lib/email/html-shell";
 import { logger } from "@/lib/logger";
 import type { AppLocale } from "@/lib/i18n";
-import { isAppLocale, DEFAULT_LOCALE } from "@spiralclass/shared";
+import { usesEnglishCopy, isAppLocale, DEFAULT_LOCALE } from "@spiralclass/shared";
 
 const log = logger({ surface: "better-auth-email-otp" });
 
@@ -19,7 +19,7 @@ export async function sendBetterAuthEmailOtp(input: {
   type: "sign-in" | "email-verification" | "forget-password" | "change-email";
 }): Promise<void> {
   const locale = await resolveLocale(input.email);
-  const en = locale === "en";
+  const en = usesEnglishCopy(locale);
   const languageCode = en ? "en" : "es_MX";
   const isEmailChange = input.type === "change-email";
   const heading = en

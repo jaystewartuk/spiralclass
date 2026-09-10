@@ -2,7 +2,7 @@
 
 import { Heading } from "@/components/ui/heading";
 import { useEffect, useState } from "react";
-import type { AppLocale } from "@/lib/i18n";
+import { DEFAULT_LOCALE, type AppLocale } from "@spiralclass/shared";
 import { useSkewRecoveryOrReport } from "@/components/use-server-action-recovery";
 // global-error renders outside the root layout, so it must pull in the
 // global stylesheet itself for the Tailwind design tokens below to apply.
@@ -44,13 +44,17 @@ function detectLocale(): AppLocale {
     if (/^fr\b/i.test(navigator.language)) return "fr";
     if (/^es\b/i.test(navigator.language)) return "es-MX";
   }
-  return "es-MX";
+  // Nothing matched, so this is the answer to "we don't know" — which is what
+  // DEFAULT_LOCALE is for, on the one screen the reader cannot navigate away
+  // from.
+  return DEFAULT_LOCALE;
 }
 
 export default function GlobalError({ error }: { error: Error & { digest?: string } }) {
-  // Default to es-MX (launch market) for the server render, then refine on
-  // the client once cookie/navigator are available.
-  const [locale, setLocale] = useState<AppLocale>("es-MX");
+  // DEFAULT_LOCALE for the server render — there is no request context out
+  // here to read a cookie from — then refine on the client once
+  // cookie/navigator are readable.
+  const [locale, setLocale] = useState<AppLocale>(DEFAULT_LOCALE);
   const copy = COPY[locale];
   // Reloads once on a deploy-skew error, and reports anything it does not
   // recover from — including skew that has already used its one reload.

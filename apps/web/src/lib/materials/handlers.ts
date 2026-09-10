@@ -17,7 +17,7 @@ import {
 } from "@/lib/materials/config";
 import { resolveClassContentTemplateBody } from "@/lib/materials/templates";
 import { resolveFocusTagsWithCategory } from "@/lib/focus-tags";
-import { languageName, resolveVocabulary } from "@spiralclass/shared";
+import { usesEnglishCopy, languageName, resolveVocabulary } from "@spiralclass/shared";
 import type { MaterialVocabulary } from "@spiralclass/shared";
 import type { MaterialPromptInput } from "@/lib/materials/prompt";
 import { materialSendTimeElapsed } from "@/lib/materials/timing";
@@ -172,7 +172,7 @@ export async function saveClassContentForBooking(input: {
   linkUrl?: string | null;
   locale: AppLocale;
 }): Promise<SaveClassContentResult> {
-  const en = input.locale === "en";
+  const en = usesEnglishCopy(input.locale);
 
   // Authoring class content is a Pro feature (viewing stays free).
   const gate = await gateProFeature(input.teacherId, "class_content");
@@ -487,7 +487,7 @@ export async function generateClassContentForBooking(input: {
   // "continue from" context. Absent/empty = today's behavior, unchanged.
   continueFromMaterialIds?: string[];
 }): Promise<GenerateClassContentResult> {
-  const en = input.locale === "en";
+  const en = usesEnglishCopy(input.locale);
 
   const gate = await gateProFeature(input.teacherId, "class_content");
   if (!gate.ok)
@@ -678,7 +678,7 @@ export async function restoreClassContentRevisionForBooking(input: {
   revisionId: string;
   locale: AppLocale;
 }): Promise<SaveClassContentResult> {
-  const en = input.locale === "en";
+  const en = usesEnglishCopy(input.locale);
   const booking = await findOwnedBooking(input.teacherId, input.bookingId);
   if (!booking) {
     return {
@@ -740,7 +740,7 @@ export async function generateLibraryMaterialForTeacher(input: {
   // (no picker yet) relies on.
   language?: string | null;
 }): Promise<GenerateLibraryMaterialResult> {
-  const en = input.locale === "en";
+  const en = usesEnglishCopy(input.locale);
 
   const gate = await gateProFeature(input.teacherId, "class_content");
   if (!gate.ok)
@@ -874,7 +874,7 @@ export async function prepareLibraryMaterialPrompt(input: {
   locale: AppLocale;
   language?: string | null;
 }): Promise<PrepareLibraryPromptResult> {
-  const en = input.locale === "en";
+  const en = usesEnglishCopy(input.locale);
 
   const gate = await gateProFeature(input.teacherId, "class_content");
   if (!gate.ok)
@@ -988,7 +988,7 @@ export async function refineMaterialForTeacher(input: {
   // Omitted → the locale default, same axis as the generate paths.
   language?: string | null;
 }): Promise<RefineMaterialResult> {
-  const en = input.locale === "en";
+  const en = usesEnglishCopy(input.locale);
 
   // Same gate as authoring class content / library content (viewing stays free).
   const gate = await gateProFeature(input.teacherId, "class_content");
@@ -1147,7 +1147,7 @@ export async function saveLibraryContentMaterial(input: {
   linkUrl?: string | null;
   locale: AppLocale;
 }): Promise<SaveLibraryContentResult> {
-  const en = input.locale === "en";
+  const en = usesEnglishCopy(input.locale);
 
   const gate = await gateProFeature(input.teacherId, "class_content");
   if (!gate.ok)
@@ -1266,7 +1266,7 @@ export async function restoreLibraryMaterialRevision(input: {
   revisionId: string;
   locale: AppLocale;
 }): Promise<SaveLibraryContentResult> {
-  const en = input.locale === "en";
+  const en = usesEnglishCopy(input.locale);
   const material = await prisma.libraryMaterial.findFirst({
     where: {
       id: input.materialId,
@@ -1337,7 +1337,7 @@ export async function saveMaterialAttachment(input: {
   sendTiming?: MaterialSendTiming | null;
   locale: AppLocale;
 }): Promise<SaveMaterialAttachmentResult> {
-  const en = input.locale === "en";
+  const en = usesEnglishCopy(input.locale);
   const label = input.label?.trim().slice(0, 80) || null;
 
   if (input.bookingId) {

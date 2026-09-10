@@ -1,10 +1,12 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { palette } from "@spiralclass/shared";
+import { palette, type AppLocale } from "@spiralclass/shared";
 import { prisma } from "@/lib/prisma";
 import { serverEnv } from "@/lib/env";
 import { applyEmailOptOut } from "@/lib/email/opt-out-handler";
 import { flushAnalytics, trackServerEvent } from "@/lib/analytics/posthog";
+import { getPreferredLocale, getT } from "@/lib/i18n";
+import { escapeHtml } from "@/lib/html-escape";
 
 // One-click unsubscribe for the email channel. Flips
 // students.email_opt_in = false. Tokens are HMAC-signed (SESSION_SECRET)
@@ -21,7 +23,7 @@ export async function GET(
   ctx: { params: Promise<{ token: string }> },
 ): Promise<Response> {
   const { token } = await ctx.params;
-  return new NextResponse(unsubscribeConfirmHtml(token), {
+  return new NextResponse(await unsubscribeConfirmHtml(token), {
     status: 200,
     headers: { "Content-Type": "text/html; charset=utf-8", "X-Robots-Tag": "noindex" },
   });
@@ -38,13 +40,13 @@ export async function POST(
   const outcome = await applyEmailOptOut({ prisma, secret: env.SESSION_SECRET }, token);
 
   if (outcome.code === "invalid-token") {
-    return new NextResponse(unsubscribeErrorHtml(outcome.reason), {
+    return new NextResponse(await unsubscribeErrorHtml(outcome.reason), {
       status: 400,
       headers: { "Content-Type": "text/html; charset=utf-8", "X-Robots-Tag": "noindex" },
     });
   }
   if (outcome.code === "not-found") {
-    return new NextResponse(unsubscribeErrorHtml("not-found"), {
+    return new NextResponse(await unsubscribeErrorHtml("not-found"), {
       status: 404,
       headers: { "Content-Type": "text/html; charset=utf-8", "X-Robots-Tag": "noindex" },
     });
@@ -61,44 +63,53 @@ export async function POST(
   });
   await flushAnalytics();
 
-  return new NextResponse(unsubscribeSuccessHtml(), {
+  return new NextResponse(await unsubscribeSuccessHtml(), {
     status: 200,
     headers: { "Content-Type": "text/html; charset=utf-8", "X-Robots-Tag": "noindex" },
   });
 }
 
-function unsubscribeConfirmHtml(token: string): string {
+// These pages are reachable from every email the product sends, so they
+// resolve the locale from the request like any other page: the `locale` cookie
+// if this browser has one, otherwise Accept-Language, otherwise
+// DEFAULT_LOCALE.
+//
+// Not the recipient's stored `students.locale`, which would be the better
+// signal: the token identifies the row, but rendering the GET confirmation
+// would then mean a DB read on a request that is deliberately side-effect-free
+// and is issued by every corporate link-scanner that touches the email. The
+// browser asking is the one reading.
+async function unsubscribeConfirmHtml(token: string): Promise<string> {
   const action = `/r/email-uns/${encodeURIComponent(token)}`;
+  const [locale, t] = await Promise.all([getPreferredLocale(), getT()]);
   return renderUnsubscribePage({
-    title: "Cancelar suscripción",
-    heading: "¿Cancelar los correos?",
-    paragraphs: [
-      "Confirma que ya no quieres recibir correos de SpiralClass.",
-      "Es posible que sigas recibiendo avisos importantes por notificaciones push en la app.",
-    ],
-    actionHtml: `<form method="POST" action="${escape(action)}" style="margin-top:8px"><button type="submit" class="btn">Sí, cancelar mis correos</button></form>`,
+    locale,
+    title: t("web.unsubscribe.confirm.title"),
+    heading: t("web.unsubscribe.confirm.heading"),
+    paragraphs: [t("web.unsubscribe.confirm.body"), t("web.unsubscribe.confirm.push")],
+    actionHtml: `<form method="POST" action="${escapeHtml(action)}" style="margin-top:8px"><button type="submit" class="btn">${escapeHtml(t("web.unsubscribe.confirm.cta"))}</button></form>`,
   });
 }
 
-function unsubscribeSuccessHtml(): string {
+async function unsubscribeSuccessHtml(): Promise<string> {
+  const [locale, t] = await Promise.all([getPreferredLocale(), getT()]);
   return renderUnsubscribePage({
-    title: "Suscripción cancelada",
-    heading: "Listo",
-    paragraphs: [
-      "Ya no te enviaremos correos.",
-      "Es posible que sigas recibiendo avisos importantes por notificaciones push en la app; puedes ajustarlas desde la app.",
-    ],
+    locale,
+    title: t("web.unsubscribe.done.title"),
+    heading: t("web.unsubscribe.done.heading"),
+    paragraphs: [t("web.unsubscribe.done.body"), t("web.unsubscribe.done.push")],
   });
 }
 
-function unsubscribeErrorHtml(reason: string): string {
+async function unsubscribeErrorHtml(reason: string): Promise<string> {
+  const [locale, t] = await Promise.all([getPreferredLocale(), getT()]);
   return renderUnsubscribePage({
-    title: "Enlace inválido",
-    heading: "Enlace inválido",
-    paragraphs: [
-      `No pudimos procesar tu solicitud (${escape(reason)}).`,
-      "Si necesitas ayuda, contacta a tu profe.",
-    ],
+    locale,
+    title: t("web.unsubscribe.error.title"),
+    heading: t("web.unsubscribe.error.heading"),
+    // `reason` is escaped by renderUnsubscribePage along with the rest of the
+    // paragraph, so it is interpolated raw here.
+    paragraphs: [t("web.unsubscribe.error.body", { reason }), t("web.unsubscribe.error.help")],
   });
 }
 
@@ -107,19 +118,20 @@ function unsubscribeErrorHtml(reason: string): string {
 // can stretch to viewport width and use real web fonts without
 // email-client compatibility constraints.
 function renderUnsubscribePage(args: {
+  locale: AppLocale;
   title: string;
   heading: string;
   paragraphs: string[];
   actionHtml?: string;
 }): string {
   const paragraphsHtml =
-    args.paragraphs.map((p) => `<p>${escape(p)}</p>`).join("") + (args.actionHtml ?? "");
+    args.paragraphs.map((p) => `<p>${escapeHtml(p)}</p>`).join("") + (args.actionHtml ?? "");
   return `<!doctype html>
-<html lang="es-MX">
+<html lang="${args.locale}">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>${escape(args.title)} · SpiralClass</title>
+<title>${escapeHtml(args.title)} · SpiralClass</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <!-- No webfont link: it loaded Fraunces and Plus Jakarta Sans, both retired
        by D-140, and fetched from Google on every open. -->
@@ -225,25 +237,11 @@ function renderUnsubscribePage(args: {
     <span class="brand-word">spiralclass</span>
   </div>
   <section class="card">
-    <h1>${escape(args.heading)}</h1>
+    <h1>${escapeHtml(args.heading)}</h1>
     ${paragraphsHtml}
   </section>
   <div class="footer">SpiralClass · spiralclass.com</div>
 </main>
 </body>
 </html>`;
-}
-
-function escape(s: string): string {
-  return s.replace(
-    /[&<>"']/g,
-    (c) =>
-      ({
-        "&": "&amp;",
-        "<": "&lt;",
-        ">": "&gt;",
-        '"': "&quot;",
-        "'": "&#39;",
-      })[c] ?? c,
-  );
 }

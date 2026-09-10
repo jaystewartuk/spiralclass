@@ -111,6 +111,17 @@ beforeEach(() => {
   state.mintCalls.length = 0;
 });
 
+/** Put tests/setup.ts's `next/headers` mock back after a test replaced it. */
+function restoreSuiteHeaders() {
+  vi.doMock("next/headers", () => ({
+    cookies: async () => ({
+      get: (name: string) => (name === "locale" ? { value: "es-MX" } : undefined),
+    }),
+    headers: async () => ({ get: () => null }),
+  }));
+  vi.resetModules();
+}
+
 describe("GET /r/ml/[notificationId] — happy path", () => {
   it("302s to /my-classes after minting a session for the resolved student", async () => {
     const [req, ctx] = makeReq("notif-1");
@@ -170,6 +181,42 @@ describe("GET /r/ml/[notificationId] — 404 paths", () => {
     const res = await GET(req, ctx);
     expect(res.status).toBe(404);
     expect(state.mintCalls).toHaveLength(0);
+  });
+
+  // This page renders to a reader with no session, and its whole job is
+  // telling them what to do next — so it has to be in a language they asked
+  // for. tests/setup.ts pins the suite's `locale` cookie, so the two cases
+  // below are "follows the cookie" and "falls back to DEFAULT_LOCALE".
+  //
+  // (tests/i18n/no-spanish-default.test.ts covers the rule across every
+  // surface, including French; these keep the assertion next to the route's
+  // own branches.)
+  it("renders the expired-link page in the locale the request asks for", async () => {
+    const [req, ctx] = makeReq("missing-id");
+    const res = await GET(req, ctx);
+    const html = await res.text();
+    expect(html).toContain('lang="es-MX"');
+    expect(html).toContain("Este enlace ya no funciona");
+  });
+
+  it("renders it in English when the request asks for nothing in particular", async () => {
+    vi.doMock("next/headers", () => ({
+      cookies: async () => ({ get: () => undefined }),
+      headers: async () => ({ get: () => null }),
+    }));
+    vi.resetModules();
+    const { GET: freshGET } = await import("@/app/r/ml/[notificationId]/route");
+    const [req, ctx] = makeReq("missing-id");
+    const res = await freshGET(req, ctx);
+    const html = await res.text();
+    expect(html).toContain('lang="en"');
+    expect(html).toContain("This link no longer works");
+    expect(html).not.toContain("Este enlace");
+    // Restore the suite's mock rather than doUnmock, which drops
+    // tests/setup.ts's `next/headers` mock too and leaves later tests reading
+    // the real one — it throws outside a request scope, lands on the
+    // DEFAULT_LOCALE catch, and passes an English assertion for the wrong reason.
+    restoreSuiteHeaders();
   });
 });
 

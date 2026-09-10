@@ -11,6 +11,7 @@ import { createBookmark } from "@/lib/lesson-notes/bookmarks";
 import { formatZonedDateTime } from "@/lib/date-display";
 import { logger } from "@/lib/logger";
 import { revalidateAfterAction } from "@/lib/revalidate";
+import { usesEnglishCopy } from "@spiralclass/shared";
 
 const log = logger({ surface: "lesson-notes" });
 
@@ -49,7 +50,7 @@ export async function copyNotesFromLastClass(
   formData: FormData,
 ): Promise<LessonNoteState> {
   const teacher = await requireOnboardedTeacher();
-  const en = (await getPreferredLocale()) === "en";
+  const en = usesEnglishCopy(await getPreferredLocale());
 
   const bookingId = String(formData.get("bookingId") ?? "");
   const current = await prisma.booking.findFirst({
@@ -116,7 +117,7 @@ export async function createLessonBookmark(
   bookingId: string,
 ): Promise<{ ok: true } | { ok: false; reason: string }> {
   const teacher = await requireOnboardedTeacher();
-  const en = (await getPreferredLocale()) === "en";
+  const en = usesEnglishCopy(await getPreferredLocale());
   const label = en ? "Bookmark" : "Marcador";
   const result = await createBookmark(prisma, { bookingId, teacherId: teacher.id, label });
   if (result.ok) revalidateAfterAction(`/dashboard/classes/${bookingId}/replay`);
@@ -128,7 +129,7 @@ export async function createLessonNote(
   formData: FormData,
 ): Promise<LessonNoteState> {
   const teacher = await requireOnboardedTeacher();
-  const en = (await getPreferredLocale()) === "en";
+  const en = usesEnglishCopy(await getPreferredLocale());
 
   const bookingId = String(formData.get("bookingId") ?? "");
   const body = String(formData.get("body") ?? "")
@@ -275,7 +276,7 @@ export async function generateLessonSummary(
 ): Promise<LessonNoteState> {
   const teacher = await requireOnboardedTeacher();
   const locale = await getPreferredLocale();
-  const en = locale === "en";
+  const en = usesEnglishCopy(locale);
 
   const gate = await gateProFeature(teacher.id, "lesson_notes");
   if (!gate.ok) return { error: upgradeNudge(gate.limit, locale) };

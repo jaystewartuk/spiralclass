@@ -609,7 +609,9 @@ describe("dispatchNotification", () => {
     expect(outcome.channel).toBe("email");
     const sends = email.getSends();
     expect(sends).toHaveLength(1);
-    expect(sends[0].body).toMatch(/terms#cancelaciones/);
+    // A Spanish email cites the Spanish document (`?lang=es`); the bare URL is
+    // English. The anchor is shared by both variants.
+    expect(sends[0].body).toMatch(/terms\?lang=es#cancellation-policy/);
   });
 
   it("notification templates: student.locale='en' routes to 'en' template language", async () => {
