@@ -77,9 +77,11 @@ describe("setProgressSharingAction", () => {
     expect(transaction.mock.calls[0]![0]).toHaveLength(2);
   });
 
-  it("revalidates her public page too, so the promise and the setting agree", async () => {
+  it("revalidates only the settings page the toggle is on (D-174)", async () => {
     await setProgressSharingAction(undefined, formData(true));
-    expect(revalidatePath).toHaveBeenCalledWith("/settings/booking-page");
-    expect(revalidatePath).toHaveBeenCalledWith("/b/alicia-moreno");
+    // Her public /b/<slug> reflects the setting too, but it is a dynamic route
+    // with nothing prerendered to invalidate — and a second revalidation would
+    // make the client discard this form's own result.
+    expect(revalidatePath.mock.calls.map((c) => c[0])).toEqual(["/settings/booking-page"]);
   });
 });

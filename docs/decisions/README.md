@@ -374,6 +374,7 @@ a hook — is a caller.
 | [D-48](./D-48.md)   | **A setting is only configuration if every consumer reads the config** — one hardcoded reader makes it a code change |
 | [D-110](./D-110.md) | One board, off this repository: 100 documents that were really queues of work are deleted                            |
 | [D-172](./D-172.md) | The board moves into this repository's Issues — the queue stays out of the tree, and stops being private             |
+| [D-174](./D-174.md) | **A server action revalidates exactly one path** — a second call makes the client discard the whole response         |
 | [D-128](./D-128.md) | The privacy layer becomes UK GDPR, and **the supplier register becomes code with a guard test**                      |
 | [D-147](./D-147.md) | _(tombstone)_ The regulatory position, kept privately — with the one engineering finding                             |
 | [D-158](./D-158.md) | Publish the shape, never the account — a third gate on the credential scanner                                        |
@@ -516,6 +517,7 @@ records removed before publication — see [What is not here](#what-is-not-here)
 | [D-171](./D-171.md) | One visual baseline set, owned by ubuntu-latest                       | Active                               |
 | [D-172](./D-172.md) | The backlog is this repository's Issues, not a private board          | Active                               |
 | [D-173](./D-173.md) | Any subject in the copy; the schema stays language-shaped             | Active                               |
+| [D-174](./D-174.md) | A server action revalidates exactly one path                          | Active                               |
 
 ---
 

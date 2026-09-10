@@ -1,6 +1,5 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
@@ -12,6 +11,7 @@ import { flushAnalytics, trackServerEvent } from "@/lib/analytics/posthog";
 import { maybeEmitFirstBooking } from "@/lib/analytics/first-events";
 import { bookPackageSlot, type BookingEventEmitter } from "@/lib/booking/book-package-slot";
 import type { TeacherBookingError } from "@/lib/booking/teacher-booking-errors";
+import { revalidateAfterAction } from "@/lib/revalidate";
 
 // Item 10 — teacher self-serve booking. Teachers take bookings over WhatsApp
 // constantly; this lets a teacher put a class on her own calendar against one
@@ -143,7 +143,6 @@ export async function createTeacherBooking(
   await maybeEmitFirstBooking(teacher.id, outcome.bookingId);
   await flushAnalytics();
 
-  revalidatePath("/dashboard/classes");
-  revalidatePath(`/dashboard/students/${pkg.studentId}`);
+  revalidateAfterAction("/dashboard/classes");
   redirect(`/dashboard/classes/${outcome.bookingId}`);
 }

@@ -5,7 +5,6 @@ import { requireOnboardedTeacher } from "@/lib/auth";
 import { getPreferredLocale } from "@/lib/i18n";
 import { leadCaptureSchema } from "@/lib/validators";
 import { normalizeE164 } from "@/lib/phone";
-import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { flushAnalytics, trackServerEvent } from "@/lib/analytics/posthog";
 import { notifyTeacherOfLead } from "@/lib/leads/notify-teacher";
@@ -15,6 +14,7 @@ import { INSTRUMENT_READINESS_SELECT, isPubliclyListed } from "@/lib/marketplace
 import { clientIp, rateLimit } from "@/lib/rate-limit";
 import { attributionProperties, currentAttribution } from "@/lib/analytics/attribution";
 import { recordEnquiry } from "@/lib/marketing/events";
+import { revalidateAfterAction } from "@/lib/revalidate";
 
 export type LeadCaptureState = { error?: string; ok?: boolean } | undefined;
 
@@ -198,6 +198,6 @@ export async function setLeadStatus(
     return { error: en ? "We couldn't find that lead." : "No encontramos ese interesado." };
   }
 
-  revalidatePath("/dashboard/leads");
+  revalidateAfterAction("/dashboard/leads");
   return { ok: true };
 }

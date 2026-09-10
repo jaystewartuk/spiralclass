@@ -1,6 +1,5 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
 import { Prisma } from "@prisma/client";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
@@ -8,6 +7,7 @@ import { requireAdmin } from "@/lib/admin";
 import { writeOverride } from "@/lib/audit";
 import { getPreferredLocale } from "@/lib/i18n";
 import { INTEGRATION_CATEGORIES, USAGE_METRICS, pricingModelSchema } from "@spiralclass/shared";
+import { revalidateAfterAction } from "@/lib/revalidate";
 
 // Financial Intelligence estimate layer (D-86, S4) — the write side of
 // `/admin/economics`: Integration registry CRUD, UsageInput upsert/delete,
@@ -155,7 +155,7 @@ export async function createIntegrationAction(
     throw err;
   }
 
-  revalidatePath(ECONOMICS_PATH);
+  revalidateAfterAction(ECONOMICS_PATH);
   return { ok: true };
 }
 
@@ -217,7 +217,7 @@ export async function updateIntegrationAction(
     actor,
   });
 
-  revalidatePath(ECONOMICS_PATH);
+  revalidateAfterAction(ECONOMICS_PATH);
   return { ok: true };
 }
 
@@ -257,7 +257,7 @@ export async function toggleIntegrationActiveAction(
     actor,
   });
 
-  revalidatePath(ECONOMICS_PATH);
+  revalidateAfterAction(ECONOMICS_PATH);
   return { ok: true };
 }
 
@@ -287,7 +287,7 @@ export async function deleteIntegrationAction(
     actor,
   });
 
-  revalidatePath(ECONOMICS_PATH);
+  revalidateAfterAction(ECONOMICS_PATH);
   return { ok: true };
 }
 
@@ -347,7 +347,7 @@ export async function upsertUsageInputAction(
     actor,
   });
 
-  revalidatePath(ECONOMICS_PATH);
+  revalidateAfterAction(ECONOMICS_PATH);
   return { ok: true };
 }
 
@@ -377,7 +377,7 @@ export async function deleteUsageInputAction(
     actor,
   });
 
-  revalidatePath(ECONOMICS_PATH);
+  revalidateAfterAction(ECONOMICS_PATH);
   return { ok: true };
 }
 
@@ -438,6 +438,6 @@ export async function updateAssumptionsAction(
     actor,
   });
 
-  revalidatePath(ECONOMICS_PATH);
+  revalidateAfterAction(ECONOMICS_PATH);
   return { ok: true };
 }

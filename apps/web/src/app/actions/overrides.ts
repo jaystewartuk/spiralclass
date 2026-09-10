@@ -1,6 +1,5 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { fromZonedTime } from "date-fns-tz";
 import { currencyForTeacher, isCaptionLanguage } from "@spiralclass/shared";
@@ -15,6 +14,7 @@ import { emitNotificationQueued } from "@/lib/notifications/events";
 import { gateProFeature, upgradeNudge } from "@/lib/subscriptions/enforce";
 import { isSlotConflictError } from "@/lib/booking/slot-conflict";
 import { logger } from "@/lib/logger";
+import { revalidateAfterAction } from "@/lib/revalidate";
 
 const log = logger({ surface: "overrides" });
 
@@ -132,8 +132,7 @@ export async function markBookingComplete(
   });
   await flushAnalytics();
 
-  revalidatePath(`/dashboard/classes/${booking.id}`);
-  revalidatePath("/dashboard/classes");
+  revalidateAfterAction(`/dashboard/classes/${booking.id}`);
   return { ok: en ? "Class marked complete." : "Clase marcada como completa." };
 }
 
@@ -245,8 +244,7 @@ export async function markBookingNoShow(
   });
   await flushAnalytics();
 
-  revalidatePath(`/dashboard/classes/${booking.id}`);
-  revalidatePath("/dashboard/classes");
+  revalidateAfterAction(`/dashboard/classes/${booking.id}`);
   return {
     ok: en
       ? "Class recorded as no-show. The class still counts (no refund)."
@@ -436,8 +434,7 @@ export async function restoreClass(
   });
   await flushAnalytics();
 
-  revalidatePath(`/dashboard/classes/${booking.id}`);
-  revalidatePath("/dashboard/classes");
+  revalidateAfterAction(`/dashboard/classes/${booking.id}`);
   return { ok: en ? "Class restored." : "Clase restaurada." };
 }
 
@@ -561,8 +558,7 @@ export async function waiveCancellation(
   });
   await flushAnalytics();
 
-  revalidatePath(`/dashboard/classes/${booking.id}`);
-  revalidatePath("/dashboard/classes");
+  revalidateAfterAction(`/dashboard/classes/${booking.id}`);
   return {
     ok: en
       ? "Cancellation waived. 1 class restored to the package."
@@ -653,7 +649,7 @@ export async function extendPackageExpiration(
   });
   await flushAnalytics();
 
-  revalidatePath(`/dashboard/students`);
+  revalidateAfterAction(`/dashboard/students`);
   return { ok: en ? "Expiration updated." : "Vencimiento actualizado." };
 }
 
@@ -821,8 +817,7 @@ export async function setStudentCustomPrice(
   });
   await flushAnalytics();
 
-  revalidatePath(`/dashboard/students/${parsed.data.studentId}`);
-  revalidatePath(`/dashboard/students`);
+  revalidateAfterAction(`/dashboard/students/${parsed.data.studentId}`);
   const cleared = Object.keys(afterMap).length === 0;
   return {
     ok: en
@@ -937,8 +932,7 @@ export async function toggleStudentArchive(
   });
   await flushAnalytics();
 
-  revalidatePath(`/dashboard/students/${parsed.data.studentId}`);
-  revalidatePath(`/dashboard/students`);
+  revalidateAfterAction(`/dashboard/students/${parsed.data.studentId}`);
   return {
     ok: archiving
       ? en
@@ -1038,7 +1032,6 @@ export async function updateBookingLanguageOverrideAction(
   });
   await flushAnalytics();
 
-  revalidatePath(`/dashboard/classes/${booking.id}`);
-  revalidatePath("/dashboard/classes");
+  revalidateAfterAction(`/dashboard/classes/${booking.id}`);
   return { ok: en ? "Class language updated." : "Idioma de la clase actualizado." };
 }

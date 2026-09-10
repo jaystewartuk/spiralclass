@@ -1,6 +1,5 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { getAuthUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
@@ -12,6 +11,7 @@ import { studentIdentityIds } from "@/lib/students/identity";
 import { flushAnalytics, trackServerEvent } from "@/lib/analytics/posthog";
 import { maybeEmitFirstBooking } from "@/lib/analytics/first-events";
 import { bookPackageSlot, type BookingEventEmitter } from "@/lib/booking/book-package-slot";
+import { revalidateAfterAction } from "@/lib/revalidate";
 
 export type ActionState = { error?: string; ok?: string } | undefined;
 
@@ -123,6 +123,6 @@ export async function createBooking(_prev: ActionState, formData: FormData): Pro
   // serverless function can freeze the moment this action returns/redirects.
   await flushAnalytics();
 
-  revalidatePath("/my-classes");
+  revalidateAfterAction("/my-classes");
   redirect(`/my-classes/book/confirmation?bookingId=${outcome.bookingId}`);
 }

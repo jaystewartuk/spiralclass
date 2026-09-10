@@ -4,9 +4,9 @@
  * called via useActionState must accept (prev, formData); these
  * actions are confirm-only (no fields) so neither parameter is used. */
 
-import { revalidatePath } from "next/cache";
 import { requireTeacher, requireStudent } from "@/lib/auth";
 import { rotateTeacherFeedToken, rotateStudentFeedToken } from "@/lib/calendar/feed-token";
+import { revalidateAfterAction } from "@/lib/revalidate";
 
 export type FeedActionState = { error?: string; ok?: boolean } | undefined;
 
@@ -19,7 +19,7 @@ export async function regenerateTeacherFeedAction(
 ): Promise<FeedActionState> {
   const teacher = await requireTeacher();
   await rotateTeacherFeedToken(teacher.id);
-  revalidatePath("/settings/calendar");
+  revalidateAfterAction("/settings/calendar");
   return { ok: true };
 }
 
@@ -29,6 +29,6 @@ export async function regenerateStudentFeedAction(
 ): Promise<FeedActionState> {
   const student = await requireStudent();
   await rotateStudentFeedToken(student.id);
-  revalidatePath("/my-classes/account");
+  revalidateAfterAction("/my-classes/account");
   return { ok: true };
 }

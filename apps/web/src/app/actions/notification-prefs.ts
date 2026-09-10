@@ -1,6 +1,5 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
 import { requireOnboardedTeacher, requireStudent } from "@/lib/auth";
 import { getPreferredLocale } from "@/lib/i18n";
 import { prisma } from "@/lib/prisma";
@@ -12,6 +11,7 @@ import {
   type NotificationPrefs,
   type NotificationChannel,
 } from "@/lib/notifications/preferences";
+import { revalidateAfterAction } from "@/lib/revalidate";
 
 export type PrefsActionState = { ok?: boolean; error?: string } | undefined;
 export type NotificationsToggleFormState = { ok?: string; error?: string } | undefined;
@@ -72,7 +72,7 @@ export async function saveNotificationPrefsAction(
     data: { notificationPrefs: prefs as object, emailOptIn, pushOptIn },
   });
 
-  revalidatePath("/my-classes/account");
+  revalidateAfterAction("/my-classes/account");
   return { ok: true };
 }
 
@@ -101,7 +101,7 @@ export async function setStudentNotificationsAsTeacherAction(
     return { error: en ? "This student isn't in your list." : "Este alumno no está en tu lista." };
   }
 
-  revalidatePath(`/dashboard/students/${studentId}`);
+  revalidateAfterAction(`/dashboard/students/${studentId}`);
   return {
     ok: enabled
       ? en

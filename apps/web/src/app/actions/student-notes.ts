@@ -1,11 +1,11 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireOnboardedTeacher } from "@/lib/auth";
 import { getPreferredLocale } from "@/lib/i18n";
 import { flushAnalytics, trackServerEvent } from "@/lib/analytics/posthog";
+import { revalidateAfterAction } from "@/lib/revalidate";
 
 // Teacher-private notes about a student. Scoped to (teacher, student) and never
 // shown to the student. Deliberately NOT routed through the Override audit
@@ -66,7 +66,7 @@ export async function addStudentNote(
   });
   await flushAnalytics();
 
-  revalidatePath(`/dashboard/students/${parsed.data.studentId}`);
+  revalidateAfterAction(`/dashboard/students/${parsed.data.studentId}`);
   return { ok: en ? "Note added." : "Nota agregada." };
 }
 
@@ -111,7 +111,7 @@ export async function updateStudentNote(
       properties: { teacherId: teacher.id, studentId: note.studentId },
     });
     await flushAnalytics();
-    revalidatePath(`/dashboard/students/${note.studentId}`);
+    revalidateAfterAction(`/dashboard/students/${note.studentId}`);
   }
   return { ok: en ? "Note updated." : "Nota actualizada." };
 }
@@ -150,6 +150,6 @@ export async function deleteStudentNote(
   });
   await flushAnalytics();
 
-  revalidatePath(`/dashboard/students/${note.studentId}`);
+  revalidateAfterAction(`/dashboard/students/${note.studentId}`);
   return { ok: en ? "Note deleted." : "Nota eliminada." };
 }

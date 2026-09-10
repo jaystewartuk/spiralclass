@@ -1,6 +1,5 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireOnboardedTeacher } from "@/lib/auth";
@@ -11,6 +10,7 @@ import { generateSummaryText, SummaryUnavailableError } from "@/lib/lesson-notes
 import { createBookmark } from "@/lib/lesson-notes/bookmarks";
 import { formatZonedDateTime } from "@/lib/date-display";
 import { logger } from "@/lib/logger";
+import { revalidateAfterAction } from "@/lib/revalidate";
 
 const log = logger({ surface: "lesson-notes" });
 
@@ -105,7 +105,7 @@ export async function copyNotesFromLastClass(
     })),
   });
 
-  revalidatePath(`/dashboard/classes/${current.id}`);
+  revalidateAfterAction(`/dashboard/classes/${current.id}`);
   return { ok: true };
 }
 
@@ -119,7 +119,7 @@ export async function createLessonBookmark(
   const en = (await getPreferredLocale()) === "en";
   const label = en ? "Bookmark" : "Marcador";
   const result = await createBookmark(prisma, { bookingId, teacherId: teacher.id, label });
-  if (result.ok) revalidatePath(`/dashboard/classes/${bookingId}/replay`);
+  if (result.ok) revalidateAfterAction(`/dashboard/classes/${bookingId}/replay`);
   return result;
 }
 
@@ -170,7 +170,7 @@ export async function createLessonNote(
   });
   await flushAnalytics();
 
-  revalidatePath(`/dashboard/classes/${ownedId}`);
+  revalidateAfterAction(`/dashboard/classes/${ownedId}`);
   return { ok: true };
 }
 
@@ -193,7 +193,7 @@ export async function updateLessonNote(formData: FormData): Promise<void> {
   if (!note) return;
 
   await prisma.lessonNote.update({ where: { id: note.id }, data: { body } });
-  revalidatePath(`/dashboard/classes/${note.bookingId}`);
+  revalidateAfterAction(`/dashboard/classes/${note.bookingId}`);
 }
 
 export async function deleteLessonNote(formData: FormData): Promise<void> {
@@ -208,7 +208,7 @@ export async function deleteLessonNote(formData: FormData): Promise<void> {
   if (!note) return;
 
   await prisma.lessonNote.delete({ where: { id: note.id } });
-  revalidatePath(`/dashboard/classes/${note.bookingId}`);
+  revalidateAfterAction(`/dashboard/classes/${note.bookingId}`);
 }
 
 // Teacher checks a cue off (or back on) mid-class. Student-audience notes have
@@ -228,7 +228,7 @@ export async function toggleLessonNoteDone(formData: FormData): Promise<void> {
     where: { id: note.id },
     data: { doneAt: note.doneAt ? null : new Date() },
   });
-  revalidatePath(`/dashboard/classes/${note.bookingId}`);
+  revalidateAfterAction(`/dashboard/classes/${note.bookingId}`);
 }
 
 // Swap a note with its neighbour in the same audience column. Simple position
@@ -261,7 +261,7 @@ export async function moveLessonNote(formData: FormData): Promise<void> {
     prisma.lessonNote.update({ where: { id: note.id }, data: { position: neighbour.position } }),
     prisma.lessonNote.update({ where: { id: neighbour.id }, data: { position: note.position } }),
   ]);
-  revalidatePath(`/dashboard/classes/${note.bookingId}`);
+  revalidateAfterAction(`/dashboard/classes/${note.bookingId}`);
 }
 
 // AI post-class summary (live-notes-panel.md "step 2", D-15). Generates a short
@@ -369,6 +369,6 @@ export async function generateLessonSummary(
   });
   await flushAnalytics();
 
-  revalidatePath(`/dashboard/classes/${booking.id}`);
+  revalidateAfterAction(`/dashboard/classes/${booking.id}`);
   return { ok: true };
 }

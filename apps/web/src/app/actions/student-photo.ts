@@ -1,6 +1,5 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireStudent } from "@/lib/auth";
 import { getPreferredLocale } from "@/lib/i18n";
@@ -11,6 +10,7 @@ import {
   removeStudentPhoto,
 } from "@/lib/storage/student-photo";
 import { logger } from "@/lib/logger";
+import { revalidateAfterAction } from "@/lib/revalidate";
 
 const log = logger({ surface: "student-photo" });
 
@@ -58,8 +58,7 @@ export async function saveStudentPhotoAction(
     data: { photoPath: path },
   });
 
-  revalidatePath("/my-classes/account");
-  revalidatePath("/my-classes", "layout");
+  revalidateAfterAction("/my-classes/account");
   return { ok: true };
 }
 
@@ -74,7 +73,6 @@ export async function removeStudentPhotoAction(): Promise<ProfileState> {
     where: { id: student.id },
     data: { photoPath: null },
   });
-  revalidatePath("/my-classes/account");
-  revalidatePath("/my-classes", "layout");
+  revalidateAfterAction("/my-classes/account");
   return { ok: true };
 }

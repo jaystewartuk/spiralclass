@@ -1,7 +1,5 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
-
 import { prisma } from "@/lib/prisma";
 import { requireOnboardedTeacher, requireStudent } from "@/lib/auth";
 import { getPreferredLocale } from "@/lib/i18n";
@@ -10,6 +8,7 @@ import {
   setCaptionsConsentForStudent,
   setCaptionsGuardianConsentFor,
 } from "@/lib/captions/consent-writes";
+import { revalidateAfterAction } from "@/lib/revalidate";
 
 // Live-captions consent gate (the captions architecture review
 // P0). Two independent actions, mirroring the two people who can give this
@@ -48,7 +47,7 @@ export async function setCaptionsGuardianConsent(
     };
   }
 
-  revalidatePath(`/dashboard/students/${studentId}`);
+  revalidateAfterAction(`/dashboard/students/${studentId}`);
   return { ok: true };
 }
 
@@ -70,6 +69,6 @@ export async function setCaptionsConsent(consented: boolean): Promise<ConsentSta
     };
   }
 
-  revalidatePath("/my-classes/account");
+  revalidateAfterAction("/my-classes/account");
   return { ok: true };
 }

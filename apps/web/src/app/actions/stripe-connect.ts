@@ -1,7 +1,6 @@
 "use server";
 
 import { redirect } from "next/navigation";
-import { revalidatePath } from "next/cache";
 import * as Sentry from "@sentry/nextjs";
 import { currencyForTeacher, isConnectCountrySupported } from "@spiralclass/shared";
 import { requireOnboardedTeacher } from "@/lib/auth";
@@ -13,6 +12,7 @@ import {
   isStripeConnectNotEnabledError,
 } from "@/lib/stripe";
 import { maybeEmitMarketplaceReady } from "@/lib/marketplace-ready";
+import { revalidateAfterAction } from "@/lib/revalidate";
 
 // Server actions powering /settings/payments. Stripe Connect Express:
 //   1. `startStripeConnect` — creates an Express account on first call
@@ -235,6 +235,6 @@ export async function disconnectStripeConnect(): Promise<void> {
       stripePayoutsEnabled: false,
     },
   });
-  revalidatePath("/settings/payments");
+  revalidateAfterAction("/settings/payments");
   redirect("/settings/payments?disconnected=1");
 }

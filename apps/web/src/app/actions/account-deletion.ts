@@ -4,7 +4,6 @@
  * called via useActionState must accept (prev, formData); these
  * actions are confirm-only (no fields) so neither parameter is used. */
 
-import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { headers } from "next/headers";
 import { requireTeacher, requireStudent } from "@/lib/auth";
@@ -20,6 +19,7 @@ import {
   teacherHasUnusedActivePackages,
   studentsHaveUnusedActivePackages,
 } from "@/lib/account-deletion/requests";
+import { revalidateAfterAction } from "@/lib/revalidate";
 
 // docs/security.md.
 //
@@ -70,7 +70,7 @@ export async function requestTeacherDeletionAction(
     scheduledFor: new Date(Date.now() + DELETION_GRACE_PERIOD_MS),
   });
 
-  revalidatePath("/settings/account");
+  revalidateAfterAction("/settings/account");
   return { ok: true };
 }
 
@@ -80,7 +80,7 @@ export async function cancelTeacherDeletionAction(
 ): Promise<AccountDeletionState> {
   const teacher = await requireTeacher();
   await cancelTeacherDeletionRequests(teacher.id);
-  revalidatePath("/settings/account");
+  revalidateAfterAction("/settings/account");
   return { ok: true };
 }
 
@@ -125,7 +125,7 @@ export async function requestStudentDeletionAction(
     scheduledFor: new Date(Date.now() + DELETION_GRACE_PERIOD_MS),
   });
 
-  revalidatePath("/my-classes");
+  revalidateAfterAction("/my-classes");
   return { ok: true };
 }
 
@@ -135,7 +135,7 @@ export async function cancelStudentDeletionAction(
 ): Promise<AccountDeletionState> {
   const student = await requireStudent();
   await cancelStudentDeletionRequests(await studentComplianceIds(student));
-  revalidatePath("/my-classes");
+  revalidateAfterAction("/my-classes");
   return { ok: true };
 }
 

@@ -1,6 +1,5 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
@@ -11,6 +10,7 @@ import { getPreferredLocale } from "@/lib/i18n";
 import { enqueueAccountDisabledTeacher } from "@/lib/notifications/enqueue";
 import { emitNotificationQueued } from "@/lib/notifications/events";
 import { logger } from "@/lib/logger";
+import { revalidateAfterAction } from "@/lib/revalidate";
 
 const log = logger({ surface: "admin-teachers" });
 
@@ -78,8 +78,7 @@ export async function disableTeacherAction(
     log.warn("emit notification.queued failed", { error: err });
   }
 
-  revalidatePath("/admin/teachers");
-  revalidatePath(`/admin/teachers/${parsed.data.teacherId}`);
+  revalidateAfterAction(`/admin/teachers/${parsed.data.teacherId}`);
   return { ok: true };
 }
 
@@ -121,8 +120,7 @@ export async function enableTeacherAction(
     });
   });
 
-  revalidatePath("/admin/teachers");
-  revalidatePath(`/admin/teachers/${parsed.data.teacherId}`);
+  revalidateAfterAction(`/admin/teachers/${parsed.data.teacherId}`);
   return { ok: true };
 }
 

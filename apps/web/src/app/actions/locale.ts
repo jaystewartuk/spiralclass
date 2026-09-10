@@ -1,7 +1,6 @@
 "use server";
 
 import { cookies, headers } from "next/headers";
-import { revalidatePath } from "next/cache";
 import {
   DEFAULT_LOCALE,
   isLocalePreference,
@@ -11,6 +10,7 @@ import {
 import { LOCALE_COOKIE } from "@/lib/i18n";
 import { getAuthUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { revalidateAfterAction } from "@/lib/revalidate";
 
 // Persist the user's manual language *preference* via cookie so future requests
 // bypass Accept-Language sniffing. The stored value is a LocalePreference: a
@@ -56,5 +56,5 @@ export async function setLocaleAction(formData: FormData): Promise<void> {
     }
   }
 
-  revalidatePath("/", "layout");
+  revalidateAfterAction("/", "layout");
 }

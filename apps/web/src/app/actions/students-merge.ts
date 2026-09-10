@@ -1,12 +1,12 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { requireOnboardedTeacher } from "@/lib/auth";
 import { getPreferredLocale } from "@/lib/i18n";
 import { mergeRosterStudents as mergeCore, type MergeRefusal } from "@/lib/students/merge";
 import { flushAnalytics, trackServerEvent } from "@/lib/analytics/posthog";
 import type { OverrideState } from "./overrides";
+import { revalidateAfterAction } from "@/lib/revalidate";
 
 // Teacher-facing duplicate merge (see lib/students/merge.ts for the rules
 // and the full list of what moves). This wrapper owns auth, input parsing,
@@ -83,8 +83,7 @@ export async function mergeRosterStudents(
   });
   await flushAnalytics();
 
-  revalidatePath("/dashboard/students");
-  revalidatePath(`/dashboard/students/${keepStudentId}`);
+  revalidateAfterAction(`/dashboard/students/${keepStudentId}`);
   return {
     ok: en
       ? "Students merged — packages and classes now live under one profile."

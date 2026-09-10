@@ -1,6 +1,5 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/admin";
@@ -11,6 +10,7 @@ import {
   EXPENSE_CATEGORIES,
   type ExpenseVendor,
 } from "@spiralclass/shared";
+import { revalidateAfterAction } from "@/lib/revalidate";
 
 export type AdminCostsActionState = { error?: string; ok?: boolean } | undefined;
 
@@ -84,7 +84,7 @@ export async function createExpenseAction(
     },
   });
 
-  revalidatePath("/admin/costs");
+  revalidateAfterAction("/admin/costs");
   return { ok: true };
 }
 
@@ -125,7 +125,7 @@ export async function updateExpenseAction(
     },
   });
 
-  revalidatePath("/admin/costs");
+  revalidateAfterAction("/admin/costs");
   return { ok: true };
 }
 
@@ -149,6 +149,6 @@ export async function deleteExpenseAction(
   }
 
   await prisma.platformExpense.delete({ where: { id: parsed.data.id } });
-  revalidatePath("/admin/costs");
+  revalidateAfterAction("/admin/costs");
   return { ok: true };
 }

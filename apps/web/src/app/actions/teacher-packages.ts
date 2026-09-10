@@ -1,6 +1,5 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { Prisma } from "@prisma/client";
 import { fromZonedTime, formatInTimeZone } from "date-fns-tz";
@@ -11,6 +10,7 @@ import { getPreferredLocale } from "@/lib/i18n";
 import { writeOverride } from "@/lib/audit";
 import { flushAnalytics, trackServerEvent } from "@/lib/analytics/posthog";
 import { addMonthsEndOfDayInZone } from "@/lib/dates";
+import { revalidateAfterAction } from "@/lib/revalidate";
 
 // Record a package the teacher already sold off-platform — the heart of
 // onboarding a MID-PACKAGE student. She types in how many classes the student
@@ -191,8 +191,7 @@ export async function createManualPackageAction(
   });
   await flushAnalytics();
 
-  revalidatePath(`/dashboard/students/${data.studentId}`);
-  revalidatePath("/dashboard/students");
+  revalidateAfterAction(`/dashboard/students/${data.studentId}`);
   return {
     ok: en
       ? `Package added — ${data.classesRemaining} of ${data.classesTotal} classes left.`
@@ -385,8 +384,7 @@ export async function editManualPackageAction(
   });
   await flushAnalytics();
 
-  revalidatePath(`/dashboard/students/${pkg.studentId}`);
-  revalidatePath("/dashboard/students");
+  revalidateAfterAction(`/dashboard/students/${pkg.studentId}`);
   return {
     ok: en
       ? `Package updated — ${data.classesRemaining} of ${data.classesTotal} classes left.`
@@ -524,7 +522,6 @@ export async function deleteManualPackageAction(
   });
   await flushAnalytics();
 
-  revalidatePath(`/dashboard/students/${pkg.studentId}`);
-  revalidatePath("/dashboard/students");
+  revalidateAfterAction(`/dashboard/students/${pkg.studentId}`);
   return { ok: en ? "Package deleted." : "Paquete eliminado." };
 }

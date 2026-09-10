@@ -1,6 +1,5 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import type { TFunction } from "@spiralclass/shared";
 import { requireOnboardedTeacher } from "@/lib/auth";
@@ -22,6 +21,7 @@ import {
   uploadTestimonialPhoto,
 } from "@/lib/storage/testimonial-photos";
 import { prisma } from "@/lib/prisma";
+import { revalidateAfterAction } from "@/lib/revalidate";
 
 // Teacher-authored testimonials shown as social proof on the public booking
 // page (docs/features/student-acquisition.md, D-24). The CRUD rules live
@@ -41,8 +41,8 @@ export type TestimonialState = { error?: string; ok?: boolean } | undefined;
 const idField = z.string().uuid();
 
 async function revalidate(bookingSlug: string) {
-  revalidatePath("/dashboard/testimonials");
-  revalidatePath(`/b/${bookingSlug}`);
+  revalidateAfterAction("/dashboard/testimonials");
+  revalidateAfterAction(`/b/${bookingSlug}`);
 }
 
 // Validates and uploads a testimonial photo from formData. Returns the storage

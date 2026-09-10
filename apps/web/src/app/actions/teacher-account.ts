@@ -1,6 +1,5 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { requireTeacher } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
@@ -22,6 +21,7 @@ import {
   resolveDashboardTiles,
   type DashboardTilePref,
 } from "@spiralclass/shared";
+import { revalidateAfterAction } from "@/lib/revalidate";
 
 export type TeacherContactFormState = { ok?: string; error?: string } | undefined;
 export type TeacherCountryFormState = { ok?: string; error?: string } | undefined;
@@ -96,7 +96,7 @@ export async function updateMyTeacherContactAction(
     staleZone = stale?.timezone ?? null;
   }
 
-  revalidatePath("/settings/account");
+  revalidateAfterAction("/settings/account");
   const saved = en ? "Details saved." : "Datos guardados.";
   if (staleZone) {
     return {
@@ -152,7 +152,7 @@ export async function updateMyTeacherCountryAction(
     await flushAnalytics();
   }
 
-  revalidatePath("/settings/account");
+  revalidateAfterAction("/settings/account");
   return { ok: en ? "Country saved." : "País guardado." };
 }
 
@@ -266,7 +266,7 @@ export async function verifyTeacherEmailChangeAction(
     };
   }
 
-  revalidatePath("/settings/account");
+  revalidateAfterAction("/settings/account");
   const ok = result.googleDisconnected
     ? en
       ? "Email updated. Your Google account was disconnected for security — reconnect it below with your new Google account if you'd like to keep using Google Sign-In."
@@ -325,8 +325,7 @@ export async function saveTeacherNotificationPrefsAction(
     data: { notificationPrefs: prefs as object, emailOptIn, pushOptIn },
   });
 
-  revalidatePath("/settings/notifications");
-  revalidatePath("/settings/account");
+  revalidateAfterAction("/settings/notifications");
   return { ok: true };
 }
 
@@ -372,7 +371,6 @@ export async function saveDashboardTilesAction(
     data: { dashboardTileOrder: resolveDashboardTiles(tiles) as object },
   });
 
-  revalidatePath("/dashboard");
-  revalidatePath("/dashboard/customize");
+  revalidateAfterAction("/dashboard/customize");
   return { ok: true };
 }

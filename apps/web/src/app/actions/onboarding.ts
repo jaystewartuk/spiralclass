@@ -1,6 +1,5 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import type { ZodError } from "zod";
 import {
@@ -19,6 +18,7 @@ import { ensureTeacherFocusTags } from "@/lib/focus-tags";
 import { gateTemplateSet, upgradeNudge } from "@/lib/subscriptions/enforce";
 import { normalizeE164 } from "@/lib/phone";
 import { maybeEmitMarketplaceReady } from "@/lib/marketplace-ready";
+import { revalidateAfterAction } from "@/lib/revalidate";
 
 // `templateIndex` (when present) points the templates form at the offending
 // package card so the error highlights the right row, not always the first.
@@ -207,7 +207,7 @@ export async function saveTimezoneAction(
   });
   await flushAnalytics();
 
-  revalidatePath("/onboarding", "layout");
+  revalidateAfterAction("/onboarding", "layout");
   redirect("/onboarding/availability");
 }
 
@@ -304,7 +304,7 @@ export async function saveAvailabilityAction(
   await maybeEmitMarketplaceReady(prisma, teacher.id);
 
   const target = fromOnboarding ? "/onboarding/templates" : "/settings/availability?saved=1";
-  revalidatePath("/", "layout");
+  revalidateAfterAction("/", "layout");
   redirect(target);
 }
 
@@ -504,7 +504,7 @@ export async function saveTemplatesAction(
   await flushAnalytics();
   await maybeEmitMarketplaceReady(prisma, teacher.id);
 
-  revalidatePath("/", "layout");
+  revalidateAfterAction("/", "layout");
   if (fromOnboarding) redirect("/onboarding/preview");
 
   // Settings stays put and re-seeds the editor from what was actually written.
@@ -557,6 +557,6 @@ export async function finishOnboardingAction() {
   }
   await maybeEmitMarketplaceReady(prisma, teacher.id);
 
-  revalidatePath("/", "layout");
+  revalidateAfterAction("/", "layout");
   redirect("/dashboard");
 }

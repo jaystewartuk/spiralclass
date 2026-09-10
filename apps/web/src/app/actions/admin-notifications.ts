@@ -1,6 +1,5 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/admin";
@@ -8,6 +7,7 @@ import { writeOverride } from "@/lib/audit";
 import { getPreferredLocale } from "@/lib/i18n";
 import { emitNotificationQueued } from "@/lib/notifications/events";
 import { getEmailClient } from "@/lib/email";
+import { revalidateAfterAction } from "@/lib/revalidate";
 
 export type AdminNotificationActionState =
   { error?: string; ok?: boolean; info?: string } | undefined;
@@ -63,7 +63,7 @@ export async function retryNotificationAction(
     teacherId: existing.teacherId,
   });
 
-  revalidatePath("/admin/notifications");
+  revalidateAfterAction("/admin/notifications");
   return { ok: true, info: en ? "Re-queued" : "Re-encolado" };
 }
 
@@ -160,7 +160,7 @@ export async function sendAdminBroadcastAction(
     });
   }
 
-  revalidatePath("/admin/notifications");
+  revalidateAfterAction("/admin/notifications");
   return {
     ok: true,
     info: en

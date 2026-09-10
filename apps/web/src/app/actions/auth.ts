@@ -1,7 +1,6 @@
 "use server";
 
 import { headers } from "next/headers";
-import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth/server";
 import { signUpSchema, signInSchema } from "@/lib/validators";
@@ -11,6 +10,7 @@ import { finalizeSignIn } from "@/app/actions/session";
 import { safeNextPath } from "@/lib/auth/safe-next";
 import { logger } from "@/lib/logger";
 import { allowRateLimitBypass } from "@/lib/env";
+import { revalidateAfterAction } from "@/lib/revalidate";
 
 const log = logger({ surface: "auth" });
 
@@ -171,6 +171,6 @@ export async function verifySignInCodeAction(
 
 export async function signOutAction() {
   await auth.api.signOut({ headers: await headers() });
-  revalidatePath("/", "layout");
+  revalidateAfterAction("/", "layout");
   redirect("/");
 }

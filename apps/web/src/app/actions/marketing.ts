@@ -1,6 +1,5 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import {
   isMarketingContentKind,
@@ -36,6 +35,7 @@ import {
   saveMemeSettings,
 } from "@/lib/marketing/profile";
 import { loadEntitlements } from "@/lib/subscriptions/service";
+import { revalidateAfterAction } from "@/lib/revalidate";
 
 // Server actions for the Get Students surface (D-125).
 //
@@ -126,8 +126,7 @@ export async function addCommunityAction(
   }
   const teacher = await requireOnboardedTeacher();
   await addCommunity(teacher.id, parsed.data);
-  revalidatePath(`${GET_STUDENTS_PATH}/communities`);
-  revalidatePath(GET_STUDENTS_PATH);
+  revalidateAfterAction(`${GET_STUDENTS_PATH}/communities`);
   return { ok: true };
 }
 
@@ -142,8 +141,7 @@ export async function updateCommunityAction(
   const teacher = await requireOnboardedTeacher();
   const ok = await updateCommunity(teacher.id, id.data, parsed.data);
   if (!ok) return failed(en);
-  revalidatePath(`${GET_STUDENTS_PATH}/communities`);
-  revalidatePath(GET_STUDENTS_PATH);
+  revalidateAfterAction(`${GET_STUDENTS_PATH}/communities`);
   return { ok: true };
 }
 
@@ -159,7 +157,7 @@ export async function archiveCommunityAction(
   // planner ranks by, and deleting a row silently rewrites her own history.
   const ok = await archiveCommunity(teacher.id, id.data);
   if (!ok) return failed(en);
-  revalidatePath(`${GET_STUDENTS_PATH}/communities`);
+  revalidateAfterAction(`${GET_STUDENTS_PATH}/communities`);
   return { ok: true };
 }
 
@@ -173,7 +171,7 @@ export async function restoreCommunityAction(
   const teacher = await requireOnboardedTeacher();
   const ok = await restoreCommunity(teacher.id, id.data);
   if (!ok) return failed(en);
-  revalidatePath(`${GET_STUDENTS_PATH}/communities`);
+  revalidateAfterAction(`${GET_STUDENTS_PATH}/communities`);
   return { ok: true };
 }
 
@@ -187,7 +185,7 @@ export async function deleteCommunityAction(
   const teacher = await requireOnboardedTeacher();
   const ok = await deleteCommunity(teacher.id, id.data);
   if (!ok) return failed(en);
-  revalidatePath(`${GET_STUDENTS_PATH}/communities`);
+  revalidateAfterAction(`${GET_STUDENTS_PATH}/communities`);
   return { ok: true };
 }
 
@@ -219,8 +217,7 @@ export async function saveMarketingProfileAction(
   if (!parsed.success) return failed(en);
   const teacher = await requireOnboardedTeacher();
   await saveMarketingProfile(teacher.id, parsed.data);
-  revalidatePath(`${GET_STUDENTS_PATH}/profile`);
-  revalidatePath(GET_STUDENTS_PATH);
+  revalidateAfterAction(`${GET_STUDENTS_PATH}/profile`);
   return { ok: true };
 }
 
@@ -247,8 +244,7 @@ export async function prepareActivityAction(
     sourcePost:
       typeof sourcePost === "string" && sourcePost.trim() ? sourcePost.trim().slice(0, 2000) : null,
   });
-  revalidatePath(GET_STUDENTS_PATH);
-  revalidatePath(`${GET_STUDENTS_PATH}/${id.data}`);
+  revalidateAfterAction(`${GET_STUDENTS_PATH}/${id.data}`);
   if (!result.ok) return { error: result.reason, reason: result.reason };
   return { ok: true };
 }
@@ -263,8 +259,7 @@ export async function markActivityDoneAction(
   const teacher = await requireOnboardedTeacher();
   const ok = await markActivityDone(teacher.id, id.data);
   if (!ok) return failed(en);
-  revalidatePath(GET_STUDENTS_PATH);
-  revalidatePath(`${GET_STUDENTS_PATH}/${id.data}`);
+  revalidateAfterAction(`${GET_STUDENTS_PATH}/${id.data}`);
   return { ok: true };
 }
 
@@ -278,7 +273,7 @@ export async function skipActivityAction(
   const teacher = await requireOnboardedTeacher();
   const ok = await skipActivity(teacher.id, id.data);
   if (!ok) return failed(en);
-  revalidatePath(GET_STUDENTS_PATH);
+  revalidateAfterAction(GET_STUDENTS_PATH);
   return { ok: true };
 }
 
@@ -293,7 +288,7 @@ export async function saveActivityBodyAction(
   const teacher = await requireOnboardedTeacher();
   const ok = await updateActivityBody(teacher.id, id.data, body.data);
   if (!ok) return failed(en);
-  revalidatePath(`${GET_STUDENTS_PATH}/${id.data}`);
+  revalidateAfterAction(`${GET_STUDENTS_PATH}/${id.data}`);
   return { ok: true };
 }
 
@@ -303,7 +298,7 @@ export async function regeneratePlanAction(
 ): Promise<MarketingState> {
   const teacher = await requireOnboardedTeacher();
   await regenerateWeeklyPlan({ teacherId: teacher.id });
-  revalidatePath(GET_STUDENTS_PATH);
+  revalidateAfterAction(GET_STUDENTS_PATH);
   return { ok: true };
 }
 
@@ -325,7 +320,7 @@ export async function addActivityAction(
     platform,
     communityId: parsedCommunity.success ? parsedCommunity.data : null,
   });
-  revalidatePath(GET_STUDENTS_PATH);
+  revalidateAfterAction(GET_STUDENTS_PATH);
   return { ok: true };
 }
 
@@ -350,7 +345,7 @@ export async function saveMemeSettingsAction(
   if (!parsed.success) return failed(en);
   const teacher = await requireOnboardedTeacher();
   await saveMemeSettings(teacher.id, parsed.data);
-  revalidatePath(`${GET_STUDENTS_PATH}/communities`);
+  revalidateAfterAction(`${GET_STUDENTS_PATH}/communities`);
   return { ok: true };
 }
 
@@ -403,8 +398,7 @@ export async function generateCommunityPostAction(
     withImage: false,
   });
 
-  revalidatePath(`${GET_STUDENTS_PATH}/communities`);
-  revalidatePath(GET_STUDENTS_PATH);
+  revalidateAfterAction(`${GET_STUDENTS_PATH}/communities`);
   if (!result.ok) return { error: result.reason, reason: result.reason };
   return { ok: true };
 }
