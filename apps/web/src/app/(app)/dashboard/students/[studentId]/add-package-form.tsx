@@ -1,7 +1,7 @@
 "use client";
 
 import { useActionState, useRef, useState, type FormEvent } from "react";
-import { hasFieldErrors, validateManualPackageFields } from "@spiralclass/shared";
+import { usesEnglishCopy, hasFieldErrors, validateManualPackageFields } from "@spiralclass/shared";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -34,7 +34,7 @@ export function AddPackageForm({
   templates: PackageTemplateOption[];
 }) {
   const locale = useLocale();
-  const en = locale === "en";
+  const en = usesEnglishCopy(locale);
   const t = useT();
   const currency = usePricingCurrency();
   const [open, setOpen] = useState(false);

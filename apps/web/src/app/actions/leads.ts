@@ -9,7 +9,7 @@ import { z } from "zod";
 import { flushAnalytics, trackServerEvent } from "@/lib/analytics/posthog";
 import { notifyTeacherOfLead } from "@/lib/leads/notify-teacher";
 import { applyLeadStatus, leadStatusSchema } from "@/lib/leads/status";
-import { isAppLocale, DEFAULT_LOCALE } from "@spiralclass/shared";
+import { usesEnglishCopy, isAppLocale, DEFAULT_LOCALE } from "@spiralclass/shared";
 import { INSTRUMENT_READINESS_SELECT, isPubliclyListed } from "@/lib/marketplace-ready";
 import { clientIp, rateLimit } from "@/lib/rate-limit";
 import { attributionProperties, currentAttribution } from "@/lib/analytics/attribution";
@@ -29,7 +29,7 @@ export async function captureLead(
   formData: FormData,
 ): Promise<LeadCaptureState> {
   const locale = await getPreferredLocale();
-  const en = locale === "en";
+  const en = usesEnglishCopy(locale);
   const parsed = leadCaptureSchema(locale).safeParse({
     slug: formData.get("slug"),
     name: formData.get("name"),
@@ -182,7 +182,7 @@ export async function setLeadStatus(
   _prev: LeadStatusState,
   formData: FormData,
 ): Promise<LeadStatusState> {
-  const en = (await getPreferredLocale()) === "en";
+  const en = usesEnglishCopy(await getPreferredLocale());
   const parsed = statusSchema.safeParse({
     leadId: formData.get("leadId"),
     status: formData.get("status"),

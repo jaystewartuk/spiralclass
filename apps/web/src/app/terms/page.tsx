@@ -5,6 +5,7 @@ import { SUPPORT_EMAIL } from "@/lib/support";
 import { Logo } from "@/components/brand/logo";
 import { hasStripeCreds } from "@/lib/env";
 import { createT } from "@/lib/i18n-translate";
+import { CANCELLATION_POLICY_ANCHOR, LEGACY_CANCELLATION_ANCHOR } from "@/lib/terms-anchors";
 
 const CONTACT_EMAIL = SUPPORT_EMAIL;
 
@@ -23,6 +24,23 @@ const CONTACT_EMAIL = SUPPORT_EMAIL;
  */
 function isSpanishRequested(lang: string | undefined): boolean {
   return lang === "es" || lang === "es-MX";
+}
+
+/**
+ * The cancellation clause's previous fragment, kept addressable.
+ *
+ * A URL fragment never reaches the server, so nothing can redirect one — a
+ * renamed id is only ever a link that silently lands at the top of a long
+ * legal page. Cancellation and deduction emails carry this one and are already
+ * in people's inboxes, so it stays reachable as an empty target rather than
+ * being carried by the section itself: an element has one id, and the one it
+ * announces should be the current one.
+ *
+ * Both ids appear in both language variants, so a link works whichever
+ * document the reader lands on.
+ */
+function LegacyCancellationAnchor() {
+  return <span id={LEGACY_CANCELLATION_ANCHOR} aria-hidden="true" />;
 }
 
 // Metadata follows the ?lang param (which picks the rendered variant), not the
@@ -138,9 +156,8 @@ function SpanishTerms({ stripeAvailable }: { stripeAvailable: boolean }) {
         </p>
       </section>
 
-      {/* id shared with the English render: deduction emails deep-link to
-          /terms#cancelaciones regardless of language. */}
-      <section id="cancelaciones" className="space-y-2">
+      <LegacyCancellationAnchor />
+      <section id={CANCELLATION_POLICY_ANCHOR} className="space-y-2">
         <Heading level={4} as="h2">
           5. Cancelaciones y reembolsos
         </Heading>
@@ -349,7 +366,8 @@ function EnglishTerms({ stripeAvailable }: { stripeAvailable: boolean }) {
         </p>
       </section>
 
-      <section id="cancelaciones" className="space-y-2">
+      <LegacyCancellationAnchor />
+      <section id={CANCELLATION_POLICY_ANCHOR} className="space-y-2">
         <Heading level={4} as="h2">
           5. Cancellations and refunds
         </Heading>

@@ -1,5 +1,6 @@
 import type { LanguageCode, TemplateName, TemplateVariables } from "@/lib/notifications/templates";
 import { renderBrandedEmailHtml, type EmailHtmlContent } from "./html-shell";
+import { cancellationPolicyPath } from "@/lib/terms-anchors";
 
 // Email rendering for the 13 notifications, in es-MX + en. The text body
 // is the WhatsApp fallback; the html body wraps the same content
@@ -87,11 +88,9 @@ function notificationSettingsLine(
 // judgement is why no citation survives anywhere a reader can see. Falls back
 // to the production
 // origin when the dispatcher hasn't wired appUrl (tests).
-// The bare URL serves the English document; `?lang=es` selects Spanish. Links
-// already sent with `?lang=en` still resolve to English.
 function cancellationPolicyUrl(appUrl: string | undefined, es: boolean): string {
   const origin = (appUrl ?? "https://spiralclass.com").replace(/\/$/, "");
-  return es ? `${origin}/terms?lang=es#cancelaciones` : `${origin}/terms#cancelaciones`;
+  return `${origin}${cancellationPolicyPath(es)}`;
 }
 
 // Teacher-mirror note when the student's own notice was suppressed by the

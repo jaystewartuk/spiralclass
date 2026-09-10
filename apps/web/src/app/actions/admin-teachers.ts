@@ -11,6 +11,7 @@ import { enqueueAccountDisabledTeacher } from "@/lib/notifications/enqueue";
 import { emitNotificationQueued } from "@/lib/notifications/events";
 import { logger } from "@/lib/logger";
 import { revalidateAfterAction } from "@/lib/revalidate";
+import { usesEnglishCopy } from "@spiralclass/shared";
 
 const log = logger({ surface: "admin-teachers" });
 
@@ -35,7 +36,7 @@ export async function disableTeacherAction(
 ): Promise<AdminTeacherActionState> {
   const actor = await requireAdmin("support");
   const locale = await getPreferredLocale();
-  const en = locale === "en";
+  const en = usesEnglishCopy(locale);
   const parsed = disableSchema.safeParse({
     teacherId: formData.get("teacherId"),
     reason: formData.get("reason"),
@@ -88,7 +89,7 @@ export async function enableTeacherAction(
 ): Promise<AdminTeacherActionState> {
   const actor = await requireAdmin("support");
   const locale = await getPreferredLocale();
-  const en = locale === "en";
+  const en = usesEnglishCopy(locale);
   const parsed = enableSchema.safeParse({
     teacherId: formData.get("teacherId"),
   });
@@ -134,7 +135,7 @@ export async function resendTeacherMagicLinkAction(
 ): Promise<AdminTeacherActionState> {
   await requireAdmin("support");
   const locale = await getPreferredLocale();
-  const en = locale === "en";
+  const en = usesEnglishCopy(locale);
   const parsed = resendSchema.safeParse({
     teacherId: formData.get("teacherId"),
   });

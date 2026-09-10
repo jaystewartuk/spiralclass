@@ -6,6 +6,7 @@ import { getPreferredLocale, getT } from "@/lib/i18n";
 import { AvailabilityForm } from "@/app/(app)/onboarding/availability/availability-form";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { cn } from "@/lib/utils";
+import { usesEnglishCopy } from "@spiralclass/shared";
 
 const WEEKDAYS_ES = ["Do", "Lu", "Ma", "Mi", "Ju", "Vi", "Sá"];
 const WEEKDAYS_EN = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"];
@@ -17,7 +18,7 @@ export default async function AvailabilitySettingsPage({
 }) {
   const teacher = await requireOnboardedTeacher();
   const locale = await getPreferredLocale();
-  const en = locale === "en";
+  const en = usesEnglishCopy(locale);
   const t = await getT();
   const params = await searchParams;
   const rules = await prisma.availabilityRule.findMany({

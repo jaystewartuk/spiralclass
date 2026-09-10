@@ -15,6 +15,7 @@ import { railReadinessError, startCheckout } from "@/lib/payments/start-checkout
 import { flushAnalytics } from "@/lib/analytics/posthog";
 import { INSTRUMENT_READINESS_SELECT, isPubliclyListed } from "@/lib/marketplace-ready";
 import { hasStripeEmbeddedCheckout } from "@/lib/env";
+import { usesEnglishCopy } from "@spiralclass/shared";
 
 // Wise stays a redirect (thrown by next/navigation's redirect() — never
 // reaches this return type). A Stripe checkout renders inline via
@@ -105,7 +106,7 @@ async function createCheckoutIntentCore(
   formData: FormData,
 ): Promise<CheckoutState> {
   const locale = await getPreferredLocale();
-  const en = locale === "en";
+  const en = usesEnglishCopy(locale);
   const parsed = checkoutIntentSchema(locale).safeParse({
     slug: formData.get("slug"),
     templateId: formData.get("templateId"),
@@ -248,7 +249,7 @@ export async function createPortalCheckoutIntent(
   formData: FormData,
 ): Promise<CheckoutState> {
   const locale = await getPreferredLocale();
-  const en = locale === "en";
+  const en = usesEnglishCopy(locale);
   const parsed = portalCheckoutIntentSchema.safeParse({
     teacherId: formData.get("teacherId"),
     templateId: formData.get("templateId"),

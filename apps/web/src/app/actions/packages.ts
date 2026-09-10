@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { requireOnboardedTeacher } from "@/lib/auth";
 import { getPreferredLocale } from "@/lib/i18n";
 import { revalidateAfterAction } from "@/lib/revalidate";
+import { usesEnglishCopy } from "@spiralclass/shared";
 
 export type PackagePauseState = { error?: string; ok?: boolean } | undefined;
 
@@ -24,7 +25,7 @@ export async function togglePackagePauseAction(
   formData: FormData,
 ): Promise<PackagePauseState> {
   const teacher = await requireOnboardedTeacher();
-  const en = (await getPreferredLocale()) === "en";
+  const en = usesEnglishCopy(await getPreferredLocale());
   const parsed = schema.safeParse({
     packageId: formData.get("packageId"),
     intent: formData.get("intent"),

@@ -8,6 +8,7 @@ import {
 import { logger } from "@/lib/logger";
 import { PODCAST_SCRIPT_MAX_CHARS } from "@/lib/materials/config";
 import type { SynthesizeOpts, SynthesizePodcastResult } from "./tts";
+import { usesEnglishCopy } from "@spiralclass/shared";
 
 const log = logger({ surface: "ai" });
 
@@ -49,9 +50,11 @@ const LANGUAGE_VOICES: Record<string, { languageCode: string; voice: string }> =
 // Mirrors buildPodcastScriptPrompt's own output-language default (locale → es/en).
 function resolveVoice(opts?: SynthesizeOpts): { languageCode: string; voice: string } {
   const name = (
-    opts?.language?.trim() || (opts?.locale === "en" ? "English" : "Spanish")
+    opts?.language?.trim() || (usesEnglishCopy(opts?.locale) ? "English" : "Spanish")
   ).toLowerCase();
-  const localeDefault = opts?.locale === "en" ? LANGUAGE_VOICES.english : LANGUAGE_VOICES.spanish;
+  const localeDefault = usesEnglishCopy(opts?.locale)
+    ? LANGUAGE_VOICES.english
+    : LANGUAGE_VOICES.spanish;
   const base = LANGUAGE_VOICES[name] ?? localeDefault;
   return {
     languageCode: googleTtsLanguageCode() ?? base.languageCode,

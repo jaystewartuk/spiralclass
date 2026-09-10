@@ -14,6 +14,7 @@ import {
   type AddInsightInput,
 } from "@/lib/lesson-notes/insight-actions";
 import { revalidateAfterAction } from "@/lib/revalidate";
+import { usesEnglishCopy } from "@spiralclass/shared";
 
 // Phase E teacher validation loop (the Phase E design,
 // D-19). Web server-action wrappers around the shared core
@@ -28,7 +29,7 @@ async function gate(): Promise<
 > {
   const teacher = await requireOnboardedTeacher();
   const locale = await getPreferredLocale();
-  const en = locale === "en";
+  const en = usesEnglishCopy(locale);
   const pro = await gateProFeature(teacher.id, "lesson_notes");
   if (!pro.ok) return { ok: false, error: upgradeNudge(pro.limit, locale) };
   return { ok: true, teacherId: teacher.id, en };

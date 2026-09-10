@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { usesEnglishCopy } from "./i18n/locales";
 import type { LocaleCode as AppLocale } from "./api";
 import { isLanguageCode } from "./languages";
 import { isPricingCurrencySupported } from "./pricing-currency";
@@ -11,7 +12,7 @@ type Loc = (es: string, en: string) => string;
 const t =
   (locale: AppLocale): Loc =>
   (es, en) =>
-    locale === "en" ? en : es;
+    usesEnglishCopy(locale) ? en : es;
 
 const hhmm = (loc: Loc) =>
   z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/, loc("Formato HH:MM", "Use HH:MM format"));

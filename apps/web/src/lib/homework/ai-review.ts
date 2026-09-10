@@ -5,6 +5,7 @@ import {
   extractHomeworkExcerptText,
   parseMaterialDoc,
   type HomeworkAiReviewDraft,
+  usesEnglishCopy,
 } from "@spiralclass/shared";
 import { prisma } from "@/lib/prisma";
 import { gateProFeature, upgradeNudge } from "@/lib/subscriptions/enforce";
@@ -63,7 +64,7 @@ export async function requestHomeworkAiReview(
   input: { instructions?: string | null },
   locale: AppLocale,
 ): Promise<RequestHomeworkAiReviewResult> {
-  const en = locale === "en";
+  const en = usesEnglishCopy(locale);
 
   const gate = await gateProFeature(teacher.id, "homework_review");
   if (!gate.ok) return { ok: false, code: "not-pro", message: upgradeNudge(gate.limit, locale) };

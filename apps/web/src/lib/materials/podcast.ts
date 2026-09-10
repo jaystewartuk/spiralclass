@@ -3,7 +3,7 @@ import type { AppLocale } from "@/lib/i18n";
 import { gateProFeature, upgradeNudge } from "@/lib/subscriptions/enforce";
 import { trackServerEvent } from "@/lib/analytics/posthog";
 import { resolveFocusTagsWithCategory } from "@/lib/focus-tags";
-import { languageName, stripAnswerKeyMarkdown } from "@spiralclass/shared";
+import { usesEnglishCopy, languageName, stripAnswerKeyMarkdown } from "@spiralclass/shared";
 import { logger } from "@/lib/logger";
 import { hasAnthropicCreds, podcastsEnabled } from "@/lib/env";
 import { enqueue } from "@/lib/jobs/enqueue";
@@ -78,7 +78,7 @@ export async function requestMaterialPodcast(input: {
   targetDurationMin?: number | null;
   locale: AppLocale;
 }): Promise<RequestPodcastResult> {
-  const en = input.locale === "en";
+  const en = usesEnglishCopy(input.locale);
 
   const gate = await gateProFeature(input.teacherId, "class_content");
   if (!gate.ok)

@@ -13,6 +13,7 @@ import {
   upsertStudentTestimonial,
 } from "@/lib/testimonials/store";
 import { revalidateAfterAction } from "@/lib/revalidate";
+import { usesEnglishCopy } from "@spiralclass/shared";
 
 // The student's own half of the testimonial feature — the half that makes the
 // verified badge mean anything.
@@ -32,7 +33,7 @@ export async function saveStudentTestimonial(
   _prev: StudentTestimonialState,
   formData: FormData,
 ): Promise<StudentTestimonialState> {
-  const en = (await getPreferredLocale()) === "en";
+  const en = usesEnglishCopy(await getPreferredLocale());
   const parsed = z
     .object({ teacherId: teacherIdField })
     .merge(studentTestimonialInputSchema)
@@ -88,7 +89,7 @@ export async function removeStudentTestimonial(
   _prev: StudentTestimonialState,
   formData: FormData,
 ): Promise<StudentTestimonialState> {
-  const en = (await getPreferredLocale()) === "en";
+  const en = usesEnglishCopy(await getPreferredLocale());
   const parsed = z
     .object({ teacherId: teacherIdField })
     .safeParse({ teacherId: formData.get("teacherId") });

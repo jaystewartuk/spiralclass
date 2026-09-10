@@ -11,6 +11,7 @@ import {
 } from "@/lib/storage/student-photo";
 import { logger } from "@/lib/logger";
 import { revalidateAfterAction } from "@/lib/revalidate";
+import { usesEnglishCopy } from "@spiralclass/shared";
 
 const log = logger({ surface: "student-photo" });
 
@@ -27,7 +28,7 @@ export async function saveStudentPhotoAction(
 ): Promise<ProfileState> {
   const student = await requireStudent();
   const locale = await getPreferredLocale();
-  const en = locale === "en";
+  const en = usesEnglishCopy(locale);
 
   const file = formData.get("photo");
   if (!(file instanceof File) || file.size === 0) {

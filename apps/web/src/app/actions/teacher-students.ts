@@ -12,6 +12,7 @@ import { normalizeE164 } from "@/lib/phone";
 import { gateAddStudent, upgradeNudge } from "@/lib/subscriptions/enforce";
 import { defaultNewStudentNotificationPrefs } from "@/lib/notifications/preferences";
 import { revalidateAfterAction } from "@/lib/revalidate";
+import { usesEnglishCopy } from "@spiralclass/shared";
 
 // Silent onboarding (gradual go-live). A teacher can stage a student on her
 // roster by hand — replacing the paper notebook — before that student knows
@@ -32,7 +33,7 @@ export async function createStudentAction(
   formData: FormData,
 ): Promise<RosterActionState> {
   const locale = await getPreferredLocale();
-  const en = locale === "en";
+  const en = usesEnglishCopy(locale);
 
   const parsed = teacherCreateStudentSchema(locale).safeParse({
     name: formData.get("name"),
@@ -160,7 +161,7 @@ export async function setStudentLiveAction(
   formData: FormData,
 ): Promise<RosterActionState> {
   const locale = await getPreferredLocale();
-  const en = locale === "en";
+  const en = usesEnglishCopy(locale);
   const parsed = goLiveSchema.safeParse({ studentId: formData.get("studentId") });
   if (!parsed.success) {
     return { error: en ? "Invalid data." : "Datos inválidos." };

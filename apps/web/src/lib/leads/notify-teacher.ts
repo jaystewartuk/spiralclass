@@ -3,6 +3,7 @@ import { renderBrandedEmailHtml } from "@/lib/email/html-shell";
 import { serverEnv } from "@/lib/env";
 import { logger } from "@/lib/logger";
 import type { AppLocale } from "@/lib/i18n";
+import { usesEnglishCopy } from "@spiralclass/shared";
 
 const log = logger({ surface: "leads" });
 
@@ -19,7 +20,7 @@ export async function notifyTeacherOfLead(input: {
   locale: AppLocale;
   lead: { name: string; email: string; phone: string | null; message: string | null };
 }): Promise<void> {
-  const en = input.locale === "en";
+  const en = usesEnglishCopy(input.locale);
   const appUrl = serverEnv().APP_URL.replace(/\/$/, "");
   const leadsUrl = `${appUrl}/dashboard/leads`;
 

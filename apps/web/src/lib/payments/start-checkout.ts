@@ -4,6 +4,7 @@ import {
   hasOfferableInstrument,
   stripeMinChargeMinorUnits,
   type InstrumentReadiness,
+  usesEnglishCopy,
 } from "@spiralclass/shared";
 import { prisma } from "@/lib/prisma";
 import { serverEnv } from "@/lib/env";
@@ -143,7 +144,7 @@ export function railReadinessError(
   locale: AppLocale,
   instruments: readonly InstrumentReadiness[],
 ): string | null {
-  const en = locale === "en";
+  const en = usesEnglishCopy(locale);
   if (paymentMethod === "stripe") {
     if (!teacher.stripeAccountId || !teacher.stripeChargesEnabled) {
       return en
@@ -180,7 +181,7 @@ async function instrumentsFor(teacherId: string): Promise<InstrumentReadiness[]>
 // anonymous first-time buyers and signed-in repurchasers alike.
 export async function startCheckout(args: StartCheckoutArgs): Promise<StartCheckoutResult> {
   const { teacher, student, template, paymentMethod, locale } = args;
-  const en = locale === "en";
+  const en = usesEnglishCopy(locale);
   const env = serverEnv();
   const appUrl = env.APP_URL.replace(/\/$/, "");
   // The settlement currency for this teacher's rows — the teacher's own
@@ -321,12 +322,12 @@ export async function startCheckout(args: StartCheckoutArgs): Promise<StartCheck
           amountMinorUnits: ref.discountMinorUnits,
         };
       } else if (ref.reason === "not_a_referral") {
-        return { error: discountRejectMessage("not_found", locale === "en") };
+        return { error: discountRejectMessage("not_found", usesEnglishCopy(locale)) };
       } else {
-        return { error: referralRejectMessage(ref.reason, locale === "en") };
+        return { error: referralRejectMessage(ref.reason, usesEnglishCopy(locale)) };
       }
     } else {
-      return { error: discountRejectMessage(promo.reason, locale === "en") };
+      return { error: discountRejectMessage(promo.reason, usesEnglishCopy(locale)) };
     }
   }
 

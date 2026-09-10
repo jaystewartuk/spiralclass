@@ -490,7 +490,9 @@ function bookingWhen(
 }
 
 function formatShortDate(d: Date, tz: string, locale: AppLocale): string {
-  return new Intl.DateTimeFormat(locale === "en" ? "en-US" : "es-MX", {
+  // The locale itself, not one of two: Intl knows `fr` and every other tag
+  // the registry ships, and a date is not a two-branch string.
+  return new Intl.DateTimeFormat(locale, {
     timeZone: tz,
     day: "numeric",
     month: "short",

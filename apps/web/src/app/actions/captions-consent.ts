@@ -9,6 +9,7 @@ import {
   setCaptionsGuardianConsentFor,
 } from "@/lib/captions/consent-writes";
 import { revalidateAfterAction } from "@/lib/revalidate";
+import { usesEnglishCopy } from "@spiralclass/shared";
 
 // Live-captions consent gate (the captions architecture review
 // P0). Two independent actions, mirroring the two people who can give this
@@ -28,7 +29,7 @@ export async function setCaptionsGuardianConsent(
 ): Promise<ConsentState> {
   const teacher = await requireOnboardedTeacher();
   const locale = await getPreferredLocale();
-  const en = locale === "en";
+  const en = usesEnglishCopy(locale);
 
   const gate = await gateProFeature(teacher.id, "lesson_notes");
   if (!gate.ok) return { error: upgradeNudge(gate.limit, locale) };
@@ -62,10 +63,9 @@ export async function setCaptionsConsent(consented: boolean): Promise<ConsentSta
   if (!res.ok) {
     const locale = await getPreferredLocale();
     return {
-      error:
-        locale === "en"
-          ? "Couldn't save. Please try again."
-          : "No se pudo guardar. Inténtalo de nuevo.",
+      error: usesEnglishCopy(locale)
+        ? "Couldn't save. Please try again."
+        : "No se pudo guardar. Inténtalo de nuevo.",
     };
   }
 
