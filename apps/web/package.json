@@ -9,7 +9,7 @@
     "build": "prisma generate && next build",
     "build:standalone": "next build --turbopack",
     "start": "dotenv -e ../../config/env/local.runtime.env -- next start",
-    "lint": "next lint",
+    "lint": "eslint src",
     "typecheck": "tsc --noEmit",
     "test": "vitest run --project unit",
     "test:integration": "vitest run --project integration --passWithNoTests",
