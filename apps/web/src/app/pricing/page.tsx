@@ -164,7 +164,11 @@ export default async function PricingPage() {
           {t("web.pricing.fees.title")}
         </Heading>
         <p className="mt-2 text-center text-muted-foreground">{t("web.pricing.fees.intro")}</p>
-        <div className="mt-6 grid gap-4 lg:grid-cols-3">
+        {/* mt-8 and gap-6, matching every other section heading and card grid in
+            the marketing pages. This section had 24px and 16px — the only
+            3-up grid in the product with a different gutter from the one
+            directly above it on the same page. */}
+        <div className="mt-8 grid gap-6 lg:grid-cols-3">
           <Card>
             <CardHeader>
               <CardTitle as="h3" className="text-base">
