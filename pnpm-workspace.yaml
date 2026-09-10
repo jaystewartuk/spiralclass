@@ -84,7 +84,14 @@ overrides:
   tmp@<0.2.7: "0.2.7" # GHSA-52f5-9888-hmc6, GHSA-ph9p-34f9-6g65, GHSA-7c78-jf6q-g5cm
   uuid@<11.1.1: "11.1.1" # GHSA-w5hq-g745-h8pq
   "@babel/core@<=7.29.0": "7.29.6" # GHSA-4x5r-pxfx-6jf8
-  postcss@<=8.5.17: "8.5.22" # GHSA-6g55-p6wh-862q, GHSA-r28c-9q8g-f849
+  # Widened 2026-09-09, <=8.5.17 -> <=8.5.22. 8.5.22 is the version this pin
+  # itself installed, and it is now the vulnerable one: GHSA-fxqj-rqcc-2cmp
+  # says the fix for GHSA-6g55-p6wh-862q was incomplete, and its range reaches
+  # <=8.5.22. Same shape as the nanoid, fast-uri and sharp re-bumps below — a
+  # new advisory against an unchanged lockfile, reproducing on origin/main.
+  # Widened rather than left beside a second entry, per the sharp note: one
+  # rule per package, so a narrower stale pin cannot win.
+  postcss@<=8.5.22: "8.5.23" # GHSA-fxqj-rqcc-2cmp (incomplete fix of GHSA-6g55-p6wh-862q)
   # 2026-08-17: the one high-severity finding left failing `pnpm audit --prod
   # --audit-level high`, i.e. the gate's audit step, on every branch. Reached
   # only through the Prisma CLI chain (@prisma/client > prisma > @prisma/…),
@@ -149,6 +156,21 @@ overrides:
   # cannot regress a code path this repo has. Exact pin, not ">=3.22.0", per the
   # 2026-07-20 note above.
   mysql2@<3.22.0: "3.24.3" # GHSA-3f6p-5ww8-9rcr
+  # 2026-09-09 sweep, run when Dependabot alerts were switched on for the public
+  # repo and reported eight findings the gate's audit step never had to see:
+  # it grades `--prod --audit-level high`, and these are moderate, dev-tree, or
+  # both. A fix path exists for each below, so each is an override rather than
+  # an ignoreGhsas entry, per that list's own criterion. Exact pins, not open
+  # ">=" ranges, for the dedup reason the 2026-07-20 sweep documents above.
+  #
+  # js-yaml's 3.x line, reached only through @lhci/cli > @lhci/utils, i.e.
+  # Lighthouse CI. The 4.x and 5.x entries above do not touch it — 3.15.0 sat
+  # below all of them. 3.15.2 covers both advisories; 3.15.1 closes only one.
+  js-yaml@>=3.0.0 <3.15.2: "3.15.2" # GHSA-2883-xcg3-v3hh, GHSA-5p4m-2wfm-xmqj
+  # qs is NOT dev-only: express reaches the production tree through inngest as
+  # well as through @lhci/cli. One range covers both findings (>=2.2.5 <6.16.0
+  # and >=6.14.2 <=6.15.3 both end at 6.16.0).
+  qs@<6.16.0: "6.16.0" # GHSA-4mjr-xmp4-gh2g, GHSA-x5fp-wj9c-mxmx
 
 # auditConfig.ignoreGhsas emptied 2026-07-20: the prior 45-entry high+
 # baseline (docs/security.md) is now fully resolved via the
