@@ -27,7 +27,7 @@ vi.mock("@/components/locale-provider", () => ({
 
 const { ContactEditForm } =
   await import("@/app/(app)/dashboard/students/[studentId]/contact-edit-form");
-const { AddStudentForm } = await import("@/app/(app)/dashboard/students/nuevo/add-student-form");
+const { AddStudentForm } = await import("@/app/(app)/dashboard/students/new/add-student-form");
 
 describe("ContactEditForm — inline name validation", () => {
   const html = renderToStaticMarkup(

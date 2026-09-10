@@ -277,7 +277,7 @@ export default async function TeacherStudentsPage({
         actions={
           <>
             <Button asChild>
-              <Link href="/dashboard/students/nuevo">
+              <Link href="/dashboard/students/new">
                 {t("web.dashboard.students.new.addStudent")}
               </Link>
             </Button>
@@ -301,7 +301,7 @@ export default async function TeacherStudentsPage({
           action={
             <div className="mt-2 flex w-full max-w-reading flex-col items-center gap-3">
               <Button asChild>
-                <Link href="/dashboard/students/nuevo">
+                <Link href="/dashboard/students/new">
                   {t("web.dashboard.students.new.addStudent")}
                 </Link>
               </Button>
