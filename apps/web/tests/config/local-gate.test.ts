@@ -375,14 +375,42 @@ describe("the workflows call the registry, and never restate it (D-157)", () => 
     }
   });
 
-  it("neither deploy workflow reimplements fly-deploy.sh", () => {
+  it("no deploy workflow reimplements a deploy script", () => {
     // The seven steps are ordered and the order is load-bearing — step 1 is the
     // Neon checkpoint that makes a bad migration recoverable. The last time
     // these steps existed in two places, the copy that got re-typed was the one
     // missing the checkpoint (see scripts/fly-deploy.sh's header).
+    //
+    // ⚠️ WIDENED BY [D-175] FROM "fly-deploy.sh" TO "a deploy script", because
+    // there are two targets now. The rule did not change: a deploy workflow
+    // CALLS a script a laptop can also run, and states none of the steps
+    // itself. What changed is that asserting the Fly script by name would have
+    // started failing for the wrong reason the moment a second target's
+    // workflow existed — so the assertion is now "at least one of the known
+    // deploy scripts", and the forbidden list covers both targets' verbs.
+    const DEPLOY_SCRIPTS = ["scripts/fly-deploy.sh", "scripts/vercel-deploy.sh"];
+
+    // Every step either target's script owns. `vercel pull`, `vercel build` and
+    // `vercel deploy` are here for the same reason `docker buildx build` is:
+    // the ONE place the Vercel build's env overlay happens is that script, and
+    // a workflow that ran `vercel build` itself would skip it and ship the
+    // dashboard's values to real browsers.
+    const FORBIDDEN = [
+      "flyctl deploy",
+      "docker buildx build",
+      "prisma migrate deploy",
+      "vercel pull",
+      "vercel build",
+      "vercel deploy",
+      "vercel promote",
+    ];
+
     for (const { file, text } of workflows.filter((w) => w.file.startsWith("deploy-"))) {
-      expect(text, `${file} does not call the deploy script`).toContain("scripts/fly-deploy.sh");
-      for (const forbidden of ["flyctl deploy", "docker buildx build", "prisma migrate deploy"]) {
+      expect(
+        DEPLOY_SCRIPTS.some((script) => text.includes(script)),
+        `${file} calls no deploy script — it must invoke one of ${DEPLOY_SCRIPTS.join(" / ")}`,
+      ).toBe(true);
+      for (const forbidden of FORBIDDEN) {
         expect(runBodies(text), `${file} reimplements a deploy step: ${forbidden}`).not.toContain(
           forbidden,
         );

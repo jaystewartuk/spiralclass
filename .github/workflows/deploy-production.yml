@@ -318,3 +318,148 @@ jobs:
             echo "tag IS the commit. Not \`pnpm release:status\`: its ledger is"
             echo "per-machine and this deploy did not run on that machine."
           } >> "$GITHUB_STEP_SUMMARY"
+
+  # ── The second production target ([D-175]) ───────────────────────────────
+  #
+  # Fly serves spiralclass.com and this does not change that. What this job
+  # produces is a PRODUCTION deployment of the same commit on Vercel that is
+  # built, deployed, and holds no domain — a failover that is proven on every
+  # release instead of a dormant project nobody has deployed since they set it
+  # up. D-164 is the lesson being applied: infrastructure that is never
+  # exercised stops describing anything, and the reader who trusts it is the one
+  # who gets hurt.
+  #
+  # ⚠️ A SECOND JOB HERE, NOT A SECOND WORKFLOW, and the reason is the database.
+  # The Neon checkpoint and the migrations belong to ONE commit and must happen
+  # ONCE — see scripts/vercel-deploy.sh's header for what this deploy therefore
+  # deliberately omits. `needs: [deploy]` is what makes "already migrated" a
+  # fact rather than a hope: a separate `workflow_run` workflow would be the
+  # same claim with a race in it, and a separate push-triggered workflow would
+  # run the two targets concurrently against one database.
+  #
+  # ⚠️ IT RUNS AFTER THE PROBES, deliberately. Nothing in this job may delay,
+  # gate or obscure the Fly release: by the time it starts, production is
+  # serving and `scripts/local/synthetic.sh` has said so. A red job here means
+  # "the failover did not refresh", which is worth knowing and is not an
+  # incident — and it reads that way in the Actions tab because the job above it
+  # is green.
+  #
+  # ⚠️ Same `production` environment as the job above, which means the same
+  # required reviewer and the same credential boundary. That is correct rather
+  # than convenient: this is a production deploy of production code, and its
+  # three VERCEL_* values are pushed into that environment from Infisical
+  # ([D-163]) exactly as Fly's token is. It deliberately holds NO database URL
+  # and NO Neon key — it has no business with the schema, and the narrowest way
+  # to say so is to not hand it the means.
+  vercel:
+    name: Deploy the same commit to the Vercel failover, without taking the domain
+    needs: [deploy]
+    if: ${{ github.ref == 'refs/heads/production' }}
+    runs-on: ubuntu-latest # ⚠️ Never a larger runner — those are billed even on a public repo.
+    timeout-minutes: 30
+    environment:
+      name: production
+    env:
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      # These stand in for `vercel link`, which would write a .vercel/project.json
+      # this repository does not commit. They are deploy-time credentials, not
+      # runtime config — nothing in apps/web reads a VERCEL_* variable, and
+      # decommissioned-platforms.test.ts still asserts that (D-175).
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+      # config/env/production.build.env's `__LOCAL__` values, resolved by
+      # scripts/env-config.mjs — the SAME source the Docker build reads, so the
+      # two targets cannot bake different values into the same commit's bundle.
+      NEXT_PUBLIC_TEACHER_PHOTOS_R2_PUBLIC_URL: ${{ secrets.NEXT_PUBLIC_TEACHER_PHOTOS_R2_PUBLIC_URL }}
+      NEXT_PUBLIC_TEACHER_VIDEOS_R2_PUBLIC_URL: ${{ secrets.NEXT_PUBLIC_TEACHER_VIDEOS_R2_PUBLIC_URL }}
+      NEXT_PUBLIC_SUPPORT_WHATSAPP: ${{ secrets.NEXT_PUBLIC_SUPPORT_WHATSAPP }}
+      NEXT_PUBLIC_SENTRY_DSN: ${{ secrets.NEXT_PUBLIC_SENTRY_DSN }}
+      NEXT_PUBLIC_POSTHOG_KEY: ${{ secrets.NEXT_PUBLIC_POSTHOG_KEY }}
+      NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Refuse before building if this environment cannot deploy
+        # Same reasoning as the Fly job's preflight, and the same trap: an
+        # ABSENT GitHub secret is the empty string, not an error. Without this,
+        # a value Infisical has not pushed yet reaches the CLI looking exactly
+        # like a value that is set, and the first symptom is a project-linking
+        # message about a project that is in fact configured.
+        #
+        # The build half is checked by the same derived call the Fly job uses,
+        # so a __LOCAL__ key added to config/env/production.build.env is covered
+        # here in the same commit with no list to widen.
+        run: |
+          set -euo pipefail
+          missing=""
+          [ -n "${VERCEL_TOKEN:-}" ] || missing="$missing VERCEL_TOKEN"
+          [ -n "${VERCEL_ORG_ID:-}" ] || missing="$missing VERCEL_ORG_ID"
+          [ -n "${VERCEL_PROJECT_ID:-}" ] || missing="$missing VERCEL_PROJECT_ID"
+          if [ -n "$missing" ]; then
+            echo "The \`production\` environment is missing:$missing" >&2
+            echo "" >&2
+            echo "Infisical is the source of truth and syncs these in (D-163), so fix the" >&2
+            echo "value THERE rather than setting it by hand here." >&2
+            exit 1
+          fi
+          echo "› Every value this deploy reads arrived."
+
+          node scripts/env-build-args.mjs production >/dev/null
+          echo "› Every __LOCAL__ build value resolves."
+
+      - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
+        with:
+          dest: ~/setup-pnpm
+
+      - name: Read the Node major the app actually ships on
+        # Read from the Dockerfile like every other job here. It is the Fly
+        # image's Node version, and using it means the two targets build the
+        # same commit on the same major — a divergence here would be a real
+        # difference between the thing serving and the thing standing by.
+        run: |
+          set -euo pipefail
+          major="$(sed -n 's/^FROM node:\([0-9][0-9]*\)-slim.*/\1/p' Dockerfile | head -1)"
+          if [ -z "$major" ]; then
+            echo "Could not read a Node major from the Dockerfile's FROM line." >&2
+            exit 1
+          fi
+          echo "NODE_VERSION=$major" >> "$GITHUB_ENV"
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      - name: Deploy
+        # One line, like the Fly job. Every step lives in the script, which is
+        # also what `pnpm deploy:vercel` runs — so a failover refreshed from
+        # here and one refreshed from the laptop are the same deploy. No
+        # `vercel` CLI version appears in this file: the script pins it, and a
+        # second pin here would be the copy that stops matching.
+        run: bash scripts/vercel-deploy.sh production --gate-already-passed
+
+      - name: Say what is standing by
+        if: ${{ always() }}
+        env:
+          OUTCOME: ${{ job.status }}
+        run: |
+          set -euo pipefail
+          {
+            echo "## Vercel failover · ${OUTCOME}"
+            echo
+            echo "| | |"
+            echo "| --- | --- |"
+            echo "| Commit | \`${GITHUB_SHA}\` |"
+            echo "| Serving | nothing — \`--skip-domain\` (D-175) |"
+            echo "| Domain | still Fly \`agendaprofe\` (D-150 addendum 2) |"
+            echo
+            echo "This ran AFTER production was serving and probed, so its outcome"
+            echo "says nothing about whether the release shipped — read the job above."
+            echo "A red run here means the failover did not refresh."
+            echo
+            echo "Handing it the domain is an operator step this workflow never takes."
+            echo "The procedure, and what is NOT yet covered by a promote, is in"
+            echo "docs/deployment/RELEASE_AND_STAGING.md — read it before an incident."
+          } >> "$GITHUB_STEP_SUMMARY"
