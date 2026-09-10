@@ -6776,4 +6776,29 @@ export const esMX = {
   "web.getStudents.postNoKinds":
     "Todavía no hay nada que podamos publicar aquí con honestidad. Revisa la configuración de promoción de esta comunidad, o agrega un paquete, una foto o un testimonio a tu página.",
   "web.getStudents.copyPostAndLink": "Copiar publicación",
+
+  // Las páginas HTML independientes que sirven los enrutadores /r/* y el
+  // manejador de baja de correos. Se renderizan fuera del shell de la app — sin
+  // layout ni LocaleProvider — así que arman su propio marcado y resuelven el
+  // idioma desde la petición.
+  "web.expiredLink.title": "Enlace expirado",
+  "web.expiredLink.heading": "Este enlace ya no funciona",
+  "web.expiredLink.signIn": "Pide a tu profe un nuevo enlace de inicio de sesión.",
+  "web.expiredLink.reschedule": "El enlace para reagendar tu clase ya no está disponible.",
+  "web.expiredLink.rescheduleAction": "Ir a tus clases",
+  "web.unsubscribe.confirm.title": "Cancelar suscripción",
+  "web.unsubscribe.confirm.heading": "¿Cancelar los correos?",
+  "web.unsubscribe.confirm.body": "Confirma que ya no quieres recibir correos de SpiralClass.",
+  "web.unsubscribe.confirm.push":
+    "Es posible que sigas recibiendo avisos importantes por notificaciones push en la app.",
+  "web.unsubscribe.confirm.cta": "Sí, cancelar mis correos",
+  "web.unsubscribe.done.title": "Suscripción cancelada",
+  "web.unsubscribe.done.heading": "Listo",
+  "web.unsubscribe.done.body": "Ya no te enviaremos correos.",
+  "web.unsubscribe.done.push":
+    "Es posible que sigas recibiendo avisos importantes por notificaciones push en la app; puedes ajustarlas desde la app.",
+  "web.unsubscribe.error.title": "Enlace inválido",
+  "web.unsubscribe.error.heading": "Enlace inválido",
+  "web.unsubscribe.error.body": "No pudimos procesar tu solicitud ({reason}).",
+  "web.unsubscribe.error.help": "Si necesitas ayuda, contacta a tu profe.",
 } as const;

@@ -156,12 +156,12 @@ describe("intervalsOverlap", () => {
 });
 
 describe("formatDateTimeInZone", () => {
-  it("renders a human-readable es-MX date+time string in the teacher's zone", () => {
+  it("renders a human-readable date+time string in the teacher's zone", () => {
     const d = new Date("2026-04-15T15:00:00Z"); // 09:00 CDMX
     const out = formatDateTimeInZone(d, MX);
-    // ICU shape: "miércoles, 15 de abril, 9:00 a.m." (NBSP and case may vary).
-    expect(out).toMatch(/miércoles/i);
-    expect(out).toMatch(/15 de abril/);
+    // ICU shape: "Wednesday, April 15 at 9:00 AM" (NBSP and case may vary).
+    expect(out).toMatch(/wednesday/i);
+    expect(out).toMatch(/april 15/i);
     // 9, not 09 — the hour carries no leading zero in a 12-hour locale (packages/shared/src/time-format.ts).
     expect(out).toMatch(/9:00/);
   });
@@ -175,7 +175,7 @@ describe("formatDateTimeInZone", () => {
 
   it("flips the date when crossing zones changes the day", () => {
     const d = new Date("2026-04-16T01:00:00Z"); // still 04-15 in CDMX, 04-16 in UTC
-    expect(formatDateTimeInZone(d, MX)).toMatch(/15 de abril/);
-    expect(formatDateTimeInZone(d, "UTC")).toMatch(/16 de abril/);
+    expect(formatDateTimeInZone(d, MX)).toMatch(/april 15/i);
+    expect(formatDateTimeInZone(d, "UTC")).toMatch(/april 16/i);
   });
 });

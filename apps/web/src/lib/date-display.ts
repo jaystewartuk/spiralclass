@@ -3,6 +3,7 @@
 // the teacher's local time, plus the student's browser time when known.
 
 import {
+  DEFAULT_LOCALE,
   formatTimeInZone,
   timeOptionsFor,
   getDualZoneTime,
@@ -45,7 +46,7 @@ export function bookingWhen(
   };
 }
 
-export function formatZonedDateTime(d: Date, tz: string, locale = "es-MX"): string {
+export function formatZonedDateTime(d: Date, tz: string, locale: string = DEFAULT_LOCALE): string {
   return new Intl.DateTimeFormat(locale, {
     timeZone: tz,
     weekday: "short",
@@ -55,7 +56,7 @@ export function formatZonedDateTime(d: Date, tz: string, locale = "es-MX"): stri
   }).format(d);
 }
 
-export function formatZonedTime(d: Date, tz: string, locale = "es-MX"): string {
+export function formatZonedTime(d: Date, tz: string, locale: string = DEFAULT_LOCALE): string {
   return formatTimeInZone(d, tz, locale);
 }
 
@@ -73,11 +74,15 @@ export function formatZonedTime(d: Date, tz: string, locale = "es-MX"): string {
  * or abbreviates differently gets its own answer rather than an English one
  * with translated month names.
  */
-export function formatZonedDateCompact(d: Date, tz: string, locale = "es-MX"): string {
+export function formatZonedDateCompact(
+  d: Date,
+  tz: string,
+  locale: string = DEFAULT_LOCALE,
+): string {
   return new Intl.DateTimeFormat(locale, { timeZone: tz, dateStyle: "medium" }).format(d);
 }
 
-export function formatZonedDate(d: Date, tz: string, locale = "es-MX"): string {
+export function formatZonedDate(d: Date, tz: string, locale: string = DEFAULT_LOCALE): string {
   return new Intl.DateTimeFormat(locale, {
     timeZone: tz,
     weekday: "long",
@@ -138,9 +143,10 @@ export function timezoneCityLabel(tz: string): string {
  * every row in 2026 is noise, while a bare "12 Aug" on a class from two years
  * ago is a genuine misreading.
  *
- * `locale` is required rather than defaulted: the defaults on this file's older
- * helpers are "es-MX", which predates `DEFAULT_LOCALE` becoming "en", and a new
- * one should not inherit that.
+ * `locale` is required rather than defaulted. The other helpers here default to
+ * `DEFAULT_LOCALE`, which is the right answer for a caller that genuinely has
+ * no locale — but a caller that simply forgot to thread one through gets the
+ * same answer silently, and a date is exactly where that goes unnoticed.
  */
 export function formatZonedShortDate(
   d: Date,
@@ -159,7 +165,7 @@ export function formatZonedShortDate(
   }).format(d);
 }
 
-export function formatZonedDayHeader(d: Date, tz: string, locale = "es-MX"): string {
+export function formatZonedDayHeader(d: Date, tz: string, locale: string = DEFAULT_LOCALE): string {
   return new Intl.DateTimeFormat(locale, {
     timeZone: tz,
     weekday: "long",
@@ -176,7 +182,7 @@ export function formatBothZones(
   d: Date,
   teacherTz: string,
   studentTz: string | null | undefined,
-  locale = "es-MX",
+  locale: string = DEFAULT_LOCALE,
 ): string {
   const teacherStr = formatZonedDateTime(d, teacherTz, locale);
   if (!studentTz || studentTz === teacherTz) return teacherStr;

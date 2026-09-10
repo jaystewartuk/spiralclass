@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { createT } from "@spiralclass/shared";
+import { createT, DEFAULT_LOCALE } from "@spiralclass/shared";
 import {
   bookingWhen,
   formatZonedDateCompact,
@@ -268,8 +268,9 @@ describe("formatZonedDateCompact", () => {
     }
   });
 
-  it("defaults to es-MX when no locale is given", () => {
+  it("formats in DEFAULT_LOCALE when no locale is given", () => {
     const d = new Date("2026-10-03T15:00:00Z");
-    expect(formatZonedDateCompact(d, "UTC")).toBe(formatZonedDateCompact(d, "UTC", "es-MX"));
+    expect(formatZonedDateCompact(d, "UTC")).toBe(formatZonedDateCompact(d, "UTC", DEFAULT_LOCALE));
+    expect(formatZonedDateCompact(d, "UTC")).toBe(formatZonedDateCompact(d, "UTC", "en"));
   });
 });

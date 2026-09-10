@@ -96,7 +96,7 @@ export default async function PurchasePage({
   // Terms link follows the funnel's own language, not the browser's — sending
   // an English checkout's cancellation-policy link to the Spanish terms is
   // exactly the split this pinning exists to remove.
-  const termsHref = "/terms?lang=en#cancelaciones";
+  const termsHref = "/terms#cancelaciones";
   const teacherName = teacher.name.trim();
 
   const stripeReady = Boolean(teacher.stripeAccountId && teacher.stripeChargesEnabled);

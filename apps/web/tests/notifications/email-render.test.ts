@@ -544,7 +544,9 @@ describe("renderEmail — no_show_student", () => {
     });
     expect(r.subject).toMatch(/no asistencia/);
     expect(r.body).toMatch(/política de cancelaciones/);
-    expect(r.body).toMatch(/https:\/\/app\.test\/terms#cancelaciones/);
+    // Spanish email, Spanish document. The bare URL is English, so the Spanish
+    // variant is the one that names itself.
+    expect(r.body).toMatch(/https:\/\/app\.test\/terms\?lang=es#cancelaciones/);
     // No spec section number, of any kind. This asserted `/§6\.6/` alone,
     // written when that exact citation shipped to a student; the rule is that
     // an internal section number is meaningless to a recipient, so guard the
@@ -623,7 +625,7 @@ describe("renderEmail — teacher mirrors for booking/cancel/reschedule", () => 
     });
     expect(r.subject).toMatch(/Mariana canceló con menos de 24h/);
     expect(r.body).toMatch(/se descontó del paquete según la política de cancelaciones/);
-    expect(r.body).toMatch(/https:\/\/app\.test\/terms#cancelaciones/);
+    expect(r.body).toMatch(/https:\/\/app\.test\/terms\?lang=es#cancelaciones/);
     expect(r.html).toMatch(/Ver política de cancelaciones/);
     // No archived note unless the flag is set.
     expect(r.body).not.toMatch(/dado de baja/);

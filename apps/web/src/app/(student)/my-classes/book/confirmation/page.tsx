@@ -26,7 +26,9 @@ export default async function ConfirmacionPage({
   const locale = await getPreferredLocale();
   const en = locale === "en";
   const t = await getT();
-  const termsHref = en ? "/terms?lang=en#cancelaciones" : "/terms#cancelaciones";
+  // Bare /terms is the English document, so Spanish asks for itself. The
+  // anchor is `#cancelaciones` in both variants and is already in sent email.
+  const termsHref = en ? "/terms#cancelaciones" : "/terms?lang=es#cancelaciones";
   const { bookingId } = await searchParams;
   if (!bookingId) notFound();
 

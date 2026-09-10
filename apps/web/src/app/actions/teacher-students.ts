@@ -103,9 +103,13 @@ export async function createStudentAction(
       data: {
         name,
         email: email ?? null,
-        // Locale matches the funnel's find-or-create default; the teacher can
-        // change it later from the contact card if needed.
-        locale: "es-MX",
+        // No explicit locale — the column default applies, as it does on the
+        // other two paths that mint a student (lib/students/find-or-create.ts,
+        // lib/invitations/manage.ts). This value is not a display default the
+        // next render can correct: it is stamped on the row and addresses
+        // every lifecycle email that student ever receives, so guessing it
+        // here is worse than letting the column answer. The teacher can set it
+        // from the contact card.
         phoneE164,
         notificationPrefs: defaultNewStudentNotificationPrefs(),
         teacherStudents: {
