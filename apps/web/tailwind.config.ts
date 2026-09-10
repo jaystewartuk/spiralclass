@@ -24,22 +24,38 @@ const brandBoxShadow = Object.fromEntries(
 ) as Record<`brand-${"sm" | "md" | "lg"}`, string>;
 
 const config: Config = {
-  darkMode: ["class"],
+  // v4 types this as `"class"` or `["class", <selector>]`; the bare one-element
+  // array v3 accepted no longer compiles.
+  darkMode: "class",
   content: ["./src/**/*.{ts,tsx}"],
   theme: {
     // Replaces Tailwind's default scale outright (sm:640 md:768 lg:1024 …), so
     // every tablet width falls through to the unprefixed mobile layout.
-    screens: { ...SCREENS },
-    container: {
-      center: true,
-      padding: "1rem",
-      // The container plugin reads the VALUES here, not the key names — this
-      // says "from 1280px up, settle at 1280px wide". The key is arbitrary
-      // and no longer tracks the `2xl` token in `screens` above; it is spelled
-      // out rather than derived so the content column keeps its current
-      // ceiling no matter where the layout breakpoints move.
-      screens: { content: CONTAINER_MAX_WIDTH },
-    },
+    // WIDTH-BASED ENTRIES ONLY. Tailwind 4 has no way to express a `raw`
+    // media query in `theme.screens`: its container compatibility shim walks
+    // every screen and writes `max-width: <the screen's value>`, so the two
+    // `pointer: fine` entries came out as
+    // `max-width: (min-width: 1024px) and (pointer: fine)` — invalid CSS, and
+    // two build warnings. `corePlugins: { container: false }` does not turn it
+    // off; v4 dropped `corePlugins` entirely.
+    //
+    // So the two raw screens are declared as `@custom-variant` in globals.css,
+    // which is v4's mechanism for exactly this. SCREENS in src/lib/breakpoints
+    // is STILL the single source for both halves — the CSS mirrors it the way
+    // the colour tokens do, and tests/config/responsive-breakpoints.test.ts
+    // fails on any drift between the two.
+    screens: Object.fromEntries(
+      Object.entries(SCREENS).filter(([, value]) => typeof value === "string"),
+    ) as Record<string, string>,
+    // NO `container` KEY. Tailwind 4 dropped the container plugin's options
+    // (`center`, `padding`, `screens`) and its compatibility shim derives the
+    // utility from `theme.screens` instead — which here holds two `raw`
+    // entries, so it emitted `@media (width >= (min-width: 1024px) and
+    // (pointer: fine))` and `max-width: (min-width: 1024px) and (pointer:
+    // fine)`: three "Unexpected token ParenthesisBlock" warnings and a
+    // `.container` with no usable max-width. The utility is written out in
+    // globals.css instead, against the same `--container-content` this file
+    // still defines (see `maxWidth.content` below).
     extend: {
       /**
        * The one canonical social-card shape, 1200x630 (D-123).
@@ -199,7 +215,7 @@ const config: Config = {
         // reported barriers for a dyslexic reader (D-140), and a ch cap holds
         // whatever text size the reader has chosen.
         reading: "66ch",
-        content: "1280px",
+        content: CONTAINER_MAX_WIDTH,
         // A chat bubble: wide enough for a sentence, narrow enough that the
         // column still reads as a conversation rather than a document. The
         // `ch` cap is the half that matters on a desktop window — 72% of a

@@ -1,6 +1,48 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+/* Tailwind 4 replaces the three @tailwind directives with one import. */
+@import "tailwindcss";
+
+/* The theme stays in tailwind.config.ts rather than moving into an @theme
+   block here. That file is not a bag of values: it imports the brand palette,
+   the elevation geometry and the type scale from packages/shared/src/tokens
+   (so the web cannot drift from the shared source), and the responsive scale
+   from src/lib/breakpoints.ts (so the guard tests and the CSS read the same
+   numbers). @theme takes literal CSS values and could do none of that — the
+   D-140 legibility floors and the D-141 breakpoint scale would have to be
+   re-typed by hand, in a second place, with nothing checking the copy. v4
+   supports the config file natively; this is the supported way to keep it. */
+@config "../../tailwind.config.ts";
+
+/* The two `pointer: fine` breakpoints, which a width alone cannot express and
+   which Tailwind 4's `theme.screens` cannot hold (see the note in
+   tailwind.config.ts). These MIRROR `SCREENS.desktop` and
+   `SCREENS["desktop-wide"]` in src/lib/breakpoints.ts — that file is still the
+   source, and tests/config/responsive-breakpoints.test.ts compares the two
+   texts and fails if either side is edited alone. */
+@custom-variant desktop (@media (min-width: 1024px) and (pointer: fine));
+@custom-variant desktop-wide (@media (min-width: 1280px) and (pointer: fine));
+
+/* The container utility, written out because Tailwind 4 removed the container
+   plugin's `center` / `padding` / `screens` options, and its compatibility
+   shim derives `.container` from `theme.screens` instead — which is not what
+   this app's container is for.
+
+   The width is a LITERAL, and it has to be: a legacy `@config` file feeds v4's
+   utilities but not its CSS custom properties, so `var(--container-content)`
+   here resolved to nothing at all and `.container` came out with no max-width,
+   spanning the whole viewport. It mirrors CONTAINER_MAX_WIDTH in
+   src/lib/breakpoints.ts, the way the colour tokens further down mirror
+   packages/shared/src/tokens.ts, and
+   tests/config/responsive-breakpoints.test.ts fails if the two drift.
+
+   No media query, deliberately. v3 said "from 1280px up, settle at 1280px
+   wide"; below 1280px a `width: 100%` box is already narrower than 1280px, so
+   an unconditional cap renders identically with one rule instead of two. */
+@utility container {
+  width: 100%;
+  margin-inline: auto;
+  padding-inline: 1rem;
+  max-width: 1280px; /* = CONTAINER_MAX_WIDTH */
+}
 
 @layer base {
   :root {
@@ -317,13 +359,22 @@
      instead of forcing a wide horizontal scroll. The header row is kept in
      the DOM (visually hidden) for assistive tech.
 
-     The bound is read from the scale rather than hardcoded: this rule and
-     TableShell's `lg:overflow-hidden lg:rounded-md lg:border` (ui/table.tsx)
-     are two halves of ONE switch, and a hardcoded pixel here is how they drift
-     apart — leaving a band of widths that draws the desktop frame around
-     already-stacked cards. `not all and (min-width: …)` is "below md"; a
-     `max-width` of the same number would overlap it by a pixel. */
-  @media not all and (min-width: theme("screens.lg")) {
+     This rule and TableShell's `lg:overflow-hidden lg:rounded-md lg:border`
+     (ui/table.tsx) are two halves of ONE switch, and a number here that drifts
+     from `lg` leaves a band of widths that draws the desktop frame around
+     already-stacked cards. `not all and (min-width: …)` is "below lg"; a
+     `max-width` of the same number would overlap it by a pixel.
+
+     This USED to read `theme("screens.lg")`. Under Tailwind 4 that silently
+     stopped tracking the scale: a legacy `@config` file supplies utilities but
+     not the `--breakpoint-*` custom properties `theme()` resolves against, so
+     v4 answered from ITS OWN default scale and emitted `64rem`. That happens to
+     equal this app's `lg` (1024px), so nothing looked wrong — and it would have
+     kept emitting 64rem however far `lg` moved. A literal that a test compares
+     against SCREENS.lg is honest about being a copy; `theme()` here was a
+     reference that had quietly stopped referring. */
+  @media not all and (min-width: 1024px) {
+    /* = SCREENS.lg, held by tests/config/responsive-breakpoints.test.ts */
     table.table-stack thead {
       position: absolute;
       width: 1px;

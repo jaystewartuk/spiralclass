@@ -13,11 +13,22 @@ import { CONTAINER_MAX_WIDTH, DESKTOP_MIN_WIDTH, SCREENS } from "../../src/lib/b
 //   1. tailwind.config.ts, which could be hand-typed back to literals, or have
 //      `screens` moved under `extend` (which MERGES with Tailwind's defaults
 //      and would quietly resurrect sm:640 alongside sm:1281).
-//   2. globals.css, whose two raw media queries are the other half of switches
-//      whose first half is a `md:` utility. A pixel literal there is how
-//      `.table-stack` and TableShell's frame end up disagreeing about what
-//      "below md" means, leaving a band of widths that draws a desktop table
-//      frame around already-stacked cards.
+//   2. globals.css, whose raw media query is the other half of a switch whose
+//      first half is an `lg:` utility. A number there that drifts from the
+//      scale is how `.table-stack` and TableShell's frame end up disagreeing
+//      about what "below lg" means, leaving a band of widths that draws a
+//      desktop table frame around already-stacked cards.
+//
+//      Under Tailwind 3 this file could REFER to the scale — `theme("screens.
+//      lg")` — and the guard was simply "no literals here". Tailwind 4 took
+//      that away: a legacy `@config` file supplies utilities but not the
+//      `--breakpoint-*` custom properties `theme()` resolves against, so
+//      `theme("screens.lg")` silently answered from v4's OWN default scale.
+//      It emitted 64rem, which happens to equal this app's lg, and would have
+//      gone on emitting 64rem however far lg moved. So globals.css now holds
+//      literals on purpose, and the guards below changed from "there are no
+//      literals" to "every literal matches the scale" — a mirror with a parity
+//      check, which is what the colour tokens in that same file already are.
 //   3. The Playwright configs, whose "Desktop Chrome" preset is 1280×720 —
 //      one pixel below the threshold. Unpinned, every browser spec renders the
 //      MOBILE layout and still passes, so desktop coverage disappears without
@@ -43,8 +54,34 @@ const read = (file: string) => readFileSync(file, "utf8");
 describe("tailwind config consumes the scale", () => {
   const theme = tailwindConfig.theme as Record<string, unknown>;
 
-  it("feeds theme.screens from src/lib/breakpoints rather than literals", () => {
-    expect(theme.screens).toEqual(SCREENS);
+  it("feeds theme.screens the width-based half of the scale, from breakpoints.ts", () => {
+    // Tailwind 4 cannot hold a `raw` media query in theme.screens: its
+    // container compatibility shim writes `max-width: <every screen's value>`,
+    // so a raw entry came out as `max-width: (min-width: 1024px) and (pointer:
+    // fine)`. The two pointer-gated screens live in globals.css as
+    // `@custom-variant` instead — the test below is what keeps them honest.
+    const widthOnly = Object.fromEntries(
+      Object.entries(SCREENS).filter(([, value]) => typeof value === "string"),
+    );
+    expect(theme.screens).toEqual(widthOnly);
+  });
+
+  it("keeps every pointer-gated screen in globals.css, spelled exactly as SCREENS spells it", () => {
+    // The other half of the scale. These are still DECLARED in breakpoints.ts —
+    // this asserts globals.css mirrors each one character for character, so
+    // editing either side alone is a failing test rather than a variant that
+    // silently stops matching the device it was written for.
+    const css = read(join(SRC, "app/globals.css"));
+    const missing: string[] = [];
+    for (const [name, value] of Object.entries(SCREENS)) {
+      if (typeof value === "string") continue;
+      const expected = `@custom-variant ${name} (@media ${value.raw});`;
+      if (!css.includes(expected)) missing.push(expected);
+    }
+    expect(
+      missing,
+      `globals.css must declare each raw screen verbatim:\n${missing.join("\n")}`,
+    ).toEqual([]);
   });
 
   it("replaces the default scale instead of extending it", () => {
@@ -54,32 +91,65 @@ describe("tailwind config consumes the scale", () => {
     expect(extend.screens).toBeUndefined();
   });
 
-  it("pins the container ceiling to CONTAINER_MAX_WIDTH", () => {
-    const container = theme.container as { screens?: Record<string, string> };
-    expect(Object.values(container.screens ?? {})).toEqual([CONTAINER_MAX_WIDTH]);
+  it("pins the container ceiling in globals.css to CONTAINER_MAX_WIDTH", () => {
+    // Tailwind 4 removed the container plugin's options, so `.container` is
+    // written out in globals.css. Its cap is a literal there — v4 exposes no
+    // custom property for a legacy config's theme values — so this is the
+    // parity check that keeps the literal equal to the constant.
+    const css = read(join(SRC, "app/globals.css"));
+    const utility = css.match(/@utility container \{([\s\S]*?)\n\}/);
+    expect(utility, "globals.css must define the container utility").not.toBeNull();
+    expect(utility?.[1]).toContain(`max-width: ${CONTAINER_MAX_WIDTH};`);
+  });
+
+  it("no longer asks the Tailwind config for a container, which v4 would misread", () => {
+    // Leaving a `container` key in place would not error. v4 ignores its
+    // options and derives `.container` from theme.screens regardless, so the
+    // key would read as the source of a ceiling it no longer sets.
+    expect(theme.container).toBeUndefined();
   });
 });
 
 describe("globals.css stays bound to the scale", () => {
   const css = read(join(SRC, "app/globals.css"));
 
-  it("has no hardcoded width media query", () => {
-    const literals = css.match(/@media[^{]*\((?:min|max)-width:\s*\d[^)]*\)/g) ?? [];
+  it("uses no width in a media query that is not a value from the scale", () => {
+    // The v3 rule was "no literals at all", enforceable because theme() worked.
+    // The rule now is that every width written here is one the scale declares —
+    // which catches the thing that actually goes wrong (a number drifting away
+    // from `lg`) without banning the literals v4 forces.
+    //
+    // `@custom-variant` lines are excluded: those are the mirrored raw screens,
+    // and the test above already compares them to SCREENS character for
+    // character.
+    const declared = new Set<string>(
+      Object.values(SCREENS).map((value) => (typeof value === "string" ? value : value.raw)),
+    );
+    const offenders: string[] = [];
+    for (const line of css.split("\n")) {
+      if (line.trimStart().startsWith("@custom-variant")) continue;
+      for (const [, width] of line.matchAll(/@media[^{]*\((?:min|max)-width:\s*(\d+px)\)/g)) {
+        if (!declared.has(width)) offenders.push(line.trim());
+      }
+    }
     expect(
-      literals,
-      'width media queries must read theme("screens.…") — a pixel literal here is how the ' +
-        "`.table-stack` collapse and TableShell's `md:` frame drift apart",
+      offenders,
+      "a width media query here must use a width SCREENS declares — a number of its own is how " +
+        "the `.table-stack` collapse and TableShell's `lg:` frame drift apart:\n" +
+        offenders.join("\n"),
     ).toEqual([]);
   });
 
-  it("bounds its raw block on screens.lg", () => {
-    const bound = css.match(/@media not all and \(min-width: theme\("screens\.lg"\)\)/g) ?? [];
-    expect(bound).toHaveLength(1);
+  it("bounds its raw block on SCREENS.lg", () => {
+    const bound = css.match(new RegExp(`@media not all and \\(min-width: ${SCREENS.lg}\\)`, "g"));
+    expect(bound, `the table-stack collapse must be bounded at lg (${SCREENS.lg})`).toHaveLength(1);
     // …and it is the one we know about, still guarding what it was written to
     // guard. (There were two until the Sentry feedback widget was replaced by a
     // first-party dialog; the second bounded a `--bottom` offset on the SDK's
     // floating trigger, which no longer renders.)
-    expect(css).toMatch(/screens\.lg"\)\) \{[\s\S]*?table\.table-stack thead/);
+    expect(css).toMatch(
+      new RegExp(`min-width: ${SCREENS.lg}\\) \\{[\\s\\S]*?table\\.table-stack thead`),
+    );
   });
 });
 
