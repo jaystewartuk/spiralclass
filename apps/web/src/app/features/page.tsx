@@ -127,7 +127,15 @@ export default async function FeaturesPage() {
   ];
 
   return (
-    <PageShell width="wide">
+    // One rhythm between top-level sections, declared once on the shell — the
+    // same 56px the other marketing pages use. It was three different numbers
+    // across these pages (40, 48, 56) because none of them rendered under
+    // Tailwind 3: `space-y-6` on PageShell out-specified every one of them, so
+    // the values drifted with nobody able to see it. The page header now
+    // separates from the content at least as strongly as a section break does,
+    // which at 390px it did not: 40px sat only 16px clear of the 24px gap
+    // BETWEEN the cards below it.
+    <PageShell width="wide" className="space-y-14">
       <header className="text-center">
         <Heading level={1} className="lg:text-display">
           {t("web.features.headline")}
@@ -137,13 +145,13 @@ export default async function FeaturesPage() {
         </p>
       </header>
 
-      <div className="mt-12 grid gap-6 lg:grid-cols-2 xl:grid-cols-3">
+      <div className="grid gap-6 lg:grid-cols-2 xl:grid-cols-3">
         {FEATURE_ITEMS.map((f) => (
           <FeatureCard key={f.title} icon={f.icon} title={f.title} body={f.body} titleAs="h2" />
         ))}
       </div>
 
-      <div className="mt-14 rounded-3xl bg-primary px-6 py-14 text-center text-primary-foreground">
+      <div className="rounded-3xl bg-primary px-6 py-14 text-center text-primary-foreground">
         <Heading level={2}>{t("web.trialBand.title")}</Heading>
         <p className="mt-3 text-primary-foreground">{t("web.trialBand.noCard")}</p>
         <div className="mt-7 flex flex-col items-center gap-3 lg:flex-row lg:justify-center">
