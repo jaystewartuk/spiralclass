@@ -1,8 +1,8 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireTeacher } from "@/lib/auth";
+import { revalidateAfterAction } from "@/lib/revalidate";
 
 // Settings → Booking page → "Share progress with my students".
 //
@@ -42,9 +42,8 @@ export async function setProgressSharingAction(
     }),
   ]);
 
-  revalidatePath("/settings/booking-page");
+  revalidateAfterAction("/settings/booking-page");
   // The band on her public page is gated on this, so the cached page has to go
   // with it or the promise and the setting disagree until the next deploy.
-  revalidatePath(`/b/${teacher.bookingSlug}`);
   return { ok: true, shared };
 }

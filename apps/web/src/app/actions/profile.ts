@@ -1,6 +1,5 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
 import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { requireTeacher } from "@/lib/auth";
@@ -43,6 +42,7 @@ import {
   type IntroVideoAnalysisState,
 } from "@/lib/intro-video/analysis";
 import { inngest } from "@/lib/inngest/client";
+import { revalidateAfterAction } from "@/lib/revalidate";
 
 const log = logger({ surface: "teacher-photo" });
 
@@ -112,12 +112,9 @@ export async function saveBookingSlugAction(
   });
   await flushAnalytics();
 
-  revalidatePath("/settings/booking-page");
-  revalidatePath("/onboarding/preview");
+  revalidateAfterAction("/settings/booking-page");
   // Bust both the old and new public pages so the old slug 404s and the new
   // one renders immediately.
-  revalidatePath(`/b/${previousSlug}`);
-  revalidatePath(`/b/${slug}`);
   return { ok: true, slug };
 }
 
@@ -160,10 +157,11 @@ export async function saveTargetLanguageAction(
   });
   await flushAnalytics();
 
-  // Rendered on the booking-page settings (public catalog data). Also revalidate
-  // the public /b/<slug> page since the taught language is shown there.
-  revalidatePath("/settings/booking-page");
-  if (teacher.bookingSlug) revalidatePath(`/b/${teacher.bookingSlug}`);
+  // The settings page this form is on. The public /b/<slug> page shows the
+  // taught language too, but it is a dynamic route with nothing prerendered to
+  // invalidate, and a second revalidation here would cost this form its own
+  // result — see @/lib/revalidate.
+  revalidateAfterAction("/settings/booking-page");
   return { ok: true };
 }
 
@@ -190,7 +188,7 @@ export async function saveTeachingLanguageAction(
   });
 
   // Rendered on the booking-page settings now (grouped with the taught language).
-  revalidatePath("/settings/booking-page");
+  revalidateAfterAction("/settings/booking-page");
   return { ok: true };
 }
 
@@ -224,7 +222,7 @@ export async function saveBookingPageLocaleAction(
   // The funnel's locale is read per request by `funnelLocaleForSlug`, so the
   // public page picks this up on its next render; the settings page needs the
   // new value echoed back.
-  revalidatePath("/settings/booking-page");
+  revalidateAfterAction("/settings/booking-page");
   return { ok: true };
 }
 
@@ -251,7 +249,7 @@ export async function saveAutoSurfaceLevelMaterialsAction(
   });
   await flushAnalytics();
 
-  revalidatePath("/settings/account");
+  revalidateAfterAction("/settings/account");
   return { ok: true };
 }
 
@@ -283,7 +281,7 @@ export async function saveAutoRecordClassesAction(
   });
   await flushAnalytics();
 
-  revalidatePath("/settings/account");
+  revalidateAfterAction("/settings/account");
   return { ok: true };
 }
 
@@ -312,8 +310,7 @@ export async function saveHeadlineAction(
     data: { headline: raw === "" ? null : raw },
   });
 
-  revalidatePath("/settings/booking-page");
-  revalidatePath(`/b/${teacher.bookingSlug}`);
+  revalidateAfterAction("/settings/booking-page");
   return { ok: true };
 }
 
@@ -343,8 +340,7 @@ export async function saveBioAction(
   await maybeEmitProfileCompleted(prisma, teacher.id);
   await maybeEmitMarketplaceReady(prisma, teacher.id);
 
-  revalidatePath("/settings/booking-page");
-  revalidatePath(`/b/${teacher.bookingSlug}`);
+  revalidateAfterAction("/settings/booking-page");
   return { ok: true };
 }
 
@@ -390,8 +386,7 @@ export async function saveBookingPageWhatsappAction(
     await flushAnalytics();
   }
 
-  revalidatePath("/settings/booking-page");
-  revalidatePath(`/b/${teacher.bookingSlug}`);
+  revalidateAfterAction("/settings/booking-page");
   return { ok: true };
 }
 
@@ -449,7 +444,7 @@ export async function saveMaterialStyleAction(
   });
   await flushAnalytics();
 
-  revalidatePath("/settings/materials");
+  revalidateAfterAction("/settings/materials");
   return { ok: true };
 }
 
@@ -496,8 +491,7 @@ export async function saveTeacherPhotoAction(
   await maybeEmitProfileCompleted(prisma, teacher.id);
   await maybeEmitMarketplaceReady(prisma, teacher.id);
 
-  revalidatePath("/settings/booking-page");
-  revalidatePath(`/b/${teacher.bookingSlug}`);
+  revalidateAfterAction("/settings/booking-page");
   return { ok: true };
 }
 
@@ -512,8 +506,7 @@ export async function removeTeacherPhotoAction(): Promise<ProfileState> {
     where: { id: teacher.id },
     data: { photoPath: null },
   });
-  revalidatePath("/settings/booking-page");
-  revalidatePath(`/b/${teacher.bookingSlug}`);
+  revalidateAfterAction("/settings/booking-page");
   return { ok: true };
 }
 
@@ -621,8 +614,7 @@ export async function finalizeIntroVideoAction(
   });
   await flushAnalytics();
 
-  revalidatePath("/settings/booking-page");
-  revalidatePath(`/b/${teacher.bookingSlug}`);
+  revalidateAfterAction("/settings/booking-page");
   return { ok: true };
 }
 
@@ -649,8 +641,7 @@ export async function removeIntroVideoAction(): Promise<ProfileState> {
     hadCoachFeedback: prior.hadCoachFeedback,
   });
   await flushAnalytics();
-  revalidatePath("/settings/booking-page");
-  revalidatePath(`/b/${teacher.bookingSlug}`);
+  revalidateAfterAction("/settings/booking-page");
   return { ok: true };
 }
 
@@ -685,7 +676,7 @@ export async function retryIntroVideoAnalysisAction(): Promise<ProfileState> {
       data: { teacherId: teacher.id, videoPath: teacher.introVideoPath },
     })
     .catch((err) => log.warn("intro-video.ready retry emit failed", { error: String(err) }));
-  revalidatePath("/settings/booking-page");
+  revalidateAfterAction("/settings/booking-page");
   return { ok: true };
 }
 
@@ -719,7 +710,6 @@ export async function saveIntroVideoTranscriptPublicOptInAction(
   });
   await flushAnalytics();
 
-  revalidatePath("/settings/booking-page");
-  revalidatePath(`/b/${teacher.bookingSlug}`);
+  revalidateAfterAction("/settings/booking-page");
   return { ok: true, optedIn };
 }

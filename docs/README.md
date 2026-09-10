@@ -23,7 +23,7 @@ README](../README.md) is the front door; this is the map behind it.
 - **[architecture/](architecture/README.md)** — durable system design: the
   components and their boundaries, the data model, the identity model, how a
   purchase and a booking actually flow, and what was reversed along the way.
-- **[decisions/](decisions/README.md)** — 121 decision records. **Current
+- **[decisions/](decisions/README.md)** — 122 decision records. **Current
   policy, not history**: before reversing anything a decision constrains, read
   its record first. Several reverse an earlier one and say why.
 - **[features/](features/)** — the single source of truth for application

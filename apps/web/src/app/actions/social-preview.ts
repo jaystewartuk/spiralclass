@@ -1,6 +1,5 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import {
   isSocialPreviewAngle,
@@ -21,6 +20,7 @@ import {
 } from "@/lib/social-preview/store";
 import { uploadSocialPreviewImage } from "@/lib/social-preview/upload";
 import { loadEntitlements } from "@/lib/subscriptions/service";
+import { revalidateAfterAction } from "@/lib/revalidate";
 
 // Social-preview server actions (D-123). The rules live in
 // lib/social-preview/*; these parse the
@@ -38,7 +38,7 @@ export type SocialPreviewState = { error?: string; ok?: boolean; imageId?: strin
 const PREVIEW_PATH = "/dashboard/get-students/communities";
 
 function revalidate() {
-  revalidatePath(PREVIEW_PATH);
+  revalidateAfterAction(PREVIEW_PATH);
 }
 
 // --- Messages ----------------------------------------------------------------

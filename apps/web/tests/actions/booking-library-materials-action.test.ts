@@ -203,15 +203,17 @@ describe("attachLibraryMaterialToBookingAction", () => {
     expect(enqueueMaterialsSendMock).not.toHaveBeenCalled();
   });
 
-  it("revalidates the class lists so their 'Has Materials' chip updates", async () => {
+  it("revalidates the class page it was invoked from, and only that (D-174)", async () => {
     await attachLibraryMaterialToBookingAction(
       undefined,
       form({ bookingId: BOOKING_ID, libraryMaterialId: "file-mat", sendTiming: "t_24h" }),
     );
-    const paths = revalidatePathMock.mock.calls.map((c) => c[0]);
-    expect(paths).toContain(`/dashboard/classes/${BOOKING_ID}`);
-    expect(paths).toContain("/dashboard/classes");
-    expect(paths).toContain("/my-classes");
+    // A second revalidation would cost the form its own result — the write
+    // lands and the client discards the response. The class lists this used to
+    // revalidate are dynamic routes that refetch on navigation anyway.
+    expect(revalidatePathMock.mock.calls.map((c) => c[0])).toEqual([
+      `/dashboard/classes/${BOOKING_ID}`,
+    ]);
   });
 
   it("sends immediately when attaching with 'confirmation' timing (always elapsed)", async () => {
@@ -279,13 +281,12 @@ describe("detachLibraryMaterialFromBookingAction", () => {
     expect(state.attachments).toHaveLength(0);
   });
 
-  it("revalidates the class lists so a removed material clears the chip", async () => {
+  it("revalidates the class page it was invoked from, and only that (D-174)", async () => {
     await detachLibraryMaterialFromBookingAction(
       form({ bookingId: BOOKING_ID, libraryMaterialId: "file-mat" }),
     );
-    const paths = revalidatePathMock.mock.calls.map((c) => c[0]);
-    expect(paths).toContain(`/dashboard/classes/${BOOKING_ID}`);
-    expect(paths).toContain("/dashboard/classes");
-    expect(paths).toContain("/my-classes");
+    expect(revalidatePathMock.mock.calls.map((c) => c[0])).toEqual([
+      `/dashboard/classes/${BOOKING_ID}`,
+    ]);
   });
 });

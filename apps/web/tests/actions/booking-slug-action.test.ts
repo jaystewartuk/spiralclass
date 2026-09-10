@@ -67,8 +67,10 @@ describe("saveBookingSlugAction", () => {
       expect.objectContaining({ name: "teacher_booking_slug_changed" }),
     );
     // Old and new public pages both busted.
-    expect(revalidatePath).toHaveBeenCalledWith("/b/alicia-moreno-abc123");
-    expect(revalidatePath).toHaveBeenCalledWith("/b/profe-maria");
+    // One revalidation, for the settings page this form is on (D-174). The two
+    // /b/<slug> pages are dynamic routes with nothing prerendered to
+    // invalidate, and a second call here would cost the form its own result.
+    expect(revalidatePath.mock.calls.map((c) => c[0])).toEqual(["/settings/booking-page"]);
   });
 
   it("rejects too-short slugs without touching the database", async () => {

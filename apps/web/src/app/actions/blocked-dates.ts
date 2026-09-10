@@ -1,6 +1,5 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
 import { fromZonedTime } from "date-fns-tz";
 import { prisma } from "@/lib/prisma";
 import { requireOnboardedTeacher } from "@/lib/auth";
@@ -12,6 +11,7 @@ import { inngest } from "@/lib/inngest/client";
 import { emitNotificationQueued } from "@/lib/notifications/events";
 import type { CancelEventEmitter } from "@/lib/cancellation/cancel-handler";
 import { notifyBookingsInBlockedRange } from "@/lib/cancellation/blocked-date-collision";
+import { revalidateAfterAction } from "@/lib/revalidate";
 
 export type BlockedDateState = { error?: string; ok?: string } | undefined;
 
@@ -96,8 +96,7 @@ export async function createBlockedDateAction(
     },
   );
 
-  revalidatePath("/settings/blocked-dates");
-  revalidatePath("/dashboard/classes");
+  revalidateAfterAction("/settings/blocked-dates");
   if (canceled > 0) {
     return { ok: t("web.settings.blockedDates.savedCanceled", { count: canceled }) };
   }
@@ -118,5 +117,5 @@ export async function deleteBlockedDateAction(formData: FormData): Promise<void>
   // Filter by teacherId so RLS-defeating service-role can't be tricked into
   // deleting another teacher's row through this action either.
   await prisma.blockedDate.deleteMany({ where: { id, teacherId: teacher.id } });
-  revalidatePath("/settings/blocked-dates");
+  revalidateAfterAction("/settings/blocked-dates");
 }

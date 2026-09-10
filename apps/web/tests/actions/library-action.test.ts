@@ -139,15 +139,13 @@ describe("deleteLibraryMaterialAction", () => {
     expect(del).not.toHaveBeenCalled();
   });
 
-  it("revalidates the class lists when a CLASS-SCOPED material is deleted", async () => {
-    // A booking-scoped material (bookingId set) also drives the class-list
-    // "Has Materials" chip — deleting the last one must clear it there too.
+  it("revalidates the class page a CLASS-SCOPED delete came from, and only that", async () => {
+    // A booking-scoped material renders on its class page rather than the
+    // library list, so that is the page the delete was issued from and the one
+    // revalidated. One call, never two — see D-174.
     state.material = { id: "m1", storagePath: null, bookingId: "b1" };
     await deleteLibraryMaterialAction(form({ materialId: "m1" }));
-    const paths = revalidatePathMock.mock.calls.map((c) => c[0]);
-    expect(paths).toContain("/dashboard/classes/b1");
-    expect(paths).toContain("/dashboard/classes");
-    expect(paths).toContain("/my-classes");
+    expect(revalidatePathMock.mock.calls.map((c) => c[0])).toEqual(["/dashboard/classes/b1"]);
   });
 
   it("does NOT touch the class lists when a pure library material is deleted", async () => {

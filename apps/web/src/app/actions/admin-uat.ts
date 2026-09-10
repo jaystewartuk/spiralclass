@@ -1,6 +1,5 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/admin";
@@ -10,6 +9,7 @@ import { runUatProbe } from "@/lib/uat/probe";
 import { runPostHogCheck } from "@/lib/uat/posthog-check";
 import { runStripeCheck } from "@/lib/uat/stripe-check";
 import { assertReseedAllowed, UAT_OVERRIDE_TARGET_IDS } from "@/lib/uat/env-targets";
+import { revalidateAfterAction } from "@/lib/revalidate";
 
 export type UatActionState = { error?: string; result?: unknown } | undefined;
 
@@ -33,7 +33,7 @@ export async function runUatProbeAction(
     after: report,
     actor,
   });
-  revalidatePath("/admin/uat");
+  revalidateAfterAction("/admin/uat");
   return { result: report };
 }
 
@@ -55,7 +55,7 @@ export async function runPostHogCheckAction(
     after: report,
     actor,
   });
-  revalidatePath("/admin/uat");
+  revalidateAfterAction("/admin/uat");
   return { result: report };
 }
 
@@ -90,7 +90,7 @@ export async function runStripeCheckAction(
     after: report,
     actor,
   });
-  revalidatePath("/admin/uat");
+  revalidateAfterAction("/admin/uat");
   return { result: report };
 }
 
@@ -137,7 +137,7 @@ export async function reseedPreviewAction(
     reason: `queued from /admin/uat (bulkTeachers=${parsed.data.bulkTeachers}, studentsPerBulkTeacher=${parsed.data.studentsPerBulkTeacher})`,
     actor,
   });
-  revalidatePath("/admin/uat");
+  revalidateAfterAction("/admin/uat");
   return { result: { queued: true, queuedAt: queuedAt.toISOString() } };
 }
 
@@ -197,7 +197,7 @@ export async function clearUatChecklistAction(
     reason: `env=${parsed.data.env}`,
     actor,
   });
-  revalidatePath("/admin/uat");
+  revalidateAfterAction("/admin/uat");
   return { result: { ok: true } };
 }
 
@@ -241,6 +241,6 @@ export async function toggleUatChecklistItemAction(
       updatedByAdminId: actor.id,
     },
   });
-  revalidatePath("/admin/uat");
+  revalidateAfterAction("/admin/uat");
   return { result: { ok: true } };
 }

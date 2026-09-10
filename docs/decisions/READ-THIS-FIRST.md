@@ -16,7 +16,7 @@ anyone noticed. That is what this log is for.
 ---
 
 The rest of this page is those two at length — context, decision, what else was
-considered, and what each one cost. There are 121 decision records
+considered, and what each one cost. There are 122 decision records
 in this directory and these are two of them; every number below is from the
 record it cites, and where a record states a cost it is repeated here rather than
 smoothed over.

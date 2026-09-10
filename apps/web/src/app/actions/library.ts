@@ -1,6 +1,5 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireOnboardedTeacher } from "@/lib/auth";
@@ -33,7 +32,7 @@ import {
 } from "@/lib/materials/handlers";
 import { removeUnreferencedMaterialImages } from "@/lib/materials/image-cleanup";
 import { syncLibraryMaterialFocusTags } from "@/lib/materials/tags";
-import { revalidateClassMaterialLists } from "@/lib/materials/revalidate";
+import { revalidateAfterAction } from "@/lib/revalidate";
 
 // The material library (docs/features/library-materials.md;
 // merged with per-class materials at D-69, docs/features/library-materials.md).
@@ -163,11 +162,9 @@ export async function saveMaterialAttachmentAction(
   }
   await flushAnalytics();
 
-  if (booking) {
-    revalidatePath(`/dashboard/classes/${booking.id}`);
-    // Keep the class-list "Has Materials" chip in sync with this new material.
-    revalidateClassMaterialLists();
-  } else revalidatePath("/dashboard/materials");
+  // One call site, one revalidation: see @/lib/revalidate for why an action
+  // must never revalidate twice.
+  revalidateAfterAction(booking ? `/dashboard/classes/${booking.id}` : "/dashboard/materials");
   return { ok: true, error: undefined };
 }
 
@@ -282,11 +279,7 @@ export async function saveMaterialContentAction(
         await syncLibraryMaterialFocusTags(teacher.id, result.materialId, focusTagIds);
       }
     }
-    if (bookingId) {
-      revalidatePath(`/dashboard/classes/${bookingId}`);
-      // A class-scoped content material lights the class-list chip too.
-      revalidateClassMaterialLists();
-    } else revalidatePath("/dashboard/materials");
+    revalidateAfterAction(bookingId ? `/dashboard/classes/${bookingId}` : "/dashboard/materials");
     return { ok: true, materialId: result.materialId };
   }
 
@@ -327,11 +320,7 @@ export async function saveMaterialContentAction(
       await syncLibraryMaterialFocusTags(teacher.id, result.materialId, focusTagIds);
     }
   }
-  if (bookingId) {
-    revalidatePath(`/dashboard/classes/${bookingId}`);
-    // A class-scoped attachment lights the class-list chip too.
-    revalidateClassMaterialLists();
-  } else revalidatePath("/dashboard/materials");
+  revalidateAfterAction(bookingId ? `/dashboard/classes/${bookingId}` : "/dashboard/materials");
   return { ok: true, materialId: result.materialId };
 }
 
@@ -476,8 +465,9 @@ export async function generateMaterialPodcastAction(
     where: { id: materialId, teacherId: teacher.id },
     select: { bookingId: true },
   });
-  if (material?.bookingId) revalidatePath(`/dashboard/classes/${material.bookingId}`);
-  else revalidatePath("/dashboard/materials");
+  revalidateAfterAction(
+    material?.bookingId ? `/dashboard/classes/${material.bookingId}` : "/dashboard/materials",
+  );
   return { ok: true, status: "pending" };
 }
 
@@ -554,11 +544,11 @@ export async function restoreMaterialRevisionAction(
   if (!result.ok) return { error: result.message };
 
   if (bookingId) {
-    revalidatePath(`/dashboard/classes/${bookingId}`);
+    revalidateAfterAction(`/dashboard/classes/${bookingId}`);
     const restored = await getClassContentForBooking({ teacherId: teacher.id, bookingId });
     return { ok: true, body: restored?.body, source: restored?.source };
   }
-  revalidatePath("/dashboard/materials");
+  revalidateAfterAction("/dashboard/materials");
   const restored = await prisma.libraryMaterial.findFirst({
     where: { id: result.materialId, teacherId: teacher.id },
     select: { body: true, contentSource: true },
@@ -637,7 +627,7 @@ export async function saveContentToLibraryAction(
   });
   await flushAnalytics();
 
-  revalidatePath("/dashboard/materials");
+  revalidateAfterAction("/dashboard/materials");
   return {
     ok: en ? "Saved to your library." : "Guardado en tu biblioteca.",
   };
@@ -715,7 +705,7 @@ export async function updateLibraryMaterialAction(
     await syncLibraryMaterialFocusTags(teacher.id, material.id, readFocusTagIds(formData));
   }
 
-  revalidatePath("/dashboard/materials");
+  revalidateAfterAction("/dashboard/materials");
   return { ok: en ? "Material updated." : "Material actualizado." };
 }
 
@@ -732,7 +722,7 @@ export async function setLibraryMaterialArchivedAction(formData: FormData): Prom
     where: { id, teacherId: teacher.id },
     data: { archived },
   });
-  revalidatePath("/dashboard/materials");
+  revalidateAfterAction("/dashboard/materials");
 }
 
 // ---------- hard delete (frees storage) ----------
@@ -763,14 +753,12 @@ export async function deleteLibraryMaterialAction(formData: FormData): Promise<v
     body: material.body,
   });
   await prisma.libraryMaterial.delete({ where: { id: material.id } });
-  revalidatePath("/dashboard/materials");
-  // A booking-scoped row (D-69) also renders on its class page — revalidate
-  // that too so a delete from there doesn't leave a stale cached list.
-  if (material.bookingId) {
-    revalidatePath(`/dashboard/classes/${material.bookingId}`);
-    // Deleting the last class-scoped material must flip the class-list chip off.
-    revalidateClassMaterialLists();
-  }
+  // A booking-scoped row (D-69) renders on its class page instead of the
+  // library list, and the delete is issued from whichever of the two the
+  // teacher is looking at. One revalidation, for that page.
+  revalidateAfterAction(
+    material.bookingId ? `/dashboard/classes/${material.bookingId}` : "/dashboard/materials",
+  );
 }
 
 // ---------- reorder within a level ----------
@@ -809,7 +797,7 @@ export async function moveLibraryMaterialAction(formData: FormData): Promise<voi
       data: { position: item.position },
     }),
   ]);
-  revalidatePath("/dashboard/materials");
+  revalidateAfterAction("/dashboard/materials");
 }
 
 // ---------- per-student assignment + completion (the notebook) ----------
@@ -895,7 +883,7 @@ export async function assignLibraryMaterialAction(
   }
   await flushAnalytics();
 
-  revalidatePath(`/dashboard/students/${studentId}`);
+  revalidateAfterAction(`/dashboard/students/${studentId}`);
   return { ok: true };
 }
 
@@ -909,7 +897,7 @@ export async function unassignLibraryMaterialAction(formData: FormData): Promise
   await prisma.studentLibraryItem.deleteMany({
     where: { teacherId: teacher.id, studentId, libraryMaterialId: materialId },
   });
-  revalidatePath(`/dashboard/students/${studentId}`);
+  revalidateAfterAction(`/dashboard/students/${studentId}`);
 }
 
 // Teacher-driven completion (it's her notebook). completedBy records who
@@ -936,5 +924,5 @@ export async function setLibraryItemCompletedAction(formData: FormData): Promise
   });
   await flushAnalytics();
 
-  revalidatePath(`/dashboard/students/${studentId}`);
+  revalidateAfterAction(`/dashboard/students/${studentId}`);
 }

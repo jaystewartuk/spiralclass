@@ -1,6 +1,5 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
@@ -16,6 +15,7 @@ import {
 } from "@/lib/cancellation/reschedule-handler";
 import type { TeacherRescheduleError } from "@/lib/cancellation/teacher-reschedule-errors";
 import { flushAnalytics, trackServerEvent } from "@/lib/analytics/posthog";
+import { revalidateAfterAction } from "@/lib/revalidate";
 
 /**
  * Teacher-initiated reschedule — "change the date and time of a class".
@@ -200,8 +200,6 @@ export async function rescheduleBookingAsTeacher(
   });
   await flushAnalytics();
 
-  revalidatePath("/dashboard/classes");
-  revalidatePath(`/dashboard/classes/${old.id}`);
-  revalidatePath(`/dashboard/students/${old.studentId}`);
+  revalidateAfterAction(`/dashboard/classes/${old.id}`);
   redirect(`/dashboard/classes/${outcome.newBookingId}`);
 }

@@ -1,6 +1,5 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { requireOnboardedTeacher } from "@/lib/auth";
 import { getPreferredLocale } from "@/lib/i18n";
@@ -10,6 +9,7 @@ import {
   shareGroupInputSchema,
   updateShareGroup as updateShareGroupCore,
 } from "@/lib/share-groups/store";
+import { revalidateAfterAction } from "@/lib/revalidate";
 
 // Legacy entry point for the community CRUD, kept for any caller that still
 // imports it. The rules moved to lib/marketing/communities
@@ -49,7 +49,7 @@ export async function addShareGroup(
   const teacher = await requireOnboardedTeacher();
   await addShareGroupCore(teacher.id, parsed.data);
 
-  revalidatePath("/dashboard/get-students/communities");
+  revalidateAfterAction("/dashboard/get-students/communities");
   return { ok: true };
 }
 
@@ -74,7 +74,7 @@ export async function updateShareGroup(
   const ok = await updateShareGroupCore(teacher.id, id, input);
   if (!ok) return notFound(en);
 
-  revalidatePath("/dashboard/get-students/communities");
+  revalidateAfterAction("/dashboard/get-students/communities");
   return { ok: true };
 }
 
@@ -94,6 +94,6 @@ export async function deleteShareGroup(
   const ok = await deleteShareGroupCore(teacher.id, parsed.data.id);
   if (!ok) return notFound(en);
 
-  revalidatePath("/dashboard/get-students/communities");
+  revalidateAfterAction("/dashboard/get-students/communities");
   return { ok: true };
 }

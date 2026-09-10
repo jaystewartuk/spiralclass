@@ -1,12 +1,12 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { requireOnboardedTeacher } from "@/lib/auth";
 import { getT } from "@/lib/i18n";
 import type { TFunction } from "@/lib/i18n-translate";
 import { absent } from "@/lib/form-data";
 import { saveReferralProgram as saveReferralProgramCore } from "@/lib/referrals/manage";
+import { revalidateAfterAction } from "@/lib/revalidate";
 
 // Teacher config for the student→student referral program (slice 2b,
 // docs/features/referrals-discounts.md). One row per teacher (upsert). Both rewards
@@ -90,7 +90,7 @@ export async function saveReferralProgram(
     rewardExpiryDays: expiry.data,
   });
 
-  revalidatePath("/dashboard/referrals");
+  revalidateAfterAction("/dashboard/referrals");
   return { ok: true };
 }
 

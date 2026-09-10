@@ -1,6 +1,5 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/admin";
@@ -9,6 +8,7 @@ import { lockedPriceForPlan } from "@/lib/subscriptions/service";
 import { activateSubscription, recordSubscriptionInvoice } from "@/lib/subscriptions/lifecycle";
 import { inngest } from "@/lib/inngest/client";
 import type { LifecycleEmitter } from "@/lib/subscriptions/lifecycle";
+import { revalidateAfterAction } from "@/lib/revalidate";
 
 const emit: LifecycleEmitter = async (event) => {
   await inngest.send(event);
@@ -64,8 +64,7 @@ export async function markSubscriptionComped(
     after: { plan: parsed.data.plan, comped: true },
     actor,
   });
-  revalidatePath("/admin/subscriptions");
-  revalidatePath(`/admin/teachers/${parsed.data.teacherId}`);
+  revalidateAfterAction("/admin/subscriptions");
   return { ok: true };
 }
 
@@ -154,7 +153,6 @@ export async function markSubscriptionPaidManually(
     },
     actor,
   });
-  revalidatePath("/admin/subscriptions");
-  revalidatePath(`/admin/teachers/${parsed.data.teacherId}`);
+  revalidateAfterAction("/admin/subscriptions");
   return { ok: true };
 }

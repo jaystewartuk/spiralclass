@@ -1,12 +1,11 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
-
 import { prisma } from "@/lib/prisma";
 import { requireOnboardedTeacher } from "@/lib/auth";
 import { getPreferredLocale } from "@/lib/i18n";
 import { gateProFeature, upgradeNudge } from "@/lib/subscriptions/enforce";
 import { setShareProgressFor } from "@/lib/lesson-notes/student-prefs";
+import { revalidateAfterAction } from "@/lib/revalidate";
 
 // Phase F, Half 2. The teacher opts
 // a student in (or out) of seeing their own learning profile. Wrapper around
@@ -37,6 +36,6 @@ export async function setShareProgress(studentId: string, share: boolean): Promi
     };
   }
 
-  revalidatePath(`/dashboard/students/${studentId}`);
+  revalidateAfterAction(`/dashboard/students/${studentId}`);
   return { ok: true };
 }

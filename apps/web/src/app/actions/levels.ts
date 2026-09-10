@@ -1,12 +1,12 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireOnboardedTeacher } from "@/lib/auth";
 import { getPreferredLocale } from "@/lib/i18n";
 import { flushAnalytics, trackServerEvent } from "@/lib/analytics/posthog";
 import { ensureTeacherLevels } from "@/lib/levels";
+import { revalidateAfterAction } from "@/lib/revalidate";
 
 // Level-gated material library — docs/features/library-materials.md.
 //
@@ -71,8 +71,7 @@ export async function setStudentLevel(
   });
   await flushAnalytics();
 
-  revalidatePath(`/dashboard/students/${studentId}`);
-  revalidatePath(`/dashboard/students`);
+  revalidateAfterAction(`/dashboard/students/${studentId}`);
   return { ok: en ? "Level saved." : "Nivel guardado." };
 }
 

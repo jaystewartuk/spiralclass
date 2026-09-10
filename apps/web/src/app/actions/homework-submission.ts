@@ -1,6 +1,5 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireStudent } from "@/lib/auth";
@@ -20,6 +19,7 @@ import {
   presignSubmissionUpload,
 } from "@/lib/storage/homework-file";
 import { logger } from "@/lib/logger";
+import { revalidateAfterAction } from "@/lib/revalidate";
 
 const log = logger({ surface: "web-homework-submission" });
 
@@ -79,8 +79,8 @@ async function forCaller(assignmentId: string) {
 }
 
 function revalidate(bookingId: string, assignmentId: string) {
-  revalidatePath(`/my-classes/${bookingId}/homework/${assignmentId}`);
-  revalidatePath(`/my-classes/${bookingId}`);
+  revalidateAfterAction(`/my-classes/${bookingId}/homework/${assignmentId}`);
+  revalidateAfterAction(`/my-classes/${bookingId}`);
 }
 
 // Trimmed before the empty check. Without the trim a hand-in of nothing but

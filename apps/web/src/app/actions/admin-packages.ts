@@ -1,12 +1,12 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/admin";
 import { writeOverride } from "@/lib/audit";
 import { getPreferredLocale } from "@/lib/i18n";
 import { addMonths } from "@/lib/dates";
+import { revalidateAfterAction } from "@/lib/revalidate";
 
 export type AdminPackageActionState = { error?: string; ok?: boolean } | undefined;
 
@@ -64,8 +64,7 @@ export async function cancelPackageAction(
     });
   });
 
-  revalidatePath(`/admin/packages/${pkg.id}`);
-  revalidatePath(`/admin/teachers/${pkg.teacherId}`);
+  revalidateAfterAction(`/admin/packages/${pkg.id}`);
   return { ok: true };
 }
 
@@ -131,7 +130,6 @@ export async function extendPackageExpirationAction(
     });
   });
 
-  revalidatePath(`/admin/packages/${pkg.id}`);
-  revalidatePath(`/admin/teachers/${pkg.teacherId}`);
+  revalidateAfterAction(`/admin/packages/${pkg.id}`);
   return { ok: true };
 }

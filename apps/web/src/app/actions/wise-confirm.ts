@@ -1,6 +1,5 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireOnboardedTeacher } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
@@ -9,6 +8,7 @@ import { confirmTransferPayment } from "@/lib/payments/transfer-confirm";
 import { getPreferredLocale } from "@/lib/i18n";
 import { enqueueEvent } from "@/lib/jobs/enqueue";
 import { flushAnalytics } from "@/lib/analytics/posthog";
+import { revalidateAfterAction } from "@/lib/revalidate";
 
 // Teacher action: marks a Wise-pending payment as received.
 //
@@ -63,8 +63,7 @@ export async function confirmTransferPaymentAction(formData: FormData): Promise<
   // the detail page. The teacher just sees the current state without an
   // error toast — clicking again on a stale tab shouldn't punish them.
 
-  revalidatePath(`/payments/${input.paymentId}`);
-  revalidatePath("/payments");
+  revalidateAfterAction(`/payments/${input.paymentId}`);
   // confirmTransferPayment fires payment_received on this success path; drain it
   // before the redirect throws (this action never flushed before).
   await flushAnalytics();
@@ -131,7 +130,6 @@ export async function failWisePaymentAction(formData: FormData): Promise<void> {
     });
   });
 
-  revalidatePath(`/payments/${input.paymentId}`);
-  revalidatePath("/payments");
+  revalidateAfterAction(`/payments/${input.paymentId}`);
   redirect(`/payments/${input.paymentId}?wise_failed=1`);
 }

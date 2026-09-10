@@ -1,10 +1,10 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
 import { requireTeacher } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { disconnectGoogleCalendar } from "@/lib/calendar/google/connection";
 import { syncTeacherBusy } from "@/lib/calendar/google/sync";
+import { revalidateAfterAction } from "@/lib/revalidate";
 
 export type GoogleCalendarActionState = { error?: string; ok?: boolean } | undefined;
 
@@ -19,7 +19,7 @@ export async function disconnectGoogleCalendarAction(
   void _formData;
   const teacher = await requireTeacher();
   await disconnectGoogleCalendar(teacher.id);
-  revalidatePath(SETTINGS_PATH);
+  revalidateAfterAction(SETTINGS_PATH);
   return { ok: true };
 }
 
@@ -33,7 +33,7 @@ export async function resyncGoogleCalendarAction(
   void _formData;
   const teacher = await requireTeacher();
   const result = await syncTeacherBusy(teacher.id);
-  revalidatePath(SETTINGS_PATH);
+  revalidateAfterAction(SETTINGS_PATH);
   if (result.status === "error") return { error: result.error };
   return { ok: true };
 }
@@ -55,6 +55,6 @@ export async function setGoogleSyncEnabledAction(
   if (enabled) await syncTeacherBusy(teacher.id);
   // Pausing clears the imported intervals so they stop blocking slots.
   else await prisma.googleBusyInterval.deleteMany({ where: { teacherId: teacher.id } });
-  revalidatePath(SETTINGS_PATH);
+  revalidateAfterAction(SETTINGS_PATH);
   return { ok: true };
 }

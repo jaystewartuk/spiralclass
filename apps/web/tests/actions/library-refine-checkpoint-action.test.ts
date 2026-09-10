@@ -31,7 +31,6 @@ vi.mock("@/lib/subscriptions/enforce", () => ({
 vi.mock("@/lib/materials/config", () => ({ validateClassContentBody: vi.fn() }));
 vi.mock("@/lib/materials/image-cleanup", () => ({ removeUnreferencedMaterialImages: vi.fn() }));
 vi.mock("@/lib/materials/tags", () => ({ syncLibraryMaterialFocusTags: vi.fn() }));
-vi.mock("@/lib/materials/revalidate", () => ({ revalidateClassMaterialLists: vi.fn() }));
 
 const requireOnboardedTeacher = vi.fn(async () => ({ id: "t1" }));
 vi.mock("@/lib/auth", () => ({ requireOnboardedTeacher }));

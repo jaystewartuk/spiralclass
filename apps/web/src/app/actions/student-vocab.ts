@@ -1,6 +1,5 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
 import { prisma } from "@/lib/prisma";
@@ -8,6 +7,7 @@ import { requireStudent } from "@/lib/auth";
 import { studentIdentityIds } from "@/lib/students/identity";
 import { GRADES, type Grade } from "@/lib/lesson-notes/srs";
 import { gradeVocabularyFor } from "@/lib/lesson-notes/student-progress";
+import { revalidateAfterAction } from "@/lib/revalidate";
 
 // Phase F, Half 2: a student grades a due vocabulary term; the SRS scheduler
 // reschedules it. Wrapper around the shared core
@@ -28,6 +28,6 @@ export async function gradeVocabulary(reviewId: string, grade: Grade): Promise<G
   const res = await gradeVocabularyFor(prisma, ids, reviewId, parsed.data);
   if (!res.ok) return { error: res.reason };
 
-  revalidatePath("/my-classes/progress");
+  revalidateAfterAction("/my-classes/progress");
   return { ok: true };
 }

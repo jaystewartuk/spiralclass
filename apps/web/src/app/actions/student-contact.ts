@@ -1,6 +1,5 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { isCaptionLanguage } from "@spiralclass/shared";
 import { requireOnboardedTeacher, requireStudent } from "@/lib/auth";
@@ -11,6 +10,7 @@ import { studentContactSchema, teacherEditStudentContactSchema } from "@/lib/val
 import { applyStudentContactUpdate, type ContactUpdateError } from "@/lib/students/contact";
 import { requestStudentEmailChange, verifyStudentEmailChange } from "@/lib/students/email-change";
 import { flushAnalytics } from "@/lib/analytics/posthog";
+import { revalidateAfterAction } from "@/lib/revalidate";
 
 export type ContactFormState = { ok?: string; error?: string } | undefined;
 export type EmailChangeFormState =
@@ -69,7 +69,7 @@ export async function updateMyContactInfoAction(
   // Drain student_contact_updated before the action returns / lambda freezes.
   await flushAnalytics();
 
-  revalidatePath("/my-classes", "layout");
+  revalidateAfterAction("/my-classes", "layout");
   return { ok: en ? "Details saved." : "Datos guardados." };
 }
 
@@ -113,8 +113,7 @@ export async function updateStudentContactAsTeacherAction(
   if (!result.ok) return { error: contactErrorMessage(result.error, en) };
   await flushAnalytics();
 
-  revalidatePath(`/dashboard/students/${parsed.data.studentId}`);
-  revalidatePath("/dashboard/students");
+  revalidateAfterAction(`/dashboard/students/${parsed.data.studentId}`);
   return { ok: en ? "Contact details saved." : "Datos de contacto guardados." };
 }
 
@@ -236,7 +235,7 @@ export async function verifyEmailChangeAction(
     };
   }
 
-  revalidatePath("/my-classes/account");
+  revalidateAfterAction("/my-classes/account");
   const ok = result.googleDisconnected
     ? en
       ? "Email updated. Your Google account was disconnected for security — reconnect it below with your new Google account if you'd like to keep using Google Sign-In."
@@ -269,6 +268,6 @@ export async function saveNativeLanguageAction(
     data: { nativeLanguage },
   });
 
-  revalidatePath("/my-classes/account");
+  revalidateAfterAction("/my-classes/account");
   return { ok: en ? "Language saved." : "Idioma guardado." };
 }

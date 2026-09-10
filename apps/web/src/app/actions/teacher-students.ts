@@ -1,6 +1,5 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
@@ -12,6 +11,7 @@ import { teacherCreateStudentSchema } from "@/lib/validators";
 import { normalizeE164 } from "@/lib/phone";
 import { gateAddStudent, upgradeNudge } from "@/lib/subscriptions/enforce";
 import { defaultNewStudentNotificationPrefs } from "@/lib/notifications/preferences";
+import { revalidateAfterAction } from "@/lib/revalidate";
 
 // Silent onboarding (gradual go-live). A teacher can stage a student on her
 // roster by hand — replacing the paper notebook — before that student knows
@@ -143,7 +143,7 @@ export async function createStudentAction(
   });
   await flushAnalytics();
 
-  revalidatePath("/dashboard/students");
+  revalidateAfterAction("/dashboard/students");
   redirect(`/dashboard/students/${studentId}`);
 }
 
@@ -211,8 +211,7 @@ export async function setStudentLiveAction(
   });
   await flushAnalytics();
 
-  revalidatePath(`/dashboard/students/${parsed.data.studentId}`);
-  revalidatePath("/dashboard/students");
+  revalidateAfterAction(`/dashboard/students/${parsed.data.studentId}`);
   return {
     ok: en
       ? "Student is live. They'll receive notifications from now on."

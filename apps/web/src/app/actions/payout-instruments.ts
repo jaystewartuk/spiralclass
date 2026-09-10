@@ -1,12 +1,12 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { wiseInstrumentSchema } from "@spiralclass/shared";
 import { requireOnboardedTeacher } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { getPreferredLocale } from "@/lib/i18n";
 import { saveTeacherInstrument } from "@/lib/payments/save-instrument";
+import { revalidateAfterAction } from "@/lib/revalidate";
 
 export type PayoutInstrumentState = { error?: string; ok?: string } | undefined;
 
@@ -56,6 +56,6 @@ export async function updateWiseInstrument(
     wiseEmail: parsed.data.email ?? null,
   });
 
-  revalidatePath("/settings/payments");
+  revalidateAfterAction("/settings/payments");
   redirect("/settings/payments?wise=1");
 }
