@@ -73,7 +73,7 @@ appears in it.</sub>
 It is published as an honest record of how one engineer builds and runs a
 payments-handling, video-carrying SaaS product alone: the architecture, the
 decisions, the things that went wrong, and the mechanisms built so they would
-not go wrong twice. The 120 decision records in
+not go wrong twice. The 121 decision records in
 [`docs/decisions/`](docs/decisions/README.md) are the most useful thing here —
 several of them reverse an earlier one and say why.
 
@@ -615,7 +615,7 @@ in [`docs/deployment/ORACLE_LIVEKIT_PRODUCTION.md`](docs/deployment/ORACLE_LIVEK
 | Where                                      | What                                                                                   |
 | ------------------------------------------ | -------------------------------------------------------------------------------------- |
 | [`docs/architecture/`](docs/architecture/) | System design, the data model, how a purchase and a booking flow                       |
-| [`docs/decisions/`](docs/decisions/)       | **120 decision records.** Current policy, not history — several reverse an earlier one |
+| [`docs/decisions/`](docs/decisions/)       | **121 decision records.** Current policy, not history — several reverse an earlier one |
 | [`docs/features/`](docs/features/)         | Canonical product behaviour, one document per feature                                  |
 | [`docs/development/`](docs/development/)   | Setup, testing, the change workflow, i18n, analytics                                   |
 | [`docs/deployment/`](docs/deployment/)     | Release, incident response, backup and restore, infrastructure runbooks                |
