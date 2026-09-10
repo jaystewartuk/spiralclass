@@ -158,7 +158,7 @@ export default async function TransferInstructionsPage({
         <Heading level={2} as="h1">
           {t(isWise ? "web.wiseInstructions.title" : "web.bankInstructions.title")}
         </Heading>
-        <p className="mt-1 text-sm text-muted-foreground">
+        <p className="text-muted-foreground mt-1 text-sm">
           {payment.package.template?.name ?? t("web.wiseInstructions.package")} ·{" "}
           {t("web.wiseInstructions.classesOf", {
             count: payment.package.classesTotal,
@@ -190,7 +190,7 @@ export default async function TransferInstructionsPage({
                 {t("buy.wise.payNow")}
               </a>
             </Button>
-            <p className="text-xs text-muted-foreground">{t("web.wiseInstructions.step1.hint")}</p>
+            <p className="text-muted-foreground text-xs">{t("web.wiseInstructions.step1.hint")}</p>
           </CardContent>
         </Card>
       ) : (
@@ -211,8 +211,8 @@ export default async function TransferInstructionsPage({
                 rejects spaces would choke on the grouped one. */}
             {instructions.fields.map((field) => (
               <div key={field.labelKey}>
-                <p className="mb-1 text-xs text-muted-foreground">{t(field.labelKey)}</p>
-                <div className="select-all break-all rounded-md border bg-muted/40 px-3 py-2 font-mono text-sm lg:text-base">
+                <p className="text-muted-foreground mb-1 text-xs">{t(field.labelKey)}</p>
+                <div className="bg-muted/40 rounded-md border px-3 py-2 font-mono text-sm break-all select-all lg:text-base">
                   {field.display}
                 </div>
               </div>
@@ -222,7 +222,7 @@ export default async function TransferInstructionsPage({
               label={t("web.bankInstructions.copyClabe")}
               toastMessage={t("web.bankInstructions.clabeCopied")}
             />
-            <p className="text-xs text-muted-foreground">{t("web.bankInstructions.checkBank")}</p>
+            <p className="text-muted-foreground text-xs">{t("web.bankInstructions.checkBank")}</p>
           </CardContent>
         </Card>
       )}
@@ -237,7 +237,7 @@ export default async function TransferInstructionsPage({
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-2">
-          <div className="select-all break-all rounded-md border bg-muted/40 px-3 py-2 font-mono text-sm lg:text-base">
+          <div className="bg-muted/40 rounded-md border px-3 py-2 font-mono text-sm break-all select-all lg:text-base">
             {payment.paymentReference}
           </div>
           <CopyLinkButton
@@ -266,7 +266,7 @@ export default async function TransferInstructionsPage({
         </CardContent>
       </Card>
 
-      <footer className="border-t pt-4 text-xs text-muted-foreground">
+      <footer className="text-muted-foreground border-t pt-4 text-xs">
         {t("web.wiseInstructions.internalReference")}:{" "}
         <span className="font-mono">{payment.externalReference}</span>
       </footer>

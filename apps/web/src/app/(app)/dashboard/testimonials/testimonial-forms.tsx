@@ -147,17 +147,17 @@ function PhotoField({
             alt=""
             width={40}
             height={40}
-            className="h-10 w-10 shrink-0 rounded-full border border-border object-cover"
+            className="border-border h-10 w-10 shrink-0 rounded-full border object-cover"
           />
         ) : (
           <span
             aria-hidden
-            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-muted text-muted-foreground"
+            className="bg-muted text-muted-foreground flex h-10 w-10 shrink-0 items-center justify-center rounded-full"
           >
             <UserRound className="h-4 w-4" />
           </span>
         )}
-        <span className="text-xs text-muted-foreground">{caption}</span>
+        <span className="text-muted-foreground text-xs">{caption}</span>
       </div>
       <Input
         id={`${idPrefix}-photo`}
@@ -172,11 +172,11 @@ function PhotoField({
         className="cursor-pointer"
       />
       {rejected ? (
-        <p id={errorId} role="alert" className="text-xs text-destructive">
+        <p id={errorId} role="alert" className="text-destructive text-xs">
           {rejected}
         </p>
       ) : (
-        <p id={hintId} className="text-xs text-muted-foreground">
+        <p id={hintId} className="text-muted-foreground text-xs">
           {hint}
         </p>
       )}
@@ -413,7 +413,7 @@ export function TestimonialCard({
               {t("web.dashboard.testimonials.verifiedBadge")}
             </Badge>
           ) : (
-            <Badge variant="outline" className="font-normal text-muted-foreground">
+            <Badge variant="outline" className="text-muted-foreground font-normal">
               {t("web.dashboard.testimonials.addedByYou")}
             </Badge>
           )}
@@ -474,7 +474,7 @@ export function TestimonialCard({
         </div>
 
         {headerError && (
-          <p role="alert" className="mt-3 text-sm text-destructive">
+          <p role="alert" className="text-destructive mt-3 text-sm">
             {headerError}
           </p>
         )}
@@ -485,8 +485,8 @@ export function TestimonialCard({
             page's divs: it is a quotation with an attribution, which is the
             one thing those elements are for. */}
         <figure className="mt-4 space-y-3">
-          <Quote className="h-5 w-5 text-primary/60" aria-hidden />
-          <blockquote className="whitespace-pre-line text-sm text-foreground/80">
+          <Quote className="text-primary/60 h-5 w-5" aria-hidden />
+          <blockquote className="text-foreground/80 text-sm whitespace-pre-line">
             {item.body}
           </blockquote>
           <figcaption className="flex items-center gap-2 text-sm font-medium">
@@ -502,7 +502,7 @@ export function TestimonialCard({
             )}
             <span>
               {item.authorName}
-              {note && <span className="font-normal text-muted-foreground">{` · ${note}`}</span>}
+              {note && <span className="text-muted-foreground font-normal">{` · ${note}`}</span>}
             </span>
           </figcaption>
         </figure>
@@ -514,7 +514,7 @@ export function TestimonialCard({
                every teacher-side write filters on `teacher_curated` and a CHECK
                constraint backs that up. Offering an edit that would be refused
                is worse than not offering one. */
-            <p className="pb-4 text-sm text-muted-foreground">
+            <p className="text-muted-foreground pb-4 text-sm">
               {t("web.dashboard.testimonials.verifiedLocked", { name: item.authorName })}
             </p>
           ) : (

@@ -99,7 +99,7 @@ function NoteColumn({
 
   return (
     <div className="space-y-3">
-      <h3 className="text-sm font-medium text-muted-foreground">{title}</h3>
+      <h3 className="text-muted-foreground text-sm font-medium">{title}</h3>
 
       {notes.length > 0 ? (
         <ul className="space-y-2">
@@ -115,14 +115,14 @@ function NoteColumn({
           ))}
         </ul>
       ) : (
-        <p className="text-sm text-muted-foreground">{t("lessonNotes.empty")}</p>
+        <p className="text-muted-foreground text-sm">{t("lessonNotes.empty")}</p>
       )}
 
       <form action={formAction} className="space-y-2">
         <input type="hidden" name="bookingId" value={bookingId} />
         <input type="hidden" name="audience" value={audience} />
         <Textarea name="body" rows={2} placeholder={placeholder} maxLength={500} />
-        {state?.error && <p className="text-sm text-destructive">{state.error}</p>}
+        {state?.error && <p className="text-destructive text-sm">{state.error}</p>}
         <Button type="submit" size="sm" variant="secondary" disabled={pending}>
           {pending ? t("lessonNotes.adding") : t("lessonNotes.add")}
         </Button>
@@ -216,7 +216,7 @@ function CopyFromLastClass({ bookingId, t }: { bookingId: string; t: TFunction }
           ? t("web.dashboard.classes.lessonNotes.copying")
           : t("web.dashboard.classes.lessonNotes.copyFromLastClass")}
       </Button>
-      {state?.error && <span className="ml-2 text-xs text-muted-foreground">{state.error}</span>}
+      {state?.error && <span className="text-muted-foreground ml-2 text-xs">{state.error}</span>}
     </form>
   );
 }

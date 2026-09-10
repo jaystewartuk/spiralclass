@@ -108,17 +108,17 @@ export function PreparePanel(props: PreparePanelProps) {
               : t("web.getStudents.prepare")}
         </Button>
         {prepareState?.reason === "not-configured" && (
-          <p className="text-sm text-muted-foreground">{t("web.getStudents.notConfigured")}</p>
+          <p className="text-muted-foreground text-sm">{t("web.getStudents.notConfigured")}</p>
         )}
         {prepareState?.reason === "throttled" && (
-          <p role="alert" className="text-sm text-destructive">
+          <p role="alert" className="text-destructive text-sm">
             {t("web.getStudents.throttled")}
           </p>
         )}
         {prepareState?.reason &&
           prepareState.reason !== "not-configured" &&
           prepareState.reason !== "throttled" && (
-            <p role="alert" className="text-sm text-destructive">
+            <p role="alert" className="text-destructive text-sm">
               {t("web.getStudents.generateFailed")}
             </p>
           )}
@@ -127,7 +127,7 @@ export function PreparePanel(props: PreparePanelProps) {
       {props.angleNote && (
         <div className="space-y-1">
           <div className="text-sm font-medium">{t("web.getStudents.theAngle")}</div>
-          <p className="text-sm text-muted-foreground">{props.angleNote}</p>
+          <p className="text-muted-foreground text-sm">{props.angleNote}</p>
         </div>
       )}
 
@@ -143,7 +143,7 @@ export function PreparePanel(props: PreparePanelProps) {
             value={draft}
             onChange={(e) => setDraft(e.target.value)}
           />
-          <p className="text-xs text-muted-foreground">{t("web.getStudents.editHint")}</p>
+          <p className="text-muted-foreground text-xs">{t("web.getStudents.editHint")}</p>
         </div>
         <div className="flex flex-wrap gap-2">
           <Button type="submit" variant="outline" size="sm" disabled={saving || !hasBody}>
@@ -169,14 +169,14 @@ export function PreparePanel(props: PreparePanelProps) {
           )}
         </div>
         {saveState?.error && (
-          <p role="alert" className="text-sm text-destructive">
+          <p role="alert" className="text-destructive text-sm">
             {saveState.error}
           </p>
         )}
       </form>
 
       {props.trackedLink && (
-        <p className="text-xs text-muted-foreground">{t("web.getStudents.trackedLinkNotice")}</p>
+        <p className="text-muted-foreground text-xs">{t("web.getStudents.trackedLinkNotice")}</p>
       )}
     </div>
   );

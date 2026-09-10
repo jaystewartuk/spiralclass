@@ -169,7 +169,7 @@ export function PackagesTable({
       </FilterBar>
 
       {visiblePackages.length === 0 ? (
-        <p className="text-sm text-muted-foreground">{t("web.admin.packages.noneMatched")}</p>
+        <p className="text-muted-foreground text-sm">{t("web.admin.packages.noneMatched")}</p>
       ) : (
         <TableShell>
           <DataTable

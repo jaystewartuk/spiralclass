@@ -64,12 +64,12 @@ export default function GlobalError({ error }: { error: Error & { digest?: strin
 
   return (
     <html lang={locale}>
-      <body className="m-0 flex min-h-dvh items-center justify-center bg-background p-8 text-center font-sans text-foreground">
+      <body className="bg-background text-foreground m-0 flex min-h-dvh items-center justify-center p-8 text-center font-sans">
         <div className="max-w-md space-y-4">
           <Heading level={1}>SpiralClass</Heading>
           <p className="text-muted-foreground">{copy.body}</p>
           {error.digest && (
-            <p className="text-xs text-muted-foreground">
+            <p className="text-muted-foreground text-xs">
               {copy.reference}: <code>{error.digest}</code>
             </p>
           )}
@@ -78,7 +78,7 @@ export default function GlobalError({ error }: { error: Error & { digest?: strin
             onClick={() => {
               window.location.href = "/";
             }}
-            className="inline-flex h-11 items-center justify-center rounded-md bg-primary px-8 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary-hover focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring focus-visible:ring-offset-2"
+            className="bg-primary text-primary-foreground hover:bg-primary-hover focus-visible:ring-ring inline-flex h-11 items-center justify-center rounded-md px-8 text-sm font-medium transition-colors focus-visible:ring-3 focus-visible:ring-offset-2 focus-visible:outline-none"
           >
             {copy.home}
           </button>

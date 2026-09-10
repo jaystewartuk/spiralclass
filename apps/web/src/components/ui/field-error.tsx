@@ -4,7 +4,7 @@
 export function FieldError({ id, message }: { id: string; message?: string }) {
   if (!message) return null;
   return (
-    <p id={id} role="alert" aria-live="polite" className="text-xs text-destructive">
+    <p id={id} role="alert" aria-live="polite" className="text-destructive text-xs">
       {message}
     </p>
   );

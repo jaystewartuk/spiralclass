@@ -32,14 +32,14 @@ export default async function StudentTeachersPage() {
       ) : (
         <Card>
           <CardContent className="p-0">
-            <ul className="divide-y divide-border">
+            <ul className="divide-border divide-y">
               {teachers.map((teacher, i) => {
                 const language = languageDisplayName(teacher.targetLanguage, locale);
                 return (
                   <li key={teacher.id}>
                     <Link
                       href={`/my-classes/teachers/${teacher.id}`}
-                      className={`flex items-center gap-3 px-4 py-3.5 transition-colors hover:bg-muted/50 ${
+                      className={`hover:bg-muted/50 flex items-center gap-3 px-4 py-3.5 transition-colors ${
                         i === 0 ? "rounded-t-lg" : ""
                       } ${i === teachers.length - 1 ? "rounded-b-lg" : ""}`}
                     >
@@ -47,7 +47,7 @@ export default async function StudentTeachersPage() {
                       <div className="min-w-0 flex-1">
                         <p className="truncate text-sm font-medium">{teacher.name}</p>
                         {language && (
-                          <p className="truncate text-xs text-muted-foreground">{language}</p>
+                          <p className="text-muted-foreground truncate text-xs">{language}</p>
                         )}
                       </div>
                     </Link>

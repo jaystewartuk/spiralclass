@@ -94,7 +94,7 @@ export function CommunityPostPanel(props: CommunityPostPanelProps) {
     // Every kind was filtered out — a prohibited community with nothing
     // educational left, or an account with no packages, photo or testimonials
     // yet. Saying which is the planner's job, not this panel's.
-    return <p className="text-sm text-muted-foreground">{t("web.getStudents.postNoKinds")}</p>;
+    return <p className="text-muted-foreground text-sm">{t("web.getStudents.postNoKinds")}</p>;
   }
 
   return (
@@ -110,7 +110,7 @@ export function CommunityPostPanel(props: CommunityPostPanelProps) {
             id={`kind-${props.communityId}`}
             value={kind}
             onChange={(e) => setKind(e.target.value as MarketingContentKind)}
-            className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm"
+            className="border-input bg-background h-9 w-full rounded-md border px-3 text-sm"
           >
             {props.kinds.map((k) => (
               <option key={k} value={k}>
@@ -118,7 +118,7 @@ export function CommunityPostPanel(props: CommunityPostPanelProps) {
               </option>
             ))}
           </select>
-          <p className="text-xs text-muted-foreground">{contentKindSummary(kind, locale)}</p>
+          <p className="text-muted-foreground text-xs">{contentKindSummary(kind, locale)}</p>
         </div>
 
         <div className="space-y-1">
@@ -142,7 +142,7 @@ export function CommunityPostPanel(props: CommunityPostPanelProps) {
           {/* Whether this post will carry a link, said BEFORE she generates —
               the community's own rules decided it, and finding out afterwards
               reads as the feature having failed. */}
-          <span className="text-xs text-muted-foreground">
+          <span className="text-muted-foreground text-xs">
             {spec.wantsLink
               ? link
                 ? t("web.getStudents.postIncludesLink")
@@ -152,17 +152,17 @@ export function CommunityPostPanel(props: CommunityPostPanelProps) {
         </div>
 
         {generateState?.reason === "not-configured" && (
-          <p className="text-sm text-muted-foreground">{t("web.getStudents.notConfigured")}</p>
+          <p className="text-muted-foreground text-sm">{t("web.getStudents.notConfigured")}</p>
         )}
         {generateState?.reason === "throttled" && (
-          <p role="alert" className="text-sm text-destructive">
+          <p role="alert" className="text-destructive text-sm">
             {t("web.getStudents.throttled")}
           </p>
         )}
         {generateState?.reason &&
           generateState.reason !== "not-configured" &&
           generateState.reason !== "throttled" && (
-            <p role="alert" className="text-sm text-destructive">
+            <p role="alert" className="text-destructive text-sm">
               {t("web.getStudents.generateFailed")}
             </p>
           )}
@@ -171,7 +171,7 @@ export function CommunityPostPanel(props: CommunityPostPanelProps) {
       {props.draft?.angleNote && (
         <div className="space-y-1">
           <div className="text-sm font-medium">{t("web.getStudents.theAngle")}</div>
-          <p className="text-sm text-muted-foreground">{props.draft.angleNote}</p>
+          <p className="text-muted-foreground text-sm">{props.draft.angleNote}</p>
         </div>
       )}
 
@@ -189,18 +189,18 @@ export function CommunityPostPanel(props: CommunityPostPanelProps) {
               onChange={(e) => setDraftBody(e.target.value)}
               placeholder={t("web.getStudents.postBodyPlaceholder")}
             />
-            <p className="text-xs text-muted-foreground">{t("web.getStudents.editHint")}</p>
+            <p className="text-muted-foreground text-xs">{t("web.getStudents.editHint")}</p>
           </div>
 
           {/* The finished thing, exactly as it will be pasted. Shown rather
               than described, because "post + link + image" is a promise that
               only means something once she can see it assembled. */}
           {hasBody && (
-            <div className="space-y-3 rounded-md border bg-muted/40 p-3">
+            <div className="bg-muted/40 space-y-3 rounded-md border p-3">
               <p className="text-xs font-medium">{t("web.getStudents.postPreview")}</p>
-              <p className="whitespace-pre-wrap text-sm">{composed}</p>
+              <p className="text-sm whitespace-pre-wrap">{composed}</p>
               {props.draft.imageUrl && (
-                <div className="relative aspect-social w-full max-w-sm overflow-hidden rounded-md border">
+                <div className="aspect-social relative w-full max-w-sm overflow-hidden rounded-md border">
                   <Image
                     src={props.draft.imageUrl}
                     alt=""
@@ -230,13 +230,13 @@ export function CommunityPostPanel(props: CommunityPostPanelProps) {
             )}
           </div>
           {saveState?.error && (
-            <p role="alert" className="text-sm text-destructive">
+            <p role="alert" className="text-destructive text-sm">
               {saveState.error}
             </p>
           )}
         </form>
       ) : (
-        <p className="text-sm text-muted-foreground">{t("web.getStudents.postNone")}</p>
+        <p className="text-muted-foreground text-sm">{t("web.getStudents.postNone")}</p>
       )}
     </div>
   );
@@ -250,7 +250,7 @@ export function CommunityPostSummary({ ready }: { ready: boolean }) {
   return ready ? (
     <Badge variant="success">{t("web.getStudents.postReadyBadge")}</Badge>
   ) : (
-    <span className="shrink-0 text-xs text-muted-foreground">
+    <span className="text-muted-foreground shrink-0 text-xs">
       {t("web.getStudents.postNoneShort")}
     </span>
   );

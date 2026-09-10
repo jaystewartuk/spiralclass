@@ -86,20 +86,20 @@ export function BookingPagePreview({
   const tzLabel = timezone.split("/").pop()?.replace(/_/g, " ") ?? timezone;
 
   return (
-    <div className="overflow-hidden rounded-lg border bg-muted/40">
+    <div className="bg-muted/40 overflow-hidden rounded-lg border">
       {/* Address bar. Establishes that what is below is a different page, and
           incidentally puts the live URL in the teacher's eyeline while she
           edits the slug that produces it. */}
       <div className="border-b px-3 py-2">
-        <p className="truncate text-center font-mono text-xs text-muted-foreground">{displayUrl}</p>
+        <p className="text-muted-foreground truncate text-center font-mono text-xs">{displayUrl}</p>
       </div>
 
-      <div className="space-y-4 bg-background p-5 text-center">
+      <div className="bg-background space-y-4 p-5 text-center">
         <div className="space-y-1.5">
-          <p className="text-balance text-lg font-semibold">
+          <p className="text-lg font-semibold text-balance">
             {headline || pt("web.bookingLanding.classesWith", { name })}
           </p>
-          <p className="text-xs text-muted-foreground">{pt("web.bookingLanding.tagline")}</p>
+          <p className="text-muted-foreground text-xs">{pt("web.bookingLanding.tagline")}</p>
         </div>
 
         {photoUrl ? (
@@ -113,9 +113,9 @@ export function BookingPagePreview({
         ) : (
           <div
             aria-hidden
-            className="mx-auto flex h-28 w-28 items-center justify-center rounded-2xl border bg-muted"
+            className="bg-muted mx-auto flex h-28 w-28 items-center justify-center rounded-2xl border"
           >
-            <span className="text-3xl font-semibold text-muted-foreground">
+            <span className="text-muted-foreground text-3xl font-semibold">
               {initialsFrom(name)}
             </span>
           </div>
@@ -151,20 +151,20 @@ export function BookingPagePreview({
         </div>
 
         {hasVideo && (
-          <div className="mx-auto flex h-20 w-full max-w-56 items-center justify-center gap-2 rounded-lg border bg-muted text-xs text-muted-foreground">
+          <div className="bg-muted text-muted-foreground mx-auto flex h-20 w-full max-w-56 items-center justify-center gap-2 rounded-lg border text-xs">
             <Play className="h-4 w-4" aria-hidden />
             {t("web.settings.bookingPage.preview.videoPlaceholder")}
           </div>
         )}
 
         {bio ? (
-          <p className="mx-auto max-w-prose whitespace-pre-line text-sm text-foreground/80">
+          <p className="text-foreground/80 mx-auto max-w-prose text-sm whitespace-pre-line">
             {bio}
           </p>
         ) : (
           // Clearly an editor hint, not content: dashed and muted, so it can
           // never be mistaken for something a visitor would read.
-          <p className="mx-auto max-w-prose rounded-md border border-dashed px-3 py-2 text-xs text-muted-foreground">
+          <p className="text-muted-foreground mx-auto max-w-prose rounded-md border border-dashed px-3 py-2 text-xs">
             {t("web.settings.bookingPage.preview.bioPlaceholder")}
           </p>
         )}
@@ -173,11 +173,11 @@ export function BookingPagePreview({
             representative, non-interactive control stands in for it — enough to
             show where the action sits, without pretending to be it. */}
         <div className="space-y-2 pt-1">
-          <span className="flex h-10 w-full items-center justify-center rounded-md bg-primary text-sm font-semibold text-primary-foreground">
+          <span className="bg-primary text-primary-foreground flex h-10 w-full items-center justify-center rounded-md text-sm font-semibold">
             {pt("web.bookingLanding.packagesHeading")}
           </span>
           {hasWhatsapp && (
-            <span className="flex h-10 w-full items-center justify-center gap-2 rounded-md border border-border text-sm font-medium text-foreground">
+            <span className="border-border text-foreground flex h-10 w-full items-center justify-center gap-2 rounded-md border text-sm font-medium">
               <MessageCircle className="h-4 w-4" aria-hidden />
               {pt("common.chatOnWhatsApp")}
             </span>

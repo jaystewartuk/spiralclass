@@ -20,7 +20,7 @@ export function CtaBand({
 }) {
   return (
     <section className="container py-20">
-      <div className="relative overflow-hidden rounded-3xl bg-primary px-6 py-14 text-center text-primary-foreground">
+      <div className="bg-primary text-primary-foreground relative overflow-hidden rounded-3xl px-6 py-14 text-center">
         <div
           aria-hidden
           className="pointer-events-none absolute inset-0 -z-0 opacity-30"
@@ -39,7 +39,7 @@ export function CtaBand({
           {secondaryHref && secondaryLabel && (
             <Link
               href={secondaryHref}
-              className="text-sm text-primary-foreground underline-offset-4 hover:text-primary-foreground hover:underline"
+              className="text-primary-foreground hover:text-primary-foreground text-sm underline-offset-4 hover:underline"
             >
               {secondaryLabel}
             </Link>

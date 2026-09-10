@@ -33,7 +33,7 @@ function StudentMonogram({ name, email }: { name: string; email: string | null }
   return (
     <span
       aria-hidden
-      className="flex h-14 w-14 shrink-0 select-none items-center justify-center rounded-full border border-border bg-secondary text-lg font-semibold text-secondary-foreground"
+      className="border-border bg-secondary text-secondary-foreground flex h-14 w-14 shrink-0 items-center justify-center rounded-full border text-lg font-semibold select-none"
     >
       {initialsFrom(name, email)}
     </span>
@@ -91,14 +91,14 @@ export function StudentIdentity({
             announcing three unrelated fragments separated by interpuncts. The
             labels are visually hidden because the shapes (an @, a +, a clock)
             already say which is which to a sighted reader. */}
-        <dl className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground">
+        <dl className="text-muted-foreground flex flex-wrap items-center gap-x-4 gap-y-1 text-sm">
           <div className="flex min-w-0 items-center gap-1.5">
             <dt className="sr-only">{t("web.dashboard.students.contact.emailLabel")}</dt>
             <dd className="min-w-0 truncate">
               {email ? (
                 <a
                   href={`mailto:${email}`}
-                  className="underline-offset-4 hover:text-foreground hover:underline"
+                  className="hover:text-foreground underline-offset-4 hover:underline"
                 >
                   {email}
                 </a>
@@ -113,7 +113,7 @@ export function StudentIdentity({
               <dd>
                 <a
                   href={`tel:${phone}`}
-                  className="underline-offset-4 hover:text-foreground hover:underline"
+                  className="hover:text-foreground underline-offset-4 hover:underline"
                 >
                   {phone}
                 </a>
@@ -183,14 +183,14 @@ function GlanceTile({
   tone?: "warning";
 }) {
   return (
-    <div className="space-y-1 bg-card px-4 py-4">
-      <dt className="text-sm text-muted-foreground">{label}</dt>
+    <div className="bg-card space-y-1 px-4 py-4">
+      <dt className="text-muted-foreground text-sm">{label}</dt>
       <dd
         className={cn("text-2xl font-semibold tabular-nums", tone === "warning" && "text-warning")}
       >
         {value}
       </dd>
-      {hint ? <p className="text-sm text-muted-foreground">{hint}</p> : null}
+      {hint ? <p className="text-muted-foreground text-sm">{hint}</p> : null}
     </div>
   );
 }
@@ -226,7 +226,7 @@ export function StudentGlance({
   t: TFunction;
 }) {
   return (
-    <dl className="grid grid-cols-2 gap-px overflow-hidden rounded-lg border bg-border shadow-brand-sm lg:grid-cols-4">
+    <dl className="bg-border shadow-brand-sm grid grid-cols-2 gap-px overflow-hidden rounded-lg border lg:grid-cols-4">
       <GlanceTile
         label={t("web.dashboard.students.glance.classesLeft")}
         value={String(classesLeft)}
@@ -280,7 +280,7 @@ export function StudentTabNav({
 }) {
   return (
     <nav aria-label={t("web.dashboard.students.tab.navLabel")} className="border-b">
-      <ul className="-mb-px flex gap-1 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+      <ul className="-mb-px flex [scrollbar-width:none] gap-1 overflow-x-auto [&::-webkit-scrollbar]:hidden">
         {STUDENT_TABS.map((tab) => {
           const current = tab === active;
           return (
@@ -292,10 +292,10 @@ export function StudentTabNav({
                   // 44px of height, per D-140's target floor, and the underline
                   // rather than a pill so the row reads as one control strip
                   // sitting on the content it switches.
-                  "inline-flex min-h-11 items-center whitespace-nowrap rounded-t-md border-b-2 px-3 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring",
+                  "focus-visible:ring-ring inline-flex min-h-11 items-center rounded-t-md border-b-2 px-3 text-sm font-medium whitespace-nowrap transition-colors focus-visible:ring-3 focus-visible:outline-none",
                   current
                     ? "border-primary text-foreground"
-                    : "border-transparent text-muted-foreground hover:border-border hover:text-foreground",
+                    : "text-muted-foreground hover:border-border hover:text-foreground border-transparent",
                 )}
               >
                 {t(STUDENT_TAB_LABEL_KEY[tab])}

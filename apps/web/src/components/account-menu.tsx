@@ -81,7 +81,7 @@ export function AccountMenu({
         aria-controls={menuId}
         aria-label={menuLabel}
         onClick={toggle}
-        className={cn("gap-2 rounded-full pl-1 pr-2", open && "bg-muted/60")}
+        className={cn("gap-2 rounded-full pr-2 pl-1", open && "bg-muted/60")}
       >
         <AccountAvatar
           name={account?.name}
@@ -92,7 +92,7 @@ export function AccountMenu({
         <span className="hidden max-w-48 truncate xl:block">{triggerName}</span>
         <ChevronDown
           aria-hidden
-          className={cn("h-4 w-4 text-muted-foreground transition-transform", open && "rotate-180")}
+          className={cn("text-muted-foreground h-4 w-4 transition-transform", open && "rotate-180")}
         />
       </Button>
 
@@ -102,7 +102,7 @@ export function AccountMenu({
           ref={panelRef}
           onKeyDown={onPanelKeyDown}
           aria-label={menuLabel}
-          className="absolute right-0 z-50 mt-2 max-h-menu w-72 overflow-y-auto rounded-md border border-border bg-popover p-1 text-popover-foreground shadow-lg"
+          className="max-h-menu border-border bg-popover text-popover-foreground absolute right-0 z-50 mt-2 w-72 overflow-y-auto rounded-md border p-1 shadow-lg"
         >
           {account && accountHref && (
             <>
@@ -118,7 +118,7 @@ export function AccountMenu({
                   className="min-w-0 flex-1"
                 />
                 <span className="sr-only">{t("web.nav.viewAccount")}</span>
-                <ChevronRight aria-hidden className="h-4 w-4 shrink-0 text-muted-foreground" />
+                <ChevronRight aria-hidden className="text-muted-foreground h-4 w-4 shrink-0" />
               </Link>
               <NavDivider />
             </>
@@ -158,7 +158,7 @@ export function AccountMenu({
 
           <NavDivider />
 
-          <NavPreferences localeToggle={localeToggle} className="px-3 pb-3 pt-0" />
+          <NavPreferences localeToggle={localeToggle} className="px-3 pt-0 pb-3" />
 
           <SignOutButton label={t("common.signOut")} className="px-1 pb-1" />
         </div>

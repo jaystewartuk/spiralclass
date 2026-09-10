@@ -77,7 +77,7 @@ export default async function AdminIntegrationsPage() {
     <div className="space-y-6">
       <header>
         <PageHeader title={t("web.admin.integrations.title")} />
-        <p className="text-sm text-muted-foreground">{t("web.admin.integrations.subtitle")}</p>
+        <p className="text-muted-foreground text-sm">{t("web.admin.integrations.subtitle")}</p>
       </header>
 
       <TableShell>
@@ -104,7 +104,7 @@ export default async function AdminIntegrationsPage() {
                 </TableCell>
                 <TableCell
                   data-label={t("web.admin.integrations.notes")}
-                  className="text-xs text-muted-foreground"
+                  className="text-muted-foreground text-xs"
                 >
                   {r.detail}
                 </TableCell>

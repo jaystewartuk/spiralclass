@@ -80,14 +80,14 @@ export async function PageReadinessCard({
         <CardDescription className="max-w-reading">{lead}</CardDescription>
       </CardHeader>
       <CardContent className="p-0">
-        <ul className="divide-y divide-border border-t">
+        <ul className="divide-border divide-y border-t">
           {readiness.gaps.map((gap) => {
             const severityKey = SEVERITY_KEY[gap.severity];
             return (
               <li key={gap.code}>
                 <Link
                   href={gap.href}
-                  className="flex min-h-target items-center gap-3 px-6 py-3 transition-colors hover:bg-muted/50 focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring"
+                  className="min-h-target hover:bg-muted/50 focus-visible:ring-ring flex items-center gap-3 px-6 py-3 transition-colors focus-visible:ring-3 focus-visible:outline-none"
                 >
                   <span className="min-w-0 flex-1 text-sm">{t(GAP_KEY[gap.code])}</span>
                   {severityKey ? (
@@ -96,7 +96,7 @@ export async function PageReadinessCard({
                     </Badge>
                   ) : null}
                   <ChevronRight
-                    className="h-5 w-5 shrink-0 text-muted-foreground"
+                    className="text-muted-foreground h-5 w-5 shrink-0"
                     aria-hidden="true"
                   />
                 </Link>

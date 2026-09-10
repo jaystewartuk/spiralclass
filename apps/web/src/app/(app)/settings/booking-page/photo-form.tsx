@@ -57,9 +57,9 @@ export function PhotoForm({ photoUrl, name }: { photoUrl: string | null; name: s
         ) : (
           <div
             aria-hidden
-            className="flex h-20 w-20 shrink-0 items-center justify-center rounded-2xl border border-dashed bg-muted"
+            className="bg-muted flex h-20 w-20 shrink-0 items-center justify-center rounded-2xl border border-dashed"
           >
-            <span className="text-xl font-semibold text-muted-foreground">
+            <span className="text-muted-foreground text-xl font-semibold">
               {initialsFrom(name)}
             </span>
           </div>
@@ -76,7 +76,7 @@ export function PhotoForm({ photoUrl, name }: { photoUrl: string | null; name: s
                 combinator, so a peer variant here draws no focus ring at all —
                 a keyboard user tabbing onto the control would see nothing
                 move. */}
-            <label className="inline-flex h-11 cursor-pointer items-center justify-center rounded-md border border-border bg-transparent px-4 text-sm font-medium ring-offset-background transition-colors focus-within:ring-3 focus-within:ring-ring focus-within:ring-offset-2 hover:bg-muted hover:text-foreground active:bg-muted/70 lg:h-10">
+            <label className="border-border ring-offset-background focus-within:ring-ring hover:bg-muted hover:text-foreground active:bg-muted/70 inline-flex h-11 cursor-pointer items-center justify-center rounded-md border bg-transparent px-4 text-sm font-medium transition-colors focus-within:ring-3 focus-within:ring-offset-2 lg:h-10">
               <input
                 name="photo"
                 type="file"
@@ -99,10 +99,10 @@ export function PhotoForm({ photoUrl, name }: { photoUrl: string | null; name: s
           {/* The nudge leads when there is no photo: the format rules matter
               only once she is choosing a file, and she is not yet. */}
           {!photoUrl && (
-            <p className="text-xs text-muted-foreground">{t("bookingPage.noPhotoNudge")}</p>
+            <p className="text-muted-foreground text-xs">{t("bookingPage.noPhotoNudge")}</p>
           )}
 
-          <p className="text-xs text-muted-foreground">{t("web.settings.bookingPage.photoHelp")}</p>
+          <p className="text-muted-foreground text-xs">{t("web.settings.bookingPage.photoHelp")}</p>
 
           {photoUrl && (
             <form action={removeAction}>

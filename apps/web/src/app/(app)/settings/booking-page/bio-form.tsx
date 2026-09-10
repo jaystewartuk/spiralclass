@@ -60,7 +60,7 @@ export function BioForm({ initialBio }: { initialBio: string | null }) {
           className="resize-y"
         />
         <div className="flex items-start justify-between gap-3">
-          <p id="bio-help" className="text-xs text-muted-foreground">
+          <p id="bio-help" className="text-muted-foreground text-xs">
             {t("web.settings.bookingPage.bioHelp")}
           </p>
           <CharacterCounter id="bio-counter" length={bio.length} max={BIO_MAX_LENGTH} />

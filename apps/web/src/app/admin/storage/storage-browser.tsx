@@ -129,7 +129,7 @@ export function StorageBrowser({ buckets }: { buckets: BucketInfo[] }) {
               className={cn(
                 "rounded-md border px-3 py-1.5 text-sm transition-colors",
                 active
-                  ? "border-primary bg-primary/10 font-medium text-foreground"
+                  ? "border-primary bg-primary/10 text-foreground font-medium"
                   : "border-border/60 text-muted-foreground hover:bg-muted/60",
               )}
             >
@@ -147,7 +147,7 @@ export function StorageBrowser({ buckets }: { buckets: BucketInfo[] }) {
                 <Badge variant={SENSITIVITY_BADGE[bucket.sensitivity].variant}>
                   {SENSITIVITY_BADGE[bucket.sensitivity].label}
                 </Badge>
-                <span className="text-sm text-muted-foreground">{bucket.description}</span>
+                <span className="text-muted-foreground text-sm">{bucket.description}</span>
               </div>
               <Button
                 variant="outline"
@@ -167,17 +167,17 @@ export function StorageBrowser({ buckets }: { buckets: BucketInfo[] }) {
               <button
                 type="button"
                 onClick={() => setPrefix("")}
-                className="rounded px-1.5 py-0.5 font-medium hover:bg-muted/60"
+                className="hover:bg-muted/60 rounded px-1.5 py-0.5 font-medium"
               >
                 {bucket.label}
               </button>
               {segments.map((seg, i) => (
                 <span key={i} className="flex items-center gap-1">
-                  <ChevronRight className="h-3.5 w-3.5 text-muted-foreground" />
+                  <ChevronRight className="text-muted-foreground h-3.5 w-3.5" />
                   <button
                     type="button"
                     onClick={() => setPrefix(crumbTo(i))}
-                    className="rounded px-1.5 py-0.5 hover:bg-muted/60"
+                    className="hover:bg-muted/60 rounded px-1.5 py-0.5"
                   >
                     {seg}
                   </button>
@@ -186,7 +186,7 @@ export function StorageBrowser({ buckets }: { buckets: BucketInfo[] }) {
             </nav>
 
             {error && (
-              <div className="rounded-md border border-destructive/40 bg-destructive-bg px-3 py-2 text-sm text-destructive">
+              <div className="border-destructive/40 bg-destructive-bg text-destructive rounded-md border px-3 py-2 text-sm">
                 {error}
               </div>
             )}
@@ -206,7 +206,7 @@ export function StorageBrowser({ buckets }: { buckets: BucketInfo[] }) {
                 <TableBody>
                   {prefixes.length === 0 && objects.length === 0 && !pending && (
                     <TableRow>
-                      <TableCell colSpan={4} className="text-sm text-muted-foreground">
+                      <TableCell colSpan={4} className="text-muted-foreground text-sm">
                         {t("web.admin.storage.empty")}
                       </TableCell>
                     </TableRow>
@@ -220,12 +220,12 @@ export function StorageBrowser({ buckets }: { buckets: BucketInfo[] }) {
                     >
                       <TableCell className="font-medium">
                         <span className="inline-flex items-center gap-2">
-                          <Folder className="h-4 w-4 text-muted-foreground" />
+                          <Folder className="text-muted-foreground h-4 w-4" />
                           {prefixLeaf(p)}/
                         </span>
                       </TableCell>
-                      <TableCell className="text-right text-muted-foreground">—</TableCell>
-                      <TableCell className="text-right text-muted-foreground">—</TableCell>
+                      <TableCell className="text-muted-foreground text-right">—</TableCell>
+                      <TableCell className="text-muted-foreground text-right">—</TableCell>
                       <TableCell />
                     </TableRow>
                   ))}
@@ -234,14 +234,14 @@ export function StorageBrowser({ buckets }: { buckets: BucketInfo[] }) {
                     <TableRow key={`o:${o.key}`}>
                       <TableCell>
                         <span className="inline-flex items-center gap-2">
-                          <File className="h-4 w-4 text-muted-foreground" />
+                          <File className="text-muted-foreground h-4 w-4" />
                           <span className="font-mono text-xs">{objectLeaf(o.key, prefix)}</span>
                         </span>
                       </TableCell>
-                      <TableCell className="text-right text-xs text-muted-foreground">
+                      <TableCell className="text-muted-foreground text-right text-xs">
                         {humanSize(o.size)}
                       </TableCell>
-                      <TableCell className="text-right text-xs text-muted-foreground">
+                      <TableCell className="text-muted-foreground text-right text-xs">
                         {o.lastModified ? new Date(o.lastModified).toLocaleString() : "—"}
                       </TableCell>
                       <TableCell>

@@ -25,14 +25,14 @@ export function AgendaList({
   t: TFunction;
 }) {
   return (
-    <ul className="divide-y overflow-hidden rounded-lg border bg-card shadow-brand-sm">
+    <ul className="bg-card shadow-brand-sm divide-y overflow-hidden rounded-lg border">
       {events.map((e) => {
         const style = styleFor(e.status);
         return (
           <li key={e.id}>
             <Link
               href={e.href}
-              className="group flex items-center gap-3 px-3 py-3 transition-colors hover:bg-muted/50 sm:gap-4 sm:px-4"
+              className="group hover:bg-muted/50 flex items-center gap-3 px-3 py-3 transition-colors sm:gap-4 sm:px-4"
             >
               <span aria-hidden className={cn("h-10 w-1 shrink-0 rounded-full", style.dot)} />
               <div className="min-w-0 flex-1 space-y-1">
@@ -53,12 +53,12 @@ export function AgendaList({
                 </div>
                 <div className="truncate">{e.title}</div>
               </div>
-              <span className="shrink-0 text-sm tabular-nums text-muted-foreground">
+              <span className="text-muted-foreground shrink-0 text-sm tabular-nums">
                 {t("web.dashboard.home.schedule.durationMin", { count: e.durationMinutes })}
               </span>
               <ChevronRight
                 aria-hidden
-                className="h-4 w-4 shrink-0 text-muted-foreground transition-colors group-hover:text-foreground"
+                className="text-muted-foreground group-hover:text-foreground h-4 w-4 shrink-0 transition-colors"
               />
             </Link>
           </li>

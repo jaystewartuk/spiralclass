@@ -154,7 +154,7 @@ function ReactionPills({
               emoji: reaction.emoji,
             })}
             className={cn(
-              "h-7 rounded-full bg-card px-2 text-base leading-none shadow-brand-sm lg:h-7",
+              "bg-card shadow-brand-sm h-7 rounded-full px-2 text-base leading-none lg:h-7",
               mine && "border-primary",
             )}
           >
@@ -245,9 +245,9 @@ export const MessageBubble = memo(function MessageBubble({
       onClick={handleToggleSelected}
       aria-label={t("chat.select")}
       aria-pressed={selected}
-      className="shrink-0 self-center text-muted-foreground"
+      className="text-muted-foreground shrink-0 self-center"
     >
-      {selected ? <CheckSquare className="h-5 w-5 text-primary" /> : <Square className="h-5 w-5" />}
+      {selected ? <CheckSquare className="text-primary h-5 w-5" /> : <Square className="h-5 w-5" />}
     </Button>
   ) : null;
 
@@ -298,7 +298,7 @@ export const MessageBubble = memo(function MessageBubble({
                   </Button>
                 ))}
               </div>
-              <div className="-mx-1 mb-1 border-t border-border" />
+              <div className="border-border -mx-1 mb-1 border-t" />
               <ChatMenuItem
                 icon={<Smile className="h-4 w-4" />}
                 label={t("chat.react.more")}
@@ -361,7 +361,7 @@ export const MessageBubble = memo(function MessageBubble({
   let content: React.ReactNode;
   if (message.deletedAt) {
     content = (
-      <p className="flex items-center gap-1.5 text-muted-foreground">
+      <p className="text-muted-foreground flex items-center gap-1.5">
         <Ban className="h-4 w-4 shrink-0" aria-hidden />
         {fromMe ? t("chat.deleted.byMe") : t("chat.deleted.byThem")}
       </p>
@@ -404,7 +404,7 @@ export const MessageBubble = memo(function MessageBubble({
     content = (
       <p
         className={cn(
-          "whitespace-pre-wrap break-words",
+          "break-words whitespace-pre-wrap",
           jumboEmoji ? "text-4xl leading-tight" : "text-base",
         )}
       >
@@ -427,7 +427,7 @@ export const MessageBubble = memo(function MessageBubble({
       {selectionMode && !fromMe && checkbox}
       {fromMe && actions}
       <div
-        className={cn("min-w-0 max-w-bubble", selectionMode && "cursor-pointer")}
+        className={cn("max-w-bubble min-w-0", selectionMode && "cursor-pointer")}
         onClick={rowClick}
       >
         {startsRun && <p className="sr-only">{fromMe ? t("chat.you") : peerName}</p>}
@@ -438,11 +438,11 @@ export const MessageBubble = memo(function MessageBubble({
               : cn(
                   bubbleCorners(fromMe, startsRun, endsRun),
                   message.deletedAt
-                    ? "border border-border bg-muted text-muted-foreground"
+                    ? "border-border bg-muted text-muted-foreground border"
                     : bubbleSurface(fromMe, !isMedia),
                   isMedia ? "max-w-attachment overflow-hidden p-1" : "px-3.5 py-2.5",
                 ),
-            selected && "ring-3 ring-ring ring-offset-2 ring-offset-background",
+            selected && "ring-ring ring-offset-background ring-3 ring-offset-2",
             pending && "opacity-70",
           )}
         >
@@ -463,7 +463,7 @@ export const MessageBubble = memo(function MessageBubble({
             body text it used to sit beside at the same size. */}
         <p
           className={cn(
-            "mt-1 flex items-center gap-1.5 text-sm text-muted-foreground",
+            "text-muted-foreground mt-1 flex items-center gap-1.5 text-sm",
             fromMe ? "justify-end" : "justify-start",
             !endsRun && "sr-only",
           )}

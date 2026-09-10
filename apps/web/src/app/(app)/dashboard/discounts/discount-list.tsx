@@ -108,8 +108,8 @@ function UsageBar({ used, max }: { used: number; max: number }) {
   // token bypass, and a percentage cannot be a utility class.
   const width = `${pct}%`;
   return (
-    <div className="h-1 w-full max-w-xs overflow-hidden rounded-full bg-muted" aria-hidden>
-      <div className="h-full rounded-full bg-primary" style={{ width }} />
+    <div className="bg-muted h-1 w-full max-w-xs overflow-hidden rounded-full" aria-hidden>
+      <div className="bg-primary h-full rounded-full" style={{ width }} />
     </div>
   );
 }
@@ -199,7 +199,7 @@ function DiscountRowView({ row, ctx }: { row: DiscountRow; ctx: ListContext }) {
           )}
         </div>
 
-        <p className="text-sm text-muted-foreground">
+        <p className="text-muted-foreground text-sm">
           {meta.map((part, i) => (
             <span key={part}>
               {/* Decoration, not something to announce. */}
@@ -266,7 +266,7 @@ export function DiscountGroup({
       </Heading>
       <Card className={cn(muted && "bg-muted/40 shadow-none")}>
         <CardContent className="p-0">
-          <ul className="divide-y divide-border">
+          <ul className="divide-border divide-y">
             {rows.map((row) => (
               <DiscountRowView key={row.id} row={row} ctx={ctx} />
             ))}

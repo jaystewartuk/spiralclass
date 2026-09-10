@@ -33,14 +33,14 @@ export function DuplicateMergeCard({ pairs }: { pairs: DuplicatePairDisplay[] })
   if (pairs.length === 0) return null;
 
   return (
-    <section className="space-y-3 rounded-md border border-warning/40 bg-warning-bg p-4">
+    <section className="border-warning/40 bg-warning-bg space-y-3 rounded-md border p-4">
       <div>
-        <h2 className="text-sm font-semibold text-warning">
+        <h2 className="text-warning text-sm font-semibold">
           {pairs.length === 1
             ? t("web.dashboard.students.duplicate.titleOne")
             : t("web.dashboard.students.duplicate.titleMany")}
         </h2>
-        <p className="text-xs text-warning">{t("web.dashboard.students.duplicate.body")}</p>
+        <p className="text-warning text-xs">{t("web.dashboard.students.duplicate.body")}</p>
       </div>
       <ul className="space-y-3">
         {pairs.map((pair) => (
@@ -78,10 +78,10 @@ function DuplicatePairRow({ pair, t }: { pair: DuplicatePairDisplay; t: TFunctio
           </Badge>
         )}
       </div>
-      <div className="truncate text-xs text-muted-foreground">
+      <div className="text-muted-foreground truncate text-xs">
         {s.email ?? t("web.dashboard.students.noEmail")}
       </div>
-      <div className="text-sm text-muted-foreground">
+      <div className="text-muted-foreground text-sm">
         {t("web.dashboard.students.duplicate.packageCount", { count: s.packageCount })}
         {s.hasLogin && <> · {t("web.dashboard.students.duplicate.hasSignedIn")}</>}
       </div>
@@ -89,8 +89,8 @@ function DuplicatePairRow({ pair, t }: { pair: DuplicatePairDisplay; t: TFunctio
   );
 
   return (
-    <li className="rounded-md border border-warning/30 bg-card p-3">
-      <div className="mb-2 text-sm text-muted-foreground">{reasonCopy(pair.reason, t)}</div>
+    <li className="border-warning/30 bg-card rounded-md border p-3">
+      <div className="text-muted-foreground mb-2 text-sm">{reasonCopy(pair.reason, t)}</div>
       <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
         {side(pair.keep, true)}
         {side(pair.merge, false)}
@@ -112,12 +112,12 @@ function DuplicatePairRow({ pair, t }: { pair: DuplicatePairDisplay; t: TFunctio
         </form>
       </div>
       {state?.error && (
-        <p role="alert" className="mt-2 text-xs text-destructive">
+        <p role="alert" className="text-destructive mt-2 text-xs">
           {state.error}
         </p>
       )}
       {state?.ok && (
-        <p role="status" className="mt-2 text-xs text-success">
+        <p role="status" className="text-success mt-2 text-xs">
           {state.ok}
         </p>
       )}

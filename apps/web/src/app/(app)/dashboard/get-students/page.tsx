@@ -143,7 +143,7 @@ export default async function GetStudentsPage() {
               </Heading>
               <Card>
                 <CardContent className="p-0">
-                  <ul className="divide-y divide-border">
+                  <ul className="divide-border divide-y">
                     {rest.map((item) => (
                       <ActionRow key={item.id} item={item} />
                     ))}
@@ -191,7 +191,7 @@ export default async function GetStudentsPage() {
               </Heading>
               <Card>
                 <CardContent className="p-0">
-                  <ul className="divide-y divide-border">
+                  <ul className="divide-border divide-y">
                     {settled.map((item) => (
                       <DoneRow key={item.id} item={item} />
                     ))}

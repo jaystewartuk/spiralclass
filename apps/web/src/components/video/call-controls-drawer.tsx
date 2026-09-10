@@ -54,8 +54,8 @@ export function CallControlsDrawer({ children }: { children: ReactNode }) {
                 // the only call chrome left on screen. A faint 15%-white sliver
                 // floating over a material reads as an artifact; this reads as a
                 // handle.
-                "h-7 w-20 border border-overlay-3 bg-scrim-2 backdrop-blur-md hover:bg-scrim-3"
-              : "h-[22px] w-11 bg-overlay-1 hover:bg-overlay-2",
+                "border-overlay-3 bg-scrim-2 hover:bg-scrim-3 h-7 w-20 border backdrop-blur-md"
+              : "bg-overlay-1 hover:bg-overlay-2 h-[22px] w-11",
           )}
         >
           {collapsed ? (

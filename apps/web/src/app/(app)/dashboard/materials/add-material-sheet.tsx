@@ -49,7 +49,7 @@ export function AddMaterialFlow({
   if (saved) {
     return (
       <div className="space-y-4">
-        <p className="text-sm font-medium text-success">{t("web.materials.success.title")}</p>
+        <p className="text-success text-sm font-medium">{t("web.materials.success.title")}</p>
         <div className="flex flex-col gap-2">
           <Button type="button" variant="secondary" onClick={onViewMaterial}>
             {t("web.materials.success.viewMaterial")}

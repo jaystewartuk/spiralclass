@@ -88,7 +88,7 @@ export function ReplayViewer({
           </CardHeader>
           <CardContent className="space-y-2 text-sm">
             <p className="whitespace-pre-wrap">{summary.body}</p>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-muted-foreground text-xs">
               {t("web.dashboard.classes.summary.generated")}
               {summary.generatedAt}
             </p>
@@ -117,7 +117,7 @@ export function ReplayViewer({
               />
             )
           ) : (
-            <p className="text-sm text-muted-foreground">
+            <p className="text-muted-foreground text-sm">
               {t("web.dashboard.classes.replay.videoUnavailable")}
             </p>
           )}
@@ -139,11 +139,11 @@ export function ReplayViewer({
                     type="button"
                     onClick={() => b.atMs !== null && seekTo(b.atMs)}
                     disabled={!recordingUrl || b.atMs === null}
-                    className="flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs hover:bg-muted/50 disabled:cursor-default disabled:opacity-50 disabled:hover:bg-transparent"
+                    className="hover:bg-muted/50 flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs disabled:cursor-default disabled:opacity-50 disabled:hover:bg-transparent"
                   >
                     <span>{b.label}</span>
                     {b.atMs !== null && (
-                      <span className="tabular-nums text-muted-foreground">{formatMs(b.atMs)}</span>
+                      <span className="text-muted-foreground tabular-nums">{formatMs(b.atMs)}</span>
                     )}
                   </button>
                 </li>
@@ -167,7 +167,7 @@ export function ReplayViewer({
             aria-label={t("web.dashboard.classes.replay.searchPlaceholder")}
           />
           {filtered.length === 0 ? (
-            <p className="text-sm text-muted-foreground">
+            <p className="text-muted-foreground text-sm">
               {t("web.dashboard.classes.replay.noMatches")}
             </p>
           ) : (
@@ -178,7 +178,7 @@ export function ReplayViewer({
                     type="button"
                     onClick={() => seekTo(u.startMs)}
                     disabled={!recordingUrl}
-                    className="flex w-full items-start gap-2 rounded-md border-l-2 border-muted px-2 py-1.5 text-left text-sm hover:bg-muted/50 disabled:cursor-default disabled:hover:bg-transparent"
+                    className="border-muted hover:bg-muted/50 flex w-full items-start gap-2 rounded-md border-l-2 px-2 py-1.5 text-left text-sm disabled:cursor-default disabled:hover:bg-transparent"
                   >
                     <Badge
                       variant={u.speaker === "teacher" ? "default" : "secondary"}
@@ -188,13 +188,13 @@ export function ReplayViewer({
                         ? t("web.dashboard.classes.replay.speakerTeacher")
                         : t("web.dashboard.classes.replay.speakerStudent")}
                     </Badge>
-                    <span className="shrink-0 text-xs tabular-nums text-muted-foreground">
+                    <span className="text-muted-foreground shrink-0 text-xs tabular-nums">
                       {formatMs(u.startMs)}
                     </span>
                     <span className="min-w-0 flex-1">
                       {highlightSegments(u.text, query).map((seg, j) =>
                         seg.match ? (
-                          <mark key={j} className="rounded bg-warning/40 px-0.5">
+                          <mark key={j} className="bg-warning/40 rounded px-0.5">
                             {seg.text}
                           </mark>
                         ) : (

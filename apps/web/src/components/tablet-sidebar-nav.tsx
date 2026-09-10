@@ -35,7 +35,7 @@ export function TabletSidebarNav({
   return (
     <aside
       aria-label={navLabel}
-      className="fixed inset-y-0 left-0 top-14 z-30 hidden w-56 overflow-y-auto border-r border-border/60 bg-background px-2 pb-6 pt-4 desktop:block desktop-wide:hidden"
+      className="border-border/60 bg-background desktop:block desktop-wide:hidden fixed inset-y-0 top-14 left-0 z-30 hidden w-56 overflow-y-auto border-r px-2 pt-4 pb-6"
     >
       <nav className="flex flex-col">
         {groups.map((group, i) => (

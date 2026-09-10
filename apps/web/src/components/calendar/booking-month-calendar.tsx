@@ -77,7 +77,7 @@ export async function BookingMonthCalendar({
         </div>
       </div>
 
-      <div className="grid grid-cols-7 gap-1 text-center text-xs font-medium text-muted-foreground">
+      <div className="text-muted-foreground grid grid-cols-7 gap-1 text-center text-xs font-medium">
         {weekdays.map((w, i) => (
           <div key={i} className="py-1 capitalize">
             {w}
@@ -114,14 +114,14 @@ export async function BookingMonthCalendar({
                 className={cn(
                   base,
                   isSelected
-                    ? "bg-primary font-semibold text-primary-foreground"
+                    ? "bg-primary text-primary-foreground font-semibold"
                     : "text-foreground hover:bg-primary/10",
                   !g.inCurrentMonth && !isSelected && "text-muted-foreground",
                 )}
               >
                 {dayNum}
                 {!isSelected && (
-                  <span className="absolute bottom-1 h-1 w-1 rounded-full bg-primary" />
+                  <span className="bg-primary absolute bottom-1 h-1 w-1 rounded-full" />
                 )}
               </HardLink>
             );
@@ -135,7 +135,7 @@ export async function BookingMonthCalendar({
               className={cn(
                 base,
                 "text-muted-foreground/40",
-                isToday && "ring-1 ring-inset ring-border",
+                isToday && "ring-border ring-1 ring-inset",
               )}
             >
               {dayNum}
@@ -144,13 +144,13 @@ export async function BookingMonthCalendar({
         })}
       </div>
 
-      <div className="flex items-center gap-3 text-xs text-muted-foreground">
+      <div className="text-muted-foreground flex items-center gap-3 text-xs">
         <span className="inline-flex items-center gap-1.5">
-          <span className="h-1.5 w-1.5 rounded-full bg-primary" />
+          <span className="bg-primary h-1.5 w-1.5 rounded-full" />
           {t("web.calendar.available")}
         </span>
         <span className="inline-flex items-center gap-1.5">
-          <span className="h-3 w-3 rounded-sm bg-primary" />
+          <span className="bg-primary h-3 w-3 rounded-sm" />
           {t("web.calendar.selected")}
         </span>
       </div>
@@ -172,7 +172,7 @@ function ChevronNav({
     return (
       <span
         aria-hidden
-        className="inline-flex h-9 w-9 items-center justify-center rounded-md text-muted-foreground/30"
+        className="text-muted-foreground/30 inline-flex h-9 w-9 items-center justify-center rounded-md"
       >
         <Icon className="h-5 w-5" />
       </span>
@@ -182,7 +182,7 @@ function ChevronNav({
     <HardLink
       href={href}
       aria-label={label}
-      className="inline-flex h-9 w-9 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted/60 hover:text-foreground"
+      className="text-muted-foreground hover:bg-muted/60 hover:text-foreground inline-flex h-9 w-9 items-center justify-center rounded-md transition-colors"
     >
       <Icon className="h-5 w-5" />
     </HardLink>

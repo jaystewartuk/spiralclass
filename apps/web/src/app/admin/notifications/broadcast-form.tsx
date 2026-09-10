@@ -21,7 +21,7 @@ export function BroadcastForm() {
   );
 
   return (
-    <details className="rounded-md border bg-muted/30 p-4">
+    <details className="bg-muted/30 rounded-md border p-4">
       <summary className="cursor-pointer text-sm font-medium">
         {t("web.admin.notifications.sendBroadcast")}
       </summary>
@@ -33,7 +33,7 @@ export function BroadcastForm() {
             name="audience"
             required
             defaultValue="teachers"
-            className="h-9 w-full rounded-md border bg-background px-2 text-sm"
+            className="bg-background h-9 w-full rounded-md border px-2 text-sm"
           >
             <option value="teachers">{t("web.admin.notifications.audienceTeachers")}</option>
             <option value="students-active">{t("web.admin.notifications.audienceStudents")}</option>
@@ -47,8 +47,8 @@ export function BroadcastForm() {
           <Label htmlFor="body">{t("web.admin.notifications.bodyLabel")}</Label>
           <Textarea id="body" name="body" required maxLength={5000} rows={8} />
         </div>
-        {state?.error && <p className="text-sm text-destructive">{state.error}</p>}
-        {state?.info && <p className="text-sm text-success">{state.info}</p>}
+        {state?.error && <p className="text-destructive text-sm">{state.error}</p>}
+        {state?.info && <p className="text-success text-sm">{state.info}</p>}
         <Button type="submit" disabled={pending}>
           {pending
             ? t("web.admin.notifications.sending")

@@ -78,7 +78,7 @@ export default async function AdminSubscriptionsPage() {
     <div className="space-y-6">
       <header>
         <PageHeader title={t("web.admin.subscriptions.title")} />
-        <p className="text-sm text-muted-foreground">{t("web.admin.subscriptions.subtitle")}</p>
+        <p className="text-muted-foreground text-sm">{t("web.admin.subscriptions.subtitle")}</p>
       </header>
 
       {otherCurrencyMrrEntries.length > 0 ? (
@@ -167,14 +167,14 @@ export default async function AdminSubscriptionsPage() {
           <CardTitle className="text-lg">{t("web.admin.subscriptions.wiseRenewalsDue")}</CardTitle>
         </CardHeader>
         <CardContent className="text-sm">
-          <p className="mb-3 text-muted-foreground">
+          <p className="text-muted-foreground mb-3">
             {t("web.admin.subscriptions.wiseRenewalsBody")}
           </p>
           {wiseRenewalsDue.length === 0 ? (
             <p className="text-muted-foreground">{t("web.admin.subscriptions.nothingDue")}</p>
           ) : (
             <table className="w-full text-xs">
-              <thead className="text-left text-muted-foreground">
+              <thead className="text-muted-foreground text-left">
                 <tr>
                   <th className="py-1">{t("web.admin.subscriptions.colTeacher")}</th>
                   <th>{t("web.admin.subscriptions.colPlan")}</th>
@@ -243,7 +243,7 @@ export default async function AdminSubscriptionsPage() {
                     <span>{a.ambassador}</span>
                     <span>{formatMinorUnits(a.totalPayableMinorUnits)}</span>
                   </div>
-                  <div className="text-xs text-muted-foreground">
+                  <div className="text-muted-foreground text-xs">
                     {t("web.admin.subscriptions.commissionSummary", {
                       referred: a.referredTeacherCount,
                       invoices: a.lineItems.length,
@@ -252,7 +252,7 @@ export default async function AdminSubscriptionsPage() {
                   </div>
                   {a.lineItems.length > 0 && (
                     <table className="mt-2 w-full text-xs">
-                      <thead className="text-left text-muted-foreground">
+                      <thead className="text-muted-foreground text-left">
                         <tr>
                           <th className="py-1">{t("web.admin.subscriptions.colTeacher")}</th>
                           <th>{t("web.admin.subscriptions.colPeriod")}</th>
@@ -300,11 +300,11 @@ function Stat({
   return (
     <Card>
       <CardContent className="pt-6">
-        <div className="text-xs text-muted-foreground">{label}</div>
+        <div className="text-muted-foreground text-xs">{label}</div>
         <div className={`mt-1 text-2xl font-semibold ${danger ? "text-destructive" : ""}`}>
           {value}
         </div>
-        {hint ? <div className="mt-1 text-xs text-muted-foreground">{hint}</div> : null}
+        {hint ? <div className="text-muted-foreground mt-1 text-xs">{hint}</div> : null}
       </CardContent>
     </Card>
   );

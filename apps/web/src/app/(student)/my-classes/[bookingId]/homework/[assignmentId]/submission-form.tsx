@@ -175,15 +175,15 @@ export function SubmissionForm({
       </CardHeader>
       <CardContent className="space-y-4">
         {submittedAt && (
-          <p className="text-sm text-muted-foreground">
+          <p className="text-muted-foreground text-sm">
             {t("homework.detail.submittedAt", { date: submittedAt })}
           </p>
         )}
 
         {!canEdit ? (
           <>
-            <p className="text-sm text-muted-foreground">{t("homework.detail.locked")}</p>
-            {text.trim() && <p className="whitespace-pre-line text-sm">{text}</p>}
+            <p className="text-muted-foreground text-sm">{t("homework.detail.locked")}</p>
+            {text.trim() && <p className="text-sm whitespace-pre-line">{text}</p>}
           </>
         ) : (
           <div className="space-y-2">
@@ -204,7 +204,7 @@ export function SubmissionForm({
         <div className="space-y-2">
           <p className="text-sm font-medium">{t("homework.detail.attachments")}</p>
           {files.length === 0 ? (
-            <p className="text-sm text-muted-foreground">{t("homework.detail.noFiles")}</p>
+            <p className="text-muted-foreground text-sm">{t("homework.detail.noFiles")}</p>
           ) : (
             <ul className="space-y-2">
               {files.map((f) => (
@@ -213,7 +213,7 @@ export function SubmissionForm({
                   className="flex items-center justify-between gap-3 rounded-md border px-3 py-2 text-sm"
                 >
                   <span className="flex min-w-0 items-center gap-2">
-                    <Paperclip className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden />
+                    <Paperclip className="text-muted-foreground h-4 w-4 shrink-0" aria-hidden />
                     {f.viewUrl ? (
                       <a
                         href={f.viewUrl}
@@ -279,13 +279,13 @@ export function SubmissionForm({
           )}
         </div>
 
-        {lateWarning && <p className="text-sm text-warning">{t("homework.detail.lateWarning")}</p>}
+        {lateWarning && <p className="text-warning text-sm">{t("homework.detail.lateWarning")}</p>}
         {pastDue && !allowLateSubmission && !submittedAt && (
-          <p className="text-sm text-muted-foreground">{t("homework.detail.pastDue")}</p>
+          <p className="text-muted-foreground text-sm">{t("homework.detail.pastDue")}</p>
         )}
-        {error && <p className="text-sm text-destructive">{t(error)}</p>}
+        {error && <p className="text-destructive text-sm">{t(error)}</p>}
         {notice && !error && (
-          <p role="status" className="text-sm text-success">
+          <p role="status" className="text-success text-sm">
             {t(notice)}
           </p>
         )}

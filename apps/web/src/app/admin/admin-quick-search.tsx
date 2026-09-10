@@ -95,8 +95,8 @@ export function AdminQuickSearch() {
   return (
     <div ref={containerRef} className="relative">
       {open ? (
-        <div className="flex items-center gap-1 rounded-md border bg-background px-2">
-          <Search className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden />
+        <div className="bg-background flex items-center gap-1 rounded-md border px-2">
+          <Search className="text-muted-foreground h-4 w-4 shrink-0" aria-hidden />
           <input
             ref={inputRef}
             type="search"
@@ -109,13 +109,13 @@ export function AdminQuickSearch() {
             onChange={(e) => setQuery(e.target.value)}
             onKeyDown={onKeyDown}
             placeholder={t("web.admin.quickSearch.placeholder")}
-            className="h-9 w-56 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
+            className="placeholder:text-muted-foreground h-9 w-56 bg-transparent text-sm outline-none"
           />
           <button
             type="button"
             aria-label={t("web.admin.quickSearch.close")}
             onClick={close}
-            className="rounded p-1 text-muted-foreground hover:bg-muted/60"
+            className="text-muted-foreground hover:bg-muted/60 rounded p-1"
           >
             <X className="h-3.5 w-3.5" aria-hidden />
           </button>
@@ -128,16 +128,16 @@ export function AdminQuickSearch() {
             setOpen(true);
             requestAnimationFrame(() => inputRef.current?.focus());
           }}
-          className="inline-flex h-9 w-9 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted/60 hover:text-foreground"
+          className="text-muted-foreground hover:bg-muted/60 hover:text-foreground inline-flex h-9 w-9 items-center justify-center rounded-md transition-colors"
         >
           <Search className="h-4 w-4" aria-hidden />
         </button>
       )}
 
       {open && query.trim() ? (
-        <div className="absolute right-0 top-full z-20 mt-2 w-72 rounded-md border bg-popover p-2 text-popover-foreground shadow-md">
+        <div className="bg-popover text-popover-foreground absolute top-full right-0 z-20 mt-2 w-72 rounded-md border p-2 shadow-md">
           {loading ? (
-            <p className="px-2 py-1.5 text-xs text-muted-foreground">
+            <p className="text-muted-foreground px-2 py-1.5 text-xs">
               {t("web.admin.quickSearch.searching")}
             </p>
           ) : hasResults ? (
@@ -153,7 +153,7 @@ export function AdminQuickSearch() {
                 return (
                   <li key={`${result.hrefBase}-${result.id}`} role="presentation">
                     {showGroupLabel ? (
-                      <div className="px-2 pb-1 text-sm font-semibold text-muted-foreground">
+                      <div className="text-muted-foreground px-2 pb-1 text-sm font-semibold">
                         {result.groupLabel}
                       </div>
                     ) : null}
@@ -172,14 +172,14 @@ export function AdminQuickSearch() {
                       )}
                     >
                       <div className="font-medium">{result.name}</div>
-                      <div className="text-xs text-muted-foreground">{result.email}</div>
+                      <div className="text-muted-foreground text-xs">{result.email}</div>
                     </div>
                   </li>
                 );
               })}
             </ul>
           ) : (
-            <p className="px-2 py-1.5 text-xs text-muted-foreground">
+            <p className="text-muted-foreground px-2 py-1.5 text-xs">
               {t("web.admin.quickSearch.noMatches")}
             </p>
           )}

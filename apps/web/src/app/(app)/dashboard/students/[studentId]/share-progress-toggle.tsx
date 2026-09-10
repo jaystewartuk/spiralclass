@@ -42,7 +42,7 @@ export function ShareProgressToggle({ studentId, shared }: { studentId: string; 
         {on ? t("web.studentProfile.shared") : t("web.studentProfile.share")}
       </Button>
       {error && (
-        <p role="alert" className="text-sm text-destructive">
+        <p role="alert" className="text-destructive text-sm">
           {error}
         </p>
       )}

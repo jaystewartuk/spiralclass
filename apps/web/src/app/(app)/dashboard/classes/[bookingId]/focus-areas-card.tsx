@@ -113,11 +113,11 @@ export function FocusAreasCard({
         <CardDescription>{t("insights.help")}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        {error && <p className="text-sm text-destructive">{error}</p>}
+        {error && <p className="text-destructive text-sm">{error}</p>}
 
         {grouped.map(({ category, items }) => (
           <div key={category} className="space-y-2">
-            <h4 className="text-sm font-medium text-muted-foreground">
+            <h4 className="text-muted-foreground text-sm font-medium">
               {t(CATEGORY_LABEL_KEY[category])}
             </h4>
             <ul className="space-y-3">
@@ -182,7 +182,7 @@ function ReviewRow({
   const [skill, setSkill] = useState(item.skill || suggestSkill(item.category, item.summary));
 
   return (
-    <li className="space-y-1 border-l-2 border-muted pl-3 text-sm">
+    <li className="border-muted space-y-1 border-l-2 pl-3 text-sm">
       <div className="flex items-center gap-2">
         <p className="font-medium">{item.summary}</p>
         {item.confirmed && <Badge variant="secondary">{`✓ ${t("insights.confirmed")}`}</Badge>}
@@ -202,7 +202,7 @@ function ReviewRow({
           <>
             <select
               aria-label={t("web.dashboard.classes.focusAreas.skill")}
-              className="h-8 rounded-md border border-input bg-background px-2 text-xs"
+              className="border-input bg-background h-8 rounded-md border px-2 text-xs"
               value={skill}
               onChange={(e) => setSkill(e.target.value)}
             >
@@ -269,7 +269,7 @@ function EditRow({
   }
 
   return (
-    <li className="space-y-2 border-l-2 border-primary pl-3 text-sm">
+    <li className="border-primary space-y-2 border-l-2 pl-3 text-sm">
       <Textarea
         value={summary}
         onChange={(e) => {
@@ -289,7 +289,7 @@ function EditRow({
       <div className="flex flex-wrap gap-2">
         <select
           aria-label={t("web.dashboard.classes.focusAreas.category")}
-          className="h-8 rounded-md border border-input bg-background px-2 text-xs"
+          className="border-input bg-background h-8 rounded-md border px-2 text-xs"
           value={category}
           onChange={(e) => setCategory(e.target.value as InsightCategory)}
         >
@@ -301,7 +301,7 @@ function EditRow({
         </select>
         <select
           aria-label={t("web.dashboard.classes.focusAreas.skill")}
-          className="h-8 rounded-md border border-input bg-background px-2 text-xs"
+          className="border-input bg-background h-8 rounded-md border px-2 text-xs"
           value={skill}
           onChange={(e) => setSkill(e.target.value)}
         >
@@ -367,7 +367,7 @@ function AddRow({
       <p className="font-medium">{t("web.dashboard.classes.focusAreas.addTitle")}</p>
       <select
         aria-label={t("web.dashboard.classes.focusAreas.category")}
-        className="h-8 rounded-md border border-input bg-background px-2 text-xs"
+        className="border-input bg-background h-8 rounded-md border px-2 text-xs"
         value={category}
         onChange={(e) => setCategory(e.target.value as InsightCategory)}
       >

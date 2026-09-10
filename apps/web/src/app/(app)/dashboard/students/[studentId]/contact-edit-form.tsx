@@ -101,7 +101,7 @@ export function ContactEditForm({
           defaultValue={initialEmail ?? ""}
           disabled={emailLocked}
         />
-        <p className="text-xs text-muted-foreground">
+        <p className="text-muted-foreground text-xs">
           {emailLocked
             ? t("web.dashboard.students.contact.emailLockedHint")
             : t("web.dashboard.students.contact.emailHint")}

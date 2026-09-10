@@ -21,13 +21,13 @@ export async function MarketingHeader({
       <div className="flex items-center gap-4 text-sm">
         <Link
           href="/features"
-          className="hidden text-muted-foreground transition-colors hover:text-foreground sm:inline"
+          className="text-muted-foreground hover:text-foreground hidden transition-colors sm:inline"
         >
           {t("web.landing.nav.features")}
         </Link>
         <Link
           href="/pricing"
-          className="hidden text-muted-foreground transition-colors hover:text-foreground sm:inline"
+          className="text-muted-foreground hover:text-foreground hidden transition-colors sm:inline"
         >
           {t("web.landing.nav.pricing")}
         </Link>

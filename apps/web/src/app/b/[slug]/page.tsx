@@ -529,7 +529,7 @@ export default async function BookingLandingPage({
                 ? teacher.headline
                 : t("web.bookingLanding.classesWith", { name: teacher.name })}
             </Heading>
-            <p className="text-sm text-muted-foreground">{t("web.bookingLanding.tagline")}</p>
+            <p className="text-muted-foreground text-sm">{t("web.bookingLanding.tagline")}</p>
           </div>
           {photoUrl ? (
             <Image
@@ -545,20 +545,20 @@ export default async function BookingLandingPage({
             // and looks intentional to a student, instead of the column collapsing.
             <div
               aria-hidden
-              className="mx-auto flex h-56 w-56 items-center justify-center rounded-2xl border bg-muted shadow-sm lg:h-72 lg:w-72"
+              className="bg-muted mx-auto flex h-56 w-56 items-center justify-center rounded-2xl border shadow-sm lg:h-72 lg:w-72"
             >
-              <span className="font-display text-6xl font-semibold text-muted-foreground lg:text-7xl">
+              <span className="font-display text-muted-foreground text-6xl font-semibold lg:text-7xl">
                 {initials}
               </span>
             </div>
           )}
           {!photoUrl && isOwner && (
             // Owner-only: students never see upload prompts on the public page.
-            <p className="mx-auto max-w-xs text-xs text-muted-foreground">
+            <p className="text-muted-foreground mx-auto max-w-xs text-xs">
               {t("web.bookingLanding.ownerOnlyPrefix")}
               <Link
                 href="/settings/booking-page"
-                className="font-medium text-foreground underline underline-offset-2 hover:text-primary"
+                className="text-foreground hover:text-primary font-medium underline underline-offset-2"
               >
                 {t("web.bookingLanding.addProfilePhoto")}
               </Link>
@@ -607,7 +607,7 @@ export default async function BookingLandingPage({
             />
           )}
           {teacher.bio?.trim() && (
-            <p className="mx-auto max-w-prose whitespace-pre-line text-base text-foreground/80">
+            <p className="text-foreground/80 mx-auto max-w-prose text-base whitespace-pre-line">
               {teacher.bio.trim()}
             </p>
           )}
@@ -660,7 +660,7 @@ export default async function BookingLandingPage({
                       <h3 className="text-sm font-medium">
                         {t("web.bookingLanding.packagesHeading")}
                       </h3>
-                      <p className="text-xs text-muted-foreground">
+                      <p className="text-muted-foreground text-xs">
                         {t("web.bookingLanding.packagesHint")}
                       </p>
                     </div>
@@ -672,8 +672,8 @@ export default async function BookingLandingPage({
                           href={`/b/${slug}/buy?package=${pkg.id}`}
                           className={
                             pkg.id === bestValueId
-                              ? "flex items-center justify-between gap-3 rounded-md border-2 border-primary bg-background p-3 text-sm transition-colors hover:bg-muted/40"
-                              : "flex items-center justify-between gap-3 rounded-md border bg-background p-3 text-sm transition-colors hover:bg-muted/40"
+                              ? "border-primary bg-background hover:bg-muted/40 flex items-center justify-between gap-3 rounded-md border-2 p-3 text-sm transition-colors"
+                              : "bg-background hover:bg-muted/40 flex items-center justify-between gap-3 rounded-md border p-3 text-sm transition-colors"
                           }
                         >
                           <span className="min-w-0">
@@ -683,7 +683,7 @@ export default async function BookingLandingPage({
                                 {t("web.bookingLanding.bestValue")}
                               </Badge>
                             )}
-                            <span className="block text-xs text-muted-foreground lg:ml-2 lg:inline">
+                            <span className="text-muted-foreground block text-xs lg:ml-2 lg:inline">
                               {isOneClassOffering(pkg)
                                 ? t("web.bookingLanding.singleClassDuration", {
                                     min: pkg.classDurationMin,
@@ -694,7 +694,7 @@ export default async function BookingLandingPage({
                                   })}
                             </span>
                           </span>
-                          <span className="shrink-0 whitespace-nowrap text-right">
+                          <span className="shrink-0 text-right whitespace-nowrap">
                             <span className="block font-semibold tabular-nums">
                               {formatPriceForBuyer(pkg.priceMinorUnits, pkg.currency, funnelLocale)}
                             </span>
@@ -712,7 +712,7 @@ export default async function BookingLandingPage({
                                 approximation has to touch the number it
                                 approximates. */}
                             {approxUsdCentsFor(pkg.priceMinorUnits, pkg.currency) !== null && (
-                              <span className="block text-xs tabular-nums text-muted-foreground">
+                              <span className="text-muted-foreground block text-xs tabular-nums">
                                 {t("web.buyFlow.approxPrice", {
                                   price: formatPriceForBuyer(
                                     approxUsdCentsFor(pkg.priceMinorUnits, pkg.currency)!,
@@ -727,7 +727,7 @@ export default async function BookingLandingPage({
                                 student compare two packages without doing the
                                 division herself. */}
                             {pkg.classCount > 1 && (
-                              <span className="block text-xs tabular-nums text-muted-foreground">
+                              <span className="text-muted-foreground block text-xs tabular-nums">
                                 {t("web.bookingLanding.perClass", {
                                   price: formatPriceForBuyer(
                                     Math.round(pkg.priceMinorUnits / pkg.classCount),
@@ -751,7 +751,7 @@ export default async function BookingLandingPage({
                   <div className="border-t pt-4 text-center">
                     {hasStudentSession ? (
                       <div className="space-y-3">
-                        <p className="text-sm text-muted-foreground">
+                        <p className="text-muted-foreground text-sm">
                           {t("web.bookingLanding.signedInWaiting")}
                         </p>
                         <Button asChild variant="outline" className="w-full">
@@ -759,7 +759,7 @@ export default async function BookingLandingPage({
                         </Button>
                       </div>
                     ) : (
-                      <p className="text-sm text-muted-foreground">
+                      <p className="text-muted-foreground text-sm">
                         {t("web.bookingLanding.haveAccountSignIn")}{" "}
                         <Link
                           href="/sign-in"
@@ -810,7 +810,7 @@ export default async function BookingLandingPage({
             )}
           </Card>
 
-          <footer className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-xs text-muted-foreground">
+          <footer className="text-muted-foreground flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-xs">
             <span className="inline-flex items-center gap-1">
               <ShieldCheck className="h-3.5 w-3.5" aria-hidden />
               {t("web.bookingLanding.instantConfirmation")}
@@ -852,7 +852,7 @@ export default async function BookingLandingPage({
               cannot weigh a mark whose meaning they have to guess, and a page
               with no verified quotes has nothing to say here. */}
           {teacher.testimonials.some((x) => x.source === "student_submitted") && (
-            <p className="mx-auto max-w-2xl text-center text-xs text-muted-foreground">
+            <p className="text-muted-foreground mx-auto max-w-2xl text-center text-xs">
               {t("web.bookingLanding.verifiedExplainer", { name: teacher.name })}
             </p>
           )}
@@ -873,7 +873,7 @@ export default async function BookingLandingPage({
                 <li key={testimonial.id}>
                   <Card className="h-full">
                     <CardContent className="space-y-3 pt-6">
-                      <Quote className="h-5 w-5 text-primary/60" aria-hidden />
+                      <Quote className="text-primary/60 h-5 w-5" aria-hidden />
                       <TestimonialBody
                         body={testimonial.body}
                         moreLabel={t("web.bookingLanding.testimonialMore")}
@@ -894,16 +894,16 @@ export default async function BookingLandingPage({
                           <p className="text-sm font-medium">
                             {testimonial.authorName}
                             {testimonial.authorNote?.trim() && (
-                              <span className="font-normal text-muted-foreground">
+                              <span className="text-muted-foreground font-normal">
                                 {" · "}
                                 {testimonial.authorNote}
                               </span>
                             )}
                           </p>
                           {verified && (
-                            <p className="mt-0.5 flex items-center gap-1 text-xs text-muted-foreground">
+                            <p className="text-muted-foreground mt-0.5 flex items-center gap-1 text-xs">
                               <ShieldCheck
-                                className="h-3.5 w-3.5 shrink-0 text-primary"
+                                className="text-primary h-3.5 w-3.5 shrink-0"
                                 aria-hidden
                               />
                               <span>
@@ -955,10 +955,10 @@ export default async function BookingLandingPage({
                   })}
                   label={t("web.bookingLanding.whatsappButton")}
                 />
-                <div className="flex items-center gap-3 text-xs text-muted-foreground">
-                  <span className="h-px flex-1 bg-border" />
+                <div className="text-muted-foreground flex items-center gap-3 text-xs">
+                  <span className="bg-border h-px flex-1" />
                   {t("web.bookingLanding.orWriteToUs")}
-                  <span className="h-px flex-1 bg-border" />
+                  <span className="bg-border h-px flex-1" />
                 </div>
               </>
             )}
@@ -975,8 +975,8 @@ export default async function BookingLandingPage({
           a footer line rather than a band because the moment SpiralClass
           competes for attention with the teacher, her page reads as a
           marketplace listing (D-24). */}
-      <footer className="mt-12 flex flex-wrap items-center justify-center gap-x-4 gap-y-1 border-t pt-6 text-xs text-muted-foreground">
-        <Link href="/" className="underline-offset-4 hover:text-foreground hover:underline">
+      <footer className="text-muted-foreground mt-12 flex flex-wrap items-center justify-center gap-x-4 gap-y-1 border-t pt-6 text-xs">
+        <Link href="/" className="hover:text-foreground underline-offset-4 hover:underline">
           {t("web.bookingLanding.poweredBy")}
         </Link>
         {/* Straight to sign-up rather than to "/" again: a teacher who reads
@@ -984,7 +984,7 @@ export default async function BookingLandingPage({
             at. Not UTM-tagged — the attribution cookie is first-touch only
             (lib/auth/middleware.ts), so a visitor who reached this page already
             has one and a tag here would record nothing. */}
-        <Link href="/sign-up" className="underline-offset-4 hover:text-foreground hover:underline">
+        <Link href="/sign-up" className="hover:text-foreground underline-offset-4 hover:underline">
           {t("web.bookingLanding.teacherPrompt")}
         </Link>
       </footer>

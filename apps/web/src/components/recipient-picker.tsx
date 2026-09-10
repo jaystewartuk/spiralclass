@@ -49,25 +49,25 @@ export function RecipientPicker({
       <div className="space-y-1">
         <Link
           href={backHref}
-          className="inline-flex items-center gap-1 text-sm text-muted-foreground transition-colors hover:text-foreground"
+          className="text-muted-foreground hover:text-foreground inline-flex items-center gap-1 text-sm transition-colors"
         >
           <ChevronLeft className="h-4 w-4" />
           {title}
         </Link>
         <PageHeader title={title} />
-        <p className="text-sm text-muted-foreground">{subtitle}</p>
+        <p className="text-muted-foreground text-sm">{subtitle}</p>
       </div>
 
       {recipients.length === 0 ? (
         <Card>
-          <CardContent className="py-16 text-center text-sm text-muted-foreground">
+          <CardContent className="text-muted-foreground py-16 text-center text-sm">
             {emptyLabel}
           </CardContent>
         </Card>
       ) : (
         <div className="space-y-4">
           <div className="relative">
-            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Search className="text-muted-foreground pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
             <Input
               type="search"
               value={query}
@@ -79,17 +79,17 @@ export function RecipientPicker({
           </div>
 
           {filtered.length === 0 ? (
-            <p className="py-8 text-center text-sm text-muted-foreground">{noMatchLabel}</p>
+            <p className="text-muted-foreground py-8 text-center text-sm">{noMatchLabel}</p>
           ) : (
             <Card>
               <CardContent className="p-0">
-                <ul className="divide-y divide-border">
+                <ul className="divide-border divide-y">
                   {filtered.map((r, i) => (
                     <li key={r.id}>
                       <Link
                         href={`${hrefBase}/${r.id}`}
                         className={cn(
-                          "flex items-center gap-3 px-4 py-3.5 transition-colors hover:bg-muted/50",
+                          "hover:bg-muted/50 flex items-center gap-3 px-4 py-3.5 transition-colors",
                           i === 0 && "rounded-t-lg",
                           i === filtered.length - 1 && "rounded-b-lg",
                         )}

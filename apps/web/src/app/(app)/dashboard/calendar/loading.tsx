@@ -37,9 +37,9 @@ export default function CalendarLoading() {
       {/* Month grid */}
       <div className="overflow-hidden rounded-lg border">
         <Skeleton className="h-10 w-full rounded-none" />
-        <div className="grid grid-cols-7 gap-px bg-border">
+        <div className="bg-border grid grid-cols-7 gap-px">
           {Array.from({ length: 35 }).map((_, i) => (
-            <Skeleton key={i} className="min-h-cell rounded-none sm:min-h-cell-lg" />
+            <Skeleton key={i} className="min-h-cell sm:min-h-cell-lg rounded-none" />
           ))}
         </div>
       </div>

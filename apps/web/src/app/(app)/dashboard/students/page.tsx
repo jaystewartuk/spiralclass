@@ -299,16 +299,16 @@ export default async function TeacherStudentsPage({
           title={t("web.dashboard.students.empty.title")}
           description={t("web.dashboard.students.empty.description")}
           action={
-            <div className="mt-2 flex w-full max-w-reading flex-col items-center gap-3">
+            <div className="max-w-reading mt-2 flex w-full flex-col items-center gap-3">
               <Button asChild>
                 <Link href="/dashboard/students/nuevo">
                   {t("web.dashboard.students.new.addStudent")}
                 </Link>
               </Button>
-              <p className="text-sm text-muted-foreground">
+              <p className="text-muted-foreground text-sm">
                 {t("web.dashboard.students.roster.shareLinkLabel")}
               </p>
-              <div className="w-full break-all rounded-md border bg-muted/40 px-3 py-2 font-mono text-sm">
+              <div className="bg-muted/40 w-full rounded-md border px-3 py-2 font-mono text-sm break-all">
                 {bookingUrl}
               </div>
               <CopyLinkButton value={bookingUrl} />
@@ -353,7 +353,7 @@ export default async function TeacherStudentsPage({
                 as far as the ceiling, and silence there would be a wrong answer
                 rather than a partial one. */}
             {capped && (
-              <p className="text-sm text-muted-foreground">
+              <p className="text-muted-foreground text-sm">
                 {t("web.dashboard.students.roster.capped", { limit: ROSTER_LIMIT })}
               </p>
             )}

@@ -102,7 +102,7 @@ export function AvailabilityForm({
       {redirectTo && <input type="hidden" name="redirectTo" value={redirectTo} />}
       <section className="space-y-3">
         <h2 className="font-medium">{t("web.onboarding.availability.editDaysHours")}</h2>
-        <p className="text-sm text-muted-foreground">
+        <p className="text-muted-foreground text-sm">
           {t("web.onboarding.availability.editDaysHoursHint")}
         </p>
         {rangesError && (
@@ -110,7 +110,7 @@ export function AvailabilityForm({
             id="availability-error"
             role="alert"
             aria-live="polite"
-            className="text-sm text-destructive"
+            className="text-destructive text-sm"
           >
             {rangesError}
           </p>
@@ -212,7 +212,7 @@ export function AvailabilityForm({
           id="availability-error"
           role="alert"
           aria-live="polite"
-          className="text-sm text-destructive"
+          className="text-destructive text-sm"
         >
           {state.error}
         </p>
@@ -308,7 +308,7 @@ function DayRow({
                 onClick={() => removeRange(index)}
                 aria-label={`${label} · ${t("web.onboarding.availability.removeTimeRange")}`}
               >
-                <Trash2 className="h-4 w-4 text-destructive" />
+                <Trash2 className="text-destructive h-4 w-4" />
               </Button>
             </div>
           ))}
@@ -318,7 +318,7 @@ function DayRow({
               variant="link"
               size="sm"
               onClick={addRange}
-              className="h-auto gap-1.5 px-0 text-primary no-underline hover:no-underline"
+              className="text-primary h-auto gap-1.5 px-0 no-underline hover:no-underline"
             >
               <PlusCircle className="h-4 w-4" />
               {t("web.onboarding.availability.addTimeRange")}

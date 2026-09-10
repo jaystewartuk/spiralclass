@@ -62,7 +62,7 @@ export function MaterialMetaFields({
           onChange={(e) => onLabelChange(e.target.value)}
           placeholder={t("web.materials.labelPlaceholder")}
         />
-        <p className="text-xs text-muted-foreground">{t("web.materials.nameHelp")}</p>
+        <p className="text-muted-foreground text-xs">{t("web.materials.nameHelp")}</p>
       </div>
 
       <div className="grid gap-3 lg:grid-cols-2">
@@ -99,7 +99,7 @@ export function MaterialMetaFields({
               <SelectItem value="all">{t("web.materials.visibilityAll")}</SelectItem>
             </SelectContent>
           </Select>
-          <p className="text-xs text-muted-foreground">{t("web.materials.visibilityHelp")}</p>
+          <p className="text-muted-foreground text-xs">{t("web.materials.visibilityHelp")}</p>
         </div>
       </div>
 
@@ -113,7 +113,7 @@ export function MaterialMetaFields({
           onChange={(e) => onUnitChange(e.target.value)}
           placeholder={t("web.materials.unitPlaceholder")}
         />
-        <p className="text-xs text-muted-foreground">{t("web.materials.unitHelp")}</p>
+        <p className="text-muted-foreground text-xs">{t("web.materials.unitHelp")}</p>
       </div>
 
       {focusGroups.length > 0 && (
@@ -125,7 +125,7 @@ export function MaterialMetaFields({
             selected={focusTagIds}
             onToggle={onToggleFocusTag}
           />
-          <p className="text-xs text-muted-foreground">{t("web.materials.tagsHelp")}</p>
+          <p className="text-muted-foreground text-xs">{t("web.materials.tagsHelp")}</p>
         </div>
       )}
     </div>

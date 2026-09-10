@@ -68,12 +68,12 @@ export function ResendCodeButton({
             : t("web.resend.cta")}
       </Button>
       {state?.ok && secondsLeft > 0 && (
-        <p className="mt-1 text-sm text-muted-foreground" role="status">
+        <p className="text-muted-foreground mt-1 text-sm" role="status">
           {t("web.resend.sent")}
         </p>
       )}
       {state?.error && (
-        <p role="alert" aria-live="polite" className="mt-1 text-sm text-destructive">
+        <p role="alert" aria-live="polite" className="text-destructive mt-1 text-sm">
           {state.error}
         </p>
       )}

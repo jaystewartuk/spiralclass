@@ -26,7 +26,7 @@ export default async function AdminSecurityPage() {
     <div className="mx-auto max-w-lg space-y-6">
       <header>
         <PageHeader title={t("web.admin.security.title")} />
-        <p className="text-sm text-muted-foreground">{t("web.admin.security.body")}</p>
+        <p className="text-muted-foreground text-sm">{t("web.admin.security.body")}</p>
       </header>
 
       <Card>

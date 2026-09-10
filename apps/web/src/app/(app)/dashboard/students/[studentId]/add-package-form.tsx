@@ -91,12 +91,12 @@ export function AddPackageForm({
       action={formAction}
       onSubmit={handleSubmit}
       noValidate
-      className="space-y-3 rounded-md border bg-muted/30 p-3"
+      className="bg-muted/30 space-y-3 rounded-md border p-3"
     >
       <input type="hidden" name="studentId" value={studentId} />
 
       <p className="text-sm font-medium">{t("web.dashboard.students.package.recordExisting")}</p>
-      <p className="text-xs text-muted-foreground">
+      <p className="text-muted-foreground text-xs">
         {t("web.dashboard.students.package.recordExistingHint")}
       </p>
 
@@ -106,7 +106,7 @@ export function AddPackageForm({
           <select
             id="pkg-template"
             name="templateId"
-            className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm"
+            className="border-input bg-background h-9 w-full rounded-md border px-3 text-sm"
             defaultValue=""
             onChange={(e) => applyTemplate(e.target.value)}
           >

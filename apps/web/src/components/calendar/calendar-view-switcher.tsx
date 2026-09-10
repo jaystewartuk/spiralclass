@@ -30,7 +30,7 @@ export function CalendarViewSwitcher({
   return (
     <nav
       aria-label={t("calendar.viewCta")}
-      className="flex w-full max-w-xs rounded-lg bg-muted p-1 sm:w-fit sm:max-w-none"
+      className="bg-muted flex w-full max-w-xs rounded-lg p-1 sm:w-fit sm:max-w-none"
     >
       {VIEWS.map((view) => {
         const isActive = view === active;
@@ -40,7 +40,7 @@ export function CalendarViewSwitcher({
             href={href(view)}
             aria-current={isActive ? "page" : undefined}
             className={cn(
-              "flex min-h-target flex-1 items-center justify-center rounded-md px-4 text-sm font-medium transition-colors sm:flex-none sm:px-6",
+              "min-h-target flex flex-1 items-center justify-center rounded-md px-4 text-sm font-medium transition-colors sm:flex-none sm:px-6",
               isActive
                 ? "bg-card text-foreground shadow-brand-sm"
                 : "text-muted-foreground hover:text-foreground",

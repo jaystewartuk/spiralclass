@@ -58,7 +58,7 @@ export function StudentLevelForm({
             ))}
           </SelectContent>
         </Select>
-        <p className="text-xs text-muted-foreground">{t("web.studentLevel.hint")}</p>
+        <p className="text-muted-foreground text-xs">{t("web.studentLevel.hint")}</p>
       </div>
 
       <Button type="submit" disabled={pending}>
@@ -66,12 +66,12 @@ export function StudentLevelForm({
       </Button>
 
       {state?.error && (
-        <p role="alert" className="text-sm text-destructive">
+        <p role="alert" className="text-destructive text-sm">
           {state.error}
         </p>
       )}
       {state?.ok && (
-        <p role="status" className="text-sm text-success">
+        <p role="status" className="text-success text-sm">
           {state.ok}
         </p>
       )}

@@ -24,17 +24,17 @@ export function InboxShell({ rail, children }: { rail: ReactNode; children: Reac
   const atRoot = usePathname() === INBOX_ROOT;
 
   return (
-    <div className="flex h-thread overflow-hidden">
+    <div className="h-thread flex overflow-hidden">
       {/* A plain element, not an `<aside>`: the list inside it is already a
           named `<nav>` landmark, and wrapping that in a complementary one
           would announce the same region twice under two different names. */}
       <div
         className={cn(
-          "shrink-0 border-border desktop-wide:w-rail desktop-wide:border-r",
+          "border-border desktop-wide:w-rail desktop-wide:border-r shrink-0",
           // The rule between the panes only means anything while there ARE
           // two panes — at the root on a narrow window it is a hairline down
           // the edge of the screen.
-          atRoot ? "flex w-full" : "hidden border-r desktop-wide:flex",
+          atRoot ? "flex w-full" : "desktop-wide:flex hidden border-r",
         )}
       >
         {rail}
@@ -44,7 +44,7 @@ export function InboxShell({ rail, children }: { rail: ReactNode; children: Reac
           "min-w-0 flex-1 overflow-y-auto",
           // At the root on a narrow window the list IS the screen; an empty
           // pane beside it would take half the width to say nothing.
-          atRoot && "hidden desktop-wide:block",
+          atRoot && "desktop-wide:block hidden",
         )}
       >
         {children}

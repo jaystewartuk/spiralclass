@@ -202,7 +202,7 @@ export function LeadActions({
           />
         )}
         {state?.error && (
-          <span role="alert" className="basis-full text-xs text-destructive">
+          <span role="alert" className="text-destructive basis-full text-xs">
             {state.error}
           </span>
         )}

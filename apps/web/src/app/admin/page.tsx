@@ -103,7 +103,7 @@ export default async function AdminOverviewPage() {
     <div className="space-y-6">
       <header>
         <PageHeader title={t("web.admin.overview.title")} />
-        <p className="text-sm text-muted-foreground">{t("web.admin.overview.subtitle")}</p>
+        <p className="text-muted-foreground text-sm">{t("web.admin.overview.subtitle")}</p>
       </header>
 
       <div className="grid gap-4 lg:grid-cols-2 xl:grid-cols-4">
@@ -172,16 +172,16 @@ export default async function AdminOverviewPage() {
           </CardHeader>
           <CardContent>
             {recentTeachers.length === 0 ? (
-              <p className="text-sm text-muted-foreground">{t("web.admin.overview.noneYet")}</p>
+              <p className="text-muted-foreground text-sm">{t("web.admin.overview.noneYet")}</p>
             ) : (
               <ul className="divide-y">
                 {recentTeachers.map((teacher) => (
                   <li key={teacher.id} className="flex items-center justify-between py-2 text-sm">
                     <Link href={`/admin/teachers/${teacher.id}`} className="hover:underline">
                       <div className="font-medium">{teacher.name}</div>
-                      <div className="text-xs text-muted-foreground">{teacher.email}</div>
+                      <div className="text-muted-foreground text-xs">{teacher.email}</div>
                     </Link>
-                    <span className="text-xs text-muted-foreground">
+                    <span className="text-muted-foreground text-xs">
                       {teacher.onboardingCompleteAt
                         ? t("web.admin.overview.onboarded")
                         : t("web.admin.overview.pending")}
@@ -199,7 +199,7 @@ export default async function AdminOverviewPage() {
           </CardHeader>
           <CardContent>
             {recentPayments.length === 0 ? (
-              <p className="text-sm text-muted-foreground">{t("web.admin.overview.noneYet")}</p>
+              <p className="text-muted-foreground text-sm">{t("web.admin.overview.noneYet")}</p>
             ) : (
               <ul className="divide-y">
                 {recentPayments.map((p) => (
@@ -208,7 +208,7 @@ export default async function AdminOverviewPage() {
                       <div className="truncate font-medium">
                         {p.package.student.name} → {p.package.teacher.name}
                       </div>
-                      <div className="text-xs text-muted-foreground">
+                      <div className="text-muted-foreground text-xs">
                         {p.paidAt ? new Date(p.paidAt).toLocaleString() : "-"}
                       </div>
                     </div>

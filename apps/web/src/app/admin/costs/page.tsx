@@ -114,7 +114,7 @@ export default async function AdminCostsPage() {
     <div className="space-y-6">
       <header>
         <PageHeader title={t("web.admin.costs.title")} />
-        <p className="text-sm text-muted-foreground">{t("web.admin.costs.intro")}</p>
+        <p className="text-muted-foreground text-sm">{t("web.admin.costs.intro")}</p>
       </header>
 
       {otherCurrencyEntries.length > 0 ? (
@@ -156,7 +156,7 @@ export default async function AdminCostsPage() {
             <CardTitle className="text-lg">{t("web.admin.costs.expenseChartTitle")}</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="mb-3 text-sm text-muted-foreground">
+            <p className="text-muted-foreground mb-3 text-sm">
               {t("web.admin.costs.expenseChartBody", { months: WINDOW_MONTHS })}
             </p>
             <CategoryBarChart data={expenseChart} valueFormat="minorUnits" />
@@ -167,7 +167,7 @@ export default async function AdminCostsPage() {
             <CardTitle className="text-lg">{t("web.admin.costs.netProfitChartTitle")}</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="mb-3 text-sm text-muted-foreground">
+            <p className="text-muted-foreground mb-3 text-sm">
               {t("web.admin.costs.netProfitChartBody")}
             </p>
             <CategoryBarChart data={netProfitChart} valueFormat="minorUnits" />

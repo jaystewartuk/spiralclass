@@ -80,14 +80,14 @@ export default async function AboutPage() {
   return (
     <PageShell width="wide">
       <header className="text-center">
-        <p className="inline-flex items-center gap-1.5 rounded-full border bg-muted/30 px-3 py-1 text-xs font-medium text-muted-foreground">
+        <p className="bg-muted/30 text-muted-foreground inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-medium">
           <Sparkles className="h-3.5 w-3.5" aria-hidden />
           {t("web.about.eyebrow")}
         </p>
-        <Heading level={1} className="mt-4 lg:text-display">
+        <Heading level={1} className="lg:text-display mt-4">
           {t("web.about.headline")}
         </Heading>
-        <p className="mx-auto mt-4 max-w-reading text-pretty text-lg text-muted-foreground">
+        <p className="max-w-reading text-muted-foreground mx-auto mt-4 text-lg text-pretty">
           {t("web.about.sub")}
         </p>
       </header>
@@ -97,9 +97,9 @@ export default async function AboutPage() {
         <Heading level={2} className="text-center">
           {t("web.about.whoBuiltIt")}
         </Heading>
-        <div className="mx-auto mt-8 grid max-w-reading gap-6">
+        <div className="max-w-reading mx-auto mt-8 grid gap-6">
           {FOUNDERS.map((f) => (
-            <div key={f.nameEn} className="rounded-2xl border bg-card p-6 shadow-sm">
+            <div key={f.nameEn} className="bg-card rounded-2xl border p-6 shadow-sm">
               <div className="flex items-center gap-4">
                 {/* The shared avatar, not a copy of it. The copy that used to
                     live here painted its monogram fallback as `text-primary` on
@@ -114,21 +114,21 @@ export default async function AboutPage() {
                 <PersonAvatar name={en ? f.nameEn : f.nameEs} photoUrl={f.photo} size={56} />
                 <div>
                   <h3 className="font-display text-lg font-semibold">{en ? f.nameEn : f.nameEs}</h3>
-                  <p className="text-sm text-muted-foreground">{t(f.roleKey)}</p>
+                  <p className="text-muted-foreground text-sm">{t(f.roleKey)}</p>
                 </div>
               </div>
-              <p className="mt-4 text-sm leading-relaxed text-muted-foreground">{t(f.bioKey)}</p>
+              <p className="text-muted-foreground mt-4 text-sm leading-relaxed">{t(f.bioKey)}</p>
             </div>
           ))}
         </div>
       </section>
 
       {/* Why / mission */}
-      <section className="mt-14 rounded-3xl border bg-muted/20 p-8 lg:p-10">
-        <div className="mx-auto flex max-w-reading flex-col items-center gap-3 text-center">
-          <Heart className="h-6 w-6 text-primary" aria-hidden />
+      <section className="bg-muted/20 mt-14 rounded-3xl border p-8 lg:p-10">
+        <div className="max-w-reading mx-auto flex flex-col items-center gap-3 text-center">
+          <Heart className="text-primary h-6 w-6" aria-hidden />
           <Heading level={2}>{t("web.about.ourWhy.title")}</Heading>
-          <p className="text-pretty text-muted-foreground">{t("web.about.ourWhy.body")}</p>
+          <p className="text-muted-foreground text-pretty">{t("web.about.ourWhy.body")}</p>
         </div>
       </section>
 
@@ -143,18 +143,18 @@ export default async function AboutPage() {
           {TRUST_POINTS.map((p) => {
             const Icon = p.icon;
             return (
-              <div key={p.title} className="rounded-2xl border bg-card p-6 shadow-sm">
-                <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10 text-primary">
+              <div key={p.title} className="bg-card rounded-2xl border p-6 shadow-sm">
+                <div className="bg-primary/10 text-primary flex h-11 w-11 items-center justify-center rounded-xl">
                   <Icon className="h-5 w-5" aria-hidden />
                 </div>
-                <h3 className="mt-4 font-display text-h3 font-semibold">{p.title}</h3>
-                <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{p.body}</p>
+                <h3 className="font-display text-h3 mt-4 font-semibold">{p.title}</h3>
+                <p className="text-muted-foreground mt-2 text-sm leading-relaxed">{p.body}</p>
                 {"href" in p && p.href ? (
                   <a
                     href={p.href}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="mt-3 inline-block text-sm font-medium text-primary hover:underline"
+                    className="text-primary mt-3 inline-block text-sm font-medium hover:underline"
                   >
                     {p.linkLabel}
                   </a>
@@ -165,9 +165,9 @@ export default async function AboutPage() {
         </div>
       </section>
 
-      <div className="mt-14 rounded-3xl bg-primary px-6 py-14 text-center text-primary-foreground">
+      <div className="bg-primary text-primary-foreground mt-14 rounded-3xl px-6 py-14 text-center">
         <Heading level={2}>{t("web.trialBand.title")}</Heading>
-        <p className="mt-3 text-primary-foreground">{t("web.trialBand.noCard")}</p>
+        <p className="text-primary-foreground mt-3">{t("web.trialBand.noCard")}</p>
         <div className="mt-7 flex flex-col items-center gap-3 lg:flex-row lg:justify-center">
           <Button asChild size="lg" variant="secondary">
             <Link href="/sign-up">{t("web.trialBand.createAccount")}</Link>

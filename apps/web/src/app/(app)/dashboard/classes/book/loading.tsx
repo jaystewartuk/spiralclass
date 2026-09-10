@@ -51,7 +51,7 @@ export default function BookLoading() {
             ))}
           </div>
         </div>
-        <div className="space-y-4 border-t p-4 lg:col-span-3 lg:border-l lg:border-t-0 lg:p-6">
+        <div className="space-y-4 border-t p-4 lg:col-span-3 lg:border-t-0 lg:border-l lg:p-6">
           <Skeleton className="h-5 w-56" />
           <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
             {Array.from({ length: 9 }, (_, i) => (

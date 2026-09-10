@@ -138,20 +138,20 @@ export function LeadRow({ lead, ctx }: { lead: LeadItem; ctx: LeadContext }) {
             right, so a screen reader announcing it would say the name twice. */}
         <span
           aria-hidden
-          className="flex size-9 shrink-0 items-center justify-center rounded-full bg-muted text-sm font-semibold text-muted-foreground"
+          className="bg-muted text-muted-foreground flex size-9 shrink-0 items-center justify-center rounded-full text-sm font-semibold"
         >
           {initialsFrom(lead.name, lead.email)}
         </span>
 
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-            <h3 id={headingId} className="min-w-0 break-words font-semibold">
+            <h3 id={headingId} className="min-w-0 font-semibold break-words">
               {lead.name}
             </h3>
             <Badge variant={STATUS_VARIANT[lead.status]}>{statusLabel(lead.status, t)}</Badge>
             <WaitingBadge elapsed={elapsed} urgency={urgency} t={t} />
           </div>
-          <p className="break-words text-sm text-muted-foreground">
+          <p className="text-muted-foreground text-sm break-words">
             {lead.email}
             {lead.phoneE164 ? ` · ${lead.phoneE164}` : ""}
           </p>
@@ -161,7 +161,7 @@ export function LeadRow({ lead, ctx }: { lead: LeadItem; ctx: LeadContext }) {
             the visible text is the useful approximation. */}
         <time
           dateTime={lead.createdAt.toISOString()}
-          className="shrink-0 text-xs text-muted-foreground"
+          className="text-muted-foreground shrink-0 text-xs"
         >
           {arrivedLabel(elapsed, lead.createdAt, ctx)}
         </time>
@@ -215,7 +215,7 @@ export function LeadGroup({
         </CardHeader>
       ) : null}
       <CardContent className={cn("p-0", title && "border-t")}>
-        <ul className="divide-y divide-border">
+        <ul className="divide-border divide-y">
           {leads.map((lead) => (
             <li key={lead.id}>
               <LeadRow lead={lead} ctx={ctx} />

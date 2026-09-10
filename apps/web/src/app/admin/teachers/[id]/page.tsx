@@ -113,7 +113,7 @@ export default async function AdminTeacherDetailPage({
       <BackLink href="/admin/teachers" label={t("web.admin.teachers.title")} />
       <header>
         <PageHeader title={teacher.name} />
-        <p className="text-sm text-muted-foreground">
+        <p className="text-muted-foreground text-sm">
           {teacher.email} · {teacher.timezone} · {t("web.admin.teachers.slugLabel")}{" "}
           <code>{teacher.bookingSlug}</code>
         </p>
@@ -282,14 +282,14 @@ export default async function AdminTeacherDetailPage({
           {t("web.admin.teachers.activeTemplatesTitle")}
         </Heading>
         {teacher.packageTemplates.length === 0 ? (
-          <p className="text-sm text-muted-foreground">{t("web.admin.none")}</p>
+          <p className="text-muted-foreground text-sm">{t("web.admin.none")}</p>
         ) : (
           <ul className="divide-y overflow-hidden rounded-md border">
             {teacher.packageTemplates.map((tpl) => (
               <li key={tpl.id} className="flex items-center justify-between p-3 text-sm">
                 <div>
                   <div className="font-medium">{tpl.name}</div>
-                  <div className="text-xs text-muted-foreground">
+                  <div className="text-muted-foreground text-xs">
                     {tpl.classCount}× {tpl.classDurationMin}m
                     {tpl.expirationMonths
                       ? ` · ${t("web.admin.teachers.expirationMonths", { months: tpl.expirationMonths })}`
@@ -308,14 +308,14 @@ export default async function AdminTeacherDetailPage({
           {t("web.admin.teachers.recentPaymentsTitle")}
         </Heading>
         {recentPayments.length === 0 ? (
-          <p className="text-sm text-muted-foreground">{t("web.admin.none")}</p>
+          <p className="text-muted-foreground text-sm">{t("web.admin.none")}</p>
         ) : (
           <ul className="divide-y overflow-hidden rounded-md border">
             {recentPayments.map((p) => (
               <li key={p.id} className="flex items-center justify-between p-3 text-sm">
                 <div>
                   <div className="font-medium">{p.package.student.name}</div>
-                  <div className="text-xs text-muted-foreground">
+                  <div className="text-muted-foreground text-xs">
                     {new Date(p.createdAt).toLocaleString()} · {p.status}
                   </div>
                 </div>
@@ -340,14 +340,14 @@ export default async function AdminTeacherDetailPage({
           {t("web.admin.recentNotifications")}
         </Heading>
         {recentNotifications.length === 0 ? (
-          <p className="text-sm text-muted-foreground">{t("web.admin.none")}</p>
+          <p className="text-muted-foreground text-sm">{t("web.admin.none")}</p>
         ) : (
           <ul className="divide-y overflow-hidden rounded-md border">
             {recentNotifications.map((n) => (
               <li key={n.id} className="flex items-center justify-between p-3 text-sm">
                 <div>
                   <div className="font-medium">{n.templateName}</div>
-                  <div className="text-xs text-muted-foreground">
+                  <div className="text-muted-foreground text-xs">
                     {new Date(n.createdAt).toLocaleString()} · {n.channel} ·{" "}
                     {n.recipientType === "teacher"
                       ? teacher.name
@@ -370,9 +370,9 @@ export default async function AdminTeacherDetailPage({
 function Field({ label, value, hint }: { label: string; value: string; hint?: string }) {
   return (
     <div className="rounded-md border p-3">
-      <div className="text-xs text-muted-foreground">{label}</div>
-      <div className="mt-1 break-all font-medium">{value}</div>
-      {hint ? <div className="mt-1 text-xs text-muted-foreground">{hint}</div> : null}
+      <div className="text-muted-foreground text-xs">{label}</div>
+      <div className="mt-1 font-medium break-all">{value}</div>
+      {hint ? <div className="text-muted-foreground mt-1 text-xs">{hint}</div> : null}
     </div>
   );
 }

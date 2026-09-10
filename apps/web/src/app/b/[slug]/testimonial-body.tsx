@@ -54,7 +54,7 @@ export function TestimonialBody({
       <p
         id={id}
         className={cn(
-          "whitespace-pre-line text-sm text-foreground/80",
+          "text-foreground/80 text-sm whitespace-pre-line",
           clampable && !expanded && "line-clamp-5",
         )}
       >
@@ -68,7 +68,7 @@ export function TestimonialBody({
           aria-expanded={expanded}
           aria-controls={id}
           onClick={() => setExpanded((open) => !open)}
-          className="-ml-3 h-auto px-3 py-1 text-xs text-muted-foreground hover:text-foreground"
+          className="text-muted-foreground hover:text-foreground -ml-3 h-auto px-3 py-1 text-xs"
         >
           <ChevronDown className={cn("size-3", expanded && "rotate-180")} aria-hidden />
           {expanded ? lessLabel : moreLabel}

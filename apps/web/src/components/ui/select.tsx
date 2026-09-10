@@ -17,7 +17,7 @@ const SelectTrigger = React.forwardRef<
     ref={ref}
     className={cn(
       // Matches Input: taller + 16px text on mobile (no iOS zoom), compact on desktop.
-      "flex h-11 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 lg:h-10 lg:text-sm [&>span]:line-clamp-1",
+      "border-input bg-background ring-offset-background placeholder:text-muted-foreground focus:ring-ring flex h-11 w-full items-center justify-between rounded-md border px-3 py-2 text-base focus:ring-2 focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 lg:h-10 lg:text-sm [&>span]:line-clamp-1",
       className,
     )}
     {...props}
@@ -38,7 +38,7 @@ const SelectContent = React.forwardRef<
     <SelectPrimitive.Content
       ref={ref}
       className={cn(
-        "relative z-50 max-h-96 min-w-32 overflow-hidden rounded-md border bg-popover text-popover-foreground shadow-md data-[state=open]:animate-in data-[state=closed]:animate-out",
+        "bg-popover text-popover-foreground data-[state=open]:animate-in data-[state=closed]:animate-out relative z-50 max-h-96 min-w-32 overflow-hidden rounded-md border shadow-md",
         position === "popper" && "translate-y-1",
         className,
       )}
@@ -67,7 +67,7 @@ const SelectItem = React.forwardRef<
     ref={ref}
     className={cn(
       // Roomier rows on touch screens so options are easy to tap.
-      "relative flex w-full cursor-default select-none items-center rounded-sm py-2.5 pl-8 pr-2 text-base outline-none focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50 lg:py-1.5 lg:text-sm",
+      "focus:bg-accent focus:text-accent-foreground relative flex w-full cursor-default items-center rounded-sm py-2.5 pr-2 pl-8 text-base outline-none select-none data-[disabled]:pointer-events-none data-[disabled]:opacity-50 lg:py-1.5 lg:text-sm",
       className,
     )}
     {...props}

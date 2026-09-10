@@ -176,7 +176,7 @@ export default async function AdminNotificationsPage({
     <div className="space-y-6">
       <header>
         <PageHeader title={t("web.admin.notifications.title")} />
-        <p className="text-sm text-muted-foreground">{t("web.admin.notifications.subtitle")}</p>
+        <p className="text-muted-foreground text-sm">{t("web.admin.notifications.subtitle")}</p>
       </header>
 
       <div className="grid gap-3 lg:grid-cols-4">
@@ -199,7 +199,7 @@ export default async function AdminNotificationsPage({
         <Heading level={3} as="h2">
           {t("web.admin.notifications.connections")}
         </Heading>
-        <p className="text-sm text-muted-foreground">
+        <p className="text-muted-foreground text-sm">
           {t("web.admin.notifications.connectionsBody")}
         </p>
         <div className="space-y-2 rounded-md border p-4 text-sm">
@@ -230,7 +230,7 @@ export default async function AdminNotificationsPage({
 function Stat({ label, value, danger }: { label: string; value: number; danger?: boolean }) {
   return (
     <div className="rounded-md border p-3">
-      <div className="text-xs text-muted-foreground">{label}</div>
+      <div className="text-muted-foreground text-xs">{label}</div>
       <div className={`mt-1 text-2xl font-semibold ${danger ? "text-destructive" : ""}`}>
         {value}
       </div>
@@ -253,8 +253,8 @@ function ConnRow({
       <span
         className={
           kind === "real"
-            ? "rounded-full border border-success/30 bg-success-bg px-2 py-0.5 text-xs text-success"
-            : "rounded-full border bg-muted/40 px-2 py-0.5 text-xs text-muted-foreground"
+            ? "border-success/30 bg-success-bg text-success rounded-full border px-2 py-0.5 text-xs"
+            : "bg-muted/40 text-muted-foreground rounded-full border px-2 py-0.5 text-xs"
         }
       >
         {kind === "real" ? t("web.admin.notifications.live") : t("web.admin.notifications.stub")}

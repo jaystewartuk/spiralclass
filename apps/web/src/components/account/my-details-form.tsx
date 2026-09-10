@@ -151,7 +151,7 @@ export function MyDetailsForm({
           </SelectContent>
         </Select>
         <input type="hidden" name="timezone" value={timezone} />
-        <p className="text-xs text-muted-foreground">{t("web.myDetailsForm.timezoneHint")}</p>
+        <p className="text-muted-foreground text-xs">{t("web.myDetailsForm.timezoneHint")}</p>
       </div>
 
       <div className="flex items-center gap-3">

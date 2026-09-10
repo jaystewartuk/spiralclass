@@ -123,7 +123,7 @@ export async function MaterialCard({
     // scrollport, and a scrollport that never scrolls means the edit form's
     // sticky Save bar could never stick. The footer div carries its own
     // rounded-b-lg instead.
-    <li className="rounded-lg border bg-card shadow-sm transition-colors hover:border-foreground/20">
+    <li className="bg-card hover:border-foreground/20 rounded-lg border shadow-sm transition-colors">
       <div className="flex gap-3 p-4">
         <span
           className={`flex size-9 shrink-0 items-center justify-center rounded-md ${KIND_TINT[kind]}`}
@@ -146,7 +146,7 @@ export async function MaterialCard({
                   href={m.viewUrl}
                   target="_blank"
                   rel="noreferrer"
-                  className="rounded-sm underline decoration-transparent underline-offset-4 transition-colors hover:text-primary hover:decoration-current focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring"
+                  className="hover:text-primary focus-visible:ring-ring rounded-sm underline decoration-transparent underline-offset-4 transition-colors hover:decoration-current focus-visible:ring-3 focus-visible:outline-none"
                 >
                   {title}
                   <span className="sr-only"> ({t("web.materials.opensInNewTab")})</span>
@@ -167,7 +167,7 @@ export async function MaterialCard({
               landed. "Added" is what makes the Newest/Oldest sort legible —
               the list offered that order with the value it ordered by nowhere
               on screen. */}
-          <p className="flex flex-wrap gap-x-2 gap-y-0.5 text-xs text-muted-foreground">
+          <p className="text-muted-foreground flex flex-wrap gap-x-2 gap-y-0.5 text-xs">
             {m.unit && <span>{t("web.materials.unitLabel", { unit: m.unit })}</span>}
             {m.unit && (
               // An expression, not the `&middot;` entity: the i18n scanner reads
@@ -192,7 +192,7 @@ export async function MaterialCard({
                 because capitals remove the word-shape a dyslexic reader leans
                 on, and "pdf" is the extension as it is actually written. */}
             {extension && (
-              <Badge variant="outline" className="font-normal text-muted-foreground">
+              <Badge variant="outline" className="text-muted-foreground font-normal">
                 {extension}
               </Badge>
             )}
@@ -200,7 +200,7 @@ export async function MaterialCard({
               <Badge
                 key={focusTag.id}
                 variant="outline"
-                className="font-normal text-muted-foreground"
+                className="text-muted-foreground font-normal"
               >
                 {focusTag.label}
               </Badge>
@@ -209,7 +209,7 @@ export async function MaterialCard({
 
           {view === "active" && m.body && (
             <details className="group [&_summary::-webkit-details-marker]:hidden">
-              <summary className="inline-flex cursor-pointer list-none items-center gap-1 rounded-sm text-xs text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring">
+              <summary className="text-muted-foreground hover:text-foreground focus-visible:ring-ring inline-flex cursor-pointer list-none items-center gap-1 rounded-sm text-xs transition-colors focus-visible:ring-3 focus-visible:outline-none">
                 <ChevronRight
                   className="size-3.5 transition-transform group-open:rotate-90"
                   aria-hidden
@@ -230,7 +230,7 @@ export async function MaterialCard({
           exactly as loudly as "Download". Two groups now: what she does WITH
           the material on the left, what she does TO it on the right, and only
           the two everyday actions keep a border. */}
-      <div className="flex flex-wrap items-center gap-x-2 gap-y-1 rounded-b-lg border-t bg-muted/20 px-3 py-2">
+      <div className="bg-muted/20 flex flex-wrap items-center gap-x-2 gap-y-1 rounded-b-lg border-t px-3 py-2">
         {view === "active" ? (
           <>
             {m.body && (

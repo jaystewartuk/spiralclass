@@ -16,7 +16,7 @@ export default async function PreviewStepPage() {
     <div className="space-y-6">
       <div>
         <PageHeader title={t("onboarding.preview.title")} />
-        <p className="mt-1 text-sm text-muted-foreground">
+        <p className="text-muted-foreground mt-1 text-sm">
           {t("web.onboarding.preview.shareHint")}
         </p>
       </div>
@@ -28,7 +28,7 @@ export default async function PreviewStepPage() {
         </CardHeader>
         <CardContent>
           <BookingSlugForm initialSlug={teacher.bookingSlug} appUrl={appUrl} />
-          <p className="mt-4 text-xs text-muted-foreground">
+          <p className="text-muted-foreground mt-4 text-xs">
             {t("web.onboarding.preview.liveHint")}
           </p>
         </CardContent>

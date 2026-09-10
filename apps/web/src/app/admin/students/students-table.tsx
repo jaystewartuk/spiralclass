@@ -78,7 +78,7 @@ export function StudentsTable({
                 <Badge variant="destructive">{t("web.admin.disabledBadge")}</Badge>
               )}
             </div>
-            <div className="text-xs text-muted-foreground">
+            <div className="text-muted-foreground text-xs">
               {row.original.email ?? t("web.admin.students.noEmail")}
             </div>
           </RowLink>
@@ -150,7 +150,7 @@ export function StudentsTable({
       </FilterBar>
 
       {visibleStudents.length === 0 ? (
-        <p className="text-sm text-muted-foreground">{t("web.admin.noResults")}</p>
+        <p className="text-muted-foreground text-sm">{t("web.admin.noResults")}</p>
       ) : (
         <TableShell>
           <DataTable

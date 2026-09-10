@@ -57,7 +57,7 @@ export function ToggleField({
             {label}
           </label>
           {hint ? (
-            <p id={hintId} className="text-sm text-muted-foreground">
+            <p id={hintId} className="text-muted-foreground text-sm">
               {hint}
             </p>
           ) : null}
@@ -83,11 +83,11 @@ export function ToggleField({
           />
           <span
             aria-hidden
-            className="h-6 w-11 rounded-full border border-input bg-muted ring-offset-background transition-colors peer-checked:border-primary peer-checked:bg-primary peer-focus-visible:ring-3 peer-focus-visible:ring-ring peer-focus-visible:ring-offset-2 peer-disabled:opacity-50"
+            className="border-input bg-muted ring-offset-background peer-checked:border-primary peer-checked:bg-primary peer-focus-visible:ring-ring h-6 w-11 rounded-full border transition-colors peer-focus-visible:ring-3 peer-focus-visible:ring-offset-2 peer-disabled:opacity-50"
           />
           <span
             aria-hidden
-            className="pointer-events-none absolute left-0.5 top-1/2 h-5 w-5 -translate-y-1/2 rounded-full bg-background shadow-brand-sm transition-transform peer-checked:translate-x-5 peer-disabled:opacity-50"
+            className="bg-background shadow-brand-sm pointer-events-none absolute top-1/2 left-0.5 h-5 w-5 -translate-y-1/2 rounded-full transition-transform peer-checked:translate-x-5 peer-disabled:opacity-50"
           />
         </label>
       </div>

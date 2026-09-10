@@ -27,7 +27,7 @@ export default async function OnboardingReadingPage() {
     <div className="flex flex-col gap-8">
       <div className="flex flex-col gap-3">
         <h1 className="text-2xl font-bold">{t("web.onboarding.reading.heading")}</h1>
-        <p className="max-w-prose text-muted-foreground">{t("web.onboarding.reading.intro")}</p>
+        <p className="text-muted-foreground max-w-prose">{t("web.onboarding.reading.intro")}</p>
       </div>
 
       <ReadingControls initial={reading} />
@@ -36,7 +36,7 @@ export default async function OnboardingReadingPage() {
         <Button asChild>
           <Link href="/onboarding/timezone">{t("web.onboarding.reading.continue")}</Link>
         </Button>
-        <span className="text-sm text-muted-foreground">
+        <span className="text-muted-foreground text-sm">
           {t("web.onboarding.reading.changeLater")}
         </span>
       </div>

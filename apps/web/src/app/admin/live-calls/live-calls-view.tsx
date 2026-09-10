@@ -153,7 +153,7 @@ export function LiveCallsView({ initial }: { initial: LiveCallsInitialState }) {
         />
       </div>
 
-      <div className="flex flex-wrap items-end gap-3 rounded-md border bg-muted/30 p-4">
+      <div className="bg-muted/30 flex flex-wrap items-end gap-3 rounded-md border p-4">
         <label className="min-w-[220px] flex-1 space-y-1 text-xs">
           <span className="text-muted-foreground">
             {t("web.admin.liveCalls.searchPlaceholder")}
@@ -169,7 +169,7 @@ export function LiveCallsView({ initial }: { initial: LiveCallsInitialState }) {
           <select
             value={kindFilter}
             onChange={(e) => setKindFilter(e.target.value as "all" | CallKind)}
-            className="h-9 w-full rounded-md border bg-background px-2 text-sm"
+            className="bg-background h-9 w-full rounded-md border px-2 text-sm"
           >
             <option value="all">{t("web.admin.liveCalls.filterKindAll")}</option>
             <option value="class">{t("web.admin.liveCalls.kind.class")}</option>
@@ -182,7 +182,7 @@ export function LiveCallsView({ initial }: { initial: LiveCallsInitialState }) {
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value as "all" | "full" | "waiting")}
-            className="h-9 w-full rounded-md border bg-background px-2 text-sm"
+            className="bg-background h-9 w-full rounded-md border px-2 text-sm"
           >
             <option value="all">{t("web.admin.liveCalls.filterStatusAll")}</option>
             <option value="full">{t("web.admin.liveCalls.filterStatusFull")}</option>
@@ -192,11 +192,11 @@ export function LiveCallsView({ initial }: { initial: LiveCallsInitialState }) {
       </div>
 
       {rooms.length === 0 ? (
-        <div className="rounded-md border border-dashed p-8 text-center text-sm text-muted-foreground">
+        <div className="text-muted-foreground rounded-md border border-dashed p-8 text-center text-sm">
           {t("web.admin.liveCalls.empty")}
         </div>
       ) : filteredRooms.length === 0 ? (
-        <div className="rounded-md border border-dashed p-8 text-center text-sm text-muted-foreground">
+        <div className="text-muted-foreground rounded-md border border-dashed p-8 text-center text-sm">
           {t("web.admin.liveCalls.noneMatched")}
         </div>
       ) : (
@@ -223,7 +223,7 @@ export function LiveCallsView({ initial }: { initial: LiveCallsInitialState }) {
                       <Badge variant={room.kind === "unknown" ? "outline" : "secondary"}>
                         {t(`web.admin.liveCalls.kind.${room.kind}`)}
                       </Badge>
-                      <span className="font-mono text-xs text-muted-foreground">{room.room}</span>
+                      <span className="text-muted-foreground font-mono text-xs">{room.room}</span>
                     </div>
                   </TableCell>
                   <TableCell data-label={t("web.admin.liveCalls.table.teacher")}>

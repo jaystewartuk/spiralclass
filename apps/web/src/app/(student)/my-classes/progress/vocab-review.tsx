@@ -36,7 +36,7 @@ export function VocabReview({
   const remaining = terms.filter((term) => !doneIds.has(term.id));
 
   if (remaining.length === 0) {
-    return <p className="text-sm text-muted-foreground">{t("progress.vocabDone")}</p>;
+    return <p className="text-muted-foreground text-sm">{t("progress.vocabDone")}</p>;
   }
 
   const current = remaining[0]!;
@@ -54,18 +54,18 @@ export function VocabReview({
         type="button"
         onClick={() => setFlipped((f) => !f)}
         aria-label={t(flipped ? "progress.flashcard.showTerm" : "progress.flashcard.flip")}
-        className="flex min-h-24 w-full flex-col items-center justify-center gap-1 rounded-lg border bg-muted/30 px-4 py-6 text-center transition-colors hover:bg-muted/50"
+        className="bg-muted/30 hover:bg-muted/50 flex min-h-24 w-full flex-col items-center justify-center gap-1 rounded-lg border px-4 py-6 text-center transition-colors"
       >
         {flipped ? (
           current.context ? (
             <p className="text-sm">{current.context}</p>
           ) : (
-            <p className="text-sm text-muted-foreground">{t("progress.flashcard.noContext")}</p>
+            <p className="text-muted-foreground text-sm">{t("progress.flashcard.noContext")}</p>
           )
         ) : (
           <p className="text-lg font-medium">{current.term}</p>
         )}
-        <span className="text-xs text-muted-foreground">
+        <span className="text-muted-foreground text-xs">
           {t(flipped ? "progress.flashcard.showTerm" : "progress.flashcard.flip")}
         </span>
       </button>
@@ -76,7 +76,7 @@ export function VocabReview({
           </Button>
         ))}
       </div>
-      <p className="text-xs text-muted-foreground">
+      <p className="text-muted-foreground text-xs">
         {t("web.studentProgress.toReviewCount", { count: remaining.length })}
       </p>
     </div>

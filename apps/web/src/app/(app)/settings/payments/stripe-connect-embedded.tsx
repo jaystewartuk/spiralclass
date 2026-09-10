@@ -66,7 +66,7 @@ export function StripeConnectEmbeddedOnboarding({ publishableKey }: { publishabl
   // First paint, before the effect has run. A plain reserved box rather than
   // null so the card doesn't visibly jump when the iframe mounts.
   if (!connectInstance) {
-    return <div className="h-64 animate-pulse rounded-md bg-muted/40" aria-hidden />;
+    return <div className="bg-muted/40 h-64 animate-pulse rounded-md" aria-hidden />;
   }
 
   return (

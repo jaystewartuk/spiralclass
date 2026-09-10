@@ -128,9 +128,9 @@ function DayHeading({
       className={cn(
         // An opaque ground, not a tint: a translucent sticky band lets the
         // rows it is meant to hide show through as they pass underneath.
-        "sticky top-14 z-10 border-b bg-muted px-4 py-2 text-sm font-medium text-muted-foreground lg:px-5",
+        "bg-muted text-muted-foreground sticky top-14 z-10 border-b px-4 py-2 text-sm font-medium lg:px-5",
         first ? "rounded-t-lg" : "border-t",
-        emphasis && "font-semibold text-foreground",
+        emphasis && "text-foreground font-semibold",
       )}
     >
       {label}
@@ -174,7 +174,7 @@ function NotificationRow({
           first, whether read or unread, and the page's most important
           distinction silently disappeared. Rendered visually only; the word
           "unread" reaches a screen reader from the row body below. */}
-      {unread ? <span aria-hidden className="absolute inset-y-0 left-0 w-0.5 bg-primary" /> : null}
+      {unread ? <span aria-hidden className="bg-primary absolute inset-y-0 left-0 w-0.5" /> : null}
       <form action={openNotificationAction}>
         <input type="hidden" name="id" value={item.id} />
         <input type="hidden" name="href" value={item.href ?? ""} />
@@ -185,7 +185,7 @@ function NotificationRow({
           // A row, not a control: full width, left aligned, top aligned, and
           // free to grow with its own copy. The primitive still carries the
           // focus ring, the press state and the minimum touch target.
-          className="flex h-auto min-h-target w-full items-start justify-start gap-3 whitespace-normal rounded-none px-4 py-3 text-left text-base font-normal lg:h-auto lg:gap-4 lg:px-5"
+          className="min-h-target flex h-auto w-full items-start justify-start gap-3 rounded-none px-4 py-3 text-left text-base font-normal whitespace-normal lg:h-auto lg:gap-4 lg:px-5"
         >
           <span
             aria-hidden
@@ -209,12 +209,12 @@ function NotificationRow({
               <time
                 dateTime={item.createdAt.toISOString()}
                 title={formatZonedDateTime(item.createdAt, timezone, locale)}
-                className="shrink-0 text-sm tabular-nums text-muted-foreground"
+                className="text-muted-foreground shrink-0 text-sm tabular-nums"
               >
                 {formatZonedTime(item.createdAt, timezone, locale)}
               </time>
             </span>
-            {item.body ? <span className="text-sm text-muted-foreground">{item.body}</span> : null}
+            {item.body ? <span className="text-muted-foreground text-sm">{item.body}</span> : null}
             {/* Unread is carried visually by the edge, the ground and the
                 weight — none of which reach a screen reader. This does, and it
                 sits last so the row still announces what happened first. */}
@@ -224,7 +224,7 @@ function NotificationRow({
           {/* Only where there is somewhere to go. A chevron on a row that only
               marks itself read promises a destination that does not exist. */}
           {item.href ? (
-            <ChevronRight className="mt-2 size-5 shrink-0 text-muted-foreground" aria-hidden />
+            <ChevronRight className="text-muted-foreground mt-2 size-5 shrink-0" aria-hidden />
           ) : null}
         </Button>
       </form>
@@ -266,7 +266,7 @@ export function NotificationList({
               this list's SIBLING, so nothing that sticks sits inside it. */}
           <ul
             className={cn(
-              "divide-y divide-border",
+              "divide-border divide-y",
               roundedBottom && index === groups.length - 1 && "overflow-hidden rounded-b-lg",
             )}
           >

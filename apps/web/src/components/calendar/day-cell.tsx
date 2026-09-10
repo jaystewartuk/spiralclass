@@ -59,8 +59,8 @@ export function DayCell({
       <span
         className={cn(
           "inline-flex h-7 w-7 items-center justify-center self-start rounded-full text-sm tabular-nums",
-          isToday && "bg-primary font-semibold text-primary-foreground",
-          !isToday && inCurrentMonth && "font-medium text-foreground",
+          isToday && "bg-primary text-primary-foreground font-semibold",
+          !isToday && inCurrentMonth && "text-foreground font-medium",
           // Ink, not a grey fill. A spill-over day used to get `bg-muted/30`,
           // which on the dark theme is LIGHTER than the page and so read as
           // raised — an inverted elevation ladder on the one row that is
@@ -92,7 +92,7 @@ export function DayCell({
           </span>
         ))}
         {events.length > MAX_CHIPS && (
-          <span className="px-1.5 text-sm text-muted-foreground">
+          <span className="text-muted-foreground px-1.5 text-sm">
             +{events.length - MAX_CHIPS} {moreWord}
           </span>
         )}

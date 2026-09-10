@@ -55,7 +55,7 @@ export function AnchoredHeading({
       </Heading>
       <a
         href={`#${targetId}`}
-        className="shrink-0 rounded-sm p-1 text-muted-foreground opacity-0 transition-opacity hover:text-foreground focus-visible:opacity-100 group-hover:opacity-100"
+        className="text-muted-foreground hover:text-foreground shrink-0 rounded-sm p-1 opacity-0 transition-opacity group-hover:opacity-100 focus-visible:opacity-100"
       >
         <Link2 className="h-4 w-4" aria-hidden />
         <span className="sr-only">{linkLabel}</span>

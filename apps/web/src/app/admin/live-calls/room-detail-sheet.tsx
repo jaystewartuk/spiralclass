@@ -86,13 +86,13 @@ export function RoomDetailSheet({
         )}
 
         {state.status === "not-found" && (
-          <p className="text-sm text-muted-foreground">
+          <p className="text-muted-foreground text-sm">
             {t("web.admin.liveCalls.detail.notFound")}
           </p>
         )}
 
         {state.status === "error" && (
-          <p className="text-sm text-destructive">{t("web.admin.liveCalls.detail.loadError")}</p>
+          <p className="text-destructive text-sm">{t("web.admin.liveCalls.detail.loadError")}</p>
         )}
 
         {state.status === "ready" && room && (
@@ -123,7 +123,7 @@ function RoomDetailBody({
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
+      <div className="text-muted-foreground flex flex-wrap items-center gap-2 text-sm">
         <Badge variant={detail.kind === "unknown" ? "outline" : "secondary"}>
           {t(`web.admin.liveCalls.kind.${detail.kind}`)}
         </Badge>
@@ -142,7 +142,7 @@ function RoomDetailBody({
       <div className="space-y-2">
         <h3 className="text-sm font-medium">{t("web.admin.liveCalls.detail.participants")}</h3>
         {detail.participants.length === 0 ? (
-          <p className="text-sm text-muted-foreground">{t("web.admin.liveCalls.empty")}</p>
+          <p className="text-muted-foreground text-sm">{t("web.admin.liveCalls.empty")}</p>
         ) : (
           detail.participants.map((p) => (
             <ParticipantCard key={p.identity} room={room} participant={p} onDone={onActionDone} />
@@ -168,7 +168,7 @@ function ParticipantCard({
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div>
           <div className="font-medium">{participant.name}</div>
-          <div className="text-xs text-muted-foreground">
+          <div className="text-muted-foreground text-xs">
             {t(`web.admin.liveCalls.detail.role.${participant.role}`)} ·{" "}
             {t(`web.admin.liveCalls.detail.state.${participant.state}`)}
           </div>
@@ -186,7 +186,7 @@ function ParticipantCard({
           <Badge variant="info">{t("web.admin.liveCalls.detail.screenShare")}</Badge>
         )}
       </div>
-      <div className="text-xs text-muted-foreground">
+      <div className="text-muted-foreground text-xs">
         {t("web.admin.liveCalls.detail.joinedAgo", {
           duration: formatDuration(participant.durationSec),
         })}

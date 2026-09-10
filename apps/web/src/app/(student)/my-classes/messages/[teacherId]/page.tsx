@@ -78,8 +78,8 @@ export default async function StudentChatPage({
     // stays put and only the message list scrolls. The side borders on a wide
     // window are what make the column read as a panel rather than as text
     // floating in the middle of the page.
-    <main className="mx-auto flex h-thread max-w-3xl flex-col border-border lg:border-x">
-      <header className="flex shrink-0 items-center gap-2 border-b border-border bg-background/95 px-2 py-2 backdrop-blur supports-[backdrop-filter]:bg-background/80 lg:px-3">
+    <main className="h-thread border-border mx-auto flex max-w-3xl flex-col lg:border-x">
+      <header className="border-border bg-background/95 supports-[backdrop-filter]:bg-background/80 flex shrink-0 items-center gap-2 border-b px-2 py-2 backdrop-blur lg:px-3">
         <Button asChild variant="ghost" size="icon" className="shrink-0">
           <Link
             href="/my-classes/messages"
@@ -94,7 +94,7 @@ export default async function StudentChatPage({
           <Heading level={3} as="h1" className="truncate">
             <TeacherNameLink teacherId={teacherId} name={ts.teacher.name} />
           </Heading>
-          <p className="truncate text-sm text-muted-foreground">
+          <p className="text-muted-foreground truncate text-sm">
             <PeerLocalTime
               initialTime={formatTimeInZone(new Date(), ts.teacher.timezone, locale)}
               timeZone={ts.teacher.timezone}

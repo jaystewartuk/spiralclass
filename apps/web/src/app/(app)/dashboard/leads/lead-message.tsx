@@ -39,7 +39,7 @@ export function LeadMessage({ message }: { message: string }) {
   const clampable = message.length > CLAMP_CHARS;
 
   return (
-    <div className="rounded-md bg-muted/40 p-3 text-sm">
+    <div className="bg-muted/40 rounded-md p-3 text-sm">
       <p id={id} className={cn("whitespace-pre-line", clampable && !expanded && "line-clamp-4")}>
         {message}
       </p>
@@ -51,7 +51,7 @@ export function LeadMessage({ message }: { message: string }) {
           aria-expanded={expanded}
           aria-controls={id}
           onClick={() => setExpanded((open) => !open)}
-          className="-ml-3 mt-1 h-auto px-3 py-1 text-xs text-muted-foreground hover:text-foreground"
+          className="text-muted-foreground hover:text-foreground mt-1 -ml-3 h-auto px-3 py-1 text-xs"
         >
           <ChevronDown className={cn("size-3", expanded && "rotate-180")} aria-hidden />
           {expanded

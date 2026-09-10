@@ -156,7 +156,7 @@ export function PaymentsTable({
                   href={stripeUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-xs text-muted-foreground underline hover:text-foreground"
+                  className="text-muted-foreground hover:text-foreground text-xs underline"
                 >
                   {t("web.admin.common.stripe")} ↗
                 </a>
@@ -214,7 +214,7 @@ export function PaymentsTable({
       </FilterBar>
 
       {visiblePayments.length === 0 ? (
-        <p className="text-sm text-muted-foreground">{t("web.admin.payments.noneMatched")}</p>
+        <p className="text-muted-foreground text-sm">{t("web.admin.payments.noneMatched")}</p>
       ) : (
         <TableShell>
           <DataTable

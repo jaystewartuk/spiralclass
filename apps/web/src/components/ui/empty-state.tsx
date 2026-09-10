@@ -27,10 +27,10 @@ export function EmptyState({
   return (
     <Card className={className}>
       <CardContent className="flex flex-col items-center gap-3 py-16 text-center">
-        {Icon ? <Icon className="h-10 w-10 text-muted-foreground/40" aria-hidden /> : null}
-        <p className="font-bold text-foreground">{title}</p>
+        {Icon ? <Icon className="text-muted-foreground/40 h-10 w-10" aria-hidden /> : null}
+        <p className="text-foreground font-bold">{title}</p>
         {description ? (
-          <p className="max-w-prose text-sm text-muted-foreground">{description}</p>
+          <p className="text-muted-foreground max-w-prose text-sm">{description}</p>
         ) : null}
         {action}
       </CardContent>

@@ -173,7 +173,7 @@ export function ChatPopover({
       onKeyDown={onPanelKeyDown}
       style={placement ? { top: placement.top, left: placement.left } : undefined}
       className={cn(
-        "fixed z-over-overlay rounded-lg border border-border bg-popover p-1 text-popover-foreground shadow-brand-lg",
+        "z-over-overlay border-border bg-popover text-popover-foreground shadow-brand-lg fixed rounded-lg border p-1",
         placement ? "opacity-100" : "opacity-0",
         panelClassName,
       )}

@@ -125,13 +125,13 @@ export function BookingSlugForm({
           {showFullLink ? t("bookingLink.title") : t("bookingLink.label")}
         </Label>
         {showFullLink && (
-          <div className="flex items-center gap-2 rounded-md border bg-muted/40 px-3 py-2">
-            <span className="flex-1 break-all font-mono text-sm">{fullUrl}</span>
+          <div className="bg-muted/40 flex items-center gap-2 rounded-md border px-3 py-2">
+            <span className="flex-1 font-mono text-sm break-all">{fullUrl}</span>
             <CopyLinkButton value={fullUrl} iconOnly />
           </div>
         )}
-        <div className="flex items-stretch overflow-hidden rounded-md border ring-offset-background focus-within:ring-3 focus-within:ring-ring focus-within:ring-offset-2">
-          <span className="flex select-none items-center whitespace-nowrap bg-muted px-3 font-mono text-xs text-muted-foreground">
+        <div className="ring-offset-background focus-within:ring-ring flex items-stretch overflow-hidden rounded-md border focus-within:ring-3 focus-within:ring-offset-2">
+          <span className="bg-muted text-muted-foreground flex items-center px-3 font-mono text-xs whitespace-nowrap select-none">
             {prefix}
           </span>
           <Input
@@ -149,7 +149,7 @@ export function BookingSlugForm({
           />
         </div>
         <AvailabilityHint check={check} onPick={setSlug} />
-        <p className="text-xs text-muted-foreground">{t("bookingLink.hint")}</p>
+        <p className="text-muted-foreground text-xs">{t("bookingLink.hint")}</p>
       </div>
       <FormStatus state={state} errorId="bookingSlug-error" savedMessage={t("bookingLink.saved")} />
       <Button type="submit" disabled={pending || blocking}>
@@ -177,7 +177,7 @@ function AvailabilityHint({
     return (
       <p
         id="bookingSlug-availability"
-        className="flex items-center gap-1 text-xs text-muted-foreground"
+        className="text-muted-foreground flex items-center gap-1 text-xs"
       >
         <LogoSpinner size={14} />
         {t("bookingLink.checking")}
@@ -187,7 +187,7 @@ function AvailabilityHint({
 
   if (check.status === "current") {
     return (
-      <p id="bookingSlug-availability" className="text-xs text-muted-foreground">
+      <p id="bookingSlug-availability" className="text-muted-foreground text-xs">
         {t("bookingLink.current")}
       </p>
     );
@@ -195,7 +195,7 @@ function AvailabilityHint({
 
   if (check.status === "available") {
     return (
-      <p id="bookingSlug-availability" className="flex items-center gap-1 text-xs text-success">
+      <p id="bookingSlug-availability" className="text-success flex items-center gap-1 text-xs">
         <Check className="h-3 w-3" aria-hidden />
         {t("web.settings.bookingPage.slugAvailable", { slug: check.slug })}
       </p>
@@ -217,20 +217,20 @@ function AvailabilityHint({
         id="bookingSlug-availability"
         role="alert"
         aria-live="polite"
-        className="flex items-center gap-1 text-xs text-destructive"
+        className="text-destructive flex items-center gap-1 text-xs"
       >
         <X className="h-3 w-3" aria-hidden />
         {message}
       </p>
       {suggestions.length > 0 && (
         <div className="flex flex-wrap items-center gap-1.5">
-          <span className="text-xs text-muted-foreground">{t("bookingLink.tryInstead")}</span>
+          <span className="text-muted-foreground text-xs">{t("bookingLink.tryInstead")}</span>
           {suggestions.map((s) => (
             <button
               key={s}
               type="button"
               onClick={() => onPick(s)}
-              className="rounded-full border bg-background px-2.5 py-0.5 font-mono text-xs text-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
+              className="bg-background text-foreground hover:bg-accent hover:text-accent-foreground rounded-full border px-2.5 py-0.5 font-mono text-xs transition-colors"
             >
               {s}
             </button>

@@ -102,7 +102,7 @@ export function CustomPriceForm({
 
   if (templates.length === 0) {
     return (
-      <p className="text-sm text-muted-foreground">
+      <p className="text-muted-foreground text-sm">
         {t("web.dashboard.students.price.noPackages")}
       </p>
     );
@@ -115,7 +115,7 @@ export function CustomPriceForm({
       <input type="hidden" name="studentId" value={studentId} />
       <input type="hidden" name="pricesJson" value={pricesJson} />
 
-      <p className="text-xs text-muted-foreground">
+      <p className="text-muted-foreground text-xs">
         {t("web.dashboard.students.price.perPackageHint")}
       </p>
 
@@ -139,7 +139,7 @@ export function CustomPriceForm({
               }}
             />
             <FieldError id={`price-${tpl.id}-error`} message={errors[tpl.id]} />
-            <p className="text-xs text-muted-foreground">
+            <p className="text-muted-foreground text-xs">
               {t("web.dashboard.students.price.catalogPrice", {
                 price: formatMinorUnits(tpl.priceMinorUnits, currency),
               })}
@@ -148,7 +148,7 @@ export function CustomPriceForm({
         ))}
       </div>
 
-      <p className="text-xs text-muted-foreground">
+      <p className="text-muted-foreground text-xs">
         {t("web.dashboard.students.price.appliedHint")}{" "}
         {t("web.dashboard.students.price.agreedOnCount", {
           count: agreedCount,
@@ -182,12 +182,12 @@ export function CustomPriceForm({
       </div>
 
       {state?.error && (
-        <p role="alert" className="text-sm text-destructive">
+        <p role="alert" className="text-destructive text-sm">
           {state.error}
         </p>
       )}
       {state?.ok && (
-        <p role="status" className="text-sm text-success">
+        <p role="status" className="text-success text-sm">
           {state.ok}
         </p>
       )}

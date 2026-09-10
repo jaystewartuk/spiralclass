@@ -635,7 +635,7 @@ export function ChatRoom({
   return (
     <div className="flex min-h-0 flex-1 flex-col">
       {selectionMode && (
-        <div className="flex shrink-0 items-center gap-2 border-b border-border bg-muted px-3 py-2 lg:px-4">
+        <div className="border-border bg-muted flex shrink-0 items-center gap-2 border-b px-3 py-2 lg:px-4">
           <Button
             type="button"
             variant="ghost"
@@ -665,7 +665,7 @@ export function ChatRoom({
               onClick={() => setBulkDeleteOpen(true)}
               aria-label={t("chat.selection.delete")}
             >
-              <Trash2 className="h-4 w-4 text-destructive" />
+              <Trash2 className="text-destructive h-4 w-4" />
             </Button>
           )}
         </div>
@@ -693,8 +693,8 @@ export function ChatRoom({
           {isEmpty ? (
             <div className="flex h-full flex-col items-center justify-center gap-3 px-6 text-center">
               <PersonAvatar name={peerName} photoUrl={peerPhotoUrl} size={56} />
-              <p className="font-bold text-foreground">{t("chat.empty.title")}</p>
-              <p className="max-w-prose text-sm text-muted-foreground">
+              <p className="text-foreground font-bold">{t("chat.empty.title")}</p>
+              <p className="text-muted-foreground max-w-prose text-sm">
                 {t(myRole === "student" ? "chat.empty.student" : "chat.empty.teacher")}
               </p>
             </div>
@@ -720,8 +720,8 @@ export function ChatRoom({
                 ) : (
                   <div className="flex flex-col items-center gap-2 px-6 py-4 text-center">
                     <PersonAvatar name={peerName} photoUrl={peerPhotoUrl} size={56} />
-                    <p className="font-bold text-foreground">{peerName}</p>
-                    <p className="text-sm text-muted-foreground">{t("chat.history.start")}</p>
+                    <p className="text-foreground font-bold">{peerName}</p>
+                    <p className="text-muted-foreground text-sm">{t("chat.history.start")}</p>
                   </div>
                 )}
               </div>
@@ -732,7 +732,7 @@ export function ChatRoom({
                     {/* Sticky within its own day, so the date you are reading
                       stays named for as long as you are inside it. */}
                     <div className="sticky top-0 z-20 flex justify-center py-2">
-                      <span className="rounded-full border border-border bg-muted px-3 py-1 text-sm font-medium text-muted-foreground shadow-brand-sm">
+                      <span className="border-border bg-muted text-muted-foreground shadow-brand-sm rounded-full border px-3 py-1 text-sm font-medium">
                         {label}
                       </span>
                     </div>
@@ -774,7 +774,7 @@ export function ChatRoom({
               variant="secondary"
               size="sm"
               onClick={jumpToLatest}
-              className="animate-fade-in-up pointer-events-auto rounded-full shadow-brand-lg"
+              className="animate-fade-in-up shadow-brand-lg pointer-events-auto rounded-full"
             >
               <ArrowDown className="h-4 w-4" />
               {unseen > 0 ? t("chat.jump.newCount", { count: unseen }) : t("chat.jump.latest")}

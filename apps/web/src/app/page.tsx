@@ -227,23 +227,23 @@ export default async function LandingPage({
           {/* One ink wash behind the mark, and a small gold one offset from it.
               The gold was at 20% and read as a stain on a cool ground — the
               accent is a highlight, not a wash. */}
-          <div className="absolute left-1/2 top-[-12%] h-[34rem] w-[34rem] -translate-x-1/2 rounded-full bg-primary/10 blur-3xl" />
-          <div className="absolute right-[6%] top-[26%] h-56 w-56 rounded-full bg-accent/10 blur-3xl" />
+          <div className="bg-primary/10 absolute top-[-12%] left-1/2 h-[34rem] w-[34rem] -translate-x-1/2 rounded-full blur-3xl" />
+          <div className="bg-accent/10 absolute top-[26%] right-[6%] h-56 w-56 rounded-full blur-3xl" />
         </div>
 
         <div className="container flex flex-col items-center gap-6 py-20 text-center lg:py-28">
           <Logo size="xl" />
 
-          <span className="inline-flex items-center gap-2 rounded-full border border-border/70 bg-card/60 px-4 py-1.5 text-xs font-medium text-muted-foreground backdrop-blur">
-            <Sparkles className="h-3.5 w-3.5 text-accent" aria-hidden />
+          <span className="border-border/70 bg-card/60 text-muted-foreground inline-flex items-center gap-2 rounded-full border px-4 py-1.5 text-xs font-medium backdrop-blur">
+            <Sparkles className="text-accent h-3.5 w-3.5" aria-hidden />
             {t("web.landing.eyebrow")}
           </span>
 
-          <Heading level={1} className="max-w-reading text-balance lg:text-display">
+          <Heading level={1} className="max-w-reading lg:text-display text-balance">
             {t("web.landing.headline")}
           </Heading>
 
-          <p className="max-w-reading text-pretty text-lg text-muted-foreground">
+          <p className="max-w-reading text-muted-foreground text-lg text-pretty">
             {t("web.landing.sub")}
           </p>
 
@@ -264,21 +264,21 @@ export default async function LandingPage({
             )}
           </div>
 
-          <ul className="mt-2 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-xs text-muted-foreground">
+          <ul className="text-muted-foreground mt-2 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-xs">
             {trustPills.map((pill) => (
               <li key={pill} className="inline-flex items-center gap-1.5">
-                <Check className="h-3.5 w-3.5 text-primary" aria-hidden />
+                <Check className="text-primary h-3.5 w-3.5" aria-hidden />
                 {pill}
               </li>
             ))}
           </ul>
 
           {!loggedInCta && (
-            <p className="text-sm text-muted-foreground">
+            <p className="text-muted-foreground text-sm">
               {t("landing.studentPrompt")}{" "}
               <Link
                 href="/sign-in"
-                className="font-medium text-foreground underline-offset-4 hover:underline"
+                className="text-foreground font-medium underline-offset-4 hover:underline"
               >
                 {t("landing.studentCta")}
               </Link>
@@ -295,20 +295,20 @@ export default async function LandingPage({
         description={t("web.landing.wedge.sub")}
       >
         <div className="grid gap-4 lg:grid-cols-2">
-          <div className="rounded-2xl border bg-card/50 p-6 text-center">
-            <p className="text-sm font-medium text-muted-foreground">
+          <div className="bg-card/50 rounded-2xl border p-6 text-center">
+            <p className="text-muted-foreground text-sm font-medium">
               {t("web.landing.wedge.marketplace.label")}
             </p>
-            <p className="mt-2 font-display text-2xl font-semibold text-muted-foreground">
+            <p className="font-display text-muted-foreground mt-2 text-2xl font-semibold">
               {t("web.landing.wedge.marketplace.value")}
             </p>
           </div>
-          <div className="rounded-2xl border-2 border-primary bg-card p-6 text-center shadow-sm">
-            <p className="text-sm font-medium text-primary">{t("web.landing.wedge.us.label")}</p>
-            <p className="mt-2 font-display text-2xl font-semibold">
+          <div className="border-primary bg-card rounded-2xl border-2 p-6 text-center shadow-sm">
+            <p className="text-primary text-sm font-medium">{t("web.landing.wedge.us.label")}</p>
+            <p className="font-display mt-2 text-2xl font-semibold">
               {t("web.landing.wedge.us.value")}
             </p>
-            <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+            <p className="text-muted-foreground mt-2 text-sm leading-relaxed">
               {t("web.landing.wedge.us.note")}
             </p>
           </div>
@@ -356,7 +356,7 @@ export default async function LandingPage({
         <div className="mt-8 text-center">
           <Link
             href="/features"
-            className="text-sm font-medium text-primary underline-offset-4 hover:underline"
+            className="text-primary text-sm font-medium underline-offset-4 hover:underline"
           >
             {t("web.landing.seeAllFeatures")}
           </Link>
@@ -368,10 +368,10 @@ export default async function LandingPage({
         <ol className="grid gap-8 lg:grid-cols-3">
           {steps.map((step, i) => (
             <li key={step} className="text-center lg:text-left">
-              <span className="font-display text-3xl font-semibold tabular-nums text-primary/40">
+              <span className="font-display text-primary/40 text-3xl font-semibold tabular-nums">
                 {`0${i + 1}`}
               </span>
-              <p className="mt-2 text-sm leading-relaxed text-foreground/80">{step}</p>
+              <p className="text-foreground/80 mt-2 text-sm leading-relaxed">{step}</p>
             </li>
           ))}
         </ol>
@@ -382,9 +382,9 @@ export default async function LandingPage({
       <Section title={t("web.landing.social.title")} description={t("web.landing.social.body")}>
         <dl className="grid gap-6 lg:grid-cols-3">
           {socialStats.map((stat) => (
-            <div key={stat.value} className="rounded-2xl border bg-card p-6 text-center shadow-sm">
-              <dt className="font-display text-2xl font-semibold text-primary">{stat.value}</dt>
-              <dd className="mt-1 text-sm text-muted-foreground">{stat.label}</dd>
+            <div key={stat.value} className="bg-card rounded-2xl border p-6 text-center shadow-sm">
+              <dt className="font-display text-primary text-2xl font-semibold">{stat.value}</dt>
+              <dd className="text-muted-foreground mt-1 text-sm">{stat.label}</dd>
             </div>
           ))}
         </dl>

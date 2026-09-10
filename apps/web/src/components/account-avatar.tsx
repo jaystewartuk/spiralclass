@@ -49,7 +49,7 @@ export function AccountAvatar({
         aria-hidden
         width={px}
         height={px}
-        className={cn("shrink-0 select-none rounded-full object-cover", box, className)}
+        className={cn("shrink-0 rounded-full object-cover select-none", box, className)}
       />
     );
   }
@@ -65,7 +65,7 @@ export function AccountAvatar({
     <span
       aria-hidden
       className={cn(
-        "inline-flex shrink-0 select-none items-center justify-center rounded-full bg-secondary font-medium text-secondary-foreground",
+        "bg-secondary text-secondary-foreground inline-flex shrink-0 items-center justify-center rounded-full font-medium select-none",
         box,
         text,
         className,

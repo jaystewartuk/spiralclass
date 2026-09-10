@@ -30,14 +30,14 @@ export async function CashFlowPanel({ cashFlow }: { cashFlow: CashFlow }) {
         {cashFlow.byCurrency.map((summary) => (
           <div key={summary.currency} className="space-y-2">
             {perCurrency && (
-              <h3 className="text-xs font-medium text-muted-foreground">
+              <h3 className="text-muted-foreground text-xs font-medium">
                 {t("web.cashflow.inCurrency", { currency: summary.currency })}
               </h3>
             )}
             <CashFlowStats summary={summary} t={t} />
           </div>
         ))}
-        <p className="text-xs text-muted-foreground">{t("web.cashflow.whyAverage")}</p>
+        <p className="text-muted-foreground text-xs">{t("web.cashflow.whyAverage")}</p>
       </CardContent>
     </Card>
   );
@@ -126,7 +126,7 @@ export async function SafeToSpendTile({ cashFlow }: { cashFlow: CashFlow }) {
   return (
     <Card>
       <CardHeader className="gap-1 pb-3">
-        <CardTitle className="text-sm font-medium text-muted-foreground" as="h2">
+        <CardTitle className="text-muted-foreground text-sm font-medium" as="h2">
           {t("web.cashflow.safeToSpendMonthly")}
         </CardTitle>
         <p className="text-h1 font-semibold tabular-nums">
@@ -144,12 +144,12 @@ export async function SafeToSpendTile({ cashFlow }: { cashFlow: CashFlow }) {
           </div>
           <div className="flex items-baseline justify-between gap-3">
             <dt className="text-muted-foreground">{t("web.cashflow.held")}</dt>
-            <dd className="font-medium tabular-nums text-warning">
+            <dd className="text-warning font-medium tabular-nums">
               {formatMinorUnits(summary.heldCents, summary.currency)}
             </dd>
           </div>
         </dl>
-        <p className="text-sm text-muted-foreground">
+        <p className="text-muted-foreground text-sm">
           {t(
             summary.currentMonthLessons === 1
               ? "web.cashflow.classesTaughtOne"
@@ -158,13 +158,13 @@ export async function SafeToSpendTile({ cashFlow }: { cashFlow: CashFlow }) {
           )}
         </p>
         {summary.provisionalMonths > 0 && (
-          <p className="text-sm text-muted-foreground">
+          <p className="text-muted-foreground text-sm">
             {provisionalNote(summary.provisionalMonths, t)}
           </p>
         )}
         {others.length > 0 && (
           <div className="space-y-1 border-t pt-2">
-            <p className="text-sm text-muted-foreground">{t("web.cashflow.otherCurrencies")}</p>
+            <p className="text-muted-foreground text-sm">{t("web.cashflow.otherCurrencies")}</p>
             <dl className="space-y-1 text-sm">
               {others.map((other) => (
                 <div key={other.currency} className="flex items-baseline justify-between gap-3">
@@ -209,13 +209,13 @@ function Stat({
   const valueTone = tone === "success" ? "text-success" : tone === "warning" ? "text-warning" : "";
   return (
     <div className="space-y-0.5">
-      <div className="text-xs text-muted-foreground">{label}</div>
+      <div className="text-muted-foreground text-xs">{label}</div>
       <div
         className={`font-semibold tabular-nums ${hero ? "font-display text-2xl" : "text-lg"} ${valueTone}`}
       >
         {value}
       </div>
-      {sub ? <div className="text-xs text-muted-foreground">{sub}</div> : null}
+      {sub ? <div className="text-muted-foreground text-xs">{sub}</div> : null}
     </div>
   );
 }

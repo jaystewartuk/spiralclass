@@ -54,7 +54,7 @@ function SpanishTerms({ stripeAvailable }: { stripeAvailable: boolean }) {
         <Heading level={2} as="h1">
           Términos y condiciones
         </Heading>
-        <p className="text-xs text-muted-foreground">
+        <p className="text-muted-foreground text-xs">
           Última actualización: 10 de julio de 2026 ·{" "}
           <Link className="underline" href="/terms?lang=en">
             English
@@ -267,7 +267,7 @@ function EnglishTerms({ stripeAvailable }: { stripeAvailable: boolean }) {
         <Heading level={2} as="h1">
           Terms of Service
         </Heading>
-        <p className="text-xs text-muted-foreground">
+        <p className="text-muted-foreground text-xs">
           Last updated: July 10, 2026 ·{" "}
           <Link className="underline" href="/terms">
             Español

@@ -378,7 +378,7 @@ export default async function TeacherBookPage({
 
           <section
             aria-labelledby="book-times"
-            className="border-t border-border p-4 lg:col-span-3 lg:border-l lg:border-t-0 lg:p-6"
+            className="border-border border-t p-4 lg:col-span-3 lg:border-t-0 lg:border-l lg:p-6"
           >
             <div className="mb-1 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
               {/* Capitalised in JS, not by `capitalize`: that utility
@@ -391,14 +391,14 @@ export default async function TeacherBookPage({
                 )}
               </h2>
               {slots.length > 0 && (
-                <p className="text-sm text-muted-foreground">
+                <p className="text-muted-foreground text-sm">
                   {t("web.dashboard.classes.book.slotCount", { count: slots.length })}
                 </p>
               )}
             </div>
 
             {crossZone && studentTz && (
-              <p className="mb-4 text-sm text-muted-foreground">
+              <p className="text-muted-foreground mb-4 text-sm">
                 {t("web.dashboard.classes.book.studentZoneNote", {
                   name: studentName,
                   tz: timezoneCityLabel(studentTz),
@@ -437,7 +437,7 @@ export default async function TeacherBookPage({
                 help article: yes, they are told. Only beside times she can
                 pick — on an empty day it is a promise about nothing. */}
             {slots.length > 0 && (
-              <p className="mt-6 flex items-start gap-2 border-t pt-4 text-sm text-muted-foreground">
+              <p className="text-muted-foreground mt-6 flex items-start gap-2 border-t pt-4 text-sm">
                 <Mail className="mt-0.5 size-4 shrink-0" aria-hidden />
                 <span>
                   {t("web.dashboard.classes.book.whenYouBookBody", { name: studentName })}
@@ -524,12 +524,12 @@ function BookingContext({
         <div className="flex flex-wrap items-center gap-3">
           <span
             aria-hidden
-            className="inline-flex size-10 shrink-0 select-none items-center justify-center rounded-full bg-secondary font-semibold text-secondary-foreground"
+            className="bg-secondary text-secondary-foreground inline-flex size-10 shrink-0 items-center justify-center rounded-full font-semibold select-none"
           >
             {initialsFrom(studentName, studentEmail)}
           </span>
           <span className="min-w-0 flex-1">
-            <span className="block text-sm text-muted-foreground">
+            <span className="text-muted-foreground block text-sm">
               {t("web.dashboard.classes.book.student")}
             </span>
             <span className="block truncate font-semibold">{studentName}</span>
@@ -545,7 +545,7 @@ function BookingContext({
         </div>
 
         <div className="border-t pt-4">
-          <p id="book-package" className="mb-2 text-sm text-muted-foreground">
+          <p id="book-package" className="text-muted-foreground mb-2 text-sm">
             {t("web.dashboard.classes.book.package")}
           </p>
           {packages.length === 1 ? (
@@ -567,7 +567,7 @@ function BookingContext({
                     href={bookHref({ studentId, packageId: p.id, date })}
                     aria-current={active ? "true" : undefined}
                     className={cn(
-                      "flex min-h-target flex-col justify-center rounded-md border px-3 py-2 text-sm transition-colors",
+                      "min-h-target flex flex-col justify-center rounded-md border px-3 py-2 text-sm transition-colors",
                       // A SOLID selected state, not `bg-primary/10`: a tint
                       // composites against whatever is behind it, which is the
                       // defect `Badge` was migrated off (see badge.tsx).
@@ -641,7 +641,7 @@ function SlotGroups({
     <div className="space-y-5">
       {groups.map(({ part, slots: partSlots }) => (
         <section key={part} aria-labelledby={`book-part-${part}`}>
-          <h3 id={`book-part-${part}`} className="mb-2 text-sm font-semibold text-muted-foreground">
+          <h3 id={`book-part-${part}`} className="text-muted-foreground mb-2 text-sm font-semibold">
             {DAY_PART_LABEL[part]}
           </h3>
           <ul className="grid grid-cols-2 gap-2 sm:grid-cols-3">
@@ -722,20 +722,20 @@ function EmptyDay({
   t: TFunction;
 }) {
   return (
-    <div className="rounded-md border bg-muted p-6 text-center">
-      <CalendarPlus className="mx-auto mb-3 size-8 text-muted-foreground" aria-hidden />
+    <div className="bg-muted rounded-md border p-6 text-center">
+      <CalendarPlus className="text-muted-foreground mx-auto mb-3 size-8" aria-hidden />
       <p className="font-semibold">{t("book.empty")}</p>
       {nextAvailableDate && nextAvailableHref ? (
         <Button
           asChild
-          className="mt-4 h-auto min-h-target max-w-full whitespace-normal py-2 text-center"
+          className="min-h-target mt-4 h-auto max-w-full py-2 text-center whitespace-normal"
         >
           <HardLink href={nextAvailableHref}>
             {t("web.dashboard.classes.goToNextAvailableDay", { date: nextAvailableLabel })}
           </HardLink>
         </Button>
       ) : (
-        <p className="mt-2 text-sm text-muted-foreground">
+        <p className="text-muted-foreground mt-2 text-sm">
           {t("web.dashboard.classes.book.noTimesInWindow", { date: windowEndLabel })}{" "}
           <Link href="/settings/availability" className="underline">
             {t("web.dashboard.classes.book.checkHours")}

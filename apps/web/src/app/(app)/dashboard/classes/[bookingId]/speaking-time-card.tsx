@@ -15,14 +15,14 @@ export function SpeakingTimeCard({ summary, t }: { summary: SpeakingTimeSummary;
         <CardDescription>{t("web.dashboard.classes.speakingTime.help")}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-3">
-        <div className="flex h-3 w-full overflow-hidden rounded-full bg-muted">
+        <div className="bg-muted flex h-3 w-full overflow-hidden rounded-full">
           <div
-            className="h-full bg-primary"
+            className="bg-primary h-full"
             style={{ width: `${summary.teacherSharePct}%` }}
             title={t("web.dashboard.classes.speakingTime.teacher")}
           />
           <div
-            className="h-full bg-secondary-foreground/40"
+            className="bg-secondary-foreground/40 h-full"
             style={{ width: `${summary.studentSharePct}%` }}
             title={t("web.dashboard.classes.speakingTime.student")}
           />

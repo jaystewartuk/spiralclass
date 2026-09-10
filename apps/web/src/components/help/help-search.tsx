@@ -81,7 +81,7 @@ export function HelpSearch({ entries }: { entries: HelpSearchEntry[] }) {
         {t("web.help.search.label")}
       </label>
       <Search
-        className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground"
+        className="text-muted-foreground pointer-events-none absolute top-1/2 left-4 h-5 w-5 -translate-y-1/2"
         aria-hidden
       />
       <Input
@@ -113,7 +113,7 @@ export function HelpSearch({ entries }: { entries: HelpSearchEntry[] }) {
         // `no-native-clear` (globals.css) suppresses WebKit's own clear
         // button; this field supplies one of its own and two of them side by
         // side reads as a rendering fault.
-        className="no-native-clear h-12 rounded-full pl-12 pr-12 text-base lg:h-12 lg:text-base"
+        className="no-native-clear h-12 rounded-full pr-12 pl-12 text-base lg:h-12 lg:text-base"
       />
       {searching && (
         <Button
@@ -121,7 +121,7 @@ export function HelpSearch({ entries }: { entries: HelpSearchEntry[] }) {
           variant="ghost"
           size="icon"
           onClick={clear}
-          className="absolute right-1 top-1/2 h-10 w-10 -translate-y-1/2 rounded-full"
+          className="absolute top-1/2 right-1 h-10 w-10 -translate-y-1/2 rounded-full"
         >
           <X className="h-4 w-4" aria-hidden />
           <span className="sr-only">{t("web.help.search.clear")}</span>
@@ -138,11 +138,11 @@ export function HelpSearch({ entries }: { entries: HelpSearchEntry[] }) {
       {open && (
         <div
           className={cn(
-            "absolute left-0 right-0 top-full z-30 mt-2 overflow-hidden rounded-2xl border bg-popover text-left shadow-brand-lg",
+            "bg-popover shadow-brand-lg absolute top-full right-0 left-0 z-30 mt-2 overflow-hidden rounded-2xl border text-left",
           )}
         >
           {results.length === 0 ? (
-            <p className="px-5 py-6 text-sm text-muted-foreground">
+            <p className="text-muted-foreground px-5 py-6 text-sm">
               {t("web.help.search.noResults", { query: trimmed })}
             </p>
           ) : (
@@ -167,15 +167,15 @@ export function HelpSearch({ entries }: { entries: HelpSearchEntry[] }) {
                           clear();
                         }
                       }}
-                      className="flex items-start gap-3 px-5 py-3 hover:bg-muted focus-visible:bg-muted"
+                      className="hover:bg-muted focus-visible:bg-muted flex items-start gap-3 px-5 py-3"
                     >
-                      <Icon className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" aria-hidden />
+                      <Icon className="text-muted-foreground mt-0.5 h-4 w-4 shrink-0" aria-hidden />
                       <span className="min-w-0">
-                        <span className="block text-sm font-semibold text-foreground">
+                        <span className="text-foreground block text-sm font-semibold">
                           {result.label}
                         </span>
                         {result.context && (
-                          <span className="block text-xs text-subtle">{result.context}</span>
+                          <span className="text-subtle block text-xs">{result.context}</span>
                         )}
                         {/* `line-clamp-*` sets `display: -webkit-box`, so the
                             snippet must NOT also carry `block` — the later
@@ -184,7 +184,7 @@ export function HelpSearch({ entries }: { entries: HelpSearchEntry[] }) {
                             right result, not so much that eight results stop
                             being a list. */}
                         {result.snippet && (
-                          <span className="mt-0.5 line-clamp-2 text-xs text-muted-foreground">
+                          <span className="text-muted-foreground mt-0.5 line-clamp-2 text-xs">
                             {result.snippet}
                           </span>
                         )}

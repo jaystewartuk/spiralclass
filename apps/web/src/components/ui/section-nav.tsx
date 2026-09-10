@@ -99,14 +99,14 @@ export function SectionNav({
   return (
     <div
       className={cn(
-        "sticky top-14 z-30 -mx-4 border-b border-border/60 bg-background/95 px-4 py-2 backdrop-blur supports-[backdrop-filter]:bg-background/80 lg:mx-0 lg:rounded-md lg:border",
+        "border-border/60 bg-background/95 supports-[backdrop-filter]:bg-background/80 sticky top-14 z-30 -mx-4 border-b px-4 py-2 backdrop-blur lg:mx-0 lg:rounded-md lg:border",
         className,
       )}
     >
       <nav
         ref={listRef}
         aria-label={ariaLabel}
-        className="flex gap-1 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        className="flex [scrollbar-width:none] gap-1 overflow-x-auto [&::-webkit-scrollbar]:hidden"
       >
         {sections.map((s) => (
           <a
@@ -117,9 +117,9 @@ export function SectionNav({
             // by a fill and a weight, neither of which reaches a screen reader.
             aria-current={activeId === s.id ? "true" : undefined}
             className={cn(
-              "flex shrink-0 items-center whitespace-nowrap rounded-full px-3 py-1.5 text-sm transition-colors focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring",
+              "focus-visible:ring-ring flex shrink-0 items-center rounded-full px-3 py-1.5 text-sm whitespace-nowrap transition-colors focus-visible:ring-3 focus-visible:outline-none",
               activeId === s.id
-                ? "bg-muted font-medium text-foreground"
+                ? "bg-muted text-foreground font-medium"
                 : "text-muted-foreground hover:bg-muted/60 hover:text-foreground",
             )}
           >

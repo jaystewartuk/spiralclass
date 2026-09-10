@@ -67,7 +67,7 @@ export default async function TestimonialsPage() {
               <Heading level={3} as="h2" id="testimonials-heading">
                 {t("web.dashboard.testimonials.yourTestimonials")}
               </Heading>
-              <p className="text-sm text-muted-foreground">
+              <p className="text-muted-foreground text-sm">
                 {items.length > 1
                   ? t("web.dashboard.testimonials.orderHint")
                   : t("web.dashboard.testimonials.previewNote")}

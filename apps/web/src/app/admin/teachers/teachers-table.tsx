@@ -128,7 +128,7 @@ export function TeachersTable({
                 </Badge>
               ) : null}
             </div>
-            <div className="text-xs text-muted-foreground">{row.original.email}</div>
+            <div className="text-muted-foreground text-xs">{row.original.email}</div>
           </RowLink>
         ),
       },
@@ -159,7 +159,7 @@ export function TeachersTable({
             ) : (
               <Badge variant="outline">{t("web.admin.teachers.notConnected")}</Badge>
             )}
-            <div className="mt-1 text-xs text-muted-foreground">
+            <div className="text-muted-foreground mt-1 text-xs">
               {row.original.stripeChargesEnabled ? t("web.admin.teachers.charges") : "—"}
               {" / "}
               {row.original.stripePayoutsEnabled ? t("web.admin.teachers.payouts") : "—"}
@@ -266,7 +266,7 @@ export function TeachersTable({
       </FilterBar>
 
       {visibleTeachers.length === 0 ? (
-        <p className="text-sm text-muted-foreground">{t("web.admin.teachers.noneMatched")}</p>
+        <p className="text-muted-foreground text-sm">{t("web.admin.teachers.noneMatched")}</p>
       ) : (
         <TableShell>
           <DataTable

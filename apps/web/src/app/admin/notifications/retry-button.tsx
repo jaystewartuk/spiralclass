@@ -16,14 +16,14 @@ export function RetryButton({ notificationId }: { notificationId: string }) {
   );
 
   if (state?.ok)
-    return <span className="text-xs text-success">{t("web.admin.notifications.requeued")}</span>;
+    return <span className="text-success text-xs">{t("web.admin.notifications.requeued")}</span>;
   return (
     <form action={action} className="inline">
       <input type="hidden" name="notificationId" value={notificationId} />
       <Button type="submit" variant="outline" size="sm" disabled={pending}>
         {pending ? "…" : t("common.retry")}
       </Button>
-      {state?.error && <span className="ml-2 text-xs text-destructive">{state.error}</span>}
+      {state?.error && <span className="text-destructive ml-2 text-xs">{state.error}</span>}
     </form>
   );
 }

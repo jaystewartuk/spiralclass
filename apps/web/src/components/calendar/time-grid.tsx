@@ -83,13 +83,13 @@ export function TimeGrid({
   const showDayHeaders = days.length > 1;
 
   return (
-    <div className="overflow-x-auto rounded-lg border bg-card shadow-brand-sm">
+    <div className="bg-card shadow-brand-sm overflow-x-auto rounded-lg border">
       {/* The floor is for SEVEN columns. A one-column day grid already fits
           any viewport, and forcing 36rem on it would make the day view scroll
           sideways inside its own (narrower) column on a wide screen. */}
       <div className={cn("flex", days.length > 1 && "min-w-table")}>
         {/* Hour gutter */}
-        <div className="w-16 shrink-0 border-r bg-muted/30">
+        <div className="bg-muted/30 w-16 shrink-0 border-r">
           {showDayHeaders && <div className="h-14 border-b" />}
           <div style={{ height: gridHeight }} className="relative">
             {hours.map((h, i) => (
@@ -101,7 +101,7 @@ export function TimeGrid({
                 // be blanked, which left the topmost hour — often the one
                 // holding the first class of the day — as the only unlabelled
                 // row on the axis.
-                className="absolute right-2 pt-1 text-sm tabular-nums text-muted-foreground"
+                className="text-muted-foreground absolute right-2 pt-1 text-sm tabular-nums"
               >
                 {String(h).padStart(2, "0")}:00
               </div>
@@ -131,16 +131,16 @@ export function TimeGrid({
                   <Link
                     href={dayHref(day.ymd)}
                     className={cn(
-                      "flex h-14 flex-col items-center justify-center gap-0.5 border-b transition-colors hover:bg-muted",
+                      "hover:bg-muted flex h-14 flex-col items-center justify-center gap-0.5 border-b transition-colors",
                       isToday ? "bg-primary/10" : "text-muted-foreground",
                     )}
                   >
-                    <span className="text-sm capitalize leading-none">
+                    <span className="text-sm leading-none capitalize">
                       {weekdayFmt.format(dayDate)}
                     </span>
                     <span
                       className={cn(
-                        "flex h-7 w-7 items-center justify-center rounded-full text-sm font-semibold tabular-nums leading-none",
+                        "flex h-7 w-7 items-center justify-center rounded-full text-sm leading-none font-semibold tabular-nums",
                         isToday ? "bg-primary text-primary-foreground" : "text-foreground",
                       )}
                     >
@@ -157,7 +157,7 @@ export function TimeGrid({
                     <div
                       key={h}
                       style={{ top: i * HOUR_PX }}
-                      className="absolute inset-x-0 border-t border-border/60"
+                      className="border-border/60 absolute inset-x-0 border-t"
                     />
                   ))}
 
@@ -192,7 +192,7 @@ export function TimeGrid({
                           width: `calc(${widthPct}% - 4px)`,
                         }}
                         className={cn(
-                          "absolute z-10 overflow-hidden rounded-md border border-l-4 px-1.5 py-0.5 text-sm leading-snug shadow-sm transition-shadow hover:shadow-brand-md",
+                          "hover:shadow-brand-md absolute z-10 overflow-hidden rounded-md border border-l-4 px-1.5 py-0.5 text-sm leading-snug shadow-sm transition-shadow",
                           styleFor(l.ev.status).block,
                           // Too short for two lines: run them together so the
                           // student's name is still there rather than clipped

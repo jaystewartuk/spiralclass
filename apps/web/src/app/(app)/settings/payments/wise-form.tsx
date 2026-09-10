@@ -58,7 +58,7 @@ export function WiseForm(props: WiseFormProps) {
           all. It sits in its own bordered row rather than as a bare checkbox
           above the fields, because it is a different KIND of control from the
           three values under it. */}
-      <div className="flex items-start gap-3 rounded-md border border-border bg-muted/40 p-4">
+      <div className="border-border bg-muted/40 flex items-start gap-3 rounded-md border p-4">
         <Checkbox
           id="wise-enabled"
           name="enabled"
@@ -69,10 +69,10 @@ export function WiseForm(props: WiseFormProps) {
           className="mt-0.5"
         />
         <div className="min-w-0 space-y-1">
-          <Label htmlFor="wise-enabled" className="text-sm font-medium leading-snug">
+          <Label htmlFor="wise-enabled" className="text-sm leading-snug font-medium">
             {t("web.settings.payments.wiseEnableLabel")}
           </Label>
-          <p id="wise-enabled-hint" className="text-sm text-muted-foreground">
+          <p id="wise-enabled-hint" className="text-muted-foreground text-sm">
             {t("web.settings.payments.wiseEnableHint")}
           </p>
         </div>
@@ -94,16 +94,16 @@ export function WiseForm(props: WiseFormProps) {
           invalid={Boolean(state?.error)}
           aria-describedby={`${previewId}${state?.error ? ` ${errorId}` : ""}`}
         />
-        <p className="text-sm text-muted-foreground">{t("web.settings.payments.wisetagHint")}</p>
+        <p className="text-muted-foreground text-sm">{t("web.settings.payments.wisetagHint")}</p>
         {/* The link itself, live, on its own ground so it reads as the RESULT
             of the field above rather than as a third sentence of help.
             `aria-live` off deliberately: the field points at it through
             aria-describedby, so a screen reader reaches it on focus instead of
             being interrupted once per keystroke. */}
-        <p id={previewId} className="rounded-md bg-muted/60 px-3 py-2 text-xs">
+        <p id={previewId} className="bg-muted/60 rounded-md px-3 py-2 text-xs">
           {trimmed && handleValid ? (
             <a
-              className="inline-flex items-center gap-1.5 break-all font-mono text-primary underline underline-offset-4"
+              className="text-primary inline-flex items-center gap-1.5 font-mono break-all underline underline-offset-4"
               href={`${WISE_PAY_BASE_URL}${encodeURIComponent(trimmed)}`}
               target="_blank"
               rel="noopener noreferrer"
@@ -117,7 +117,7 @@ export function WiseForm(props: WiseFormProps) {
             // trip, rather than only as the server's error after Save.
             <span className="text-warning">{t("web.settings.payments.wisetagInvalid")}</span>
           ) : (
-            <span className="break-all font-mono text-muted-foreground">{WISE_PAY_BASE_URL}</span>
+            <span className="text-muted-foreground font-mono break-all">{WISE_PAY_BASE_URL}</span>
           )}
         </p>
       </div>
@@ -134,7 +134,7 @@ export function WiseForm(props: WiseFormProps) {
           disabled={pending}
           aria-describedby="wise-account-holder-hint"
         />
-        <p id="wise-account-holder-hint" className="text-sm text-muted-foreground">
+        <p id="wise-account-holder-hint" className="text-muted-foreground text-sm">
           {t("web.settings.payments.accountHolderHint")}
         </p>
       </div>
@@ -153,7 +153,7 @@ export function WiseForm(props: WiseFormProps) {
       </div>
 
       {state?.error && (
-        <p id={errorId} role="alert" aria-live="polite" className="text-sm text-destructive">
+        <p id={errorId} role="alert" aria-live="polite" className="text-destructive text-sm">
           {state.error}
         </p>
       )}

@@ -79,7 +79,7 @@ export default async function AdminStudentsPage({
     <div className="space-y-6">
       <header>
         <PageHeader title={t("web.admin.students.title")} />
-        <p className="text-sm text-muted-foreground">{t("web.admin.students.subtitle")}</p>
+        <p className="text-muted-foreground text-sm">{t("web.admin.students.subtitle")}</p>
       </header>
 
       <Card>

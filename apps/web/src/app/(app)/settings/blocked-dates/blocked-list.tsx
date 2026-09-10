@@ -33,7 +33,7 @@ export function BlockedList({
   const t = useT();
 
   return (
-    <ul className="divide-y divide-border">
+    <ul className="divide-border divide-y">
       {blocks.map((block) => {
         const range = formatRange(block);
         const running = block.start <= todayYmd;
@@ -57,7 +57,7 @@ export function BlockedList({
                       })}
                 </Badge>
               </div>
-              <p className="text-sm text-muted-foreground">
+              <p className="text-muted-foreground text-sm">
                 {t("web.settings.blockedDates.dayCount", { count: rangeLength(block) })}
                 {block.reason ? ` · ${block.reason}` : ""}
               </p>

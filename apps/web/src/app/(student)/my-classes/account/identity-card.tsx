@@ -61,9 +61,9 @@ export function AccountIdentityCard({
           <Heading level={3} as="h2" className="break-words">
             {name}
           </Heading>
-          {email ? <p className="break-all text-sm text-muted-foreground">{email}</p> : null}
+          {email ? <p className="text-muted-foreground text-sm break-all">{email}</p> : null}
           {meta.length > 0 ? (
-            <p className="flex flex-wrap items-center gap-x-2 text-sm text-muted-foreground">
+            <p className="text-muted-foreground flex flex-wrap items-center gap-x-2 text-sm">
               {meta.map((item, index) => (
                 // The separator travels INSIDE the item it precedes, so a wrap
                 // on a narrow screen takes it down with its own fact rather
@@ -130,7 +130,7 @@ export function AccountIdentityCard({
         </div>
       </div>
 
-      <p id="photo-hint" className="text-sm text-muted-foreground">
+      <p id="photo-hint" className="text-muted-foreground text-sm">
         {t("web.myClasses.account.photo.hint")}
       </p>
       <FormStatus state={uploadState} savedMessage={t("web.myClasses.account.photo.saved")} />

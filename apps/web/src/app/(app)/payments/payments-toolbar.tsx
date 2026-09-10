@@ -51,7 +51,7 @@ export function PaymentsToolbar({
           translation or a raised text size makes them not. */}
       <nav
         aria-label={t("web.payments.views.label")}
-        className="-mx-1 flex gap-1 self-start overflow-x-auto rounded-md bg-muted p-1"
+        className="bg-muted -mx-1 flex gap-1 self-start overflow-x-auto rounded-md p-1"
       >
         {PAYMENTS_SCOPES.map((value) => {
           const active = value === scope;
@@ -61,7 +61,7 @@ export function PaymentsToolbar({
               href={paymentsHref(value, search)}
               aria-current={active ? "page" : undefined}
               className={cn(
-                "flex items-center gap-2 whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium transition-colors",
+                "flex items-center gap-2 rounded-sm px-3 py-1.5 text-sm font-medium whitespace-nowrap transition-colors",
                 active
                   ? "bg-background text-foreground shadow-brand-sm"
                   : "text-muted-foreground hover:text-foreground",
@@ -82,7 +82,7 @@ export function PaymentsToolbar({
         {scope !== "all" && <input type="hidden" name="show" value={scope} />}
         <div className="relative min-w-0 flex-1 lg:w-64 lg:flex-none">
           <Search
-            className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
+            className="text-muted-foreground pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2"
             aria-hidden
           />
           <Input

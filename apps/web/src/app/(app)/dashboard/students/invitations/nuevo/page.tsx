@@ -49,12 +49,12 @@ export default async function InviteStudentsPage({
       <header>
         <Link
           href="/dashboard/students/invitations"
-          className="text-xs text-muted-foreground hover:text-foreground"
+          className="text-muted-foreground hover:text-foreground text-xs"
         >
           {t("web.dashboard.invitations.backToStudents")}
         </Link>
         <PageHeader title={t("web.dashboard.invitations.form.title")} />
-        <p className="text-sm text-muted-foreground">
+        <p className="text-muted-foreground text-sm">
           {t("web.dashboard.invitations.form.description")}
         </p>
       </header>

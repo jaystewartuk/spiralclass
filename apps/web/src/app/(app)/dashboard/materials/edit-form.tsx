@@ -80,7 +80,7 @@ export function LibraryEditForm({
   return (
     <form
       action={formAction}
-      className="order-last mt-2 w-full space-y-3 rounded-md border bg-muted/40 p-3"
+      className="bg-muted/40 order-last mt-2 w-full space-y-3 rounded-md border p-3"
     >
       <input type="hidden" name="materialId" value={material.id} />
       <input type="hidden" name="levelId" value={levelId} />
@@ -161,7 +161,7 @@ export function LibraryEditForm({
       </div>
 
       {state?.error && (
-        <p role="alert" className="text-sm text-destructive">
+        <p role="alert" className="text-destructive text-sm">
           {state.error}
         </p>
       )}

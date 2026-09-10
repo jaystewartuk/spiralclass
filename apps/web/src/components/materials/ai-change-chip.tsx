@@ -25,7 +25,7 @@ export function AiChangeChip({
   return (
     <div
       className={cn(
-        "flex items-center gap-1.5 rounded-full bg-clay-bg px-2 py-1 text-clay",
+        "bg-clay-bg text-clay flex items-center gap-1.5 rounded-full px-2 py-1",
         className,
       )}
       aria-live="polite"

@@ -59,7 +59,7 @@ export const FilterBar = React.forwardRef<
     <form
       ref={ref}
       action={action}
-      className={cn("grid gap-3 rounded-md border bg-muted/30 p-4", GRID_COLS[columns])}
+      className={cn("bg-muted/30 grid gap-3 rounded-md border p-4", GRID_COLS[columns])}
     >
       {children}
       {hidden
@@ -138,7 +138,7 @@ export function FilterSelect({
               },
             }
           : { defaultValue: defaultValue ?? "" })}
-        className="h-9 w-full rounded-md border bg-background px-2 text-sm"
+        className="bg-background h-9 w-full rounded-md border px-2 text-sm"
       >
         {options.map((o) => (
           <option key={o.value} value={o.value}>

@@ -33,7 +33,7 @@ export default function StudentError({
         <Heading level={1}>{t("common.error")}</Heading>
         <p className="text-muted-foreground">{t("web.errorBoundary.student.body")}</p>
         {error.digest && (
-          <p className="text-xs text-muted-foreground">
+          <p className="text-muted-foreground text-xs">
             {t("web.errorBoundary.reference")}: <code>{error.digest}</code>
           </p>
         )}

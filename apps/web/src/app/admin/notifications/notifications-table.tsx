@@ -95,7 +95,7 @@ export function NotificationsTable({
         cell: ({ row }) => (
           <>
             <div className="font-medium">{row.original.recipient?.name ?? "—"}</div>
-            <div className="text-xs text-muted-foreground">
+            <div className="text-muted-foreground text-xs">
               {row.original.recipientType}
               {row.original.recipient?.email ? ` · ${row.original.recipient.email}` : ""}
             </div>
@@ -141,7 +141,7 @@ export function NotificationsTable({
         cell: ({ row }) => (
           <span
             className={
-              row.original.suppressed ? "text-xs text-warning" : "text-xs text-destructive"
+              row.original.suppressed ? "text-warning text-xs" : "text-destructive text-xs"
             }
           >
             {row.original.suppressed ?? row.original.error ?? ""}
@@ -161,7 +161,7 @@ export function NotificationsTable({
                   href={n.resendUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-xs text-muted-foreground underline hover:text-foreground"
+                  className="text-muted-foreground hover:text-foreground text-xs underline"
                 >
                   {t("web.admin.notifications.resendLink")}
                 </a>
@@ -213,7 +213,7 @@ export function NotificationsTable({
       </FilterBar>
 
       {visibleNotifications.length === 0 ? (
-        <p className="text-sm text-muted-foreground">{t("web.admin.notifications.noneMatched")}</p>
+        <p className="text-muted-foreground text-sm">{t("web.admin.notifications.noneMatched")}</p>
       ) : (
         <TableShell>
           <DataTable

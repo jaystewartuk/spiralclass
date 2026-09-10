@@ -186,7 +186,7 @@ export function TimezoneForm({
           searchPlaceholder={t("web.onboarding.timezone.countrySearchPlaceholder")}
           emptyText={t("web.onboarding.timezone.countryEmpty")}
         />
-        <p className="text-xs text-muted-foreground">{t("web.onboarding.timezone.countryHint")}</p>
+        <p className="text-muted-foreground text-xs">{t("web.onboarding.timezone.countryHint")}</p>
       </div>
       <div className="space-y-2">
         <Label htmlFor="pricingCurrency">{t("web.onboarding.timezone.pricingCurrency")}</Label>
@@ -209,7 +209,7 @@ export function TimezoneForm({
             ))}
           </SelectContent>
         </Select>
-        <p className="text-xs text-muted-foreground">
+        <p className="text-muted-foreground text-xs">
           {t("web.onboarding.timezone.pricingCurrencyHint")}
         </p>
       </div>
@@ -235,7 +235,7 @@ export function TimezoneForm({
           aria-invalid={errors.targetLanguage ? true : undefined}
           aria-describedby={errors.targetLanguage ? "targetLanguage-field-error" : undefined}
         />
-        <p className="text-xs text-muted-foreground">
+        <p className="text-muted-foreground text-xs">
           {t("web.onboarding.timezone.targetLanguageHint")}
         </p>
         <FieldError id="targetLanguage-field-error" message={errors.targetLanguage} />
@@ -243,7 +243,7 @@ export function TimezoneForm({
       <div className="space-y-2">
         <Label htmlFor="timezone">{t("onboarding.timezone.title")}</Label>
         {detected && (
-          <p className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
+          <p className="text-muted-foreground flex flex-wrap items-center gap-2 text-sm">
             <span>{t("web.onboarding.timezone.detected")}</span>
             <Badge variant="secondary">{detected}</Badge>
             {detected !== value && (
@@ -315,7 +315,7 @@ export function TimezoneForm({
       />
       <FieldError id="phoneE164-error" message={errors.phoneE164} />
       {state?.error && (
-        <p id="timezone-error" role="alert" aria-live="polite" className="text-sm text-destructive">
+        <p id="timezone-error" role="alert" aria-live="polite" className="text-destructive text-sm">
           {state.error}
         </p>
       )}

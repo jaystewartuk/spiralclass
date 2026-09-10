@@ -41,26 +41,26 @@ export function SiteFooter({ localeToggle }: { localeToggle?: ReactNode }) {
     <footer className={cn("mt-12 border-t", mobileOnly && "lg:hidden")}>
       <div className="container flex flex-col items-center gap-5 py-8 text-center">
         {/* Wordmark — gives the footer a little brand presence */}
-        <span className="font-display text-sm font-semibold text-foreground/70">SpiralClass</span>
+        <span className="font-display text-foreground/70 text-sm font-semibold">SpiralClass</span>
 
         {/* Page links — generous spacing so they breathe when they wrap on mobile */}
-        <nav className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-xs text-muted-foreground">
-          <a href="/about" className="transition-colors hover:text-foreground">
+        <nav className="text-muted-foreground flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-xs">
+          <a href="/about" className="hover:text-foreground transition-colors">
             {t("web.siteFooter.about")}
           </a>
-          <a href="/features" className="transition-colors hover:text-foreground">
+          <a href="/features" className="hover:text-foreground transition-colors">
             {t("web.siteFooter.features")}
           </a>
-          <a href="/pricing" className="transition-colors hover:text-foreground">
+          <a href="/pricing" className="hover:text-foreground transition-colors">
             {t("web.siteFooter.pricing")}
           </a>
-          <Link href="/help" className="transition-colors hover:text-foreground">
+          <Link href="/help" className="hover:text-foreground transition-colors">
             {t("web.siteFooter.help")}
           </Link>
-          <a href="/terms" className="transition-colors hover:text-foreground">
+          <a href="/terms" className="hover:text-foreground transition-colors">
             {t("web.siteFooter.terms")}
           </a>
-          <a href="/privacy-notice" className="transition-colors hover:text-foreground">
+          <a href="/privacy-notice" className="hover:text-foreground transition-colors">
             {t("web.siteFooter.privacy")}
           </a>
           {/* The repository is public (AGPL-3.0-only) and the site says so —
@@ -70,7 +70,7 @@ export function SiteFooter({ localeToggle }: { localeToggle?: ReactNode }) {
             href={SOURCE_CODE_URL}
             target="_blank"
             rel="noopener noreferrer"
-            className="transition-colors hover:text-foreground"
+            className="hover:text-foreground transition-colors"
           >
             {t("web.siteFooter.sourceCode")}
           </a>
@@ -78,21 +78,21 @@ export function SiteFooter({ localeToggle }: { localeToggle?: ReactNode }) {
 
         {/* Preferences — language + theme, grouped into a pill so they read as
             settings rather than more navigation. */}
-        <div className="flex items-center gap-3 rounded-full border bg-muted/30 px-4 py-1.5">
+        <div className="bg-muted/30 flex items-center gap-3 rounded-full border px-4 py-1.5">
           {localeToggle}
-          <span className="h-3.5 w-px bg-border" aria-hidden />
+          <span className="bg-border h-3.5 w-px" aria-hidden />
           <ThemeToggle />
         </div>
 
-        <p className="text-sm text-subtle">© {year} SpiralClass</p>
+        <p className="text-subtle text-sm">© {year} SpiralClass</p>
 
-        <p className="text-sm text-subtle">
+        <p className="text-subtle text-sm">
           {t("web.siteFooter.madeBy")}{" "}
           <a
             href="https://jaystewart.co.uk"
             target="_blank"
             rel="noopener noreferrer"
-            className="transition-colors hover:text-foreground"
+            className="hover:text-foreground transition-colors"
           >
             Jay Stewart
           </a>

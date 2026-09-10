@@ -69,12 +69,12 @@ export default async function TeacherChatPage({
   // and this route had no main landmark at all before.
   return (
     <main className="flex h-full flex-col">
-      <header className="flex shrink-0 items-center gap-3 border-b border-border bg-background/95 px-2 py-2.5 backdrop-blur supports-[backdrop-filter]:bg-background/80 lg:px-4">
+      <header className="border-border bg-background/95 supports-[backdrop-filter]:bg-background/80 flex shrink-0 items-center gap-3 border-b px-2 py-2.5 backdrop-blur lg:px-4">
         {/* The back arrow is only an affordance while the list is a SCREEN.
             At `desktop-wide` the rail is on the left the whole time, so an
             arrow pointing at something already visible is just a control that
             can be pressed by mistake. */}
-        <Button asChild variant="ghost" size="icon" className="shrink-0 desktop-wide:hidden">
+        <Button asChild variant="ghost" size="icon" className="desktop-wide:hidden shrink-0">
           <Link
             href="/dashboard/messages"
             aria-label={t("web.messages.backToMessages")}
@@ -91,7 +91,7 @@ export default async function TeacherChatPage({
             </Link>
           </Heading>
           {ts.student.timezone ? (
-            <p className="truncate text-sm text-muted-foreground">
+            <p className="text-muted-foreground truncate text-sm">
               <PeerLocalTime
                 initialTime={formatTimeInZone(new Date(), ts.student.timezone, locale)}
                 timeZone={ts.student.timezone}
@@ -105,7 +105,7 @@ export default async function TeacherChatPage({
         <Button asChild variant="outline" size="sm" className="shrink-0">
           <Link href={profileHref} aria-label={t("web.messages.openStudentProfile")}>
             <UserRound className="h-4 w-4" />
-            <span className="hidden desktop:inline">{t("web.messages.studentProfile")}</span>
+            <span className="desktop:inline hidden">{t("web.messages.studentProfile")}</span>
           </Link>
         </Button>
       </header>

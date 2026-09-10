@@ -16,9 +16,9 @@ export default async function TeacherMessagesPage() {
 
   return (
     <main className="flex h-full flex-col items-center justify-center gap-3 px-6 text-center">
-      <MessageSquare className="h-10 w-10 text-muted-foreground/40" aria-hidden />
-      <p className="font-bold text-foreground">{t("web.messages.pickAConversation")}</p>
-      <p className="max-w-prose text-sm text-muted-foreground">{t("web.messages.description")}</p>
+      <MessageSquare className="text-muted-foreground/40 h-10 w-10" aria-hidden />
+      <p className="text-foreground font-bold">{t("web.messages.pickAConversation")}</p>
+      <p className="text-muted-foreground max-w-prose text-sm">{t("web.messages.description")}</p>
     </main>
   );
 }

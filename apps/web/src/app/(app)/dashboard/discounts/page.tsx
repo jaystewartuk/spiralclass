@@ -151,7 +151,7 @@ export default async function DiscountsPage() {
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <ul className="list-disc space-y-2 pl-5 text-sm text-muted-foreground">
+        <ul className="text-muted-foreground list-disc space-y-2 pl-5 text-sm">
           <li>{t("web.dashboard.discounts.howType")}</li>
           <li>{t("web.dashboard.discounts.howLink")}</li>
           <li>{t("web.dashboard.discounts.howCost")}</li>
@@ -172,15 +172,15 @@ export default async function DiscountsPage() {
         <Card>
           <CardContent className="space-y-4 py-8">
             <div className="flex items-start gap-3">
-              <Tag className="mt-0.5 h-8 w-8 shrink-0 text-muted-foreground/40" aria-hidden />
+              <Tag className="text-muted-foreground/40 mt-0.5 h-8 w-8 shrink-0" aria-hidden />
               <div className="space-y-1">
                 <p className="font-bold">{t("web.dashboard.discounts.emptyTitle")}</p>
-                <p className="text-sm text-muted-foreground">
+                <p className="text-muted-foreground text-sm">
                   {t("web.dashboard.discounts.emptyBody")}
                 </p>
               </div>
             </div>
-            <ul className="list-disc space-y-2 pl-5 text-sm text-muted-foreground">
+            <ul className="text-muted-foreground list-disc space-y-2 pl-5 text-sm">
               <li>{t("web.dashboard.discounts.emptyUseWinBack")}</li>
               <li>{t("web.dashboard.discounts.emptyUseQuietWeek")}</li>
               <li>{t("web.dashboard.discounts.emptyUseFirstBuy")}</li>

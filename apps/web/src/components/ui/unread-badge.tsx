@@ -32,7 +32,7 @@ export function UnreadBadge({
       <span
         aria-hidden
         className={cn(
-          "inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1.5 text-xs font-semibold leading-none text-primary-foreground",
+          "bg-primary text-primary-foreground inline-flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-xs leading-none font-semibold",
           className,
         )}
       >

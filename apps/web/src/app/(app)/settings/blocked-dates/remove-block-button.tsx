@@ -44,7 +44,7 @@ export function RemoveBlockButton({
           variant={variant}
           size={size}
           aria-label={t("web.settings.blockedDates.removeLabel", { range })}
-          className="gap-1.5 text-destructive hover:bg-destructive-bg hover:text-destructive"
+          className="text-destructive hover:bg-destructive-bg hover:text-destructive gap-1.5"
         >
           <Trash2 className="size-4" aria-hidden />
           {t("web.settings.blockedDates.remove")}

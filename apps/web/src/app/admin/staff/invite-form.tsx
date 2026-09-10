@@ -43,7 +43,7 @@ export function InviteForm() {
       action={action}
       onSubmit={handleSubmit}
       noValidate
-      className="space-y-3 rounded-md border bg-muted/30 p-4"
+      className="bg-muted/30 space-y-3 rounded-md border p-4"
     >
       <h3 className="text-sm font-semibold">{t("web.admin.staff.addAdmin")}</h3>
       <div className="grid gap-3 lg:grid-cols-[2fr_1fr_auto] lg:items-end">
@@ -67,7 +67,7 @@ export function InviteForm() {
             name="role"
             required
             defaultValue="support"
-            className="h-9 w-full rounded-md border bg-background px-2 text-sm"
+            className="bg-background h-9 w-full rounded-md border px-2 text-sm"
           >
             {ROLES.map((r) => (
               <option key={r} value={r}>
@@ -80,8 +80,8 @@ export function InviteForm() {
           {pending ? "…" : t("web.admin.staff.add")}
         </Button>
       </div>
-      {state?.error && <p className="text-sm text-destructive">{state.error}</p>}
-      {state?.ok && <p className="text-sm text-success">{t("web.admin.staff.added")}</p>}
+      {state?.error && <p className="text-destructive text-sm">{state.error}</p>}
+      {state?.ok && <p className="text-success text-sm">{t("web.admin.staff.added")}</p>}
     </form>
   );
 }
@@ -107,7 +107,7 @@ export function RoleSelect({
         name="role"
         defaultValue={currentRole}
         disabled={pending || selfDisabled}
-        className="h-8 rounded-md border bg-background px-2 text-sm"
+        className="bg-background h-8 rounded-md border px-2 text-sm"
       >
         {ROLES.map((r) => (
           <option key={r} value={r}>
@@ -118,7 +118,7 @@ export function RoleSelect({
       <Button type="submit" size="sm" variant="outline" disabled={pending || selfDisabled}>
         {t("common.save")}
       </Button>
-      {state?.error && <span className="text-xs text-destructive">{state.error}</span>}
+      {state?.error && <span className="text-destructive text-xs">{state.error}</span>}
     </form>
   );
 }
@@ -149,7 +149,7 @@ export function ToggleDisabledButton({
       >
         {pending ? "…" : isDisabled ? t("web.admin.staff.enable") : t("web.admin.staff.disable")}
       </Button>
-      {state?.error && <span className="ml-2 text-xs text-destructive">{state.error}</span>}
+      {state?.error && <span className="text-destructive ml-2 text-xs">{state.error}</span>}
     </form>
   );
 }

@@ -570,12 +570,12 @@ export function MaterialForm({
   // field has no `name` (never submitted with the save form) and its Enter key
   // triggers a refine instead of submitting the surrounding form.
   const editWithAi = body.trim() ? (
-    <div className="space-y-2 rounded-md border bg-muted/40 p-3">
+    <div className="bg-muted/40 space-y-2 rounded-md border p-3">
       <div className="flex items-center gap-1.5">
-        <Sparkles className="size-4 text-primary" aria-hidden />
+        <Sparkles className="text-primary size-4" aria-hidden />
         <Label htmlFor="refine-instruction">{t("classContent.author.editWithAi")}</Label>
       </div>
-      <p className="text-xs text-muted-foreground">{t("classContent.author.refineHint")}</p>
+      <p className="text-muted-foreground text-xs">{t("classContent.author.refineHint")}</p>
       <div className="flex gap-2">
         <Input
           id="refine-instruction"
@@ -601,7 +601,7 @@ export function MaterialForm({
         </Button>
       </div>
       {!isPro && <ProLockNote message={t("classContent.author.proRequired")} />}
-      {refineState?.error && <p className="text-sm text-destructive">{refineState.error}</p>}
+      {refineState?.error && <p className="text-destructive text-sm">{refineState.error}</p>}
       {lastAiChange && (
         <AiChangeChip>
           {t("classContent.author.aiChangeApplied")}
@@ -617,20 +617,20 @@ export function MaterialForm({
     <div className="space-y-4">
       <div className="space-y-4">
         {templateList.length > 0 && (
-          <div className="space-y-1.5 rounded-md border bg-muted/40 p-3">
-            <p className="text-xs font-medium text-muted-foreground">
+          <div className="bg-muted/40 space-y-1.5 rounded-md border p-3">
+            <p className="text-muted-foreground text-xs font-medium">
               {t("classContent.author.startFromTemplate")}
             </p>
             <div className="flex flex-wrap gap-1.5">
               {templateList.map((tpl) => (
                 <div
                   key={tpl.id}
-                  className="flex items-center gap-1 rounded-full border bg-background"
+                  className="bg-background flex items-center gap-1 rounded-full border"
                 >
                   <button
                     type="button"
                     onClick={() => applyTemplate(tpl)}
-                    className="rounded-full px-2.5 py-1 text-xs hover:bg-accent"
+                    className="hover:bg-accent rounded-full px-2.5 py-1 text-xs"
                   >
                     {tpl.label}
                   </button>
@@ -640,7 +640,7 @@ export function MaterialForm({
                     aria-label={t("web.dashboard.classes.classContent.deleteTemplate", {
                       label: tpl.label,
                     })}
-                    className="pr-2 text-xs text-muted-foreground hover:text-destructive"
+                    className="text-muted-foreground hover:text-destructive pr-2 text-xs"
                   >
                     ×
                   </button>
@@ -655,7 +655,7 @@ export function MaterialForm({
           // inside carries that text, and a test targeting the button by text
           // must never match the header.
           <Collapsible title={t("classContent.author.createWithAi")} defaultOpen={!existing}>
-            <form action={genAction} className="space-y-2 rounded-md border bg-muted/40 p-3">
+            <form action={genAction} className="bg-muted/40 space-y-2 rounded-md border p-3">
               {bookingId && <input type="hidden" name="bookingId" value={bookingId} />}
               {!isBooking && <input type="hidden" name="levelId" value={levelId} />}
               {[...focusTagIds].map((id) => (
@@ -685,7 +685,7 @@ export function MaterialForm({
 
               {templateList.length > 0 && (
                 <div className="space-y-1">
-                  <p className="text-xs font-medium text-muted-foreground">
+                  <p className="text-muted-foreground text-xs font-medium">
                     {t("classContent.author.structureLabel")}
                   </p>
                   <Select value={genTemplateId} onValueChange={setGenTemplateId}>
@@ -706,17 +706,17 @@ export function MaterialForm({
 
               {isBooking && continuationCandidates.length > 0 && (
                 <div className="space-y-1">
-                  <p className="text-xs font-medium text-muted-foreground">
+                  <p className="text-muted-foreground text-xs font-medium">
                     {t("classContent.author.continueFromLabel")}
                   </p>
-                  <p className="text-xs text-muted-foreground">
+                  <p className="text-muted-foreground text-xs">
                     {t("classContent.author.continueFromHint")}
                   </p>
                   <div className="max-h-48 space-y-1 overflow-y-auto rounded-md border p-2">
                     {continuationCandidates.map((c) => (
                       <label
                         key={c.materialId}
-                        className="flex cursor-pointer items-start gap-2 rounded px-2 py-1 text-sm hover:bg-accent"
+                        className="hover:bg-accent flex cursor-pointer items-start gap-2 rounded px-2 py-1 text-sm"
                       >
                         <input
                           type="checkbox"
@@ -733,7 +733,7 @@ export function MaterialForm({
                               )}
                           </span>
                           {c.preview && (
-                            <span className="line-clamp-1 block text-xs text-muted-foreground">
+                            <span className="text-muted-foreground line-clamp-1 block text-xs">
                               {c.preview}
                             </span>
                           )}
@@ -762,11 +762,11 @@ export function MaterialForm({
                 </Button>
               </div>
               {isPro ? (
-                <p className="text-xs text-muted-foreground">{t("classContent.author.aiHelp")}</p>
+                <p className="text-muted-foreground text-xs">{t("classContent.author.aiHelp")}</p>
               ) : (
                 <ProLockNote message={t("classContent.author.proRequired")} />
               )}
-              {genState?.error && <p className="text-sm text-destructive">{genState.error}</p>}
+              {genState?.error && <p className="text-destructive text-sm">{genState.error}</p>}
             </form>
           </Collapsible>
         )}
@@ -859,7 +859,7 @@ export function MaterialForm({
               with its top-level tagsSection. */}
           {focusGroups.length > 0 && (
             <div className="space-y-2">
-              <p className="text-xs font-medium text-muted-foreground">
+              <p className="text-muted-foreground text-xs font-medium">
                 {isBooking ? t("classContent.author.focusLabel") : t("libManage.tags")}
               </p>
               <FocusTagSelect
@@ -898,7 +898,7 @@ export function MaterialForm({
               {aiEnabled ? (
                 // Empty body → the generate control above is the entry point.
                 <div className="min-h-32 rounded-md border px-3 py-2">
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-muted-foreground text-sm">
                     {t("classContent.author.previewEmpty")}
                   </p>
                 </div>
@@ -1018,7 +1018,7 @@ export function MaterialForm({
           </Collapsible>
         )}
         {podcastEnabled && !existing && body.trim() && (
-          <div className="flex items-center gap-1.5 rounded-md border bg-muted/40 p-3 text-xs text-muted-foreground">
+          <div className="bg-muted/40 text-muted-foreground flex items-center gap-1.5 rounded-md border p-3 text-xs">
             <Mic className="size-4" aria-hidden />
             {t("classContent.podcast.saveFirst")}
           </div>
@@ -1029,7 +1029,7 @@ export function MaterialForm({
             <form
               action={libAction}
               onSubmit={handleLibSubmit}
-              className="space-y-2 rounded-md border bg-muted/40 p-3"
+              className="bg-muted/40 space-y-2 rounded-md border p-3"
             >
               <input type="hidden" name="body" value={body} />
               <input type="hidden" name="source" value={source} />
@@ -1063,11 +1063,11 @@ export function MaterialForm({
                 </Button>
               </div>
               <FieldError id="lib-level-error" message={libLevelError} />
-              <p className="text-xs text-muted-foreground">
+              <p className="text-muted-foreground text-xs">
                 {t("classContent.author.saveToLibraryHelp")}
               </p>
-              {libState?.error && <p className="text-sm text-destructive">{libState.error}</p>}
-              {libState?.ok && <p className="text-sm text-success">{libState.ok}</p>}
+              {libState?.error && <p className="text-destructive text-sm">{libState.error}</p>}
+              {libState?.ok && <p className="text-success text-sm">{libState.ok}</p>}
             </form>
           </Collapsible>
         )}
@@ -1077,7 +1077,7 @@ export function MaterialForm({
             <form
               action={tplAction}
               onSubmit={handleTplSubmit}
-              className="space-y-2 rounded-md border bg-muted/40 p-3"
+              className="bg-muted/40 space-y-2 rounded-md border p-3"
             >
               <input type="hidden" name="body" value={body} />
               <div className="flex flex-wrap items-center gap-2">
@@ -1102,18 +1102,18 @@ export function MaterialForm({
                 </Button>
               </div>
               <FieldError id="template-label-error" message={templateLabelError} />
-              {tplState?.error && <p className="text-sm text-destructive">{tplState.error}</p>}
+              {tplState?.error && <p className="text-destructive text-sm">{tplState.error}</p>}
             </form>
           </Collapsible>
         )}
 
         {existing && revisionList.length > 0 && (
           <Collapsible title={t("classContent.author.versionHistory")} defaultOpen={false}>
-            <div className="space-y-2 rounded-md border bg-muted/40 p-3">
+            <div className="bg-muted/40 space-y-2 rounded-md border p-3">
               <ul className="space-y-1.5">
                 {revisionList.slice(0, 10).map((r) => (
                   <li key={r.id} className="flex items-center justify-between gap-2 text-sm">
-                    <span className="min-w-0 flex-1 truncate text-muted-foreground">
+                    <span className="text-muted-foreground min-w-0 flex-1 truncate">
                       {/* Which kind of change this revision undoes — without it,
                           a teacher scanning several similarly-timed rows for
                           "the one right before the AI messed it up" has only a
@@ -1149,7 +1149,7 @@ export function MaterialForm({
                 ))}
               </ul>
               {restoreState?.error && (
-                <p className="text-sm text-destructive">{restoreState.error}</p>
+                <p className="text-destructive text-sm">{restoreState.error}</p>
               )}
             </div>
           </Collapsible>
@@ -1165,33 +1165,33 @@ export function MaterialForm({
       <div
         role="group"
         aria-label={t("classContent.author.actionsLabel")}
-        className="sticky bottom-0 z-30 flex flex-wrap items-center justify-between gap-3 border-t border-border/60 bg-background/95 py-3 pb-safe-bottom backdrop-blur supports-[backdrop-filter]:bg-background/80"
+        className="border-border/60 bg-background/95 pb-safe-bottom supports-[backdrop-filter]:bg-background/80 sticky bottom-0 z-30 flex flex-wrap items-center justify-between gap-3 border-t py-3 backdrop-blur"
       >
         <div className="min-w-0 flex-1 space-y-1">
           {saveStatus === "saving" ? (
-            <p role="status" aria-live="polite" className="text-sm text-muted-foreground">
+            <p role="status" aria-live="polite" className="text-muted-foreground text-sm">
               {t("classContent.author.saving")}
             </p>
           ) : saveStatus === "dirty" ? (
-            <p className="text-sm text-warning" aria-live="polite">
+            <p className="text-warning text-sm" aria-live="polite">
               {t("classContent.author.unsavedChanges")}
             </p>
           ) : (
             <FormStatus state={saveState} savedMessage={t("classContent.author.savedShort")} />
           )}
           {saveStatus === "dirty" && saveState?.error && (
-            <p className="text-sm text-destructive">{saveState.error}</p>
+            <p className="text-destructive text-sm">{saveState.error}</p>
           )}
           <FieldError id="content-content-error" message={errors.content} />
           {(errors.level || errors.linkUrl) && (
-            <p className="text-sm text-destructive" aria-live="polite">
+            <p className="text-destructive text-sm" aria-live="polite">
               {t("classContent.author.fixErrors")}
             </p>
           )}
           {overLimit && (
             // The submit handler silently blocks an over-limit save — without
             // this line the Save button just looks dead.
-            <p className="text-xs text-destructive" aria-live="polite">
+            <p className="text-destructive text-xs" aria-live="polite">
               {t("material.editor.overLimit", {
                 max: CLASS_CONTENT_MAX_CHARS.toLocaleString(),
                 count: classContentLength(body).toLocaleString(),

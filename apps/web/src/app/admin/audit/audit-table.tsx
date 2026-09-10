@@ -95,10 +95,10 @@ export function AuditTable({
           row.original.teacher ? (
             <>
               <div className="font-medium">{row.original.teacher.name}</div>
-              <div className="text-xs text-muted-foreground">{row.original.teacher.email}</div>
+              <div className="text-muted-foreground text-xs">{row.original.teacher.email}</div>
             </>
           ) : (
-            <span className="text-xs text-muted-foreground">{t("web.admin.audit.platform")}</span>
+            <span className="text-muted-foreground text-xs">{t("web.admin.audit.platform")}</span>
           ),
       },
       {
@@ -119,7 +119,7 @@ export function AuditTable({
         cell: ({ row }) => (
           <>
             <div>{row.original.targetType}</div>
-            <div className="break-all text-muted-foreground">{row.original.targetId}</div>
+            <div className="text-muted-foreground break-all">{row.original.targetId}</div>
           </>
         ),
       },
@@ -170,7 +170,7 @@ export function AuditTable({
       </FilterBar>
 
       {visibleOverrides.length === 0 ? (
-        <p className="text-sm text-muted-foreground">{t("web.admin.audit.noneMatched")}</p>
+        <p className="text-muted-foreground text-sm">{t("web.admin.audit.noneMatched")}</p>
       ) : (
         <TableShell>
           <DataTable

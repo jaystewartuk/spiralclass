@@ -146,7 +146,7 @@ export function SignUpForm({ googleEnabled = false }: { googleEnabled?: boolean 
               id="sign-up-error"
               role="alert"
               aria-live="polite"
-              className="text-sm text-destructive"
+              className="text-destructive text-sm"
             >
               {state.error}
             </p>
@@ -157,13 +157,13 @@ export function SignUpForm({ googleEnabled = false }: { googleEnabled?: boolean 
             {pending ? t("web.signIn.sending") : t("web.signUp.create")}
           </Button>
           {googleEnabled && <GoogleSignInButton intent="sign-up" />}
-          <p className="text-sm text-muted-foreground">
+          <p className="text-muted-foreground text-sm">
             {t("web.signUp.haveAccount")}{" "}
             <Link href="/sign-in" className="underline">
               {t("web.signUp.signInLink")}
             </Link>
           </p>
-          <p className="text-xs text-muted-foreground">
+          <p className="text-muted-foreground text-xs">
             {t("web.signUp.terms")}{" "}
             <Link href="/privacy-notice" className="underline">
               {t("web.signUp.privacyNotice")}

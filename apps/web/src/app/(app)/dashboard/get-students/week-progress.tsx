@@ -30,13 +30,13 @@ export async function WeekProgress({ progress }: { progress: PlanProgress }) {
           })}
         </p>
         {progress.remaining > 0 ? (
-          <p className="text-sm text-muted-foreground">
+          <p className="text-muted-foreground text-sm">
             {t("web.getStudents.minutesLeft", { minutes: progress.minutesLeft })}
           </p>
         ) : null}
       </div>
       <div
-        className="h-1.5 w-full overflow-hidden rounded-full bg-muted"
+        className="bg-muted h-1.5 w-full overflow-hidden rounded-full"
         role="progressbar"
         aria-label={t("web.getStudents.weekProgressLabel")}
         aria-valuenow={percent}
@@ -44,7 +44,7 @@ export async function WeekProgress({ progress }: { progress: PlanProgress }) {
         aria-valuemax={100}
       >
         <div
-          className="h-full rounded-full bg-primary transition-all"
+          className="bg-primary h-full rounded-full transition-all"
           style={{ width: `${percent}%` }}
         />
       </div>

@@ -58,7 +58,7 @@ export function HomeworkAttemptCard({
             <Badge variant="warning">{t("homework.teacher.review.pendingReview")}</Badge>
           )}
         </div>
-        <p className="text-xs text-muted-foreground">
+        <p className="text-muted-foreground text-xs">
           {t("homework.teacher.review.submittedAt", {
             date: formatZonedDateTime(new Date(attempt.submittedAt), teacherTimezone, locale),
           })}
@@ -66,7 +66,7 @@ export function HomeworkAttemptCard({
       </CardHeader>
       <CardContent className="space-y-3">
         {attempt.textResponse && (
-          <p className="whitespace-pre-wrap text-sm">{attempt.textResponse}</p>
+          <p className="text-sm whitespace-pre-wrap">{attempt.textResponse}</p>
         )}
         {attempt.files.length > 0 && (
           <ul className="space-y-1 text-sm">
@@ -86,10 +86,10 @@ export function HomeworkAttemptCard({
         )}
 
         {attempt.feedback ? (
-          <div className="space-y-1 rounded-md border bg-muted/40 p-3 text-sm">
+          <div className="bg-muted/40 space-y-1 rounded-md border p-3 text-sm">
             <p className="whitespace-pre-wrap">{attempt.feedback.content}</p>
             {attempt.feedback.score != null && (
-              <p className="text-xs text-muted-foreground">
+              <p className="text-muted-foreground text-xs">
                 {t("homework.teacher.review.scoreDisplay", {
                   score: String(attempt.feedback.score),
                   max: String(HOMEWORK_FEEDBACK_MAX_SCORE),
@@ -164,7 +164,7 @@ function AiReviewPanel({
               ? t("homework.teacher.review.ai.regenerate")
               : t("homework.teacher.review.ai.button")}
         </Button>
-        {state?.error && <p className="text-sm text-destructive">{state.error}</p>}
+        {state?.error && <p className="text-destructive text-sm">{state.error}</p>}
       </form>
 
       {latest && <AiReviewDraftCard draft={latest} />}
@@ -176,10 +176,10 @@ function AiReviewDraftCard({ draft }: { draft: HomeworkAiReviewDraft }) {
   const t = useT();
   const { content } = draft;
   return (
-    <div className="space-y-2 rounded-md bg-muted/40 p-3 text-sm">
+    <div className="bg-muted/40 space-y-2 rounded-md p-3 text-sm">
       <p className="font-medium">{t("homework.teacher.review.ai.draftTitle")}</p>
       {content.suggestedScore != null && (
-        <p className="text-xs text-muted-foreground">
+        <p className="text-muted-foreground text-xs">
           {t("homework.teacher.review.ai.suggestedScore", {
             score: String(content.suggestedScore),
             max: String(HOMEWORK_FEEDBACK_MAX_SCORE),
@@ -187,7 +187,7 @@ function AiReviewDraftCard({ draft }: { draft: HomeworkAiReviewDraft }) {
         </p>
       )}
       <div>
-        <p className="text-xs font-medium text-muted-foreground">
+        <p className="text-muted-foreground text-xs font-medium">
           {t("homework.teacher.review.ai.suggestedFeedback")}
         </p>
         <p className="whitespace-pre-wrap">{content.suggestedFeedback}</p>
@@ -215,7 +215,7 @@ function BulletSection({ label, items }: { label: string; items: string[] }) {
   if (items.length === 0) return null;
   return (
     <div>
-      <p className="text-xs font-medium text-muted-foreground">{label}</p>
+      <p className="text-muted-foreground text-xs font-medium">{label}</p>
       <ul className="list-disc pl-4">
         {items.map((item, i) => (
           <li key={i}>{item}</li>
@@ -248,7 +248,7 @@ function FeedbackForm({
   );
 
   return (
-    <form action={formAction} className="space-y-3 rounded-md border bg-muted/40 p-3">
+    <form action={formAction} className="bg-muted/40 space-y-3 rounded-md border p-3">
       <input type="hidden" name="attemptId" value={attemptId} />
       <input type="hidden" name="bookingId" value={bookingId} />
       <input type="hidden" name="assignmentId" value={assignmentId} />
@@ -300,7 +300,7 @@ function FeedbackForm({
           {t("homework.teacher.review.reject")}
         </Button>
       </div>
-      {state?.error && <p className="text-sm text-destructive">{state.error}</p>}
+      {state?.error && <p className="text-destructive text-sm">{state.error}</p>}
     </form>
   );
 }

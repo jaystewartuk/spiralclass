@@ -64,7 +64,7 @@ export function TargetLanguageForm({
           searchPlaceholder={t("web.settings.targetLanguage.search")}
           emptyText={t("web.settings.targetLanguage.empty")}
         />
-        <p className="text-xs text-muted-foreground">{t("web.settings.targetLanguage.hint")}</p>
+        <p className="text-muted-foreground text-xs">{t("web.settings.targetLanguage.hint")}</p>
       </div>
       <FormStatus
         state={state}

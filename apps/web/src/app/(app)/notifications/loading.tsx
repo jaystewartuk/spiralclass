@@ -52,7 +52,7 @@ export default function NotificationsLoading() {
       >
         <span className="sr-only">{t("common.loading")}</span>
         <Skeleton className="h-9 w-full rounded-none" />
-        <div className="divide-y divide-border">
+        <div className="divide-border divide-y">
           {Array.from({ length: 6 }).map((_, i) => (
             <div key={i} className="flex items-start gap-3 px-4 py-3 lg:gap-4 lg:px-5">
               <Skeleton className="mt-0.5 size-9 shrink-0" />

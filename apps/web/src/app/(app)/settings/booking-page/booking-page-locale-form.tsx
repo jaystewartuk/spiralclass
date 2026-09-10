@@ -61,7 +61,7 @@ export function BookingPageLocaleForm({ initialLocale }: { initialLocale: string
             ))}
           </SelectContent>
         </Select>
-        <p className="text-xs text-muted-foreground">{t("web.settings.bookingPageLocale.hint")}</p>
+        <p className="text-muted-foreground text-xs">{t("web.settings.bookingPageLocale.hint")}</p>
       </div>
       <FormStatus
         state={state}

@@ -321,7 +321,7 @@ export function ReportProblemDialog({
               {t("feedback.received")}
             </p>
             <div className="flex justify-center py-2">
-              <span className="flex h-14 w-14 items-center justify-center rounded-full bg-success-bg text-success">
+              <span className="bg-success-bg text-success flex h-14 w-14 items-center justify-center rounded-full">
                 <CheckCircle2 className="h-7 w-7" aria-hidden />
               </span>
             </div>
@@ -347,7 +347,7 @@ export function ReportProblemDialog({
                 negative margin keeps focus rings from being clipped by it. */}
             <div className="-mx-1 flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto px-1">
               <fieldset className="flex flex-col gap-2" disabled={sending}>
-                <legend className="text-sm font-medium leading-none">
+                <legend className="text-sm leading-none font-medium">
                   {t("feedback.topicLabel")}
                 </legend>
                 <div className="flex flex-wrap gap-2 pt-1">
@@ -364,9 +364,9 @@ export function ReportProblemDialog({
                       <span
                         className={cn(
                           "border-border text-muted-foreground hover:border-foreground/30 hover:text-foreground",
-                          "peer-checked:border-primary peer-checked:bg-primary/10 peer-checked:font-medium peer-checked:text-foreground",
-                          "peer-focus-visible:ring-3 peer-focus-visible:ring-ring peer-focus-visible:ring-offset-2 peer-focus-visible:ring-offset-background",
-                          "inline-flex h-8 select-none items-center rounded-full border px-3 text-sm transition-colors",
+                          "peer-checked:border-primary peer-checked:bg-primary/10 peer-checked:text-foreground peer-checked:font-medium",
+                          "peer-focus-visible:ring-ring peer-focus-visible:ring-offset-background peer-focus-visible:ring-3 peer-focus-visible:ring-offset-2",
+                          "inline-flex h-8 items-center rounded-full border px-3 text-sm transition-colors select-none",
                         )}
                       >
                         {t(option.labelKey)}
@@ -428,7 +428,7 @@ export function ReportProblemDialog({
                     {t("feedback.attachLabel")}
                   </Button>
                   {!attachment && (
-                    <span className="text-xs text-muted-foreground">
+                    <span className="text-muted-foreground text-xs">
                       {t("feedback.attachHint", { max: ATTACHMENT_MAX_MB })}
                     </span>
                   )}
@@ -441,12 +441,12 @@ export function ReportProblemDialog({
                   onChange={handlePickFile}
                 />
                 {attachment && (
-                  <div className="flex items-center gap-3 rounded-md border border-border bg-muted/40 p-2">
+                  <div className="border-border bg-muted/40 flex items-center gap-3 rounded-md border p-2">
                     {/* eslint-disable-next-line @next/next/no-img-element -- a local object URL, not a remote asset next/image can optimise */}
                     <img
                       src={attachment.previewUrl}
                       alt=""
-                      className="h-10 w-10 rounded border border-border object-cover"
+                      className="border-border h-10 w-10 rounded border object-cover"
                     />
                     <span className="min-w-0 flex-1 truncate text-xs">{attachment.filename}</span>
                     <Button
@@ -456,7 +456,7 @@ export function ReportProblemDialog({
                       onClick={() => setAttachment(null)}
                       disabled={sending}
                       aria-label={t("feedback.attachRemove", { filename: attachment.filename })}
-                      className="h-8 w-8 shrink-0 text-muted-foreground hover:text-foreground"
+                      className="text-muted-foreground hover:text-foreground h-8 w-8 shrink-0"
                     >
                       <X className="h-4 w-4" aria-hidden />
                     </Button>
@@ -470,7 +470,7 @@ export function ReportProblemDialog({
                   read as one block at the foot of the form. */}
               <div className="flex flex-col gap-2">
                 {identityFromSession && !editingIdentity ? (
-                  <p className="text-xs text-muted-foreground">
+                  <p className="text-muted-foreground text-xs">
                     {t("feedback.sendingAs", { email })}{" "}
                     <Button
                       type="button"
@@ -512,7 +512,7 @@ export function ReportProblemDialog({
                         invalid={Boolean(errors.email)}
                         aria-describedby={describedBy(emailHintId, errors.email && emailErrorId)}
                       />
-                      <p id={emailHintId} className="text-xs text-muted-foreground">
+                      <p id={emailHintId} className="text-muted-foreground text-xs">
                         {t("feedback.emailHint")}
                       </p>
                       <FieldError
@@ -523,7 +523,7 @@ export function ReportProblemDialog({
                   </div>
                 )}
 
-                <p className="text-xs leading-relaxed text-muted-foreground">
+                <p className="text-muted-foreground text-xs leading-relaxed">
                   {t("feedback.diagnosticsNote")}
                 </p>
               </div>
@@ -552,7 +552,7 @@ export function ReportProblemDialog({
               </DialogFooter>
 
               {whatsAppConfigured && (
-                <p className="mt-4 border-t border-border/60 pt-3 text-xs text-muted-foreground">
+                <p className="border-border/60 text-muted-foreground mt-4 border-t pt-3 text-xs">
                   {t("feedback.orReachUs")}{" "}
                   <Button
                     type="button"

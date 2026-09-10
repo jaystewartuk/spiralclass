@@ -196,7 +196,7 @@ export default async function StudentPortalPage({
               {t("student.portal.greeting", { name: student.name })}
             </Heading>
             {greetingTeacher && (
-              <p className="text-sm text-muted-foreground">
+              <p className="text-muted-foreground text-sm">
                 {t("buyAnother.with", { name: greetingTeacher })}
               </p>
             )}
@@ -212,7 +212,7 @@ export default async function StudentPortalPage({
                     l.level && (
                       <span
                         key={`${l.teacher.name}-${i}`}
-                        className="rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground"
+                        className="bg-muted text-muted-foreground rounded-full px-2 py-0.5 text-xs"
                       >
                         {`${l.teacher.name}: ${l.level.label}`}
                       </span>
@@ -237,14 +237,14 @@ export default async function StudentPortalPage({
       {alreadyStudentNotice && (
         <div
           role="alert"
-          className="rounded-md border border-warning/30 bg-warning-bg px-4 py-3 text-sm"
+          className="border-warning/30 bg-warning-bg rounded-md border px-4 py-3 text-sm"
         >
           {t("web.studentHome.alreadyStudentNotice")}
         </div>
       )}
 
       {showRunningLow && (
-        <div className="flex flex-wrap items-center justify-between gap-3 rounded-md border border-warning/30 bg-warning-bg px-4 py-3">
+        <div className="border-warning/30 bg-warning-bg flex flex-wrap items-center justify-between gap-3 rounded-md border px-4 py-3">
           <p className="text-sm">
             {remainingBookable <= 1
               ? t("web.studentHome.oneClassLeft")
@@ -263,7 +263,7 @@ export default async function StudentPortalPage({
         </CardHeader>
         <CardContent className="space-y-3">
           {packages.length === 0 && (
-            <p className="text-sm text-muted-foreground">
+            <p className="text-muted-foreground text-sm">
               {canBuy
                 ? t("web.studentHome.noActivePackage")
                 : t("web.studentHome.noActivePackageAskTeacher")}
@@ -291,7 +291,7 @@ export default async function StudentPortalPage({
               <Link href="/my-classes/buy">{t("buyAnother.title")}</Link>
             </Button>
           ) : (
-            <p className="text-sm text-muted-foreground">
+            <p className="text-muted-foreground text-sm">
               {t("web.studentHome.onceActiveBookHere")}
             </p>
           )}
@@ -304,11 +304,11 @@ export default async function StudentPortalPage({
         </CardHeader>
         <CardContent className="space-y-4">
           {upcoming.length === 0 ? (
-            <p className="text-sm text-muted-foreground">{t("classes.empty.upcoming")}</p>
+            <p className="text-muted-foreground text-sm">{t("classes.empty.upcoming")}</p>
           ) : (
             upcomingGroups.map((group) => (
               <div key={group.ymd} className="space-y-2">
-                <p className="text-sm text-muted-foreground">{group.label}</p>
+                <p className="text-muted-foreground text-sm">{group.label}</p>
                 <div className="space-y-2">
                   {group.items.map((b) => (
                     <BookingCard
@@ -367,7 +367,7 @@ export default async function StudentPortalPage({
                   {ovs.length > 0 && (
                     <ul className="mt-2 space-y-0.5 border-t pt-2">
                       {ovs.map((o, i) => (
-                        <li key={`${b.id}-${i}`} className="text-xs text-muted-foreground">
+                        <li key={`${b.id}-${i}`} className="text-muted-foreground text-xs">
                           <span className="font-medium">{studentOverrideLabel(o.action, t)}:</span>{" "}
                           {o.reason}
                         </li>
@@ -435,8 +435,8 @@ function PackageRow({
           <p className="font-medium">
             {pkg.teacherName ?? pkg.templateName ?? t("book.choosePackage")}
           </p>
-          {detail ? <p className="text-xs text-muted-foreground">{detail}</p> : null}
-          <p className="text-xs text-muted-foreground">
+          {detail ? <p className="text-muted-foreground text-xs">{detail}</p> : null}
+          <p className="text-muted-foreground text-xs">
             {t("web.studentHome.classesOfTotal", {
               remaining,
               total: pkg.classesTotal,
@@ -448,7 +448,7 @@ function PackageRow({
               : ""}
           </p>
         </div>
-        <span className="text-xs text-muted-foreground">{renderPackageStatus(pkg.status, t)}</span>
+        <span className="text-muted-foreground text-xs">{renderPackageStatus(pkg.status, t)}</span>
       </div>
     </PackageDetailsSheet>
   );

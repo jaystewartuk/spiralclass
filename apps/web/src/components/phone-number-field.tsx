@@ -67,7 +67,7 @@ export function PhoneNumberField({
           below the field, outside the clip box) — so on web the searchable
           country list never appeared. The two inner controls instead round
           their own outer corners to sit flush inside the rounded border. */}
-      <div className="flex rounded-md border border-input bg-transparent shadow-sm focus-within:ring-1 focus-within:ring-ring">
+      <div className="border-input focus-within:ring-ring flex rounded-md border bg-transparent shadow-sm focus-within:ring-1">
         <Combobox
           name={countryName}
           value={country}
@@ -81,7 +81,7 @@ export function PhoneNumberField({
           // Wide enough for every real dial code ("+" + up to 3 digits, e.g.
           // "+998") plus the chevron — 4.5rem clipped to "+…" once the
           // trigger's own padding + icon ate into the budget.
-          className="h-9 w-[5.5rem] shrink-0 rounded-l-md rounded-r-none border-0 border-r border-input text-sm shadow-none focus-visible:ring-0"
+          className="border-input h-9 w-[5.5rem] shrink-0 rounded-l-md rounded-r-none border-0 border-r text-sm shadow-none focus-visible:ring-0"
         />
         <Input
           id={id}
@@ -96,7 +96,7 @@ export function PhoneNumberField({
           className="h-9 rounded-l-none rounded-r-md border-0 text-sm shadow-none focus-visible:ring-0 lg:h-9"
         />
       </div>
-      {hint ? <p className="text-xs text-muted-foreground">{hint}</p> : null}
+      {hint ? <p className="text-muted-foreground text-xs">{hint}</p> : null}
     </div>
   );
 }

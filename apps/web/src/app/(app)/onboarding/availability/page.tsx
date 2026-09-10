@@ -16,7 +16,7 @@ export default async function AvailabilityStepPage() {
     <div className="space-y-6">
       <div>
         <PageHeader title={t("web.onboarding.availability.setTitle")} />
-        <p className="mt-1 text-sm text-muted-foreground">
+        <p className="text-muted-foreground mt-1 text-sm">
           {t("web.onboarding.availability.setSubtitle")}
         </p>
       </div>

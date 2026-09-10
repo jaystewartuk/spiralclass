@@ -147,7 +147,7 @@ export function BlockedDatesManager({
                 onMonthChange={(year, month0) => setMonth({ year, month0 })}
               />
               {anchor && (
-                <p className="text-sm text-muted-foreground">
+                <p className="text-muted-foreground text-sm">
                   {t("web.settings.blockedDates.selectionOpen")}
                 </p>
               )}

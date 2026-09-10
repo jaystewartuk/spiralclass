@@ -109,7 +109,7 @@ export async function WhatsIncluded({
     <section className="mt-12 space-y-5">
       <div className="space-y-2 text-center">
         <Heading level={2}>{t("web.bookingLanding.included.title")}</Heading>
-        <p className="mx-auto max-w-prose text-sm text-muted-foreground">
+        <p className="text-muted-foreground mx-auto max-w-prose text-sm">
           {t("web.bookingLanding.included.subtitle")}
         </p>
       </div>
@@ -117,13 +117,13 @@ export async function WhatsIncluded({
         {items.map((item) => {
           const { icon: Icon, title, body } = ITEMS[item];
           return (
-            <li key={item} className="flex gap-3 rounded-2xl border bg-card/50 p-4">
-              <Icon className="mt-0.5 h-5 w-5 shrink-0 text-primary" aria-hidden />
+            <li key={item} className="bg-card/50 flex gap-3 rounded-2xl border p-4">
+              <Icon className="text-primary mt-0.5 h-5 w-5 shrink-0" aria-hidden />
               <div className="min-w-0 space-y-1">
                 <p className="text-sm font-medium">{t(title)}</p>
                 {/* `name` is interpolated only by some bodies; the others
                     ignore it, which keeps one call shape here. */}
-                <p className="text-sm text-muted-foreground">{t(body, { name: teacherName })}</p>
+                <p className="text-muted-foreground text-sm">{t(body, { name: teacherName })}</p>
               </div>
             </li>
           );

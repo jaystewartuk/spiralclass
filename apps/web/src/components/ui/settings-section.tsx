@@ -47,9 +47,9 @@ export function SettingsSection({
         <Heading level={3} as="h2" id={headingId}>
           {title}
         </Heading>
-        {description ? <p className="text-sm text-muted-foreground">{description}</p> : null}
+        {description ? <p className="text-muted-foreground text-sm">{description}</p> : null}
       </div>
-      <Card className={cn("divide-y divide-border", tone === "danger" && "border-destructive")}>
+      <Card className={cn("divide-border divide-y", tone === "danger" && "border-destructive")}>
         {children}
       </Card>
     </section>
@@ -82,7 +82,7 @@ export function SettingRow({
                 {title}
               </Heading>
             ) : null}
-            {description ? <p className="text-sm text-muted-foreground">{description}</p> : null}
+            {description ? <p className="text-muted-foreground text-sm">{description}</p> : null}
           </div>
           {action ? <div className="shrink-0">{action}</div> : null}
         </div>

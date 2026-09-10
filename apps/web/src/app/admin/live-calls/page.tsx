@@ -28,7 +28,7 @@ export default async function AdminLiveCallsPage() {
     <div className="space-y-6">
       <header>
         <PageHeader title={t("web.admin.liveCalls.title")} />
-        <p className="text-sm text-muted-foreground">{t("web.admin.liveCalls.subtitle")}</p>
+        <p className="text-muted-foreground text-sm">{t("web.admin.liveCalls.subtitle")}</p>
       </header>
 
       <LiveCallsView initial={initial} />

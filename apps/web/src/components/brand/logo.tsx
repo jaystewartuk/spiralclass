@@ -88,7 +88,7 @@ export function LogoMark({
  */
 function Wordmark({ className }: { className?: string }) {
   return (
-    <span className={cn("font-bold tracking-wordmark text-foreground", className)}>
+    <span className={cn("tracking-wordmark text-foreground font-bold", className)}>
       SpiralClass
     </span>
   );

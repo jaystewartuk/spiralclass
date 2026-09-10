@@ -12,7 +12,7 @@ export function VideoMessage({ videoUrl, t }: { videoUrl: string; t: TFunction }
       playsInline
       preload="metadata"
       aria-label={t("chat.media.video")}
-      className="block max-h-attachment w-full rounded-xl bg-scrim-3"
+      className="max-h-attachment bg-scrim-3 block w-full rounded-xl"
     />
   );
 }

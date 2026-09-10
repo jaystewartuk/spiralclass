@@ -55,7 +55,7 @@ export function RosterToolbar({
           or a raised reading scale makes them not. */}
       <nav
         aria-label={t("web.dashboard.students.roster.viewsLabel")}
-        className="-mx-1 flex gap-1 self-start overflow-x-auto rounded-md bg-muted p-1"
+        className="bg-muted -mx-1 flex gap-1 self-start overflow-x-auto rounded-md p-1"
       >
         {STUDENT_SCOPES.map((value) => {
           const active = value === scope;
@@ -65,7 +65,7 @@ export function RosterToolbar({
               href={studentsHref(value, { search, sort })}
               aria-current={active ? "page" : undefined}
               className={cn(
-                "flex items-center gap-2 whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium transition-colors",
+                "flex items-center gap-2 rounded-sm px-3 py-1.5 text-sm font-medium whitespace-nowrap transition-colors",
                 active
                   ? "bg-background text-foreground shadow-brand-sm"
                   : "text-muted-foreground hover:text-foreground",
@@ -91,7 +91,7 @@ export function RosterToolbar({
         {sort !== DEFAULT_STUDENT_SORT && <input type="hidden" name="sort" value={sort} />}
         <div className="relative min-w-0 flex-1 lg:w-64 lg:flex-none">
           <Search
-            className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
+            className="text-muted-foreground pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2"
             aria-hidden
           />
           <Input
@@ -153,11 +153,11 @@ export function RosterListHeader({
 
   return (
     <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 border-b px-4 py-3 lg:px-6">
-      <p className="text-sm text-muted-foreground">
+      <p className="text-muted-foreground text-sm">
         {t("web.dashboard.students.roster.count", { count })}
       </p>
       <div className="flex flex-wrap items-center gap-x-1 gap-y-1">
-        <span className="text-sm text-muted-foreground" id="roster-sort-label">
+        <span className="text-muted-foreground text-sm" id="roster-sort-label">
           {t("web.dashboard.students.roster.sortLabel")}
         </span>
         <nav aria-labelledby="roster-sort-label" className="flex flex-wrap items-center gap-1">
@@ -171,7 +171,7 @@ export function RosterListHeader({
                 className={cn(
                   "rounded-sm px-2 py-1 text-sm transition-colors",
                   active
-                    ? "bg-muted font-medium text-foreground"
+                    ? "bg-muted text-foreground font-medium"
                     : "text-muted-foreground hover:bg-muted/60 hover:text-foreground",
                 )}
               >

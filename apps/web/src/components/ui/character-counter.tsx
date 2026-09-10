@@ -23,7 +23,7 @@ export function CharacterCounter({
       className={cn(
         // `whitespace-nowrap`: in a narrow column the counter broke as
         // "0 /" over "80", which reads as two numbers rather than a ratio.
-        "whitespace-nowrap text-xs tabular-nums text-muted-foreground",
+        "text-muted-foreground text-xs whitespace-nowrap tabular-nums",
         nearLimit && "text-warning",
         atLimit && "text-destructive",
         className,

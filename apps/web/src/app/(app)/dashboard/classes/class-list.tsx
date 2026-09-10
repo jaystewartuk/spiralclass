@@ -82,13 +82,13 @@ function DayHeading({
       className={cn(
         // An opaque ground, not a tint: a translucent sticky band lets the rows
         // it is meant to hide show through it as they pass underneath.
-        "sticky top-14 z-10 border-b bg-muted px-4 py-2 text-sm font-medium text-muted-foreground lg:px-6",
+        "bg-muted text-muted-foreground sticky top-14 z-10 border-b px-4 py-2 text-sm font-medium lg:px-6",
         // The card cannot clip its children — `overflow-hidden` is what makes
         // a sticky descendant stop sticking — so the first band rounds its own
         // corners rather than square-cutting the card's.
         first ? "rounded-t-lg" : "border-t",
         // Today and tomorrow are the two days she is actually working in.
-        emphasis && "font-semibold text-foreground",
+        emphasis && "text-foreground font-semibold",
       )}
     >
       {label}
@@ -147,13 +147,13 @@ async function ClassRow({
   return (
     <Link
       href={`/dashboard/classes/${item.id}`}
-      className="flex min-h-target items-center gap-3 px-4 py-3 transition-colors hover:bg-muted/50 lg:gap-4 lg:px-6"
+      className="min-h-target hover:bg-muted/50 flex items-center gap-3 px-4 py-3 transition-colors lg:gap-4 lg:px-6"
     >
       {/* A fixed column so the times align, `whitespace-nowrap` rather than a
           hard truncate so a reader who has turned the text scale up gets a
           wider column instead of a clipped clock. */}
       <div className="w-24 shrink-0 whitespace-nowrap">
-        {showDate && <div className="text-sm text-muted-foreground">{zoned.viewer.dateLabel}</div>}
+        {showDate && <div className="text-muted-foreground text-sm">{zoned.viewer.dateLabel}</div>}
         <div className={cn("font-semibold tabular-nums", featured && "text-lg")}>
           {zoned.viewer.timeLabel}
         </div>
@@ -173,7 +173,7 @@ async function ClassRow({
             {item.studentName}
           </div>
           {meta.length > 0 && (
-            <div className="text-sm text-muted-foreground">
+            <div className="text-muted-foreground text-sm">
               {meta.map((part, i) => (
                 <span key={part}>
                   {/* The separator is decoration, not part of what the row says. */}
@@ -186,7 +186,7 @@ async function ClassRow({
           {/* Only when the two clocks genuinely differ. An identical second time
               on every row trains the eye to skip the one line where it matters. */}
           {!zoned.sameWallClock && (
-            <div className="text-sm text-subtle">
+            <div className="text-subtle text-sm">
               {t("web.dualZone.otherPartyTime", {
                 name: zoned.other.label,
                 time: `${zoned.other.timeLabel} (${zoned.other.tzDisplay})`,
@@ -208,7 +208,7 @@ async function ClassRow({
         </div>
       </div>
 
-      <ChevronRight className="size-5 shrink-0 text-muted-foreground" aria-hidden />
+      <ChevronRight className="text-muted-foreground size-5 shrink-0" aria-hidden />
     </Link>
   );
 }
@@ -253,7 +253,7 @@ export function ClassList({
               this list's SIBLING, so nothing that sticks sits inside it. */}
           <ul
             className={cn(
-              "divide-y divide-border",
+              "divide-border divide-y",
               roundedBottom && index === groups.length - 1 && "overflow-hidden rounded-b-lg",
             )}
           >
@@ -290,7 +290,7 @@ export function FlatClassList({
   showStatus?: boolean;
 }) {
   return (
-    <ul className="divide-y divide-border overflow-hidden rounded-b-lg border-t">
+    <ul className="divide-border divide-y overflow-hidden rounded-b-lg border-t">
       {items.map((item) => (
         <li key={item.id}>
           <ClassRow item={item} ctx={ctx} showStatus={showStatus} showDate showMaterials={false} />
@@ -321,13 +321,13 @@ export function RecentRow({ item, ctx }: { item: ClassListItem; ctx: ListContext
   return (
     <Link
       href={`/dashboard/classes/${item.id}`}
-      className="flex min-h-target flex-col gap-1 px-4 py-3 transition-colors hover:bg-muted/50 lg:px-6"
+      className="min-h-target hover:bg-muted/50 flex flex-col gap-1 px-4 py-3 transition-colors lg:px-6"
     >
       <div className="flex items-start justify-between gap-2">
         <span className="min-w-0 truncate font-medium">{item.studentName}</span>
         <BookingStatusBadge status={item.status} viewer="teacher" />
       </div>
-      <span className="text-sm tabular-nums text-muted-foreground">
+      <span className="text-muted-foreground text-sm tabular-nums">
         {zoned.viewer.dateLabel}, {zoned.viewer.timeLabel}
       </span>
     </Link>

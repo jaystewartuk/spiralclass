@@ -120,7 +120,7 @@ export default async function StudentHomeworkPage({
         {assignment.instructions?.trim() && (
           <CardContent className="space-y-2">
             <p className="text-sm font-medium">{t("homework.detail.instructions")}</p>
-            <p className="whitespace-pre-line text-sm text-muted-foreground">
+            <p className="text-muted-foreground text-sm whitespace-pre-line">
               {assignment.instructions.trim()}
             </p>
           </CardContent>
@@ -148,13 +148,13 @@ export default async function StudentHomeworkPage({
                     {t(`homework.detail.feedback.decision.${a.feedback!.decision}`)}
                   </Badge>
                   {a.feedback!.score != null && (
-                    <span className="text-xs text-muted-foreground">
+                    <span className="text-muted-foreground text-xs">
                       {t("homework.detail.feedback.scoreLabel", { score: a.feedback!.score })}
                     </span>
                   )}
-                  <span className="text-xs text-muted-foreground">{a.feedback!.createdAt}</span>
+                  <span className="text-muted-foreground text-xs">{a.feedback!.createdAt}</span>
                 </div>
-                <p className="whitespace-pre-line text-sm">{a.feedback!.content}</p>
+                <p className="text-sm whitespace-pre-line">{a.feedback!.content}</p>
               </div>
             ))}
           </CardContent>

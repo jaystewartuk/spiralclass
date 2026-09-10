@@ -281,7 +281,7 @@ export default async function TeacherClassesPage({
                 />
                 {hasMore && (
                   <div className="flex flex-wrap items-center justify-between gap-3 border-t px-4 py-4 lg:px-6">
-                    <p className="text-sm text-muted-foreground">
+                    <p className="text-muted-foreground text-sm">
                       {t("web.dashboard.classes.list.more", { shown: items.length })}
                     </p>
                     <Button asChild variant="outline" size="sm">
@@ -336,7 +336,7 @@ export default async function TeacherClassesPage({
                 </CardDescription>
               </CardHeader>
               <CardContent className="p-0">
-                <ul className="divide-y divide-border border-t">
+                <ul className="divide-border divide-y border-t">
                   {recent.map((item) => (
                     <li key={item.id}>
                       <RecentRow item={item} ctx={ctx} />

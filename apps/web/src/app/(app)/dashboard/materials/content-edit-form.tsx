@@ -67,7 +67,7 @@ export function LibraryContentEditForm({
   }
 
   return (
-    <div className="order-last mt-2 w-full space-y-3 rounded-md border bg-muted/40 p-3">
+    <div className="bg-muted/40 order-last mt-2 w-full space-y-3 rounded-md border p-3">
       <MaterialForm
         scope="library"
         levels={levels}

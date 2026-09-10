@@ -31,7 +31,7 @@ export function FileMessage({
       rel="noreferrer"
       download={fileName ?? undefined}
       aria-label={t("chat.file.download", { name })}
-      className="flex min-w-attachment items-center gap-3 rounded-xl"
+      className="min-w-attachment flex items-center gap-3 rounded-xl"
     >
       <span
         aria-hidden

@@ -62,7 +62,7 @@ export function HomeworkPanel({
       </CardHeader>
       <CardContent className="space-y-4">
         {assignments.length === 0 ? (
-          <p className="text-sm text-muted-foreground">{t("homework.teacher.empty")}</p>
+          <p className="text-muted-foreground text-sm">{t("homework.teacher.empty")}</p>
         ) : (
           <ul className="space-y-2 text-sm">
             {assignments.map((a) => (
@@ -72,7 +72,7 @@ export function HomeworkPanel({
               >
                 <div className="min-w-0 space-y-0.5">
                   <p className="truncate font-medium">{a.title}</p>
-                  <p className="text-xs text-muted-foreground">
+                  <p className="text-muted-foreground text-xs">
                     {a.dueAtLabel ? `${a.dueAtLabel} · ` : ""}
                     {a.submissionCount > 0
                       ? t("homework.teacher.submissionCount", { count: String(a.submissionCount) })
@@ -115,7 +115,7 @@ export function HomeworkPanel({
         )}
 
         {showForm ? (
-          <form action={formAction} className="space-y-3 rounded-md border bg-muted/40 p-3">
+          <form action={formAction} className="bg-muted/40 space-y-3 rounded-md border p-3">
             <input type="hidden" name="bookingId" value={bookingId} />
             <div className="space-y-1">
               <Label htmlFor="hw-title">{t("homework.teacher.titleLabel")}</Label>
@@ -158,7 +158,7 @@ export function HomeworkPanel({
                 {t("common.cancel")}
               </Button>
             </div>
-            {state?.error && <p className="text-sm text-destructive">{state.error}</p>}
+            {state?.error && <p className="text-destructive text-sm">{state.error}</p>}
           </form>
         ) : (
           <Button type="button" variant="secondary" onClick={() => setShowForm(true)}>

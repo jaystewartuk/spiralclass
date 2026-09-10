@@ -58,7 +58,7 @@ export function Pagination({
   return (
     <nav
       className={cn(
-        "flex flex-wrap items-center justify-between gap-3 text-sm text-muted-foreground",
+        "text-muted-foreground flex flex-wrap items-center justify-between gap-3 text-sm",
         className,
       )}
       aria-label="Pagination"
@@ -68,9 +68,9 @@ export function Pagination({
           L.noResults
         ) : (
           <>
-            {L.showing} <span className="font-medium text-foreground">{from.toLocaleString()}</span>
-            –<span className="font-medium text-foreground">{to.toLocaleString()}</span> {L.of}{" "}
-            <span className="font-medium text-foreground">{total.toLocaleString()}</span>
+            {L.showing} <span className="text-foreground font-medium">{from.toLocaleString()}</span>
+            –<span className="text-foreground font-medium">{to.toLocaleString()}</span> {L.of}{" "}
+            <span className="text-foreground font-medium">{total.toLocaleString()}</span>
           </>
         )}
       </p>

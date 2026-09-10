@@ -110,10 +110,10 @@ function RewardFields({
   ];
 
   return (
-    <div className="flex flex-col gap-3 rounded-md border bg-muted/40 p-4">
+    <div className="bg-muted/40 flex flex-col gap-3 rounded-md border p-4">
       <div className="space-y-1">
         <p className="font-semibold">{label}</p>
-        <p id={hintId} className="text-sm text-muted-foreground">
+        <p id={hintId} className="text-muted-foreground text-sm">
           {hint}
         </p>
       </div>
@@ -152,7 +152,7 @@ function RewardFields({
         <div
           role="radiogroup"
           aria-label={t("web.dashboard.referrals.rewardType")}
-          className="inline-flex h-11 items-center gap-1 rounded-md border border-input bg-background p-1 lg:h-10"
+          className="border-input bg-background inline-flex h-11 items-center gap-1 rounded-md border p-1 lg:h-10"
         >
           {options.map((option) => (
             <label
@@ -170,7 +170,7 @@ function RewardFields({
                 value={option.kind}
                 checked={state.kind === option.kind}
                 onChange={() => onChange({ ...state, kind: option.kind })}
-                className="absolute inset-0 h-full w-full cursor-pointer appearance-none rounded-sm focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring"
+                className="focus-visible:ring-ring absolute inset-0 h-full w-full cursor-pointer appearance-none rounded-sm focus-visible:ring-3 focus-visible:outline-none"
               />
               <span>{option.label}</span>
             </label>
@@ -189,7 +189,7 @@ function PreviewRow({ label, value, strong }: { label: string; value: string; st
     <div
       className={cn(
         "flex items-baseline justify-between gap-4 py-1.5",
-        strong && "mt-1 border-t border-border pt-3 font-semibold",
+        strong && "border-border mt-1 border-t pt-3 font-semibold",
       )}
     >
       {/* No wrapping on the row: a label that wraps still keeps its amount
@@ -251,7 +251,7 @@ export function ReferralProgramForm({ initial }: { initial: ProgramInitial }) {
 
   return (
     <form action={formAction} className="space-y-5">
-      <div className="flex items-start gap-3 rounded-md border p-4 transition-colors hover:bg-muted/40">
+      <div className="hover:bg-muted/40 flex items-start gap-3 rounded-md border p-4 transition-colors">
         <Checkbox
           id={enabledId}
           name="enabled"
@@ -263,7 +263,7 @@ export function ReferralProgramForm({ initial }: { initial: ProgramInitial }) {
           <Label htmlFor={enabledId} className="block text-base font-semibold">
             {t("web.dashboard.referrals.turnOn")}
           </Label>
-          <p className="text-sm text-muted-foreground">{t("web.dashboard.referrals.turnOnHint")}</p>
+          <p className="text-muted-foreground text-sm">{t("web.dashboard.referrals.turnOnHint")}</p>
         </div>
       </div>
 
@@ -311,11 +311,11 @@ export function ReferralProgramForm({ initial }: { initial: ProgramInitial }) {
             }
             className="w-24 text-right"
           />
-          <span className="text-sm text-muted-foreground">
+          <span className="text-muted-foreground text-sm">
             {t("web.dashboard.referrals.rewardExpiryUnit")}
           </span>
         </div>
-        <p id={expiryHintId} className="text-sm text-muted-foreground">
+        <p id={expiryHintId} className="text-muted-foreground text-sm">
           {t("web.dashboard.referrals.rewardExpiryHint")}
         </p>
         <FieldError id={expiryErrorId} message={state?.fields?.expiry} />
@@ -328,16 +328,16 @@ export function ReferralProgramForm({ initial }: { initial: ProgramInitial }) {
         <CardContent className="space-y-2 p-4">
           <p className="font-semibold">{t("web.dashboard.referrals.preview.title")}</p>
           {sample == null ? (
-            <p className="text-sm text-muted-foreground">
+            <p className="text-muted-foreground text-sm">
               {t("web.dashboard.referrals.preview.noPackage")}
             </p>
           ) : friendOff == null || studentOff == null ? (
-            <p className="text-sm text-muted-foreground">
+            <p className="text-muted-foreground text-sm">
               {t("web.dashboard.referrals.preview.incomplete")}
             </p>
           ) : (
             <>
-              <p className="text-sm text-muted-foreground">
+              <p className="text-muted-foreground text-sm">
                 {t("web.dashboard.referrals.preview.onPackage", {
                   package: sample.name,
                   price: formatMinorUnits(base, previewCurrency),
@@ -362,7 +362,7 @@ export function ReferralProgramForm({ initial }: { initial: ProgramInitial }) {
                   value={formatMinorUnits(friendOff + studentOff, previewCurrency)}
                 />
               </dl>
-              <p className="text-sm text-muted-foreground">
+              <p className="text-muted-foreground text-sm">
                 {expiryValid
                   ? t("web.dashboard.referrals.preview.expiry", { days: expiryNumber })
                   : t("web.dashboard.referrals.preview.noExpiry")}

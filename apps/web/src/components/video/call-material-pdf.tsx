@@ -193,13 +193,13 @@ export function CallMaterialPdf({ url }: { url: string }) {
     <div>
       <div ref={containerRef} data-testid="call-material-pdf" />
       {state === "loading" && (
-        <p className="py-8 text-center text-sm text-muted-foreground">
+        <p className="text-muted-foreground py-8 text-center text-sm">
           {t("call.materialPdfLoading")}
         </p>
       )}
       {state === "failed" && (
         <div className="py-8 text-center">
-          <p className="text-sm text-muted-foreground">{t("call.materialPreviewFailed")}</p>
+          <p className="text-muted-foreground text-sm">{t("call.materialPreviewFailed")}</p>
           <a
             href={url}
             target="_blank"

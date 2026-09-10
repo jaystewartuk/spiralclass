@@ -85,7 +85,7 @@ export function VoiceMessage({
   const remaining = playing && totalMs > currentMs ? totalMs - currentMs : totalMs;
 
   return (
-    <div className="flex min-w-attachment items-center gap-3">
+    <div className="min-w-attachment flex items-center gap-3">
       <audio ref={audioRef} src={voiceUrl} preload="metadata" />
       <Button
         type="button"

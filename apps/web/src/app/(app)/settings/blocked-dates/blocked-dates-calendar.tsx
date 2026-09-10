@@ -230,7 +230,7 @@ export function BlockedDatesCalendar({
               <th
                 key={w.long}
                 scope="col"
-                className="pb-1 text-xs font-medium text-muted-foreground"
+                className="text-muted-foreground pb-1 text-xs font-medium"
               >
                 <span aria-hidden className="capitalize">
                   {w.short}
@@ -286,12 +286,12 @@ export function BlockedDatesCalendar({
                       className={cn(
                         "relative w-full flex-col gap-0 rounded-md font-normal lg:w-full",
                         !day.inCurrentMonth && "opacity-45",
-                        isPast && "cursor-not-allowed text-muted-foreground hover:bg-transparent",
-                        isBlocked && !isPicked && "bg-destructive-bg font-medium text-destructive",
-                        isHighlighted && !isPicked && "ring-2 ring-destructive",
+                        isPast && "text-muted-foreground cursor-not-allowed hover:bg-transparent",
+                        isBlocked && !isPicked && "bg-destructive-bg text-destructive font-medium",
+                        isHighlighted && !isPicked && "ring-destructive ring-2",
                         isPicked &&
-                          "bg-primary font-semibold text-primary-foreground hover:bg-primary-hover hover:text-primary-foreground",
-                        isToday && !isPicked && !isBlocked && "ring-1 ring-primary",
+                          "bg-primary text-primary-foreground hover:bg-primary-hover hover:text-primary-foreground font-semibold",
+                        isToday && !isPicked && !isBlocked && "ring-primary ring-1",
                       )}
                     >
                       <span className={cn(isBlocked && "line-through")}>
@@ -315,17 +315,17 @@ export function BlockedDatesCalendar({
         </tbody>
       </table>
 
-      <ul className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
+      <ul className="text-muted-foreground flex flex-wrap items-center gap-x-4 gap-y-1 text-xs">
         <li className="flex items-center gap-1.5">
-          <span aria-hidden className="h-3 w-3 rounded-sm bg-primary" />
+          <span aria-hidden className="bg-primary h-3 w-3 rounded-sm" />
           {t("web.settings.blockedDates.selected")}
         </li>
         <li className="flex items-center gap-1.5">
-          <span aria-hidden className="h-3 w-3 rounded-sm bg-destructive-bg" />
+          <span aria-hidden className="bg-destructive-bg h-3 w-3 rounded-sm" />
           {t("web.settings.blockedDates.blocked")}
         </li>
         <li className="flex items-center gap-1.5">
-          <span aria-hidden className="h-1.5 w-1.5 rounded-full bg-info" />
+          <span aria-hidden className="bg-info h-1.5 w-1.5 rounded-full" />
           {t("web.settings.blockedDates.legendClasses")}
         </li>
       </ul>

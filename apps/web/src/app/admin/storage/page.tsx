@@ -20,7 +20,7 @@ export default async function AdminStoragePage() {
     <div className="space-y-6">
       <header>
         <PageHeader title={t("web.admin.storage.title")} />
-        <p className="text-sm text-muted-foreground">
+        <p className="text-muted-foreground text-sm">
           {t("web.admin.storage.intro.pre")}{" "}
           <a href="/admin/audit" className="underline underline-offset-2">
             {t("web.admin.storage.auditLog")}
@@ -30,7 +30,7 @@ export default async function AdminStoragePage() {
       </header>
 
       {buckets.length === 0 ? (
-        <div className="rounded-lg border border-border/60 bg-muted/40 px-4 py-6 text-sm text-muted-foreground">
+        <div className="border-border/60 bg-muted/40 text-muted-foreground rounded-lg border px-4 py-6 text-sm">
           {t("web.admin.storage.noBuckets")}
         </div>
       ) : (

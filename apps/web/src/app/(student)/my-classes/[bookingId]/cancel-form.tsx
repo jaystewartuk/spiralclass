@@ -44,12 +44,12 @@ export function StudentCancelForm({
       footer={(close) => (
         <div className="flex w-full flex-col gap-2">
           {state?.error && (
-            <p role="alert" className="text-sm text-destructive">
+            <p role="alert" className="text-destructive text-sm">
               {state.error}
             </p>
           )}
           {state?.ok && (
-            <p role="status" className="text-sm text-success">
+            <p role="status" className="text-success text-sm">
               {state.ok}
             </p>
           )}
@@ -82,7 +82,7 @@ export function StudentCancelForm({
             id="cancel-reason"
             name="reason"
             defaultValue=""
-            className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm"
+            className="border-input bg-background h-9 w-full rounded-md border px-3 text-sm"
           >
             <option value="">{t("web.myClasses.cancel.reasonPlaceholder")}</option>
             <option value="schedule_conflict">

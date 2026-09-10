@@ -51,7 +51,7 @@ function TypeChoice({
   return (
     <fieldset className="space-y-1">
       <legend className="text-sm font-medium">{t("web.dashboard.discounts.type")}</legend>
-      <div className="flex gap-1 rounded-md border border-input bg-muted p-1">
+      <div className="border-input bg-muted flex gap-1 rounded-md border p-1">
         {options.map((option) => (
           // The label IS the control surface: the radio inside it is visually
           // hidden but still focusable, so the focus ring, the checked state and
@@ -59,13 +59,13 @@ function TypeChoice({
           <label
             key={option.key}
             className={cn(
-              "flex min-h-target flex-1 cursor-pointer items-center justify-center rounded px-3 text-sm font-medium transition-colors",
-              "has-[:focus-visible]:ring-3 has-[:focus-visible]:ring-ring has-[:focus-visible]:ring-offset-1 has-[:focus-visible]:ring-offset-background",
+              "min-h-target flex flex-1 cursor-pointer items-center justify-center rounded px-3 text-sm font-medium transition-colors",
+              "has-[:focus-visible]:ring-ring has-[:focus-visible]:ring-offset-background has-[:focus-visible]:ring-3 has-[:focus-visible]:ring-offset-1",
               // Both states carry a border so the box does not resize when the
               // selection moves; only the selected one draws it.
               value === option.key
-                ? "border border-border bg-card text-foreground shadow-brand-sm"
-                : "border border-transparent text-muted-foreground hover:text-foreground",
+                ? "border-border bg-card text-foreground shadow-brand-sm border"
+                : "text-muted-foreground hover:text-foreground border border-transparent",
             )}
           >
             <input
@@ -141,7 +141,7 @@ export function CreateDiscountForm() {
           aria-invalid={invalid("code") || undefined}
           aria-describedby={describedBy("code", `${uid}-code-help`)}
         />
-        <p id={`${uid}-code-help`} className="text-xs text-muted-foreground">
+        <p id={`${uid}-code-help`} className="text-muted-foreground text-xs">
           {t("web.dashboard.discounts.codeHelp")}
         </p>
       </div>
@@ -195,14 +195,14 @@ export function CreateDiscountForm() {
             aria-invalid={invalid("perStudentLimit") || undefined}
             aria-describedby={describedBy("perStudentLimit", `${uid}-per-help`)}
           />
-          <p id={`${uid}-per-help`} className="text-xs text-muted-foreground">
+          <p id={`${uid}-per-help`} className="text-muted-foreground text-xs">
             {t("web.dashboard.discounts.perStudentHelp")}
           </p>
         </div>
         <div className="space-y-1">
           <Label htmlFor={`${uid}-max`}>
             {t("web.dashboard.discounts.totalUses")}{" "}
-            <span className="font-normal text-muted-foreground">({t("common.optional")})</span>
+            <span className="text-muted-foreground font-normal">({t("common.optional")})</span>
           </Label>
           <Input
             id={`${uid}-max`}
@@ -222,7 +222,7 @@ export function CreateDiscountForm() {
       <div className="space-y-1">
         <Label htmlFor={`${uid}-exp`}>
           {t("web.dashboard.discounts.expiresOptional")}{" "}
-          <span className="font-normal text-muted-foreground">({t("common.optional")})</span>
+          <span className="text-muted-foreground font-normal">({t("common.optional")})</span>
         </Label>
         <Input
           id={`${uid}-exp`}
@@ -234,7 +234,7 @@ export function CreateDiscountForm() {
           aria-invalid={invalid("expiresAt") || undefined}
           aria-describedby={describedBy("expiresAt", `${uid}-exp-help`)}
         />
-        <p id={`${uid}-exp-help`} className="text-xs text-muted-foreground">
+        <p id={`${uid}-exp-help`} className="text-muted-foreground text-xs">
           {t("web.dashboard.discounts.expiresHelp")}
         </p>
       </div>

@@ -186,28 +186,28 @@ export function CallMaterialsPanel({
             "flex h-12 w-12 items-center justify-center rounded-full shadow-lg transition-colors",
             listOpen
               ? "bg-overlay-4 text-scrim-3 hover:bg-overlay-4"
-              : "bg-overlay-1 text-white backdrop-blur-md hover:bg-overlay-2",
+              : "bg-overlay-1 hover:bg-overlay-2 text-white backdrop-blur-md",
           )}
         >
           <Files className="h-5 w-5" aria-hidden />
         </span>
-        <span className="text-center text-sm leading-tight text-on-dark-muted">
+        <span className="text-on-dark-muted text-center text-sm leading-tight">
           {t("call.materials")}
         </span>
       </button>
 
       {/* Material list — a sheet over the video the teacher/student picks from. */}
       {listOpen && (
-        <div className="fixed inset-0 z-over-overlay flex items-end justify-center lg:items-center">
+        <div className="z-over-overlay fixed inset-0 flex items-end justify-center lg:items-center">
           <button
             type="button"
             aria-label={t("call.materialsClose")}
-            className="absolute inset-0 bg-scrim-2"
+            className="bg-scrim-2 absolute inset-0"
             onClick={() => setListOpen(false)}
           />
           <div
             data-testid="call-materials-sheet"
-            className="relative m-4 max-h-over-stage w-full max-w-md overflow-y-auto rounded-2xl bg-background p-4 text-foreground shadow-2xl"
+            className="max-h-over-stage bg-background text-foreground relative m-4 w-full max-w-md overflow-y-auto rounded-2xl p-4 shadow-2xl"
           >
             <div className="mb-3 flex items-center justify-between">
               <Heading level={4} as="h2">
@@ -216,7 +216,7 @@ export function CallMaterialsPanel({
               <button
                 type="button"
                 onClick={() => setListOpen(false)}
-                className="rounded-md px-2 py-1 text-sm text-muted-foreground hover:bg-muted"
+                className="text-muted-foreground hover:bg-muted rounded-md px-2 py-1 text-sm"
               >
                 {t("call.materialsClose")}
               </button>
@@ -248,16 +248,16 @@ export function CallMaterialsPanel({
       {/* Open-for choice — only ever reached from the teacher's library tab
           while a student is present (see `open` above). */}
       {choice && (
-        <div className="fixed inset-0 z-over-everything flex items-end justify-center lg:items-center">
+        <div className="z-over-everything fixed inset-0 flex items-end justify-center lg:items-center">
           <button
             type="button"
             aria-label={t("call.materialOpenChoiceCancel")}
-            className="absolute inset-0 bg-scrim-2"
+            className="bg-scrim-2 absolute inset-0"
             onClick={() => setChoice(null)}
           />
           <div
             data-testid="call-material-open-choice"
-            className="relative m-4 w-full max-w-sm rounded-2xl bg-background p-4 text-foreground shadow-2xl"
+            className="bg-background text-foreground relative m-4 w-full max-w-sm rounded-2xl p-4 shadow-2xl"
           >
             <h3 className="mb-3 text-sm font-semibold">{t("call.materialOpenChoiceTitle")}</h3>
             <div className="flex flex-col gap-2">
@@ -265,7 +265,7 @@ export function CallMaterialsPanel({
                 type="button"
                 data-testid="call-material-open-me"
                 onClick={() => resolveChoice("me")}
-                className="rounded-lg border border-border px-3 py-2 text-left text-sm hover:bg-muted"
+                className="border-border hover:bg-muted rounded-lg border px-3 py-2 text-left text-sm"
               >
                 {t("call.materialOpenForMe")}
               </button>
@@ -273,7 +273,7 @@ export function CallMaterialsPanel({
                 type="button"
                 data-testid="call-material-open-student"
                 onClick={() => resolveChoice("student")}
-                className="rounded-lg border border-border px-3 py-2 text-left text-sm hover:bg-muted"
+                className="border-border hover:bg-muted rounded-lg border px-3 py-2 text-left text-sm"
               >
                 {t("call.materialOpenForStudent")}
               </button>
@@ -281,13 +281,13 @@ export function CallMaterialsPanel({
                 type="button"
                 data-testid="call-material-open-both"
                 onClick={() => resolveChoice("both")}
-                className="rounded-lg border border-border px-3 py-2 text-left text-sm hover:bg-muted"
+                className="border-border hover:bg-muted rounded-lg border px-3 py-2 text-left text-sm"
               >
                 {t("call.materialOpenForBoth")}
               </button>
             </div>
             {choice.fromLibrary && bookingId && (
-              <label className="mt-3 flex items-center gap-2 text-xs text-muted-foreground">
+              <label className="text-muted-foreground mt-3 flex items-center gap-2 text-xs">
                 <input
                   type="checkbox"
                   checked={assignToLesson}
@@ -299,7 +299,7 @@ export function CallMaterialsPanel({
             <button
               type="button"
               onClick={() => setChoice(null)}
-              className="mt-3 w-full rounded-md px-2 py-1.5 text-center text-sm text-muted-foreground hover:bg-muted"
+              className="text-muted-foreground hover:bg-muted mt-3 w-full rounded-md px-2 py-1.5 text-center text-sm"
             >
               {t("call.materialOpenChoiceCancel")}
             </button>
@@ -320,7 +320,7 @@ function MaterialsList({
   t: ReturnType<typeof useT>;
 }) {
   if (materials.length === 0) {
-    return <p className="text-sm text-muted-foreground">{t("call.materialsNoneForClass")}</p>;
+    return <p className="text-muted-foreground text-sm">{t("call.materialsNoneForClass")}</p>;
   }
 
   return (
@@ -331,11 +331,11 @@ function MaterialsList({
             type="button"
             data-testid={`call-material-item-${m.id}`}
             onClick={() => onOpen(m)}
-            className="flex w-full flex-col items-start gap-0.5 rounded-lg border border-border px-3 py-2 text-left hover:bg-muted"
+            className="border-border hover:bg-muted flex w-full flex-col items-start gap-0.5 rounded-lg border px-3 py-2 text-left"
           >
             <span className="text-sm font-medium">{m.label ?? t(labelFallbackKey(m.kind))}</span>
             {!rendersInCall(m) && (
-              <span className="text-xs text-muted-foreground">
+              <span className="text-muted-foreground text-xs">
                 {t("call.materialOpensExternally")}
               </span>
             )}
@@ -361,9 +361,9 @@ export function CallMaterialViewer({
   return (
     <div
       data-testid="call-material-viewer"
-      className="absolute inset-0 z-10 flex flex-col bg-background text-foreground"
+      className="bg-background text-foreground absolute inset-0 z-10 flex flex-col"
     >
-      <div className="flex items-center justify-between border-b border-border px-5 py-3">
+      <div className="border-border flex items-center justify-between border-b px-5 py-3">
         <Heading level={4} as="h2" className="truncate">
           {material.label ?? t("call.materials")}
         </Heading>
@@ -371,7 +371,7 @@ export function CallMaterialViewer({
           type="button"
           data-testid="call-material-viewer-close"
           onClick={onClose}
-          className="shrink-0 rounded-md px-3 py-1.5 text-sm font-medium hover:bg-muted"
+          className="hover:bg-muted shrink-0 rounded-md px-3 py-1.5 text-sm font-medium"
         >
           {t("call.materialsClose")}
         </button>

@@ -389,8 +389,8 @@ export default async function StudentBookingDetailPage({
       <Card>
         <CardHeader>
           <CardTitle>{studentWhen(booking.scheduledStart).when}</CardTitle>
-          <p className="text-xs text-muted-foreground">{t("web.dualZone.yourTime")}</p>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-muted-foreground text-xs">{t("web.dualZone.yourTime")}</p>
+          <p className="text-muted-foreground text-sm">
             {studentWhen(booking.scheduledStart).whenSecondary}
           </p>
           <CardDescription>
@@ -423,7 +423,7 @@ export default async function StudentBookingDetailPage({
               <span className="text-muted-foreground">{t("web.myClasses.detail.movedFrom")}</span>
               <span className="flex flex-col items-end">
                 <span>{studentWhen(booking.rescheduleOf.scheduledStart).when}</span>
-                <span className="text-xs text-muted-foreground">
+                <span className="text-muted-foreground text-xs">
                   {studentWhen(booking.rescheduleOf.scheduledStart).whenSecondary}
                 </span>
               </span>
@@ -436,7 +436,7 @@ export default async function StudentBookingDetailPage({
               </span>
               <span className="flex flex-col items-end">
                 <span>{studentWhen(booking.reschedules[0].scheduledStart).when}</span>
-                <span className="text-xs text-muted-foreground">
+                <span className="text-muted-foreground text-xs">
                   {studentWhen(booking.reschedules[0].scheduledStart).whenSecondary}
                 </span>
               </span>
@@ -560,11 +560,11 @@ export default async function StudentBookingDetailPage({
               <Link
                 key={a.id}
                 href={`/my-classes/${booking.id}/homework/${a.id}`}
-                className="flex items-center justify-between gap-3 rounded-md border px-3 py-2 text-sm transition-colors hover:bg-muted/50"
+                className="hover:bg-muted/50 flex items-center justify-between gap-3 rounded-md border px-3 py-2 text-sm transition-colors"
               >
                 <div className="min-w-0 space-y-0.5">
                   <p className="truncate font-medium">{a.title}</p>
-                  <p className="text-xs text-muted-foreground">
+                  <p className="text-muted-foreground text-xs">
                     {a.dueAt
                       ? t("homework.due", { date: studentWhen(new Date(a.dueAt)).when })
                       : t("homework.noDue")}
@@ -593,7 +593,7 @@ export default async function StudentBookingDetailPage({
                     {t("web.myClasses.detail.rescheduleThisClass")}
                   </Link>
                 </Button>
-                <p className="text-xs text-muted-foreground">
+                <p className="text-muted-foreground text-xs">
                   {scheduleChangesLeft === 1
                     ? t("web.myClasses.detail.scheduleChangesLeftOne")
                     : t("web.myClasses.detail.scheduleChangesLeft", {
@@ -603,7 +603,7 @@ export default async function StudentBookingDetailPage({
               </div>
             )}
             {!eligibility.ok && (
-              <p className="text-sm text-muted-foreground">
+              <p className="text-muted-foreground text-sm">
                 {rescheduleRejectMessage(eligibility.reason, t)}
               </p>
             )}
@@ -693,7 +693,7 @@ function StudentMaterialGroups({
     <>
       {groups.map((g) => (
         <div key={g.categoryId ?? "__other__"} className="space-y-2">
-          <p className="text-xs font-semibold text-muted-foreground">
+          <p className="text-muted-foreground text-xs font-semibold">
             {g.categoryId === null ? t("library.otherCategory") : g.categoryLabel}
           </p>
           {g.items.map((m) => (
@@ -720,7 +720,7 @@ function StudentMaterialGroups({
                     .map((chip, i) => (
                       <span
                         key={`${chip}-${i}`}
-                        className="rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground"
+                        className="bg-muted text-muted-foreground rounded-full px-2 py-0.5 text-xs"
                       >
                         {chip}
                       </span>

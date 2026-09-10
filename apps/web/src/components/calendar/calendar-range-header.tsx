@@ -39,21 +39,21 @@ export function CalendarRangeHeader({
   return (
     <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
       <div className="flex min-w-0 flex-wrap items-baseline gap-x-3 gap-y-1">
-        <h2 className={cn("min-w-0 truncate text-h3 font-semibold", titleClassName)}>{title}</h2>
-        <span className="text-sm tabular-nums text-muted-foreground">
+        <h2 className={cn("text-h3 min-w-0 truncate font-semibold", titleClassName)}>{title}</h2>
+        <span className="text-muted-foreground text-sm tabular-nums">
           {count === 0 ? t("web.calendar.noClasses") : t("web.calendar.classCount", { count })}
         </span>
       </div>
       {/* A segmented cluster rather than three loose links: they are one
           control (move the range), and the 44px targets are the D-140 minimum
           rather than the ~30px the loose links used to be. */}
-      <div className="flex shrink-0 items-center rounded-lg border bg-card">
+      <div className="bg-card flex shrink-0 items-center rounded-lg border">
         <NavLink href={prev.href} label={prev.label} className="rounded-l-lg border-r">
           <ChevronLeft aria-hidden className="h-5 w-5" />
         </NavLink>
         <Link
           href={todayHref}
-          className="flex min-h-target items-center px-4 text-sm font-medium transition-colors hover:bg-muted/60 focus-visible:z-10"
+          className="min-h-target hover:bg-muted/60 flex items-center px-4 text-sm font-medium transition-colors focus-visible:z-10"
         >
           {t("web.calendar.today")}
         </Link>
@@ -81,7 +81,7 @@ function NavLink({
       href={href}
       aria-label={label}
       className={cn(
-        "flex min-h-target w-11 items-center justify-center text-muted-foreground transition-colors hover:bg-muted/60 hover:text-foreground focus-visible:z-10",
+        "min-h-target text-muted-foreground hover:bg-muted/60 hover:text-foreground flex w-11 items-center justify-center transition-colors focus-visible:z-10",
         className,
       )}
     >

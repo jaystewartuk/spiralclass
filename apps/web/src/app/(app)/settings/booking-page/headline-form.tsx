@@ -64,7 +64,7 @@ export function HeadlineForm({ initialHeadline }: { initialHeadline: string | nu
           }
         />
         <div className="flex items-start justify-between gap-3">
-          <p id="headline-help" className="text-xs text-muted-foreground">
+          <p id="headline-help" className="text-muted-foreground text-xs">
             {t("web.settings.bookingPage.headlineHelp")}
           </p>
           <CharacterCounter

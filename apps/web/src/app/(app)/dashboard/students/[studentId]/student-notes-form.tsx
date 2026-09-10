@@ -35,7 +35,7 @@ export function StudentNotes({
     <div className="space-y-4">
       <AddStudentNoteForm studentId={studentId} />
       {notes.length === 0 ? (
-        <p className="text-sm text-muted-foreground">{t("web.studentNotes.empty")}</p>
+        <p className="text-muted-foreground text-sm">{t("web.studentNotes.empty")}</p>
       ) : (
         <div className="space-y-2">
           {notes.map((note) => (
@@ -79,12 +79,12 @@ function AddStudentNoteForm({ studentId }: { studentId: string }) {
           {pending ? t("web.studentNotes.saving") : t("web.studentNotes.add")}
         </Button>
         {state?.error && (
-          <p role="alert" className="text-sm text-destructive">
+          <p role="alert" className="text-destructive text-sm">
             {state.error}
           </p>
         )}
         {state?.ok && (
-          <p role="status" className="text-sm text-success">
+          <p role="status" className="text-success text-sm">
             {state.ok}
           </p>
         )}
@@ -132,7 +132,7 @@ function StudentNoteItem({ note }: { note: StudentNoteView }) {
             {t("common.cancel")}
           </Button>
           {editState?.error && (
-            <p role="alert" className="text-sm text-destructive">
+            <p role="alert" className="text-destructive text-sm">
               {editState.error}
             </p>
           )}
@@ -143,8 +143,8 @@ function StudentNoteItem({ note }: { note: StudentNoteView }) {
 
   return (
     <div className="rounded-md border px-3 py-2 text-sm">
-      <p className="whitespace-pre-wrap break-words">{note.body}</p>
-      <div className="mt-2 flex items-center justify-between gap-2 text-xs text-muted-foreground">
+      <p className="break-words whitespace-pre-wrap">{note.body}</p>
+      <div className="text-muted-foreground mt-2 flex items-center justify-between gap-2 text-xs">
         <span>
           {note.timestampLabel}
           {note.edited && t("web.studentNotes.editedSuffix")}
@@ -168,7 +168,7 @@ function StudentNoteItem({ note }: { note: StudentNoteView }) {
         </span>
       </div>
       {deleteState?.error && (
-        <p role="alert" className="mt-1 text-xs text-destructive">
+        <p role="alert" className="text-destructive mt-1 text-xs">
           {deleteState.error}
         </p>
       )}

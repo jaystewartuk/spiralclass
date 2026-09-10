@@ -57,7 +57,7 @@ export default async function ClassContentPrintPage({
         <Heading level={2} as="h1">
           {t("web.myClasses.content.title")}
         </Heading>
-        <p className="text-sm text-muted-foreground">
+        <p className="text-muted-foreground text-sm">
           {t("web.myClasses.withTeacher")}
           {booking.teacher.name} ·{" "}
           {formatBothZones(

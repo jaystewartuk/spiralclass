@@ -56,12 +56,12 @@ export function StudentArchiveButton({
       </Button>
 
       {state?.error && (
-        <p role="alert" className="text-sm text-destructive">
+        <p role="alert" className="text-destructive text-sm">
           {state.error}
         </p>
       )}
       {state?.ok && (
-        <p role="status" className="text-sm text-success">
+        <p role="status" className="text-success text-sm">
           {state.ok}
         </p>
       )}

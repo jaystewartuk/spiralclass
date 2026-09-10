@@ -41,7 +41,7 @@ export function AssignMaterialForm({
 
   if (options.length === 0) {
     return (
-      <p className="text-sm text-muted-foreground">
+      <p className="text-muted-foreground text-sm">
         {t("web.dashboard.students.material.allAssigned")}
       </p>
     );
@@ -84,12 +84,12 @@ export function AssignMaterialForm({
         </Button>
       </div>
       {pickError && (
-        <p role="alert" aria-live="polite" className="text-sm text-destructive">
+        <p role="alert" aria-live="polite" className="text-destructive text-sm">
           {pickError}
         </p>
       )}
       {state?.error && (
-        <p role="alert" aria-live="polite" className="text-sm text-destructive">
+        <p role="alert" aria-live="polite" className="text-destructive text-sm">
           {state.error}
         </p>
       )}

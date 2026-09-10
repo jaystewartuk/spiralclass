@@ -20,7 +20,7 @@ export default async function MaintenancePage() {
       <div className="max-w-md space-y-3">
         <Heading level={1}>{t("maintenance.title")}</Heading>
         <p className="text-muted-foreground">{message ?? t("maintenance.body")}</p>
-        {until ? <p className="text-sm text-muted-foreground">{until}</p> : null}
+        {until ? <p className="text-muted-foreground text-sm">{until}</p> : null}
       </div>
       <RetryButton label={t("maintenance.cta")} />
     </main>

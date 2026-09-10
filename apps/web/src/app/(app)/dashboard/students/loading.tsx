@@ -36,7 +36,7 @@ export default function StudentsLoading() {
               <Skeleton className="h-4 w-24" />
               <Skeleton className="h-4 w-48" />
             </div>
-            <ul className="divide-y divide-border">
+            <ul className="divide-border divide-y">
               {Array.from({ length: 6 }).map((_, i) => (
                 <li key={i} className="flex items-start gap-3 px-4 py-3 lg:px-6">
                   <Skeleton className="size-9 shrink-0 rounded-full" />

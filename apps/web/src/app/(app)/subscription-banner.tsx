@@ -26,7 +26,7 @@ export async function SubscriptionBanner({ teacherId }: { teacherId: string }) {
     (summary.disposition === "none" && summary.needsAttention)
   ) {
     return (
-      <div className="bg-destructive px-4 py-2 text-center text-sm text-destructive-foreground">
+      <div className="bg-destructive text-destructive-foreground px-4 py-2 text-center text-sm">
         {t("web.subscriptionBanner.pastDue")}{" "}
         <Link href="/settings/billing" className="font-semibold underline">
           {t("web.subscriptionBanner.updatePayment")}
@@ -37,7 +37,7 @@ export async function SubscriptionBanner({ teacherId }: { teacherId: string }) {
 
   if (summary.disposition === "trial_ends") {
     return (
-      <div className="bg-warning-bg px-4 py-2 text-center text-sm text-warning">
+      <div className="bg-warning-bg text-warning px-4 py-2 text-center text-sm">
         {/* `count` selects the CLDR plural variant; this printed "1 day(s)
             left" on the last day of every trial before that existed. */}
         {t("web.subscriptionBanner.trialing", { count: summary.daysRemaining ?? 0 })}{" "}

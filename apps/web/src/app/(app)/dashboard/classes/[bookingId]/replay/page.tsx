@@ -98,7 +98,7 @@ export default async function LessonReplayPage({
       </Button>
       <header>
         <PageHeader title={t("web.dashboard.classes.replay.title")} />
-        <p className="text-sm text-muted-foreground">{booking.student.name}</p>
+        <p className="text-muted-foreground text-sm">{booking.student.name}</p>
       </header>
 
       <ReplayViewer

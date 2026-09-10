@@ -245,14 +245,14 @@ export default async function ReschedulePage({
           </div>
 
           {slots.length === 0 ? (
-            <div className="space-y-3 rounded-md border border-border/60 bg-muted/30 p-4 text-center">
-              <p className="text-sm text-muted-foreground">
+            <div className="border-border/60 bg-muted/30 space-y-3 rounded-md border p-4 text-center">
+              <p className="text-muted-foreground text-sm">
                 {t("web.myClasses.reschedule.noTimesAvailable")}
               </p>
               {nextAvailableDate ? (
                 <Button
                   asChild
-                  className="h-auto min-h-11 max-w-full whitespace-normal py-2 text-center lg:min-h-10"
+                  className="h-auto min-h-11 max-w-full py-2 text-center whitespace-normal lg:min-h-10"
                 >
                   <HardLink href={`/my-classes/${old.id}/reschedule?date=${nextAvailableDate}`}>
                     {t("web.myClasses.reschedule.goToNextAvailableDay", {
@@ -261,7 +261,7 @@ export default async function ReschedulePage({
                   </HardLink>
                 </Button>
               ) : (
-                <p className="text-sm text-muted-foreground">
+                <p className="text-muted-foreground text-sm">
                   {t("web.myClasses.reschedule.noTimesLeftInWindow")}
                 </p>
               )}
@@ -291,7 +291,7 @@ export default async function ReschedulePage({
             </ul>
           )}
 
-          <p className="text-xs text-muted-foreground">
+          <p className="text-muted-foreground text-xs">
             {t("web.myClasses.reschedule.noTimeWorksHint")}
           </p>
         </CardContent>

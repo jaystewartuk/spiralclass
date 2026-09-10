@@ -73,7 +73,7 @@ export async function CalendarDay({
       />
 
       {dayEvents.length === 0 ? (
-        <p className="rounded-lg border border-dashed px-4 py-12 text-center text-sm text-muted-foreground">
+        <p className="text-muted-foreground rounded-lg border border-dashed px-4 py-12 text-center text-sm">
           {emptyDayText}
         </p>
       ) : (

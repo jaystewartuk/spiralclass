@@ -51,10 +51,10 @@ export function PrepareCard({ bookingId, brief }: { bookingId: string; brief: Br
         {brief.focus.length > 0 && (
           <ul className="space-y-3">
             {brief.focus.map((f, i) => (
-              <li key={`${f.skill}-${i}`} className="space-y-1 border-l-2 border-muted pl-3">
+              <li key={`${f.skill}-${i}`} className="border-muted space-y-1 border-l-2 pl-3">
                 <p className="font-medium">
                   {f.skill.replace(/_/g, " ")}{" "}
-                  <span className="font-normal text-muted-foreground">
+                  <span className="text-muted-foreground font-normal">
                     ·{" "}
                     {CATEGORY_LABEL_KEY[f.category]
                       ? t(CATEGORY_LABEL_KEY[f.category]!)
@@ -70,7 +70,7 @@ export function PrepareCard({ bookingId, brief }: { bookingId: string; brief: Br
 
         {brief.vocabulary.length > 0 && (
           <div className="space-y-1">
-            <h4 className="text-sm font-medium text-muted-foreground">
+            <h4 className="text-muted-foreground text-sm font-medium">
               {t("web.dashboard.classes.prepare.vocabulary")}
             </h4>
             <div className="flex flex-wrap gap-1.5">
@@ -97,7 +97,7 @@ function AddCue({ bookingId, body, t }: { bookingId: string; body: string; t: TF
 
   return (
     <div className="flex flex-wrap items-center gap-2">
-      <p className="flex-1 text-muted-foreground">“{body}”</p>
+      <p className="text-muted-foreground flex-1">“{body}”</p>
       {state?.ok ? (
         <Badge variant="secondary">{`✓ ${t("web.dashboard.classes.prepare.addedToNotes")}`}</Badge>
       ) : (
@@ -110,7 +110,7 @@ function AddCue({ bookingId, body, t }: { bookingId: string; body: string; t: TF
           </Button>
         </form>
       )}
-      {state?.error && <p className="w-full text-destructive">{state.error}</p>}
+      {state?.error && <p className="text-destructive w-full">{state.error}</p>}
     </div>
   );
 }

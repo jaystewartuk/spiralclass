@@ -114,7 +114,7 @@ function MemeSettingsForm({
                 of sentence that helps, and the help text says what it is for —
                 anything more technical would be the product handing her its own
                 job back. */}
-            <p className="text-xs text-muted-foreground">{t("socialPreview.generalBriefHelp")}</p>
+            <p className="text-muted-foreground text-xs">{t("socialPreview.generalBriefHelp")}</p>
           </div>
 
           <div className="space-y-2">
@@ -124,7 +124,7 @@ function MemeSettingsForm({
               name="memeStyle"
               value={style}
               onChange={(e) => setStyle(e.target.value as MemeStyle)}
-              className="h-9 w-full max-w-xs rounded-md border border-input bg-background px-3 text-sm"
+              className="border-input bg-background h-9 w-full max-w-xs rounded-md border px-3 text-sm"
             >
               {MEME_STYLES.map((option) => (
                 <option key={option} value={option}>
@@ -132,7 +132,7 @@ function MemeSettingsForm({
                 </option>
               ))}
             </select>
-            <p className="text-xs text-muted-foreground">{memeStyleSpec(style).summary[locale]}</p>
+            <p className="text-muted-foreground text-xs">{memeStyleSpec(style).summary[locale]}</p>
           </div>
 
           <FormStatus state={state} savedMessage={t("socialPreview.settingsSaved")} />
@@ -163,7 +163,7 @@ function MemeCard({ image, usage }: { image: SocialPreviewImageView; usage: Meme
 
   return (
     <Card className="overflow-hidden">
-      <div className="relative aspect-social w-full bg-muted">
+      <div className="aspect-social bg-muted relative w-full">
         {image.url && (
           <Image
             src={image.url}
@@ -207,7 +207,7 @@ function MemeCard({ image, usage }: { image: SocialPreviewImageView; usage: Meme
             </Button>
           </div>
           {renameState?.error && (
-            <p role="alert" className="text-xs text-destructive">
+            <p role="alert" className="text-destructive text-xs">
               {renameState.error}
             </p>
           )}
@@ -241,7 +241,7 @@ function MemeCard({ image, usage }: { image: SocialPreviewImageView; usage: Meme
           />
         </div>
         {deleteState?.error && (
-          <p role="alert" className="text-xs text-destructive">
+          <p role="alert" className="text-destructive text-xs">
             {deleteState.error}
           </p>
         )}

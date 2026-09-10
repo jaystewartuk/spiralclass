@@ -144,7 +144,7 @@ export default async function CommunitiesPage() {
         />
       </span>
     ) : (
-      <span className="shrink-0 text-xs text-muted-foreground">
+      <span className="text-muted-foreground shrink-0 text-xs">
         {t("socialPreview.standardShort")}
       </span>
     );
@@ -164,9 +164,9 @@ export default async function CommunitiesPage() {
               It is the first question the page has to answer, and the previous
               version answered it only by scrolling. */}
           <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm font-medium">
-            <Users className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
+            <Users className="text-muted-foreground h-4 w-4" aria-hidden="true" />
             <span>{t("web.getStudents.communityCount", { count: live.length })}</span>
-            <span className="font-normal text-muted-foreground">
+            <span className="text-muted-foreground font-normal">
               {t("web.getStudents.communitiesPromotable", { count: promotable })}
             </span>
           </p>

@@ -167,12 +167,12 @@ export default async function PaymentsSettingsPage({
             ) : isLinked ? (
               <>
                 <SettingRow title={t("web.settings.payments.accountStatusTitle")}>
-                  <dl className="divide-y divide-border text-sm">
+                  <dl className="divide-border divide-y text-sm">
                     <StatusRow label={t("web.settings.payments.accountIdLabel")}>
                       {/* `break-all` because an `acct_` id is 21 unbroken
                           characters and a phone is 320px wide; the old markup
                           let it push the card's own layout sideways. */}
-                      <span className="break-all font-mono text-xs">{teacher.stripeAccountId}</span>
+                      <span className="font-mono text-xs break-all">{teacher.stripeAccountId}</span>
                     </StatusRow>
                     <StatusRow label={t("web.settings.payments.chargesLabel")}>
                       <Badge variant={canCharge ? "success" : "warning"}>
@@ -247,7 +247,7 @@ export default async function PaymentsSettingsPage({
               </>
             ) : (
               <SettingRow>
-                <p className="text-sm text-muted-foreground">
+                <p className="text-muted-foreground text-sm">
                   {t("web.settings.payments.stripeOnboardingHelp")}
                 </p>
                 {embedded && publishableKey ? (

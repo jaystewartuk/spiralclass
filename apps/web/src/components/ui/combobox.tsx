@@ -110,8 +110,8 @@ export function Combobox({
         onClick={() => setOpen((o) => !o)}
         {...aria}
         className={cn(
-          "flex h-9 w-full items-center justify-between rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors",
-          "focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50",
+          "border-input flex h-9 w-full items-center justify-between rounded-md border bg-transparent px-3 py-1 text-sm shadow-sm transition-colors",
+          "focus-visible:ring-ring focus-visible:ring-1 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50",
           !selected && "text-muted-foreground",
           className,
         )}
@@ -127,7 +127,7 @@ export function Combobox({
         // compact chip (e.g. the phone dial-code chip, ~72px) — without it,
         // the search input and every country name inherit that same
         // trigger-width via w-full, becoming unreadable/untappable.
-        <div className="absolute z-50 mt-1 w-full min-w-64 rounded-md border bg-popover text-popover-foreground shadow-md">
+        <div className="bg-popover text-popover-foreground absolute z-50 mt-1 w-full min-w-64 rounded-md border shadow-md">
           <div className="p-1">
             <input
               ref={inputRef}
@@ -137,12 +137,12 @@ export function Combobox({
               placeholder={searchPlaceholder}
               aria-label={searchPlaceholder}
               autoComplete="off"
-              className="flex h-8 w-full rounded-sm bg-transparent px-2 text-sm outline-none placeholder:text-muted-foreground"
+              className="placeholder:text-muted-foreground flex h-8 w-full rounded-sm bg-transparent px-2 text-sm outline-none"
             />
           </div>
           <ul id={listId} role="listbox" className="max-h-60 overflow-y-auto p-1">
             {filtered.length === 0 ? (
-              <li className="px-2 py-1.5 text-sm text-muted-foreground">{emptyText}</li>
+              <li className="text-muted-foreground px-2 py-1.5 text-sm">{emptyText}</li>
             ) : (
               filtered.map((opt, i) => {
                 const isSelected = opt.value === value;

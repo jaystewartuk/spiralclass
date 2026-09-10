@@ -104,13 +104,13 @@ function PackageRow({
                 alignment that lets a column of packages be read down. */}
             <span className="mt-1 flex items-baseline gap-1.5">
               <span className="text-2xl font-semibold tabular-nums">{left}</span>
-              <span className="text-sm text-muted-foreground">
+              <span className="text-muted-foreground text-sm">
                 {t("web.dashboard.students.package.leftOfTotal", {
                   total: String(pkg.classesTotal),
                 })}
               </span>
             </span>
-            <span className="mt-1 block text-sm text-muted-foreground">
+            <span className="text-muted-foreground mt-1 block text-sm">
               {formatMinorUnits(pkg.pricePaidMinorUnits, pkg.currency)}
               {" · "}
               {pkg.expiresAt
@@ -264,7 +264,7 @@ export async function PackagesTab({
           </CardHeader>
           <CardContent>
             {packages.length === 0 ? (
-              <p className="text-sm text-muted-foreground">
+              <p className="text-muted-foreground text-sm">
                 {t("web.dashboard.students.package.noneYet")}
               </p>
             ) : (
@@ -304,7 +304,7 @@ export async function PackagesTab({
                       {/* Was the raw column value — a teacher's adjustment log
                           literally read `set_custom_price`. */}
                       <span className="font-medium">{overrideActionLabel(o.action, t)}</span>
-                      <span className="text-sm text-muted-foreground">
+                      <span className="text-muted-foreground text-sm">
                         {formatZonedDateTime(o.createdAt, teacher.timezone, locale)}
                       </span>
                     </div>

@@ -104,7 +104,7 @@ export default async function AdminPackagesPage({
     <div className="space-y-6">
       <header>
         <PageHeader title={t("web.admin.packages.title")} />
-        <p className="text-sm text-muted-foreground">
+        <p className="text-muted-foreground text-sm">
           {t("web.admin.packages.matchingCount", { count: total.toLocaleString() })}
         </p>
       </header>

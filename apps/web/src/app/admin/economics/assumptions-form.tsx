@@ -89,7 +89,7 @@ export function AssumptionsForm({ initial }: { initial: EconomicsAssumptionsValu
                   name="allocationBasis"
                   required
                   defaultValue={initial.allocationBasis}
-                  className="h-9 w-full rounded-md border bg-background px-2 text-sm lg:w-auto"
+                  className="bg-background h-9 w-full rounded-md border px-2 text-sm lg:w-auto"
                 >
                   {ALLOCATION_BASES.map((basis) => (
                     <option key={basis} value={basis}>
@@ -102,7 +102,7 @@ export function AssumptionsForm({ initial }: { initial: EconomicsAssumptionsValu
             <Button type="submit" disabled={pending}>
               {pending ? "…" : t("common.save")}
             </Button>
-            {state?.error && <p className="text-sm text-destructive">{state.error}</p>}
+            {state?.error && <p className="text-destructive text-sm">{state.error}</p>}
           </form>
         </CardContent>
       ) : null}

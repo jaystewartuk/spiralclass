@@ -94,7 +94,7 @@ export function MaterialEditor({
   return (
     <div className="space-y-2">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <p className="text-xs text-muted-foreground">{t("material.editor.hint")}</p>
+        <p className="text-muted-foreground text-xs">{t("material.editor.hint")}</p>
         {lastChange === "refine" ? (
           // An AI change gets its own, more prominent affordance than the
           // generic diff bar below — a teacher who just watched the AI touch
@@ -110,7 +110,7 @@ export function MaterialEditor({
         ) : (
           lastChange && (
             <div className="flex items-center gap-1.5" aria-live="polite">
-              <span className="text-xs text-muted-foreground">{t(CHANGE_LABEL[lastChange])}</span>
+              <span className="text-muted-foreground text-xs">{t(CHANGE_LABEL[lastChange])}</span>
               <Button type="button" variant="ghost" size="sm" onClick={undo}>
                 <Undo2 className="mr-1 size-4" aria-hidden />
                 {t("material.editor.undo")}
@@ -167,17 +167,17 @@ function AddSectionRow({ onAdd }: { onAdd: () => void }) {
   const t = useT();
   return (
     <div className="group flex items-center gap-2 py-0.5">
-      <span className="h-px flex-1 bg-border opacity-40 transition-opacity group-hover:opacity-100" />
+      <span className="bg-border h-px flex-1 opacity-40 transition-opacity group-hover:opacity-100" />
       <button
         type="button"
         onClick={onAdd}
         aria-label={t("material.editor.addSectionHere")}
-        className="flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs text-muted-foreground opacity-60 transition-opacity hover:bg-accent hover:text-foreground group-hover:opacity-100"
+        className="text-muted-foreground hover:bg-accent hover:text-foreground flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs opacity-60 transition-opacity group-hover:opacity-100"
       >
         <Plus className="size-3.5" aria-hidden />
         {t("material.editor.addSection")}
       </button>
-      <span className="h-px flex-1 bg-border opacity-40 transition-opacity group-hover:opacity-100" />
+      <span className="bg-border h-px flex-1 opacity-40 transition-opacity group-hover:opacity-100" />
     </div>
   );
 }
@@ -207,8 +207,8 @@ function SectionCard({
       : t("material.editor.untitledSection"));
 
   return (
-    <section className="rounded-md border bg-background" aria-label={title}>
-      <div className="flex items-center gap-1 rounded-t-md border-b bg-muted/40 px-2 py-1">
+    <section className="bg-background rounded-md border" aria-label={title}>
+      <div className="bg-muted/40 flex items-center gap-1 rounded-t-md border-b px-2 py-1">
         <span className="min-w-0 flex-1 truncate text-xs font-medium">{title}</span>
         <IconButton
           label={t("material.editor.moveUp")}
@@ -335,7 +335,7 @@ function SectionRefine({
 
   return (
     <div className="space-y-1.5 border-t px-3 py-2">
-      <p className="text-xs text-muted-foreground">{t("material.editor.refineSectionHint")}</p>
+      <p className="text-muted-foreground text-xs">{t("material.editor.refineSectionHint")}</p>
       <div className="flex gap-2">
         <Input
           value={instruction}
@@ -363,9 +363,9 @@ function SectionRefine({
           {t("common.cancel")}
         </Button>
       </div>
-      {refineState?.error && <p className="text-sm text-destructive">{refineState.error}</p>}
+      {refineState?.error && <p className="text-destructive text-sm">{refineState.error}</p>}
       {dropped && (
-        <p className="text-sm text-destructive">{t("material.editor.refineSectionGone")}</p>
+        <p className="text-destructive text-sm">{t("material.editor.refineSectionGone")}</p>
       )}
     </div>
   );

@@ -20,7 +20,7 @@ export function SectionNav({ label, items }: { label: string; items: SectionNavI
           <li key={item.id}>
             <a
               href={`#${item.id}`}
-              className="flex h-11 items-center whitespace-nowrap rounded-full border border-border bg-card px-3.5 text-sm text-muted-foreground ring-offset-background transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring focus-visible:ring-offset-2"
+              className="border-border bg-card text-muted-foreground ring-offset-background hover:bg-muted hover:text-foreground focus-visible:ring-ring flex h-11 items-center rounded-full border px-3.5 text-sm whitespace-nowrap transition-colors focus-visible:ring-3 focus-visible:ring-offset-2 focus-visible:outline-none"
             >
               {item.label}
             </a>

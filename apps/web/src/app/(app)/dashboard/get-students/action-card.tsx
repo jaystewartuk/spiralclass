@@ -114,7 +114,7 @@ export function NextActionCard({ item }: { item: ActionCardItem }) {
         <div className="flex flex-wrap items-center gap-2">
           <Badge variant="secondary">{where}</Badge>
           {item.status === "ready" && <Badge variant="success">{t("web.getStudents.ready")}</Badge>}
-          <span className="inline-flex items-center gap-1 text-sm text-muted-foreground">
+          <span className="text-muted-foreground inline-flex items-center gap-1 text-sm">
             <Clock3 className="h-4 w-4 shrink-0" aria-hidden="true" />
             {t("web.getStudents.aboutMinutes", { minutes: estimatedMinutesFor(item.kind) })}
           </span>
@@ -126,7 +126,7 @@ export function NextActionCard({ item }: { item: ActionCardItem }) {
         <div className="max-w-reading space-y-1">
           <Heading level={3}>{reason ?? task}</Heading>
           {reason ? <p className="font-medium">{task}</p> : null}
-          <p className="text-sm text-muted-foreground">{contentKindSummary(item.kind, locale)}</p>
+          <p className="text-muted-foreground text-sm">{contentKindSummary(item.kind, locale)}</p>
         </div>
 
         <div className="flex flex-wrap gap-2">
@@ -186,7 +186,7 @@ export function ActionRow({ item }: { item: ActionCardItem }) {
       <div className="flex items-stretch">
         <Link
           href={`/dashboard/get-students/${item.id}`}
-          className="flex min-h-target min-w-0 flex-1 items-center gap-3 py-3 pl-6 pr-2 transition-colors hover:bg-muted/50 focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring"
+          className="min-h-target hover:bg-muted/50 focus-visible:ring-ring flex min-w-0 flex-1 items-center gap-3 py-3 pr-2 pl-6 transition-colors focus-visible:ring-3 focus-visible:outline-none"
         >
           <span className="min-w-0 flex-1">
             <span className="flex flex-wrap items-center gap-2">
@@ -196,11 +196,11 @@ export function ActionRow({ item }: { item: ActionCardItem }) {
                 <Badge variant="success">{t("web.getStudents.ready")}</Badge>
               )}
             </span>
-            <span className="block text-sm text-muted-foreground">
+            <span className="text-muted-foreground block text-sm">
               {reason ?? contentKindSummary(item.kind, locale)}
             </span>
           </span>
-          <ChevronRight className="h-5 w-5 shrink-0 text-muted-foreground" aria-hidden="true" />
+          <ChevronRight className="text-muted-foreground h-5 w-5 shrink-0" aria-hidden="true" />
         </Link>
         <form action={doneAction} className="flex items-center pr-4">
           <input type="hidden" name="id" value={item.id} />
@@ -233,18 +233,18 @@ export function DoneRow({ item }: { item: ActionCardItem }) {
     <li>
       <Link
         href={`/dashboard/get-students/${item.id}`}
-        className="flex min-h-target flex-wrap items-center justify-between gap-x-3 gap-y-1 px-6 py-3 transition-colors hover:bg-muted/50 focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring"
+        className="min-h-target hover:bg-muted/50 focus-visible:ring-ring flex flex-wrap items-center justify-between gap-x-3 gap-y-1 px-6 py-3 transition-colors focus-visible:ring-3 focus-visible:outline-none"
       >
         <span className="flex min-w-0 items-center gap-2">
           {/* Decoration beside a word that already says it — D-140: never state
               a status in a mark alone. A tick on a SKIPPED row would say the
               opposite of the badge next to it, so skipped gets a dash. */}
           {done ? (
-            <Check className="h-4 w-4 shrink-0 text-success" aria-hidden="true" />
+            <Check className="text-success h-4 w-4 shrink-0" aria-hidden="true" />
           ) : (
-            <Minus className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden="true" />
+            <Minus className="text-muted-foreground h-4 w-4 shrink-0" aria-hidden="true" />
           )}
-          <span className="min-w-0 truncate text-muted-foreground">
+          <span className="text-muted-foreground min-w-0 truncate">
             {contentKindLabel(item.kind, locale)}
           </span>
           <Badge variant={done ? "success" : "outline"}>
@@ -252,7 +252,7 @@ export function DoneRow({ item }: { item: ActionCardItem }) {
           </Badge>
         </span>
         {done ? (
-          <span className="text-sm text-muted-foreground">{resultText(t, item.results)}</span>
+          <span className="text-muted-foreground text-sm">{resultText(t, item.results)}</span>
         ) : null}
       </Link>
     </li>

@@ -31,8 +31,8 @@ export function IconButton({
       size="sm"
       className={
         destructive
-          ? "px-1.5 text-muted-foreground hover:text-destructive"
-          : "px-1.5 text-muted-foreground"
+          ? "text-muted-foreground hover:text-destructive px-1.5"
+          : "text-muted-foreground px-1.5"
       }
       onClick={onClick}
       disabled={disabled}

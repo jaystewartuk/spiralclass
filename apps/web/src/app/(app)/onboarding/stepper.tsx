@@ -28,7 +28,7 @@ export function OnboardingBack() {
   return (
     <Link
       href={previous.href}
-      className="mt-6 inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
+      className="text-muted-foreground hover:text-foreground mt-6 inline-flex items-center gap-1 text-sm"
     >
       <ChevronLeft className="h-4 w-4" aria-hidden />
       {t("web.onboarding.stepper.backTo", { step: previousLabel })}

@@ -59,10 +59,10 @@ export function CopyLinkButton({
         size="icon"
         onClick={onClick}
         aria-label={ariaLabel ?? label ?? t("web.copyLinkButton.copyLink")}
-        className={cn("shrink-0 text-muted-foreground hover:text-foreground", className)}
+        className={cn("text-muted-foreground hover:text-foreground shrink-0", className)}
       >
         {copied ? (
-          <Check className="h-4 w-4 text-success" aria-hidden />
+          <Check className="text-success h-4 w-4" aria-hidden />
         ) : (
           <Copy className="h-4 w-4" aria-hidden />
         )}

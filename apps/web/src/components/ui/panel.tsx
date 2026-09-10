@@ -31,12 +31,12 @@ export function Panel({
   className?: string;
 }) {
   return (
-    <section className={cn("flex flex-col gap-3 border-t border-border pt-5", className)}>
+    <section className={cn("border-border flex flex-col gap-3 border-t pt-5", className)}>
       {title ? (
         <div className="flex flex-wrap items-start justify-between gap-2">
           <div className="flex min-w-0 flex-col gap-1">
             <h2 className="font-bold">{title}</h2>
-            {description ? <p className="text-sm text-muted-foreground">{description}</p> : null}
+            {description ? <p className="text-muted-foreground text-sm">{description}</p> : null}
           </div>
           {actions ? <div className="flex shrink-0 items-center gap-2">{actions}</div> : null}
         </div>

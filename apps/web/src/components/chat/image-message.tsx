@@ -35,7 +35,7 @@ export function ImageMessage({
         src={imageUrl}
         alt={t("chat.media.photo")}
         style={{ aspectRatio }}
-        className="h-auto w-full bg-muted object-cover"
+        className="bg-muted h-auto w-full object-cover"
         loading="lazy"
       />
     </a>

@@ -32,7 +32,7 @@ const TableFooter = React.forwardRef<
   HTMLTableSectionElement,
   React.HTMLAttributes<HTMLTableSectionElement>
 >(({ className, ...props }, ref) => (
-  <tfoot ref={ref} className={cn("border-t bg-muted/50 font-medium", className)} {...props} />
+  <tfoot ref={ref} className={cn("bg-muted/50 border-t font-medium", className)} {...props} />
 ));
 TableFooter.displayName = "TableFooter";
 
@@ -43,7 +43,7 @@ const TableRow = React.forwardRef<HTMLTableRowElement, React.HTMLAttributes<HTML
       className={cn(
         // `relative` makes the row a positioning context so a `RowLink`'s
         // stretched overlay covers the whole row (see RowLink below).
-        "relative border-t border-border transition-colors hover:bg-muted/40 data-[state=selected]:bg-muted",
+        "border-border hover:bg-muted/40 data-[state=selected]:bg-muted relative border-t transition-colors",
         className,
       )}
       {...props}
@@ -60,7 +60,7 @@ const TableHead = React.forwardRef<
     ref={ref}
     scope={scope}
     className={cn(
-      "h-10 px-3 text-left align-middle text-xs font-semibold text-muted-foreground [&:has([role=checkbox])]:pr-0",
+      "text-muted-foreground h-10 px-3 text-left align-middle text-xs font-semibold [&:has([role=checkbox])]:pr-0",
       className,
     )}
     {...props}
@@ -84,7 +84,7 @@ const TableCaption = React.forwardRef<
   HTMLTableCaptionElement,
   React.HTMLAttributes<HTMLTableCaptionElement>
 >(({ className, ...props }, ref) => (
-  <caption ref={ref} className={cn("mt-4 text-sm text-muted-foreground", className)} {...props} />
+  <caption ref={ref} className={cn("text-muted-foreground mt-4 text-sm", className)} {...props} />
 ));
 TableCaption.displayName = "TableCaption";
 
@@ -174,7 +174,7 @@ function SortableHead({
       <Link
         href={sortHref(params, column, nextDir)}
         scroll={false}
-        className="group inline-flex items-center gap-1 rounded transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring"
+        className="group hover:text-foreground focus-visible:ring-ring inline-flex items-center gap-1 rounded transition-colors focus-visible:ring-3 focus-visible:outline-none"
       >
         {label}
         <SortArrow active={active} dir={sort.dir} />

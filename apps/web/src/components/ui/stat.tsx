@@ -17,11 +17,11 @@ export function StatCard({
   return (
     <Card>
       <CardContent className="pt-6">
-        <div className="text-xs text-muted-foreground">{label}</div>
+        <div className="text-muted-foreground text-xs">{label}</div>
         <div className={`mt-1 text-2xl font-semibold ${danger ? "text-destructive" : ""}`}>
           {value}
         </div>
-        {hint ? <div className="mt-1 text-xs text-muted-foreground">{hint}</div> : null}
+        {hint ? <div className="text-muted-foreground mt-1 text-xs">{hint}</div> : null}
       </CardContent>
     </Card>
   );

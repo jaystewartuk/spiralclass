@@ -143,7 +143,7 @@ export function PortalPurchaseFlow({
 
       {showToggle && (
         <fieldset className="space-y-2 rounded-md border p-3">
-          <legend className="flex items-center gap-1 px-1 text-xs text-muted-foreground">
+          <legend className="text-muted-foreground flex items-center gap-1 px-1 text-xs">
             {t("buy.method.title")}
             <HelpTip
               text={t("web.help.hint.studentPayments.text")}
@@ -202,30 +202,30 @@ export function PortalPurchaseFlow({
                     value={tpl.id}
                     checked={checked}
                     onChange={() => setSelectedId(tpl.id)}
-                    className="mt-1 size-4 cursor-pointer accent-foreground"
+                    className="accent-foreground mt-1 size-4 cursor-pointer"
                   />
                 )}
                 <div>
                   <div className="font-medium">{tpl.name}</div>
-                  <div className="text-xs text-muted-foreground">{describe(tpl, t)}</div>
+                  <div className="text-muted-foreground text-xs">{describe(tpl, t)}</div>
                 </div>
               </div>
               <div className="text-right">
                 <div className="font-semibold tabular-nums">{formatMinorUnits(price)}</div>
                 {agreed !== undefined && (
-                  <div className="text-xs text-muted-foreground">
+                  <div className="text-muted-foreground text-xs">
                     {t("web.studentBuy.yourAgreedPrice")}
                   </div>
                 )}
                 {hasTransferDiscount &&
                   (method === "manual_transfer" ? (
-                    <div className="text-xs text-success">
+                    <div className="text-success text-xs">
                       {t("web.studentBuy.youSave", { amount: formatMinorUnits(savings) })}
                     </div>
                   ) : (
                     // Card selected: reveal the cheaper transfer price upfront
                     // so the saving is visible before the student decides.
-                    <div className="text-xs text-success">
+                    <div className="text-success text-xs">
                       {t("web.studentBuy.wisePriceWithSavings", {
                         wisePrice: formatMinorUnits(transferPrice),
                         savings: formatMinorUnits(savings),
@@ -264,14 +264,14 @@ export function PortalPurchaseFlow({
           variant="link"
           onClick={() => setShowDiscount(true)}
           disabled={noMethods || pending}
-          className="h-auto justify-start px-0 text-sm text-muted-foreground hover:text-foreground"
+          className="text-muted-foreground hover:text-foreground h-auto justify-start px-0 text-sm"
         >
           {t("web.checkoutForm.haveDiscountCode")}
         </Button>
       )}
 
       {errorMessage && (
-        <p role="alert" aria-live="polite" className="text-sm text-destructive">
+        <p role="alert" aria-live="polite" className="text-destructive text-sm">
           {errorMessage}
         </p>
       )}
@@ -282,7 +282,7 @@ export function PortalPurchaseFlow({
           : ctaCopy(method, formatMinorUnits(effectivePrice(selected)), t)}
       </Button>
       {method === "stripe" && (
-        <p className="flex items-center justify-center gap-1 text-xs text-muted-foreground">
+        <p className="text-muted-foreground flex items-center justify-center gap-1 text-xs">
           <Lock className="h-3.5 w-3.5" />
           {t("buy.trust.secure")}
         </p>
@@ -291,7 +291,7 @@ export function PortalPurchaseFlow({
           rationale as the public checkout's CheckoutForm. Lives here (not
           the page footer) because this is the one place in this flow that
           already tracks the selected rail. */}
-      <p className="text-center text-xs leading-snug text-muted-foreground">
+      <p className="text-muted-foreground text-center text-xs leading-snug">
         {method === "manual_transfer"
           ? t("buyAnother.disclaimer.wise")
           : t("buyAnother.disclaimer.stripe")}
@@ -340,7 +340,7 @@ function MethodOption({
         name="method-toggle"
         checked={checked}
         onChange={onSelect}
-        className="size-4 cursor-pointer accent-foreground"
+        className="accent-foreground size-4 cursor-pointer"
       />
       <span className="font-medium">{label}</span>
     </label>

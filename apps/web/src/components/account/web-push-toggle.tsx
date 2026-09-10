@@ -217,7 +217,7 @@ export function WebPushToggle() {
           </div>
           {/* Turning this on or off changes nothing else visible on the page,
               so the sentence under it is the only confirmation there is. */}
-          <p className="text-sm text-muted-foreground" role="status" aria-live="polite">
+          <p className="text-muted-foreground text-sm" role="status" aria-live="polite">
             {state === "ios-needs-install"
               ? t("web.webPush.iosNeedsInstall")
               : state === "unsupported"
@@ -241,7 +241,7 @@ export function WebPushToggle() {
         )}
       </div>
       {error ? (
-        <p className="text-sm text-destructive" role="alert">
+        <p className="text-destructive text-sm" role="alert">
           {error}
         </p>
       ) : null}

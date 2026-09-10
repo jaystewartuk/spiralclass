@@ -342,7 +342,7 @@ export function ClassContentTemplatesForm({ initial }: { initial: TemplateDraft[
   return (
     <form action={formAction} onSubmit={handleSubmit} noValidate className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <p className="text-sm tabular-nums text-muted-foreground" aria-live="polite">
+        <p className="text-muted-foreground text-sm tabular-nums" aria-live="polite">
           {t("web.settings.classContentTemplates.count", { count: visible.length })}
         </p>
         <Button
@@ -359,7 +359,7 @@ export function ClassContentTemplatesForm({ initial }: { initial: TemplateDraft[
       </div>
 
       {atCap && (
-        <p className="text-sm text-muted-foreground">
+        <p className="text-muted-foreground text-sm">
           {t("web.settings.classContentTemplates.capReached", {
             max: CLASS_CONTENT_TEMPLATE_MAX_PER_TEACHER,
           })}
@@ -469,7 +469,7 @@ export function ClassContentTemplatesForm({ initial }: { initial: TemplateDraft[
 
       {showBar && (
         <div
-          className="sticky bottom-0 z-20 -mx-4 flex flex-wrap items-center justify-between gap-x-4 gap-y-2 border-t bg-background/95 px-4 py-3 backdrop-blur supports-[backdrop-filter]:bg-background/80"
+          className="bg-background/95 supports-[backdrop-filter]:bg-background/80 sticky bottom-0 z-20 -mx-4 flex flex-wrap items-center justify-between gap-x-4 gap-y-2 border-t px-4 py-3 backdrop-blur"
           role="region"
           aria-label={t("settings.classContentTemplates.title")}
         >
@@ -482,7 +482,7 @@ export function ClassContentTemplatesForm({ initial }: { initial: TemplateDraft[
               </p>
             )}
             {showErrors ? (
-              <p role="alert" className="text-sm text-destructive">
+              <p role="alert" className="text-destructive text-sm">
                 {t("web.settings.classContentTemplates.fixErrors")}
               </p>
             ) : (
@@ -613,7 +613,7 @@ function TemplateRow({
             {...attributes}
             {...listeners}
             aria-label={t("web.settings.classContentTemplates.dragHandleAria", { name })}
-            className="flex size-10 shrink-0 cursor-grab touch-none items-center justify-center rounded-md text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring active:cursor-grabbing lg:size-8"
+            className="text-muted-foreground hover:text-foreground focus-visible:ring-ring flex size-10 shrink-0 cursor-grab touch-none items-center justify-center rounded-md focus-visible:ring-3 focus-visible:outline-none active:cursor-grabbing lg:size-8"
           >
             <GripVertical className="size-4" aria-hidden />
           </button>
@@ -625,27 +625,27 @@ function TemplateRow({
             aria-expanded={open}
             aria-controls={panelId}
             aria-label={t("web.settings.classContentTemplates.rowToggleAria", { name })}
-            className="flex min-w-0 flex-1 items-center gap-3 rounded-md px-2 py-1.5 text-left hover:bg-muted/60 focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring"
+            className="hover:bg-muted/60 focus-visible:ring-ring flex min-w-0 flex-1 items-center gap-3 rounded-md px-2 py-1.5 text-left focus-visible:ring-3 focus-visible:outline-none"
           >
             <span className="min-w-0 flex-1">
               <span className="flex items-center gap-2">
                 <span
                   className={cn(
                     "truncate font-semibold",
-                    !row.label.trim() && "font-normal italic text-muted-foreground",
+                    !row.label.trim() && "text-muted-foreground font-normal italic",
                   )}
                 >
                   {name}
                 </span>
                 {status && (
-                  <span className="shrink-0 rounded-full border border-border px-1.5 py-0.5 text-xs font-medium leading-none text-muted-foreground">
+                  <span className="border-border text-muted-foreground shrink-0 rounded-full border px-1.5 py-0.5 text-xs leading-none font-medium">
                     {status === "new"
                       ? t("web.settings.classContentTemplates.statusNew")
                       : t("web.settings.classContentTemplates.statusEdited")}
                   </span>
                 )}
               </span>
-              <span className="mt-1 block truncate text-xs text-muted-foreground">
+              <span className="text-muted-foreground mt-1 block truncate text-xs">
                 {outline.length > 0
                   ? outline.slice(0, 5).join(" · ") + (outline.length > 5 ? " …" : "")
                   : excerpt || t("web.settings.classContentTemplates.noSections")}
@@ -655,13 +655,13 @@ function TemplateRow({
               // Only ever a count of something. At zero the summary line
               // already says "no sections yet", and a "0 sections" chip beside
               // it would be the same fact twice in two different phrasings.
-              <span className="hidden shrink-0 text-xs tabular-nums text-muted-foreground lg:block">
+              <span className="text-muted-foreground hidden shrink-0 text-xs tabular-nums lg:block">
                 {t("web.settings.classContentTemplates.sections", { count: outline.length })}
               </span>
             )}
             <ChevronDown
               className={cn(
-                "size-4 shrink-0 text-muted-foreground transition-transform",
+                "text-muted-foreground size-4 shrink-0 transition-transform",
                 open && "rotate-180",
               )}
               aria-hidden
@@ -694,7 +694,7 @@ function TemplateRow({
               <div
                 role="group"
                 aria-label={t("classContentTemplates.editor.body")}
-                className="inline-flex items-center gap-1 rounded-md bg-muted p-1"
+                className="bg-muted inline-flex items-center gap-1 rounded-md p-1"
               >
                 <ModeButton pressed={!preview} onClick={() => onPreview(false)}>
                   {t("web.settings.classContentTemplates.write")}
@@ -706,11 +706,11 @@ function TemplateRow({
             </div>
 
             {preview ? (
-              <div className="min-h-48 rounded-md border bg-muted/30 px-4 py-3">
+              <div className="bg-muted/30 min-h-48 rounded-md border px-4 py-3">
                 {row.body.trim() ? (
                   <ClassContentMarkdown body={row.body} />
                 ) : (
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-muted-foreground text-sm">
                     {t("web.settings.classContentTemplates.noPreview")}
                   </p>
                 )}
@@ -731,7 +731,7 @@ function TemplateRow({
             )}
 
             <div className="flex flex-wrap items-start justify-between gap-2">
-              <p id={helpId} className="max-w-prose text-xs text-muted-foreground">
+              <p id={helpId} className="text-muted-foreground max-w-prose text-xs">
                 {t("web.settings.classContentTemplates.bodyHelp")}
               </p>
               <CharacterCounter
@@ -751,14 +751,14 @@ function TemplateRow({
 
           {outline.length > 0 && (
             <div className="space-y-1.5">
-              <p className="text-xs font-medium text-muted-foreground">
+              <p className="text-muted-foreground text-xs font-medium">
                 {t("web.settings.classContentTemplates.outlineLabel")}
               </p>
               <ol className="flex flex-wrap gap-1.5">
                 {outline.map((heading, i) => (
                   <li
                     key={`${heading}-${i}`}
-                    className="rounded-full border border-border bg-muted/40 px-2.5 py-1 text-xs text-muted-foreground"
+                    className="border-border bg-muted/40 text-muted-foreground rounded-full border px-2.5 py-1 text-xs"
                   >
                     {heading}
                   </li>
@@ -834,7 +834,7 @@ function ModeButton({
       aria-pressed={pressed}
       onClick={onClick}
       className={cn(
-        "rounded-sm px-2.5 py-1 text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring",
+        "focus-visible:ring-ring rounded-sm px-2.5 py-1 text-xs font-medium transition-colors focus-visible:ring-3 focus-visible:outline-none",
         pressed
           ? "bg-background text-foreground shadow-sm"
           : "text-muted-foreground hover:text-foreground",

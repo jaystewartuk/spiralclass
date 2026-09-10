@@ -96,14 +96,14 @@ export async function CalendarMonth({
         t={t}
       />
 
-      <div className="overflow-hidden rounded-lg border bg-card shadow-brand-sm">
+      <div className="bg-card shadow-brand-sm overflow-hidden rounded-lg border">
         {/* Weekday header. Hidden from assistive tech: it labels the columns
             visually, but each cell's own accessible name already carries its
             weekday, so announcing this row is a second reading of the same
             fact with no structure to attach it to. */}
         <div
           aria-hidden
-          className="grid grid-cols-7 border-b bg-muted/40 text-center text-sm font-medium text-muted-foreground"
+          className="bg-muted/40 text-muted-foreground grid grid-cols-7 border-b text-center text-sm font-medium"
         >
           {weekdays.map((w, i) => (
             <div key={i} className="truncate py-2 capitalize">
@@ -115,7 +115,7 @@ export async function CalendarMonth({
         {/* Day grid. The 1px gaps are drawn by the container's own background
             showing through, so there is exactly one rule between two cells
             rather than two borders meeting. */}
-        <div className="grid grid-cols-7 gap-px bg-border">
+        <div className="bg-border grid grid-cols-7 gap-px">
           {grid.map((g) => {
             const dayEvents = byDay.get(g.ymd) ?? [];
             const isSelected = g.ymd === selectedYmd;
@@ -134,13 +134,13 @@ export async function CalendarMonth({
                   classes: countLabel,
                 })}
                 className={cn(
-                  "relative flex min-h-cell flex-col p-1.5 text-left transition-colors sm:min-h-cell-lg sm:p-2",
+                  "min-h-cell sm:min-h-cell-lg relative flex flex-col p-1.5 text-left transition-colors sm:p-2",
                   // An INSET ring rather than the global outline. The grid is
                   // clipped by its rounded card, so an outline drawn outside a
                   // cell's box — which is what `outline-offset: 2px` asks for —
                   // is cut off on every edge cell, and no z-index fixes that.
                   // Same 3px, same colour, painted where it can be seen.
-                  "focus-visible:z-10 focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-inset focus-visible:ring-ring",
+                  "focus-visible:ring-ring focus-visible:z-10 focus-visible:ring-3 focus-visible:outline-none focus-visible:ring-inset",
                   // OPAQUE, all three of them. The 1px rules between cells are
                   // the container's `bg-border` showing through a `gap-px`, so
                   // a translucent cell fill does not composite over the card
@@ -150,7 +150,7 @@ export async function CalendarMonth({
                   g.inCurrentMonth ? "bg-card" : "bg-background",
                   "hover:bg-muted",
                   // Selection is the ring, not a tint, for the same reason.
-                  isSelected && "z-10 ring-2 ring-inset ring-primary",
+                  isSelected && "ring-primary z-10 ring-2 ring-inset",
                 )}
               >
                 <DayCell
@@ -183,13 +183,13 @@ export async function CalendarMonth({
             {selectedLabel}
           </h3>
           {selectedEvents.length > 0 && (
-            <span className="text-sm tabular-nums text-muted-foreground">
+            <span className="text-muted-foreground text-sm tabular-nums">
               {t("web.calendar.classCount", { count: selectedEvents.length })}
             </span>
           )}
         </div>
         {selectedEvents.length === 0 ? (
-          <p className="rounded-lg border border-dashed px-4 py-8 text-center text-sm text-muted-foreground">
+          <p className="text-muted-foreground rounded-lg border border-dashed px-4 py-8 text-center text-sm">
             {emptyDayText}
           </p>
         ) : (

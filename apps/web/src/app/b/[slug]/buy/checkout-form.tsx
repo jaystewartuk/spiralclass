@@ -232,7 +232,7 @@ export function CheckoutForm({
           <button
             type="button"
             onClick={acceptSuggestion}
-            className="text-left text-xs text-warning underline underline-offset-2"
+            className="text-warning text-left text-xs underline underline-offset-2"
           >
             {t("web.checkoutForm.didYouMean")}{" "}
             <span className="font-medium">{emailSuggestion}</span>?
@@ -259,7 +259,7 @@ export function CheckoutForm({
           type="button"
           onClick={() => setShowDiscount(true)}
           disabled={noMethods || pending}
-          className="text-left text-sm text-muted-foreground underline underline-offset-2 hover:text-foreground disabled:opacity-50"
+          className="text-muted-foreground hover:text-foreground text-left text-sm underline underline-offset-2 disabled:opacity-50"
         >
           {t("web.checkoutForm.haveDiscountCode")}
         </button>
@@ -269,13 +269,13 @@ export function CheckoutForm({
           id={`checkout-error-${templateId}`}
           role="alert"
           aria-live="polite"
-          className="text-sm text-destructive"
+          className="text-destructive text-sm"
         >
           {errorMessage}
         </p>
       )}
       {requireSlot && !intendedStartUtc && (
-        <p className="text-sm text-muted-foreground">{t("web.checkoutForm.pickTimeFirst")}</p>
+        <p className="text-muted-foreground text-sm">{t("web.checkoutForm.pickTimeFirst")}</p>
       )}
       <Button
         type="submit"
@@ -287,7 +287,7 @@ export function CheckoutForm({
           : ctaCopy(t, method, formatPriceForBuyer(displayPrice, currency, locale))}
       </Button>
       {method === "stripe" && (
-        <p className="flex items-center justify-center gap-1 text-xs text-muted-foreground">
+        <p className="text-muted-foreground flex items-center justify-center gap-1 text-xs">
           <Lock className="h-3.5 w-3.5" />
           {t("web.checkoutForm.securePaymentStripe")}
         </p>
@@ -298,7 +298,7 @@ export function CheckoutForm({
           variants keep the seller-of-record sentence. Lives here (not the
           page footer) because this is the one place in the funnel that
           already tracks the selected rail. */}
-      <p className="text-center text-xs leading-snug text-muted-foreground">
+      <p className="text-muted-foreground text-center text-xs leading-snug">
         {method === "manual_transfer"
           ? t("buy.sellerDisclaimer.wise")
           : t("buy.sellerDisclaimer.stripe")}

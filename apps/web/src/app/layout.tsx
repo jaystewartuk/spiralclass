@@ -109,10 +109,10 @@ export default async function RootLayout({
       // the page under her, which is worse than not offering the control.
       style={readingStyle(reading) as React.CSSProperties}
     >
-      <body className="min-h-dvh bg-background font-sans text-foreground">
+      <body className="bg-background text-foreground min-h-dvh font-sans">
         <a
           href="#main-content"
-          className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:bg-primary focus:px-4 focus:py-2 focus:text-sm focus:font-medium focus:text-primary-foreground focus:shadow"
+          className="focus:bg-primary focus:text-primary-foreground sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:rounded-md focus:px-4 focus:py-2 focus:text-sm focus:font-medium focus:shadow"
         >
           {t("web.layout.skipToContent")}
         </a>

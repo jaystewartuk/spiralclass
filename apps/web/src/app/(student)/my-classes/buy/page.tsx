@@ -102,7 +102,7 @@ export default async function PortalComprarPage({
             <CardTitle>{t("buyAnother.title")}</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-muted-foreground text-sm">
               {t("buyAnother.none")}. {t("buyAnother.noneHint")}
             </p>
           </CardContent>
@@ -131,7 +131,7 @@ export default async function PortalComprarPage({
 
       <header>
         <PageHeader title={t("buyAnother.title")} />
-        <p className="text-sm text-muted-foreground">
+        <p className="text-muted-foreground text-sm">
           {t("buyAnother.with", { name: teacher.name })}
         </p>
       </header>
@@ -156,13 +156,13 @@ export default async function PortalComprarPage({
       )}
 
       {noMethods && (
-        <div className="rounded-md border border-warning/30 bg-warning-bg px-4 py-3 text-sm text-warning">
+        <div className="border-warning/30 bg-warning-bg text-warning rounded-md border px-4 py-3 text-sm">
           {t("buyAnother.noMethods")}
         </div>
       )}
 
       {teacher.packageTemplates.length === 0 ? (
-        <p className="text-sm text-muted-foreground">{t("buyAnother.noPackages")}</p>
+        <p className="text-muted-foreground text-sm">{t("buyAnother.noPackages")}</p>
       ) : (
         <PortalPurchaseFlow
           teacherId={teacher.id}
@@ -176,7 +176,7 @@ export default async function PortalComprarPage({
       {/* The seller-of-record (CFDI) disclaimer now renders inside
           PortalPurchaseFlow, rail-aware — it needs the selected payment
           method, which only exists inside that client component. */}
-      <footer className="space-y-2 border-t pt-4 text-xs text-muted-foreground">
+      <footer className="text-muted-foreground space-y-2 border-t pt-4 text-xs">
         <p>
           {t("book.byPaying")}{" "}
           <Link href="/privacy-notice" className="underline">

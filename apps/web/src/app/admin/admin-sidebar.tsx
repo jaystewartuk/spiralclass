@@ -60,13 +60,13 @@ export function AdminSidebar({
           "flex items-center justify-between gap-2 rounded-md px-3 py-2 text-sm transition-colors",
           mobile ? "py-3 text-base" : "",
           isActive(item)
-            ? "bg-muted font-medium text-foreground"
+            ? "bg-muted text-foreground font-medium"
             : "text-muted-foreground hover:bg-muted/60 hover:text-foreground",
         )}
       >
         <span>{item.label}</span>
         {count > 0 ? (
-          <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-destructive px-1.5 text-sm font-semibold leading-none text-destructive-foreground">
+          <span className="bg-destructive text-destructive-foreground inline-flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-sm leading-none font-semibold">
             {count > 99 ? "99+" : count}
           </span>
         ) : null}
@@ -78,12 +78,12 @@ export function AdminSidebar({
     return sections.map((section) => (
       <div
         key={section.key}
-        className="space-y-1 border-t border-border/40 pt-4 first:border-t-0 first:pt-0"
+        className="border-border/40 space-y-1 border-t pt-4 first:border-t-0 first:pt-0"
       >
         {/* Not a link — deliberately lighter/looser than the nav items below
             it (no hover state, faded color, wide tracking) so it reads as a
             group label rather than another row in the list. */}
-        <div className="select-none px-3 pb-1 text-sm font-semibold text-subtle">
+        <div className="text-subtle px-3 pb-1 text-sm font-semibold select-none">
           {section.label}
         </div>
         {section.items.map((item) => renderLink(item, mobile))}
@@ -93,7 +93,7 @@ export function AdminSidebar({
 
   return (
     <div className="flex h-dvh flex-col">
-      <header className="flex h-14 shrink-0 items-center justify-between gap-4 border-b border-border/60 px-4">
+      <header className="border-border/60 flex h-14 shrink-0 items-center justify-between gap-4 border-b px-4">
         <div className="flex min-w-0 items-center gap-3">
           <button
             type="button"
@@ -101,7 +101,7 @@ export function AdminSidebar({
             aria-controls="admin-mobile-sidebar"
             aria-label={open ? t("web.admin.nav.closeMenu") : t("web.admin.nav.openMenu")}
             onClick={() => setOpen((v) => !v)}
-            className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-md text-foreground transition-colors hover:bg-muted/60 desktop:hidden"
+            className="text-foreground hover:bg-muted/60 desktop:hidden inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-md transition-colors"
           >
             {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
           </button>
@@ -123,7 +123,7 @@ export function AdminSidebar({
           <div className="hidden sm:block">
             <AdminQuickSearch />
           </div>
-          <div className="hidden desktop:block">
+          <div className="desktop:block hidden">
             <AccountMenu account={{ email, role: "admin" }} />
           </div>
         </div>
@@ -138,7 +138,7 @@ export function AdminSidebar({
         {/* Desktop: fixed grouped sidebar, scrolls independently of main. */}
         <nav
           aria-label={t("web.admin.nav.ariaLabel")}
-          className="hidden w-56 shrink-0 overflow-y-auto border-r border-border/60 p-3 desktop:block"
+          className="border-border/60 desktop:block hidden w-56 shrink-0 overflow-y-auto border-r p-3"
         >
           {renderSections()}
         </nav>
@@ -146,20 +146,20 @@ export function AdminSidebar({
         {/* Mobile: off-canvas drawer with the same grouped sections plus
             identity + sign out, since mobile has no account dropdown. */}
         {open ? (
-          <div className="fixed inset-0 z-40 desktop:hidden">
+          <div className="desktop:hidden fixed inset-0 z-40">
             <div
-              className="absolute inset-0 bg-foreground/20"
+              className="bg-foreground/20 absolute inset-0"
               aria-hidden
               onClick={() => setOpen(false)}
             />
             <div
               id="admin-mobile-sidebar"
-              className="absolute left-0 top-0 flex h-full w-72 max-w-sheet flex-col overflow-y-auto border-r border-border/60 bg-background p-3"
+              className="max-w-sheet border-border/60 bg-background absolute top-0 left-0 flex h-full w-72 flex-col overflow-y-auto border-r p-3"
             >
               <nav aria-label={t("web.admin.nav.ariaLabel")} className="flex-1 space-y-1">
                 {renderSections(true)}
               </nav>
-              <div className="mt-4 flex items-center justify-between gap-3 border-t border-border/60 pt-3">
+              <div className="border-border/60 mt-4 flex items-center justify-between gap-3 border-t pt-3">
                 <AccountBadge variant="full" email={email} />
                 <SignOutButton label={t("common.signOut")} />
               </div>

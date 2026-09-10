@@ -62,7 +62,7 @@ export function CostsTable({ entries }: { entries: ExpenseRow[] }) {
       <ExpenseForm initial={blankExpenseValues()} />
 
       {entries.length === 0 ? (
-        <p className="text-sm text-muted-foreground">{t("web.admin.costs.noEntries")}</p>
+        <p className="text-muted-foreground text-sm">{t("web.admin.costs.noEntries")}</p>
       ) : (
         <TableShell>
           <Table>
@@ -101,7 +101,7 @@ export function CostsTable({ entries }: { entries: ExpenseRow[] }) {
                     <TableCell className="text-right tabular-nums">
                       {formatMinorUnits(entry.amountMinorUnits, entry.currency)}
                     </TableCell>
-                    <TableCell className="max-w-xs truncate text-xs text-muted-foreground">
+                    <TableCell className="text-muted-foreground max-w-xs truncate text-xs">
                       {entry.notes ?? "—"}
                     </TableCell>
                     <TableCell className="text-right">

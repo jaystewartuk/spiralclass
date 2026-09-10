@@ -67,7 +67,7 @@ function DeleteUsageButton({ id }: { id: string }) {
     >
       <form id={`delete-usage-${id}`} action={action}>
         <input type="hidden" name="id" value={id} />
-        {state?.error && <p className="text-sm text-destructive">{state.error}</p>}
+        {state?.error && <p className="text-destructive text-sm">{state.error}</p>}
       </form>
     </ConfirmDialog>
   );
@@ -108,7 +108,7 @@ export function UsagePanel({ entries }: { entries: UsageEntry[] }) {
         ) : null}
 
         {entries.length === 0 ? (
-          <p className="text-sm text-muted-foreground">
+          <p className="text-muted-foreground text-sm">
             {t("web.admin.economics.usage.noEntries")}
           </p>
         ) : (
@@ -145,7 +145,7 @@ export function UsagePanel({ entries }: { entries: UsageEntry[] }) {
                         )}
                       </Badge>
                     </TableCell>
-                    <TableCell className="max-w-xs truncate text-xs text-muted-foreground">
+                    <TableCell className="text-muted-foreground max-w-xs truncate text-xs">
                       {entry.notes ?? "—"}
                     </TableCell>
                     <TableCell className="text-right">

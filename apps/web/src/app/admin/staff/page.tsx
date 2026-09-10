@@ -23,9 +23,9 @@ export default async function AdminStaffPage() {
     <div className="space-y-6">
       <header>
         <PageHeader title={t("web.admin.staff.title")} />
-        <p className="text-sm text-muted-foreground">
+        <p className="text-muted-foreground text-sm">
           {t("web.admin.staff.subtitlePrefix")}
-          <code className="mx-1 rounded bg-muted px-1 py-0.5">SUPERUSER_EMAILS</code>
+          <code className="bg-muted mx-1 rounded px-1 py-0.5">SUPERUSER_EMAILS</code>
           {t("web.admin.staff.subtitleSuffix")}
         </p>
         {isBootstrap ? (

@@ -68,7 +68,7 @@ export function PayoutStatusPanel({ readiness, t }: { readiness: PayoutReadiness
                 : "web.settings.payments.status.blockedHeadline",
             )}
           </Heading>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-muted-foreground text-sm">
             {t(
               canBePaid
                 ? "web.settings.payments.status.readyBody"
@@ -81,7 +81,7 @@ export function PayoutStatusPanel({ readiness, t }: { readiness: PayoutReadiness
       {/* One row per rail she is actually offered, in the order the sections
           below appear. A rail this deploy has no credentials for is absent
           rather than reported as unavailable — see RailState's `hidden`. */}
-      <dl className="divide-y divide-border border-t">
+      <dl className="divide-border divide-y border-t">
         {card === "hidden" ? null : (
           <RailRow
             name={t("web.settings.payments.method.card")}
@@ -133,7 +133,7 @@ function RailRow({
     <div className="flex flex-wrap items-start justify-between gap-x-4 gap-y-1 py-3">
       <dt className="min-w-0">
         <span className="block text-sm font-medium">{name}</span>
-        <span className="block text-sm text-muted-foreground">{hint}</span>
+        <span className="text-muted-foreground block text-sm">{hint}</span>
       </dt>
       <dd className="shrink-0">
         <Badge variant={variant}>{t(key)}</Badge>
