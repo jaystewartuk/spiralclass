@@ -224,7 +224,11 @@ one type-checks, lints and builds.
 
 - **There is no database-side RLS.** Application-level `where teacherId = ?` is
   the only tenant isolation, so every service-role, admin and webhook query
-  needs an explicit scope filter.
+  needs an explicit scope filter. `apps/web/scripts/tenancy-guard.mjs` parses
+  for it and ratchets (D-175); a query that reads across tenants on purpose
+  carries `// tenancy-exempt: <reason>`. ⚠️ Never regenerate that baseline to
+  turn the check green — and note it proves a query names _a_ tenant, never the
+  right one.
 - **An applied migration is never edited, not even a comment** — Prisma
   checksums each file and any drift breaks `migrate deploy` on the next
   environment. Correct a mistake with a new migration.
