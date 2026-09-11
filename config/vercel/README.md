@@ -11,7 +11,7 @@ come back — not as a leftover of the teardown, but because Vercel reads a root
 `vercel.json` automatically, which is how a repository acquires a deploy trigger
 nobody typed. Keeping the config here means the CLI is the only thing that can
 find it, and the CLI only runs when something calls it.
-[D-175](../../docs/decisions/D-175.md) is the record.
+[D-177](../../docs/decisions/D-177.md) is the record.
 
 JSON carries no comments, so the three non-obvious values are explained here and
 each is pinned by `apps/web/tests/config/vercel-deploy.test.ts` — a sentence in

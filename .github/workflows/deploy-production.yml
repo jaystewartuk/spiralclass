@@ -319,7 +319,7 @@ jobs:
             echo "per-machine and this deploy did not run on that machine."
           } >> "$GITHUB_STEP_SUMMARY"
 
-  # ── The second production target ([D-175]) ───────────────────────────────
+  # ── The second production target ([D-177]) ───────────────────────────────
   #
   # Fly serves spiralclass.com and this does not change that. What this job
   # produces is a PRODUCTION deployment of the same commit on Vercel that is
@@ -364,7 +364,7 @@ jobs:
       # These stand in for `vercel link`, which would write a .vercel/project.json
       # this repository does not commit. They are deploy-time credentials, not
       # runtime config — nothing in apps/web reads a VERCEL_* variable, and
-      # decommissioned-platforms.test.ts still asserts that (D-175).
+      # decommissioned-platforms.test.ts still asserts that (D-177).
       VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
       VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
       # config/env/production.build.env's `__LOCAL__` values, resolved by
@@ -452,7 +452,7 @@ jobs:
             echo "| | |"
             echo "| --- | --- |"
             echo "| Commit | \`${GITHUB_SHA}\` |"
-            echo "| Serving | nothing — \`--skip-domain\` (D-175) |"
+            echo "| Serving | nothing — \`--skip-domain\` (D-177) |"
             echo "| Domain | still Fly \`agendaprofe\` (D-150 addendum 2) |"
             echo
             echo "This ran AFTER production was serving and probed, so its outcome"

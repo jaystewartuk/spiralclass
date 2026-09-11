@@ -98,7 +98,7 @@ restore it in seconds with `infra/database/scripts/neon-rollback.sh`, Neon's
 own point-in-time restore. See [`DB_BACKUP_RESTORE.md`](./DB_BACKUP_RESTORE.md) for the full
 restore procedure and the fastest safe recovery path for a failed migration.
 
-## The Vercel failover ([D-175](../decisions/D-175.md))
+## The Vercel failover ([D-177](../decisions/D-177.md))
 
 **Production serves from Fly. This does not change that**, and nothing in CI can.
 
@@ -130,7 +130,7 @@ failover:**
 
 - **Inngest still points at Fly.** The endpoint is registered per URL and the
   Vercel deploy deliberately does not sync it (syncing a second URL would fire
-  every cron twice — see D-175). After a promote, **background work is pointed at
+  every cron twice — see D-177). After a promote, **background work is pointed at
   an app that is no longer serving**: reminders, emails and push notifications.
   Sync it by hand at the new URL, and know that Fly's registration must go.
 - **The region pin is unverified.** `config/vercel/production.json` says `cle1`

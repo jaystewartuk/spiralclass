@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # The SECOND production target. Fly is the first one and is unchanged.
 #
-# [D-175] reversed the half of [D-89] Phase 5 that tore the Vercel project down,
+# [D-177] reversed the half of [D-89] Phase 5 that tore the Vercel project down,
 # and reversed nothing else: the TARGET comes back, the COUPLING does not. There
 # is still no `VERCEL_ENV` branch in `apps/web/src`, still no `@vercel/*`
 # dependency, and still no `vercel.json` at the repo root — which is what
@@ -124,7 +124,7 @@ ENVIRONMENT="${1:-}"
 case "$ENVIRONMENT" in
 production)
   # The same two doors fly-deploy.sh opens, and for the same reason. There is no
-  # `preview` case yet on purpose: D-175 added ONE target, and preview's is
+  # `preview` case yet on purpose: D-177 added ONE target, and preview's is
   # still the Oracle box D-150's addendum assigned it. Adding preview here means
   # adding config/vercel/preview.json and a decision about what serves
   # preview.spiralclass.com — not defaulting into it.
@@ -217,7 +217,7 @@ if [ "$ENV_COUNT" -ne 1 ]; then
   echo "" >&2
   echo "  Refusing to continue. The overlay below is what keeps" >&2
   echo "  config/env/${ENVIRONMENT}.build.env the single source of truth for values that" >&2
-  echo "  are baked IRREVERSIBLY into the client bundle (D-175). Appending to the wrong" >&2
+  echo "  are baked IRREVERSIBLY into the client bundle (D-177). Appending to the wrong" >&2
   echo "  file would ship the Vercel dashboard's copy instead, with nothing failing." >&2
   echo "" >&2
   echo "  If the CLI changed where it writes, fix this discovery — do not hardcode a name." >&2

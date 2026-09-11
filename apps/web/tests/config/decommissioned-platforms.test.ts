@@ -5,7 +5,7 @@ import { describe, expect, it } from "vitest";
 import { REPO_ROOT } from "../../../../scripts/env-config.mjs";
 
 // Supabase is fully decommissioned (D-89 Phase 5) and Vercel's COUPLING is,
-// which since [D-175] is a narrower claim than this file used to make. Read the
+// which since [D-177] is a narrower claim than this file used to make. Read the
 // distinction before widening or relaxing anything here, because the two halves
 // moved in opposite directions:
 //
@@ -63,7 +63,7 @@ const PACKAGE_JSONS = ["package.json", "apps/web/package.json", "packages/shared
  * longer exist. Fixing the list without widening this guard would have left
  * the hole open, which is the whole lesson of D-164.
  *
- * ⚠️ `config/vercel/production.json` was added with the target itself ([D-175])
+ * ⚠️ `config/vercel/production.json` was added with the target itself ([D-177])
  * rather than after the third time this hole was found. It is the one new
  * deploy config in the tree, it is comment-free JSON, and the thing it must
  * never grow is a `VERCEL_*` entry: the three values the deploy needs
@@ -103,7 +103,7 @@ const BARE_NAME_PATTERNS: ReadonlyArray<{ pattern: RegExp; why: string }> = [
       "names a VERCEL_* variable in committed build/deploy config. The three the deploy needs " +
       "(TOKEN, ORG_ID, PROJECT_ID) are credentials in the `production` GitHub Environment, pushed " +
       "from Infisical (D-163) — never committed. Anything else is the app learning which platform " +
-      "it is on, which APP_URL already answers (D-89 Phase 5, reaffirmed by D-175)",
+      "it is on, which APP_URL already answers (D-89 Phase 5, reaffirmed by D-177)",
   },
 ];
 
@@ -111,7 +111,7 @@ const BARE_NAME_PATTERNS: ReadonlyArray<{ pattern: RegExp; why: string }> = [
  * Config files that must not come back at all.
  *
  * ⚠️ `vercel.json` STAYS BANNED NOW THAT VERCEL IS A TARGET AGAIN, and the
- * reason changed rather than expiring ([D-175]). D-164 deleted it because it
+ * reason changed rather than expiring ([D-177]). D-164 deleted it because it
  * described a torn-down project. Today the objection is live: Vercel reads a
  * ROOT `vercel.json` automatically, so committing one is how a repository
  * acquires a deploy trigger nobody typed — which is the precise thing D-89
@@ -129,10 +129,10 @@ const BANNED_FILES: ReadonlyArray<readonly [string, string]> = [
   [
     "vercel.json",
     "is the config Vercel reads AUTOMATICALLY, which is a deploy trigger nobody typed. " +
-      "The Vercel target is real again (D-175) but its config belongs at config/vercel/<env>.json, " +
+      "The Vercel target is real again (D-177) but its config belongs at config/vercel/<env>.json, " +
       "passed with --local-config by scripts/vercel-deploy.sh",
   ],
-  ["vercel.jsonc", "same as vercel.json — see config/vercel/README.md (D-175)"],
+  ["vercel.jsonc", "same as vercel.json — see config/vercel/README.md (D-177)"],
 ];
 
 /** An assignment, not a mention: `#`-commented history must stay readable. */
@@ -143,7 +143,7 @@ const DEPLOY_CONFIG_PATTERNS: ReadonlyArray<{ pattern: RegExp; why: string }> = 
   },
   {
     pattern: /\bVERCEL_(ENV|URL)\s*=/,
-    why: "sets a VERCEL_* variable — the app must stay platform-neutral (D-89 Phase 5, reaffirmed by D-175); prod-vs-preview is decided by APP_URL",
+    why: "sets a VERCEL_* variable — the app must stay platform-neutral (D-89 Phase 5, reaffirmed by D-177); prod-vs-preview is decided by APP_URL",
   },
 ];
 
@@ -160,7 +160,7 @@ const BANNED_PATTERNS: ReadonlyArray<{ pattern: RegExp; why: string }> = [
     why: "reads a SUPABASE_* env var — Supabase is decommissioned (D-89 Phase 5); the database is Neon and object storage is Cloudflare R2",
   },
   {
-    // ⚠️ STILL BANNED WITH THE TARGET BACK ([D-175]), and this is the single
+    // ⚠️ STILL BANNED WITH THE TARGET BACK ([D-177]), and this is the single
     // most load-bearing pattern in the file now. The Vercel deploy works
     // BECAUSE the app reads neither of these: prod-vs-preview is decided by
     // APP_URL, so the same image-equivalent build serves from Fly or from
@@ -170,7 +170,7 @@ const BANNED_PATTERNS: ReadonlyArray<{ pattern: RegExp; why: string }> = [
     // system environment variables at all, so a branch on VERCEL_URL would
     // read as undefined on the very deploy it was added for.
     pattern: /process\.env\.VERCEL_(ENV|URL)\b/,
-    why: "branches on a VERCEL_* env var — the app must stay platform-neutral (D-89 Phase 5, reaffirmed by D-175); prod-vs-preview is decided by APP_URL",
+    why: "branches on a VERCEL_* env var — the app must stay platform-neutral (D-89 Phase 5, reaffirmed by D-177); prod-vs-preview is decided by APP_URL",
   },
   {
     pattern: /from\s+["']@supabase\/|require\(\s*["']@supabase\//,
@@ -178,7 +178,7 @@ const BANNED_PATTERNS: ReadonlyArray<{ pattern: RegExp; why: string }> = [
   },
 ];
 
-// ⚠️ `@vercel/*` stays banned with the target back ([D-175]). The deploy reaches
+// ⚠️ `@vercel/*` stays banned with the target back ([D-177]). The deploy reaches
 // the CLI through `npx --yes vercel@<pinned>` in scripts/vercel-deploy.sh, which
 // is a tool the deploy fetches rather than a dependency the APP carries into its
 // own bundle and lockfile. A runtime `@vercel/*` import is the coupling this

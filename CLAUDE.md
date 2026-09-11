@@ -299,7 +299,7 @@ authored per language, `<slug>.es-MX.md` beside `<slug>.md`.
 ## Never do
 
 - **Reintroduce Supabase.** Decommissioned in D-89 Phase 5 — no dependency, no
-  env var, no code path. **Vercel is different since D-175**: it is a deploy
+  env var, no code path. **Vercel is different since D-177**: it is a deploy
   _target_ again — a second production target that holds no domain — while
   everything that coupled the app to it stays gone. No `VERCEL_ENV` branch
   (`APP_URL` decides prod-vs-preview), no `@vercel/*` dependency, and no root

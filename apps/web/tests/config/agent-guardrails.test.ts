@@ -81,7 +81,7 @@ describe("the operator's decisions cannot be taken by a session", () => {
     ["bash scripts/vercel-deploy.sh production", "deploying to the second target"],
     // The bare CLI too, not just the script. `vercel promote <url>` is the
     // command that hands spiralclass.com to the failover, and it reaches
-    // production without touching either deploy script (D-175).
+    // production without touching either deploy script (D-177).
     ["npx --yes vercel@59.15.1 promote https://example.vercel.app --yes", "taking the domain"],
     ["vercel deploy --prod", "deploying straight to the production target"],
     // ⚠️ EVERY PACKAGE RUNNER, not just npx. The rule named npx alone at first,
@@ -124,7 +124,7 @@ describe("it does not block ordinary work", () => {
     // `[[:space:]]vercel[[:space:]]` pattern blocks this, and this is exactly
     // the harmless lookup someone does when bumping the pinned CLI version in
     // scripts/vercel-deploy.sh — it reads no credential and deploys nothing.
-    // So that rule is anchored at a command position (D-175).
+    // So that rule is anchored at a command position (D-177).
     "npm view vercel version",
   ])("allows %s", (command) => {
     const { blocked, reason } = blocks(command);

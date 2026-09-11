@@ -8,7 +8,7 @@ import { REPO_ROOT } from "../../../../scripts/env-config.mjs";
  * The Vercel target is a FAILOVER, not a fork — and every property that makes
  * that true is invisible in a diff.
  *
- * [D-175] reversed one sentence of [D-89] Phase 5: the Vercel project exists
+ * [D-177] reversed one sentence of [D-89] Phase 5: the Vercel project exists
  * again, as a second production target for the same commit. What it did NOT
  * reverse is everything that made the teardown worth doing — the app stayed
  * platform-neutral, the deploy stayed Actions-driven, and the database stayed
@@ -128,7 +128,7 @@ describe("the Vercel target is a second target, not a second opinion", () => {
     for (const secret of ["DATABASE_URL", "DIRECT_URL", "NEON_API_KEY", "NEON_PROJECT_ID"]) {
       expect(
         vercelJob(),
-        `the vercel job is handed ${secret} — it runs no migrations and cuts no checkpoint (D-175)`,
+        `the vercel job is handed ${secret} — it runs no migrations and cuts no checkpoint (D-177)`,
       ).not.toContain(secret);
     }
     // And the Fly token, for the same reason in the other direction: this job
@@ -155,7 +155,7 @@ describe("the Vercel target is a second target, not a second opinion", () => {
     ]) {
       expect(
         executable,
-        `scripts/vercel-deploy.sh runs ${forbidden} — the Fly deploy owns it for this commit (D-175)`,
+        `scripts/vercel-deploy.sh runs ${forbidden} — the Fly deploy owns it for this commit (D-177)`,
       ).not.toContain(forbidden);
     }
   });

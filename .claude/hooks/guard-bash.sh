@@ -126,7 +126,7 @@ VERCEL_RUNNER='((npx|bunx)[[:space:]]+(--yes[[:space:]]+)?|(pnpm|npm|yarn)[[:spa
 if [[ "$command_line" == *vercel-deploy.sh* ]] ||
   [[ "$command_line" =~ (^|[\;\&\|])[[:space:]]*([A-Za-z_][A-Za-z0-9_]*=[^[:space:]]*[[:space:]]+)*${VERCEL_RUNNER}vercel([[:space:]]|@|$) ]]; then
   block "This deploys to, or reads secrets from, the live Vercel production project." \
-    "It is the second production target ([D-175]) and one 'vercel promote' away from the domain.
+    "It is the second production target ([D-177]) and one 'vercel promote' away from the domain.
 Production only ever ships through 'pnpm promote', run by the operator."
 fi
 

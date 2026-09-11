@@ -381,7 +381,7 @@ describe("the workflows call the registry, and never restate it (D-157)", () => 
     // these steps existed in two places, the copy that got re-typed was the one
     // missing the checkpoint (see scripts/fly-deploy.sh's header).
     //
-    // ⚠️ WIDENED BY [D-175] FROM "fly-deploy.sh" TO "a deploy script", because
+    // ⚠️ WIDENED BY [D-177] FROM "fly-deploy.sh" TO "a deploy script", because
     // there are two targets now. The rule did not change: a deploy workflow
     // CALLS a script a laptop can also run, and states none of the steps
     // itself. What changed is that asserting the Fly script by name would have
