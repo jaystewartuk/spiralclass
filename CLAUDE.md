@@ -228,10 +228,10 @@ one type-checks, lints and builds.
 - **An applied migration is never edited, not even a comment** — Prisma
   checksums each file and any drift breaks `migrate deploy` on the next
   environment. Correct a mistake with a new migration.
-- **There are two migrations and the split is the point**: the regenerated
-  Prisma baseline, and a hand-written invariants file holding what the schema
-  language cannot say. ⚠️ **The drift check compares models**, so it cannot see
-  a missing constraint.
+- **The squashed history is two migrations and the split is the point**: the
+  regenerated Prisma baseline, and a hand-written invariants file holding what
+  the schema language cannot say. ⚠️ **The drift check compares models**, so it
+  cannot see a missing constraint.
 - **Only one migration-bearing branch in flight at a time** — two collide on
   ordering and checksums.
 - Detail: [docs/architecture/data-model.md](docs/architecture/data-model.md)

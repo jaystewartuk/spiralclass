@@ -1,6 +1,8 @@
 # Migrations
 
-Two files, and the split between them is the point.
+The squashed history is two files, and the split between them is the point.
+Every change since is an ordinary migration on top of them — see
+[Adding a schema change](#adding-a-schema-change).
 
 | Migration                            | Written by | Contains                                                                                                      |
 | ------------------------------------ | ---------- | ------------------------------------------------------------------------------------------------------------- |
@@ -16,14 +18,21 @@ The baseline is **regenerated, never edited**:
 
 ```bash
 pnpm --filter spiralclass-web exec prisma migrate diff \
-  --from-empty --to-schema-datamodel prisma/schema.prisma --script
+  --from-empty --to-schema prisma/schema.prisma --script
 ```
 
-reproduces it byte for byte. That is the property worth protecting — and it
-is exactly the property a single combined file destroys, because the raw SQL
-mixed into it would be silently dropped the first time anyone regenerated.
+reproduces it byte for byte, below its comment header. That is the property
+worth protecting — and it is exactly the property a single combined file
+destroys, because the raw SQL mixed into it would be silently dropped the first
+time anyone regenerated.
 Keeping the hand-authored half in its own file makes "regenerate the first,
 hand-review the second" a procedure rather than a thing to remember.
+
+Prisma 7 renamed `--to-schema-datamodel` to `--to-schema` and removed
+`--from-url`. The baseline's own header still spells the old flag, and stays
+that way because the file is checksummed. Nothing else here may:
+`tests/migrations/readme-commands.test.ts` runs the command above, and checks
+every flag in this file's shell blocks against the installed CLI.
 
 The second file is the half Prisma cannot help with. `prisma migrate dev` will
 never write a partial index or an exclusion constraint for you, and the
@@ -51,29 +60,60 @@ checksums each file and `migrate deploy` fails on a mismatch.
 
 An environment that was migrated by an earlier, different history will not
 accept the baseline — it would try to `CREATE TABLE` things that exist.
-Adopt it instead, once, before the next `migrate deploy` ever runs there:
+Adopt it instead, once, before the next `migrate deploy` ever runs there.
+
+**Verify first.** From `apps/web`, with `DIRECT_URL` naming that database —
+since Prisma 7, `prisma.config.ts` is the only way a URL reaches the CLI:
+
+```bash
+prisma migrate diff --from-config-datasource \
+  --to-schema prisma/schema.prisma --script
+```
+
+A database the old history migrated prints exactly the objects a retired
+feature left behind — the baseline never creates them, and
+`20260912120000_drop_retired_intro_calls` removes them. ⚠️ **Anything else in
+the output means stop:**
+
+```sql
+-- DropForeignKey
+ALTER TABLE "intro_calls" DROP CONSTRAINT "intro_calls_student_id_fkey";
+-- DropForeignKey
+ALTER TABLE "intro_calls" DROP CONSTRAINT "intro_calls_teacher_id_fkey";
+-- AlterTable
+ALTER TABLE "teachers" DROP COLUMN "intro_calls_available";
+-- DropTable
+DROP TABLE "intro_calls";
+-- DropEnum
+DROP TYPE "IntroCallStatus";
+```
+
+Then adopt:
 
 ```bash
 prisma migrate resolve --applied 20260906120000_schema_baseline
 prisma migrate resolve --applied 20260906120100_database_invariants
-prisma migrate status   # expect: up to date
 ```
 
 `migrate resolve` only writes rows to `_prisma_migrations`; it runs none of
-the SQL. Verify first that the database really does match — from a checkout
-of this repo:
+the SQL. ⚠️ **`prisma migrate status` now exits 1, and that is correct:** it
+names the drop migration as not yet applied and the old history's rows as
+missing locally. The next `migrate deploy` — the deploy's own, after its Neon
+checkpoint — applies the drop. From then on `status` prints
+`Database schema is up to date!` and the diff above prints
+`-- This is an empty migration.` The old history's rows stay, and nothing
+reads them.
 
-```bash
-prisma migrate diff --from-url "$DATABASE_URL" \
-  --to-schema-datamodel prisma/schema.prisma --script
-```
+⚠️ **If a `migrate deploy` reaches the database before the adoption**, it stops
+at the baseline's first `CREATE TYPE` (P3018), applies nothing, and records
+the baseline as failed, which blocks every later deploy. The two `resolve`
+commands above still work unchanged and clear it.
 
-must print `-- This is an empty migration.`
-
-That check covers the models only. The invariants are invisible to it, so
+The diff covers the models only. The invariants are invisible to it, so
 verify them directly — this lists every object the second migration creates,
 and is the same query used to prove the two files reproduce the schema an
-older history produced:
+older history produced. Run it on the adopted database and on a fresh one
+(`pnpm db:dev:up`), and diff the two:
 
 ```sql
 SELECT 'ext  ' || extname FROM pg_extension WHERE extname <> 'plpgsql'
@@ -91,5 +131,5 @@ ORDER BY 1;
 ```
 
 A brand-new database — a fresh Neon branch, the `postgres:16` container
-behind `pnpm db:dev:up`, CI — needs none of this. It just runs both
-migrations like any other.
+behind `pnpm db:dev:up`, CI — needs none of this. It just runs every
+migration like any other, and the drop finds nothing to drop.
