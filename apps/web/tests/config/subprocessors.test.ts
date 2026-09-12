@@ -62,6 +62,9 @@ const NOT_A_PROCESSOR: Record<string, string> = {
   SESSION_SECRET: "Our own signing secret.",
   FIELD_ENCRYPTION_KEY: "Our own encryption key.",
   FIELD_ENCRYPTION_REQUIRED: "A boot-time assertion, not a vendor.",
+  TENANCY_GUARD:
+    "How loudly our own tenancy guard reacts to a cross-tenant query. No vendor, " +
+    "and its reports carry model and operation names, never row values.",
   DATABASE_URL: "Points at Neon, which IS registered.",
   DIRECT_URL: "Points at Neon, which IS registered.",
   TEST_DATABASE_URL: "A local test database. Never holds real personal data.",

@@ -234,8 +234,18 @@ Stated plainly, including the uncomfortable one.
 
 - **Tenant isolation is application-level `teacherId` scoping. There is no
   row-level security.** A missing `where teacherId = ?` on an admin, webhook or
-  service query is a vulnerability, not a style nit, and is treated as one in
-  review. This is the single largest security assumption in the system.
+  service query is a vulnerability, not a style nit. This is the single largest
+  security assumption in the system, and since [D-175](decisions/D-175.md) it is
+  the one property here a machine checks rather than a reviewer:
+  `apps/web/scripts/tenancy-guard.mjs` parses every Prisma call in the tree and
+  fails the gate on a query against a tenant-owned model that does not constrain
+  itself to a tenant. It parses rather than greps because five shapes contain
+  the string `teacherId` and none of them filter — `teacherId: undefined` is a
+  Prisma query with no `where` at all — and it ratchets against a baseline
+  rather than claiming the tree is clean: **264 queries were unscoped the day it
+  landed**, and that file is the list. What it cannot see is stated in the
+  record: a `where` assembled at runtime, raw SQL, and whether the tenant id a
+  scoped query was handed is the _right_ one.
 - **Authentication is passwordless** — a one-time code by email, or Google
   Sign-In — so there is no password database to breach and no credential-stuffing
   surface. better-auth owns sessions and 2FA, and resolves one from a
