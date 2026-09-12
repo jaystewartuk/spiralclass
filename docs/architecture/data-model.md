@@ -29,6 +29,17 @@ it is invisible from the application code. That trade is defensible at this size
 and would not be at a larger one; it is written down so the reversal is a
 decision rather than a discovery.
 
+**What checks it.** [D-175](../decisions/D-175.md) moved that assumption off
+the reviewer and onto the gate: `apps/web/scripts/tenancy-guard.mjs` parses
+every Prisma call against a model carrying `teacherId` and reports the ones
+that do not constrain themselves to a tenant, ratcheted against a baseline by
+`apps/web/tests/authz/tenancy-guard.test.ts`. A query that genuinely reads
+across tenants — the admin console does, by design — says so at the call site
+with `// tenancy-exempt: <reason>`. Read the record before assuming the check
+covers more than it does: a `where` built at runtime and raw SQL are both
+outside what it can see, and it verifies that a query names a tenant, never
+that it names the right one.
+
 ## Identity: a student belongs to several teachers
 
 The most consequential modelling decision in the schema. **A `Student` is a
