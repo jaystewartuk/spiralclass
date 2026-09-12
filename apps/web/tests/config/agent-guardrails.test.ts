@@ -91,6 +91,13 @@ describe("the operator's decisions cannot be taken by a session", () => {
     ["npm exec vercel deploy --prod", "deploying via npm exec"],
     // An env assignment in front of it, the shape a permission prefix misses.
     ["VERCEL_TOKEN=xxx vercel deploy --prod", "deploying behind an env assignment"],
+    // The database job's script, which checkpoints and migrates production on
+    // its own since the targets were split ([D-177]'s addendum).
+    [
+      "bash scripts/database-deploy.sh production --gate-already-passed",
+      "migrating production by hand",
+    ],
+    ["./scripts/database-deploy.sh preview", "migrating preview by hand"],
     ["pnpm --filter spiralclass-web migrate:prod", "migrating a shared database"],
     ["infisical run -- pnpm dev", "handing out live credentials"],
   ])("blocks %s", (command) => {

@@ -5,8 +5,12 @@ import { describe, expect, it } from "vitest";
 import { REPO_ROOT } from "../../../../scripts/env-config.mjs";
 
 // Locks the checkpoint-retention contract for the pre-migration Neon safety net
-// (D-95): `scripts/fly-deploy.sh`'s production path creates a `pre-deploy-*`
+// (D-95): `scripts/database-deploy.sh`'s production path creates a `pre-deploy-*`
 // branch before any migration touches production, and that step fails closed.
+// Since the production targets were split ([D-177]'s addendum) that script is
+// the deploy workflow's `database` job, and the first thing a hand-run
+// `scripts/fly-deploy.sh` does — it was steps 1 and 2 of the Fly script until
+// then, which is why the older notes below name that file.
 //
 // Why this test matters: the retention count is bounded from BOTH sides, and
 // both bounds fail silently.
@@ -27,6 +31,7 @@ import { REPO_ROOT } from "../../../../scripts/env-config.mjs";
 // only call site doesn't quietly override it.
 
 const SCRIPT_SH = resolve(REPO_ROOT, "infra/database/scripts/neon-checkpoint.sh");
+const DATABASE_DEPLOY_SH = resolve(REPO_ROOT, "scripts/database-deploy.sh");
 const FLY_DEPLOY_SH = resolve(REPO_ROOT, "scripts/fly-deploy.sh");
 
 // The production Neon project's per-project branch ceiling (`owner.branches_limit`
@@ -88,9 +93,12 @@ describe("neon checkpoint retention", () => {
   });
 
   it("is not overridden at the only call site, so the script default is what production runs", () => {
-    const sh = readFileSync(FLY_DEPLOY_SH, "utf8");
+    const sh = readFileSync(DATABASE_DEPLOY_SH, "utf8");
     const call = sh.match(/^(?!\s*#).*neon-checkpoint\.sh.*$/m)?.[0];
-    expect(call, "no neon-checkpoint.sh invocation found in scripts/fly-deploy.sh").toBeTruthy();
+    expect(
+      call,
+      "no neon-checkpoint.sh invocation found in scripts/database-deploy.sh",
+    ).toBeTruthy();
     // If the call site ever DOES pass --keep, that value — not the script's
     // default — is what production runs with, and the bounds asserted above stop
     // describing reality. Pin them together in that same change.
@@ -110,31 +118,55 @@ describe("neon checkpoint retention", () => {
   // Two assertions, because removing the default and removing the literal are
   // different failures. A future edit could reintroduce either alone.
   it("names no Neon project id, so the production database is not identified in the tree", () => {
+    // Both scripts: the one that carried the id, and the one its code moved to.
+    for (const [name, path] of [
+      ["scripts/fly-deploy.sh", FLY_DEPLOY_SH],
+      ["scripts/database-deploy.sh", DATABASE_DEPLOY_SH],
+    ] as const) {
+      const sh = readFileSync(path, "utf8");
+      // Neon's shape: <adjective>-<noun>-<8 digits>. Same shape check-leaks.mjs
+      // now gates the whole tree on; asserted here too so the call site that
+      // used to carry one says why it must not again.
+      const found = sh.match(/\b(?:org-)?[a-z]+-[a-z]+-\d{8}\b/);
+      expect(
+        found?.[0],
+        `${name} names a Neon project id (${found?.[0]}). ` +
+          "Supply it as the NEON_PROJECT_ID environment secret instead — see D-158.",
+      ).toBeUndefined();
+    }
+  });
+
+  it("a hand-run Fly deploy still checkpoints first, unless the workflow's database job already did", () => {
+    // The split must not have taken the checkpoint off the recovery path. A
+    // bare `fly-deploy.sh production` runs database-deploy.sh before it builds
+    // anything; only --database-already-deployed skips it, and that flag's one
+    // honest caller is pinned in production-targets.test.ts.
     const sh = readFileSync(FLY_DEPLOY_SH, "utf8");
-    // Neon's shape: <adjective>-<noun>-<8 digits>. Same shape check-leaks.mjs
-    // now gates the whole tree on; asserted here too so the call site that used
-    // to carry one says why it must not again.
-    const found = sh.match(/\b(?:org-)?[a-z]+-[a-z]+-\d{8}\b/);
-    expect(
-      found?.[0],
-      `scripts/fly-deploy.sh names a Neon project id (${found?.[0]}). ` +
-        "Supply it as the NEON_PROJECT_ID environment secret instead — see D-158.",
-    ).toBeUndefined();
+    const call = sh.match(/^(?!\s*#).*bash scripts\/database-deploy\.sh .*$/m)?.[0];
+    expect(call, "scripts/fly-deploy.sh no longer runs scripts/database-deploy.sh").toBeTruthy();
+    expect(sh.indexOf(call!), "the database step must run before the image is built").toBeLessThan(
+      sh.indexOf("docker buildx build"),
+    );
+    expect(sh.slice(0, sh.indexOf(call!))).toMatch(
+      /if \[ "\$DATABASE_ALREADY_DEPLOYED" = 1 \]; then/,
+    );
   });
 
   it("refuses the production deploy when NEON_PROJECT_ID is unset, rather than guessing", () => {
-    const sh = readFileSync(FLY_DEPLOY_SH, "utf8");
+    const sh = readFileSync(DATABASE_DEPLOY_SH, "utf8");
     // Fail-closed, and it must fail BEFORE the checkpoint and the migrations —
     // the whole reason a missing value here is cheap. Same posture as
     // LIVEKIT_ORIGIN_IP in scripts/local/synthetic.sh: refuse rather than guess.
     const guard = sh.indexOf('if [ -z "${NEON_PROJECT_ID:-}" ]; then');
-    expect(guard, "no fail-closed guard for NEON_PROJECT_ID in fly-deploy.sh").toBeGreaterThan(-1);
+    expect(guard, "no fail-closed guard for NEON_PROJECT_ID in database-deploy.sh").toBeGreaterThan(
+      -1,
+    );
 
     // The INVOCATION, not the first mention — the script's header comment names
     // neon-checkpoint.sh long before it runs it, and indexOf finds that instead.
     // Same non-comment matcher the retention assertion above uses.
     const invocation = sh.match(/^(?!\s*#).*neon-checkpoint\.sh.*$/m);
-    expect(invocation, "no neon-checkpoint.sh invocation found in fly-deploy.sh").toBeTruthy();
+    expect(invocation, "no neon-checkpoint.sh invocation found in database-deploy.sh").toBeTruthy();
     const checkpoint = sh.indexOf(invocation![0]);
     expect(
       guard,
@@ -200,18 +232,23 @@ describe("neon auth (D-146 follow-up)", () => {
     }
   });
 
-  it("fly-deploy.sh no longer fetches the key from Infisical", () => {
-    expect(readFileSync(FLY_DEPLOY_SH, "utf8")).not.toMatch(
-      /infisical_export_secrets --env infra NEON_API_KEY/,
-    );
+  it("neither deploy script fetches the key from Infisical", () => {
+    for (const path of [FLY_DEPLOY_SH, DATABASE_DEPLOY_SH]) {
+      expect(readFileSync(path, "utf8")).not.toMatch(
+        /infisical_export_secrets --env infra NEON_API_KEY/,
+      );
+    }
   });
 
   it("...but production still refuses to migrate without a checkpoint", () => {
     // The load-bearing half. This is D-95's rule, and the credential change
-    // must not have relaxed it: fly-deploy.sh still calls the checkpoint on
-    // the production path, and the script still exits non-zero when the
-    // create fails.
-    expect(readFileSync(FLY_DEPLOY_SH, "utf8")).toMatch(/neon-checkpoint\.sh --parent production/);
+    // must not have relaxed it: database-deploy.sh (fly-deploy.sh's steps 1–2
+    // until the targets were split) still calls the checkpoint on the
+    // production path, and the script still exits non-zero when the create
+    // fails.
+    expect(readFileSync(DATABASE_DEPLOY_SH, "utf8")).toMatch(
+      /neon-checkpoint\.sh --parent production/,
+    );
     expect(checkpoint()).toMatch(/Failed to create the checkpoint branch/);
     expect(checkpoint()).toMatch(/do NOT bypass the checkpoint/i);
     // The auth failure must name the fix, or the next person hits a dead end
