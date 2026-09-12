@@ -4,10 +4,25 @@ import { join, relative, resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 import { REPO_ROOT } from "../../../../scripts/env-config.mjs";
 
-// Supabase and Vercel are fully decommissioned (D-89 Phase 5). Both are named in
-// CLAUDE.md as things never to reintroduce, and today the source tree is clean:
-// no @supabase/supabase-js dependency, no SUPABASE_* / NEXT_PUBLIC_SUPABASE_*
-// reads, no VERCEL_ENV branch (prod-vs-preview is decided by APP_URL).
+// Supabase is fully decommissioned (D-89 Phase 5) and Vercel's COUPLING is,
+// which since [D-177] is a narrower claim than this file used to make. Read the
+// distinction before widening or relaxing anything here, because the two halves
+// moved in opposite directions:
+//
+//   * Supabase is gone entirely — no @supabase/supabase-js dependency, no
+//     SUPABASE_* / NEXT_PUBLIC_SUPABASE_* reads, no platform, no target.
+//   * Vercel is a DEPLOY TARGET again (scripts/vercel-deploy.sh, a second
+//     production target that holds no domain), and that reversed exactly one
+//     sentence of D-89 Phase 5. Everything else it removed stays removed: there
+//     is still no VERCEL_ENV branch in the app, no @vercel/* dependency, and no
+//     root vercel.json. prod-vs-preview is still decided by APP_URL, and the
+//     new target needed NO application change at all — which is the evidence
+//     that the decoupling was the valuable half of the teardown, not the
+//     teardown itself.
+//
+// So the patterns below are unchanged for Supabase, and for Vercel they now
+// guard the coupling rather than the existence. A reader who came here to
+// remove "the Vercel ban" should remove none of it.
 //
 // That state is currently held by convention alone. A reintroduction would not
 // fail any existing check — it type-checks, lints, and builds, and on a preview
@@ -47,6 +62,16 @@ const PACKAGE_JSONS = ["package.json", "apps/web/package.json", "packages/shared
  * depends on, and this one said the build depended on two platforms that no
  * longer exist. Fixing the list without widening this guard would have left
  * the hole open, which is the whole lesson of D-164.
+ *
+ * ⚠️ `config/vercel/production.json` was added with the target itself ([D-177])
+ * rather than after the third time this hole was found. It is the one new
+ * deploy config in the tree, it is comment-free JSON, and the thing it must
+ * never grow is a `VERCEL_*` entry: the three values the deploy needs
+ * (`VERCEL_TOKEN`, `VERCEL_ORG_ID`, `VERCEL_PROJECT_ID`) are credentials that
+ * live in the `production` GitHub Environment, pushed there from Infisical
+ * (D-163). A copy in a committed file is the copy nobody rotates, and on a
+ * PUBLIC repository a project or org identifier is also the reconnaissance
+ * surface D-158 exists to remove.
  */
 const DEPLOY_CONFIGS = [
   "Dockerfile",
@@ -54,6 +79,7 @@ const DEPLOY_CONFIGS = [
   "fly.preview.toml",
   "docker-compose.yml",
   "turbo.json",
+  "config/vercel/production.json",
 ];
 
 /**
@@ -64,7 +90,7 @@ const DEPLOY_CONFIGS = [
  * `"SUPABASE_URL"` in a list is always a live declaration and can be matched
  * as one. Keep this to genuinely comment-free formats.
  */
-const NO_COMMENT_CONFIGS = new Set(["turbo.json"]);
+const NO_COMMENT_CONFIGS = new Set(["turbo.json", "config/vercel/production.json"]);
 
 const BARE_NAME_PATTERNS: ReadonlyArray<{ pattern: RegExp; why: string }> = [
   {
@@ -73,17 +99,40 @@ const BARE_NAME_PATTERNS: ReadonlyArray<{ pattern: RegExp; why: string }> = [
   },
   {
     pattern: /\bVERCEL_[A-Z_]+\b/,
-    why: "names a VERCEL_* variable — Vercel is decommissioned (D-89 Phase 5); prod-vs-preview is decided by APP_URL",
+    why:
+      "names a VERCEL_* variable in committed build/deploy config. The three the deploy needs " +
+      "(TOKEN, ORG_ID, PROJECT_ID) are credentials in the `production` GitHub Environment, pushed " +
+      "from Infisical (D-163) — never committed. Anything else is the app learning which platform " +
+      "it is on, which APP_URL already answers (D-89 Phase 5, reaffirmed by D-177)",
   },
 ];
 
-/** Config files that must not come back at all. */
+/**
+ * Config files that must not come back at all.
+ *
+ * ⚠️ `vercel.json` STAYS BANNED NOW THAT VERCEL IS A TARGET AGAIN, and the
+ * reason changed rather than expiring ([D-177]). D-164 deleted it because it
+ * described a torn-down project. Today the objection is live: Vercel reads a
+ * ROOT `vercel.json` automatically, so committing one is how a repository
+ * acquires a deploy trigger nobody typed — which is the precise thing D-89
+ * ruled out ("no Vercel native git integration") and D-150's addendum settled
+ * again ("every deploy runs through GitHub Actions").
+ *
+ * The deploy's configuration therefore lives at `config/vercel/<env>.json`,
+ * where only `scripts/vercel-deploy.sh` can find it, passed with
+ * `--local-config`. That file also sets `git.deploymentEnabled: false`, so even
+ * a repository connected by hand in the dashboard deploys nothing on a push.
+ * Two independent locks, because the failure they prevent — a second,
+ * unreviewed path to production — is the expensive kind.
+ */
 const BANNED_FILES: ReadonlyArray<readonly [string, string]> = [
   [
     "vercel.json",
-    "configures Vercel git deployments — the Vercel project was torn down in D-89 Phase 5",
+    "is the config Vercel reads AUTOMATICALLY, which is a deploy trigger nobody typed. " +
+      "The Vercel target is real again (D-177) but its config belongs at config/vercel/<env>.json, " +
+      "passed with --local-config by scripts/vercel-deploy.sh",
   ],
-  ["vercel.jsonc", "same as vercel.json — Vercel is decommissioned (D-89 Phase 5)"],
+  ["vercel.jsonc", "same as vercel.json — see config/vercel/README.md (D-177)"],
 ];
 
 /** An assignment, not a mention: `#`-commented history must stay readable. */
@@ -94,7 +143,7 @@ const DEPLOY_CONFIG_PATTERNS: ReadonlyArray<{ pattern: RegExp; why: string }> = 
   },
   {
     pattern: /\bVERCEL_(ENV|URL)\s*=/,
-    why: "sets a VERCEL_* variable — Vercel is decommissioned (D-89 Phase 5); prod-vs-preview is decided by APP_URL",
+    why: "sets a VERCEL_* variable — the app must stay platform-neutral (D-89 Phase 5, reaffirmed by D-177); prod-vs-preview is decided by APP_URL",
   },
 ];
 
@@ -111,8 +160,17 @@ const BANNED_PATTERNS: ReadonlyArray<{ pattern: RegExp; why: string }> = [
     why: "reads a SUPABASE_* env var — Supabase is decommissioned (D-89 Phase 5); the database is Neon and object storage is Cloudflare R2",
   },
   {
+    // ⚠️ STILL BANNED WITH THE TARGET BACK ([D-177]), and this is the single
+    // most load-bearing pattern in the file now. The Vercel deploy works
+    // BECAUSE the app reads neither of these: prod-vs-preview is decided by
+    // APP_URL, so the same image-equivalent build serves from Fly or from
+    // Vercel with no branch. Re-adding one would make the app know which
+    // platform it is on, and the second target would stop being a failover and
+    // become a fork. Note also that `vercel deploy --prebuilt` does not expose
+    // system environment variables at all, so a branch on VERCEL_URL would
+    // read as undefined on the very deploy it was added for.
     pattern: /process\.env\.VERCEL_(ENV|URL)\b/,
-    why: "branches on a VERCEL_* env var — Vercel is decommissioned (D-89 Phase 5); prod-vs-preview is decided by APP_URL",
+    why: "branches on a VERCEL_* env var — the app must stay platform-neutral (D-89 Phase 5, reaffirmed by D-177); prod-vs-preview is decided by APP_URL",
   },
   {
     pattern: /from\s+["']@supabase\/|require\(\s*["']@supabase\//,
@@ -120,6 +178,11 @@ const BANNED_PATTERNS: ReadonlyArray<{ pattern: RegExp; why: string }> = [
   },
 ];
 
+// ⚠️ `@vercel/*` stays banned with the target back ([D-177]). The deploy reaches
+// the CLI through `npx --yes vercel@<pinned>` in scripts/vercel-deploy.sh, which
+// is a tool the deploy fetches rather than a dependency the APP carries into its
+// own bundle and lockfile. A runtime `@vercel/*` import is the coupling this
+// whole file exists to prevent; the pinned CLI is not.
 const BANNED_DEPENDENCIES = [/^@supabase\//, /^@vercel\/(?!analytics$)/];
 
 const SOURCE_EXTENSIONS = [".ts", ".tsx", ".js", ".jsx", ".mjs"];

@@ -37,6 +37,7 @@
     "gate:status": "node scripts/ci/status.mjs",
     "promote": "node scripts/ci/promote.mjs",
     "deploy:preview": "bash scripts/fly-deploy.sh preview",
+    "deploy:vercel": "bash scripts/vercel-deploy.sh production",
     "ship:preview": "node scripts/ci/ship.mjs preview",
     "pr": "bash scripts/open-pr.sh",
     "release:status": "node scripts/ci/release-status.mjs",

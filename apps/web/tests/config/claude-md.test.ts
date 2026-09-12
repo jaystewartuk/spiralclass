@@ -212,6 +212,12 @@ describe("the operator-only rule is enforced, not merely stated", () => {
     "pnpm ship:preview",
     "pnpm deploy:preview",
     "scripts/fly-deploy.sh",
+    // The second production target ([D-177]). It deploys real production code
+    // to a live project and is one `vercel promote` from holding
+    // spiralclass.com, so it belongs on this list for exactly the reasons the
+    // Fly script does — and it joined the list in the commit that created it,
+    // rather than after a session ran it once.
+    "scripts/vercel-deploy.sh",
     "migrate:prod",
     "infisical",
   ];

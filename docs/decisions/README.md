@@ -345,6 +345,7 @@ and exercised for real when the provider actually changed.
 | [D-168](./D-168.md) | **46 migrations become two**, split by who writes them — generated baseline, hand-authored invariants        |
 | [D-169](./D-169.md) | **One wrapper owns every Infisical call**, and deployment does not make one — it reads pushed GitHub secrets |
 | [D-170](./D-170.md) | The Codespaces path is **deleted rather than repaired** — a development path with no users is not a feature  |
+| [D-177](./D-177.md) | **Vercel returns as a second production target that holds no domain** — the target, not the coupling         |
 
 ### CI, the gate and releasing
 
@@ -453,7 +454,7 @@ records removed before publication — see [What is not here](#what-is-not-here)
 | [D-86](./D-86.md)   | Unit-economics estimates: pricing as data, never per-provider code    | Active                               |
 | [D-87](./D-87.md)   | Model defaults split by call shape; `effort` and Haiku never coexist  | Active                               |
 | [D-88](./D-88.md)   | One-to-one is an always-on prompt directive                           | Active                               |
-| [D-89](./D-89.md)   | Production cutover executed; Vercel and Supabase decommissioned       | Active                               |
+| [D-89](./D-89.md)   | Production cutover executed; Vercel and Supabase decommissioned       | Active (Vercel target back → D-177)  |
 | [D-93](./D-93.md)   | Homework review / feedback / AI-assist architecture                   | Designed; shipping in slices         |
 | [D-94](./D-94.md)   | Production onto the self-hosted LiveKit box                           | Active                               |
 | [D-95](./D-95.md)   | Neon PITR + pre-migration checkpoint branches                         | Active                               |
@@ -518,6 +519,7 @@ records removed before publication — see [What is not here](#what-is-not-here)
 | [D-172](./D-172.md) | The backlog is this repository's Issues, not a private board          | Active                               |
 | [D-173](./D-173.md) | Any subject in the copy; the schema stays language-shaped             | Active                               |
 | [D-174](./D-174.md) | A server action revalidates exactly one path                          | Active                               |
+| [D-177](./D-177.md) | Vercel is a second production target; it holds no domain              | Decided; built, never served         |
 
 ---
 
