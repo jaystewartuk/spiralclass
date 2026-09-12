@@ -3,7 +3,6 @@ import { describe, expect, it } from "vitest";
 // the coverage denominator; the test drives it here — the same shape as
 // tests/i18n-guard.test.ts.
 import {
-  collectCounts,
   collectFindings,
   loadBaseline,
   scanSource,
@@ -24,7 +23,15 @@ import {
 describe("tenancy scoping ratchet", () => {
   const models = tenantModels();
   const baseline: Record<string, number> = loadBaseline();
-  const current: Record<string, number> = collectCounts(undefined, models);
+  // ONE walk of the tree, shared by every assertion below. Parsing every file
+  // in src/ is the expensive part, and doing it twice — once for the counts,
+  // again for the exemptions — pushed a single test past the 20s timeout on a
+  // two-core runner under coverage instrumentation, having passed on the
+  // previous push. A guard that flakes is a guard people learn to re-run.
+  const findings = collectFindings(undefined, models);
+  const current: Record<string, number> = Object.fromEntries(
+    Object.entries(findings.byFile).map(([file, list]) => [file, list.length]),
+  );
 
   it("adds no new files containing unscoped tenant queries", () => {
     const newOffenders = Object.keys(current).filter((file) => !(file in baseline));
@@ -154,7 +161,7 @@ describe("tenancy scoping ratchet", () => {
     // `// tenancy-exempt:` is a silencer, and a check that can be silenced
     // without a reason stops being a check — so an empty or one-word reason
     // fails here rather than being counted.
-    const { exemptions } = collectFindings(undefined, models);
+    const { exemptions } = findings;
     const unjustified = exemptions
       .filter((e) => e.reason.trim().split(/\s+/).filter(Boolean).length < 4)
       .map((e) => `${e.file}:${e.line} ${e.model}.${e.op} — "${e.reason}"`);
