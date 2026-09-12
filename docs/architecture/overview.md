@@ -317,9 +317,11 @@ nobody reads.
 The decision log is the real record; this is the shape of it.
 
 - **Hosting**: Vercel + Supabase → Fly.io + Neon ([D-70](../decisions/D-70.md),
-  [D-89](../decisions/D-89.md)). Both originals are fully decommissioned; there
-  is no `VERCEL_ENV` branch and no Supabase dependency left. Production versus
-  preview is decided by `APP_URL`.
+  [D-89](../decisions/D-89.md)). Supabase is fully decommissioned. There is still
+  no `VERCEL_ENV` branch — production versus preview is decided by `APP_URL` —
+  and that decoupling is what later let Vercel come back as a **second
+  production target holding no domain** ([D-177](../decisions/D-177.md)),
+  needing no application change at all. Production serves from Fly.
 - **Payments**: separate charges and transfers → direct charges on Accounts v2
   ([D-143](../decisions/D-143.md)). The platform stopped touching the money.
 - **Platform entity**: UK → Mexico → UK

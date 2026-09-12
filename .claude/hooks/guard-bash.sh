@@ -102,6 +102,34 @@ if [[ "$command_line" == *fly-deploy.sh* ]] || [[ "$command_line" =~ (^|[[:space
     "Production only ever ships through 'pnpm promote', run by the operator."
 fi
 
+# ⚠️ ANCHORED AT A COMMAND POSITION, not on the word anywhere in the line. The
+# Fly rule above can afford `[[:space:]]fly[[:space:]]` because `fly` is rarely
+# an argument; `vercel` is the npm package name, so the loose form blocks
+# `npm view vercel version` — a read-only lookup the exemption above does not
+# cover, because it is not one of the reader commands. So: start of line or
+# after a `; & |` separator, optionally behind env assignments
+# (`VERCEL_TOKEN=… vercel deploy`).
+#
+# ⚠️ AND BEHIND ANY PACKAGE RUNNER, not just `npx`. The first version of this
+# rule named `npx` alone, which left `pnpm dlx vercel promote` — the command that
+# hands spiralclass.com to the failover — completely unblocked. `pnpm` is this
+# repository's package manager, so that was the likelier spelling of the two. A
+# guard that covers the runner nobody here uses and misses the one everybody uses
+# is worse than no guard, because it reads as coverage.
+#
+# This is not airtight and is not trying to be: `bash -c 'vercel deploy'` gets
+# through, as it does for every other rule in this file. The hook defends against
+# a session's own mistake, not against a session determined to route around it —
+# the deny list in .claude/settings.json and CLAUDE.md's operator-only section
+# are the other two copies of the rule.
+VERCEL_RUNNER='((npx|bunx)[[:space:]]+(--yes[[:space:]]+)?|(pnpm|npm|yarn)[[:space:]]+(dlx|exec)[[:space:]]+(--yes[[:space:]]+)?)?'
+if [[ "$command_line" == *vercel-deploy.sh* ]] ||
+  [[ "$command_line" =~ (^|[\;\&\|])[[:space:]]*([A-Za-z_][A-Za-z0-9_]*=[^[:space:]]*[[:space:]]+)*${VERCEL_RUNNER}vercel([[:space:]]|@|$) ]]; then
+  block "This deploys to, or reads secrets from, the live Vercel production project." \
+    "It is the second production target ([D-177]) and one 'vercel promote' away from the domain.
+Production only ever ships through 'pnpm promote', run by the operator."
+fi
+
 if [[ "$command_line" == *migrate:prod* ]] || [[ "$command_line" == *migrate:preview* ]]; then
   block "This runs migrations against a shared database." \
     "Production migrations run inside the deploy, behind a Neon checkpoint (D-95).

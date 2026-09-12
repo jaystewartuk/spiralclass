@@ -98,6 +98,54 @@ restore it in seconds with `infra/database/scripts/neon-rollback.sh`, Neon's
 own point-in-time restore. See [`DB_BACKUP_RESTORE.md`](./DB_BACKUP_RESTORE.md) for the full
 restore procedure and the fastest safe recovery path for a failed migration.
 
+## The Vercel failover ([D-177](../decisions/D-177.md))
+
+**Production serves from Fly. This does not change that**, and nothing in CI can.
+
+Every production release also deploys the same commit to Vercel, as a second job
+in `deploy-production.yml` that runs **after** the Fly deploy and its probes. That
+deployment is built, live, and **holds no domain** — `vercel deploy --prebuilt
+--prod --skip-domain`. It exists so the failover is proven on every release
+rather than being a project nobody has deployed since they set it up ([D-164](../decisions/D-164.md)
+is the lesson).
+
+A red `vercel` job means **the failover did not refresh**. Production is
+unaffected; read the job above it, which is the one that shipped.
+
+**To hand it the domain.** This is the one command that makes Vercel serve
+traffic, and it is an operator step — a session is blocked from running it by
+`.claude/hooks/guard-bash.sh`:
+
+```sh
+vercel promote <deployment-url> --yes
+```
+
+No CLI version is written here on purpose: `scripts/vercel-deploy.sh` holds the
+one pin, and its final line prints this command with that version and the real
+deployment URL already filled in. Copy it from the deploy's output rather than
+from here, and a bumped pin cannot leave a stale number in a runbook.
+
+⚠️ **Read this before you do it in an incident. It is not yet a complete
+failover:**
+
+- **Inngest still points at Fly.** The endpoint is registered per URL and the
+  Vercel deploy deliberately does not sync it (syncing a second URL would fire
+  every cron twice — see D-177). After a promote, **background work is pointed at
+  an app that is no longer serving**: reminders, emails and push notifications.
+  Sync it by hand at the new URL, and know that Fly's registration must go.
+- **The region pin is unverified.** `config/vercel/production.json` says `cle1`
+  on the strength of D-150's "Neon is in Ohio". Confirm with
+  `neonctl projects list`; a wrong region costs the 58-ms-versus-12-ms hop that
+  record measured, on every query.
+- **Nothing has ever served a request from it.** Cold-start behaviour against
+  Neon is unmeasured.
+
+To hand it back, `vercel rollback`, or point DNS at Fly — whichever is faster at
+the time.
+
+To refresh it by hand without a release, `pnpm deploy:vercel` (operator-only, and
+it refuses production without `--yes-i-understand-this-skips-the-promote-gate`).
+
 ## Changing the Fly region (one-time, manual)
 
 **Editing `primary_region` in a fly config does NOT relocate machines that
