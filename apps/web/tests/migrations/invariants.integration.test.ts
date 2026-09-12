@@ -4,10 +4,10 @@ import { describeIntegration, getTestPrisma } from "../_setup/test-db";
 /**
  * The half of the schema nothing else checks.
  *
- * `prisma/migrations/` is two files: a baseline generated from
- * `schema.prisma`, and `20260906120100_database_invariants` — the partial
- * indexes, CHECK constraints, exclusion constraints, list-column NOT NULLs and
- * triggers Prisma's schema language cannot express (D-168).
+ * The squashed history in `prisma/migrations/` is two files: a baseline
+ * generated from `schema.prisma`, and `20260906120100_database_invariants` —
+ * the partial indexes, CHECK constraints, exclusion constraints, list-column
+ * NOT NULLs and triggers Prisma's schema language cannot express (D-168).
  *
  * The migration-drift check in `scripts/ci/integration.sh` diffs MODELS, so it
  * is blind to every object below: drop the whole second migration and it still

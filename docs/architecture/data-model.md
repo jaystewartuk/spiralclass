@@ -1,9 +1,9 @@
 # Data model
 
-82 models, 2 migrations, 128 indexes and 23 unique constraints of PostgreSQL,
-reached through Prisma, hosted on Neon. (Two migrations, not two hundred — the
-history was squashed into a regenerable baseline plus a hand-authored invariants
-file; see [Migrations](#migrations).) The schema
+82 models, 3 migrations, 128 indexes and 23 unique constraints of PostgreSQL,
+reached through Prisma, hosted on Neon. (Not two hundred — the history was
+squashed into a regenerable baseline plus a hand-authored invariants file, and
+changes since sit on top of them; see [Migrations](#migrations).) The schema
 (`apps/web/prisma/schema.prisma`) is heavily commented and is the authority;
 this document covers the decisions a reader cannot recover by reading columns.
 
@@ -151,7 +151,8 @@ constant, not a migration.
 
 ## Migrations
 
-**There are two, and the split between them is the point.**
+**The squashed history is two, and the split between them is the point.**
+Every change since is an ordinary incremental migration on top of them.
 
 | Migration               | Written by | Contains                                                                     |
 | ----------------------- | ---------- | ---------------------------------------------------------------------------- |
@@ -162,7 +163,7 @@ Neither is the schema on its own; `migrate deploy` applies both, in order, and
 a database is correct only once it has run both.
 
 The baseline is **regenerated, never edited** — `prisma migrate diff
---from-empty --to-schema-datamodel` reproduces it byte for byte. That is the
+--from-empty --to-schema` reproduces it byte for byte. That is the
 property worth protecting, and it is exactly the property a single combined file
 destroys: the hand-written SQL mixed into it would be silently dropped the first
 time anyone regenerated. So the partial indexes, the CHECK constraints, the two

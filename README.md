@@ -141,7 +141,7 @@ graph TB
 
     SH["packages/shared<br/>wire types · Zod validators · money<br/>pricing + entitlement config · i18n catalog"]
 
-    DB[("PostgreSQL / Neon<br/>82 models · 2 migrations")]
+    DB[("PostgreSQL / Neon<br/>82 models · 3 migrations")]
     JOBS["Inngest<br/>durable background execution"]
 
     subgraph external["External services"]
@@ -312,11 +312,12 @@ change.
 
 ### Database
 
-82 models, 2 migrations, 128 indexes, 23 unique constraints. Postgres via
+82 models, 3 migrations, 128 indexes, 23 unique constraints. Postgres via
 Prisma, on Neon.
 
-**Two migrations, and the split is deliberate.** The first is generated from
-`schema.prisma` and reproducible byte-for-byte; the second is the hand-authored
+**The squashed history is two migrations, and the split is deliberate.** Every
+change since is an ordinary incremental migration on top. The first is generated
+from `schema.prisma` and reproducible byte-for-byte; the second is the hand-authored
 Postgres layer Prisma's schema language cannot express — partial indexes,
 CHECK constraints, two GiST exclusion constraints, two triggers. They are
 separate files so that regenerating the first can never silently drop the
@@ -510,7 +511,7 @@ pnpm test:e2e                # Playwright
 pnpm gate --allow-dirty      # everything the pre-push hook will check
 ```
 
-There are 793 test files across five layers — unit, real-database integration,
+There are 794 test files across five layers — unit, real-database integration,
 Playwright end-to-end, visual regression and accessibility — plus a mutation
 spot-check that measures whether the unit suite would actually catch a defect,
 and a per-PR diff-coverage floor on new code.
