@@ -11,6 +11,7 @@ import {
   REPO_ROOT,
   envFilePath,
   parseEnvFile,
+  resolveEnvFile,
 } from "../../../../scripts/env-config.mjs";
 
 const FLY_CONFIGS = {
@@ -41,6 +42,43 @@ describe("config/env non-secret files", () => {
       // empty key, not vanish (project_preview_posthog_server_key).
       expect(map).toHaveProperty("NEXT_PUBLIC_POSTHOG_HOST");
       expect(map.NEXT_PUBLIC_POSTHOG_HOST).toBe("");
+    }
+  });
+
+  it("builds no WhatsApp support number, and no environment can supply one (#105)", () => {
+    // It held a person's own mobile number, baked into every client bundle.
+    // Removing the secret was not enough while the key stayed `__LOCAL__`:
+    // anything that injected the old value — a laptop deploy under Infisical,
+    // a stale GitHub secret — would build it straight back in. Committed empty,
+    // the resolver never reads it from the environment at all.
+    const saved = process.env.NEXT_PUBLIC_SUPPORT_WHATSAPP;
+    const stubbed: string[] = [];
+    try {
+      process.env.NEXT_PUBLIC_SUPPORT_WHATSAPP = "5215512345678";
+      for (const env of ENVIRONMENTS) {
+        const committed = parseEnvFile(envFilePath(env, "build")).map;
+        expect(committed.NEXT_PUBLIC_SUPPORT_WHATSAPP, `${env}.build.env`).toBe("");
+
+        // Every other __LOCAL__ key needs a value, or the resolver throws.
+        for (const [key, value] of Object.entries(committed)) {
+          if (value === "__LOCAL__" && process.env[key] === undefined) {
+            process.env[key] = "stub";
+            stubbed.push(key);
+          }
+        }
+        expect(resolveEnvFile(env, "build").map.NEXT_PUBLIC_SUPPORT_WHATSAPP, env).toBe("");
+      }
+    } finally {
+      if (saved === undefined) delete process.env.NEXT_PUBLIC_SUPPORT_WHATSAPP;
+      else process.env.NEXT_PUBLIC_SUPPORT_WHATSAPP = saved;
+      for (const key of stubbed) delete process.env[key];
+    }
+
+    for (const workflow of ["deploy-production.yml", "deploy-preview.yml"]) {
+      expect(
+        readFileSync(resolve(REPO_ROOT, ".github", "workflows", workflow), "utf8"),
+        `${workflow} still reads a WhatsApp secret`,
+      ).not.toContain("NEXT_PUBLIC_SUPPORT_WHATSAPP");
     }
   });
 
