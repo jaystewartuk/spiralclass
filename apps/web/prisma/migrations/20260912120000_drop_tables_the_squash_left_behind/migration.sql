@@ -23,7 +23,10 @@
 -- maps these objects. The code production ran until the first deploy from this
 -- tree maps all four, and a Prisma read that does not narrow its `select` names
 -- `teachers.intro_calls_available` — so this migration ships in a release AFTER
--- that code is gone, never in the same one. See README.md.
+-- that code is gone, never in the same one. See README.md and D-178.
+--
+-- What shipped first: `a7fd8a5`, deployed to production on 2026-09-13, whose
+-- schema maps none of the four.
 --
 -- The table goes before the enum: its `status` column uses it, and dropping the
 -- table takes its indexes and both foreign keys with it.
