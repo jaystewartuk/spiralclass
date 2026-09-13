@@ -344,9 +344,9 @@ if [ "$RESTORE_CADDY" -eq 1 ]; then
   # what saves the issuance.
   $SSH "sudo test -d ${CERT_ROOT}/caddy/certificates" \
     || fail "restore left no ${CERT_ROOT}/caddy/certificates — the archive almost certainly carries a path prefix (rebuild it with 'tar -czf - -C <volume>/_data .')"
-  $SSH "sudo find ${CERT_ROOT}/caddy/certificates -name 'livekit.spiralclass.com.crt' | grep -q ." \
+  $SSH "test -n \"\$(sudo find ${CERT_ROOT}/caddy/certificates -name 'livekit.spiralclass.com.crt' -print -quit)\"" \
     || fail "restore produced no certificate for livekit.spiralclass.com — do NOT continue; Caddy will re-issue through Cloudflare's proxy"
-  $SSH "sudo find ${CERT_ROOT}/caddy/acme -name '*.key' | grep -q ." \
+  $SSH "test -n \"\$(sudo find ${CERT_ROOT}/caddy/acme -name '*.key' -print -quit)\"" \
     || fail "restore produced no ACME account key — that is the part that cannot be regenerated"
   ok "certificates and ACME account key restored, and verified in place"
 fi

@@ -229,8 +229,7 @@ while IFS= read -r line; do
   # $2 on those rows and $1 on deployed ones. Staged counts: it is exactly the
   # state a secret is in between being set and the deploy that consumes it,
   # which is this script.
-  if ! printf '%s\n' "$FLY_SECRETS" |
-    awk '{ if ($1 == "*") print $2; else print $1 }' | grep -qx "$key"; then
+  if ! grep -qx "$key" <<<"$(awk '{ if ($1 == "*") print $2; else print $1 }' <<<"$FLY_SECRETS")"; then
     MISSING="$MISSING $key"
   fi
 done < "$RUNTIME_FILE"

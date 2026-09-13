@@ -52,7 +52,7 @@ APT="apt-get -o DPkg::Lock::Timeout=300"
 # real, occasional memory spike, and OOM-killing a live class recording is a
 # far worse outcome than 4 GB of a 50-100 GB boot volume. Revisit only if
 # disk is ever genuinely tight (see docs/deployment/ORACLE_LIVEKIT_PRODUCTION.md).
-if ! swapon --show | grep -q /swapfile; then
+if ! grep -q /swapfile /proc/swaps; then
   fallocate -l 4G /swapfile && chmod 600 /swapfile && mkswap /swapfile && swapon /swapfile
   echo '/swapfile none swap sw 0 0' >> /etc/fstab
 fi

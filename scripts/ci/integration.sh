@@ -98,8 +98,8 @@ psql_root -c 'CREATE DATABASE spiralclass_drift' >/dev/null
   echo "----- reconciliation script -----"
   cat "${TMPDIR:-/tmp}/spiralclass-drift.sql"
   echo "---------------------------------"
-  if grep -iE 'CREATE TABLE|DROP TABLE|ADD COLUMN|DROP COLUMN|RENAME COLUMN|SET DATA TYPE|SET NOT NULL|DROP NOT NULL|CREATE TYPE|ALTER TYPE|DROP TYPE' \
-    "${TMPDIR:-/tmp}/spiralclass-drift.sql" | grep -q .; then
+  if grep -qiE 'CREATE TABLE|DROP TABLE|ADD COLUMN|DROP COLUMN|RENAME COLUMN|SET DATA TYPE|SET NOT NULL|DROP NOT NULL|CREATE TYPE|ALTER TYPE|DROP TYPE' \
+    "${TMPDIR:-/tmp}/spiralclass-drift.sql"; then
     echo ""
     echo "  schema.prisma has model changes no migration captures."
     echo "  Fix: pnpm --filter spiralclass-web prisma:migrate  (then commit the migration)"

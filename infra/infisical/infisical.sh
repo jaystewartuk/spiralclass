@@ -95,7 +95,7 @@ infisical_secrets() {
   }
   # Every key the caller named, or none of them.
   for key in "$@"; do
-    printf '%s\n' "$out" | grep -q "^${key}=" || {
+    grep -q "^${key}=" <<<"$out" || {
       echo "infisical returned no value for ${key} (env=$env path=$path) — refusing a partial fetch" >&2
       return 1
     }
@@ -122,7 +122,7 @@ infisical_env() {
     out="$(infisical export --projectId="$proj" --env="$env" --path="$path" --format="$fmt")" || return 1
     all="${all}${out}"$'\n'
   done
-  printf '%s' "$all" | grep -q '[^[:space:]]' || {
+  grep -q '[^[:space:]]' <<<"$all" || {
     echo "infisical returned nothing for env=$env paths=$* — refusing rather than report an empty environment" >&2
     return 1
   }

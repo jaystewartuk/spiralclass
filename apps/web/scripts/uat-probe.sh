@@ -28,7 +28,7 @@ fail=0
 health_body=$(curl -sS -w $'\n%{http_code}' --max-time 15 "${BASE_URL}/api/health" || printf '\n000')
 health_code=$(printf '%s\n' "$health_body" | tail -n1)
 health_json=$(printf '%s\n' "$health_body" | sed '$d')
-if [ "$health_code" = "200" ] && printf '%s' "$health_json" | grep -q '"db":"ok"'; then
+if [ "$health_code" = "200" ] && grep -q '"db":"ok"' <<<"$health_json"; then
   green "PASS  health          200, db:ok"
 else
   red "FAIL  health          got HTTP ${health_code} — ${health_json:-<no body>}"
