@@ -70,7 +70,7 @@ cat > /tmp/oracle-ci.sh <<'CLOUDINIT'
 set -euo pipefail
 export DEBIAN_FRONTEND=noninteractive
 APT="apt-get -o DPkg::Lock::Timeout=300"
-if ! swapon --show | grep -q /swapfile; then
+if ! grep -q /swapfile /proc/swaps; then
   fallocate -l 4G /swapfile && chmod 600 /swapfile && mkswap /swapfile && swapon /swapfile
   echo '/swapfile none swap sw 0 0' >> /etc/fstab
 fi

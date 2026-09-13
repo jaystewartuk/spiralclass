@@ -91,7 +91,7 @@ if [ -n "$existing_pid" ]; then
   # superset of the old single-root check and never a different set.
   repo_web_dirs="$(git worktree list --porcelain 2>/dev/null \
     | awk '/^worktree /{ $1=""; sub(/^ /,""); print $0"/apps/web" }')"
-  if [ -n "$existing_cwd" ] && printf '%s\n' "$repo_web_dirs" | grep -Fxq "$existing_cwd"; then
+  if [ -n "$existing_cwd" ] && grep -Fxq "$existing_cwd" <<<"$repo_web_dirs"; then
     # .../<worktree>/apps/web -> <worktree>. The main checkout is a worktree
     # too as far as git is concerned, but calling it one in the message would
     # read oddly, so it gets named for what it is.

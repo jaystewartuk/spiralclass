@@ -23,7 +23,7 @@ URL="${1:?usage: inngest-sync.sh <inngest-endpoint-url>}"
 for i in $(seq 1 5); do
   response=$(curl -sS -X PUT "$URL" || true)
   echo "$response"
-  if echo "$response" | grep -qE '"(message|modified)"'; then
+  if grep -qE '"(message|modified)"' <<<"$response"; then
     echo "Inngest sync confirmed"
     exit 0
   fi

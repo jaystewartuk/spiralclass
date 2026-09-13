@@ -110,7 +110,7 @@ DETACHED=0
 [ "$CURRENT" != "HEAD" ] || DETACHED=1
 
 if [ -z "$BRANCH" ]; then
-  if [ "$DETACHED" = "1" ] || echo "$CURRENT" | grep -q '^worktree-'; then
+  if [ "$DETACHED" = "1" ] || grep -q '^worktree-' <<<"$CURRENT"; then
     BRANCH="$(derive_branch)"
     [ -n "$BRANCH" ] || die "could not derive a branch name from the last commit subject — pass --branch."
   else

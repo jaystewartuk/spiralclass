@@ -63,6 +63,13 @@ LIVEKIT_HOST="${LIVEKIT_HOST:-livekit.spiralclass.com}"
 LIVEKIT_CERT_MIN_DAYS="${LIVEKIT_CERT_MIN_DAYS:-21}"
 
 failures=0
+# ⚠️ Every body check is `grep -q … <<<"$body"`, never `printf "$body" | grep -q`.
+# Under pipefail, GNU grep exits at its first match, printf takes EPIPE writing
+# the rest of a page larger than the pipe buffer, and the pipeline fails: the
+# marker reads as missing BECAUSE it was found. The 2026-09-13 deploy of #98
+# went red that way on a booking page carrying ten package links. macOS's BSD
+# grep drains its input, so it never shows on a laptop — only on the runner.
+# apps/web/tests/config/synthetic-probe.test.ts reproduces it on both.
 pass() { printf '  ✓ %s\n' "$1"; }
 fail() { printf '  ✗ %s\n' "$1" >&2; failures=$((failures + 1)); }
 
@@ -74,9 +81,9 @@ body=$(printf '%s\n' "$response" | sed '$d')
 status=$(printf '%s\n' "$response" | tail -n1)
 if [ "$status" != "200" ]; then
   fail "homepage returned $status"
-elif ! printf '%s' "$body" | grep -q "/sign-up"; then
+elif ! grep -q "/sign-up" <<<"$body"; then
   fail "homepage body missing /sign-up CTA"
-elif ! printf '%s' "$body" | grep -q "/sign-in"; then
+elif ! grep -q "/sign-in" <<<"$body"; then
   fail "homepage body missing /sign-in CTA"
 else
   pass "homepage"
@@ -88,9 +95,9 @@ body=$(printf '%s\n' "$response" | sed '$d')
 status=$(printf '%s\n' "$response" | tail -n1)
 if [ "$status" != "200" ]; then
   fail "/api/health returned $status (body: $body)"
-elif ! printf '%s' "$body" | grep -q '"status":"ok"'; then
+elif ! grep -q '"status":"ok"' <<<"$body"; then
   fail "/api/health did not report status ok"
-elif ! printf '%s' "$body" | grep -q '"db":"ok"'; then
+elif ! grep -q '"db":"ok"' <<<"$body"; then
   fail "/api/health did not report db ok"
 else
   pass "/api/health"
@@ -105,7 +112,7 @@ body=$(printf '%s\n' "$response" | sed '$d')
 status=$(printf '%s\n' "$response" | tail -n1)
 if [ "$status" != "200" ]; then
   fail "/b/${TEACHER_SLUG} returned $status"
-elif ! printf '%s' "$body" | grep -q "/b/${TEACHER_SLUG}/buy?package="; then
+elif ! grep -q "/b/${TEACHER_SLUG}/buy?package=" <<<"$body"; then
   fail "/b/${TEACHER_SLUG} rendered no purchasable package"
 else
   pass "/b/${TEACHER_SLUG}"
@@ -144,7 +151,7 @@ body=$(printf '%s\n' "$response" | sed '$d')
 status=$(printf '%s\n' "$response" | tail -n1)
 if [ "$status" != "200" ]; then
   fail "/b/${TEACHER_SLUG}/buy returned $status"
-elif ! printf '%s' "$body" | grep -qE '\\"stripeReady\\":true|\\"instruments\\":\[\{'; then
+elif ! grep -qE '\\"stripeReady\\":true|\\"instruments\\":\[\{' <<<"$body"; then
   fail "/b/${TEACHER_SLUG}/buy offers no payment rail"
 else
   pass "/b/${TEACHER_SLUG}/buy"
@@ -157,7 +164,7 @@ fi
 # silently broke on 2026-07-26, when a gate change de-listed every teacher who
 # had onboarded before it and the sitemap emptied out unnoticed.
 body=$(curl -sS --max-time 20 "${BASE_URL}/sitemap.xml" || true)
-if ! printf '%s' "$body" | grep -q "/b/${TEACHER_SLUG}<"; then
+if ! grep -q "/b/${TEACHER_SLUG}<" <<<"$body"; then
   fail "/sitemap.xml does not list /b/${TEACHER_SLUG}"
 else
   pass "sitemap lists /b/${TEACHER_SLUG}"

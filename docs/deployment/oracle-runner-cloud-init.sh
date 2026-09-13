@@ -39,7 +39,7 @@ APT="apt-get -o DPkg::Lock::Timeout=300"
 
 # 4 GB swap — insurance against OOM during tsc/vitest (matters most if the box
 # fell back to the 6 GB A1 size instead of 12 GB).
-if ! swapon --show | grep -q /swapfile; then
+if ! grep -q /swapfile /proc/swaps; then
   fallocate -l 4G /swapfile && chmod 600 /swapfile && mkswap /swapfile && swapon /swapfile
   echo '/swapfile none swap sw 0 0' >> /etc/fstab
 fi
