@@ -39,11 +39,21 @@
 # Values flow through stdin only, never argv — the house rule from
 # push-fly-secrets.sh (D-66), so nothing lands in shell history or in `ps`.
 #
+# STALE NAMES. A push only ever adds, so on its own it would make the GitHub
+# copy derived for VALUES and not for NAMES: a secret the workflow stops
+# reading would sit in the environment indefinitely, readable by any job that
+# later names it (#106). So after verifying, it lists what the environment
+# holds and reports every name the workflow does not read. It deletes them
+# only behind --delete-stale, because a delete cannot be undone — GitHub never
+# returns a value — and the report is what lets a human confirm the list is the
+# workflow having moved on rather than this parse having broken.
+#
 # Requires: the Infisical CLI (logged in, this directory linked), `gh`
 # (authenticated, with admin on the repository), and `jq`.
 #
 # Usage:
-#   infra/infisical/push-github-secrets.sh
+#   infra/infisical/push-github-secrets.sh                 push, verify, REPORT stale names
+#   infra/infisical/push-github-secrets.sh --delete-stale  push, verify, DELETE stale names
 #   REPO=jaystewartuk/spiralclass infra/infisical/push-github-secrets.sh
 set -euo pipefail
 INFISICAL_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -52,6 +62,22 @@ cd "$INFISICAL_DIR/../.."
 ENVIRONMENT=production
 GH_ENV=production
 WORKFLOW=.github/workflows/deploy-production.yml
+
+# Parsed before anything is read or pushed. An unknown argument is refused
+# rather than ignored: `--delete-stail` silently becoming a report-only run is
+# harmless, but a script that shrugs off flags it does not know teaches its
+# operator that a flag they typed did something.
+DELETE_STALE=0
+for arg in "$@"; do
+  case "$arg" in
+    --delete-stale) DELETE_STALE=1 ;;
+    *)
+      echo "unknown argument: $arg" >&2
+      echo "usage: infra/infisical/push-github-secrets.sh [--delete-stale]" >&2
+      exit 1
+      ;;
+  esac
+done
 
 command -v infisical >/dev/null || {
   echo "install the Infisical CLI: https://infisical.com/docs/cli/overview" >&2
@@ -169,6 +195,55 @@ if [ "${#absent[@]}" -gt 0 ]; then
   echo "  Pushed, but GitHub does not list:" >&2
   printf '    %s\n' "${absent[@]}" >&2
   exit 1
+fi
+
+# ── Stale names ──────────────────────────────────────────────────────────
+# Everything the environment holds that the workflow does not read. HELD is the
+# list the verify step just fetched, so this costs no extra call. A stale name
+# is not an error — the push itself succeeded — so without --delete-stale this
+# reports and the script still exits 0; failing would train the operator to
+# pass the flag just to get a green run.
+# ⚠️ Only deploy-production.yml uses the `production` environment. If another
+# workflow ever does, its names must join NAMES before this runs, or this
+# reports — and with the flag, deletes — secrets that workflow needs.
+# A here-string rather than `printf | grep -q`: under pipefail, grep exiting on
+# its first match can SIGPIPE the printf, fail the pipeline, and report a name
+# the workflow DOES read as stale — the one mistake this step must never make.
+READ_NAMES="$(printf '%s\n' "${NAMES[@]}")"
+stale=()
+while IFS= read -r name; do
+  [ -n "$name" ] || continue
+  grep -qxF "$name" <<<"$READ_NAMES" || stale+=("$name")
+done <<<"$HELD"
+
+# `${stale[@]}` is only expanded behind a length check: bash 3.2 treats an
+# empty array as unbound under `set -u`.
+if [ "${#stale[@]}" -gt 0 ]; then
+  echo "" >&2
+  echo "  On \`${GH_ENV}\` but not read by $WORKFLOW:" >&2
+  printf '    %s\n' "${stale[@]}" >&2
+  if [ "$DELETE_STALE" = 1 ]; then
+    for name in "${stale[@]}"; do
+      gh secret delete "$name" --repo "$REPO" --env "$GH_ENV"
+      echo "    deleted $name" >&2
+    done
+    # Re-read rather than trust the exit codes, for the same reason the verify
+    # step exists: what GitHub lists is the only evidence of what it holds.
+    HELD="$(gh secret list --repo "$REPO" --env "$GH_ENV" --json name -q '.[].name' | sort)"
+    remaining=()
+    for name in "${stale[@]}"; do
+      if grep -qxF "$name" <<<"$HELD"; then remaining+=("$name"); fi
+    done
+    if [ "${#remaining[@]}" -gt 0 ]; then
+      echo "  Deleted, but GitHub still lists:" >&2
+      printf '    %s\n' "${remaining[@]}" >&2
+      exit 1
+    fi
+  else
+    echo "" >&2
+    echo "  Nothing reads these, and every job on the environment still could." >&2
+    echo "  Nothing was deleted. Re-run with --delete-stale to remove them." >&2
+  fi
 fi
 
 echo >&2
