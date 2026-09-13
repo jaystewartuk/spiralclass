@@ -12,7 +12,7 @@ pnpm test                    # unit — no database, seconds
 pnpm test:integration:local  # integration — boots its own Postgres on :5433
 pnpm test:e2e                # Playwright, hermetic
 pnpm gate --allow-dirty      # everything the pre-push hook will check
-pnpm gate:full               # the above plus mutation, integration and browsers
+pnpm gate:full               # the above plus mutation, integration, browsers, image
 ```
 
 Single files, per workspace (Turborepo's tasks do not take file arguments, so
@@ -26,7 +26,7 @@ pnpm --filter @spiralclass/shared test -- src/money.test.ts
 
 ## The layers
 
-There are 795 test files. They are not all the same kind of thing.
+There are 796 test files. They are not all the same kind of thing.
 
 | Layer                 | Runs                                           | Needs                         | Where                                     |
 | --------------------- | ---------------------------------------------- | ----------------------------- | ----------------------------------------- |
@@ -36,6 +36,7 @@ There are 795 test files. They are not all the same kind of thing.
 | **Visual regression** | same                                           | Chromium, committed baselines | `apps/web/tests/visual/`                  |
 | **Accessibility**     | same                                           | Chromium                      | `playwright.a11y.config.ts`               |
 | **Mutation**          | same                                           | nothing                       | `apps/web/scripts/mutation-spotcheck.mjs` |
+| **Production image**  | same                                           | Docker with buildx            | `scripts/ci/image-build.sh`               |
 
 **Unit** is Vitest, colocated with the module it covers. This is where most of
 the suite lives and it is the only layer fast enough to run while writing code.
@@ -66,6 +67,16 @@ a gallery instead of asserting against one, so it needs no committed image.
 **Mutation** is a spot-check, not a full run: it perturbs code and asserts the
 suite notices, so the unit tests are measured on whether they would actually
 catch a defect rather than on how many lines they touch.
+
+**Production image** builds the `Dockerfile` the production deploy builds —
+`linux/amd64`, final stage, the same build args — with a stub for every
+`__LOCAL__` key in `config/env/production.build.env`, and discards the result:
+no push, no tag, no registry credential. Every other layer runs `next build` on
+the runner's own Node, so before this step a broken base image or pnpm bootstrap
+was first found by the production deploy, after it had migrated
+([#100](https://github.com/jaystewartuk/spiralclass/issues/100)). On an arm64
+laptop, `IMAGE_BUILD_PLATFORM=linux/arm64 bash scripts/ci/image-build.sh` is the
+fast, weaker local answer; the amd64 verdict comes from the runner.
 
 ## Coverage
 

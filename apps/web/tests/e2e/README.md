@@ -17,7 +17,7 @@ the whole suite hits one server process with one in-memory rate-limit bucket.
 
 The suite runs in `scripts/ci/e2e.sh`, which is a **heavy-tier step in
 `scripts/ci/steps.mjs`**. That means it runs in `pnpm gate:full` on the laptop
-and, since [D-161](../../../../docs/decisions/D-161.md), as one of the three
+and, since [D-161](../../../../docs/decisions/D-161.md), as one of the
 parallel jobs in `.github/workflows/heavy.yml` on every pull request and every
 push to `main`. It is not a required check.
 

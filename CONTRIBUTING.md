@@ -68,8 +68,9 @@ branch → implement + tests → git push (the pre-push hook runs pnpm gate)
   `gate.yml` runs the same registry on every pull request and posts the same
   status, so a laptop-less day is not a stranded PR. The two producers cannot
   disagree about anything but timing.
-- **The heavy suites run on runners.** Mutation, real-database integration and
-  the browser suites are three parallel jobs in `heavy.yml`, on every pull
+- **The heavy suites run on runners.** Mutation, real-database integration, the
+  browser suites and a no-push build of the production image are parallel jobs
+  in `heavy.yml`, on every pull
   request _and_ every push to `main`. The run against `main` is the one that
   catches a combination broken though every PR in it was green alone. They are
   deliberately **not** a required check — read them before merging anyway.
