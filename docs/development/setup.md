@@ -10,7 +10,7 @@ until you supply keys; nothing else is.
 
 | Need                 | Why                                                                                        |
 | -------------------- | ------------------------------------------------------------------------------------------ |
-| **Node 24 or newer** | `package.json` enforces `>=24.15.0`; `.nvmrc` pins 26, the major production runs           |
+| **Node 24 or newer** | `package.json` enforces `>=24.15.0`; `.nvmrc` pins 24, the major production runs           |
 | **pnpm 11**          | `corepack enable` activates the version pinned in `package.json` — do not install globally |
 | **Docker**           | For the local Postgres. Optional if you point `DATABASE_URL` at a hosted database instead  |
 
@@ -163,7 +163,7 @@ duplicate logic. Test and gate tasks are deliberately absent from the
 ## When something does not start
 
 **`corepack` is not enabling pnpm.** Node 24 ships it, but a Node installed by
-some package managers disables it. `corepack enable` needs to succeed before
+some package managers disables it, and Node 25 and later do not ship it at all. `corepack enable` needs to succeed before
 anything else will.
 
 **Docker is installed but the setup script still fails.** It checks
