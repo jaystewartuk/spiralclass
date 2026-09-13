@@ -71,7 +71,7 @@ another way" about anything that still exists.
   both reversed by [D-40](./D-40.md)).
 
 **Numbering is never reused and never renumbered**, so `D-01` is still the
-first decision and `D-177` the most recent. A gap means a record was removed,
+first decision and `D-178` the most recent. A gap means a record was removed,
 not that one is missing.
 
 **Everything kept is unedited**, except where a record named an account
@@ -325,29 +325,30 @@ has broken production.
 The three-layer thesis — provision, schema, data — written before it was needed
 and exercised for real when the provider actually changed.
 
-| #                   | Decision                                                                                                     |
-| ------------------- | ------------------------------------------------------------------------------------------------------------ |
-| [D-11](./D-11.md)   | Migrations are applied by hand, never by a deploy                                                            |
-| [D-18](./D-18.md)   | …and re-coupled, because the named risk bit: code shipped ahead of its schema                                |
-| [D-26](./D-26.md)   | A staging tier and a gated promote — `main` stops deploying to production                                    |
-| [D-43](./D-43.md)   | Rename staging → preview, and the two silent outages the rename actually caused                              |
-| [D-49](./D-49.md)   | **Provision · schema · data as three independently reproducible layers**                                     |
-| [D-51](./D-51.md)   | The serving plane is designed and deliberately **not** built — these layers change the hot path              |
-| [D-65](./D-65.md)   | IaC written without live API access got the bucket list wrong; preview and production split                  |
-| [D-66](./D-66.md)   | A managed secrets store replaces a plaintext file nobody rotates                                             |
-| [D-70](./D-70.md)   | **Full exit from Supabase and Vercel**; 125 migrations squashed to one portable baseline                     |
-| [D-76](./D-76.md)   | Maintenance mode is an env var, because a flag you cannot read while the database is down is useless         |
-| [D-85](./D-85.md)   | Non-secret config leaves the host's own format — split on one question: is this a credential?                |
-| [D-89](./D-89.md)   | The cutover, executed — and the decommission that removed the code coupling                                  |
-| [D-95](./D-95.md)   | Neon PITR plus a named pre-migration checkpoint branch replaces a dump that gated every deploy               |
-| [D-115](./D-115.md) | Collapse the cron wake grid; serve the tight leg with a delayed-event chain                                  |
-| [D-127](./D-127.md) | Image generation moves to Vertex AI — the consumer API gates on a prepay balance                             |
-| [D-139](./D-139.md) | **Delete the OpenTofu modules that were never applied** — they assert a state nobody reconciled              |
-| [D-150](./D-150.md) | Measure the latency before taking the free box, and keep the database where it is                            |
-| [D-168](./D-168.md) | **46 migrations become two**, split by who writes them — generated baseline, hand-authored invariants        |
-| [D-169](./D-169.md) | **One wrapper owns every Infisical call**, and deployment does not make one — it reads pushed GitHub secrets |
-| [D-170](./D-170.md) | The Codespaces path is **deleted rather than repaired** — a development path with no users is not a feature  |
-| [D-177](./D-177.md) | **Vercel returns as a second production target that holds no domain** — the target, not the coupling         |
+| #                   | Decision                                                                                                      |
+| ------------------- | ------------------------------------------------------------------------------------------------------------- |
+| [D-11](./D-11.md)   | Migrations are applied by hand, never by a deploy                                                             |
+| [D-18](./D-18.md)   | …and re-coupled, because the named risk bit: code shipped ahead of its schema                                 |
+| [D-26](./D-26.md)   | A staging tier and a gated promote — `main` stops deploying to production                                     |
+| [D-43](./D-43.md)   | Rename staging → preview, and the two silent outages the rename actually caused                               |
+| [D-49](./D-49.md)   | **Provision · schema · data as three independently reproducible layers**                                      |
+| [D-51](./D-51.md)   | The serving plane is designed and deliberately **not** built — these layers change the hot path               |
+| [D-65](./D-65.md)   | IaC written without live API access got the bucket list wrong; preview and production split                   |
+| [D-66](./D-66.md)   | A managed secrets store replaces a plaintext file nobody rotates                                              |
+| [D-70](./D-70.md)   | **Full exit from Supabase and Vercel**; 125 migrations squashed to one portable baseline                      |
+| [D-76](./D-76.md)   | Maintenance mode is an env var, because a flag you cannot read while the database is down is useless          |
+| [D-85](./D-85.md)   | Non-secret config leaves the host's own format — split on one question: is this a credential?                 |
+| [D-89](./D-89.md)   | The cutover, executed — and the decommission that removed the code coupling                                   |
+| [D-95](./D-95.md)   | Neon PITR plus a named pre-migration checkpoint branch replaces a dump that gated every deploy                |
+| [D-115](./D-115.md) | Collapse the cron wake grid; serve the tight leg with a delayed-event chain                                   |
+| [D-127](./D-127.md) | Image generation moves to Vertex AI — the consumer API gates on a prepay balance                              |
+| [D-139](./D-139.md) | **Delete the OpenTofu modules that were never applied** — they assert a state nobody reconciled               |
+| [D-150](./D-150.md) | Measure the latency before taking the free box, and keep the database where it is                             |
+| [D-168](./D-168.md) | **46 migrations become two**, split by who writes them — generated baseline, hand-authored invariants         |
+| [D-169](./D-169.md) | **One wrapper owns every Infisical call**, and deployment does not make one — it reads pushed GitHub secrets  |
+| [D-170](./D-170.md) | The Codespaces path is **deleted rather than repaired** — a development path with no users is not a feature   |
+| [D-177](./D-177.md) | **Vercel returns as a second production target that holds no domain** — the target, not the coupling          |
+| [D-178](./D-178.md) | **A migration must work with the code already serving**; drops ship a release after the code stops using them |
 
 ### CI, the gate and releasing
 
@@ -524,6 +525,7 @@ records removed before publication — see [What is not here](#what-is-not-here)
 | [D-175](./D-175.md) | Tenant scoping is checked by a parser, not by a reader                | Active                               |
 | [D-176](./D-176.md) | The tenant is carried from the auth gate, not taken from the query    | Active                               |
 | [D-177](./D-177.md) | Vercel is a second production target; it holds no domain              | Decided; built, never served         |
+| [D-178](./D-178.md) | Migrations expand; contracts ship a release later, marked CONTRACT    | Active                               |
 
 ---
 
