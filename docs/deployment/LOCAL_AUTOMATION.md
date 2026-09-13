@@ -44,8 +44,8 @@ pnpm local:status        # when did the probes and the sweep last pass?
 1. **Push and merge.** `.githooks/pre-push` runs `pnpm gate` (fast tier) and
    posts the `local-gate` status branch protection requires. `gate.yml` posts
    the same context on the PR, so a laptop-less day is not a stranded PR.
-   `heavy.yml` runs the mutation, integration and browser suites on every PR
-   and on every push to `main`.
+   `heavy.yml` runs the mutation, integration and browser suites, and a no-push
+   build of the production image, on every PR and on every push to `main`.
 2. **`pnpm ship:preview`** ships preview web (migrations → image → Fly →
    Inngest) when this commit changed something preview carries. It compares the
    commit against what this machine last shipped (`scripts/ci/relevance.mjs` +
@@ -63,15 +63,15 @@ pnpm local:status        # when did the probes and the sweep last pass?
 
 ## What runs where
 
-| Job                                                   | Where                                             | How                                                               |
-| ----------------------------------------------------- | ------------------------------------------------- | ----------------------------------------------------------------- |
-| Merge gate (format · typecheck · lint · unit · audit) | Laptop, every push · **and** a runner, every PR   | `.githooks/pre-push` → `pnpm gate` (D-119) · `gate.yml` (D-157)   |
-| Heavy tier (mutation · integration · E2E · visual)    | Runner, every PR and every push to `main`         | `heavy.yml` (D-161)                                               |
-| **Production deploy**                                 | Runner, triggered by promote's push               | `deploy-production.yml` → `scripts/fly-deploy.sh` (D-157)         |
-| Preview deploy                                        | Laptop, on demand                                 | `pnpm ship:preview` / `pnpm deploy:preview`                       |
-| Production synthetic probes                           | Runner, after every production deploy; on demand  | last step of `deploy-production.yml` · `pnpm local synthetic`     |
-| Production DB backup                                  | **Neon** (PITR + pre-migration checkpoints, D-95) | not a local job — see the [D-129](../decisions/D-129.md) addendum |
-| Time-bomb sweep                                       | Laptop, on demand                                 | `pnpm local sweep`                                                |
+| Job                                                        | Where                                             | How                                                               |
+| ---------------------------------------------------------- | ------------------------------------------------- | ----------------------------------------------------------------- |
+| Merge gate (format · typecheck · lint · unit · audit)      | Laptop, every push · **and** a runner, every PR   | `.githooks/pre-push` → `pnpm gate` (D-119) · `gate.yml` (D-157)   |
+| Heavy tier (mutation · integration · E2E · visual · image) | Runner, every PR and every push to `main`         | `heavy.yml` (D-161)                                               |
+| **Production deploy**                                      | Runner, triggered by promote's push               | `deploy-production.yml` → `scripts/fly-deploy.sh` (D-157)         |
+| Preview deploy                                             | Laptop, on demand                                 | `pnpm ship:preview` / `pnpm deploy:preview`                       |
+| Production synthetic probes                                | Runner, after every production deploy; on demand  | last step of `deploy-production.yml` · `pnpm local synthetic`     |
+| Production DB backup                                       | **Neon** (PITR + pre-migration checkpoints, D-95) | not a local job — see the [D-129](../decisions/D-129.md) addendum |
+| Time-bomb sweep                                            | Laptop, on demand                                 | `pnpm local sweep`                                                |
 
 **There is still no scheduler**, and no cron either. A launchd agent was
 considered and not built: it is a schedule nobody owns, and a shut laptop

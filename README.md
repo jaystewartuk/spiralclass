@@ -444,8 +444,9 @@ by a cleanup nobody scheduled is a check people learn to skip.
 a stranded PR. Both post the same `local-gate` commit status, bound to the exact
 commit they certified.
 
-The expensive half — a real Postgres, two production builds, a Chromium fleet —
-runs as three parallel jobs in `.github/workflows/heavy.yml`, also on every pull
+The expensive half — a real Postgres, two production builds, a Chromium fleet,
+and the production `Dockerfile` built the way the deploy builds it — runs as
+parallel jobs in `.github/workflows/heavy.yml`, also on every pull
 request and every push to `main`. It reads the tier out of the same registry
 rather than listing jobs: one step asks `gate.mjs --tier heavy --list --json`
 and the matrix fans out over the answer, so a suite added to `steps.mjs` gets a

@@ -20,9 +20,9 @@
 //           gate.yml on a runner; either way the result is posted as the
 //           `local-gate` commit status on the PR head. One registry, so the two
 //           can only disagree about timing.
-//   heavy — the mutation spot-check and the two suites that need Docker or a
-//           browser, WITHOUT the fast half in front of them. Run by
-//           heavy.yml on a runner, on every PR ([D-161]).
+//   heavy — the mutation spot-check, the two suites that need Docker or a
+//           browser, and the production image build, WITHOUT the fast half in
+//           front of them. Run by heavy.yml on a runner, on every PR ([D-161]).
 //   full  — fast + heavy. The promote gate: `pnpm promote` runs this on the
 //           laptop before it fast-forwards `production`, and it is the tier
 //           whose receipt certifies the commit that ships.
@@ -204,6 +204,27 @@ export const STEPS = [
     cmd: ["bash", "scripts/ci/e2e.sh"],
     needs: ["docker"],
     replaces: "e2e.yml",
+  },
+  {
+    // The production Dockerfile, built to its final stage with stub build args
+    // and pushed nowhere (#101). Until this step, nothing before a production
+    // deploy ever built the image: the first deploy from this repository found
+    // a Dockerfile that could not build (#100) from inside the deploy, after
+    // the database job had already migrated production. Integration and E2E run
+    // `next build` on the runner's own Node, so they cannot see a broken base
+    // image, apt layer, pnpm bootstrap or standalone copy.
+    //
+    // Runs on every heavy run rather than only when the Dockerfile, a lockfile
+    // or a package.json changes: this registry has no per-step path relevance,
+    // and the list of inputs that can break the image is the whole build
+    // context — a new import in apps/web breaks it as surely as a FROM line.
+    // An unconditional build costs a runner some minutes; a skipped one is #100.
+    id: "image-build",
+    title: "Production image builds (no push)",
+    tier: "heavy",
+    cmd: ["bash", "scripts/ci/image-build.sh"],
+    needs: ["docker"],
+    replaces: "nothing — only the production deploy ever built the image",
   },
 ];
 

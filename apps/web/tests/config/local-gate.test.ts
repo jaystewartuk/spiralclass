@@ -566,10 +566,32 @@ describe("the local tier covers what CI used to run", () => {
   it("the full tier adds mutation and every promote-gate suite", () => {
     const full = stepsForTier("full");
     const scripts = full.map((s) => s.cmd.join(" ")).join("\n");
-    for (const suite of ["scripts/ci/integration.sh", "scripts/ci/e2e.sh"]) {
+    for (const suite of [
+      "scripts/ci/integration.sh",
+      "scripts/ci/e2e.sh",
+      "scripts/ci/image-build.sh",
+    ]) {
       expect(scripts, `full tier has no step running ${suite}`).toContain(suite);
     }
     expect(scripts).toContain("mutation:spotcheck");
+  });
+
+  it("the production image is built in the heavy tier, before any deploy builds it (#101)", () => {
+    // The first production deploy from this repository found a Dockerfile that
+    // could not build (#100) from inside the deploy, after the database job had
+    // migrated production. Gate and Heavy were green on that commit because
+    // neither built the image. This step is what makes that commit red first.
+    // What the script itself may and may not do is tests/config/image-build.test.ts.
+    const step = STEPS.find((s) => s.id === "image-build");
+    expect(step, "no image-build step in the registry").toBeDefined();
+    expect(step!.tier, "the image build must be in the heavy half").toBe("heavy");
+    expect(step!.cmd).toEqual(["bash", "scripts/ci/image-build.sh"]);
+    // gate.mjs's Docker preflight keys on this, so a missing daemon stops the
+    // run with an instruction rather than a buildx error minutes in.
+    expect(step!.needs).toContain("docker");
+    // heavy.yml derives its matrix from exactly this selection, so being in it
+    // IS getting a runner on every PR and every push to main.
+    expect(stepsForTier("heavy").map((s) => s.id)).toContain("image-build");
   });
 
   it("each suite script the registry points at exists", () => {
@@ -758,7 +780,7 @@ describe("one heavy job at a time on this machine (D-146)", () => {
     // Not only via gate.mjs: `pnpm test:integration:local` and a bare
     // `bash scripts/ci/e2e.sh` have to be serialized too, or the guarantee is
     // only as good as the entry point someone happened to use.
-    for (const suite of ["integration.sh", "e2e.sh"]) {
+    for (const suite of ["integration.sh", "e2e.sh", "image-build.sh"]) {
       const src = read("scripts", "ci", suite);
       expect(src, `${suite} does not take the machine lock`).toContain("lock.mjs run");
       expect(src, `${suite} can recurse into itself`).toContain("SPIRALCLASS_LOCK_INNER");
