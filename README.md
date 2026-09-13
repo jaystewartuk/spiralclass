@@ -73,7 +73,7 @@ appears in it.</sub>
 It is published as an honest record of how one engineer builds and runs a
 payments-handling, video-carrying SaaS product alone: the architecture, the
 decisions, the things that went wrong, and the mechanisms built so they would
-not go wrong twice. The 125 decision records in
+not go wrong twice. The 126 decision records in
 [`docs/decisions/`](docs/decisions/README.md) are the most useful thing here —
 several of them reverse an earlier one and say why.
 
@@ -445,8 +445,9 @@ by a cleanup nobody scheduled is a check people learn to skip.
 a stranded PR. Both post the same `local-gate` commit status, bound to the exact
 commit they certified.
 
-The expensive half — a real Postgres, two production builds, a Chromium fleet —
-runs as three parallel jobs in `.github/workflows/heavy.yml`, also on every pull
+The expensive half — a real Postgres, two production builds, a Chromium fleet,
+and the production `Dockerfile` built the way the deploy builds it — runs as
+parallel jobs in `.github/workflows/heavy.yml`, also on every pull
 request and every push to `main`. It reads the tier out of the same registry
 rather than listing jobs: one step asks `gate.mjs --tier heavy --list --json`
 and the matrix fans out over the answer, so a suite added to `steps.mjs` gets a
@@ -616,7 +617,7 @@ in [`docs/deployment/ORACLE_LIVEKIT_PRODUCTION.md`](docs/deployment/ORACLE_LIVEK
 | Where                                      | What                                                                                   |
 | ------------------------------------------ | -------------------------------------------------------------------------------------- |
 | [`docs/architecture/`](docs/architecture/) | System design, the data model, how a purchase and a booking flow                       |
-| [`docs/decisions/`](docs/decisions/)       | **125 decision records.** Current policy, not history — several reverse an earlier one |
+| [`docs/decisions/`](docs/decisions/)       | **126 decision records.** Current policy, not history — several reverse an earlier one |
 | [`docs/features/`](docs/features/)         | Canonical product behaviour, one document per feature                                  |
 | [`docs/development/`](docs/development/)   | Setup, testing, the change workflow, i18n, analytics                                   |
 | [`docs/deployment/`](docs/deployment/)     | Release, incident response, backup and restore, infrastructure runbooks                |

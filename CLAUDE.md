@@ -141,8 +141,8 @@ and the runner inherit it in the same commit. Guard tests in
   · dependency audit. The credential scan needs `brew install gitleaks`
   (⚠️ never the npm package of that name — an unrelated third party's).
 - **heavy** (`pnpm gate:heavy`) — mutation spot-check, real-Postgres
-  integration, E2E. Runs on a runner for every PR and every push to `main`, and
-  needs Docker locally.
+  integration, E2E, the production image build (no push). Runs on a runner for
+  every PR and every push to `main`, and needs Docker locally.
 - **full** (`pnpm gate:full`) — both halves. What `pnpm promote` runs.
 
 **One heavy job at a time.** Several sessions share one laptop through git

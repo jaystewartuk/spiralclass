@@ -16,8 +16,8 @@
  * agree until the day they do not.
  *
  *   pnpm gate               # fast tier (what the PR gate used to run)
- *   pnpm gate:full          # + mutation, integration and the browser suites
- *   pnpm gate --tier heavy  # ONLY those three — what heavy.yml runs (D-161)
+ *   pnpm gate:full          # + mutation, integration, the browser suites, the image build
+ *   pnpm gate --tier heavy  # ONLY that heavy half — what heavy.yml runs (D-161)
  *   pnpm gate --only lint,typecheck
  *   pnpm gate --skip audit
  *   pnpm gate --list
@@ -195,15 +195,17 @@ async function runGate(argv = []) {
     return 1;
   }
 
-  const missingDocker = steps.some((s) => s.needs?.includes("docker")) && !dockerReady();
-  if (missingDocker) {
+  // Named from the registry rather than typed, so a Docker step added to
+  // steps.mjs is in the instruction the moment it lands.
+  const dockerSteps = steps.filter((s) => s.needs?.includes("docker")).map((s) => s.id);
+  if (dockerSteps.length > 0 && !dockerReady()) {
     console.error(
       [
         "",
-        "  Docker isn't running, and the integration + E2E steps need a Postgres container.",
-        "  Start Docker (or OrbStack) and re-run, or skip them:",
+        `  Docker isn't running, and these steps need it: ${dockerSteps.join(", ")}.`,
+        "  Start Docker (or OrbStack, or colima) and re-run, or skip them:",
         "",
-        "    pnpm gate:full --skip integration,e2e",
+        `    node scripts/ci/gate.mjs --tier ${args.tier} --skip ${dockerSteps.join(",")}`,
         "",
       ].join("\n"),
     );

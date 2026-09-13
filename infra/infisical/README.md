@@ -499,9 +499,9 @@ version-controlled, and diff-reviewable: `CSP_ENFORCE`,
 `CAPTION_TRANSLATION_MODEL`. See `fly.toml`'s comments for each
 var's current default and what enabling it actually does — uncommenting one
 is a real behavior change on next deploy, review it like any other code
-change. `NEXT_PUBLIC_SUPPORT_WHATSAPP` is the same kind of non-secret flag
-but is also a `NEXT_PUBLIC_*` build-time var, so it can't go in `fly.toml`'s
-`[env]` (runtime-only) — see the build-arg note below if it needs wiring.
+change. `NEXT_PUBLIC_SUPPORT_WHATSAPP` is not in Infisical at all: it is
+committed empty in `config/env/*.build.env`, because the only value it ever held
+was a person's own number (#105).
 
 This list should equal exactly what `fly secrets list --app agendaprofe`
 shows (minus the R2 ones and the four inert `NEXT_PUBLIC_*` runtime copies

@@ -42,7 +42,7 @@ flow, and rollback.
    `--gate` runs the full tier first.
 
 2. _(Optional)_ Run **`pnpm gate:full`** on `main` — fast tier + mutation +
-   integration + E2E, and it **deploys nothing**. The gate is hermetic: it
+   integration + E2E + a no-push image build, and it **deploys nothing**. The gate is hermetic: it
    validates the _commit_, so a green run means the version you're about to
    hand-test is the version that will clear promote. Usually unnecessary now —
    **`heavy.yml` runs that same half on every PR and every push to `main`**

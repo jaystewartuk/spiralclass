@@ -1,7 +1,13 @@
 name: Heavy
 
 # The heavy half of the gate — the mutation spot-check, the real-DB integration
-# suite and the three browser suites — on GitHub-hosted runners ([D-161]).
+# suite, the three browser suites and the production image build — on
+# GitHub-hosted runners ([D-161]).
+#
+# The image build needs nothing from this file: ubuntu-latest ships Docker with
+# buildx, and deploy-production.yml's Fly job already builds this Dockerfile on
+# the same stock runner with no setup action. Its leg pays for a `pnpm install`
+# it does not use, which is the price of every leg being the same job.
 #
 # ⚠️ READ THIS BEFORE ADDING A STEP. Like gate.yml, this workflow does not know
 # what "green" means and must not learn. `scripts/ci/steps.mjs` is the single
