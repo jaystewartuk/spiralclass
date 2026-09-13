@@ -13,16 +13,23 @@
 # does. Read this before adding any of it back, because each omission is load
 # bearing and two of them are hazards rather than savings.
 #
-#   * NO Neon checkpoint (D-95) and NO migrations. Fly's deploy already ran
-#     both, against the same Neon `production` branch, for the same commit —
-#     `deploy-production.yml` runs this AFTER that job, `needs:` it, and the
-#     database work is therefore already done and done once. Cutting a second
-#     checkpoint is merely noisy. Running `migrate-regions.ts` a second time is
+#   * NO Neon checkpoint (D-95) and NO migrations. scripts/database-deploy.sh
+#     owns both, and `deploy-production.yml` runs it as the `database` job this
+#     job `needs:` — so for the same commit, against the same Neon `production`
+#     branch, the database work is already done and done once. It does NOT wait
+#     for the Fly deploy, and has not since 2026-09-12 ([D-177]'s addendum): the
+#     database is not Fly's, and a failover that can only deploy after Fly
+#     succeeds cannot deploy when Fly is down. Cutting a second checkpoint here
+#     would be merely noisy. Running `migrate-regions.ts` a second time is
 #     worse: Prisma takes an advisory lock, so a concurrent run would block
 #     rather than corrupt, but a SEQUENTIAL second run against an
 #     already-migrated branch is a no-op that makes this script look like it
 #     owns the schema. It does not. One commit, one migration run, in the job
 #     that checkpoints first.
+#
+#     ⚠️ FROM A LAPTOP, that ordering is yours to keep. If the commit carries a
+#     migration, run scripts/database-deploy.sh for it first — this script
+#     cannot tell, because it holds no database credential to look with.
 #   * NO Inngest sync, and this is the sharp one. `scripts/inngest-sync.sh`
 #     PUTs an endpoint URL, and Inngest registers an app PER URL. Syncing a
 #     second URL would register a second app — so a cron defined once would be

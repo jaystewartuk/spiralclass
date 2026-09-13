@@ -6,10 +6,12 @@
  * script READS the runners' verdict on the exact commit — the Gate and Heavy
  * workflows, both green for this SHA, from their push-to-`main` runs — and then
  * fast-forwards the `production` branch. That push triggers
- * .github/workflows/deploy-production.yml, which runs the same
- * scripts/fly-deploy.sh this used to invoke directly — migrations behind a
- * Neon checkpoint, the amd64 image, the Fly deploy, the Inngest sync, then the
- * production probes.
+ * .github/workflows/deploy-production.yml: a database job (migrations behind a
+ * Neon checkpoint), then the same scripts/fly-deploy.sh this used to invoke
+ * directly — the amd64 image, the Fly deploy, the Inngest sync, the production
+ * probes — alongside the Vercel failover, which does not wait for Fly. Promote
+ * judges production by the database and Fly jobs, and reports the failover on
+ * its own line (scripts/ci/deploy-verdict.mjs).
  *
  * WHY THE DEPLOY MOVED, AND WHY THAT IS NOT THE 2026-07-19 DRIFT AGAIN.
  * D-120 chained the deploy into this command because a HUMAN DISPATCH STEP had
@@ -61,6 +63,7 @@ import { readFileSync } from "node:fs";
 import { createInterface } from "node:readline/promises";
 
 import { recordRun } from "../local/receipts.mjs";
+import { deployVerdict, failoverLine } from "./deploy-verdict.mjs";
 import { capture, check, git, has, lastRelease, run } from "./lib.mjs";
 
 const args = process.argv.slice(2);
@@ -324,15 +327,18 @@ if (has("gh")) {
 // ── Deploy ───────────────────────────────────────────────────────────────────
 // The push above IS the deploy trigger ([D-157]): it moved `production`, using
 // the operator's own credentials, so deploy-production.yml fires. That workflow
-// runs the same scripts/fly-deploy.sh this used to run here, then the probes.
+// migrates in its database job, then runs the same scripts/fly-deploy.sh this
+// used to run here, the probes, and — not waiting on Fly — the Vercel failover.
 //
 // The chain D-120 insisted on is intact — nothing here is left for a human to
-// remember. What IS left for a human is one approval on the `production`
-// environment, which is a queued run with a notification rather than a step
-// that can be silently skipped. See deploy-production.yml's header.
+// remember. What IS left for a human is the approvals on the `production`
+// environment, which GitHub asks for per job: the database job, then the two
+// targets together. Each is a queued run with a notification rather than a
+// step that can be silently skipped. See deploy-production.yml's header.
 const RUN_URL = `https://github.com/${capture("gh", ["repo", "view", "--json", "nameWithOwner", "-q", ".nameWithOwner"]) || "jaystewartuk/spiralclass"}/actions/workflows/deploy-production.yml`;
 
 let deployOk = true;
+let failover = "";
 if (noWait || !has("gh")) {
   console.log(
     [
@@ -345,7 +351,9 @@ if (noWait || !has("gh")) {
   );
 } else {
   console.log("\n── Waiting for the deploy workflow");
-  console.log(`  It needs one approval on the production environment: ${RUN_URL}\n`);
+  console.log(
+    `  It needs two approvals on the production environment — the database job, then both targets: ${RUN_URL}\n`,
+  );
   // Matched on the HEAD SHA, not "the most recent run on this branch" — the
   // previous promote's run is also on this branch, and watching that one would
   // report a green deploy of the commit before this one.
@@ -383,11 +391,28 @@ if (noWait || !has("gh")) {
     );
     deployOk = false;
   } else {
-    // `gh run watch --exit-status` blocks through the approval wait and the run
-    // itself, and exits non-zero on a red run — so a promote that ends green
-    // means production is actually serving, which is what `pnpm promote` has
-    // always meant. Ctrl-C only stops watching; the deploy carries on.
-    deployOk = run("gh", ["run", "watch", runId, "--exit-status"]) === 0;
+    // `gh run watch` blocks through the approval waits and the run itself.
+    // Ctrl-C only stops watching; the deploy carries on.
+    //
+    // ⚠️ NOT `--exit-status`, which answers for the RUN — red whenever any job
+    // is. Since the targets were split ([D-177]'s addendum), a Vercel failover
+    // that could not refresh would have turned a Fly release that shipped into
+    // a promote reporting that production may not have moved. So the verdict
+    // is read job by job, and a promote that ends green still means exactly
+    // what it always has: production is serving this commit.
+    run("gh", ["run", "watch", runId]);
+    let jobs = [];
+    try {
+      jobs = JSON.parse(capture("gh", ["run", "view", runId, "--json", "jobs"]) || "{}").jobs ?? [];
+    } catch {
+      // Unreadable is not green. deployVerdict([]) reports every job missing.
+    }
+    const verdict = deployVerdict(jobs);
+    deployOk = verdict.productionOk;
+    failover = failoverLine(verdict.vercel);
+    if (!deployOk) {
+      console.log(`\n  Database job: ${verdict.database}. Fly job: ${verdict.fly}. Run: ${runId}`);
+    }
 
     // The workflow ran the production probes as its last step, so record that
     // here. The nag in `pnpm gate` asks "when did this last SUCCEED", and the
@@ -413,11 +438,12 @@ console.log(
     `  ✓ production branch → ${short}`,
     "",
     deployOk
-      ? "  Deployed by GitHub Actions: Neon checkpoint, migrations, native amd64 image,"
+      ? "  Deployed by GitHub Actions: Neon checkpoint and migrations, native amd64 image,"
       : "  ⚠ The deploy did NOT finish green. `production` moved and the running app may not have.",
     deployOk
       ? "    Fly deploy, Inngest sync, then the production probes."
       : "    Recover from here:  ./scripts/fly-deploy.sh production --gate-already-passed",
+    ...(failover ? ["", failover] : []),
     "",
     "  Where things stand:  pnpm release:status",
     "  ⚠️ A deploy run by Actions leaves no entry in the local ledger, so that",

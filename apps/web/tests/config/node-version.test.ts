@@ -1,5 +1,6 @@
 import { readFileSync } from "node:fs";
-import { join } from "node:path";
+import { createRequire } from "node:module";
+import { dirname, join } from "node:path";
 import { describe, expect, it } from "vitest";
 
 import { REPO_ROOT } from "./_tree";
@@ -72,5 +73,75 @@ describe("the Node major is stated once and followed everywhere", () => {
       `engines.node floors at ${floor} while the image ships ${major}: production ` +
         "would not satisfy the package manifest it runs.",
     ).toBeLessThanOrEqual(major);
+  });
+});
+
+/**
+ * Whether the image can be built and run at that major at all.
+ *
+ * On 2026-09-13 the first production deploy from this repository failed in its
+ * Docker build. The Dockerfile read `node:26-slim` and still ran
+ * `corepack enable`, and Node 26 ships no Corepack (#100). Gate and Heavy were
+ * green, because neither builds the image; they run on whatever major the
+ * Dockerfile names, and pnpm reaches them another way. Every install on that
+ * runner also carried Prisma's own warning that 26 is not a line it supports
+ * (#102). Nothing checked either, so both were first found by a deploy against
+ * production.
+ */
+describe("the image's Node major can build the image and run Prisma", () => {
+  const major = dockerfileMajor();
+
+  /**
+   * The last Node major whose official image ships a `corepack` binary.
+   * Checked 2026-09-13: `node:24-slim` has Corepack 0.36.0; `node:25-slim` and
+   * `node:26-slim` have none. A literal, because nothing in the tree can ask
+   * Docker Hub.
+   */
+  const LAST_MAJOR_WITH_COREPACK = 24;
+
+  it("does not rely on a bundled Corepack on a major that has none", () => {
+    const executable = read("Dockerfile")
+      .split("\n")
+      .filter((line) => !line.trimStart().startsWith("#"))
+      .join("\n");
+    if (!/\bcorepack\b/.test(executable)) return;
+
+    // Installing Corepack from npm is the other way to move past 24, and it
+    // would pass here rather than being mistaken for the bundled one.
+    const installsCorepack = /npm (?:install|i) (?:-g|--global) corepack/.test(executable);
+    expect(
+      installsCorepack || major <= LAST_MAJOR_WITH_COREPACK,
+      `The Dockerfile runs corepack on node:${major}-slim, which ships none — the image ` +
+        `cannot build (#100). Stay on ${LAST_MAJOR_WITH_COREPACK}, or install Corepack ` +
+        "explicitly with `npm install -g corepack@<version>` before enabling it.",
+    ).toBe(true);
+  });
+
+  it("is a Node line Prisma's own install check supports", () => {
+    // Prisma's `engines.node` (">=24.0") would admit any later major; its
+    // preinstall does not. The preinstall compares the running major against a
+    // table of supported lines and prints a warning for anything else, and that
+    // table is what this reads. It is minified, so the read fails loudly
+    // rather than guessing if the table's shape ever changes.
+    const prismaDir = dirname(
+      createRequire(join(REPO_ROOT, "apps", "web", "package.json")).resolve("prisma/package.json"),
+    );
+    const preinstall = readFileSync(join(prismaDir, "preinstall", "index.js"), "utf8");
+    const table =
+      /\{((?:\d+:\d+,)*\d+:\d+)\},\w+=\w+\[\w+\];if\(!\(typeof \w+<"u"&&\w+>=\w+\)\)/.exec(
+        preinstall,
+      );
+    expect(
+      table,
+      "Could not find the supported-Node table in prisma/preinstall/index.js. Prisma changed " +
+        "how it checks; re-read its system requirements for the Dockerfile's major and update " +
+        "this test rather than deleting it.",
+    ).not.toBeNull();
+
+    const supported = table![1].split(",").map((pair) => Number(pair.split(":")[0]));
+    expect(
+      supported,
+      `Prisma's preinstall supports Node ${supported.join(", ")}; the image ships ${major} (#102).`,
+    ).toContain(major);
   });
 });

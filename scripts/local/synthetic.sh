@@ -18,10 +18,18 @@
 set -uo pipefail
 
 BASE_URL="${BASE_URL:-https://spiralclass.com}"
-# Dedicated synthetic-monitor teacher in prod. If renamed or deleted, update
-# here — a 404 means the slug is gone or the public route regressed, and both
-# are worth knowing about.
-TEACHER_SLUG="${TEACHER_SLUG:-alicia-moreno}"
+# A real, publicly listed teacher in PRODUCTION, named with her agreement. If
+# renamed or deleted, update here — a 404 means the slug is gone or the public
+# route regressed, and both are worth knowing about.
+#
+# ⚠️ Never a seed teacher. The publication sweep replaced this with
+# `alicia-moreno`, the pseudonym apps/web/scripts/seed.ts creates locally, and
+# production has no such page: the first deploy from this repository
+# (2026-09-13) shipped, then failed four probes against a 404. The pseudonyms
+# stay right everywhere that runs against the seed; this is the one file that
+# runs against the live site. apps/web/tests/config/synthetic-probe.test.ts
+# refuses any slug the seed creates.
+TEACHER_SLUG="${TEACHER_SLUG:-ana-laura}"
 # NOTE: LIVEKIT_URL used to live here, for a reachability probe that moved to
 # HetrixTools on 2026-08-29 (see the MOVED block below). The lockstep rule it
 # carried now belongs to that monitor: it must target the host

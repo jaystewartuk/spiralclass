@@ -102,15 +102,30 @@ restore procedure and the fastest safe recovery path for a failed migration.
 
 **Production serves from Fly. This does not change that**, and nothing in CI can.
 
-Every production release also deploys the same commit to Vercel, as a second job
-in `deploy-production.yml` that runs **after** the Fly deploy and its probes. That
-deployment is built, live, and **holds no domain** — `vercel deploy --prebuilt
---prod --skip-domain`. It exists so the failover is proven on every release
-rather than being a project nobody has deployed since they set it up ([D-164](../decisions/D-164.md)
-is the lesson).
+Every production release also deploys the same commit to Vercel, as the `vercel`
+job in `deploy-production.yml`. That deployment is built, live, and **holds no
+domain** — `vercel deploy --prebuilt --prod --skip-domain`. It exists so the
+failover is proven on every release rather than being a project nobody has
+deployed since they set it up ([D-164](../decisions/D-164.md) is the lesson).
+
+**The two targets deploy independently** (D-177's addendum). The `database` job
+checkpoints Neon and migrates, once; the `fly` and `vercel` jobs both need it,
+and neither waits on the other. Each holds only its own credentials, so a
+missing or revoked Vercel value cannot stop a Fly release, and a Fly outage
+cannot stop the failover from deploying. To deploy one target alone, dispatch
+the workflow on `production` with `target: fly` or `target: vercel` — the
+database job still runs first.
 
 A red `vercel` job means **the failover did not refresh**. Production is
-unaffected; read the job above it, which is the one that shipped.
+unaffected; read the `fly` job, which is the one that shipped. `pnpm promote`
+judges the release by the `database` and `fly` jobs and prints the failover's
+outcome on its own line.
+
+⚠️ **Before you hand it the domain, confirm the database job for that commit is
+green.** The failover deploys against whatever schema the database job left. A
+Vercel deployment refreshed by hand (`pnpm deploy:vercel`) runs no migrations at
+all, so if the commit carries one, `scripts/database-deploy.sh` must have run
+for it first.
 
 **To hand it the domain.** This is the one command that makes Vercel serve
 traffic, and it is an operator step — a session is blocked from running it by

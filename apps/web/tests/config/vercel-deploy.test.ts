@@ -18,11 +18,12 @@ import { REPO_ROOT } from "../../../../scripts/env-config.mjs";
  * machinery that would break silently:
  *
  *   1. THE DATABASE WORK HAPPENS ONCE. scripts/vercel-deploy.sh deliberately
- *      runs no Neon checkpoint and no migrations, because the Fly job it
- *      `needs:` already did both for this commit. That is only safe while the
- *      ordering holds, and `needs:` is one word — delete it and the two targets
- *      race, with the failover free to serve code against a schema that has not
- *      moved yet.
+ *      runs no Neon checkpoint and no migrations, because the `database` job it
+ *      `needs:` already ran scripts/database-deploy.sh for this commit. That job
+ *      was the Fly job until [D-177]'s addendum split them, so the failover no
+ *      longer waits on Fly. It is only safe while the ordering holds, and
+ *      `needs:` is one word — delete it and the failover races the migrations,
+ *      free to serve code against a schema that has not moved yet.
  *   2. IT NEVER TAKES THE DOMAIN. `--skip-domain` is the whole difference
  *      between "the failover is warm" and "a CI job performed a DNS cutover".
  *      Drop the flag and `vercel deploy --prod` assigns spiralclass.com on the
@@ -90,10 +91,13 @@ describe("the Vercel target is a second target, not a second opinion", () => {
     }
   });
 
-  it("the Vercel job runs only after the Fly job that owns the database", () => {
+  it("the Vercel job runs only after the database job, and never waits for Fly", () => {
     // ⚠️ THE ORDERING IS THE SAFETY PROPERTY. See this file's header, point 1.
-    expect(vercelJob(), "the vercel job does not depend on the Fly deploy").toMatch(
-      /needs:\s*\[deploy\]/,
+    // Exactly `[database]`: a `needs:` that also named the Fly job would put
+    // back the coupling [D-177]'s addendum removed — no failover while Fly is
+    // down — and one that named neither would race the migrations.
+    expect(vercelJob(), "the vercel job does not need exactly the database job").toMatch(
+      /^\s{4}needs:\s*\[database\]\s*$/m,
     );
   });
 
@@ -147,6 +151,7 @@ describe("the Vercel target is a second target, not a second opinion", () => {
       .join("\n");
 
     for (const forbidden of [
+      "database-deploy.sh",
       "migrate-regions.ts",
       "prisma migrate",
       "neon-checkpoint.sh",
@@ -155,7 +160,7 @@ describe("the Vercel target is a second target, not a second opinion", () => {
     ]) {
       expect(
         executable,
-        `scripts/vercel-deploy.sh runs ${forbidden} — the Fly deploy owns it for this commit (D-177)`,
+        `scripts/vercel-deploy.sh runs ${forbidden} — the database job or the Fly deploy owns it for this commit (D-177)`,
       ).not.toContain(forbidden);
     }
   });

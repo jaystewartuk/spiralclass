@@ -130,6 +130,16 @@ if [[ "$command_line" == *vercel-deploy.sh* ]] ||
 Production only ever ships through 'pnpm promote', run by the operator."
 fi
 
+# The database half of every deploy, on its own since the production targets
+# were split ([D-177]'s addendum). Matched on the name anywhere, like the Fly
+# script: nothing ordinary spells it, and `bash -c` or a path prefix is the
+# likelier way a session would reach it than a bare invocation.
+if [[ "$command_line" == *database-deploy.sh* ]]; then
+  block "This checkpoints and migrates a live, shared database." \
+    "It is the first job of every production deploy, and run by hand it skips the promote gate.
+Production only ever migrates through 'pnpm promote', run by the operator."
+fi
+
 if [[ "$command_line" == *migrate:prod* ]] || [[ "$command_line" == *migrate:preview* ]]; then
   block "This runs migrations against a shared database." \
     "Production migrations run inside the deploy, behind a Neon checkpoint (D-95).

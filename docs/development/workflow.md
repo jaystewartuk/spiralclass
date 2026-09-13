@@ -248,19 +248,27 @@ workflows' push runs, both green ([D-162](../decisions/D-162.md)) — rather tha
 re-running the suites. Then it confirms, fast-forwards `production`, and stamps a
 `vYYYY.MM.DD.N` tag and a GitHub Release.
 
-**That push is the trigger.** `deploy-production.yml` runs
-`scripts/fly-deploy.sh` after a required reviewer approves: Neon checkpoint,
-migrations, a **native amd64** image, the Fly deploy, the Inngest sync, then the
-production probes. `pnpm promote` watches that run and exits non-zero if it goes
-red, so a green promote means production is serving.
+**That push is the trigger.** `deploy-production.yml` runs three jobs, each
+behind the `production` environment's required reviewer. First, `database`
+(`scripts/database-deploy.sh`: Neon checkpoint, then migrations). Then two jobs
+side by side that do not wait on each other: `fly` (`scripts/fly-deploy.sh`: a
+**native amd64** image, the Fly deploy, the Inngest sync, the production probes)
+and `vercel` (the failover, holding no domain). Each job holds only its own
+credentials. GitHub asks for approval per job, so a promote asks twice.
+`pnpm promote` watches the run and exits non-zero unless the database and Fly
+jobs are green, so a green promote means production is serving. A red failover
+is reported on its own line and does not change that.
+([D-177](../decisions/D-177.md)'s addendum.)
 
 - `--force-gate` runs the full tier here instead of reading the verdict — the
   offline and recovery path, and still the QEMU cross-build.
 - **`gh` unavailable means the verdict cannot be read**, and that is a refusal
   rather than a pass.
 - If the deploy fails _after_ the fast-forward, the branch moved and the app did
-  not: re-run the workflow, or run `./scripts/fly-deploy.sh production
---gate-already-passed` from the laptop. Same script either way.
+  not: re-run the workflow, dispatch it for one target (`target: fly` or
+  `target: vercel` — the database job runs first either way), or run
+  `./scripts/fly-deploy.sh production --gate-already-passed` from the laptop,
+  which checkpoints and migrates before it deploys. Same scripts every way.
 
 Then watch the probes, Sentry and PostHog for about fifteen minutes.
 

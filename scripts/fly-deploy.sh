@@ -17,6 +17,11 @@
 #   1. (production only) checkpoint the Neon `production` branch, so a bad
 #      migration has a named restore point (D-95)
 #   2. apply pending Prisma migrations to the target Neon branch
+#      — steps 1 and 2 are scripts/database-deploy.sh, which this runs first
+#        UNLESS passed --database-already-deployed. deploy-production.yml passes
+#        it, because its `database` job already ran that script for this commit
+#        and this job `needs:` that one ([D-177]'s addendum). A hand run passes
+#        nothing, and checkpoints and migrates exactly as it always has.
 #   3. build apps/web's amd64 image via docker buildx
 #      (Fly's bundled Depot builder is unreliable — see the build section below)
 #   4. push it to registry.fly.io
@@ -57,9 +62,8 @@
 #
 #   * Fly. `flyctl` reads FLY_API_TOKEN natively, so an exported token wins
 #     over any `flyctl auth login` session without this script branching.
-#   * DATABASE_URL / DIRECT_URL. If BOTH are already in the environment they
-#     are used as-is. Otherwise this script shells out to the Infisical CLI
-#     itself — the path a bare laptop run still takes.
+#   * DATABASE_URL / DIRECT_URL. Read only by scripts/database-deploy.sh,
+#     which requires both in the environment and refuses otherwise.
 #   * The __LOCAL__ BUILD args. scripts/env-config.mjs resolves those from the
 #     process environment, throwing and naming every key it cannot satisfy —
 #     so a misconfigured caller fails loudly instead of baking a broken client
@@ -71,43 +75,62 @@
 # skips that gate entirely, so it refuses to run against production unless
 # you pass --yes-i-understand-this-skips-the-promote-gate too.
 #
-# Requires: flyctl, docker (with buildx), python3, pnpm — plus infisical
-# (logged in, linked via infra/infisical/.infisical.json) ONLY when the
-# database URLs are not already in the environment. Production additionally
-# needs npx and a neonctl that can authenticate for the pre-migration
-# checkpoint — `neonctl auth` once per machine, or NEON_API_KEY — and
-# NEON_PROJECT_ID, which has no default and must be supplied (see below).
+# Requires: flyctl, docker (with buildx), python3 and FLY_API_TOKEN (or a
+# `flyctl auth login` session). Unless --database-already-deployed is passed,
+# also everything scripts/database-deploy.sh requires: pnpm, DATABASE_URL and
+# DIRECT_URL, and for production npx, a neonctl that can authenticate and
+# NEON_PROJECT_ID. With the flag, this script holds no database credential at
+# all — which is what lets the workflow's Fly job hold none.
 #
 # Usage:
 #   ./scripts/fly-deploy.sh                # preview (default)
 #   ./scripts/fly-deploy.sh preview
-#   ./scripts/fly-deploy.sh production --gate-already-passed   # what `pnpm promote` and deploy-production.yml call
+#   ./scripts/fly-deploy.sh production --gate-already-passed   # a recovery deploy: checkpoints and migrates first
+#   ./scripts/fly-deploy.sh production --gate-already-passed --database-already-deployed   # what deploy-production.yml calls
 #   ./scripts/fly-deploy.sh production --yes-i-understand-this-skips-the-promote-gate
 
 set -euo pipefail
 cd "$(dirname "${BASH_SOURCE[0]}")/.."
 
+USAGE="usage: $0 [preview|production] [--gate-already-passed|--yes-i-understand-this-skips-the-promote-gate] [--database-already-deployed]"
+
 ENVIRONMENT="${1:-preview}"
+[ "$#" -eq 0 ] || shift
+
+# Flags in any order, and anything unrecognised is refused rather than ignored:
+# a misspelt --database-already-deployed must not quietly mean "run the
+# migrations after all" on the one job that holds no database credential.
+GATE_FLAG=""
+DATABASE_ALREADY_DEPLOYED=0
+for arg in "$@"; do
+  case "$arg" in
+  --gate-already-passed | --yes-i-understand-this-skips-the-promote-gate) GATE_FLAG="$arg" ;;
+  --database-already-deployed) DATABASE_ALREADY_DEPLOYED=1 ;;
+  *)
+    echo "$USAGE" >&2
+    exit 1
+    ;;
+  esac
+done
+
 case "$ENVIRONMENT" in
 preview) CONFIG=fly.preview.toml ;;
 production)
   CONFIG=fly.production.toml
   # Two ways to reach production. `--gate-already-passed` is what
-  # scripts/ci/promote.mjs passes after it has just run the full tier and
-  # fast-forwarded the branch — that is the NORMAL path as of D-120, since the
-  # deploy is chained into promote rather than triggered by the push. The
-  # louder flag is for a human deploying production outside that flow, where
-  # the gate genuinely has not run and saying so out loud is the point.
-  if [ "${2:-}" != "--gate-already-passed" ] &&
-    [ "${2:-}" != "--yes-i-understand-this-skips-the-promote-gate" ]; then
+  # deploy-production.yml passes, after `pnpm promote` ran the full tier and
+  # fast-forwarded the branch. The louder flag is for a human deploying
+  # production outside that flow, where the gate genuinely has not run and
+  # saying so out loud is the point.
+  if [ -z "$GATE_FLAG" ]; then
     echo "Refusing to deploy production from a local script without the full promote gate (checks + integration + E2E)." >&2
-    echo "Normal path: pnpm promote — it runs the gate, fast-forwards production, and calls this script for you." >&2
+    echo "Normal path: pnpm promote — it runs the gate, fast-forwards production, and deploy-production.yml calls this for you." >&2
     echo "If you really mean to bypass that here, re-run with: production --yes-i-understand-this-skips-the-promote-gate" >&2
     exit 1
   fi
   ;;
 *)
-  echo "usage: $0 [preview|production] [--gate-already-passed|--yes-i-understand-this-skips-the-promote-gate]" >&2
+  echo "$USAGE" >&2
   exit 1
   ;;
 esac
@@ -116,27 +139,15 @@ command -v flyctl >/dev/null || { echo "install flyctl: https://fly.io/install.s
 command -v docker >/dev/null || { echo "docker is required (with buildx)" >&2; exit 1; }
 command -v python3 >/dev/null || { echo "python3 is required" >&2; exit 1; }
 
-# Infisical is only a dependency of the path that actually reads from it. A
-# runner supplies DATABASE_URL/DIRECT_URL as environment secrets and has no
-# Infisical login; demanding the CLI there would be demanding a tool for a
-# branch that is never taken. Both must be present — one alone is a
-# half-configured environment, and silently falling back to Infisical for the
-# other half is how you migrate one database and deploy against the other.
-# ⚠️ THIS SCRIPT NO LONGER READS INFISICAL, and [D-163] is why rather than
+# ⚠️ THIS SCRIPT DOES NOT READ INFISICAL, and [D-163] is why rather than
 # [D-169]. Its own text says the laptop reads these values "through
 # `infra/infisical/run.sh production ./scripts/fly-deploy.sh …` rather than
 # from a file that is the copy nobody rotates" — the composition is the
-# supported path, and the branch that used to be here was a second one nobody
-# removed. CI already invokes this with both values in the environment.
+# supported path. The DATABASE_URL/DIRECT_URL check that used to sit here moved
+# with the steps that need them, into scripts/database-deploy.sh, and runs
+# before that script touches anything.
 #
 #   from a laptop:  infra/infisical/run.sh preview scripts/fly-deploy.sh preview
-#
-[ -n "${DATABASE_URL:-}" ] && [ -n "${DIRECT_URL:-}" ] || {
-  echo "DATABASE_URL and DIRECT_URL must both be in the environment." >&2
-  echo "From a laptop, compose with the wrapper rather than reaching for the CLI here:" >&2
-  echo "  infra/infisical/run.sh ${ENVIRONMENT:-preview} scripts/fly-deploy.sh ${ENVIRONMENT:-preview}" >&2
-  exit 1
-}
 
 # `app` lives in the fly config itself — reading it here means this script
 # never needs its own preview/production app-name table to keep in sync with
@@ -154,94 +165,29 @@ esac
 SHA="$(git rev-parse HEAD)"
 IMAGE="registry.fly.io/${APP}:${SHA}"
 
-# ── 1. Neon checkpoint (production only) ─────────────────────────────────
-# The pre-migration restore point D-95 made production's primary safety net,
-# and the one step that did NOT come along when D-120 moved the production
-# deploy off `fly-deploy.yml` — it lived in a composite action the deploy left
-# behind, so deploying from here skipped it silently while promote.mjs's
-# summary went on claiming a checkpoint had been taken.
+# ── 1/2. Checkpoint and migrate — scripts/database-deploy.sh ─────────────
+# Fail-closed, and before anything is built: code must never reach a schema it
+# may not match (D-72 — a deploy shipped code reading a new column, the branch
+# never got it, and every teacher read 500ed behind a green deploy).
 #
-# ⚠️ THIS is why [D-157] routes the workflow through this script rather than
-# re-typing the seven steps: the last time these steps existed in two places,
-# the copy that got re-typed was the one missing the checkpoint. Fail-closed
-# and it must stay that way — no credential, no checkpoint, no deploy. A
-# migration is exactly the thing you cannot undo by redeploying the previous
-# image.
+# The steps live in their own script because the database is not Fly's. Both
+# production targets serve the same Neon branch, so the checkpoint and the
+# migrations belong to the commit, not to whichever platform deploys it — and
+# while they sat inside this file, the Vercel failover could only deploy after
+# a Fly deploy had succeeded ([D-177]'s addendum).
 #
-# Preview is deliberately NOT checkpointed: that branch is disposable and
-# re-seedable.
-if [ "$ENVIRONMENT" = "production" ]; then
-  # No NEON_API_KEY is fetched here any more. neon-checkpoint.sh authenticates
-  # neonctl itself — its own stored credential from `neonctl auth`, or an
-  # explicit NEON_API_KEY if one happens to be exported (ensure_neon_auth in
-  # infra/database/scripts/_common.sh).
-  #
-  # This used to read the key from Infisical's `infra` environment on every
-  # production deploy. That coupling broke a deploy for real on 2026-08-31: the
-  # Neon API keys were deleted, the checkpoint fail-closed as designed, and
-  # `production` was left fast-forwarded with the app still on the previous
-  # release. Since this laptop is the only thing that deploys (D-129), a
-  # machine-local credential loses nothing that was in use, and removes a secret
-  # that has to exist, be valid and be rotated for a deploy to work at all.
-  #
-  # The fail-closed shape is UNCHANGED and must stay: no checkpoint, no deploy.
-  # A migration is the one thing redeploying the previous image cannot undo.
-  # Only the credential moved; the refusal did not.
-  #
-  # Belt and braces: the checkpoint runs in a child process, so a NEON_API_KEY
-  # set in this shell but never exported would not reach it.
-  [ -z "${NEON_API_KEY:-}" ] || export NEON_API_KEY
-
-  # Supplied as the `NEON_PROJECT_ID` environment SECRET, which
-  # deploy-production.yml passes through ([D-157]), or exported by hand for a
-  # laptop deploy: `NEON_PROJECT_ID=$(neonctl projects list) …`. It was a
-  # repository variable until 2026-09-10; the reasoning below is what moved it,
-  # and it applies to a plaintext run log as much as to this file ([D-163]'s
-  # second addendum).
-  #
-  # ⚠️ NO DEFAULT, and this is deliberate. It used to fall back to the
-  # production project id written out in full right here — not a credential, so
-  # it read as free zero-config. It is not free in a PUBLIC repository: a Neon
-  # project id names the exact project holding real student data, which is the
-  # reconnaissance surface [D-158] exists to remove, and the file it was
-  # "already in" published it too. Same posture as `LIVEKIT_ORIGIN_IP` in
-  # scripts/local/synthetic.sh: refuse rather than guess.
-  #
-  # Failing here is safe — this is BEFORE the checkpoint and before migrations,
-  # so a missing value costs a re-run, not a half-deployed production.
-  if [ -z "${NEON_PROJECT_ID:-}" ]; then
-    echo "fly-deploy: NEON_PROJECT_ID is unset — the pre-migration Neon checkpoint cannot run." >&2
-    echo "  Set the NEON_PROJECT_ID environment secret, or export it for this run." >&2
-    echo "  Find it with: neonctl projects list" >&2
-    exit 2
-  fi
-  export NEON_PROJECT_ID
-
-  echo "› Checkpointing the Neon production branch before migrations…"
-  # No --keep: the retention number lives once, in neon-checkpoint.sh's own
-  # KEEP (pinned against the action's default by
-  # apps/web/tests/config/neon-checkpoint-retention.test.ts) — passing it here
-  # would be a third copy to keep in lockstep. --yes because pruning is routine
-  # and this runs unattended inside `pnpm promote`.
-  bash infra/database/scripts/neon-checkpoint.sh --parent production --label "$SHA" --yes
+# ⚠️ --database-already-deployed is a claim, not a check: this script cannot
+# verify it, and with it this job holds no database credential to verify with.
+# It is honest in exactly one place — deploy-production.yml's Fly job, which
+# `needs:` the `database` job that ran the script for this commit, and
+# apps/web/tests/config/production-targets.test.ts asserts that is the only
+# caller. Passed by hand against a commit whose migrations have not run, it
+# deploys code ahead of its schema.
+if [ "$DATABASE_ALREADY_DEPLOYED" = 1 ]; then
+  echo "› Skipping the checkpoint and migrations: --database-already-deployed (the workflow's database job ran them)."
+else
+  bash scripts/database-deploy.sh "$ENVIRONMENT" ${GATE_FLAG:+"$GATE_FLAG"}
 fi
-
-# ── 2. Migrations ────────────────────────────────────────────────────────
-# Fail-closed: refuse to deploy code against a schema it may not match rather
-# than silently skip. D-72 is the reason — preview had no migrate step, this
-# shipped the code that read a new column, the Neon branch never got it, and
-# every teacher read (sign-in included) started 500ing behind a green deploy.
-echo "› Using the ${ENVIRONMENT} DATABASE_URL/DIRECT_URL from the environment…"
-
-if [ -z "$DATABASE_URL" ] || [ -z "$DIRECT_URL" ]; then
-  echo "No DATABASE_URL/DIRECT_URL for env=${ENVIRONMENT} — aborting rather than deploy against an unmigrated schema." >&2
-  exit 1
-fi
-
-echo "› Applying pending Prisma migrations to ${ENVIRONMENT}…"
-pnpm install --frozen-lockfile --filter spiralclass-web...
-DATABASE_URL="$DATABASE_URL" DIRECT_URL="$DIRECT_URL" \
-  pnpm --filter spiralclass-web exec tsx scripts/migrate-regions.ts
 
 # ── 3/4. Build (amd64) and push ─────────────────────────────────────────
 echo "› Collecting NEXT_PUBLIC_* build args from config/env/${ENVIRONMENT}.build.env…"

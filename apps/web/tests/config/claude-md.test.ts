@@ -218,6 +218,11 @@ describe("the operator-only rule is enforced, not merely stated", () => {
     // Fly script does — and it joined the list in the commit that created it,
     // rather than after a session ran it once.
     "scripts/vercel-deploy.sh",
+    // The database half of every production deploy, split out of the Fly
+    // script when the two targets became independently deployable ([D-177]'s
+    // addendum). It checkpoints and migrates the live database, so a session
+    // running it by hand is `migrate:prod` under another name.
+    "scripts/database-deploy.sh",
     "migrate:prod",
     "infisical",
   ];

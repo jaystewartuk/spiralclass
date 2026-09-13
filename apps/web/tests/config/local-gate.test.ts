@@ -388,17 +388,28 @@ describe("the workflows call the registry, and never restate it (D-157)", () => 
     // started failing for the wrong reason the moment a second target's
     // workflow existed — so the assertion is now "at least one of the known
     // deploy scripts", and the forbidden list covers both targets' verbs.
-    const DEPLOY_SCRIPTS = ["scripts/fly-deploy.sh", "scripts/vercel-deploy.sh"];
+    // scripts/database-deploy.sh joined when the checkpoint and migrations moved
+    // out of the Fly script into a job of their own ([D-177]'s addendum). Same
+    // rule, a third script.
+    const DEPLOY_SCRIPTS = [
+      "scripts/fly-deploy.sh",
+      "scripts/vercel-deploy.sh",
+      "scripts/database-deploy.sh",
+    ];
 
-    // Every step either target's script owns. `vercel pull`, `vercel build` and
+    // Every step a deploy script owns. `vercel pull`, `vercel build` and
     // `vercel deploy` are here for the same reason `docker buildx build` is:
     // the ONE place the Vercel build's env overlay happens is that script, and
     // a workflow that ran `vercel build` itself would skip it and ship the
-    // dashboard's values to real browsers.
+    // dashboard's values to real browsers. The checkpoint and the migration
+    // runner are here because a database job that re-typed them is the
+    // 2026-07 failure exactly: the copy that got re-typed lost the checkpoint.
     const FORBIDDEN = [
       "flyctl deploy",
       "docker buildx build",
       "prisma migrate deploy",
+      "neon-checkpoint.sh",
+      "migrate-regions.ts",
       "vercel pull",
       "vercel build",
       "vercel deploy",
@@ -1007,12 +1018,17 @@ describe("the deploy is triggered, never dispatched by hand", () => {
     // promote.mjs printed "Neon checkpoint" in its success summary either way.
     // A code rollback never undoes a migration, so this is the step whose
     // absence only shows up on the day it is needed.
-    const deploy = withoutComments(read("scripts", "fly-deploy.sh"));
+    //
+    // Both steps moved into scripts/database-deploy.sh when the production
+    // targets were split ([D-177]'s addendum); a hand-run fly-deploy.sh still
+    // runs that script before it builds anything, which
+    // neon-checkpoint-retention.test.ts pins.
+    const deploy = withoutComments(read("scripts", "database-deploy.sh"));
     const checkpoint = deploy.indexOf("neon-checkpoint.sh");
     const migrate = deploy.indexOf("migrate-regions.ts");
 
-    expect(checkpoint, "fly-deploy.sh no longer runs neon-checkpoint.sh").toBeGreaterThan(-1);
-    expect(migrate, "fly-deploy.sh no longer applies migrations").toBeGreaterThan(-1);
+    expect(checkpoint, "database-deploy.sh no longer runs neon-checkpoint.sh").toBeGreaterThan(-1);
+    expect(migrate, "database-deploy.sh no longer applies migrations").toBeGreaterThan(-1);
     // Order is the whole point: a checkpoint taken after the migration is not a
     // restore point for that migration.
     expect(checkpoint, "the checkpoint must run BEFORE migrations").toBeLessThan(migrate);

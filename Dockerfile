@@ -20,7 +20,17 @@
 # disconnects mid-SSR-stream (e.g. a mobile browser navigating away while
 # `/dashboard/materials` is still streaming). Never backported to the 22.x
 # LTS line — see Sentry SPIRALCLASS-2W. Don't downgrade this back to 22.
-FROM node:26-slim@sha256:14bf3eac4bf209d906d3c41256597d3ab1f926b2e93a79e9bdfe1efd32454239 AS base
+#
+# ⚠️ AND NOT ABOVE 24 YET, for two reasons found on the first production deploy
+# from this repository (2026-09-13, when this line read `node:26-slim`):
+#   * Node 25+ ships no Corepack (checked: `node:25-slim` and `node:26-slim` have
+#     no `corepack` binary), so `RUN corepack enable` below dies with exit 127
+#     and the image never builds (#100).
+#   * Prisma 7.10's preinstall supports exactly the 20, 22 and 24 lines, and
+#     warns on anything else (#102).
+# apps/web/tests/config/node-version.test.ts holds both, so moving past 24 fails
+# there, naming the reason, rather than at a production deploy.
+FROM node:24-slim@sha256:2fe369e969550cde8e867afc3fe370b260140cab4a23d467074295b42163d553 AS base
 # Prisma's engine postinstall probes libssl to pick the right query-engine
 # binary; node:24-slim doesn't ship it, so without this it silently guesses
 # openssl-1.1.x, which can mismatch the engine actually bundled and fail at
