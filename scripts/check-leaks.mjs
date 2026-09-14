@@ -604,7 +604,7 @@ const NON_PERSONAL_EMAIL = [
 const PERSONAL_EMAIL =
   /\b[a-zA-Z0-9._%+-]+@(?:gmail|googlemail|hotmail|outlook|yahoo|protonmail|proton|icloud|live|aol|yandex|gmx)\.[a-z.]{2,}\b/gi;
 
-function findPersonalData(source) {
+export function findPersonalData(source) {
   const hits = [];
 
   for (const match of source.matchAll(PERSONAL_EMAIL)) {

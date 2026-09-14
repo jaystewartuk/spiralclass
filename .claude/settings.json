@@ -71,6 +71,10 @@
       "Bash(gh pr checks:*)",
       "Bash(gh run list:*)",
       "Bash(gh run view:*)",
+      "Bash(gh issue list:*)",
+      "Bash(gh issue view:*)",
+      "Bash(pnpm issue:check:*)",
+      "Bash(gh label list:*)",
       "Bash(fly status:*)"
     ],
     "deny": [

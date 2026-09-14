@@ -102,11 +102,13 @@ one subagent, and what was deliberately **not** built — is described in
 
 ## Issues, backlog and documentation
 
-- **This repository holds no backlog** ([D-110](./docs/decisions/D-110.md)).
-  Open work lives on the maintainer's private board. Do not add `TODO.md`-style
-  files, and do not open GitHub issues for your own work — Issues are for
-  machine-filed reports, anything a PR closes with `Closes #N`, and reports and
-  questions from outside.
+- **Open work lives in this repository's Issues**
+  ([D-172](./docs/decisions/D-172.md)), and **there is no backlog in the tree**
+  ([D-110](./docs/decisions/D-110.md)) — no `TODO.md`-style files. An issue is a
+  closable statement of work: a sentence naming the problem from the user's
+  side, the evidence, and a **Done when** line a PR can meet with `Closes #N`.
+  A session files one with `/issue`. From outside, use the bug report or docs
+  templates.
 - New documentation goes where
   [`docs/development/documentation.md`](./docs/development/documentation.md)
   says; [`docs/README.md`](./docs/README.md) is the map. Superseded documents are

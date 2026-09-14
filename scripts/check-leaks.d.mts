@@ -67,6 +67,13 @@ export function findPeople(relPath: string, source: string): PersonFinding[];
  */
 export function reflow(source: string): string;
 
+/**
+ * Real-looking email addresses (free-mail domains, fixture domains excluded) in
+ * one text. Exported for `scripts/issue-check.mjs`, which runs the same
+ * detectors over an issue draft before it is published.
+ */
+export function findPersonalData(source: string): string[];
+
 /** Every name declared in fixture-personas.json — personas and not-people. */
 export function declaredPeople(): Set<string>;
 

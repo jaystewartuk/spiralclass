@@ -33,6 +33,10 @@ const REPO_LABELS = new Set([
   "accessibility",
   "ci",
   "dependencies",
+  // The triage priorities D-172 describes, named by the /issue skill.
+  "p1",
+  "p2",
+  "p3",
   // Created by Dependabot itself, unasked, the first time a security advisory
   // opened a pip PR. It creates its own ecosystem labels; it will not create
   // the ones dependabot.yml asks for, which is the whole point of this file.
@@ -94,6 +98,27 @@ describe("labels named in .github/", () => {
         REPO_LABELS.has(label),
         `dependabot.yml names a label that does not exist: ${label}`,
       ).toBe(true);
+    }
+  });
+
+  it("only tells /issue to file with labels the repository has", () => {
+    // `gh issue create --label` fails outright on a label that does not exist,
+    // so a stale name here is a session whose issue never gets filed. The skill
+    // names labels two ways: as `--label "x"` in its command, and as backticked
+    // names in the section on choosing them.
+    const skill = read(".claude", "skills", "issue", "SKILL.md");
+    const section = skill.split("### 5. Choose labels")[1]?.split("\n### ")[0] ?? "";
+    const named = [
+      ...[...skill.matchAll(/--label "([^"]+)"/g)].map((m) => m[1]!),
+      ...[...section.matchAll(/`([a-z0-9][a-z0-9 -]*)`/g)]
+        .map((m) => m[1]!)
+        .filter((name) => !name.startsWith("gh ")),
+    ];
+    expect(named, "the label parser found nothing to check").toContain("p2");
+    for (const label of named) {
+      expect(REPO_LABELS.has(label), `/issue names a label that does not exist: ${label}`).toBe(
+        true,
+      );
     }
   });
 

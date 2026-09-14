@@ -1,6 +1,6 @@
-# Blank issues are off on purpose. This repository holds no backlog — every open
-# action lives on a private board (D-110) — so an issue here is either a bug
-# report or a question, and anything else will be closed rather than tracked.
+# Blank issues are off on purpose. Open work does live in Issues (D-172), but it
+# is filed by the maintainer's sessions through /issue, which holds the shape a
+# template cannot. From outside, an issue here is a bug report or a docs issue.
 blank_issues_enabled: false
 contact_links:
   - name: Security vulnerability
