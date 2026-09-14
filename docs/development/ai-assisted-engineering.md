@@ -158,9 +158,12 @@ admitted nothing enforces an issue's shape; the skill is the checklist in the
 meantime — search open and closed issues for a duplicate, send anything
 exploitable to [SECURITY.md](../../SECURITY.md) instead, write a **Done when**
 line, and file only after the user approves the draft, because the repository
-is public and filing publishes. `apps/web/tests/config/agent-skills.test.ts`
-holds the parts of that which can be checked: the labels it names exist, and the
-approval, security and never-close rules are still in it.
+is public and filing publishes. The parts a machine does better run as
+`pnpm issue:check` (`scripts/issue-check.mjs`), which the skill calls on every
+draft. It lints the title and the end state, rejects labels that do not exist,
+runs the gate's own leak detectors over the text, and ranks the closest open and
+closed issues. `apps/web/tests/config/agent-skills.test.ts` fails if the skill
+stops calling the checker or loses its approval, security or never-close rules.
 
 **What was deliberately not built.** No skill for writing a decision record —
 `docs/decisions/_template.md` and its README already say how, and a skill

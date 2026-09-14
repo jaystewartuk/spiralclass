@@ -77,13 +77,24 @@ describe("/issue keeps the rules that make filing safe on a public repository", 
   });
 
   it("files only after the user approves the draft", () => {
-    expect(source).toMatch(/### \d\. Show the draft, then file/);
+    const step = source.search(/### \d\. Check the draft, show it, then file/);
+    expect(step, "the approval step is gone").toBeGreaterThan(-1);
     expect(source).toMatch(/only on a yes/);
     // The create command appears after the approval step, not before it. Prose
     // earlier in the file names the command; the fenced one is what runs.
     const create = source.search(/```bash\ngh issue create/);
     expect(create, "no fenced gh issue create command").toBeGreaterThan(-1);
-    expect(create).toBeGreaterThan(source.indexOf("Show the draft, then file"));
+    expect(create).toBeGreaterThan(step);
+  });
+
+  it("runs the executable checker on the draft before filing it", () => {
+    // scripts/issue-check.mjs is where the shape, the labels and the leak scan
+    // are actually enforced; a skill that stopped calling it would be back to
+    // a checklist nothing checks.
+    const check = source.search(/```bash\npnpm issue:check --title/);
+    expect(check, "no fenced pnpm issue:check command").toBeGreaterThan(-1);
+    expect(check).toBeLessThan(source.search(/```bash\ngh issue create/));
+    expect(commands).toMatch(/pnpm issue:check[^\n]*--body-file/);
   });
 
   it("sends security problems to the private channel, never a public issue", () => {

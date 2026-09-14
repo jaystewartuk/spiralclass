@@ -48,6 +48,7 @@
     "check:leaks": "node scripts/check-leaks.mjs",
     "check:links": "node apps/web/scripts/check-links.mjs",
     "check:counts": "node scripts/readme-counts.mjs",
+    "issue:check": "node scripts/issue-check.mjs",
     "prepare": "git config core.hooksPath .githooks || true",
     "reset:preview": "bash infra/infisical/reset-preview.sh",
     "gate:lock": "node scripts/ci/lock.mjs status"

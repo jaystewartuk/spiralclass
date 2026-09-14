@@ -49,6 +49,10 @@ gh issue list --state all --limit 30 --search "<terms>"
 gh issue list --state all --limit 30 --search "<file or module name> in:body"
 ```
 
+Step 7's `pnpm issue:check` also ranks the closest issues by shared words and
+shared file paths. Use it as a second opinion, not instead of searching: it
+cannot tell "the same work" from "the same file".
+
 Read the body of anything plausible (`gh issue view <n>`), not just the title.
 Then:
 
@@ -92,7 +96,8 @@ Not `ci: vercel secrets`, not `Fix tenant filter`.
 4. **`Related: #n`** lines, if any.
 5. **`**Done when**`** — one line a pull request can meet and a reader can
    check. If there is a legitimate "or we decide not to", say where that
-   decision would be recorded.
+   decision would be recorded. Work that needs more than a line gets a
+   `## What done looks like` section instead, as #90–#96 have.
 
 ### 5. Choose labels
 
@@ -120,19 +125,40 @@ Before showing the draft, remove:
 - **Production identifiers that aid an attack** — if you are removing a lot of
   these, go back to step 1.
 
-### 7. Show the draft, then file
+### 7. Check the draft, show it, then file
 
-Show the title, labels and body, the duplicate searches from step 2, and the
-priority reasoning. On a yes:
+Write the body to a file in the scratchpad and run the checker:
+
+```bash
+pnpm issue:check --title "<title>" --body-file <scratchpad>/issue-<slug>.md --label "enhancement" --label "p2"
+```
+
+It fails on a category-prefix or imperative title, a missing **Done when**, a
+label that does not exist, two priorities, and anything the gate's leak
+detectors find: a credential, an account identifier, an undeclared person's
+name, a personal email. It reports the kind of leak and never the value.
+**Fix every error before showing the draft.** Never work around one by
+rewording until the detector stops matching. If it is a false positive, say so
+to the user, with the reason.
+
+Show the title, labels and body, the duplicate searches from step 2, the
+checker's closest matches, and the priority reasoning. On a yes:
 
 ```bash
 gh issue create --title "<title>" --body-file <scratchpad>/issue-<slug>.md --label "enhancement" --label "p2"
 ```
 
-Write the body to a file in the scratchpad rather than inlining it: backticks
-and `$` in a `--body` string get eaten by the shell.
+Use the same body file rather than inlining the text: backticks and `$` in a
+`--body` string get eaten by the shell. If the draft changed after approval,
+run the checker again.
 
 Report the issue number and URL.
+
+## Auditing what is already open
+
+`pnpm issue:check --audit` lints every open issue for shape and leaks, which is
+useful before the weekly triage. It only reports. It never edits or labels
+anything: fixing an issue is a user's decision, and so is closing one.
 
 ## Several findings at once
 
@@ -141,7 +167,7 @@ An investigation that turns up several things files them in one pass:
 1. Draft them all.
 2. Deduplicate them **against each other** before searching the tracker — two
    drafts with the same **Done when** are one issue.
-3. Run step 2 for each.
+3. Run steps 2 and 7's checker for each.
 4. Show every draft together and take one approval for the batch.
 5. File in dependency order, so a later issue can say `Related: #n` about an
    earlier one with a real number.
