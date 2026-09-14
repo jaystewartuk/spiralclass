@@ -26,7 +26,7 @@ pnpm --filter @spiralclass/shared test -- src/money.test.ts
 
 ## The layers
 
-There are 803 test files. They are not all the same kind of thing.
+There are more than 800 test files. They are not all the same kind of thing.
 
 | Layer                 | Runs                                           | Needs                         | Where                                     |
 | --------------------- | ---------------------------------------------- | ----------------------------- | ----------------------------------------- |
