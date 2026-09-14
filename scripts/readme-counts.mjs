@@ -26,6 +26,18 @@
 // cost, and it is the point: a count nobody was willing to make checkable does
 // not belong in a document whose whole claim is that nothing was staged for
 // presentation.
+//
+// ⚠️ Two claims are FLOORS, not exact counts (D-180): test files and decision
+// records. Nearly every pull request adds a test file, so an exact count put the
+// same line of README.md and docs/development/testing.md in every open branch,
+// and any two of them conflicted — 19 of the commits that touched those files
+// in the ten days before this changed the test-file number. A floor is stated
+// as "more than N", where N is the largest multiple of the claim's `floor` step
+// strictly below the real count. It is still recomputed, still exact in what it
+// asserts, and still rewritten by --fix; it just moves once per step instead of
+// once per file. Two branches that both cross a step write the identical line,
+// which git merges cleanly. Keep every other claim exact: none of them moved
+// more than three times in the same window.
 
 import { execFileSync } from "node:child_process";
 import { readFileSync, writeFileSync, readdirSync } from "node:fs";
@@ -74,6 +86,9 @@ const CHECKED = [
   // says "40 files ... of tests" rather than "40 test files" for exactly that
   // reason — the latter would be rewritten to the whole tree's count.
   "docs/decisions/READ-THIS-FIRST.md",
+  // The decision scout's own prompt states the record count to the agent. It
+  // said 125 against a tree of 127 with nothing checking it.
+  ".claude/agents/decision-scout.md",
 ];
 
 const git = (...args) =>
@@ -96,6 +111,7 @@ const envVars = () =>
  * @property {string}   id
  * @property {() => number} actual
  * @property {RegExp}   pattern   global, group 1 is the number
+ * @property {number}   [floor]   state "more than N" for N a multiple of this
  */
 
 /** @type {Claim[]} */
@@ -112,7 +128,8 @@ const CLAIMS = [
   {
     id: "decision records",
     actual: () => tracked("docs/decisions/D-*.md"),
-    pattern: /(\d[\d,]*) decision records/g,
+    pattern: /[Mm]ore than (\d[\d,]*) decision records/g,
+    floor: 25,
   },
   {
     id: "server-action modules",
@@ -150,7 +167,8 @@ const CLAIMS = [
   {
     id: "test files",
     actual: () => git("ls-files").filter((f) => /\.(test|spec)\.[tj]sx?$/.test(f)).length,
-    pattern: /(\d[\d,]*) test files/g,
+    pattern: /[Mm]ore than (\d[\d,]*) test files/g,
+    floor: 100,
   },
   {
     // Stated in the setup guide as "all N variables are documented there".
@@ -192,65 +210,118 @@ const CLAIMS = [
   },
 ];
 
-const fix = process.argv.includes("--fix");
-/** @type {Map<string, string>} relative path -> current contents */
-const docs = new Map(CHECKED.map((rel) => [rel, readFileSync(resolve(ROOT, rel), "utf8")]));
-const dirty = new Set();
-const drift = [];
-const unstated = [];
+/** The number a claim should state for `actual`: itself, or for a floor claim
+ * the largest multiple of the step strictly below it, so "more than N" is true. */
+export function expectedFor(claim, actual) {
+  if (!claim.floor) return actual;
+  return Math.max(0, Math.ceil(actual / claim.floor) - 1) * claim.floor;
+}
 
-for (const claim of CLAIMS) {
-  const actual = claim.actual();
-  let stated = 0;
+/** A floor claim's pattern without its "more than", matching only where the
+ * phrase is missing — an exact count of a floored thing, which nothing checks. */
+function exactFormOf(claim) {
+  const bare = claim.pattern.source.replace(/^\[Mm\]ore than /, "");
+  return new RegExp(`(?<![Mm]ore than )\\b${bare}`, "g");
+}
 
-  for (const [rel, text] of docs) {
-    const matches = [...text.matchAll(claim.pattern)];
-    if (matches.length === 0) continue;
-    stated += matches.length;
+/**
+ * Check every claim against `docs` (relative path -> contents). Pure: returns
+ * the rewritten contents rather than writing them.
+ *
+ * @param {Map<string, string>} docs
+ * @param {Array<Claim & { value: number }>} claims  each with its counted value
+ */
+export function reconcile(docs, claims) {
+  const next = new Map(docs);
+  const drift = [];
+  const unstated = [];
+  const unfloored = [];
 
-    let next = text;
-    for (const m of matches) {
-      if (Number(m[1].replace(/,/g, "")) === actual) continue;
-      drift.push(`${claim.id}: ${rel} says ${m[1]}, the tree says ${actual}`);
-      if (fix) next = next.replace(m[0], m[0].replace(m[1], String(actual)));
+  for (const claim of claims) {
+    const expected = expectedFor(claim, claim.value);
+    let stated = 0;
+
+    for (const [rel, text] of next) {
+      if (claim.floor) {
+        for (const m of text.matchAll(exactFormOf(claim))) {
+          unfloored.push(`${claim.id}: ${rel} says "${m[0]}"; state it as "more than ${expected}"`);
+        }
+      }
+      const matches = [...text.matchAll(claim.pattern)];
+      if (matches.length === 0) continue;
+      stated += matches.length;
+
+      let rewritten = text;
+      for (const m of matches) {
+        if (Number(m[1].replace(/,/g, "")) === expected) continue;
+        drift.push(
+          `${claim.id}: ${rel} says ${m[1]}, the tree says ${expected}${claim.floor ? ` (${claim.value} counted, floored to ${claim.floor})` : ""}`,
+        );
+        rewritten = rewritten.replace(m[0], m[0].replace(m[1], String(expected)));
+      }
+      next.set(rel, rewritten);
     }
-    if (next !== text) {
-      docs.set(rel, next);
-      dirty.add(rel);
+
+    if (stated === 0) {
+      unstated.push(
+        `${claim.id} (${claim.value}) — no sentence in the checked documents states it`,
+      );
     }
   }
 
-  if (stated === 0) {
-    unstated.push(`${claim.id} (${actual}) — no sentence in the checked documents states it`);
+  return { next, drift, unstated, unfloored };
+}
+
+function main() {
+  const fix = process.argv.includes("--fix");
+  /** @type {Map<string, string>} relative path -> current contents */
+  const docs = new Map(CHECKED.map((rel) => [rel, readFileSync(resolve(ROOT, rel), "utf8")]));
+  const { next, drift, unstated, unfloored } = reconcile(
+    docs,
+    CLAIMS.map((claim) => ({ ...claim, value: claim.actual() })),
+  );
+
+  if (unstated.length > 0) {
+    console.error(
+      "Counted, but claimed nowhere — remove it here, or state it in one of:\n  " +
+        CHECKED.join("\n  "),
+    );
+    for (const line of unstated) console.error(`  · ${line}`);
   }
+
+  if (unfloored.length > 0) {
+    console.error("An exact count of a floored claim — nothing checks that form (D-180):");
+    for (const line of unfloored) console.error(`  · ${line}`);
+  }
+
+  const broken = unstated.length > 0 || unfloored.length > 0;
+
+  if (drift.length === 0 && !broken) {
+    console.log(
+      `Doc counts: ${CLAIMS.length} claims across ${CHECKED.length} documents, all match the tree.`,
+    );
+    process.exit(0);
+  }
+
+  if (fix && drift.length > 0) {
+    let rewrote = 0;
+    for (const [rel, text] of next) {
+      if (text === docs.get(rel)) continue;
+      writeFileSync(resolve(ROOT, rel), text);
+      rewrote++;
+    }
+    console.log(`Rewrote ${rewrote} file(s) — ${drift.length} count(s) corrected:`);
+    for (const line of drift) console.log(`  · ${line}`);
+    process.exit(broken ? 1 : 0);
+  }
+
+  if (drift.length > 0) {
+    console.error("::error::The documentation states counts the tree does not support.");
+    for (const line of drift) console.error(`  · ${line}`);
+    console.error("\nRun `node scripts/readme-counts.mjs --fix` and commit the result.");
+  }
+
+  process.exit(1);
 }
 
-if (unstated.length > 0) {
-  console.error(
-    "Counted, but claimed nowhere — remove it here, or state it in one of:\n  " +
-      CHECKED.join("\n  "),
-  );
-  for (const line of unstated) console.error(`  · ${line}`);
-}
-
-if (drift.length === 0 && unstated.length === 0) {
-  console.log(
-    `Doc counts: ${CLAIMS.length} claims across ${CHECKED.length} documents, all match the tree.`,
-  );
-  process.exit(0);
-}
-
-if (fix && drift.length > 0) {
-  for (const rel of dirty) writeFileSync(resolve(ROOT, rel), docs.get(rel));
-  console.log(`Rewrote ${dirty.size} file(s) — ${drift.length} count(s) corrected:`);
-  for (const line of drift) console.log(`  · ${line}`);
-  process.exit(unstated.length > 0 ? 1 : 0);
-}
-
-if (drift.length > 0) {
-  console.error("::error::The documentation states counts the tree does not support.");
-  for (const line of drift) console.error(`  · ${line}`);
-  console.error("\nRun `node scripts/readme-counts.mjs --fix` and commit the result.");
-}
-
-process.exit(1);
+if (fileURLToPath(import.meta.url) === resolve(process.argv[1] ?? "")) main();

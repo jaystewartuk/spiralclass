@@ -71,7 +71,7 @@ another way" about anything that still exists.
   both reversed by [D-40](./D-40.md)).
 
 **Numbering is never reused and never renumbered**, so `D-01` is still the
-first decision and `D-179` the most recent. A gap means a record was removed,
+first decision and `D-180` the most recent. A gap means a record was removed,
 not that one is missing.
 
 **Everything kept is unedited**, except where a record named an account
@@ -370,6 +370,7 @@ a hook — is a caller.
 | [D-164](./D-164.md) | **A runbook for infrastructure that does not exist is deleted, not banner-ed**                 |
 | [D-171](./D-171.md) | One visual baseline set, owned by the machine that gates the merge — the macOS half is deleted |
 | [D-179](./D-179.md) | **CodeQL gates on new alerts through a ruleset**, not a workflow and not a required check      |
+| [D-180](./D-180.md) | The two counts every PR moves are stated as floors, so open branches stop conflicting on them  |
 
 ### Privacy, governance and publication
 
@@ -528,6 +529,7 @@ records removed before publication — see [What is not here](#what-is-not-here)
 | [D-177](./D-177.md) | Vercel is a second production target; it holds no domain              | Decided; built, never served         |
 | [D-178](./D-178.md) | Migrations expand; contracts ship a release later, marked CONTRACT    | Active                               |
 | [D-179](./D-179.md) | CodeQL scans every PR; main refuses a merge that adds an alert        | Active                               |
+| [D-180](./D-180.md) | Test-file and decision-record counts are floors, not exact            | Active                               |
 
 ---
 
