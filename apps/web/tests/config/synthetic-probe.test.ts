@@ -12,7 +12,7 @@ import { REPO_ROOT } from "./_tree";
 /**
  * `scripts/local/synthetic.sh` is the one probe that runs against the LIVE site.
  * Every other place a booking slug appears — the seed, the E2E and a11y suites,
- * Lighthouse, the unit fixtures — runs against a database the seed built.
+ * the unit fixtures — runs against a database the seed built.
  *
  * The publication sweep replaced the production teacher's slug everywhere,
  * including here, with the seed's pseudonym `alicia-moreno`. That is right for

@@ -163,13 +163,13 @@ overrides:
   # an ignoreGhsas entry, per that list's own criterion. Exact pins, not open
   # ">=" ranges, for the dedup reason the 2026-07-20 sweep documents above.
   #
-  # js-yaml's 3.x line, reached only through @lhci/cli > @lhci/utils, i.e.
-  # Lighthouse CI. The 4.x and 5.x entries above do not touch it — 3.15.0 sat
-  # below all of them. 3.15.2 covers both advisories; 3.15.1 closes only one.
-  js-yaml@>=3.0.0 <3.15.2: "3.15.2" # GHSA-2883-xcg3-v3hh, GHSA-5p4m-2wfm-xmqj
-  # qs is NOT dev-only: express reaches the production tree through inngest as
-  # well as through @lhci/cli. One range covers both findings (>=2.2.5 <6.16.0
-  # and >=6.14.2 <=6.15.3 both end at 6.16.0).
+  # qs is NOT dev-only: express reaches the production tree through inngest.
+  # One range covers both findings (>=2.2.5 <6.16.0 and >=6.14.2 <=6.15.3 both
+  # end at 6.16.0).
+  #
+  # (This sweep also pinned js-yaml's 3.x line, reached only through Lighthouse
+  # CI. Lighthouse CI was retired on 2026-09-14 and took every js-yaml 3.x with
+  # it, so that override was removed with it.)
   qs@<6.16.0: "6.16.0" # GHSA-4mjr-xmp4-gh2g, GHSA-x5fp-wj9c-mxmx
 
 # auditConfig.ignoreGhsas emptied 2026-07-20: the prior 45-entry high+
