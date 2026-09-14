@@ -175,3 +175,21 @@ export async function signOutAction() {
   revalidateAfterAction("/", "layout");
   redirect("/");
 }
+
+// Sign out, then land on /sign-in with `next` and `email` carried through. The
+// invitation landing's "use a different account" needs this rather than a plain
+// link: /sign-in sends anyone holding a valid session straight on to `next`
+// (app/(auth)/redirect-if-signed-in.ts), so a signed-in visitor following a
+// bare link would only ever bounce back to the invitation they cannot accept.
+// `next` is validated the same way every other post-auth destination is.
+export async function switchAccountAction(formData: FormData) {
+  const next = safeNextPath(formData.get("next"));
+  const email = String(formData.get("email") ?? "").trim();
+  await auth.api.signOut({ headers: await headers() });
+  revalidateAfterAction("/", "layout");
+  const params = new URLSearchParams();
+  if (next) params.set("next", next);
+  if (email) params.set("email", email);
+  const query = params.toString();
+  redirect(query ? `/sign-in?${query}` : "/sign-in");
+}

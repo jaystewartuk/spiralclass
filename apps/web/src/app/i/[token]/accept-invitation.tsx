@@ -5,11 +5,13 @@ import { useActionState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { usePostHog } from "posthog-js/react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useT } from "@/components/locale-provider";
 import { CORE_BENEFIT_KEYS, benefitCatalogKey } from "@/lib/invitations/benefits";
 import { acceptInvitationAction, type AcceptActionState } from "@/app/actions/invitations";
+import { switchAccountAction } from "@/app/actions/auth";
 import type { InvitationLandingInfo } from "@/lib/invitations/accept";
 
 type Props = {
@@ -26,6 +28,7 @@ type Props = {
 export function AcceptInvitationView(props: Props) {
   const t = useT();
   const router = useRouter();
+  const posthog = usePostHog();
   const [actionState, formAction, pending] = useActionState<AcceptActionState, FormData>(
     acceptInvitationAction,
     undefined,
@@ -142,9 +145,23 @@ export function AcceptInvitationView(props: Props) {
               <p className="text-sm text-muted-foreground">
                 {t("invitation.accept.mismatchBody", { email: props.invitedEmail })}
               </p>
-              <Button asChild variant="outline" className="w-full">
-                <Link href={signInHref}>{t("invitation.accept.switchAccount")}</Link>
-              </Button>
+              {/* Signs out first: a plain link to /sign-in would only send a
+                  signed-in visitor straight back here (see switchAccountAction).
+                  posthog.reset() drops this browser's identity the same way the
+                  sign-out button does, so the next account is not merged into
+                  the one being left. */}
+              <form action={switchAccountAction} onSubmit={() => posthog?.reset()}>
+                <input type="hidden" name="next" value={`/i/${props.token}`} />
+                <input type="hidden" name="email" value={props.invitedEmail} />
+                <Button
+                  type="submit"
+                  variant="outline"
+                  className="w-full"
+                  data-testid="invitation-switch-account"
+                >
+                  {t("invitation.accept.switchAccount")}
+                </Button>
+              </form>
             </div>
           ) : (
             <div className="space-y-2">
