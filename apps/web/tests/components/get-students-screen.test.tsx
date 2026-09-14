@@ -62,7 +62,10 @@ function render(node: React.ReactNode) {
 /** The one anchor in `html` pointing at `href`, so an assertion can be about
  * that link rather than about the order React emits attributes in. */
 function anchorFor(html: string, href: string): string {
-  const match = html.match(new RegExp(`<a [^>]*href="${href.replace(/[/?]/g, "\\$&")}"[^>]*>`));
+  // Every regex metacharacter, not just `/` and `?`: an href with a `.` or `+`
+  // would otherwise match a different link than the one the test names.
+  const escaped = href.replace(/[.*+?^${}()|[\]\\/]/g, "\\$&");
+  const match = html.match(new RegExp(`<a [^>]*href="${escaped}"[^>]*>`));
   expect(match, `no anchor for ${href}`).not.toBeNull();
   return match![0];
 }

@@ -46,6 +46,35 @@ describe("parseInline", () => {
       { type: "link", href: "https://x.test/a", children: [{ type: "text", value: "docs" }] },
     ]);
   });
+
+  // The cases below pin the alternation the scanner replaced: `**` before `*`,
+  // each span closing at its nearest delimiter, and a `[` that cannot become a
+  // link staying literal text.
+  it("prefers strong at a start and closes at the nearest delimiter", () => {
+    expect(parseInline("***a**")).toEqual([
+      { type: "strong", children: [{ type: "text", value: "*a" }] },
+    ]);
+    expect(parseInline("__a_")).toEqual([
+      { type: "em", children: [{ type: "text", value: "_a" }] },
+    ]);
+  });
+
+  it("leaves an empty code span and malformed links as text", () => {
+    expect(parseInline("`` x")).toEqual([{ type: "text", value: "`` x" }]);
+    expect(parseInline("[a] (b) [c](d e) [f](g)")).toEqual([
+      { type: "text", value: "[a] (b) [c](d e) " },
+      { type: "link", href: "g", children: [{ type: "text", value: "f" }] },
+    ]);
+  });
+
+  it("stays linear on a run of openers that never close", () => {
+    // The old single regex backtracked to the end of the text from every `[`:
+    // 20,000 of them took 356ms, and it grew with the square of the length.
+    const openers = "[".repeat(200_000) + "]";
+    const started = performance.now();
+    expect(parseInline(openers)).toEqual([{ type: "text", value: openers }]);
+    expect(performance.now() - started).toBeLessThan(1000);
+  });
 });
 
 describe("parseMaterialDoc — core blocks (backwards compatible)", () => {

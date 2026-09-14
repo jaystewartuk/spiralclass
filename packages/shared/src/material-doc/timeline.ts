@@ -70,9 +70,13 @@ export const TIMELINE_MAX_POINTS = 8;
  * runtime) draws it with everything else, and a teacher can correct it. */
 export const TIMELINE_DEFAULT_LABELS = { past: "Past", now: "Now", future: "Future" } as const;
 
-const PAST_RE = /^past(?:\s+(.*))?$/;
-const NOW_RE = /^now(?:\s+(.*))?$/;
-const FUTURE_RE = /^future(?:\s+(.*))?$/;
+// The label starts at a non-space. `\s+(.*)` let the spaces be split between
+// the two quantifiers every possible way, so a long run of them before a `\r`
+// (which `.` does not cross) took quadratic time to reject: 20,000 spaces took
+// 450ms. Lines arrive trimmed, so no label that matched before is lost.
+const PAST_RE = /^past(?:\s+(\S.*))?$/;
+const NOW_RE = /^now(?:\s+(\S.*))?$/;
+const FUTURE_RE = /^future(?:\s+(\S.*))?$/;
 const NUM = "\\d+(?:\\.\\d+)?";
 const POINT_RE = new RegExp(`^point\\s+(${NUM})\\s*(.*)$`);
 const SPAN_RE = new RegExp(`^span\\s+(${NUM})\\s+(${NUM})\\s*(.*)$`);
