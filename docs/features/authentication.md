@@ -198,6 +198,35 @@ links it to the right student record automatically.
   expires on the server or is explicitly revoked — by sign-out, an admin
   action, or account deletion.
 
+**Sign-in links in notifications**
+
+Two student notifications carry a button that signs the student in on the way
+to where she needs to go ([D-40](../decisions/D-40.md)):
+
+| Link            | Sent with                                  | Lands on                                                | Works for |
+| --------------- | ------------------------------------------ | ------------------------------------------------------- | --------- |
+| `/r/re/<token>` | a class canceled (by the teacher, or late) | the book page, with the canceled class's credits chosen | 72 hours  |
+| `/r/ml/<token>` | her first paid checkout with a teacher     | her classes                                             | 1 hour    |
+
+- The token is issued when the notification is sent, is random, and is stored
+  only as a hash. It is bound to the student row, the email that row had, and
+  the one class or notification it was sent for.
+- **Each link works once.** Opening it shows a page with a single button; only
+  pressing that button uses the link and signs her in. Email and chat link
+  scanners open every link they see, and must not be able to use one up.
+- The link stops working — showing a "this link no longer works" page — when
+  it has been used, has lapsed, was not issued for that route, or no longer
+  matches: the row's email changed, the class moved to another student, or the
+  student left that teacher's roster. The rebook version of that page links to
+  her classes through the ordinary sign-in.
+- A link never signs in a disabled student, a teacher or a staff member; they
+  are sent to the ordinary sign-in page instead.
+- The in-app notifications list shows the same notices without a sign-in link:
+  whoever is reading it is already signed in, so it links to the book page
+  directly.
+- Links sent before this rule — which named the class or notification itself
+  — no longer work, and show the same page.
+
 **Redirect safety**
 
 - Any "continue to this page after signing in" destination is validated: it

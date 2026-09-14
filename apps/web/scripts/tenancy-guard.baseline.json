@@ -32,8 +32,6 @@
   "app/admin/students/[id]/page.tsx": 2,
   "app/g/[code]/route.ts": 1,
   "app/i/[token]/page.tsx": 1,
-  "app/r/ml/[notificationId]/route.ts": 1,
-  "app/r/re/[bookingId]/route.ts": 1,
   "lib/account-deletion/anonymize.ts": 2,
   "lib/account-deletion/purge-recordings.ts": 2,
   "lib/booking/auto-book-intended.ts": 1,

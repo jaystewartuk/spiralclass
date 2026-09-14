@@ -5,9 +5,9 @@ import { emitNotificationQueued } from "@/lib/notifications/events";
 
 // CLAUDE.md "Known gaps" closure: after a paid checkout, send the student a
 // notification whose button (dispatcher.ts's "magic_link" template) resolves
-// to `/r/ml/<notificationId>` — a redirect router that mints a real
-// server-trusted sign-in session at click time (lib/auth/server-otp.ts,
-// D-40) — so they reach `/my-classes` without re-entering their email. Slice
+// to `/r/ml/<token>` — a single-use, hour-long sign-in link issued at send time
+// (lib/auth/notification-link.ts, D-40) — so they reach `/my-classes` without
+// re-entering their email. Slice
 // 3 enqueues `payment_received`; this function adds the magic-link-handoff
 // that was previously listed as a known gap.
 //
@@ -77,11 +77,11 @@ export async function magicLinkOnFirstPaymentHandler({
     });
     if (!student?.email) return { skipped: "student-has-no-email" };
 
-    // dispatcher.ts's "magic_link" template builds the actual send target
-    // from the notification's own id (`r/ml/<id>`), never from this stored
-    // URL — it's only a presence marker (see MagicLinkMetadata / the
-    // "missing-metadata:magicLinkUrl" gate). No minting needed here anymore
-    // now that /r/ml mints its own session at click time.
+    // dispatcher.ts's "magic_link" template issues the actual send target
+    // (`r/ml/<token>`) when it sends, never from this stored URL — it's only a
+    // presence marker (see MagicLinkMetadata / the
+    // "missing-metadata:magicLinkUrl" gate). Nothing credential-shaped is
+    // stored on the notification row.
     const notificationId = await enqueueMagicLink(prisma, {
       teacherId,
       studentId,

@@ -25,7 +25,7 @@ import { serverEnv } from "@/lib/env";
 // this only ever broke self-hosted.
 //
 // APP_URL is the canonical public origin and is already what the other redirecting
-// routes build against (app/r/ml, app/api/stripe/connect/return,
+// routes build against (app/r/ml and app/r/re, app/api/stripe/connect/return,
 // app/api/calendar/google/callback). It also can't be poisoned by a spoofed Host
 // header the way header-derived origins can.
 

@@ -173,6 +173,7 @@ describe("preloadPackages", () => {
         {
           id: "book-1",
           packageId: PKG1,
+          studentId: "student-1",
           scheduledStart: new Date("2027-01-01T15:00:00Z"),
           scheduledEnd: new Date("2027-01-01T16:00:00Z"),
           status: "scheduled",
@@ -213,6 +214,7 @@ describe("packageRefFromBookingCache", () => {
         {
           id: "book-1",
           packageId: PKG1,
+          studentId: "student-1",
           scheduledStart: new Date(),
           scheduledEnd: new Date(),
           status: "scheduled",

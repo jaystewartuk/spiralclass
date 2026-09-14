@@ -18,6 +18,10 @@ import { renderEmail } from "@/lib/email/templates";
 import { buildGoogleCalendarUrl } from "@/lib/calendar/add-to-calendar";
 import { signEmailOptOutToken } from "@/lib/email/opt-out-token";
 import { signNotificationSettingsToken } from "./settings-link-token";
+import {
+  issueNotificationLinkToken,
+  NOTIFICATION_LINK_TTL_SECONDS,
+} from "@/lib/auth/notification-link";
 import { loadEntitlements } from "@/lib/subscriptions/service";
 import { getVideoProvider } from "@/lib/video/provider";
 import { formatMinorUnits } from "@/lib/money";
@@ -478,6 +482,7 @@ async function runClaimedDispatch(
     recipientLocale,
     teacherTimezone: teacher.timezone,
     storage: deps.storage ?? null,
+    signInRecipient: isTeacherRecipient ? null : { studentId: recipientId, email: recipientEmail },
   });
   if (!built.ok) {
     // A class canceled/rescheduled between enqueue and delivery is an expected
@@ -1139,6 +1144,7 @@ async function deliverFallbackEmail(
     recipientLocale,
     teacherTimezone: teacher.timezone,
     storage: deps.storage ?? null,
+    signInRecipient: isTeacherRecipient ? null : { studentId: recipientId, email: recipientEmail },
   });
   if (!built.ok) return { code: "failed", reason: built.reason };
 
@@ -1309,6 +1315,12 @@ export type BuildContext = {
   // (dispatcher.ts, inbox.ts) passes the real value.
   teacherTimezone?: string;
   storage: StorageProvider | null;
+  // The student a live send is addressed to. Only the dispatch paths pass it:
+  // the cancel family and `magic_link` then carry a single-use sign-in link
+  // bound to this row (lib/auth/notification-link.ts). The inbox omits it —
+  // its reader is already signed in, so it links to the portal directly, and
+  // viewing a list never issues a credential.
+  signInRecipient?: { studentId: string; email: string | null } | null;
   // Optional preloaded (teacherId, bookingId) → booking map. When supplied,
   // loadBooking reads from it instead of issuing a per-row query — set by the
   // inbox batch renderer to collapse its N+1. The live dispatch path leaves it
@@ -1497,7 +1509,7 @@ export async function buildVariables(
         teacherTimezone,
         teacherName,
       );
-      const reschedulePathSuffix = `r/re/${booking.id}`;
+      const reschedulePathSuffix = await rebookPathSuffix(prisma, ctx.signInRecipient, booking);
       if (t === "cancel_lt24h") {
         return { ok: true, variables: { teacherName, originalDateTime, reschedulePathSuffix } };
       }
@@ -1568,13 +1580,27 @@ export async function buildVariables(
     case "magic_link": {
       const md = (ctx.notification.metadata ?? {}) as MagicLinkMetadata;
       if (!md.magicLinkUrl) return { ok: false, reason: "missing-metadata:magicLinkUrl" };
-      const suffix = `r/ml/${ctx.notification.id}`;
+      const recipient = ctx.signInRecipient;
+      if (!recipient?.email) return { ok: false, reason: "magic-link-without-recipient" };
+      // The copy states the expiry, so the token and the sentence share one
+      // number — never longer than the kind's own ceiling.
+      const ttlSeconds = Math.min(
+        (md.expiryMinutes ?? 60) * 60,
+        NOTIFICATION_LINK_TTL_SECONDS["magic-link"],
+      );
+      const token = await issueNotificationLinkToken(prisma, {
+        kind: "magic-link",
+        studentId: recipient.studentId,
+        email: recipient.email,
+        subjectId: ctx.notification.id,
+        ttlSeconds,
+      });
       return {
         ok: true,
         variables: {
           teacherName,
-          expiryMinutes: String(md.expiryMinutes ?? 60),
-          magicLinkPathSuffix: suffix,
+          expiryMinutes: String(Math.floor(ttlSeconds / 60)),
+          magicLinkPathSuffix: `r/ml/${token}`,
         },
       };
     }
@@ -2337,9 +2363,31 @@ export async function buildVariables(
   return { ok: false, reason: `unhandled-template:${_exhaustive}` };
 }
 
+// The rebook button on a cancellation. A live send to the booking's own student
+// gets a single-use sign-in link to the book page; anything else — the inbox,
+// whose reader is signed in, or a recipient the booking does not belong to —
+// gets the book page itself, with the same credit pool pre-selected.
+async function rebookPathSuffix(
+  prisma: PrismaClient,
+  recipient: BuildContext["signInRecipient"],
+  booking: LoadedBooking,
+): Promise<string> {
+  if (!recipient?.email || recipient.studentId !== booking.studentId) {
+    return `my-classes/book?packageId=${encodeURIComponent(booking.packageId)}`;
+  }
+  const token = await issueNotificationLinkToken(prisma, {
+    kind: "rebook",
+    studentId: recipient.studentId,
+    email: recipient.email,
+    subjectId: booking.id,
+  });
+  return `r/re/${token}`;
+}
+
 export type LoadedBooking = {
   id: string;
   packageId: string;
+  studentId: string;
   scheduledStart: Date;
   scheduledEnd: Date;
   status: string;
@@ -2351,6 +2399,7 @@ export type LoadedBooking = {
 const BOOKING_SELECT = {
   id: true,
   packageId: true,
+  studentId: true,
   scheduledStart: true,
   scheduledEnd: true,
   status: true,
@@ -2404,6 +2453,7 @@ export async function preloadBookings(
         ? {
             id: row.id,
             packageId: row.packageId,
+            studentId: row.studentId,
             scheduledStart: row.scheduledStart,
             scheduledEnd: row.scheduledEnd,
             status: row.status,

@@ -6814,6 +6814,12 @@ export const fr = {
   "web.expiredLink.signIn": "Demandez à votre professeur un nouveau lien de connexion.",
   "web.expiredLink.reschedule": "Le lien pour reprogrammer votre cours n'est plus disponible.",
   "web.expiredLink.rescheduleAction": "Aller à vos cours",
+  "web.notificationLink.title": "Continuer vers SpiralClass",
+  "web.notificationLink.rebookHeading": "Choisissez un nouvel horaire pour votre cours",
+  "web.notificationLink.signInHeading": "Accédez à vos cours",
+  "web.notificationLink.body":
+    "Ce lien vous connecte sur cet appareil et ne fonctionne qu'une seule fois.",
+  "web.notificationLink.cta": "Continuer",
   "web.unsubscribe.confirm.title": "Se désabonner",
   "web.unsubscribe.confirm.heading": "Arrêter ces e-mails ?",
   "web.unsubscribe.confirm.body":

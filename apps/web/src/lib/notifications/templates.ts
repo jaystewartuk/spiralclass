@@ -275,8 +275,8 @@ export type TemplateVariables = {
   cancel_lt24h: {
     teacherName: string;
     originalDateTime: string;
-    // Push deep-link (`r/re/<bookingId>`). Mobile's routeForDeepLink maps this
-    // prefix to the student book tab so they can pick a new slot.
+    // Rebook link: `r/re/<token>` on a live send (a single-use sign-in link,
+    // lib/auth/notification-link.ts), or the book page itself in the inbox.
     reschedulePathSuffix?: string;
   };
   cancel_gte24h_with_reschedule: {
