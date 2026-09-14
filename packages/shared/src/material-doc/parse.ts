@@ -121,14 +121,71 @@ function parseAlign(sepCells: string[]): ColumnAlign[] {
 
 // --- inline -----------------------------------------------------------------
 
-// One alternation, tried left-to-right so `**` beats `*` and `__` beats `_`.
-// Groups: 1 code, 2/3 strong, 4/5 em, 6 link.
-const INLINE =
-  /(`[^`]+`)|(\*\*[\s\S]+?\*\*)|(__[\s\S]+?__)|(\*[\s\S]+?\*)|(_[\s\S]+?_)|(\[[^\]]+\]\([^)\s]+\))/;
+type InlineToken = { kind: "code" | "strong" | "em" | "link"; start: number; end: number };
+
+// A hand-written scanner with the semantics of the single alternation it
+// replaced,
+//   (`[^`]+`)|(\*\*[\s\S]+?\*\*)|(__[\s\S]+?__)|(\*[\s\S]+?\*)|(_[\s\S]+?_)|(\[[^\]]+\]\([^)\s]+\))
+// — leftmost start wins, and at one start `**` beats `*` and `__` beats `_`,
+// each closing at its nearest delimiter. The regex backtracked to the end of
+// the text from every unclosed opener, so a document of openers with no
+// closers took quadratic time to render; a material document is authored by a
+// teacher and rendered to her students. `nextIndex` remembers its last answer
+// per delimiter, so a run of openers that cannot close is one scan, not one
+// scan each.
+function inlineScanner(text: string) {
+  const memo = new Map<string, { from: number; at: number }>();
+  const nextIndex = (needle: string, from: number): number => {
+    const hit = memo.get(needle);
+    if (hit && from >= hit.from && (hit.at === -1 || from <= hit.at)) return hit.at;
+    const at = text.indexOf(needle, from);
+    memo.set(needle, { from, at });
+    return at;
+  };
+  // A `[…]` whose first `]` is not followed by a valid `(href)` fails for every
+  // `[` before that same `]`, so each `]` is checked once.
+  const badLinkClose = new Set<number>();
+
+  const tokenAt = (i: number): InlineToken | null => {
+    const c = text[i];
+    if (c === "`") {
+      const close = nextIndex("`", i + 1);
+      return close > i + 1 ? { kind: "code", start: i, end: close + 1 } : null;
+    }
+    if (c === "*" || c === "_") {
+      if (text[i + 1] === c) {
+        const close = nextIndex(c + c, i + 3);
+        if (close !== -1) return { kind: "strong", start: i, end: close + 2 };
+      }
+      const close = nextIndex(c, i + 2);
+      return close !== -1 ? { kind: "em", start: i, end: close + 1 } : null;
+    }
+    if (c === "[") {
+      const close = nextIndex("]", i + 1);
+      if (close <= i + 1 || badLinkClose.has(close)) return null;
+      if (text[close + 1] === "(") {
+        let k = close + 2;
+        while (k < text.length && text[k] !== ")" && !/\s/.test(text[k])) k++;
+        if (k > close + 2 && text[k] === ")") return { kind: "link", start: i, end: k + 1 };
+      }
+      badLinkClose.add(close);
+    }
+    return null;
+  };
+
+  return (from: number): InlineToken | null => {
+    for (let i = from; i < text.length; i++) {
+      const token = tokenAt(i);
+      if (token) return token;
+    }
+    return null;
+  };
+}
 
 export function parseInline(text: string): InlineNode[] {
   const out: InlineNode[] = [];
-  let rest = text;
+  const nextToken = inlineScanner(text);
+  let pos = 0;
 
   const pushText = (value: string) => {
     if (!value) return;
@@ -137,30 +194,30 @@ export function parseInline(text: string): InlineNode[] {
     else out.push({ type: "text", value });
   };
 
-  while (rest.length) {
-    const m = INLINE.exec(rest);
-    if (!m) {
-      pushText(rest);
+  while (pos < text.length) {
+    const token = nextToken(pos);
+    if (!token) {
+      pushText(text.slice(pos));
       break;
     }
-    if (m.index > 0) pushText(rest.slice(0, m.index));
-    const tok = m[0];
+    pushText(text.slice(pos, token.start));
+    const tok = text.slice(token.start, token.end);
 
-    if (m[1]) {
+    if (token.kind === "code") {
       out.push({ type: "code", value: tok.slice(1, -1) });
-    } else if (m[2] || m[3]) {
+    } else if (token.kind === "strong") {
       out.push({ type: "strong", children: parseInline(tok.slice(2, -2)) });
-    } else if (m[4] || m[5]) {
+    } else if (token.kind === "em") {
       out.push({ type: "em", children: parseInline(tok.slice(1, -1)) });
     } else {
-      const link = /^\[([^\]]+)\]\(([^)\s]+)\)$/.exec(tok);
-      if (link) {
-        out.push({ type: "link", href: link[2], children: parseInline(link[1]) });
-      } else {
-        pushText(tok);
-      }
+      const close = tok.indexOf("]");
+      out.push({
+        type: "link",
+        href: tok.slice(close + 2, -1),
+        children: parseInline(tok.slice(1, close)),
+      });
     }
-    rest = rest.slice(m.index + tok.length);
+    pos = token.end;
   }
 
   return out.length ? out : [{ type: "text", value: "" }];

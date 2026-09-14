@@ -14,6 +14,14 @@ describe("bookingPageUrl", () => {
     );
   });
 
+  it("strips every trailing slash, and only trailing ones, in linear time", () => {
+    expect(bookingPageUrl("https://spiralclass.com///", "a")).toBe("https://spiralclass.com/b/a");
+    const slashes = "/".repeat(200_000);
+    const started = performance.now();
+    expect(bookingPageUrl(`https://x.test${slashes}x`, "a")).toBe(`https://x.test${slashes}x/b/a`);
+    expect(performance.now() - started).toBeLessThan(1000);
+  });
+
   it("encodes special characters in the slug", () => {
     expect(bookingPageUrl("https://spiralclass.com", "alicia moreno")).toBe(
       "https://spiralclass.com/b/alicia%20moreno",

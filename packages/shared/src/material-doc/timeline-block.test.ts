@@ -151,6 +151,13 @@ describe("a timeline fence the parser will not read", () => {
     expect(block).toMatchObject({ lang: "timeline" });
   });
 
+  it("rejects a long run of spaces before a carriage return in linear time", () => {
+    const body = fence("past" + " ".repeat(200_000) + "a\rb", "point 20 x");
+    const started = performance.now();
+    parseMaterialDoc(body);
+    expect(performance.now() - started).toBeLessThan(1000);
+  });
+
   it("round-trips the un-read payload verbatim, losing nothing", () => {
     const body = fence("point 20 x", "wobble 3");
     expect(serializeMaterialDoc(parseMaterialDoc(body))).toBe(body);

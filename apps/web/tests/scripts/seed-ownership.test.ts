@@ -1,6 +1,19 @@
+import { execFileSync } from "node:child_process";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
+
+/** Files under `dir` containing `needle`. grep exits 1 for "no match". */
+function grepFiles(needle: string, dir: string): string[] {
+  try {
+    return execFileSync("grep", ["-rl", "--", needle, dir], { encoding: "utf8" })
+      .split("\n")
+      .filter(Boolean);
+  } catch (error) {
+    if ((error as { status?: number }).status === 1) return [];
+    throw error;
+  }
+}
 
 // The seed's idempotent cleanup has to answer one question — "did I create this
 // row?" — and for a long time it INFERRED the answer from email domains and id
@@ -61,10 +74,11 @@ describe("seed ownership marker", () => {
     // schema, so it names every column by construction and says nothing about
     // who writes one.
     const appSrc = join(process.cwd(), "src");
-    const { execSync } = require("node:child_process") as typeof import("node:child_process");
-    const hits = execSync(`grep -rl "seededAt" ${appSrc} | grep -v "\\.generated\\." || true`, {
-      encoding: "utf8",
-    }).trim();
+    // No shell: the path is passed to grep as an argument, so a checkout under a
+    // directory with spaces or shell metacharacters cannot change the command.
+    const hits = grepFiles("seededAt", appSrc)
+      .filter((file) => !file.includes(".generated."))
+      .join("\n");
     expect(hits, `seededAt written outside the seed:\n${hits}`).toBe("");
   });
 });

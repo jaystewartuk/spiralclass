@@ -1,5 +1,4 @@
 import "server-only";
-import { randomBytes } from "node:crypto";
 import { MarketingActivityStatus, Prisma } from "@prisma/client";
 import {
   communityAllowsLink,
@@ -24,6 +23,7 @@ import { getCommunity, type CommunityView } from "./communities";
 import { generateMarketingContent } from "./content";
 import { buildImageTopic } from "./prompt";
 import { buildTeacherContext, type TeacherContext } from "./profile";
+import { newTrackingCode } from "./tracking-code";
 
 const log = logger({ surface: "marketing" });
 
@@ -36,16 +36,6 @@ const log = logger({ surface: "marketing" });
 // part a platform's rules require a human to do: actually posting it.
 
 // ── Tracking links ─────────────────────────────────────────────────────────
-
-/** 10 lowercase base32-ish chars: ~50 bits, unguessable, still typeable. */
-const TRACKING_ALPHABET = "abcdefghijkmnpqrstuvwxyz23456789";
-
-function newTrackingCode(): string {
-  const bytes = randomBytes(10);
-  let out = "";
-  for (let i = 0; i < 10; i++) out += TRACKING_ALPHABET[bytes[i] % TRACKING_ALPHABET.length];
-  return out;
-}
 
 /**
  * The teacher-visible tracked link.
