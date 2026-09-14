@@ -61,6 +61,22 @@ deliberate cost trade — and removed outright once demoted, since it was never 
 required status check. That suite is `pnpm gate:full`, and since D-129 that is
 the only place it exists.
 
+### Code scanning — a ruleset, not a required check ([D-179](../decisions/D-179.md))
+
+The script also turns on **private vulnerability reporting** (the route
+`SECURITY.md` promises) and **CodeQL default setup**, then applies a ruleset
+named `main: no new CodeQL alerts` with one `code_scanning` rule. It blocks a
+merge that _introduces_ a CodeQL alert at severity `error`, or a security alert
+at `high` or `critical`.
+
+- It is **not** a required status context, and `local-gate` stays the only one.
+  The rule reads the alert database, so alerts already open on `main` do not
+  block unrelated PRs, and no job name can strand a PR by moving.
+- It has **no bypass actor**. To merge past a false positive, dismiss the alert
+  on the Security tab with a reason.
+- Never add a `codeql.yml` workflow. Tune the scan through the default setup's
+  `query_suite` in the script.
+
 ## `production` — do NOT put a blocking rule on it
 
 `production` is written only by a promote fast-forward — `pnpm promote` from the

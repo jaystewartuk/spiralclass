@@ -85,6 +85,35 @@ describe("the required status context (D-119)", () => {
     // so requiring it would block every PR on a run nothing can start.
     expect(script).not.toContain("checks / Typecheck / lint / unit / audit");
   });
+});
+
+describe("code scanning gates on new alerts, not on a check (D-179)", () => {
+  const script = withoutComments(read("scripts", "setup-branch-protection.sh"));
+
+  it("applies a code_scanning rule for CodeQL on the default branch", () => {
+    expect(script).toContain(`"type": "code_scanning"`);
+    expect(script).toContain(`"tool": "CodeQL"`);
+    expect(script).toContain(`"security_alerts_threshold": "high_or_higher"`);
+    expect(script).toContain(`"include": ["~DEFAULT_BRANCH"]`);
+    expect(script).toContain("code-scanning/default-setup");
+  });
+
+  it("names no bypass actor and requires no CodeQL job context", () => {
+    // A bypass leaves no record where a dismissed alert does, and a required
+    // `Analyze (…)` context strands every PR the day GitHub renames the leg.
+    expect(script).not.toContain("bypass_actors");
+    expect(script).not.toMatch(/"context":\s*"(Analyze|CodeQL)/);
+  });
+
+  it("keeps the private reporting route SECURITY.md sends reporters to", () => {
+    expect(read("SECURITY.md")).toContain("Report a vulnerability");
+    expect(script).toContain("private-vulnerability-reporting");
+  });
+
+  it("is a repository setting, never an advanced-setup workflow", () => {
+    const workflows = readdirSync(join(repoRoot, ".github", "workflows"));
+    expect(workflows.filter((f) => /codeql/i.test(f))).toEqual([]);
+  });
 
   it("the pre-push hook runs the gate and hands off the status post", () => {
     const hook = read(".githooks", "pre-push");
