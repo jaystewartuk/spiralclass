@@ -123,8 +123,63 @@ else
 fi
 echo "  ✓ production guarded (no force-push, no deletion; fast-forward still allowed)."
 
+# ── Security tab: reporting, code scanning, and merge protection (D-179) ─────
+# SECURITY.md and the issue-template contact link both send a reporter to the
+# private "Report a vulnerability" flow. With the setting off that link is a
+# dead end, and a reporter who hits one opens a public issue instead.
+echo "Enabling private vulnerability reporting on ${REPO}…"
+gh api -X PUT "repos/${REPO}/private-vulnerability-reporting" >/dev/null
+echo "  ✓ private vulnerability reporting on."
+
+# CodeQL default setup, not an advanced-setup workflow file: a workflow that
+# performs a check is forbidden (the registry is the one definition of green),
+# and default setup is a repository setting with no file in the tree.
+echo "Configuring CodeQL default setup on ${REPO}…"
+gh api -X PATCH "repos/${REPO}/code-scanning/default-setup" \
+  -f state=configured -f query_suite=default >/dev/null
+echo "  ✓ CodeQL default setup configured."
+
+# A code_scanning RULE, not a required status context. It blocks a merge that
+# INTRODUCES an error or a high/critical security alert, so the alerts already
+# open on main do not freeze every PR, and it names no job, so a renamed CodeQL
+# leg cannot strand one. It deliberately has no bypass actor.
+CODE_SCANNING_RULESET_NAME="main: no new CodeQL alerts"
+CODE_SCANNING_PAYLOAD="$(cat <<JSON
+{
+  "name": "${CODE_SCANNING_RULESET_NAME}",
+  "target": "branch",
+  "enforcement": "active",
+  "conditions": { "ref_name": { "include": ["~DEFAULT_BRANCH"], "exclude": [] } },
+  "rules": [
+    {
+      "type": "code_scanning",
+      "parameters": {
+        "code_scanning_tools": [
+          { "tool": "CodeQL", "alerts_threshold": "errors", "security_alerts_threshold": "high_or_higher" }
+        ]
+      }
+    }
+  ]
+}
+JSON
+)"
+
+echo "Applying code-scanning merge protection to ${REPO}…"
+CODE_SCANNING_RULESET_ID="$(gh api "repos/${REPO}/rulesets" --jq ".[] | select(.name==\"${CODE_SCANNING_RULESET_NAME}\") | .id" 2>/dev/null | head -1 || true)"
+if [ -n "${CODE_SCANNING_RULESET_ID}" ]; then
+  echo "  updating existing ruleset (id ${CODE_SCANNING_RULESET_ID})…"
+  echo "${CODE_SCANNING_PAYLOAD}" | gh api -X PUT "repos/${REPO}/rulesets/${CODE_SCANNING_RULESET_ID}" --input - >/dev/null
+else
+  echo "  creating ruleset…"
+  echo "${CODE_SCANNING_PAYLOAD}" | gh api -X POST "repos/${REPO}/rulesets" --input - >/dev/null
+fi
+echo "  ✓ main refuses a merge that adds a CodeQL error or a high/critical alert."
+
 echo
 echo "Verify main:"
 echo "  gh api repos/${REPO}/branches/main/protection | jq '{required: [.required_status_checks.checks[].context], strict: .required_status_checks.strict, pr_required: (.required_pull_request_reviews!=null), approvals: .required_pull_request_reviews.required_approving_review_count, enforce_admins: .enforce_admins.enabled, linear: .required_linear_history.enabled}'"
 echo "Verify production ruleset:"
 echo "  gh api repos/${REPO}/rulesets --jq '.[] | select(.name==\"${RULESET_NAME}\") | {name, enforcement, rules: [.rules[]?.type]}'"
+echo "Verify the security settings:"
+echo "  gh api repos/${REPO}/private-vulnerability-reporting"
+echo "  gh api repos/${REPO}/code-scanning/default-setup --jq '{state, languages}'"
