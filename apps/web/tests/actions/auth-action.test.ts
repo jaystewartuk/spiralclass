@@ -48,6 +48,7 @@ const {
   requestTeacherSignupCodeAction,
   verifySignInCodeAction,
   signOutAction,
+  switchAccountAction,
 } = await import("@/app/actions/auth");
 
 function form(entries: Record<string, string>): FormData {
@@ -252,5 +253,39 @@ describe("signOutAction", () => {
     }
     expect(signOut).toHaveBeenCalled();
     expect(url).toBe("/");
+  });
+});
+
+// The invitation landing's "use a different account". A plain link to
+// /sign-in cannot do this job: /sign-in sends a live session straight on to
+// `next`, so the visitor would only bounce back to the invitation they cannot
+// accept. The action ends the session first, then lands on the form with the
+// resume path and the invited email carried through.
+describe("switchAccountAction", () => {
+  async function run(entries: Record<string, string>): Promise<string> {
+    try {
+      await switchAccountAction(form(entries));
+    } catch (err) {
+      if (err instanceof RedirectError) return err.url;
+      throw err;
+    }
+    return "";
+  }
+
+  it("signs out, then lands on /sign-in carrying next and email", async () => {
+    const url = await run({ next: "/i/abc", email: "student@example.com" });
+    expect(signOut).toHaveBeenCalled();
+    expect(url).toBe("/sign-in?next=%2Fi%2Fabc&email=student%40example.com");
+  });
+
+  it("drops an unsafe next (open redirect) rather than carrying it", async () => {
+    const url = await run({ next: "//evil.example", email: "student@example.com" });
+    expect(url).toBe("/sign-in?email=student%40example.com");
+  });
+
+  it("still signs out and lands on a bare /sign-in with nothing to carry", async () => {
+    const url = await run({});
+    expect(signOut).toHaveBeenCalled();
+    expect(url).toBe("/sign-in");
   });
 });

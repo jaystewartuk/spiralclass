@@ -11,9 +11,9 @@ import { MAINTENANCE_BYPASS_COOKIE } from "@/lib/maintenance";
 //
 // Optimistic/edge-safe per the D-40 migration plan: only a session-cookie
 // PRESENCE check (getSessionCookie) gates protected paths — no DB round trip.
-// The superuser destination on the /sign-in bounce reads the signed
-// cookie-cache (getCookieCache) best-effort; a cache miss just falls back to
-// /dashboard rather than blocking anything.
+// Presence is all it knows, which is why it never decides that a visitor IS
+// signed in: the /sign-in bounce for a live session belongs to the page
+// (app/(auth)/redirect-if-signed-in.ts), on the authoritative getSession().
 
 const getSessionCookie = vi.fn();
 const getCookieCache = vi.fn();
@@ -123,38 +123,34 @@ describe("updateSession — auth gate redirects", () => {
     expect(res.headers.get("Content-Security-Policy-Report-Only")).toBeTruthy();
   });
 
-  it("bounces an authenticated non-superuser away from /sign-in to /dashboard", async () => {
-    getSessionCookie.mockReturnValue("session-token");
+  // Regression: a session cookie that had outlived its session (the user row
+  // deleted server-side, the session revoked) used to bounce /sign-in →
+  // /dashboard on cookie presence alone. The page layer then found no session
+  // and bounced back to /sign-in, and so on until the browser gave up on a
+  // blank /dashboard — with an invitation's `?next=` lost on the first hop.
+  // The signed-in bounce now lives on the page (app/(auth)/redirect-if-signed-in.ts),
+  // on the authoritative getSession(); the middleware must let /sign-in and
+  // /sign-up render for ANY cookie state, so a dead cookie can be replaced.
+  it("never redirects /sign-in on cookie presence — a stale cookie must reach the form", async () => {
+    getSessionCookie.mockReturnValue("stale-session-token");
     getCookieCache.mockResolvedValue({ user: { email: "t@x.com" } });
-    const res = await updateSession(reqFor("/sign-in"));
-    const loc = new URL(res.headers.get("location")!);
-    expect(loc.pathname).toBe("/dashboard");
+    const res = await updateSession(reqFor("/sign-in?next=%2Fi%2Fabc&email=student%40example.com"));
+    expect(res.headers.get("location")).toBeNull();
+    expect(res.headers.get("Content-Security-Policy-Report-Only")).toBeTruthy();
   });
 
-  it("bounces an authenticated superuser away from /sign-in to /admin", async () => {
+  it("never redirects /sign-up on cookie presence either, superuser cookie-cache or not", async () => {
     getSessionCookie.mockReturnValue("session-token");
     getCookieCache.mockResolvedValue({ user: { email: "admin@x.com" } });
     isSuperuser.mockReturnValue(true);
     const res = await updateSession(reqFor("/sign-up"));
-    const loc = new URL(res.headers.get("location")!);
-    expect(loc.pathname).toBe("/admin");
+    expect(res.headers.get("location")).toBeNull();
   });
 
-  it("falls back to /dashboard when the cookie-cache is a miss (cache expired)", async () => {
+  it("does not consult the cookie-cache at all — no signed-in decision is made at the edge", async () => {
     getSessionCookie.mockReturnValue("session-token");
-    getCookieCache.mockResolvedValue(null);
-    const res = await updateSession(reqFor("/sign-in"));
-    const loc = new URL(res.headers.get("location")!);
-    expect(loc.pathname).toBe("/dashboard");
-  });
-
-  it("degrades to /dashboard without calling getCookieCache when BETTER_AUTH_SECRET is unset (misconfigured deploy env) — getCookieCache throws BetterAuthError otherwise", async () => {
-    envState.betterAuthSecret = undefined;
-    getSessionCookie.mockReturnValue("session-token");
-    const res = await updateSession(reqFor("/sign-in"));
+    await updateSession(reqFor("/sign-in"));
     expect(getCookieCache).not.toHaveBeenCalled();
-    const loc = new URL(res.headers.get("location")!);
-    expect(loc.pathname).toBe("/dashboard");
   });
 });
 
@@ -189,31 +185,17 @@ describe("updateSession — redirects resolve against the public origin (APP_URL
     expect(loc.pathname).toBe("/");
   });
 
-  // The exact reported failure: signed-in visit to /sign-in bounced to
-  // https://0.0.0.0:3000/dashboard.
-  it("sends the authenticated /sign-in bounce to APP_URL, not the bind address", async () => {
-    getSessionCookie.mockReturnValue("session-token");
-    getCookieCache.mockResolvedValue({ user: { email: "t@x.com" } });
-    const res = await updateSession(new NextRequest(`${BIND_ORIGIN}/sign-in`));
-    expect(res.headers.get("location")).toBe(`${PUBLIC_ORIGIN}/dashboard`);
-  });
-
-  it("sends the authenticated superuser bounce to APP_URL", async () => {
-    getSessionCookie.mockReturnValue("session-token");
-    getCookieCache.mockResolvedValue({ user: { email: "admin@x.com" } });
-    isSuperuser.mockReturnValue(true);
-    const res = await updateSession(new NextRequest(`${BIND_ORIGIN}/sign-in`));
-    expect(res.headers.get("location")).toBe(`${PUBLIC_ORIGIN}/admin`);
+  it("sends the unauthenticated admin bounce to APP_URL, not the bind address", async () => {
+    const res = await updateSession(new NextRequest(`${BIND_ORIGIN}/admin`));
+    expect(res.headers.get("location")).toBe(`${PUBLIC_ORIGIN}/sign-in?next=%2Fadmin`);
   });
 
   // Production and preview are different origins (D-26); the redirect origin
   // must follow APP_URL rather than being pinned to either.
   it("follows APP_URL per environment", async () => {
     envState.appUrl = "https://spiralclass.com";
-    getSessionCookie.mockReturnValue("session-token");
-    getCookieCache.mockResolvedValue({ user: { email: "t@x.com" } });
-    const res = await updateSession(new NextRequest(`${BIND_ORIGIN}/sign-in`));
-    expect(res.headers.get("location")).toBe("https://spiralclass.com/dashboard");
+    const res = await updateSession(new NextRequest(`${BIND_ORIGIN}/dashboard`));
+    expect(res.headers.get("location")).toBe("https://spiralclass.com/sign-in?next=%2Fdashboard");
   });
 });
 

@@ -180,9 +180,20 @@ links it to the right student record automatically.
 - Sessions are cookie-based. better-auth resolves a session from a request's
   headers the same way whether the credential arrives as a cookie or a bearer
   token, which is why route handlers and page routes share one session store.
-- The middleware keeps a short (~60 second) optimistic cache of "am I signed
-  in" to avoid extra checks on every request; the authoritative check still
-  happens at the page level.
+- The middleware only checks that a session cookie is _present_ before letting
+  a request at a protected page through; the authoritative check always
+  happens at the page level. A cookie that has outlived its session (revoked,
+  expired, the account deleted) therefore reaches the page and is treated as
+  not signed in — including on the sign-in page itself, which renders the
+  form so the dead cookie can be replaced rather than bouncing the visitor
+  between sign-in and the dashboard.
+- Someone who opens the sign-in or sign-up page while already signed in is
+  sent on: to the "continue to" destination if the link carried one (an
+  invitation, a notification deep link), otherwise to their own landing
+  (teacher, student or staff).
+- "Use a different account" on an invitation page signs the current session
+  out first, then opens sign-in with the invited email pre-filled and the
+  invitation as the destination.
 - There is no silent refresh-token renewal. A session stays valid until it
   expires on the server or is explicitly revoked — by sign-out, an admin
   action, or account deletion.

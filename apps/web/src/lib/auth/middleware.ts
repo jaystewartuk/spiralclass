@@ -1,6 +1,5 @@
-import { getSessionCookie, getCookieCache } from "better-auth/cookies";
+import { getSessionCookie } from "better-auth/cookies";
 import { NextResponse, type NextRequest } from "next/server";
-import { isSuperuser, serverEnv } from "@/lib/env";
 import { buildCsp, cspHeaderName, generateNonce } from "@/lib/csp";
 import { toPublicOrigin } from "@/lib/public-url";
 import {
@@ -114,8 +113,6 @@ export async function updateSession(request: NextRequest) {
     }
   }
 
-  const isAuthPath = path.startsWith("/sign-in") || path.startsWith("/sign-up");
-
   // The (app) route group — every segment behind requireTeacher() in its
   // layout. That layout guard is the authoritative check; this list is
   // defense in depth so an unauthenticated hit bounces before rendering.
@@ -147,23 +144,16 @@ export async function updateSession(request: NextRequest) {
   // requireAdmin() fails closed for non-admins. The !hasSession case is
   // already handled above.
 
-  // On /sign-in or /sign-up redirect an authenticated user straight to
-  // /dashboard, or /admin for superusers. The superuser destination is read
-  // from the signed cookie-cache (best-effort, no DB hit); a cache
-  // miss/expiry just falls back to /dashboard rather than blocking anything.
-  if (isAuthPath && hasSession) {
-    const url = request.nextUrl.clone();
-    // getCookieCache throws BetterAuthError if BETTER_AUTH_SECRET is unset —
-    // a misconfigured deploy env, not a user-facing condition. Degrade to the
-    // non-superuser default (worst case: a superuser lands on /dashboard
-    // instead of /admin, one extra click) rather than 500ing every
-    // already-signed-in visit to /sign-in.
-    const secret = serverEnv().BETTER_AUTH_SECRET;
-    const cache = secret ? await getCookieCache(request, { secret }) : null;
-    url.pathname = isSuperuser(cache?.user?.email) ? "/admin" : "/dashboard";
-    url.search = "";
-    return NextResponse.redirect(toPublicOrigin(url));
-  }
+  // /sign-in and /sign-up are deliberately NOT bounced here on cookie
+  // presence. A visitor already holding a VALID session is sent on by the
+  // page itself (app/(auth)/redirect-if-signed-in.ts), which asks
+  // auth.api.getSession() — the authoritative check. Deciding it here on the
+  // raw cookie looped whenever the cookie outlived its session (revoked,
+  // expired, or the user deleted server-side): /sign-in → /dashboard on the
+  // cookie, /dashboard → /sign-in on the missing session, and so on until the
+  // browser gave up on a blank page. Nothing in a page render can clear the
+  // dead cookie (only a route handler can set one), so the loop never
+  // self-healed — and an invitation's `?next=` never survived it either.
 
   // Lightweight ambassador attribution: stamp a `?ref=CODE` into a first-party
   // cookie so it survives until the teacher row is lazy-created (lib/auth.ts).
