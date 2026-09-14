@@ -152,6 +152,16 @@ finished change to an open, green pull request. It stops there, deliberately —
 opening a pull request and shipping one are different decisions, and a command
 that quietly did both would be making the second on the operator's behalf.
 
+**`.claude/skills/issue/SKILL.md`** (`/issue`) files the work a session finds
+but does not fix. [D-172](../decisions/D-172.md) put that work in Issues and
+admitted nothing enforces an issue's shape; the skill is the checklist in the
+meantime — search open and closed issues for a duplicate, send anything
+exploitable to [SECURITY.md](../../SECURITY.md) instead, write a **Done when**
+line, and file only after the user approves the draft, because the repository
+is public and filing publishes. `apps/web/tests/config/agent-skills.test.ts`
+holds the parts of that which can be checked: the labels it names exist, and the
+approval, security and never-close rules are still in it.
+
 **What was deliberately not built.** No skill for writing a decision record —
 `docs/decisions/_template.md` and its README already say how, and a skill
 restating them would be a second source of truth. No skill for migrations —
