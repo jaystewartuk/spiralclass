@@ -6788,6 +6788,12 @@ export const esMX = {
   "web.expiredLink.signIn": "Pide a tu profe un nuevo enlace de inicio de sesión.",
   "web.expiredLink.reschedule": "El enlace para reagendar tu clase ya no está disponible.",
   "web.expiredLink.rescheduleAction": "Ir a tus clases",
+  "web.notificationLink.title": "Continuar a SpiralClass",
+  "web.notificationLink.rebookHeading": "Elige un nuevo horario para tu clase",
+  "web.notificationLink.signInHeading": "Ve a tus clases",
+  "web.notificationLink.body":
+    "Este enlace inicia tu sesión en este dispositivo y solo funciona una vez.",
+  "web.notificationLink.cta": "Continuar",
   "web.unsubscribe.confirm.title": "Cancelar suscripción",
   "web.unsubscribe.confirm.heading": "¿Cancelar los correos?",
   "web.unsubscribe.confirm.body": "Confirma que ya no quieres recibir correos de SpiralClass.",

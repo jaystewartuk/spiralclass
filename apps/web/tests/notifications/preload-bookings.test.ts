@@ -11,6 +11,7 @@ function bookingRow(id: string, teacherId: string) {
     id,
     teacherId,
     packageId: "pkg-1",
+    studentId: "student-1",
     scheduledStart: new Date("2026-07-01T15:00:00Z"),
     scheduledEnd: new Date("2026-07-01T16:00:00Z"),
     status: "scheduled",

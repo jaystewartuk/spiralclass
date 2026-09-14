@@ -2,10 +2,10 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 // After the FIRST paid checkout for a (teacher, student) pair, enqueue a
 // notification so the student lands in /my-classes without re-entering their
-// email — dispatcher.ts's "magic_link" template builds the actual send
-// target from the notification's own id (`r/ml/<id>`), which mints a real
-// better-auth session at click time (D-40, lib/auth/server-otp.ts); nothing
-// needs to be minted here anymore. Repeat payments and the various
+// email — dispatcher.ts's "magic_link" template issues the actual send target
+// (`r/ml/<token>`, a single-use sign-in link — D-40,
+// lib/auth/notification-link.ts) when it sends; nothing credential-shaped is
+// stored here. Repeat payments and the various
 // missing-data cases skip.
 
 vi.mock("@/lib/inngest/client", () => ({ inngest: { createFunction: () => ({}) } }));

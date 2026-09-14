@@ -81,6 +81,7 @@ function buildFakePrisma(state: {
     {
       id: string;
       packageId: string;
+      studentId: string;
       scheduledStart: Date;
       scheduledEnd: Date;
       teacherId: string;
@@ -115,6 +116,8 @@ function buildFakePrisma(state: {
   // Ids passed to webPushSubscription.updateMany — lets a test assert that a
   // gone (404/410) subscription was soft-revoked.
   revokedWebSubIds?: string[];
+  // Rows written to `verification` — one per sign-in link issued.
+  verifications?: Array<{ identifier: string; value: string; expiresAt: Date }>;
 }) {
   return {
     notification: {
@@ -236,6 +239,14 @@ function buildFakePrisma(state: {
         };
       },
     },
+    // Where the cancel family and magic_link issue their single-use sign-in
+    // links (lib/auth/notification-link.ts).
+    verification: {
+      create: async ({ data }: any) => {
+        state.verifications?.push(data);
+        return { id: `v-${state.verifications?.length ?? 0}`, ...data };
+      },
+    },
     webPushSubscription: {
       findMany: async ({ where }: any) => {
         if (!state.webPushSubscriptions) return [];
@@ -334,6 +345,7 @@ function freshState(overrides?: { studentOverrides?: Partial<StudentRow> }) {
         id: BOOKING_ID,
         teacherId: TEACHER_ID,
         packageId: PACKAGE_ID,
+        studentId: STUDENT_ID,
         scheduledStart: new Date("2026-05-15T15:00:00Z"),
         scheduledEnd: new Date("2026-05-15T15:50:00Z"),
         status: "scheduled",
@@ -349,6 +361,7 @@ function freshState(overrides?: { studentOverrides?: Partial<StudentRow> }) {
     bookings,
     packages,
     payments,
+    verifications: [] as Array<{ identifier: string; value: string; expiresAt: Date }>,
     webPushSubscriptions: undefined as
       | Map<
           string,
@@ -911,7 +924,16 @@ describe("dispatchNotification", () => {
     await dispatchNotification(NOTIFICATION_ID, deps(prisma));
 
     expect(webPush.sentBatches).toHaveLength(1);
-    expect(webPush.sentBatches[0].payload.deepLink).toBe(`/r/re/${BOOKING_ID}`);
+    const deepLink = webPush.sentBatches[0].payload.deepLink as string;
+    expect(deepLink).toMatch(/^\/r\/re\/[A-Za-z0-9_-]{43}$/);
+    // The link is a single-use token, never the booking id itself.
+    expect(deepLink).not.toContain(BOOKING_ID);
+    expect(state.verifications).toHaveLength(1);
+    expect(state.verifications[0].identifier).toMatch(/^notification-link:rebook:/);
+    expect(JSON.parse(state.verifications[0].value)).toMatchObject({
+      s: STUDENT_ID,
+      x: BOOKING_ID,
+    });
   });
 
   it("cancel_lt24h push deep-link routes to rebooking", async () => {
@@ -923,7 +945,25 @@ describe("dispatchNotification", () => {
     await dispatchNotification(NOTIFICATION_ID, deps(prisma));
 
     expect(webPush.sentBatches).toHaveLength(1);
-    expect(webPush.sentBatches[0].payload.deepLink).toBe(`/r/re/${BOOKING_ID}`);
+    expect(webPush.sentBatches[0].payload.deepLink).toMatch(/^\/r\/re\/[A-Za-z0-9_-]{43}$/);
+  });
+
+  it("magic_link emails a single-use sign-in link, never the notification id", async () => {
+    const state = freshState();
+    const row = state.notifications.get(NOTIFICATION_ID)!;
+    row.templateName = "magic_link";
+    row.bookingId = null;
+    row.metadata = { magicLinkUrl: "/r/ml/pending", expiryMinutes: 60 };
+    const prisma = buildFakePrisma(state);
+
+    const outcome = await dispatchNotification(NOTIFICATION_ID, deps(prisma));
+
+    expect(outcome.code).toBe("sent");
+    const html = JSON.stringify(email.getSends()[0]);
+    expect(html).toMatch(/\/r\/ml\/[A-Za-z0-9_-]{43}/);
+    expect(html).not.toContain(`/r/ml/${NOTIFICATION_ID}`);
+    expect(state.verifications).toHaveLength(1);
+    expect(state.verifications[0].identifier).toMatch(/^notification-link:magic-link:/);
   });
 
   it("retry idempotency (fan-out): channels in metadata.channelsSent are not re-sent", async () => {

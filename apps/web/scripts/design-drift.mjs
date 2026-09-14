@@ -114,6 +114,12 @@ export const ALLOWLIST = {
   // Calendar event positioning is computed from time arithmetic — a top/height
   // percentage cannot be a utility class.
   "components/calendar/time-grid.tsx": { inlineStyle: true },
+
+  // A standalone HTML string returned by a route handler, outside React and
+  // outside Tailwind: there is no component tree for <Button> to render into,
+  // and the page's one control has to be a plain form submit so it works with
+  // no JavaScript.
+  "lib/auth/notification-link-pages.ts": { rawButton: true },
 };
 
 // ---------------------------------------------------------------------------

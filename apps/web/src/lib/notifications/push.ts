@@ -108,7 +108,7 @@ export function renderPush<T extends TemplateName>(
         body: es
           ? `Tu clase del ${v.originalDateTime} con ${v.teacherName} fue cancelada (menos de 24 h).`
           : `Your class on ${v.originalDateTime} with ${v.teacherName} was canceled (less than 24 h).`,
-        // r/re/<id> → the student book surface (not the canceled booking's
+        // Rebook link → the student book surface (not the canceled booking's
         // reschedule screen) so the student can pick a new slot.
         deepLink: v.reschedulePathSuffix ?? null,
       };
