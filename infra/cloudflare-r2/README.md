@@ -201,17 +201,20 @@ verification; do not skip straight to `apply`.
 ```sh
 cd infra/cloudflare-r2
 
-cp terraform.tfvars.example   terraform.tfvars     # account_id
+cp ../backend.hcl.example      ../backend.hcl       # account id, once per checkout
+cp terraform.tfvars.example   terraform.tfvars     # account_id — only for plan/apply
 
 ../infisical/run.sh infra tofu init -backend-config=../backend.hcl
 ```
 
-No per-module `backend.hcl` to copy/fill in — `../backend.hcl` is
-the one shared, committed bucket+endpoint config every R2-state module in
-this repo points at now; see `infra/README.md`. `terraform.tfvars` is
-committed here too (see `.gitignore`'s exception) — copying the `.example`
-just gives you the working starting point to edit, not a gitignored
-placeholder.
+Both files are **gitignored**, and both hold the Cloudflare account id — the
+hex string in any R2 endpoint URL. They were committed until 2026-09-04 and
+templated ahead of the repository going public, so every checkout (and every
+worktree) fills them in once. `../backend.hcl` is still the one shared
+partial-backend config every R2-state module points at; see `infra/README.md`.
+Reading state — `tofu output`, which `push-fly-secrets.sh` and
+`infra/infisical/push-vercel-env.sh` do — needs only the backend file, not
+`terraform.tfvars`.
 
 ### Credentials come from Infisical's `infra` environment (D-66)
 
