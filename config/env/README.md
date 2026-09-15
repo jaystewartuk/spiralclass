@@ -90,6 +90,12 @@ Two files per environment, split by **when the value is consumed**:
   `<env>.runtime.env` (selected by `APP_ENV`, set in the trimmed
   `fly.<env>.toml [env]`) before starting the server. Already-set
   container env (Infisical secrets, `fly secrets`) wins over the file.
+- **Vercel failover** ([D-177](../../docs/decisions/D-177.md)) —
+  `scripts/vercel-deploy.sh` replaces what `vercel pull` writes with
+  `production.build.env`'s values, and syncs `production.runtime.env` onto the
+  project from the commit (`scripts/vercel-env.mjs sync-committed`). A value
+  pushed from Infisical by `infra/infisical/push-vercel-env.sh` wins over the
+  file, as on Fly.
 - **Local dev** — `apps/web`'s `dev` and `start` scripts load
   `local.runtime.env` through `dotenv` before `next` sees the process, which is
   why a fresh checkout boots with no per-developer file to fill in.

@@ -121,6 +121,23 @@ unaffected; read the `fly` job, which is the one that shipped. `pnpm promote`
 judges the release by the `database` and `fly` jobs and prints the failover's
 outcome on its own line.
 
+**Its runtime environment is Fly's, from the same three places.** The project's
+env store is a derived copy, and nothing is set in the dashboard by hand:
+
+| Source                               | Written by                                        | When                                |
+| ------------------------------------ | ------------------------------------------------- | ----------------------------------- |
+| Infisical `production` `/`           | `infra/infisical/push-vercel-env.sh`, `sensitive` | By the operator, after any rotation |
+| The production R2 credentials (Tofu) | the same push                                     | By the operator, after any rotation |
+| `config/env/production.runtime.env`  | `scripts/vercel-deploy.sh`, from the commit       | Every release                       |
+
+The push reads Tofu state, so it runs under the `infra` credentials; its header
+has the command. The deploy **refuses** when a `__LOCAL__` runtime key was never
+pushed, or when a dashboard value nobody owns would shadow a committed one —
+the push reports those as stale and removes them with `--delete-stale`. The
+three project credentials live in Infisical `production` at `/deploy`, beside
+`FLY_API_TOKEN`, and reach the workflow through
+`infra/infisical/push-github-secrets.sh`.
+
 ⚠️ **Before you hand it the domain, confirm the database job for that commit is
 green.** The failover deploys against whatever schema the database job left. A
 Vercel deployment refreshed by hand (`pnpm deploy:vercel`) runs no migrations at

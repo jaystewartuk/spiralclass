@@ -41,10 +41,12 @@ keeping in mind for any future caller: `infisical_export_secrets` _exports_ the
 secret rather than handing back the raw `--output dotenv` string, so anything
 that needs `KEY=VALUE` shape has to rebuild it.
 
-Nothing left in `infra/infisical/` duplicates the old boilerplate —
-`push-fly-secrets.sh` is the one remaining script here, and it's genuinely
-about Infisical (importing a whole environment into `fly secrets`), not a
-task script that merely consumes one secret.
+Nothing left in `infra/infisical/` duplicates the old boilerplate. The scripts
+that remain here are genuinely about Infisical — each pushes a whole set of
+values into one consumer, rather than merely consuming one secret:
+`push-fly-secrets.sh` (Fly), `push-github-secrets.sh` (the deploy workflow's
+environment) and `push-vercel-env.sh` (the Vercel failover's runtime
+environment, with the R2 credentials Fly also gets).
 
 ## Account setup (cloud free tier)
 
