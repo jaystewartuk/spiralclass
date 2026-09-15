@@ -85,9 +85,9 @@
 #
 # Replaced rather than appended to, now that the project holds the runtime
 # environment (step 0 and infra/infisical/push-vercel-env.sh): the Docker build
-# sees only the build args, so the Vercel build sees only the build args too,
-# and no runtime value is left in a file on the runner while the build runs
-# third-party install scripts.
+# sees only the build args and the Dockerfile's placeholder shapes, so the
+# Vercel build sees exactly those too, and no runtime value is left in a file on
+# the runner while the build runs third-party install scripts.
 #
 # WHY NO `output: "standalone"`. next.config.ts sets it only when
 # BUILD_STANDALONE=1, which the Dockerfile sets and this script does not. The
@@ -271,6 +271,18 @@ BUILD_ARGS_BLOCK="$(echo "$BUILD_ARGS_OUT" | sed -n '/^build_args<</,/^__FLY_BUI
   # that was served by Fly and is then served by Vercel after a promote must
   # not see a skew it has to hard-navigate through.
   echo "NEXT_DEPLOYMENT_ID=${SHA}"
+  # The Dockerfile's build-time placeholder SHAPES, and only those. Next's
+  # "Collecting page data" imports every route module, and something in that
+  # chain validates serverEnv() at module load — so a build with none of these
+  # dies on `DATABASE_URL: Required` without ever connecting to anything. They
+  # are the Dockerfile's values exactly (apps/web/tests/config/vercel-deploy.test.ts
+  # holds the two to each other), they satisfy Zod's formats and nothing else,
+  # and they live only in this build-time file: the deployment's runtime reads
+  # the project's real values, which `vercel pull` wrote here as [SENSITIVE] and
+  # this block has just replaced.
+  echo 'DATABASE_URL=postgresql://build:build@localhost:5432/build'
+  echo 'DIRECT_URL=postgresql://build:build@localhost:5432/build'
+  echo 'SESSION_SECRET=build-time-placeholder-not-a-real-secret'
 } >"$ENV_FILE"
 
 # ── 2. Build ─────────────────────────────────────────────────────────────

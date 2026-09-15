@@ -184,6 +184,29 @@ describe("the Vercel target is a second target, not a second opinion", () => {
     ).not.toMatch(/>>"\$ENV_FILE"/);
   });
 
+  it("the build gets the Dockerfile's placeholder shapes, exactly, and nothing more", () => {
+    // Next's "Collecting page data" validates serverEnv() at module load, so a
+    // build with no DATABASE_URL / DIRECT_URL / SESSION_SECRET dies before it
+    // connects to anything — the first Vercel build did exactly that. The
+    // Dockerfile states the placeholder shapes that get past it; the Vercel
+    // build must state the same ones, or a key the schema starts requiring is
+    // added to one build and fails the other only on the next release.
+    const dockerfile = read("Dockerfile");
+    const block = /^ENV DATABASE_URL=[\s\S]*?[^\\]\n/m.exec(dockerfile)?.[0];
+    expect(block, "the Dockerfile no longer sets its build-time placeholders").toBeTruthy();
+    const docker = Object.fromEntries(
+      [...block!.matchAll(/([A-Z_]+)="([^"]*)"/g)].map((m) => [m[1], m[2]]),
+    );
+    expect(Object.keys(docker).length).toBeGreaterThan(0);
+
+    // The script writes each placeholder as a literal, single-quoted
+    // `echo 'KEY=value'`, and writes nothing else that way.
+    const vercel = Object.fromEntries(
+      [...SCRIPT.matchAll(/^\s*echo '([A-Z_]+)=([^']*)'$/gm)].map((m) => [m[1], m[2]]),
+    );
+    expect(vercel).toEqual(docker);
+  });
+
   it("syncs the commit's runtime config before anything is built or deployed", () => {
     // Fly's entrypoint reads config/env/production.runtime.env from the image;
     // Vercel has no entrypoint, so the deploy writes it onto the project from the
