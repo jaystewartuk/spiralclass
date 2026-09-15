@@ -170,12 +170,40 @@ describe("the Vercel target is a second target, not a second opinion", () => {
     // stated, and they are baked IRREVERSIBLY into the client bundle. A Vercel
     // build that read the dashboard's copy instead would ship different values
     // for the same commit, with nothing failing — so the script calls the same
-    // env-build-args.mjs the Dockerfile path calls, and overlays the result
-    // last-wins over whatever `vercel pull` brought down.
+    // env-build-args.mjs the Dockerfile path calls, and the result REPLACES
+    // whatever `vercel pull` brought down. Replaced, not appended to: the
+    // project now holds the runtime secrets too, and the Docker build sees none
+    // of them, so neither may the Vercel build — nor a file on the runner.
     expect(SCRIPT).toContain("scripts/env-build-args.mjs");
-    expect(SCRIPT, "the pulled env file is not overlaid, so the dashboard can win").toMatch(
-      />>"\$ENV_FILE"/,
+    expect(SCRIPT, "the pulled env file is not replaced, so the dashboard can win").toMatch(
+      /\}\s>"\$ENV_FILE"/,
     );
+    expect(
+      SCRIPT,
+      "the pulled env file is appended to, so its runtime values reach the build",
+    ).not.toMatch(/>>"\$ENV_FILE"/);
+  });
+
+  it("syncs the commit's runtime config before anything is built or deployed", () => {
+    // Fly's entrypoint reads config/env/production.runtime.env from the image;
+    // Vercel has no entrypoint, so the deploy writes it onto the project from the
+    // commit being deployed. A deployment captures the project's variables when
+    // it is CREATED, so the sync must come before `deploy` — and it is where the
+    // deploy refuses on an unpushed __LOCAL__ secret, so before `build` too,
+    // where a refusal costs nothing.
+    const executable = SCRIPT.split("\n")
+      .filter((line) => !line.trimStart().startsWith("#"))
+      .join("\n");
+    const sync = executable.indexOf("node scripts/vercel-env.mjs sync-committed");
+    expect(
+      sync,
+      "scripts/vercel-deploy.sh does not sync the committed runtime config",
+    ).toBeGreaterThan(-1);
+    for (const step of ["pull --yes", "build --prod", "deploy --prebuilt"]) {
+      const at = executable.indexOf(step);
+      expect(at, `no \`${step}\` step`).toBeGreaterThan(-1);
+      expect(sync, `the sync runs after \`${step}\``).toBeLessThan(at);
+    }
   });
 
   it("both targets stamp the same deployment id for the same commit", () => {

@@ -32,8 +32,19 @@ value and the test that pins it in the same commit.
 
 ## What is not here
 
-**No runtime environment variables.** `config/env/production.runtime.env` is
-their one home, and the Vercel project's own env store is deliberately not a
-second one — `scripts/vercel-deploy.sh` overwrites what `vercel pull` brings
-down with this repository's values, so the dashboard cannot win a disagreement
-it should not be having. Read that script's header for why.
+**No environment variables.** The project's env store holds the failover's
+runtime environment, but only as a copy derived from the places Fly's comes
+from, written by two callers that mark every entry they own:
+
+- `infra/infisical/push-vercel-env.sh` (operator) pushes Infisical
+  `production` `/` and the production R2 credentials, as `sensitive`.
+- `scripts/vercel-deploy.sh` (every release) syncs
+  `config/env/production.runtime.env` from the commit, and refuses to deploy
+  when a `__LOCAL__` key was never pushed or a dashboard value nobody owns
+  would shadow a committed one.
+
+Nothing is to be set in the dashboard by hand — the deploy refuses on it. The
+build sees none of the store either: the deploy replaces what `vercel pull`
+brings down with `config/env/production.build.env`'s values, so the dashboard
+cannot win a disagreement it should not be having. `scripts/vercel-env.mjs`'s
+header is the full account.

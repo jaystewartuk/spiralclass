@@ -43,8 +43,10 @@
 #     --skip-domain below). Pointing it at the Vercel deployment URL would be a
 #     second definition of "is production healthy".
 #
-# So the ordered steps here are four, not seven:
+# So the ordered steps here are five, not seven:
 #
+#   0. sync config/env/<env>.runtime.env onto the project, and refuse if the
+#      pushed secrets it depends on are not there (scripts/vercel-env.mjs)
 #   1. resolve the build-time NEXT_PUBLIC_* values from the SAME source the
 #      Docker build reads — config/env/<env>.build.env, through
 #      scripts/env-build-args.mjs
@@ -69,17 +71,23 @@
 #
 #   npx --yes vercel@59.15.1 promote <deployment-url> --yes
 #
-# WHY THE BUILD VALUES ARE WRITTEN OVER WHAT `vercel pull` BRINGS DOWN.
+# WHY THE BUILD VALUES REPLACE WHAT `vercel pull` BRINGS DOWN.
 # `vercel pull` writes the Vercel project's own env vars to
 # .vercel/.env.production.local, and `vercel build` reads that file. Left alone,
 # that makes the Vercel dashboard a SECOND source of truth for values that are
 # baked irreversibly into the client bundle — the exact drift
 # scripts/env-build-args.mjs exists to prevent for the Docker build (see its
-# header). So step 1 appends this repository's values after the pulled ones,
-# last-wins, and config/env/<env>.build.env stays the only place they are
+# header). So step 1 REPLACES the pulled file's contents with this repository's
+# build values, and config/env/<env>.build.env stays the only place they are
 # stated. resolveEnvFile throws naming every unsatisfied __LOCAL__, so a
 # misconfigured caller fails here rather than shipping a broken Stripe key to
 # real browsers.
+#
+# Replaced rather than appended to, now that the project holds the runtime
+# environment (step 0 and infra/infisical/push-vercel-env.sh): the Docker build
+# sees only the build args, so the Vercel build sees only the build args too,
+# and no runtime value is left in a file on the runner while the build runs
+# third-party install scripts.
 #
 # WHY NO `output: "standalone"`. next.config.ts sets it only when
 # BUILD_STANDALONE=1, which the Dockerfile sets and this script does not. The
@@ -183,20 +191,36 @@ export VERCEL_TOKEN VERCEL_ORG_ID VERCEL_PROJECT_ID
 
 SHA="$(git rev-parse HEAD)"
 
+# ── 0. Runtime config ────────────────────────────────────────────────────
+# Fly's container reads config/env/production.runtime.env at boot. Vercel has no
+# entrypoint, so the committed values become project environment variables here,
+# from the commit being deployed — and a deployment captures the project's
+# variables when it is created, so this runs before step 3.
+#
+# It also REFUSES, before anything is built, when a __LOCAL__ runtime key was
+# never pushed from Infisical, or when a dashboard value nobody owns would shadow
+# a committed one. Either would deploy green and break sign-in or checkout on the
+# failover, which is the same reason scripts/fly-deploy.sh preflights Fly's
+# secrets. The secrets themselves are not this script's to write:
+# infra/infisical/push-vercel-env.sh pushes them, and scripts/vercel-env.mjs
+# explains how the two share the store.
+echo "› Syncing the committed runtime config onto the project…"
+node scripts/vercel-env.mjs sync-committed
+
 # ── 1. Build-time config, from the one place it is stated ────────────────
-# Pull first so the project's settings and env land in .vercel/, then append
-# this repository's values so they win. --yes because the prompt it suppresses
-# is "pull settings?", and that is the whole reason we called it.
+# Pull first so the project's settings land in .vercel/, then replace the env
+# file it writes with this repository's build values. --yes because the prompt
+# it suppresses is "pull settings?", and that is the whole reason we called it.
 echo "› Pulling ${ENVIRONMENT} project settings from Vercel…"
 "${VERCEL[@]}" pull --yes --environment="$ENVIRONMENT"
 
 # ⚠️ DISCOVERED, NOT ASSUMED. `vercel pull` writes the project's env into
 # `.vercel/`, and the CLI's own documentation does not pin the filename —
 # `.env.production.local` is convention, not a contract, and it has moved
-# before. Hardcoding it would fail in the worst available way: the append would
+# before. Hardcoding it would fail in the worst available way: the write would
 # create a file the builder ignores, the build would go green, and the DASHBOARD
-# values would ship to real browsers. That is precisely the drift this overlay
-# exists to prevent, reached by trusting a path instead of checking it.
+# values would ship to real browsers. That is precisely the drift this
+# replacement exists to prevent, reached by trusting a path instead of checking it.
 #
 # So: find what the pull actually wrote, require exactly one candidate, and
 # refuse otherwise. A deploy that cannot prove where its build values come from
@@ -222,15 +246,15 @@ if [ "$ENV_COUNT" -ne 1 ]; then
   echo "  found ${ENV_COUNT}:" >&2
   [ -z "$ENV_FOUND" ] || printf '%s' "$ENV_FOUND" >&2
   echo "" >&2
-  echo "  Refusing to continue. The overlay below is what keeps" >&2
+  echo "  Refusing to continue. The replacement below is what keeps" >&2
   echo "  config/env/${ENVIRONMENT}.build.env the single source of truth for values that" >&2
-  echo "  are baked IRREVERSIBLY into the client bundle (D-177). Appending to the wrong" >&2
+  echo "  are baked IRREVERSIBLY into the client bundle (D-177). Writing to the wrong" >&2
   echo "  file would ship the Vercel dashboard's copy instead, with nothing failing." >&2
   echo "" >&2
   echo "  If the CLI changed where it writes, fix this discovery — do not hardcode a name." >&2
   exit 1
 fi
-echo "› Overlaying NEXT_PUBLIC_* from config/env/${ENVIRONMENT}.build.env onto ${ENV_FILE} (last wins)…"
+echo "› Replacing ${ENV_FILE} with the NEXT_PUBLIC_* values from config/env/${ENVIRONMENT}.build.env…"
 # Same invocation the Docker build uses, same throw on an unsatisfied __LOCAL__.
 # The sed strips env-build-args.mjs's GITHUB_OUTPUT heredoc wrapper, exactly as
 # scripts/fly-deploy.sh does — kept byte-identical so the two callers cannot
@@ -247,7 +271,7 @@ BUILD_ARGS_BLOCK="$(echo "$BUILD_ARGS_OUT" | sed -n '/^build_args<</,/^__FLY_BUI
   # that was served by Fly and is then served by Vercel after a promote must
   # not see a skew it has to hard-navigate through.
   echo "NEXT_DEPLOYMENT_ID=${SHA}"
-} >>"$ENV_FILE"
+} >"$ENV_FILE"
 
 # ── 2. Build ─────────────────────────────────────────────────────────────
 # --prod, not --target=production: the flag that selects PRODUCTION
