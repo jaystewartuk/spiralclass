@@ -348,7 +348,9 @@ build` does not fail on type errors by itself.
 - **Commit subjects and PR titles are a full sentence naming the problem the
   change fixed, in past tense, from the user's side** — not a category prefix.
   _"The class list said everything twice and could not say what was next"_, not
-  _"fix: class list dedupe"_. The body says why; the diff says what.
+  _"fix: class list dedupe"_. The body says why; the diff says what. **A
+  security fix is the exception** — neutral title, pushed only when it can ship
+  ([SECURITY.md](SECURITY.md#how-a-security-fix-lands)).
 - **A change that sets or reverses policy gets a decision record** — copy
   `docs/decisions/_template.md` to the next unused number and add a row to both
   tables in its README.

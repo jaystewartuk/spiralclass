@@ -71,7 +71,7 @@ another way" about anything that still exists.
   both reversed by [D-40](./D-40.md)).
 
 **Numbering is never reused and never renumbered**, so `D-01` is still the
-first decision and `D-180` the most recent. A gap means a record was removed,
+first decision and `D-181` the most recent. A gap means a record was removed,
 not that one is missing.
 
 **Everything kept is unedited**, except where a record named an account
@@ -385,6 +385,7 @@ a hook — is a caller.
 | [D-147](./D-147.md) | _(tombstone)_ The regulatory position, kept privately — with the one engineering finding                             |
 | [D-158](./D-158.md) | Publish the shape, never the account — a third gate on the credential scanner                                        |
 | [D-159](./D-159.md) | What was built is published; what the operator personally owes is not                                                |
+| [D-181](./D-181.md) | **A security fix lands as a public PR with a neutral title**, pushed only when it can ship                           |
 
 ### Naming and positioning
 
@@ -530,6 +531,7 @@ records removed before publication — see [What is not here](#what-is-not-here)
 | [D-178](./D-178.md) | Migrations expand; contracts ship a release later, marked CONTRACT    | Active                               |
 | [D-179](./D-179.md) | CodeQL scans every PR; main refuses a merge that adds an alert        | Active                               |
 | [D-180](./D-180.md) | Test-file and decision-record counts are floors, not exact            | Active                               |
+| [D-181](./D-181.md) | A security fix is a public PR, neutral title, pushed when it can ship | Active                               |
 
 ---
 

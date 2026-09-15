@@ -36,3 +36,27 @@ no credentials required — that is the right place to prove a finding.
   admin/webhook/service query is a reportable vulnerability, not a style nit.
 - Never commit real credentials. `.env.local` and friends are gitignored;
   secrets live in Infisical / Fly / GitHub environments.
+
+## How a security fix lands
+
+This section is for the maintainer and for any session writing a fix. It
+changes nothing above: a reporter still never opens an issue or a pull request.
+
+**A fix lands through an ordinary pull request on this repository, never
+through a security advisory's temporary private fork.** GitHub runs no CI on a
+temporary private fork and enforces none of `main`'s protection rules when one
+is merged, so a fix merged that way skips every required check, on the code
+where a broken fix costs the most.
+
+The exposure is held down by wording and timing instead:
+
+- **The title, body and commit subject stay neutral.** They name the area that
+  changed and how it was tested, and say nothing about how the flaw could be
+  used; that detail stays in the private advisory until it is published. This
+  is the one exception to the rule that a title names the problem it fixed.
+- **The branch is not pushed until the maintainer can merge and promote in the
+  same sitting.** A pushed branch is public, so the fix stays on the machine
+  until then. A session writing one commits it and stops short of `pnpm pr`.
+
+The reasoning, and what this leaves open, is
+[D-181](docs/decisions/D-181.md).
