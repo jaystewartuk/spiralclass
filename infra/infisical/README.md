@@ -68,9 +68,9 @@ environment, with the R2 credentials Fly also gets).
    relocated to a shared top-level spot like `infra/backend.hcl`)
    because `push-fly-secrets.sh`/`seed-preview.sh` in this directory already
    assume it lives right here (`seed-preview.sh` even reads it directly via
-   Node), and every other module points at it via
-   `--project-config-dir=../infisical` instead of needing its own copy; see
-   `infra/README.md`.
+   Node), and every other module reaches it through `run.sh infra …`
+   instead of needing its own copy; see `infra/README.md`. `~/.infisical.json`
+   works too — `project-id.sh` resolves either and verifies the project.
 
    ⚠️ **Do not commit it** — [D-158](../../docs/decisions/D-158.md) reverses
    the earlier convenience on this one point.

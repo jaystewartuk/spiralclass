@@ -27,11 +27,16 @@
 # builtin, so the JSON it writes is never a process argument either.
 #
 # Requires: the Infisical CLI (logged in), OpenTofu with infra/cloudflare-r2
-# initialised, and node. `tofu output` reads an R2-hosted state backend, so
-# run it the way that module's own commands run, with the `infra` credentials:
+# initialised, and node. `tofu output` reads an R2-hosted state backend, and
+# this script fetches the `infra` credentials that needs itself, through the
+# same verified project as every other read here. Run it bare, from anywhere:
 #
-#   infisical run --project-config-dir=infra/infisical --env=infra -- \
-#     infra/infisical/push-vercel-env.sh [--delete-stale]
+#   infra/infisical/push-vercel-env.sh [--delete-stale]
+#
+# ⚠️ Not wrapped in an outer `infisical run --env=infra`. That resolves the
+# project from wherever the CLI finds a link file — `--project-config-dir`
+# names one place, the upward search from the working directory another — and
+# neither is checked against infra/infisical/project.sha256.
 set -euo pipefail
 INFISICAL_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$INFISICAL_DIR/../.." && pwd)"
@@ -79,12 +84,13 @@ echo "› Reading Infisical \`${ENVIRONMENT}\` / (not recursive)…" >&2
 INFISICAL_JSON="$(infisical_env --json "$ENVIRONMENT" /)"
 
 # ── Source 2: the R2 credentials ─────────────────────────────────────────
+# The state backend's credentials are Infisical `infra`'s, injected into tofu
+# alone. `infisical_exec` replaces the process, which here is only the subshell.
 echo "› Reading the R2 bucket credentials from infra/cloudflare-r2's Tofu state…" >&2
-if ! R2_JSON="$(cd infra/cloudflare-r2 && "$TOFU" output -json buckets)"; then
+if ! R2_JSON="$(cd infra/cloudflare-r2 && infisical_exec infra -- "$TOFU" output -json buckets)"; then
   echo "" >&2
-  echo "  \`tofu output -json buckets\` failed in infra/cloudflare-r2. It reads a remote" >&2
-  echo "  state backend: run this under the \`infra\` credentials (see this file's header)," >&2
-  echo "  after \`tofu init\` in that directory." >&2
+  echo "  \`tofu output -json buckets\` failed in infra/cloudflare-r2, with Infisical" >&2
+  echo "  \`infra\`'s credentials. Has \`tofu init\` been run in that directory?" >&2
   exit 1
 fi
 

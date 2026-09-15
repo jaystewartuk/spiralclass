@@ -50,7 +50,12 @@ that directory now go through `with-secret.sh`'s shared helper instead,
 which resolves the file relative to itself rather than assuming
 co-location — see `infra/infisical/README.md`'s "Adding a new script"
 section — but `push-fly-secrets.sh` hasn't been migrated onto that helper
-yet.) Every other module (`cloudflare-r2`) references it via the flag instead.
+yet.) Every other module (`cloudflare-r2`) runs its commands through
+`../infisical/run.sh infra …`, which resolves the link wherever it lives —
+here, or `~/.infisical.json` (`infra/infisical/project-id.sh`) — and verifies
+the project before injecting anything. The bare
+`infisical run --project-config-dir=../infisical` it replaced found only this
+location, and verified nothing.
 
 **`--project-config-dir` only exists on `infisical run`** (confirmed via
 `infisical run --help` in this session) — `infisical export`/
@@ -64,7 +69,7 @@ the repo.
 
 | Module          | Provisions                                                        | Backend                       | Infisical link                                                                                                                                                                                    |
 | --------------- | ----------------------------------------------------------------- | ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `cloudflare-r2` | R2 buckets + tokens for app storage                               | shared `backend.hcl`          | `--project-config-dir=../infisical`                                                                                                                                                               |
+| `cloudflare-r2` | R2 buckets + tokens for app storage                               | shared `backend.hcl`          | `../infisical/run.sh infra`                                                                                                                                                                       |
 | `infisical`     | Not a Tofu module — scripts + the shared `.infisical.json` itself | —                             | canonical location                                                                                                                                                                                |
 | `aws-ses`       | SES sender IAM user + Cloudflare DNS for email                    | own `backend.hcl` (see above) | `push-infisical-secrets.sh` `cd`s into `../infisical` for its `infisical secrets set` calls — that subcommand has no `--project-config-dir` flag (unlike `infisical run`), confirmed via `--help` |
 

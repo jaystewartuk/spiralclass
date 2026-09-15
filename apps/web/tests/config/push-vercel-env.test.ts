@@ -81,10 +81,20 @@ const stub = (name: string, body: string) => {
 };
 
 // `export --path=<p>` prints that path's JSON; `secrets get KEY … --path <p>`
-// prints KEY=value from that path, as the real CLI's dotenv output does.
+// prints KEY=value from that path, as the real CLI's dotenv output does; `run`
+// execs the command after `--`, telling it which environment it was injected
+// with, as the real CLI hands it that environment's secrets.
 stub(
   "infisical",
   `case "$1" in
+  run)
+    injected=""
+    while [ "$#" -gt 0 ] && [ "$1" != "--" ]; do
+      case "$1" in --env=*) injected="\${1#--env=}" ;; esac
+      shift
+    done
+    shift
+    STUB_INJECTED_ENV="$injected" exec "$@" ;;
   export)
     for arg in "$@"; do
       case "$arg" in
@@ -113,6 +123,7 @@ esac`,
 stub(
   "tofu",
   `echo "tofu cwd $(pwd)" >> "$STUB_LOG"
+echo "tofu injected \${STUB_INJECTED_ENV:-nothing}" >> "$STUB_LOG"
 [ -n "$STUB_TOFU_FAIL" ] && { echo "stub tofu: no state" >&2; exit 1; }
 [ "$*" = "output -json buckets" ] || { echo "stub tofu: unexpected: $*" >&2; exit 97; }
 echo '${JSON.stringify(BUCKETS)}'`,
@@ -177,8 +188,12 @@ describe("push-vercel-env.sh hands the failover what Fly gets, and nothing else"
     expect(exports).toHaveLength(1);
     expect(exports[0]).toContain("--path=/ ");
     expect(exports[0]).toContain("--env=production");
-    expect(result.calls).not.toContain("--recursive");
+    expect(exports[0]).not.toContain("--recursive");
     expect(result.calls).not.toContain("/config");
+    // The one recursive read is `infra`'s, and it reaches tofu alone.
+    for (const line of result.calls.split("\n").filter((l) => l.includes("--recursive"))) {
+      expect(line).toMatch(/^infisical run .*--env=infra /);
+    }
   });
 
   it("reads exactly the three Vercel credentials from `/deploy`, and no other deploy value", () => {
@@ -194,11 +209,29 @@ describe("push-vercel-env.sh hands the failover what Fly gets, and nothing else"
     );
   });
 
-  it("reads the buckets from infra/cloudflare-r2's state", () => {
+  it("reads the buckets from infra/cloudflare-r2's state, with `infra`'s credentials it fetched itself", () => {
+    // Run bare, as the operator runs it: no outer `infisical run`. The first
+    // documented command wrapped the script in one with --project-config-dir,
+    // which named a link file that a machine with the link in $HOME does not
+    // have — and neither location was checked against project.sha256.
     const result = run([]);
     expect(result.status, result.stderr).toBe(0);
+    expect(result.calls).toContain(
+      "infisical run --projectId=stub-project --env=infra --recursive -- ",
+    );
     expect(result.calls).toContain("tofu output -json buckets");
+    expect(result.calls).toContain("tofu injected infra");
     expect(result.calls).toContain(`tofu cwd ${join(tree, "infra", "cloudflare-r2")}`);
+    expect(result.calls).not.toContain("--project-config-dir");
+  });
+
+  it("documents running it bare, and never behind --project-config-dir", () => {
+    const header = readFileSync(join(REPO_ROOT, SCRIPT), "utf8")
+      .split("\n")
+      .filter((line) => line.startsWith("#"))
+      .join("\n");
+    expect(header).toMatch(/^#\s+infra\/infisical\/push-vercel-env\.sh \[--delete-stale\]$/m);
+    expect(header).not.toMatch(/infisical run --project-config-dir/);
   });
 
   it("hands the module both sources on stdin, and the deploy's own values in neither", () => {
@@ -223,7 +256,7 @@ describe("push-vercel-env.sh hands the failover what Fly gets, and nothing else"
   it("stops, pushing nothing, when the Tofu state cannot be read", () => {
     const result = run([], { STUB_TOFU_FAIL: "1" });
     expect(result.status).toBe(1);
-    expect(result.stderr).toContain("under the `infra` credentials");
+    expect(result.stderr).toContain("Has `tofu init` been run in that directory?");
     expect(result.calls).not.toContain("node ");
     expect(existsSync(handed)).toBe(false);
   });

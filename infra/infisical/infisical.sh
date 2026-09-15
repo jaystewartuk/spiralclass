@@ -55,11 +55,14 @@ _infisical_project() {
   printf '%s\n' "$_INFISICAL_PROJECT_CACHE"
 }
 
+# `infra` is the Tofu operator credentials (README: "The `infra` environment"),
+# not an app environment — the list is closed so a typo refuses, not so that a
+# real environment has to be reached around the wrapper.
 _infisical_check_env() {
   case "${1:-}" in
-    preview | production) return 0 ;;
+    preview | production | infra) return 0 ;;
   esac
-  echo "unknown environment '${1:-}' (expected: preview, production)" >&2
+  echo "unknown environment '${1:-}' (expected: preview, production, infra)" >&2
   return 1
 }
 
