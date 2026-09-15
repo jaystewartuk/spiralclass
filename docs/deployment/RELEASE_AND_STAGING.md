@@ -130,8 +130,8 @@ env store is a derived copy, and nothing is set in the dashboard by hand:
 | The production R2 credentials (Tofu) | the same push                                     | By the operator, after any rotation |
 | `config/env/production.runtime.env`  | `scripts/vercel-deploy.sh`, from the commit       | Every release                       |
 
-The push reads Tofu state, so it runs under the `infra` credentials; its header
-has the command. The deploy **refuses** when a `__LOCAL__` runtime key was never
+Run the push bare, `infra/infisical/push-vercel-env.sh`: it fetches the `infra`
+credentials Tofu state needs itself. The deploy **refuses** when a `__LOCAL__` runtime key was never
 pushed, or when a dashboard value nobody owns would shadow a committed one —
 the push reports those as stale and removes them with `--delete-stale`. The
 three project credentials live in Infisical `production` at `/deploy`, beside

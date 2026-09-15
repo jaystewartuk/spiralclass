@@ -203,7 +203,7 @@ cd infra/cloudflare-r2
 
 cp terraform.tfvars.example   terraform.tfvars     # account_id
 
-infisical run --project-config-dir=../infisical --env=infra -- tofu init -backend-config=../backend.hcl
+../infisical/run.sh infra tofu init -backend-config=../backend.hcl
 ```
 
 No per-module `backend.hcl` to copy/fill in — `../backend.hcl` is
@@ -219,10 +219,12 @@ The three secrets this module needs to _run_ are pulled from Infisical's
 dedicated **`infra`** environment (the repurposed free `development` slot —
 NOT `preview`/`production`, which sync wholesale to Fly), so you never
 re-export them by hand. Prefix every `tofu` invocation with
-`infisical run --project-config-dir=../infisical --env=infra --` (see
-"Configure" above — this directory has no `.infisical.json` of its own,
-see `infra/README.md`); it injects them for that command only, off argv and out of
-shell history. The three keys, stored under these **exact** names:
+`../infisical/run.sh infra` (see "Configure" above). It resolves the project
+wherever its link lives — `infra/infisical/.infisical.json` or
+`~/.infisical.json` — and checks it against `infra/infisical/project.sha256`
+before injecting them for that command only, off argv and out of shell
+history. The bare `infisical run --project-config-dir=../infisical` this used
+to name finds only the first of those, and checks neither. The three keys, stored under these **exact** names:
 
 | Infisical key           | Read by                   | What it is                                |
 | ----------------------- | ------------------------- | ----------------------------------------- |
@@ -262,10 +264,10 @@ the module). Confirm with `tofu plan` first; if it wants to create an
 already-existing preview bucket, import it before applying:
 
 ```sh
-TOKEN_ID=<existing token's id — see import.sh header> infisical run --project-config-dir=../infisical --env=infra -- ./import.sh agendaprofe-preview-chat-audio
-TOKEN_ID=<existing token's id>                        infisical run --project-config-dir=../infisical --env=infra -- ./import.sh agendaprofe-preview-class-materials
-TOKEN_ID=<existing token's id>                        infisical run --project-config-dir=../infisical --env=infra -- ./import.sh agendaprofe-preview-recordings
-TOKEN_ID=<existing token's id>                        infisical run --project-config-dir=../infisical --env=infra -- ./import.sh agendaprofe-preview-teacher-photos
+TOKEN_ID=<existing token's id — see import.sh header> ../infisical/run.sh infra ./import.sh agendaprofe-preview-chat-audio
+TOKEN_ID=<existing token's id>                        ../infisical/run.sh infra ./import.sh agendaprofe-preview-class-materials
+TOKEN_ID=<existing token's id>                        ../infisical/run.sh infra ./import.sh agendaprofe-preview-recordings
+TOKEN_ID=<existing token's id>                        ../infisical/run.sh infra ./import.sh agendaprofe-preview-teacher-photos
 ```
 
 If an import shows a diff on a bucket/token, see "Before the first real
@@ -278,8 +280,8 @@ Once `tofu plan` is clean (no unexpected changes to existing preview
 buckets):
 
 ```sh
-infisical run --project-config-dir=../infisical --env=infra -- tofu plan   # EXPECT: 8 to add — 6 agendaprofe-production-* + agendaprofe-preview-{teacher-videos,material-podcasts} (each a bucket + a token) — 0 to change/destroy
-infisical run --project-config-dir=../infisical --env=infra -- tofu apply
+../infisical/run.sh infra tofu plan   # EXPECT: 8 to add — 6 agendaprofe-production-* + agendaprofe-preview-{teacher-videos,material-podcasts} (each a bucket + a token) — 0 to change/destroy
+../infisical/run.sh infra tofu apply
 ```
 
 This creates the eight new **empty** buckets. Nothing in production is
@@ -289,7 +291,7 @@ credentials to the preview Fly app (`push-fly-secrets.sh` reads Tofu state,
 which still needs `CLOUDFLARE_API_TOKEN` in the env):
 
 ```sh
-ENVIRONMENT=preview FLY_APP=agendaprofe-preview infisical run --project-config-dir=../infisical --env=infra -- ./push-fly-secrets.sh
+ENVIRONMENT=preview FLY_APP=agendaprofe-preview ../infisical/run.sh infra ./push-fly-secrets.sh
 ```
 
 Do **not** push `production` here — that repoints live production storage and
@@ -317,7 +319,7 @@ When you're ready to move production off the bare-named buckets:
 2. **Repoint production** — push the production creds to the production Fly
    app, which flips its `*_R2_BUCKET` vars to the new buckets:
    ```sh
-   ENVIRONMENT=production FLY_APP=agendaprofe infisical run --project-config-dir=../infisical --env=infra -- ./push-fly-secrets.sh
+   ENVIRONMENT=production FLY_APP=agendaprofe ../infisical/run.sh infra ./push-fly-secrets.sh
    ```
 3. **Re-enable public access** by hand for the two `public = true` buckets
    (`agendaprofe-production-teacher-photos`, `-teacher-videos`) and update the
