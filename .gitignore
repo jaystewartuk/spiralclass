@@ -104,24 +104,13 @@ crash.*.log
 infra/**/terraform.tfvars
 infra/**/*.auto.tfvars
 infra/**/backend.hcl
-# Exception 1: infra/backend.hcl is the ONE shared, committed
-# bucket+endpoint partial-backend config for every module whose state lives
-# in agendaprofe-tofu-state via bare AWS_* env-var auth (cloudflare-r2) —
-# non-secret (account_id + R2 endpoint only), committed so no module needs
-# its own copy-and-fill-in step. See infra/README.md. infra/aws-ses is the
-# deliberate exception (needs an extra `profile` key) and keeps its own
-# separate, still-gitignored backend.hcl.
-!infra/backend.hcl
-
-# Real values for the __LOCAL__ entries in config/env/*.env — the committed
-# files declare the keys and document them; these supply the values.
-config/env/*.local.env
-# Exception 2: cloudflare-r2's terraform.tfvars is non-secret (bucket
-# names/tokens config, not a backend concern) and committed so every
-# checkout/worktree can run tofu without re-assembling it. Kept narrow on
-# purpose — other modules' tfvars (e.g. infra/cloudflare) carry values like
-# allowed_emails, so stay ignored.
-!infra/cloudflare-r2/terraform.tfvars
+# ⚠️ NO EXCEPTIONS. infra/backend.hcl and infra/cloudflare-r2/terraform.tfvars
+# were each committed on purpose once, and un-ignored here to allow it. Both
+# hold the Cloudflare account id, and both were templated on 2026-09-04 ahead
+# of the repository going public — but the tfvars negation outlived that, so
+# following the README's `cp terraform.tfvars.example terraform.tfvars` left a
+# file with the account id waiting to be committed.
+# apps/web/tests/config/infra-local-config-ignored.test.ts holds it.
 
 # Infisical CLI's project link file (project ID only, no secrets).
 infra/**/.infisical.json
