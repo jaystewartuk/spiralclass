@@ -1,0 +1,389 @@
+{
+  "src/app/(app)/app-nav.tsx": {
+    "react-hooks/set-state-in-effect": {
+      "count": 1
+    }
+  },
+  "src/app/(app)/dashboard/classes/[bookingId]/homework-panel.tsx": {
+    "react-hooks/set-state-in-effect": {
+      "count": 1
+    }
+  },
+  "src/app/(app)/dashboard/classes/[bookingId]/override-action.tsx": {
+    "react-hooks/set-state-in-effect": {
+      "count": 1
+    }
+  },
+  "src/app/(app)/dashboard/discounts/discount-forms.tsx": {
+    "react-hooks/set-state-in-effect": {
+      "count": 2
+    }
+  },
+  "src/app/(app)/dashboard/get-students/communities/community-forms.tsx": {
+    "react-hooks/set-state-in-effect": {
+      "count": 1
+    }
+  },
+  "src/app/(app)/dashboard/students/[studentId]/assign-material-form.tsx": {
+    "react-hooks/set-state-in-effect": {
+      "count": 1
+    }
+  },
+  "src/app/(app)/dashboard/students/[studentId]/delete-package-button.tsx": {
+    "react-hooks/set-state-in-effect": {
+      "count": 1
+    }
+  },
+  "src/app/(app)/dashboard/testimonials/testimonial-forms.tsx": {
+    "react-hooks/set-state-in-effect": {
+      "count": 3
+    }
+  },
+  "src/app/(app)/onboarding/templates/templates-form.tsx": {
+    "react-hooks/set-state-in-effect": {
+      "count": 1
+    }
+  },
+  "src/app/(app)/onboarding/timezone/timezone-form.tsx": {
+    "react-hooks/set-state-in-effect": {
+      "count": 3
+    }
+  },
+  "src/app/(app)/settings/blocked-dates/blocked-date-form.tsx": {
+    "react-hooks/refs": {
+      "count": 1
+    },
+    "react-hooks/set-state-in-effect": {
+      "count": 1
+    }
+  },
+  "src/app/(app)/settings/booking-page/booking-slug-form.tsx": {
+    "react-hooks/set-state-in-effect": {
+      "count": 1
+    }
+  },
+  "src/app/(app)/settings/booking-page/intro-video-coach-panel.tsx": {
+    "react-hooks/set-state-in-effect": {
+      "count": 1
+    }
+  },
+  "src/app/(app)/settings/booking-page/intro-video-form.tsx": {
+    "react-hooks/refs": {
+      "count": 2
+    }
+  },
+  "src/app/(app)/settings/class-content-templates/class-content-templates-form.tsx": {
+    "react-hooks/set-state-in-effect": {
+      "count": 1
+    }
+  },
+  "src/app/(app)/settings/focus-tags/tags-manager.tsx": {
+    "react-hooks/refs": {
+      "count": 1
+    }
+  },
+  "src/app/(app)/settings/materials/material-style-form.tsx": {
+    "react-hooks/refs": {
+      "count": 1
+    }
+  },
+  "src/app/(auth)/otp-verify-card.tsx": {
+    "react-hooks/set-state-in-effect": {
+      "count": 1
+    }
+  },
+  "src/app/(auth)/sign-in/sign-in-form.tsx": {
+    "react-hooks/refs": {
+      "count": 3
+    },
+    "react-hooks/set-state-in-effect": {
+      "count": 1
+    }
+  },
+  "src/app/(auth)/sign-up/sign-up-form.tsx": {
+    "react-hooks/refs": {
+      "count": 6
+    }
+  },
+  "src/app/(student)/my-classes/materials/page.tsx": {
+    "react-hooks/static-components": {
+      "count": 1
+    }
+  },
+  "src/app/(student)/my-classes/referral-share.tsx": {
+    "react-hooks/purity": {
+      "count": 1
+    }
+  },
+  "src/app/(student)/my-classes/student-nav.tsx": {
+    "react-hooks/set-state-in-effect": {
+      "count": 1
+    }
+  },
+  "src/app/admin/admin-quick-search.tsx": {
+    "react-hooks/set-state-in-effect": {
+      "count": 1
+    }
+  },
+  "src/app/admin/admin-sidebar.tsx": {
+    "react-hooks/set-state-in-effect": {
+      "count": 1
+    }
+  },
+  "src/app/admin/audit/audit-table.tsx": {
+    "react-hooks/set-state-in-effect": {
+      "count": 1
+    }
+  },
+  "src/app/admin/costs/expense-form.tsx": {
+    "react-hooks/refs": {
+      "count": 1
+    }
+  },
+  "src/app/admin/disputes/disputes-table.tsx": {
+    "react-hooks/set-state-in-effect": {
+      "count": 1
+    }
+  },
+  "src/app/admin/economics/integration-form.tsx": {
+    "react-hooks/refs": {
+      "count": 1
+    }
+  },
+  "src/app/admin/economics/integrations-table.tsx": {
+    "react-hooks/set-state-in-effect": {
+      "count": 1
+    }
+  },
+  "src/app/admin/economics/usage-form.tsx": {
+    "react-hooks/refs": {
+      "count": 1
+    }
+  },
+  "src/app/admin/economics/usage-panel.tsx": {
+    "react-hooks/set-state-in-effect": {
+      "count": 1
+    }
+  },
+  "src/app/admin/lesson-insights/page.tsx": {
+    "react-hooks/purity": {
+      "count": 1
+    }
+  },
+  "src/app/admin/live-calls/page.tsx": {
+    "react-hooks/purity": {
+      "count": 1
+    }
+  },
+  "src/app/admin/live-calls/room-detail-sheet.tsx": {
+    "react-hooks/set-state-in-effect": {
+      "count": 1
+    }
+  },
+  "src/app/admin/notifications/notifications-table.tsx": {
+    "react-hooks/set-state-in-effect": {
+      "count": 1
+    }
+  },
+  "src/app/admin/packages/packages-table.tsx": {
+    "react-hooks/set-state-in-effect": {
+      "count": 1
+    }
+  },
+  "src/app/admin/payments/payments-table.tsx": {
+    "react-hooks/set-state-in-effect": {
+      "count": 1
+    }
+  },
+  "src/app/admin/payments/refund-form.tsx": {
+    "react-hooks/set-state-in-effect": {
+      "count": 1
+    }
+  },
+  "src/app/admin/security/admin-mfa-form.tsx": {
+    "react-hooks/set-state-in-effect": {
+      "count": 2
+    }
+  },
+  "src/app/admin/students/students-table.tsx": {
+    "react-hooks/set-state-in-effect": {
+      "count": 1
+    }
+  },
+  "src/app/admin/teachers/teachers-table.tsx": {
+    "react-hooks/set-state-in-effect": {
+      "count": 1
+    }
+  },
+  "src/app/admin/uat/uat-runbook.tsx": {
+    "react-hooks/set-state-in-effect": {
+      "count": 1
+    }
+  },
+  "src/app/b/[slug]/buy/class-slot-picker.tsx": {
+    "react-hooks/set-state-in-effect": {
+      "count": 1
+    }
+  },
+  "src/app/global-error.tsx": {
+    "react-hooks/set-state-in-effect": {
+      "count": 1
+    }
+  },
+  "src/components/account/email-change-form.tsx": {
+    "react-hooks/set-state-in-effect": {
+      "count": 1
+    }
+  },
+  "src/components/account/my-details-form.tsx": {
+    "react-hooks/set-state-in-effect": {
+      "count": 1
+    }
+  },
+  "src/components/account/notification-prefs-form.tsx": {
+    "react-hooks/refs": {
+      "count": 1
+    }
+  },
+  "src/components/chat-room.tsx": {
+    "react-hooks/purity": {
+      "count": 1
+    },
+    "react-hooks/refs": {
+      "count": 2
+    },
+    "react-hooks/set-state-in-effect": {
+      "count": 1
+    }
+  },
+  "src/components/chat/chat-popover.tsx": {
+    "react-hooks/refs": {
+      "count": 1
+    },
+    "react-hooks/set-state-in-effect": {
+      "count": 1
+    }
+  },
+  "src/components/chat/message-bubble.tsx": {
+    "react-hooks/purity": {
+      "count": 1
+    }
+  },
+  "src/components/dashboard/dashboard-view.tsx": {
+    "react-hooks/static-components": {
+      "count": 1
+    }
+  },
+  "src/components/focus-tags/focus-tag-select.tsx": {
+    "react-hooks/set-state-in-effect": {
+      "count": 1
+    }
+  },
+  "src/components/marketing/captions-demo.tsx": {
+    "react-hooks/set-state-in-effect": {
+      "count": 1
+    }
+  },
+  "src/components/materials/ai-generate-flow.tsx": {
+    "react-hooks/set-state-in-effect": {
+      "count": 1
+    }
+  },
+  "src/components/materials/material-editor.tsx": {
+    "react-hooks/refs": {
+      "count": 1
+    }
+  },
+  "src/components/materials/material-form.tsx": {
+    "react-hooks/refs": {
+      "count": 2
+    },
+    "react-hooks/set-state-in-effect": {
+      "count": 6
+    }
+  },
+  "src/components/nav/appearance-control.tsx": {
+    "react-hooks/set-state-in-effect": {
+      "count": 1
+    }
+  },
+  "src/components/nav/use-menu-popover.ts": {
+    "react-hooks/set-state-in-effect": {
+      "count": 1
+    }
+  },
+  "src/components/report-problem-dialog.tsx": {
+    "react-hooks/set-state-in-effect": {
+      "count": 1
+    }
+  },
+  "src/components/theme-toggle.tsx": {
+    "react-hooks/set-state-in-effect": {
+      "count": 1
+    }
+  },
+  "src/components/ui/combobox.tsx": {
+    "react-hooks/set-state-in-effect": {
+      "count": 1
+    }
+  },
+  "src/components/ui/form-status.tsx": {
+    "react-hooks/set-state-in-effect": {
+      "count": 1
+    }
+  },
+  "src/components/ui/otp-input.tsx": {
+    "react-hooks/set-state-in-effect": {
+      "count": 1
+    }
+  },
+  "src/components/use-server-action-recovery.ts": {
+    "react-hooks/set-state-in-effect": {
+      "count": 1
+    }
+  },
+  "src/components/video/call-library-browser.tsx": {
+    "react-hooks/refs": {
+      "count": 2
+    }
+  },
+  "src/components/video/call-session-bootstrap.tsx": {
+    "react-hooks/refs": {
+      "count": 1
+    }
+  },
+  "src/components/video/caption-band.tsx": {
+    "react-hooks/preserve-manual-memoization": {
+      "count": 1
+    }
+  },
+  "src/components/video/class-call.tsx": {
+    "react-hooks/purity": {
+      "count": 1
+    },
+    "react-hooks/refs": {
+      "count": 4
+    },
+    "react-hooks/set-state-in-effect": {
+      "count": 4
+    }
+  },
+  "src/lib/captions/use-caption-feed.ts": {
+    "react-hooks/purity": {
+      "count": 1
+    },
+    "react-hooks/set-state-in-effect": {
+      "count": 1
+    }
+  },
+  "src/lib/captions/use-caption-preferences.ts": {
+    "react-hooks/set-state-in-effect": {
+      "count": 1
+    }
+  },
+  "src/lib/use-unsaved-changes-guard.ts": {
+    "react-hooks/refs": {
+      "count": 1
+    }
+  }
+}

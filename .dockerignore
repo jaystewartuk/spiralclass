@@ -1,0 +1,16 @@
+**/node_modules
+**/.next
+**/.turbo
+**/coverage
+**/.wrangler
+**/tsconfig.tsbuildinfo
+.git
+.github
+.githooks
+.claude
+.vscode
+.playwright-mcp
+docs
+infra
+**/.env*
+!.env.example

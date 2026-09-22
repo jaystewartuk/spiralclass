@@ -1,0 +1,129 @@
+# Dependabot config — see the security plan §11.12 / §16.
+#
+# Four ecosystems: workspace npm (every package.json in the monorepo),
+# github-actions, docker, and pip (the docs site's requirements.txt).
+#
+# ⚠️ EVERY LABEL NAMED BELOW MUST ALREADY EXIST ON THE REPOSITORY. Dependabot
+# will not create the ones it is ASKED for. It leaves a comment on the pull
+# request — "The following labels could not be found ... Please create them
+# before Dependabot can add them to a pull request" — and carries on
+# unlabelled. That is a bot comment on a PR nobody is watching, not a failed
+# check, which is why the names here are guarded by
+# apps/web/tests/config/github-labels.test.ts. Adding one is two things in the
+# same change: the name below, and `gh label create`.
+#
+# Do not read a label appearing on its own as evidence against this. Dependabot
+# creates its OWN ecosystem labels unasked — `python` appeared on the repo the
+# first time a security advisory opened a pip PR, having never been named here
+# or created by hand. It is the `labels:` keys below, and only those, that it
+# declines to create.
+#
+# `github-actions` was removed by D-129, when there was nothing left to pin,
+# and comes back with the workflows ([D-157]). It is not decoration: this
+# repository requires every action to be pinned to a full 40-character commit
+# SHA (`sha_pinning_required` is on, so `@v4` is REJECTED by policy, not merely
+# frowned at), and a SHA pin is a pin to a specific version forever. Without
+# Dependabot watching them, "supply-chain hygiene" becomes four actions frozen
+# at whatever was current the day they were written, including their
+# vulnerabilities. Dependabot rewrites the SHA and the trailing `# vX.Y.Z`
+# comment together.
+#
+# Grouped updates keep the noise low; security advisories ignore the group and
+# always open a dedicated PR.
+
+# `docker` watches the `FROM` in the root Dockerfile, which is pinned to an
+# immutable @sha256 digest (M-7). ⚠️ THE PIN IS WHY THIS ENTRY EXISTS. An
+# unpinned `node:24-slim` at least drifts onto the current patched image on
+# every rebuild; a pinned one is frozen at the day it was written, so without
+# something moving it the pin trades a supply-chain risk for a stale-CVE one.
+# Dependabot rewrites the digest and opens a PR against it. Do not remove this
+# entry while the FROM carries a digest, and do not unpin the FROM to avoid
+# needing it.
+
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    # Monthly cadence. A dependency PR runs the Gate workflow like any other,
+    # so the audit step sees it before it merges. Security advisories ignore
+    # this schedule and open a dedicated PR immediately (GitHub default).
+    schedule:
+      interval: monthly
+      time: "06:00"
+      timezone: Europe/London
+    open-pull-requests-limit: 5
+    labels:
+      - dependencies
+    groups:
+      prod-minor-patch:
+        update-types: [minor, patch]
+        exclude-patterns:
+          - "next"
+          - "react"
+          - "react-dom"
+          - "@prisma/*"
+          - "prisma"
+      dev-minor-patch:
+        dependency-type: development
+        update-types: [minor, patch]
+    ignore:
+      # Pinned via root pnpm-workspace.yaml's overrides; bumping here causes lockfile thrash.
+      - dependency-name: "@types/react"
+      - dependency-name: "@types/react-dom"
+
+  - package-ecosystem: github-actions
+    directory: /
+    # Quarterly would be too slow for a supply-chain surface and weekly is
+    # noise for four actions; monthly matches npm above so both land together.
+    schedule:
+      interval: monthly
+      time: "06:00"
+      timezone: Europe/London
+    open-pull-requests-limit: 3
+    labels:
+      - dependencies
+      - ci
+    groups:
+      actions:
+        update-types: [minor, patch]
+
+  - package-ecosystem: docker
+    directory: /
+    # Monthly, matching the two above so a base-image bump lands in the same
+    # sweep rather than as a lone surprise PR. A security advisory against the
+    # base image ignores this schedule, like everywhere else.
+    schedule:
+      interval: monthly
+      time: "06:00"
+      timezone: Europe/London
+    open-pull-requests-limit: 2
+    labels:
+      - dependencies
+      - ci
+
+  - package-ecosystem: pip
+    directory: /
+    # The docs site (MkDocs Material), built by Cloudflare Pages — the only
+    # Python in this repository. Every line of requirements.txt is an exact
+    # `==` pin, so the argument made for `docker` above applies here word for
+    # word: a pin with nothing moving it is frozen at the day it was written,
+    # its vulnerabilities included.
+    #
+    # ⚠️ THIS ENTRY IS NOT WHAT PATCHES A VULNERABLE mkdocs-material. Security
+    # advisories ignore the `updates:` list entirely and open a PR against
+    # anything in the dependency graph, which is how this manifest got patched
+    # while sitting outside this file altogether. What was missing is the
+    # routine half: a pin that is merely old, and not yet vulnerable, was never
+    # bumped at all. Monthly, matching the three above, so the sweep lands
+    # together.
+    schedule:
+      interval: monthly
+      time: "06:00"
+      timezone: Europe/London
+    open-pull-requests-limit: 2
+    labels:
+      - dependencies
+      - documentation
+    groups:
+      docs-site:
+        update-types: [minor, patch]

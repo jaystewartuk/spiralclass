@@ -1,0 +1,77 @@
+name: Bug report
+description: Something in the code behaves incorrectly.
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time.
+
+        **If this is a security problem, stop and read [SECURITY.md](https://github.com/jaystewartuk/spiralclass/blob/main/SECURITY.md) instead.**
+        An unfixed vulnerability described in a public issue is a roadmap for abuse.
+
+  - type: textarea
+    id: what
+    attributes:
+      label: What happens
+      description: What you observed, and what you expected instead.
+    validations:
+      required: true
+
+  - type: textarea
+    id: repro
+    attributes:
+      label: How to reproduce
+      description: |
+        The smallest sequence that shows it. A failing test is the ideal form —
+        `pnpm test` needs no database.
+      placeholder: |
+        1. pnpm setup
+        2. Sign in as the seeded teacher
+        3. …
+    validations:
+      required: true
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      description: Best guess is fine.
+      options:
+        - Scheduling / booking
+        - Payments (card or transfer)
+        - Subscriptions / billing
+        - Auth
+        - Video / captions
+        - Homework / materials
+        - Notifications
+        - Admin
+        - Local development setup
+        - Documentation
+        - Other / not sure
+    validations:
+      required: true
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: Only if you ran it locally.
+      placeholder: |
+        node -v:
+        pnpm -v:
+        OS:
+        Commit:
+    validations:
+      required: false
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Errors or logs
+      description: |
+        Paste any stack trace or console output. **Redact anything that looks like a
+        key, token or connection string** before pasting.
+      render: text
+    validations:
+      required: false

@@ -1,0 +1,39 @@
+#!/usr/bin/env sh
+# pre-commit: refuse a commit whose author or committer email is not the one
+# this clone expects. Enabled by `pnpm install`, with the rest of .githooks.
+#
+# The failure it exists to catch: on 2026-09-04 a Claude Code session built the
+# address `jay73x@users.noreply.github.com` out of the local part of the email
+# in its environment block, and passed it inline with `git -c user.email=`.
+# Nothing rejected it — it is the valid noreply of a second GitHub account, so
+# the push was accepted and the commit was attributed to the wrong account. 27
+# commits across five of the operator's repositories carry it.
+#
+# A global `user.email` does not prevent this, because `-c` overrides it for
+# one command. So the check reads `git var`, which reports the identity the
+# commit will actually carry, rather than `git config user.email`, which would
+# report the one being overridden.
+#
+# A contributor who is not the operator sets their own address:
+#
+#     git config hooks.authorEmail you@example.com
+#
+# Not a security control. `--no-verify` skips it, `git rebase` never runs it,
+# and it binds to this clone. It is here to catch a typed address, which is the
+# only way this has ever gone wrong.
+
+expected=$(git config hooks.authorEmail || true)
+[ -n "$expected" ] || expected='243896581+jaystewartuk@users.noreply.github.com'
+
+for role in AUTHOR COMMITTER; do
+	ident=$(git var "GIT_${role}_IDENT") || exit 1
+	email=${ident##*<}
+	email=${email%%>*}
+	if [ "$email" != "$expected" ]; then
+		printf '%s\n' \
+			"pre-commit: refusing to commit with ${role} email <${email}>." \
+			"This clone expects <${expected}>." \
+			"Set yours with: git config hooks.authorEmail you@example.com" >&2
+		exit 1
+	fi
+done

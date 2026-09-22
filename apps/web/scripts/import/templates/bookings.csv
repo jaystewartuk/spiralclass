@@ -1,0 +1,5 @@
+student_ref,package_ref,start_datetime,duration_min,status
+maria-h,maria-h-p1,2026-06-04 10:00,50,scheduled
+maria-h,maria-h-p1,2026-06-11 10:00,50,scheduled
+carlos-r,carlos-r-p1,2026-05-28 17:00,50,completed
+carlos-r,carlos-r-p1,2026-06-05 17:00,50,scheduled

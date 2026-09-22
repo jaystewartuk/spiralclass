@@ -1,0 +1,185 @@
+#cloud-config
+#
+# First-boot provisioning for the SpiralClass Oracle A1 box.
+#
+# ⚠️ THIS BUILDS THE MACHINE. IT DOES NOT DEPLOY ANYTHING.
+# Docker, Tailscale, the firewall and swap — nothing else. The LiveKit stack,
+# the preview web app and preview's Postgres are all laid down by
+# scripts/oracle-deploy.sh, which is re-runnable and is what CI invokes. That
+# split is the point: a box that has to be rebuilt to change what it runs is
+# the box this rebuild is replacing.
+#
+# ⚠️ There is deliberately no `packages:` block and no `package_update: true`.
+# The instance is created with assign_public_ip = false so that a RESERVED
+# address can be attached instead of an ephemeral one, which means the box
+# has NO route to the internet for the first minute or so of its life. Every
+# cloud-init module that fetches anything would fail in that window. So all
+# of it happens in runcmd, after the wait loop below.
+
+write_files:
+  # Matches what the old box actually had: unattended-upgrades installed,
+  # automatic reboot left at its default of false. That is why it accumulated
+  # 44 days of uptime and why kernel updates wait for a human. Reproduced
+  # rather than "improved", because a box that reboots itself mid-class is a
+  # worse failure than a box running a slightly old kernel.
+  - path: /etc/apt/apt.conf.d/20auto-upgrades
+    permissions: "0644"
+    content: |
+      APT::Periodic::Update-Package-Lists "1";
+      APT::Periodic::Unattended-Upgrade "1";
+
+runcmd:
+  # ── Wait for the reserved public IP to be attached ────────────────────
+  # Until Tofu attaches it, this box has a private IP and no egress. Nothing
+  # below can work before that, and cloud-init has no built-in way to wait.
+  #
+  # ⚠️ THIS LOOP MUST NOT GIVE UP, AND MUST NOT `exit`.
+  #
+  # cloud-init concatenates every runcmd entry into ONE /bin/sh script, so an
+  # `exit 1` here abandons Docker, Tailscale and the firewall as well. And
+  # cloud-init runs once per instance — `lifecycle { ignore_changes = [metadata] }`
+  # in main.tf means no later apply re-runs it. Recovery from that is
+  # `-replace`, which re-enters the "Out of host capacity" lottery with the
+  # old box already destroyed.
+  #
+  # An earlier version bounded this at 10 minutes and exited. The attach
+  # normally takes under a minute, but it only starts after Tofu sees RUNNING
+  # and resolves two data sources — so an OCI hiccup, or the security-token
+  # session lapsing mid-apply, can push it arbitrarily late. Waiting costs
+  # nothing; giving up costs a rebuild.
+  #
+  # ⚠️ BUT A LOOP THAT NEVER GIVES UP MUST SAY WHICH CONDITION IT IS STUCK ON.
+  # An earlier version tested one third-party URL and printed "no public IP
+  # attached yet" whatever the reason, so an archive.ubuntu.com outage — or a
+  # route table or security list that never lets anything out — presented as
+  # an attach that had not happened, forever, with no timeout and nobody able
+  # to look: Tailscale is not up yet and :22 is closed, so the only window
+  # onto this box is the serial console.
+  #
+  # Two probes instead of one. The instance metadata service on 169.254.169.254
+  # needs NO egress, so it can answer "is a public IP attached" even while the
+  # box is still cut off — which is the whole distinction. Egress is then
+  # probed against three unrelated hosts, so one of them being down is not
+  # mistaken for the box being isolated.
+  - |
+    has_public_ip() {
+      curl -s --max-time 5 -H 'Authorization: Bearer Oracle' \
+        http://169.254.169.254/opc/v2/vnics/ 2>/dev/null | grep -q '"publicIp"'
+    }
+    has_egress() {
+      for u in https://download.docker.com/ https://archive.ubuntu.com/ https://one.one.one.one/; do
+        curl -sfI --max-time 5 "$${u}" >/dev/null 2>&1 && return 0
+      done
+      return 1
+    }
+    n=0
+    until has_egress; do
+      n=$((n + 1))
+      if ! command -v curl >/dev/null 2>&1; then
+        # Both probes ARE curl. The standard Ubuntu 24.04 cloud image ships it
+        # and the minimal one does not; if you are reading this on the serial
+        # console, that is which image got picked, and nothing below this loop
+        # has run or ever will.
+        echo "cloud-init: FATAL — curl is not in this image, so neither probe can run and this loop cannot exit. Serial console is the only way in."
+      elif has_public_ip; then
+        echo "cloud-init: a public IP IS attached, and there is still no egress (attempt $${n}). This is NOT the reserved-IP wait — look at the route table, the security list's egress rule, and whether the probe hosts are up."
+      else
+        echo "cloud-init: waiting for the reserved public IP to be attached (attempt $${n})"
+      fi
+      sleep 15
+    done
+    echo "cloud-init: network up after $${n} attempt(s)"
+
+  # ── Firewall, BEFORE Docker exists ────────────────────────────────────
+  # ⚠️ APPENDED RULE BY RULE, NEVER `iptables-restore` OF A WHOLE TABLE.
+  #
+  # An earlier version wrote a `*filter` table containing only INPUT rules and
+  # restored it. `iptables-restore` without --noflush REPLACES the entire
+  # table, and it ran after Docker had started. Read off the old box, the real
+  # filter table also carries `:FORWARD DROP`, Docker's six chains
+  # (DOCKER-USER, DOCKER-FORWARD, DOCKER-BRIDGE, DOCKER-CT, DOCKER-INTERNAL,
+  # DOCKER), tailscale's ts-input/ts-forward, and Oracle's own
+  # `-A OUTPUT -d 169.254.0.0/16 -j InstanceServices`, which protects the
+  # instance metadata service. All of that would have been wiped, and
+  # `netfilter-persistent save` on the next line would have persisted the
+  # damage across reboots.
+  #
+  # Appending leaves every chain this does not name alone. Tailscale inserts
+  # its ts-input jump at the head of INPUT when it starts, so it still lands
+  # above the REJECT below, exactly as on the old box.
+  #
+  # ⚠️ These must stay in step with the OCI security list in main.tf. They are
+  # two separate control planes; opening one without the other gives a box
+  # that looks correct and drops media.
+  - iptables -A INPUT -m state --state RELATED,ESTABLISHED -j ACCEPT
+  - iptables -A INPUT -p icmp -j ACCEPT
+  - iptables -A INPUT -i lo -j ACCEPT
+  # :22 on the TAILSCALE INTERFACE ONLY. The old box accepted tcp/22 on every
+  # interface and was saved from that solely by the OCI security list — one
+  # control plane deep. A rule naming an interface that does not exist yet
+  # simply never matches, so this is safe before tailscaled starts.
+  - iptables -A INPUT -i tailscale0 -p tcp -m state --state NEW -m tcp --dport 22 -j ACCEPT
+  - iptables -A INPUT -p udp -m udp --dport 50000:60000 -m comment --comment "LiveKit RTC media + TURN relay" -j ACCEPT
+  - iptables -A INPUT -p udp -m udp --dport 3478 -m comment --comment "LiveKit embedded TURN" -j ACCEPT
+  - iptables -A INPUT -p tcp -m tcp --dport 7881 -m state --state NEW -m comment --comment "LiveKit RTC TCP fallback" -j ACCEPT
+  - iptables -A INPUT -p tcp -m tcp --dport 80 -m state --state NEW -m comment --comment "ACME HTTP-01 + Cloudflare origin fetch" -j ACCEPT
+  - iptables -A INPUT -p tcp -m tcp --dport 443 -m state --state NEW -m comment --comment "LiveKit signaling and the web app (Caddy)" -j ACCEPT
+  - iptables -A INPUT -j REJECT --reject-with icmp-host-prohibited
+
+  # ── Base packages ─────────────────────────────────────────────────────
+  - apt-get update -qq
+  - DEBIAN_FRONTEND=noninteractive apt-get install -y -qq ca-certificates curl gnupg git jq iptables-persistent unattended-upgrades
+
+  # ── Swap ──────────────────────────────────────────────────────────────
+  # The old box had a 4 GB swapfile that no record mentions. On a machine
+  # with 12 GB and no second box to fail over to, it is cheap insurance.
+  - |
+    if [ ! -f /swapfile ]; then
+      fallocate -l ${swap_gb}G /swapfile
+      chmod 600 /swapfile
+      mkswap /swapfile
+      swapon /swapfile
+      echo '/swapfile none swap sw 0 0' >> /etc/fstab
+    fi
+
+  # ── Docker, from Docker's own repository ──────────────────────────────
+  # Not Ubuntu's docker.io: the observed box ran Docker 29.6.1 with Compose
+  # v5.3.1, which only the upstream repo ships.
+  - install -m 0755 -d /etc/apt/keyrings
+  - curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
+  - chmod a+r /etc/apt/keyrings/docker.asc
+  - |
+    echo "deb [arch=arm64 signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu $(. /etc/os-release && echo "$${VERSION_CODENAME}") stable" \
+      > /etc/apt/sources.list.d/docker.list
+  - apt-get update -qq
+  - DEBIAN_FRONTEND=noninteractive apt-get install -y -qq docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+  - systemctl enable --now docker
+  - usermod -aG docker ubuntu
+
+  # ── Tailscale ─────────────────────────────────────────────────────────
+  # ⚠️ --ssh is what makes this box reachable at all; the banner on :22 is
+  # SSH-2.0-Tailscale and ordinary SSH keys are irrelevant to it.
+  #
+  # ⚠️ Key expiry must be disabled for this node in the admin console after
+  # it joins. It CANNOT be done from here, and if it is skipped the node's
+  # key expires 180 days from now and access lapses on a date nobody has
+  # written down. That is a real trap the old box only avoided because
+  # someone turned it off by hand.
+  - curl -fsSL https://tailscale.com/install.sh | sh
+  - tailscale up --authkey='${tailscale_authkey}' --hostname='${tailscale_hostname}' --ssh
+  - tailscale status
+
+  # ── Persist the firewall, LAST ────────────────────────────────────────
+  # Saved only now, so the file captures the complete table — this file's
+  # INPUT rules plus the chains Docker and Tailscale added for themselves.
+  # Saving any earlier would persist a half-built firewall as the boot state.
+  - netfilter-persistent save
+
+  # ── The stack directory, empty and waiting ────────────────────────────
+  # scripts/oracle-deploy.sh fills these. Creating them here means the deploy
+  # script never has to care whether it is the first run.
+  - install -d -o ubuntu -g ubuntu -m 0755 /home/ubuntu/oracle-livekit-production
+  - install -d -o ubuntu -g ubuntu -m 0755 /opt/spiralclass
+  - chown ubuntu:ubuntu /opt/spiralclass
+
+  - echo "cloud-init: base build complete — run scripts/oracle-deploy.sh next"

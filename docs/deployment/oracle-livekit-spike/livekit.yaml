@@ -1,0 +1,21 @@
+# Minimal single-node LiveKit config for the Oracle A1 capacity spike — see
+# ../ORACLE_LIVEKIT_SPIKE.md. NOT tuned for production (no TLS, no key
+# rotation, no TURN). Replace the placeholder key/secret before running:
+#   docker run --rm livekit/livekit-server generate-keys
+# Never commit real keys — this spike box holds nothing precious, but treat
+# the habit as if it did.
+
+port: 7880
+
+rtc:
+  tcp_port: 7881
+  port_range_start: 50000
+  port_range_end: 60000
+  # No public IP is ever offered to a real client here — this spike is only
+  # reachable over the Tailscale mesh, so there's nothing for STUN to
+  # discover. Leave false; do NOT flip this true without also opening public
+  # inbound ports, which this spike deliberately never does (see the runbook).
+  use_external_ip: false
+
+keys:
+  spikekeyPLACEHOLDER: spikesecretPLACEHOLDERreplaceme

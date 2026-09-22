@@ -1,0 +1,15 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": "nextjs",
+  "installCommand": "pnpm install --frozen-lockfile --filter spiralclass-web...",
+  "buildCommand": "pnpm --filter spiralclass-web build",
+  "outputDirectory": "apps/web/.next",
+  "regions": ["cle1"],
+  "git": {
+    "deploymentEnabled": false
+  },
+  "github": {
+    "enabled": false,
+    "silent": true
+  }
+}

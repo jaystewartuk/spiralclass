@@ -1,0 +1,19 @@
+# Copy to terraform.tfvars (gitignored) and fill in. These values are NOT secret
+# (the API token is passed via the CLOUDFLARE_API_TOKEN env var, never here).
+
+account_id = "your-cloudflare-account-id"
+
+# Optional override (default shown) — the canonical bucket list. Adding a
+# bucket is a one-line diff here; see README.md for the import step needed
+# the FIRST time you add an entry for a bucket that already exists (was
+# created by hand in the dashboard).
+# buckets = [
+#   { name = "agendaprofe-class-materials",           env_prefix = "CLASS_MATERIALS_R2", environment = "production", public = false },
+#   { name = "agendaprofe-teacher-photos",          env_prefix = "TEACHER_PHOTOS_R2",  environment = "production", public = true },
+#   { name = "agendaprofe-chat-audio",              env_prefix = "CHAT_AUDIO_R2",       environment = "production", public = false },
+#   { name = "agendaprofe-recordings",              env_prefix = "LIVEKIT_EGRESS_S3",   environment = "production", public = false },
+#   { name = "agendaprofe-preview-class-materials",    env_prefix = "CLASS_MATERIALS_R2",  environment = "preview",    public = false },
+#   { name = "agendaprofe-preview-teacher-photos",  env_prefix = "TEACHER_PHOTOS_R2",   environment = "preview",    public = true },
+#   { name = "agendaprofe-preview-chat-audio",      env_prefix = "CHAT_AUDIO_R2",        environment = "preview",    public = false },
+#   { name = "agendaprofe-preview-recordings",      env_prefix = "LIVEKIT_EGRESS_S3",    environment = "preview",    public = false },
+# ]

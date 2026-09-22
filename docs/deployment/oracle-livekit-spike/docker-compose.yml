@@ -1,0 +1,16 @@
+# Oracle A1 LiveKit capacity spike — see ../ORACLE_LIVEKIT_SPIKE.md.
+# NOT a production deployment. Never exposed publicly (network_mode: host on
+# a box whose public inbound is closed except SSH-over-Tailscale — see the
+# runbook's "Why not this box for production").
+#
+# network_mode: host is the standard LiveKit self-host recommendation:
+# Docker's default bridge networking NATs the RTC UDP port range, which
+# breaks WebRTC ICE candidate gathering. Host networking avoids that.
+services:
+  livekit:
+    image: livekit/livekit-server:latest
+    restart: unless-stopped
+    network_mode: host
+    command: --config /etc/livekit.yaml
+    volumes:
+      - ./livekit.yaml:/etc/livekit.yaml:ro

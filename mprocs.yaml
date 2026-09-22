@@ -1,0 +1,7 @@
+procs:
+  web:
+    shell: "pnpm dev"
+  db:
+    shell: "pnpm --filter spiralclass-web db:test:up"
+  docs:
+    shell: "bash scripts/docs-serve.sh"

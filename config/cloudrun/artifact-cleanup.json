@@ -1,0 +1,17 @@
+[
+  {
+    "name": "keep-recent-releases",
+    "action": { "type": "Keep" },
+    "mostRecentVersions": { "keepCount": 5 }
+  },
+  {
+    "name": "delete-untagged",
+    "action": { "type": "Delete" },
+    "condition": { "tagState": "UNTAGGED", "olderThan": "1d" }
+  },
+  {
+    "name": "delete-superseded",
+    "action": { "type": "Delete" },
+    "condition": { "tagState": "ANY", "olderThan": "60d" }
+  }
+]

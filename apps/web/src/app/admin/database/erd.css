@@ -1,0 +1,39 @@
+/* Theme React Flow's built-in chrome (controls, minimap) to the app's design
+   tokens so it reads as part of the admin surface in both light and dark. The
+   `colorMode` prop handles the canvas itself; these tune the overlays. */
+
+.react-flow__controls {
+  border-radius: 0.5rem;
+  overflow: hidden;
+  box-shadow: 0 1px 2px hsl(var(--foreground) / 0.08);
+  border: 1px solid hsl(var(--border) / 0.6);
+}
+
+.react-flow__controls-button {
+  background: hsl(var(--background));
+  border-bottom: 1px solid hsl(var(--border) / 0.6);
+  color: hsl(var(--foreground));
+}
+
+.react-flow__controls-button:hover {
+  background: hsl(var(--muted));
+}
+
+.react-flow__controls-button svg {
+  fill: currentColor;
+}
+
+.react-flow__minimap {
+  border-radius: 0.5rem;
+  border: 1px solid hsl(var(--border) / 0.6);
+  background: hsl(var(--muted) / 0.4);
+}
+
+.react-flow__attribution {
+  display: none;
+}
+
+/* Dotted background pattern picks up the muted token in both themes. */
+.react-flow__background {
+  color: hsl(var(--muted-foreground) / 0.25);
+}

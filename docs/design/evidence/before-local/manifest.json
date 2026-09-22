@@ -1,0 +1,752 @@
+{
+  "label": "before-local",
+  "capturedAt": "2026-08-29T20:45:56.232Z",
+  "origin": "http://preview.localhost:3000",
+  "commit": "145edd679575c2f66b9955a4cece40adff0539e4",
+  "encoding": {
+    "format": "jpeg",
+    "quality": 72,
+    "maxEdge": 1400,
+    "note": "Full-page renders, downscaled. The raw PNGs are gitignored build output."
+  },
+  "projects": ["390-light", "390-dark", "1440-light", "1440-dark"],
+  "totalBytes": 6968859,
+  "images": [
+    {
+      "name": "about",
+      "path": "/about",
+      "project": "1440-dark",
+      "file": "about__1440-dark.jpg",
+      "bytes": 124256,
+      "sha256": "fe526638847680c4bdd69716c757602c2859c32f4eec88870df4a261c1c9434b"
+    },
+    {
+      "name": "about",
+      "path": "/about",
+      "project": "1440-light",
+      "file": "about__1440-light.jpg",
+      "bytes": 126720,
+      "sha256": "9f87a5903bbd14f0d03b445cb207e2bfe2555447324f9534798392282baa81b5"
+    },
+    {
+      "name": "about",
+      "path": "/about",
+      "project": "390-dark",
+      "file": "about__390-dark.jpg",
+      "bytes": 50758,
+      "sha256": "0d190f4d25409f62534d25bdc7dafdb1d215d4731495d78865912c5482a35a98"
+    },
+    {
+      "name": "about",
+      "path": "/about",
+      "project": "390-light",
+      "file": "about__390-light.jpg",
+      "bytes": 52297,
+      "sha256": "400120bb38b7e06e9e0cca5f499700bf96c9582e9b7ad00edc0c296efe9ab4ec"
+    },
+    {
+      "name": "booking",
+      "path": "/b/alicia-moreno",
+      "project": "1440-dark",
+      "file": "booking__1440-dark.jpg",
+      "bytes": 117991,
+      "sha256": "418f6d7d3eef7b657d48794bb5cc5f2c090048ba045bf29039f566646ced858f"
+    },
+    {
+      "name": "booking",
+      "path": "/b/alicia-moreno",
+      "project": "1440-light",
+      "file": "booking__1440-light.jpg",
+      "bytes": 119647,
+      "sha256": "3880389326f4fcb586ed501f09695fcd4ac5df88d410d69a17fb80aeb31653b5"
+    },
+    {
+      "name": "booking",
+      "path": "/b/alicia-moreno",
+      "project": "390-dark",
+      "file": "booking__390-dark.jpg",
+      "bytes": 53516,
+      "sha256": "4da6d9b532e35c42ae1eff8dc59d3b664bb3b6a28cd13cc307f4b18e0920575a"
+    },
+    {
+      "name": "booking",
+      "path": "/b/alicia-moreno",
+      "project": "390-light",
+      "file": "booking__390-light.jpg",
+      "bytes": 53349,
+      "sha256": "325e92eaa1969f3fcbdb58c359d1cf361f081aa33d1621d2187b79a798a2d36f"
+    },
+    {
+      "name": "booking-buy",
+      "path": "/b/alicia-moreno/buy",
+      "project": "1440-dark",
+      "file": "booking-buy__1440-dark.jpg",
+      "bytes": 115700,
+      "sha256": "aaf0a5bc5eddc2bf90ea093d825ddb2020f34a515c102ccfd5d2fc9f359e72e1"
+    },
+    {
+      "name": "booking-buy",
+      "path": "/b/alicia-moreno/buy",
+      "project": "1440-light",
+      "file": "booking-buy__1440-light.jpg",
+      "bytes": 116755,
+      "sha256": "61af849bf98a7c46c0e4ef5c978233e09b4e100245151f003b3df6bb88719041"
+    },
+    {
+      "name": "booking-buy",
+      "path": "/b/alicia-moreno/buy",
+      "project": "390-dark",
+      "file": "booking-buy__390-dark.jpg",
+      "bytes": 85657,
+      "sha256": "8caa8d76ccddde0095713dd5b6a77a8f91ebcd38980373170c7fa031a91f98cd"
+    },
+    {
+      "name": "booking-buy",
+      "path": "/b/alicia-moreno/buy",
+      "project": "390-light",
+      "file": "booking-buy__390-light.jpg",
+      "bytes": 87136,
+      "sha256": "b34faee4b071a86fac1b4d870f62270d7c81d91b0e5c35820c0accde105e1425"
+    },
+    {
+      "name": "calendar",
+      "path": "/dashboard/calendar",
+      "project": "1440-dark",
+      "file": "calendar__1440-dark.jpg",
+      "bytes": 84422,
+      "sha256": "5d7fe33ceb4b31fb3cccdc27110db2ab9e189972a9ecb1c62ef5526104141f36"
+    },
+    {
+      "name": "calendar",
+      "path": "/dashboard/calendar",
+      "project": "1440-light",
+      "file": "calendar__1440-light.jpg",
+      "bytes": 83990,
+      "sha256": "e3cf18b8f7abbc068b6ec59c32eb71b2d7d285ed540fb74644be06ed5114a83f"
+    },
+    {
+      "name": "calendar",
+      "path": "/dashboard/calendar",
+      "project": "390-dark",
+      "file": "calendar__390-dark.jpg",
+      "bytes": 68760,
+      "sha256": "eed9e5a2d12745815f2dba19e24932f42d83f557ba45e989d0aedd7ce3b2b977"
+    },
+    {
+      "name": "calendar",
+      "path": "/dashboard/calendar",
+      "project": "390-light",
+      "file": "calendar__390-light.jpg",
+      "bytes": 72130,
+      "sha256": "41009cad1aeed55680720192f2d1dce81886f910d0e70cefe758d3f1811a9e49"
+    },
+    {
+      "name": "class-detail",
+      "path": "/dashboard/classes/b74fcdba-30bd-4b5d-a42c-7765fc027912",
+      "project": "1440-dark",
+      "file": "class-detail__1440-dark.jpg",
+      "bytes": 105124,
+      "sha256": "2f9aed2f79a758b62adf846f4f4bdd4365837c04bd50fb6dc249a3fe40d1b4ae"
+    },
+    {
+      "name": "class-detail",
+      "path": "/dashboard/classes/b74fcdba-30bd-4b5d-a42c-7765fc027912",
+      "project": "1440-light",
+      "file": "class-detail__1440-light.jpg",
+      "bytes": 110822,
+      "sha256": "d1274c88dd3025628b833c673a867f2cb6851e934c9758869a8530632605d384"
+    },
+    {
+      "name": "class-detail",
+      "path": "/dashboard/classes/b74fcdba-30bd-4b5d-a42c-7765fc027912",
+      "project": "390-dark",
+      "file": "class-detail__390-dark.jpg",
+      "bytes": 49210,
+      "sha256": "a11c0490c276d4c73d8639cbe89196e5ec9115298e5d5eafd53ddf3e687ae558"
+    },
+    {
+      "name": "class-detail",
+      "path": "/dashboard/classes/b74fcdba-30bd-4b5d-a42c-7765fc027912",
+      "project": "390-light",
+      "file": "class-detail__390-light.jpg",
+      "bytes": 50669,
+      "sha256": "7774a5bf02ecfa295502dca97047b4908cd6ba06171b7f6828f759072d408a2e"
+    },
+    {
+      "name": "classes",
+      "path": "/dashboard/classes",
+      "project": "1440-dark",
+      "file": "classes__1440-dark.jpg",
+      "bytes": 120577,
+      "sha256": "a7f1683e8ea01f4d2a1e6f29f1c75bbe4a13497df7cd9d4501b13c252e7f0e2a"
+    },
+    {
+      "name": "classes",
+      "path": "/dashboard/classes",
+      "project": "1440-light",
+      "file": "classes__1440-light.jpg",
+      "bytes": 130825,
+      "sha256": "74b3ed498f59f5441ac741a2f9e5bd3f2a35d310bba1c8a035363763075bae6c"
+    },
+    {
+      "name": "classes",
+      "path": "/dashboard/classes",
+      "project": "390-dark",
+      "file": "classes__390-dark.jpg",
+      "bytes": 61950,
+      "sha256": "97e95425ccb06b1f5053c502c82d2818bc4898c40b1d9db3753de931c672367a"
+    },
+    {
+      "name": "classes",
+      "path": "/dashboard/classes",
+      "project": "390-light",
+      "file": "classes__390-light.jpg",
+      "bytes": 67043,
+      "sha256": "c03938bf866e58418a51d15e27a4b42a1ee17d44af3b150b860e6f2006138b00"
+    },
+    {
+      "name": "dashboard",
+      "path": "/dashboard",
+      "project": "1440-dark",
+      "file": "dashboard__1440-dark.jpg",
+      "bytes": 121918,
+      "sha256": "7f5998d38d6cc2f96339e3c67a6663bed474c62a587c72475a01475c2108bbe8"
+    },
+    {
+      "name": "dashboard",
+      "path": "/dashboard",
+      "project": "1440-light",
+      "file": "dashboard__1440-light.jpg",
+      "bytes": 132881,
+      "sha256": "c7f11efd1bf3afe8f15f12b4554940f66a16221ae19962a894ab0d2ce1af1c77"
+    },
+    {
+      "name": "dashboard",
+      "path": "/dashboard",
+      "project": "390-dark",
+      "file": "dashboard__390-dark.jpg",
+      "bytes": 45752,
+      "sha256": "1e1e15a6591e15df601be409b376aa98b848a4e6cd4fd5c27acc23acb1745cdf"
+    },
+    {
+      "name": "dashboard",
+      "path": "/dashboard",
+      "project": "390-light",
+      "file": "dashboard__390-light.jpg",
+      "bytes": 50245,
+      "sha256": "79bfe59e92cf436471886f4faa0f483071ffbba2d2c33ebbc1aaacc3204cf749"
+    },
+    {
+      "name": "features",
+      "path": "/features",
+      "project": "1440-dark",
+      "file": "features__1440-dark.jpg",
+      "bytes": 123843,
+      "sha256": "dcbec4502613002d62783dba3cb8d539e115c85f33a3b7e5fa68e4ddeed6ef6d"
+    },
+    {
+      "name": "features",
+      "path": "/features",
+      "project": "1440-light",
+      "file": "features__1440-light.jpg",
+      "bytes": 131023,
+      "sha256": "fbf8eab5128213e1511eff255d02d3670c0ecae7513cabf5c117cc4899789ed5"
+    },
+    {
+      "name": "features",
+      "path": "/features",
+      "project": "390-dark",
+      "file": "features__390-dark.jpg",
+      "bytes": 33998,
+      "sha256": "87f51317647d6fd113a00b9b1c638bd0536ed4101215a966af99c5fc4cf67718"
+    },
+    {
+      "name": "features",
+      "path": "/features",
+      "project": "390-light",
+      "file": "features__390-light.jpg",
+      "bytes": 34374,
+      "sha256": "217a30c6da39e1146cad24efa9b6f4b4d1ab06f5bce4b0348a928cfa65967554"
+    },
+    {
+      "name": "help-index",
+      "path": "/help",
+      "project": "1440-dark",
+      "file": "help-index__1440-dark.jpg",
+      "bytes": 46467,
+      "sha256": "eb8e24f7d0d29b056e7944e1b4e25e12eb86ecd17a40e1e426791113f9d8816e"
+    },
+    {
+      "name": "help-index",
+      "path": "/help",
+      "project": "1440-light",
+      "file": "help-index__1440-light.jpg",
+      "bytes": 46187,
+      "sha256": "492f985aab8646f64c5ad5a9975b3146975428f382537e5b3098a65747102ace"
+    },
+    {
+      "name": "help-index",
+      "path": "/help",
+      "project": "390-dark",
+      "file": "help-index__390-dark.jpg",
+      "bytes": 26919,
+      "sha256": "99c5d2060e0c86940797b60eae8de5161222df6d7d6cacfeabb9f342b231b542"
+    },
+    {
+      "name": "help-index",
+      "path": "/help",
+      "project": "390-light",
+      "file": "help-index__390-light.jpg",
+      "bytes": 26918,
+      "sha256": "61c52a151c87ec938bd5a57386c45812232fc3f7bb71d565840c5a80600b0246"
+    },
+    {
+      "name": "landing",
+      "path": "/",
+      "project": "1440-dark",
+      "file": "landing__1440-dark.jpg",
+      "bytes": 63196,
+      "sha256": "c4e90f0f0df5559d715ae536f9acfcd48a6f7749b29eb6df7f5f18c39e4e5755"
+    },
+    {
+      "name": "landing",
+      "path": "/",
+      "project": "1440-light",
+      "file": "landing__1440-light.jpg",
+      "bytes": 64466,
+      "sha256": "b10feefe65ada724111683d6621d52b6c0f1de00ef805f8ef74d729070919fce"
+    },
+    {
+      "name": "landing",
+      "path": "/",
+      "project": "390-dark",
+      "file": "landing__390-dark.jpg",
+      "bytes": 26151,
+      "sha256": "92d8ec1ca380b2867e138e90aa8aac3eb9179260c99f1ffc0528a6a1f7149589"
+    },
+    {
+      "name": "landing",
+      "path": "/",
+      "project": "390-light",
+      "file": "landing__390-light.jpg",
+      "bytes": 26401,
+      "sha256": "71d3c565bfc34913f84172ee203c3dd58613b21b6d227a9ca6c5139cddf617dc"
+    },
+    {
+      "name": "materials",
+      "path": "/dashboard/materials",
+      "project": "1440-dark",
+      "file": "materials__1440-dark.jpg",
+      "bytes": 65285,
+      "sha256": "ea09e7b571f2dee1b0a41bd5cdbb134ee0f023daf44852ba2bd0fec2f1b44fbc"
+    },
+    {
+      "name": "materials",
+      "path": "/dashboard/materials",
+      "project": "1440-light",
+      "file": "materials__1440-light.jpg",
+      "bytes": 65314,
+      "sha256": "fca432a989570600515a0495f6c1cfcacf49f1458ad2a55d1cba1ab7a57d31cf"
+    },
+    {
+      "name": "materials",
+      "path": "/dashboard/materials",
+      "project": "390-dark",
+      "file": "materials__390-dark.jpg",
+      "bytes": 75504,
+      "sha256": "3940b635b4539483bc51b7a09bbf74050c6dbbdbee79d3290f623945fc192fc0"
+    },
+    {
+      "name": "materials",
+      "path": "/dashboard/materials",
+      "project": "390-light",
+      "file": "materials__390-light.jpg",
+      "bytes": 77286,
+      "sha256": "5ca8d7f2b9d50dc2dae2b104d29ad3262cc8a2d7b462423fca67931422e37d18"
+    },
+    {
+      "name": "onboarding-timezone",
+      "path": "/onboarding/timezone",
+      "project": "1440-dark",
+      "file": "onboarding-timezone__1440-dark.jpg",
+      "bytes": 83957,
+      "sha256": "8b8a03c4c366a98f910294825a7609bb46e5dfd1e7deb3541ece59091849b1dc"
+    },
+    {
+      "name": "onboarding-timezone",
+      "path": "/onboarding/timezone",
+      "project": "1440-light",
+      "file": "onboarding-timezone__1440-light.jpg",
+      "bytes": 83340,
+      "sha256": "d6b4b899d90ce40f4d024ad1704acc77ad0811a16c5a7b55d9ff5365aeb56355"
+    },
+    {
+      "name": "onboarding-timezone",
+      "path": "/onboarding/timezone",
+      "project": "390-dark",
+      "file": "onboarding-timezone__390-dark.jpg",
+      "bytes": 98264,
+      "sha256": "8005d123780236468527269a52ab1b5ffa7c6c0427a090d7e336ac5f433fb3cc"
+    },
+    {
+      "name": "onboarding-timezone",
+      "path": "/onboarding/timezone",
+      "project": "390-light",
+      "file": "onboarding-timezone__390-light.jpg",
+      "bytes": 99081,
+      "sha256": "f64ab7eeaa48cdc19d2791cfe0936d052c84f9ed164b81555af59072e96f07d6"
+    },
+    {
+      "name": "payments",
+      "path": "/payments",
+      "project": "1440-dark",
+      "file": "payments__1440-dark.jpg",
+      "bytes": 101466,
+      "sha256": "40f8f8af1b776b5c97535568f2e436fbf58f71ffcad50a12ba20feaf15df3584"
+    },
+    {
+      "name": "payments",
+      "path": "/payments",
+      "project": "1440-light",
+      "file": "payments__1440-light.jpg",
+      "bytes": 107358,
+      "sha256": "e99cdf47f364394de6d0530c9ec2d67e5f49e5247b056b4ab6c8e257c284c856"
+    },
+    {
+      "name": "payments",
+      "path": "/payments",
+      "project": "390-dark",
+      "file": "payments__390-dark.jpg",
+      "bytes": 82409,
+      "sha256": "052df282e05edcb84238151082d7c306a04141a1a548bafb450d5a969dccccb8"
+    },
+    {
+      "name": "payments",
+      "path": "/payments",
+      "project": "390-light",
+      "file": "payments__390-light.jpg",
+      "bytes": 88450,
+      "sha256": "77cb7b698c57e678758b2d02c1d57d4524c3f63b0bf25f957e27c0468a414368"
+    },
+    {
+      "name": "pricing",
+      "path": "/precios",
+      "project": "1440-dark",
+      "file": "pricing__1440-dark.jpg",
+      "bytes": 83404,
+      "sha256": "2a744d4095ceeba2d7cf7e969328b5ab25e268801b0df45b4767acb11c20e9a2"
+    },
+    {
+      "name": "pricing",
+      "path": "/precios",
+      "project": "1440-light",
+      "file": "pricing__1440-light.jpg",
+      "bytes": 86064,
+      "sha256": "90802712739b844f17cf8c837f23622c356be605a14b9f203ee002795e3e53ca"
+    },
+    {
+      "name": "pricing",
+      "path": "/precios",
+      "project": "390-dark",
+      "file": "pricing__390-dark.jpg",
+      "bytes": 69609,
+      "sha256": "91e26a897587ae8e65f46265e3fe93c921abded64c511100fe953fb53f1dc757"
+    },
+    {
+      "name": "pricing",
+      "path": "/precios",
+      "project": "390-light",
+      "file": "pricing__390-light.jpg",
+      "bytes": 76254,
+      "sha256": "b8a68ced2e0cab97162e8563402054d977789d052fab41d9767ee6675c84812c"
+    },
+    {
+      "name": "settings-availability",
+      "path": "/settings/availability",
+      "project": "1440-dark",
+      "file": "settings-availability__1440-dark.jpg",
+      "bytes": 130170,
+      "sha256": "8086304a733e5b01b092942f2bdca622610aee4c833baa38fdf19c8bf4c5d4de"
+    },
+    {
+      "name": "settings-availability",
+      "path": "/settings/availability",
+      "project": "1440-light",
+      "file": "settings-availability__1440-light.jpg",
+      "bytes": 131203,
+      "sha256": "0987a592f2eb833f8ff52ec0655258762cff651fcd749462af93e8dbc0855487"
+    },
+    {
+      "name": "settings-availability",
+      "path": "/settings/availability",
+      "project": "390-dark",
+      "file": "settings-availability__390-dark.jpg",
+      "bytes": 70070,
+      "sha256": "285779e88b00dc86d3489433738290efe30abc1b010f006fd873de64da4f489d"
+    },
+    {
+      "name": "settings-availability",
+      "path": "/settings/availability",
+      "project": "390-light",
+      "file": "settings-availability__390-light.jpg",
+      "bytes": 70728,
+      "sha256": "e345752ead8febb16fe11c66d30bc5dd41e07b327b344ebc02ce78d2525c5daf"
+    },
+    {
+      "name": "settings-booking-page",
+      "path": "/settings/booking-page",
+      "project": "1440-dark",
+      "file": "settings-booking-page__1440-dark.jpg",
+      "bytes": 107433,
+      "sha256": "c65ae2559772642a9416e1341ba2f8f9cae5378aaf89a7e7e2ce5fe07cb3ec8a"
+    },
+    {
+      "name": "settings-booking-page",
+      "path": "/settings/booking-page",
+      "project": "1440-light",
+      "file": "settings-booking-page__1440-light.jpg",
+      "bytes": 117401,
+      "sha256": "509ea6f521e46465a7f861dedf522bf21c3244a7fd6b1132bff5e351fa5937f1"
+    },
+    {
+      "name": "settings-booking-page",
+      "path": "/settings/booking-page",
+      "project": "390-dark",
+      "file": "settings-booking-page__390-dark.jpg",
+      "bytes": 49700,
+      "sha256": "0fc1bbec50e32a8a839e6701e8366220f04fb6a4ffd64956d31ac68de770c186"
+    },
+    {
+      "name": "settings-booking-page",
+      "path": "/settings/booking-page",
+      "project": "390-light",
+      "file": "settings-booking-page__390-light.jpg",
+      "bytes": 51659,
+      "sha256": "94a42ede9f5303b83f4d2974dc7a1f1e4c0ec5a3baf48c4bc88feb428475bbbb"
+    },
+    {
+      "name": "sign-in",
+      "path": "/sign-in",
+      "project": "1440-dark",
+      "file": "sign-in__1440-dark.jpg",
+      "bytes": 55339,
+      "sha256": "fe06623a54f0a2cb6645bf9d0b16f05363fa042cb9a736e248409792eefd125b"
+    },
+    {
+      "name": "sign-in",
+      "path": "/sign-in",
+      "project": "1440-light",
+      "file": "sign-in__1440-light.jpg",
+      "bytes": 57148,
+      "sha256": "bafa40a9a3f0c9e116110996588545c12e87226d080b37d51cba2e2e85a56963"
+    },
+    {
+      "name": "sign-in",
+      "path": "/sign-in",
+      "project": "390-dark",
+      "file": "sign-in__390-dark.jpg",
+      "bytes": 46726,
+      "sha256": "0ba20273cafabf4550c9c6fbd0003f1120a8c667065189751369010a51ad0d5e"
+    },
+    {
+      "name": "sign-in",
+      "path": "/sign-in",
+      "project": "390-light",
+      "file": "sign-in__390-light.jpg",
+      "bytes": 48682,
+      "sha256": "e9fa3921f85c91dae1702f8f5e139e9c701f7bdae87bbc34e1038b22387acdba"
+    },
+    {
+      "name": "sign-up",
+      "path": "/sign-up",
+      "project": "1440-dark",
+      "file": "sign-up__1440-dark.jpg",
+      "bytes": 60405,
+      "sha256": "dbdc4d3ed7bb5d936d21d848fea01a3db50e363529023b780584b7458c2806d8"
+    },
+    {
+      "name": "sign-up",
+      "path": "/sign-up",
+      "project": "1440-light",
+      "file": "sign-up__1440-light.jpg",
+      "bytes": 62415,
+      "sha256": "5d2a3b3556a7ab02ed67a5ceb0401f33d711b476b491c1c6e1f68da82f92c4a8"
+    },
+    {
+      "name": "sign-up",
+      "path": "/sign-up",
+      "project": "390-dark",
+      "file": "sign-up__390-dark.jpg",
+      "bytes": 52020,
+      "sha256": "6f6d184388cbff7d303aa9eda15c16ba666e18c025679ed3b68702adc4e80923"
+    },
+    {
+      "name": "sign-up",
+      "path": "/sign-up",
+      "project": "390-light",
+      "file": "sign-up__390-light.jpg",
+      "bytes": 54862,
+      "sha256": "e44d3f89f062f30aed43c58565f35e7260a871c580897305554eb976717559e7"
+    },
+    {
+      "name": "student-book",
+      "path": "/my-classes/book",
+      "project": "1440-dark",
+      "file": "student-book__1440-dark.jpg",
+      "bytes": 83416,
+      "sha256": "57f6fc3ea251637434ace7fd7b4da9694df3a3c5c89c560efb5b7bf2d8ee63ea"
+    },
+    {
+      "name": "student-book",
+      "path": "/my-classes/book",
+      "project": "1440-light",
+      "file": "student-book__1440-light.jpg",
+      "bytes": 88742,
+      "sha256": "0077317cfc9ed3fb2d8d9b389106bfd1944ea52120294098e53dc94705fa9d1d"
+    },
+    {
+      "name": "student-book",
+      "path": "/my-classes/book",
+      "project": "390-dark",
+      "file": "student-book__390-dark.jpg",
+      "bytes": 61703,
+      "sha256": "1524183686ccc1db0d7688b2b914c554a0d2086d84987bf92fafd779d6907804"
+    },
+    {
+      "name": "student-book",
+      "path": "/my-classes/book",
+      "project": "390-light",
+      "file": "student-book__390-light.jpg",
+      "bytes": 67064,
+      "sha256": "9bd48f2da4b3082c94c8c285adbb8f4cce682d1658986543fb6344c724eb7e7f"
+    },
+    {
+      "name": "student-detail",
+      "path": "/dashboard/students/8d090674-2c8e-4cb8-8cde-d8f78d2308d0",
+      "project": "1440-dark",
+      "file": "student-detail__1440-dark.jpg",
+      "bytes": 61724,
+      "sha256": "9320af2bb5823ca798e4eed830eaff1752e6c034108c8b34c094edcb4944c3b0"
+    },
+    {
+      "name": "student-detail",
+      "path": "/dashboard/students/8d090674-2c8e-4cb8-8cde-d8f78d2308d0",
+      "project": "1440-light",
+      "file": "student-detail__1440-light.jpg",
+      "bytes": 61569,
+      "sha256": "393295a1949aac375f5ac5adc67d819b7082cf4dd4126682204cf4984e6d7ddc"
+    },
+    {
+      "name": "student-detail",
+      "path": "/dashboard/students/8d090674-2c8e-4cb8-8cde-d8f78d2308d0",
+      "project": "390-dark",
+      "file": "student-detail__390-dark.jpg",
+      "bytes": 33734,
+      "sha256": "c3e103d6601dc39f8d358448d39b882f3e16dbc65e086b45f8d16760f764fd0a"
+    },
+    {
+      "name": "student-detail",
+      "path": "/dashboard/students/8d090674-2c8e-4cb8-8cde-d8f78d2308d0",
+      "project": "390-light",
+      "file": "student-detail__390-light.jpg",
+      "bytes": 33561,
+      "sha256": "50cfe77f05d727541e02ff8d7c8f3b33047024f1aaa52c1500d05c4379b28200"
+    },
+    {
+      "name": "student-home",
+      "path": "/my-classes",
+      "project": "1440-dark",
+      "file": "student-home__1440-dark.jpg",
+      "bytes": 102679,
+      "sha256": "e78631ad98ce80a32077c42db167f7162c95c21c26ff8d670012926a3d68d913"
+    },
+    {
+      "name": "student-home",
+      "path": "/my-classes",
+      "project": "1440-light",
+      "file": "student-home__1440-light.jpg",
+      "bytes": 110227,
+      "sha256": "557b1837a9523acad4a3be7101ea1f08531d5a73023f6dcf6dee1b5e5a38b7a5"
+    },
+    {
+      "name": "student-home",
+      "path": "/my-classes",
+      "project": "390-dark",
+      "file": "student-home__390-dark.jpg",
+      "bytes": 67744,
+      "sha256": "031db80f7e6d62f5ec4a974e89be74fe89f45c6d1d7e2028967d1109e395398c"
+    },
+    {
+      "name": "student-home",
+      "path": "/my-classes",
+      "project": "390-light",
+      "file": "student-home__390-light.jpg",
+      "bytes": 75387,
+      "sha256": "1fab829b4ef1cc7375dc11a120e60e035e167033635f3bfaf20f329704920565"
+    },
+    {
+      "name": "student-progress",
+      "path": "/my-classes/progress",
+      "project": "1440-dark",
+      "file": "student-progress__1440-dark.jpg",
+      "bytes": 51633,
+      "sha256": "4b318a9ebfb01646b0c290a753ecad7a68ae1de54b7e3981b85289a26f5df33c"
+    },
+    {
+      "name": "student-progress",
+      "path": "/my-classes/progress",
+      "project": "1440-light",
+      "file": "student-progress__1440-light.jpg",
+      "bytes": 51969,
+      "sha256": "882e6cdba3a02eed405720446451e4c28000586a2272d830fc4d2717fd2715b1"
+    },
+    {
+      "name": "student-progress",
+      "path": "/my-classes/progress",
+      "project": "390-dark",
+      "file": "student-progress__390-dark.jpg",
+      "bytes": 55603,
+      "sha256": "557f4206525035aefa0ff33d2e1144885a1b5211fa49581fdd8a06992fa13104"
+    },
+    {
+      "name": "student-progress",
+      "path": "/my-classes/progress",
+      "project": "390-light",
+      "file": "student-progress__390-light.jpg",
+      "bytes": 59480,
+      "sha256": "9e59517c8130fbe1dedf49e1e539f059c8c128501b3b5f44aec3dbaa892b0d83"
+    },
+    {
+      "name": "students",
+      "path": "/dashboard/students",
+      "project": "1440-dark",
+      "file": "students__1440-dark.jpg",
+      "bytes": 63348,
+      "sha256": "ad9145c9a763b8a3c986b2eba0ae29ba25355ea487fc18442083147f6f8d16a5"
+    },
+    {
+      "name": "students",
+      "path": "/dashboard/students",
+      "project": "1440-light",
+      "file": "students__1440-light.jpg",
+      "bytes": 62370,
+      "sha256": "bd04c53d566b21cce0ef9040a170ea30b4e5a0a63f60a166049080c0c6506b14"
+    },
+    {
+      "name": "students",
+      "path": "/dashboard/students",
+      "project": "390-dark",
+      "file": "students__390-dark.jpg",
+      "bytes": 79212,
+      "sha256": "783ad61de78cca6fcef077d3f3a94a71b978ccfb715174759adf13c82a8c8f1b"
+    },
+    {
+      "name": "students",
+      "path": "/dashboard/students",
+      "project": "390-light",
+      "file": "students__390-light.jpg",
+      "bytes": 78645,
+      "sha256": "13225d7cef7b94f15e1703e7b862bd847ca1277a454d044b2a21adba2067007e"
+    }
+  ]
+}

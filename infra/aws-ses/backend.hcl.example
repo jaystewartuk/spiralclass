@@ -1,0 +1,34 @@
+# Copy to backend.hcl (gitignored) and fill in, then:
+#   tofu init -backend-config=backend.hcl
+#
+# This holds the R2 bucket + account-specific endpoint (partial backend
+# config). It is NOT secret — the S3 credentials for the STATE bucket come
+# from a named AWS CLI profile, NOT the bare AWS_ACCESS_KEY_ID/
+# AWS_SECRET_ACCESS_KEY env vars (see main.tf's big comment for why: this
+# module's `provider "aws"` block ALSO wants those exact env var names, for
+# REAL AWS, and the two must not collide).
+#
+# NOT deduplicated into the shared infra/backend.hcl on purpose —
+# that file only carries bucket+endpoints, and every OTHER R2-state module
+# reads it via bare AWS_* env vars, which this module can't do (the
+# collision above). This module needs the extra `profile` key, so it keeps
+# its own backend.hcl rather than the shared one.
+#
+# One-time setup:
+#   aws configure --profile agendaprofe-r2-state
+#     AWS Access Key ID:     <the R2 API token's derived Access Key ID>
+#     AWS Secret Access Key: <the R2 API token's derived Secret Access Key>
+#     Default region name:   auto
+#     Default output format: json
+# This can be the SAME R2 token already used for infra/cloudflare-r2's
+# state backend — just parked under a named profile instead of env vars,
+# since this is the first module that also
+# needs the AWS_ACCESS_KEY_ID/AWS_SECRET_ACCESS_KEY env vars for something
+# else (the real `aws` provider below).
+
+bucket  = "agendaprofe-tofu-state"
+profile = "agendaprofe-r2-state"
+
+# Your R2 S3 endpoint — <account_id>.r2.cloudflarestorage.com. Find the
+# account id in the Cloudflare dashboard URL or `wrangler whoami`.
+endpoints = { s3 = "https://YOUR_ACCOUNT_ID.r2.cloudflarestorage.com" }

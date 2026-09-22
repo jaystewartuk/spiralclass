@@ -1,0 +1,15 @@
+{
+  "CORSRules": [
+    {
+      "AllowedOrigins": [
+        "https://spiralclass.com",
+        "https://preview.spiralclass.com",
+        "http://localhost:3000"
+      ],
+      "AllowedMethods": ["GET", "PUT", "HEAD"],
+      "AllowedHeaders": ["content-type"],
+      "ExposeHeaders": ["ETag"],
+      "MaxAgeSeconds": 3600
+    }
+  ]
+}

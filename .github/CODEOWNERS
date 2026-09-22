@@ -1,0 +1,5 @@
+# Default owner for everything in the repo. GitHub auto-requests review from
+# the matching owner on every PR — branch protection does not *require* the
+# review (the CI check is the merge gate; see docs/development/workflow.md),
+# but this keeps the maintainer in the loop on contributor PRs by default.
+* @jaystewartuk

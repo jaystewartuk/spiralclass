@@ -1,0 +1,69 @@
+# fly.toml app configuration file generated for spiralclass on 2026-07-11T20:39:21-06:00
+#
+# See https://fly.io/docs/reference/configuration/ for information about how to use this file.
+#
+
+app = 'agendaprofe-preview'
+# `ord` (Chicago) to match production — see fly.production.toml for the full
+# rationale (Neon is in aws-us-east-2/Ohio, and Prisma pays four round trips
+# per query). Preview must track production's region or its timings stop
+# being a useful signal for what production will do.
+#
+# NOTE: editing primary_region does NOT relocate running machines. See
+# docs/deployment/RELEASE_AND_STAGING.md for the one-time migration step.
+primary_region = 'ord'
+
+# Non-secret config lives in config/env/ now (D-85), NOT here — see that
+# dir's README. [build.args] (NEXT_PUBLIC_*) moved to config/env/preview.build.env;
+# it is fed to the build by scripts/env-build-args.mjs (build-push-action can't
+# read a fly config). [env] (runtime non-secret) moved to
+# config/env/preview.runtime.env; scripts/docker-entrypoint.sh sources it at
+# boot, selected by APP_ENV below. Only the three platform-owned vars stay here.
+[env]
+  NODE_ENV = 'production'
+  PORT = '3000'
+  # Selects which config/env/<APP_ENV>.runtime.env the entrypoint sources.
+  APP_ENV = 'preview'
+
+[http_service]
+  internal_port = 3000
+  force_https = true
+  auto_stop_machines = 'stop'
+  auto_start_machines = true
+  # 0 (2026-08-19, cost-minimization pass, pre-revenue): scale-to-zero.
+  # Preview is a dev-only environment — nothing user-facing depends on it
+  # staying warm, and D-120 already requires an explicit `pnpm
+  # deploy:preview` before any Maestro session, so a cold first request there
+  # is a non-issue. Costs ~rootfs-storage-only (~$0.30/mo) vs the prior
+  # always-on machine's ~$3.27/mo. Unlike production, there's no acquisition
+  # traffic here to protect from a cold-start stall — see fly.production.toml
+  # for why production stayed at min=1 instead of 0.
+  #
+  # History: was min=1 (2026-07-14) to kill the first-request cold start
+  # under this environment's old $5/mo budget cap; briefly tried min=2 in
+  # #509 (~$6.54/mo, over budget) and reverted. That budget-cap framing no
+  # longer applies now that preview is intentionally minimized rather than
+  # capped. Production (separate app/cutover, see
+  # docs/decisions/D-89.md's Phase 3 scaling item) gets its own
+  # budget decision — do not carry this value forward automatically.
+  min_machines_running = 0
+  processes = ['app']
+
+  [[http_service.checks]]
+    interval = '15s'
+    # /api/health/live, not /api/health: this check has no DB query, so its
+    # 15s interval doesn't keep resetting Neon's ~5min idle-suspend timer.
+    # Real DB-down detection stays on /api/health via UptimeRobot/BetterStack
+    # + synthetic.yml, at a period that lets the compute actually suspend
+    # (diagnosed 2026-08-07 — the primary Neon branch on both prod and
+    # preview had been active 100% of the billing period because of this).
+    # timeout 8s + grace_period 30s so the ~8s boot finishes before checks
+    # start (ported from #518).
+    timeout = '8s'
+    grace_period = '30s'
+    method = 'GET'
+    path = '/api/health/live'
+
+[[vm]]
+  size = 'shared-cpu-1x'
+  memory = '512mb'

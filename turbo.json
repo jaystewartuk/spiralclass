@@ -1,0 +1,44 @@
+{
+  "$schema": "https://turborepo.com/schema.json",
+  "ui": "tui",
+  "tasks": {
+    "build": {
+      "dependsOn": ["^build"],
+      "outputs": [".next/**", "!.next/cache/**"],
+      "env": [
+        "NODE_ENV",
+        "DATABASE_URL",
+        "DIRECT_URL",
+        "SESSION_SECRET",
+        "APP_URL",
+        "STRIPE_SECRET_KEY",
+        "STRIPE_WEBHOOK_SECRET",
+        "RESEND_API_KEY",
+        "INNGEST_EVENT_KEY",
+        "INNGEST_SIGNING_KEY",
+        "SENTRY_*",
+        "POSTHOG_*",
+        "NEXT_PUBLIC_*",
+        "SUPERUSER_EMAILS"
+      ]
+    },
+    "typecheck": {
+      "inputs": ["$TURBO_DEFAULT$", "tsconfig*.json"],
+      "env": ["NODE_ENV"]
+    },
+    "lint": {
+      "inputs": ["$TURBO_DEFAULT$", "eslint.config.*", ".eslintrc*"],
+      "env": ["NODE_ENV"]
+    },
+    "test": {
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        ".env.test",
+        ".env.test.local",
+        "vitest.config.*",
+        "vitest.workspace.*"
+      ],
+      "env": ["NODE_ENV", "CI", "CSP_ENFORCE", "TEST_DATABASE_URL", "SKIP_GLOBAL_MIGRATE"]
+    }
+  }
+}

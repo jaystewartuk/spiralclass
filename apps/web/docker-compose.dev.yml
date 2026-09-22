@@ -1,0 +1,39 @@
+# Local development Postgres.
+#
+# `config/env/local.runtime.env` — the committed, non-secret local config every
+# db/seed/dev script loads — points DATABASE_URL and DIRECT_URL at
+# postgres:postgres@localhost:5432/spiralclass. This file is what actually
+# serves that URL, so the two must agree; changing the credentials here means
+# changing them there in the same commit.
+#
+# Separate from docker-compose.test.yml on purpose. That one backs the Vitest
+# integration project on :5433 and is wiped by `pnpm db:test:down` between
+# runs; this one holds the database you seed and click through, and losing it
+# to a test teardown would be a bad afternoon. Different port, different
+# volume, different lifecycle.
+#
+# Usage (or `pnpm --filter spiralclass-web db:dev:up` from anywhere):
+#   docker compose -f docker-compose.dev.yml up -d --wait
+#   docker compose -f docker-compose.dev.yml down      # stop, keep data
+#   docker compose -f docker-compose.dev.yml down -v   # stop and wipe
+
+services:
+  dev-db:
+    image: postgres:16
+    container_name: spiralclass-dev-db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: spiralclass
+    ports:
+      - "5432:5432"
+    volumes:
+      - dev-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d spiralclass"]
+      interval: 2s
+      timeout: 2s
+      retries: 30
+
+volumes:
+  dev-db-data:

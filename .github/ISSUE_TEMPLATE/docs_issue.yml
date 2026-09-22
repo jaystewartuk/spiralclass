@@ -1,0 +1,30 @@
+name: Documentation problem
+description: Something in the docs is wrong, stale, or missing.
+labels: ["documentation"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        [`docs/README.md`](https://github.com/jaystewartuk/spiralclass/blob/main/docs/README.md)
+        is the map. Two guard tests hold the docs to the tree — every `docs/…` path
+        written anywhere must name a real file, and every relative Markdown link must
+        resolve — so a broken pointer is a bug, not expected drift. Please report it.
+
+  - type: input
+    id: where
+    attributes:
+      label: Which document or file
+      placeholder: docs/architecture/overview.md, or apps/web/src/lib/payments/start-checkout.ts
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: What is wrong
+      description: |
+        Wrong, out of date, contradicts the code, or missing entirely — say which. If a
+        document contradicts a decision record, quote both; that is the most useful kind
+        of report.
+    validations:
+      required: true

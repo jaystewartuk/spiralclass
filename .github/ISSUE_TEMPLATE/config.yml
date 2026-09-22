@@ -1,0 +1,11 @@
+# Blank issues are off on purpose. Open work does live in Issues (D-172), but it
+# is filed by the maintainer's sessions through /issue, which holds the shape a
+# template cannot. From outside, an issue here is a bug report or a docs issue.
+blank_issues_enabled: false
+contact_links:
+  - name: Security vulnerability
+    url: https://github.com/jaystewartuk/spiralclass/security/advisories/new
+    about: Never report a security problem in a public issue. Use the private advisory flow, or the address in SECURITY.md.
+  - name: How contributions work
+    url: https://github.com/jaystewartuk/spiralclass/blob/main/CONTRIBUTING.md
+    about: "Outside code is not being merged, and CONTRIBUTING.md says why: it is about relicensing rights, not quality. Bug reports and questions are welcome as issues; a fork is the right answer for anything else."
