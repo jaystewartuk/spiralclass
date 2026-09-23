@@ -105,6 +105,7 @@ const SESSION = (
   },
   recognitionLocales: { teacher: "es-MX", student: "en" },
   studentConsent: true,
+  cloudRecognition: false,
   ...over,
 });
 
@@ -113,6 +114,11 @@ const fetchMock = vi.fn(async (url: string, init?: RequestInit) => {
   if (url === "/api/captions/config") {
     const next = configReplies.length > 1 ? configReplies.shift() : configReplies[0];
     return new Response(JSON.stringify(next), { status: 200 });
+  }
+  if (url === "/api/captions/stt-token") {
+    return new Response(JSON.stringify({ ok: true, token: "jwt", url: "wss://dg.test/listen" }), {
+      status: 200,
+    });
   }
   const { text } = JSON.parse(String(init?.body)) as { text: string };
   return new Response(JSON.stringify({ ok: true, text: `T(${text})` }), { status: 200 });
@@ -274,6 +280,45 @@ describe("useBrowserCaptions — recognising and delivering", () => {
     remoteRec.final("how are you");
     await settle();
     expect(shown[0]).toMatchObject({ for: "t1", from: "s1", text: "T(how are you)" });
+  });
+
+  it("streams its own speaker to the cloud when neither browser can recognise", async () => {
+    Object.defineProperty(navigator, "userAgentData", {
+      value: { mobile: true, brands: [{ brand: "Chromium" }] },
+      configurable: true,
+    });
+    const sockets: { url: string; protocols: string[] }[] = [];
+    vi.stubGlobal(
+      "WebSocket",
+      class {
+        readyState = 0;
+        onopen = null;
+        onmessage = null;
+        onclose = null;
+        onerror = null;
+        constructor(url: string, protocols: string[]) {
+          sockets.push({ url, protocols });
+        }
+        send() {}
+        close() {}
+      },
+    );
+    vi.stubGlobal(
+      "MediaRecorder",
+      Object.assign(function MediaRecorder() {}, { isTypeSupported: () => true }),
+    );
+    configReplies = [
+      { ok: true, enabled: true, session: SESSION("teacher", { cloudRecognition: true }) },
+    ];
+    const room = new FakeRoom("t1");
+    room.join(new FakeParticipant("s1", { id: "s1-mic", readyState: "live" }));
+    room.remoteParticipants.get("s1")!.attributes.captionsAsr = "0";
+    await render({ room, role: "teacher", teacherCaptionsOn: true, prefetchSession: true });
+
+    expect(latest.status).toEqual({ uncaptioned: [], stopped: null });
+    expect(FakeRecognition.instances).toHaveLength(0);
+    expect(fetchMock.mock.calls.some(([u]) => u === "/api/captions/stt-token")).toBe(true);
+    expect(sockets).toEqual([{ url: "wss://dg.test/listen", protocols: ["bearer", "jwt"] }]);
   });
 
   it("follows the teacher's attribute on the student's side, and only hers", async () => {

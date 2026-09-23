@@ -1774,15 +1774,24 @@ export function ClassCall({
                   <StatusPill tone="attention" label={t("call.captionsConsentHint")} />
                 )}
                 {/* Captions are on, but neither browser in this call can
-                recognise speech (two phones, measured in D-185). Said
-                rather than left as a band that listens forever. */}
+                recognise speech (two phones, measured in D-185) and the paid
+                fallback for that case is not configured. Said rather than
+                left as a band that listens forever. */}
                 {roomCaptionsOn && browserCaptions.status.uncaptioned.length > 0 && (
                   <StatusPill tone="attention" label={t("call.captionsNeedComputer")} />
                 )}
                 {/* A recogniser here gave up for good — the microphone
-                permission, or a language this browser cannot recognise. */}
+                permission, a language this browser cannot recognise, or the
+                phone-to-phone fallback's service out of reach. */}
                 {roomCaptionsOn && browserCaptions.status.stopped && (
-                  <StatusPill tone="attention" label={t("call.captionsStopped")} />
+                  <StatusPill
+                    tone="attention"
+                    label={t(
+                      browserCaptions.status.stopped === "unavailable"
+                        ? "call.captionsServiceUnavailable"
+                        : "call.captionsStopped",
+                    )}
+                  />
                 )}
                 {/* Camera-switch failure — brief, non-blocking (the camera
                 keeps working on whichever device it already had). */}

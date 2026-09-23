@@ -18,7 +18,8 @@ const TrackSource = { UNKNOWN: 0, CAMERA: 1, MICROPHONE: 2, SCREEN_SHARE: 3 };
 
 vi.mock("livekit-server-sdk", () => ({ RoomServiceClient, TrackSource }));
 
-const { listParticipantMicTracks } = await import("@/lib/video/room");
+const { listParticipantMicTracks, listRoomParticipantAttributes } =
+  await import("@/lib/video/room");
 
 beforeEach(() => {
   vi.clearAllMocks();
@@ -72,5 +73,31 @@ describe("listParticipantMicTracks", () => {
     delete process.env.LIVEKIT_API_KEY;
     expect(await listParticipantMicTracks("class-b1")).toEqual([]);
     expect(RoomServiceClient).not.toHaveBeenCalled();
+  });
+});
+
+describe("listRoomParticipantAttributes", () => {
+  it("returns each participant's identity and attributes", async () => {
+    listParticipants.mockResolvedValueOnce([
+      { identity: "t1", tracks: [], attributes: { captionsOn: "true", captionsAsr: "0" } },
+      // A participant that never set an attribute.
+      { identity: "s1", tracks: [] },
+    ]);
+
+    expect(await listRoomParticipantAttributes("class-b1")).toEqual([
+      { identity: "t1", attributes: { captionsOn: "true", captionsAsr: "0" } },
+      { identity: "s1", attributes: {} },
+    ]);
+    expect(listParticipants).toHaveBeenCalledWith("class-b1");
+  });
+
+  it("throws when the room service fails, so the caller refuses rather than guesses", async () => {
+    listParticipants.mockRejectedValueOnce(new Error("twirp"));
+    await expect(listRoomParticipantAttributes("class-b1")).rejects.toThrow("twirp");
+  });
+
+  it("returns null when LiveKit isn't configured", async () => {
+    delete process.env.LIVEKIT_API_KEY;
+    expect(await listRoomParticipantAttributes("class-b1")).toBeNull();
   });
 });

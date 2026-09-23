@@ -134,7 +134,7 @@ graph TB
 
     subgraph app["apps/web — the only server"]
         RSC["Server Components<br/>+ 71 server-action modules"]
-        API["58 route handlers<br/>by audience: teacher · student · public · internal"]
+        API["59 route handlers<br/>by audience: teacher · student · public · internal"]
         MW["middleware.ts<br/>CSP nonce · session gate · ?ref= attribution"]
         LIB["src/lib/** — one folder per bounded concern<br/>payments · booking · cancellation · subscriptions<br/>auth · notifications · chat · homework · video"]
     end

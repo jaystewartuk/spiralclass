@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   captionsConfigured,
+  cloudCaptionsConfigured,
   deepgramApiKey,
   googleTranslateApiKey,
   liveCaptionsEnabled,
@@ -22,6 +23,18 @@ vi.mock("@/lib/logger", () => ({
 
 afterEach(() => {
   vi.unstubAllEnvs();
+});
+
+describe("cloudCaptionsConfigured", () => {
+  it("is on only with a Deepgram key, independent of the translation key", () => {
+    vi.stubEnv("GOOGLE_TRANSLATE_API_KEY", "g-key");
+    vi.stubEnv("DEEPGRAM_API_KEY", "");
+    expect(cloudCaptionsConfigured()).toBe(false);
+    vi.stubEnv("DEEPGRAM_API_KEY", "dg-key");
+    expect(cloudCaptionsConfigured()).toBe(true);
+    vi.stubEnv("GOOGLE_TRANSLATE_API_KEY", "");
+    expect(cloudCaptionsConfigured()).toBe(true);
+  });
 });
 
 describe("deepgramApiKey", () => {

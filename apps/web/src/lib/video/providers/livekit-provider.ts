@@ -158,7 +158,7 @@ export class LiveKitProvider implements VideoProvider {
     const participants = await client.listParticipants(room);
     return participants.map((p) => {
       const mic = p.tracks.find((t) => t.source === TrackSource.MICROPHONE);
-      return { identity: p.identity, micTrackId: mic?.sid ?? null };
+      return { identity: p.identity, micTrackId: mic?.sid ?? null, attributes: p.attributes ?? {} };
     });
   }
 

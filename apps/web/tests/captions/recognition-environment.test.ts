@@ -1,9 +1,11 @@
 import { describe, expect, it } from "vitest";
 import {
   browserCanRecognizeDuringCall,
+  mediaRecorderCtor,
   recognitionEnvironment,
   speechRecognitionCtor,
   translatorApi,
+  webSocketCtor,
 } from "@/lib/captions/recognition-environment";
 
 // Reading a browser into the booleans canRecognizeDuringCall decides on. The
@@ -79,5 +81,16 @@ describe("speechRecognitionCtor / translatorApi", () => {
     expect(translatorApi({ Translator: api })).toBe(api);
     expect(translatorApi({ Translator: { availability: async () => "" } })).toBeNull();
     expect(translatorApi({})).toBeNull();
+  });
+});
+
+describe("webSocketCtor / mediaRecorderCtor", () => {
+  it("returns the constructors the cloud fallback streams with, or null", () => {
+    function WS() {}
+    function MR() {}
+    expect(webSocketCtor({ WebSocket: WS })).toBe(WS);
+    expect(mediaRecorderCtor({ MediaRecorder: MR })).toBe(MR);
+    expect(webSocketCtor({})).toBeNull();
+    expect(mediaRecorderCtor({ MediaRecorder: {} })).toBeNull();
   });
 });
