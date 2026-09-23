@@ -6,15 +6,13 @@
 /** Each deploy job's `name:`, exactly as deploy-production.yml declares it. */
 export const DEPLOY_JOBS: Readonly<{
   database: string;
-  fly: string;
-  vercel: string;
   cloudrun: string;
+  vercel: string;
 }>;
 
 /** The targets that are deployed but serve no domain — reported, never decisive. */
 export const STANDBYS: Readonly<{
   vercel: string;
-  cloudrun: string;
 }>;
 
 /** One entry of `gh run view <id> --json jobs`'s `.jobs`. */
@@ -25,16 +23,15 @@ export interface RunJob {
 }
 
 export interface DeployVerdict {
-  /** The database job and the Fly job are both green. */
+  /** The database job and the Cloud Run job — the one serving the domain — are both green. */
   productionOk: boolean;
   /** Each job's conclusion or status, or `missing` when the run has no such job. */
   database: string;
-  fly: string;
-  vercel: string;
   cloudrun: string;
+  vercel: string;
 }
 
 export function deployVerdict(jobs: ReadonlyArray<RunJob>): DeployVerdict;
 
 /** One line per standby, newline-joined, for the end of a promote. */
-export function failoverLine(verdict: { vercel: string; cloudrun: string }): string;
+export function failoverLine(verdict: { vercel: string }): string;

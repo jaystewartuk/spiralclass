@@ -7,11 +7,12 @@
  * workflows, both green for this SHA, from their push-to-`main` runs — and then
  * fast-forwards the `production` branch. That push triggers
  * .github/workflows/deploy-production.yml: a database job (migrations behind a
- * Neon checkpoint), then the same scripts/fly-deploy.sh this used to invoke
- * directly — the amd64 image, the Fly deploy, the Inngest sync, the production
- * probes — alongside the Vercel failover, which does not wait for Fly. Promote
- * judges production by the database and Fly jobs, and reports the failover on
- * its own line (scripts/ci/deploy-verdict.mjs).
+ * Neon checkpoint), then scripts/cloudrun-deploy.sh — the amd64 image, the
+ * Cloud Run deploy, the Inngest sync — and the production probes, alongside the
+ * Vercel failover, which does not wait for Cloud Run. Promote judges production
+ * by the database and Cloud Run jobs, and reports the failover on its own line
+ * (scripts/ci/deploy-verdict.mjs). Cloud Run has held the domain since the
+ * 2026-09-23 cutover ([D-184]'s addendum); it was Fly before.
  *
  * WHY THE DEPLOY MOVED, AND WHY THAT IS NOT THE 2026-07-19 DRIFT AGAIN.
  * D-120 chained the deploy into this command because a HUMAN DISPATCH STEP had
@@ -27,8 +28,10 @@
  * amd64 runner. On this arm64 laptop it was a QEMU cross-build — 20-30+
  * minutes, flaky with threaded native addons — which made a promote something
  * you scheduled rather than something you did. If Actions is unavailable,
- * `./scripts/fly-deploy.sh production --gate-already-passed` still deploys
- * from here; that path is unchanged and is also the recovery path.
+ * scripts/database-deploy.sh then scripts/cloudrun-deploy.sh, each with
+ * `production --gate-already-passed`, deploy from here; that is also the
+ * recovery path. The Cloud Run script holds no database credential, which is
+ * why the database script comes first.
  *
  * There is no second half any more. This script once finished by running a
  * release for it, on the argument that a promote ending with half the product
@@ -109,8 +112,8 @@ try {
       "The production deploy workflow has no `push` trigger, so fast-forwarding",
       "`production` would move the branch and deploy nothing.",
       "",
-      "Production deploys to Fly and that workflow's trigger is supposed to be",
-      "live (D-150's second addendum, D-157's addendum 2). If it has been taken",
+      "Production deploys to Cloud Run and that workflow's trigger is supposed",
+      "to be live (D-157's addendum 2, D-184's addendum). If it has been taken",
       "off, put it back rather than working around this.",
       "",
       "Nothing is broken — production is still serving whatever shipped last.",
@@ -327,8 +330,8 @@ if (has("gh")) {
 // ── Deploy ───────────────────────────────────────────────────────────────────
 // The push above IS the deploy trigger ([D-157]): it moved `production`, using
 // the operator's own credentials, so deploy-production.yml fires. That workflow
-// migrates in its database job, then runs the same scripts/fly-deploy.sh this
-// used to run here, the probes, and — not waiting on Fly — the Vercel failover.
+// migrates in its database job, then runs scripts/cloudrun-deploy.sh and the
+// probes, and — not waiting on Cloud Run — the Vercel failover.
 //
 // The chain D-120 insisted on is intact — nothing here is left for a human to
 // remember. What IS left for a human is the approvals on the `production`
@@ -345,7 +348,7 @@ if (noWait || !has("gh")) {
       "",
       "  production is fast-forwarded; the deploy workflow has been triggered by that push.",
       `  Approve and watch it:  ${RUN_URL}`,
-      "  Deploy from here instead:  ./scripts/fly-deploy.sh production --gate-already-passed",
+      "  Deploy from here instead:  bash scripts/database-deploy.sh production --gate-already-passed && bash scripts/cloudrun-deploy.sh production --gate-already-passed",
       "",
     ].join("\n"),
   );
@@ -385,7 +388,7 @@ if (noWait || !has("gh")) {
       [
         `  No deploy run appeared for ${short} within a minute.`,
         "  Check the Actions tab, or deploy from here:",
-        "    ./scripts/fly-deploy.sh production --gate-already-passed",
+        "    bash scripts/database-deploy.sh production --gate-already-passed && bash scripts/cloudrun-deploy.sh production --gate-already-passed",
         "",
       ].join("\n"),
     );
@@ -396,8 +399,8 @@ if (noWait || !has("gh")) {
     //
     // ⚠️ NOT `--exit-status`, which answers for the RUN — red whenever any job
     // is. Since the targets were split ([D-177]'s addendum), a Vercel failover
-    // that could not refresh would have turned a Fly release that shipped into
-    // a promote reporting that production may not have moved. So the verdict
+    // that could not refresh would have turned a release that shipped into a
+    // promote reporting that production may not have moved. So the verdict
     // is read job by job, and a promote that ends green still means exactly
     // what it always has: production is serving this commit.
     run("gh", ["run", "watch", runId]);
@@ -411,7 +414,9 @@ if (noWait || !has("gh")) {
     deployOk = verdict.productionOk;
     failover = failoverLine(verdict);
     if (!deployOk) {
-      console.log(`\n  Database job: ${verdict.database}. Fly job: ${verdict.fly}. Run: ${runId}`);
+      console.log(
+        `\n  Database job: ${verdict.database}. Cloud Run job: ${verdict.cloudrun}. Run: ${runId}`,
+      );
     }
 
     // The workflow ran the production probes as its last step, so record that
@@ -441,8 +446,8 @@ console.log(
       ? "  Deployed by GitHub Actions: Neon checkpoint and migrations, native amd64 image,"
       : "  ⚠ The deploy did NOT finish green. `production` moved and the running app may not have.",
     deployOk
-      ? "    Fly deploy, Inngest sync, then the production probes."
-      : "    Recover from here:  ./scripts/fly-deploy.sh production --gate-already-passed",
+      ? "    Cloud Run deploy, Inngest sync, then the production probes."
+      : "    Recover from here:  bash scripts/database-deploy.sh production --gate-already-passed && bash scripts/cloudrun-deploy.sh production --gate-already-passed",
     ...(failover ? ["", failover] : []),
     "",
     "  Where things stand:  pnpm release:status",

@@ -11,13 +11,14 @@ verdict what promote reads). The release/promote/rollback gate structure below
 is current.
 
 ⚠️ **PREVIEW's deploy workflow is suspended; production's is not** (D-157's
-addenda). Production stays on Fly and `deploy-production.yml`'s `push` trigger
-is live — `pnpm promote` reads that trigger off the workflow file and refuses
-before the fast-forward if it is ever missing. Preview moves to the Oracle A1
-box ([D-150](../decisions/D-150.md)) and has `workflow_dispatch` alone until
-that box is serving, so merging to `main` does not deploy preview today; run
-`pnpm ship:preview`. `./scripts/fly-deploy.sh <env>` still deploys from the
-laptop and is the recovery path.
+addenda). Production serves from Cloud Run ([D-184](../decisions/D-184.md)'s
+addendum) and `deploy-production.yml`'s `push` trigger is live — `pnpm promote`
+reads that trigger off the workflow file and refuses before the fast-forward if
+it is ever missing. Preview moves to the Oracle A1 box
+([D-150](../decisions/D-150.md)) and has `workflow_dispatch` alone until that
+box is serving, so merging to `main` does not deploy preview today. Production's
+recovery path from the laptop is
+[below](#recovering-a-release-by-hand).
 
 This file is the operator runbook — the one-time setup, the everyday release
 flow, and rollback.
@@ -59,30 +60,30 @@ flow, and rollback.
    - An older commit may have aged out of what GitHub still keeps; an expired
      run is not a green one, so promote refuses. **`--force-gate`** certifies it
      on this machine instead.
-5. The workflow, after a **required reviewer**, runs the same
-   `scripts/fly-deploy.sh production` the operator runs by hand: checkpoint the
-   Neon `production` branch → migrations → **native amd64** image → `flyctl
-deploy` → Inngest sync → the **production probes** against the live site.
-   `pnpm promote` watches that run and exits non-zero if it goes red, so a green
-   promote means production is serving.
+5. The workflow, after a **required reviewer**, runs the same scripts the
+   operator runs by hand: `scripts/database-deploy.sh production` (checkpoint
+   the Neon `production` branch → migrations), then
+   `scripts/cloudrun-deploy.sh production` (**native amd64** image →
+   `gcloud run deploy` → Inngest sync), then the **production probes** against
+   the live site. `pnpm promote` watches that run and exits non-zero if it goes
+   red, so a green promote means production is serving.
    - If the deploy fails _after_ the fast-forward, the branch moved and the app
-     did not. Re-run the workflow, or
-     `./scripts/fly-deploy.sh production --gate-already-passed` from here — the
-     same script either way.
+     did not. Re-run the workflow, or run the same two scripts from here — see
+     [Recovering a release by hand](#recovering-a-release-by-hand).
 6. `pnpm release:status` for what this machine has and hasn't shipped, and
    `pnpm local:status` for whether the probes and the sweep are current.
 
 ## Rollback
 
-**Code:** `flyctl releases -a agendaprofe` to see recent releases, then
-`flyctl deploy -a agendaprofe --image <previous>` (or `fly releases rollback`)
-to redeploy a known-good image, then `git revert` on `main` when fixed. Do
-**not**
-fast-forward `production` backwards; roll forward to a new commit or redeploy
-a previous image instead.
+**Code:** `gcloud run revisions list --service web --region us-east4` to see
+recent revisions, then `gcloud run services update-traffic web --region us-east4
+--to-revisions <revision>=100` to send traffic back to a known-good one, then
+`git revert` on `main` when fixed. Do **not** fast-forward `production`
+backwards; roll forward to a new commit or re-point at a previous revision
+instead. Only the five newest images are kept, so that is the rollback depth.
 
 **Captions Agent (self-hosted Oracle box):** not covered by any of the above —
-it does not ship through Fly or `pnpm promote`. Its images are built on the box
+it does not ship through Cloud Run or `pnpm promote`. Its images are built on the box
 and tagged `spiralclass-captions-agent:<sha>`, so rollback is repointing the
 pinned tag in `~/oracle-livekit-production/docker-compose.yml` and
 `docker compose up -d --no-build captions-agent` — no rebuild, no network.
@@ -92,15 +93,16 @@ for any class in progress. Full procedure in
 §"Captions Agent — deploy & rollback".
 
 **This only rolls back code, never the database.** A code rollback does not
-undo a migration or bad data change. `scripts/fly-deploy.sh` checkpoints the
-Neon `production` branch before every production migration (D-95) —
+undo a migration or bad data change. `scripts/database-deploy.sh` checkpoints
+the Neon `production` branch before every production migration (D-95) —
 restore it in seconds with `infra/database/scripts/neon-rollback.sh`, Neon's
 own point-in-time restore. See [`DB_BACKUP_RESTORE.md`](./DB_BACKUP_RESTORE.md) for the full
 restore procedure and the fastest safe recovery path for a failed migration.
 
 ## The Vercel failover ([D-177](../decisions/D-177.md))
 
-**Production serves from Fly. This does not change that**, and nothing in CI can.
+**Production serves from Cloud Run. This does not change that**, and nothing in
+CI can.
 
 Every production release also deploys the same commit to Vercel, as the `vercel`
 job in `deploy-production.yml`. That deployment is built, live, and **holds no
@@ -109,17 +111,17 @@ failover is proven on every release rather than being a project nobody has
 deployed since they set it up ([D-164](../decisions/D-164.md) is the lesson).
 
 **The two targets deploy independently** (D-177's addendum). The `database` job
-checkpoints Neon and migrates, once; the `fly` and `vercel` jobs both need it,
-and neither waits on the other. Each holds only its own credentials, so a
-missing or revoked Vercel value cannot stop a Fly release, and a Fly outage
+checkpoints Neon and migrates, once; the `cloudrun` and `vercel` jobs both need
+it, and neither waits on the other. Each holds only its own credentials, so a
+missing or revoked Vercel value cannot stop a release, and a Cloud Run outage
 cannot stop the failover from deploying. To deploy one target alone, dispatch
-the workflow on `production` with `target: fly` or `target: vercel` — the
+the workflow on `production` with `target: cloudrun` or `target: vercel` — the
 database job still runs first.
 
 A red `vercel` job means **the failover did not refresh**. Production is
-unaffected; read the `fly` job, which is the one that shipped. `pnpm promote`
-judges the release by the `database` and `fly` jobs and prints the failover's
-outcome on its own line.
+unaffected; read the `cloudrun` job, which is the one that shipped. `pnpm
+promote` judges the release by the `database` and `cloudrun` jobs and prints the
+failover's outcome on its own line.
 
 **Vercel checks who wrote the commit.** A CLI deploy sends the commit's author
 with it, and Vercel **blocks** a deployment whose author it cannot match to an
@@ -132,7 +134,7 @@ The deploy does not wait on a blocked deployment: `scripts/vercel-await.mjs`
 fails the job as soon as Vercel answers, and prints the state and Vercel's
 reason. The CLI's own wait never exits on that state.
 
-**Its runtime environment is Fly's, from the same three places.** The project's
+**Its runtime environment is production's, from the same three places.** The project's
 env store is a derived copy, and nothing is set in the dashboard by hand:
 
 | Source                               | Written by                                        | When                                |
@@ -146,7 +148,7 @@ credentials Tofu state needs itself. The deploy **refuses** when a `__LOCAL__` r
 pushed, or when a dashboard value nobody owns would shadow a committed one —
 the push reports those as stale and removes them with `--delete-stale`. The
 three project credentials live in Infisical `production` at `/deploy`, beside
-`FLY_API_TOKEN`, and reach the workflow through
+the GCP deploy values, and reach the workflow through
 `infra/infisical/push-github-secrets.sh`.
 
 ⚠️ **Before you hand it the domain, confirm the database job for that commit is
@@ -171,11 +173,15 @@ from here, and a bumped pin cannot leave a stale number in a runbook.
 ⚠️ **Read this before you do it in an incident. It is not yet a complete
 failover:**
 
-- **Inngest still points at Fly.** The endpoint is registered per URL and the
-  Vercel deploy deliberately does not sync it (syncing a second URL would fire
-  every cron twice — see D-177). After a promote, **background work is pointed at
-  an app that is no longer serving**: reminders, emails and push notifications.
-  Sync it by hand at the new URL, and know that Fly's registration must go.
+- **Inngest is registered at the domain and the Vercel deploy never syncs it**
+  (syncing a second URL would fire every cron twice — see D-177). Once the
+  domain resolves to Vercel, re-sync that same URL —
+  `scripts/inngest-sync.sh https://spiralclass.com/api/inngest` — so the
+  registration describes the deployment now answering it. Never sync a
+  `vercel.app` URL.
+- **The domain's DNS points at Google.** The apex records are Cloud Run's
+  domain-mapping set, DNS-only; `vercel promote` alone does not move traffic
+  until those records point at Vercel. Write them down before changing them.
 - **The region pin is unverified.** `config/vercel/production.json` says `cle1`
   on the strength of D-150's "Neon is in Ohio". Confirm with
   `neonctl projects list`; a wrong region costs the 58-ms-versus-12-ms hop that
@@ -183,133 +189,113 @@ failover:**
 - **Nothing has ever served a request from it.** Cold-start behaviour against
   Neon is unmeasured.
 
-To hand it back, `vercel rollback`, or point DNS at Fly — whichever is faster at
-the time.
+To hand it back, put the Cloud Run records back. The domain mapping stays in
+place while they point elsewhere; if they were away long enough for Google's
+certificate to lapse, expect the same ~15-minute re-issue as the cutover.
 
 To refresh it by hand without a release, `pnpm deploy:vercel` (operator-only, and
 it refuses production without `--yes-i-understand-this-skips-the-promote-gate`).
 
-## Cloud Run, and the cutover off Fly ([D-184](../decisions/D-184.md))
+## Cloud Run serves production ([D-184](../decisions/D-184.md))
 
-**Production serves from Fly. This does not change that**, and nothing in CI
-can. What is different from the Vercel failover is the **intent**: this target
-exists to _take_ the domain, because Fly costs ~$7/month against no revenue.
-
-Every production release deploys the same commit to Cloud Run `web` in
-`us-east4`, as the `cloudrun` job, on the same terms as the Vercel one — it
-`needs:` the `database` job and not Fly, holds only its own two credentials, and
-takes no domain. A red `cloudrun` job means that target did not refresh;
-production is unaffected, and `pnpm promote` prints it on its own line.
+**Cloud Run `web` in `us-east4` has served `spiralclass.com` since 2026-09-23.**
+Fly `agendaprofe` was destroyed the same day. Every production release deploys
+to it as the `cloudrun` job, which `needs:` the database job and not Vercel,
+holds only its own credentials, syncs Inngest against the domain, probes
+production, and is the job `pnpm promote` reads to decide whether the release
+shipped. A red `cloudrun` job means production did not move.
 
 **Its secrets are one mounted file, not environment variables.**
 `infra/gcp/push-cloudrun-env.sh` (operator) writes the whole runtime set as a
-single Secret Manager version from the same two sources Fly and Vercel read, and
-`scripts/docker-entrypoint.sh` sources it at boot from the path in
-`SECRETS_ENV_FILE`. The deploy identity is never granted `secretAccessor`, so CI
-can ship an image and cannot read a Stripe key. `infra/gcp/README.md` is the
-full account, including why the credential is a key rather than Workload
-Identity Federation.
+single Secret Manager version, and `scripts/docker-entrypoint.sh` sources it at
+boot from the path in `SECRETS_ENV_FILE`. The deploy identity is never granted
+`secretAccessor`, so CI can ship an image and cannot read a Stripe key.
+`infra/gcp/README.md` is the full account, including why the credential is a
+key rather than Workload Identity Federation.
 
 ⚠️ **A service whose secret was never written deploys fine and then will not
 start.** The preflight cannot catch it — it holds no credential to look with.
 
-### The cutover, in order
+⚠️ **The cold start is only acceptable because of a monitor.** HetrixTools
+`spiralclass production liveness` hits `/api/health/live` about once a minute,
+inside Cloud Run's ~15-minute idle keep, and follows the domain. Do not delete
+or re-point it, and keep it on `/api/health/live`: a sub-5-minute check against
+`/api/health` holds Neon's compute awake.
 
-Every step is the operator's. Nothing in CI performs any of it, and a session
-may not: it opens the pull requests and stops.
+### Recovering a release by hand
 
-1. **Verify the `run.app` URL by hand, signed in.** A booking page and a
-   dashboard page. The probes cover the signed-out half only.
-2. **Measure LiveKit reachability from `us-east4`.** D-177 left this unmeasured
-   from Vercel and D-184 inherited the gap. Production video is on LiveKit Cloud
-   (`config/env/production.runtime.env`), so this is a network check.
-3. **Map the domain.** `gcloud run domain-mappings create` in `us-east4`, then
-   the records it prints, at Cloudflare.
-   ⚠️ **Domain mapping is a Preview feature with no SLA.** If it misbehaves,
-   **stop and leave the domain on Fly.** The alternative is a global load
-   balancer at ~$18/month, which costs more than Fly and defeats the exercise.
-4. **Move the Inngest registration — do not add one.** ⚠️ **The sharpest step on
-   this page.** Inngest registers an app **per URL**, so syncing a second live
-   URL registers a second app and every cron fires **twice**, including ones
-   that bill Stripe customers. `scripts/inngest-sync.sh` against the new URL,
-   and the old app removed in Inngest.
-5. **Watch one real class join, end to end**, before anything irreversible.
-6. **Stop the Fly app — `stop`, never destroy.** A stopped machine costs pennies
-   of rootfs storage and is the rollback for the following week.
+If Actions cannot run, the operator deploys from the laptop with the same two
+scripts the workflow calls, database first because the Cloud Run script holds no
+database credential:
+
+```bash
+bash scripts/database-deploy.sh production --gate-already-passed
+bash scripts/cloudrun-deploy.sh production --gate-already-passed
+```
+
+The second one ends by syncing Inngest against the domain.
 
 ### Rolling back
 
-Point DNS at Fly and start the machine. That is the whole procedure, and it is
-why step 6 stops rather than destroys — D-150 said of this choice that it is
-"reversible for the price of a DNS record", and that stays true in both
-directions.
+**Within Cloud Run:** `gcloud run services update-traffic web --region us-east4
+--to-revisions <revision>=100`. That needs the revision's **image** to still
+exist, and `config/cloudrun/artifact-cleanup.json` keeps the five newest for
+exactly this.
 
-A Cloud Run rollback _within_ the target is `gcloud run services update-traffic
---to-revisions`, which needs that revision's **image** to still exist:
-`config/cloudrun/artifact-cleanup.json` keeps the five newest for exactly this.
+**Off Cloud Run:** there is no Fly to fall back to. The Vercel failover
+([D-177](../decisions/D-177.md)) is deployed warm on every release and holds no
+domain; taking it is its own section of this document.
 
-### After it holds
+### If the domain ever moves again
 
-The cutover makes three things false, and each should be retired **in the change
-that proves it dead** rather than left to look load-bearing — the lesson
-CLAUDE.md draws from an `/api/mobile` tree that outlived its client by a month:
+The cutover of 2026-09-23 is the template, and these are the steps that cost
+something when they were learned. Every one is the operator's.
 
-- **D-184's status line** says "never yet serving traffic". An addendum, or a
-  new record if anything about the decision changed on contact.
-- **`fly.production.toml` and the `fly` job.** Fly stops being the thing that
-  decides whether production shipped, so `scripts/ci/deploy-verdict.mjs` moves
-  `productionOk` to the `cloudrun` job — its header already says so.
-- **Three warm targets is one more than the argument supports.** Vercel is a
-  failover worth keeping; Fly, once it holds no domain, is a third copy of the
-  same thing and should go rather than rot.
-
-## Changing the Fly region (one-time, manual)
-
-**Editing `primary_region` in a fly config does NOT relocate machines that
-already exist.** `fly deploy` reuses the machines in place; `primary_region`
-only decides where _newly created_ machines land. So a region change that
-stops at the config edit is a silent no-op — the config claims `ord`, the
-machines keep running in `dfw`, and nothing warns you.
-
-Both apps moved `dfw` → `ord` to sit next to Neon's `aws-us-east-2` (see the
-comment at the top of `fly.production.toml` for why). To actually land that on
-an existing app, per app (`agendaprofe`, `agendaprofe-preview`):
-
-```bash
-fly status -a agendaprofe                      # note the current machine ids + count
-fly machine clone <machine-id> --region ord -a agendaprofe   # repeat per machine
-fly status -a agendaprofe                      # confirm the ord machines are healthy
-fly machine destroy <old-dfw-machine-id> -a agendaprofe --force
-```
-
-Clone-then-destroy rather than destroy-then-create: production runs
-`min_machines_running = 2` precisely so there is no single point of failure,
-and destroying first would drop to one machine (or zero) mid-move. Do
-**preview first**, confirm it is healthy, and do production off lesson hours.
-
-Verify the move actually paid off before closing it out — the whole point is
-the round trip to Neon. In Sentry, the `BEGIN` span on any DB-touching
-transaction is pure RTT (the statement does no work), so it is the cleanest
-probe available: it averaged **27.5ms** from `dfw` and should land in the
-single digits from `ord`. If it did not move, the machines did not move.
+1. **Verify the new target by hand, signed in** — a booking page and a
+   dashboard page. The probes cover the signed-out half only. A magic link is
+   addressed to `APP_URL`, so signing in on a bare platform URL means editing
+   the link's host.
+2. **Map the domain.** On Cloud Run: `gcloud beta run domain-mappings create
+--service web --domain spiralclass.com --region us-east4`, which first needs
+   the domain verified in Search Console by the same Google account `gcloud`
+   uses. It prints four A and four AAAA records.
+3. **Replace the apex records at Cloudflare, DNS-only (grey cloud).** Google
+   cannot issue the certificate through Cloudflare's proxy. ⚠️ **HTTPS is down
+   from the moment the records change until the certificate reaches Google's
+   front ends** — about fifteen minutes on 2026-09-23. Do it outside lesson
+   hours, and write the old records down first: putting them back is the
+   rollback. `www` needs nothing; a Cloudflare redirect rule sends it to the
+   apex at the edge.
+4. **Move the Inngest registration — do not add one.** ⚠️ **The sharpest step on
+   this page.** Inngest registers an app **per URL**, so syncing a second live
+   URL registers a second app and every cron fires **twice**, including ones
+   that bill Stripe customers. Sync the domain, never a platform URL, and check
+   the Inngest dashboard shows exactly one production app.
+5. **Watch one real class join, end to end.**
+6. **Stop the old target — `fly machine stop`, never `fly scale count 0`**,
+   which destroys machines. Stopping keeps a rollback; destroying is a separate
+   decision, taken on 2026-09-23 knowing it gave that rollback up.
 
 ## Maintenance windows (taking the apps offline)
 
 For planned work that needs the apps offline (a destructive migration, an infra
 cutover), flip the **`MAINTENANCE_MODE`** env flag (D-76) — no code deploy
 needed to enter or exit. The app serves a localized 503 wall. `/api/health` and
-`/api/health/live` stay 200 so Fly + monitors don't flap. (The allowlist once
+`/api/health/live` stay 200 so the uptime monitors don't flap. (The allowlist once
 carried a config route for a client that polled it; client and route are both
 gone.)
 
 **Enter:**
 
 1. Set `MAINTENANCE_MODE=1` in **every** environment you're taking down:
-   - **Production** → `fly secrets set MAINTENANCE_MODE=1 -a agendaprofe`
-     (hot-applies on restart — no rebuild needed) or `fly.production.toml`
-     `[env]` + redeploy.
-   - **Preview** → `fly secrets set MAINTENANCE_MODE=1 -a agendaprofe-preview`
-     (hot-applies on restart), or `fly.preview.toml` `[env]`.
+   - **Production** → `gcloud run services update web --region us-east4
+--update-env-vars MAINTENANCE_MODE=1` (operator-only). That rolls a new
+     revision of the same image — no rebuild — and the container environment
+     wins over the mounted secret file, so nothing else needs touching.
+     ⚠️ `--update-env-vars`, never `--set-env-vars`, which replaces the
+     service's whole environment.
+   - **Preview** has had no Fly app since 2026-09-23; set it wherever preview
+     is being served ([D-150](../decisions/D-150.md)).
    - Optionally set `MAINTENANCE_MESSAGE="…"` and/or `MAINTENANCE_UNTIL="18:00 CST"`
      for custom copy / an ETA, and `MAINTENANCE_BYPASS_TOKEN=<random>` to let
      yourself through.
@@ -319,11 +305,11 @@ gone.)
 4. Verify the fix on the **real** site via `https://…/?maintenance_bypass=<token>`
    (sets a cookie so the rest of your session is live while everyone else is walled).
 
-**Exit:** 5. Unset `MAINTENANCE_MODE` (or set `0`) everywhere it was set —
-`fly secrets unset MAINTENANCE_MODE -a agendaprofe` (and `-a
-   agendaprofe-preview`), which restarts the machines to apply, or redeploy if
-you set it via `fly.toml`. Confirm the apps are live and `/api/health` is
-green. Clear `MAINTENANCE_MESSAGE`/`MAINTENANCE_UNTIL` if you set them.
+**Exit:** 5. Remove `MAINTENANCE_MODE` everywhere it was set —
+`gcloud run services update web --region us-east4 --remove-env-vars
+MAINTENANCE_MODE` for production, which rolls another revision. Confirm the app
+is live and `/api/health` is green. Remove `MAINTENANCE_MESSAGE`/
+`MAINTENANCE_UNTIL`/`MAINTENANCE_BYPASS_TOKEN` the same way if you set them.
 
 > `MAINTENANCE_MODE` is deliberately env-driven, not a DB row: the flag has to be
 > readable even when the DB is the thing under maintenance. See D-76.

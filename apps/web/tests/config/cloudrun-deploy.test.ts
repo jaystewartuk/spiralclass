@@ -1,5 +1,13 @@
 import { spawnSync } from "node:child_process";
-import { chmodSync, existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import {
+  chmodSync,
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from "node:fs";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { afterAll, describe, expect, it } from "vitest";
@@ -7,8 +15,8 @@ import { composeEnvFile, namesOf } from "../../../../scripts/cloudrun-env.mjs";
 import { REPO_ROOT } from "../../../../scripts/env-config.mjs";
 
 /**
- * The Cloud Run target ([D-184]) — the third production target, and the one
- * built to take the domain from Fly.
+ * The Cloud Run target ([D-184]) — built to take the domain from Fly, and
+ * serving spiralclass.com since the 2026-09-23 cutover (its addendum).
  *
  * Most of what makes it safe is a value in a config file or a flag in a shell
  * script, and none of those fail a build when they go. The parts that would
@@ -302,13 +310,23 @@ describe("the deploy can ship production and cannot read it", () => {
     }
   });
 
-  it("takes no domain, syncs no Inngest app and touches no database", () => {
-    // Each of these is a whole class of incident. The Inngest one is the
-    // sharpest: Inngest registers an app per URL, so a second synced URL fires
-    // every cron twice — including ones that bill Stripe customers.
+  it("maps no domain and touches no database", () => {
+    // The mapping was made once, by the operator; a DNS change from a CI job is
+    // what CLAUDE.md's first rule reserves to them. The migrations belong to
+    // the database job, once per commit.
     expect(EXECUTABLE).not.toContain("domain-mappings");
-    expect(EXECUTABLE).not.toContain("inngest-sync");
     expect(EXECUTABLE).not.toContain("database-deploy");
+  });
+
+  it("syncs Inngest against the domain and nothing else", () => {
+    // Inngest registers an app PER URL, so syncing the run.app URL would
+    // register a second app and fire every cron twice — including ones that
+    // bill Stripe customers. The run is executed below; this is the reminder
+    // at the source, where the tempting edit is `"$URL/api/inngest"`.
+    const syncs = EXECUTABLE.split("\n").filter((line) => line.includes("inngest-sync"));
+    expect(syncs).toEqual([
+      'exec bash scripts/inngest-sync.sh "https://spiralclass.com/api/inngest"',
+    ]);
   });
 });
 
@@ -368,6 +386,83 @@ describe("the script refuses before it touches anything", () => {
     expect(result.status).toBe(1);
     expect(result.stderr).toContain("GCP_PROJECT_ID");
     expect(result.stdout, "it started a build").not.toContain("Deploying");
+  });
+});
+
+/**
+ * A whole deploy, EXECUTED with gcloud, docker, node and curl replaced by stubs
+ * that record their calls. What it answers is the one question a grep cannot:
+ * which URL Inngest is told about, and whether that happens after the revision
+ * serving it is live.
+ */
+describe("a deploy run with its platform tools stubbed", () => {
+  const scratch = mkdtempSync(join(tmpdir(), "cloudrun-deploy-run-"));
+  afterAll(() => rmSync(scratch, { recursive: true, force: true }));
+
+  const bin = join(scratch, "bin");
+  const log = join(scratch, "calls.log");
+  mkdirSync(bin, { recursive: true });
+  const stub = (name: string, body: string) => {
+    writeFileSync(join(bin, name), `#!/bin/sh\necho "${name} $*" >> "$STUB_LOG"\n${body}\n`);
+    chmodSync(join(bin, name), 0o755);
+  };
+  // `describe` is the only gcloud call whose output the script reads.
+  stub(
+    "gcloud",
+    'case "$*" in *"services describe"*) echo "https://web-stub-uk.a.run.app" ;; esac\nexit 0',
+  );
+  stub("docker", "exit 0");
+  // env-build-args must print at least one build arg or the script refuses;
+  // record-release must not write to a real ledger.
+  stub("node", 'case "$1" in *env-build-args*) echo "NEXT_PUBLIC_STUB=1" ;; esac\nexit 0');
+  // The shape inngest-sync.sh reads as a confirmed sync.
+  stub("curl", `echo '{"message":"Successfully registered","modified":false}'`);
+
+  const deploy = () => {
+    writeFileSync(log, "");
+    const result = spawnSync("bash", [SCRIPT_PATH, "production", "--gate-already-passed"], {
+      cwd: REPO_ROOT,
+      encoding: "utf8",
+      env: {
+        HOME: scratch,
+        PATH: `${bin}:${process.env.PATH ?? ""}`,
+        STUB_LOG: log,
+        GCP_PROJECT_ID: "stub-project",
+      } as unknown as NodeJS.ProcessEnv,
+    });
+    return { ...result, calls: readFileSync(log, "utf8").split("\n").filter(Boolean) };
+  };
+
+  const run = deploy();
+
+  it("finishes green", () => {
+    expect(run.status, `${run.stdout}\n${run.stderr}`).toBe(0);
+    expect(run.stdout).toContain("Inngest sync confirmed");
+  });
+
+  it("PUTs the domain's Inngest endpoint, and never the run.app URL", () => {
+    const curls = run.calls.filter((call) => call.startsWith("curl "));
+    expect(curls).toHaveLength(1);
+    expect(curls[0]).toContain("-X PUT https://spiralclass.com/api/inngest");
+    expect(run.calls.join("\n"), "something was pointed at the run.app URL").not.toMatch(
+      /curl .*run\.app/,
+    );
+  });
+
+  it("syncs only after the new revision is deployed", () => {
+    // A sync against the previous revision registers the previous function
+    // set, and a cron this commit adds silently never runs — the 2026-07-07
+    // outage's class.
+    const deployed = run.calls.findIndex((call) => call.startsWith("gcloud run deploy"));
+    const synced = run.calls.findIndex((call) => call.startsWith("curl "));
+    expect(deployed).toBeGreaterThan(-1);
+    expect(synced).toBeGreaterThan(deployed);
+  });
+
+  it("records the deploy as production web, the row release:status reads", () => {
+    const ledger = run.calls.filter((call) => call.includes("record-release"));
+    expect(ledger).toHaveLength(1);
+    expect(ledger[0]).toContain("--kind web-deploy --env production");
   });
 });
 
