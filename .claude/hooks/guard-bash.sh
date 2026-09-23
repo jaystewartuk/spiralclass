@@ -150,12 +150,16 @@ fi
 # a session's own mistake, not against a session determined to route around it —
 # the deny list in .claude/settings.json and CLAUDE.md's operator-only section
 # are the other two copies of the rule.
+#
+# ⚠️ KEPT AFTER THE FAILOVER WAS RETIRED ([D-186]). This repository no longer
+# deploys to Vercel, but the project is the operator's to delete, and until it
+# is gone `vercel promote` against an old deployment still reaches production
+# data. Retire this rule when the project is deleted, not before.
 VERCEL_RUNNER='((npx|bunx)[[:space:]]+(--yes[[:space:]]+)?|(pnpm|npm|yarn)[[:space:]]+(dlx|exec)[[:space:]]+(--yes[[:space:]]+)?)?'
-if [[ "$command_only" == *vercel-deploy.sh* ]] ||
-  [[ "$command_line" =~ (^|[\;\&\|])[[:space:]]*([A-Za-z_][A-Za-z0-9_]*=[^[:space:]]*[[:space:]]+)*${VERCEL_RUNNER}vercel([[:space:]]|@|$) ]]; then
+if [[ "$command_line" =~ (^|[\;\&\|])[[:space:]]*([A-Za-z_][A-Za-z0-9_]*=[^[:space:]]*[[:space:]]+)*${VERCEL_RUNNER}vercel([[:space:]]|@|$) ]]; then
   block "This deploys to, or reads secrets from, the live Vercel production project." \
-    "It is the second production target ([D-177]) and one 'vercel promote' away from the domain.
-Production only ever ships through 'pnpm promote', run by the operator."
+    "The failover is retired ([D-186]) but the project may still exist, holding production
+secrets. Deleting it, like shipping, is the operator's."
 fi
 
 # The third production target ([D-184]). `gcloud run deploy` and the two

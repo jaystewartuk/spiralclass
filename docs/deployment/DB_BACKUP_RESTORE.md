@@ -232,8 +232,8 @@ below.
    `DATABASE_URL`/`DIRECT_URL` in Infisical `production` at the restored
    target, re-run `infra/gcp/push-cloudrun-env.sh` (operator), and deploy so a
    new revision mounts the new secret version (a running revision keeps the one
-   it started with). The Vercel failover and the `production` GitHub
-   Environment hold their own copies of those two values; re-push them too.
+   it started with). The `production` GitHub Environment holds its own copy
+   of those two values; re-push it too.
    Verify `/api/health` and a real sign-in, exit maintenance mode.
 
 If data was only partially corrupted rather than needing a wholesale cutover,

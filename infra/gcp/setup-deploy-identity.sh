@@ -7,8 +7,8 @@
 #   infra/gcp/setup-deploy-identity.sh <project-id>
 #
 # It prints the three values CI needs at the end. They go into Infisical
-# `production` at /deploy, beside the VERCEL_* values, and reach the workflow through
-# the same sync ([D-163]) — never typed into GitHub by hand.
+# `production` at /deploy, and reach the workflow through
+# the Infisical sync ([D-163]) — never typed into GitHub by hand.
 #
 # ⚠️ IT GRANTS NO `secretAccessor` TO THE DEPLOY ACCOUNT, and that omission is
 # the point of the file. github-deploy can push an image and roll a revision; it
@@ -29,8 +29,7 @@
 # exception, not the best.
 #
 # So the credential is a key for an identity that can deploy a revision and
-# cannot read a secret. That is the same trade VERCEL_TOKEN makes, and Fly's
-# token made. Its real cost is rotation, which nothing automates:
+# cannot read a secret — the same trade Fly's token made. Its real cost is rotation, which nothing automates:
 #
 #   gcloud iam service-accounts keys list  --iam-account=<deploy sa>
 #   gcloud iam service-accounts keys create - --iam-account=<deploy sa>  # stdout
@@ -214,8 +213,8 @@ EOF
 
 if [ "$EXISTING_KEYS" = "0" ]; then
   cat <<EOF
-Two values go into Infisical \`production\` at /deploy, beside the
-VERCEL_* values. Do not type them into GitHub by hand — the sync (D-163)
+Two values go into Infisical \`production\` at /deploy. Do not type them
+into GitHub by hand — the sync (D-163)
 is what puts them in the environment.
 
   GCP_PROJECT_ID = $PROJECT

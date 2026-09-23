@@ -1,7 +1,7 @@
 # Infisical — deploy and runtime secrets
 
-Secrets manager for everything the production app (Cloud Run `web`, and the
-Vercel failover) needs at runtime, **except** the R2 credentials, which stay
+Secrets manager for everything the production app (Cloud Run `web`) needs at
+runtime, **except** the R2 credentials, which stay
 Tofu-owned (`infra/cloudflare-r2/`, D-65) — don't move those here.
 
 It replaced a plaintext `.env.fly.local` that was being pasted into `fly
@@ -25,7 +25,7 @@ NOT need to live in this directory** to use it — put it wherever its actual
 task domain suggests (e.g. `docs/deployment/livekit-credentials.sh` sits with the
 rest of the LiveKit-box runbook, not here, even though it pulls production's
 `LIVEKIT_API_SECRET`). Reserve `infra/infisical/` itself for scripts that
-are genuinely _about_ Infisical/secrets management (`push-vercel-env.sh`,
+are genuinely _about_ Infisical/secrets management (`push-github-secrets.sh`,
 this helper) rather than task scripts that merely consume one secret.
 
 Every script that pulls `DATABASE_URL`/etc. is on the helper now —
@@ -44,10 +44,8 @@ that needs `KEY=VALUE` shape has to rebuild it.
 Nothing left in `infra/infisical/` duplicates the old boilerplate. The scripts
 that remain here are genuinely about Infisical — each pushes a whole set of
 values into one consumer, rather than merely consuming one secret:
-`push-github-secrets.sh` (the deploy workflow's environment) and
-`push-vercel-env.sh` (the Vercel failover's runtime environment, with the R2
-credentials Cloud Run also gets). Cloud Run's own push lives with the rest of
-its setup, as `infra/gcp/push-cloudrun-env.sh`.
+`push-github-secrets.sh` (the deploy workflow's environment). Cloud Run's own
+push lives with the rest of its setup, as `infra/gcp/push-cloudrun-env.sh`.
 
 ## Account setup (cloud free tier)
 
@@ -120,8 +118,8 @@ D-89/Neon migration completed; the module was removed from the repo.)
   uses a named AWS profile instead of the bare env vars — to avoid colliding
   with these.)
 - **⚠️ Never sync this environment to a deploy target.**
-  `infra/gcp/push-cloudrun-env.sh` and `push-vercel-env.sh` import
-  `production`'s `/` wholesale into the running app — they must never be
+  `infra/gcp/push-cloudrun-env.sh` imports
+  `production`'s `/` wholesale into the running app — it must never be
   pointed at `infra`. Keeping the operator creds in their
   own environment (not a folder under `preview`) is the hard guarantee they
   can't leak into the app's runtime, regardless of export/path semantics.
@@ -490,7 +488,7 @@ list is missing.
 time**, not read from the runtime secret — see the comment block in the root
 `Dockerfile`. They all live in `config/env/<env>.build.env` now, and
 `scripts/env-build-args.mjs` feeds every one of them to the build (via
-`scripts/cloudrun-deploy.sh` and `scripts/vercel-deploy.sh`) — so the earlier state where only three were wired,
+`scripts/cloudrun-deploy.sh`) — so the earlier state where only three were wired,
 and Sentry/PostHog weren't wired at all, is closed. The R2 public-bucket URLs
 are still non-secret values manually sourced from the Cloudflare dashboard
 (`infra/cloudflare-r2/README.md`'s "public URL is manual" note); they just live
@@ -504,7 +502,6 @@ is re-pushed. All operator-only:
 | Script                                   | Writes                                               |
 | ---------------------------------------- | ---------------------------------------------------- |
 | `infra/gcp/push-cloudrun-env.sh`         | Cloud Run's one runtime secret (production)          |
-| `infra/infisical/push-vercel-env.sh`     | the Vercel failover's runtime environment            |
 | `infra/infisical/push-github-secrets.sh` | the `production` GitHub Environment the deploy reads |
 
 Cloud Run picks a new secret version up only when a deploy rolls a new

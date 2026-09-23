@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # The production deploy. Cloud Run `web` has served spiralclass.com since the
 # 2026-09-23 cutover ([D-184]'s addendum); Fly `agendaprofe` was destroyed
-# the same day. The Vercel failover ([D-177]) is untouched by this file.
+# the same day. It is the only production target ([D-186]).
 #
 # ⚠️ WHAT THIS DELIBERATELY DOES NOT DO, and each omission is load bearing
 # rather than unfinished:
@@ -32,10 +32,10 @@
 #
 # So the ordered steps are five:
 #
-#   1. resolve the build-time NEXT_PUBLIC_* values from the SAME source the
-#      Vercel build reads — config/env/<env>.build.env, through
-#      scripts/env-build-args.mjs. Two targets baking different values into
-#      one commit's client bundle is a class of bug with no runtime symptom.
+#   1. resolve the build-time NEXT_PUBLIC_* values from their one home —
+#      config/env/<env>.build.env, through scripts/env-build-args.mjs. A
+#      second copy baking different values into one commit's client bundle is
+#      a class of bug with no runtime symptom.
 #   2. build apps/web's amd64 image with docker buildx and push it to Artifact
 #      Registry, tagged with the commit SHA
 #   3. `gcloud run deploy --image` it, with the shape from
@@ -82,8 +82,7 @@
 # best: it runs more third-party code than any other.
 #
 # So GCP_DEPLOY_KEY is a service-account key for an identity that can deploy a
-# revision and cannot read a secret — the same shape, blast radius and rotation
-# story as VERCEL_TOKEN. Its cost is that it is long-lived, and
+# revision and cannot read a secret. Its cost is that it is long-lived, and
 # infra/gcp/README.md owns the rotation.
 #
 # ⚠️ From a LAPTOP, leave GCP_DEPLOY_KEY unset: the operator's own `gcloud auth
@@ -210,11 +209,8 @@ fi
 
 # NEXT_DEPLOYMENT_ID is what Next stamps on asset requests as `?dpl=`, so a
 # client left on an old build gets a hard navigation instead of silently pulling
-# chunks the new deploy renamed. The FULL commit, byte-identical to what
-# scripts/vercel-deploy.sh stamps: a client served by one target before a
-# failover and the other after compares this value, and a short SHA here against
-# a full one there is a skew on every page for every visitor. It shipped short
-# until 2026-09-23; the guard pinning the pair still named Fly.
+# chunks the new deploy renamed. The FULL commit, which is what the image tag
+# and `git log origin/production` name. It shipped short until 2026-09-23.
 BUILD_ARGS+=(--build-arg "NEXT_DEPLOYMENT_ID=$SHA")
 
 # ---------------------------------------------------------------------------

@@ -26,7 +26,7 @@ variable "buckets" {
     `environment` is "production" or "preview" — it doesn't change what
     this module provisions (every entry gets its own real bucket + token
     either way), only which environment's push picks its creds up —
-    r2Entries() in scripts/vercel-env.mjs takes production only. See D-65.
+    r2Entries() in scripts/cloudrun-env.mjs takes production only. See D-65.
 
     `public` is metadata only (surfaced in the `buckets` output for
     humans) — this module does not provision

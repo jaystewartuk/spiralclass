@@ -416,18 +416,13 @@ describe("the workflows call the registry, and never restate it (D-157)", () => 
     // script a laptop can also run, and states none of the steps itself.
     // scripts/database-deploy.sh joined when the checkpoint and migrations moved
     // into a job of their own ([D-177]'s addendum); the Cloud Run script
-    // replaced Fly's when the domain moved ([D-184]'s addendum).
-    const DEPLOY_SCRIPTS = [
-      "scripts/cloudrun-deploy.sh",
-      "scripts/vercel-deploy.sh",
-      "scripts/database-deploy.sh",
-    ];
+    // replaced Fly's when the domain moved ([D-184]'s addendum). The Vercel
+    // script left with the failover ([D-186]).
+    const DEPLOY_SCRIPTS = ["scripts/cloudrun-deploy.sh", "scripts/database-deploy.sh"];
 
-    // Every step a deploy script owns. `vercel pull`, `vercel build` and
-    // `vercel deploy` are here for the same reason `docker buildx build` is:
-    // the ONE place the Vercel build's env overlay happens is that script, and
-    // a workflow that ran `vercel build` itself would skip it and ship the
-    // dashboard's values to real browsers. The checkpoint and the migration
+    // Every step a deploy script owns. The `vercel` verbs outlived the Vercel
+    // script ([D-186]): no script owns them now, so a workflow running one is a
+    // deploy to a retired target with no script behind it. The checkpoint and the migration
     // runner are here because a database job that re-typed them is the
     // 2026-07 failure exactly: the copy that got re-typed lost the checkpoint.
     const FORBIDDEN = [

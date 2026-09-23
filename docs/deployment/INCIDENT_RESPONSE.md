@@ -147,8 +147,6 @@ Every step below that says **apply it** means this, all of it the operator's:
 3. Deploy, so a new revision mounts that version — `pnpm promote`, or
    `pnpm deploy:cloudrun` by hand. **A running revision keeps the version it
    started with**, so nothing changes until this step.
-4. Run `infra/infisical/push-vercel-env.sh`, or the Vercel failover keeps the
-   old value.
 
 ### 4.1 `SUPABASE_SERVICE_ROLE_KEY`
 

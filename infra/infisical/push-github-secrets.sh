@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Push the production deploy's values from Infisical into the GitHub
-# `production` Environment. One push target among several, beside
-# infra/gcp/push-cloudrun-env.sh (Cloud Run runtime) and push-vercel-env.sh —
+# `production` Environment. One push target of two, beside
+# infra/gcp/push-cloudrun-env.sh (Cloud Run runtime) —
 # Infisical is the one vault and everything else holds a derived copy
 # ([D-163] and its addenda).
 #

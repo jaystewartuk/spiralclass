@@ -7,9 +7,8 @@ feature needs a new bucket, someone creates it by hand in the Cloudflare
 dashboard, creates a scoped R2 API token for it, and copies the resulting
 Access Key ID / Secret into the host's secrets by hand. Adding a bucket here
 becomes a one-line diff in `variables.tf`'s `buckets` list, and the production
-pushes — `infra/gcp/push-cloudrun-env.sh` (Cloud Run) and
-`infra/infisical/push-vercel-env.sh` (the failover) — read the credentials
-straight out of this module's state.
+push — `infra/gcp/push-cloudrun-env.sh` — reads the credentials straight out
+of this module's state.
 
 Provider: `cloudflare/cloudflare ~> 5`. Two resources per bucket:
 **`cloudflare_r2_bucket`** and a bucket-scoped **`cloudflare_api_token`**
@@ -73,9 +72,8 @@ domain / `NEXT_PUBLIC_*` URL — reads go through short-lived signed URLs).
 So the `buckets` list is 14 entries: an `agendaprofe-production-<purpose>`
 and an `agendaprofe-preview-<purpose>` per row above — a separate bucket and a
 separate token each, not a shared bucket split by env-var target. Production's
-credentials reach Cloud Run through `infra/gcp/push-cloudrun-env.sh` and the
-Vercel failover through `infra/infisical/push-vercel-env.sh`; preview has no
-host today, so nothing pushes its credentials.
+credentials reach Cloud Run through `infra/gcp/push-cloudrun-env.sh`; preview
+has no host today, so nothing pushes its credentials.
 
 > **Migration note (Supabase→Neon, D-70).** The original **bare-named**
 > buckets (`agendaprofe-teacher-photos`, `agendaprofe-class-materials`,
@@ -215,8 +213,8 @@ hex string in any R2 endpoint URL. They were committed until 2026-09-04 and
 templated ahead of the repository going public, so every checkout (and every
 worktree) fills them in once. `../backend.hcl` is still the one shared
 partial-backend config every R2-state module points at; see `infra/README.md`.
-Reading state — `tofu output`, which `infra/gcp/push-cloudrun-env.sh` and
-`infra/infisical/push-vercel-env.sh` do — needs only the backend file, not
+Reading state — `tofu output`, which `infra/gcp/push-cloudrun-env.sh` does —
+needs only the backend file, not
 `terraform.tfvars`.
 
 ### Credentials come from Infisical's `infra` environment (D-66)
@@ -318,8 +316,7 @@ When you're ready to move production off the bare-named buckets:
    nothing to copy; they start empty.)
 2. **Repoint production** — run `infra/gcp/push-cloudrun-env.sh` (operator),
    which writes the production creds into Cloud Run's runtime secret, and
-   deploy so a new revision mounts it. Run `infra/infisical/push-vercel-env.sh`
-   too, for the failover.
+   deploy so a new revision mounts it.
 3. **Re-enable public access** by hand for the two `public = true` buckets
    (`agendaprofe-production-teacher-photos`, `-teacher-videos`) and update the
    `NEXT_PUBLIC_*_R2_PUBLIC_URL` build-args (Dockerfile) — the module doesn't
@@ -338,9 +335,8 @@ When you're ready to move production off the bare-named buckets:
 4. Add the bucket's `env_prefix` to
    `apps/web/src/lib/storage/provider.ts`'s `R2_ENV_PREFIX` map (still a
    manual one-line code change — this module doesn't touch application
-   code), then re-run `infra/gcp/push-cloudrun-env.sh` and
-   `infra/infisical/push-vercel-env.sh` so production carries the 5 env vars,
-   and deploy.
+   code), then re-run `infra/gcp/push-cloudrun-env.sh` so production carries
+   the 5 env vars, and deploy.
 
 ## Notes
 

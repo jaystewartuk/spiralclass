@@ -7,12 +7,6 @@
 export const DEPLOY_JOBS: Readonly<{
   database: string;
   cloudrun: string;
-  vercel: string;
-}>;
-
-/** The targets that are deployed but serve no domain — reported, never decisive. */
-export const STANDBYS: Readonly<{
-  vercel: string;
 }>;
 
 /** One entry of `gh run view <id> --json jobs`'s `.jobs`. */
@@ -28,10 +22,6 @@ export interface DeployVerdict {
   /** Each job's conclusion or status, or `missing` when the run has no such job. */
   database: string;
   cloudrun: string;
-  vercel: string;
 }
 
 export function deployVerdict(jobs: ReadonlyArray<RunJob>): DeployVerdict;
-
-/** One line per standby, newline-joined, for the end of a promote. */
-export function failoverLine(verdict: { vercel: string }): string;

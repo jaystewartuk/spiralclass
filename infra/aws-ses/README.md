@@ -129,8 +129,7 @@ files ship, and neither holds a secret.
 credentials` (the SAME access key/secret pushed to preview above — this
    module provisions one shared IAM credential, not per-environment ones)
    into Infisical `production`: `SES_ACCESS_KEY_ID`, `SES_SECRET_ACCESS_KEY`
-   (secret). Then run `infra/gcp/push-cloudrun-env.sh` (and
-   `infra/infisical/push-vercel-env.sh` for the failover) and deploy. The
+   (secret). Then run `infra/gcp/push-cloudrun-env.sh` and deploy. The
    non-secret `SES_REGION` and `SES_FROM = soporte@updates.spiralclass.com`
    (production's verified domain — NOT the same value used on preview) go in
    `config/env/production.runtime.env`.

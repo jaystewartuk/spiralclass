@@ -212,11 +212,6 @@ describe("the operator-only rule is enforced, not merely stated", () => {
     // What serves spiralclass.com since the 2026-09-23 cutover ([D-184]'s
     // addendum). It replaced the Fly script on this list when it replaced Fly.
     "scripts/cloudrun-deploy.sh",
-    // The failover ([D-177]). It deploys real production code to a live
-    // project and is one `vercel promote` from holding spiralclass.com — and
-    // it joined the list in the commit that created it, rather than after a
-    // session ran it once.
-    "scripts/vercel-deploy.sh",
     // The database half of every production deploy, split out of the serving
     // target's script when the targets became independently deployable
     // ([D-177]'s addendum). It checkpoints and migrates the live database, so a session

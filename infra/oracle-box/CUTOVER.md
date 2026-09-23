@@ -456,8 +456,8 @@ spiralclass-preview`. It has to pass before anything else here means much:
      `/config` and the secret at `/`, the two paths
      `scripts/oracle-render-livekit.sh` reads. ⚠️ Never in `preview`, not even
      as a stopgap to bring preview's video back. Then push it to the
-     production app with `infra/gcp/push-cloudrun-env.sh` and
-     `infra/infisical/push-vercel-env.sh`, deploy so a new Cloud Run revision
+     production app with `infra/gcp/push-cloudrun-env.sh`, deploy so a new
+     Cloud Run revision
      mounts it, and set the key id wherever production's current one is set.
   3. **Redeploy the box** (`./scripts/oracle-deploy.sh`). It re-renders
      `livekit.yaml` from `production` and restarts livekit-server to load it.

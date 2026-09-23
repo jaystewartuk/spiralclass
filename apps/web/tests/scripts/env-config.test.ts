@@ -186,7 +186,6 @@ describe("NEXT_DEPLOYMENT_ID reaches the build", () => {
   // silence: it cannot be caught by a build, a type, or a green deploy.
   const dockerfile = readFileSync(resolve(REPO_ROOT, "Dockerfile"), "utf8");
   const cloudrunDeploy = readFileSync(resolve(REPO_ROOT, "scripts", "cloudrun-deploy.sh"), "utf8");
-  const vercelDeploy = readFileSync(resolve(REPO_ROOT, "scripts", "vercel-deploy.sh"), "utf8");
 
   it("next.config.ts still reads it (the reason the rest of this exists)", () => {
     const nextConfig = readFileSync(resolve(REPO_ROOT, "apps", "web", "next.config.ts"), "utf8");
@@ -214,13 +213,10 @@ describe("NEXT_DEPLOYMENT_ID reaches the build", () => {
     );
   });
 
-  it("both targets stamp the same id for the same commit", () => {
-    // Next compares `?dpl=` against this value. A client served by Cloud Run
-    // before a failover and by Vercel after it sees a skew — a hard navigation
-    // on every page, for every visitor — unless both stamp the same string.
-    // Cloud Run shipped the SHORT sha until 2026-09-23 while the guard for this
-    // pair still pointed at the Fly script.
-    expect(vercelDeploy).toContain("NEXT_DEPLOYMENT_ID=${SHA}");
+  it("stamps the full commit, never the short one", () => {
+    // Cloud Run shipped the SHORT sha until 2026-09-23. The full one is what
+    // `git log origin/production` and the image tag name, so the id a skewed
+    // client reports can be matched to a release without a lookup.
     expect(cloudrunDeploy).not.toMatch(/NEXT_DEPLOYMENT_ID=\$\{?SHORT_SHA/);
   });
 

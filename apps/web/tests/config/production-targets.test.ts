@@ -3,32 +3,22 @@ import { mkdtempSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterAll, describe, expect, it } from "vitest";
-import {
-  DEPLOY_JOBS,
-  STANDBYS,
-  deployVerdict,
-  failoverLine,
-} from "../../../../scripts/ci/deploy-verdict.mjs";
+import { DEPLOY_JOBS, deployVerdict } from "../../../../scripts/ci/deploy-verdict.mjs";
 import { REPO_ROOT } from "../../../../scripts/env-config.mjs";
 
 /**
- * The production targets deploy independently, and none holds another's
+ * The database is a job of its own, and the target holds none of its
  * credentials ([D-177]'s addendum, 2026-09-12). Cloud Run took the domain from
- * Fly on 2026-09-23 and Fly was destroyed ([D-184]'s addendum), so the targets
- * are Cloud Run, which serves, and the Vercel failover.
+ * Fly on 2026-09-23 and Fly was destroyed ([D-184]'s addendum); the Vercel
+ * failover that ran beside it was retired the same week ([D-186]). So there is
+ * one target, Cloud Run, and it serves.
  *
- * Until 2026-09-12 the Neon checkpoint and the migrations lived inside the
- * serving target's job, and the Vercel job `needs:`-ed it. That made two things
- * true that should not be. A failure of the serving platform — the one case a
- * failover exists for — meant the failover could not deploy at all. And a
- * missing Vercel credential turned a release that had shipped into a red run,
- * and `pnpm promote` into a report that production might not have moved.
- *
- * So the database work is a job of its own that both targets need, each job
- * holds only its own secrets, a dispatch can pick one target, and promote
- * judges production by the database job and the job serving the domain. Every
- * one of those is a word in a YAML file or a line in a script, and none of them
- * fails a build when it goes — so this file is where they are held.
+ * The split was made so two targets could deploy independently. It outlived
+ * the second one because it is also a credential boundary: the job that builds
+ * the image runs the most third-party code and never holds DATABASE_URL, and a
+ * revoked GCP key cannot stop a migration. Every one of those is a word in a
+ * YAML file or a line in a script, and none of them fails a build when it goes
+ * — so this file is where they are held.
  */
 
 const read = (...parts: string[]) => readFileSync(join(REPO_ROOT, ...parts), "utf8");
@@ -80,9 +70,7 @@ const preflightOf = (id: string) =>
 
 /**
  * The build values, DERIVED from the file the build reads rather than listed
- * here: every `__LOCAL__` key in config/env/production.build.env. Both targets
- * bake the same client bundle for the same commit, so these are the only
- * values the two target jobs share.
+ * here: every `__LOCAL__` key in config/env/production.build.env.
  */
 const BUILD = new Set(
   read("config", "env", "production.build.env")
@@ -94,19 +82,20 @@ const BUILD = new Set(
 const FLAG = "--database-already-deployed";
 
 const DATABASE = new Set(["DATABASE_URL", "DIRECT_URL", "NEON_API_KEY", "NEON_PROJECT_ID"]);
-const VERCEL = new Set(["VERCEL_TOKEN", "VERCEL_ORG_ID", "VERCEL_PROJECT_ID"]);
 // LIVEKIT_ORIGIN_IP belongs to the probe, and the probe belongs to whichever
 // job serves the domain. It moved here from Fly's job with the domain.
 const CLOUDRUN = new Set(["GCP_PROJECT_ID", "GCP_DEPLOY_KEY", "LIVEKIT_ORIGIN_IP"]);
 
 /** Every job that deploys somewhere — i.e. every job but the database one. */
-const TARGETS = ["cloudrun", "vercel"] as const;
+const TARGETS = ["cloudrun"] as const;
 
 const sorted = (set: Iterable<string>) => [...set].sort();
 
-describe("the database is a job of its own, and no target waits on another", () => {
-  it("has exactly the three jobs, and the build values are real", () => {
-    expect(Object.keys(JOBS).sort()).toEqual(["cloudrun", "database", "vercel"]);
+describe("the database is a job of its own, and the target waits only on it", () => {
+  it("has exactly the two jobs, and the build values are real", () => {
+    // A third job is a third target, and that is a decision record, not an
+    // edit here (D-186 retired the last one).
+    expect(Object.keys(JOBS).sort()).toEqual(["cloudrun", "database"]);
     // An empty BUILD would make every subset assertion below vacuous.
     expect(BUILD.size).toBeGreaterThan(0);
   });
@@ -141,19 +130,14 @@ describe("each job holds its own credentials and no other job's", () => {
     expect(sorted(secretsOf("database"))).toEqual(sorted(DATABASE));
   });
 
-  it("the Vercel job holds Vercel's values and the build values — no database, no GCP", () => {
-    expect(sorted(secretsOf("vercel"))).toEqual(sorted([...VERCEL, ...BUILD]));
-  });
-
-  it("the Cloud Run job holds its own values and the build values — no database, no Vercel", () => {
+  it("the Cloud Run job holds its own values and the build values — no database", () => {
     expect(sorted(secretsOf("cloudrun"))).toEqual(sorted([...CLOUDRUN, ...BUILD]));
   });
 
   it("each preflight refuses on exactly its own job's credentials", () => {
     // A preflight that checked another job's secret would make that job's
-    // absence fatal here — the exact coupling this split removes.
+    // absence fatal here — the coupling this split removed.
     expect(sorted(preflightOf("database"))).toEqual(sorted(DATABASE));
-    expect(sorted(preflightOf("vercel"))).toEqual(sorted(VERCEL));
     expect(sorted(preflightOf("cloudrun"))).toEqual(sorted(CLOUDRUN));
   });
 
@@ -185,7 +169,7 @@ describe("each job holds its own credentials and no other job's", () => {
   });
 });
 
-describe("a dispatch can pick one target; a push deploys every one", () => {
+describe("a dispatch can name the target; a push deploys it", () => {
   /**
    * Evaluates a job's `if:` for a given run. GitHub's expression syntax is a
    * JavaScript subset for the operators used here, so the translation is
@@ -207,46 +191,45 @@ describe("a dispatch can pick one target; a push deploys every one", () => {
 
   const PRODUCTION = "refs/heads/production";
 
-  const ALL = { database: true, vercel: true, cloudrun: true };
+  const ALL = { database: true, cloudrun: true };
 
   it.each([
     ["a push", { ref: PRODUCTION, event: "push" }, ALL],
     ["a dispatch for all", { ref: PRODUCTION, event: "workflow_dispatch", target: "all" }, ALL],
     [
-      "a dispatch for Vercel",
-      { ref: PRODUCTION, event: "workflow_dispatch", target: "vercel" },
-      { database: true, vercel: true, cloudrun: false },
-    ],
-    [
       "a dispatch for Cloud Run",
       { ref: PRODUCTION, event: "workflow_dispatch", target: "cloudrun" },
-      { database: true, vercel: false, cloudrun: true },
+      ALL,
     ],
     [
       // A dispatch left over from before the cutover, or typed from habit,
       // deploys no target rather than being read as "all".
       "a dispatch still naming Fly",
       { ref: PRODUCTION, event: "workflow_dispatch", target: "fly" },
-      { database: true, vercel: false, cloudrun: false },
+      { database: true, cloudrun: false },
+    ],
+    [
+      "a dispatch still naming the retired Vercel failover",
+      { ref: PRODUCTION, event: "workflow_dispatch", target: "vercel" },
+      { database: true, cloudrun: false },
     ],
     [
       "a dispatch from another branch",
       { ref: "refs/heads/main", event: "workflow_dispatch", target: "all" },
-      { database: false, vercel: false, cloudrun: false },
+      { database: false, cloudrun: false },
     ],
   ])("%s runs exactly the jobs it should", (_label, run, expected) => {
     expect({
       database: selects("database", run),
-      vercel: selects("vercel", run),
       cloudrun: selects("cloudrun", run),
     }).toEqual(expected);
   });
 
-  it("offers exactly those three choices, defaulting to all", () => {
+  it("offers exactly those two choices, defaulting to all", () => {
     // `all`, not `both` — a word that stays true whatever the number of
-    // targets is, which is why it survived Fly's retirement unchanged.
+    // targets is, which is why it survived Fly's and Vercel's retirement.
     const dispatch = WORKFLOW.split(/^ {2}workflow_dispatch:$/m)[1]?.split(/^\S/m)[0] ?? "";
-    expect(dispatch).toMatch(/^\s+options: \[all, vercel, cloudrun\]$/m);
+    expect(dispatch).toMatch(/^\s+options: \[all, cloudrun\]$/m);
     expect(dispatch).toMatch(/^\s+default: all$/m);
   });
 });
@@ -298,17 +281,7 @@ describe("promote judges production by the database and Cloud Run jobs", () => {
     // turn every future promote red.
     expect(nameOf("database")).toBe(DEPLOY_JOBS.database);
     expect(nameOf("cloudrun")).toBe(DEPLOY_JOBS.cloudrun);
-    expect(nameOf("vercel")).toBe(DEPLOY_JOBS.vercel);
     expect(Object.keys(DEPLOY_JOBS).sort()).toEqual(Object.keys(JOBS).sort());
-  });
-
-  it("every standby is a job, and the job serving the domain is not a standby", () => {
-    // STANDBYS is what failoverLine iterates, so a target added to the workflow
-    // and not to it would deploy on every release and be reported by nothing.
-    for (const key of Object.keys(STANDBYS)) {
-      expect(JOBS[key], `STANDBYS names \`${key}\`, which is not a job`).toBeDefined();
-    }
-    expect(Object.keys(STANDBYS)).toEqual(["vercel"]);
   });
 
   it("the job that decides is the one that probes and holds the domain", () => {
@@ -318,7 +291,6 @@ describe("promote judges production by the database and Cloud Run jobs", () => {
     const cloudrun = job("cloudrun");
     expect(cloudrun).toMatch(/^\s+run: bash scripts\/local\/synthetic\.sh$/m);
     expect(cloudrun).toMatch(/^\s+url: https:\/\/spiralclass\.com$/m);
-    expect(job("vercel"), "the failover probes production").not.toContain("synthetic.sh");
   });
 
   it("promote reads the verdict job by job, not from the run's exit status", () => {
@@ -340,30 +312,33 @@ describe("promote judges production by the database and Cloud Run jobs", () => {
     );
   });
 
-  const jobs = (database: string, cloudrun: string, vercel: string) => [
+  const jobs = (database: string, cloudrun: string) => [
     { name: DEPLOY_JOBS.database, conclusion: database },
     { name: DEPLOY_JOBS.cloudrun, conclusion: cloudrun },
-    { name: DEPLOY_JOBS.vercel, conclusion: vercel },
   ];
 
   it.each([
-    ["everything green", jobs("success", "success", "success"), true],
-    ["the failover red", jobs("success", "success", "failure"), true],
-    ["the failover not dispatched", jobs("success", "success", "skipped"), true],
-    ["Cloud Run red, the failover green", jobs("success", "failure", "success"), false],
-    ["Cloud Run not dispatched", jobs("success", "skipped", "success"), false],
-    ["the database red, every target skipped", jobs("failure", "skipped", "skipped"), false],
+    ["everything green", jobs("success", "success"), true],
+    ["Cloud Run red", jobs("success", "failure"), false],
+    ["Cloud Run not dispatched", jobs("success", "skipped"), false],
+    ["the database red, the target skipped", jobs("failure", "skipped"), false],
     ["no jobs readable", [], false],
   ])("%s → production %s", (_label, runJobs, productionOk) => {
     expect(deployVerdict(runJobs).productionOk).toBe(productionOk);
   });
 
-  it("a run still carrying the old Fly job is judged by Cloud Run alone", () => {
-    // A green job under the retired name must not stand in for the job that
+  it.each([
+    ["Fly", "Build amd64, deploy to Fly and probe production"],
+    [
+      "the Vercel failover",
+      "Deploy the same commit to the Vercel failover, without taking the domain",
+    ],
+  ])("a run still carrying the retired %s job is judged by Cloud Run alone", (_label, name) => {
+    // A green job under a retired name must not stand in for the job that
     // serves the domain.
     const verdict = deployVerdict([
       { name: DEPLOY_JOBS.database, conclusion: "success" },
-      { name: "Build amd64, deploy to Fly and probe production", conclusion: "success" },
+      { name, conclusion: "success" },
     ]);
     expect(verdict.productionOk).toBe(false);
     expect(verdict.cloudrun).toBe("missing");
@@ -378,21 +353,7 @@ describe("promote judges production by the database and Cloud Run jobs", () => {
       productionOk: false,
       database: "success",
       cloudrun: "in_progress",
-      vercel: "missing",
     });
-  });
-
-  it("says a red standby does not decide whether production shipped", () => {
-    const line = (vercel: string) => failoverLine({ vercel });
-    expect(line("success")).toContain("refreshed");
-    expect(line("skipped")).toContain("never on Cloud Run");
-    expect(line("failure")).toContain("does not change whether production shipped");
-  });
-
-  it("reports every standby on its own line", () => {
-    const lines = failoverLine({ vercel: "failure" }).split("\n");
-    expect(lines).toHaveLength(Object.keys(STANDBYS).length);
-    expect(lines[0]).toContain("⚠ Vercel failover: failure");
   });
 });
 

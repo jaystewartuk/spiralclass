@@ -36,7 +36,6 @@
     "gate:heavy": "node scripts/ci/gate.mjs --tier heavy",
     "gate:status": "node scripts/ci/status.mjs",
     "promote": "node scripts/ci/promote.mjs",
-    "deploy:vercel": "bash scripts/vercel-deploy.sh production",
     "deploy:cloudrun": "bash scripts/cloudrun-deploy.sh production",
     "pr": "bash scripts/open-pr.sh",
     "release:status": "node scripts/ci/release-status.mjs",

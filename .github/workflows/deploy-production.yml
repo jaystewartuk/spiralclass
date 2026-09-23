@@ -4,47 +4,38 @@ name: Deploy production
 # ([D-157]), after a required reviewer approves the run.
 #
 # ⚠️ This workflow does not deploy anything, and it does not gate anything
-# either. `scripts/database-deploy.sh`, `scripts/cloudrun-deploy.sh` and
-# `scripts/vercel-deploy.sh` deploy; `pnpm promote` gates. None of them is
-# re-typed here.
+# either. `scripts/database-deploy.sh` and `scripts/cloudrun-deploy.sh` deploy;
+# `pnpm promote` gates. Neither is re-typed here.
 #
-# THREE JOBS, AND WHY NEITHER TARGET WAITS ON THE OTHER ([D-177]'s addendum).
+# TWO JOBS, AND WHY THE DATABASE IS ONE OF ITS OWN ([D-177]'s addendum).
 #
-#   database ──┬──> cloudrun  serves spiralclass.com, then the production probes
-#              └──> vercel    the failover: deployed warm, holds no domain
+#   database ───> cloudrun    serves spiralclass.com, then the production probes
 #
 # Cloud Run took the domain from Fly on 2026-09-23 and Fly was destroyed the
-# same day ([D-184]'s addendum). The shape did not change: the job that serves
+# same day ([D-184]'s addendum). The Vercel failover that ran beside it was
+# retired the same week ([D-186]). The shape did not change: the job that serves
 # the domain is the one that probes it and decides whether production shipped.
 #
-# The database job checkpoints Neon and runs the migrations, ONCE per commit.
-# Both targets `needs:` it and neither needs the other. Until 2026-09-12 the
-# checkpoint and migrations lived inside the serving target's job and the
-# Vercel job `needs:`-ed that, which made two things true that should not be: a
-# failure of the serving platform — the one case a failover exists for — meant
-# the failover could not be deployed at all; and a missing Vercel credential
-# turned a release that had shipped into a red run and a `pnpm promote`
-# reporting that production had not moved.
+# The database job checkpoints Neon and runs the migrations, ONCE per commit,
+# and holds no platform credential; the target holds no database credential.
+# That split was made so two targets could deploy independently, and it
+# outlived the second target because it is also a credential boundary: a
+# revoked GCP key cannot stop a migration, and a job that builds the image —
+# the one running the most third-party code — never holds DATABASE_URL.
 #
 # ⚠️ EACH JOB HOLDS ITS OWN CREDENTIALS AND NO OTHER JOB'S.
 #
 #   database   DATABASE_URL · DIRECT_URL · NEON_API_KEY · NEON_PROJECT_ID
 #   cloudrun   GCP_PROJECT_ID · GCP_DEPLOY_KEY · LIVEKIT_ORIGIN_IP · the build values
-#   vercel     VERCEL_TOKEN · VERCEL_ORG_ID · VERCEL_PROJECT_ID · the build values
 #
-# The build values are the only overlap, because they are the same client
-# bundle for the same commit. So a target can be deployed with the other
-# target's secrets absent, revoked or never configured, and each preflight
-# checks its own set and nothing else.
 # `apps/web/tests/config/production-targets.test.ts` holds all of this.
 #
-# ⚠️ A dispatch can choose one target (`target: cloudrun` or `target: vercel`). The
-# database job runs first either way, because neither target may reach a schema
-# the commit has not migrated. A push always deploys both — a failover that is
-# only refreshed when someone remembers to dispatch it is D-120's drift again.
+# ⚠️ A dispatch can name its target (`target: cloudrun`), or `all`. The database
+# job runs first either way, because no target may reach a schema the commit
+# has not migrated. A push deploys every target.
 #
 # ⚠️ Approvals are PER JOB on GitHub, not per run. A push asks twice: once for
-# the database job, then once for the two targets together.
+# the database job, then once for the target.
 #
 # THE GATE STILL RUNS ON THE LAPTOP, AND STILL RUNS FIRST. `production` is a
 # fast-forward-only branch that only `pnpm promote` moves, and promote runs the
@@ -143,9 +134,10 @@ on:
         description: Which production target to deploy. The database job runs first either way.
         type: choice
         # `all`, not `both`: [D-184] made it three targets, and retiring Fly
-        # made it two again. `all` stays true whatever the count is, which is
-        # why it was chosen over a word that would have to be renamed each time.
-        options: [all, vercel, cloudrun]
+        # and then Vercel ([D-186]) made it one. `all` stays true whatever the
+        # count is, which is why it was chosen over a word that would have to be
+        # renamed each time.
+        options: [all, cloudrun]
         default: all
 
 permissions:
@@ -161,15 +153,15 @@ concurrency:
 jobs:
   # ── The database: checkpoint, then migrate. Once per commit ([D-95]) ──────
   #
-  # Neither target owns this, because both serve the same Neon branch. It holds
-  # the database and Neon credentials and nothing a target holds — no GCP
-  # key, no Vercel token — so a revoked platform credential cannot stop a
+  # The target does not own this, and neither did any of the three that have
+  # served this Neon branch. It holds the database and Neon credentials and
+  # nothing a target holds — no GCP key — so a revoked platform credential cannot stop a
   # migration, and a migration job cannot deploy anything.
   database:
     name: Checkpoint and migrate the production database
     # A dispatch cannot be pointed at an arbitrary branch and reach production:
-    # the only ref that deploys is the one `pnpm promote` fast-forwards. Both
-    # targets `needs:` this job, so this guard is theirs too.
+    # the only ref that deploys is the one `pnpm promote` fast-forwards. The
+    # target `needs:` this job, so this guard is its too.
     if: ${{ github.ref == 'refs/heads/production' }}
     runs-on: ubuntu-latest # ⚠️ Never a larger runner — those are billed even on a public repo.
     timeout-minutes: 20
@@ -268,150 +260,7 @@ jobs:
             echo "| Branch | Neon \`production\` |"
             echo
             echo "Checkpointed before migrations ran (D-95), by \`scripts/database-deploy.sh\`."
-            echo "Both targets need this job, and neither needs the other."
-          } >> "$GITHUB_STEP_SUMMARY"
-
-  # ── Vercel: the failover ([D-177]) ────────────────────────────────────────
-  #
-  # Cloud Run serves spiralclass.com and this does not change that. What this job
-  # produces is a PRODUCTION deployment of the same commit on Vercel that is
-  # built, deployed, and holds no domain — a failover that is proven on every
-  # release instead of a dormant project nobody has deployed since they set it
-  # up. D-164 is the lesson being applied: infrastructure that is never
-  # exercised stops describing anything, and the reader who trusts it is the one
-  # who gets hurt.
-  #
-  # ⚠️ A JOB HERE, NOT A SECOND WORKFLOW, and the reason is still the
-  # database. The checkpoint and the migrations belong to ONE commit and must
-  # happen ONCE. `needs: [database]` is what makes "already migrated" a fact
-  # rather than a hope: a separate push-triggered workflow would run this
-  # concurrently with the migrations, against one database.
-  #
-  # ⚠️ IT DOES NOT WAIT FOR CLOUD RUN, and nothing in it can delay, gate or
-  # obscure the release — the two jobs run side by side once the database job is
-  # green. A red job here means "the failover did not refresh", which is worth
-  # knowing and is not an incident; `pnpm promote` reports it on its own line
-  # and judges production by the database and Cloud Run jobs alone.
-  #
-  # ⚠️ Same `production` environment as the jobs above, which means the same
-  # required reviewer and the same credential boundary. That is correct rather
-  # than convenient: this is a production deploy of production code, and its
-  # three VERCEL_* values are pushed into that environment from Infisical
-  # ([D-163]) exactly as the GCP key is. It deliberately holds NO database URL,
-  # NO Neon key and NO GCP value — it has no business with the schema or with
-  # the thing that is serving, and the narrowest way to say so is to not hand it
-  # the means.
-  vercel:
-    name: Deploy the same commit to the Vercel failover, without taking the domain
-    needs: [database]
-    # Skipped by a dispatch that named another target. See the Cloud Run job's note.
-    if: ${{ github.ref == 'refs/heads/production' && (github.event_name != 'workflow_dispatch' || inputs.target == 'all' || inputs.target == 'vercel') }}
-    runs-on: ubuntu-latest # ⚠️ Never a larger runner — those are billed even on a public repo.
-    timeout-minutes: 30
-    environment:
-      name: production
-    env:
-      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-      # These stand in for `vercel link`, which would write a .vercel/project.json
-      # this repository does not commit. They are deploy-time credentials, not
-      # runtime config — nothing in apps/web reads a VERCEL_* variable, and
-      # decommissioned-platforms.test.ts still asserts that (D-177).
-      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
-      # config/env/production.build.env's `__LOCAL__` values, resolved by
-      # scripts/env-config.mjs — the SAME source the Docker build reads, so the
-      # two targets cannot bake different values into the same commit's bundle.
-      NEXT_PUBLIC_TEACHER_PHOTOS_R2_PUBLIC_URL: ${{ secrets.NEXT_PUBLIC_TEACHER_PHOTOS_R2_PUBLIC_URL }}
-      NEXT_PUBLIC_TEACHER_VIDEOS_R2_PUBLIC_URL: ${{ secrets.NEXT_PUBLIC_TEACHER_VIDEOS_R2_PUBLIC_URL }}
-      NEXT_PUBLIC_SENTRY_DSN: ${{ secrets.NEXT_PUBLIC_SENTRY_DSN }}
-      NEXT_PUBLIC_POSTHOG_KEY: ${{ secrets.NEXT_PUBLIC_POSTHOG_KEY }}
-      NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY }}
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
-
-      - name: Refuse before building if this job's values did not arrive
-        # Same reasoning as the other preflights, and the same trap: an ABSENT
-        # GitHub secret is the empty string, not an error. Without this, a value
-        # Infisical has not pushed yet reaches the CLI looking exactly like a
-        # value that is set, and the first symptom is a project-linking message
-        # about a project that is in fact configured.
-        #
-        # The build half is checked by the same derived call the Cloud Run job uses,
-        # so a __LOCAL__ key added to config/env/production.build.env is covered
-        # here in the same commit with no list to widen.
-        run: |
-          set -euo pipefail
-          missing=""
-          [ -n "${VERCEL_TOKEN:-}" ] || missing="$missing VERCEL_TOKEN"
-          [ -n "${VERCEL_ORG_ID:-}" ] || missing="$missing VERCEL_ORG_ID"
-          [ -n "${VERCEL_PROJECT_ID:-}" ] || missing="$missing VERCEL_PROJECT_ID"
-          if [ -n "$missing" ]; then
-            echo "The \`production\` environment is missing:$missing" >&2
-            echo "" >&2
-            echo "Infisical is the source of truth and syncs these in (D-163), so fix the" >&2
-            echo "value THERE rather than setting it by hand here." >&2
-            exit 1
-          fi
-          echo "› Every value this job reads arrived."
-
-          node scripts/env-build-args.mjs production >/dev/null
-          echo "› Every __LOCAL__ build value resolves."
-
-      - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
-        with:
-          dest: ~/setup-pnpm
-
-      - name: Read the Node major the app actually ships on
-        # Read from the Dockerfile like every other job here. It is the Cloud
-        # Run image's Node version, and using it means the two targets build the
-        # same commit on the same major — a divergence here would be a real
-        # difference between the thing serving and the thing standing by.
-        run: |
-          set -euo pipefail
-          major="$(sed -n 's/^FROM node:\([0-9][0-9]*\)-slim.*/\1/p' Dockerfile | head -1)"
-          if [ -z "$major" ]; then
-            echo "Could not read a Node major from the Dockerfile's FROM line." >&2
-            exit 1
-          fi
-          echo "NODE_VERSION=$major" >> "$GITHUB_ENV"
-
-      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: pnpm
-
-      - name: Deploy
-        # One line, like the Cloud Run job. Every step lives in the script, which is
-        # also what `pnpm deploy:vercel` runs — so a failover refreshed from
-        # here and one refreshed from the laptop are the same deploy. No
-        # `vercel` CLI version appears in this file: the script pins it, and a
-        # second pin here would be the copy that stops matching.
-        run: bash scripts/vercel-deploy.sh production --gate-already-passed
-
-      - name: Say what is standing by
-        if: ${{ always() }}
-        env:
-          OUTCOME: ${{ job.status }}
-        run: |
-          set -euo pipefail
-          {
-            echo "## Vercel failover · ${OUTCOME}"
-            echo
-            echo "| | |"
-            echo "| --- | --- |"
-            echo "| Commit | \`${GITHUB_SHA}\` |"
-            echo "| Serving | nothing — \`--skip-domain\` (D-177) |"
-            echo "| Domain | Cloud Run \`web\` (D-184) |"
-            echo
-            echo "This job does not wait for the Cloud Run deploy, so its outcome says"
-            echo "nothing about whether the release shipped — read the Cloud Run job. A"
-            echo "red run here means the failover did not refresh."
-            echo
-            echo "Handing it the domain is an operator step this workflow never takes."
-            echo "The procedure, and what is NOT yet covered by a promote, is in"
-            echo "docs/deployment/RELEASE_AND_STAGING.md — read it before an incident."
+            echo "The Cloud Run job needs this one, and holds no database credential."
           } >> "$GITHUB_STEP_SUMMARY"
 
   # ── Cloud Run: the target that serves spiralclass.com ([D-184]) ─────────
@@ -419,8 +268,7 @@ jobs:
   # It took the domain from Fly on 2026-09-23, and this job took over what the
   # Fly job did: deploy, sync Inngest against the domain (inside the script, as
   # its last step), probe production, and decide whether the release shipped.
-  # It `needs:` the database job and NOT Vercel, so the failover can never
-  # delay or obscure it.
+  # It `needs:` the database job, and nothing else.
   #
   # ⚠️ IT AUTHENTICATES WITH A KEY, AND NOT WITH WORKLOAD IDENTITY FEDERATION,
   # which is the opposite of the usual advice and is a deliberate reversal.
@@ -436,8 +284,7 @@ jobs:
   # deploy job, because it builds the image.
   #
   # So the credential is a service-account key, scoped to an account that can
-  # deploy a revision and cannot read a secret — the same shape as VERCEL_TOKEN,
-  # with the same blast radius and the same rotation story. The cost is real and
+  # deploy a revision and cannot read a secret. The cost is real and
   # named in [D-184]: a long-lived credential that must be rotated by hand.
   # infra/gcp/README.md says how.
   cloudrun:
@@ -456,8 +303,8 @@ jobs:
       GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
       GCP_DEPLOY_KEY: ${{ secrets.GCP_DEPLOY_KEY }}
       # config/env/production.build.env's `__LOCAL__` values, resolved by
-      # scripts/env-config.mjs — the SAME source the Vercel build reads, so two
-      # targets cannot bake two different client bundles out of one commit.
+      # scripts/env-config.mjs — the one home of those values, so a hand-set
+      # copy cannot bake a different client bundle out of the same commit.
       NEXT_PUBLIC_TEACHER_PHOTOS_R2_PUBLIC_URL: ${{ secrets.NEXT_PUBLIC_TEACHER_PHOTOS_R2_PUBLIC_URL }}
       NEXT_PUBLIC_TEACHER_VIDEOS_R2_PUBLIC_URL: ${{ secrets.NEXT_PUBLIC_TEACHER_VIDEOS_R2_PUBLIC_URL }}
       NEXT_PUBLIC_SENTRY_DSN: ${{ secrets.NEXT_PUBLIC_SENTRY_DSN }}
@@ -502,7 +349,7 @@ jobs:
           echo "› Every __LOCAL__ build value resolves."
 
       - name: Deploy
-        # One line, like the Vercel job. Every step lives in the script, which
+        # One line, like the database job. Every step lives in the script, which
         # is also what `pnpm deploy:cloudrun` runs — so a release from here and
         # a recovery deploy from the laptop are the same deploy, Inngest sync
         # included. The `gcloud` CLI is preinstalled on ubuntu-latest; no

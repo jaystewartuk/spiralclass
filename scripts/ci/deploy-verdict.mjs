@@ -2,17 +2,12 @@
  * What a production deploy run says about production, read job by job
  * ([D-177]'s addendum).
  *
- * .github/workflows/deploy-production.yml runs three jobs: `database`, then
- * `cloudrun` and `vercel` side by side. A RUN is red whenever any one of its
- * jobs is, so `gh run watch --exit-status` could not tell "production did not
- * ship" from "the failover did not refresh" — a Vercel secret not yet synced
- * once made `pnpm promote` report that the running app might not have moved,
- * while the serving target had shipped and been probed.
- *
- * Production is serving the commit exactly when the database job and the job
- * that deployed the thing holding spiralclass.com are both green. Since the
- * 2026-09-23 cutover ([D-184]'s addendum) that is Cloud Run; it was Fly before.
- * The failover is reported beside that verdict and never decides it.
+ * .github/workflows/deploy-production.yml runs `database`, then `cloudrun`.
+ * Production is serving the commit exactly when both are green. The run's own
+ * exit status would say the same thing today, with one target; it did not
+ * while a Vercel failover ran beside them, and reading the jobs by name keeps
+ * the verdict about the thing serving the domain however many targets the
+ * workflow grows ([D-186]).
  *
  * Pure, so a table test can hold it without a run to watch.
  */
@@ -27,19 +22,13 @@
 export const DEPLOY_JOBS = Object.freeze({
   database: "Checkpoint and migrate the production database",
   cloudrun: "Build amd64, deploy to Cloud Run and probe production",
-  vercel: "Deploy the same commit to the Vercel failover, without taking the domain",
-});
-
-/** The targets that are deployed but serve no domain — reported, never decisive. */
-export const STANDBYS = Object.freeze({
-  vercel: "Vercel failover",
 });
 
 /**
  * @param {ReadonlyArray<{ name?: string; conclusion?: string | null; status?: string }>} jobs
  *   `.jobs` from `gh run view <id> --json jobs`.
- * @returns {{ productionOk: boolean; database: string; cloudrun: string; vercel: string }}
- *   Each target's conclusion (`success`, `failure`, `skipped`, …), or `missing`
+ * @returns {{ productionOk: boolean; database: string; cloudrun: string }}
+ *   Each job's conclusion (`success`, `failure`, `skipped`, …), or `missing`
  *   when the run has no job by that name.
  */
 export function deployVerdict(jobs) {
@@ -53,33 +42,10 @@ export function deployVerdict(jobs) {
 
   const database = outcome(DEPLOY_JOBS.database);
   const cloudrun = outcome(DEPLOY_JOBS.cloudrun);
-  const vercel = outcome(DEPLOY_JOBS.vercel);
 
   return {
     productionOk: database === "success" && cloudrun === "success",
     database,
     cloudrun,
-    vercel,
   };
-}
-
-/**
- * One line per standby, for the end of a promote. Derived from {@link STANDBYS}
- * rather than written per target, so a standby cannot be added to the workflow
- * and silently go unreported here.
- *
- * @param {{ vercel: string }} verdict from {@link deployVerdict}
- * @returns {string} one line per standby, newline-joined
- */
-export function failoverLine(verdict) {
-  return Object.entries(STANDBYS)
-    .map(([key, label]) => {
-      const outcome = verdict?.[key] ?? "missing";
-      if (outcome === "success") return `  ${label}: refreshed, and holding no domain.`;
-      if (outcome === "skipped") {
-        return `  ${label}: skipped — it waits on the database job, never on Cloud Run.`;
-      }
-      return `  ⚠ ${label}: ${outcome}, so it did not refresh. That does not change whether production shipped.`;
-    })
-    .join("\n");
 }
