@@ -138,15 +138,15 @@ export class LiveKitProvider implements VideoProvider {
       room: opts.room,
       canPublish: true,
       canSubscribe: true,
-      // The class-call UI flips its own `captionsOn` participant attribute via
-      // localParticipant.setAttributes() when the caption toggle is tapped —
-      // without this grant, LiveKit's server rejects that call with
-      // "does not have permission to update own metadata" (a
-      // SignalRequestError, silently swallowed client-side as an unhandled
-      // rejection), so the attribute never actually changes and the
-      // server-side captions Agent (packages/livekit-captions-agent) never
-      // sees the toggle at all — confirmed via a live Sentry event
-      // (SPIRALCLASS-MOBILE-M) during the Agent migration's end-to-end test.
+      // Live captions run on participant attributes (D-185): the teacher's
+      // `captionsOn` switch, and each browser's `captionsAsr` saying whether
+      // it can recognise speech during a call, both set via
+      // localParticipant.setAttributes(). Without this grant, LiveKit's server
+      // rejects that call with "does not have permission to update own
+      // metadata" (a SignalRequestError, silently swallowed client-side as an
+      // unhandled rejection), so the attribute never changes and the other
+      // browser never sees it — confirmed via a live Sentry event
+      // (SPIRALCLASS-MOBILE-M) when the switch first moved onto an attribute.
       canUpdateOwnMetadata: true,
     });
     const token = await at.toJwt();
@@ -248,7 +248,7 @@ export class LiveKitProvider implements VideoProvider {
   // AUDIO-ONLY since 2026-08-27 (D-135). This used to composite video too, at
   // LiveKit's default H264_720P_30 preset, which produced 846 MB for a single
   // 51-minute class and dropped 2,586 video frames doing it — the 2-OCPU ARM box
-  // also runs livekit-server, Redis, Caddy and the captions agent, and video
+  // also ran livekit-server, Redis, Caddy and (then) a captions worker, and video
   // compositing is the expensive part of that workload. It was also the largest
   // and most sensitive thing the platform accumulated with no retention policy,
   // on a product whose students can be minors.

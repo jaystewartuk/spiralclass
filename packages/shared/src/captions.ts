@@ -1,7 +1,7 @@
-// The live-caption data-channel protocol. Pure and dependency-free so the web
-// every consumer shares ONE definition — every consumer of the room's
-// data channel agrees on the wire shape without drifting. Encoded as JSON over
-// LiveKit's reliable data channel under a dedicated topic.
+// The live-caption data-channel protocol. Pure and dependency-free so every
+// consumer of the room's data channel agrees on the wire shape without
+// drifting. Encoded as JSON over LiveKit's reliable data channel under a
+// dedicated topic.
 //
 // Two message kinds travel the channel:
 //   * "line"  — one finished, translated caption to show.
@@ -10,19 +10,18 @@
 //               captions off clears the screen immediately rather than
 //               leaving the last line stranded).
 //
-// `for` (required on every message, since the LiveKit captions Agent — see
-// the captions architecture review — publishes into a room with
-// more than 2 participants): the LiveKit participant identity this message is
-// addressed to. Before the Agent, there were always exactly 2 human
-// participants and a publisher's own `publishData` is never echoed back to
-// itself, so "whatever arrives over this topic must be the other side's
-// line" held by construction. A third room participant breaks that
-// assumption, so every message now names its intended recipient explicitly;
-// a receiver must check `msg.for === myOwnIdentity` before rendering.
+// `for` (required on every message): the LiveKit participant identity the
+// message is addressed to, and a receiver renders only what names it. A
+// class room holds two people, and a publisher's own `publishData` is never
+// echoed back to it, so "arrived on this topic" nearly implies "meant for
+// me" — but not quite: the publisher also sets `destination_identities`, and
+// a line reaching a client it was not addressed to (an admin observer, a
+// future group class) must be dropped rather than shown. Lines a client
+// recognises itself (the other person's speech, when their device cannot —
+// see caption-recognition.ts) never touch the channel at all.
 //
-// TextEncoder/TextDecoder are used for the JSON<->bytes step. They exist in the
-// browser and in the React Native runtime that livekit-client already relies on
-// for its own data methods, so both consumers are covered.
+// TextEncoder/TextDecoder are used for the JSON<->bytes step; they exist in
+// every browser livekit-client runs in.
 
 // LiveKit data-channel topic the caption packets ride on. Namespaced so a caption
 // packet is never confused with any other use of the room's data channel.
@@ -40,12 +39,10 @@ export type CaptionLine = {
   // WHAT THE SPEAKER ACTUALLY SAID, verbatim, before translation.
   //
   // This is a language-teaching product: the words the other person just
-  // produced ARE the lesson, and until now the one component that had them
-  // (the Agent, which asks Deepgram for them and then hands them to Claude)
-  // threw them away and shipped only the translation. A learner watching a
-  // subtitle that says "how are you?" cannot map it back to the sounds she
-  // just heard; one that shows "¿cómo estás?" over "how are you?" is the
-  // whole point of captioning a lesson rather than a meeting.
+  // produced ARE the lesson. A learner watching a subtitle that says "how are
+  // you?" cannot map it back to the sounds she just heard; one that shows
+  // "¿cómo estás?" over "how are you?" is the whole point of captioning a
+  // lesson rather than a meeting.
   //
   // OPTIONAL, and every consumer must render fine without it: any client
   // build older than this field omits it, and a
@@ -114,32 +111,6 @@ export function decodeCaption(bytes: Uint8Array): CaptionMessage | null {
     return { t: "state", for: obj.for, on: obj.on };
   }
   return null;
-}
-
-// The captions Agent's own LiveKit participant identity. It joins every
-// caption-enabled class room as a real third participant, so ANY client code
-// that reasons about "the other person in this call" must exclude it — a
-// remote-participant list is not a list of humans.
-//
-// Lives here rather than only in packages/livekit-captions-agent/src/config.ts
-// (which now re-exports this) because the clients need it too, and two
-// independently-maintained copies of a participant identity is precisely the
-// kind of drift that produces silent, no-error bugs. Production 2026-07-26→29:
-// "open material for the student" addressed its message to
-// remoteParticipants[0], which could be the Agent, so the student never
-// received it and nothing logged an error.
-export const CAPTIONS_AGENT_IDENTITY = "captions-agent";
-
-export function isCaptionsAgentIdentity(identity: string | undefined | null): boolean {
-  return identity === CAPTIONS_AGENT_IDENTITY;
-}
-
-// The humans among a room's remote participants. The Agent publishes no media
-// tracks, so a track-derived list already excludes it — but a
-// `room.remoteParticipants`-derived one does NOT, and that is the list most
-// "is the other person here?" checks reach for first.
-export function humanRemotes<T extends { identity: string }>(remotes: Iterable<T>): T[] {
-  return [...remotes].filter((p) => !isCaptionsAgentIdentity(p.identity));
 }
 
 // The two roles in a captioned call, and the language each speaks → the

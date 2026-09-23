@@ -27,7 +27,7 @@ For how a change gets _to_ a release, see
 ## Platform
 
 - **[Oracle LiveKit production](ORACLE_LIVEKIT_PRODUCTION.md)** — the
-  self-hosted video box: LiveKit, Egress and the captions agent.
+  self-hosted video box: LiveKit and Egress.
 - **[Oracle box rebuild](ORACLE_BOX_REBUILD.md)** — standing that box back up
   from nothing.
 - **[Cost playbook](COST_PLAYBOOK.md)** — what each hosted dependency costs at

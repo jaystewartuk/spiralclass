@@ -387,7 +387,7 @@ export const fr = {
     "Votre langue — utilisée pour les sous-titres en direct pendant vos cours.",
   "myDetails.captionsConsent": "Sous-titres en direct",
   "myDetails.captionsConsentDescription":
-    "Activez ceci pour que votre cours ait aussi des sous-titres en direct de VOTRE voix — votre micro est envoyé à un service de reconnaissance vocale et de traduction par IA pendant qu'il est actif. Rien n'est stocké.",
+    "Activez ceci pour que votre cours ait aussi des sous-titres en direct de VOTRE voix — tant que c'est actif, un navigateur de l'appel reconnaît votre voix (sur l'appareil ou avec le service vocal de ce navigateur) et elle est traduite sur l'appareil ou par Google. Rien n'est stocké.",
   "myDetails.captionsConsentEnable": "Activer les sous-titres en direct pour ma voix",
   "myDetails.captionsConsentEnabled": "Sous-titres en direct activés",
   "email.title": "Changer l'adresse e-mail",
@@ -694,10 +694,15 @@ export const fr = {
   "call.captionsConsentHint":
     "Les sous-titres en direct sont disponibles — activez-les dans les paramètres de votre compte.",
   "call.captionsDisclosure":
-    "Les sous-titres en direct envoient votre voix à un service de reconnaissance vocale et de traduction par IA. Rien n'est stocké.",
+    "Les sous-titres sont produits dans vos navigateurs : la voix est reconnue sur l'appareil ou par le service vocal du navigateur, et traduite sur l'appareil ou par Google. Rien n'est stocké.",
   "call.captionsNoticeTitle": "Avant d'activer les sous-titres",
   "call.captionsNoticeDismiss": "Compris",
   "call.captionsEnabledToast": "Sous-titres en direct activés.",
+  "call.captionsNeedComputer":
+    "Les sous-titres nécessitent que l'un de vous utilise Chrome sur un ordinateur.",
+  "call.captionsStopped":
+    "Les sous-titres se sont arrêtés sur cet appareil — vérifiez l'autorisation du micro.",
+  "call.captionsDownloading": "Préparation de la traduction sur l'appareil… {percent} %",
   // Réglages de lecture des sous-titres en direct. Ils appartiennent à la
   // personne qui LIT (l'un ou l'autre rôle) et sont distincts de
   // l'interrupteur de la professeure pour toute la classe (captionsOn /
@@ -4592,7 +4597,7 @@ export const fr = {
   "web.myClasses.account.nativeLanguage.savedMessage": "Enregistré.",
   "web.myClasses.account.captionsConsent.title": "Sous-titres en direct",
   "web.myClasses.account.captionsConsent.description":
-    "Activez ceci pour que votre cours ait aussi des sous-titres en direct de VOTRE voix — votre micro est envoyé à un service de reconnaissance vocale et de traduction par IA pendant qu'il est actif. Rien n'est stocké.",
+    "Activez ceci pour que votre cours ait aussi des sous-titres en direct de VOTRE voix — tant que c'est actif, un navigateur de l'appel reconnaît votre voix (sur l'appareil ou avec le service vocal de ce navigateur) et elle est traduite sur l'appareil ou par Google. Rien n'est stocké.",
   "web.myClasses.account.captionsConsent.record": "Activer les sous-titres en direct pour ma voix",
   "web.myClasses.account.captionsConsent.recorded": "✓ Sous-titres en direct activés",
   "web.myClasses.account.signInEmail.title": "E-mail de connexion",

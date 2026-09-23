@@ -402,7 +402,7 @@ export const esMX = {
     "Tu idioma — se usa para los subtítulos en vivo durante tus clases.",
   "myDetails.captionsConsent": "Subtítulos en vivo",
   "myDetails.captionsConsentDescription":
-    "Actívalo para que tu clase también tenga subtítulos en vivo de TU voz — tu micrófono se envía a un servicio de reconocimiento de voz y traducción con IA mientras está activo. No se guarda nada.",
+    "Actívalo para que tu clase también tenga subtítulos en vivo de TU voz — mientras esté activo, un navegador de la llamada reconoce tu voz (en el dispositivo o con el servicio de voz de ese navegador) y se traduce en el dispositivo o con Google. No se guarda nada.",
   "myDetails.captionsConsentEnable": "Activar subtítulos en vivo para mi voz",
   "myDetails.captionsConsentEnabled": "Subtítulos en vivo activados",
 
@@ -709,10 +709,15 @@ export const esMX = {
   "call.captionsConsentHint":
     "Los subtítulos en vivo están disponibles — actívalos en la configuración de tu cuenta.",
   "call.captionsDisclosure":
-    "Los subtítulos en vivo envían tu voz a un servicio de reconocimiento de voz y traducción con IA. No se guarda nada.",
+    "Los subtítulos se hacen en sus navegadores: la voz se reconoce en el dispositivo o con el servicio de voz del propio navegador, y se traduce en el dispositivo o con Google. No se guarda nada.",
   "call.captionsNoticeTitle": "Antes de activar los subtítulos",
   "call.captionsNoticeDismiss": "Entendido",
   "call.captionsEnabledToast": "Subtítulos en vivo activados.",
+  "call.captionsNeedComputer":
+    "Los subtítulos necesitan que uno de los dos use Chrome en una computadora.",
+  "call.captionsStopped":
+    "Los subtítulos se detuvieron en este dispositivo — revisa el permiso del micrófono.",
+  "call.captionsDownloading": "Preparando la traducción en el dispositivo… {percent} %",
   // Controles de lectura de los subtítulos en vivo. Son de QUIEN LEE
   // (cualquiera de los dos roles), y son distintos del interruptor de la
   // maestra para toda la clase (captionsOn/captionsOff, arriba) — ver
@@ -4636,7 +4641,7 @@ export const esMX = {
   "web.myClasses.account.nativeLanguage.savedMessage": "Guardado.",
   "web.myClasses.account.captionsConsent.title": "Subtítulos en vivo",
   "web.myClasses.account.captionsConsent.description":
-    "Actívalo para que tu clase también tenga subtítulos en vivo de TU voz — tu micrófono se envía a un servicio de reconocimiento de voz y traducción con IA mientras está activo. No se guarda nada.",
+    "Actívalo para que tu clase también tenga subtítulos en vivo de TU voz — mientras esté activo, un navegador de la llamada reconoce tu voz (en el dispositivo o con el servicio de voz de ese navegador) y se traduce en el dispositivo o con Google. No se guarda nada.",
   "web.myClasses.account.captionsConsent.record": "Activar subtítulos en vivo para mi voz",
   "web.myClasses.account.captionsConsent.recorded": "✓ Subtítulos en vivo activados",
   "web.myClasses.account.signInEmail.title": "Correo de acceso",

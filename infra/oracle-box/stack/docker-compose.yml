@@ -7,8 +7,10 @@
 # ⚠️ PRODUCTION IS NOT HERE, and that is the 2026-09-04 decision, not an
 # omission. The production web app stays on Fly and production's database
 # stays on Neon; Oracle carries everything else. See D-150's second addendum.
-# Two consequences follow and both are load-bearing below: this box runs ONE
-# web app, and the captions agent's callback to production leaves the box.
+# Two consequences follow and both are load-bearing: this box runs ONE web
+# app, and livekit-server's webhook to production leaves the box — which is
+# why scripts/oracle-render-livekit.sh renders that URL and
+# scripts/oracle-deploy.sh fails the deploy if it answers with a redirect.
 #
 # ⚠️ THIS FILE IS NOT EDITED ON THE BOX. It is copied there by
 # scripts/oracle-deploy.sh. The box this replaced was hand-maintained, and a
@@ -96,49 +98,8 @@ services:
       - redis
       - livekit
 
-  captions-agent:
-    # ⚠️ PULLED, NOT BUILT. The old box built this from a 192 MB source copy
-    # at /home/ubuntu/agendaprofe, which meant a 3.43 GB image built on two
-    # OCPUs that also carry live classes — the cost D-108 named. The image is
-    # built off-box now and loaded or pulled; the source copy is gone.
-    image: ${CAPTIONS_AGENT_IMAGE}
-    container_name: livekit-captions-agent
-    restart: unless-stopped
-    security_opt:
-      - no-new-privileges:true
-    cap_drop:
-      - ALL
-    network_mode: host
-    environment:
-      - LIVEKIT_URL=ws://127.0.0.1:7880
-      - LIVEKIT_API_KEY=${LIVEKIT_API_KEY}
-      - LIVEKIT_API_SECRET=${LIVEKIT_API_SECRET}
-      - DEEPGRAM_API_KEY=${DEEPGRAM_API_KEY}
-      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
-      - CAPTIONS_AGENT_SHARED_SECRET=${CAPTIONS_AGENT_SHARED_SECRET}
-      # ⚠️ THIS LEAVES THE BOX. The production app is on Fly, so the agent
-      # posts to `https://spiralclass.com` through Cloudflare — the same path
-      # that broke on 2026-08-30. Read that outage precisely, because the
-      # mitigation depends on which half caused it: the D-138 rename left this
-      # value on `agendaprofe.com`, the 301 turned the agent's POST into a
-      # GET, it got a 405, discovery.ts started no RoomWorker, and one real
-      # class ran with captions silently dead. livekit-server's webhooks
-      # failed identically while its own log kept saying `sent webhook`. The
-      # fault was a STALE HOSTNAME nothing owned, not the hop itself.
-      #
-      # So two things replace the loopback that a box-hosted app would have
-      # given, and neither is optional:
-      #
-      #   1. This value is RENDERED, from scripts/oracle-render-livekit.sh,
-      #      and never hand-edited on the box. That is what makes a rename
-      #      sweep able to reach it.
-      #   2. scripts/oracle-deploy.sh PROBES it after every deploy and FAILS
-      #      on any 3xx. A redirect is invisible from every other angle — it
-      #      looks like a delivered webhook — so this probe is the only thing
-      #      standing between a rename and a silent repeat.
-      - APP_INTERNAL_BASE_URL=${APP_INTERNAL_BASE_URL}
-    depends_on:
-      - livekit
+  # Live captions do not run on this box: they run in the participants'
+  # browsers (D-185, docs/features/live-calls-video.md).
 
   # ── The web app ────────────────────────────────────────────────────────
   #
@@ -176,8 +137,8 @@ services:
       - ./preview.app.env
     # ⚠️ CAPPED, and this is the whole safeguard of putting preview here at
     # all. Preview shares two OCPUs with every live class. Production's web
-    # app is no longer on this box to be starved, but LiveKit, egress and the
-    # captions agent are — and starving those drops someone mid-lesson, which
+    # app is no longer on this box to be starved, but LiveKit and egress
+    # are — and starving those drops someone mid-lesson, which
     # is worse. Nothing else stops a runaway preview request, a reseed or a
     # migration from doing it. These numbers are a ceiling, not a measurement
     # — raise them deliberately, never to "fix" a slow preview.

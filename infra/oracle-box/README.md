@@ -172,9 +172,13 @@ existed to remove, and it is a debt with a due date, not a decision.
 
 ## Secrets: what this box holds, and why tmpfs does not help
 
-⚠️ **What this box holds is preview's whole environment plus five production
-LiveKit values** — `LIVEKIT_API_KEY`, `LIVEKIT_API_SECRET`, `DEEPGRAM_API_KEY`,
-`ANTHROPIC_API_KEY` and `CAPTIONS_AGENT_SHARED_SECRET`. That is the single
+⚠️ **What this box holds is preview's whole environment plus production's
+LiveKit key pair** — `LIVEKIT_API_KEY` and `LIVEKIT_API_SECRET`, in
+`livekit.yaml` and `egress.yaml`. (The Deepgram and Anthropic keys and the
+shared secret the box used to hold went with the caption worker it used to
+run; live captions run in the browser now —
+[live-calls-video.md](../../docs/features/live-calls-video.md),
+[D-185](../../docs/decisions/D-185.md).) That is the single
 biggest security consequence of keeping production off this box, and it is worth
 stating in the positive: an earlier draft of this rebuild put the production
 app here too, which would have meant `STRIPE_SECRET_KEY`, production's
@@ -215,8 +219,8 @@ is not a thing to attempt beside a cutover.
 
 ### Cheaper wins that are already applied
 
-- `no-new-privileges` and `cap_drop: ALL` on the preview app, the preview
-  database and the captions agent. ⚠️ **Egress is deliberately exempt** — it needs
+- `no-new-privileges` and `cap_drop: ALL` on the preview app and the preview
+  database. ⚠️ **Egress is deliberately exempt** — it needs
   `SYS_ADMIN` for Chrome's sandbox and cannot be locked down without breaking
   recordings.
 - Preview's Postgres publishes to `127.0.0.1` on a bridge network, not the host

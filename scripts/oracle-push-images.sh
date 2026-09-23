@@ -17,12 +17,14 @@
 # Until then this exists so the BOX never builds. A build on this machine
 # occupies both OCPUs that also carry live classes — the cost D-108 named —
 # and the web app build alone peaks at 5.26 GB against 12 GB of RAM shared
-# with livekit-server, egress, Redis, Caddy and the captions agent.
+# with livekit-server, egress, Redis and Caddy.
 #
 # ⚠️ The PREVIEW image, not the production one — the production web app is on
 # Fly and its image is never pulled onto this box (D-150's second addendum).
+# It is the only first-party image the box runs: live captions run in the
+# browser now (D-185), not in a container here.
 #
-#   ./scripts/oracle-push-images.sh spiralclass-web-preview:abc1234 agendaprofe-captions-agent:abc1234
+#   ./scripts/oracle-push-images.sh spiralclass-web-preview:abc1234
 set -euo pipefail
 
 BOX="${ORACLE_BOX_HOST:-spiralclass-box}"

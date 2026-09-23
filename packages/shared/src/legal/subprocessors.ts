@@ -175,9 +175,9 @@ export const SUBPROCESSORS: readonly Subprocessor[] = [
     id: "anthropic",
     name: "Anthropic",
     purpose:
-      "Powers the AI features: drafting lesson materials, translating live captions, reviewing homework, and writing promotional posts.",
+      "Powers the AI features: drafting lesson materials, reviewing homework, and writing promotional posts.",
     dataShared:
-      "Only the text you submit to that feature — a material you are drafting, a caption being translated, a homework answer, or your own teaching profile.",
+      "Only the text you submit to that feature — a material you are drafting, a homework answer, or your own teaching profile.",
     location: "United States",
     gate: "ANTHROPIC_API_KEY",
     evidence: "vendor documentation",
@@ -185,10 +185,44 @@ export const SUBPROCESSORS: readonly Subprocessor[] = [
   {
     id: "deepgram",
     name: "Deepgram",
-    purpose: "Converts speech to text for live captions and for intro-video coaching.",
-    dataShared: "The audio of the speaker who turned the feature on.",
+    purpose:
+      "Converts speech to text for intro-video coaching and, where the student has consented, for post-class lesson transcripts.",
+    dataShared:
+      "The audio of the teacher's intro video, or of a consenting student's side of a class.",
     location: "United States",
     gate: "DEEPGRAM_API_KEY",
+    evidence: "vendor documentation",
+  },
+  // Live captions (D-185). Speech is recognised by the web browser of a
+  // participant in the call — on the device when the browser has the model,
+  // otherwise by that browser's own speech service — and each finished line
+  // is translated on the device or, failing that, by Google Cloud
+  // Translation through our server. The browser's service is not a vendor we
+  // contract with (the participant's browser chooses it), but it is where the
+  // audio goes, so it is listed rather than left to the reader to guess.
+  {
+    id: "browser-speech",
+    name: "Your web browser's speech service (Google, for Chrome)",
+    purpose:
+      "Recognises speech for live captions when the browser cannot do it on the device itself.",
+    dataShared:
+      "The audio of a class participant whose speech is being captioned — the teacher's, or a consenting student's.",
+    location: "Global",
+    gate: "LIVE_CAPTIONS_ENABLED",
+    // The browser picks its own servers and does not publish a region.
+    evidence: "not published by the browser vendor",
+  },
+  {
+    id: "google-translate",
+    name: "Google Cloud Translation",
+    purpose: "Translates live captions when the browser cannot translate on the device.",
+    dataShared:
+      "The text of one finished caption at a time. Never audio, and nothing that says who spoke.",
+    // Cloud Translation - Basic (v2) has only global endpoints; data cannot
+    // be pinned to a region (Google's Cloud Translation data-usage FAQ, read
+    // 2026-09-23 — after the date below, which covers the other entries).
+    location: "Global",
+    gate: "GOOGLE_TRANSLATE_API_KEY",
     evidence: "vendor documentation",
   },
   {

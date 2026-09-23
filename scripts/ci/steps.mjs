@@ -124,11 +124,11 @@ export const STEPS = [
   },
   {
     // The hole this closes: the only unit step in this registry was filtered to
-    // `spiralclass-web`, so `packages/shared` and `packages/livekit-captions-agent`
-    // ran under `pnpm test` and under nothing the hook, the gate or the workflow
-    // ever invoked. Three assertions in `packages/shared` sat red on `main` for
-    // a day before anyone ran the workspace script by hand, and one of them was
-    // the only place a real person's name survived a sanitising pass.
+    // `spiralclass-web`, so the shared packages' suites ran under `pnpm test`
+    // and under nothing the hook, the gate or the workflow ever invoked. Three
+    // assertions in `packages/shared` sat red on `main` for a day before anyone
+    // ran the workspace script by hand, and one of them was the only place a
+    // real person's name survived a sanitising pass.
     //
     // Filtered by path rather than by package name, so a package added tomorrow
     // is covered without a second edit here — the failure mode above was a list

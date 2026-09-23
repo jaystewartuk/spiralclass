@@ -264,10 +264,11 @@ run lint`, so setting `TURBO_TOKEN`/`TURBO_TEAM` in the shell environment still
   x86 box brings the QEMU cross-build back with it.
 - Recording storage rides the existing R2 line above (Egress uploads
   directly, no separate line item).
-- Vendor keys for the AI-adjacent video features (Deepgram captions/ASR,
-  Anthropic caption translation) are the same pay-as-you-go lines as the
-  Anthropic section below — LiveKit itself no longer meters usage now that
-  it's self-hosted.
+- Live captions cost nothing to run in the browser; their translation
+  fallback is Google Cloud Translation, free for the first 500,000 characters
+  a month and $20 per million after that (checked 2026-09-23 —
+  [D-185](../decisions/D-185.md)). Post-class transcription (Deepgram) is the
+  same pay-as-you-go line as the Anthropic section below.
 
 ### Analytics — skip until you need it
 

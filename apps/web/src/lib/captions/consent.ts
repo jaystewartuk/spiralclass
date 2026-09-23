@@ -1,8 +1,8 @@
 // Live-captions consent gate (the captions architecture review P0).
 //
-// Captions are bidirectional: a student's own mic can be streamed to a
-// third-party ASR provider (and its transcript to an LLM translator) during
-// an ordinary scheduled class. That's a materially
+// Captions are bidirectional: a student's own speech can be recognised by a
+// browser's speech service and its text translated during an ordinary
+// scheduled class (D-185). That's a materially
 // more direct, real-time case than the post-call lesson-insights pipeline
 // (see lib/lesson-notes/consent.ts) — so this is a SEPARATE consent, not a
 // reuse of insightsConsentAt: an adult student must consent HERSELF
@@ -10,10 +10,12 @@
 // minor path stays teacher-attested, exactly like the insights gate, and
 // shares the same `isMinor` flag (one concept, not duplicated per feature).
 //
-// This only gates whether THIS person's own mic may be published to ASR —
-// receiving captions of what the other participant says is never gated by
-// this predicate (see lib/captions/class-access.ts and the token-mint
-// routes for where this is actually enforced).
+// This only gates whether the STUDENT's speech may be captioned — whichever
+// browser in the call would recognise it. Receiving captions of what the
+// other participant says is never gated by this predicate. It is enforced in
+// captionsPublishConsentOk (lib/captions/class-access.ts), whose verdict the
+// caption config route hands both browsers and the translation route
+// re-checks on every call.
 //
 // Pure predicate (no I/O), mirroring lessonInsightsConsentOk's shape.
 

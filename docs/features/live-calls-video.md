@@ -9,7 +9,8 @@ LiveKit** (a single Oracle free-tier box — see decision D-94, 2026-07-21).
 call (mute/camera/screen-share/leave), the product layers three Pro-gated,
 legal/consent-sensitive capabilities: **recording** (teacher-controlled A/V
 capture of the whole class), **live captions** (real-time speech-to-text +
-translation, one-way teacher→student on a scheduled class), and **post-call
+translation of both people, run in their browsers — [D-185](../decisions/D-185.md)),
+and **post-call
 transcription** (derived from separate per-participant audio, feeding a
 downstream lesson-insights pipeline). All three were re-enabled in production by
 D-94 after having initially been held back.
@@ -26,8 +27,8 @@ Source: `apps/web/src/lib/video/*`, `apps/web/src/lib/captions/*`,
 - As a **teacher**, I want to record a class (Pro feature) so I have a
   reference of what was taught.
 - As a **teacher**, I want live captions of what I'm saying translated for
-  my student in real time, without either of us needing to set anything up
-  mid-call.
+  my student in real time, and of what she says translated for me, without
+  either of us needing to set anything up mid-call.
 - As a **teacher**, I want a transcript and pronunciation insight generated
   automatically after class, without having to remember to start anything —
   as long as my student has actually consented to being analyzed this way.
@@ -118,27 +119,64 @@ That lasts until preview has a LiveKit server of its own.
 
 ### Live captions
 
-15. Provider: **Deepgram** (streaming ASR) for speech recognition,
-    **Anthropic** (Claude) for translation of each finalized utterance.
-16. On a **scheduled class**, captioning is **one-way only**: only the
-    teacher's mic is captioned and translated (Spanish→English by default);
-    the student receives, but does not need to enable, anything.
+15. **Captions run in the participants' browsers**
+    ([D-185](../decisions/D-185.md)). Speech is recognised by the browser's own
+    speech recognition — on the device when the browser has the model for that
+    language, otherwise by the browser's speech service (Google, for Chrome) —
+    and each finished utterance is translated on the device when the browser
+    has a translator for the pair (desktop Chrome), otherwise by
+    `POST /api/captions/translate` through Google Cloud Translation. Only
+    finished utterances are translated; interim results never leave the
+    browser. There is no server-side captions process.
+    - **Who recognises whom.** Each person's speech is recognised by their
+      own browser when it can recognise during a call — today that means
+      Chrome on a computer. When it cannot (Android Chrome measurably hears
+      nothing while the call holds the microphone), the **other** person's
+      browser recognises it from the call audio it already receives. When
+      neither browser can — two phones — nothing is captioned, and both
+      screens say captions need one of them on Chrome on a computer. Both
+      browsers compute this from the same room state (each publishes whether
+      it can, as a participant attribute), so they agree without talking.
+    - A line one browser recognises for its own speaker is published to the
+      other participant over LiveKit's reliable data channel, addressed to
+      them. A line a browser recognises from the other person is shown on
+      that browser only — its viewer is the reader.
+    - On-device models download on the teacher's click of the toggle (the
+      browser refuses the download without one); until then, and on any
+      browser without a translator, lines go through the server.
+16. **Both directions are captioned, behind one switch.** The teacher's
+    toggle is the room's single switch (D-27, teacher-toggled) and covers
+    both people. The teacher's speech is translated into the student's
+    language and needs no consent record; the **student's speech is captioned
+    only with her recorded captions consent** (her guardian's, for a minor —
+    D-22), whichever browser would recognise it, and
+    `/api/captions/translate` refuses her speech without it. A student
+    without consent still receives captions of the teacher. (This rule
+    previously read "one-way only, the teacher's mic"; the retired agent
+    already captioned both sides under the same switch and consent, and the
+    browser design keeps that.)
 17. **Per-class language override**: `Booking.teacherLanguageOverride` /
     `studentLanguageOverride` — if the teacher has set a class-specific
     override, it wins over the teacher's/student's own profile default
-    language. This is read live on every token-mint/translate call, **not
-    snapshotted at booking creation** — a mid-day language change takes
-    effect the next time either party's client mints a token or requests a
-    translation, not retroactively for an already-open session.
+    language. It is read live, **not snapshotted at booking creation**: both
+    browsers re-read the class's caption config every minute while captions
+    are on, and the translation route resolves the languages from the
+    booking on every call — the client never names a language. The teacher's
+    speech is recognised in her country's regional variant when that is a
+    real one (`es` + Mexico → `es-MX`), the student's in the bare language.
 18. Captions are **never persisted** — they're rendered ephemerally
     (a short rolling on-screen history, ~3 lines, each lingering a few
-    seconds) and then gone; there is no caption transcript artifact separate
-    from the post-call transcription pipeline below.
-19. The teacher's caption toggle is hidden entirely if the flag is on but a
-    required vendor key is missing — no error state, matching the
+    seconds) and then gone; the in-call transcript panel lives in the
+    browser's memory and goes when the viewer leaves. There is no caption
+    transcript artifact separate from the post-call transcription pipeline
+    below. The translation route logs a character count per call, never text.
+19. The teacher's caption toggle is hidden entirely if the flag is on but
+    `GOOGLE_TRANSLATE_API_KEY` is missing — no error state, matching the
     "flag-on-but-dark" failure mode the product has hit before (the
     diagnostic logging that exists specifically for this was added _because_
-    it happened silently once, at the Vercel→Fly cutover).
+    it happened silently once, at the Vercel→Fly cutover). Both caption
+    routes re-check the flag, the key, the class's participants and the
+    teacher's Pro plan on every call.
 
 ### Post-call transcription & lesson insights
 
@@ -223,7 +261,8 @@ That lasts until preview has a LiveKit server of its own.
 5. The teacher, if on Pro and the feature is enabled, can start recording;
    a recording indicator is shown while active, and Stop finalizes it.
 6. The teacher, if captions are enabled, can toggle live captions; the
-   student sees a translated scrolling caption of what the teacher says.
+   student sees a translated scrolling caption of what the teacher says, and
+   the teacher sees one of what the student says if she has consented.
 7. After the call ends (either party leaves, or the room otherwise
    finishes), any in-progress recording/audio-capture is finalized via
    webhook; consenting students' audio proceeds into the transcription
@@ -269,9 +308,13 @@ That lasts until preview has a LiveKit server of its own.
 - A student without insights consent is in a class the teacher records: the
   A/V recording proceeds normally; that student's voice is simply never
   captured into the separate lesson-audio/transcription pipeline.
-- Mid-class language override change: takes effect on the next token
-  mint/translate call, not instantly for an already-open caption session
-  (a caption socket bakes in its language at connection time).
+- Mid-class language override change: takes effect within a minute, at the
+  next caption-config read; the recogniser restarts in the new language.
+- Both people on phones: nothing can be captioned in the browser, and both
+  screens say so rather than showing a band that listens forever.
+- A browser whose microphone permission is refused, or that cannot recognise
+  the class's language: its recogniser stops for good and its screen says
+  captions stopped on this device.
 - Both parties try to screen-share near-simultaneously: whoever's toggle
   lands first wins; the other party's control is disabled while the first
   share is active.
@@ -288,9 +331,12 @@ That lasts until preview has a LiveKit server of its own.
 - Missing/misconfigured video provider credentials: `getVideoProvider()`
   returns null and every caller degrades gracefully (feature hidden) rather
   than throwing.
-- Missing caption vendor keys with the caption flag on: the caption toggle
-  is simply hidden — no error surfaced to the user, only a one-time internal
-  diagnostic log.
+- `GOOGLE_TRANSLATE_API_KEY` missing with the caption flag on: the caption
+  toggle is simply hidden — no error surfaced to the user, only a one-time
+  internal diagnostic log.
+- A translation the server cannot produce (Google refused or was down, or
+  the class's character budget is spent): that line is dropped, never shown
+  untranslated, and captioning carries on with the next one.
 - Recording attempted by a non-Pro teacher: blocked by the Pro-plan gate.
 - Recording attempted by anyone but the class's own teacher: blocked by
   teacher-tenancy check on the booking.
@@ -306,17 +352,17 @@ That lasts until preview has a LiveKit server of its own.
 
 ## Permissions
 
-| Action                          | Class's teacher              | Class's student                    | Other user |
-| ------------------------------- | ---------------------------- | ---------------------------------- | ---------- |
-| Join call                       | Yes                          | Yes                                | No         |
-| Mute/camera toggle              | Yes (own)                    | Yes (own)                          | No         |
-| Screen share                    | Yes (if other isn't sharing) | Yes (if other isn't sharing)       | No         |
-| Start/stop recording            | Yes (Pro only)               | No                                 | No         |
-| Toggle live captions            | Yes                          | No (receive-only)                  | No         |
-| Set per-class language override | Yes                          | No                                 | No         |
-| Send a nudge                    | Yes                          | Yes                                | No         |
-| Bookmark a moment               | Yes                          | No                                 | No         |
-| View transcript/lesson insights | Yes (own class)              | Not confirmed — see Open Questions | No         |
+| Action                          | Class's teacher              | Class's student                       | Other user |
+| ------------------------------- | ---------------------------- | ------------------------------------- | ---------- |
+| Join call                       | Yes                          | Yes                                   | No         |
+| Mute/camera toggle              | Yes (own)                    | Yes (own)                             | No         |
+| Screen share                    | Yes (if other isn't sharing) | Yes (if other isn't sharing)          | No         |
+| Start/stop recording            | Yes (Pro only)               | No                                    | No         |
+| Toggle live captions            | Yes                          | No (receives; captioned if consented) | No         |
+| Set per-class language override | Yes                          | No                                    | No         |
+| Send a nudge                    | Yes                          | Yes                                   | No         |
+| Bookmark a moment               | Yes                          | No                                    | No         |
+| View transcript/lesson insights | Yes (own class)              | Not confirmed — see Open Questions    | No         |
 
 ## Open Questions
 
@@ -331,11 +377,11 @@ That lasts until preview has a LiveKit server of its own.
   confirming it was resolved. If unresolved, production calls would fail to
   connect outright rather than merely degrade. Verify live before treating
   video calls as fully operational in production.
-- **Vendor keys for captions/transcription (`DEEPGRAM_API_KEY`,
-  `ANTHROPIC_API_KEY`, or `ASSEMBLYAI_API_KEY`) cannot be confirmed present
-  in production from this repo** — verify against Infisical `production`
-  (which `infra/gcp/push-cloudrun-env.sh` writes into the running service's
-  secret) rather than assuming.
+- **Vendor keys for captions/transcription (`GOOGLE_TRANSLATE_API_KEY`,
+  `DEEPGRAM_API_KEY`, `ANTHROPIC_API_KEY`, or `ASSEMBLYAI_API_KEY`) cannot be
+  confirmed present in production from this repo** — verify against Infisical
+  `production` (which `infra/gcp/push-cloudrun-env.sh` writes into the running
+  service's secret) rather than assuming.
   The feature flags (`LIVE_CAPTIONS_ENABLED`, `CLASS_RECORDING_ENABLED`,
   `LESSON_INSIGHTS_TRANSCRIPTION_ENABLED`) are confirmed ON in production
   per D-94, but "flag on" has already once meant "silently dark" in this

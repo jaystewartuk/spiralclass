@@ -39,7 +39,6 @@ const WORKSPACES = [
   "apps/web/package.json",
   "packages/shared/package.json",
   "packages/livekit-activity-cli/package.json",
-  "packages/livekit-captions-agent/package.json",
 ];
 
 describe("the TypeScript major this repo can actually install", () => {

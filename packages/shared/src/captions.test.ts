@@ -1,15 +1,7 @@
 import { describe, expect, it } from "vitest";
-import {
-  CAPTION_TOPIC,
-  CAPTIONS_AGENT_IDENTITY,
-  decodeCaption,
-  encodeCaption,
-  humanRemotes,
-  isCaptionsAgentIdentity,
-  type CaptionMessage,
-} from "./captions";
+import { CAPTION_TOPIC, decodeCaption, encodeCaption, type CaptionMessage } from "./captions";
 
-// The shared caption wire format used by both web and mobile. Pins the
+// The shared caption wire format every client agrees on. Pins the
 // round-trip, the required recipient (`for`) field, and the defensive decode
 // (a malformed or foreign packet must degrade to null, never throw into a
 // DataReceived handler).
@@ -127,39 +119,5 @@ describe("decodeCaption enrichment fields", () => {
       ),
     );
     expect(decoded).toEqual({ t: "line", for: "x", id: "1", text: "hello", srcLang: "es" });
-  });
-});
-
-describe("isCaptionsAgentIdentity / humanRemotes", () => {
-  it("identifies the Agent's participant identity", () => {
-    expect(isCaptionsAgentIdentity(CAPTIONS_AGENT_IDENTITY)).toBe(true);
-    expect(isCaptionsAgentIdentity("some-student-uuid")).toBe(false);
-    expect(isCaptionsAgentIdentity(undefined)).toBe(false);
-    expect(isCaptionsAgentIdentity(null)).toBe(false);
-  });
-
-  // The regression guard. The captions Agent joins every caption-enabled class
-  // room as a real remote participant, so `remoteParticipants` is NOT a list of
-  // humans. Production 2026-07-26→29: "open this material for the student"
-  // addressed its message to remoteParticipants[0], which could be the Agent —
-  // the student never received it, and nothing errored, because a client
-  // correctly ignores a message not addressed to itself.
-  it("excludes the Agent when picking the other person in the call", () => {
-    const remotes = [{ identity: CAPTIONS_AGENT_IDENTITY }, { identity: "student-1" }];
-    expect(humanRemotes(remotes)).toEqual([{ identity: "student-1" }]);
-    // Order must not matter: whichever the SDK yields first, the human wins.
-    expect(humanRemotes([...remotes].reverse())).toEqual([{ identity: "student-1" }]);
-  });
-
-  it("reports an Agent-only room as having nobody else in it", () => {
-    // Drives "is the other person here?" — the waiting-room state, the
-    // swap-video affordance and the open-for choice sheet all read this.
-    expect(humanRemotes([{ identity: CAPTIONS_AGENT_IDENTITY }])).toEqual([]);
-    expect(humanRemotes([])).toEqual([]);
-  });
-
-  it("preserves the full participant object, not just the identity", () => {
-    const student = { identity: "student-1", sid: "PA_x" };
-    expect(humanRemotes([student])[0]).toBe(student);
   });
 });

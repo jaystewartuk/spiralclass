@@ -22,14 +22,16 @@
 // **On the name.** Nine of this file's eleven exports went with a large route
 // deletion — the session payload builder, the student and superuser gates, the
 // notification-recipient resolver, the admin-role lookup and a force-update
-// gate. What is left is what the web code actually calls.
+// gate. What is left is what the web code actually calls, plus a
+// call-participant gate added when the live-caption routes gave a student's
+// browser something to call (D-185).
 
 import * as Sentry from "@sentry/nextjs";
 import { auth } from "@/lib/auth/server";
 import { identifyServerUser } from "@/lib/analytics/posthog";
 import { prisma } from "@/lib/prisma";
 
-import type { Teacher } from "@prisma/client";
+import type { Student, Teacher } from "@prisma/client";
 
 // Tag the current request's Sentry scope + identify to PostHog, exactly like
 // lib/auth.ts's requireTeacher/requireAdmin do for page requests, so a request
@@ -97,4 +99,30 @@ export async function requireApiOnboardedTeacher(req: Request): Promise<Teacher>
   const teacher = await requireApiTeacher(req);
   if (!teacher.onboardingCompleteAt) throw new ApiAuthError(409, "onboarding-incomplete");
   return teacher;
+}
+
+// Either participant of a class, for the few plain-`Request` routes both
+// sides' browsers call (the live-caption routes, D-185). One session read,
+// then the teacher row, then the student row — the two are mutually
+// exclusive for one sign-in. The student half mirrors `requireStudent()` in
+// `lib/auth.ts` minus its claim-on-first-visit linking: a student reaching one
+// of these routes has already rendered a portal page, which linked her. A
+// moderated row is refused on either side, and whether the caller belongs to
+// a particular booking is the route's own question, answered with this role.
+export type ApiCallParticipant =
+  { role: "teacher"; teacher: Teacher } | { role: "student"; student: Student };
+
+export async function requireApiCallParticipant(req: Request): Promise<ApiCallParticipant> {
+  const user = await requireApiUser(req);
+  const teacher = await prisma.teacher.findUnique({ where: { id: user.authUserId } });
+  if (teacher) {
+    if (teacher.disabledAt) throw new ApiAuthError(403, "teacher-disabled");
+    attachActorToObservability(teacher, "teacher");
+    return { role: "teacher", teacher };
+  }
+  const student = await prisma.student.findUnique({ where: { authUserId: user.authUserId } });
+  if (!student) throw new ApiAuthError(403, "no-participant-row");
+  if (student.disabledAt) throw new ApiAuthError(403, "student-disabled");
+  attachActorToObservability(student, "student");
+  return { role: "student", student };
 }

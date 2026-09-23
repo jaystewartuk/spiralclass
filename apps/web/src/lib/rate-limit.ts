@@ -28,6 +28,14 @@ export interface RateLimitOptions {
   limit: number;
   // Window length in ms.
   windowMs: number;
+  // How much of the allowance this one call spends. Defaults to 1 (the limit
+  // counts requests); a route that pays a vendor by volume passes the volume
+  // instead, so `limit` becomes a budget of that unit per window — the
+  // live-caption translation route budgets characters, which is what Google
+  // bills. A call costing more than is left is refused and spends nothing
+  // (in-memory) or spends its cost anyway (Upstash, whose counter only goes
+  // up); both refuse every later call in the window the same way.
+  cost?: number;
 }
 
 export interface RateLimitResult {
@@ -57,6 +65,7 @@ function createInMemoryBackend(): RateLimitBackend {
     async consume(identifier, options) {
       const now = Date.now();
       const key = `${options.scope}:${identifier}`;
+      const cost = options.cost ?? 1;
       const existing = buckets.get(key);
 
       if (!existing || existing.resetAt <= now) {
@@ -66,18 +75,19 @@ function createInMemoryBackend(): RateLimitBackend {
           const oldestKey = buckets.keys().next().value;
           if (oldestKey) buckets.delete(oldestKey);
         }
+        if (cost > options.limit) return { ok: false, retryAfterMs: options.windowMs };
         buckets.set(key, {
-          tokens: options.limit - 1,
+          tokens: options.limit - cost,
           resetAt: now + options.windowMs,
         });
         return { ok: true, retryAfterMs: 0 };
       }
 
-      if (existing.tokens <= 0) {
+      if (existing.tokens < cost) {
         return { ok: false, retryAfterMs: existing.resetAt - now };
       }
 
-      existing.tokens -= 1;
+      existing.tokens -= cost;
       return { ok: true, retryAfterMs: 0 };
     },
     reset() {
@@ -88,10 +98,10 @@ function createInMemoryBackend(): RateLimitBackend {
 
 // ---------- Upstash backend ----------
 
-// Hits Upstash's REST API with a 2-command pipeline:
-//   INCR key
+// Hits Upstash's REST API with a 3-command pipeline:
+//   INCRBY key cost
 //   PEXPIRE key windowMs NX
-// Reading the INCR result tells us the current count; the NX flag on
+// Reading the INCRBY result tells us the current count; the NX flag on
 // PEXPIRE makes the TTL stick only on the first call of the window.
 // If anything goes wrong (network, 5xx), we fail open with a Sentry
 // breadcrumb — better to let one request through than to lock the
@@ -108,7 +118,7 @@ function createUpstashBackend(url: string, token: string): RateLimitBackend {
             Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify([
-            ["INCR", key],
+            ["INCRBY", key, String(options.cost ?? 1)],
             ["PEXPIRE", key, String(options.windowMs), "NX"],
             ["PTTL", key],
           ]),
@@ -232,6 +242,7 @@ export function resolveRateLimitOptions(options: RateLimitOptions): RateLimitOpt
     scope: options.scope,
     limit: envPositiveInt(`RATE_LIMIT_${key}`) ?? options.limit,
     windowMs: envPositiveInt(`RATE_LIMIT_${key}_WINDOW_MS`) ?? options.windowMs,
+    ...(options.cost === undefined ? {} : { cost: options.cost }),
   };
 }
 

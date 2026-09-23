@@ -76,22 +76,25 @@ Everything lives in `/home/ubuntu/oracle-livekit-production/`:
 
 | File                 | Mode | Purpose                                                                            |
 | -------------------- | ---- | ---------------------------------------------------------------------------------- |
-| `docker-compose.yml` | 644  | the five services                                                                  |
+| `docker-compose.yml` | 644  | the four services                                                                  |
 | `Caddyfile`          | 644  | TLS termination and the signaling reverse proxy                                    |
 | `livekit.yaml`       | 600  | livekit-server config — sections `port`, `rtc`, `turn`, `redis`, `keys`, `webhook` |
 | `egress.yaml`        | 600  | egress config — `ws_url`, `api_key`, `api_secret`, `redis`, `cpu_cost`             |
-| `.env`               | 600  | secrets, consumed by compose variable substitution                                 |
+| `.env`               | 600  | `APP_INTERNAL_BASE_URL`, read back by the deploy's callback probe — see below      |
 
 Several `.bak` copies sit alongside these, written by hand before each edit.
 They are the closest thing to a change history the box has.
 
-**Five containers, all `network_mode: host`, all `restart: unless-stopped`:**
+**Four containers, all `network_mode: host`, all `restart: unless-stopped`:**
 
 - `livekit-caddy` — `caddy:2`
 - `livekit-server` — `livekit/livekit-server:latest`
 - `livekit-egress` — `livekit/egress:latest`, `shm_size: 2gb`, `cap_add: SYS_ADMIN`
 - `livekit-redis` — `redis:7-alpine`, `redis-server --bind 127.0.0.1 --port 6379 --save 60 1`
-- `livekit-captions-agent` — built locally, see below
+
+Live captions do not run on this box: they run in the participants' browsers
+([live-calls-video.md](../features/live-calls-video.md#live-captions),
+[D-185](../decisions/D-185.md)).
 
 Host networking is deliberate: livekit-server needs unmediated access to its
 RTC UDP range, and Docker bridge NAT breaks ICE.
@@ -103,27 +106,12 @@ RTC UDP range, and Docker bridge NAT breaks ICE.
 - `oracle-livekit-production_redis_data`
 - `oracle-livekit-production_egress_tmp`
 
-### The captions agent is not pulled, it is built
-
-```yaml
-build:
-  context: /home/ubuntu/agendaprofe
-  dockerfile: packages/livekit-captions-agent/Dockerfile
-image: agendaprofe-captions-agent:bd6d6679
-```
-
-**A source copy of this repo lives at `/home/ubuntu/agendaprofe` on the box**
-— a minimal copy, not a full checkout — and the image tag is the commit it was
-built from. A rebuild must recreate that directory before `docker compose up`
-can succeed. The context path still carries the pre-rename name.
-
 ### Secrets
 
-`.env` supplies six variables by compose substitution. Their values are **not**
-in this repo and must come from Infisical:
-
-`LIVEKIT_API_KEY`, `LIVEKIT_API_SECRET`, `DEEPGRAM_API_KEY`,
-`ANTHROPIC_API_KEY`, `CAPTIONS_AGENT_SHARED_SECRET`, `APP_INTERNAL_BASE_URL`
+`livekit.yaml` and `egress.yaml` carry the LiveKit key pair,
+`LIVEKIT_API_KEY` and `LIVEKIT_API_SECRET`, and `.env` carries
+`APP_INTERNAL_BASE_URL`. Their values are **not** in this repo; they come from
+Infisical, rendered by `scripts/oracle-render-livekit.sh`.
 
 Infisical also holds `tailscale_authkey_oracle` and `cloudflare_zone_id`, which
 the rebuild needs but compose does not read. See
@@ -135,7 +123,7 @@ the rotation runbook, which is kept privately (see
 ⚠️ **Read this before the migration, not during it. The failure mode is
 silence.**
 
-Today the box runs LiveKit, the captions agent, Caddy and Redis.
+Today the box runs LiveKit, Egress, Caddy and Redis.
 [D-150](../decisions/D-150.md) moves the Next.js app here too, and the app gets
 its non-secret configuration a different way from everything above.
 
@@ -160,7 +148,7 @@ its prices, and classes lose the LiveKit key. **You find out from a person, not
 from the deploy.**
 
 **What to do instead.** Infisical is the source of truth for these, at path
-`/config`, per environment — the same store the six variables above come from,
+`/config`, per environment — the same store the LiveKit values above come from,
 and unlike any one host's secret store it is provider-neutral, which is the
 whole reason it holds them.
 
@@ -196,50 +184,50 @@ boot** — a quiet boot is exactly what a missing value looks like.
 
 ### The two URLs on this box that name the app, and the outage they caused
 
-`APP_INTERNAL_BASE_URL` is in that list but is **not a secret** — it is a
-plain origin, and it is one of exactly two places on this box that name the
-Next.js app. Both must be the canonical origin, `https://spiralclass.com`:
+`APP_INTERNAL_BASE_URL` is **not a secret** — it is a plain origin, and it is
+one of exactly two places on this box that name the Next.js app. Both must be
+the canonical origin, `https://spiralclass.com`:
 
-- **`.env` line 6 — `APP_INTERNAL_BASE_URL=https://spiralclass.com`.** The
-  captions agent posts room-config here once per room and again on a 60-second
-  poll.
+- **`.env` — `APP_INTERNAL_BASE_URL=https://spiralclass.com`.** The render
+  script derives the webhook URL below from it, and `scripts/oracle-deploy.sh`
+  reads it back to probe that origin for redirects.
 - **`livekit.yaml`, the `webhook` section — `https://spiralclass.com/api/livekit/webhook`.**
   livekit-server posts room and participant events here.
 
-**Neither is rewritten by anything.** The [D-138](../decisions/D-138.md) rename
-swept 934 files in the repo and could not touch this box, so both were left on
+**On the old box neither was rewritten by anything.** The
+[D-138](../decisions/D-138.md) rename swept 934 files in the repo and could
+not touch this box, so both were left on
 `https://agendaprofe.com` and both broke on 2026-08-30. `agendaprofe.com` is
 retained and 301s to the new domain, and a 301 turns a POST into a GET, so:
 
-- The captions agent's POST became a GET against a POST-only route and got
-  **405**. `discovery.ts` only starts a `RoomWorker` when room-config comes
-  back enabled, so on a null it starts none and **publishes no captions at
-  all**. One real class ran with subtitles silently dead before this was found.
+- The box's caption worker, which then called the app from here, got a
+  **405** and published no captions; one real class ran with subtitles
+  silently dead. That worker is retired.
 - livekit-server's webhooks never reached the app. It logs `sent webhook` on a
   301, so **the failure is invisible from the box** — the tell is the `url`
   field in its own log line, not an error. That endpoint is the completion
   signal for lesson-insights Phase A and for finalizing recordings.
 
 > [!IMPORTANT]
-> **Changing either value needs a restart, and they differ.** `.env` is read by
-> compose substitution, so the agent needs `docker compose up -d captions-agent`
-> to be **recreated** — a plain `restart` re-runs the old environment.
-> `livekit.yaml` is a mounted file, so compose sees no change at all and
-> `docker compose restart livekit` is required. **Restarting livekit-server
-> disconnects everyone in a live class** (they auto-reconnect in a few seconds),
-> so check for live rooms first — and check _occupancy_, not recent join events.
+> **Changing the webhook URL needs a restart.** `livekit.yaml` is a mounted
+> file, so compose sees no change at all and `docker compose restart livekit`
+> is required — `scripts/oracle-deploy.sh` does it when the file changed.
+> **Restarting livekit-server disconnects everyone in a live class** (they
+> auto-reconnect in a few seconds), so check for live rooms first — and check
+> _occupancy_, not recent join events.
 > A participant who joined ten minutes ago and is still talking produces no
 > recent log line. That mistake was made on 2026-08-30 and dropped one
 > participant mid-call.
 
-**Two HetrixTools monitors now cover the app half of both paths** (see
-`scripts/local/synthetic.sh`'s MOVED block for why they live there rather than
-in that file). Note what they do and do not catch: they prove the two routes
-are alive and answering **directly** on the canonical origin, because
-`max_redirects` is 0 and the only accepted code is 405 — so a 301 fails them.
-They **cannot** see this box's config, so they would not have caught this
-outage. Nothing external can. The box's copy of these two URLs is checked by
-reading it here.
+**A HetrixTools monitor covers the app half of the webhook path** (see
+`scripts/local/synthetic.sh`'s MOVED block for why it lives there rather than
+in that file). Note what it does and does not catch: it proves the route is
+alive and answering **directly** on the canonical origin, because
+`max_redirects` is 0 and the only accepted code is 405 — so a 301 fails it.
+It **cannot** see this box's config, so it would not have caught this outage.
+Nothing external can. The box's side is covered by rendering both values from
+`scripts/oracle-render-livekit.sh` and by `scripts/oracle-deploy.sh`'s
+callback probe, which fails the deploy on any redirect.
 
 ## Networking
 
@@ -410,12 +398,10 @@ Roughly two to four hours, and it is all by hand.
 4. **Join the tailnet** with `tailscale_authkey_oracle`, enable Tailscale SSH,
    then **disable key expiry for the node** in the admin console.
 5. **Restore the stack directory.** Recreate
-   `/home/ubuntu/oracle-livekit-production/` with the five files above, and
-   `/home/ubuntu/agendaprofe` with enough of this repo to build the captions
-   agent. Restore `.env`, `livekit.yaml` and `egress.yaml` from Infisical at
-   mode 600.
+   `/home/ubuntu/oracle-livekit-production/` with the five files above.
+   Restore `.env`, `livekit.yaml` and `egress.yaml` from Infisical at mode 600.
 6. **Point DNS at the new IP, grey-clouded**, and bring the stack up with
-   `docker compose up -d --build`. Grey-clouded first, so Caddy can obtain
+   `docker compose up -d`. Grey-clouded first, so Caddy can obtain
    certificates by tls-alpn-01 without the proxy in the way.
 7. **Verify a class connects**, then re-proxy the records (orange cloud) and
    confirm `Always Use HTTPS` is off and SSL mode is Full on both zones.
@@ -442,9 +428,3 @@ Recorded because the disagreement is the evidence for
   `docker exec livekit-caddy caddy reload`.
 - **The module's `services/Caddyfile` and the box's differ.** The box's is
   authoritative.
-- **`docker-compose.yml` on the box still contains a comment** saying the
-  Tofu module "isn't managing this box yet" and that the hand-added captions
-  agent matches "the module's intended service definition once Tofu import
-  happens later." **That import is now cancelled**; the comment is stale and
-  is left in place only because editing the live compose file for a comment
-  means touching production for no functional reason.

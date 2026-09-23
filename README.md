@@ -134,7 +134,7 @@ graph TB
 
     subgraph app["apps/web — the only server"]
         RSC["Server Components<br/>+ 71 server-action modules"]
-        API["57 route handlers<br/>by audience: teacher · student · public · internal"]
+        API["58 route handlers<br/>by audience: teacher · student · public · internal"]
         MW["middleware.ts<br/>CSP nonce · session gate · ?ref= attribution"]
         LIB["src/lib/** — one folder per bounded concern<br/>payments · booking · cancellation · subscriptions<br/>auth · notifications · chat · homework · video"]
     end
@@ -147,9 +147,9 @@ graph TB
     subgraph external["External services"]
         STRIPE["Stripe Connect<br/>direct charges on the teacher's account"]
         WISE["Wise API<br/>transfer reconciliation"]
-        LK["Self-hosted LiveKit<br/>+ Egress + captions agent"]
+        LK["Self-hosted LiveKit<br/>+ Egress"]
         R2["Cloudflare R2<br/>media · recordings · materials"]
-        AI["Deepgram · Anthropic<br/>Azure Speech · Vertex AI"]
+        AI["Deepgram · Anthropic<br/>Azure Speech · Vertex AI<br/>Cloud Translation"]
         MAIL["Resend / Amazon SES<br/>+ Web Push"]
     end
 
@@ -366,10 +366,10 @@ by Caddy with a Let's Encrypt certificate. The application talks to it through a
 cutover changed two configuration values and zero lines of application code.
 
 Recording is room-composite Egress writing straight to R2 with per-request
-credentials. Live captions run in a **separate worker process**
-(`packages/livekit-captions-agent`) deployed onto the LiveKit box: speech to
-text, translation, published back into the room as a data track. Nothing about
-captions is stored.
+credentials. Live captions run **in the participants' browsers**: speech is
+recognised by the browser (by the other person's, when a phone cannot recognise
+during a call), translated on the device or through the app, and published into
+the room as a data message. Nothing about captions is stored.
 
 The honest part: both environments share one physical box, which is a documented
 risk acceptance with a written graduation trigger, not an oversight.
@@ -574,7 +574,7 @@ graph LR
     RUN["Cloud Run — web, us-east4"]
     NEON[("Neon<br/>production branch")]
     CF["Cloudflare DNS"]
-    LKBOX["Self-hosted LiveKit<br/>+ Egress + captions agent"]
+    LKBOX["Self-hosted LiveKit<br/>+ Egress"]
 
     DEV --> G --> FF --> APPROVE --> DB --> BUILD --> RUN
     BUILD --> PROBE

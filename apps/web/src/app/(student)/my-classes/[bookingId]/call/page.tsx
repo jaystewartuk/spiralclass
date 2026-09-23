@@ -90,10 +90,10 @@ export default async function StudentCallPage({
   const materials = await getCallMaterials(booking.id, { audience: "student" });
 
   // Consent gate (the captions architecture review P0): her own
-  // mic may only be published to ASR if she's consented (or her guardian
+  // speech may only be captioned if she's consented (or her guardian
   // has, via the teacher) — the teacher's captions toggle (D-27,
-  // teacher-toggled) can turn her audio-forwarding ON, but can never bypass
-  // this. Distinguished from "feature off entirely" so the call UI can
+  // teacher-toggled) covers both directions, but can never bypass this
+  // (D-185). Distinguished from "feature off entirely" so the call UI can
   // explain why her own speech isn't being captioned even while the
   // teacher's toggle is on. No `canCaption` is passed here — only the
   // teacher's own call page renders the toggle; see class-call.tsx's

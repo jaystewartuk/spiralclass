@@ -256,18 +256,22 @@ fi
 #
 # Added 2026-08-30, same reasoning, after the D-138 rename broke both of them:
 #
-#   - `spiralclass livekit webhook` and `spiralclass captions room-config` —
-#     5-minute, four locations, GET, redirects NOT followed, accepting only
-#     405. Both routes are POST-only, so 405 is the app answering; a 301 is the
-#     origin redirecting and is exactly the failure that killed live subtitles
-#     and every lesson-insight webhook on 2026-08-30. Same shape as the two
-#     Stripe webhook monitors, which exist for the same reason (2026-08-29).
+#   - `spiralclass livekit webhook` — 5-minute, four locations, GET, redirects
+#     NOT followed, accepting only 405. The route is POST-only, so 405 is the
+#     app answering; a 301 is the origin redirecting and is exactly the failure
+#     that killed every lesson-insight webhook on 2026-08-30. Same shape as the
+#     two Stripe webhook monitors, which exist for the same reason
+#     (2026-08-29). Its twin watched the box-side caption worker's callback
+#     route; that route was deleted when captions moved into the browser
+#     (D-185), so that monitor can only answer 404 — delete it in HetrixTools
+#     if it is still there.
 #
-# ⚠ These monitor the APP half only. They cannot see the Oracle box's own
+# ⚠ This monitors the APP half only. It cannot see the Oracle box's own
 # `.env` / `livekit.yaml`, which is where that outage actually lived — the box
 # was still pointed at `agendaprofe.com` long after the app was fine. Nothing
-# external can see that; it is checked by reading
-# docs/deployment/ORACLE_BOX_REBUILD.md's "two URLs on this box" section.
+# external can see that; scripts/oracle-deploy.sh's callback probe checks it
+# from the box on every deploy, and docs/deployment/ORACLE_BOX_REBUILD.md's
+# "two URLs on this box" section explains it.
 #
 # ⚠ `livekit.agendaprofe.com` is deliberately NOT monitored, and this note
 # exists because a session added monitors for it on 2026-08-29 and had to take

@@ -4,8 +4,9 @@
 # Called by scripts/oracle-deploy.sh; usable on its own to see what would be
 # written. Takes one argument: a directory to write into.
 #
-# ⚠️ These three files carry the LiveKit key pair and land on the box at mode
-# 600. Nothing here is committed, and nothing here should be edited on the box
+# ⚠️ livekit.yaml and egress.yaml carry the LiveKit key pair, and .env and
+# preview-db.env carry preview's database password; all four land on the box
+# at mode 600. Nothing here is committed, and nothing here should be edited on the box
 # — the previous box's copies were hand-edited with `.bak` files beside them
 # as the only history, and that is how two URLs went stale through the D-138
 # rename and took captions and webhooks down through a real class.
@@ -18,20 +19,20 @@ INFISICAL_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../infra/infisical" && pwd)"
 # shellcheck source=../infra/infisical/infisical.sh
 source "${INFISICAL_DIR}/infisical.sh"
 
-# ⚠️ THE PRODUCTION APP IS NOT ON THIS BOX, so both of these leave it.
+# ⚠️ THE PRODUCTION APP IS NOT ON THIS BOX, so the webhook leaves it.
 #
 # The production web app stays on Fly and production's database stays on Neon
 # (D-150's second addendum, 2026-09-04); Oracle carries LiveKit, preview and
-# preview's Postgres. So the captions agent and livekit-server both call the
-# app out through Cloudflare, which is the path that broke on 2026-08-30 —
-# and the important part of that outage is WHICH half caused it. The D-138
-# rename swept 934 files in this repository and could not touch the box, so
-# both values sat on `agendaprofe.com`; the 301 turned the agent's POST into a
-# GET, it got a 405, discovery.ts started no RoomWorker, and one real class ran
-# with subtitles silently dead. livekit-server's webhooks failed the same way
-# while its own log kept saying `sent webhook`, because a 301 looks like
-# success. The fault was a stale hostname that nothing in the repository
-# owned — not the fact that the request left the machine.
+# preview's Postgres. So livekit-server calls the app out through Cloudflare,
+# which is the path that broke on 2026-08-30 — and the important part of that
+# outage is WHAT caused it. The D-138 rename swept 934 files in this
+# repository and could not touch the box, so the callback URLs sat on
+# `agendaprofe.com`, which 301s. livekit-server's webhooks stopped reaching
+# the app while its own log kept saying `sent webhook`, because a 301 looks
+# like success. (Live captions also called that origin then, from a worker on
+# the box; they run in the browser now, D-185.) The fault was a stale hostname that
+# nothing in the repository owned — not the fact that the request left the
+# machine.
 #
 # ⚠️ So the two defences are: this value is RENDERED here, from one place a
 # rename sweep can reach, and never hand-edited on the box; and
@@ -54,9 +55,6 @@ secret() {
 
 LIVEKIT_API_KEY="$(secret LIVEKIT_API_KEY /config)"
 LIVEKIT_API_SECRET="$(secret LIVEKIT_API_SECRET /)"
-DEEPGRAM_API_KEY="$(secret DEEPGRAM_API_KEY /)"
-ANTHROPIC_API_KEY="$(secret ANTHROPIC_API_KEY /)"
-CAPTIONS_AGENT_SHARED_SECRET="$(secret CAPTIONS_AGENT_SHARED_SECRET /)"
 
 # ⚠️ The old module read LIVEKIT_API_KEY out of
 # config/env/production.runtime.env with a regex(). That value is the literal
@@ -64,8 +62,7 @@ CAPTIONS_AGENT_SHARED_SECRET="$(secret CAPTIONS_AGENT_SHARED_SECRET /)"
 # applying it would have written `__LOCAL__` as LiveKit's API key and every
 # token would have failed to verify, with nothing in any log saying why.
 # Guard against the same class of mistake from any source.
-for v in LIVEKIT_API_KEY LIVEKIT_API_SECRET DEEPGRAM_API_KEY \
-         ANTHROPIC_API_KEY CAPTIONS_AGENT_SHARED_SECRET; do
+for v in LIVEKIT_API_KEY LIVEKIT_API_SECRET; do
   case "${!v}" in
     ""|__LOCAL__) echo "oracle-render-livekit: $v is empty or __LOCAL__" >&2; exit 1 ;;
   esac
@@ -78,13 +75,14 @@ umask 077
 # `ab$cd+ef` reaches the container as `ab+ef`. Verified against Compose 5.4.0
 # on 2026-09-04, and `$$` is the escape that survives as a literal `$`.
 #
-# The damage is worse than one mangled value, because LIVEKIT_API_SECRET
-# travels TWO paths out of this script from ONE source: an unquoted shell
-# heredoc into livekit.yaml (no compose anywhere) and this file into the
-# captions agent (compose interpolation). A `$` corrupts the second and not
-# the first, so livekit-server holds the right secret while the captions agent
-# authenticates with a different one — which presents as captions silently
-# dead, the same symptom as 2026-08-30 and a different cause.
+# What still goes through that interpolation is preview's Postgres
+# credentials, and an operator-supplied PREVIEW_DB_PASSWORD can carry a `$`.
+# scripts/oracle-deploy.sh undoes the escape when it reads values back.
+#
+# ⚠️ The LiveKit key pair is deliberately NOT in `.env` any more. Its only
+# reader there was the box-side caption worker D-185 retired; livekit-server
+# and egress read the pair from their own YAML. Putting it back would be an
+# unread second copy of the secret on the box.
 #
 # ⚠️ Do NOT apply this to livekit.yaml, egress.yaml or preview-db.env. Those
 # are read by LiveKit and by `env_file:`, neither of which interpolates, so an
@@ -152,12 +150,9 @@ EOF
 PREVIEW_DB_USER="${PREVIEW_DB_USER:-spiralclass_preview}"
 PREVIEW_DB_NAME="${PREVIEW_DB_NAME:-spiralclass_preview}"
 
+# APP_INTERNAL_BASE_URL is here for scripts/oracle-deploy.sh, which reads it
+# back to probe the webhook's origin for redirects. No compose service reads it.
 cat > "$OUT/.env" <<EOF
-LIVEKIT_API_KEY=$(env_escape "$LIVEKIT_API_KEY")
-LIVEKIT_API_SECRET=$(env_escape "$LIVEKIT_API_SECRET")
-DEEPGRAM_API_KEY=$(env_escape "$DEEPGRAM_API_KEY")
-ANTHROPIC_API_KEY=$(env_escape "$ANTHROPIC_API_KEY")
-CAPTIONS_AGENT_SHARED_SECRET=$(env_escape "$CAPTIONS_AGENT_SHARED_SECRET")
 APP_INTERNAL_BASE_URL=$(env_escape "$APP_INTERNAL_BASE_URL")
 PREVIEW_DB_USER=$(env_escape "$PREVIEW_DB_USER")
 PREVIEW_DB_PASSWORD=$(env_escape "$PREVIEW_DB_PASSWORD")

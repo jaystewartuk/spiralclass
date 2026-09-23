@@ -1,8 +1,13 @@
 "use client";
 
-import { useEffect, useMemo, useReducer, useState } from "react";
+import { useCallback, useEffect, useMemo, useReducer, useState } from "react";
 import { Room, RoomEvent } from "livekit-client";
-import { CAPTION_TOPIC, decodeCaption } from "@spiralclass/shared";
+import {
+  CAPTION_TOPIC,
+  CAPTIONS_ON_ATTRIBUTE,
+  decodeCaption,
+  type CaptionLine,
+} from "@spiralclass/shared";
 import {
   INITIAL_FEED_STATE,
   reduceCaptionFeed,
@@ -34,6 +39,12 @@ export type CaptionFeed = {
   transcript: CaptionEntry[];
   // Whether the room is captioning right now (the teacher's switch).
   active: boolean;
+  // Feed a line this browser recognised itself — the other participant's
+  // speech, when their device cannot recognise it (D-185). It joins the same
+  // feed a received line does.
+  addLine: (line: CaptionLine) => void;
+  // Show or hide the band: the room's switch as this browser reads it.
+  setActive: (on: boolean) => void;
 };
 
 export function useCaptionFeed(room: Room | null): CaptionFeed {
@@ -49,9 +60,7 @@ export function useCaptionFeed(room: Room | null): CaptionFeed {
       if (topic !== CAPTION_TOPIC) return;
       const msg = decodeCaption(payload);
       if (!msg) return;
-      // Addressed to someone else. The captions Agent is a THIRD room
-      // participant, so "arrived on this topic" has not implied "meant for
-      // me" since it shipped.
+      // Addressed to someone else — see the protocol's note on `for`.
       if (msg.for !== room.localParticipant?.identity) return;
       if (msg.t === "state") {
         dispatch({ kind: "active", on: msg.on });
@@ -90,20 +99,26 @@ export function useCaptionFeed(room: Room | null): CaptionFeed {
     return () => clearTimeout(timer);
   }, [state, expiryTick]);
 
-  return { visible, transcript: state.entries, active: state.active };
+  const addLine = useCallback(
+    (line: CaptionLine) => dispatch({ kind: "line", line, at: Date.now() }),
+    [],
+  );
+  const setActive = useCallback((on: boolean) => dispatch({ kind: "active", on }), []);
+
+  return { visible, transcript: state.entries, active: state.active, addLine, setActive };
 }
 
 // Whether the room's captions switch is currently ON, as seen from either
 // side of the call.
 //
 // The teacher's client writes `captionsOn` as a LiveKit participant
-// attribute (D-27) and the Agent reads it. LiveKit broadcasts attribute
-// changes to every participant, so the STUDENT can read the same flag — and
-// until now did not: her only evidence that subtitles existed was a line
-// appearing, which is one ASR round-trip plus one translation after the
-// teacher actually flipped the switch. For those seconds her screen was
-// indistinguishable from a call with no captions at all, and if the teacher
-// then said nothing, it stayed that way.
+// attribute (D-27), which both browsers read to decide what to recognise
+// (use-browser-captions.ts). LiveKit broadcasts attribute changes to every
+// participant, so the STUDENT reads the same flag for the band too — without
+// it, her only evidence that subtitles existed was a line appearing, one
+// recognition plus one translation after the teacher actually flipped the
+// switch, and if the teacher then said nothing, her screen stayed
+// indistinguishable from a call with no captions at all.
 //
 // Reading the attribute directly closes that gap and is what lets the band
 // show a "listening" state instead of nothing.
@@ -115,14 +130,14 @@ export function useRoomCaptionsEnabled(room: Room | null): boolean {
       setOn(false);
       return;
     }
-    // Any participant with the flag set counts. Only the teacher's is ever
-    // trusted server-side (the Agent checks isTeacher before acting on it),
-    // so a student faking her own attribute changes nothing but her own
-    // screen's "listening" hint — the audio gate is not here.
+    // Any participant with the flag set counts here, for the band alone.
+    // What is actually RECOGNISED follows only the teacher's attribute
+    // (use-browser-captions.ts), so a student faking her own attribute
+    // changes nothing but her own screen's "listening" hint.
     const recompute = () => {
-      const local = room.localParticipant?.attributes?.captionsOn === "true";
+      const local = room.localParticipant?.attributes?.[CAPTIONS_ON_ATTRIBUTE] === "true";
       const remote = [...room.remoteParticipants.values()].some(
-        (p) => p.attributes?.captionsOn === "true",
+        (p) => p.attributes?.[CAPTIONS_ON_ATTRIBUTE] === "true",
       );
       setOn(local || remote);
     };

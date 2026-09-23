@@ -11,10 +11,10 @@
 # docker BRIDGE network on this box, resolves a public name that points at this
 # same box and leaves it to come back.
 #
-# The other two app↔LiveKit directions — livekit-server's webhook and the
-# captions agent's APP_INTERNAL_BASE_URL — both point at PRODUCTION, which is
-# on Fly. They leave the box for real, and scripts/oracle-deploy.sh probes them
-# separately and fails on any 3xx. Whether that works depends on Cloudflare's proxy
+# The other app↔LiveKit direction — livekit-server's webhook, rendered from
+# APP_INTERNAL_BASE_URL — points at PRODUCTION, which is on Fly. It leaves the
+# box for real, and scripts/oracle-deploy.sh probes it separately and fails on
+# any 3xx. Whether that works depends on Cloudflare's proxy
 # state, on this box's own egress, and — while a hostname is grey-clouded — on
 # OCI hairpinning traffic from a bridged container to the instance's own
 # reserved address. None of that is true by construction, and when it is false

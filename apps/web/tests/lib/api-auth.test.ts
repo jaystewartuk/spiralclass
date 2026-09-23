@@ -20,7 +20,13 @@ const getSession = vi.fn();
 vi.mock("@/lib/auth/server", () => ({ auth: { api: { getSession: () => getSession() } } }));
 
 const findUnique = vi.fn();
-vi.mock("@/lib/prisma", () => ({ prisma: { teacher: { findUnique: () => findUnique() } } }));
+const findStudent = vi.fn();
+vi.mock("@/lib/prisma", () => ({
+  prisma: {
+    teacher: { findUnique: () => findUnique() },
+    student: { findUnique: (args: unknown) => findStudent(args) },
+  },
+}));
 
 const setUser = vi.fn();
 vi.mock("@sentry/nextjs", () => ({ setUser }));
@@ -28,8 +34,14 @@ vi.mock("@sentry/nextjs", () => ({ setUser }));
 const identifyServerUser = vi.fn();
 vi.mock("@/lib/analytics/posthog", () => ({ identifyServerUser }));
 
-const { ApiAuthError, getApiUser, requireApiUser, requireApiTeacher, requireApiOnboardedTeacher } =
-  await import("@/lib/api/auth");
+const {
+  ApiAuthError,
+  getApiUser,
+  requireApiUser,
+  requireApiTeacher,
+  requireApiOnboardedTeacher,
+  requireApiCallParticipant,
+} = await import("@/lib/api/auth");
 
 const req = () => new Request("https://x.test/api/teacher/thing");
 
@@ -161,6 +173,71 @@ describe("requireApiOnboardedTeacher", () => {
     await expect(requireApiOnboardedTeacher(req())).rejects.toMatchObject({
       reason: "teacher-disabled",
     });
+  });
+});
+
+describe("requireApiCallParticipant", () => {
+  const STUDENT = { id: "s1", email: "ana@example.com", disabledAt: null };
+
+  it("resolves a teacher first, and never looks for a student row", async () => {
+    await expect(requireApiCallParticipant(req())).resolves.toEqual({
+      role: "teacher",
+      teacher: ONBOARDED,
+    });
+    expect(findStudent).not.toHaveBeenCalled();
+  });
+
+  // No onboarding gate: a teacher in a class call has onboarded, and the call
+  // routes must not bounce her to onboarding mid-lesson if a flag regresses.
+  it("does not apply the onboarding gate", async () => {
+    findUnique.mockResolvedValue({ ...ONBOARDED, onboardingCompleteAt: null });
+    await expect(requireApiCallParticipant(req())).resolves.toMatchObject({ role: "teacher" });
+  });
+
+  it("refuses a moderated teacher", async () => {
+    findUnique.mockResolvedValue({ ...ONBOARDED, disabledAt: new Date() });
+    await expect(requireApiCallParticipant(req())).rejects.toMatchObject({
+      status: 403,
+      reason: "teacher-disabled",
+    });
+  });
+
+  it("resolves the student linked to the session and identifies her as a student", async () => {
+    findUnique.mockResolvedValue(null);
+    findStudent.mockResolvedValue(STUDENT);
+    await expect(requireApiCallParticipant(req())).resolves.toEqual({
+      role: "student",
+      student: STUDENT,
+    });
+    expect(findStudent).toHaveBeenCalledWith({ where: { authUserId: "t1" } });
+    expect(identifyServerUser).toHaveBeenCalledWith("s1", {
+      email: "ana@example.com",
+      role: "student",
+    });
+  });
+
+  it("refuses a request with no session as 401", async () => {
+    getSession.mockResolvedValue(null);
+    await expect(requireApiCallParticipant(req())).rejects.toMatchObject({ status: 401 });
+  });
+
+  it("refuses a signed-in user who is neither a teacher nor a linked student as 403", async () => {
+    findUnique.mockResolvedValue(null);
+    findStudent.mockResolvedValue(null);
+    await expect(requireApiCallParticipant(req())).rejects.toMatchObject({
+      status: 403,
+      reason: "no-participant-row",
+    });
+  });
+
+  it("refuses a moderated student row and identifies nobody", async () => {
+    findUnique.mockResolvedValue(null);
+    findStudent.mockResolvedValue({ ...STUDENT, disabledAt: new Date() });
+    await expect(requireApiCallParticipant(req())).rejects.toMatchObject({
+      status: 403,
+      reason: "student-disabled",
+    });
+    expect(identifyServerUser).not.toHaveBeenCalled();
   });
 });
 

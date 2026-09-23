@@ -3,9 +3,9 @@
 // `ApiAuthError` into the right status code, so each route file is a one-liner
 // around its handler.
 //
-// It survived a large route deletion because a web route still uses it
-// (`api/internal/captions/room-config`), and lost the two exports that went
-// with those routes: `json()` (unused) and `localeFromRequest()`.
+// It survived a large route deletion because web routes still use it (the
+// live-caption routes under `api/captions/`), and lost the two exports that
+// went with those routes: `json()` (unused) and `localeFromRequest()`.
 
 import { NextResponse } from "next/server";
 import { z, type ZodSchema } from "zod";

@@ -35,6 +35,27 @@ describe("rateLimit", () => {
     );
   });
 
+  // A route that pays a vendor by volume budgets the volume, not the calls.
+  it("spends `cost` from the allowance when one is given", async () => {
+    const opts = { scope: "test-cost", limit: 100, windowMs: 60_000 };
+    expect((await rateLimit("u", { ...opts, cost: 60 })).ok).toBe(true);
+    expect((await rateLimit("u", { ...opts, cost: 30 })).ok).toBe(true);
+    // 10 left: a call costing 11 is refused and spends nothing…
+    expect((await rateLimit("u", { ...opts, cost: 11 })).ok).toBe(false);
+    // …so one costing exactly what is left still fits.
+    expect((await rateLimit("u", { ...opts, cost: 10 })).ok).toBe(true);
+    expect((await rateLimit("u", { ...opts, cost: 1 })).ok).toBe(false);
+  });
+
+  it("refuses a first call that costs more than the whole allowance", async () => {
+    const opts = { scope: "test-cost", limit: 5, windowMs: 60_000 };
+    const res = await rateLimit("u2", { ...opts, cost: 6 });
+    expect(res.ok).toBe(false);
+    expect(res.retryAfterMs).toBeGreaterThan(0);
+    // It spent nothing: a normal call right after still passes.
+    expect((await rateLimit("u2", opts)).ok).toBe(true);
+  });
+
   it("re-fills after the window elapses", async () => {
     const opts = { scope: "test", limit: 1, windowMs: 10 };
     expect((await rateLimit("ip-1", opts)).ok).toBe(true);
@@ -69,6 +90,10 @@ describe("resolveRateLimitOptions", () => {
       limit: 11,
       windowMs: 90_000,
     });
+  });
+
+  it("carries a per-call cost through untouched", () => {
+    expect(resolveRateLimitOptions({ ...opts, cost: 42 })).toEqual({ ...opts, cost: 42 });
   });
 
   it("overrides the limit and the window independently", () => {

@@ -38,7 +38,6 @@ const WORKSPACES: ReadonlyArray<readonly [string, string]> = [
   ["spiralclass-web", "apps/web/package.json"],
   ["@spiralclass/shared", "packages/shared/package.json"],
   ["@spiralclass/livekit-activity-cli", "packages/livekit-activity-cli/package.json"],
-  ["@spiralclass/livekit-captions-agent", "packages/livekit-captions-agent/package.json"],
 ];
 
 const workspaceScripts = new Map<string, Set<string>>(

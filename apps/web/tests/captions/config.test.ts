@@ -1,5 +1,10 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { captionsConfigured, deepgramApiKey, liveCaptionsEnabled } from "@/lib/captions/config";
+import {
+  captionsConfigured,
+  deepgramApiKey,
+  googleTranslateApiKey,
+  liveCaptionsEnabled,
+} from "@/lib/captions/config";
 
 // `warnIfCaptionsMisconfigured` is once-guarded per module instance, so the
 // diagnostics suite re-imports the module fresh per test (resetModules) to get a
@@ -10,9 +15,10 @@ vi.mock("@/lib/logger", () => ({
   logger: () => ({ warn, info: vi.fn(), error: vi.fn(), debug: vi.fn() }),
 }));
 
-// The two-condition availability gate: both vendor keys present AND the explicit
-// enablement flag on. Mirrors the transcription gate — keys can be set while the
-// switch stays off (privacy/consent), so the feature must stay dormant until both.
+// The two-condition availability gate: the translation fallback's key present
+// AND the explicit enablement flag on (D-185). Mirrors the transcription gate —
+// the key can be set while the switch stays off (privacy/consent), so the
+// feature must stay dormant until both.
 
 afterEach(() => {
   vi.unstubAllEnvs();
@@ -55,32 +61,39 @@ describe("deepgramApiKey", () => {
   });
 });
 
+describe("googleTranslateApiKey", () => {
+  it("returns undefined when unset or blank", () => {
+    vi.stubEnv("GOOGLE_TRANSLATE_API_KEY", " ");
+    expect(googleTranslateApiKey()).toBeUndefined();
+  });
+
+  it("unwraps a quote-wrapped key, like every key this module reads", () => {
+    vi.stubEnv("GOOGLE_TRANSLATE_API_KEY", '"AIza-key"');
+    expect(googleTranslateApiKey()).toBe("AIza-key");
+  });
+});
+
 describe("captionsConfigured", () => {
-  it("needs both Deepgram and Anthropic keys", () => {
-    vi.stubEnv("DEEPGRAM_API_KEY", "dg");
-    vi.stubEnv("ANTHROPIC_API_KEY", "");
+  it("needs the Google Cloud Translation key", () => {
+    vi.stubEnv("GOOGLE_TRANSLATE_API_KEY", "");
     expect(captionsConfigured()).toBe(false);
-
-    vi.stubEnv("DEEPGRAM_API_KEY", "");
-    vi.stubEnv("ANTHROPIC_API_KEY", "an");
-    expect(captionsConfigured()).toBe(false);
-
-    vi.stubEnv("DEEPGRAM_API_KEY", "dg");
-    vi.stubEnv("ANTHROPIC_API_KEY", "an");
+    vi.stubEnv("GOOGLE_TRANSLATE_API_KEY", "AIza-key");
     expect(captionsConfigured()).toBe(true);
   });
 
-  it("still passes when ANTHROPIC_API_KEY is quote-wrapped — the other half of the copy-paste mistake fixed for DEEPGRAM_API_KEY, which made every /api/captions/translate call fail with a 502 even though captionsConfigured() (and liveCaptionsEnabled()) reported the feature as available", () => {
-    vi.stubEnv("DEEPGRAM_API_KEY", "dg");
-    vi.stubEnv("ANTHROPIC_API_KEY", '"an"');
+  // The retired design needed both; captions no longer call either vendor, and
+  // requiring them would keep a working feature dark on a deploy without them.
+  it("no longer needs Deepgram or Anthropic", () => {
+    vi.stubEnv("GOOGLE_TRANSLATE_API_KEY", "AIza-key");
+    vi.stubEnv("DEEPGRAM_API_KEY", "");
+    vi.stubEnv("ANTHROPIC_API_KEY", "");
     expect(captionsConfigured()).toBe(true);
   });
 });
 
 describe("liveCaptionsEnabled", () => {
-  it("stays off until the flag is on AND both vendors are configured", () => {
-    vi.stubEnv("DEEPGRAM_API_KEY", "dg");
-    vi.stubEnv("ANTHROPIC_API_KEY", "an");
+  it("stays off until the flag is on AND the key is configured", () => {
+    vi.stubEnv("GOOGLE_TRANSLATE_API_KEY", "AIza-key");
 
     vi.stubEnv("LIVE_CAPTIONS_ENABLED", "");
     expect(liveCaptionsEnabled()).toBe(false);
@@ -88,14 +101,13 @@ describe("liveCaptionsEnabled", () => {
     vi.stubEnv("LIVE_CAPTIONS_ENABLED", "1");
     expect(liveCaptionsEnabled()).toBe(true);
 
-    // Flag on but a vendor missing → still off.
-    vi.stubEnv("DEEPGRAM_API_KEY", "");
+    // Flag on but the key missing → still off.
+    vi.stubEnv("GOOGLE_TRANSLATE_API_KEY", "");
     expect(liveCaptionsEnabled()).toBe(false);
   });
 
   it("accepts the documented truthy flag spellings", () => {
-    vi.stubEnv("DEEPGRAM_API_KEY", "dg");
-    vi.stubEnv("ANTHROPIC_API_KEY", "an");
+    vi.stubEnv("GOOGLE_TRANSLATE_API_KEY", "AIza-key");
     for (const v of ["1", "true", "on", "TRUE", "On"]) {
       vi.stubEnv("LIVE_CAPTIONS_ENABLED", v);
       expect(liveCaptionsEnabled()).toBe(true);
@@ -107,43 +119,32 @@ describe("liveCaptionsEnabled", () => {
   });
 });
 
-// Diagnostics for the exact Vercel→Fly cutover failure: the flag survives the
-// migration (it lives in fly.toml [env]) but a vendor secret doesn't reach
-// `fly secrets`, so the feature is dark with no logged reason. captionsReadiness
-// reports per-dependency state (booleans only, never the key values) and
-// warnIfCaptionsMisconfigured emits one operator warning naming the missing var.
+// Diagnostics for the failure shape the Vercel→Fly cutover produced: the flag
+// reaches the new deploy but a secret doesn't, so the feature is dark with no
+// logged reason. captionsReadiness reports per-dependency state (booleans only,
+// never the key value) and warnIfCaptionsMisconfigured emits one operator
+// warning naming the missing var.
 describe("captionsReadiness", () => {
-  it("reports every dependency satisfied when the flag is on and both keys are present", async () => {
+  it("reports every dependency satisfied when the flag is on and the key is present", async () => {
     vi.stubEnv("LIVE_CAPTIONS_ENABLED", "1");
-    vi.stubEnv("DEEPGRAM_API_KEY", "dg");
-    vi.stubEnv("ANTHROPIC_API_KEY", "an");
+    vi.stubEnv("GOOGLE_TRANSLATE_API_KEY", "AIza-key");
     const { captionsReadiness } = await import("@/lib/captions/config");
     expect(captionsReadiness()).toEqual({
       flagOn: true,
-      deepgram: true,
-      anthropic: true,
+      googleTranslate: true,
       enabled: true,
       missing: [],
     });
   });
 
-  it("names DEEPGRAM_API_KEY as missing — the key that didn't cross the Fly cutover — while the flag and Anthropic are present", async () => {
+  it("names GOOGLE_TRANSLATE_API_KEY as missing while the flag is on", async () => {
     vi.stubEnv("LIVE_CAPTIONS_ENABLED", "1");
-    vi.stubEnv("DEEPGRAM_API_KEY", "");
-    vi.stubEnv("ANTHROPIC_API_KEY", "an");
+    vi.stubEnv("GOOGLE_TRANSLATE_API_KEY", "");
     const { captionsReadiness } = await import("@/lib/captions/config");
     const r = captionsReadiness();
     expect(r.enabled).toBe(false);
-    expect(r.deepgram).toBe(false);
-    expect(r.missing).toEqual(["DEEPGRAM_API_KEY"]);
-  });
-
-  it("lists both vendor keys when neither is set", async () => {
-    vi.stubEnv("LIVE_CAPTIONS_ENABLED", "1");
-    vi.stubEnv("DEEPGRAM_API_KEY", "");
-    vi.stubEnv("ANTHROPIC_API_KEY", "");
-    const { captionsReadiness } = await import("@/lib/captions/config");
-    expect(captionsReadiness().missing).toEqual(["DEEPGRAM_API_KEY", "ANTHROPIC_API_KEY"]);
+    expect(r.googleTranslate).toBe(false);
+    expect(r.missing).toEqual(["GOOGLE_TRANSLATE_API_KEY"]);
   });
 });
 
@@ -153,23 +154,21 @@ describe("warnIfCaptionsMisconfigured", () => {
     vi.resetModules();
   });
 
-  it("warns once, naming the missing key, when the flag is on but a vendor key is absent", async () => {
+  it("warns once, naming the missing key, when the flag is on but the key is absent", async () => {
     vi.stubEnv("LIVE_CAPTIONS_ENABLED", "1");
-    vi.stubEnv("DEEPGRAM_API_KEY", "");
-    vi.stubEnv("ANTHROPIC_API_KEY", "an");
+    vi.stubEnv("GOOGLE_TRANSLATE_API_KEY", "");
     const { warnIfCaptionsMisconfigured } = await import("@/lib/captions/config");
 
     warnIfCaptionsMisconfigured();
     warnIfCaptionsMisconfigured();
 
     expect(warn).toHaveBeenCalledTimes(1);
-    expect(warn.mock.calls[0][1]).toEqual({ missing: ["DEEPGRAM_API_KEY"] });
+    expect(warn.mock.calls[0][1]).toEqual({ missing: ["GOOGLE_TRANSLATE_API_KEY"] });
   });
 
   it("stays silent when captions are correctly configured", async () => {
     vi.stubEnv("LIVE_CAPTIONS_ENABLED", "1");
-    vi.stubEnv("DEEPGRAM_API_KEY", "dg");
-    vi.stubEnv("ANTHROPIC_API_KEY", "an");
+    vi.stubEnv("GOOGLE_TRANSLATE_API_KEY", "AIza-key");
     const { warnIfCaptionsMisconfigured } = await import("@/lib/captions/config");
     warnIfCaptionsMisconfigured();
     expect(warn).not.toHaveBeenCalled();
@@ -177,20 +176,18 @@ describe("warnIfCaptionsMisconfigured", () => {
 
   it("stays silent when the feature is deliberately off (flag unset) — a missing key is not a misconfig if nobody asked for captions", async () => {
     vi.stubEnv("LIVE_CAPTIONS_ENABLED", "");
-    vi.stubEnv("DEEPGRAM_API_KEY", "");
-    vi.stubEnv("ANTHROPIC_API_KEY", "");
+    vi.stubEnv("GOOGLE_TRANSLATE_API_KEY", "");
     const { warnIfCaptionsMisconfigured } = await import("@/lib/captions/config");
     warnIfCaptionsMisconfigured();
     expect(warn).not.toHaveBeenCalled();
   });
 
-  it("is triggered as a side effect of liveCaptionsEnabled() resolving to unavailable — the shared web+mobile chokepoint", async () => {
+  it("is triggered as a side effect of liveCaptionsEnabled() resolving to unavailable — the chokepoint every caption surface hits", async () => {
     vi.stubEnv("LIVE_CAPTIONS_ENABLED", "1");
-    vi.stubEnv("DEEPGRAM_API_KEY", "");
-    vi.stubEnv("ANTHROPIC_API_KEY", "an");
+    vi.stubEnv("GOOGLE_TRANSLATE_API_KEY", "");
     const { liveCaptionsEnabled } = await import("@/lib/captions/config");
     expect(liveCaptionsEnabled()).toBe(false);
     expect(warn).toHaveBeenCalledTimes(1);
-    expect(warn.mock.calls[0][1]).toEqual({ missing: ["DEEPGRAM_API_KEY"] });
+    expect(warn.mock.calls[0][1]).toEqual({ missing: ["GOOGLE_TRANSLATE_API_KEY"] });
   });
 });

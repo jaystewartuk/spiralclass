@@ -242,23 +242,16 @@ const serverSchema = z.object({
   DEEPGRAM_API_KEY: blankAsAbsent(z.string().min(1).optional()),
   ASSEMBLYAI_API_KEY: blankAsAbsent(z.string().min(1).optional()),
   LESSON_INSIGHTS_TRANSCRIPTION_ENABLED: blankAsAbsent(z.string().min(1).optional()),
-  // Live in-class captions (D-27): real-time Spanish→English subtitles. Reuses
-  // DEEPGRAM_API_KEY (streaming ASR) + ANTHROPIC_API_KEY (translation), so it
-  // adds no new vendor. LIVE_CAPTIONS_ENABLED is the kill-switch — the teacher's
-  // toggle stays hidden until it is on AND both keys are present (lib/captions/
-  // config.ts reads these straight from process.env). CAPTION_TRANSLATION_MODEL
-  // optionally overrides the (fast, cheap) translation model; defaults to Haiku.
+  // Live in-class captions (D-27, D-185). Speech is recognised in the
+  // participants' browsers; each finished utterance is translated on the device
+  // where the browser can, and otherwise by POST /api/captions/translate through
+  // Google Cloud Translation with GOOGLE_TRANSLATE_API_KEY — an API key
+  // restricted to that one API. LIVE_CAPTIONS_ENABLED is the kill-switch: the
+  // teacher's toggle stays hidden until it is on AND the key is present
+  // (lib/captions/config.ts reads both straight from process.env). Warn-only,
+  // like every vendor key.
   LIVE_CAPTIONS_ENABLED: blankAsAbsent(z.string().min(1).optional()),
-  CAPTION_TRANSLATION_MODEL: blankAsAbsent(z.string().min(1).optional()),
-  // Shared secret authenticating the self-hosted LiveKit captions Agent
-  // (packages/livekit-captions-agent, docs/architecture/
-  // LIVEKIT_CAPTIONS_AUDIT.md) when it calls back into
-  // /api/internal/captions/* for room config (consent/language/entitlement)
-  // and translation — a trusted server-to-server caller, not a browser
-  // session, so it authenticates via this header secret instead. Absent =
-  // those routes 404 (dark by default); must be set in both preview and
-  // production.
-  CAPTIONS_AGENT_SHARED_SECRET: blankAsAbsent(z.string().min(1).optional()),
+  GOOGLE_TRANSLATE_API_KEY: blankAsAbsent(z.string().min(1).optional()),
   // Class recording (LiveKit Egress). CLASS_RECORDING_ENABLED is the kill-switch
   // — OFF by default — so the teacher's Record control stays hidden and the
   // start is refused until it is on AND egress storage is configured
@@ -577,20 +570,6 @@ export function hasAnthropicCreds(): boolean {
 // supports effort.
 export function anthropicModel(): string {
   return serverEnv().ANTHROPIC_MODEL ?? "claude-sonnet-5";
-}
-
-// The Claude model used for live caption translation (D-27). A hot path — one
-// call per finished utterance — so the intent has always been fast, cheap
-// Haiku; as of D-87 the four short lesson-notes/intro-coach surfaces are Haiku
-// too, so this is no longer the odd one out (it kept its own env override).
-// Class-content compose stays on Sonnet 5 — it is long-form and passes
-// `effort`, which Haiku does not support. Was TEMPORARILY
-// defaulted to claude-opus-4-8 (2026-07-12) after the dated snapshot
-// claude-haiku-4-5-20251001 502'd for lacking model access; reverted to the
-// undated alias claude-haiku-4-5 once Haiku access was confirmed enabled.
-// Overridable via env either way.
-export function captionTranslationModel(): string {
-  return serverEnv().CAPTION_TRANSLATION_MODEL ?? "claude-haiku-4-5";
 }
 
 // ElevenLabs text-to-speech, for material podcast generation. Sanitized the
