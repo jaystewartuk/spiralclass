@@ -30,7 +30,7 @@
 #     warns on anything else (#102).
 # apps/web/tests/config/node-version.test.ts holds both, so moving past 24 fails
 # there, naming the reason, rather than at a production deploy.
-FROM node:24-slim@sha256:2fe369e969550cde8e867afc3fe370b260140cab4a23d467074295b42163d553 AS base
+FROM node:25-slim@sha256:81db02c4b671288a03915da9534dbd54f96d0e7c24d80ccc54f5b36b2e684370 AS base
 # Prisma's engine postinstall probes libssl to pick the right query-engine
 # binary; node:24-slim doesn't ship it, so without this it silently guesses
 # openssl-1.1.x, which can mismatch the engine actually bundled and fail at
