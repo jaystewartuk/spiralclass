@@ -13,9 +13,9 @@
   },
   "dependencies": {
     "@spiralclass/shared": "workspace:*",
-    "@anthropic-ai/sdk": "^0.124.0",
+    "@anthropic-ai/sdk": "^0.127.0",
     "@livekit/rtc-node": "^0.13.34",
-    "livekit-server-sdk": "^2.18.0",
+    "livekit-server-sdk": "^2.19.0",
     "ws": "^8.21.3"
   },
   "devDependencies": {
@@ -23,6 +23,6 @@
     "@types/ws": "^8.18.1",
     "tsx": "^4.23.13",
     "typescript": "^6.0.3",
-    "vitest": "^5.0.0"
+    "vitest": "^5.0.1"
   }
 }
