@@ -16,8 +16,8 @@
 // untrusted third party.
 //
 // `for` (see captions.ts's note): required on every message so a receiver
-// only ever acts on one addressed to itself, even if a non-human participant
-// (e.g. the captions Agent) is ever in the room.
+// only ever acts on one addressed to itself, even if a third participant is
+// ever in the room.
 //
 // ANSWER KEYS NEVER RIDE THIS CHANNEL. The trust model above covers "may the
 // receiver see this material at all" — it does NOT cover "may the receiver see

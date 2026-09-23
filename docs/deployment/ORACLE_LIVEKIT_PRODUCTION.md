@@ -29,22 +29,11 @@ this deployment operates under) and
 
 Read this before assuming any part of the box comes from the repo.
 
-| Layer                                      | How it works **today**                                                                                                                                                                                    | The plan                                                                               |
-| ------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
-| Compute, network, firewall, DNS            | Provisioned **by hand** on 2026-07-21. An OpenTofu module was written for it and never applied, then deleted ([D-139](../decisions/D-139.md)); `infra/oracle-box` is the current, also-unapplied attempt. | Apply it; the box becomes rebuildable from `tofu apply`.                               |
-| LiveKit / Egress / Caddy / Redis config    | Rendered onto the box **by hand** in `~/oracle-livekit-production/`. It has since drifted from `services/*.tftpl` (secrets moved into a box-local `.env`).                                                | Rendered by Tofu at apply time.                                                        |
-| Upstream images                            | `docker compose pull`, tracking `:latest`.                                                                                                                                                                | Unchanged, or pinned — open question.                                                  |
-| **Captions Agent** (only first-party code) | Built **on the box** from a real `main` git checkout at `~/agendaprofe`, image pinned by commit SHA — **D-108**.                                                                                          | CI-built arm64 image in GHCR, pulled by tag — `CAPTIONS_AGENT_DELIVERY.md` Pieces 1–3. |
-
-**The single biggest trap:** `services/docker-compose.livekit.yml.tftpl`
-declares `image: ghcr.io/…/agendaprofe-captions-agent:latest`, and **nothing
-has ever published that image**. Applying the module onto a rebuilt box would
-bring LiveKit up fine while the Agent silently fails to start — classes
-connect normally with no captions. That module is deleted ([D-139](../decisions/D-139.md)), so the trap is
-now only a reason never to resurrect it from git history without reading
-this first. On the live box the Agent is **built locally** from
-`/home/ubuntu/agendaprofe`, not pulled — see
-[`ORACLE_BOX_REBUILD.md`](./ORACLE_BOX_REBUILD.md).
+| Layer                                   | How it works **today**                                                                                                                                                                                    | The plan                                                 |
+| --------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------- |
+| Compute, network, firewall, DNS         | Provisioned **by hand** on 2026-07-21. An OpenTofu module was written for it and never applied, then deleted ([D-139](../decisions/D-139.md)); `infra/oracle-box` is the current, also-unapplied attempt. | Apply it; the box becomes rebuildable from `tofu apply`. |
+| LiveKit / Egress / Caddy / Redis config | Rendered onto the box **by hand** in `~/oracle-livekit-production/`. It has since drifted from `services/*.tftpl` (secrets moved into a box-local `.env`).                                                | Rendered by Tofu at apply time.                          |
+| Upstream images                         | `docker compose pull`, tracking `:latest`.                                                                                                                                                                | Unchanged, or pinned — open question.                    |
 
 **On the Tofu module's scope.** Everything the "Manual step" sections below
 originally had to be done by hand over SSH — the OCI security list, the host
@@ -115,6 +104,10 @@ All four services (`caddy`, `redis`, `livekit`, `egress`) run via one
 Tailscale-only; only the ports in the diagram above are open at the OCI
 security-list layer (see "Manual step 1" below) — this box's original
 hardening (its runbook was deleted by [D-164](../decisions/D-164.md)) is otherwise untouched.
+
+Live captions do not run on this box: they run in the participants' browsers
+([live-calls-video.md](../features/live-calls-video.md#live-captions),
+[D-185](../decisions/D-185.md)).
 
 ## What's app-side vs. box-side
 
@@ -344,148 +337,6 @@ docker compose logs -f livekit   # confirm no errors, watch for the TURN/redis c
 curl -sS https://livekit.spiralclass.com/   # once DNS+ports are live — should 200
 ```
 
-## Captions Agent — deploy & rollback (interim, 2026-07-29)
-
-The other four services are upstream images pulled by tag. The captions Agent
-(`packages/livekit-captions-agent`) is the **only first-party code on this
-box**, so it is the only thing that gets _built_ — `docker compose pull` does
-not cover it, and neither does the image-tag bump above.
-
-**Known, deliberate drift from the Tofu template.** `infra/oracle-runner/
-services/docker-compose.livekit.yml.tftpl` declares
-`image: ghcr.io/jaystewart-dev/agendaprofe-captions-agent:latest`. Nothing has
-ever published that image. Until the GHCR pipeline in
-`CAPTIONS_AGENT_DELIVERY.md`
-is built, the box's own `~/oracle-livekit-production/docker-compose.yml`
-instead carries a `build:` context plus a **pinned SHA tag**. Do not "fix"
-this drift by editing the template — when the box is next rebuilt from Tofu,
-the `build:` stanza goes away and `image:` becomes correct again.
-
-### Why the box has a git checkout
-
-Before 2026-07-29 the image was built from `/home/ubuntu/captions-agent-src`,
-a hand-copied partial source tree with **no `.git`** — so "is the box running
-current code?" could only be answered by hashing files over SSH. That is what
-turned a two-line bug into the 2026-07-28 captions outage.
-
-The box now has `~/agendaprofe`, a real checkout whose `git rev-parse HEAD`
-is a verifiable commit. **That path, and the `agendaprofe-captions-agent`
-image name below, are the PRE-RENAME ones** — the repo became `spiralclass`
-and the box's directory and image tag did not follow, so the compose file's
-`build.context` and `image:` both still say `agendaprofe`. This section said
-`~/spiralclass` until 2026-09-02, which is a directory that does not exist;
-following it costs you the whole mechanism described here, because the
-obvious recovery is to copy files up by hand — which is exactly the
-pre-D-108 state this section exists to prevent, and is what happened on
-2026-09-02. The repo is **private and the box holds no GitHub
-credential** — nothing is cloned from GitHub. Instead the operator's machine
-pushes to it over Tailscale SSH, into a repo configured with
-`receive.denyCurrentBranch=updateInstead` so the push updates the working tree
-directly (and refuses if that tree is ever dirty, which is the intended
-safety property). Commit SHAs survive the transport, so provenance is intact
-either way.
-
-Track **`main`**, not `production` (changed 2026-07-29 — D-108 shipped hours
-earlier saying the opposite; see its addendum for why that reversed). Three
-reasons:
-
-- **The production deploy does not ship the Agent.** `deploy-production.yml`
-  builds and deploys the web image only, and the box build is manual
-  regardless. Tracking `production` never bought synchrony with anything — it
-  only forced a full production gate and a `production` fast-forward for a
-  change production itself never deploys.
-- **This one box serves BOTH preview and production** (D-94). Preview clients
-  run `main`, so tracking `production` kept the Agent _behind_ half the
-  clients it serves.
-- Agent changes so far are box-internal lifecycle fixes (leaked workers, mic
-  re-handling, the rejoin race) that never touch the wire contract.
-
-> **The exception that still needs sequencing.** If a change alters the shared
-> caption wire contract (`packages/shared/src/captions.ts` — `CAPTION_TOPIC`,
-> `encodeCaption`, the `for` field) or the `captionsOn` attribute's meaning,
-> the Agent running ahead of production clients is a real hazard — a
-> mismatched contract is precisely what the 2026-07-28 outage was. Ship the
-> client change to production **first**, then the Agent.
-
-### Deploy
-
-```bash
-# 1. from your machine (adds the remote once: git remote add oraclebox \
-#    ubuntu@oracle-a1-runner:spiralclass)
-git push oraclebox origin/main:refs/heads/main
-
-# 2. on the box
-ssh ubuntu@oracle-a1-runner
-cd ~/agendaprofe && SHA=$(git rev-parse --short HEAD)
-docker build -f packages/livekit-captions-agent/Dockerfile \
-  -t agendaprofe-captions-agent:$SHA -t agendaprofe-captions-agent:latest .
-sed -i "s|agendaprofe-captions-agent:[a-z0-9]*|agendaprofe-captions-agent:$SHA|" \
-  ~/oracle-livekit-production/docker-compose.yml
-cd ~/oracle-livekit-production && docker compose up -d --no-build captions-agent
-```
-
-Expect **~9 minutes** on this box's 2 OCPUs — the `COPY node_modules` and
-image-export/unpack steps dominate (~74 s and ~127 s), not the pnpm install.
-Only the `captions-agent` container is recreated; the other four are
-untouched.
-
-Two things that will otherwise confuse you mid-build:
-
-- **BuildKit applies the two `-t` tags at different times.** It names
-  `:$SHA`, spends ~53 s _unpacking_, then names `:latest`. Seeing the SHA tag
-  appear does **not** mean the build finished, and a lagging `:latest` is not
-  a failure — wait for the `docker build` process to exit.
-- Always double-tag. The `:$SHA` tags are the entire rollback story (there is
-  no registry), and they survive both `docker image prune` and
-  `docker builder prune`; an untagged previous image does not.
-
-### Live-call interlock — check before every restart
-
-**Restarting the Agent kills captions for any call in progress**, and unlike
-a web deploy there is no graceful drain. Check first:
-
-```bash
-set -a; . ~/oracle-livekit-production/.env; set +a
-lk room list --url http://127.0.0.1:7880 \
-  --api-key "$LIVEKIT_API_KEY" --api-secret "$LIVEKIT_API_SECRET"
-```
-
-Safe to restart when **every room shows 0 publishers and at most 1
-participant** — the Agent joins as a real participant, so `1` means "the
-Agent and nobody else". A live class is 2+ participants with at least one
-publisher.
-
-Parsing this in a script has three traps, all of which will silently produce
-a wrong answer: `lk` prints a banner on **stderr** (so don't blindly strip
-the first line); the payload is `{"rooms": [...]}`, not a bare array; and it
-is protobuf JSON, which **omits zero-valued fields** — `numParticipants` and
-`numPublishers` are simply absent when 0, so default them rather than
-`KeyError`ing or, worse, treating absence as truthy. Make the guard fail
-_closed_: if parsing fails, abort the restart.
-
-### Rollback
-
-No rebuild and no network — point the tag back and recreate:
-
-```bash
-docker images agendaprofe-captions-agent          # the SHA tags are your history
-sed -i "s|agendaprofe-captions-agent:[a-z0-9]*|agendaprofe-captions-agent:<prev-sha>|" \
-  ~/oracle-livekit-production/docker-compose.yml
-cd ~/oracle-livekit-production && docker compose up -d --no-build captions-agent
-```
-
-### Verifying a deploy
-
-All of these should agree:
-
-1. `docker ps` — the running image tag is the SHA you just built.
-2. `git -C ~/agendaprofe rev-parse --short HEAD` — the same SHA.
-3. `grep agendaprofe-captions-agent ~/oracle-livekit-production/docker-compose.yml`
-   — the same SHA.
-4. First real class — one `captions_toggle_seen` from the teacher followed by
-   **two** `sync_deepgram` lines, one per identity. One line means the Agent
-   predates `19307f60` (the teacher-only toggle).
-
 ## Restart / health / logs
 
 - **Auto-restart:** every service is `restart: unless-stopped` — survives a
@@ -513,11 +364,6 @@ docker compose pull          # new livekit-server/egress/caddy/redis images
 docker compose up -d         # recreates changed containers, others untouched
 docker compose logs -f livekit egress   # confirm clean startup before walking away
 ```
-
-This covers the **four upstream images only**. The captions Agent is built
-locally from `~/agendaprofe`, so `pull` does not update it — see "Captions
-Agent — deploy & rollback" above, and check the live-call interlock there
-before any restart that includes it.
 
 Rollback: `docker compose down`, edit the image tags back to the previous
 known-good version, `docker compose up -d` again. No blue/green — a brief

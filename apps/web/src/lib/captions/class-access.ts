@@ -1,19 +1,24 @@
 import "server-only";
 import type { Booking, Prisma, Student, Teacher } from "@prisma/client";
-import { resolveCaptionDirection, type CaptionDirection } from "@spiralclass/shared";
+import {
+  recognitionLocale,
+  resolveCaptionDirection,
+  type CaptionDirection,
+  type CaptionSession,
+} from "@spiralclass/shared";
 import { prisma } from "@/lib/prisma";
 import { flushAnalytics, trackServerEvent } from "@/lib/analytics/posthog";
 import { captionsConsentOk } from "@/lib/captions/consent";
 
-// Class-booking caption language/consent resolution. Ordinary scheduled
-// classes are captioned server-side by the LiveKit Agent
-// (packages/livekit-captions-agent, docs/architecture/
-// the captions access review) — the per-viewer resolvers this file used to
-// export for the (now-deleted) client-driven token/translate routes are
-// gone; resolveClassCallRoomConfig below is the Agent's equivalent, needing
-// BOTH directions at once rather than a single session-scoped viewer.
+// Class-booking caption language/consent resolution. Captions run in the
+// participants' browsers (D-185), and every fact a browser needs to caption a
+// class — both directions' languages, the recognition locale, whether the
+// student has consented — is resolved here, server-side, for a caller who is
+// proven to be one of the booking's two participants. The client never
+// chooses a language: /api/captions/translate re-resolves the direction from
+// the booking on every call.
 type BookingWithLanguages = Booking & {
-  teacher: Pick<Teacher, "id" | "teachingLanguage">;
+  teacher: Pick<Teacher, "id" | "teachingLanguage" | "country">;
   student: Pick<Student, "nativeLanguage">;
 };
 
@@ -23,7 +28,7 @@ function findBookingWithLanguages(
   return prisma.booking.findFirst({
     where,
     include: {
-      teacher: { select: { id: true, teachingLanguage: true } },
+      teacher: { select: { id: true, teachingLanguage: true, country: true } },
       student: { select: { nativeLanguage: true } },
     },
   }) as Promise<BookingWithLanguages | null>;
@@ -32,8 +37,8 @@ function findBookingWithLanguages(
 // The caption direction for a role on a booking: a booking-level override, if
 // the teacher set one for this class, else the teacher/student's own default
 // language. Live-read every call — the override is NOT snapshotted, so a
-// mid-day language change takes effect on the caller's next join (see the
-// schema comment on Booking.teacherLanguageOverride).
+// mid-day language change takes effect on the next caption config poll (see
+// the schema comment on Booking.teacherLanguageOverride).
 function directionForBooking(
   booking: BookingWithLanguages,
   role: "teacher" | "student",
@@ -45,8 +50,8 @@ function directionForBooking(
   });
 }
 
-// Whether THIS viewer's own mic may be published to ASR (docs/architecture/
-// LIVEKIT_CAPTIONS_AUDIT.md P0). Only the student side is gated — a teacher's
+// Whether a participant's speech may be captioned at all — whichever browser
+// would recognise it (D-22, D-185). Only the student side is gated — a teacher's
 // own audio has no per-student consent record to check (covered instead by
 // the Terms of Service + the in-call disclosure). Missing TeacherStudent row
 // (shouldn't happen for a resolved booking, but fail closed if it does) reads
@@ -64,36 +69,37 @@ export async function captionsPublishConsentOk(
   return captionsConsentOk(pairing);
 }
 
-// Room-config resolution for the server-side captions Agent
-// (packages/livekit-captions-agent, docs/architecture/
-// the captions access review): there's no single "viewer" here — the Agent
-// needs BOTH directions (it transcribes and translates both parties) plus
-// the student consent check, all in one call, keyed only by bookingId (which
-// it recovers from the LiveKit room name via bookingIdFromCallRoom). Reuses
-// the same findBookingWithLanguages/directionForBooking/
-// captionsPublishConsentOk this file already has.
-export type ClassCallRoomConfig = {
-  bookingId: string;
-  teacherId: string;
-  studentId: string;
-  teacherDirection: CaptionDirection;
-  studentDirection: CaptionDirection;
-  studentCaptionsAllowed: boolean;
-};
+// Who is asking, proven by the route's session gate: the teacher by her own
+// id, a student by every row her sign-in owns (studentIdentityIds — one
+// person studying with two teachers has a row per teacher, and the booking
+// may sit on any of them).
+export type CaptionCaller =
+  { role: "teacher"; teacherId: string } | { role: "student"; studentIds: string[] };
 
-export async function resolveClassCallRoomConfig(
+export async function resolveCaptionSession(
   bookingId: string,
-): Promise<ClassCallRoomConfig | null> {
-  const booking = await findBookingWithLanguages({ id: bookingId });
+  caller: CaptionCaller,
+): Promise<CaptionSession | null> {
+  // Scoped to the caller: a booking she is not a party to resolves to null,
+  // exactly like one that does not exist.
+  const booking = await findBookingWithLanguages(
+    caller.role === "teacher"
+      ? { id: bookingId, teacherId: caller.teacherId }
+      : { id: bookingId, studentId: { in: caller.studentIds } },
+  );
   if (!booking) return null;
-  const studentCaptionsAllowed = await captionsPublishConsentOk(booking, "student");
+  const teacherDirection = directionForBooking(booking, "teacher");
+  const studentDirection = directionForBooking(booking, "student");
   return {
     bookingId: booking.id,
-    teacherId: booking.teacherId,
-    studentId: booking.studentId,
-    teacherDirection: directionForBooking(booking, "teacher"),
-    studentDirection: directionForBooking(booking, "student"),
-    studentCaptionsAllowed,
+    role: caller.role,
+    teacherIdentity: booking.teacherId,
+    directions: { teacher: teacherDirection, student: studentDirection },
+    recognitionLocales: {
+      teacher: recognitionLocale(teacherDirection.source, booking.teacher.country),
+      student: recognitionLocale(studentDirection.source),
+    },
+    studentConsent: await captionsPublishConsentOk(booking, "student"),
   };
 }
 

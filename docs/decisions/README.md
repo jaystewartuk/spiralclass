@@ -71,7 +71,7 @@ another way" about anything that still exists.
   both reversed by [D-40](./D-40.md)).
 
 **Numbering is never reused and never renumbered**, so `D-01` is still the
-first decision and `D-183` the most recent. A gap means a record was removed,
+first decision and `D-185` the most recent. A gap means a record was removed,
 not that one is missing.
 
 **Everything kept is unedited**, except where a record named an account
@@ -231,6 +231,7 @@ on it.
 | [D-134](./D-134.md) | The media host goes behind Cloudflare's proxy, after one teacher's iPhone could not join   |
 | [D-135](./D-135.md) | Recording becomes audio-only: the first real class produced an 846 MB file                 |
 | [D-182](./D-182.md) | Production goes back to LiveKit Cloud while Oracle refuses to rebuild the box              |
+| [D-185](./D-185.md) | **Captions move into the browsers**, and a computer in the call covers a phone that cannot |
 
 ### The lesson-AI pipeline, and the consent that gates it
 
@@ -471,9 +472,9 @@ records removed before publication — see [What is not here](#what-is-not-here)
 | [D-97](./D-97.md)   | Flashcards, speaking-time analytics, derived-offset bookmarks         | Active                               |
 | [D-99](./D-99.md)   | Platform billing currency MXN → GBP                                   | Active                               |
 | [D-104](./D-104.md) | Public listing gates on Marketplace Ready                             | Active                               |
-| [D-106](./D-106.md) | Captions move to a server-side LiveKit agent                          | Active                               |
+| [D-106](./D-106.md) | Captions move to a server-side LiveKit agent                          | Superseded by D-185                  |
 | [D-107](./D-107.md) | Materials opens on a level picker                                     | Active                               |
-| [D-108](./D-108.md) | The captions agent ships from a checkout on the box                   | Active (interim)                     |
+| [D-108](./D-108.md) | The captions agent ships from a checkout on the box                   | Superseded by D-185                  |
 | [D-110](./D-110.md) | One board in `hq`; this repository carries no backlog                 | Active (location → D-172)            |
 | [D-111](./D-111.md) | Package guest booking is "pick your first class"                      | Decided; not built                   |
 | [D-112](./D-112.md) | Teaching language asked at onboarding                                 | Active                               |
@@ -538,6 +539,7 @@ records removed before publication — see [What is not here](#what-is-not-here)
 | [D-182](./D-182.md) | Production video back on LiveKit Cloud, the box having no capacity    | Active (reverses D-94's first half)  |
 | [D-183](./D-183.md) | The Oracle tenancy goes Pay As You Go; Always Free ceilings now bill  | Active                               |
 | [D-184](./D-184.md) | Cloud Run serves production; Fly is retired                           | Active (revisits D-150's premise)    |
+| [D-185](./D-185.md) | Live captions run in the browsers; a computer covers a phone          | Active (supersedes D-106, D-108)     |
 
 ---
 

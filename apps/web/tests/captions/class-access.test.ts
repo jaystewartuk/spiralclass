@@ -3,10 +3,11 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 // lib/captions/class-access.ts sat at ~5% line coverage while owning two
 // properties that are expensive to get wrong:
 //
-//   1. WHOSE MIC MAY REACH A THIRD-PARTY ASR PROVIDER. A student's live audio
-//      is streamed out during an ordinary class, and for a minor that requires
-//      a guardian's recorded consent. The gate has to fail CLOSED — a missing
-//      pairing row must read as "no consent", never as "sure, go ahead".
+//   1. WHOSE SPEECH MAY BE CAPTIONED. A student's live speech is recognised
+//      by a browser vendor's speech service during an ordinary class, and for
+//      a minor that requires a guardian's recorded consent. The gate has to
+//      fail CLOSED — a missing pairing row must read as "no consent", never as
+//      "sure, go ahead".
 //   2. TENANT SCOPING on the booking-language override, which is a write plus
 //      an audit row. With no RLS behind it, the `teacherId` in that `where` is
 //      the entire boundary.
@@ -42,7 +43,7 @@ vi.mock("@/lib/analytics/posthog", () => ({
 import {
   applyBookingLanguageOverride,
   captionsPublishConsentOk,
-  resolveClassCallRoomConfig,
+  resolveCaptionSession,
 } from "@/lib/captions/class-access";
 
 const BOOKING = { teacherId: "t1", studentId: "s1" };
@@ -120,75 +121,109 @@ describe("captionsPublishConsentOk", () => {
   });
 });
 
-describe("resolveClassCallRoomConfig", () => {
+describe("resolveCaptionSession", () => {
   const bookingRow = (overrides: Record<string, unknown> = {}) => ({
     id: "b1",
     teacherId: "t1",
     studentId: "s1",
     teacherLanguageOverride: null,
     studentLanguageOverride: null,
-    teacher: { id: "t1", teachingLanguage: "en" },
-    student: { nativeLanguage: "es" },
+    teacher: { id: "t1", teachingLanguage: "es", country: "MX" },
+    student: { nativeLanguage: "en" },
     ...overrides,
   });
+  const TEACHER = { role: "teacher", teacherId: "t1" } as const;
+  const STUDENT = { role: "student" as const, studentIds: ["s1", "s1-sibling"] };
 
-  it("returns null for an unknown booking", async () => {
+  it("returns null for a booking the caller is not a party to", async () => {
     bookingFindFirst.mockResolvedValue(null);
-
-    expect(await resolveClassCallRoomConfig("nope")).toBeNull();
+    expect(await resolveCaptionSession("nope", TEACHER)).toBeNull();
   });
 
-  it("resolves BOTH directions from the parties' default languages", async () => {
-    // The Agent transcribes and translates both sides, so it needs the pair —
-    // teacher speaks en→es, student speaks es→en.
+  // The tenant boundary: with no RLS, the party filter in this `where` is the
+  // only thing between one teacher's session and another teacher's class.
+  it("scopes the lookup to the teacher's own bookings", async () => {
+    bookingFindFirst.mockResolvedValue(null);
+    await resolveCaptionSession("b1", TEACHER);
+    expect(bookingFindFirst).toHaveBeenCalledWith(
+      expect.objectContaining({ where: { id: "b1", teacherId: "t1" } }),
+    );
+  });
+
+  it("scopes a student's lookup to every row her sign-in owns", async () => {
+    bookingFindFirst.mockResolvedValue(null);
+    await resolveCaptionSession("b1", STUDENT);
+    expect(bookingFindFirst).toHaveBeenCalledWith(
+      expect.objectContaining({ where: { id: "b1", studentId: { in: ["s1", "s1-sibling"] } } }),
+    );
+  });
+
+  it("resolves both speakers' directions from the parties' default languages", async () => {
     bookingFindFirst.mockResolvedValue(bookingRow());
     teacherStudentFindUnique.mockResolvedValue(null);
 
-    const config = await resolveClassCallRoomConfig("b1");
-
-    expect(config).toMatchObject({
+    expect(await resolveCaptionSession("b1", TEACHER)).toMatchObject({
       bookingId: "b1",
-      teacherDirection: { source: "en", target: "es" },
-      studentDirection: { source: "es", target: "en" },
+      role: "teacher",
+      teacherIdentity: "t1",
+      directions: {
+        teacher: { source: "es", target: "en" },
+        student: { source: "en", target: "es" },
+      },
     });
   });
 
   it("prefers the per-booking language override over the party's default", async () => {
-    // Live-read, never snapshotted — a mid-day language change takes effect on
-    // the next join.
+    // Live-read, never snapshotted — a mid-day change takes effect on the
+    // next config poll.
     bookingFindFirst.mockResolvedValue(
       bookingRow({ teacherLanguageOverride: "fr", studentLanguageOverride: "de" }),
     );
     teacherStudentFindUnique.mockResolvedValue(null);
 
-    const config = await resolveClassCallRoomConfig("b1");
-
-    expect(config).toMatchObject({
-      teacherDirection: { source: "fr", target: "de" },
-      studentDirection: { source: "de", target: "fr" },
+    expect(await resolveCaptionSession("b1", STUDENT)).toMatchObject({
+      role: "student",
+      directions: {
+        teacher: { source: "fr", target: "de" },
+        student: { source: "de", target: "fr" },
+      },
     });
   });
 
-  it("carries the student consent verdict through to the Agent", async () => {
+  it("recognises the teacher in her country's variant and the student in the bare language", async () => {
+    bookingFindFirst.mockResolvedValue(bookingRow());
+    teacherStudentFindUnique.mockResolvedValue(null);
+
+    expect((await resolveCaptionSession("b1", TEACHER))?.recognitionLocales).toEqual({
+      teacher: "es-MX",
+      student: "en",
+    });
+  });
+
+  it("falls back to the bare language for a teacher with no country yet", async () => {
+    bookingFindFirst.mockResolvedValue(
+      bookingRow({ teacher: { id: "t1", teachingLanguage: "es", country: null } }),
+    );
+    teacherStudentFindUnique.mockResolvedValue(null);
+
+    expect((await resolveCaptionSession("b1", TEACHER))?.recognitionLocales.teacher).toBe("es");
+  });
+
+  it("carries the student consent verdict through, for either caller", async () => {
     bookingFindFirst.mockResolvedValue(bookingRow());
     teacherStudentFindUnique.mockResolvedValue({
       isMinor: false,
       captionsConsentAt: new Date(),
       captionsGuardianConsentAt: null,
     });
-
-    expect(await resolveClassCallRoomConfig("b1")).toMatchObject({
-      studentCaptionsAllowed: true,
-    });
+    expect(await resolveCaptionSession("b1", TEACHER)).toMatchObject({ studentConsent: true });
+    expect(await resolveCaptionSession("b1", STUDENT)).toMatchObject({ studentConsent: true });
   });
 
-  it("reports studentCaptionsAllowed false when consent is absent", async () => {
+  it("reports no consent when the pairing has none", async () => {
     bookingFindFirst.mockResolvedValue(bookingRow());
     teacherStudentFindUnique.mockResolvedValue(null);
-
-    expect(await resolveClassCallRoomConfig("b1")).toMatchObject({
-      studentCaptionsAllowed: false,
-    });
+    expect(await resolveCaptionSession("b1", TEACHER)).toMatchObject({ studentConsent: false });
   });
 });
 

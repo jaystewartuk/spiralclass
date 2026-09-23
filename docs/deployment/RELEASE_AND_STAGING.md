@@ -74,16 +74,6 @@ recent revisions, then `gcloud run services update-traffic web --region us-east4
 backwards; roll forward to a new commit or re-point at a previous revision
 instead. Only the five newest images are kept, so that is the rollback depth.
 
-**Captions Agent (self-hosted Oracle box):** not covered by any of the above —
-it does not ship through Cloud Run or `pnpm promote`. Its images are built on the box
-and tagged `spiralclass-captions-agent:<sha>`, so rollback is repointing the
-pinned tag in `~/oracle-livekit-production/docker-compose.yml` and
-`docker compose up -d --no-build captions-agent` — no rebuild, no network.
-**Check the live-call interlock first**: restarting the Agent kills captions
-for any class in progress. Full procedure in
-[`ORACLE_LIVEKIT_PRODUCTION.md`](./ORACLE_LIVEKIT_PRODUCTION.md)
-§"Captions Agent — deploy & rollback".
-
 **This only rolls back code, never the database.** A code rollback does not
 undo a migration or bad data change. `scripts/database-deploy.sh` checkpoints
 the Neon `production` branch before every production migration (D-95) —

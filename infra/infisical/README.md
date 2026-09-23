@@ -89,16 +89,13 @@ provision the Oracle box) — credentials you'd otherwise `export`
 by hand every session. They are **not** app secrets; the running app never
 reads them.
 
-| Key                                   | Read by                                                                                                                                                                | What it is                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
-| ------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `CLOUDFLARE_API_TOKEN`                | the `cloudflare` provider                                                                                                                                              | account-scoped provider token (`infra/cloudflare`, `infra/cloudflare-r2`)                                                                                                                                                                                                                                                                                                                                                                                                                                        |
-| `AWS_ACCESS_KEY_ID`                   | OpenTofu's `s3` state backend                                                                                                                                          | `agendaprofe-tofu-state` R2 access key id                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
-| `AWS_SECRET_ACCESS_KEY`               | OpenTofu's `s3` state backend                                                                                                                                          | `agendaprofe-tofu-state` R2 secret                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
-| `TF_VAR_tailscale_authkey_oracle`     | hand-copied into the box's `.env`/config during a rebuild (D-139 — was a Tofu `TF_VAR_*` binding until `infra/oracle-runner` was deleted)                              | Tailscale auth key, from Tailscale admin console → Settings → Keys. **Reusable ON, Ephemeral OFF** (long-lived box, never routinely destroyed — ephemeral would risk Tailscale pruning it after ~30-60min offline, which a slow reboot could exceed). See the rotation runbook (kept privately — see `docs/security.md`)                                                                                                                                                                                         |
-| `TF_VAR_livekit_api_secret`           | hand-copied into the box's `.env` (D-139 — was a Tofu `TF_VAR_*` binding; interpolated into `livekit.yaml`/`egress.yaml`/the `captions-agent` compose service)         | LiveKit API secret — the genuinely sensitive half of the box's key pair (signs/verifies tokens). Must exactly match the app-side `LIVEKIT_API_SECRET` (this same project's `preview`/`production` environments) — see the rotation runbook (kept privately — see `docs/security.md`) for the full rotation coupling. The paired, non-secret key **id** (`LIVEKIT_API_KEY`) is deliberately NOT here — it is read straight from the committed `config/env/production.runtime.env` instead, so the id has one home |
-| `TF_VAR_deepgram_api_key`             | hand-copied into the box's `.env` (D-139 — was a Tofu `TF_VAR_*` binding; the captions Agent's server-side Deepgram STT calls, D-106)                                  | Deepgram API key — console.deepgram.com → API Keys. Doesn't strictly have to equal the app-side `DEEPGRAM_API_KEY` below, but reusing the same value avoids provisioning a second key for no reason                                                                                                                                                                                                                                                                                                              |
-| `TF_VAR_captions_agent_shared_secret` | hand-copied into the box's `.env` (D-139 — was a Tofu `TF_VAR_*` binding; the captions Agent's auth to `apps/web`'s `/api/internal/captions/room-config` route, D-106) | Self-generated (`openssl rand -hex 32` or equivalent). Must exactly match `CAPTIONS_AGENT_SHARED_SECRET` in this project's `production` environment (below) — a mismatch 404s the Agent's calls (the route is dark-by-default on failure, `apps/web/src/lib/captions/internal-auth.ts`)                                                                                                                                                                                                                          |
-| `TF_VAR_anthropic_api_key`            | hand-copied into the box's `.env` (D-139 — was a Tofu `TF_VAR_*` binding; the captions Agent's own direct Anthropic translate call, D-106 addendum 2026-07-26)         | console.anthropic.com → Settings → API Keys. Doesn't strictly have to equal the app-side `ANTHROPIC_API_KEY` below, but reusing the same value avoids provisioning a second key for no reason                                                                                                                                                                                                                                                                                                                    |
+| Key                               | Read by                                                                                                                                   | What it is                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| --------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `CLOUDFLARE_API_TOKEN`            | the `cloudflare` provider                                                                                                                 | account-scoped provider token (`infra/cloudflare`, `infra/cloudflare-r2`)                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| `AWS_ACCESS_KEY_ID`               | OpenTofu's `s3` state backend                                                                                                             | `agendaprofe-tofu-state` R2 access key id                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| `AWS_SECRET_ACCESS_KEY`           | OpenTofu's `s3` state backend                                                                                                             | `agendaprofe-tofu-state` R2 secret                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| `TF_VAR_tailscale_authkey_oracle` | hand-copied into the box's `.env`/config during a rebuild (D-139 — was a Tofu `TF_VAR_*` binding until `infra/oracle-runner` was deleted) | Tailscale auth key, from Tailscale admin console → Settings → Keys. **Reusable ON, Ephemeral OFF** (long-lived box, never routinely destroyed — ephemeral would risk Tailscale pruning it after ~30-60min offline, which a slow reboot could exceed). See the rotation runbook (kept privately — see `docs/security.md`)                                                                                                                                                                                         |
+| `TF_VAR_livekit_api_secret`       | hand-copied onto the box (D-139 — was a Tofu `TF_VAR_*` binding; interpolated into `livekit.yaml`/`egress.yaml`)                          | LiveKit API secret — the genuinely sensitive half of the box's key pair (signs/verifies tokens). Must exactly match the app-side `LIVEKIT_API_SECRET` (this same project's `preview`/`production` environments) — see the rotation runbook (kept privately — see `docs/security.md`) for the full rotation coupling. The paired, non-secret key **id** (`LIVEKIT_API_KEY`) is deliberately NOT here — it is read straight from the committed `config/env/production.runtime.env` instead, so the id has one home |
 
 Every key name in this table must match exactly what its consuming
 provider/SDK expects — `infisical run --env=infra --` injects secrets under
@@ -222,7 +219,6 @@ DEEPGRAM_API_KEY
 ASSEMBLYAI_API_KEY
 AZURE_SPEECH_KEY
 FIELD_ENCRYPTION_KEY
-CAPTIONS_AGENT_SHARED_SECRET
 GEMINI_VERTEX_SERVICE_ACCOUNT_KEY_BASE64
 VAPID_PUBLIC_KEY
 VAPID_PRIVATE_KEY
@@ -260,12 +256,6 @@ VAPID_SUBJECT
 - `VAPID_SUBJECT` — a `mailto:` or `https:` URL identifying the application
   server, so a push service has someone to contact about a misbehaving one.
   Required by the VAPID spec; goes to push services, not to users.
-- `CAPTIONS_AGENT_SHARED_SECRET` (D-106) — `openssl rand -hex 32` or
-  equivalent. **`production` only** — the captions Agent's
-  `APP_INTERNAL_BASE_URL` is hardcoded to production, so there's no
-  `preview` counterpart to keep in sync. Must exactly match
-  `TF_VAR_captions_agent_shared_secret` in this project's `infra`
-  environment (above) — see the rotation runbook (kept privately — see `docs/security.md`).
 
 **Stripe** (Dashboard → Developers — use **test-mode** keys for preview, per
 this repo's preview convention):
@@ -444,7 +434,7 @@ are real `env.ts` secrets read by `apps/web`.
 `apps/web/src`, not just `env.ts`'s declared schema** (this catches anything
 read directly off `process.env` that `env.ts` doesn't surface): added
 `DEEPGRAM_API_KEY`, `ASSEMBLYAI_API_KEY`, `AZURE_SPEECH_KEY`/
-`AZURE_SPEECH_REGION` (live-captions/pronunciation-insights transcription
+`AZURE_SPEECH_REGION` (transcription/pronunciation-insights
 backends — real credentials, `env.ts` marks them optional and the features
 degrade without them, same as Stripe/LiveKit above).
 
@@ -457,11 +447,11 @@ board** — a template that no longer names a secret does not remove it from an
 environment that already has it, and until then it is a live credential nothing
 uses, which is the worst state for one to be in.
 
-- **`DEEPGRAM_API_KEY` was live on Fly preview** (confirmed 2026-07-17), with
-  `LIVE_CAPTIONS_ENABLED=1` and `ANTHROPIC_API_KEY` beside it. An earlier
-  revision of this note said Deepgram was "in the code, not currently live" —
-  that was stale; do not use it to conclude captions are dark for want of the
-  key.
+- **`DEEPGRAM_API_KEY` was live on Fly preview** (confirmed 2026-07-17). It no
+  longer has anything to do with live captions: since
+  [D-185](../../docs/decisions/D-185.md) those run in the browser and need
+  `GOOGLE_TRANSLATE_API_KEY` for their server-side translation fallback.
+  Deepgram backs intro-video coaching and post-class transcription.
 - `ASSEMBLYAI_API_KEY` and `AZURE_SPEECH_KEY`/`AZURE_SPEECH_REGION` back the
   separate transcription/pronunciation-insights features and their production
   status is not vouched for here — check Infisical `production` before
@@ -482,8 +472,7 @@ their unset state is today's live behavior) into `config/env/*.runtime.env`
 instead, which is plain, version-controlled, and diff-reviewable: `CSP_ENFORCE`,
 `LESSON_INSIGHTS_TRANSCRIPTION_ENABLED`,
 `LESSON_INSIGHTS_PRONUNCIATION_ENABLED`, `LIVE_CAPTIONS_ENABLED`,
-`STRIPE_TAX_ENABLED`, `ANTHROPIC_MODEL` and
-`CAPTION_TRANSLATION_MODEL`. See those files' comments for each
+`STRIPE_TAX_ENABLED` and `ANTHROPIC_MODEL`. See those files' comments for each
 var's current default and what enabling it actually does — uncommenting one
 is a real behavior change on next deploy, review it like any other code
 change. `NEXT_PUBLIC_SUPPORT_WHATSAPP` is not in Infisical at all: it is

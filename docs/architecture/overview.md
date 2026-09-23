@@ -84,13 +84,6 @@ not.
 It still carries wire types for a deleted route tree. They are inert and typed,
 and sweeping them is its own change.
 
-### `packages/livekit-captions-agent` — a separate process
-
-A server-side LiveKit worker: it joins a room, streams audio to speech-to-text,
-translates, and publishes captions back into the room as a data track. It is
-deployed onto the LiveKit box, not into the web application, and is imported by
-neither client.
-
 ### `packages/livekit-activity-cli` — an operator tool
 
 A small standalone CLI for inspecting room and participant activity. Not
@@ -189,9 +182,9 @@ graph LR
     LK -- webhook --> W
     LK --> EG["Egress<br/>room-composite"]
     EG --> R2[("Cloudflare R2")]
-    LK <--> CA["captions agent<br/>(separate process)"]
-    CA --> STT["Deepgram STT"]
-    CA --> TR["Claude translation"]
+    T -. "caption lines, recognised<br/>in the browser" .-> LK
+    T -- "caption translation<br/>(when not on the device)" --> W
+    W --> GT["Google Cloud Translation"]
     R2 -- "lesson.audio.ready" --> IN["Inngest pipeline"]
     IN --> INS["transcript → focus areas → brief"]
 ```
@@ -202,9 +195,12 @@ the self-hosted box changed two configuration values and zero lines of
 application code.
 
 Recording is room-composite Egress writing straight to R2 with per-request
-credentials. Captions are ephemeral — streamed, translated, published into the
-room, never stored — which is why they sit outside the retention rules that
-govern transcription.
+credentials. Captions are ephemeral — recognised in a participant's browser,
+translated on the device or through the app, published into the room, never
+stored — which is why they sit outside the retention rules that govern
+transcription. Which browser recognises whom, and why, is
+[D-185](../decisions/D-185.md); the behaviour is
+[live-calls-video.md](../features/live-calls-video.md).
 
 Lesson insights are **derive-then-discard**: consented per-speaker audio is
 captured, transcribed, turned into focus areas and a brief, and the audio is

@@ -229,9 +229,12 @@ turned it off by hand.
 
 The box builds nothing.
 
-⚠️ **Two images, not three. The production web app is not on this box** — it
-is on Cloud Run and `deploy-production.yml` ships it, unchanged, throughout
-this procedure. Do not push it here.
+⚠️ **One image, the preview web app. The production web app is not on this
+box** — it is on Cloud Run and `deploy-production.yml` ships it, unchanged,
+throughout this procedure. Do not push it here. Nor is there a caption image
+any more: live captions run in the participants' browsers
+([live-calls-video.md](../../docs/features/live-calls-video.md#live-captions),
+[D-185](../../docs/decisions/D-185.md)).
 
 ⚠️ **Use the same tag everywhere.** The images built on 2026-09-04 carry both
 a commit-SHA tag and `:latest`, and the capture's own `verify-capture.sh`
@@ -251,12 +254,10 @@ and PostHog key in its browser bundle.
 
 ```bash
 WEB_PREVIEW=spiralclass-web-preview:latest
-CAP=agendaprofe-captions-agent:latest
 
-./scripts/oracle-push-images.sh "$WEB_PREVIEW" "$CAP"
+./scripts/oracle-push-images.sh "$WEB_PREVIEW"
 
 export APP_IMAGE_PREVIEW="$WEB_PREVIEW"
-export CAPTIONS_AGENT_IMAGE="$CAP"
 ./scripts/oracle-deploy.sh --restore-caddy
 ```
 
@@ -347,9 +348,8 @@ the whole point of doing it in this order.
   refuses to export a `__LOCAL__` and the app boots clean without sign-in,
   checkout or LiveKit. Do not read a quiet boot as a passing one.
 - **The callback into production, which now leaves the box.** livekit-server's
-  webhook and the captions agent both post to `https://spiralclass.com`, on
-  Cloud Run, through DNS-only Cloudflare records — the path the 2026-08-30
-  outage broke. The deploy script probes it
+  webhook posts to `https://spiralclass.com`, on Cloud Run, through DNS-only
+  Cloudflare records — the path the 2026-08-30 outage broke. The deploy script probes it
   and **fails on any 3xx**; run it by hand too, since it costs one command:
 
   ```bash
@@ -358,10 +358,10 @@ the whole point of doing it in this order.
   ```
 
   **401 is the pass** — the route was reached and rejected an unsigned body.
-  ⚠️ Anything in the 3xx range is the 2026-08-30 outage: a 301 turns the
-  agent's POST into a GET, it gets a 405, `discovery.ts` starts no RoomWorker,
-  and classes run with captions silently dead while livekit-server's log says
-  `sent webhook`. Do not carry on past a redirect; fix the hostname.
+  ⚠️ Anything in the 3xx range is the 2026-08-30 outage: the webhooks never
+  reach the app — no recording is finalized, no lesson-insight job starts —
+  while livekit-server's log says `sent webhook`. Do not carry on past a
+  redirect; fix the hostname.
 
 - **PREVIEW's own route to LiveKit.** `LIVEKIT_URL` is
   `wss://livekit.spiralclass.com` and can never be loopback — the same value is

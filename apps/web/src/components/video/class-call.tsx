@@ -45,6 +45,7 @@ import { Button } from "@/components/ui/button";
 import { guardAudioPlaybackResume } from "@/lib/video/audio-playback";
 import { startCallRecording, stopCallRecording } from "@/app/actions/call-recording";
 import { useCaptionFeed, useRoomCaptionsEnabled } from "@/lib/captions/use-caption-feed";
+import { useBrowserCaptions } from "@/lib/captions/use-browser-captions";
 import { useCaptionPreferences } from "@/lib/captions/use-caption-preferences";
 import {
   CAPTIONS_NOTICE_STORAGE_KEY,
@@ -65,7 +66,7 @@ import {
   CALL_MATERIAL_OPEN_TOPIC,
   encodeCallMaterialOpen,
   decodeCallMaterialOpen,
-  humanRemotes,
+  CAPTIONS_ON_ATTRIBUTE,
   clampSelfViewPosition,
   isTapGesture,
   type CallMaterial,
@@ -162,12 +163,11 @@ export function ClassCall({
   canRecord?: boolean;
   // Teacher-only: shows the single Subtitles toggle for the call (D-27 —
   // "teacher-toggled" from the start; captions were briefly bidirectional
-  // with each side controlling its own independent toggle, which is what let
-  // the two flap/race against each other — see room-worker.ts's
-  // captions-toggle.ts). The student never gets this control; her own call
-  // page simply never sets this prop. Her own speech is still only ever
-  // transcribed if she's separately consented (below) — the teacher's switch
-  // can turn HER audio-forwarding on, but can't bypass her consent gate.
+  // with each side controlling its own independent toggle, which let the two
+  // flap and race against each other). The student never gets this control;
+  // her own call page simply never sets this prop. Her own speech is still
+  // only ever captioned if she's separately consented (below) — the
+  // teacher's switch covers both directions, but can't bypass her consent.
   canCaption?: boolean;
   // Student-only: true when captions are enabled/available room-wide but SHE
   // hasn't consented yet, so her own speech won't be transcribed for the
@@ -573,11 +573,9 @@ export function ClassCall({
     }
 
     function syncRemoteCount() {
-      // Humans only. `remoteParticipants` includes the captions Agent, and
-      // this count drives "is the other person here?" for the waiting-room
-      // state, the swap-video affordance and the materials open-choice sheet —
-      // all of which were treating an Agent-only room as "they're here".
-      if (!cancelled) setRemoteCount(humanRemotes(room.remoteParticipants.values()).length);
+      // Drives "is the other person here?" for the waiting-room state, the
+      // swap-video affordance and the materials open-choice sheet.
+      if (!cancelled) setRemoteCount(room.remoteParticipants.size);
     }
 
     // Both the native "stop sharing" bar and LocalTrackUnpublished can fire
@@ -868,13 +866,14 @@ export function ClassCall({
     };
   }, [room]);
 
-  // Caption wiring: server-side LiveKit Agent (packages/livekit-captions-agent)
-  // transcribes/translates both sides and addresses each line to its listener
-  // (the protocol's `for` field) — this component only ever receives, it
-  // doesn't publish. The teacher's toggle (captionsOn, below) sets a single
-  // participant attribute the Agent reads before forwarding EITHER side's
-  // audio anywhere (D-27) — not a client-side publish, and not something the
-  // student's own instance of this component ever sets.
+  // Caption wiring (D-185): captions run in the two browsers.
+  // useBrowserCaptions recognises whichever speakers THIS browser is assigned
+  // — its own person's speech, and the other person's too when their device
+  // cannot recognise during a call — translates each finished utterance, and
+  // either publishes the line to the other participant or feeds it straight
+  // into this viewer's own caption feed. The teacher's toggle (captionsOn,
+  // below) sets the one participant attribute both browsers read as the
+  // room's switch (D-27); the student's instance never sets it.
   const captions = useCaptionFeed(room);
   // The room's switch as seen from EITHER side — the teacher's own toggle
   // state on her screen, and the same flag read off her participant
@@ -882,6 +881,20 @@ export function ClassCall({
   // student needs it (she had no way to know captions were on until a line
   // arrived, which is a second or two of looking like nothing works).
   const roomCaptionsOn = useRoomCaptionsEnabled(room);
+  const browserCaptions = useBrowserCaptions({
+    room,
+    bookingId,
+    role,
+    teacherCaptionsOn: captionsOn,
+    prefetchSession: Boolean(canCaption),
+    showLocal: captions.addLine,
+  });
+  // The band follows the room's switch: turning captions off clears it on
+  // both screens at once, without waiting for the last line to age out.
+  const setCaptionsActive = captions.setActive;
+  useEffect(() => {
+    if (!roomCaptionsOn) setCaptionsActive(false);
+  }, [roomCaptionsOn, setCaptionsActive]);
   const { prefs: captionPrefs, setPrefs: setCaptionPrefs } = useCaptionPreferences();
   const [transcriptOpen, setTranscriptOpen] = useState(false);
   // Resolve a caption's speaker identity to the name the room knows them by.
@@ -941,11 +954,9 @@ export function ClassCall({
   const sendMaterialToOther = useCallback(
     (material: CallMaterial) => {
       const room = roomRef.current;
-      // humanRemotes, not [0]: the captions Agent joins every caption-enabled
-      // class room as a real remote participant, and addressing the message to
-      // it meant the student never got it — with no error anywhere, since the
-      // student correctly ignores a message not addressed to them.
-      const other = room ? humanRemotes(room.remoteParticipants.values())[0] : undefined;
+      // A class room holds two people, so the other participant is the one
+      // remote one.
+      const other = room ? [...room.remoteParticipants.values()][0] : undefined;
       if (!room || !other) {
         posthog?.capture("call_material_open_send_skipped", analyticsProps());
         return false;
@@ -1361,52 +1372,53 @@ export function ClassCall({
     }
   }, [bookingId, recording, recordPending, t, posthog, analyticsProps]);
 
-  // Ordinary classes are captioned server-side by the LiveKit Agent
-  // (packages/livekit-captions-agent) — this toggle no longer starts a
-  // client-side publish, it sets a participant attribute the Agent reads to
-  // decide whether to forward audio to Deepgram/Anthropic at all (a
-  // deliberate choice to preserve today's exact processing scope — audio is
-  // only sent externally while this toggle is on, same as before). Only
-  // rendered for the teacher (see canCaption's doc comment) — D-27's
-  // original "teacher-toggled" design, restored after a since-undocumented
-  // scope change briefly gave the student her own independent toggle. This
-  // ONE switch now gates BOTH directions on the Agent side; her own
-  // speech still separately requires her consent (captionsConsentMissing).
+  // The room's one captions switch (D-27: teacher-toggled). Only rendered for
+  // the teacher (see canCaption's doc comment); it sets the participant
+  // attribute both browsers read before recognising EITHER side's speech
+  // (D-185), and the student's speech still separately requires her consent
+  // (captionsConsentMissing).
+  //
+  // Not a functional state update: turning captions on has to start the
+  // on-device model downloads INSIDE this click, because Chrome refuses
+  // them without a user gesture — and a state updater may run twice and
+  // must not have side effects.
+  const prepareCaptionsOnDevice = browserCaptions.prepareOnDevice;
   const toggleCaptions = useCallback(() => {
-    setCaptionsOn((on) => {
-      const next = !on;
-      void roomRef.current?.localParticipant.setAttributes({ captionsOn: next ? "true" : "false" });
-      if (next) {
-        captionsStartedAtRef.current = Date.now();
-        // Turning the room's captions on must also bring the band back on
-        // HER screen if she had hidden it earlier (the two are separate
-        // switches by design — see the student's control in the row below).
-        // Without this, a teacher who hid the band last lesson turns
-        // subtitles on this lesson and sees nothing happen.
-        setCaptionPrefs({ visible: true });
-        posthog?.capture("call_captions_enabled", analyticsProps());
-        const seen =
-          typeof window !== "undefined" &&
-          parseCaptionsNoticeSeen(
-            window.localStorage.getItem(CAPTIONS_NOTICE_STORAGE_KEY),
-            window.localStorage.getItem(LEGACY_CAPTIONS_NOTICE_STORAGE_KEY),
-          );
-        if (seen) {
-          toast.success(t("call.captionsEnabledToast"));
-        } else {
-          setShowCaptionsNotice(true);
-        }
-      } else {
-        const enabledDurationSeconds = captionsStartedAtRef.current
-          ? Math.round((Date.now() - captionsStartedAtRef.current) / 1000)
-          : undefined;
-        captionsStartedAtRef.current = null;
-        posthog?.capture("call_captions_disabled", analyticsProps({ enabledDurationSeconds }));
-        setShowCaptionsNotice(false);
-      }
-      return next;
+    const next = !captionsOn;
+    if (next) prepareCaptionsOnDevice();
+    setCaptionsOn(next);
+    void roomRef.current?.localParticipant.setAttributes({
+      [CAPTIONS_ON_ATTRIBUTE]: next ? "true" : "false",
     });
-  }, [t, posthog, analyticsProps, setCaptionPrefs]);
+    if (next) {
+      captionsStartedAtRef.current = Date.now();
+      // Turning the room's captions on must also bring the band back on
+      // HER screen if she had hidden it earlier (the two are separate
+      // switches by design — see the student's control in the row below).
+      // Without this, a teacher who hid the band last lesson turns
+      // subtitles on this lesson and sees nothing happen.
+      setCaptionPrefs({ visible: true });
+      posthog?.capture("call_captions_enabled", analyticsProps());
+      const seen =
+        typeof window !== "undefined" &&
+        parseCaptionsNoticeSeen(
+          window.localStorage.getItem(CAPTIONS_NOTICE_STORAGE_KEY),
+          window.localStorage.getItem(LEGACY_CAPTIONS_NOTICE_STORAGE_KEY),
+        );
+      if (seen) {
+        toast.success(t("call.captionsEnabledToast"));
+      } else {
+        setShowCaptionsNotice(true);
+      }
+    } else {
+      const enabledDurationSeconds = captionsStartedAtRef.current
+        ? Math.round((Date.now() - captionsStartedAtRef.current) / 1000)
+        : undefined;
+      captionsStartedAtRef.current = null;
+      posthog?.capture("call_captions_disabled", analyticsProps({ enabledDurationSeconds }));
+      setShowCaptionsNotice(false);
+    }
+  }, [captionsOn, prepareCaptionsOnDevice, t, posthog, analyticsProps, setCaptionPrefs]);
 
   const dismissCaptionsNotice = useCallback(() => {
     if (typeof window !== "undefined") {
@@ -1761,6 +1773,17 @@ export function ClassCall({
                 {captionsConsentMissing && roomCaptionsOn && (
                   <StatusPill tone="attention" label={t("call.captionsConsentHint")} />
                 )}
+                {/* Captions are on, but neither browser in this call can
+                recognise speech (two phones, measured in D-185). Said
+                rather than left as a band that listens forever. */}
+                {roomCaptionsOn && browserCaptions.status.uncaptioned.length > 0 && (
+                  <StatusPill tone="attention" label={t("call.captionsNeedComputer")} />
+                )}
+                {/* A recogniser here gave up for good — the microphone
+                permission, or a language this browser cannot recognise. */}
+                {roomCaptionsOn && browserCaptions.status.stopped && (
+                  <StatusPill tone="attention" label={t("call.captionsStopped")} />
+                )}
                 {/* Camera-switch failure — brief, non-blocking (the camera
                 keeps working on whichever device it already had). */}
                 {flipCameraError && (
@@ -1784,6 +1807,17 @@ export function ClassCall({
                 the feature looks broken; with it, the way back is one tap. */}
                 {roomCaptionsOn && !captionPrefs.visible && (
                   <StatusPill tone="info" label={t("call.captionsHiddenHint")} />
+                )}
+                {/* The on-device translation model is downloading — once, on
+                the teacher's first captioned class on this computer. Lines
+                go through the server meanwhile, so nothing is waiting on it. */}
+                {roomCaptionsOn && browserCaptions.downloadProgress !== null && (
+                  <StatusPill
+                    tone="info"
+                    label={t("call.captionsDownloading", {
+                      percent: Math.round(browserCaptions.downloadProgress * 100),
+                    })}
+                  />
                 )}
               </div>
             )}

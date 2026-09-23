@@ -117,8 +117,7 @@ fi
 # publishable key, Sentry DSN and PostHog key ship inside preview's browser
 # bundle.
 : "${APP_IMAGE_PREVIEW:?set APP_IMAGE_PREVIEW to the PREVIEW web app image (digest or tag)}"
-: "${CAPTIONS_AGENT_IMAGE:?set CAPTIONS_AGENT_IMAGE}"
-ok "images: preview=${APP_IMAGE_PREVIEW} captions=${CAPTIONS_AGENT_IMAGE}"
+ok "image: preview=${APP_IMAGE_PREVIEW}"
 
 # ── 2. Render config from Infisical ───────────────────────────────────────
 # ⚠️ Infisical is the source of truth for every one of these. Nothing here is
@@ -216,7 +215,7 @@ say "Rendering livekit.yaml, egress.yaml and preview's database credentials"
 # Postgres writes the password into the data directory at initdb and IGNORES
 # POSTGRES_PASSWORD on every start after that. So a deploy that invents a new
 # one gives you: a container that starts, a `pg_isready -q` that passes
-# because it never authenticates, eight running containers, a green
+# because it never authenticates, six running containers, a green
 # verify-runtime-env — and a preview app failing every query with `password
 # authentication failed`. The deploy reports success.
 #
@@ -260,8 +259,8 @@ ok "preview points at postgres-preview, not Neon"
 
 # ── 4. Ship the stack ─────────────────────────────────────────────────────
 
-# ⚠️ COMPOSE DOES NOT NOTICE THAT A BIND-MOUNTED FILE CHANGED, AND THE
-# ASYMMETRY THAT CREATES IS A SILENT OUTAGE.
+# ⚠️ COMPOSE DOES NOT NOTICE THAT A BIND-MOUNTED FILE CHANGED, AND THAT IS A
+# SILENT OUTAGE.
 #
 # `docker compose up -d` recreates a container when its service DEFINITION
 # hash changes — image, environment, ports, volume declarations. The CONTENT
@@ -269,14 +268,10 @@ ok "preview points at postgres-preview, not Neon"
 # egress.yaml or Caddyfile and running `up -d` leaves all three processes
 # running their old configuration, and the deploy says nothing.
 #
-# The asymmetry is the dangerous half. The captions agent takes its LiveKit
-# credentials through `environment:` interpolated from `.env`, which IS in the
-# hash — so it gets recreated with the new key while livekit-server, reading
-# the same key from the bind-mounted livekit.yaml, keeps the old one. Rotate
-# the key pair (CUTOVER.md step 9 says to, and says now is cheapest) and you
-# get an agent that cannot authenticate against a server that looks perfectly
-# healthy: captions silently dead, which is the 2026-08-30 symptom with a
-# third distinct cause.
+# Rotate the key pair (CUTOVER.md step 9 says to, and says now is cheapest)
+# and the app mints tokens with the new secret while livekit-server and egress
+# go on verifying against the old one: every container looks healthy and no
+# class connects.
 #
 # So compare before shipping and act after starting. Caddy has a graceful
 # reload; livekit-server and egress do not, and restarting them drops whatever
@@ -362,7 +357,6 @@ if [ "$VERIFY_ONLY" -eq 0 ]; then
   # it.
   $SSH "cd ${STACK_DIR} && \
     APP_IMAGE_PREVIEW='${APP_IMAGE_PREVIEW}' \
-    CAPTIONS_AGENT_IMAGE='${CAPTIONS_AGENT_IMAGE}' \
     docker compose up -d --remove-orphans"
   ok "compose up"
 
@@ -386,7 +380,6 @@ if [ "$VERIFY_ONLY" -eq 0 ]; then
           printf '\033[33m! %s.yaml changed — restarting %s, which DROPS anything connected to it\033[0m\n' "$svc" "$svc" >&2
           $SSH "cd ${STACK_DIR} && \
             APP_IMAGE_PREVIEW='${APP_IMAGE_PREVIEW}' \
-            CAPTIONS_AGENT_IMAGE='${CAPTIONS_AGENT_IMAGE}' \
             docker compose restart ${svc}" \
             || fail "${svc}.yaml changed but ${svc} would not restart — it is still running the old config"
           ok "${svc}.yaml changed — ${svc} restarted"
@@ -428,7 +421,7 @@ say "Container state"
 # deploy reported success.
 $SSH "docker ps --filter status=running --format '{{.Names}}\t{{.Status}}'" | tee "$TMP/ps.txt"
 EXPECTED="livekit-caddy livekit-server livekit-egress livekit-redis \
-livekit-captions-agent spiralclass-preview spiralclass-preview-db"
+spiralclass-preview spiralclass-preview-db"
 for c in $EXPECTED; do
   grep -q "^${c}[[:space:]]" "$TMP/ps.txt" || { printf '\033[31m✗ %s not running\033[0m\n' "$c" >&2; FAILED=1; }
 done
@@ -468,20 +461,18 @@ fi
 
 # ⚠️ THE CALLBACK INTO PRODUCTION, AND THIS IS THE ONLY THING WATCHING IT.
 #
-# livekit-server's webhook and the captions agent both post to
-# APP_INTERNAL_BASE_URL, which is production ON FLY — off this box, through
-# Cloudflare. That is the 2026-08-30 path: a stale hostname answered with a
-# 301, the 301 turned the agent's POST into a GET, it got a 405,
-# discovery.ts started no RoomWorker, and a real class ran with captions
-# silently dead while livekit-server's own log said `sent webhook`. A redirect
-# is indistinguishable from success from every other angle, which is why it is
+# livekit-server's webhook posts to APP_INTERNAL_BASE_URL, which is
+# production ON FLY — off this box, through Cloudflare. That is the 2026-08-30
+# path: a stale hostname answered with a 301, and the webhooks never reached
+# the app while livekit-server's own log said `sent webhook`. A redirect is
+# indistinguishable from success from every other angle, which is why it is
 # asserted on every deploy rather than reasoned about once.
 #
 # 401 is the PASS: the route was reached and it rejected an unsigned body.
 # Any 3xx is a failure. 000 means the box could not reach it at all.
 say "The callback into production (Fly), from this box"
 CALLBACK_BASE="$(sed -n 's/^APP_INTERNAL_BASE_URL=//p' "$TMP/.env" | sed 's/\$\$/$/g')"
-[ -n "$CALLBACK_BASE" ] || fail "no APP_INTERNAL_BASE_URL was rendered — the captions agent has no app to call"
+[ -n "$CALLBACK_BASE" ] || fail "no APP_INTERNAL_BASE_URL was rendered — there is no webhook origin to probe"
 CALLBACK_CODE="$($SSH "curl -s -o /dev/null -m 15 -w '%{http_code}' -X POST ${CALLBACK_BASE}/api/livekit/webhook" 2>/dev/null || echo 000)"
 case "$CALLBACK_CODE" in
   401 | 403)
@@ -489,8 +480,8 @@ case "$CALLBACK_CODE" in
     summary "- Callback into production — ${CALLBACK_CODE}, no redirect"
     ;;
   3??)
-    printf '\033[31m✗ callback: %s answered %s — A REDIRECT. This is the 2026-08-30 outage: captions and webhooks fail silently.\033[0m\n' "$CALLBACK_BASE" "$CALLBACK_CODE" >&2
-    summary "- ⚠️ Callback into production — ${CALLBACK_CODE} REDIRECT; captions and webhooks are silently dead"
+    printf '\033[31m✗ callback: %s answered %s — A REDIRECT. This is the 2026-08-30 outage: webhooks fail silently.\033[0m\n' "$CALLBACK_BASE" "$CALLBACK_CODE" >&2
+    summary "- ⚠️ Callback into production — ${CALLBACK_CODE} REDIRECT; webhooks are silently dead"
     FAILED=1
     ;;
   *)

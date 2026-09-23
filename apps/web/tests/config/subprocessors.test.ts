@@ -82,7 +82,6 @@ const NOT_A_PROCESSOR: Record<string, string> = {
 
   // Credential halves of vendors already registered under another var.
   ANTHROPIC_MODEL: "A model name for Anthropic, which IS registered.",
-  CAPTION_TRANSLATION_MODEL: "A model name for Anthropic, which IS registered.",
   GEMINI_IMAGE_MODEL: "A model name for Google, which IS registered.",
   GEMINI_VERTEX_PROJECT_ID: "A GCP project id for Google, which IS registered.",
   GEMINI_VERTEX_LOCATION: "A Vertex AI region for Google, which IS registered.",
@@ -131,7 +130,6 @@ const NOT_A_PROCESSOR: Record<string, string> = {
   VAPID_PRIVATE_KEY: "Our own Web Push signing key. The push service is the browser vendor's.",
   VAPID_PUBLIC_KEY: "Our own Web Push signing key.",
   VAPID_SUBJECT: "A contact URL embedded in Web Push requests.",
-  CAPTIONS_AGENT_SHARED_SECRET: "Our own shared secret between the app and the captions worker.",
   SUPERUSER_EMAILS: "Our own admin allowlist.",
 
   // Never-enabled or test-only.
@@ -160,6 +158,7 @@ const CREDENTIAL_TO_SUBPROCESSOR: Record<string, string> = {
   GEMINI_VERTEX_SERVICE_ACCOUNT_KEY_BASE64: "google-ai",
   GOOGLE_CLIENT_ID: "google-sign-in",
   GOOGLE_TTS_API_KEY: "google-ai",
+  GOOGLE_TRANSLATE_API_KEY: "google-translate",
   ELEVENLABS_API_KEY: "elevenlabs",
   RESEND_API_KEY: "resend",
 };

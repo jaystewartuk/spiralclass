@@ -59,7 +59,8 @@ apps/web/           Next.js 15, App Router. The only client and the only API tre
 packages/shared/    Wire types, validators, money math, pricing/subscription
                     config, the i18n catalog — anything the handlers and the UI
                     must agree on. Look here before writing a helper in apps/web
-packages/livekit-*  A captions worker (deployed onto the LiveKit box) and a CLI
+packages/livekit-activity-cli/
+                    An operator CLI for live LiveKit rooms
 docs/               See docs/README.md for the map
 scripts/            The gate, the deploys, the local jobs
 infra/              OpenTofu; each module documents itself

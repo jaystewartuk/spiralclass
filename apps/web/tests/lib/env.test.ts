@@ -404,20 +404,6 @@ describe("anthropicModel", () => {
   });
 });
 
-describe("captionTranslationModel", () => {
-  it("defaults to claude-haiku-4-5 when unset", async () => {
-    setEnv(withBaseRequired({ CAPTION_TRANSLATION_MODEL: undefined }));
-    const { captionTranslationModel } = await import("@/lib/env");
-    expect(captionTranslationModel()).toBe("claude-haiku-4-5");
-  });
-
-  it("respects an explicit override", async () => {
-    setEnv(withBaseRequired({ CAPTION_TRANSLATION_MODEL: "claude-custom-fast" }));
-    const { captionTranslationModel } = await import("@/lib/env");
-    expect(captionTranslationModel()).toBe("claude-custom-fast");
-  });
-});
-
 describe("clientEnv()", () => {
   it("parses the NEXT_PUBLIC_* subset only", async () => {
     setEnv(

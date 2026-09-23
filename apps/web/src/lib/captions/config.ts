@@ -1,23 +1,27 @@
 import { logger } from "@/lib/logger";
 
-// Live in-class captions config + availability gate (D-27).
+// Live in-class captions config + availability gate (D-27, D-185).
 //
-// The teacher speaks Spanish; the student sees English subtitles in real time.
-// Unlike the post-class transcription pipeline (lib/transcription, D-19), this is
-// a LIVE path that runs entirely while the call is up: the teacher's browser
-// streams its own mic to Deepgram's streaming ASR, each finished Spanish
-// utterance is translated to English on our server (the platform Anthropic key),
-// and the English line is published into the LiveKit room for the other side to
-// render. Nothing is stored — captions are ephemeral and never persisted.
+// Captions run in the participants' browsers (D-185): each direction of speech
+// is recognised by a browser's own SpeechRecognition — the speaker's, or the
+// other participant's when the speaker's device cannot (see
+// @spiralclass/shared caption-recognition.ts) — and translated on that device
+// where the browser has a translator, otherwise by POST /api/captions/translate
+// through Google Cloud Translation. The finished line is published into the
+// LiveKit room for the other side to render. Nothing is stored — captions are
+// ephemeral and never persisted.
 //
 // Two independent conditions must BOTH hold before the feature is offered:
-//   1. Both vendors are configured: a Deepgram key (streaming ASR) AND Anthropic
-//      creds (translation). Either missing → the teacher's toggle is hidden and
-//      the call behaves exactly as before.
-//   2. The explicit enablement flag (LIVE_CAPTIONS_ENABLED) is on. Like the
-//      transcription flag, this exists because sending a live lesson's audio to
-//      an outside ASR vendor carries the same privacy/consent weight (D-21/D-22)
-//      — the code can ship and keys can be set while the switch stays off.
+//   1. The server fallback is configured: GOOGLE_TRANSLATE_API_KEY. Only
+//      desktop Chrome translates on the device, so without the key most
+//      pairs of devices would caption nothing; the toggle stays hidden rather
+//      than offering a feature that works for some classes and silently not
+//      for others.
+//   2. The explicit enablement flag (LIVE_CAPTIONS_ENABLED) is on. Sending a
+//      live lesson's speech to a browser vendor's recogniser and a translation
+//      service carries the same privacy/consent weight as the transcription
+//      pipeline (D-21/D-22) — the code can ship and the key can be set while
+//      the switch stays off.
 //
 // Keys are read straight from process.env (like provider.ts / transcription
 // config) so an availability check never depends on the whole env schema
@@ -29,9 +33,8 @@ const log = logger({ surface: "captions" });
 // Trim + strip one layer of accidentally-wrapped quotes (a copy-paste mistake
 // from a .env-style snippet — pasting `KEY="abc"` verbatim into an env-var UI
 // field). Shared by every vendor-key reader in this module so the fix lives in
-// one place; each key still fails a DIFFERENT way when malformed — Deepgram
-// rejects it outright (400) while Anthropic's SDK returns an auth error that
-// this module's callers otherwise can't distinguish from "not configured".
+// one place; a quote-wrapped key is rejected by the vendor as malformed, which
+// reads as "configured but broken" rather than "not configured".
 function sanitizeApiKey(raw: string | undefined): string | undefined {
   const trimmed = raw?.trim();
   if (!trimmed) return undefined;
@@ -43,7 +46,7 @@ function sanitizeApiKey(raw: string | undefined): string | undefined {
 }
 
 // Read + sanitize the Deepgram key from the raw environment. Every reader of
-// DEEPGRAM_API_KEY (this module, transcription/config.ts) goes through here so
+// DEEPGRAM_API_KEY (transcription/config.ts) goes through here so
 // the fix below lives in exactly one place. Some env-var UIs make it easy to
 // accidentally paste a value WITH its surrounding quotes (copying `KEY="abc"`
 // verbatim out of a .env-style snippet) — Deepgram then sees a malformed
@@ -55,14 +58,15 @@ export function deepgramApiKey(): string | undefined {
   return sanitizeApiKey(process.env.DEEPGRAM_API_KEY);
 }
 
-// Both vendors present? Captions need Deepgram (ASR) AND Anthropic
-// (translation). Read straight from process.env (not env.ts's serverEnv(),
-// see the module note above on why) and through the same sanitizer as
-// deepgramApiKey — an unquoted-vs-quoted ANTHROPIC_API_KEY was the other half
-// of the same copy-paste mistake, and it surfaced as translate calls failing
-// with an opaque 502 rather than "not configured".
+// The Google Cloud Translation key the server fallback calls with — an API
+// key restricted to that one API. Sanitized like every key in this module.
+export function googleTranslateApiKey(): string | undefined {
+  return sanitizeApiKey(process.env.GOOGLE_TRANSLATE_API_KEY);
+}
+
+// Is the server-side translation fallback configured?
 export function captionsConfigured(): boolean {
-  return Boolean(deepgramApiKey() && sanitizeApiKey(process.env.ANTHROPIC_API_KEY));
+  return Boolean(googleTranslateApiKey());
 }
 
 function enablementFlagOn(): boolean {
@@ -76,36 +80,30 @@ function enablementFlagOn(): boolean {
 // module, so it works even if the full env schema wouldn't validate.
 //
 // This exists because the failure it surfaces is otherwise invisible: when the
-// flag is on but a vendor key is absent, liveCaptionsEnabled() returns false,
-// the teacher's toggle is hidden, and both /api/captions/{token,translate}
-// (plus their four mobile siblings) return 404 with no logged reason. That is
-// exactly the shape of the Vercel→Fly cutover (D-70) regression: DEEPGRAM_API_KEY
-// was configured on Vercel but not carried into Fly's `fly secrets`, so captions
-// went dark on preview with nothing in the logs to point at the missing key.
+// flag is on but the key is absent, liveCaptionsEnabled() returns false, the
+// teacher's toggle is hidden and the caption routes answer "disabled" with no
+// logged reason. That is exactly the shape of the Vercel→Fly cutover (D-70)
+// regression, when a vendor key set on one platform was not carried to the
+// next and captions went dark with nothing in the logs to point at it.
 export type CaptionsReadiness = {
   flagOn: boolean;
-  deepgram: boolean;
-  anthropic: boolean;
+  googleTranslate: boolean;
   enabled: boolean;
   missing: string[];
 };
 
 export function captionsReadiness(): CaptionsReadiness {
   const flagOn = enablementFlagOn();
-  const deepgram = Boolean(deepgramApiKey());
-  const anthropic = Boolean(sanitizeApiKey(process.env.ANTHROPIC_API_KEY));
-  const missing = [
-    deepgram ? null : "DEEPGRAM_API_KEY",
-    anthropic ? null : "ANTHROPIC_API_KEY",
-  ].filter((v): v is string => v !== null);
-  return { flagOn, deepgram, anthropic, enabled: flagOn && deepgram && anthropic, missing };
+  const googleTranslate = captionsConfigured();
+  const missing = googleTranslate ? [] : ["GOOGLE_TRANSLATE_API_KEY"];
+  return { flagOn, googleTranslate, enabled: flagOn && googleTranslate, missing };
 }
 
 // One structured warning per process when the operator has switched captions ON
-// but a required vendor key is missing, so a dark feature is diagnosable from the
-// logs instead of silent. Once-guarded (not per-request) so it reads as a boot
-// signal on a persistent server (Fly) rather than log spam. No-op when captions
-// are correctly configured, or correctly off.
+// but the key is missing, so a dark feature is diagnosable from the logs instead
+// of silent. Once-guarded (not per-request) so it reads as a boot signal on a
+// persistent server rather than log spam. No-op when captions are correctly
+// configured, or correctly off.
 let warnedMisconfig = false;
 export function warnIfCaptionsMisconfigured(): void {
   if (warnedMisconfig) return;
@@ -113,17 +111,16 @@ export function warnIfCaptionsMisconfigured(): void {
   if (readiness.flagOn && !readiness.enabled) {
     warnedMisconfig = true;
     log.warn(
-      "LIVE_CAPTIONS_ENABLED is on but required vendor key(s) are missing — captions stay dark (teacher toggle hidden, token/translate routes 404). Classic cause: a key set on Vercel but not carried into Fly `fly secrets` at the Vercel-to-Fly cutover. Set the missing key(s) and redeploy.",
+      "LIVE_CAPTIONS_ENABLED is on but a required key is missing — captions stay dark (teacher toggle hidden, caption routes answer disabled). Set the missing key where the deploy reads its secrets and redeploy.",
       { missing: readiness.missing },
     );
   }
 }
 
-// The single gate the call surface checks before showing the teacher's toggle.
-// Both the vendors AND the flag are required — see the module note on the flag.
-// Emits the misconfig diagnostic (once) whenever it resolves to unavailable, so
-// the "flag on, key missing" state that broke captions at the Fly cutover leaves
-// a trail — this is the one chokepoint every web AND mobile caption route hits.
+// The single gate the call surface checks before showing the teacher's toggle,
+// and that both caption routes re-check on every call. The key AND the flag are
+// required — see the module note. Emits the misconfig diagnostic (once)
+// whenever it resolves to unavailable, so "flag on, key missing" leaves a trail.
 export function liveCaptionsEnabled(): boolean {
   const enabled = enablementFlagOn() && captionsConfigured();
   if (!enabled) warnIfCaptionsMisconfigured();
