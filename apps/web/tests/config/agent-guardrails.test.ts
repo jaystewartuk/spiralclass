@@ -78,19 +78,6 @@ describe("the operator's decisions cannot be taken by a session", () => {
     ["gh pr merge 1234 --squash", "merging"],
     ["pnpm promote", "promoting"],
     ["bash scripts/cloudrun-deploy.sh production --gate-already-passed", "deploying"],
-    ["bash scripts/vercel-deploy.sh production", "deploying to the failover"],
-    // The bare CLI too, not just the script. `vercel promote <url>` is the
-    // command that hands spiralclass.com to the failover, and it reaches
-    // production without touching either deploy script (D-177).
-    ["npx --yes vercel@59.15.1 promote https://example.vercel.app --yes", "taking the domain"],
-    ["vercel deploy --prod", "deploying straight to the production target"],
-    // ⚠️ EVERY PACKAGE RUNNER, not just npx. The rule named npx alone at first,
-    // which left the pnpm spelling — this repository's own package manager, so
-    // the likelier one — entirely unblocked.
-    ["pnpm dlx vercel promote https://example.vercel.app --yes", "taking the domain via pnpm"],
-    ["npm exec vercel deploy --prod", "deploying via npm exec"],
-    // An env assignment in front of it, the shape a permission prefix misses.
-    ["VERCEL_TOKEN=xxx vercel deploy --prod", "deploying behind an env assignment"],
     // The database job's script, which checkpoints and migrates production on
     // its own since the targets were split ([D-177]'s addendum).
     [
@@ -119,7 +106,6 @@ describe("a heredoc body is data, not command", () => {
   const script = (stem: string) => `${stem}-deploy.sh`;
 
   it.each([
-    ["vercel", script("vercel")],
     ["the database", script("database")],
     ["Cloud Run", script("cloudrun")],
   ])("lets a commit message explain a change to the %s script", (_label, name) => {
@@ -133,7 +119,6 @@ describe("a heredoc body is data, not command", () => {
   it("still blocks the same name when it is actually being run", () => {
     // The whole point: stripping the body must not loosen what a command means.
     expect(blocks(`bash scripts/${script("cloudrun")} production`).blocked).toBe(true);
-    expect(blocks(`./scripts/${script("vercel")} production`).blocked).toBe(true);
   });
 
   it("still blocks a command that follows a heredoc it opened", () => {
@@ -175,13 +160,6 @@ describe("it does not block ordinary work", () => {
     // Asking a question about a forbidden command is not performing it. This
     // is the false positive that would get the hook switched off.
     'grep -rn "pnpm pro" "mote" docs/',
-    // ⚠️ `vercel` is an npm PACKAGE NAME as well as a command, which the Fly
-    // rule's shape does not have to cope with. A loose
-    // `[[:space:]]vercel[[:space:]]` pattern blocks this, and this is exactly
-    // the harmless lookup someone does when bumping the pinned CLI version in
-    // scripts/vercel-deploy.sh — it reads no credential and deploys nothing.
-    // So that rule is anchored at a command position (D-177).
-    "npm view vercel version",
   ])("allows %s", (command) => {
     const { blocked, reason } = blocks(command);
     expect(blocked, `guard-bash.sh blocked ordinary work: ${command} — ${reason}`).toBe(false);

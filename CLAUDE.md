@@ -119,7 +119,7 @@ pnpm --filter @spiralclass/shared test -- src/money.test.ts
 ```
 
 **Operator-only, never run from a session:** `pnpm promote`, `gh pr merge`,
-`scripts/vercel-deploy.sh` and the bare `vercel` CLI, `scripts/cloudrun-deploy.sh`
+`scripts/cloudrun-deploy.sh`
 and the two operator scripts in `infra/gcp/`, `scripts/database-deploy.sh`,
 anything matching `migrate:prod`, and `infisical`. These are denied in `.claude/settings.json` and
 by a `PreToolUse` hook, so you will be stopped rather than trusted to remember.
@@ -306,15 +306,13 @@ authored per language, `<slug>.es.md` beside `<slug>.md`.
 
 ## Never do
 
-- **Reintroduce Supabase.** Decommissioned in D-89 Phase 5 — no dependency, no
-  env var, no code path. **Vercel is different since D-177**: it is a deploy
-  _target_ again — a second production target that holds no domain — while
-  everything that coupled the app to it stays gone. No `VERCEL_ENV` branch
-  (`APP_URL` decides prod-vs-preview), no `@vercel/*` dependency, and no root
-  `vercel.json` (Vercel reads that one automatically, which is a deploy trigger
-  nobody typed; the config lives in `config/vercel/`). Both halves guarded by
-  `apps/web/tests/config/decommissioned-platforms.test.ts` and
-  `apps/web/tests/config/vercel-deploy.test.ts`.
+- **Reintroduce Supabase or Vercel.** Supabase was decommissioned in D-89
+  Phase 5 — no dependency, no env var, no code path. Vercel was too, came back
+  as a failover (D-177), and was retired again (D-186): no deploy target, no
+  `VERCEL_ENV` branch (`APP_URL` decides prod-vs-preview), no `@vercel/*`
+  dependency, and no root `vercel.json` (Vercel reads that one automatically,
+  which is a deploy trigger nobody typed). Guarded by
+  `apps/web/tests/config/decommissioned-platforms.test.ts`.
 - **Reintroduce a mobile app or an `/api/mobile` tree.** The client and the 220
   routes named for it are both deleted. No React Native dependency, no
   Maestro flow, no CI step that builds one. Guarded in

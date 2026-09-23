@@ -81,109 +81,12 @@ restore it in seconds with `infra/database/scripts/neon-rollback.sh`, Neon's
 own point-in-time restore. See [`DB_BACKUP_RESTORE.md`](./DB_BACKUP_RESTORE.md) for the full
 restore procedure and the fastest safe recovery path for a failed migration.
 
-## The Vercel failover ([D-177](../decisions/D-177.md))
-
-**Production serves from Cloud Run. This does not change that**, and nothing in
-CI can.
-
-Every production release also deploys the same commit to Vercel, as the `vercel`
-job in `deploy-production.yml`. That deployment is built, live, and **holds no
-domain** — `vercel deploy --prebuilt --prod --skip-domain`. It exists so the
-failover is proven on every release rather than being a project nobody has
-deployed since they set it up ([D-164](../decisions/D-164.md) is the lesson).
-
-**The two targets deploy independently** (D-177's addendum). The `database` job
-checkpoints Neon and migrates, once; the `cloudrun` and `vercel` jobs both need
-it, and neither waits on the other. Each holds only its own credentials, so a
-missing or revoked Vercel value cannot stop a release, and a Cloud Run outage
-cannot stop the failover from deploying. To deploy one target alone, dispatch
-the workflow on `production` with `target: cloudrun` or `target: vercel` — the
-database job still runs first.
-
-A red `vercel` job means **the failover did not refresh**. Production is
-unaffected; read the `cloudrun` job, which is the one that shipped. `pnpm
-promote` judges the release by the `database` and `cloudrun` jobs and prints the
-failover's outcome on its own line.
-
-**Vercel checks who wrote the commit.** A CLI deploy sends the commit's author
-with it, and Vercel **blocks** a deployment whose author it cannot match to an
-account allowed to deploy the project — matched through that account's Login
-Connections, per
-[Vercel's own page](https://vercel.com/docs/deployments/troubleshoot-project-collaboration#team-configuration).
-So the account that owns the project needs GitHub connected under Account
-Settings → Authentication, or the failover lands `BLOCKED` on every release.
-The deploy does not wait on a blocked deployment: `scripts/vercel-await.mjs`
-fails the job as soon as Vercel answers, and prints the state and Vercel's
-reason. The CLI's own wait never exits on that state.
-
-**Its runtime environment is production's, from the same three places.** The project's
-env store is a derived copy, and nothing is set in the dashboard by hand:
-
-| Source                               | Written by                                        | When                                |
-| ------------------------------------ | ------------------------------------------------- | ----------------------------------- |
-| Infisical `production` `/`           | `infra/infisical/push-vercel-env.sh`, `sensitive` | By the operator, after any rotation |
-| The production R2 credentials (Tofu) | the same push                                     | By the operator, after any rotation |
-| `config/env/production.runtime.env`  | `scripts/vercel-deploy.sh`, from the commit       | Every release                       |
-
-Run the push bare, `infra/infisical/push-vercel-env.sh`: it fetches the `infra`
-credentials Tofu state needs itself. The deploy **refuses** when a `__LOCAL__` runtime key was never
-pushed, or when a dashboard value nobody owns would shadow a committed one —
-the push reports those as stale and removes them with `--delete-stale`. The
-three project credentials live in Infisical `production` at `/deploy`, beside
-the GCP deploy values, and reach the workflow through
-`infra/infisical/push-github-secrets.sh`.
-
-⚠️ **Before you hand it the domain, confirm the database job for that commit is
-green.** The failover deploys against whatever schema the database job left. A
-Vercel deployment refreshed by hand (`pnpm deploy:vercel`) runs no migrations at
-all, so if the commit carries one, `scripts/database-deploy.sh` must have run
-for it first.
-
-**To hand it the domain.** This is the one command that makes Vercel serve
-traffic, and it is an operator step — a session is blocked from running it by
-`.claude/hooks/guard-bash.sh`:
-
-```sh
-vercel promote <deployment-url> --yes
-```
-
-No CLI version is written here on purpose: `scripts/vercel-deploy.sh` holds the
-one pin, and its final line prints this command with that version and the real
-deployment URL already filled in. Copy it from the deploy's output rather than
-from here, and a bumped pin cannot leave a stale number in a runbook.
-
-⚠️ **Read this before you do it in an incident. It is not yet a complete
-failover:**
-
-- **Inngest is registered at the domain and the Vercel deploy never syncs it**
-  (syncing a second URL would fire every cron twice — see D-177). Once the
-  domain resolves to Vercel, re-sync that same URL —
-  `scripts/inngest-sync.sh https://spiralclass.com/api/inngest` — so the
-  registration describes the deployment now answering it. Never sync a
-  `vercel.app` URL.
-- **The domain's DNS points at Google.** The apex records are Cloud Run's
-  domain-mapping set, DNS-only; `vercel promote` alone does not move traffic
-  until those records point at Vercel. Write them down before changing them.
-- **The region pin is unverified.** `config/vercel/production.json` says `cle1`
-  on the strength of D-150's "Neon is in Ohio". Confirm with
-  `neonctl projects list`; a wrong region costs the 58-ms-versus-12-ms hop that
-  record measured, on every query.
-- **Nothing has ever served a request from it.** Cold-start behaviour against
-  Neon is unmeasured.
-
-To hand it back, put the Cloud Run records back. The domain mapping stays in
-place while they point elsewhere; if they were away long enough for Google's
-certificate to lapse, expect the same ~15-minute re-issue as the cutover.
-
-To refresh it by hand without a release, `pnpm deploy:vercel` (operator-only, and
-it refuses production without `--yes-i-understand-this-skips-the-promote-gate`).
-
 ## Cloud Run serves production ([D-184](../decisions/D-184.md))
 
 **Cloud Run `web` in `us-east4` has served `spiralclass.com` since 2026-09-23.**
 Fly `agendaprofe` was destroyed the same day. Every production release deploys
-to it as the `cloudrun` job, which `needs:` the database job and not Vercel,
-holds only its own credentials, syncs Inngest against the domain, probes
+to it as the `cloudrun` job, which `needs:` the database job, holds only its
+own credentials, syncs Inngest against the domain, probes
 production, and is the job `pnpm promote` reads to decide whether the release
 shipped. A red `cloudrun` job means production did not move.
 
@@ -224,9 +127,9 @@ The second one ends by syncing Inngest against the domain.
 exist, and `config/cloudrun/artifact-cleanup.json` keeps the five newest for
 exactly this.
 
-**Off Cloud Run:** there is no Fly to fall back to. The Vercel failover
-([D-177](../decisions/D-177.md)) is deployed warm on every release and holds no
-domain; taking it is its own section of this document.
+**Off Cloud Run:** there is no warm standby. Fly was destroyed at the cutover
+and the Vercel failover was retired ([D-186](../decisions/D-186.md)), so leaving
+Cloud Run means standing up a new target and following the section below.
 
 ### If the domain ever moves again
 

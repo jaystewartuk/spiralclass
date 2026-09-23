@@ -5,10 +5,9 @@
 # It was steps 1 and 2 of the Fly deploy script until 2026-09-12, when the
 # production targets became independently deployable ([D-177]'s addendum). The
 # steps did not change; who owns them did. While they lived inside the Fly
-# deploy, the Vercel failover could only be deployed after a Fly deploy had
-# succeeded — so the one time a failover matters, with Fly unavailable, it could
-# not be deployed at all. The database is not Fly's, and this is where that
-# stops being a comment and becomes the structure.
+# deploy, the Vercel failover (since retired, [D-186]) could only be deployed
+# after a Fly deploy had succeeded. The database is not any target's, and this
+# is where that stops being a comment and becomes the structure.
 #
 # Two callers, and they must stay two, not three:
 #
@@ -18,10 +17,6 @@
 #   * The operator, by hand, before scripts/cloudrun-deploy.sh in a recovery
 #     deploy — the Cloud Run script holds no database credential and never
 #     migrates, so this is how a recovery still checkpoints first.
-#
-# scripts/vercel-deploy.sh does NOT run it and must not: that job is handed no
-# database credential, which is the narrowest way to say it has no business
-# with the schema ([D-177]).
 #
 # The steps, in an order that is load-bearing:
 #
@@ -33,7 +28,7 @@
 # additionally needs npx and a neonctl that can authenticate for the checkpoint
 # — `neonctl auth` once per machine, or NEON_API_KEY — and NEON_PROJECT_ID,
 # which has no default and must be supplied (see below). No flyctl, no Docker,
-# no Vercel CLI: nothing here knows which platform will serve the code.
+# no gcloud: nothing here knows which platform will serve the code.
 #
 # From a laptop, compose with the wrapper, as for either target:
 #
@@ -55,7 +50,7 @@ ENVIRONMENT="${1:-}"
 case "$ENVIRONMENT" in
 preview) ;;
 production)
-  # The same two doors vercel-deploy.sh opens, for the same
+  # The same two doors the Cloud Run script opens, for the same
   # reason: production is normally reached only after `pnpm promote`'s full gate.
   if [ "${2:-}" != "--gate-already-passed" ] &&
     [ "${2:-}" != "--yes-i-understand-this-skips-the-promote-gate" ]; then

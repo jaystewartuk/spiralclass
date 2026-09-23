@@ -317,9 +317,10 @@ The decision log is the real record; this is the shape of it.
   ([D-184](../decisions/D-184.md)). Supabase is fully decommissioned, and the
   Fly app was destroyed at the 2026-09-23 cutover. There is still
   no `VERCEL_ENV` branch — production versus preview is decided by `APP_URL` —
-  and that decoupling is what later let Vercel come back as a **second
-  production target holding no domain** ([D-177](../decisions/D-177.md)),
-  needing no application change at all. Production serves from Cloud Run.
+  and that decoupling is what let Vercel come back as a failover
+  ([D-177](../decisions/D-177.md)) with no application change. That failover
+  never served a request and was retired ([D-186](../decisions/D-186.md)).
+  Production serves from Cloud Run, the only target.
 - **Payments**: separate charges and transfers → direct charges on Accounts v2
   ([D-143](../decisions/D-143.md)). The platform stopped touching the money.
 - **Platform entity**: consolidated in the UK

@@ -71,7 +71,7 @@ another way" about anything that still exists.
   both reversed by [D-40](./D-40.md)).
 
 **Numbering is never reused and never renumbered**, so `D-01` is still the
-first decision and `D-185` the most recent. A gap means a record was removed,
+first decision and `D-186` the most recent. A gap means a record was removed,
 not that one is missing.
 
 **Everything kept is unedited**, except where a record named an account
@@ -353,6 +353,7 @@ and exercised for real when the provider actually changed.
 | [D-178](./D-178.md) | **A migration must work with the code already serving**; drops ship a release after the code stops using them                                             |
 | [D-183](./D-183.md) | **The Oracle tenancy goes Pay As You Go** to buy A1 capacity priority; the free ceilings now bill instead of refusing                                     |
 | [D-184](./D-184.md) | **Cloud Run `us-east4` takes production from Fly** — measured at +9 ms to Neon, against the +46 ms D-150 refused; serving since 2026-09-23, Fly destroyed |
+| [D-186](./D-186.md) | **The Vercel failover is retired** — it never served a request; Cloud Run is the only target and the coupling bans stay                                   |
 
 ### CI, the gate and releasing
 
@@ -464,7 +465,7 @@ records removed before publication — see [What is not here](#what-is-not-here)
 | [D-86](./D-86.md)   | Unit-economics estimates: pricing as data, never per-provider code    | Active                               |
 | [D-87](./D-87.md)   | Model defaults split by call shape; `effort` and Haiku never coexist  | Active                               |
 | [D-88](./D-88.md)   | One-to-one is an always-on prompt directive                           | Active                               |
-| [D-89](./D-89.md)   | Production cutover executed; Vercel and Supabase decommissioned       | Active (Vercel target back → D-177)  |
+| [D-89](./D-89.md)   | Production cutover executed; Vercel and Supabase decommissioned       | Active (D-177 → D-186)               |
 | [D-93](./D-93.md)   | Homework review / feedback / AI-assist architecture                   | Designed; shipping in slices         |
 | [D-94](./D-94.md)   | Production onto the self-hosted LiveKit box                           | First half reversed → D-182          |
 | [D-95](./D-95.md)   | Neon PITR + pre-migration checkpoint branches                         | Active                               |
@@ -531,7 +532,7 @@ records removed before publication — see [What is not here](#what-is-not-here)
 | [D-174](./D-174.md) | A server action revalidates exactly one path                          | Active                               |
 | [D-175](./D-175.md) | Tenant scoping is checked by a parser, not by a reader                | Active                               |
 | [D-176](./D-176.md) | The tenant is carried from the auth gate, not taken from the query    | Active                               |
-| [D-177](./D-177.md) | Vercel is a second production target; it holds no domain              | Decided; built, never served         |
+| [D-177](./D-177.md) | Vercel is a second production target; it holds no domain              | Reversed → D-186                     |
 | [D-178](./D-178.md) | Migrations expand; contracts ship a release later, marked CONTRACT    | Active                               |
 | [D-179](./D-179.md) | CodeQL scans every PR; main refuses a merge that adds an alert        | Active                               |
 | [D-180](./D-180.md) | Test-file and decision-record counts are floors, not exact            | Active                               |
@@ -540,6 +541,7 @@ records removed before publication — see [What is not here](#what-is-not-here)
 | [D-183](./D-183.md) | The Oracle tenancy goes Pay As You Go; Always Free ceilings now bill  | Active                               |
 | [D-184](./D-184.md) | Cloud Run serves production; Fly is retired                           | Active (revisits D-150's premise)    |
 | [D-185](./D-185.md) | Live captions run in the browsers; a computer covers a phone          | Active (supersedes D-106, D-108)     |
+| [D-186](./D-186.md) | The Vercel failover is retired; Cloud Run is the only target          | Active (reverses D-177)              |
 
 ---
 

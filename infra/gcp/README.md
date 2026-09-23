@@ -52,8 +52,7 @@ third-party install scripts is the worst candidate for an exception, not the
 best.**
 
 So the credential is a service-account key for an identity that can deploy a
-revision and cannot read a secret — the same trade `VERCEL_TOKEN` already
-makes, with the same blast radius.
+revision and cannot read a secret.
 
 **The cost is rotation, and nothing automates it.** The key is long-lived, and
 `setup-deploy-identity.sh` deliberately does not mint, print or write one — it
@@ -62,8 +61,8 @@ vault.
 
 ## The two values CI needs
 
-They belong in Infisical `production` at `/deploy`, beside the `VERCEL_*`
-values, and reach the workflow through the same sync
+They belong in Infisical `production` at `/deploy`, and reach the workflow
+through the sync
 ([D-163](../../docs/decisions/D-163.md)) — never typed into GitHub by hand.
 
 | Name             | What it is                                                                                                 |

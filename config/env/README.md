@@ -6,8 +6,8 @@ and `[build.args]` tables (D-85). Genuine secrets still live in Infisical — se
 `infra/infisical/README.md` and D-66.
 
 Splitting the config out of one host's own config format is what lets **any**
-environment consume it — Cloud Run, the Vercel failover and a plain local
-checkout load the exact same file. That is why moving production off Fly
+environment consume it — Cloud Run and a plain local checkout load the exact
+same file. That is why moving production off Fly
 changed none of these values: a new host is another reader of the same file
 rather than another copy of the values.
 
@@ -35,11 +35,9 @@ so the overlay can never become a second, undocumented config.
   `resolveEnvFile` and **throws**, naming every unsatisfied key. Build args are
   baked irreversibly into the client bundle, so a placeholder reaching a build
   would ship a broken Sentry DSN to real browsers with nothing failing.
-- **Deploy time** — `scripts/vercel-deploy.sh` refuses to deploy when a
-  `__LOCAL__` runtime key was never pushed to the Vercel project.
-  `scripts/cloudrun-deploy.sh` cannot make the same check — it holds no
-  credential that can read the runtime secret, by design — so on Cloud Run the
-  boot-time rule below is the one that binds.
+- **Deploy time** — nothing checks. `scripts/cloudrun-deploy.sh` holds no
+  credential that can read the runtime secret, by design, so the boot-time
+  rule below is the one that binds.
 - **Boot time** — `scripts/docker-entrypoint.sh` refuses to _export_ a
   `__LOCAL__`, logging loudly instead. Leaving it unset lets `env.ts` apply the
   variable's own absent-value behaviour, which degrades the feature cleanly;
@@ -94,12 +92,6 @@ Two files per environment, split by **when the value is consumed**:
   mounted Secret Manager file of Infisical secrets is sourced **after** it, by
   the same only-if-unset rule, so it fills what this file leaves unset —
   every `__LOCAL__` included.
-- **Vercel failover** ([D-177](../../docs/decisions/D-177.md)) —
-  `scripts/vercel-deploy.sh` replaces what `vercel pull` writes with
-  `production.build.env`'s values, and syncs `production.runtime.env` onto the
-  project from the commit (`scripts/vercel-env.mjs sync-committed`). A value
-  pushed from Infisical by `infra/infisical/push-vercel-env.sh` wins over the
-  file, as on Cloud Run.
 - **Local dev** — `apps/web`'s `dev` and `start` scripts load
   `local.runtime.env` through `dotenv` before `next` sees the process, which is
   why a fresh checkout boots with no per-developer file to fill in.

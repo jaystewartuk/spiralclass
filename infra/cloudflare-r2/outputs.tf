@@ -2,10 +2,9 @@ output "buckets" {
   description = <<-EOT
     Per-bucket R2 config + derived S3-compatible credentials, keyed by the
     real Cloudflare bucket name (e.g. "agendaprofe-teacher-photos").
-    Consumed by scripts/vercel-env.mjs's r2Entries(), which keeps the
-    production entries and spells them as the app reads them; the Vercel
-    failover push and the Cloud Run secret (scripts/cloudrun-env.mjs) both use
-    it — do not rename these fields without updating that function.
+    Consumed by scripts/cloudrun-env.mjs's r2Entries(), which keeps the
+    production entries and spells them as the app reads them for the Cloud
+    Run secret — do not rename these fields without updating that function.
 
     `bucket`/`access_key_id`/`secret_access_key` are wrapped in `try(...,
     null)` because during the ADOPTION phase (importing existing buckets

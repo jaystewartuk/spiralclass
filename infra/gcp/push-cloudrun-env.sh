@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Write the production app's runtime SECRETS into the Cloud Run target's one
-# Secret Manager secret ([D-184]) — the same two sets Fly and Vercel get, from
-# the same two places:
+# Secret Manager secret ([D-184]) — the same two sets Fly got, from the same
+# two places:
 #
 #   * Infisical `production` at `/`, NOT recursive — exactly what
 #     Fly's secrets import once took. Never `/config` and never `/deploy`,

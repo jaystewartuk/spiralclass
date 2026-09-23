@@ -8,10 +8,8 @@
  * fast-forwards the `production` branch. That push triggers
  * .github/workflows/deploy-production.yml: a database job (migrations behind a
  * Neon checkpoint), then scripts/cloudrun-deploy.sh — the amd64 image, the
- * Cloud Run deploy, the Inngest sync — and the production probes, alongside the
- * Vercel failover, which does not wait for Cloud Run. Promote judges production
- * by the database and Cloud Run jobs, and reports the failover on its own line
- * (scripts/ci/deploy-verdict.mjs). Cloud Run has held the domain since the
+ * Cloud Run deploy, the Inngest sync — and the production probes. Promote
+ * judges production by those two jobs (scripts/ci/deploy-verdict.mjs). Cloud Run has held the domain since the
  * 2026-09-23 cutover ([D-184]'s addendum); it was Fly before.
  *
  * WHY THE DEPLOY MOVED, AND WHY THAT IS NOT THE 2026-07-19 DRIFT AGAIN.
@@ -66,7 +64,7 @@ import { readFileSync } from "node:fs";
 import { createInterface } from "node:readline/promises";
 
 import { recordRun } from "../local/receipts.mjs";
-import { deployVerdict, failoverLine } from "./deploy-verdict.mjs";
+import { deployVerdict } from "./deploy-verdict.mjs";
 import { capture, check, git, has, run } from "./lib.mjs";
 
 const args = process.argv.slice(2);
@@ -315,17 +313,16 @@ if (has("gh")) {
 // The push above IS the deploy trigger ([D-157]): it moved `production`, using
 // the operator's own credentials, so deploy-production.yml fires. That workflow
 // migrates in its database job, then runs scripts/cloudrun-deploy.sh and the
-// probes, and — not waiting on Cloud Run — the Vercel failover.
+// probes.
 //
 // The chain D-120 insisted on is intact — nothing here is left for a human to
 // remember. What IS left for a human is the approvals on the `production`
-// environment, which GitHub asks for per job: the database job, then the two
-// targets together. Each is a queued run with a notification rather than a
+// environment, which GitHub asks for per job: the database job, then the
+// target. Each is a queued run with a notification rather than a
 // step that can be silently skipped. See deploy-production.yml's header.
 const RUN_URL = `https://github.com/${capture("gh", ["repo", "view", "--json", "nameWithOwner", "-q", ".nameWithOwner"]) || "jaystewartuk/spiralclass"}/actions/workflows/deploy-production.yml`;
 
 let deployOk = true;
-let failover = "";
 if (noWait || !has("gh")) {
   console.log(
     [
@@ -339,7 +336,7 @@ if (noWait || !has("gh")) {
 } else {
   console.log("\n── Waiting for the deploy workflow");
   console.log(
-    `  It needs two approvals on the production environment — the database job, then both targets: ${RUN_URL}\n`,
+    `  It needs two approvals on the production environment — the database job, then the target: ${RUN_URL}\n`,
   );
   // Matched on the HEAD SHA, not "the most recent run on this branch" — the
   // previous promote's run is also on this branch, and watching that one would
@@ -382,8 +379,8 @@ if (noWait || !has("gh")) {
     // Ctrl-C only stops watching; the deploy carries on.
     //
     // ⚠️ NOT `--exit-status`, which answers for the RUN — red whenever any job
-    // is. Since the targets were split ([D-177]'s addendum), a Vercel failover
-    // that could not refresh would have turned a release that shipped into a
+    // is. While a Vercel failover ran beside Cloud Run ([D-177] to [D-186]), a
+    // failover that could not refresh turned a release that shipped into a
     // promote reporting that production may not have moved. So the verdict
     // is read job by job, and a promote that ends green still means exactly
     // what it always has: production is serving this commit.
@@ -396,7 +393,6 @@ if (noWait || !has("gh")) {
     }
     const verdict = deployVerdict(jobs);
     deployOk = verdict.productionOk;
-    failover = failoverLine(verdict);
     if (!deployOk) {
       console.log(
         `\n  Database job: ${verdict.database}. Cloud Run job: ${verdict.cloudrun}. Run: ${runId}`,
@@ -432,7 +428,6 @@ console.log(
     deployOk
       ? "    Cloud Run deploy, Inngest sync, then the production probes."
       : "    Recover from here:  bash scripts/database-deploy.sh production --gate-already-passed && bash scripts/cloudrun-deploy.sh production --gate-already-passed",
-    ...(failover ? ["", failover] : []),
     "",
     "  Where things stand:  pnpm release:status",
     "  ⚠️ A deploy run by Actions leaves no entry in the local ledger, so that",

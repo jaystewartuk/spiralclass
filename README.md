@@ -553,8 +553,7 @@ more. One here held 220 unreachable routes in place for a month.
 ## Deployment
 
 Production runs on **Google Cloud Run** — service `web` in `us-east4` — backed
-by its own **Neon** Postgres project, with a Vercel failover that is deployed on
-every release and holds no domain ([D-177](docs/decisions/D-177.md)). The image
+by its own **Neon** Postgres project ([D-184](docs/decisions/D-184.md)). The image
 is built from the root `Dockerfile` (standalone Next output). Cloudflare holds
 DNS. LiveKit runs on a separate self-hosted ARM box.
 
