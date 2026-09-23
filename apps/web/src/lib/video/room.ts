@@ -1,3 +1,4 @@
+import type { RoomParticipantAttributes } from "@spiralclass/shared";
 import { getVideoProvider } from "@/lib/video/providers";
 
 // Server-side room introspection for the lesson-insights audio capture
@@ -49,4 +50,18 @@ export async function listRoomParticipantIdentities(room: string): Promise<strin
   } catch {
     return [];
   }
+}
+
+// Who is in a room and what each has published about themselves, as LiveKit's
+// server holds it. The live-captions speech-to-text token route reads it to
+// check a room really is one no browser can caption before it spends money
+// (D-185). Null when no provider is configured; a failed read throws, so the
+// caller can refuse rather than guess.
+export async function listRoomParticipantAttributes(
+  room: string,
+): Promise<RoomParticipantAttributes[] | null> {
+  const provider = getVideoProvider();
+  if (!provider) return null;
+  const participants = await provider.listParticipants(room);
+  return participants.map((p) => ({ identity: p.identity, attributes: p.attributes }));
 }

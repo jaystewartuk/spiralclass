@@ -7,6 +7,7 @@ import {
   canRecognizeDuringCall,
   captionLineId,
   chooseTranslationRoute,
+  cloudRecognitionRefusal,
   recognitionLocale,
   splitUtterance,
   type RecognitionEnvironment,
@@ -90,8 +91,13 @@ describe("assignRecognizers", () => {
     teacher: { present: true, capable: true },
     student: { present: true, capable: true },
     studentConsent: true,
+    cloudAvailable: false,
     ...over,
   });
+  const phones = {
+    teacher: { present: true, capable: false },
+    student: { present: true, capable: false },
+  };
 
   it("has each speaker recognised by their own browser when both can", () => {
     expect(assignRecognizers(room())).toEqual({ teacher: "teacher", student: "student" });
@@ -111,12 +117,54 @@ describe("assignRecognizers", () => {
     });
   });
 
-  it("assigns nobody when neither browser can recognise", () => {
+  it("assigns nobody when neither browser can recognise and the fallback is not configured", () => {
+    expect(assignRecognizers(room(phones))).toEqual({ teacher: null, student: null });
+  });
+
+  it("sends each speaker to the cloud from their own device when neither browser can recognise", () => {
+    expect(assignRecognizers(room({ ...phones, cloudAvailable: true }))).toEqual({
+      teacher: "cloud",
+      student: "cloud",
+    });
+  });
+
+  it("never uses the cloud for a speaker any browser in the room can recognise", () => {
+    // The whole matrix of who can: one capable browser anywhere means no
+    // paid minutes, for either speaker.
+    for (const teacherCapable of [true, false]) {
+      for (const studentCapable of [true, false]) {
+        if (!teacherCapable && !studentCapable) continue;
+        const assignment = assignRecognizers(
+          room({
+            cloudAvailable: true,
+            teacher: { present: true, capable: teacherCapable },
+            student: { present: true, capable: studentCapable },
+          }),
+        );
+        expect(assignment.teacher).not.toBe("cloud");
+        expect(assignment.student).not.toBe("cloud");
+        expect(assignment.teacher).not.toBeNull();
+        expect(assignment.student).not.toBeNull();
+      }
+    }
+  });
+
+  it("never sends the student to the cloud without her consent", () => {
+    expect(
+      assignRecognizers(room({ ...phones, cloudAvailable: true, studentConsent: false })),
+    ).toEqual({ teacher: "cloud", student: null });
+  });
+
+  it("never uses the cloud while the switch is off or someone is missing", () => {
+    expect(assignRecognizers(room({ ...phones, cloudAvailable: true, captionsOn: false }))).toEqual(
+      { teacher: null, student: null },
+    );
     expect(
       assignRecognizers(
         room({
+          cloudAvailable: true,
           teacher: { present: true, capable: false },
-          student: { present: true, capable: false },
+          student: { present: false, capable: false },
         }),
       ),
     ).toEqual({ teacher: null, student: null });
@@ -244,5 +292,42 @@ describe("captionLineId", () => {
 
   it("separates two lines from one speaker in the same millisecond", () => {
     expect(captionLineId("a", 5, 0)).not.toBe(captionLineId("a", 5, 1));
+  });
+});
+
+describe("cloudRecognitionRefusal", () => {
+  const teacher = (attrs: Record<string, string> = {}) => ({
+    identity: "t1",
+    attributes: { captionsOn: "true", captionsAsr: "0", ...attrs },
+  });
+  const student = (attrs: Record<string, string> = {}) => ({
+    identity: "s1",
+    attributes: { captionsAsr: "0", ...attrs },
+  });
+  const verdict = (participants: { identity: string; attributes: Record<string, string> }[]) =>
+    cloudRecognitionRefusal({ participants, callerIdentity: "s1", teacherIdentity: "t1" });
+
+  it("allows a room of two phones with the teacher's switch on", () => {
+    expect(verdict([teacher(), student()])).toBeNull();
+    // A participant that never published the attribute reads as unable.
+    expect(verdict([teacher(), { identity: "s1", attributes: {} }])).toBeNull();
+  });
+
+  it("refuses when any browser in the room can recognise", () => {
+    expect(verdict([teacher({ captionsAsr: "1" }), student()])).toBe("browser-can-recognise");
+    expect(verdict([teacher(), student({ captionsAsr: "1" })])).toBe("browser-can-recognise");
+  });
+
+  it("refuses a caller who is not in the room, or is alone in it", () => {
+    expect(verdict([teacher()])).toBe("caller-absent");
+    expect(verdict([student()])).toBe("alone");
+  });
+
+  it("refuses while the teacher's switch is off, trusting only her attribute", () => {
+    expect(verdict([teacher({ captionsOn: "false" }), student()])).toBe("captions-off");
+    // The student setting the switch on herself counts for nothing.
+    expect(verdict([teacher({ captionsOn: "false" }), student({ captionsOn: "true" })])).toBe(
+      "captions-off",
+    );
   });
 });

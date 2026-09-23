@@ -113,13 +113,15 @@ export function buildCsp(nonce: string): string {
       // above, so both stay listed rather than making this env-conditional.
       "https://livekit.spiralclass.com",
       "wss://livekit.spiralclass.com",
-      // Deepgram is deliberately ABSENT. Captions were client-streamed under
-      // D-27 and the teacher's browser held a wss socket to api.deepgram.com;
-      // D-106 moved that to the server-side Agent, and the last surface still
-      // publishing from the browser is gone. The only Deepgram call left is a
-      // server-side batch fetch (lib/transcription/deepgram.ts), which no
-      // connect-src governs. Do not re-add it without a browser socket to
-      // justify it — tests/lib/csp.test.ts pins this list exactly.
+      // Deepgram streaming speech-to-text, for live captions' phone-to-phone
+      // fallback (D-185's addendum): when no browser in a class can
+      // recognise speech, the speaker's own browser opens this socket and
+      // streams its microphone, authenticated by a short-lived token from
+      // /api/captions/stt-token. Only the wss host — every other Deepgram
+      // call (the grant, post-class transcription) is server-side, which no
+      // connect-src governs. Without it the socket is silently blocked under
+      // enforcement and two phones get no captions.
+      "wss://api.deepgram.com",
       // Intro-video upload (D-73): the booking-page editor uploads the video
       // straight to R2 via a presigned PUT (bypassing the 25 MB Server-Action
       // body limit), so the browser opens a direct connection to the R2 S3 API

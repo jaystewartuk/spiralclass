@@ -69,6 +69,16 @@ export function captionsConfigured(): boolean {
   return Boolean(googleTranslateApiKey());
 }
 
+// Is the phone-to-phone fallback configured — the paid streaming
+// speech-to-text a speaker's own browser uses when no browser in the class
+// can recognise (D-185's addendum)? Not a condition of the feature: without
+// it, two phones get a "needs a computer" notice instead of captions, exactly
+// as before the fallback existed. The key is the one post-class transcription
+// already uses, so it is normally present wherever captions are on.
+export function cloudCaptionsConfigured(): boolean {
+  return Boolean(deepgramApiKey());
+}
+
 function enablementFlagOn(): boolean {
   const raw = process.env.LIVE_CAPTIONS_ENABLED?.trim().toLowerCase();
   return raw === "1" || raw === "true" || raw === "on";

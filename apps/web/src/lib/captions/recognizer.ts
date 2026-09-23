@@ -98,7 +98,9 @@ export function installOnDeviceModels(args: {
   }
 }
 
-export type RecognizerStopReason = "permission" | "unsupported";
+// "unavailable" is the cloud fallback's: the speech-to-text service could not
+// be reached, or the server refused this browser a stream (cloud-recognizer.ts).
+export type RecognizerStopReason = "permission" | "unsupported" | "unavailable";
 
 export type RecognizerOptions = {
   Ctor: SpeechRecognitionCtorLike;

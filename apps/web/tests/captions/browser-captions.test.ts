@@ -5,6 +5,7 @@ import {
   type BrowserCaptionsDeps,
   type BrowserCaptionsInput,
 } from "@/lib/captions/browser-captions";
+import type { CloudRecognizerOptions } from "@/lib/captions/cloud-recognizer";
 import type { RecognizerOptions, SpeechRecognitionCtorLike } from "@/lib/captions/recognizer";
 
 // The controller that decides which speakers THIS browser recognises and
@@ -15,6 +16,8 @@ import type { RecognizerOptions, SpeechRecognitionCtorLike } from "@/lib/caption
 
 type FakeRecognizer = RecognizerOptions & { started: boolean; stopped: boolean };
 let recognizers: FakeRecognizer[];
+type FakeCloud = CloudRecognizerOptions & { started: boolean; stopped: boolean };
+let clouds: FakeCloud[];
 
 const SESSION = (over: Partial<CaptionSession> = {}): CaptionSession => ({
   bookingId: "b1",
@@ -26,6 +29,7 @@ const SESSION = (over: Partial<CaptionSession> = {}): CaptionSession => ({
   },
   recognitionLocales: { teacher: "es-MX", student: "en" },
   studentConsent: true,
+  cloudRecognition: false,
   ...over,
 });
 
@@ -57,6 +61,8 @@ function setup(over: Partial<BrowserCaptionsDeps> = {}) {
   const deps: BrowserCaptionsDeps = {
     SpeechRecognition: function Fake() {} as unknown as SpeechRecognitionCtorLike,
     Translator: null,
+    WebSocket: null,
+    MediaRecorder: null,
     fetch,
     publish: async (line) => {
       published.push(line);
@@ -68,6 +74,18 @@ function setup(over: Partial<BrowserCaptionsDeps> = {}) {
     createRecognizer: (o) => {
       const r: FakeRecognizer = { ...o, started: false, stopped: false };
       recognizers.push(r);
+      return {
+        start: () => {
+          r.started = true;
+        },
+        stop: () => {
+          r.stopped = true;
+        },
+      };
+    },
+    createCloudRecognizer: (o) => {
+      const r: FakeCloud = { ...o, started: false, stopped: false };
+      clouds.push(r);
       return {
         start: () => {
           r.started = true;
@@ -90,6 +108,7 @@ const flush = async () => {
 
 beforeEach(() => {
   recognizers = [];
+  clouds = [];
 });
 
 describe("BrowserCaptions — who recognises whom", () => {
@@ -167,6 +186,111 @@ describe("BrowserCaptions — who recognises whom", () => {
       }),
     );
     expect(recognizers).toHaveLength(0);
+  });
+});
+
+describe("BrowserCaptions — the cloud fallback (two phones)", () => {
+  const phones = (over: Partial<BrowserCaptionsInput> = {}) =>
+    input({
+      selfCapable: false,
+      session: SESSION({ cloudRecognition: true }),
+      room: { ...input().room, remote: { identity: "s1", micTrack: remoteMic, capable: false } },
+      ...over,
+    });
+  const liveClouds = () => clouds.filter((r) => r.started && !r.stopped);
+
+  it("streams its own speaker's mic, and nobody else's, when neither browser can recognise", () => {
+    const { c, statuses } = setup();
+    c.sync(phones());
+    expect(liveClouds()).toHaveLength(1);
+    expect(liveClouds()[0]).toMatchObject({ track: localMic, bookingId: "b1" });
+    expect(recognizers).toHaveLength(0);
+    // Nobody is left uncaptioned, so the "needs a computer" notice goes.
+    expect(statuses.at(-1)).toEqual({ uncaptioned: [], stopped: null });
+  });
+
+  it("streams even in a browser without the Web Speech API", () => {
+    const { c } = setup({ SpeechRecognition: null });
+    c.sync(phones());
+    expect(liveClouds()).toHaveLength(1);
+  });
+
+  it("never streams when either browser in the room can recognise", () => {
+    const { c } = setup();
+    c.sync(phones({ selfCapable: true }));
+    c.sync(
+      phones({
+        room: { ...input().room, remote: { identity: "s1", micTrack: remoteMic, capable: true } },
+      }),
+    );
+    expect(clouds).toHaveLength(0);
+  });
+
+  it("stops streaming the moment a computer that can recognise joins the other side", () => {
+    const { c } = setup();
+    c.sync(phones());
+    c.sync(
+      phones({
+        room: { ...input().room, remote: { identity: "s1", micTrack: remoteMic, capable: true } },
+      }),
+    );
+    expect(liveClouds()).toHaveLength(0);
+  });
+
+  it("never streams the student's speech without her consent", () => {
+    const { c, statuses } = setup();
+    c.sync(
+      phones({
+        session: SESSION({ role: "student", cloudRecognition: true, studentConsent: false }),
+        room: {
+          localIdentity: "s1",
+          localMicTrack: localMic,
+          remote: { identity: "t1", micTrack: remoteMic, capable: false },
+        },
+      }),
+    );
+    expect(clouds).toHaveLength(0);
+    expect(statuses.at(-1)).toEqual({ uncaptioned: [], stopped: null });
+  });
+
+  it("still reports both uncaptioned when the fallback is not configured", () => {
+    const { c, statuses } = setup();
+    c.sync(phones({ session: SESSION({ cloudRecognition: false }) }));
+    expect(clouds).toHaveLength(0);
+    expect(statuses.at(-1)).toEqual({ uncaptioned: ["teacher", "student"], stopped: null });
+  });
+
+  it("publishes a cloud final to the other participant like any line of its own", async () => {
+    const { c, published } = setup();
+    c.sync(phones());
+    liveClouds()[0].onFinal("Hola");
+    await flush();
+    expect(published).toEqual([
+      expect.objectContaining({ for: "s1", from: "t1", text: "EN(Hola)", src: "Hola" }),
+    ]);
+  });
+
+  it("reports a fallback that gave up, and does not restart it for the same track", () => {
+    const { c, statuses } = setup();
+    c.sync(phones());
+    liveClouds()[0].onStopped("unavailable");
+    c.sync(phones());
+    expect(clouds).toHaveLength(1);
+    expect(statuses.at(-1)).toEqual({ uncaptioned: [], stopped: "unavailable" });
+  });
+
+  it("passes a server refusal up so the hook re-reads the config", () => {
+    const { c, deps } = setup();
+    c.sync(phones());
+    liveClouds()[0].onRefused("no-consent");
+    expect(deps.onRefused).toHaveBeenCalledWith("no-consent");
+  });
+
+  it("stops the stream on dispose", () => {
+    const { c } = setup();
+    c.sync(phones());
+    c.dispose();
+    expect(liveClouds()).toHaveLength(0);
   });
 });
 

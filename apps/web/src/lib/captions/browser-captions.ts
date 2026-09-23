@@ -8,6 +8,12 @@ import {
 } from "@spiralclass/shared";
 import { CaptionTranslator, type TranslationRefusal } from "@/lib/captions/caption-translator";
 import {
+  CloudRecognizer,
+  type CloudRecognizerOptions,
+  type MediaRecorderCtorLike,
+  type WebSocketCtorLike,
+} from "@/lib/captions/cloud-recognizer";
+import {
   TrackRecognizer,
   type RecognizerOptions,
   type RecognizerStopReason,
@@ -21,6 +27,11 @@ import {
 // (assignRecognizers, shared with the other participant's browser, so the
 // two agree without talking) and reconciles running recognisers to match:
 // starting, stopping, or restarting one when its track or language changes.
+//
+// A speaker no browser in the room can recognise (two phones) is assigned
+// "cloud": their OWN browser streams their microphone to the paid
+// speech-to-text fallback (cloud-recognizer.ts) and publishes the result like
+// any line of its own speaker's. The other browser runs nothing for them.
 //
 // Each finished utterance is split to the route's size, translated, built
 // into a CaptionLine, and then either PUBLISHED to the other participant —
@@ -52,16 +63,21 @@ export type BrowserCaptionsInput = {
 
 export type BrowserCaptionsStatus = {
   // Speakers nobody in this room can caption right now, although captions are
-  // on and they may be captioned — the view explains why.
+  // on and they may be captioned — the view explains why. Empty for two
+  // phones whenever the cloud fallback is configured.
   uncaptioned: CallRole[];
-  // Set when a recogniser here gave up for good (microphone permission, or a
-  // language this browser cannot recognise).
+  // Set when a recogniser here gave up for good (microphone permission, a
+  // language this browser cannot recognise, or the cloud fallback
+  // unreachable).
   stopped: RecognizerStopReason | null;
 };
 
 export type BrowserCaptionsDeps = {
   SpeechRecognition: SpeechRecognitionCtorLike | null;
   Translator: TranslatorApiLike | null;
+  // What the cloud fallback records and streams with; null where absent.
+  WebSocket: WebSocketCtorLike | null;
+  MediaRecorder: MediaRecorderCtorLike | null;
   fetch: typeof fetch;
   // Send a line to the other participant (its `for`).
   publish: (line: CaptionLine) => Promise<void>;
@@ -73,6 +89,7 @@ export type BrowserCaptionsDeps = {
   onRefused: (reason: TranslationRefusal) => void;
   now?: () => number;
   createRecognizer?: (options: RecognizerOptions) => { start(): void; stop(): void };
+  createCloudRecognizer?: (options: CloudRecognizerOptions) => { start(): void; stop(): void };
 };
 
 type Running = {
@@ -105,7 +122,7 @@ export class BrowserCaptions {
     const desired = new Map<CallRole, { key: string; start: () => Running }>();
     let uncaptioned: CallRole[] = [];
 
-    if (session && input.captionsOn && this.deps.SpeechRecognition) {
+    if (session && input.captionsOn) {
       const me = session.role;
       const other: CallRole = me === "teacher" ? "student" : "teacher";
       const present = { [me]: true, [other]: room.remote !== null } as Record<CallRole, boolean>;
@@ -118,6 +135,7 @@ export class BrowserCaptions {
         teacher: { present: present.teacher, capable: capable.teacher },
         student: { present: present.student, capable: capable.student },
         studentConsent: session.studentConsent,
+        cloudAvailable: session.cloudRecognition,
       });
       uncaptioned = SPEAKERS.filter(
         (s) =>
@@ -127,8 +145,18 @@ export class BrowserCaptions {
       );
 
       for (const speaker of SPEAKERS) {
-        if (assignment[speaker] !== me || !room.remote) continue;
+        if (!room.remote) continue;
         const mine = speaker === me;
+        // This browser's recognisers: the ones assigned to its role, and the
+        // cloud stream for its own speaker. A browser recogniser needs the
+        // Web Speech API; the cloud one checks its own APIs when it starts.
+        const kind =
+          assignment[speaker] === me && this.deps.SpeechRecognition
+            ? "browser"
+            : assignment[speaker] === "cloud" && mine
+              ? "cloud"
+              : null;
+        if (!kind) continue;
         const track = mine ? room.localMicTrack : room.remote.micTrack;
         if (!track || track.readyState === "ended") continue;
         const direction = session.directions[speaker];
@@ -136,6 +164,7 @@ export class BrowserCaptions {
         const speakerIdentity = mine ? room.localIdentity : room.remote.identity;
         const listenerIdentity = mine ? room.remote.identity : room.localIdentity;
         const key = [
+          kind,
           session.bookingId,
           speaker,
           track.id,
@@ -151,6 +180,7 @@ export class BrowserCaptions {
           start: () =>
             this.startSpeaker({
               key,
+              kind,
               speaker,
               track,
               lang,
@@ -184,6 +214,7 @@ export class BrowserCaptions {
 
   private startSpeaker(args: {
     key: string;
+    kind: "browser" | "cloud";
     speaker: CallRole;
     track: MediaStreamTrack;
     lang: string;
@@ -208,21 +239,39 @@ export class BrowserCaptions {
       chain: Promise.resolve(),
       recognizer: { start() {}, stop() {} },
     };
-    const create = this.deps.createRecognizer ?? ((o: RecognizerOptions) => new TrackRecognizer(o));
-    run.recognizer = create({
-      Ctor: this.deps.SpeechRecognition as SpeechRecognitionCtorLike,
-      track: args.track,
-      lang: args.lang,
-      onFinal: (text) => {
-        run.chain = run.chain.then(() => this.deliver(text, translator, args)).catch(() => {});
-      },
-      onStopped: (reason) => {
-        this.givenUp.add(args.key);
-        if (this.running.get(args.speaker) === run) this.running.delete(args.speaker);
-        this.stopped = reason;
-        this.report({ uncaptioned: [], stopped: reason });
-      },
-    });
+    const onFinal = (text: string) => {
+      run.chain = run.chain.then(() => this.deliver(text, translator, args)).catch(() => {});
+    };
+    const onStopped = (reason: RecognizerStopReason) => {
+      this.givenUp.add(args.key);
+      if (this.running.get(args.speaker) === run) this.running.delete(args.speaker);
+      this.stopped = reason;
+      this.report({ uncaptioned: [], stopped: reason });
+    };
+    if (args.kind === "cloud") {
+      const create =
+        this.deps.createCloudRecognizer ?? ((o: CloudRecognizerOptions) => new CloudRecognizer(o));
+      run.recognizer = create({
+        bookingId: args.session.bookingId,
+        track: args.track,
+        fetch: this.deps.fetch,
+        WebSocket: this.deps.WebSocket,
+        MediaRecorder: this.deps.MediaRecorder,
+        onFinal,
+        onStopped,
+        onRefused: (reason) => this.deps.onRefused(reason),
+      });
+    } else {
+      const create =
+        this.deps.createRecognizer ?? ((o: RecognizerOptions) => new TrackRecognizer(o));
+      run.recognizer = create({
+        Ctor: this.deps.SpeechRecognition as SpeechRecognitionCtorLike,
+        track: args.track,
+        lang: args.lang,
+        onFinal,
+        onStopped,
+      });
+    }
     run.recognizer.start();
     return run;
   }

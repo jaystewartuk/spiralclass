@@ -220,18 +220,18 @@ Owning the call was never about the call. It was about owning the media the
 lesson-AI pipeline needs — and about being able to overlay the teacher's notes
 on it.
 
-| #                   | Decision                                                                                   |
-| ------------------- | ------------------------------------------------------------------------------------------ |
-| [D-16](./D-16.md)   | **A `VideoProvider` seam** — the Cloud → self-hosted move changed two config values        |
-| [D-27](./D-27.md)   | Live captions, client-streamed and ephemeral, because serverless cannot host a worker      |
-| [D-94](./D-94.md)   | Production cuts over to the self-hosted LiveKit box — an explicit risk acceptance          |
-| [D-106](./D-106.md) | Captions move to a server-side agent once the constraint behind D-27 stopped being true    |
-| [D-108](./D-108.md) | The agent ships from a real checkout on the box — the outage was provenance, not the bug   |
-| [D-132](./D-132.md) | Auto-start recording when both parties are present — who starts it, never what it captures |
-| [D-134](./D-134.md) | The media host goes behind Cloudflare's proxy, after one teacher's iPhone could not join   |
-| [D-135](./D-135.md) | Recording becomes audio-only: the first real class produced an 846 MB file                 |
-| [D-182](./D-182.md) | Production goes back to LiveKit Cloud while Oracle refuses to rebuild the box              |
-| [D-185](./D-185.md) | **Captions move into the browsers**, and a computer in the call covers a phone that cannot |
+| #                   | Decision                                                                                                                  |
+| ------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| [D-16](./D-16.md)   | **A `VideoProvider` seam** — the Cloud → self-hosted move changed two config values                                       |
+| [D-27](./D-27.md)   | Live captions, client-streamed and ephemeral, because serverless cannot host a worker                                     |
+| [D-94](./D-94.md)   | Production cuts over to the self-hosted LiveKit box — an explicit risk acceptance                                         |
+| [D-106](./D-106.md) | Captions move to a server-side agent once the constraint behind D-27 stopped being true                                   |
+| [D-108](./D-108.md) | The agent ships from a real checkout on the box — the outage was provenance, not the bug                                  |
+| [D-132](./D-132.md) | Auto-start recording when both parties are present — who starts it, never what it captures                                |
+| [D-134](./D-134.md) | The media host goes behind Cloudflare's proxy, after one teacher's iPhone could not join                                  |
+| [D-135](./D-135.md) | Recording becomes audio-only: the first real class produced an 846 MB file                                                |
+| [D-182](./D-182.md) | Production goes back to LiveKit Cloud while Oracle refuses to rebuild the box                                             |
+| [D-185](./D-185.md) | **Captions move into the browsers**, and a computer in the call covers a phone that cannot; two phones stream to Deepgram |
 
 ### The lesson-AI pipeline, and the consent that gates it
 

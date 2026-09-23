@@ -73,6 +73,7 @@ describe("buildCsp third-party allowlists are complete and asserted", () => {
       "wss://*.livekit.cloud", //      LiveKit signaling socket (wss)
       "https://livekit.spiralclass.com", // Self-hosted LiveKit (preview, 2026-07-21)
       "wss://livekit.spiralclass.com", //   Self-hosted LiveKit signaling socket (preview)
+      "wss://api.deepgram.com", //     live captions' phone-to-phone fallback stream (D-185)
       "https://*.r2.cloudflarestorage.com", // intro-video presigned PUT (browser→R2, D-73)
     ]);
     expect(new Set(directiveTokens(buildCsp("n"), "connect-src"))).toEqual(EXPECTED_CONNECT_SRC);

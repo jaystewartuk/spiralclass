@@ -1,4 +1,5 @@
 import { canRecognizeDuringCall, type RecognitionEnvironment } from "@spiralclass/shared";
+import type { MediaRecorderCtorLike, WebSocketCtorLike } from "@/lib/captions/cloud-recognizer";
 import type { SpeechRecognitionCtorLike, TranslatorApiLike } from "@/lib/captions/recognizer";
 
 // Reading the browser for live captions (D-185): which speech and translation
@@ -11,6 +12,8 @@ type BrowserLike = {
   SpeechRecognition?: unknown;
   webkitSpeechRecognition?: unknown;
   Translator?: unknown;
+  WebSocket?: unknown;
+  MediaRecorder?: unknown;
   navigator?: {
     userAgent?: string;
     userAgentData?: { mobile?: boolean; brands?: { brand: string }[] };
@@ -26,6 +29,19 @@ export function translatorApi(win: BrowserLike): TranslatorApiLike | null {
   const api = win.Translator as TranslatorApiLike | undefined;
   return api && typeof api.availability === "function" && typeof api.create === "function"
     ? api
+    : null;
+}
+
+// What the cloud fallback streams with (cloud-recognizer.ts). Both exist in
+// every current browser; null only where one does not, and the fallback then
+// gives up as unsupported rather than throwing mid-call.
+export function webSocketCtor(win: BrowserLike): WebSocketCtorLike | null {
+  return typeof win.WebSocket === "function" ? (win.WebSocket as WebSocketCtorLike) : null;
+}
+
+export function mediaRecorderCtor(win: BrowserLike): MediaRecorderCtorLike | null {
+  return typeof win.MediaRecorder === "function"
+    ? (win.MediaRecorder as MediaRecorderCtorLike)
     : null;
 }
 

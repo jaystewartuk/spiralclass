@@ -11,7 +11,10 @@
 // Chrome hears both, and will also recognise a REMOTE participant's track.
 // So a direction of speech is not always recognised by the person speaking:
 // when their device cannot, the other participant's desktop browser does it
-// from the call audio it already receives.
+// from the call audio it already receives. And when NEITHER device can —
+// two phones — the speaker's own browser streams their microphone to a paid
+// speech-to-text service instead ("cloud", D-185's addendum), the one case
+// the browsers leave uncovered.
 
 import type { CallRole, CaptionDirection, CaptionLine } from "./captions";
 
@@ -37,6 +40,10 @@ export type CaptionSession = {
   recognitionLocales: Record<CallRole, string>;
   // D-22: whether the student's speech may be captioned at all.
   studentConsent: boolean;
+  // Whether the paid speech-to-text fallback is configured on the server, so
+  // a speaker no browser here can recognise may be assigned "cloud". Both
+  // clients read it from the same answer, so they agree on the assignment.
+  cloudRecognition: boolean;
 };
 
 // ---------------------------------------------------------------------------
@@ -163,16 +170,23 @@ export type RecognizerInputs = {
   // D-22: the student's speech is only ever captioned with her consent (her
   // guardian's for a minor). The teacher's own speech needs none.
   studentConsent: boolean;
+  // CaptionSession.cloudRecognition: the paid fallback is configured.
+  cloudAvailable: boolean;
 };
 
-// For each speaker, which participant's browser recognises their speech — or
-// null when nobody does. Both clients compute this from the same room state,
-// so they agree on it without talking to each other; a client runs exactly
-// the recognisers assigned to its own role.
-export type RecognizerAssignment = Record<CallRole, CallRole | null>;
+// Who recognises one speaker: a participant's browser (by role), or "cloud" —
+// the speaker's OWN browser streaming their microphone to the paid
+// speech-to-text service, because no browser in the room can recognise.
+export type Recognizer = CallRole | "cloud";
+
+// For each speaker, who recognises their speech — or null when nobody does.
+// Both clients compute this from the same room state, so they agree on it
+// without talking to each other; a client runs exactly the recognisers
+// assigned to its own role, plus the "cloud" one for its own speaker.
+export type RecognizerAssignment = Record<CallRole, Recognizer | null>;
 
 export function assignRecognizers(inputs: RecognizerInputs): RecognizerAssignment {
-  const assign = (speaker: CallRole): CallRole | null => {
+  const assign = (speaker: CallRole): Recognizer | null => {
     const listener: CallRole = speaker === "teacher" ? "student" : "teacher";
     if (!inputs.captionsOn) return null;
     if (speaker === "student" && !inputs.studentConsent) return null;
@@ -182,9 +196,48 @@ export function assignRecognizers(inputs: RecognizerInputs): RecognizerAssignmen
     // network) and keeps each person's speech on their own device.
     if (inputs[speaker].capable) return speaker;
     if (inputs[listener].capable) return listener;
+    // Only when no browser here can recognise: never two paths for one
+    // speaker, and never paid minutes a free browser could have covered. The
+    // consent check above already applies — the student's speech never
+    // leaves her device for this without it.
+    if (inputs.cloudAvailable) return "cloud";
     return null;
   };
   return { teacher: assign("teacher"), student: assign("student") };
+}
+
+// The server's half of the "cloud" rule, run before it mints a speech-to-text
+// token: the caller's own browser may stream to the paid service only when the
+// room, as LiveKit itself reports it, is one no browser can caption — so an
+// authenticated participant cannot run up minutes from a room where a
+// computer is doing the work for free. Reads the same two attributes the
+// browsers publish; LiveKit's copy is the one the caller cannot edit after the
+// fact, but it is still self-reported, so this bounds cost, not trust (the
+// route's rate limits do the rest).
+export type RoomParticipantAttributes = {
+  identity: string;
+  attributes: Readonly<Record<string, string>>;
+};
+
+export type CloudRecognitionRefusal =
+  "caller-absent" | "alone" | "captions-off" | "browser-can-recognise";
+
+export function cloudRecognitionRefusal(args: {
+  participants: readonly RoomParticipantAttributes[];
+  callerIdentity: string;
+  teacherIdentity: string;
+}): CloudRecognitionRefusal | null {
+  const { participants, callerIdentity, teacherIdentity } = args;
+  if (!participants.some((p) => p.identity === callerIdentity)) return "caller-absent";
+  // Nobody to caption for (assignRecognizers asks the same).
+  if (!participants.some((p) => p.identity !== callerIdentity)) return "alone";
+  // Only the teacher's own switch counts (D-27).
+  const teacher = participants.find((p) => p.identity === teacherIdentity);
+  if (teacher?.attributes[CAPTIONS_ON_ATTRIBUTE] !== "true") return "captions-off";
+  if (participants.some((p) => p.attributes[CAPTIONS_RECOGNIZER_ATTRIBUTE] === "1")) {
+    return "browser-can-recognise";
+  }
+  return null;
 }
 
 // ---------------------------------------------------------------------------

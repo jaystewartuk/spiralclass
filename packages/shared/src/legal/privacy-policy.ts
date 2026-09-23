@@ -24,7 +24,7 @@
 import { SUBPROCESSORS_REVIEWED } from "./subprocessors";
 
 /** The date this document was last substantively changed. */
-export const PRIVACY_POLICY_LAST_UPDATED = "2026-08-25";
+export const PRIVACY_POLICY_LAST_UPDATED = "2026-09-23";
 
 /** Re-exported so a renderer needs one import to show both dates. */
 export { SUBPROCESSORS_REVIEWED };
@@ -230,7 +230,7 @@ export const PRIVACY_POLICY_SECTIONS: readonly PolicySection[] = [
         kind: "list",
         items: [
           "Lesson materials — when a teacher asks the product to draft or edit a teaching material, the text of that material and the teacher's own lesson template are sent to Anthropic. Student data is not included.",
-          "Live captions — when a teacher turns captions on during a class, the teacher's speech, and a student's where that student has consented (or their parent or guardian has, for a student under 18), is recognised by the web browser of someone in the call: on the device itself where the browser can, and otherwise by that browser's own speech service (Google, for Chrome). Each finished line is translated on the device where possible, and otherwise by Google Cloud Translation, which receives only the text. Nothing is stored: the captions exist only while the class is running.",
+          "Live captions — when a teacher turns captions on during a class, the teacher's speech, and a student's where that student has consented (or their parent or guardian has, for a student under 18), is recognised by the web browser of someone in the call: on the device itself where the browser can, and otherwise by that browser's own speech service (Google, for Chrome). When no device in the call can recognise speech (two phones, for example), each person's own browser sends their speech to Deepgram instead, which returns the text and is instructed not to keep the audio or use it to train its models. Each finished line is translated on the device where possible, and otherwise by Google Cloud Translation, which receives only the text. Nothing is stored: the captions exist only while the class is running.",
           "Class transcription and learning insights — where a student has consented (or their parent or guardian has, for a student under 18), each speaker's audio from that class is transcribed by Deepgram and the transcript is read by Anthropic to suggest what to work on next. The audio itself is deleted as soon as it has been transcribed, unless the teacher has chosen to keep it so the class can be played back. Every suggestion is a draft the teacher reviews before it counts for anything.",
           "Homework review — when a teacher asks for an AI first pass on a homework answer, that answer is sent to Anthropic. It produces a draft for the teacher to review; it never reaches the student without the teacher.",
           "Intro-video coaching — a teacher's own promotional video, which is public, is transcribed and reviewed to give them feedback on it. No student is involved.",

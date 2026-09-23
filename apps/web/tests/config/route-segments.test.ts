@@ -169,6 +169,7 @@ const ALLOWED_SEGMENTS: readonly string[] = [
   "storage",
   "stream",
   "stripe",
+  "stt-token",
   "student",
   "students",
   "subscription",

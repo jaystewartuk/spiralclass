@@ -225,6 +225,16 @@ describe("resolveCaptionSession", () => {
     teacherStudentFindUnique.mockResolvedValue(null);
     expect(await resolveCaptionSession("b1", TEACHER)).toMatchObject({ studentConsent: false });
   });
+
+  it("offers the phone-to-phone fallback only when its key is configured", async () => {
+    bookingFindFirst.mockResolvedValue(bookingRow());
+    teacherStudentFindUnique.mockResolvedValue(null);
+    vi.stubEnv("DEEPGRAM_API_KEY", "dg-key");
+    expect(await resolveCaptionSession("b1", TEACHER)).toMatchObject({ cloudRecognition: true });
+    vi.stubEnv("DEEPGRAM_API_KEY", "");
+    expect(await resolveCaptionSession("b1", STUDENT)).toMatchObject({ cloudRecognition: false });
+    vi.unstubAllEnvs();
+  });
 });
 
 describe("applyBookingLanguageOverride", () => {

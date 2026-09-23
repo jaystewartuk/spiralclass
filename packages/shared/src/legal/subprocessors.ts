@@ -185,10 +185,13 @@ export const SUBPROCESSORS: readonly Subprocessor[] = [
   {
     id: "deepgram",
     name: "Deepgram",
+    // Live captions joined on 2026-09-23 (D-185's addendum): the fallback
+    // for a class where no device can recognise speech, streamed from the
+    // speaker's own browser and opted out of Deepgram's model training.
     purpose:
-      "Converts speech to text for intro-video coaching and, where the student has consented, for post-class lesson transcripts.",
+      "Converts speech to text for intro-video coaching; where the student has consented, for post-class lesson transcripts; and for live captions in a class where no device in the call can recognise speech itself.",
     dataShared:
-      "The audio of the teacher's intro video, or of a consenting student's side of a class.",
+      "The audio of the teacher's intro video, of a consenting student's side of a class, or — for live captions — the speech of the teacher or a consenting student while captions are on.",
     location: "United States",
     gate: "DEEPGRAM_API_KEY",
     evidence: "vendor documentation",

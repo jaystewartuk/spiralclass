@@ -8,6 +8,7 @@ import {
 } from "@spiralclass/shared";
 import { prisma } from "@/lib/prisma";
 import { flushAnalytics, trackServerEvent } from "@/lib/analytics/posthog";
+import { cloudCaptionsConfigured } from "@/lib/captions/config";
 import { captionsConsentOk } from "@/lib/captions/consent";
 
 // Class-booking caption language/consent resolution. Captions run in the
@@ -100,6 +101,7 @@ export async function resolveCaptionSession(
       student: recognitionLocale(studentDirection.source),
     },
     studentConsent: await captionsPublishConsentOk(booking, "student"),
+    cloudRecognition: cloudCaptionsConfigured(),
   };
 }
 

@@ -185,6 +185,7 @@ graph LR
     T -. "caption lines, recognised<br/>in the browser" .-> LK
     T -- "caption translation<br/>(when not on the device)" --> W
     W --> GT["Google Cloud Translation"]
+    S -. "two phones only:<br/>mic audio" .-> DG["Deepgram"]
     R2 -- "lesson.audio.ready" --> IN["Inngest pipeline"]
     IN --> INS["transcript → focus areas → brief"]
 ```
@@ -195,9 +196,10 @@ the self-hosted box changed two configuration values and zero lines of
 application code.
 
 Recording is room-composite Egress writing straight to R2 with per-request
-credentials. Captions are ephemeral — recognised in a participant's browser,
-translated on the device or through the app, published into the room, never
-stored — which is why they sit outside the retention rules that govern
+credentials. Captions are ephemeral — recognised in a participant's browser
+(or, when neither browser can, streamed from the speaker's own browser to
+Deepgram), translated on the device or through the app, published into the
+room, never stored — which is why they sit outside the retention rules that govern
 transcription. Which browser recognises whom, and why, is
 [D-185](../decisions/D-185.md); the behaviour is
 [live-calls-video.md](../features/live-calls-video.md).

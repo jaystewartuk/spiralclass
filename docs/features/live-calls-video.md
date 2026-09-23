@@ -127,16 +127,30 @@ That lasts until preview has a LiveKit server of its own.
     has a translator for the pair (desktop Chrome), otherwise by
     `POST /api/captions/translate` through Google Cloud Translation. Only
     finished utterances are translated; interim results never leave the
-    browser. There is no server-side captions process.
+    browser. There is no server-side captions process: the one paid path
+    (below) streams from a participant's own browser to Deepgram.
     - **Who recognises whom.** Each person's speech is recognised by their
       own browser when it can recognise during a call — today that means
       Chrome on a computer. When it cannot (Android Chrome measurably hears
       nothing while the call holds the microphone), the **other** person's
-      browser recognises it from the call audio it already receives. When
-      neither browser can — two phones — nothing is captioned, and both
-      screens say captions need one of them on Chrome on a computer. Both
+      browser recognises it from the call audio it already receives. Both
       browsers compute this from the same room state (each publishes whether
       it can, as a participant attribute), so they agree without talking.
+    - **When neither browser can — two phones.** Each person's own browser
+      records their call microphone track and streams it to Deepgram
+      (Nova-3, finals only, opted out of Deepgram's model training), and the
+      transcript goes through the same translate-and-publish path. This is
+      the only case that uses it: never for a speaker a browser in the room
+      can recognise, never for the student without her consent. Each
+      connection starts at `POST /api/captions/stt-token`, which re-runs the
+      caption access and consent checks, reads the room from LiveKit's server
+      to confirm no participant says it can recognise and the teacher's
+      switch is on, then returns a 30-second Deepgram token and the listen
+      URL — the server picks the model and language, and the long-lived key
+      never reaches the browser. Grants are rate-limited per caller per class
+      and per class per day, and each is logged. Without `DEEPGRAM_API_KEY`
+      the fallback is off and two phones are told captions need one of them
+      on Chrome on a computer, as before.
     - A line one browser recognises for its own speaker is published to the
       other participant over LiveKit's reliable data channel, addressed to
       them. A line a browser recognises from the other person is shown on
@@ -169,7 +183,8 @@ That lasts until preview has a LiveKit server of its own.
     seconds) and then gone; the in-call transcript panel lives in the
     browser's memory and goes when the viewer leaves. There is no caption
     transcript artifact separate from the post-call transcription pipeline
-    below. The translation route logs a character count per call, never text.
+    below. The translation route logs a character count per call, never text;
+    the token route logs each grant, never audio or the token.
 19. The teacher's caption toggle is hidden entirely if the flag is on but
     `GOOGLE_TRANSLATE_API_KEY` is missing — no error state, matching the
     "flag-on-but-dark" failure mode the product has hit before (the

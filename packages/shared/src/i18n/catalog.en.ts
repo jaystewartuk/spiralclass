@@ -396,7 +396,7 @@ export const en = {
   "myDetails.languageDescription": "Your language — used for live captions during your classes.",
   "myDetails.captionsConsent": "Live captions",
   "myDetails.captionsConsentDescription":
-    "Turn this on to let your teacher's class have live captions of YOUR speech too — while it's on, a web browser in the call recognises your speech (on the device, or with that browser's speech service) and it is translated on the device or by Google. Nothing is stored.",
+    "Turn this on to let your teacher's class have live captions of YOUR speech too — while it's on, a web browser in the call recognises your speech (on the device, or with that browser's speech service; or, when no device in the call can, your own browser sends it to Deepgram) and it is translated on the device or by Google. Nothing is stored.",
   "myDetails.captionsConsentEnable": "Turn on live captions for my speech",
   "myDetails.captionsConsentEnabled": "Live captions enabled",
 
@@ -701,12 +701,14 @@ export const en = {
   "web.call.captionsStartFailed": "Couldn't start subtitles. Check your connection and try again.",
   "call.captionsConsentHint": "Live captions are available — enable them in your account settings.",
   "call.captionsDisclosure":
-    "Captions are made in your browsers: speech is recognised on the device or by the browser's own speech service, and translated on the device or by Google. Nothing is stored.",
+    "Captions are made in your browsers: speech is recognised on the device or by the browser's own speech service — or by Deepgram when neither of your devices can — and translated on the device or by Google. Nothing is stored.",
   "call.captionsNoticeTitle": "Before you turn on captions",
   "call.captionsNoticeDismiss": "Got it",
   "call.captionsEnabledToast": "Live captions enabled.",
   "call.captionsNeedComputer": "Captions need one of you on Chrome on a computer.",
   "call.captionsStopped": "Captions stopped on this device — check the microphone permission.",
+  "call.captionsServiceUnavailable":
+    "Captions stopped on this device — the captioning service couldn't be reached.",
   "call.captionsDownloading": "Preparing on-device translation… {percent}%",
   // Live-subtitle reading controls. These belong to the READER (either role),
   // and are separate from the teacher's room-wide captionsOn/captionsOff
@@ -4610,7 +4612,7 @@ export const en = {
   "web.myClasses.account.nativeLanguage.savedMessage": "Saved.",
   "web.myClasses.account.captionsConsent.title": "Live captions",
   "web.myClasses.account.captionsConsent.description":
-    "Turn this on to let your teacher's class have live captions of YOUR speech too — while it's on, a web browser in the call recognises your speech (on the device, or with that browser's speech service) and it is translated on the device or by Google. Nothing is stored.",
+    "Turn this on to let your teacher's class have live captions of YOUR speech too — while it's on, a web browser in the call recognises your speech (on the device, or with that browser's speech service; or, when no device in the call can, your own browser sends it to Deepgram) and it is translated on the device or by Google. Nothing is stored.",
   "web.myClasses.account.captionsConsent.record": "Turn on live captions for my speech",
   "web.myClasses.account.captionsConsent.recorded": "✓ Live captions enabled",
   "web.myClasses.account.signInEmail.title": "Sign-in email",

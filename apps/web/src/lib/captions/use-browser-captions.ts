@@ -19,8 +19,10 @@ import {
 } from "@/lib/captions/browser-captions";
 import {
   browserCanRecognizeDuringCall,
+  mediaRecorderCtor,
   speechRecognitionCtor,
   translatorApi,
+  webSocketCtor,
 } from "@/lib/captions/recognition-environment";
 import { installOnDeviceModels } from "@/lib/captions/recognizer";
 
@@ -197,6 +199,8 @@ export function useBrowserCaptions({
     const controller = new BrowserCaptions({
       SpeechRecognition: speechRecognitionCtor(window),
       Translator: translatorApi(window),
+      WebSocket: webSocketCtor(window),
+      MediaRecorder: mediaRecorderCtor(window),
       fetch: (input, init) => fetch(input, init),
       publish: async (line) => {
         await room.localParticipant.publishData(encodeCaption(line), {

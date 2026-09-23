@@ -39,6 +39,9 @@ export type ParticipantInfo = {
   // have none — e.g. a participant with only a camera track still appears
   // here with micTrackId: null, not omitted.
   micTrackId: string | null;
+  // The participant's own attributes (localParticipant.setAttributes) as the
+  // server holds them — live captions read two of them (D-185).
+  attributes: Record<string, string>;
 };
 
 // ---- Admin observability (Live Calls admin dashboard) -------------------

@@ -445,11 +445,13 @@ board** — a template that no longer names a secret does not remove it from an
 environment that already has it, and until then it is a live credential nothing
 uses, which is the worst state for one to be in.
 
-- **`DEEPGRAM_API_KEY` was live on Fly preview** (confirmed 2026-07-17). It no
-  longer has anything to do with live captions: since
-  [D-185](../../docs/decisions/D-185.md) those run in the browser and need
+- **`DEEPGRAM_API_KEY` was live on Fly preview** (confirmed 2026-07-17).
+  Deepgram backs intro-video coaching, post-class transcription and, since
+  [D-185](../../docs/decisions/D-185.md)'s addendum, live captions'
+  phone-to-phone fallback: the server mints short-lived tokens from it with
+  `/v1/auth/grant`, which needs a key with Deepgram's **Member** role or
+  above. Live captions otherwise run in the browser and need
   `GOOGLE_TRANSLATE_API_KEY` for their server-side translation fallback.
-  Deepgram backs intro-video coaching and post-class transcription.
 - `ASSEMBLYAI_API_KEY` and `AZURE_SPEECH_KEY`/`AZURE_SPEECH_REGION` back the
   separate transcription/pronunciation-insights features and their production
   status is not vouched for here — check Infisical `production` before
