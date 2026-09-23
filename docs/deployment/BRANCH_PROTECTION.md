@@ -100,16 +100,33 @@ protection) named `production: fast-forward only, no delete`, with two rules:
 It deliberately adds **no** required-PR / required-status / required-reviewer
 rule — any of those would reject the promote fast-forward. Never add one.
 
-> **The required-reviewer rule belongs on the `production` GitHub
-> _Environment_, not on the branch.** ⚠️ This paragraph said the opposite until
-> the 2026-09 documentation pass, and was written when D-129 had left no
-> workflow for such a rule to gate. [D-157](../decisions/D-157.md) restored
-> `deploy-production.yml` and put the human checkpoint there deliberately: the
-> environment approval is a queued run with a notification attached, which is
-> the opposite of the forgettable manual dispatch step that once left
-> `production` 96 commits behind live. A protection rule on the _branch_ would
-> still reject the promote fast-forward — that part has not changed. Never add
-> one there.
+### Only the owner ships production
+
+Two more settings make shipping production the repository owner's alone. The
+script applies both, and **`pnpm promote` refuses to run unless both hold**:
+it reads them live through `scripts/ci/deploy-protection.mjs` before it moves
+anything, and it fails closed when it cannot read them.
+
+- **The `production` environment requires the owner's approval** for every
+  deploy run, with **admin bypass off** so a push made with the owner's own
+  credentials still waits for a click, and **self-review allowed** because the
+  one maintainer both pushes and approves. Only the `production` branch may use
+  the environment, so its secrets reach no other ref. This is the checkpoint
+  [D-157](../decisions/D-157.md) put on the _environment_ rather than the
+  branch: a pending approval is a queued run with a notification, not a step
+  that can be silently forgotten.
+- **A second ruleset, `production: only an admin moves it`**, holds a single
+  `update` rule whose only bypass actor is the repository admin role. It does
+  not reject the promote fast-forward, because the operator pushing it is the
+  admin. It is a **separate** ruleset because a bypass actor bypasses every rule
+  in its ruleset: folded into the one above, it would let an admin force-push
+  or delete `production`.
+
+⚠️ Until 2026-09-23 this document and the deploy workflow described the
+environment reviewer while the environment had none, and a promote deployed with
+nobody approving it. The promote check is what keeps that from recurring
+unnoticed, and `apps/web/tests/config/production-access.test.ts` holds that
+what the script applies is exactly what the check accepts.
 
 ## Paired repo settings (Settings → General → Pull Requests)
 
