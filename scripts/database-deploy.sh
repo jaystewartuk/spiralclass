@@ -2,7 +2,7 @@
 # The database half of a deploy — the ONE copy of it, and the only thing in the
 # repository that checkpoints and migrates a shared database.
 #
-# It was steps 1 and 2 of scripts/fly-deploy.sh until 2026-09-12, when the
+# It was steps 1 and 2 of the Fly deploy script until 2026-09-12, when the
 # production targets became independently deployable ([D-177]'s addendum). The
 # steps did not change; who owns them did. While they lived inside the Fly
 # deploy, the Vercel failover could only be deployed after a Fly deploy had
@@ -15,9 +15,9 @@
 #   * .github/workflows/deploy-production.yml runs it as the `database` job.
 #     Both target jobs `needs:` that job, and neither needs the other — so one
 #     commit gets one checkpoint and one migration run, whichever targets deploy.
-#   * scripts/fly-deploy.sh runs it first, unless it is told the workflow
-#     already has. A hand-run recovery deploy therefore still checkpoints and
-#     migrates, exactly as it did before this file existed.
+#   * The operator, by hand, before scripts/cloudrun-deploy.sh in a recovery
+#     deploy — the Cloud Run script holds no database credential and never
+#     migrates, so this is how a recovery still checkpoints first.
 #
 # scripts/vercel-deploy.sh does NOT run it and must not: that job is handed no
 # database credential, which is the narrowest way to say it has no business
@@ -42,20 +42,20 @@
 #
 # Usage:
 #   ./scripts/database-deploy.sh preview
-#   ./scripts/database-deploy.sh production --gate-already-passed   # what deploy-production.yml and fly-deploy.sh call
+#   ./scripts/database-deploy.sh production --gate-already-passed   # what deploy-production.yml and a recovery call
 #   ./scripts/database-deploy.sh production --yes-i-understand-this-skips-the-promote-gate
 
 set -euo pipefail
 cd "$(dirname "${BASH_SOURCE[0]}")/.."
 
-# No default environment, unlike fly-deploy.sh's `preview`. A script whose whole
+# No default environment, unlike the Fly script's `preview` was. A script whose whole
 # job is to change a shared database should never be one missing word away from
 # picking which database that is.
 ENVIRONMENT="${1:-}"
 case "$ENVIRONMENT" in
 preview) ;;
 production)
-  # The same two doors fly-deploy.sh and vercel-deploy.sh open, for the same
+  # The same two doors vercel-deploy.sh opens, for the same
   # reason: production is normally reached only after `pnpm promote`'s full gate.
   if [ "${2:-}" != "--gate-already-passed" ] &&
     [ "${2:-}" != "--yes-i-understand-this-skips-the-promote-gate" ]; then
@@ -76,9 +76,9 @@ esac
 # database and deploy against the other.
 #
 # ⚠️ THIS SCRIPT DOES NOT READ INFISICAL, and [D-163] is why. Its own text says
-# the laptop reads these values "through `infra/infisical/run.sh production
-# ./scripts/fly-deploy.sh …` rather than from a file that is the copy nobody
-# rotates" — the composition is the supported path. CI invokes this with both
+# the laptop reads these values through `infra/infisical/run.sh production …`
+# rather than from a file that is the copy nobody rotates — the composition is
+# the supported path. CI invokes this with both
 # values in the environment.
 [ -n "${DATABASE_URL:-}" ] && [ -n "${DIRECT_URL:-}" ] || {
   echo "DATABASE_URL and DIRECT_URL must both be in the environment." >&2

@@ -57,7 +57,7 @@ credentials.
 ```
 branch → implement + tests → git push (the pre-push hook runs pnpm gate)
   → PR into main → local-gate status green → squash-merge
-  → pnpm ship:preview → verify on preview → pnpm promote → production
+  → pnpm promote → production
 ```
 
 - **`main` is the trunk.** Every change — docs included — lands via a pull
@@ -74,9 +74,8 @@ branch → implement + tests → git push (the pre-push hook runs pnpm gate)
   request _and_ every push to `main`. The run against `main` is the one that
   catches a combination broken though every PR in it was green alone. They are
   deliberately **not** a required check — read them before merging anyway.
-- **Merging to `main` deploys nothing today.** Preview's push trigger is
-  suspended while preview moves to a new host; `pnpm ship:preview` is how
-  preview gets fresh. Production is only ever `pnpm promote`.
+- **Merging to `main` deploys nothing today.** There is no preview host until
+  the Oracle box is rebuilt. Production is only ever `pnpm promote`.
 - **Tests ship with the change.** A change is not done until it ships with tests
   covering the new behaviour and the regression it fixes. There is one client,
   so that means web tests.

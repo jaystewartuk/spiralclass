@@ -75,8 +75,7 @@ const PACKAGE_JSONS = ["package.json", "apps/web/package.json", "packages/shared
  */
 const DEPLOY_CONFIGS = [
   "Dockerfile",
-  "fly.production.toml",
-  "fly.preview.toml",
+  "config/cloudrun/production.env",
   "docker-compose.yml",
   "turbo.json",
   "config/vercel/production.json",

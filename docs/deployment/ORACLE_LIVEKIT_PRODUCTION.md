@@ -389,8 +389,8 @@ Track **`main`**, not `production` (changed 2026-07-29 — D-108 shipped hours
 earlier saying the opposite; see its addendum for why that reversed). Three
 reasons:
 
-- **`promote.yml` does not ship the Agent.** `fly-deploy.yml`'s `paths`
-  exclude `packages/livekit-captions-agent/**`, and the box build is manual
+- **The production deploy does not ship the Agent.** `deploy-production.yml`
+  builds and deploys the web image only, and the box build is manual
   regardless. Tracking `production` never bought synchrony with anything — it
   only forced a full production gate and a `production` fast-forward for a
   change production itself never deploys.

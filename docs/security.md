@@ -14,11 +14,11 @@ For how a change is reviewed before it reaches production, see
 Environment configuration is split on exactly one question — _is this a
 credential?_ — into three tiers.
 
-| Tier                 | Where it lives                         | In this repository?          |
-| -------------------- | -------------------------------------- | ---------------------------- |
-| Non-secret           | `config/env/<env>.{build,runtime}.env` | **Yes, deliberately**        |
-| Secret               | Infisical, pushed to Fly secrets       | No                           |
-| Infrastructure-owned | Written to Fly directly by OpenTofu    | No — appears in no file here |
+| Tier                 | Where it lives                            | In this repository?          |
+| -------------------- | ----------------------------------------- | ---------------------------- |
+| Non-secret           | `config/env/<env>.{build,runtime}.env`    | **Yes, deliberately**        |
+| Secret               | Infisical, pushed to one Cloud Run secret | No                           |
+| Infrastructure-owned | Read from OpenTofu state by that push     | No — appears in no file here |
 
 Committing the first tier is the unusual half, and it is on purpose: a
 deployment's configuration becomes reviewable in a pull request instead of

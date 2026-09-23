@@ -71,9 +71,9 @@ Events live in **one place**: the `ServerEvent` union in
    route, webhook, or Inngest function/cron step, not just "long-running"
    ones. `flushAt: 1` / `flushInterval: 0` mean the actual HTTP POST to
    PostHog still happens on posthog-node's own background timer; without an
-   explicit flush, it depends on incidental process longevity (fine on
-   today's Fly.io persistent container, silently lossy on a more
-   aggressively recycled runtime). Route handlers wrapped in `handle()`
+   explicit flush, it depends on incidental process longevity, which
+   production no longer has: Cloud Run idles instances and cold-starts them,
+   so an unflushed event is silently lost. Route handlers wrapped in `handle()`
    (`lib/api/route.ts`) get this for free — everything else calls it directly,
    right after (or instead of immediately before) the redirect/return.
 

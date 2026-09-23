@@ -1270,8 +1270,8 @@ let initFailed = false;
 
 // Per-process dedup so we don't ship a fresh `$identify` event on every
 // authenticated page load. PostHog's pipeline would dedupe anyway, but
-// we'd still be charged for the events. Reset on process restart — on the
-// Fly.io persistent container (D-70/D-89) that's a deploy/restart, not a
+// we'd still be charged for the events. Reset on process restart — on Cloud
+// Run (D-184) that's a deploy or an instance being reaped after idling, not a
 // per-request boundary, so the dedup applies across many requests, not just
 // within one.
 const identifiedThisProcess = new Set<string>();
@@ -1465,9 +1465,9 @@ export async function getServerFeatureFlag(
 }
 
 // posthog-node's flushAt/flushInterval settings still batch+background the
-// actual HTTP POST — a request/Inngest step/cron run can finish (and, on a
-// more aggressively recycled runtime than today's Fly.io container, get torn
-// down) before that POST completes. Call this at the end of every handler
+// actual HTTP POST — a request/Inngest step/cron run can finish (and, on
+// Cloud Run, have its CPU throttled or its instance reaped) before that POST
+// completes. Call this at the end of every handler
 // that fires a server event (server action, webhook, Inngest function) to
 // drain it deterministically instead of relying on incidental process
 // longevity. Safe to call when no client.

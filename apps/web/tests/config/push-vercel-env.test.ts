@@ -43,7 +43,7 @@ const DEPLOY: Record<string, string> = {
   VERCEL_TOKEN: "stub-vercel-token",
   VERCEL_ORG_ID: "team_stub",
   VERCEL_PROJECT_ID: "prj_stub",
-  FLY_API_TOKEN: "stub-fly-token",
+  GCP_DEPLOY_KEY: "stub-gcp-key",
 };
 const BUCKETS = {
   "agendaprofe-production-chat-audio": {
@@ -242,7 +242,7 @@ describe("push-vercel-env.sh hands the failover what Fly gets, and nothing else"
     const payload = JSON.parse(readFileSync(handed, "utf8"));
     expect(payload).toEqual({ infisical: ROOT, r2: BUCKETS });
     const text = JSON.stringify(payload);
-    expect(text).not.toContain(DEPLOY.FLY_API_TOKEN);
+    expect(text).not.toContain(DEPLOY.GCP_DEPLOY_KEY);
     expect(text).not.toContain(DEPLOY.VERCEL_TOKEN);
     expect(text).not.toContain(CONFIG[0].value);
   });

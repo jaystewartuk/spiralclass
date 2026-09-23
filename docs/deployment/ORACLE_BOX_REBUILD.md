@@ -139,17 +139,17 @@ Today the box runs LiveKit, the captions agent, Caddy and Redis.
 [D-150](../decisions/D-150.md) moves the Next.js app here too, and the app gets
 its non-secret configuration a different way from everything above.
 
-**How it works on Fly.** `scripts/docker-entrypoint.sh` sources
+**How it works on Cloud Run.** `scripts/docker-entrypoint.sh` sources
 `config/env/<APP_ENV>.runtime.env` from inside the image at boot. Nine values in
 that file are the literal string `__LOCAL__` — they name real accounts (the
 Stripe prices and billing-portal id, `GOOGLE_CLIENT_ID`, `GEMINI_VERTEX_PROJECT_ID`,
 `LIVEKIT_API_KEY`, `SENTRY_DSN`, `POSTHOG_KEY`) and deliberately are not in git.
-On Fly the real values arrive as **Fly secrets**, and the entrypoint's
-only-if-unset rule lets them win over the file.
+On Cloud Run the real values arrive in the mounted secret file
+`infra/gcp/push-cloudrun-env.sh` composes from Infisical, which the entrypoint
+sources afterwards to fill what the committed file left unset.
 
-**Why that breaks here, quietly.** This box has no Fly secrets and does not run
-`scripts/fly-deploy.sh`, whose preflight refuses to deploy when a `__LOCAL__`
-key has no matching secret. The entrypoint **refuses to export a `__LOCAL__`**,
+**Why that breaks here, quietly.** This box has no Secret Manager mount, and
+nothing in the deploy checks for the gap. The entrypoint **refuses to export a `__LOCAL__`**,
 by design — leaving it unset so `env.ts` applies the variable's own
 absent-value behaviour and the feature degrades cleanly rather than pointing at
 a project that does not exist.
@@ -161,8 +161,8 @@ from the deploy.**
 
 **What to do instead.** Infisical is the source of truth for these, at path
 `/config`, per environment — the same store the six variables above come from,
-and unlike Fly secrets it is provider-neutral, which is the whole reason it
-holds them.
+and unlike any one host's secret store it is provider-neutral, which is the
+whole reason it holds them.
 
 ```bash
 PROJECT="$(node -pe 'require("./infra/infisical/.infisical.json").workspaceId')"
@@ -176,8 +176,7 @@ chmod 600 /opt/spiralclass/app.env
 
 Then give the app service `env_file: /opt/spiralclass/app.env` in the compose
 file. That puts the values in the **container environment**, which is what the
-entrypoint's only-if-unset rule reads — the same mechanism Fly secrets use, from
-a different source.
+entrypoint's only-if-unset rule reads, so they win over the committed file.
 
 **Verify, because the failure is silent.** After the container is up:
 

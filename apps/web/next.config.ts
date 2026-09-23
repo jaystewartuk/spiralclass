@@ -23,7 +23,7 @@ const monorepoRoot = path.join(__dirname, "..", "..");
 //
 // Must change every deploy; a commit SHA does. Resolution order:
 //   - NEXT_DEPLOYMENT_ID — the deploy identifier (Next reads this natively).
-//     scripts/fly-deploy.sh passes the commit being deployed as a build arg and
+//     scripts/cloudrun-deploy.sh passes the commit being deployed as a build arg and
 //     the Dockerfile declares it in both stages, so the baked-in id and the
 //     running server's agree. NOT in config/env/<env>.build.env, and it cannot
 //     be: that file is static, and this value has to differ per deploy.

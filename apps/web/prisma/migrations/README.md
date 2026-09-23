@@ -55,7 +55,7 @@ fails on anything missing from that file.
    in `schema.prisma` so the next person reading the model knows a rule exists
    that the model cannot show them.
 4. **Make it work with the code already serving** ([D-178](../../../../docs/decisions/D-178.md)).
-   A production deploy migrates before its new code is live, and the Fly job
+   A production deploy migrates before its new code is live, and the Cloud Run job
    can fail after the database job has succeeded, so old code will meet this
    schema. Add, don't take away. A drop, a rename or a narrowing ships a
    release **after** the code that stopped using it, with a comment containing

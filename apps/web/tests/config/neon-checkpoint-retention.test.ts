@@ -8,9 +8,9 @@ import { REPO_ROOT } from "../../../../scripts/env-config.mjs";
 // (D-95): `scripts/database-deploy.sh`'s production path creates a `pre-deploy-*`
 // branch before any migration touches production, and that step fails closed.
 // Since the production targets were split ([D-177]'s addendum) that script is
-// the deploy workflow's `database` job, and the first thing a hand-run
-// `scripts/fly-deploy.sh` does — it was steps 1 and 2 of the Fly script until
-// then, which is why the older notes below name that file.
+// the deploy workflow's `database` job, and the first step of a hand-run
+// recovery deploy, before scripts/cloudrun-deploy.sh. It was steps 1 and 2 of
+// the Fly deploy script until then, which is why older notes name Fly.
 //
 // Why this test matters: the retention count is bounded from BOTH sides, and
 // both bounds fail silently.
@@ -32,7 +32,6 @@ import { REPO_ROOT } from "../../../../scripts/env-config.mjs";
 
 const SCRIPT_SH = resolve(REPO_ROOT, "infra/database/scripts/neon-checkpoint.sh");
 const DATABASE_DEPLOY_SH = resolve(REPO_ROOT, "scripts/database-deploy.sh");
-const FLY_DEPLOY_SH = resolve(REPO_ROOT, "scripts/fly-deploy.sh");
 
 // The production Neon project's per-project branch ceiling (`owner.branches_limit`
 // on `GET /projects/<id>`), measured 2026-08-09 on the Free plan. This constant
@@ -118,11 +117,9 @@ describe("neon checkpoint retention", () => {
   // Two assertions, because removing the default and removing the literal are
   // different failures. A future edit could reintroduce either alone.
   it("names no Neon project id, so the production database is not identified in the tree", () => {
-    // Both scripts: the one that carried the id, and the one its code moved to.
-    for (const [name, path] of [
-      ["scripts/fly-deploy.sh", FLY_DEPLOY_SH],
-      ["scripts/database-deploy.sh", DATABASE_DEPLOY_SH],
-    ] as const) {
+    // The script the code moved to. The one that first carried the id, the
+    // Fly deploy script, is deleted.
+    for (const [name, path] of [["scripts/database-deploy.sh", DATABASE_DEPLOY_SH]] as const) {
       const sh = readFileSync(path, "utf8");
       // Neon's shape: <adjective>-<noun>-<8 digits>. Same shape check-leaks.mjs
       // now gates the whole tree on; asserted here too so the call site that
@@ -136,20 +133,15 @@ describe("neon checkpoint retention", () => {
     }
   });
 
-  it("a hand-run Fly deploy still checkpoints first, unless the workflow's database job already did", () => {
-    // The split must not have taken the checkpoint off the recovery path. A
-    // bare `fly-deploy.sh production` runs database-deploy.sh before it builds
-    // anything; only --database-already-deployed skips it, and that flag's one
-    // honest caller is pinned in production-targets.test.ts.
-    const sh = readFileSync(FLY_DEPLOY_SH, "utf8");
-    const call = sh.match(/^(?!\s*#).*bash scripts\/database-deploy\.sh .*$/m)?.[0];
-    expect(call, "scripts/fly-deploy.sh no longer runs scripts/database-deploy.sh").toBeTruthy();
-    expect(sh.indexOf(call!), "the database step must run before the image is built").toBeLessThan(
-      sh.indexOf("docker buildx build"),
-    );
-    expect(sh.slice(0, sh.indexOf(call!))).toMatch(
-      /if \[ "\$DATABASE_ALREADY_DEPLOYED" = 1 \]; then/,
-    );
+  it("the hand-run recovery path checkpoints first, then deploys", () => {
+    // The split must not have taken the checkpoint off the recovery path. The
+    // Cloud Run script holds no database credential and never migrates, so
+    // promote's recovery command runs database-deploy.sh BEFORE it.
+    const promote = readFileSync(resolve(REPO_ROOT, "scripts/ci/promote.mjs"), "utf8");
+    const database = promote.indexOf("bash scripts/database-deploy.sh production");
+    const cloudrun = promote.indexOf("bash scripts/cloudrun-deploy.sh production");
+    expect(database, "promote's recovery path no longer migrates").toBeGreaterThan(-1);
+    expect(database, "the database step must come before the deploy").toBeLessThan(cloudrun);
   });
 
   it("refuses the production deploy when NEON_PROJECT_ID is unset, rather than guessing", () => {
@@ -181,7 +173,7 @@ describe("neon checkpoint retention", () => {
 
 // How neonctl authenticates, changed 2026-08-31 (the D-146 follow-up).
 //
-// `fly-deploy.sh` used to fetch a long-lived NEON_API_KEY from Infisical's
+// The Fly deploy script used to fetch a long-lived NEON_API_KEY from Infisical's
 // `infra` environment on every production deploy. The keys were deleted, the
 // checkpoint fail-closed exactly as designed, and the deploy stopped with
 // `production` already fast-forwarded and the app still on the previous
@@ -233,7 +225,7 @@ describe("neon auth (D-146 follow-up)", () => {
   });
 
   it("neither deploy script fetches the key from Infisical", () => {
-    for (const path of [FLY_DEPLOY_SH, DATABASE_DEPLOY_SH]) {
+    for (const path of [DATABASE_DEPLOY_SH, resolve(REPO_ROOT, "scripts/cloudrun-deploy.sh")]) {
       expect(readFileSync(path, "utf8")).not.toMatch(
         /infisical_export_secrets --env infra NEON_API_KEY/,
       );
@@ -242,7 +234,7 @@ describe("neon auth (D-146 follow-up)", () => {
 
   it("...but production still refuses to migrate without a checkpoint", () => {
     // The load-bearing half. This is D-95's rule, and the credential change
-    // must not have relaxed it: database-deploy.sh (fly-deploy.sh's steps 1–2
+    // must not have relaxed it: database-deploy.sh (the Fly script's steps 1–2
     // until the targets were split) still calls the checkpoint on the
     // production path, and the script still exits non-zero when the create
     // fails.

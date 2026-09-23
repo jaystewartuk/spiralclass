@@ -333,8 +333,9 @@ That lasts until preview has a LiveKit server of its own.
   video calls as fully operational in production.
 - **Vendor keys for captions/transcription (`DEEPGRAM_API_KEY`,
   `ANTHROPIC_API_KEY`, or `ASSEMBLYAI_API_KEY`) cannot be confirmed present
-  in production from this repo** — the runtime env files explicitly instruct
-  verifying via `fly secrets list --app agendaprofe` rather than assuming.
+  in production from this repo** — verify against Infisical `production`
+  (which `infra/gcp/push-cloudrun-env.sh` writes into the running service's
+  secret) rather than assuming.
   The feature flags (`LIVE_CAPTIONS_ENABLED`, `CLASS_RECORDING_ENABLED`,
   `LESSON_INSIGHTS_TRANSCRIPTION_ENABLED`) are confirmed ON in production
   per D-94, but "flag on" has already once meant "silently dark" in this

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Reset + reseed the preview DB without ever writing secrets to disk. Pulls
 # what the seed reads from Infisical (env=preview) the same way
-# scripts/fly-deploy.sh and seed-preview.sh reach preview — never via
+# seed-preview.sh reaches preview — never via
 # apps/web/.env.preview.local, which this deliberately doesn't need. Step 2
 # below runs the same seed script seed-preview.sh does, so it takes the same
 # environment contract from seed-env.sh rather than a shorter copy of it: a

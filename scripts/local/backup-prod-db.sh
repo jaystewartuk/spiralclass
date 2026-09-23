@@ -21,7 +21,7 @@
 #
 # WHAT THIS IS NOT. It is the secondary, off-Neon disaster-recovery copy — not
 # production's rollback mechanism. That is Neon's own point-in-time restore plus
-# the pre-migration checkpoint branch scripts/fly-deploy.sh creates before any
+# the pre-migration checkpoint branch scripts/database-deploy.sh creates before any
 # migration (D-95, docs/deployment/DB_BACKUP_RESTORE.md). This dump is what
 # survives a Neon-account-level incident, or a bad migration noticed after the
 # PITR window closed.

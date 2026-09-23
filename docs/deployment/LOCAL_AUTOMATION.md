@@ -25,13 +25,12 @@ states that plainly, and it is the one gap the runners did not close.
 
 ## The whole workflow
 
-Four commands, in order. Everything below this section is detail on one of them.
+Three steps, in order. Everything below this section is detail on one of them.
 
 ```sh
 git push                 # 1. the gate runs itself (pre-push hook), PR, merge
-pnpm ship:preview        # 2. preview, when you want it fresh right now
-                         # 3. test it — the manual pass
-pnpm promote             # 4. production: certify, fast-forward, watch the deploy
+                         # 2. test it — the manual pass
+pnpm promote             # 3. production: certify, fast-forward, watch the deploy
 pnpm release:status      #    what is live vs what is merged
 ```
 
@@ -46,32 +45,30 @@ pnpm local:status        # when did the probes and the sweep last pass?
    the same context on the PR, so a laptop-less day is not a stranded PR.
    `heavy.yml` runs the mutation, integration and browser suites, and a no-push
    build of the production image, on every PR and on every push to `main`.
-2. **`pnpm ship:preview`** ships preview web (migrations → image → Fly →
-   Inngest) when this commit changed something preview carries. It compares the
-   commit against what this machine last shipped (`scripts/ci/relevance.mjs` +
-   the ledger), so a commit that cannot have moved preview does not spend a
-   build. `--force` ships regardless; `--gate` runs the full tier first.
-3. **Test on preview.** The U80 manual pass. `pnpm gate --allow-dirty` answers
-   "is this clean?" mid-work without deploying anything.
-4. **`pnpm promote`**, outside lesson hours. It **reads the runners' verdict**
+2. **Test it.** The U80 manual pass. There is no preview host until the
+   Oracle box is rebuilt ([Deploying preview](#deploying-preview)).
+   `pnpm gate --allow-dirty` answers "is this clean?" mid-work without
+   deploying anything.
+3. **`pnpm promote`**, outside lesson hours. It **reads the runners' verdict**
    for this exact commit (Gate and Heavy, both green for the SHA) → confirm →
    fast-forward `production` + release tag → **that push triggers
    `deploy-production.yml`**, which after a required reviewer runs
-   `scripts/fly-deploy.sh production` on a runner — Neon checkpoint →
-   migrations → native amd64 image → Fly deploy → Inngest sync → **production
-   probes**. `promote` watches that run and exits non-zero if it goes red.
+   `scripts/database-deploy.sh production` (Neon checkpoint → migrations), then
+   `scripts/cloudrun-deploy.sh production` (native amd64 image → Cloud Run
+   deploy → Inngest sync) → **production probes**. `promote` watches that run
+   and exits non-zero if it goes red.
 
 ## What runs where
 
-| Job                                                        | Where                                             | How                                                               |
-| ---------------------------------------------------------- | ------------------------------------------------- | ----------------------------------------------------------------- |
-| Merge gate (format · typecheck · lint · unit · audit)      | Laptop, every push · **and** a runner, every PR   | `.githooks/pre-push` → `pnpm gate` (D-119) · `gate.yml` (D-157)   |
-| Heavy tier (mutation · integration · E2E · visual · image) | Runner, every PR and every push to `main`         | `heavy.yml` (D-161)                                               |
-| **Production deploy**                                      | Runner, triggered by promote's push               | `deploy-production.yml` → `scripts/fly-deploy.sh` (D-157)         |
-| Preview deploy                                             | Laptop, on demand                                 | `pnpm ship:preview` / `pnpm deploy:preview`                       |
-| Production synthetic probes                                | Runner, after every production deploy; on demand  | last step of `deploy-production.yml` · `pnpm local synthetic`     |
-| Production DB backup                                       | **Neon** (PITR + pre-migration checkpoints, D-95) | not a local job — see the [D-129](../decisions/D-129.md) addendum |
-| Time-bomb sweep                                            | Laptop, on demand                                 | `pnpm local sweep`                                                |
+| Job                                                        | Where                                             | How                                                                                  |
+| ---------------------------------------------------------- | ------------------------------------------------- | ------------------------------------------------------------------------------------ |
+| Merge gate (format · typecheck · lint · unit · audit)      | Laptop, every push · **and** a runner, every PR   | `.githooks/pre-push` → `pnpm gate` (D-119) · `gate.yml` (D-157)                      |
+| Heavy tier (mutation · integration · E2E · visual · image) | Runner, every PR and every push to `main`         | `heavy.yml` (D-161)                                                                  |
+| **Production deploy**                                      | Runner, triggered by promote's push               | `deploy-production.yml` → `database-deploy.sh` → `cloudrun-deploy.sh` (D-157, D-184) |
+| Preview deploy                                             | Nowhere — no preview host today                   | `scripts/oracle-deploy.sh`, once the Oracle box is rebuilt                           |
+| Production synthetic probes                                | Runner, after every production deploy; on demand  | last step of `deploy-production.yml` · `pnpm local synthetic`                        |
+| Production DB backup                                       | **Neon** (PITR + pre-migration checkpoints, D-95) | not a local job — see the [D-129](../decisions/D-129.md) addendum                    |
+| Time-bomb sweep                                            | Laptop, on demand                                 | `pnpm local sweep`                                                                   |
 
 **There is still no scheduler**, and no cron either. A launchd agent was
 considered and not built: it is a schedule nobody owns, and a shut laptop
@@ -139,8 +136,8 @@ One command. It **reads the runners' verdict** for this exact commit rather
 than running the suites here ([D-162](../decisions/D-162.md)) — Gate and Heavy
 must both be green for the SHA — then fast-forwards `production` and cuts the
 release tag. **That push is the trigger**: `deploy-production.yml` runs, and
-after a required reviewer does Neon checkpoint → migrations → amd64 image → Fly
-deploy → Inngest sync → **production probes**. `promote` watches the run and
+after a required reviewer does Neon checkpoint → migrations → amd64 image →
+Cloud Run deploy → Inngest sync → **production probes**. `promote` watches the run and
 exits non-zero if it goes red, so a green promote means production is serving.
 
 The deploy is chained to the push on purpose. What left `production` 96 commits
@@ -166,31 +163,21 @@ Flags worth knowing:
   runbook does not die on an unknown flag. There is no mobile half.
 
 If the deploy fails _after_ the fast-forward, the branch has moved and the app
-has not. Re-run the workflow, or deploy from here — the same script either way:
+has not. Re-run the workflow, or deploy from here — the same two scripts either
+way, database first (operator-only):
 
 ```sh
-./scripts/fly-deploy.sh production --gate-already-passed
+bash scripts/database-deploy.sh production --gate-already-passed
+bash scripts/cloudrun-deploy.sh production --gate-already-passed
 ```
 
 ## Deploying preview
 
-```sh
-pnpm ship:preview                 # when this commit changed something preview carries
-pnpm ship:preview --force         # regardless
-pnpm ship:preview --gate          # full tier first
-pnpm deploy:preview               # the raw web deploy, no decisions
-```
-
-⚠️ **`deploy-preview.yml` is suspended** — preview moves to the Oracle A1 box
-([D-150](../decisions/D-150.md)), and the workflow has `workflow_dispatch`
-alone until that box is serving. So merging to `main` does not deploy preview
-today, and `pnpm ship:preview` is what you run when you want preview fresh
-right now. Hand-testing against a stale preview reads as a product bug.
-
-It skips a deploy only when it can prove nothing relevant changed since the last
-time **this machine** shipped. No ledger record means ship; an unrecognised path
-counts as relevant. The failure direction is a redundant deploy, never a silent
-no-op.
+⚠️ **There is no preview host today.** Preview moved to the Oracle A1 box
+([D-150](../decisions/D-150.md)), that box was destroyed on 2026-09-19
+([D-182](../decisions/D-182.md)), and preview has no deploy target until it is
+rebuilt ([D-183](../decisions/D-183.md)). `scripts/oracle-deploy.sh` is the way
+back. Merging to `main` deploys nothing.
 
 ## What is live
 
@@ -207,8 +194,8 @@ is behind. It knows only what THIS machine did, so an Actions deploy shows as
 
 D-129 left no fallback of any kind. [D-157](../decisions/D-157.md) and
 [D-161](../decisions/D-161.md) recovered most of it — a PR gets its
-`local-gate` status from `gate.yml`, the heavy suites run on runners, and both
-deploys run on runners. What is left:
+`local-gate` status from `gate.yml`, the heavy suites run on runners, and the
+production deploy runs on a runner. What is left:
 
 - **A shut laptop backs up nothing.** Neon's PITR is the answer, and the gap it
   accepts is in the D-129 addendum.
@@ -217,7 +204,7 @@ deploys run on runners. What is left:
   imply you posted a status you did not.
 
 Re-adding a workflow that restates a check (rather than calling
-`scripts/ci/gate.mjs` or `scripts/fly-deploy.sh`) fails
+`scripts/ci/gate.mjs` or the deploy scripts) fails
 `apps/web/tests/config/local-gate.test.ts`, on purpose.
 
 ## If a hosted dependency has to come back

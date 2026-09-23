@@ -272,9 +272,8 @@ describe("scanner coverage", () => {
     }
   });
 
-  it("reads the Fly configs, where a deploy target is named", () => {
-    expect(covers("fly.production.toml")).toBe(true);
-    expect(covers("fly.preview.toml")).toBe(true);
+  it("reads the Cloud Run config, where a deploy target is named", () => {
+    expect(covers("config/cloudrun/production.env")).toBe(true);
   });
 
   it("reads prisma/migrations, where a backfill would paste a real row", () => {

@@ -35,7 +35,7 @@ no credentials required — that is the right place to prove a finding.
   scoping is the only tenant isolation. A missing `where teacherId = ?` on an
   admin/webhook/service query is a reportable vulnerability, not a style nit.
 - Never commit real credentials. `.env.local` and friends are gitignored;
-  secrets live in Infisical / Fly / GitHub environments.
+  secrets live in Infisical / Google Secret Manager / GitHub environments.
 
 ## How a security fix lands
 

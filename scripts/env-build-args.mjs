@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // Emit an environment's build-time NEXT_PUBLIC_* config as a GITHUB_OUTPUT
-// multiline value, so docker/build-push-action (and scripts/fly-deploy.sh) can
+// multiline value, so docker/build-push-action (and scripts/cloudrun-deploy.sh) can
 // pass them as --build-arg. Replaces the old scripts/fly-build-args.py, which
 // read fly.<env>.toml's [build.args] — that table moved to
 // config/env/<env>.build.env (D-85), and this reads the new source of truth.
@@ -17,8 +17,8 @@ import { ENVIRONMENTS, envFilePath, resolveEnvFile } from "./env-config.mjs";
 
 // Heredoc-style delimiter: build args are multiline by nature (one NAME=VALUE
 // per line) and GITHUB_OUTPUT's plain `k=v` form cannot express that. Kept
-// byte-for-byte from the Python predecessor so scripts/fly-deploy.sh's sed that
-// strips this wrapper keeps working unchanged.
+// byte-for-byte from the Python predecessor so every caller's parse of it —
+// scripts/cloudrun-deploy.sh skips the heredoc wrapper lines — keeps working.
 const DELIMITER = "__FLY_BUILD_ARGS_EOF__";
 
 function main() {

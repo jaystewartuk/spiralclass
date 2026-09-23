@@ -67,7 +67,7 @@ import { createInterface } from "node:readline/promises";
 
 import { recordRun } from "../local/receipts.mjs";
 import { deployVerdict, failoverLine } from "./deploy-verdict.mjs";
-import { capture, check, git, has, lastRelease, run } from "./lib.mjs";
+import { capture, check, git, has, run } from "./lib.mjs";
 
 const args = process.argv.slice(2);
 const yes = args.includes("--yes") || args.includes("-y");
@@ -267,22 +267,6 @@ if (forceGate) {
 
   console.log(`  Certified by the runners for ${short}: ${CERTIFYING_WORKFLOWS.join(" + ")}.`);
   console.log("  (--force-gate runs the full tier here instead.)\n");
-}
-
-// ── Was this commit ever on preview? ─────────────────────────────────────────
-// A warning, not a gate: hotfixes exist, and the ledger only knows what this
-// machine shipped. But "promoted a commit nobody ever ran" is worth one line of
-// friction, and until the ledger existed nothing could say it at all.
-const previewWeb = lastRelease({ kind: "web-deploy", env: "preview" });
-if (previewWeb?.sha !== sha) {
-  console.log(
-    [
-      `  Note: no record of ${short} on preview` +
-        `${previewWeb ? ` (last preview deploy: ${previewWeb.sha.slice(0, 7)})` : ""}.`,
-      "  `pnpm ship:preview` first if you meant to hand-test this commit.",
-      "",
-    ].join("\n"),
-  );
 }
 
 // ── Confirm ──────────────────────────────────────────────────────────────────

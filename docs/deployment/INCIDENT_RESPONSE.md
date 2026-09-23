@@ -137,6 +137,19 @@ Rotate _before_ you investigate when a secret exposure is plausible.
 A rotation that turns out to be unnecessary costs minutes; a missed
 rotation costs the entire blast radius.
 
+### 4.0 How a new value reaches production
+
+Every step below that says **apply it** means this, all of it the operator's:
+
+1. Set the new value in Infisical `production` at `/`.
+2. Run `infra/gcp/push-cloudrun-env.sh <project-id>`. It rewrites Cloud Run's
+   one runtime secret as a new version — the whole set, not one key.
+3. Deploy, so a new revision mounts that version — `pnpm promote`, or
+   `pnpm deploy:cloudrun` by hand. **A running revision keeps the version it
+   started with**, so nothing changes until this step.
+4. Run `infra/infisical/push-vercel-env.sh`, or the Vercel failover keeps the
+   old value.
+
 ### 4.1 `SUPABASE_SERVICE_ROLE_KEY`
 
 Removed — the Supabase service-role key no longer exists post-D-89
@@ -145,9 +158,9 @@ Removed — the Supabase service-role key no longer exists post-D-89
 ### 4.2 `STRIPE_SECRET_KEY`
 
 1. Stripe dashboard → Developers → API keys → roll the live secret key.
-2. Update the Fly secret (`fly secrets set STRIPE_SECRET_KEY=… -a agendaprofe`).
-3. It hot-applies on machine restart.
-4. Revoke the old key from the Stripe dashboard.
+2. Apply `STRIPE_SECRET_KEY` (§4.0).
+3. Revoke the old key from the Stripe dashboard once the new revision is
+   serving.
 
 Downstream impact: in-flight Checkout sessions complete on the new key
 because Stripe re-fetches via the platform credentials. Refunds in
@@ -158,8 +171,7 @@ progress may need to be retried.
 1. Stripe dashboard → Developers → Webhooks → the endpoint → "Reveal
    signing secret" → "Roll secret".
 2. Stripe shows the old and new secrets for a 24h overlap window.
-3. Update the Fly secret to the new value
-   (`fly secrets set STRIPE_WEBHOOK_SECRET=… -a agendaprofe`).
+3. Apply the new `STRIPE_WEBHOOK_SECRET` (§4.0).
 4. Within 24h Stripe stops accepting the old one — done.
 
 Downstream impact: zero if rotated within Stripe's overlap window.
@@ -167,20 +179,19 @@ Downstream impact: zero if rotated within Stripe's overlap window.
 ### 4.4 `INNGEST_SIGNING_KEY` / `INNGEST_EVENT_KEY`
 
 1. Inngest dashboard → Production environment → Settings → roll keys.
-2. Update the Fly secret(s)
-   (`fly secrets set INNGEST_SIGNING_KEY=… INNGEST_EVENT_KEY=… -a agendaprofe`).
+2. Apply `INNGEST_SIGNING_KEY` and `INNGEST_EVENT_KEY` (§4.0).
 3. Inngest holds in-flight events; they replay on the new key.
 
 ### 4.5 `RESEND_API_KEY`
 
 1. Resend dashboard → API Keys → revoke + create.
-2. Update the Fly secret (`fly secrets set RESEND_API_KEY=… -a agendaprofe`).
-3. Outbound transactional emails resume within seconds.
+2. Apply `RESEND_API_KEY` (§4.0).
+3. Outbound transactional email resumes once the new revision is serving.
 
 ### 4.6 `SESSION_SECRET`
 
 1. Generate via `openssl rand -base64 32`.
-2. Update the Fly secret (`fly secrets set SESSION_SECRET=… -a agendaprofe`).
+2. Apply `SESSION_SECRET` (§4.0).
 3. **All sessions are invalidated.** Teachers and students will need to
    sign in again. Coordinate with comms before rotating unless it is
    an active SEV-0/1.
@@ -189,18 +200,18 @@ Downstream impact: zero if rotated within Stripe's overlap window.
 
 1. Neon dashboard → the production project → Roles → reset the role's
    password.
-2. The dashboard shows the new connection strings; update the Fly secrets
-   (`fly secrets set DATABASE_URL=… DIRECT_URL=… -a agendaprofe`) _and_
-   GitHub Actions secrets.
-3. Fly restarts the machines to apply. Brief downtime during the reset — the
-   app cannot connect while the password is mid-rotation. Expect 30–60 seconds
-   of 5xx.
+2. The dashboard shows the new connection strings; apply `DATABASE_URL` and
+   `DIRECT_URL` (§4.0) _and_ re-sync the `production` GitHub Environment
+   (`infra/infisical/push-github-secrets.sh`), which the deploy's `database`
+   job reads.
+3. The app cannot connect from the reset until a revision carrying the new
+   value is serving, and that deploy includes an image build — expect 5xx for
+   the whole window, and have step 2 ready before you reset.
 
 ### 4.8 `BETTER_AUTH_SECRET`
 
 1. Generate via `openssl rand -base64 32`.
-2. Update the Fly secret (`fly secrets set BETTER_AUTH_SECRET=… -a agendaprofe`);
-   the machine restart applies it.
+2. Apply `BETTER_AUTH_SECRET` (§4.0).
 3. **All sessions are invalidated** — better-auth signs/verifies session
    tokens with this secret, so every teacher and student is signed out and
    must sign in again (same blast radius as §4.6's `SESSION_SECRET`, and for
@@ -311,7 +322,7 @@ Filled in by ops, not committed here. The recommended pattern is a
 sealed envelope in 1Password ("Incident Contacts") with:
 
 - Each team member's phone, personal email, alternate Slack handle.
-- The Neon and Fly support contacts.
+- The Neon and Google Cloud support contacts.
 - The Stripe Connect contact.
 - Legal contact, for breach-notification guidance.
 

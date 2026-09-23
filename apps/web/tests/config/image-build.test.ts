@@ -136,12 +136,12 @@ describe("the image build is the deploy's build, minus the credentials (#101)", 
     }
   });
 
-  it("builds linux/amd64 by default, the platform Fly runs, and takes an override", () => {
+  it("builds linux/amd64 by default, the platform Cloud Run runs, and takes an override", () => {
     const { build } = runScript();
     expect(flagValue(build!, "--platform")).toBe("linux/amd64");
     // The deploy builds the same platform; if that ever moves, this default
     // must move with it.
-    expect(readFileSync(join(REPO_ROOT, "scripts", "fly-deploy.sh"), "utf8")).toContain(
+    expect(readFileSync(join(REPO_ROOT, "scripts", "cloudrun-deploy.sh"), "utf8")).toContain(
       "--platform linux/amd64",
     );
 
@@ -154,7 +154,7 @@ describe("the image build is the deploy's build, minus the credentials (#101)", 
     expect(build!.at(-1), "the build context is not the repo root").toBe(".");
     expect(build!, "naming a stage stops this being the deploy's build").not.toContain("--target");
     expect(
-      executable(readFileSync(join(REPO_ROOT, "scripts", "fly-deploy.sh"), "utf8")),
+      executable(readFileSync(join(REPO_ROOT, "scripts", "cloudrun-deploy.sh"), "utf8")),
     ).not.toMatch(/--target/);
   });
 

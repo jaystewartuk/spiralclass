@@ -52,8 +52,8 @@ third-party install scripts is the worst candidate for an exception, not the
 best.**
 
 So the credential is a service-account key for an identity that can deploy a
-revision and cannot read a secret — the same trade `FLY_API_TOKEN` and
-`VERCEL_TOKEN` already make, with the same blast radius.
+revision and cannot read a secret — the same trade `VERCEL_TOKEN` already
+makes, with the same blast radius.
 
 **The cost is rotation, and nothing automates it.** The key is long-lived, and
 `setup-deploy-identity.sh` deliberately does not mint, print or write one — it
@@ -62,8 +62,8 @@ vault.
 
 ## The two values CI needs
 
-They belong in Infisical `production` at `/deploy`, beside `FLY_API_TOKEN` and
-the `VERCEL_*` values, and reach the workflow through the same sync
+They belong in Infisical `production` at `/deploy`, beside the `VERCEL_*`
+values, and reach the workflow through the same sync
 ([D-163](../../docs/decisions/D-163.md)) — never typed into GitHub by hand.
 
 | Name             | What it is                                                                                                 |
@@ -72,8 +72,7 @@ the `VERCEL_*` values, and reach the workflow through the same sync
 | `GCP_DEPLOY_KEY` | `github-deploy`'s key, the whole JSON document                                                             |
 
 Unset `GCP_DEPLOY_KEY` locally and `scripts/cloudrun-deploy.sh` falls back to
-the operator's own `gcloud auth login` — the same split `scripts/fly-deploy.sh`
-makes between the runner and the laptop.
+the operator's own `gcloud auth login`, so a laptop deploy needs no key.
 
 ## Why the secrets are one file, not eighteen variables
 
@@ -81,8 +80,8 @@ makes between the runner and the laptop.
 (`web-runtime-env`) holding the whole runtime set as an env-file, and
 `scripts/cloudrun-deploy.sh` mounts it at `/secrets/runtime.env`.
 `scripts/docker-entrypoint.sh` sources it when `SECRETS_ENV_FILE` names it, and
-skips the whole block when it does not — which is why **Fly's boot is
-unchanged**.
+skips the whole block when it does not — so a host that supplies secrets as
+plain container environment boots unchanged.
 
 Three reasons, in the order they decided it:
 
@@ -100,8 +99,8 @@ Three reasons, in the order they decided it:
    content goes in over stdin and never appears in argv.
 
 The cost is real and worth naming: **rotating one value rewrites the whole
-blob.** That is what re-running this script does, and it is what
-`push-fly-secrets.sh` effectively does on Fly too.
+blob.** That is what re-running this script does, and a running revision
+keeps the version it started with until the next deploy.
 
 ## The two ways this target stops being free
 

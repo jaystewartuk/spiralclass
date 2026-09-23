@@ -5,7 +5,7 @@
 # `__LOCAL__` placeholder, by design — so an app missing these starts cleanly,
 # logs nothing wrong, and quietly loses sign-in (no Google client), checkout
 # (no Stripe prices) and live classes (no LiveKit key). On Fly that could not
-# happen, because fly-deploy.sh's preflight refused to deploy when a __LOCAL__
+# happen, because the Fly deploy's preflight refused to deploy when a __LOCAL__
 # key had no matching secret. There is no preflight here. Nothing else looks.
 #
 # Runs ON the box. Shipped by scripts/oracle-deploy.sh — POSIX sh, because it

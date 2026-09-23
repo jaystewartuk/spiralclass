@@ -74,18 +74,12 @@
       "Bash(gh issue list:*)",
       "Bash(gh issue view:*)",
       "Bash(pnpm issue:check:*)",
-      "Bash(gh label list:*)",
-      "Bash(fly status:*)"
+      "Bash(gh label list:*)"
     ],
     "deny": [
       "Bash(pnpm promote:*)",
-      "Bash(pnpm ship:preview:*)",
-      "Bash(pnpm deploy:preview:*)",
       "Bash(gh pr merge:*)",
       "Bash(gh release:*)",
-      "Bash(scripts/fly-deploy.sh:*)",
-      "Bash(bash scripts/fly-deploy.sh:*)",
-      "Bash(./scripts/fly-deploy.sh:*)",
       "Bash(pnpm deploy:vercel:*)",
       "Bash(scripts/vercel-deploy.sh:*)",
       "Bash(bash scripts/vercel-deploy.sh:*)",

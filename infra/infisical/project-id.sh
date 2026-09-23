@@ -8,12 +8,12 @@
 # project. One in $HOME points at whichever project `infisical init` was last
 # aimed at, and this account has three.
 #
-# ⚠️ WHAT THAT COSTS, CONCRETELY. infra/infisical/push-fly-secrets.sh runs
-# `fly secrets import` with whatever the export returned: aimed at the wrong
-# project it overwrites EVERY production secret with another project's values
-# and restarts the running machines. scripts/fly-deploy.sh would deploy against
-# another project's DATABASE_URL. Neither fails first — both succeed at doing
-# the wrong thing.
+# ⚠️ WHAT THAT COSTS, CONCRETELY. infra/gcp/push-cloudrun-env.sh writes a new
+# version of production's whole secret with whatever the export returned: aimed
+# at the wrong project it replaces EVERY production secret with another
+# project's values at the next deploy. infra/infisical/run.sh would hand a
+# database deploy another project's DATABASE_URL. Neither fails first — both
+# succeed at doing the wrong thing.
 #
 # THE CHECK IS A HASH, NOT THE ID. infra/infisical/project.sha256 holds
 # SHA-256 of the workspace id. The id itself stays out of the repository and

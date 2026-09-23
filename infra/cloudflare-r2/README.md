@@ -5,9 +5,11 @@ Codifies the R2 buckets and their per-bucket API tokens as IaC — see
 bucket list against the live account and split preview from production. The manual chore this replaces: every time a
 feature needs a new bucket, someone creates it by hand in the Cloudflare
 dashboard, creates a scoped R2 API token for it, and copies the resulting
-Access Key ID / Secret into the Fly app's secrets (preview + production apps
-— see `push-fly-secrets.sh`). Adding a bucket here becomes a one-line diff in
-`variables.tf`'s `buckets` list.
+Access Key ID / Secret into the host's secrets by hand. Adding a bucket here
+becomes a one-line diff in `variables.tf`'s `buckets` list, and the production
+pushes — `infra/gcp/push-cloudrun-env.sh` (Cloud Run) and
+`infra/infisical/push-vercel-env.sh` (the failover) — read the credentials
+straight out of this module's state.
 
 Provider: `cloudflare/cloudflare ~> 5`. Two resources per bucket:
 **`cloudflare_r2_bucket`** and a bucket-scoped **`cloudflare_api_token`**
@@ -38,8 +40,12 @@ only the CLI name differs (`tofu` ↔ `terraform`).
 >    object migration + repoint (see the migration note above).
 > 2. What remains is the **cutover** (still deferred, post-launch): `aws s3
 sync` each bare bucket → its `agendaprofe-production-*` twin, then push
->    the new creds to the **production Fly app** and flip its `*_R2_BUCKET`
->    vars.
+>    the new creds to production and flip its `*_R2_BUCKET` vars.
+>
+> ⚠️ **Both production pushes read this module's `production` credentials on
+> every run**, so whether that cutover is still pending is not something this
+> file can confirm. Check which `*_R2_BUCKET` values the running service
+> actually has before acting on item 2.
 
 ## The bucket list (naming convention, updated for the Supabase→Neon migration)
 
@@ -65,14 +71,11 @@ was added here (2026-07-16). Unlike teacher-photos it's **private** (no public
 domain / `NEXT_PUBLIC_*` URL — reads go through short-lived signed URLs).
 
 So the `buckets` list is 14 entries: an `agendaprofe-production-<purpose>`
-and an `agendaprofe-preview-<purpose>` per row above — a **separate bucket
-
-- separate token** each, not a shared bucket split by env-var target. Both
-  environments are served by Fly (there is no more Vercel — the `infra/vercel`
-  module was removed): `push-fly-secrets.sh` (this directory) pushes each
-  `environment`'s creds to the matching Fly app. It handles `preview` today
-  (→ the preview Fly app); the `production` → production-Fly-app path is added
-  when the production cutover happens (see the migration note).
+and an `agendaprofe-preview-<purpose>` per row above — a separate bucket and a
+separate token each, not a shared bucket split by env-var target. Production's
+credentials reach Cloud Run through `infra/gcp/push-cloudrun-env.sh` and the
+Vercel failover through `infra/infisical/push-vercel-env.sh`; preview has no
+host today, so nothing pushes its credentials.
 
 > **Migration note (Supabase→Neon, D-70).** The original **bare-named**
 > buckets (`agendaprofe-teacher-photos`, `agendaprofe-class-materials`,
@@ -84,8 +87,7 @@ and an `agendaprofe-preview-<purpose>` per row above — a **separate bucket
 > `agendaprofe-production-*` buckets this module creates start **empty** and
 > serve nothing until a **post-launch cutover**: copy each old bucket's
 > objects into its new twin (`rclone`/`aws s3 sync`), then push the new
-> production creds to the **production Fly app**'s secrets
-> (`ENVIRONMENT=production FLY_APP=agendaprofe ./push-fly-secrets.sh`) to
+> production creds (`infra/gcp/push-cloudrun-env.sh`, then a deploy) to
 > repoint production's `*_R2_BUCKET` env vars. Creating the empty buckets now
 > is risk-free; the repoint is the only user-visible step, and it is
 > intentionally deferred. Full runbook in "Post-launch production cutover"
@@ -112,14 +114,15 @@ configured in the Cloudflare dashboard (R2 bucket → Settings → Public
 access) — same manual-copy chore this module exists to replace for the
 other bucket fields, just not yet extended to this one. It's non-secret
 (a public URL) and, being `NEXT_PUBLIC_*`, is inlined into the client
-bundle at **Docker build time** — it can't flow through
-`push-fly-secrets.sh`/`fly secrets` at all, and doesn't belong in Infisical
-either (D-66) since that's for runtime secrets. It's wired as a build-arg
-in the root `Dockerfile` instead, sourced manually at deploy time.
+bundle at **Docker build time** — it can't flow through a runtime secret push
+at all. It's a `__LOCAL__` key in `config/env/<env>.build.env`, resolved at
+build time and passed as a build-arg to the root `Dockerfile` (see
+`config/env/README.md`).
 
 If this value ever needs to change (bucket recreated, custom domain
 swapped), update it in two places by hand: the Cloudflare dashboard's public
-access setting, and the `--build-arg` value passed at `fly deploy`. A real
+access setting, and wherever that `__LOCAL__` key resolves from for the
+build. A real
 fix would make this module provision/output the domain like it does the
 other bucket fields — deliberately not done here (bigger change than a
 doc note), flagged for a future pass if this manual step becomes a
@@ -212,7 +215,7 @@ hex string in any R2 endpoint URL. They were committed until 2026-09-04 and
 templated ahead of the repository going public, so every checkout (and every
 worktree) fills them in once. `../backend.hcl` is still the one shared
 partial-backend config every R2-state module points at; see `infra/README.md`.
-Reading state — `tofu output`, which `push-fly-secrets.sh` and
+Reading state — `tofu output`, which `infra/gcp/push-cloudrun-env.sh` and
 `infra/infisical/push-vercel-env.sh` do — needs only the backend file, not
 `terraform.tfvars`.
 
@@ -220,7 +223,7 @@ Reading state — `tofu output`, which `push-fly-secrets.sh` and
 
 The three secrets this module needs to _run_ are pulled from Infisical's
 dedicated **`infra`** environment (the repurposed free `development` slot —
-NOT `preview`/`production`, which sync wholesale to Fly), so you never
+NOT `preview`/`production`, which are pushed wholesale to the deploy targets), so you never
 re-export them by hand. Prefix every `tofu` invocation with
 `../infisical/run.sh infra` (see "Configure" above). It resolves the project
 wherever its link lives — `infra/infisical/.infisical.json` or
@@ -289,18 +292,12 @@ buckets):
 
 This creates the eight new **empty** buckets. Nothing in production is
 repointed by this step — the live bare-named buckets keep serving until the
-post-launch cutover (migration note up top). Then push the **preview**
-credentials to the preview Fly app (`push-fly-secrets.sh` reads Tofu state,
-which still needs `CLOUDFLARE_API_TOKEN` in the env):
+post-launch cutover (migration note up top). Preview has no host today, so
+there is nowhere to push the **preview** credentials until it has one again.
 
-```sh
-ENVIRONMENT=preview FLY_APP=agendaprofe-preview ../infisical/run.sh infra ./push-fly-secrets.sh
-```
-
-Do **not** push `production` here — that repoints live production storage and
-is the deferred cutover below. See `push-fly-secrets.sh`'s header for the app
-names (production app is `agendaprofe`, preview is `agendaprofe-preview`) and
-its unverified-until-run caveats.
+Do **not** run a production push as part of this step — it would carry the
+new `production` credentials to the live service, which is the deferred
+cutover below.
 
 ## Post-launch production cutover (deferred)
 
@@ -319,11 +316,10 @@ When you're ready to move production off the bare-named buckets:
    ```
    (`teacher-videos` and `material-podcasts` have no bare-named predecessor —
    nothing to copy; they start empty.)
-2. **Repoint production** — push the production creds to the production Fly
-   app, which flips its `*_R2_BUCKET` vars to the new buckets:
-   ```sh
-   ENVIRONMENT=production FLY_APP=agendaprofe ../infisical/run.sh infra ./push-fly-secrets.sh
-   ```
+2. **Repoint production** — run `infra/gcp/push-cloudrun-env.sh` (operator),
+   which writes the production creds into Cloud Run's runtime secret, and
+   deploy so a new revision mounts it. Run `infra/infisical/push-vercel-env.sh`
+   too, for the failover.
 3. **Re-enable public access** by hand for the two `public = true` buckets
    (`agendaprofe-production-teacher-photos`, `-teacher-videos`) and update the
    `NEXT_PUBLIC_*_R2_PUBLIC_URL` build-args (Dockerfile) — the module doesn't
@@ -342,10 +338,9 @@ When you're ready to move production off the bare-named buckets:
 4. Add the bucket's `env_prefix` to
    `apps/web/src/lib/storage/provider.ts`'s `R2_ENV_PREFIX` map (still a
    manual one-line code change — this module doesn't touch application
-   code), then run `push-fly-secrets.sh` for each environment to push the 5
-   env vars to its Fly app
-   (`ENVIRONMENT=preview FLY_APP=agendaprofe-preview …`, and
-   `ENVIRONMENT=production FLY_APP=agendaprofe …` at the cutover).
+   code), then re-run `infra/gcp/push-cloudrun-env.sh` and
+   `infra/infisical/push-vercel-env.sh` so production carries the 5 env vars,
+   and deploy.
 
 ## Notes
 

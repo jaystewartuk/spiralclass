@@ -59,8 +59,8 @@ export function TabletSidebarNav({
                 // RSC prefetches on every page load, each re-running the (app)
                 // layout — ~24 concurrent React renders as one allocation
                 // spike. That was a contributing load source in the
-                // 2026-08-26 production outage (see fly.production.toml's
-                // [[vm]] note). Nav targets are a deliberate tap away, so
+                // 2026-08-26 production outage (the 512MB machine that
+                // config/cloudrun/production.env's MEMORY note records). Nav targets are a deliberate tap away, so
                 // eager prefetch buys little.
                 prefetch={false}
               />

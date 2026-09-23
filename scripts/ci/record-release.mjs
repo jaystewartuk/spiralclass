@@ -2,10 +2,10 @@
 /**
  * Write one entry into the release ledger (.gate/release.json) from a shell
  * script. The ledger's readers are Node; its most important writer is
- * scripts/fly-deploy.sh, which is bash — this is the seam between them.
+ * scripts/cloudrun-deploy.sh, which is bash — this is the seam between them.
  *
  * It lives at the END of the deploy rather than in promote.mjs on purpose: a
- * deploy re-run by hand after a failed promote (`./scripts/fly-deploy.sh
+ * deploy re-run by hand after a failed promote (`scripts/cloudrun-deploy.sh
  * production --gate-already-passed`) is exactly the case where the ledger would
  * otherwise be wrong, and it is also the case where someone is most likely to
  * be relying on it.

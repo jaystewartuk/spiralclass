@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Push the production deploy's values from Infisical into the GitHub
-# `production` Environment. The third push target, beside
-# push-fly-secrets.sh (Fly runtime) and infra/cloudflare-r2's (R2 creds) —
+# `production` Environment. One push target among several, beside
+# infra/gcp/push-cloudrun-env.sh (Cloud Run runtime) and push-vercel-env.sh —
 # Infisical is the one vault and everything else holds a derived copy
 # ([D-163] and its addenda).
 #
@@ -36,8 +36,8 @@
 # API returns a secret's value, by design), which is exactly why re-running it
 # belongs in the rotation runbook rather than in someone's memory.
 #
-# Values flow through stdin only, never argv — the house rule from
-# push-fly-secrets.sh (D-66), so nothing lands in shell history or in `ps`.
+# Values flow through stdin only, never argv — the house rule (D-66), so
+# nothing lands in shell history or in `ps`.
 #
 # STALE NAMES. A push only ever adds, so on its own it would make the GitHub
 # copy derived for VALUES and not for NAMES: a secret the workflow stops
@@ -126,9 +126,9 @@ printf '    %s\n' "${NAMES[@]}" >&2
 #
 #   `/` is the only path Fly gets.
 #
-# push-fly-secrets.sh runs `infisical export` with no `--path`, which is `/`
-# and not recursive, and pipes the lot into `fly secrets import` — so anything
-# at `/` becomes an environment variable inside the running production app.
+# infra/gcp/push-cloudrun-env.sh reads `/` only, not recursive, and writes the
+# lot into the secret the running production app mounts — so anything at `/`
+# becomes an environment variable inside it.
 # That makes the path a decision about exposure, not filing:
 #
 #   /         what the RUNNING APP needs — database URLs, Stripe, LiveKit's
@@ -136,9 +136,9 @@ printf '    %s\n' "${NAMES[@]}" >&2
 #   /config   BUILD-time values, inlined into the client bundle and public by
 #             construction. Must not become Fly runtime secrets (D-85 says so
 #             explicitly), and do not, because they are not at `/`.
-#   /deploy   credentials only this deploy uses — FLY_API_TOKEN, NEON_API_KEY,
-#             LIVEKIT_ORIGIN_IP. ⚠️ These MUST NOT sit at `/`: a Fly token that
-#             can deploy the app, living inside the app it deploys, is a
+#   /deploy   credentials only this deploy uses — GCP_PROJECT_ID, GCP_DEPLOY_KEY,
+#             NEON_API_KEY, LIVEKIT_ORIGIN_IP. ⚠️ These MUST NOT sit at `/`: a key
+#             that can deploy the app, living inside the app it deploys, is a
 #             privilege escalation waiting for one code-execution bug.
 #
 # This script reads all three because the deploy needs values from all three.
@@ -180,8 +180,8 @@ if [ "${#missing[@]}" -gt 0 ]; then
 fi
 
 # ── Verify ───────────────────────────────────────────────────────────────
-# The half that stops this being push-fly-secrets.sh, whose header has said
-# "UNVERIFIED IN THIS SESSION" since the day it was written. It cannot check a
+# The half the old Fly push never had — its header said "UNVERIFIED IN THIS
+# SESSION" from the day it was written until it was deleted. It cannot check a
 # value — no API returns one — but "the name is set on the right environment"
 # is checkable, and a typo'd name is the failure that otherwise surfaces as a
 # deploy dying on an empty string.

@@ -87,9 +87,6 @@ const DELETED_DOCS = new Set([
   "docs/product/HOMEWORK_WORKFLOW.md",
   "docs/product/MATERIALS_TAXONOMY.md",
   "docs/product/SUBSCRIPTIONS.md",
-  // Not a reference at all: a synthetic path fed to `changedTargets()` to
-  // assert that a docs-only change is ignored by the relevance filter.
-  "docs/x.md",
 ]);
 
 /**

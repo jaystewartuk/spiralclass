@@ -45,9 +45,9 @@ else
       # unconditionally, including for keys the container env HAD supplied, so
       # every boot printed all nine lines and the warning could not tell a
       # configured box from a broken one. On Fly that never mattered — a
-      # __LOCAL__ with no matching secret is refused before the deploy by
-      # scripts/fly-deploy.sh's preflight. Off Fly there is no preflight
-      # (D-150), so this line is the only boot-time signal there is.
+      # __LOCAL__ with no matching secret was refused before the deploy by the
+      # Fly script's preflight. The Cloud Run deploy cannot read the secret to
+      # check it (D-184), so this line is the only boot-time signal there is.
       if [ "$current" = "__ENTRYPOINT_UNSET__" ]; then
         echo "docker-entrypoint: $key is __LOCAL__ and no override was supplied — leaving it unset" >&2
       fi

@@ -1,5 +1,5 @@
 import { execFileSync, spawnSync } from "node:child_process";
-import { chmodSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { mkdtempSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterAll, describe, expect, it } from "vitest";
@@ -285,9 +285,9 @@ describe("--database-already-deployed is claimed by no workflow job", () => {
         }),
     );
 
-    // Only the script that defines the flag, until it is deleted with the rest
-    // of the Fly half.
-    expect(users.filter((file) => file !== "scripts/fly-deploy.sh")).toEqual([]);
+    // The flag's one definition went with the Fly script. Nothing may bring the
+    // idea back without bringing a test with it.
+    expect(users).toEqual([]);
   });
 });
 
@@ -334,7 +334,7 @@ describe("promote judges production by the database and Cloud Run jobs", () => {
     // A recovery command that named Fly would be the first thing an operator
     // typed in an incident, against an app that no longer exists.
     const promote = read("scripts", "ci", "promote.mjs");
-    expect(promote).not.toContain("fly-deploy.sh");
+    expect(promote).not.toMatch(/fly[-.]/);
     expect(promote).toContain(
       "bash scripts/database-deploy.sh production --gate-already-passed && bash scripts/cloudrun-deploy.sh production --gate-already-passed",
     );
@@ -460,67 +460,5 @@ describe("the scripts refuse before they touch anything", () => {
     expect(result.status).toBe(2);
     expect(result.stderr).toContain("NEON_PROJECT_ID is unset");
     expect(result.stdout).not.toContain("Checkpointing");
-  });
-
-  /**
-   * The Fly script, with flyctl, docker and python3 replaced by stubs that
-   * record their calls. The stubbed `flyctl secrets list` fails, which is the
-   * script's first platform call after the database step — so every run ends
-   * there, and the question each case asks is only what happened BEFORE it.
-   */
-  describe("the Fly script with its platform tools stubbed", () => {
-    const bin = join(scratch, "bin");
-    const log = join(scratch, "calls.log");
-    mkdirSync(bin, { recursive: true });
-    const stub = (name: string, body: string) => {
-      writeFileSync(join(bin, name), `#!/bin/sh\necho "${name} $*" >> "$STUB_LOG"\n${body}\n`);
-      chmodSync(join(bin, name), 0o755);
-    };
-    stub("flyctl", 'case "$1" in secrets) echo "stub: cannot list" >&2; exit 3 ;; esac\nexit 0');
-    stub("docker", "exit 97");
-    stub("python3", "echo agendaprofe");
-
-    const fly = (args: string[]) => {
-      writeFileSync(log, "");
-      const result = spawnSync("bash", ["scripts/fly-deploy.sh", ...args], {
-        cwd: REPO_ROOT,
-        encoding: "utf8",
-        env: bareEnv({ PATH: `${bin}:${process.env.PATH ?? ""}`, STUB_LOG: log }),
-      });
-      return { ...result, calls: readFileSync(log, "utf8") };
-    };
-
-    it("still refuses production without a gate flag, whatever else is passed", () => {
-      const result = fly(["production", FLAG]);
-      expect(result.status).toBe(1);
-      expect(result.stderr).toContain("without the full promote gate");
-      expect(result.calls).toBe("");
-    });
-
-    it("refuses a misspelt flag rather than running the migrations it meant to skip", () => {
-      const result = fly(["production", "--gate-already-passed", "--database-alredy-deployed"]);
-      expect(result.status).toBe(1);
-      expect(result.stderr).toContain("usage:");
-      expect(result.calls).toBe("");
-    });
-
-    it("without the flag, runs the database step first — and needs its credentials", () => {
-      const result = fly(["production", "--gate-already-passed"]);
-      expect(result.status).toBe(1);
-      expect(result.stderr).toContain(
-        "DATABASE_URL and DIRECT_URL must both be in the environment",
-      );
-      expect(result.calls, "reached Fly before the database step").not.toContain("secrets");
-      expect(result.calls).not.toContain("docker");
-    });
-
-    it("with the flag, skips the database step and needs no database credential", () => {
-      const result = fly(["production", "--gate-already-passed", FLAG]);
-      expect(result.stdout).toContain("Skipping the checkpoint and migrations");
-      expect(result.stderr).not.toContain("DATABASE_URL");
-      expect(result.calls).toContain("flyctl secrets list --app agendaprofe");
-      expect(result.calls).not.toContain("docker");
-      expect(result.status).toBe(1);
-    });
   });
 });

@@ -118,21 +118,22 @@ files ship, and neither holds a secret.
    ```sh
    ./push-infisical-secrets.sh
    ```
-   Then uncomment `SES_REGION`/`SES_FROM`/`EMAIL_PROVIDER` in `fly.toml`'s
-   `[env]` block by hand (non-secret config stays git-reviewed there, not
-   in Infisical — see `infra/aws-ses/README.md` Part D) and deploy.
+   Then uncomment `SES_REGION`/`SES_FROM`/`EMAIL_PROVIDER` in
+   `config/env/preview.runtime.env` by hand (non-secret config stays
+   git-reviewed there, not in Infisical — see `infra/aws-ses/README.md` Part D
+   and `config/env/README.md`) and deploy, once preview has a host again.
    `SES_FROM` here is `soporte@updates.staging.spiralclass.com` (preview's
    verified domain) — the access key/secret are the SAME shared credential
    as production (see outputs.tf), only `SES_FROM` differs per environment.
 2. **Wire the credentials to production:** copy `tofu output -json
 credentials` (the SAME access key/secret pushed to preview above — this
    module provisions one shared IAM credential, not per-environment ones)
-   onto the **production Fly app** (`fly secrets` / Infisical `production`
-   env): `SES_ACCESS_KEY_ID`, `SES_SECRET_ACCESS_KEY` (secret), plus the
+   into Infisical `production`: `SES_ACCESS_KEY_ID`, `SES_SECRET_ACCESS_KEY`
+   (secret). Then run `infra/gcp/push-cloudrun-env.sh` (and
+   `infra/infisical/push-vercel-env.sh` for the failover) and deploy. The
    non-secret `SES_REGION` and `SES_FROM = soporte@updates.spiralclass.com`
-   (production's verified domain — NOT the same value used on preview) in
-   `fly.production.toml`'s `[env]`. No script pushes the production side
-   yet.
+   (production's verified domain — NOT the same value used on preview) go in
+   `config/env/production.runtime.env`.
 3. **Request SES production access** (Part C — manual, no Tofu resource
    exists for an AWS Support case). Do this before relying on real sends;
    the sandbox caps you at 200/day and verified-recipients-only.
@@ -154,8 +155,8 @@ credentials` (the SAME access key/secret pushed to preview above — this
 - **Rotating the SES-sender key**: `tofu taint aws_iam_access_key.ses_sender
 && tofu apply` creates a new key and destroys the old one in the same
   apply (IAM allows 2 access keys per user, so there's no window with
-  zero valid keys) — then re-run `push-infisical-secrets.sh` and update the
-  production Fly app's secrets by hand.
+  zero valid keys) — then re-run `push-infisical-secrets.sh`, update Infisical
+  `production` by hand, and re-run `infra/gcp/push-cloudrun-env.sh`.
 - **`manage_dns = false` doesn't undo already-created records** — if you
   flip it after an apply that created the DKIM/SPF records, the next
   `tofu apply` will plan to DESTROY them (for_each dropping to empty).

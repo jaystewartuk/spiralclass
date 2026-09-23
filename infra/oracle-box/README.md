@@ -35,9 +35,11 @@ preview's Postgres come from `scripts/oracle-deploy.sh`, which is re-runnable
 and is what CI invokes. A box that must be rebuilt to change what it runs is
 the box this replaced.
 
-**Does not:** carry production. The production web app is on Fly and
-production's database is on Neon — the 2026-09-04 topology decision, in
-[D-150](../../docs/decisions/D-150.md)'s second addendum. This box holds
+**Does not:** carry production. The production web app is on Cloud Run
+([D-184](../../docs/decisions/D-184.md)) and production's database is on Neon
+— the 2026-09-04 topology decision, in
+[D-150](../../docs/decisions/D-150.md)'s second addendum, kept production off
+this box. This box holds
 LiveKit, preview and preview's data, and losing it stops classes rather than
 stopping the site.
 
@@ -173,12 +175,13 @@ existed to remove, and it is a debt with a due date, not a decision.
 ⚠️ **What this box holds is preview's whole environment plus five production
 LiveKit values** — `LIVEKIT_API_KEY`, `LIVEKIT_API_SECRET`, `DEEPGRAM_API_KEY`,
 `ANTHROPIC_API_KEY` and `CAPTIONS_AGENT_SHARED_SECRET`. That is the single
-biggest security consequence of keeping production on Fly, and it is worth
+biggest security consequence of keeping production off this box, and it is worth
 stating in the positive: an earlier draft of this rebuild put the production
 app here too, which would have meant `STRIPE_SECRET_KEY`, production's
 `DATABASE_URL`, `SESSION_SECRET`, `BETTER_AUTH_SECRET` and
 `FIELD_ENCRYPTION_KEY` sitting as files at mode 600 on a free-tier box Oracle
-reserves the right to reclaim. They stay in Fly's managed secret store instead.
+reserves the right to reclaim. They stay in Google Secret Manager, mounted
+into Cloud Run, instead.
 
 ⚠️ **Preview's secrets are still real secrets.** They are not production's, but
 a preview `DATABASE_URL` and a Stripe test key are not nothing, and everything

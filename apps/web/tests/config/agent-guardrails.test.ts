@@ -77,8 +77,8 @@ describe("the operator's decisions cannot be taken by a session", () => {
   it.each([
     ["gh pr merge 1234 --squash", "merging"],
     ["pnpm promote", "promoting"],
-    ["bash scripts/fly-deploy.sh production", "deploying"],
-    ["bash scripts/vercel-deploy.sh production", "deploying to the second target"],
+    ["bash scripts/cloudrun-deploy.sh production --gate-already-passed", "deploying"],
+    ["bash scripts/vercel-deploy.sh production", "deploying to the failover"],
     // The bare CLI too, not just the script. `vercel promote <url>` is the
     // command that hands spiralclass.com to the failover, and it reaches
     // production without touching either deploy script (D-177).
@@ -119,7 +119,6 @@ describe("a heredoc body is data, not command", () => {
   const script = (stem: string) => `${stem}-deploy.sh`;
 
   it.each([
-    ["fly", script("fly")],
     ["vercel", script("vercel")],
     ["the database", script("database")],
     ["Cloud Run", script("cloudrun")],
@@ -134,7 +133,7 @@ describe("a heredoc body is data, not command", () => {
   it("still blocks the same name when it is actually being run", () => {
     // The whole point: stripping the body must not loosen what a command means.
     expect(blocks(`bash scripts/${script("cloudrun")} production`).blocked).toBe(true);
-    expect(blocks(`./scripts/${script("fly")} production`).blocked).toBe(true);
+    expect(blocks(`./scripts/${script("vercel")} production`).blocked).toBe(true);
   });
 
   it("still blocks a command that follows a heredoc it opened", () => {
@@ -143,14 +142,14 @@ describe("a heredoc body is data, not command", () => {
     // Opened with `git`, deliberately not `cat`: the read-only exemption above
     // matches on the FIRST word, so a `cat` heredoc would be allowed before
     // these rules ever run and this test would pass through the wrong door.
-    const command = `git commit -F - <<'MSG'\njust prose\nMSG\nbash scripts/${script("fly")} production`;
+    const command = `git commit -F - <<'MSG'\njust prose\nMSG\nbash scripts/${script("cloudrun")} production`;
     expect(blocks(command).blocked).toBe(true);
   });
 
   it("does not let an unterminated heredoc swallow the rest of the command", () => {
     // A body with no terminator runs to the end of the input, so nothing after
     // it is read as command — which is what the shell does with it too.
-    const command = `git commit -F - <<'MSG'\nbash scripts/${script("fly")} production`;
+    const command = `git commit -F - <<'MSG'\nbash scripts/${script("cloudrun")} production`;
     expect(blocks(command).blocked).toBe(false);
   });
 });

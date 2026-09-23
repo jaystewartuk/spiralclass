@@ -149,18 +149,21 @@ describe("the R2 credentials are the production buckets', spelled as Fly gets th
     expect(entries.map((e) => e.value)).not.toContain("preview-only-secret");
   });
 
-  it("matches the names infra/cloudflare-r2/push-fly-secrets.sh writes", async () => {
-    const { readFileSync } = await import("node:fs");
-    const { join } = await import("node:path");
+  it("emits only names the app actually reads", async () => {
+    // The parity used to be with the Fly push that first spelled these names.
+    // That script went with Fly; what the names must match is the reader —
+    // Cloud Run and the failover both get their R2 credentials from this
+    // function, so a name the app does not read is a credential that silently
+    // does nothing.
+    const { execFileSync } = await import("node:child_process");
     const { REPO_ROOT } = await import("../../../../scripts/env-config.mjs");
-    const fly = readFileSync(
-      join(REPO_ROOT, "infra", "cloudflare-r2", "push-fly-secrets.sh"),
-      "utf8",
-    );
-    for (const suffix of ["BUCKET", "ENDPOINT", "REGION", "ACCESS_KEY", "SECRET"]) {
-      expect(fly, `Fly gets no _${suffix}, so the failover must not either`).toContain(
-        `$cfg.env_prefix)_${suffix}=`,
-      );
+    for (const { key } of r2Entries(SOURCES.r2)) {
+      const readers = execFileSync(
+        "git",
+        ["grep", "-l", `process.env.${key}`, "--", "apps/web/src"],
+        { cwd: REPO_ROOT, encoding: "utf8" },
+      ).trim();
+      expect(readers, `nothing in apps/web/src reads ${key}`).not.toBe("");
     }
   });
 

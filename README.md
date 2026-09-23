@@ -122,7 +122,7 @@ One consequence worth knowing before you read the code:
 | Storage                | Cloudflare R2 (S3-compatible), signed via `aws4fetch`                                                                                                                                |
 | Email                  | Resend, with Amazon SES as a swappable second provider                                                                                                                               |
 | Observability          | Sentry, PostHog                                                                                                                                                                      |
-| Hosting                | Fly.io (Docker, standalone Next output), Cloudflare DNS                                                                                                                              |
+| Hosting                | Google Cloud Run (Docker, standalone Next output), Cloudflare DNS                                                                                                                    |
 | Infrastructure as code | OpenTofu — R2 buckets, Amazon SES, and the Oracle ARM box                                                                                                                            |
 | Tooling                | pnpm workspaces, Turborepo, Vitest, Playwright, ESLint, Prettier                                                                                                                     |
 
@@ -418,9 +418,11 @@ credential?_
   URLs and feature flags carry their real values; anything that names an
   account carries the literal `__LOCAL__` and is resolved at build or boot from
   the environment or a gitignored overlay.
-- **Secret** — Infisical, pushed to Fly secrets.
+- **Secret** — Infisical, pushed by the operator into one Cloud Run Secret
+  Manager secret that the container sources at boot.
 - **Infrastructure-owned** — every `*_R2_*` and `LIVEKIT_EGRESS_S3_*` value is
-  written directly to Fly by OpenTofu and appears in no file in this repository.
+  read from OpenTofu state by that same push and appears in no file in this
+  repository.
   That invisibility has already caused one wrong conclusion, so it is called out
   in the file headers.
 
@@ -471,7 +473,7 @@ Workflows came back when the repository went public and the minutes became free
 the deploy script rather than restating either. A guard test derives its
 forbidden-command list **from the registry itself**, so a check added there is
 covered the moment it lands. The same rule governs the deploys — neither
-workflow contains `flyctl deploy`, `docker buildx build` or `prisma migrate
+workflow contains `gcloud run deploy`, `docker buildx build` or `prisma migrate
 deploy`, because the last time those steps existed in two places, the re-typed
 copy was the one missing the pre-migration database checkpoint.
 
@@ -550,10 +552,11 @@ more. One here held 220 unreachable routes in place for a month.
 
 ## Deployment
 
-Web runs on **Fly.io** — `agendaprofe` is production, `agendaprofe-preview` is
-preview — each backed by its own **Neon** Postgres project. The image is built
-from the root `Dockerfile` (standalone Next output). Cloudflare fronts DNS.
-LiveKit runs on a separate self-hosted ARM box.
+Production runs on **Google Cloud Run** — service `web` in `us-east4` — backed
+by its own **Neon** Postgres project, with a Vercel failover that is deployed on
+every release and holds no domain ([D-177](docs/decisions/D-177.md)). The image
+is built from the root `Dockerfile` (standalone Next output). Cloudflare holds
+DNS. LiveKit runs on a separate self-hosted ARM box.
 
 ```mermaid
 graph LR
@@ -564,21 +567,22 @@ graph LR
     end
     subgraph gha["GitHub Actions — deploy-production.yml"]
         APPROVE["required reviewer"]
-        BUILD["scripts/fly-deploy.sh<br/>native amd64 build + fly deploy"]
+        DB["scripts/database-deploy.sh<br/>Neon checkpoint + migrations"]
+        BUILD["scripts/cloudrun-deploy.sh<br/>native amd64 build + gcloud run deploy"]
         PROBE["production probes"]
     end
-    FLY["Fly.io — agendaprofe"]
+    RUN["Cloud Run — web, us-east4"]
     NEON[("Neon<br/>production branch")]
     CF["Cloudflare DNS"]
     LKBOX["Self-hosted LiveKit<br/>+ Egress + captions agent"]
 
-    DEV --> G --> FF --> APPROVE --> BUILD --> FLY
+    DEV --> G --> FF --> APPROVE --> DB --> BUILD --> RUN
     BUILD --> PROBE
-    BUILD -.migrations behind a<br/>Neon checkpoint.-> NEON
-    FLY --> NEON
-    CF --> FLY
+    DB -.migrations.-> NEON
+    RUN --> NEON
+    CF --> RUN
     CF --> LKBOX
-    FLY <-.->|API + webhooks| LKBOX
+    RUN <-.->|API + webhooks| LKBOX
 ```
 
 Two properties are deliberate and both were bought with an incident:
@@ -592,15 +596,15 @@ notification, which is the opposite of a step that can be silently skipped.
 Migrations run behind a Neon checkpoint so they can be rolled back independently
 of the code.
 
-**The workflow does not know how to deploy.** It runs `scripts/fly-deploy.sh` —
-the same script the maintainer runs by hand to recover — so a deploy from a
-runner and a deploy from a laptop are the same seven ordered steps.
+**The workflow does not know how to deploy.** It runs
+`scripts/database-deploy.sh` and then `scripts/cloudrun-deploy.sh` — the same
+two scripts the maintainer runs by hand to recover — so a deploy from a runner
+and a deploy from a laptop are the same ordered steps.
 
-⚠️ **Preview's deploy is suspended; production's is not.**
-[D-150](docs/decisions/D-150.md) moves preview and preview's database to an
-Oracle ARM box, so `deploy-preview.yml` has a manual trigger alone until that
-box is serving — run `pnpm ship:preview` meanwhile. Production stays on Fly,
-`deploy-production.yml` keeps its `push: [production]` trigger, and `pnpm
+⚠️ **There is no preview host today; production's deploy is live.**
+[D-150](docs/decisions/D-150.md) moved preview to an Oracle ARM box, and preview
+has no deploy target until that box is rebuilt — `scripts/oracle-deploy.sh` is
+the way back. `deploy-production.yml` keeps its `push: [production]` trigger, and `pnpm
 promote` reads that trigger off the workflow file and refuses before the
 fast-forward if it is ever missing.
 

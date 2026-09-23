@@ -131,14 +131,8 @@ CLAUDE.md forbids risky-path merges during lesson hours, and a promote fast-forw
 'production' and triggers a real deploy."
 fi
 
-if [[ "$command_only" == *fly-deploy.sh* ]] || [[ "$command_line" =~ (^|[[:space:]&|;])fly[[:space:]]+(deploy|secrets|ssh) ]]; then
-  block "This deploys to, or reads secrets from, a live Fly app." \
-    "Production only ever ships through 'pnpm promote', run by the operator."
-fi
-
-# ⚠️ ANCHORED AT A COMMAND POSITION, not on the word anywhere in the line. The
-# Fly rule above can afford `[[:space:]]fly[[:space:]]` because `fly` is rarely
-# an argument; `vercel` is the npm package name, so the loose form blocks
+# ⚠️ ANCHORED AT A COMMAND POSITION, not on the word anywhere in the line.
+# `vercel` is the npm package name, so a loose match blocks
 # `npm view vercel version` — a read-only lookup the exemption above does not
 # cover, because it is not one of the reader commands. So: start of line or
 # after a `; & |` separator, optionally behind env assignments

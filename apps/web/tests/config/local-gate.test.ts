@@ -8,15 +8,15 @@ import { STEPS, stepsForTier } from "../../../../scripts/ci/steps.mjs";
 import { JOBS } from "../../../../scripts/local/jobs.mjs";
 
 // CI runs on the operator's laptop (D-119) AND, as of D-157, on GitHub-hosted
-// runners again — the fast tier, the preview deploy and the production deploy.
+// runners again — the fast tier, the heavy tier and the production deploy.
 // D-129 had deleted every workflow and composite action in this repo; the
 // premise it argued from was a private repository's metered minutes, and this
 // repository is public.
 //
 // What did NOT change is the thing D-119 actually bought: one definition of
 // what the checks are (scripts/ci/steps.mjs) and one definition of what the
-// deploy is (scripts/fly-deploy.sh), both of which a laptop and a runner can
-// execute. The workflows invoke those; they do not restate them.
+// deploy is (scripts/database-deploy.sh then scripts/cloudrun-deploy.sh), both
+// of which a laptop and a runner can execute. The workflows invoke those; they do not restate them.
 //
 // That arrangement has a small number of load-bearing invariants and a lot of
 // ways to break one by accident, which is what this file locks:
@@ -166,8 +166,9 @@ describe("GitHub Actions is back, on stated terms (D-157)", () => {
   // the invariants worth holding are now about what the workflows may DO.
 
   it("the workflows exist", () => {
+    // deploy-preview.yml went with Fly on 2026-09-23 ([D-184]'s addendum):
+    // preview has no host until the Oracle box is rebuilt.
     expect(WORKFLOW_FILES.sort()).toEqual([
-      "deploy-preview.yml",
       "deploy-production.yml",
       "gate.yml",
       // D-161. The heavy half of the gate — the suites D-157 recorded as
@@ -180,7 +181,7 @@ describe("GitHub Actions is back, on stated terms (D-157)", () => {
   it("no composite action came back", () => {
     // D-129 deleted four, and every one of them had a local equivalent
     // already. The shared unit between the laptop and a runner is a SCRIPT
-    // (scripts/ci/gate.mjs, scripts/fly-deploy.sh), which both can run. A
+    // (scripts/ci/gate.mjs, scripts/cloudrun-deploy.sh), which both can run. A
     // composite action can only run on a runner, so it is a copy of logic that
     // the operator's machine can never execute — exactly the second definition
     // this whole arrangement exists to avoid.
@@ -408,20 +409,16 @@ describe("the workflows call the registry, and never restate it (D-157)", () => 
     // The seven steps are ordered and the order is load-bearing — step 1 is the
     // Neon checkpoint that makes a bad migration recoverable. The last time
     // these steps existed in two places, the copy that got re-typed was the one
-    // missing the checkpoint (see scripts/fly-deploy.sh's header).
+    // missing the checkpoint.
     //
-    // ⚠️ WIDENED BY [D-177] FROM "fly-deploy.sh" TO "a deploy script", because
-    // there are two targets now. The rule did not change: a deploy workflow
-    // CALLS a script a laptop can also run, and states none of the steps
-    // itself. What changed is that asserting the Fly script by name would have
-    // started failing for the wrong reason the moment a second target's
-    // workflow existed — so the assertion is now "at least one of the known
-    // deploy scripts", and the forbidden list covers both targets' verbs.
+    // WIDENED BY [D-177] FROM ONE SCRIPT TO "a deploy script", because there is
+    // more than one target. The rule did not change: a deploy workflow CALLS a
+    // script a laptop can also run, and states none of the steps itself.
     // scripts/database-deploy.sh joined when the checkpoint and migrations moved
-    // out of the Fly script into a job of their own ([D-177]'s addendum). Same
-    // rule, a third script.
+    // into a job of their own ([D-177]'s addendum); the Cloud Run script
+    // replaced Fly's when the domain moved ([D-184]'s addendum).
     const DEPLOY_SCRIPTS = [
-      "scripts/fly-deploy.sh",
+      "scripts/cloudrun-deploy.sh",
       "scripts/vercel-deploy.sh",
       "scripts/database-deploy.sh",
     ];
@@ -434,7 +431,7 @@ describe("the workflows call the registry, and never restate it (D-157)", () => 
     // runner are here because a database job that re-typed them is the
     // 2026-07 failure exactly: the copy that got re-typed lost the checkpoint.
     const FORBIDDEN = [
-      "flyctl deploy",
+      "gcloud run deploy",
       "docker buildx build",
       "prisma migrate deploy",
       "neon-checkpoint.sh",
@@ -458,17 +455,6 @@ describe("the workflows call the registry, and never restate it (D-157)", () => 
     }
   });
 
-  it("preview asks relevance.mjs rather than declaring its own paths globs", () => {
-    // scripts/ci/relevance.mjs already answers "can this change reach a built
-    // artifact", is pure, and is table-tested. A `paths:` list would be a
-    // second answer, drifting from that one, covered by no test.
-    const preview = byName("deploy-preview.yml");
-    expect(preview).toContain("scripts/ci/relevance.mjs");
-    expect(preview, "deploy-preview.yml declares its own paths filter").not.toMatch(
-      /^\s+paths(-ignore)?:/m,
-    );
-  });
-
   it("no workflow can mint a token for a secret store", () => {
     // The deploy's values are PUSHED into its environment, so its job needs
     // exactly the twelve it declares and no way to ask for a thirteenth.
@@ -490,23 +476,21 @@ describe("the workflows call the registry, and never restate it (D-157)", () => 
     }
   });
 
-  it("production deploys behind an environment, and preview cannot reach it", () => {
+  it("production deploys behind an environment, and nothing else can reach it", () => {
     // The environment is both the approval gate and the credential boundary:
-    // production's Fly token and database URLs exist only inside it, so no
-    // other workflow in this repository can reach them even by typo.
+    // production's GCP key and database URLs exist only inside it, so no other
+    // workflow in this repository can reach them even by typo.
     expect(byName("deploy-production.yml")).toMatch(/environment:\n\s+name: production/);
-    const preview = byName("deploy-preview.yml");
-    expect(preview).toMatch(/environment:\n\s+name: preview/);
-    expect(preview, "the preview deploy can reach production credentials").not.toContain(
-      "name: production",
-    );
+    for (const { file, text } of workflows.filter((w) => w.file !== "deploy-production.yml")) {
+      expect(text, `${file} can reach production credentials`).not.toContain("name: production");
+    }
   });
 
   it("only the production branch can reach the production deploy", () => {
     // workflow_dispatch is kept as a recovery path, so this ref guard is what
     // stops it being pointed at an arbitrary branch and shipping it. The push
-    // trigger is live again (D-157's addendum 2 — production stays on Fly), so
-    // this guards the recovery path rather than the only path.
+    // trigger is live (D-157's addendum 2), so this guards the recovery path
+    // rather than the only path.
     expect(byName("deploy-production.yml")).toContain("github.ref == 'refs/heads/production'");
   });
 
@@ -690,7 +674,7 @@ describe("the Android app is decommissioned", () => {
     // Comment lines are stripped first, deliberately: both files EXPLAIN in
     // their headers what used to run and why it stopped, and that history is
     // the point of keeping the comment. What must not survive is a call.
-    for (const file of ["ship.mjs", "promote.mjs"]) {
+    for (const file of ["promote.mjs"]) {
       const code = read("scripts", "ci", file)
         .split("\n")
         .filter((line) => !/^\s*(\/\/|\*|\/\*)/.test(line))
@@ -1019,9 +1003,9 @@ describe("the maintenance the crons used to do still exists (D-129)", () => {
     expect(production).toContain("scripts/local/synthetic.sh");
     // After the deploy, never before it — probing the old release and calling
     // it a verified deploy is worse than not probing at all.
-    expect(production.indexOf("scripts/fly-deploy.sh")).toBeLessThan(
-      production.indexOf("scripts/local/synthetic.sh"),
-    );
+    const deployed = production.indexOf("run: bash scripts/cloudrun-deploy.sh");
+    expect(deployed, "the production workflow no longer deploys Cloud Run").toBeGreaterThan(-1);
+    expect(deployed).toBeLessThan(production.indexOf("run: bash scripts/local/synthetic.sh"));
   });
 });
 
@@ -1052,15 +1036,12 @@ describe("the deploy is triggered, never dispatched by hand", () => {
     expect(promote).toContain("--gate-already-passed");
   });
 
-  it("fly-deploy.sh accepts the handoff promote makes", () => {
-    expect(read("scripts", "fly-deploy.sh")).toContain("--gate-already-passed");
-  });
-
-  it("still refuses a bare local production deploy with no gate", () => {
-    // --gate-already-passed must not become a way to skip the gate by hand.
-    expect(read("scripts", "fly-deploy.sh")).toContain(
-      "--yes-i-understand-this-skips-the-promote-gate",
-    );
+  it("the Cloud Run script accepts the handoff promote makes, and nothing less", () => {
+    // --gate-already-passed must not become a way to skip the gate by hand:
+    // without it the script refuses production outright.
+    const deploy = read("scripts", "cloudrun-deploy.sh");
+    expect(deploy).toContain("--gate-already-passed");
+    expect(deploy).toContain("refusing to deploy production without the full promote gate");
   });
 
   it("the local production deploy still checkpoints Neon before it migrates", () => {
@@ -1073,9 +1054,8 @@ describe("the deploy is triggered, never dispatched by hand", () => {
     // absence only shows up on the day it is needed.
     //
     // Both steps moved into scripts/database-deploy.sh when the production
-    // targets were split ([D-177]'s addendum); a hand-run fly-deploy.sh still
-    // runs that script before it builds anything, which
-    // neon-checkpoint-retention.test.ts pins.
+    // targets were split ([D-177]'s addendum); the recovery path runs it before
+    // scripts/cloudrun-deploy.sh, which holds no database credential.
     const deploy = withoutComments(read("scripts", "database-deploy.sh"));
     const checkpoint = deploy.indexOf("neon-checkpoint.sh");
     const migrate = deploy.indexOf("migrate-regions.ts");
@@ -1087,55 +1067,6 @@ describe("the deploy is triggered, never dispatched by hand", () => {
     expect(checkpoint, "the checkpoint must run BEFORE migrations").toBeLessThan(migrate);
     // ...and only for production — preview is disposable.
     expect(deploy).toContain('if [ "$ENVIRONMENT" = "production" ]');
-  });
-
-  it("mints the registry credential after the slow build, not before it", () => {
-    // The amd64 image is cross-built under QEMU on an arm64 Mac (2-10 min,
-    // depending on surviving layer cache); `flyctl auth docker` mints a
-    // credential good for ~5-6. A single `buildx build --push` therefore RACES
-    // that token: minted before the build, used at the very end of it. When the
-    // build wins, the push fails with `unknown: app repository not found` —
-    // Fly's registry reports an expired credential as a missing repository, so
-    // it reads as a misconfiguration rather than the timeout it is. On
-    // 2026-08-30 a 565s build failed exactly this way and left three merged PRs
-    // deployed nowhere, while a 102s build through the same script had pushed
-    // fine an hour earlier.
-    const deploy = withoutComments(read("scripts", "fly-deploy.sh"));
-    const build = deploy.indexOf("docker buildx build");
-    const auth = deploy.indexOf("flyctl auth docker");
-    const push = deploy.indexOf("--push");
-
-    expect(build, "fly-deploy.sh no longer builds the image").toBeGreaterThan(-1);
-    expect(auth, "fly-deploy.sh no longer authenticates to the registry").toBeGreaterThan(-1);
-    expect(push, "fly-deploy.sh no longer pushes the image").toBeGreaterThan(-1);
-
-    // Order is the whole fix: build first, authenticate once the slow part is
-    // done, then push against a fresh token. Collapsing these back into a
-    // single `buildx build --push` reintroduces the race.
-    expect(build, "the image must be built BEFORE the credential is minted").toBeLessThan(auth);
-    expect(auth, "the credential must be minted BEFORE the push").toBeLessThan(push);
-  });
-
-  it("preview has a local entry point, since merging to main no longer deploys it", () => {
-    // Hand-testing runs against the DEPLOYED preview backend, so preview going
-    // stale is a real failure mode with a non-obvious symptom.
-    const pkg = JSON.parse(read("package.json")) as { scripts: Record<string, string> };
-    expect(pkg.scripts["deploy:preview"]).toContain("fly-deploy.sh preview");
-  });
-
-  it("ship:preview skips a deploy this commit cannot have changed", () => {
-    // The `&&` chain it replaced deployed for every commit, including the many
-    // that change nothing it carries: a 20-30 min QEMU build for a docs-only
-    // change. A command that expensive to run gets run less, which is worse
-    // than the cost it saves.
-    const ship = read("scripts", "ci", "ship.mjs");
-    expect(ship).toContain("changedTargets");
-    expect(ship).toContain("lastRelease");
-    // "No record" must never read as "nothing changed" — that is the only
-    // direction of this optimisation that can silently ship nothing.
-    expect(ship).toContain("=== null");
-    const pkg = JSON.parse(read("package.json")) as { scripts: Record<string, string> };
-    expect(pkg.scripts["ship:preview"]).toContain("ship.mjs");
   });
 
   it("promote ships only a commit the runners certified ([D-162])", () => {
@@ -1185,24 +1116,13 @@ describe("the deploy is triggered, never dispatched by hand", () => {
     expect(promote).toContain("--force-gate");
   });
 
-  it("promote says when it is shipping a commit preview never saw", () => {
-    // A warning, not a gate: hotfixes exist and the ledger only knows this
-    // machine. But nothing could say it at all before the ledger.
-    expect(read("scripts", "ci", "promote.mjs")).toContain('kind: "web-deploy", env: "preview"');
-  });
-
   it("every ship path leaves a record", () => {
     // The failure mode is silence: nothing on disk disagrees when a ship is
     // skipped. The ledger is what disagrees, and release:status is what reads
     // it.
-    expect(read("scripts", "fly-deploy.sh")).toContain("record-release.mjs");
+    expect(read("scripts", "cloudrun-deploy.sh")).toContain("record-release.mjs");
     const pkg = JSON.parse(read("package.json")) as { scripts: Record<string, string> };
     expect(pkg.scripts["release:status"]).toContain("release-status.mjs");
-    // The orchestration moved out of the package script into ship.mjs when it
-    // grew the skip logic, so assert on what that script drives.
-    const ship = read("scripts", "ci", "ship.mjs");
-    expect(pkg.scripts["ship:preview"]).toContain("ship.mjs");
-    expect(ship).toContain("scripts/fly-deploy.sh");
   });
 });
 
@@ -1225,11 +1145,10 @@ describe("opening a PR is the front half, and only the front half", () => {
     const src = openPr();
     for (const back of [
       "gh pr merge",
-      "ship.mjs",
-      "ship:preview",
       "promote.mjs",
       "pnpm promote",
-      "fly-deploy.sh",
+      "cloudrun-deploy.sh",
+      "database-deploy.sh",
     ]) {
       expect(src, `open-pr.sh reaches into the back half via '${back}'`).not.toContain(back);
     }

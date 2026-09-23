@@ -249,15 +249,15 @@ Three tiers, split on one question — _is this a credential?_
 | Tier                 | Where                                             | Example                                             |
 | -------------------- | ------------------------------------------------- | --------------------------------------------------- |
 | Non-secret           | `config/env/<env>.{build,runtime}.env`, committed | URLs, publishable keys, feature flags, project ids  |
-| Secret               | Infisical, pushed to Fly secrets                  | Stripe secret key, LiveKit API secret, database URL |
-| Infrastructure-owned | Written to Fly directly by OpenTofu               | Every `*_R2_*` and `LIVEKIT_EGRESS_S3_*` value      |
+| Secret               | Infisical, pushed to one Cloud Run secret         | Stripe secret key, LiveKit API secret, database URL |
+| Infrastructure-owned | Read from OpenTofu state by that same push        | Every `*_R2_*` and `LIVEKIT_EGRESS_S3_*` value      |
 
 Committing the non-secret tier is the unusual choice and it is on purpose: a
 deployment's configuration becomes reviewable in a diff instead of living only
 in a dashboard. The third tier's invisibility has already caused one wrong
 conclusion — a reader grepped the repository, found no Egress configuration, and
-predicted a failure in a pipeline that was fully deployed — so the file headers
-now say to check `fly secrets list` before concluding a variable is unset.
+predicted a failure in a pipeline that was fully deployed — so check the
+deployed secret set, not the repository, before concluding a variable is unset.
 
 `src/lib/env.ts` is the runtime contract. Almost everything is optional and
 degrades gracefully; only `assertProductionCredentials()` hard-fails, and only
@@ -317,11 +317,13 @@ nobody reads.
 The decision log is the real record; this is the shape of it.
 
 - **Hosting**: Vercel + Supabase → Fly.io + Neon ([D-70](../decisions/D-70.md),
-  [D-89](../decisions/D-89.md)). Supabase is fully decommissioned. There is still
+  [D-89](../decisions/D-89.md)) → Google Cloud Run + Neon
+  ([D-184](../decisions/D-184.md)). Supabase is fully decommissioned, and the
+  Fly app was destroyed at the 2026-09-23 cutover. There is still
   no `VERCEL_ENV` branch — production versus preview is decided by `APP_URL` —
   and that decoupling is what later let Vercel come back as a **second
   production target holding no domain** ([D-177](../decisions/D-177.md)),
-  needing no application change at all. Production serves from Fly.
+  needing no application change at all. Production serves from Cloud Run.
 - **Payments**: separate charges and transfers → direct charges on Accounts v2
   ([D-143](../decisions/D-143.md)). The platform stopped touching the money.
 - **Platform entity**: consolidated in the UK
