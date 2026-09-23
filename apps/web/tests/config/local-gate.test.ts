@@ -101,7 +101,14 @@ describe("code scanning gates on new alerts, not on a check (D-179)", () => {
   it("names no bypass actor and requires no CodeQL job context", () => {
     // A bypass leaves no record where a dismissed alert does, and a required
     // `Analyze (…)` context strands every PR the day GitHub renames the leg.
-    expect(script).not.toContain("bypass_actors");
+    //
+    // Read off the code-scanning payload alone: the script has one deliberate
+    // bypass, the admin role on `production`'s update-only ruleset, and
+    // production-access.test.ts holds that one.
+    const payload = /CODE_SCANNING_PAYLOAD="\$\(cat <<JSON\n([\s\S]*?)\nJSON/.exec(script)?.[1];
+    expect(payload).toBeDefined();
+    expect(payload).toContain(`"type": "code_scanning"`);
+    expect(payload).not.toContain("bypass_actors");
     expect(script).not.toMatch(/"context":\s*"(Analyze|CodeQL)/);
   });
 

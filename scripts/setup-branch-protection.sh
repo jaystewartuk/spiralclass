@@ -63,6 +63,9 @@
 #     break deploys. Promote already ran the full gate upstream. A normal
 #     fast-forward is not a force-push, so it passes non_fast_forward
 #     untouched; no bypass actor is needed.
+#   - A second ruleset restricts moving it at all to a repository admin, and
+#     the `production` environment requires the owner's approval for every
+#     deploy. See the section below that applies them.
 set -euo pipefail
 
 REPO="${1:-jaystewartuk/spiralclass}"
@@ -123,6 +126,61 @@ else
 fi
 echo "  ✓ production guarded (no force-push, no deletion; fast-forward still allowed)."
 
+# ── production: only an admin moves it, only the owner approves the deploy ───
+# The two settings that make shipping production the owner's alone. `pnpm
+# promote` refuses to run unless both hold (scripts/ci/deploy-protection.mjs).
+#
+# A SEPARATE ruleset from the one above, because a bypass actor bypasses every
+# rule in its ruleset. Folding `update` into the fast-forward ruleset would let
+# an admin force-push or delete `production`, too.
+UPDATE_RULESET_NAME="production: only an admin moves it"
+UPDATE_RULESET_PAYLOAD="$(cat <<JSON
+{
+  "name": "${UPDATE_RULESET_NAME}",
+  "target": "branch",
+  "enforcement": "active",
+  "conditions": { "ref_name": { "include": ["refs/heads/production"], "exclude": [] } },
+  "rules": [ { "type": "update", "parameters": { "update_allows_fetch_and_merge": false } } ],
+  "bypass_actors": [ { "actor_id": 5, "actor_type": "RepositoryRole", "bypass_mode": "always" } ]
+}
+JSON
+)"
+
+echo "Applying production update restriction to ${REPO}…"
+UPDATE_RULESET_ID="$(gh api "repos/${REPO}/rulesets" --jq ".[] | select(.name==\"${UPDATE_RULESET_NAME}\") | .id" 2>/dev/null | head -1 || true)"
+if [ -n "${UPDATE_RULESET_ID}" ]; then
+  echo "  updating existing ruleset (id ${UPDATE_RULESET_ID})…"
+  echo "${UPDATE_RULESET_PAYLOAD}" | gh api -X PUT "repos/${REPO}/rulesets/${UPDATE_RULESET_ID}" --input - >/dev/null
+else
+  echo "  creating ruleset…"
+  echo "${UPDATE_RULESET_PAYLOAD}" | gh api -X POST "repos/${REPO}/rulesets" --input - >/dev/null
+fi
+echo "  ✓ only a repository admin can move production."
+
+# The reviewer is the repository's owner, resolved here rather than written
+# down, so no account id lives in the tree. Self-review stays ALLOWED: the one
+# maintainer both pushes and approves, and forbidding it would block every
+# deploy. Admin bypass is OFF, so a push made with the owner's own credentials
+# still waits for a click.
+OWNER_ID="$(gh api "users/${REPO%%/*}" --jq .id)"
+echo "Applying the production environment's required reviewer on ${REPO}…"
+gh api -X PUT "repos/${REPO}/environments/production" --input - >/dev/null <<JSON
+{
+  "wait_timer": 0,
+  "prevent_self_review": false,
+  "can_admins_bypass": false,
+  "reviewers": [ { "type": "User", "id": ${OWNER_ID} } ],
+  "deployment_branch_policy": { "protected_branches": false, "custom_branch_policies": true }
+}
+JSON
+EXISTING_POLICIES="$(gh api "repos/${REPO}/environments/production/deployment-branch-policies" --jq '[.branch_policies[].name] | join(",")')"
+if [ "${EXISTING_POLICIES}" != "production" ]; then
+  echo "  ✗ the environment's branch policies are '${EXISTING_POLICIES}', not just 'production'." >&2
+  echo "    Fix them in Settings → Environments → production → Deployment branches." >&2
+  exit 1
+fi
+echo "  ✓ every production deploy waits for ${REPO%%/*}, and only the production branch can deploy."
+
 # ── Security tab: reporting, code scanning, and merge protection (D-179) ─────
 # SECURITY.md and the issue-template contact link both send a reporter to the
 # private "Report a vulnerability" flow. With the setting off that link is a
@@ -180,6 +238,8 @@ echo "Verify main:"
 echo "  gh api repos/${REPO}/branches/main/protection | jq '{required: [.required_status_checks.checks[].context], strict: .required_status_checks.strict, pr_required: (.required_pull_request_reviews!=null), approvals: .required_pull_request_reviews.required_approving_review_count, enforce_admins: .enforce_admins.enabled, linear: .required_linear_history.enabled}'"
 echo "Verify production ruleset:"
 echo "  gh api repos/${REPO}/rulesets --jq '.[] | select(.name==\"${RULESET_NAME}\") | {name, enforcement, rules: [.rules[]?.type]}'"
+echo "Verify who can ship production:"
+echo "  gh api repos/${REPO}/environments/production --jq '{can_admins_bypass, rules: [.protection_rules[] | {type, reviewers: [.reviewers[]?.reviewer.login]}]}'"
 echo "Verify the security settings:"
 echo "  gh api repos/${REPO}/private-vulnerability-reporting"
 echo "  gh api repos/${REPO}/code-scanning/default-setup --jq '{state, languages}'"

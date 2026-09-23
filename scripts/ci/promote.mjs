@@ -64,6 +64,7 @@ import { readFileSync } from "node:fs";
 import { createInterface } from "node:readline/promises";
 
 import { recordRun } from "../local/receipts.mjs";
+import { deployProtectionProblems } from "./deploy-protection.mjs";
 import { deployVerdict } from "./deploy-verdict.mjs";
 import { capture, check, git, has, run } from "./lib.mjs";
 
@@ -121,6 +122,51 @@ try {
   // No workflow file at all is the pre-D-157 world, where promote deployed
   // directly. Nothing to check there, and refusing would be wrong.
   if (error?.code !== "ENOENT") throw error;
+}
+
+// Refuse BEFORE the fast-forward, too, if the settings that make production
+// the owner's alone are not all in place (scripts/ci/deploy-protection.mjs).
+// Every promote reads them, so the settings are checked on every promote
+// instead of being assumed. This fails closed like the gate below: a setting
+// that cannot be read is not a setting that is on.
+{
+  const readJson = (path) => {
+    const raw = has("gh") ? capture("gh", ["api", path]) : "";
+    try {
+      return raw ? JSON.parse(raw) : null;
+    } catch {
+      return null;
+    }
+  };
+  const environment = readJson("repos/{owner}/{repo}/environments/production");
+  const policies = readJson(
+    "repos/{owner}/{repo}/environments/production/deployment-branch-policies",
+  );
+  const summaries = readJson("repos/{owner}/{repo}/rulesets");
+  const rulesets = Array.isArray(summaries)
+    ? summaries.map((summary) => readJson(`repos/{owner}/{repo}/rulesets/${summary.id}`))
+    : null;
+
+  const problems =
+    environment && policies && rulesets && !rulesets.includes(null)
+      ? deployProtectionProblems({
+          environment,
+          branchPolicies: (policies.branch_policies ?? []).map((policy) => policy.name),
+          rulesets,
+        })
+      : [
+          "The production protection settings could not be read (is `gh` installed and signed in?).",
+        ];
+
+  if (problems.length) {
+    die(
+      "Production is not protected so that only you can ship it:",
+      ...problems.map((problem) => `  • ${problem}`),
+      "",
+      "Fix:  bash scripts/setup-branch-protection.sh",
+      "Nothing moved. Production is still serving whatever shipped last.",
+    );
+  }
 }
 
 console.log("── Fetching origin");
