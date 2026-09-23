@@ -1,7 +1,7 @@
 # `infra/gcp` — the Cloud Run target's one-time setup
 
-[D-184](../../docs/decisions/D-184.md) added Cloud Run as a third production
-target. Every release deploys to it through
+[D-184](../../docs/decisions/D-184.md) added Cloud Run as a production target,
+and it has served `spiralclass.com` since 2026-09-23. Every release deploys to it through
 [`scripts/cloudrun-deploy.sh`](../../scripts/cloudrun-deploy.sh); **the two
 scripts here run rarely and by the operator**, because each of them creates or
 writes something a CI job must not be able to.
@@ -160,8 +160,8 @@ depends on it.
 
 ## What this directory does not do
 
-**It never maps a domain.** `spiralclass.com` is Fly's until the operator moves
-it, and no script here or in `scripts/` can move it. The cutover — map the
-domain, move the Inngest registration off Fly, watch a real class join, then
-stop the Fly app — is in `docs/deployment/RELEASE_AND_STAGING.md` and is the
-whole point of the target existing.
+**It never maps a domain.** The operator mapped `spiralclass.com` to this
+service by hand on 2026-09-23, and no script here or in `scripts/` can map or
+move it. How that was done, and what it taught — DNS-only records, fifteen
+minutes without HTTPS while the certificate issued — is in
+`docs/deployment/RELEASE_AND_STAGING.md` under "If the domain ever moves again".

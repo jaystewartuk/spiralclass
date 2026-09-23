@@ -1,15 +1,10 @@
 #!/usr/bin/env bash
-# The THIRD production target, and the one meant to replace the first.
+# The production deploy. Cloud Run `web` has served spiralclass.com since the
+# 2026-09-23 cutover ([D-184]'s addendum); Fly `agendaprofe` is stopped and
+# holds no domain. The Vercel failover ([D-177]) is untouched by this file.
 #
-# [D-184]. Fly `agendaprofe` serves spiralclass.com and is untouched by this
-# file. The Vercel failover ([D-177]) is untouched by it too. What this adds is
-# a Cloud Run service that is built and deployed on every release, holds no
-# domain, and exists so that the operator can hand it the domain and stop paying
-# Fly ~$7/month for a platform that earns nothing.
-#
-# ⚠️ WHAT THIS DELIBERATELY DOES NOT DO. The list is the same five as
-# scripts/vercel-deploy.sh's, for the same reasons, and each omission is load
-# bearing rather than unfinished:
+# ⚠️ WHAT THIS DELIBERATELY DOES NOT DO, and each omission is load bearing
+# rather than unfinished:
 #
 #   * NO Neon checkpoint (D-95) and NO migrations. scripts/database-deploy.sh
 #     owns both, and deploy-production.yml runs it as the `database` job this
@@ -17,32 +12,36 @@
 #     first. ⚠️ FROM A LAPTOP that ordering is yours to keep: if the commit
 #     carries a migration, run scripts/database-deploy.sh for it first — this
 #     script holds no database credential and cannot tell.
-#   * NO Inngest sync, and this is the sharp one. scripts/inngest-sync.sh PUTs
-#     an endpoint URL and Inngest registers an app PER URL. A second URL would
-#     register a second app, so a cron defined once would FIRE TWICE — once from
-#     Fly and once from a deployment serving nobody. Some of those crons bill
-#     Stripe customers. The Inngest endpoint belongs to whichever deployment
-#     holds the domain. At cutover it MOVES; it is never added.
 #   * NO domain. There is no `gcloud run domain-mappings create` here and there
-#     must not be. A DNS cutover performed by a CI job is exactly what
-#     CLAUDE.md's first rule reserves to the operator.
-#   * NO production probe. scripts/local/synthetic.sh probes
-#     https://spiralclass.com, which this deploy does not serve. Pointing it at
-#     the run.app URL would be a second definition of "is production healthy".
+#     must not be. The mapping exists; it was made once, by the operator, and a
+#     DNS change performed by a CI job is exactly what CLAUDE.md's first rule
+#     reserves to them.
+#   * NO production probe. deploy-production.yml runs scripts/local/synthetic.sh
+#     as its own step after this, the same split Fly's job had — so a hand-run
+#     recovery deploy is not also a second definition of "is production healthy".
 #   * NO runtime secrets. See CREDENTIALS below — this script cannot read one
 #     and does not want to.
 #
-# So the ordered steps are four:
+# ⚠️ THE INNGEST SYNC IS HERE NOW, and it syncs the DOMAIN, never this
+# service's run.app URL. Inngest registers an app PER URL, so syncing run.app
+# would register a second app and fire every cron twice — including ones that
+# bill Stripe customers. The domain is the one URL Inngest has always had; the
+# cutover moved what answers it, not the URL. The sync is last because it must
+# run against the revision this deploy just made live: a function this commit
+# adds is registered only when the endpoint that serves it is PUT.
 #
-#   1. resolve the build-time NEXT_PUBLIC_* values from the SAME source the Fly
-#      image and the Vercel build read — config/env/<env>.build.env, through
-#      scripts/env-build-args.mjs. Three targets baking different values into
+# So the ordered steps are five:
+#
+#   1. resolve the build-time NEXT_PUBLIC_* values from the SAME source the
+#      Vercel build reads — config/env/<env>.build.env, through
+#      scripts/env-build-args.mjs. Two targets baking different values into
 #      one commit's client bundle is a class of bug with no runtime symptom.
 #   2. build apps/web's amd64 image with docker buildx and push it to Artifact
 #      Registry, tagged with the commit SHA
 #   3. `gcloud run deploy --image` it, with the shape from
 #      config/cloudrun/<env>.env
 #   4. record the deploy in the local release ledger
+#   5. sync Inngest against https://spiralclass.com/api/inngest
 #
 # CREDENTIALS, and why the runtime secrets are not here. On Fly they are
 # `fly secrets`, pushed from Infisical by the operator; the deploy only swaps
@@ -191,8 +190,7 @@ SHA="$(git rev-parse HEAD)"
 SHORT_SHA="$(git rev-parse --short=12 HEAD)"
 IMAGE="$REGION-docker.pkg.dev/$GCP_PROJECT_ID/$ARTIFACT_REPO/web:$SHORT_SHA"
 
-echo "› Deploying $SHORT_SHA to Cloud Run $SERVICE ($REGION)."
-echo "  It will serve its run.app URL and NOT spiralclass.com (D-184)."
+echo "› Deploying $SHORT_SHA to Cloud Run $SERVICE ($REGION), which serves spiralclass.com."
 
 # ---------------------------------------------------------------------------
 # 1. Build args, from the one source all three targets read.
@@ -274,13 +272,21 @@ gcloud run deploy "$SERVICE" \
   --quiet
 
 URL="$(gcloud run services describe "$SERVICE" --project "$GCP_PROJECT_ID" --region "$REGION" --format='value(status.url)')"
-echo "› Deployed: $URL"
-echo "  Serving: its own URL only. spiralclass.com is still Fly (D-150 addendum 2)."
+echo "› Deployed: $URL, mapped to https://spiralclass.com"
 
 # ---------------------------------------------------------------------------
 # 4. Ledger.
 #
-# A distinct --kind, like vercel-deploy.sh's: `pnpm release:status` must not
-# report this as the thing serving spiralclass.com, because it is not.
+# `web-deploy`, the kind `pnpm release:status` reads as "production web": this
+# IS the thing serving spiralclass.com now. Before the cutover it wrote a
+# distinct kind precisely so it could not be mistaken for that.
 # ---------------------------------------------------------------------------
-node scripts/ci/record-release.mjs --kind web-deploy-cloudrun --env "$ENVIRONMENT" --sha "$SHA" || true
+node scripts/ci/record-release.mjs --kind web-deploy --env "$ENVIRONMENT" --sha "$SHA" || true
+
+# ---------------------------------------------------------------------------
+# 5. Inngest sync — the DOMAIN, never $URL. See the header: a second synced URL
+# is a second app, and every cron fires twice. `exec` because it is the last
+# step, exactly as scripts/fly-deploy.sh ends.
+# ---------------------------------------------------------------------------
+echo "› Syncing Inngest functions (production)…"
+exec bash scripts/inngest-sync.sh "https://spiralclass.com/api/inngest"

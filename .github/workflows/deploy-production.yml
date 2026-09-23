@@ -4,28 +4,32 @@ name: Deploy production
 # ([D-157]), after a required reviewer approves the run.
 #
 # ⚠️ This workflow does not deploy anything, and it does not gate anything
-# either. `scripts/database-deploy.sh`, `scripts/fly-deploy.sh` and
+# either. `scripts/database-deploy.sh`, `scripts/cloudrun-deploy.sh` and
 # `scripts/vercel-deploy.sh` deploy; `pnpm promote` gates. None of them is
 # re-typed here.
 #
 # THREE JOBS, AND WHY NEITHER TARGET WAITS ON THE OTHER ([D-177]'s addendum).
 #
-#   database ──┬──> fly      serves spiralclass.com, then the production probes
-#              └──> vercel   the failover: deployed warm, holds no domain
+#   database ──┬──> cloudrun  serves spiralclass.com, then the production probes
+#              └──> vercel    the failover: deployed warm, holds no domain
+#
+# Cloud Run took the domain from Fly on 2026-09-23 and Fly was destroyed the
+# same day ([D-184]'s addendum). The shape did not change: the job that serves
+# the domain is the one that probes it and decides whether production shipped.
 #
 # The database job checkpoints Neon and runs the migrations, ONCE per commit.
 # Both targets `needs:` it and neither needs the other. Until 2026-09-12 the
-# checkpoint and migrations lived inside the Fly job and the Vercel job
-# `needs:`-ed that, which made two things true that should not be: a Fly
-# failure — including Fly itself being down, the one case a failover exists
-# for — meant the failover could not be deployed at all; and a missing Vercel
-# credential turned a Fly release that had shipped into a red run and a
-# `pnpm promote` reporting that production had not moved.
+# checkpoint and migrations lived inside the serving target's job and the
+# Vercel job `needs:`-ed that, which made two things true that should not be: a
+# failure of the serving platform — the one case a failover exists for — meant
+# the failover could not be deployed at all; and a missing Vercel credential
+# turned a release that had shipped into a red run and a `pnpm promote`
+# reporting that production had not moved.
 #
 # ⚠️ EACH JOB HOLDS ITS OWN CREDENTIALS AND NO OTHER JOB'S.
 #
 #   database   DATABASE_URL · DIRECT_URL · NEON_API_KEY · NEON_PROJECT_ID
-#   fly        FLY_API_TOKEN · LIVEKIT_ORIGIN_IP · the NEXT_PUBLIC_* build values
+#   cloudrun   GCP_PROJECT_ID · GCP_DEPLOY_KEY · LIVEKIT_ORIGIN_IP · the build values
 #   vercel     VERCEL_TOKEN · VERCEL_ORG_ID · VERCEL_PROJECT_ID · the build values
 #
 # The build values are the only overlap, because they are the same client
@@ -34,7 +38,7 @@ name: Deploy production
 # checks its own set and nothing else.
 # `apps/web/tests/config/production-targets.test.ts` holds all of this.
 #
-# ⚠️ A dispatch can choose one target (`target: fly` or `target: vercel`). The
+# ⚠️ A dispatch can choose one target (`target: cloudrun` or `target: vercel`). The
 # database job runs first either way, because neither target may reach a schema
 # the commit has not migrated. A push always deploys both — a failover that is
 # only refreshed when someone remembers to dispatch it is D-120's drift again.
@@ -74,8 +78,9 @@ name: Deploy production
 # LOCAL ledger, which a runner deploy cannot write (D-157's unresolved risks) —
 # so it is either silent about a deploy that happened or, worse, still holding
 # the last laptop deploy's SHA and reporting production as behind when it is
-# current. The authoritative answers are `git log origin/production`, the Fly
-# release list, and this workflow's run history.
+# current. The authoritative answers are `git log origin/production`, Cloud
+# Run's revision list (the image tag IS the commit), and this workflow's run
+# history.
 #
 # The checkpoint is worth having because this is the one workflow that runs
 # migrations against live payment records behind a Neon restore point. The
@@ -85,20 +90,20 @@ name: Deploy production
 # together or this file looks like it changed its mind for no reason.
 #
 # The suspension came from "there are no more Fly deploys" — everything was
-# moving to the Oracle A1 box (D-150). Hours later that was narrowed: **the
-# production web app stays on Fly and production's database stays on Neon;
-# Oracle carries preview, preview's database and the LiveKit stack** (D-150's
-# second addendum). Fly is production's target, not a target being retired, so
-# there is nothing here to suspend — and a `production` branch that cannot
-# deploy is the 2026-07-19 drift waiting to happen.
+# moving to the Oracle A1 box (D-150). Hours later that was narrowed: the
+# production web app stayed on Fly and production's database on Neon (D-150's
+# second addendum). The web app has since moved again, to Cloud Run ([D-184]),
+# and the lesson of that day still holds: a `production` branch that cannot
+# deploy is the 2026-07-19 drift waiting to happen, so a target moving is never
+# a reason to suspend this file.
 #
 # ⚠️ Preview's workflow is still suspended, and for a reason that does not
 # apply here: its target genuinely is moving, and the box is not serving yet.
 #
 # WHERE THE VALUES COME FROM ([D-163], and read its addendum before changing
 # this). Infisical is the source of truth, and it PUSHES a copy into this
-# environment's secrets — the same direction `infra/infisical/push-fly-secrets.sh`
-# already pushes the app's runtime secrets into Fly. One vault, two push
+# environment's secrets — the same direction `infra/gcp/push-cloudrun-env.sh`
+# pushes the app's runtime secrets into Secret Manager. One vault, two push
 # targets, one mental model. Rotating a value in Infisical re-syncs it here, so
 # the copy below is derived rather than a second original.
 #
@@ -119,7 +124,7 @@ name: Deploy production
 #
 # The `config/env/*.local.env` overlays are still gone, and that half of D-163
 # stands: the laptop reads the same values through
-# `infra/infisical/run.sh production ./scripts/fly-deploy.sh …` rather than from
+# `infra/infisical/run.sh production …` rather than from
 # a file that is the copy nobody rotates.
 #
 # THE PREFLIGHTS, AND WHY THEY DID NOT GO AWAY WITH THE OVERLAYS. Every deploy
@@ -137,10 +142,10 @@ on:
       target:
         description: Which production target to deploy. The database job runs first either way.
         type: choice
-        # `all`, not `both`, since [D-184] made it three. The rename is the
-        # point: a value named `both` that dispatched three targets would be a
-        # word that had quietly stopped describing what it does.
-        options: [all, fly, vercel, cloudrun]
+        # `all`, not `both`: [D-184] made it three targets, and retiring Fly
+        # made it two again. `all` stays true whatever the count is, which is
+        # why it was chosen over a word that would have to be renamed each time.
+        options: [all, vercel, cloudrun]
         default: all
 
 permissions:
@@ -157,8 +162,8 @@ jobs:
   # ── The database: checkpoint, then migrate. Once per commit ([D-95]) ──────
   #
   # Neither target owns this, because both serve the same Neon branch. It holds
-  # the database and Neon credentials and nothing a target holds — no Fly
-  # token, no Vercel token — so a revoked platform credential cannot stop a
+  # the database and Neon credentials and nothing a target holds — no GCP
+  # key, no Vercel token — so a revoked platform credential cannot stop a
   # migration, and a migration job cannot deploy anything.
   database:
     name: Checkpoint and migrate the production database
@@ -242,9 +247,10 @@ jobs:
           cache: pnpm
 
       - name: Checkpoint and migrate
-        # The same script a hand-run `scripts/fly-deploy.sh production` runs as
-        # its first two steps, so a recovery deploy and this job cannot disagree
-        # about what migrating production means.
+        # The same script the operator runs by hand before a recovery deploy
+        # (scripts/cloudrun-deploy.sh holds no database credential), so a
+        # recovery and this job cannot disagree about what migrating production
+        # means.
         run: bash scripts/database-deploy.sh production --gate-already-passed
 
       - name: Say what was migrated
@@ -265,172 +271,9 @@ jobs:
             echo "Both targets need this job, and neither needs the other."
           } >> "$GITHUB_STEP_SUMMARY"
 
-  # ── Fly: the target that serves spiralclass.com ──────────────────────────
-  fly:
-    name: Build amd64, deploy to Fly and probe production
-    needs: [database]
-    # Skipped only by a dispatch that asked for the failover alone. Needing the
-    # database job, it also never runs against a schema this commit has not
-    # migrated.
-    # A dispatch that named another target skips this one. Written as "all or
-    # me" rather than a list of everyone else, so [D-184]'s third target did not
-    # have to edit a condition it is not mentioned in.
-    if: ${{ github.ref == 'refs/heads/production' && (github.event_name != 'workflow_dispatch' || inputs.target == 'all' || inputs.target == 'fly') }}
-    runs-on: ubuntu-latest # ⚠️ Never a larger runner — those are billed even on a public repo.
-    timeout-minutes: 45
-    environment:
-      name: production
-      url: https://spiralclass.com
-    env:
-      FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
-      # config/env/production.build.env's `__LOCAL__` values, resolved from the
-      # process environment by scripts/env-config.mjs. Baked irreversibly into
-      # the client bundle at build time, which is why they are environment-scoped
-      # rather than repository-wide — a preview value shipped to production
-      # browsers is not a thing you can take back.
-      NEXT_PUBLIC_TEACHER_PHOTOS_R2_PUBLIC_URL: ${{ secrets.NEXT_PUBLIC_TEACHER_PHOTOS_R2_PUBLIC_URL }}
-      NEXT_PUBLIC_TEACHER_VIDEOS_R2_PUBLIC_URL: ${{ secrets.NEXT_PUBLIC_TEACHER_VIDEOS_R2_PUBLIC_URL }}
-      NEXT_PUBLIC_SENTRY_DSN: ${{ secrets.NEXT_PUBLIC_SENTRY_DSN }}
-      NEXT_PUBLIC_POSTHOG_KEY: ${{ secrets.NEXT_PUBLIC_POSTHOG_KEY }}
-      NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY }}
-      # The Cloudflare origin address behind livekit.spiralclass.com, read by
-      # the probe step's LiveKit certificate check. Never committed: hiding the
-      # origin behind Cloudflare IS the protection, and scripts/local/synthetic.sh
-      # exits 2 rather than guess it (D-134).
-      LIVEKIT_ORIGIN_IP: ${{ secrets.LIVEKIT_ORIGIN_IP }}
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
-
-      # Before the toolchain, because it needs none of it and the whole point
-      # is to be the cheapest step in the job.
-      - uses: superfly/flyctl-actions/setup-flyctl@ed8efb33836e8b2096c7fd3ba1c8afe303ebbff1 # v1.6
-
-      - name: Refuse before touching anything if this job's values did not arrive
-        # WHY THIS IS FIRST, AND WHY IT IS NOT A SECOND COPY OF THE DEPLOY.
-        #
-        # scripts/fly-deploy.sh discovers a missing value WHERE IT IS FIRST
-        # USED — for the Fly token, only after the image has been built. Failing
-        # there is not dangerous, but it is twenty minutes spent on a red run.
-        #
-        # Every check below is READ-ONLY and derived, never a restatement:
-        #   * The build values come from config/env/production.build.env
-        #     through the same env-build-args.mjs the deploy calls, so adding a
-        #     __LOCAL__ key there is covered here in the same commit. It is
-        #     dependency-free (node: builtins only), which is why this can run
-        #     before pnpm exists.
-        #   * The Fly token is checked with `-c fly.production.toml`, so the app
-        #     name is read out of the config exactly as fly-deploy.sh reads it.
-        #     There is no app name in this file to keep in sync.
-        #   * LIVEKIT_ORIGIN_IP is checked HERE rather than being discovered by
-        #     the probe step, because the probe runs after the deploy. Its
-        #     absence would turn a good release into a red run at the one moment
-        #     nobody wants ambiguity about whether production shipped.
-        #
-        # ⚠️ No database URL and no Vercel value is checked, because this job
-        # holds neither: the database job migrated this commit, and the Vercel
-        # target is not this job's business.
-        run: |
-          set -euo pipefail
-          missing=""
-          [ -n "${FLY_API_TOKEN:-}" ] || missing="$missing FLY_API_TOKEN"
-          [ -n "${LIVEKIT_ORIGIN_IP:-}" ] || missing="$missing LIVEKIT_ORIGIN_IP"
-          if [ -n "$missing" ]; then
-            echo "The \`production\` environment is missing:$missing" >&2
-            echo "" >&2
-            echo "Infisical is the source of truth and syncs these in (D-163). So fix the" >&2
-            echo "value THERE and let the sync carry it, rather than setting it by hand" >&2
-            echo "here — a hand-set secret is the copy that stops matching." >&2
-            echo "⚠️ On the \`production\` environment, never repository-wide." >&2
-            exit 1
-          fi
-          echo "› Every value this job reads arrived."
-
-          # Resolves config/env/production.build.env's __LOCAL__ values from the
-          # process environment and throws naming every one it cannot satisfy.
-          # Output discarded: this is the throw we want, not the values.
-          node scripts/env-build-args.mjs production >/dev/null
-          echo "› Every __LOCAL__ build value resolves."
-
-          # The one call that proves the token is live rather than merely
-          # present. A Fly token that has been revoked or has expired looks
-          # exactly like a working one until it is used.
-          flyctl status -c fly.production.toml >/dev/null
-          echo "› The Fly token can see the production app."
-
-      - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
-        with:
-          dest: ~/setup-pnpm
-
-      - name: Read the Node major the app actually ships on
-        run: |
-          set -euo pipefail
-          major="$(sed -n 's/^FROM node:\([0-9][0-9]*\)-slim.*/\1/p' Dockerfile | head -1)"
-          if [ -z "$major" ]; then
-            echo "Could not read a Node major from the Dockerfile's FROM line." >&2
-            exit 1
-          fi
-          echo "NODE_VERSION=$major" >> "$GITHUB_ENV"
-
-      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: pnpm
-
-      - name: Deploy
-        # `--gate-already-passed` is the handoff flag scripts/fly-deploy.sh
-        # already understands. It is not a bypass: see this file's header for
-        # why the gate provably ran before the push that triggered this.
-        #
-        # `--database-already-deployed` is honest HERE and nowhere else: this
-        # job `needs: [database]`, which ran scripts/database-deploy.sh for this
-        # commit, so the script skips its own first two steps rather than
-        # cutting a second checkpoint — and this job holds no database URL to
-        # cut one with. production-targets.test.ts pins both halves.
-        run: bash scripts/fly-deploy.sh production --gate-already-passed --database-already-deployed
-
-      - name: Probe what is now live
-        # The probes D-129 chained into `pnpm promote`, moved to where the
-        # deploy now happens. They exist because the regressions they catch —
-        # a route that renders an error, a booking page with nothing
-        # purchasable, a checkout with no payment rail — all return 200, so
-        # `flyctl deploy` succeeding says nothing about them, and they are
-        # introduced at deploy time.
-        #
-        # Called directly rather than through `pnpm local synthetic`: that
-        # wrapper exists to give a hand-run task the run history and the
-        # failure notification that Actions used to provide for free (D-129).
-        # On Actions, that is what a red job already is.
-        run: bash scripts/local/synthetic.sh
-
-      - name: Say what shipped
-        if: ${{ always() }}
-        env:
-          OUTCOME: ${{ job.status }}
-        run: |
-          set -euo pipefail
-          {
-            echo "## Production · ${OUTCOME}"
-            echo
-            echo "| | |"
-            echo "| --- | --- |"
-            echo "| Commit | \`${GITHUB_SHA}\` |"
-            echo "| App | https://spiralclass.com |"
-            echo "| Image | \`registry.fly.io/agendaprofe:${GITHUB_SHA}\` |"
-            echo
-            echo "Migrated by the database job this one needs. Deployed by"
-            echo "\`scripts/fly-deploy.sh production\` — the same script the operator runs"
-            echo "by hand for a recovery deploy, which then checkpoints and migrates itself."
-            echo
-            echo "What is live: \`flyctl status -c fly.production.toml\` — the image"
-            echo "tag IS the commit. Not \`pnpm release:status\`: its ledger is"
-            echo "per-machine and this deploy did not run on that machine."
-          } >> "$GITHUB_STEP_SUMMARY"
-
-  # ── Vercel: the second production target ([D-177]) ──────────────────────
+  # ── Vercel: the failover ([D-177]) ────────────────────────────────────────
   #
-  # Fly serves spiralclass.com and this does not change that. What this job
+  # Cloud Run serves spiralclass.com and this does not change that. What this job
   # produces is a PRODUCTION deployment of the same commit on Vercel that is
   # built, deployed, and holds no domain — a failover that is proven on every
   # release instead of a dormant project nobody has deployed since they set it
@@ -438,30 +281,30 @@ jobs:
   # exercised stops describing anything, and the reader who trusts it is the one
   # who gets hurt.
   #
-  # ⚠️ A THIRD JOB HERE, NOT A SECOND WORKFLOW, and the reason is still the
+  # ⚠️ A JOB HERE, NOT A SECOND WORKFLOW, and the reason is still the
   # database. The checkpoint and the migrations belong to ONE commit and must
   # happen ONCE. `needs: [database]` is what makes "already migrated" a fact
   # rather than a hope: a separate push-triggered workflow would run this
   # concurrently with the migrations, against one database.
   #
-  # ⚠️ IT DOES NOT WAIT FOR FLY, and nothing in it can delay, gate or obscure
-  # the Fly release — the two jobs run side by side once the database job is
+  # ⚠️ IT DOES NOT WAIT FOR CLOUD RUN, and nothing in it can delay, gate or
+  # obscure the release — the two jobs run side by side once the database job is
   # green. A red job here means "the failover did not refresh", which is worth
   # knowing and is not an incident; `pnpm promote` reports it on its own line
-  # and judges production by the database and Fly jobs alone.
+  # and judges production by the database and Cloud Run jobs alone.
   #
   # ⚠️ Same `production` environment as the jobs above, which means the same
   # required reviewer and the same credential boundary. That is correct rather
   # than convenient: this is a production deploy of production code, and its
   # three VERCEL_* values are pushed into that environment from Infisical
-  # ([D-163]) exactly as Fly's token is. It deliberately holds NO database URL,
-  # NO Neon key and NO Fly value — it has no business with the schema or with
+  # ([D-163]) exactly as the GCP key is. It deliberately holds NO database URL,
+  # NO Neon key and NO GCP value — it has no business with the schema or with
   # the thing that is serving, and the narrowest way to say so is to not hand it
   # the means.
   vercel:
     name: Deploy the same commit to the Vercel failover, without taking the domain
     needs: [database]
-    # Skipped by a dispatch that named another target. See the Fly job's note.
+    # Skipped by a dispatch that named another target. See the Cloud Run job's note.
     if: ${{ github.ref == 'refs/heads/production' && (github.event_name != 'workflow_dispatch' || inputs.target == 'all' || inputs.target == 'vercel') }}
     runs-on: ubuntu-latest # ⚠️ Never a larger runner — those are billed even on a public repo.
     timeout-minutes: 30
@@ -495,7 +338,7 @@ jobs:
         # value that is set, and the first symptom is a project-linking message
         # about a project that is in fact configured.
         #
-        # The build half is checked by the same derived call the Fly job uses,
+        # The build half is checked by the same derived call the Cloud Run job uses,
         # so a __LOCAL__ key added to config/env/production.build.env is covered
         # here in the same commit with no list to widen.
         run: |
@@ -521,8 +364,8 @@ jobs:
           dest: ~/setup-pnpm
 
       - name: Read the Node major the app actually ships on
-        # Read from the Dockerfile like every other job here. It is the Fly
-        # image's Node version, and using it means the two targets build the
+        # Read from the Dockerfile like every other job here. It is the Cloud
+        # Run image's Node version, and using it means the two targets build the
         # same commit on the same major — a divergence here would be a real
         # difference between the thing serving and the thing standing by.
         run: |
@@ -540,7 +383,7 @@ jobs:
           cache: pnpm
 
       - name: Deploy
-        # One line, like the Fly job. Every step lives in the script, which is
+        # One line, like the Cloud Run job. Every step lives in the script, which is
         # also what `pnpm deploy:vercel` runs — so a failover refreshed from
         # here and one refreshed from the laptop are the same deploy. No
         # `vercel` CLI version appears in this file: the script pins it, and a
@@ -560,30 +403,24 @@ jobs:
             echo "| --- | --- |"
             echo "| Commit | \`${GITHUB_SHA}\` |"
             echo "| Serving | nothing — \`--skip-domain\` (D-177) |"
-            echo "| Domain | still Fly \`agendaprofe\` (D-150 addendum 2) |"
+            echo "| Domain | Cloud Run \`web\` (D-184) |"
             echo
-            echo "This job does not wait for the Fly deploy, so its outcome says nothing"
-            echo "about whether the release shipped — read the Fly job. A red run here"
-            echo "means the failover did not refresh."
+            echo "This job does not wait for the Cloud Run deploy, so its outcome says"
+            echo "nothing about whether the release shipped — read the Cloud Run job. A"
+            echo "red run here means the failover did not refresh."
             echo
             echo "Handing it the domain is an operator step this workflow never takes."
             echo "The procedure, and what is NOT yet covered by a promote, is in"
             echo "docs/deployment/RELEASE_AND_STAGING.md — read it before an incident."
           } >> "$GITHUB_STEP_SUMMARY"
 
-  # ── The third target: Cloud Run, and the one meant to replace Fly ─────────
+  # ── Cloud Run: the target that serves spiralclass.com ([D-184]) ─────────
   #
-  # [D-184]. Same shape as the Vercel job above and for the same reasons: it
-  # `needs:` the database job and NOT Fly, so it can deploy while Fly is down;
-  # it holds only its own credentials; it takes no domain; and a red run here
-  # means "the third target did not refresh", which `pnpm promote` reports on
-  # its own line and never mistakes for "production did not ship".
-  #
-  # What is different from Vercel is the intent. Vercel is a failover that is
-  # expected to stay one. This target exists to TAKE the domain — Fly costs
-  # ~$7/month against no revenue and Cloud Run's free grant covers this
-  # workload several times over — and the cutover is an operator step this
-  # workflow deliberately cannot perform.
+  # It took the domain from Fly on 2026-09-23, and this job took over what the
+  # Fly job did: deploy, sync Inngest against the domain (inside the script, as
+  # its last step), probe production, and decide whether the release shipped.
+  # It `needs:` the database job and NOT Vercel, so the failover can never
+  # delay or obscure it.
   #
   # ⚠️ IT AUTHENTICATES WITH A KEY, AND NOT WITH WORKLOAD IDENTITY FEDERATION,
   # which is the opposite of the usual advice and is a deliberate reversal.
@@ -599,31 +436,38 @@ jobs:
   # deploy job, because it builds the image.
   #
   # So the credential is a service-account key, scoped to an account that can
-  # deploy a revision and cannot read a secret — the same shape as FLY_API_TOKEN
-  # and VERCEL_TOKEN, with the same blast radius and the same rotation story.
-  # The cost is real and named in [D-184]: a long-lived credential that must be
-  # rotated by hand. infra/gcp/README.md says how.
+  # deploy a revision and cannot read a secret — the same shape as VERCEL_TOKEN,
+  # with the same blast radius and the same rotation story. The cost is real and
+  # named in [D-184]: a long-lived credential that must be rotated by hand.
+  # infra/gcp/README.md says how.
   cloudrun:
-    name: Deploy the same commit to Cloud Run, without taking the domain
+    name: Build amd64, deploy to Cloud Run and probe production
     needs: [database]
-    # Skipped by a dispatch that named another target. See the Fly job's note.
+    # A dispatch that named another target skips this one. Written as "all or
+    # me" rather than a list of everyone else, so adding or retiring a target
+    # never edits a condition it is not mentioned in.
     if: ${{ github.ref == 'refs/heads/production' && (github.event_name != 'workflow_dispatch' || inputs.target == 'all' || inputs.target == 'cloudrun') }}
     runs-on: ubuntu-latest # ⚠️ Never a larger runner — those are billed even on a public repo.
-    timeout-minutes: 30
+    timeout-minutes: 45
     environment:
       name: production
+      url: https://spiralclass.com
     env:
       GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
       GCP_DEPLOY_KEY: ${{ secrets.GCP_DEPLOY_KEY }}
       # config/env/production.build.env's `__LOCAL__` values, resolved by
-      # scripts/env-config.mjs — the SAME source the Fly image and the Vercel
-      # build read, so three targets cannot bake three different client bundles
-      # out of one commit.
+      # scripts/env-config.mjs — the SAME source the Vercel build reads, so two
+      # targets cannot bake two different client bundles out of one commit.
       NEXT_PUBLIC_TEACHER_PHOTOS_R2_PUBLIC_URL: ${{ secrets.NEXT_PUBLIC_TEACHER_PHOTOS_R2_PUBLIC_URL }}
       NEXT_PUBLIC_TEACHER_VIDEOS_R2_PUBLIC_URL: ${{ secrets.NEXT_PUBLIC_TEACHER_VIDEOS_R2_PUBLIC_URL }}
       NEXT_PUBLIC_SENTRY_DSN: ${{ secrets.NEXT_PUBLIC_SENTRY_DSN }}
       NEXT_PUBLIC_POSTHOG_KEY: ${{ secrets.NEXT_PUBLIC_POSTHOG_KEY }}
       NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY }}
+      # The Cloudflare origin address behind livekit.spiralclass.com, read by
+      # the probe step's LiveKit certificate check when production video is on
+      # the self-hosted box. Never committed: hiding the origin behind
+      # Cloudflare IS the protection (D-134). It moved here with the probe.
+      LIVEKIT_ORIGIN_IP: ${{ secrets.LIVEKIT_ORIGIN_IP }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -633,17 +477,23 @@ jobs:
         # Same reasoning and the same trap as the other preflights: an ABSENT
         # GitHub secret is the empty string, not an error, so a value Infisical
         # has not pushed reaches gcloud looking exactly like one that is set.
+        #
+        # LIVEKIT_ORIGIN_IP is checked HERE rather than being discovered by the
+        # probe step, because the probe runs after the deploy. Its absence would
+        # turn a good release into a red run at the one moment nobody wants
+        # ambiguity about whether production shipped.
         run: |
           set -euo pipefail
           missing=""
           [ -n "${GCP_PROJECT_ID:-}" ] || missing="$missing GCP_PROJECT_ID"
           [ -n "${GCP_DEPLOY_KEY:-}" ] || missing="$missing GCP_DEPLOY_KEY"
+          [ -n "${LIVEKIT_ORIGIN_IP:-}" ] || missing="$missing LIVEKIT_ORIGIN_IP"
           if [ -n "$missing" ]; then
             echo "The \`production\` environment is missing:$missing" >&2
             echo "" >&2
             echo "Infisical is the source of truth and syncs these in (D-163), so fix the" >&2
             echo "value THERE rather than setting it by hand here. infra/gcp/README.md" >&2
-            echo "says where each one comes from." >&2
+            echo "says where each GCP one comes from." >&2
             exit 1
           fi
           echo "› Every value this job reads arrived."
@@ -652,33 +502,47 @@ jobs:
           echo "› Every __LOCAL__ build value resolves."
 
       - name: Deploy
-        # One line, like the other two targets. Every step lives in the script,
-        # which is also what `pnpm deploy:cloudrun` runs — so a service deployed
-        # from here and one deployed from the laptop are the same deploy. The
-        # `gcloud` CLI is preinstalled on ubuntu-latest; no version is pinned in
-        # this file, because a second pin is the copy that stops matching.
+        # One line, like the Vercel job. Every step lives in the script, which
+        # is also what `pnpm deploy:cloudrun` runs — so a release from here and
+        # a recovery deploy from the laptop are the same deploy, Inngest sync
+        # included. The `gcloud` CLI is preinstalled on ubuntu-latest; no
+        # version is pinned in this file, because a second pin is the copy that
+        # stops matching.
         run: bash scripts/cloudrun-deploy.sh production --gate-already-passed
 
-      - name: Say what is standing by
+      - name: Probe what is now live
+        # The probes D-129 chained into `pnpm promote`, moved to where the
+        # deploy happens. They exist because the regressions they catch — a
+        # route that renders an error, a booking page with nothing purchasable,
+        # a checkout with no payment rail — all return 200, so `gcloud run
+        # deploy` succeeding says nothing about them, and they are introduced at
+        # deploy time.
+        #
+        # Called directly rather than through `pnpm local synthetic`: that
+        # wrapper exists to give a hand-run task the run history and the
+        # failure notification that Actions provides for free (D-129).
+        run: bash scripts/local/synthetic.sh
+
+      - name: Say what shipped
         if: ${{ always() }}
         env:
           OUTCOME: ${{ job.status }}
         run: |
           set -euo pipefail
           {
-            echo "## Cloud Run · ${OUTCOME}"
+            echo "## Production · ${OUTCOME}"
             echo
             echo "| | |"
             echo "| --- | --- |"
             echo "| Commit | \`${GITHUB_SHA}\` |"
-            echo "| Serving | its own run.app URL — no domain (D-184) |"
-            echo "| Domain | still Fly \`agendaprofe\` (D-150 addendum 2) |"
+            echo "| App | https://spiralclass.com |"
+            echo "| Serving | Cloud Run \`web\`, us-east4 (D-184) |"
             echo
-            echo "This job does not wait for the Fly deploy, so its outcome says nothing"
-            echo "about whether the release shipped — read the Fly job."
+            echo "Migrated by the database job this one needs. Deployed and synced to"
+            echo "Inngest by \`scripts/cloudrun-deploy.sh production\` — the same script the"
+            echo "operator runs by hand for a recovery deploy."
             echo
-            echo "This is the target meant to REPLACE Fly. Handing it the domain is an"
-            echo "operator step this workflow never takes, and it moves the Inngest"
-            echo "registration rather than adding one — see D-184 and"
-            echo "docs/deployment/RELEASE_AND_STAGING.md."
+            echo "What is live: \`gcloud run services describe web --region us-east4\`."
+            echo "The image tag IS the commit. Not \`pnpm release:status\`: its ledger is"
+            echo "per-machine and this deploy did not run on that machine."
           } >> "$GITHUB_STEP_SUMMARY"

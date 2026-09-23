@@ -1043,10 +1043,12 @@ describe("the deploy is triggered, never dispatched by hand", () => {
   it("the local deploy stays available as the recovery path", () => {
     // A workflow that cannot run — an Actions outage, a revoked token, a
     // repository that went private again — must not be the only way to deploy.
-    // This is the same script the workflow calls, so recovering is not a
-    // different deploy.
+    // These are the same scripts the workflow calls, so recovering is not a
+    // different deploy — the database one first, because the Cloud Run one
+    // holds no database credential.
     const promote = read("scripts", "ci", "promote.mjs");
-    expect(promote).toContain("scripts/fly-deploy.sh");
+    expect(promote).toContain("scripts/database-deploy.sh");
+    expect(promote).toContain("scripts/cloudrun-deploy.sh");
     expect(promote).toContain("--gate-already-passed");
   });
 
