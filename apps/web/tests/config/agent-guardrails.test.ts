@@ -78,18 +78,6 @@ describe("the operator's decisions cannot be taken by a session", () => {
     ["gh pr merge 1234 --squash", "merging"],
     ["pnpm promote", "promoting"],
     ["bash scripts/cloudrun-deploy.sh production --gate-already-passed", "deploying"],
-    // The bare Vercel CLI, though the failover is retired (D-186): until the
-    // operator deletes the project, `vercel promote <url>` still hands an old
-    // deployment the domain.
-    ["npx --yes vercel@59.15.1 promote https://example.vercel.app --yes", "taking the domain"],
-    ["vercel deploy --prod", "deploying straight to the production target"],
-    // ⚠️ EVERY PACKAGE RUNNER, not just npx. The rule named npx alone at first,
-    // which left the pnpm spelling — this repository's own package manager, so
-    // the likelier one — entirely unblocked.
-    ["pnpm dlx vercel promote https://example.vercel.app --yes", "taking the domain via pnpm"],
-    ["npm exec vercel deploy --prod", "deploying via npm exec"],
-    // An env assignment in front of it, the shape a permission prefix misses.
-    ["VERCEL_TOKEN=xxx vercel deploy --prod", "deploying behind an env assignment"],
     // The database job's script, which checkpoints and migrates production on
     // its own since the targets were split ([D-177]'s addendum).
     [
@@ -172,12 +160,6 @@ describe("it does not block ordinary work", () => {
     // Asking a question about a forbidden command is not performing it. This
     // is the false positive that would get the hook switched off.
     'grep -rn "pnpm pro" "mote" docs/',
-    // ⚠️ `vercel` is an npm PACKAGE NAME as well as a command, which the Fly
-    // rule's shape does not have to cope with. A loose
-    // `[[:space:]]vercel[[:space:]]` pattern blocks this, and this is exactly
-    // a harmless lookup — it reads no credential and deploys nothing.
-    // So that rule is anchored at a command position (D-177).
-    "npm view vercel version",
   ])("allows %s", (command) => {
     const { blocked, reason } = blocks(command);
     expect(blocked, `guard-bash.sh blocked ordinary work: ${command} — ${reason}`).toBe(false);

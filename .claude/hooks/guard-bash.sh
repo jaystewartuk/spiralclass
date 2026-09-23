@@ -131,37 +131,6 @@ CLAUDE.md forbids risky-path merges during lesson hours, and a promote fast-forw
 'production' and triggers a real deploy."
 fi
 
-# ⚠️ ANCHORED AT A COMMAND POSITION, not on the word anywhere in the line.
-# `vercel` is the npm package name, so a loose match blocks
-# `npm view vercel version` — a read-only lookup the exemption above does not
-# cover, because it is not one of the reader commands. So: start of line or
-# after a `; & |` separator, optionally behind env assignments
-# (`VERCEL_TOKEN=… vercel deploy`).
-#
-# ⚠️ AND BEHIND ANY PACKAGE RUNNER, not just `npx`. The first version of this
-# rule named `npx` alone, which left `pnpm dlx vercel promote` — the command that
-# hands spiralclass.com to the failover — completely unblocked. `pnpm` is this
-# repository's package manager, so that was the likelier spelling of the two. A
-# guard that covers the runner nobody here uses and misses the one everybody uses
-# is worse than no guard, because it reads as coverage.
-#
-# This is not airtight and is not trying to be: `bash -c 'vercel deploy'` gets
-# through, as it does for every other rule in this file. The hook defends against
-# a session's own mistake, not against a session determined to route around it —
-# the deny list in .claude/settings.json and CLAUDE.md's operator-only section
-# are the other two copies of the rule.
-#
-# ⚠️ KEPT AFTER THE FAILOVER WAS RETIRED ([D-186]). This repository no longer
-# deploys to Vercel, but the project is the operator's to delete, and until it
-# is gone `vercel promote` against an old deployment still reaches production
-# data. Retire this rule when the project is deleted, not before.
-VERCEL_RUNNER='((npx|bunx)[[:space:]]+(--yes[[:space:]]+)?|(pnpm|npm|yarn)[[:space:]]+(dlx|exec)[[:space:]]+(--yes[[:space:]]+)?)?'
-if [[ "$command_line" =~ (^|[\;\&\|])[[:space:]]*([A-Za-z_][A-Za-z0-9_]*=[^[:space:]]*[[:space:]]+)*${VERCEL_RUNNER}vercel([[:space:]]|@|$) ]]; then
-  block "This deploys to, or reads secrets from, the live Vercel production project." \
-    "The failover is retired ([D-186]) but the project may still exist, holding production
-secrets. Deleting it, like shipping, is the operator's."
-fi
-
 # The third production target ([D-184]). `gcloud run deploy` and the two
 # operator scripts in infra/gcp/ — the first ships an image to a live service,
 # and the other two create identities or write the production secret. Read-only

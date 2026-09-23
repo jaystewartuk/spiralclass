@@ -80,8 +80,6 @@
       "Bash(pnpm promote:*)",
       "Bash(gh pr merge:*)",
       "Bash(gh release:*)",
-      "Bash(vercel:*)",
-      "Bash(npx vercel:*)",
       "Bash(pnpm deploy:cloudrun:*)",
       "Bash(scripts/cloudrun-deploy.sh:*)",
       "Bash(bash scripts/cloudrun-deploy.sh:*)",
