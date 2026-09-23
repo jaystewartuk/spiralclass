@@ -3,11 +3,11 @@
 # ([D-177]) — the same two sets Fly gets, from the same two places:
 #
 #   * Infisical `production` at `/`, not recursive — exactly what
-#     push-fly-secrets.sh imports into Fly. Never `/config` and never `/deploy`,
+#     infra/gcp/push-cloudrun-env.sh puts in Cloud Run. Never `/config` and never `/deploy`,
 #     for D-163's reason: `/` is the path that becomes an environment variable
 #     inside the running app, and a deploy credential has no business there.
 #   * The production R2 buckets' credentials, from infra/cloudflare-r2's Tofu
-#     state — exactly what that module's push-fly-secrets.sh sets on Fly (D-65).
+#     state — the same r2Entries() Cloud Run's secret is built from (D-65).
 #
 # The committed runtime config (config/env/production.runtime.env) is NOT
 # pushed here. It is public and it changes with the commit, so
@@ -70,7 +70,7 @@ command -v node >/dev/null || { echo "node is required" >&2; exit 1; }
 source "$INFISICAL_DIR/infisical.sh"
 
 # ── The project's credentials, from where the deploy's live ──────────────
-# `/deploy`, beside FLY_API_TOKEN. Exported into this process for node to read,
+# `/deploy`, beside the GCP deploy values. Exported into this process for node to read,
 # as the Vercel CLI reads them; never passed as arguments.
 echo "› Reading the Vercel credentials from Infisical \`${ENVIRONMENT}\` /deploy…" >&2
 VERCEL_TOKEN="$(infisical_secrets --path=/deploy --plain "$ENVIRONMENT" VERCEL_TOKEN)"
@@ -78,8 +78,8 @@ VERCEL_ORG_ID="$(infisical_secrets --path=/deploy --plain "$ENVIRONMENT" VERCEL_
 VERCEL_PROJECT_ID="$(infisical_secrets --path=/deploy --plain "$ENVIRONMENT" VERCEL_PROJECT_ID)"
 export VERCEL_TOKEN VERCEL_ORG_ID VERCEL_PROJECT_ID
 
-# ── Source 1: what Fly imports ───────────────────────────────────────────
-# ⚠️ `/` ONLY. See the header, and push-fly-secrets.sh's note on --recursive.
+# ── Source 1: what the serving app reads ─────────────────────────────────
+# ⚠️ `/` ONLY, never --recursive — see the header.
 echo "› Reading Infisical \`${ENVIRONMENT}\` / (not recursive)…" >&2
 INFISICAL_JSON="$(infisical_env --json "$ENVIRONMENT" /)"
 

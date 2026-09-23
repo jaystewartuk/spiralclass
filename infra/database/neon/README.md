@@ -35,9 +35,11 @@ so a mis-sequenced adoption fails loudly rather than corrupting anything.
 ## Provisioning a Neon project
 
 1. **Create the project** at [console.neon.tech](https://console.neon.tech).
-   Region: `aws-us-east-2` (Ohio) — closest Neon-supported region to Fly's
-   `dfw` (Dallas), which is what actually matters for latency (the app talks
-   to the DB on every request; neither platform has a region in the launch market).
+   Region: `aws-us-east-2` (Ohio) — chosen as the closest Neon-supported
+   region to the app host of the day, which is what actually matters for
+   latency (the app talks to the DB on every request). Production's host is
+   now Cloud Run `us-east4` (N. Virginia); [D-184](../../../docs/decisions/D-184.md)
+   carries the measurement.
 2. **Get two connection strings** from the project's Connection Details panel:
    - **Pooled** (has `-pooler` in the hostname) → `DATABASE_URL`.
    - **Direct** (no pooler) → `DIRECT_URL`. Prisma's migration engine needs
@@ -111,9 +113,10 @@ psql "$(neonctl connection-string production --project-id "$NEON_PROJECT_ID")"
 it now authenticates with the credential `neonctl auth` stores on the deploy
 machine, same as everything else here. If a scoped key is ever reintroduced,
 keep it out of Infisical's `preview`/`production` environments —
-`push-fly-secrets.sh` bulk-imports a whole environment into `fly secrets`, and
-handing the running app a control-plane credential buys nothing. `infra` is the
-right home precisely because it is never synced to Fly.
+`infra/gcp/push-cloudrun-env.sh` bulk-imports `production`'s `/` into the
+running app's secret, and handing the running app a control-plane credential
+buys nothing. `infra` is the right home precisely because it is never synced to
+a deploy target.
 
 ### Neon is left at its defaults, on purpose (2026-08-31)
 

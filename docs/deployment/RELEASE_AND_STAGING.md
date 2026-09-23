@@ -10,14 +10,15 @@ repository went public and the minutes became free) and
 verdict what promote reads). The release/promote/rollback gate structure below
 is current.
 
-⚠️ **PREVIEW's deploy workflow is suspended; production's is not** (D-157's
-addenda). Production serves from Cloud Run ([D-184](../decisions/D-184.md)'s
-addendum) and `deploy-production.yml`'s `push` trigger is live — `pnpm promote`
-reads that trigger off the workflow file and refuses before the fast-forward if
-it is ever missing. Preview moves to the Oracle A1 box
-([D-150](../decisions/D-150.md)) and has `workflow_dispatch` alone until that
-box is serving, so merging to `main` does not deploy preview today. Production's
-recovery path from the laptop is
+⚠️ **There is no preview host today; production's deploy is live.**
+Production serves from Cloud Run ([D-184](../decisions/D-184.md)'s addendum)
+and `deploy-production.yml`'s `push` trigger is live — `pnpm promote` reads
+that trigger off the workflow file and refuses before the fast-forward if it is
+ever missing. Preview moved to the Oracle A1 box
+([D-150](../decisions/D-150.md)), which was destroyed on 2026-09-19
+([D-182](../decisions/D-182.md)); preview has no deploy target until it is
+rebuilt, and `scripts/oracle-deploy.sh` is the way back. Merging to `main`
+deploys nothing. Production's recovery path from the laptop is
 [below](#recovering-a-release-by-hand).
 
 This file is the operator runbook — the one-time setup, the everyday release
@@ -30,17 +31,8 @@ flow, and rollback.
    PR into `main`; when that status is green on the PR head, branch protection
    unlocks the merge button. (No laptop? **`gate.yml` posts the same context on
    the PR** — D-157 — so the PR is not stranded. Say plainly which run you saw,
-   and never imply you posted a status you did not.) Merge, then ship preview
-   yourself while preview's workflow is suspended:
-
-   ```sh
-   pnpm ship:preview   # when this commit changed something preview carries
-   ```
-
-   It migrates the preview DB and deploys `preview.spiralclass.com`. A docs- or
-   test-only commit ships nothing. Do this before any manual pass — it runs
-   against the _deployed_ preview, and a stale one reads as flakiness.
-   `--gate` runs the full tier first.
+   and never imply you posted a status you did not.) Merge. There is no preview
+   to ship to until the Oracle box is rebuilt, so the manual pass runs locally.
 
 2. _(Optional)_ Run **`pnpm gate:full`** on `main` — fast tier + mutation +
    integration + E2E + a no-push image build, and it **deploys nothing**. The gate is hermetic: it
@@ -272,9 +264,9 @@ something when they were learned. Every one is the operator's.
    that bill Stripe customers. Sync the domain, never a platform URL, and check
    the Inngest dashboard shows exactly one production app.
 5. **Watch one real class join, end to end.**
-6. **Stop the old target — `fly machine stop`, never `fly scale count 0`**,
-   which destroys machines. Stopping keeps a rollback; destroying is a separate
-   decision, taken on 2026-09-23 knowing it gave that rollback up.
+6. **Stop the old target; do not destroy it in the same breath.** Stopping
+   keeps a rollback; destroying is a separate decision — taken for Fly on
+   2026-09-23, knowing it gave that rollback up.
 
 ## Maintenance windows (taking the apps offline)
 
@@ -294,8 +286,8 @@ gone.)
      wins over the mounted secret file, so nothing else needs touching.
      ⚠️ `--update-env-vars`, never `--set-env-vars`, which replaces the
      service's whole environment.
-   - **Preview** has had no Fly app since 2026-09-23; set it wherever preview
-     is being served ([D-150](../decisions/D-150.md)).
+   - **Preview** has no host today; once the Oracle box serves it again
+     ([D-150](../decisions/D-150.md)), set it there.
    - Optionally set `MAINTENANCE_MESSAGE="…"` and/or `MAINTENANCE_UNTIL="18:00 CST"`
      for custom copy / an ETA, and `MAINTENANCE_BYPASS_TOKEN=<random>` to let
      yourself through.
@@ -341,31 +333,29 @@ is live and `/api/health` is green. Remove `MAINTENANCE_MESSAGE`/
   Reaching `/admin` requires your own email in `SUPERUSER_EMAILS` (main/preview
   scope) plus MFA.
 
-### 2. Fly production app
+### 2. Cloud Run production service
 
 - Create a `production` branch at the **current `main` HEAD** (this becomes what
   prod serves — no user-visible change at cutover).
-- Production is the Fly app `agendaprofe`; preview is the Fly app
-  `agendaprofe-preview`. **Production deploys on a runner**
-  (`deploy-production.yml`, triggered by promote's push — D-157); preview
-  deploys from this machine via `pnpm ship:preview` while its own workflow is
-  suspended.
-- **Environment / secrets** live in **Fly secrets** (`fly secrets set/list/unset
--a <app>`, fed from Infisical), not a Vercel dashboard, and they hot-apply on
-  machine restart (no rebuild needed):
-  - Set prod values on the `agendaprofe` app; set the preview values on
-    `agendaprofe-preview`, including `DATABASE_URL`, `DIRECT_URL`, `SESSION_SECRET`,
-    `APP_URL` (= `https://preview.spiralclass.com`), plus **sandbox**
-    Stripe/Wise/Meta/Resend keys (never live keys on preview).
+- Production is Cloud Run service `web` in `us-east4`. Its one-time setup — the
+  deploy identity, the runtime secret, the image cleanup policy, the budget
+  alert — is [`infra/gcp/README.md`](../../infra/gcp/README.md), in that
+  order, and the domain mapping is
+  [If the domain ever moves again](#if-the-domain-ever-moves-again).
+  **Production deploys on a runner** (`deploy-production.yml`, triggered by
+  promote's push — D-157). Preview has no host until the Oracle box is rebuilt.
+- **Runtime secrets** live in Infisical and reach the service as one mounted
+  Secret Manager file, written by `infra/gcp/push-cloudrun-env.sh`, not a
+  dashboard. A running revision keeps the version it started with, so a changed
+  secret is live only after the next deploy.
   - **prod-vs-preview is decided by `APP_URL`** (there is no `VERCEL_ENV` and no
     `SUPABASE_*` env — D-89); the preview `noindex` header keys off the
-    `NEXT_PUBLIC_DEPLOY_ENV` build arg.
+    `NEXT_PUBLIC_DEPLOY_ENV` build arg. Preview, when it has a host again, gets
+    **sandbox** Stripe/Wise/Meta/Resend keys — never live keys.
   - Note: `NEXT_PUBLIC_*` are build-time; the preview build inlines preview's, the
     production build inlines production's. This is why prod is a rebuild, not an
     artifact-promote (see D-26).
-- Domains: point **`preview.spiralclass.com` → `agendaprofe-preview`**; keep
-  `spiralclass.com` on the production app.
-- **Server Action skew**: there is no Fly equivalent of Vercel's Skew Protection.
+- **Server Action skew**: there is no Cloud Run equivalent of Vercel's Skew Protection.
   The client-side reload fallback (`src/lib/server-action-recovery.ts`) is the
   **sole** mechanism — when a browser running a previous deploy posts a stale
   Server Action ID and hits `Failed to find Server Action "…"`, it reloads to pick
@@ -393,6 +383,5 @@ is live and `/api/health` is green. Remove `MAINTENANCE_MESSAGE`/
 ## Migrations (live data)
 
 Keep changes **expand/contract** — additive first; drop/rename as a deliberate
-two-step release. Preview migrates on every `pnpm ship:preview`, and
-`heavy.yml`'s integration step applies migrations to a fresh DB on every PR and
+two-step release. `heavy.yml`'s integration step applies migrations to a fresh DB on every PR and
 every push to `main`, so a broken migration fails before prod.

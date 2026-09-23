@@ -14,15 +14,6 @@ import {
   resolveEnvFile,
 } from "../../../../scripts/env-config.mjs";
 
-const FLY_CONFIGS = {
-  preview: resolve(REPO_ROOT, "fly.preview.toml"),
-  production: resolve(REPO_ROOT, "fly.production.toml"),
-} as const;
-
-// Keys the fly configs are still allowed to declare in [env] — the three the
-// platform owns. Everything else moved to config/env/ (D-85).
-const ALLOWED_FLY_ENV_KEYS = new Set(["NODE_ENV", "PORT", "APP_ENV"]);
-
 describe("config/env non-secret files", () => {
   it("every env/kind file parses under the strict grammar", () => {
     for (const env of ENVIRONMENTS) {
@@ -74,7 +65,7 @@ describe("config/env non-secret files", () => {
       for (const key of stubbed) delete process.env[key];
     }
 
-    for (const workflow of ["deploy-production.yml", "deploy-preview.yml"]) {
+    for (const workflow of ["deploy-production.yml"]) {
       expect(
         readFileSync(resolve(REPO_ROOT, ".github", "workflows", workflow), "utf8"),
         `${workflow} still reads a WhatsApp secret`,
@@ -146,32 +137,22 @@ describe("preview holds no LiveKit key pair (D-94's 2026-09-16 addendum)", () =>
   });
 });
 
-describe("fly.<env>.toml drift guard (D-85)", () => {
-  for (const [env, path] of Object.entries(FLY_CONFIGS)) {
-    it(`${env}: [env] only declares platform-owned keys and has no [build.args]`, () => {
-      const text = readFileSync(path, "utf8");
-
-      // The moved build-args TOML table must be gone entirely — build-time
-      // config is config/env/<env>.build.env now. Match a real table header
-      // (line-anchored), not the substring, so the pointer comment that names
-      // the old table in prose doesn't trip this.
-      expect(text).not.toMatch(/^[ \t]*\[build\.args\]/m);
-
-      // Collect UPPER_SNAKE assignments (env-style keys) anywhere in the file.
-      // Only the three platform-owned keys may remain; anything else drifted
-      // back in instead of living in config/env/<env>.runtime.env.
-      const declared = [...text.matchAll(/^\s*([A-Z][A-Z0-9_]*)\s*=/gm)].map((m) => m[1]);
-      for (const key of declared) {
-        expect(ALLOWED_FLY_ENV_KEYS.has(key), `${env}: unexpected key ${key} in fly config`).toBe(
-          true,
-        );
-      }
-
-      // APP_ENV must be present and match the file's environment, so the
-      // entrypoint sources the right config/env/<env>.runtime.env.
-      expect(text).toMatch(new RegExp(`APP_ENV\\s*=\\s*'${env}'`));
-    });
-  }
+describe("the platform sets only what it owns (D-85)", () => {
+  // Fly's [env] table was held to the platform-owned keys, so config could not
+  // drift back out of config/env/. Cloud Run's equivalent is the one
+  // --update-env-vars the deploy passes: APP_ENV chooses the runtime file and
+  // SECRETS_ENV_FILE names the mounted secret. Anything else set there is a
+  // value config/env/<env>.runtime.env no longer owns.
+  it("the Cloud Run deploy sets exactly APP_ENV and SECRETS_ENV_FILE", () => {
+    const deploy = readFileSync(resolve(REPO_ROOT, "scripts", "cloudrun-deploy.sh"), "utf8");
+    const flags = [...deploy.matchAll(/^\s*--update-env-vars "([^"]+)"/gm)].map((m) => m[1]);
+    expect(flags).toHaveLength(1);
+    const keys = flags[0]
+      .split(",")
+      .map((pair) => pair.split("=")[0])
+      .sort();
+    expect(keys).toEqual(["APP_ENV", "SECRETS_ENV_FILE"]);
+  });
 });
 
 describe("Dockerfile build-arg parity", () => {
@@ -198,13 +179,14 @@ describe("NEXT_DEPLOYMENT_ID reaches the build", () => {
   // an old build gets a hard navigation instead of a 404 on a renamed chunk.
   //
   // For a long time next.config.ts read it and NOTHING SET IT — not the
-  // Dockerfile, not fly-deploy.sh, not config/env/<env>.build.env — so
+  // Dockerfile, not the deploy script, not config/env/<env>.build.env — so
   // `deploymentId` was undefined on every image shipped and the mitigation did
   // nothing, with no failure anywhere to say so. Half of AGENDAPROFE-3B reaching
   // a real visitor. These pin the wiring end to end, because the failure mode is
   // silence: it cannot be caught by a build, a type, or a green deploy.
   const dockerfile = readFileSync(resolve(REPO_ROOT, "Dockerfile"), "utf8");
-  const flyDeploy = readFileSync(resolve(REPO_ROOT, "scripts", "fly-deploy.sh"), "utf8");
+  const cloudrunDeploy = readFileSync(resolve(REPO_ROOT, "scripts", "cloudrun-deploy.sh"), "utf8");
+  const vercelDeploy = readFileSync(resolve(REPO_ROOT, "scripts", "vercel-deploy.sh"), "utf8");
 
   it("next.config.ts still reads it (the reason the rest of this exists)", () => {
     const nextConfig = readFileSync(resolve(REPO_ROOT, "apps", "web", "next.config.ts"), "utf8");
@@ -222,28 +204,29 @@ describe("NEXT_DEPLOYMENT_ID reaches the build", () => {
     expect(envs.length).toBe(2);
   });
 
-  it("fly-deploy.sh passes the deployed commit as the id", () => {
-    expect(flyDeploy).toContain('BUILD_ARG_FLAGS+=(--build-arg "NEXT_DEPLOYMENT_ID=${SHA}")');
+  it("the Cloud Run deploy passes the full deployed commit as the id", () => {
+    expect(cloudrunDeploy).toContain('BUILD_ARGS+=(--build-arg "NEXT_DEPLOYMENT_ID=$SHA")');
     // $SHA must be assigned before the array is extended, or the id is empty
     // and every deploy silently ships the pre-fix behaviour again.
-    expect(flyDeploy.indexOf('SHA="$(git rev-parse HEAD)"')).toBeGreaterThan(-1);
-    expect(flyDeploy.indexOf('SHA="$(git rev-parse HEAD)"')).toBeLessThan(
-      flyDeploy.indexOf("BUILD_ARG_FLAGS+=(--build-arg"),
+    expect(cloudrunDeploy.indexOf('SHA="$(git rev-parse HEAD)"')).toBeGreaterThan(-1);
+    expect(cloudrunDeploy.indexOf('SHA="$(git rev-parse HEAD)"')).toBeLessThan(
+      cloudrunDeploy.indexOf("NEXT_DEPLOYMENT_ID=$SHA"),
     );
   });
 
-  it("both buildx invocations receive it, byte-identically", () => {
-    // The push build must stay a pure cache hit of the first (the registry-token
-    // race documented in fly-deploy.sh), which it only is if both are passed the
-    // same args. Extending the shared array is what guarantees that — passing
-    // --build-arg to one `docker buildx build` and not the other would not.
-    //
-    // Anchored to the start of a line so the prose above those invocations,
-    // which names the command, is not counted as a third one.
-    const invocations = [...flyDeploy.matchAll(/^docker buildx build/gm)];
-    expect(invocations.length).toBe(2);
-    const forwarded = [...flyDeploy.matchAll(/^\s+"\$\{BUILD_ARG_FLAGS\[@\]\}"/gm)];
-    expect(forwarded.length, "each buildx invocation must forward the shared array").toBe(2);
+  it("both targets stamp the same id for the same commit", () => {
+    // Next compares `?dpl=` against this value. A client served by Cloud Run
+    // before a failover and by Vercel after it sees a skew — a hard navigation
+    // on every page, for every visitor — unless both stamp the same string.
+    // Cloud Run shipped the SHORT sha until 2026-09-23 while the guard for this
+    // pair still pointed at the Fly script.
+    expect(vercelDeploy).toContain("NEXT_DEPLOYMENT_ID=${SHA}");
+    expect(cloudrunDeploy).not.toMatch(/NEXT_DEPLOYMENT_ID=\$\{?SHORT_SHA/);
+  });
+
+  it("the build forwards it through the shared array", () => {
+    const build = cloudrunDeploy.slice(cloudrunDeploy.indexOf("\ndocker buildx build"));
+    expect(build).toMatch(/^\s+"\$\{BUILD_ARGS\[@\]\}" \\$/m);
   });
 });
 

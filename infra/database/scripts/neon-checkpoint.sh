@@ -72,7 +72,7 @@ source "$SCRIPT_DIR/_common.sh"
 PARENT="production"
 LABEL=""
 # Retention: how many pre-deploy checkpoint branches to keep. This is the ONLY
-# definition of that number — scripts/fly-deploy.sh calls this script without
+# definition of that number — scripts/database-deploy.sh calls this script without
 # --keep precisely so it stays that way. (It used to be duplicated in
 # .github/actions/neon-checkpoint/action.yml, which passed it explicitly; that
 # action and every workflow in this repo were deleted by D-129.) Bounded from

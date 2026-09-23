@@ -25,12 +25,11 @@ variable "buckets" {
 
     `environment` is "production" or "preview" — it doesn't change what
     this module provisions (every entry gets its own real bucket + token
-    either way), only which Fly app push-fly-secrets.sh pushes its creds to
-    (preview app today; production app once that path is wired at cutover).
-    See D-65.
+    either way), only which environment's push picks its creds up —
+    r2Entries() in scripts/vercel-env.mjs takes production only. See D-65.
 
     `public` is metadata only (surfaced in the `buckets` output for
-    push-fly-secrets.sh and for humans) — this module does not provision
+    humans) — this module does not provision
     public access (custom domain / r2.dev) for a bucket; that stays a manual
     Cloudflare-dashboard step, same as today.
 

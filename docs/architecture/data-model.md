@@ -180,7 +180,7 @@ each file and any drift breaks `migrate deploy` on the next environment.
 Correcting a mistake means a new migration.
 
 Production migrations run behind a **Neon checkpoint branch**
-([D-95](../decisions/D-95.md)), created by `scripts/fly-deploy.sh` before
+([D-95](../decisions/D-95.md)), created by `scripts/database-deploy.sh` before
 anything is applied, because a code rollback never undoes a schema change. The
 restore path is a script — `infra/database/scripts/neon-rollback.sh` — not a
 plan. See [`DB_BACKUP_RESTORE.md`](../deployment/DB_BACKUP_RESTORE.md).

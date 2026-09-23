@@ -6,9 +6,10 @@ while live video is down. Follow it in order.
 > [!IMPORTANT]
 > **What this box carries, since the 2026-09-04 topology decision:** the
 > LiveKit stack, the preview web app and preview's Postgres. **The production
-> web app stays on Fly and production's database stays on Neon** — see D-150's
-> second addendum. So the outage this procedure risks is **live classes**, not
-> the site: `spiralclass.com` is served by Fly throughout and its DNS record is
+> web app is on Cloud Run ([D-184](../../docs/decisions/D-184.md)) and
+> production's database stays on Neon** — see D-150's second addendum. So the
+> outage this procedure risks is **live classes**, not the site:
+> `spiralclass.com` is served by Cloud Run throughout and its DNS records are
 > never touched here.
 
 > [!CAUTION]
@@ -229,8 +230,8 @@ turned it off by hand.
 The box builds nothing.
 
 ⚠️ **Two images, not three. The production web app is not on this box** — it
-is on Fly and `scripts/fly-deploy.sh` ships it, unchanged, throughout this
-procedure. Do not push it here.
+is on Cloud Run and `deploy-production.yml` ships it, unchanged, throughout
+this procedure. Do not push it here.
 
 ⚠️ **Use the same tag everywhere.** The images built on 2026-09-04 carry both
 a commit-SHA tag and `:latest`, and the capture's own `verify-capture.sh`
@@ -347,7 +348,8 @@ the whole point of doing it in this order.
   checkout or LiveKit. Do not read a quiet boot as a passing one.
 - **The callback into production, which now leaves the box.** livekit-server's
   webhook and the captions agent both post to `https://spiralclass.com`, on
-  Fly, through Cloudflare — the 2026-08-30 path. The deploy script probes it
+  Cloud Run, through DNS-only Cloudflare records — the path the 2026-08-30
+  outage broke. The deploy script probes it
   and **fails on any 3xx**; run it by hand too, since it costs one command:
 
   ```bash
@@ -380,7 +382,7 @@ the whole point of doing it in this order.
   script runs it and warns rather than failing for that reason. It is the
   gate on step 8.5: do not re-proxy until it passes.
 
-  ⚡ **Production asks LiveKit the same question from Fly**, over the ordinary
+  ⚡ **Production asks LiveKit the same question from Cloud Run**, over the ordinary
   internet, and has been answering it correctly for months — but it answers it
   against a NEW address once step 8 moves `livekit.spiralclass.com`. Booking a
   real class in step 8.4 is what proves that, and it is the check that matters
@@ -401,7 +403,7 @@ the whole point of doing it in this order.
 
 > [!IMPORTANT]
 > **Two records move, and `spiralclass.com` is not one of them.** The apex
-> keeps pointing at Fly for the whole of this procedure — production never
+> keeps pointing at Cloud Run for the whole of this procedure — production never
 > changes address, so the site cannot be taken down by anything in this step.
 > What moves is `livekit.spiralclass.com` and `preview.spiralclass.com`.
 
@@ -417,14 +419,14 @@ until the certificate expires and every class stops.
 Order:
 
 1. Point the **two** A records at the reserved IP, **grey-clouded**. ⚠️ Not the
-   apex — leave `spiralclass.com` on Fly.
+   apex — leave `spiralclass.com`'s records alone.
 2. Watch Caddy obtain preview's certificate.
 3. Re-run preview's LiveKit probe from step 7 — `verify-app-egress.sh
 spiralclass-preview`. It has to pass before anything else here means much:
    livekit-server serving correctly and an app unable to reach it look
    identical from outside.
 4. **Verify a real class connects on `livekit.spiralclass.com` — from
-   production, on Fly.** ⚡ This is the check that matters most on the night:
+   production, on Cloud Run.** ⚡ This is the check that matters most on the night:
    it is the one that proves the machine change reached the thing users
    actually do, from the deployment that actually serves them.
 5. Re-proxy (orange cloud).
@@ -454,10 +456,9 @@ spiralclass-preview`. It has to pass before anything else here means much:
      `/config` and the secret at `/`, the two paths
      `scripts/oracle-render-livekit.sh` reads. ⚠️ Never in `preview`, not even
      as a stopgap to bring preview's video back. Then push it to the
-     production app with `infra/infisical/push-fly-secrets.sh` and
-     `infra/infisical/push-vercel-env.sh`, and set the key id wherever
-     production's current one is set. If a Fly secret is missing,
-     `scripts/fly-deploy.sh`'s preflight names it.
+     production app with `infra/gcp/push-cloudrun-env.sh` and
+     `infra/infisical/push-vercel-env.sh`, deploy so a new Cloud Run revision
+     mounts it, and set the key id wherever production's current one is set.
   3. **Redeploy the box** (`./scripts/oracle-deploy.sh`). It re-renders
      `livekit.yaml` from `production` and restarts livekit-server to load it.
      The old pair stops working at that moment. Then book a real class on
@@ -492,10 +493,10 @@ spiralclass-preview`. It has to pass before anything else here means much:
   closed to the internet; an **Infisical machine identity**, since
   `oracle-deploy.sh` renders config from Infisical and a runner has no
   operator session to borrow; and the **GHCR** build-and-push that replaces
-  `oracle-push-images.sh`, on an `ubuntu-24.04-arm` runner. Restoring
-  `deploy-preview.yml`'s push trigger against this box is the last step of
-  that, not the first — see D-157's addendum, and invert the `runs-on` guard
-  rather than deleting it.
+  `oracle-push-images.sh`, on an `ubuntu-24.04-arm` runner. A preview deploy
+  workflow with a `push` trigger against this box is the last step of that,
+  not the first — see D-157's addendum. (The old `deploy-preview.yml` was
+  deleted with Fly on 2026-09-23; git history has it.)
 - **Repoint Infisical's preview `DATABASE_URL` and `DIRECT_URL`** at the box's
   Postgres, or delete the orphaned Neon preview project. Until one of those
   happens, `pnpm seed:preview` seeds a database nothing reads and

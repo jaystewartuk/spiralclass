@@ -33,8 +33,8 @@ value and the test that pins it in the same commit.
 ## What is not here
 
 **No environment variables.** The project's env store holds the failover's
-runtime environment, but only as a copy derived from the places Fly's comes
-from, written by two callers that mark every entry they own:
+runtime environment, but only as a copy derived from the places Cloud Run's
+comes from, written by two callers that mark every entry they own:
 
 - `infra/infisical/push-vercel-env.sh` (operator) pushes Infisical
   `production` `/` and the production R2 credentials, as `sensitive`.

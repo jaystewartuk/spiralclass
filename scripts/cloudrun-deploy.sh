@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # The production deploy. Cloud Run `web` has served spiralclass.com since the
-# 2026-09-23 cutover ([D-184]'s addendum); Fly `agendaprofe` is stopped and
-# holds no domain. The Vercel failover ([D-177]) is untouched by this file.
+# 2026-09-23 cutover ([D-184]'s addendum); Fly `agendaprofe` was destroyed
+# the same day. The Vercel failover ([D-177]) is untouched by this file.
 #
 # ⚠️ WHAT THIS DELIBERATELY DOES NOT DO, and each omission is load bearing
 # rather than unfinished:
@@ -43,8 +43,8 @@
 #   4. record the deploy in the local release ledger
 #   5. sync Inngest against https://spiralclass.com/api/inngest
 #
-# CREDENTIALS, and why the runtime secrets are not here. On Fly they are
-# `fly secrets`, pushed from Infisical by the operator; the deploy only swaps
+# CREDENTIALS, and why the runtime secrets are not here. On Fly they were
+# `fly secrets`, pushed from Infisical by the operator; the deploy only swapped
 # the image. Cloud Run's equivalent is a Secret Manager secret holding the whole
 # set as one env-file, mounted into the container and sourced by
 # scripts/docker-entrypoint.sh. infra/gcp/push-cloudrun-env.sh (operator, under
@@ -83,12 +83,11 @@
 #
 # So GCP_DEPLOY_KEY is a service-account key for an identity that can deploy a
 # revision and cannot read a secret — the same shape, blast radius and rotation
-# story as FLY_API_TOKEN. Its cost is that it is long-lived, and
+# story as VERCEL_TOKEN. Its cost is that it is long-lived, and
 # infra/gcp/README.md owns the rotation.
 #
 # ⚠️ From a LAPTOP, leave GCP_DEPLOY_KEY unset: the operator's own `gcloud auth
-# login` is used instead, exactly as scripts/fly-deploy.sh falls back to their
-# own `infisical login`. A deploy from either place is otherwise identical.
+# login` is used instead. A deploy from either place is otherwise identical.
 set -euo pipefail
 
 ENVIRONMENT="${1:-}"
@@ -99,14 +98,14 @@ case "$ENVIRONMENT" in
   *)
     echo "usage: scripts/cloudrun-deploy.sh production --gate-already-passed" >&2
     echo "" >&2
-    echo "Only \`production\` exists as a Cloud Run target. Preview belongs to Fly" >&2
-    echo "(D-150's addendum), and a second service would be a second thing to keep" >&2
-    echo "in sync for no stated reason." >&2
+    echo "Only \`production\` exists as a Cloud Run target. Preview has no host until" >&2
+    echo "the Oracle box is rebuilt (D-184's addendum), and a second service would be" >&2
+    echo "a second thing to keep in sync for no stated reason." >&2
     exit 1
     ;;
 esac
 
-# The same handoff scripts/fly-deploy.sh demands, for the same reason: this can
+# The same handoff scripts/database-deploy.sh demands, for the same reason: this can
 # put a commit in front of real students, and the only thing that should is a
 # commit `pnpm promote` has already run the full gate against. A misspelt flag
 # is a usage error rather than a silent full-gate skip.
@@ -211,9 +210,12 @@ fi
 
 # NEXT_DEPLOYMENT_ID is what Next stamps on asset requests as `?dpl=`, so a
 # client left on an old build gets a hard navigation instead of silently pulling
-# chunks the new deploy renamed. The Fly build passes the commit here; a target
-# that did not would reintroduce AGENDAPROFE-3B on its own.
-BUILD_ARGS+=(--build-arg "NEXT_DEPLOYMENT_ID=$SHORT_SHA")
+# chunks the new deploy renamed. The FULL commit, byte-identical to what
+# scripts/vercel-deploy.sh stamps: a client served by one target before a
+# failover and the other after compares this value, and a short SHA here against
+# a full one there is a skew on every page for every visitor. It shipped short
+# until 2026-09-23; the guard pinning the pair still named Fly.
+BUILD_ARGS+=(--build-arg "NEXT_DEPLOYMENT_ID=$SHA")
 
 # ---------------------------------------------------------------------------
 # 2. Build amd64 and push.
@@ -242,7 +244,7 @@ docker buildx build \
 # fly.<env>.toml's [env] does.
 #
 # The shape flags are passed on every deploy rather than set once, for the
-# reason fly.production.toml's `[[vm]]` block gives about `fly scale vm`: a
+# reason Fly's config once gave about `fly scale vm`: a
 # hand-made change in a console that the next deploy silently reverts is how a
 # fix turns back into the same outage a week later. config/cloudrun/<env>.env is
 # the source of truth and says so out loud.
@@ -286,7 +288,7 @@ node scripts/ci/record-release.mjs --kind web-deploy --env "$ENVIRONMENT" --sha 
 # ---------------------------------------------------------------------------
 # 5. Inngest sync — the DOMAIN, never $URL. See the header: a second synced URL
 # is a second app, and every cron fires twice. `exec` because it is the last
-# step, exactly as scripts/fly-deploy.sh ends.
+# step.
 # ---------------------------------------------------------------------------
 echo "› Syncing Inngest functions (production)…"
 exec bash scripts/inngest-sync.sh "https://spiralclass.com/api/inngest"

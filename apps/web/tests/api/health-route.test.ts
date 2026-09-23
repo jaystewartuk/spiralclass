@@ -6,10 +6,9 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 //   * It must fail (503) whenever Postgres is unreachable — Fly decides
 //     machine health from this, so softening the status would hide a real
 //     outage.
-//   * It must NOT page for the cold-start window. `auto_stop_machines` means
-//     machines boot on demand and the first Neon connection can exceed this
-//     route's 5s DB timeout; fly.production.toml's 30s grace_period already
-//     tolerates exactly that. Reporting each one produced SPIRALCLASS-21 —
+//   * It must NOT page for the cold-start window. Cloud Run scales to zero, so
+//     instances boot on demand and the first Neon connection can exceed this
+//     route's 5s DB timeout — a warmup, not an outage. Reporting each one produced SPIRALCLASS-21 —
 //     126 production events, none an incident — which is precisely the kind
 //     of permanently-red issue a genuine DB failure then hides behind.
 

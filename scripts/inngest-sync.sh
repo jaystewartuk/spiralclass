@@ -6,11 +6,11 @@
 # registers nothing and the cron SILENTLY never runs (the 2026-07-07 email+push
 # outage was this class of failure). It is idempotent — if already in sync the
 # response just says so — and the retry is for a machine still finishing its
-# rollout, NOT a full readiness poll (`flyctl deploy` already blocked until the
-# new machines passed their health checks before this runs).
+# rollout, NOT a full readiness poll (`gcloud run deploy` already blocked until
+# the new revision was serving before this runs).
 #
-# Used by .github/actions/inngest-sync (the preview + production Fly deploy jobs)
-# and scripts/fly-deploy.sh (the local hand-deploy). This file is the ONLY copy
+# Used by scripts/cloudrun-deploy.sh, in the workflow and on the laptop alike,
+# always against the domain and never a platform URL. This file is the ONLY copy
 # of the retry loop — before it existed the same 5-attempt curl was pasted in
 # three places and drifted independently.
 #

@@ -61,14 +61,15 @@ export const SUBPROCESSORS_REVIEWED = "2026-08-25";
 export const SUBPROCESSORS: readonly Subprocessor[] = [
   // ---- Unconditional infrastructure -------------------------------------
   {
-    id: "fly",
-    name: "Fly.io",
+    id: "google-cloud-run",
+    name: "Google Cloud",
     purpose: "Runs the application servers that serve the website and its API.",
     dataShared: "Everything you send us passes through these servers in transit.",
     location: "United States",
     gate: null,
-    // fly.production.toml: primary_region = 'ord' (Chicago).
-    evidence: "fly.production.toml",
+    // config/cloudrun/production.env: REGION=us-east4 (N. Virginia). Replaced
+    // Fly.io on 2026-09-23 (D-184's addendum).
+    evidence: "config/cloudrun/production.env",
   },
   {
     id: "neon",

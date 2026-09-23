@@ -50,8 +50,8 @@ const CONFIG_PATH = "config/vercel/production.json";
  * This read to the end of the file until [D-184] added a third target after it,
  * at which point every "the Vercel job must not contain X" assertion here was
  * quietly also asserting it about Cloud Run's job — and the Cloud Run job
- * explains its credential by naming FLY_API_TOKEN, so the first symptom was a
- * failure that pointed at the wrong job entirely. A slice that depends on being
+ * then explained its credential by naming another target's token, so the first
+ * symptom was a failure that pointed at the wrong job entirely. A slice that depends on being
  * last is a premise that dies silently the first time it is not.
  *
  * It ends at the next thing at job indentation: another job header, or a
@@ -170,13 +170,14 @@ describe("the Vercel target is a second target, not a second opinion", () => {
         `the vercel job is handed ${secret} — it runs no migrations and cuts no checkpoint (D-177)`,
       ).not.toContain(secret);
     }
-    // And the Fly token, for the same reason in the other direction: this job
-    // has no business redeploying the thing that is serving.
-    expect(vercelJob(), "the vercel job is handed FLY_API_TOKEN").not.toContain("FLY_API_TOKEN");
+    // And the serving target's key, for the same reason in the other
+    // direction: this job has no business redeploying the thing that is serving.
+    expect(vercelJob(), "the vercel job is handed GCP_DEPLOY_KEY").not.toContain("GCP_DEPLOY_KEY");
   });
 
   it("the script runs no migration, cuts no checkpoint and syncs no Inngest app", () => {
-    // Each of these is a step scripts/fly-deploy.sh owns for this commit, and
+    // Each of these is a step the database job or scripts/cloudrun-deploy.sh
+    // owns for this commit, and
     // the Inngest one is a hazard rather than a duplication: Inngest registers
     // an app PER URL, so syncing a second URL would register a second app and
     // fire every cron twice — once from the thing serving and once from the
@@ -265,12 +266,12 @@ describe("the Vercel target is a second target, not a second opinion", () => {
   });
 
   it("both targets stamp the same deployment id for the same commit", () => {
-    // Next's `?dpl=` skew mitigation compares this value. If Fly stamps the SHA
-    // and Vercel stamps something else, a client served by Fly before a promote
-    // and by Vercel after it sees a skew it must hard-navigate through — on
-    // every page, for every visitor, once.
+    // Next's `?dpl=` skew mitigation compares this value. If Cloud Run stamps
+    // the SHA and Vercel stamps something else, a client served by one before a
+    // failover and by the other after it sees a skew it must hard-navigate
+    // through — on every page, for every visitor, once.
     expect(SCRIPT).toMatch(/NEXT_DEPLOYMENT_ID=\$\{SHA\}/);
-    expect(read("scripts", "fly-deploy.sh")).toContain("NEXT_DEPLOYMENT_ID=${SHA}");
+    expect(read("scripts", "cloudrun-deploy.sh")).toContain('NEXT_DEPLOYMENT_ID=$SHA")');
   });
 
   it("the CLI version is pinned, not floating", () => {

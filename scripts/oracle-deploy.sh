@@ -2,9 +2,9 @@
 # Deploy the whole Oracle box: the LiveKit stack, the preview web app and
 # preview's Postgres. Idempotent — run it as often as you like.
 #
-# ⚠️ PRODUCTION IS NOT DEPLOYED FROM HERE. The production web app is on Fly
-# and its database is on Neon (D-150's second addendum, 2026-09-04);
-# scripts/fly-deploy.sh ships it and nothing in this file touches it.
+# ⚠️ PRODUCTION IS NOT DEPLOYED FROM HERE. The production web app is on Cloud
+# Run and its database is on Neon (D-184's addendum, 2026-09-23);
+# scripts/cloudrun-deploy.sh ships it and nothing in this file touches it.
 #
 # ⚠️ THIS IS THE ONLY THING THAT DEPLOYS THE BOX. `deploy-preview.yml` is
 # what calls it once the box is serving — and when it does, it must invoke
@@ -190,8 +190,8 @@ render_app_env() {
   ok "$env: $n_total values (all $n_cfg __LOCAL__ overrides, plus the root secrets)"
 }
 
-# ⚠️ Preview only. Production's environment is Fly's, set by
-# `flyctl secrets` and by config/env/production.*.env at build time — nothing
+# ⚠️ Preview only. Production's environment is Cloud Run's, set by the
+# mounted secret and by config/env/production.*.env at build time — nothing
 # here renders it and nothing here should.
 render_app_env preview "$TMP/preview.app.env"
 

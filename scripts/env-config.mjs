@@ -24,7 +24,7 @@ export const KINDS = ["build", "runtime"];
  * accounts rather than demonstrating how the system is built.
  *
  * ⚠ It must never reach a build or a boot. `resolveEnvFile` throws if one is
- * unsatisfied, `scripts/fly-deploy.sh` preflights for it, and
+ * unsatisfied, the build's own resolver (`scripts/env-build-args.mjs`) throws, and
  * `scripts/docker-entrypoint.sh` refuses to export it — a placeholder that
  * shipped quietly would point production at a project that does not exist,
  * which is strictly worse than the value being in git.

@@ -160,8 +160,8 @@ jobs:
         # From the Dockerfile, because that is what production runs — not from
         # `engines.node`, which is a floor (">=24.15.0") and would let a runner
         # resolve a major the image has never seen. Derived rather than
-        # restated, the same way scripts/fly-deploy.sh reads the app name out
-        # of fly.<env>.toml: bump the Dockerfile and CI follows in the same
+        # restated, the same way the deploy scripts read their shape out of
+        # config/: bump the Dockerfile and CI follows in the same
         # commit. Fails loudly if the FROM line stops matching, rather than
         # falling back to a guess.
         run: |

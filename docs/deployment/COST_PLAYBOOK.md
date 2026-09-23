@@ -11,59 +11,44 @@
 
 ## TL;DR
 
-| Component           | Provider                       | Plan          | Monthly        |
-| ------------------- | ------------------------------ | ------------- | -------------- |
-| Hosting             | Fly.io                         | pay-as-you-go | ~$5.70 (D-150) |
-| Database            | Neon                           | Free          | $0 (verify)    |
-| Auth                | better-auth (in-app)           | n/a           | $0             |
-| Storage             | Cloudflare R2                  | Free          | $0             |
-| Error tracking      | Sentry                         | Developer     | $0             |
-| Transactional email | Resend                         | Free          | $0             |
-| Uptime monitor      | UptimeRobot **or** BetterStack | Free          | $0             |
-| LLM (if used)       | Anthropic API                  | Pay-as-you-go | ~$0–5          |
-| Domain              | Registrar of choice            | n/a           | ~$1 (≈ $12/yr) |
-| **Total**           |                                |               | **~$7/mo**     |
+| Component           | Provider                       | Plan          | Monthly          |
+| ------------------- | ------------------------------ | ------------- | ---------------- |
+| Hosting             | Google Cloud Run               | Always-free   | $0 (D-184)       |
+| Database            | Neon                           | Free          | $0 (verify)      |
+| Auth                | better-auth (in-app)           | n/a           | $0               |
+| Storage             | Cloudflare R2                  | Free          | $0               |
+| Error tracking      | Sentry                         | Developer     | $0               |
+| Transactional email | Resend                         | Free          | $0               |
+| Uptime monitor      | UptimeRobot **or** BetterStack | Free          | $0               |
+| LLM (if used)       | Anthropic API                  | Pay-as-you-go | ~$0–5            |
+| Domain              | Registrar of choice            | n/a           | ~$1 (≈ $12/yr)   |
+| **Total**           |                                |               | **~$1/mo + LLM** |
 
-Hosting and the domain are the only unavoidable costs. Everything else is
-$0 until usage forces an upgrade — and [D-150](../decisions/D-150.md) is
-the decision to take hosting to $0 as well, by moving the web app onto the
-Oracle Always Free box. Until that is executed, the total above is what
-this actually costs.
+The domain is the only unavoidable cost. Everything else is $0 until usage
+forces an upgrade — hosting included since 2026-09-23, when
+[D-184](../decisions/D-184.md) moved production from Fly onto Cloud Run's
+always-free grant. That is a different route to the $0 that
+[D-150](../decisions/D-150.md) set out to reach on the Oracle box.
 
 ---
 
 ## Stack by component
 
-### Hosting — Fly.io
+### Hosting — Google Cloud Run
 
-> [!IMPORTANT]
-> **"$0 (verify)" in the table above was wrong, and it has now been verified.**
-> **Fly has no free tier.** Production is one always-on `shared-cpu-1x`
-> machine with 1024 MB in `ord`, which is roughly **5.70 dollars a month** —
-> essentially the whole SpiralClass line, since neither app has a volume or a
-> dedicated IPv4. Fly's actual floor is `min_machines_running = 0` (what
-> preview already runs), which costs pennies of rootfs storage and buys an
-> eight-to-ten second cold start.
->
-> **[D-150](../decisions/D-150.md) (2026-09-03) decided the web app moves to
-> the Oracle Always Free box** for that reason, keeping Fly configured as a
-> first-class target to return to. Read it before re-deriving any of this: it
-> carries the measured latency cost of the move (58 ms to Neon from Querétaro
-> against 12 ms from `ord`, an estimated 1.3 seconds on database-heavy pages),
-> and the reason Postgres must **not** follow the app onto the box. Nothing has
-> moved yet.
-
-- **Cost shape:** pay-as-you-go on machine + volume usage; a single
-  small always-on machine for a low-traffic app is cents-to-low-dollars
-  per month (verify against the current Fly pricing / your usage). No
-  "hobby vs pro" commercial restriction — commercial use is fine on any
-  plan.
-- **Why it fits:** a single classroom's traffic keeps machines idle
-  most of the time; auto-stop/auto-start machines mean you're not paying
-  for a box that's doing nothing.
-- **Alternative if it gets expensive:** Cloudflare Pages/Workers (more
-  generous free tier) or Railway/Render, though the app is currently
-  containerized for Fly.
+- **Cost shape:** Cloud Run scales to zero and bills compute, requests and
+  egress past an always-free grant that this traffic barely touches.
+  [D-184](../decisions/D-184.md) carries the arithmetic; read it before
+  re-deriving any of this.
+- **The two ways it stops being free** — stored images and spend — are in
+  [`infra/gcp/README.md`](../../infra/gcp/README.md). ⚠️ Cloud Run has **no
+  hard spending cap**: a crawl or a loop bills rather than throttles, and the
+  budget alert described there is what tells you.
+- **Why it fits:** a single classroom's traffic leaves the service idle most
+  of the time, and an idle service costs nothing. The price is a cold start,
+  which the liveness monitor in
+  [`RELEASE_AND_STAGING.md`](./RELEASE_AND_STAGING.md) keeps away from real
+  visitors.
 
 ### Database — Neon Free
 
@@ -297,7 +282,7 @@ run lint`, so setting `TURBO_TOKEN`/`TURBO_TEAM` in the shell environment still
 
 | Service          | Cap per account                                    | Per-project isolation strategy                                    |
 | ---------------- | -------------------------------------------------- | ----------------------------------------------------------------- |
-| Fly.io           | Unlimited apps per account                         | One app per side-project (pay-as-you-go per machine).             |
+| Google Cloud Run | One always-free grant per billing account (verify) | One service per side-project, **sharing** the grant.              |
 | Neon Free        | One project on the free tier (verify)              | One project per side-project — fresh free-tier quotas each.       |
 | Sentry Developer | 1 user, multiple projects, **shared** 5k errors/mo | One project per app, watch the shared cap.                        |
 | Resend Free      | Multiple domains, **shared** 3k emails/mo          | One verified domain per app, watch the shared cap.                |
@@ -321,11 +306,11 @@ fires, in priority order:
    / point-in-time recovery. This is almost always the _first_ paid
    upgrade.
 
-2. **Fly.io paid usage — pay-as-you-go (verify).** Trigger: sustained
-   traffic keeps machines running enough that the metered machine +
-   bandwidth cost becomes non-trivial, **or** you need bigger/always-on
-   machines, more regions, or a larger volume. There's no commercial
-   restriction to trip here — it's purely a usage/spend threshold.
+2. **Cloud Run past the free grant — pay-as-you-go (verify).** Trigger:
+   sustained traffic outgrows the always-free grant, **or** you need
+   always-on instances or more regions. There's no commercial restriction to
+   trip here — it's purely a usage/spend threshold, and the budget alert in
+   [`infra/gcp/README.md`](../../infra/gcp/README.md) is how you find out.
 
 3. **Sentry Team — $26/mo.** Trigger: you hit 5k errors/mo (usually
    a sign something is broken, not a sign to upgrade). Or you want
@@ -343,7 +328,7 @@ fires, in priority order:
 - Pre-launch / alpha: ~$1/mo (domain only)
 - Launched, single classroom: ~$1–5/mo (domain + LLM usage)
 - Sticky enough to need Neon paid: ~$20/mo (verify)
-- Commercial + sticky: ~$40/mo (+ Fly paid usage) (verify)
+- Commercial + sticky: ~$40/mo (+ Cloud Run usage past the free grant) (verify)
 - Real product: $70+/mo (all baseline paid plans) (verify)
 
 The jump from $0 to $26 is where most side-projects die. Don't take
@@ -354,9 +339,8 @@ it until you have to.
 ## Project-specific notes for SpiralClass
 
 - Domain (`spiralclass.com`) already registered.
-- Fly.io apps provisioned (`agendaprofe` prod, `agendaprofe-preview`).
-  Pay-as-you-go is correct for current scope (one teacher,
-  friends-and-family alpha).
+- Production is Cloud Run `web` in `us-east4`, inside the always-free grant
+  (D-184). There is no preview host until the Oracle box is rebuilt.
 - Neon project provisioned. Free tier. ⚠️ **Free-tier auto-suspend
   cold-starts are the live risk** — a first request after a quiet period pays
   the wake-up. It has not bitten during a lesson, and it is the trigger that
@@ -366,13 +350,13 @@ it until you have to.
 - Resend is wired and its credentials are part of
   `assertProductionCredentials()` in `apps/web/src/lib/env.ts`, so production
   refuses to boot without them.
-- **There is no external uptime monitor**, deliberately for now: `/api/health`
-  exists and the production probes run as the last step of every deploy
-  (`pnpm local synthetic`), which catches a regression at the moment one is
-  introduced. What that does not catch is an outage between deploys. Pointing
-  a free UptimeRobot or BetterStack check at
-  `https://spiralclass.com/api/health` is the cheapest thing on this page and
-  is not done.
+- **The external uptime monitor is a free HetrixTools check**
+  (`spiralclass production liveness`, active since 2026-08-25) hitting
+  `https://spiralclass.com/api/health/live` about once a minute. It catches an
+  outage between deploys, which the probes at the end of every deploy do not,
+  and it is also what keeps a Cloud Run instance warm ([D-184](../decisions/D-184.md)).
+  ⚠️ Keep it on `/api/health/live`: a sub-5-minute check against `/api/health`
+  holds Neon's compute awake and exhausts the free plan's CU-hours.
 
 ---
 
@@ -496,7 +480,7 @@ and the tests all read from it. Guidance:
 ## What to do when starting the next side-project
 
 1. Buy domain.
-2. New Fly.io app (same account).
+2. New Cloud Run service (same billing account — see `infra/gcp/README.md`).
 3. New Neon project (fresh free tier).
 4. New Sentry project (same org, watch shared error cap).
 5. Add Resend domain (same account, watch shared email cap).

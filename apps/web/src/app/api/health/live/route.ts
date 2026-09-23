@@ -4,8 +4,9 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 // Process-liveness probe — no Postgres query, deliberately. This is what
-// fly.production.toml / fly.preview.toml point their `[[http_service.checks]]`
-// at (interval 15s). `/api/health` (the sibling route) does the real DB
+// the external uptime monitor hits about once a minute (it keeps a Cloud Run
+// instance warm — D-184). Fly's health checks pointed here too, until Fly was
+// retired. `/api/health` (the sibling route) does the real DB
 // readiness check and stays the target for external uptime monitors
 // (UptimeRobot/BetterStack) and synthetic.yml, which poll far less often.
 //

@@ -4,7 +4,7 @@
 # the same two places:
 #
 #   * Infisical `production` at `/`, NOT recursive — exactly what
-#     push-fly-secrets.sh imports into Fly. Never `/config` and never `/deploy`,
+#     Fly's secrets import once took. Never `/config` and never `/deploy`,
 #     for D-163's reason: `/` is the path that becomes an environment variable
 #     inside the running app, and a deploy credential has no business there.
 #   * The production R2 buckets' credentials, from infra/cloudflare-r2's Tofu
@@ -21,8 +21,8 @@
 # infra/gcp/README.md.
 #
 # ⚠️ REWRITES THE WHOLE SET. There is no "update one key": this composes the
-# file and adds a new version. That is the same shape as push-fly-secrets.sh's
-# import, and it means this must be re-run after ANY rotation, in Infisical or
+# file and adds a new version. That is the same shape as Fly's secrets import
+# had, and it means this must be re-run after ANY rotation, in Infisical or
 # in Tofu.
 #
 # ⚠️ Values flow through STDIN only, never argv (D-66). `gcloud secrets versions
@@ -79,8 +79,8 @@ command -v node >/dev/null || { echo "node is required" >&2; exit 1; }
 # shellcheck source=../infisical/infisical.sh
 source "$INFISICAL_DIR/infisical.sh"
 
-# ── Source 1: what Fly imports ───────────────────────────────────────────
-# ⚠️ `/` ONLY. See the header, and push-fly-secrets.sh's note on --recursive.
+# ── Source 1: what the app reads ─────────────────────────────────────────
+# ⚠️ `/` ONLY, never --recursive — see the header.
 echo "› Reading Infisical \`${ENVIRONMENT}\` / (not recursive)…" >&2
 INFISICAL_JSON="$(infisical_env --json "$ENVIRONMENT" /)"
 

@@ -24,8 +24,10 @@ checkpoint **fails closed**: an unauthenticated `neonctl`, a missing
 `NEON_PROJECT_ID`, or a failed branch-create blocks the deploy before any
 migration runs.
 
-**One call site** — `scripts/fly-deploy.sh`. `pnpm promote` chains this script,
-so it is what every production deploy runs. It requires `NEON_PROJECT_ID` and
+**One call site** — `scripts/database-deploy.sh`. `deploy-production.yml` runs
+it as the `database` job on every release `pnpm promote` triggers, and the
+operator runs the same script to recover a release by hand, so it is what every
+production migration goes through. It requires `NEON_PROJECT_ID` and
 does **not** default it — the default used to be the production project id
 written out in full, which a public repository cannot carry ([D-158]); supply it
 as the `production` environment secret, or export it for a laptop deploy
@@ -33,10 +35,9 @@ as the `production` environment secret, or export it for a laptop deploy
 the credential `neonctl auth` stores on this machine, or with `NEON_API_KEY` if
 one happens to be exported (2026-08-31 — see `ensure_neon_auth` in
 `infra/database/scripts/_common.sh`). **Run `neonctl auth` once per machine**;
-without it the checkpoint fails closed and says so. (There were two paths between D-120 and D-129, the second being
-`fly-deploy.yml`'s `production` job via the `neon-checkpoint` composite action.
-Both are deleted — D-129 removed every workflow and composite action in this
-repo — so there is no runner-side deploy left to keep in sync.)
+without it the checkpoint fails closed and says so. The runner and the laptop
+call the same script, so there is one copy of the checkpoint-then-migrate
+ordering to keep correct.
 
 Old checkpoints beyond the most recent 5 (per branch, tunable via `--keep`) are
 pruned automatically in the same step. The retention number lives once, in
@@ -92,8 +93,8 @@ failed dump, or a dump that does not verify is an error, never a skip. It needs
 
 **Which database does the backup actually back up?** The Neon
 cutover **has been executed** (D-89; `docs/decisions/D-89.md`).
-Production runs on the Fly app `agendaprofe` + a **Neon production project**;
-Vercel and Supabase are decommissioned (D-89 Phase 5). `PROD_BACKUP_DB_URL`
+Production runs on Cloud Run (Fly until 2026-09-23, D-184) + a **Neon
+production project**; Supabase is decommissioned (D-89 Phase 5). `PROD_BACKUP_DB_URL`
 was repointed to the Neon production project's direct connection string at
 cutover, in the same step that `PROD_DATABASE_URL`/`PROD_DIRECT_URL` were set
 (`PRODUCTION_CUTOVER.md` Phase 3) — otherwise the job would keep "succeeding"
@@ -107,29 +108,30 @@ and `D-70.md` were (and largely still are, as historical records) written
 _before_ execution and say "not yet executed". The evidence it happened is on
 the record twice over: the D-70 move to Neon put production on PG 18, which
 broke the backup job's pinned pg_dump client on 2026-07-20 (why the script now
-resolves the newest client instead of pinning), and `scripts/fly-deploy.sh` /
-`CLAUDE.md` both describe production deploying to Fly as current, running fact.
-If you're ever unsure again, check `scripts/fly-deploy.sh`'s production env
-(`PROD_DATABASE_URL`/`PROD_DIRECT_URL`) against the actual Neon console —
-that's the one source that can't drift from reality.
+resolves the newest client instead of pinning), and every production release
+since has checkpointed the Neon `production` branch before migrating it. If
+you're ever unsure again, compare the `DATABASE_URL` in Infisical `production`
+— the value `infra/gcp/push-cloudrun-env.sh` writes into the running service's
+secret — against the actual Neon console; that's the one source that can't
+drift from reality.
 
 ## What this does NOT cover (known gaps)
 
 - **No periodic/scheduled checkpoint independent of a deploy.** The Neon
-  checkpoint only runs when a deploy runs (`pnpm promote` → `fly-deploy.sh`).
+  checkpoint only runs when a deploy runs (`pnpm promote` →
+  `deploy-production.yml` → `database-deploy.sh`).
   Between deploys, PITR alone is your protection — which is fine, since PITR is
   continuous and doesn't depend on anything in this repo running, but there's
   no _named_ checkpoint for "an ordinary
   Tuesday, no deploy happened" the way there is for "right before this
   deploy." If you need one anyway (e.g. before a risky manual DB operation),
   run `neon-checkpoint.sh` by hand.
-- **Direct push to `production` bypasses the checkpoint entirely, same as it
-  always could.** Branch protection is deliberately not enabled on
-  `production` (`CLAUDE.md`) — a direct `git push origin <sha>:production` by
-  anyone with push access no longer deploys anything at all (D-120 removed
-  fly-deploy.yml's push trigger; D-129 removed the workflow) — the branch moves and production keeps
-  serving the old image, unmigrated and uncheckpointed, until someone runs the
-  deploy. The remaining real gap is the `migrate:prod` script, which runs
+- **A direct push to `production` skips promote's gate, not the checkpoint.**
+  Branch protection is deliberately not enabled on `production` — a direct
+  `git push origin <sha>:production` by anyone with push access triggers
+  `deploy-production.yml` like promote's push does, behind the same required
+  reviewer, and its `database` job checkpoints before migrating. The remaining
+  real gap is the `migrate:prod` script, which runs
   `prisma migrate deploy` straight from a developer's machine against
   `.env.production.local`, bypassing both deploy paths and the checkpoint with
   them. This is a process/discipline gap; run
@@ -227,9 +229,12 @@ below.
    exited 0" alone.
 6. **Cut over** — put the app in maintenance mode
    (`RELEASE_AND_STAGING.md`'s Maintenance windows section), repoint
-   `PROD_DATABASE_URL`/`PROD_DIRECT_URL` (Fly secrets: `fly secrets set … -a
-spiralclass`) at the restored target, redeploy/restart, verify
-   `/api/health` and a real sign-in, exit maintenance mode.
+   `DATABASE_URL`/`DIRECT_URL` in Infisical `production` at the restored
+   target, re-run `infra/gcp/push-cloudrun-env.sh` (operator), and deploy so a
+   new revision mounts the new secret version (a running revision keeps the one
+   it started with). The Vercel failover and the `production` GitHub
+   Environment hold their own copies of those two values; re-push them too.
+   Verify `/api/health` and a real sign-in, exit maintenance mode.
 
 If data was only partially corrupted rather than needing a wholesale cutover,
 consider restoring into a scratch target and manually reconciling just the
@@ -248,7 +253,7 @@ preferred whenever the incident is within PITR/checkpoint coverage.
    how much the checkpoint-branch pruning window (`--keep 5`) and the R2
    fallback actually matter.
 2. **Keep `neonctl` authenticated on the deploy machine** — `neonctl auth`,
-   once, per machine. `scripts/fly-deploy.sh`'s checkpoint step fails closed
+   once, per machine. `scripts/database-deploy.sh`'s checkpoint step fails closed
    without it, which blocks the next production deploy. This replaced the
    `NEON_API_KEY` in Infisical's `infra` environment on 2026-08-31, after the
    keys were deleted and a promote stopped with `production` fast-forwarded and

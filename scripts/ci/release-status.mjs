@@ -59,7 +59,6 @@ function row(label, entry, targetSha, extra = "") {
 }
 
 const rows = [
-  row("preview web", lastRelease({ kind: "web-deploy", env: "preview" }), mainSha),
   row("production web", lastRelease({ kind: "web-deploy", env: "production" }), prodSha),
 ];
 
@@ -99,14 +98,13 @@ if (unknown.length) {
   console.log(
     `\n  No local record for: ${unknown.map((r) => r.label).join(", ")}.` +
       "\n  This machine hasn't shipped them since the ledger existed — that is not" +
-      "\n  the same as their not being live. Check Fly if it matters.",
+      "\n  the same as their not being live. Check Cloud Run's revisions if it matters.",
   );
 }
 if (stale.length) {
   console.log(
     `\n  BEHIND: ${stale.map((r) => `${r.label} (${r.drift})`).join(", ")}\n` +
       "\n  Catch up:" +
-      "\n    pnpm ship:preview                       # preview web + mobile" +
       "\n    pnpm promote                            # production web + mobile OTA\n",
   );
   process.exit(1);

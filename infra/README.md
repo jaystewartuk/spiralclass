@@ -43,14 +43,12 @@ its committed
 `infisical init`. It carries only a project ID — not a secret.
 
 Kept at `infra/infisical/` specifically (not moved to this top-level
-directory, unlike `backend.hcl`) because `push-fly-secrets.sh` in that
-directory still hardcodes `.infisical.json` living right there — relocating
-it would break that script. (`seed-preview.sh` and the other task scripts in
-that directory now go through `with-secret.sh`'s shared helper instead,
-which resolves the file relative to itself rather than assuming
-co-location — see `infra/infisical/README.md`'s "Adding a new script"
-section — but `push-fly-secrets.sh` hasn't been migrated onto that helper
-yet.) Every other module (`cloudflare-r2`) runs its commands through
+directory, unlike `backend.hcl`) because `infra/infisical/project-id.sh` looks
+for a repo-local link beside itself before falling back to
+`~/.infisical.json`. (`seed-preview.sh` and the other task scripts in that
+directory go through `with-secret.sh`'s shared helper — see
+`infra/infisical/README.md`'s "Adding a new script" section.) Every other
+module (`cloudflare-r2`) runs its commands through
 `../infisical/run.sh infra …`, which resolves the link wherever it lives —
 here, or `~/.infisical.json` (`infra/infisical/project-id.sh`) — and verifies
 the project before injecting anything. The bare

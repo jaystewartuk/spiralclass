@@ -97,7 +97,7 @@ describe("the service shape is the one that was measured", () => {
   });
 
   it("passes the shape on every deploy, so a console edit cannot outlive it", () => {
-    // fly.production.toml's `[[vm]]` block learned this the hard way: a
+    // Fly's `[[vm]]` block learned this the hard way: a
     // hand-scaled fix that the next deploy silently reverts is how the same
     // outage comes back a week later.
     for (const flag of ["--cpu", "--memory", "--min-instances", "--max-instances"]) {

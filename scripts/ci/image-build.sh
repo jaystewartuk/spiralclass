@@ -9,7 +9,7 @@
 # the image: the integration and browser suites run `next build` on a runner's
 # own Node, never through the Dockerfile. So a change to the base image, its apt
 # layer, the pnpm bootstrap or the standalone copy was first exercised by
-# scripts/fly-deploy.sh, against production.
+# the production deploy, against production.
 #
 # This is the heavy-tier step that closes that (scripts/ci/steps.mjs). It is a
 # script rather than a `run:` in heavy.yml for the reason every other suite is:
@@ -20,7 +20,7 @@
 # credentials:
 #
 #   * The same Dockerfile, to its final stage (no --target), because that is
-#     what scripts/fly-deploy.sh builds. Naming a stage here would stop being
+#     what scripts/cloudrun-deploy.sh builds. Naming a stage here would stop being
 #     the deploy's build the day a stage is added after it.
 #   * The same build args, resolved the same way: `node scripts/env-build-args.mjs
 #     production`, over config/env/production.build.env. Every `__LOCAL__` key in
@@ -33,7 +33,7 @@
 #     runner builds natively.
 #
 # WHAT IT NEVER DOES: push, tag for a registry, authenticate to one, or call
-# flyctl. The output is `type=cacheonly` — BuildKit solves every stage, runs
+# gcloud. The output is `type=cacheonly` — BuildKit solves every stage, runs
 # every RUN and every COPY, and then discards the result, so no image with stub
 # values baked into its client bundle exists anywhere afterwards, not even in
 # the local image store. apps/web/tests/config/local-gate.test.ts holds that.
@@ -69,8 +69,7 @@ docker buildx version >/dev/null 2>&1 || { echo "docker buildx is required" >&2;
 [ -f "$BUILD_ENV" ] || { echo "$BUILD_ENV not found" >&2; exit 1; }
 
 # ── Stub the __LOCAL__ build args ─────────────────────────────────────────
-# Same line grammar scripts/fly-deploy.sh reads its runtime file with, and the
-# same one scripts/env-config.mjs parses. Exported unconditionally, so a real
+# Same line grammar scripts/env-config.mjs parses. Exported unconditionally, so a real
 # value that happens to be in the caller's environment (a laptop shell under
 # infra/infisical/run.sh) is overwritten rather than baked into a throwaway
 # build: this step must give the same answer with or without credentials.

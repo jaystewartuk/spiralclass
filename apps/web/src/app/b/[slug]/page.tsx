@@ -483,9 +483,9 @@ export default async function BookingLandingPage({
   //
   // Not simply dropped, which is what the sibling dashboard/page.tsx does:
   // ANALYTICS.md requires an explicit flush per call site precisely because
-  // posthog-node otherwise relies on incidental process longevity ("fine on
-  // today's Fly.io persistent container, silently lossy on a more aggressively
-  // recycled runtime"). Losing these would silently inflate every conversion
+  // posthog-node otherwise relies on incidental process longevity, which Cloud
+  // Run does not promise: CPU is throttled between requests, so work scheduled
+  // after the response can wait for the next one (D-184). Losing these would silently inflate every conversion
   // rate measured against them, since this event is the funnel's denominator.
   //
   // `after()` gets both: explicitly scheduled per request, run once the

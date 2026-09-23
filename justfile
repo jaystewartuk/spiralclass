@@ -186,11 +186,6 @@ gate-status:
 
 # --- ship ---------------------------------------------------------------
 
-# Deploy preview when this commit changed it
-[group('ship')]
-ship-preview:
-    pnpm ship:preview
-
 # Read the runners' verdict, fast-forward production, deploy, then probe it
 [group('ship')]
 promote:
@@ -214,11 +209,6 @@ local-status:
     pnpm local:status
 
 # --- deploy / ops ---------------------------------------------------------
-
-# Hand-deploy web to env=preview|production (⚠ production skips the promote gate)
-[group('deploy')]
-fly-deploy env="preview":
-    bash scripts/fly-deploy.sh {{env}}
 
 # Sync Inngest function definitions against a deployed endpoint (⚠ touches the target env)
 [group('deploy')]

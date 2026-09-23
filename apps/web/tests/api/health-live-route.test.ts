@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
-// /api/health/live is what Fly's [[http_service.checks]] hits every 15s on
-// both prod and preview (fly.production.toml / fly.preview.toml). It must
+// /api/health/live is what the external uptime monitor hits about once a
+// minute (and what Fly's health checks hit every 15s until Fly was retired). It must
 // NOT touch Postgres — a DB query on a 15s cadence never lets Neon's ~5min
 // idle-suspend window elapse, which is what kept both projects' primary
 // branch active 100% of the time (diagnosed 2026-08-07). Real DB-readiness

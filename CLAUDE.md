@@ -118,7 +118,6 @@ pnpm --filter @spiralclass/shared test -- src/money.test.ts
 ```
 
 **Operator-only, never run from a session:** `pnpm promote`, `gh pr merge`,
-`pnpm ship:preview`, `pnpm deploy:preview`, `scripts/fly-deploy.sh`,
 `scripts/vercel-deploy.sh` and the bare `vercel` CLI, `scripts/cloudrun-deploy.sh`
 and the two operator scripts in `infra/gcp/`, `scripts/database-deploy.sh`,
 anything matching `migrate:prod`, and `infisical`. These are denied in `.claude/settings.json` and

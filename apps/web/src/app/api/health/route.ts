@@ -19,11 +19,11 @@ const DB_TIMEOUT_MS = 5_000;
 // How long after process start a failed DB check is treated as cold-start
 // warmup rather than an incident.
 //
-// `auto_stop_machines = 'stop'` means machines boot on demand, and the first
-// Neon connection after a boot can exceed this route's own 5s DB timeout.
-// fly.production.toml already tolerates that — `grace_period = '30s'` on the
-// health check exists for exactly this window — so the machine recovers on its
-// own with no operator action. The route nonetheless reported every one to
+// Cloud Run scales to zero, so instances boot on demand, and the first Neon
+// connection after a boot can exceed this route's own 5s DB timeout. Nothing
+// platform-side points at this route (Fly's health check did, with a 30s grace
+// period for exactly this window), so a slow first answer costs a monitor
+// retry, and the instance recovers on its own with no operator action. The route nonetheless reported every one to
 // Sentry via log.error, which is where SPIRALCLASS-21's 126 production events
 // came from: all within seconds of a boot, none of them an outage.
 //

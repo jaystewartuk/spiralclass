@@ -1,14 +1,15 @@
 # `config/env` — non-secret runtime & build config (single source of truth)
 
 These files hold every **non-secret** environment value for the web app,
-per environment. They replace what used to live in `fly.preview.toml` /
-`fly.production.toml`'s `[env]` and `[build.args]` tables (D-85). Genuine
-secrets still live in Infisical — see `infra/infisical/README.md` and D-66.
+per environment. They replace what used to live in the Fly configs' `[env]`
+and `[build.args]` tables (D-85). Genuine secrets still live in Infisical — see
+`infra/infisical/README.md` and D-66.
 
-Splitting the config out of Fly's own config format is what lets **any**
-environment consume it — Fly and a plain local checkout load the exact same
-file, instead of the values being reachable only by Fly. Any future host is a
-third reader of the same file rather than a third copy of the values.
+Splitting the config out of one host's own config format is what lets **any**
+environment consume it — Cloud Run, the Vercel failover and a plain local
+checkout load the exact same file. That is why moving production off Fly
+changed none of these values: a new host is another reader of the same file
+rather than another copy of the values.
 
 ## `__LOCAL__` — values that are deliberately not in git
 
@@ -34,9 +35,11 @@ so the overlay can never become a second, undocumented config.
   `resolveEnvFile` and **throws**, naming every unsatisfied key. Build args are
   baked irreversibly into the client bundle, so a placeholder reaching a build
   would ship a broken Sentry DSN to real browsers with nothing failing.
-- **Deploy time** — `scripts/fly-deploy.sh` refuses to deploy when a
-  `__LOCAL__` runtime key has no matching Fly secret on the target app, and
-  prints the `flyctl secrets set --stage` line to fix it.
+- **Deploy time** — `scripts/vercel-deploy.sh` refuses to deploy when a
+  `__LOCAL__` runtime key was never pushed to the Vercel project.
+  `scripts/cloudrun-deploy.sh` cannot make the same check — it holds no
+  credential that can read the runtime secret, by design — so on Cloud Run the
+  boot-time rule below is the one that binds.
 - **Boot time** — `scripts/docker-entrypoint.sh` refuses to _export_ a
   `__LOCAL__`, logging loudly instead. Leaving it unset lets `env.ts` apply the
   variable's own absent-value behaviour, which degrades the feature cleanly;
@@ -66,9 +69,7 @@ exists to prevent.
 ### Setting up a fresh clone
 
 Create the overlay files with one `KEY=value` line per `__LOCAL__` name. The
-values are in Fly secrets (`flyctl secrets list`) and in the vendor dashboards.
-⚠️ **`flyctl secrets set --stage` with several `KEY=value` arguments at once
-took only the first** when this was set up — set them one per invocation.
+values are in Infisical `production` and in the vendor dashboards.
 
 ## Layout
 
@@ -83,19 +84,22 @@ Two files per environment, split by **when the value is consumed**:
 
 ## Who loads each file
 
-- **Fly image build** — `scripts/env-build-args.mjs <env>` feeds
+- **Image build** — `scripts/env-build-args.mjs <env>` feeds
   `<env>.build.env` to `docker buildx --build-arg` (see
-  `.github/actions/fly-build-deploy` and `scripts/fly-deploy.sh`).
-- **Fly container boot** — `scripts/docker-entrypoint.sh` sources
-  `<env>.runtime.env` (selected by `APP_ENV`, set in the trimmed
-  `fly.<env>.toml [env]`) before starting the server. Already-set
-  container env (Infisical secrets, `fly secrets`) wins over the file.
+  `scripts/cloudrun-deploy.sh`).
+- **Container boot** — `scripts/docker-entrypoint.sh` sources
+  `<env>.runtime.env` (selected by `APP_ENV`, which `scripts/cloudrun-deploy.sh`
+  sets on the service) before starting the server. Already-set container env
+  (`gcloud run services update --update-env-vars`) wins over the file. The
+  mounted Secret Manager file of Infisical secrets is sourced **after** it, by
+  the same only-if-unset rule, so it fills what this file leaves unset —
+  every `__LOCAL__` included.
 - **Vercel failover** ([D-177](../../docs/decisions/D-177.md)) —
   `scripts/vercel-deploy.sh` replaces what `vercel pull` writes with
   `production.build.env`'s values, and syncs `production.runtime.env` onto the
   project from the commit (`scripts/vercel-env.mjs sync-committed`). A value
   pushed from Infisical by `infra/infisical/push-vercel-env.sh` wins over the
-  file, as on Fly.
+  file, as on Cloud Run.
 - **Local dev** — `apps/web`'s `dev` and `start` scripts load
   `local.runtime.env` through `dotenv` before `next` sees the process, which is
   why a fresh checkout boots with no per-developer file to fill in.
@@ -116,5 +120,4 @@ grammar is the strict intersection all three agree on:
   (the code-level default). Uncommenting one is a real behavior change on the
   next deploy — treat it like any other code change, not a secrets sync.
 
-`apps/web/tests/scripts/env-config.test.ts` enforces all of the above plus a
-drift guard that the moved keys never creep back into the Fly configs.
+`apps/web/tests/scripts/env-config.test.ts` enforces all of the above.

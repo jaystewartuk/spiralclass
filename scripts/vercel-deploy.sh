@@ -9,8 +9,8 @@
 # Everything Vercel-shaped about this deploy lives in this file and in
 # `config/vercel/<env>.json`, where a reader looking for the deploy will find it.
 #
-# ⚠️ WHAT THIS DELIBERATELY DOES NOT DO, which is most of what fly-deploy.sh
-# does. Read this before adding any of it back, because each omission is load
+# ⚠️ WHAT THIS DELIBERATELY DOES NOT DO, which is most of what the serving
+# target's deploy does. Read this before adding any of it back, because each omission is load
 # bearing and two of them are hazards rather than savings.
 #
 #   * NO Neon checkpoint (D-95) and NO migrations. scripts/database-deploy.sh
@@ -115,8 +115,8 @@
 # (isProductionDeployment(), sentryEnvironment(), the CSP), which is why this
 # target needed no application change at all.
 #
-# Requires: node, npx, git. No Docker, no flyctl — the build happens in Vercel's
-# builder, which is the one genuine simplification over the Fly path.
+# Requires: node, npx, git. No Docker, no gcloud — the build happens in Vercel's
+# builder, which is the one genuine simplification over the Cloud Run path.
 #
 # Usage:
 #   ./scripts/vercel-deploy.sh production --gate-already-passed                        # what deploy-production.yml calls
@@ -139,7 +139,7 @@ VERCEL=(npx --yes "vercel@${VERCEL_CLI_VERSION}")
 ENVIRONMENT="${1:-}"
 case "$ENVIRONMENT" in
 production)
-  # The same two doors fly-deploy.sh opens, and for the same reason. There is no
+  # The same two doors scripts/database-deploy.sh opens, and for the same reason. There is no
   # `preview` case yet on purpose: D-177 added ONE target, and preview's is
   # still the Oracle box D-150's addendum assigned it. Adding preview here means
   # adding config/vercel/preview.json and a decision about what serves
@@ -186,8 +186,8 @@ fi
 # Exported, never passed as `--token=…`. The CLI reads all three natively, and
 # a credential on the command line is readable by any process on the box through
 # `ps` — including, on a runner, whatever `pnpm install` just executed. Same
-# reasoning as `flyctl`'s FLY_API_TOKEN in scripts/fly-deploy.sh, which is also
-# never passed as a flag.
+# reasoning as GCP_DEPLOY_KEY in scripts/cloudrun-deploy.sh, which reaches gcloud
+# as a file and is never passed as a flag.
 export VERCEL_TOKEN VERCEL_ORG_ID VERCEL_PROJECT_ID
 
 SHA="$(git rev-parse HEAD)"
@@ -201,8 +201,8 @@ SHA="$(git rev-parse HEAD)"
 # It also REFUSES, before anything is built, when a __LOCAL__ runtime key was
 # never pushed from Infisical, or when a dashboard value nobody owns would shadow
 # a committed one. Either would deploy green and break sign-in or checkout on the
-# failover, which is the same reason scripts/fly-deploy.sh preflights Fly's
-# secrets. The secrets themselves are not this script's to write:
+# failover, which is the same reason the Fly deploy preflighted Fly's secrets
+# (and why scripts/docker-entrypoint.sh refuses at boot on Cloud Run). The secrets themselves are not this script's to write:
 # infra/infisical/push-vercel-env.sh pushes them, and scripts/vercel-env.mjs
 # explains how the two share the store.
 echo "› Syncing the committed runtime config onto the project…"
@@ -257,9 +257,9 @@ if [ "$ENV_COUNT" -ne 1 ]; then
 fi
 echo "› Replacing ${ENV_FILE} with the NEXT_PUBLIC_* values from config/env/${ENVIRONMENT}.build.env…"
 # Same invocation the Docker build uses, same throw on an unsatisfied __LOCAL__.
-# The sed strips env-build-args.mjs's GITHUB_OUTPUT heredoc wrapper, exactly as
-# scripts/fly-deploy.sh does — kept byte-identical so the two callers cannot
-# disagree about the format.
+# The sed strips env-build-args.mjs's GITHUB_OUTPUT heredoc wrapper, which
+# scripts/cloudrun-deploy.sh skips line by line — two readers of one format,
+# held together by image-build.test.ts and env-config.test.ts.
 BUILD_ARGS_OUT="$(node scripts/env-build-args.mjs "$ENVIRONMENT")"
 BUILD_ARGS_BLOCK="$(echo "$BUILD_ARGS_OUT" | sed -n '/^build_args<</,/^__FLY_BUILD_ARGS_EOF__$/p' | sed '1d;$d')"
 
@@ -267,9 +267,9 @@ BUILD_ARGS_BLOCK="$(echo "$BUILD_ARGS_OUT" | sed -n '/^build_args<</,/^__FLY_BUI
   echo ""
   echo "$BUILD_ARGS_BLOCK"
   # The per-deploy identifier for Next's `?dpl=` version-skew mitigation, set
-  # exactly as scripts/fly-deploy.sh sets it: the commit being deployed. Both
-  # targets stamping the SAME id for the same commit is the point — a client
-  # that was served by Fly and is then served by Vercel after a promote must
+  # exactly as scripts/cloudrun-deploy.sh sets it: the full commit being deployed.
+  # Both targets stamping the SAME id for the same commit is the point — a client
+  # that was served by Cloud Run and is then served by Vercel after a promote must
   # not see a skew it has to hard-navigate through.
   echo "NEXT_DEPLOYMENT_ID=${SHA}"
   # The Dockerfile's build-time placeholder SHAPES, and only those. Next's

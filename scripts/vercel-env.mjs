@@ -6,11 +6,11 @@
 // failover has to be handed the same three or it is not the same app:
 //
 //   1. Infisical `production` at `/`, NOT recursive — what
-//      infra/infisical/push-fly-secrets.sh imports into Fly. `/config` (build
+//      infra/gcp/push-cloudrun-env.sh puts in Cloud Run's secret. `/config` (build
 //      values) and `/deploy` (the deploy's own credentials) are excluded for the
 //      reasons D-163's addendum gives, and they are excluded here too.
 //   2. The production R2 buckets' credentials from infra/cloudflare-r2's Tofu
-//      state — what that module's push-fly-secrets.sh sets (D-65).
+//      state, through r2Entries() below (D-65).
 //   3. config/env/production.runtime.env — committed, non-secret, and sourced by
 //      scripts/docker-entrypoint.sh at boot, where a container value for the
 //      same key WINS over the file.
@@ -81,7 +81,9 @@ const productionOnly = (entry) => {
 
 /**
  * `tofu output -json buckets` → five names per PRODUCTION bucket, spelled the
- * way infra/cloudflare-r2/push-fly-secrets.sh spells them for Fly. A null field
+ * way the app reads them (`<env_prefix>_BUCKET`, `_ENDPOINT`, `_REGION`,
+ * `_ACCESS_KEY`, `_SECRET`). scripts/cloudrun-env.mjs reuses this for the
+ * Cloud Run secret, so both targets get the same names. A null field
  * is a bucket still mid-adoption (see that module's outputs.tf), and pushing it
  * would set a credential to the string "null".
  */
@@ -197,8 +199,8 @@ export function missingPushed(existing, desired) {
  *
  *   * A `__LOCAL__` key must already be there from the push. Its value is not in
  *     git, so the deploy has nothing to write — and booting without it breaks
- *     sign-in or checkout with nothing red, which is why scripts/fly-deploy.sh
- *     refuses in the same case.
+ *     sign-in or checkout with nothing red, which is why the Cloud Run
+ *     entrypoint refuses to boot in the same case.
  *   * A key the push also holds is left alone: Infisical wins, as a Fly secret
  *     wins over the file.
  *   * A production entry nobody owns is refused. It is a dashboard value that

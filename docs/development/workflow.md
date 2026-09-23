@@ -11,7 +11,7 @@ document disagree, the decision record wins and one of them is a bug.
 ```
 branch → implement + tests → push (the fast gate runs here)
   → PR into main → local-gate green → squash-merge
-  → verify on preview → pnpm promote → production
+  → verify → pnpm promote → production
 ```
 
 ## The branching model
@@ -146,8 +146,7 @@ flowchart TD
     HV --> SP["gh pr merge --squash --delete-branch"]
     SP --> SP2["gate.yml + heavy.yml re-run<br/>on the merged commit"]
     SP2 -->|red| M["fix forward on main"]
-    SP2 -->|green| J["pnpm ship:preview"]
-    J --> K["Verify on preview"]
+    SP2 -->|green| K["Verify<br/>(no preview host today)"]
     K --> L{"Good?"}
     L -->|no| M
     M --> SP
@@ -158,7 +157,7 @@ flowchart TD
     R --> S["the push triggers deploy-production.yml<br/>required reviewer · native amd64 build"]
     S --> T["production probes"]
     T --> U{"Healthy?"}
-    U -->|no| V["redeploy the previous Fly release<br/>+ git revert on main"]
+    U -->|no| V["send traffic back to the previous<br/>Cloud Run revision + git revert on main"]
     U -->|yes| W["Done"]
 ```
 
@@ -214,24 +213,16 @@ Running the heavy suites against `main` is also the only thing that catches a
 combination broken though each half was green alone.
 
 **What this accepts:** a production-risk commit can reach `main` having had only
-the fast tier. Preview is the rehearsal environment and finding out there is the
-point; nothing reaches production without the heavy tier green on that commit.
+the fast tier. Preview is the rehearsal environment when it has a host;
+nothing reaches production without the heavy tier green on that commit.
 
 ### 5. Preview
 
-⚠️ **Merging to `main` does not currently refresh preview.**
-[D-157](../decisions/D-157.md) gave `deploy-preview.yml` its push trigger back
-and its own addendum suspended it hours later, because preview and preview's
-database are moving to the Oracle box ([D-150](../decisions/D-150.md)) and
-shipping to the retired target is the thing not wanted. `workflow_dispatch` is
-all that remains until that box serves.
-
-So run **`pnpm ship:preview`** when you need preview fresh. A hand pass hits the
-_deployed_ preview, not your checkout, and a stale one reads as a product bug
-rather than a missing deploy.
-
-⚠️ `pnpm deploy:preview` also exists and is **not** what you run: it deploys to
-Fly by hand, cross-building the amd64 image under QEMU at 20–30 minutes.
+⚠️ **There is no preview host today, so merging to `main` deploys nothing.**
+Preview moved to the Oracle box ([D-150](../decisions/D-150.md)), that box was
+destroyed on 2026-09-19 ([D-182](../decisions/D-182.md)), and preview has no
+deploy target until it is rebuilt. `scripts/oracle-deploy.sh` is the way back.
+Until then the manual pass runs against your own checkout.
 
 Then verify: the relevant `/admin/uat` section, and your own eyes on the change.
 
@@ -251,12 +242,12 @@ re-running the suites. Then it confirms, fast-forwards `production`, and stamps 
 **That push is the trigger.** `deploy-production.yml` runs three jobs, each
 behind the `production` environment's required reviewer. First, `database`
 (`scripts/database-deploy.sh`: Neon checkpoint, then migrations). Then two jobs
-side by side that do not wait on each other: `fly` (`scripts/fly-deploy.sh`: a
-**native amd64** image, the Fly deploy, the Inngest sync, the production probes)
-and `vercel` (the failover, holding no domain). Each job holds only its own
-credentials. GitHub asks for approval per job, so a promote asks twice.
-`pnpm promote` watches the run and exits non-zero unless the database and Fly
-jobs are green, so a green promote means production is serving. A red failover
+side by side that do not wait on each other: `cloudrun`
+(`scripts/cloudrun-deploy.sh`: a **native amd64** image, the Cloud Run deploy,
+the Inngest sync; then the production probes) and `vercel` (the failover,
+holding no domain). Each job holds only its own credentials. GitHub asks for
+approval per job, so a promote asks twice. `pnpm promote` watches the run and
+exits non-zero unless the database and Cloud Run jobs are green, so a green promote means production is serving. A red failover
 is reported on its own line and does not change that.
 ([D-177](../decisions/D-177.md)'s addendum.)
 
@@ -265,23 +256,27 @@ is reported on its own line and does not change that.
 - **`gh` unavailable means the verdict cannot be read**, and that is a refusal
   rather than a pass.
 - If the deploy fails _after_ the fast-forward, the branch moved and the app did
-  not: re-run the workflow, dispatch it for one target (`target: fly` or
-  `target: vercel` — the database job runs first either way), or run
-  `./scripts/fly-deploy.sh production --gate-already-passed` from the laptop,
-  which checkpoints and migrates before it deploys. Same scripts every way.
+  not: re-run the workflow, dispatch it for one target (`target: cloudrun` or
+  `target: vercel` — the database job runs first either way), or have the
+  operator run `bash scripts/database-deploy.sh production --gate-already-passed`
+  then `bash scripts/cloudrun-deploy.sh production --gate-already-passed` from
+  the laptop — database first, because the Cloud Run script holds no database
+  credential. Same scripts every way.
 
 Then watch the probes, Sentry and PostHog for about fifteen minutes.
 
 ### If something is wrong in production
 
-**Rollback beats a rushed fix.** Deployments are immutable — redeploying the last
-good Fly release is faster and safer than a hot code change. Do that first, then
-fix forward without adrenaline.
+**Rollback beats a rushed fix.** Revisions are immutable — sending traffic back
+to the last good Cloud Run revision is faster and safer than a hot code change.
+Do that first, then fix forward without adrenaline.
 
 ```bash
-fly releases -a agendaprofe
-fly releases rollback          # or: fly deploy --image <previous>
+gcloud run revisions list --service web --region us-east4
+gcloud run services update-traffic web --region us-east4 --to-revisions <revision>=100
 ```
+
+Only the five newest images are kept, so that is the rollback depth.
 
 Then `git revert` the offending commit and take it through the normal path. **A
 hotfix still goes through the gate** — the gate is exactly what stops a panic fix

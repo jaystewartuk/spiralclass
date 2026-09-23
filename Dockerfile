@@ -90,7 +90,7 @@ ENV DATABASE_URL="postgresql://build:build@localhost:5432/build" \
 # numbers — see infra/cloudflare-r2/README.md's "public URL is manual" note,
 # D-66), so pass the real ones as build args. They are sourced from
 # config/env/<env>.build.env (D-85) by scripts/env-build-args.mjs, which the
-# build+deploy path (scripts/fly-deploy.sh, which the workflows call — D-157)
+# build+deploy path (scripts/cloudrun-deploy.sh, which the workflow calls — D-184)
 # turns into `--build-arg NAME=...` flags — see config/env/README.md:
 ARG NEXT_PUBLIC_DEPLOY_ENV
 ARG NEXT_PUBLIC_TEACHER_PHOTOS_R2_PUBLIC_URL
@@ -117,7 +117,7 @@ ENV NEXT_PUBLIC_DEPLOY_ENV=${NEXT_PUBLIC_DEPLOY_ENV} \
 # the commit SHA on the Fly build" — nothing ever did, in the Dockerfile, in
 # scripts/fly-deploy.sh or in config/env/<env>.build.env, so `deploymentId` was
 # `undefined` on every image ever shipped and the mitigation was inert. That is
-# half of why AGENDAPROFE-3B reached a real visitor. scripts/fly-deploy.sh
+# half of why AGENDAPROFE-3B reached a real visitor. scripts/cloudrun-deploy.sh
 # passes `--build-arg NEXT_DEPLOYMENT_ID=$SHA` (the commit being deployed) to
 # both of its buildx invocations; unset, Next falls back to its build-time
 # default exactly as before, so a local `docker build` still works.
@@ -134,13 +134,13 @@ ENV NEXT_DEPLOYMENT_ID=${NEXT_DEPLOYMENT_ID}
 # webpack path for the gate's local/CI build check.
 #
 # WHERE THIS BUILDS: on a GitHub-hosted `ubuntu-latest` runner (16GB, genuine
-# amd64), via scripts/fly-deploy.sh — D-157. It used to build on Fly's free
+# amd64), via scripts/cloudrun-deploy.sh — D-157, D-184. It used to build on Fly's free
 # bundled Depot builder, a fixed ~4GB container: peak ~3.45GB + ~0.3GB
 # parent/pnpm left ~230MB of slack, which is a coin flip rather than a tuned
 # build — measured on run 29432718708, two Depot attempts of one commit peaked
 # 2MB apart and one died, one lived. It went red on 2026-07-15. Read
-# scripts/fly-deploy.sh's header before moving the build anywhere: Fly needs
-# amd64, which is why this laptop's arm64 cross-build takes 20-30+ minutes.
+# scripts/cloudrun-deploy.sh's header before moving the build anywhere: Cloud
+# Run needs amd64, which is why this laptop's arm64 cross-build takes 20-30+ minutes.
 #
 # MEASURED (run 29432718708, sampler below), do not re-theorise without data:
 #   cap 3072 -> compile worker peaks ~3.5GB

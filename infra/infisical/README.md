@@ -1,12 +1,12 @@
-# Infisical — Fly.io deploy secrets
+# Infisical — deploy and runtime secrets
 
-Secrets manager for everything the Fly app (`agendaprofe`, currently serving
-**preview**) needs at runtime, **except** the R2
-credentials, which stay Tofu-owned (`infra/cloudflare-r2/`, D-65) — don't
-move those here.
+Secrets manager for everything the production app (Cloud Run `web`, and the
+Vercel failover) needs at runtime, **except** the R2 credentials, which stay
+Tofu-owned (`infra/cloudflare-r2/`, D-65) — don't move those here.
 
-Replaces a plaintext `.env.fly.local` that was being pasted into `fly
-secrets set` by hand. See `docs/decisions/D-66.md` for why.
+It replaced a plaintext `.env.fly.local` that was being pasted into `fly
+secrets set` by hand, back when production ran on Fly. See
+`docs/decisions/D-66.md` for why.
 
 ## Adding a new script that needs a secret
 
@@ -25,7 +25,7 @@ NOT need to live in this directory** to use it — put it wherever its actual
 task domain suggests (e.g. `docs/deployment/livekit-credentials.sh` sits with the
 rest of the LiveKit-box runbook, not here, even though it pulls production's
 `LIVEKIT_API_SECRET`). Reserve `infra/infisical/` itself for scripts that
-are genuinely _about_ Infisical/secrets management (`push-fly-secrets.sh`,
+are genuinely _about_ Infisical/secrets management (`push-vercel-env.sh`,
 this helper) rather than task scripts that merely consume one secret.
 
 Every script that pulls `DATABASE_URL`/etc. is on the helper now —
@@ -44,9 +44,10 @@ that needs `KEY=VALUE` shape has to rebuild it.
 Nothing left in `infra/infisical/` duplicates the old boilerplate. The scripts
 that remain here are genuinely about Infisical — each pushes a whole set of
 values into one consumer, rather than merely consuming one secret:
-`push-fly-secrets.sh` (Fly), `push-github-secrets.sh` (the deploy workflow's
-environment) and `push-vercel-env.sh` (the Vercel failover's runtime
-environment, with the R2 credentials Fly also gets).
+`push-github-secrets.sh` (the deploy workflow's environment) and
+`push-vercel-env.sh` (the Vercel failover's runtime environment, with the R2
+credentials Cloud Run also gets). Cloud Run's own push lives with the rest of
+its setup, as `infra/gcp/push-cloudrun-env.sh`.
 
 ## Account setup (cloud free tier)
 
@@ -57,18 +58,17 @@ environment, with the R2 credentials Fly also gets).
 3. Repurpose the default `dev`/`staging`/`prod` trio Infisical creates into
    three slugs: `preview`, `production`, and `infra` (Infisical lets you
    rename an environment's slug in Project Settings → Environments).
-   Production stays empty until the Fly promotion actually happens; **do
-   not** wire it into any script or CI until then. `infra` holds the Tofu
-   operator credentials — see "The `infra` environment" below.
+   `production` feeds the production deploy targets (see "Pushing to the
+   deploy targets" below). `infra` holds the Tofu operator credentials — see
+   "The `infra` environment" below.
 4. Install the CLI (`brew install infisical/get-cli/infisical` or see
    [docs](https://infisical.com/docs/cli/overview)), then `infisical login`.
 5. From this directory (`infra/infisical/`), run `infisical init` once and
    pick the project — or copy `.infisical.json.example` over
    `.infisical.json` and fill in the id. It is kept here on purpose (not
    relocated to a shared top-level spot like `infra/backend.hcl`)
-   because `push-fly-secrets.sh`/`seed-preview.sh` in this directory already
-   assume it lives right here (`seed-preview.sh` even reads it directly via
-   Node), and every other module reaches it through `run.sh infra …`
+   because `project-id.sh`/`seed-preview.sh` in this directory look for it
+   right here (`seed-preview.sh` even reads it directly via Node), and every other module reaches it through `run.sh infra …`
    instead of needing its own copy; see `infra/README.md`. `~/.infisical.json`
    works too — `project-id.sh` resolves either and verifies the project.
 
@@ -86,7 +86,7 @@ Separate from the app-runtime `preview`/`production` environments above: the
 `infra` environment holds the secrets needed to **run the OpenTofu
 modules** under `infra/` (create buckets, read/write the R2 state bucket,
 provision the Oracle box) — credentials you'd otherwise `export`
-by hand every session. They are **not** app secrets; the Fly app never
+by hand every session. They are **not** app secrets; the running app never
 reads them.
 
 | Key                                   | Read by                                                                                                                                                                | What it is                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
@@ -122,9 +122,10 @@ D-89/Neon migration completed; the module was removed from the repo.)
   name is the S3 protocol, not the vendor. (This is also why `infra/aws-ses`
   uses a named AWS profile instead of the bare env vars — to avoid colliding
   with these.)
-- **⚠️ Never sync this environment to Fly.** `push-fly-secrets.sh` imports a
-  whole environment into `fly secrets` — it must only ever run with
-  `INFISICAL_ENV=preview`/`production`. Keeping the operator creds in their
+- **⚠️ Never sync this environment to a deploy target.**
+  `infra/gcp/push-cloudrun-env.sh` and `push-vercel-env.sh` import
+  `production`'s `/` wholesale into the running app — they must never be
+  pointed at `infra`. Keeping the operator creds in their
   own environment (not a folder under `preview`) is the hard guarantee they
   can't leak into the app's runtime, regardless of export/path semantics.
 
@@ -184,17 +185,11 @@ functionally fine, just loses the "rotate once" property.
 
 **Before entering anything, reconcile against what's actually live — the
 list below is derived from reading `env.ts`'s schema, not from the running
-Fly app, and you've already added secrets by hand via `fly secrets set`
-beyond what a spike-era doc anticipated.** Run:
-
-```
-fly secrets list --app agendaprofe
-```
-
-That's names only (Fly never shows values back, so it's safe to run/paste
-anywhere). Treat its output as the authoritative current list — add any
-name it shows that isn't below into Infisical too, and add it to this list
-so the doc stops drifting from reality. If a name on Fly doesn't map to
+app.** Production's runtime secret is written wholesale from Infisical
+`production` at `/` by `infra/gcp/push-cloudrun-env.sh`, so that folder's
+names are the authoritative current list (the running service holds a copy
+as of the last push). Add any name there that isn't below to this list, so
+the doc stops drifting from reality. If a name there doesn't map to
 anything in `env.ts`, it's either dead (safe to eventually retire) or read
 somewhere `env.ts`'s `serverSchema` doesn't cover (e.g. read directly off
 `process.env` elsewhere) — worth a quick `grep` before assuming either way.
@@ -256,7 +251,7 @@ VAPID_SUBJECT
   keypair per environment** — preview must not share production's — and
   **pick each one once**: the public key is baked into every subscription a
   browser mints, so rotating it silently invalidates all of them. Entered on
-  Fly `production` 2026-09-05, ending the stretch since #833 when Web Push was
+  `production` 2026-09-05 (then on Fly), ending the stretch since #833 when Web Push was
   shipped and inert; `preview` still has none, and with no key the toggle
   renders nothing and the dispatcher skips the transport. ⚠️ The private one
   is `VAPID_PRIVATE_KEY` — `web-push.ts` reads that exact name, and a
@@ -307,7 +302,7 @@ vendor's dashboard):
   only) → Security credentials → Create access key. See
   `infra/aws-ses/README.md` for the full setup (domain verification,
   sandbox exit, IAM policy). `SES_REGION`/`SES_FROM` are non-secret — they
-  live in `fly.toml`, not here.
+  live in `config/env/*.runtime.env`, not here.
 - `DEEPGRAM_API_KEY` — [console.deepgram.com](https://console.deepgram.com)
   → API Keys.
 - `ASSEMBLYAI_API_KEY` — [assemblyai.com](https://www.assemblyai.com)
@@ -341,7 +336,7 @@ service-accounts keys create key.json --iam-account=<email>`), then
 
 - `POSTHOG_PERSONAL_API_KEY` — click your account avatar (top right) →
   Personal API Keys → Create new (`phx_...`). Different from the project's
-  public `POSTHOG_KEY`, which is git-committed in `fly.toml` now.
+  public `POSTHOG_KEY`, which is declared in `config/env/` now.
 
 **Google Cloud Console** (APIs & Services → Credentials — **two separate
 OAuth clients**, don't mix them up):
@@ -349,7 +344,7 @@ OAuth clients**, don't mix them up):
 - `GOOGLE_OAUTH_CLIENT_SECRET` — the Calendar busy-import client. Redirect
   URI must be `${APP_URL}/api/calendar/google/callback`.
 - `GOOGLE_CLIENT_SECRET` — the Sign-In client (paired with `GOOGLE_CLIENT_ID`,
-  already in `fly.toml`). Redirect URI must be
+  declared in `config/env/`). Redirect URI must be
   `${APP_URL}/api/auth/callback/google`.
 
 **Azure Portal** → your Speech resource → Keys and Endpoint:
@@ -359,11 +354,12 @@ OAuth clients**, don't mix them up):
 **LiveKit** (Cloud dashboard project → Settings → Keys, or your self-hosted
 server's configured key pair):
 
-- `LIVEKIT_API_SECRET` — paired with `LIVEKIT_API_KEY` (already in
-  `fly.toml`'s commented block).
+- `LIVEKIT_API_SECRET` — paired with `LIVEKIT_API_KEY` (declared in
+  `config/env/*.runtime.env`).
 
 **Reclassified out of this list (2026-07-12), same secret-vs-not test as the
-Supabase/Sentry/PostHog move above** — moved to `fly.toml`: `BETTER_AUTH_URL`,
+Supabase/Sentry/PostHog move above** — moved to committed config (now
+`config/env/`, D-85): `BETTER_AUTH_URL`,
 `APP_URL`, `RESEND_FROM` (all just URLs/an email address, no credential
 value), `STRIPE_PRICE_MONTHLY`/`ANNUAL`/`FOUNDING` (Stripe Price IDs — public
 identifiers, not secrets), `WISE_API_BASE` (an API base URL),
@@ -372,40 +368,34 @@ design — only the paired `_SECRET` is sensitive), `LIVEKIT_URL` (already sent
 to the client in the join grant, so it was never secret), `LIVEKIT_API_KEY`
 (the identifier half of LiveKit's key/secret pair — `LIVEKIT_API_SECRET`,
 which actually signs tokens, stays here), `AZURE_SPEECH_REGION` (a region
-string). See `fly.toml`'s comments for each — some have real values already
+string). See `config/env/*.runtime.env`'s comments for each — some have real values already
 transcribed, some are commented placeholders for not-yet-enabled features.
 
 **`SUPERUSER_EMAILS` dropped entirely** — admin access is resolved via a DB
 table instead, so this env var isn't needed at all.
 
-`FIELD_ENCRYPTION_REQUIRED` also moved to `fly.toml` (it's a boolean flag,
+`FIELD_ENCRYPTION_REQUIRED` also moved to committed config (it's a boolean flag,
 not a credential) — but it's flagged there as a **DANGER** comment: it's a
 hard cutover switch paired 1:1 with `FIELD_ENCRYPTION_KEY`
 (`assertProductionCredentials()` hard-requires a valid key once this is set —
 see `docs/security.md` §11.3), so setting it without the matching
 key already live in Infisical hard-fails boot.
 
-> **D-85 update — where the non-secret values live now.** Everything in the
-> rest of this section that says a non-secret value "moved to `fly.toml`'s
-> `[env]`" (or `[build.args]`) is still accurate about _what_ is non-secret and
-> _why_ — but the **file** those values live in changed. They no longer sit in
-> `fly.preview.toml` / `fly.production.toml` directly; they live in
+> **Where the non-secret values live (D-85).** They sit in
 > `config/env/<env>.runtime.env` (runtime) and `config/env/<env>.build.env`
-> (`NEXT_PUBLIC_*` build-args). The Fly configs now carry only
-> `NODE_ENV`/`PORT`/`APP_ENV`. This is what lets non-Fly environments (GitHub
-> local dev) load the exact same config. The secret-vs-non-secret
-> split this section documents is unchanged — read on for it — just mentally
-> substitute `config/env/` for `fly.toml [env]/[build.args]`. See
-> `config/env/README.md` and `docs/decisions/D-85.md`.
+> (`NEXT_PUBLIC_*` build-args), which every host and local dev load alike. They
+> started out in the Fly configs' `[env]`/`[build.args]` tables, which are
+> gone; the secret-vs-non-secret split this section documents is unchanged.
+> See `config/env/README.md` and `docs/decisions/D-85.md`.
 
 **`SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SENTRY_DSN`, `POSTHOG_KEY`,
-`POSTHOG_HOST` deliberately removed from this list — moved to `fly.toml`'s
-`[env]` instead.** All five are non-secret by the underlying vendor's own
+`POSTHOG_HOST` deliberately removed from this list — moved to committed
+config instead.** All five are non-secret by the underlying vendor's own
 design (Supabase's anon key is RLS-protected and safe to expose; Sentry
 DSNs and PostHog client keys are meant to ship in every site's client JS —
 this is exactly why their `NEXT_PUBLIC_` twins already live in
-`[build.args]`), and since this `fly.toml` is already scoped to one
-environment (preview), committing them here carries none of the
+`[build.args]`), and since each committed config file is scoped to one
+environment, committing them there carries none of the
 cross-environment-drift risk that ruled out doing the same for the
 `NEXT_PUBLIC_*` build-args. `SUPABASE_SERVICE_ROLE_KEY` and
 `POSTHOG_PERSONAL_API_KEY` stay here — those are genuinely privileged (bypass
@@ -441,17 +431,14 @@ are real `env.ts` secrets read by `apps/web`.
 > any `process.env.SUPABASE_*` reference. It is not a live exposure so much as
 > a credential nobody is tracking, which is the shape that survives rotations.
 >
-> Remove it with `--stage`, so it applies on the next deploy rather than
-> restarting the single production machine now:
->
-> ```sh
-> flyctl secrets unset SUPABASE_PROD_DIRECT_URL --app agendaprofe --stage
-> ```
+> The Fly app and its secrets were destroyed on 2026-09-23. If
+> `SUPABASE_PROD_DIRECT_URL` is still in Infisical `production` at `/`, delete
+> it there and re-run `infra/gcp/push-cloudrun-env.sh`, or it rides into Cloud
+> Run's runtime secret on every push.
 >
 > **The generalisable lesson is the one worth keeping**: preview and
-> production are different apps and a `fly secrets list` against one says
-> nothing about the other. Both correction notes above were written from a
-> single-app read.
+> production are different environments and a read of one says nothing about
+> the other. Both correction notes above were written from a single-app read.
 
 **Second pass, cross-checked against `grep -rhoE "process\.env\.[A-Z_]+"` over
 `apps/web/src`, not just `env.ts`'s declared schema** (this catches anything
@@ -470,72 +457,66 @@ board** — a template that no longer names a secret does not remove it from an
 environment that already has it, and until then it is a live credential nothing
 uses, which is the worst state for one to be in.
 
-- **`DEEPGRAM_API_KEY` IS live on Fly** (confirmed 2026-07-17), so with
-  `LIVE_CAPTIONS_ENABLED=1` (fly.toml `[env]`) and `ANTHROPIC_API_KEY`
-  (already live), live captions are fully configured on preview. An earlier
-  revision of this note said Deepgram was "in the code, not currently live on
-  Fly" — that was stale; do not use it to conclude captions are dark for want
-  of the key.
+- **`DEEPGRAM_API_KEY` was live on Fly preview** (confirmed 2026-07-17), with
+  `LIVE_CAPTIONS_ENABLED=1` and `ANTHROPIC_API_KEY` beside it. An earlier
+  revision of this note said Deepgram was "in the code, not currently live" —
+  that was stale; do not use it to conclude captions are dark for want of the
+  key.
 - `ASSEMBLYAI_API_KEY` and `AZURE_SPEECH_KEY`/`AZURE_SPEECH_REGION` back the
-  separate transcription/pronunciation-insights features and their Fly status
-  is not vouched for here — check `fly secrets list` before assuming either
-  way.
+  separate transcription/pronunciation-insights features and their production
+  status is not vouched for here — check Infisical `production` before
+  assuming either way.
 
 **`UPSTASH_REDIS_REST_URL`/`UPSTASH_REDIS_REST_TOKEN` deliberately dropped
 from this list.** `lib/rate-limit.ts` uses them only as an optional
 distributed-rate-limit backend — when unset it falls back to an in-memory
-limiter (fine for single-region, alpha-volume traffic, which is what Fly
-preview is). Not currently in the live `fly secrets list` output either.
-Add it back if/when Fly preview actually needs cross-instance rate-limit
-state; not needed today.
+limiter, which is per instance — fine at alpha-volume traffic, but Cloud Run
+can run more than one instance (`MAX_INSTANCES` in
+`config/cloudrun/production.env`), and each keeps its own count. Add it back
+if/when production actually needs cross-instance rate-limit state.
 
 **Non-secret config/feature flags found in the same grep — deliberately
 NOT routed through Infisical.** These aren't credentials, so hiding them in
 a secrets manager is the wrong call; they're wired (commented out, since
-their unset state is today's live behavior) into root `fly.toml`'s `[env]`
-block instead — already used for `NODE_ENV`/`PORT` — which is plain,
-version-controlled, and diff-reviewable: `CSP_ENFORCE`,
+their unset state is today's live behavior) into `config/env/*.runtime.env`
+instead, which is plain, version-controlled, and diff-reviewable: `CSP_ENFORCE`,
 `LESSON_INSIGHTS_TRANSCRIPTION_ENABLED`,
 `LESSON_INSIGHTS_PRONUNCIATION_ENABLED`, `LIVE_CAPTIONS_ENABLED`,
 `STRIPE_TAX_ENABLED`, `ANTHROPIC_MODEL` and
-`CAPTION_TRANSLATION_MODEL`. See `fly.toml`'s comments for each
+`CAPTION_TRANSLATION_MODEL`. See those files' comments for each
 var's current default and what enabling it actually does — uncommenting one
 is a real behavior change on next deploy, review it like any other code
 change. `NEXT_PUBLIC_SUPPORT_WHATSAPP` is not in Infisical at all: it is
 committed empty in `config/env/*.build.env`, because the only value it ever held
 was a person's own number (#105).
 
-This list should equal exactly what `fly secrets list --app agendaprofe`
-shows (minus the R2 ones and the four inert `NEXT_PUBLIC_*` runtime copies
-noted above), plus the credential-shaped vars above that are in the code
-but not yet live on Fly. Don't pre-populate speculative future config that's
-neither read by the code nor plausibly needed soon — but do add anything
-`fly secrets list` shows that this list is missing.
+This list should equal exactly what Infisical `production` holds at `/`,
+plus the credential-shaped vars above that are in the code but not yet set.
+Don't pre-populate speculative future config that's neither read by the code
+nor plausibly needed soon — but do add anything `production` holds that this
+list is missing.
 
 **`NEXT_PUBLIC_*` build-time vars — now handled (D-85, was a gap).**
 `NEXT_PUBLIC_*` vars are inlined into the client bundle at **Docker build
-time**, not read from `fly secrets`/Infisical at runtime — see the comment
-block in the root `Dockerfile`. They all live in `config/env/<env>.build.env`
-now, and `scripts/env-build-args.mjs` feeds every one of them to the build as
-`--build-arg` (via `.github/actions/fly-build-deploy` and
-`scripts/fly-deploy.sh`) — so the earlier state where only three were wired,
+time**, not read from the runtime secret — see the comment block in the root
+`Dockerfile`. They all live in `config/env/<env>.build.env` now, and
+`scripts/env-build-args.mjs` feeds every one of them to the build (via
+`scripts/cloudrun-deploy.sh` and `scripts/vercel-deploy.sh`) — so the earlier state where only three were wired,
 and Sentry/PostHog weren't wired at all, is closed. The R2 public-bucket URLs
 are still non-secret values manually sourced from the Cloudflare dashboard
 (`infra/cloudflare-r2/README.md`'s "public URL is manual" note); they just live
 in the build.env file like the rest now. None of this touches Infisical.
 
-## Pushing to Fly
+## Pushing to the deploy targets
 
-```
-FLY_APP=agendaprofe INFISICAL_ENV=preview ./push-fly-secrets.sh
-```
+Every consumer holds a derived copy, and a rotation is not done until each copy
+is re-pushed. All operator-only:
 
-See `push-fly-secrets.sh`'s header comment for the caveats (unverified
-`infisical export` format, restart-on-push behavior).
+| Script                                   | Writes                                               |
+| ---------------------------------------- | ---------------------------------------------------- |
+| `infra/gcp/push-cloudrun-env.sh`         | Cloud Run's one runtime secret (production)          |
+| `infra/infisical/push-vercel-env.sh`     | the Vercel failover's runtime environment            |
+| `infra/infisical/push-github-secrets.sh` | the `production` GitHub Environment the deploy reads |
 
-## Retiring `.env.fly.local`
-
-Once `fly secrets list --app agendaprofe` shows everything above set (names
-only — Fly never shows values back) and the app boots clean, delete
-`.env.fly.local` from wherever it's been living locally. It was never
-committed to git, so there's no history to scrub.
+Cloud Run picks a new secret version up only when a deploy rolls a new
+revision. `docs/deployment/INCIDENT_RESPONSE.md` §4 is the rotation order.

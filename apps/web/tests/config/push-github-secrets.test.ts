@@ -34,12 +34,12 @@ const SCRIPT = join("infra", "infisical", "push-github-secrets.sh");
 const REPO = "owner/name";
 
 /** What the fixture workflow reads. GITHUB_TOKEN is minted per run, never pushed. */
-const READ = ["FLY_API_TOKEN", "NEON_API_KEY", "NEXT_PUBLIC_APP_URL"];
+const READ = ["GCP_DEPLOY_KEY", "NEON_API_KEY", "NEXT_PUBLIC_APP_URL"];
 /** The #105 incident's name: on the environment, no longer read by the workflow. */
 const STALE = "NEXT_PUBLIC_SUPPORT_WHATSAPP";
 
 const VALUES: Record<string, string> = {
-  FLY_API_TOKEN: "stub-fly-value",
+  GCP_DEPLOY_KEY: "stub-gcp-value",
   NEON_API_KEY: "stub-neon-value",
   NEXT_PUBLIC_APP_URL: "https://stub.example",
 };
@@ -153,7 +153,7 @@ const deleteCall = (name: string) => `gh secret delete ${name} --repo ${REPO} --
 describe("push-github-secrets.sh reports the names the workflow no longer reads (#106)", () => {
   beforeEach(() => {
     // One name the workflow reads is already there; the stale one is too.
-    writeFileSync(held, `FLY_API_TOKEN\n${STALE}\n`);
+    writeFileSync(held, `GCP_DEPLOY_KEY\n${STALE}\n`);
   });
 
   it("parses", () => {
@@ -167,7 +167,7 @@ describe("push-github-secrets.sh reports the names the workflow no longer reads 
     expect(result.stderr).toContain("unknown argument: --delete-stail");
     expect(result.stderr).toContain("usage:");
     expect(result.calls).toBe("");
-    expect(heldNames()).toEqual(["FLY_API_TOKEN", STALE].sort());
+    expect(heldNames()).toEqual(["GCP_DEPLOY_KEY", STALE].sort());
   });
 
   it("without --delete-stale, reports a stale name, deletes nothing and exits 0", () => {
@@ -220,7 +220,7 @@ describe("push-github-secrets.sh reports the names the workflow no longer reads 
   it("keeps values off argv while doing it", () => {
     const result = push(["--delete-stale"]);
     expect(result.status, result.stderr).toBe(0);
-    expect(result.calls).toContain(`gh secret set FLY_API_TOKEN --repo ${REPO} --env production`);
+    expect(result.calls).toContain(`gh secret set GCP_DEPLOY_KEY --repo ${REPO} --env production`);
     for (const value of Object.values(VALUES)) {
       expect(result.calls).not.toContain(value);
     }
