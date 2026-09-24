@@ -7,6 +7,8 @@
 #     Fly's secrets import once took. Never `/config` and never `/deploy`,
 #     for D-163's reason: `/` is the path that becomes an environment variable
 #     inside the running app, and a deploy credential has no business there.
+#     A name there that no app source reads is LEFT OUT and reported, not
+#     written (scripts/cloudrun-env.mjs, partitionByUse).
 #   * The production R2 buckets' credentials, from infra/cloudflare-r2's Tofu
 #     state — exactly what that module's push does on Fly (D-65).
 #

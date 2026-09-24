@@ -31,3 +31,18 @@ export function pushedEntries(sources: {
   infisical: { key: string; value: string }[];
   r2: unknown;
 }): Map<string, SecretEntry>;
+
+/** Where the running app's code lives; scanned for the names it reads. */
+export const APP_SOURCE_DIRS: readonly string[];
+
+/** Families of names the app builds at run time, so no source file spells one out. */
+export const RUNTIME_BUILT_PREFIXES: readonly string[];
+
+/** Every upper-snake token in the app's source and apps/web's top-level config. */
+export function appSourceNames(repoRoot: string): Promise<Set<string>>;
+
+/** Splits entries into those the app reads and the names of those it never does. */
+export function partitionByUse(
+  entries: { key: string; value: string }[] | undefined,
+  readable: ReadonlySet<string>,
+): { kept: { key: string; value: string }[]; omitted: string[] };

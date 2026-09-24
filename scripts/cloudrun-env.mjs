@@ -61,6 +61,72 @@ export function r2Entries(buckets) {
   return entries;
 }
 
+// ── Only names the app reads ─────────────────────────────────────────────
+// Infisical `production` at `/` is a folder people put things in, and this
+// writes whatever it holds into every running instance's environment. A name
+// the app never reads buys nothing there and costs its value's exposure to
+// anything that can read that environment. So an Infisical name reaches the
+// secret only if the app's source names it, or it belongs to a family the app
+// builds at run time (below). Everything else is LEFT OUT AND REPORTED, never
+// refused: this runs during a credential rotation, and a check that blocked
+// one mid-incident would be worse than the name it caught.
+
+/** Where the running app's code lives. Scripts (seeding, deploys) are not it. */
+export const APP_SOURCE_DIRS = ["apps/web/src", "packages/shared/src"];
+
+/**
+ * Families of names the app reads by building the name at run time, so no
+ * source file spells one out. Each is documented where it is read.
+ * tests/scripts/cloudrun-env.test.ts fails on a template-built
+ * `process.env[…]` read that no entry here (or the R2 source) accounts for.
+ */
+export const RUNTIME_BUILT_PREFIXES = [
+  "RATE_LIMIT_", // lib/rate-limit.ts: RATE_LIMIT_<SCOPE>[_WINDOW_MS]
+];
+
+const TOKEN = /\b[A-Z][A-Z0-9_]{2,}\b/g;
+
+/**
+ * Every upper-snake token in the app's source, plus apps/web's top-level
+ * config (next.config.ts, instrumentation, sentry.*.config.ts). Deliberately
+ * broad — a name in a comment counts — because a false "reads it" only keeps a
+ * name that was already there, while a false "never reads it" would drop one
+ * the app needs.
+ */
+export async function appSourceNames(repoRoot) {
+  const { readdirSync, readFileSync, statSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const names = new Set();
+  const scan = (file) => {
+    for (const m of readFileSync(file, "utf8").matchAll(TOKEN)) names.add(m[0]);
+  };
+  const walk = (dir) => {
+    for (const entry of readdirSync(dir)) {
+      if (entry === "node_modules") continue;
+      const full = join(dir, entry);
+      if (statSync(full).isDirectory()) walk(full);
+      else if (/\.(ts|tsx|js|mjs|cjs)$/.test(entry)) scan(full);
+    }
+  };
+  for (const dir of APP_SOURCE_DIRS) walk(join(repoRoot, dir));
+  for (const entry of readdirSync(join(repoRoot, "apps/web"))) {
+    if (/\.(ts|mjs|js)$/.test(entry)) scan(join(repoRoot, "apps/web", entry));
+  }
+  return names;
+}
+
+/** Splits the Infisical entries into what the app reads and what it never does. */
+export function partitionByUse(entries, readable) {
+  const kept = [];
+  const omitted = [];
+  for (const entry of entries ?? []) {
+    const used =
+      readable.has(entry.key) || RUNTIME_BUILT_PREFIXES.some((p) => entry.key.startsWith(p));
+    (used ? kept : omitted).push(entry);
+  }
+  return { kept, omitted: omitted.map((e) => e.key).sort() };
+}
+
 /**
  * The whole runtime secret set, keyed by name. An empty Infisical read is
  * refused — it would replace every secret with nothing — and so is one name
@@ -129,10 +195,24 @@ async function main(argv) {
     process.exit(1);
   }
 
-  const desired = pushedEntries(sources);
+  const { fileURLToPath } = await import("node:url");
+  const repoRoot = fileURLToPath(new URL("..", import.meta.url));
+  // The R2 names count as read — the app builds them from a prefix — so one
+  // arriving from both sources still reaches pushedEntries' clash refusal.
+  const readable = await appSourceNames(repoRoot);
+  for (const { key } of r2Entries(sources.r2)) readable.add(key);
+  const { kept, omitted } = partitionByUse(sources.infisical, readable);
+  const desired = pushedEntries({ ...sources, infisical: kept });
   process.stdout.write(composeEnvFile(desired));
   // stderr, so it cannot contaminate the secret on stdout.
   console.error(`  ${desired.size} names: ${namesOf(desired).join(", ")}`);
+  if (omitted.length > 0) {
+    console.error(
+      `  ⚠️  LEFT OUT ${omitted.length}, which no app source reads: ${omitted.join(", ")}\n` +
+        "     They stay where they are. `/` is the running app's environment (D-163):\n" +
+        "     move a deploy or seed value to /deploy, and delete a dead one.",
+    );
+  }
 }
 
 // Only when run, so the tests can import the pure halves.
