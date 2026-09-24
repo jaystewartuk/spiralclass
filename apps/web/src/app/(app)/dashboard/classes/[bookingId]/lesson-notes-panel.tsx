@@ -203,7 +203,17 @@ function NoteRow({
 
 // "Copy from last class" — appends this student's previous class notes so prep
 // isn't from scratch. Surfaces a one-line error (e.g. no earlier class) inline.
-function CopyFromLastClass({ bookingId, t }: { bookingId: string; t: TFunction }) {
+// Also rendered by the day plan, which passes `from="plan"` so the action
+// refreshes that page instead of this one (actions/lesson-notes.ts).
+export function CopyFromLastClass({
+  bookingId,
+  from,
+  t,
+}: {
+  bookingId: string;
+  from?: "plan";
+  t: TFunction;
+}) {
   const [state, formAction, pending] = useActionState<LessonNoteState, FormData>(
     copyNotesFromLastClass,
     undefined,
@@ -211,6 +221,7 @@ function CopyFromLastClass({ bookingId, t }: { bookingId: string; t: TFunction }
   return (
     <form action={formAction} className="inline">
       <input type="hidden" name="bookingId" value={bookingId} />
+      {from && <input type="hidden" name="from" value={from} />}
       <Button type="submit" size="sm" variant="outline" disabled={pending}>
         {pending
           ? t("web.dashboard.classes.lessonNotes.copying")

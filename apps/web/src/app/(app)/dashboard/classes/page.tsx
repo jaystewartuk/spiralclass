@@ -22,6 +22,7 @@ import {
 } from "@/lib/classes-list";
 import { ClassList, FlatClassList, RecentRow, type ClassListItem } from "./class-list";
 import { ClassesToolbar } from "./classes-toolbar";
+import { DAY_PLAN_PATH } from "@/lib/lesson-notes/day-plan";
 
 /**
  * The teacher's class roster.
@@ -208,6 +209,9 @@ export default async function TeacherClassesPage({
           <>
             <Button asChild>
               <Link href="/dashboard/classes/book">{t("teacherBook.cta")}</Link>
+            </Button>
+            <Button asChild variant="outline">
+              <Link href={DAY_PLAN_PATH}>{t("web.dashboard.classes.plan.cta")}</Link>
             </Button>
             <Button asChild variant="outline">
               <Link href="/dashboard/calendar">{t("web.dashboard.classes.calendarView")}</Link>

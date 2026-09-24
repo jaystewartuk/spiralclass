@@ -2688,6 +2688,23 @@ export const esMX = {
     "{name} recibe un correo de confirmación de inmediato y la clase sale del paquete de arriba.",
   "web.dashboard.classes.upcomingAndRecentInZone": "Próximas y recientes en tu zona ({tz}).",
   "web.dashboard.classes.calendarView": "Ver calendario",
+  "web.dashboard.classes.plan.cta": "Planificar el día",
+  "web.dashboard.classes.plan.title": "Planificación del día",
+  "web.dashboard.classes.plan.help":
+    "Lo que quieres ver con cada alumno. Solo tú ves estas notas, y puedes marcarlas durante la clase.",
+  "web.dashboard.classes.plan.placeholder": "Añadir un punto…",
+  "web.dashboard.classes.plan.addLabel": "Nuevo punto para {name}",
+  "web.dashboard.classes.plan.markDone": "Hecho: {cue}",
+  "web.dashboard.classes.plan.editHint": "editar",
+  "web.dashboard.classes.plan.editLabel": "Editar punto",
+  "web.dashboard.classes.plan.dayNav": "Elegir día",
+  "web.dashboard.classes.plan.previousDay": "Día anterior",
+  "web.dashboard.classes.plan.nextDay": "Día siguiente",
+  "web.dashboard.classes.plan.today": "Hoy",
+  "web.dashboard.classes.plan.lastOfPackage": "Última clase del paquete",
+  "web.dashboard.classes.plan.lastOfPackageHelp": "Buen momento para hablar del siguiente paquete.",
+  "web.dashboard.classes.plan.emptyTitle": "No hay clases este día",
+  "web.dashboard.classes.plan.emptyBody": "Elige otro día para planificar sus clases.",
   "web.dashboard.classes.tapToMarkCancelAdjust":
     "Toca una clase para marcarla, cancelarla o ajustar.",
   "web.dashboard.classes.noneScheduled":

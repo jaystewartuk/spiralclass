@@ -274,6 +274,10 @@ export default [
       "src/app/(app)/dashboard/discounts/discount-list.tsx",
       "src/app/(app)/dashboard/discounts/discount-forms.tsx",
       "src/app/(app)/dashboard/discounts/loading.tsx",
+      // Day plan — new, built against the shared catalog from the start.
+      "src/app/(app)/dashboard/classes/plan/page.tsx",
+      "src/app/(app)/dashboard/classes/plan/plan-class-card.tsx",
+      "src/app/(app)/dashboard/classes/plan/plan-cue-list.tsx",
       "src/components/theme-toggle.tsx",
       "src/components/video/class-call-client.tsx",
       "src/components/video/class-call.tsx",

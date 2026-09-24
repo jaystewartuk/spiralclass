@@ -195,6 +195,7 @@ export const TEACHER_ROUTES: Route[] = [
   { path: "/dashboard/calendar", name: "calendar", tier: "teacher", portfolio: true },
   { path: "/dashboard/classes", name: "classes", tier: "teacher", portfolio: true },
   { path: "/dashboard/classes/book", name: "classes-book", tier: "teacher" },
+  { path: "/dashboard/classes/plan", name: "classes-plan", tier: "teacher" },
   {
     path: "/dashboard/classes/:bookingId",
     name: "class-detail",
