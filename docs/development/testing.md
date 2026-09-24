@@ -41,7 +41,7 @@ There are more than 800 test files. They are not all the same kind of thing.
 **Unit** is Vitest, colocated with the module it covers. This is where most of
 the suite lives and it is the only layer fast enough to run while writing code.
 
-**Integration** is 24 suites against a real Postgres — `postgres:16` in
+**Integration** is 25 suites against a real Postgres — `postgres:16` in
 Docker — plus a production `next build` that validates the route manifest and a migration-drift
 check. It exists for the things an in-memory fake cannot assert: `EXCLUDE`
 constraints, partial unique indexes, transaction poisoning, Prisma error codes.
