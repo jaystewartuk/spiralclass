@@ -13,6 +13,10 @@
 # The checksum is md5 over the per-row md5s, aggregated order-independently, so
 # it catches value drift that a bare row-count would miss and does not depend on
 # physical row order (which differs after a dump/restore).
+#
+# It then compares schema objects (`schema_objects` in _common.sh): a clone that
+# restored every row but lost an exclusion constraint passed this script until
+# 2026-09-23, and would have gone on taking double bookings.
 set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=_common.sh
@@ -58,8 +62,11 @@ for schema in $SCHEMAS; do
   )"
   for table in $tables; do
     case "$EXCLUDE" in *" $table "*) continue ;; esac
-    on_src="$(psql_scalar "$SOURCE" "select to_regclass('${schema}.${table}') is not null")"
-    on_tgt="$(psql_scalar "$TARGET" "select to_regclass('${schema}.${table}') is not null")"
+    # Quoted: an unquoted `public.twoFactor` folds to `public.twofactor`, which
+    # does not exist, and reported the table MISSING on both sides.
+    exists="select to_regclass(quote_ident('${schema}') || '.' || quote_ident('${table}')) is not null"
+    on_src="$(psql_scalar "$SOURCE" "$exists")"
+    on_tgt="$(psql_scalar "$TARGET" "$exists")"
     if [ "$on_src" != "t" ] || [ "$on_tgt" != "t" ]; then
       printf '  %-38s %-22s %-22s %s\n' "${schema}.${table}" \
         "$([ "$on_src" = t ] && echo present || echo MISSING)" \
@@ -77,8 +84,26 @@ for schema in $SCHEMAS; do
   done
 done
 
+# Schema objects. Rows alone pass a clone that lost a constraint, an index or a
+# trigger — the database keeps every row and stops enforcing what the
+# invariants migration exists to enforce. Objects on an --exclude'd table are
+# skipped with it.
+for schema in $SCHEMAS; do
+  drift="$(diff \
+    <(schema_objects "$SOURCE" "$schema" | awk -F'\t' -v ex="$EXCLUDE" 'index(ex, " " $2 " ") == 0') \
+    <(schema_objects "$TARGET" "$schema" | awk -F'\t' -v ex="$EXCLUDE" 'index(ex, " " $2 " ") == 0') \
+    | sed -nE 's/^< /  source only: /p; s/^> /  target only: /p' || true)"
+  if [ -n "$drift" ]; then
+    echo "  schema objects in ${schema} differ:" >&2
+    printf '%s\n' "$drift" | tr '\t' ' ' >&2
+    fail=1
+  else
+    echo "  schema objects in ${schema}: PASS (extensions, constraints, indexes, triggers, functions)" >&2
+  fi
+done
+
 if [ "$fail" -eq 0 ]; then
-  echo "OK — all tables match (row count + content checksum)." >&2
+  echo "OK — all tables match (row count + content checksum) and so do their schema objects." >&2
 else
   echo "MISMATCH — see FAIL rows above." >&2
 fi

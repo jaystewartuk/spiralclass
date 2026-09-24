@@ -104,7 +104,7 @@ docker buildx build \
   --platform "$PLATFORM" \
   --output type=cacheonly \
   --progress plain \
-  "${BUILD_ARG_FLAGS[@]}" \
+  ${BUILD_ARG_FLAGS[@]+"${BUILD_ARG_FLAGS[@]}"} \
   .
 
 echo "› The production image builds."

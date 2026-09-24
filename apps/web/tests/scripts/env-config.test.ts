@@ -222,7 +222,9 @@ describe("NEXT_DEPLOYMENT_ID reaches the build", () => {
 
   it("the build forwards it through the shared array", () => {
     const build = cloudrunDeploy.slice(cloudrunDeploy.indexOf("\ndocker buildx build"));
-    expect(build).toMatch(/^\s+"\$\{BUILD_ARGS\[@\]\}" \\$/m);
+    // The empty-safe form shell-empty-arrays.test.ts requires of an array
+    // initialised `BUILD_ARGS=()`.
+    expect(build).toMatch(/^\s+\$\{BUILD_ARGS\[@\]\+"\$\{BUILD_ARGS\[@\]\}"\} \\$/m);
   });
 });
 

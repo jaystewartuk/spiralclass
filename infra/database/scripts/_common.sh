@@ -86,6 +86,43 @@ list_tables() {
 }
 
 # Major version number of a server (e.g. 16). Used for compatibility checks.
+# Every schema object a row checksum cannot see, one per line as
+# kind<TAB>table<TAB>definition, sorted: extensions (database-wide), and the
+# constraints, indexes, user triggers and non-extension functions of one
+# schema. A clone missing an exclusion constraint has identical rows and a
+# database that no longer refuses a double booking — this is what notices.
+schema_objects() {
+  local url="$1" schema="${2:-public}"
+  psql_scalar "$url" "
+    select k || E'\t' || t || E'\t' || d from (
+      select 'extension' k, '' t, e.extname || ' in ' || n.nspname d
+        from pg_extension e join pg_namespace n on n.oid = e.extnamespace
+        where e.extname <> 'plpgsql'
+      union all
+      select 'constraint', c.relname, con.conname || ' ' || pg_get_constraintdef(con.oid)
+        from pg_constraint con
+        join pg_class c on c.oid = con.conrelid
+        join pg_namespace n on n.oid = c.relnamespace
+        where n.nspname = '${schema}'
+      union all
+      select 'index', tablename, indexdef from pg_indexes where schemaname = '${schema}'
+      union all
+      select 'trigger', c.relname, pg_get_triggerdef(tg.oid)
+        from pg_trigger tg
+        join pg_class c on c.oid = tg.tgrelid
+        join pg_namespace n on n.oid = c.relnamespace
+        where not tg.tgisinternal and n.nspname = '${schema}'
+      union all
+      select 'function', '', p.proname || '(' || pg_get_function_identity_arguments(p.oid)
+                              || ') ' || md5(pg_get_functiondef(p.oid))
+        from pg_proc p join pg_namespace n on n.oid = p.pronamespace
+        where n.nspname = '${schema}' and p.prokind in ('f', 'p')
+          and not exists (select 1 from pg_depend d
+                          where d.classid = 'pg_proc'::regclass and d.objid = p.oid
+                            and d.deptype = 'e')
+    ) x order by 1"
+}
+
 server_major() {
   local n; n="$(psql_scalar "$1" 'show server_version_num')"
   echo $(( n / 10000 ))
