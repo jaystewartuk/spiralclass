@@ -69,14 +69,6 @@ const CLAIM_GATES: Record<string, string[]> = {
   "web.landing.ai.videoCoach": ["INTRO_VIDEO_COACH_ENABLED"],
   "web.features.item.videoCoach": ["INTRO_VIDEO_COACH_ENABLED"],
 
-  // AI lesson insights (D-19 Phase B/C). D-114 cut these cards and moved the
-  // keys to GATED_OFF_CLAIMS; D-131 turned the flag back on, which moves them
-  // back here. The cards themselves are still NOT rendered — nothing obliges a
-  // live capability to be advertised — so these entries are dormant until
-  // someone puts the copy back, at which point this is the gate it must pass.
-  "web.landing.ai.insights": ["LESSON_INSIGHTS_TRANSCRIPTION_ENABLED"],
-  "web.features.item.aiInsights": ["LESSON_INSIGHTS_TRANSCRIPTION_ENABLED"],
-
   // The booking page's gated reassurance line. It is ALSO gated at render time
   // by the helper the flag feeds (`liveCaptionsEnabled()`), so a flag coming
   // off hides the line rather than leaving a false promise — this guard is the
@@ -145,13 +137,17 @@ const NON_AI_CLAIMS = new Set([
 //
 // Podcasts joined pronunciation here in D-114, because podcasts had no flag at
 // all until D-114 added one, so the only way to turn them off was to pull a
-// vendor secret. Insights were here too until D-131 turned the transcription
-// flag back on — they moved up to CLAIM_GATES.
+// vendor secret. Insights were here under D-114, moved up to CLAIM_GATES when
+// D-131 turned the transcription flag back on, and are back here since D-187
+// turned it off again: the video box production now runs on has no room for
+// the egress that captures the audio.
 const GATED_OFF_CLAIMS: Record<string, string> = {
   "web.landing.ai.pronunciation": "LESSON_INSIGHTS_PRONUNCIATION_ENABLED",
   "web.features.item.pronunciation": "LESSON_INSIGHTS_PRONUNCIATION_ENABLED",
   "web.landing.ai.podcast": "MATERIAL_PODCASTS_ENABLED",
   "web.features.item.podcast": "MATERIAL_PODCASTS_ENABLED",
+  "web.landing.ai.insights": "LESSON_INSIGHTS_TRANSCRIPTION_ENABLED",
+  "web.features.item.aiInsights": "LESSON_INSIGHTS_TRANSCRIPTION_ENABLED",
 };
 
 const production = parseEnvFile(envFilePath("production", "runtime")).map as Record<string, string>;
@@ -261,24 +257,27 @@ describe("public AI claims match production enablement flags", () => {
     });
   }
 
-  // D-131 turned recording and transcription back on. Asserted positively for
-  // the same reason D-114 asserted them off: these two decide whether a
-  // student's voice is captured at all, so their state should be something a
-  // test states out loud rather than something you learn by reading an env
-  // file. Flipping either back off is a real decision — change this test in
-  // the same commit, and restore the "switched off" sentences in
+  // D-187 turned recording and transcription off again (D-131 had turned them
+  // on). Stated out loud for the same reason D-114 and D-131 did: these two
+  // decide whether a student's voice is captured at all, so their state is
+  // something a test says rather than something you learn by reading an env
+  // file. Turning either back on is a real decision — change this test in the
+  // same commit, and correct the "switched off" sentences in
   // packages/shared/src/legal/privacy-policy.ts with it.
-  it("class recording and transcription are on in production (D-131)", () => {
-    expect(flagOn("CLASS_RECORDING_ENABLED")).toBe(true);
-    expect(flagOn("LESSON_INSIGHTS_TRANSCRIPTION_ENABLED")).toBe(true);
+  it("class recording and transcription are off in production (D-187)", () => {
+    expect(flagOn("CLASS_RECORDING_ENABLED")).toBe(false);
+    expect(flagOn("LESSON_INSIGHTS_TRANSCRIPTION_ENABLED")).toBe(false);
   });
 
-  // The privacy policy claimed, in four places, that recording/transcription
-  // were switched off. D-131 rewrote all four; this is the tripwire that stops
-  // the claim creeping back in while the flags say otherwise.
-  it("the privacy policy does not claim these features are switched off", () => {
+  // Both directions, so the policy and the flags cannot drift apart either way:
+  // while the flags are off the policy must say so, and the moment they come
+  // back on the "switched off" prose has to go with them.
+  it("the privacy policy says recording and transcription are switched off exactly when they are", () => {
     const prose = JSON.stringify(PRIVACY_POLICY_SECTIONS);
-    expect(prose).not.toMatch(/switched off in production/);
+    const saysOff = /switched off in production/.test(prose);
+    const flagsOff =
+      !flagOn("CLASS_RECORDING_ENABLED") && !flagOn("LESSON_INSIGHTS_TRANSCRIPTION_ENABLED");
+    expect(saysOff).toBe(flagsOff);
     expect(prose).not.toMatch(/Not stored at all/);
   });
 });

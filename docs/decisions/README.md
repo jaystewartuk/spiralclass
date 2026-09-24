@@ -71,7 +71,7 @@ another way" about anything that still exists.
   both reversed by [D-40](./D-40.md)).
 
 **Numbering is never reused and never renumbered**, so `D-01` is still the
-first decision and `D-186` the most recent. A gap means a record was removed,
+first decision and `D-187` the most recent. A gap means a record was removed,
 not that one is missing.
 
 **Everything kept is unedited**, except where a record named an account
@@ -232,6 +232,7 @@ on it.
 | [D-135](./D-135.md) | Recording becomes audio-only: the first real class produced an 846 MB file                                                |
 | [D-182](./D-182.md) | Production goes back to LiveKit Cloud while Oracle refuses to rebuild the box                                             |
 | [D-185](./D-185.md) | **Captions move into the browsers**, and a computer in the call covers a phone that cannot; two phones stream to Deepgram |
+| [D-187](./D-187.md) | **Production video moves to a free `e2-micro`** — measured to carry a class, not its recording, so recording goes off     |
 
 ### The lesson-AI pipeline, and the consent that gates it
 
@@ -492,7 +493,7 @@ records removed before publication — see [What is not here](#what-is-not-here)
 | [D-127](./D-127.md) | Image generation moves to Vertex AI                                   | Active                               |
 | [D-128](./D-128.md) | UK GDPR privacy layer; the supplier register becomes code             | Active                               |
 | [D-129](./D-129.md) | Every workflow deleted; the laptop runs everything                    | Superseded in part by D-157          |
-| [D-131](./D-131.md) | Recording and transcription back on; the policy corrected             | Active                               |
+| [D-131](./D-131.md) | Recording and transcription back on; the policy corrected             | Reversed by D-187                    |
 | [D-132](./D-132.md) | A teacher setting that auto-starts recording                          | Active                               |
 | [D-133](./D-133.md) | Keep the name; withdraw the market premise behind it                  | Superseded (naming) by D-138         |
 | [D-134](./D-134.md) | The media host goes behind Cloudflare's proxy                         | Active (partly → D-139)              |
@@ -537,11 +538,12 @@ records removed before publication — see [What is not here](#what-is-not-here)
 | [D-179](./D-179.md) | CodeQL scans every PR; main refuses a merge that adds an alert        | Active                               |
 | [D-180](./D-180.md) | Test-file and decision-record counts are floors, not exact            | Active                               |
 | [D-181](./D-181.md) | A security fix is a public PR, neutral title, pushed when it can ship | Active                               |
-| [D-182](./D-182.md) | Production video back on LiveKit Cloud, the box having no capacity    | Active (reverses D-94's first half)  |
+| [D-182](./D-182.md) | Production video back on LiveKit Cloud, the box having no capacity    | Reversed by D-187                    |
 | [D-183](./D-183.md) | The Oracle tenancy goes Pay As You Go; Always Free ceilings now bill  | Active                               |
 | [D-184](./D-184.md) | Cloud Run serves production; Fly is retired                           | Active (revisits D-150's premise)    |
 | [D-185](./D-185.md) | Live captions run in the browsers; a computer covers a phone          | Active (supersedes D-106, D-108)     |
 | [D-186](./D-186.md) | The Vercel failover is retired; Cloud Run is the only target          | Active (reverses D-177)              |
+| [D-187](./D-187.md) | Video on a free e2-micro; recording and transcription off again       | Active (reverses D-182, D-131)       |
 
 ---
 

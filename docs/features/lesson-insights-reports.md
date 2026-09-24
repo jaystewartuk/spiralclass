@@ -2,17 +2,20 @@
 
 ## Overview
 
-**Status: fully built; ENABLED in both environments as of
-[D-131](../decisions/D-131.md) (2026-08-26).** The reasoning lives in
+**Status: fully built; OFF in both environments since
+[D-187](../decisions/D-187.md) (2026-09-24)**, for capacity: the free video box
+production runs on cannot carry the egress that captures the audio. The
+reasoning for the feature itself lives in
 [D-19](../decisions/D-19.md), [D-21](../decisions/D-21.md) and
 [D-22](../decisions/D-22.md).
 The flag history is: off at first ship, on at
 [D-94](../decisions/D-94.md) (2026-07-21), off again at
-[D-114](../decisions/D-114.md) (2026-08-08) ahead of first promotion, and on
-again at D-131 (2026-08-26). **This pipeline captures student voice, including
+[D-114](../decisions/D-114.md) (2026-08-08) ahead of first promotion, on
+again at [D-131](../decisions/D-131.md) (2026-08-26), and off again at D-187
+(2026-09-24). **This pipeline captures student voice, including
 minors.** What decides whether any given student is captured is the recorded
 per-pairing consent (D-22), which is guardian-only for a student under 18 —
-never the flag. Read D-131 before reversing this.
+never the flag. Read D-131 and D-187 before turning it back on.
 
 Two operational facts D-131 records and this document must not contradict: the
 **teacher's Record tap is the reliable trigger** for insights capture (the
@@ -74,18 +77,20 @@ the pass/fail record of attendance or payments.
   `config/env/{preview,production}.runtime.env` is the source of truth — read
   it rather than assuming this document's description means a given half is
   live:
-  - `LESSON_INSIGHTS_TRANSCRIPTION_ENABLED` is **on** in both environments
-    ([D-131](../decisions/D-131.md)). It was held off from the start, turned on
+  - `LESSON_INSIGHTS_TRANSCRIPTION_ENABLED` is **off** in both environments
+    ([D-187](../decisions/D-187.md)). It was held off from the start, turned on
     by [D-94](../decisions/D-94.md) (2026-07-21), turned back off by
-    [D-114](../decisions/D-114.md) (2026-08-08) ahead of first promotion, and
-    turned on again by D-131 (2026-08-26). **The
+    [D-114](../decisions/D-114.md) (2026-08-08) ahead of first promotion,
+    turned on again by [D-131](../decisions/D-131.md) (2026-08-26), and off
+    again by D-187 (2026-09-24), because the video box has no room for
+    egress. When it is on, **the
     flag is necessary, not sufficient**: without `DEEPGRAM_API_KEY` in
     Infisical, `transcriptionEnabled()` is false and the pipeline is dormant
     with green CI. (The older spec this
     bullet used to point at was deleted in the
     [D-110](../decisions/D-110.md) reset.)
-  - `CLASS_RECORDING_ENABLED` is **on** in both environments (D-131), so the
-    teacher's Record control is shown and the server will start a
+  - `CLASS_RECORDING_ENABLED` is **off** in both environments (D-187), so the
+    teacher's Record control is hidden. When it is on, the server starts a
     room-composite recording — provided `LIVEKIT_EGRESS_S3_*` is set on the Fly
     app (Tofu-owned, in no file in this repo) and the teacher is on Pro. Note
     it is _not_ what gates insights capture: as of D-114

@@ -24,7 +24,7 @@
 import { SUBPROCESSORS_REVIEWED } from "./subprocessors";
 
 /** The date this document was last substantively changed. */
-export const PRIVACY_POLICY_LAST_UPDATED = "2026-09-23";
+export const PRIVACY_POLICY_LAST_UPDATED = "2026-09-24";
 
 /** Re-exported so a renderer needs one import to show both dates. */
 export { SUBPROCESSORS_REVIEWED };
@@ -140,7 +140,7 @@ export const PRIVACY_POLICY_SECTIONS: readonly PolicySection[] = [
           "Payment records — the amount, date, currency and status of each payment, and the identifiers our payment providers give us. We never see or store your full card number. A teacher who takes payment by direct transfer also stores the payee details students pay into, such as an account number or an IBAN; those are the teacher's own, and a student never gives us their bank credentials.",
           "Things you write and upload — messages between a teacher and a student, homework answers and files, lesson materials, and images.",
           "Technical data — your IP address, device and browser, and the pages you visit. We use it to keep the service working and to understand which parts of the product people actually use.",
-          "Live class audio and video — carried between the two participants while the class is running. It is not recorded or stored unless a teacher starts a recording, and a student's voice is only ever analysed for learning insights where that student (or their parent or guardian, if they are under 18) has given consent for it, recorded against that teacher.",
+          "Live class audio and video — carried between the two participants while the class is running. It is not recorded or stored: class recording and learning insights are switched off in production today. When they are on, a class is recorded only if a teacher starts a recording, and a student's voice is only ever analysed for learning insights where that student (or their parent or guardian, if they are under 18) has given consent for it, recorded against that teacher.",
         ],
       },
       {
@@ -231,7 +231,7 @@ export const PRIVACY_POLICY_SECTIONS: readonly PolicySection[] = [
         items: [
           "Lesson materials — when a teacher asks the product to draft or edit a teaching material, the text of that material and the teacher's own lesson template are sent to Anthropic. Student data is not included.",
           "Live captions — when a teacher turns captions on during a class, the teacher's speech, and a student's where that student has consented (or their parent or guardian has, for a student under 18), is recognised by the web browser of someone in the call: on the device itself where the browser can, and otherwise by that browser's own speech service (Google, for Chrome). When no device in the call can recognise speech (two phones, for example), each person's own browser sends their speech to Deepgram instead, which returns the text and is instructed not to keep the audio or use it to train its models. Each finished line is translated on the device where possible, and otherwise by Google Cloud Translation, which receives only the text. Nothing is stored: the captions exist only while the class is running.",
-          "Class transcription and learning insights — where a student has consented (or their parent or guardian has, for a student under 18), each speaker's audio from that class is transcribed by Deepgram and the transcript is read by Anthropic to suggest what to work on next. The audio itself is deleted as soon as it has been transcribed, unless the teacher has chosen to keep it so the class can be played back. Every suggestion is a draft the teacher reviews before it counts for anything.",
+          "Class transcription and learning insights — switched off in production today, so no class is transcribed or analysed. When it is on: where a student has consented (or their parent or guardian has, for a student under 18), each speaker's audio from that class is transcribed by Deepgram and the transcript is read by Anthropic to suggest what to work on next. The audio itself is deleted as soon as it has been transcribed, unless the teacher has chosen to keep it so the class can be played back. Every suggestion is a draft the teacher reviews before it counts for anything.",
           "Homework review — when a teacher asks for an AI first pass on a homework answer, that answer is sent to Anthropic. It produces a draft for the teacher to review; it never reaches the student without the teacher.",
           "Intro-video coaching — a teacher's own promotional video, which is public, is transcribed and reviewed to give them feedback on it. No student is involved.",
           "Promotional posts and images — text and images are generated from a teacher's own public profile, by Anthropic and by Google's Gemini model respectively. No student data is used.",
@@ -347,7 +347,7 @@ export const PRIVACY_POLICY_SECTIONS: readonly PolicySection[] = [
           {
             what: "Live class audio and video",
             howLong:
-              "Not stored, unless a teacher records the class — and a recording is audio only, never video",
+              "Not stored — class recording is switched off in production today. When it is on, a class is stored only if a teacher records it, and a recording is audio only, never video",
           },
           {
             what: "Audio captured for learning insights",
