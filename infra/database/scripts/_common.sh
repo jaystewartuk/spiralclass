@@ -76,7 +76,44 @@ confirm() {
 }
 
 # Run a scalar query, printing the single value (tuples-only, unaligned, quiet).
-psql_scalar() { psql "$1" -tAqc "$2"; }
+# ── Passwords never go on a command line ──────────────────────────────────
+# `ps` shows every process's arguments to every user on the machine, and these
+# scripts run for minutes against production. So a password travels only
+# through the environment, which only its owner and root can read: D-66's rule
+# for secrets, which these scripts predated until 2026-09-24.
+
+# The URL's password, percent-decoded; empty when it has none.
+url_password() {
+  local pw pct='%'
+  pw="$(printf '%s\n' "$1" | sed -nE 's#^[a-z]+://[^:/@]+:([^@]*)@.*#\1#p')"
+  printf '%b' "${pw//$pct/\\x}"
+}
+url_without_password() { printf '%s\n' "$1" | sed -E 's#^([a-z]+://[^:/@]+):[^@]*@#\1@#'; }
+
+# Run a libpq client against a URL: `pg <url> psql -tAc '…'`. The client gets
+# `-d <url without its password>` and the password in PGPASSWORD, set for that
+# one command only.
+pg() {
+  local url="$1" pw
+  shift
+  pw="$(url_password "$url")"
+  if [ -n "$pw" ]; then
+    PGPASSWORD="$pw" "$@" -d "$(url_without_password "$url")"
+  else
+    "$@" -d "$url"
+  fi
+}
+
+# Refuse a password-carrying URL among a script's own arguments: by the time
+# this runs it is already in `ps`, but refusing is what stops it becoming habit.
+no_password_in_args() {
+  local a
+  for a in "$@"; do
+    [ -z "$(url_password "$a")" ] || die "a database URL with a password was passed as an argument, where \`ps\` shows it to every user on this machine. Pass it in the environment instead: SOURCE_DATABASE_URL=… TARGET_DATABASE_URL=… $(basename "$0") …"
+  done
+}
+
+psql_scalar() { pg "$1" psql -tAqc "$2"; }
 
 # List base tables in the given schema (default: public), one per line.
 list_tables() {

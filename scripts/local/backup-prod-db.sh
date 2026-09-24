@@ -32,6 +32,10 @@
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+# `pg`: runs psql/pg_dump with the password in PGPASSWORD, never on argv, where
+# `ps` would show production's password to every user for the whole dump.
+# shellcheck source=../../infra/database/scripts/_common.sh
+source "$REPO_ROOT/infra/database/scripts/_common.sh"
 KEEP=14
 MIN_TABLES=30
 
@@ -83,7 +87,7 @@ command -v aws >/dev/null 2>&1 || { echo "error: aws CLI not found. brew install
 # version in exactly the case pg_dump would refuse — which is the case worth
 # diagnosing precisely rather than leaving the operator with pg_dump's terse
 # "aborting because of server version mismatch".
-SERVER_VERSION_NUM="$(psql "$PROD_BACKUP_DB_URL" -tAc 'SHOW server_version_num')"
+SERVER_VERSION_NUM="$(pg "$PROD_BACKUP_DB_URL" psql -tAc 'SHOW server_version_num')"
 SERVER_MAJOR=$((SERVER_VERSION_NUM / 10000))
 CLIENT_MAJOR="$(pg_dump --version | awk '{print $3}' | cut -d. -f1)"
 echo "Server major: $SERVER_MAJOR | pg_dump major: $CLIENT_MAJOR ($(command -v pg_dump))"
@@ -100,7 +104,7 @@ trap 'rm -rf "$WORK"' EXIT
 FILE="prod-$(date -u +%Y-%m-%dT%H%M%SZ).dump"
 
 echo "Dumping production…"
-pg_dump "$PROD_BACKUP_DB_URL" -Fc --no-owner --no-privileges -f "$WORK/$FILE"
+pg "$PROD_BACKUP_DB_URL" pg_dump -Fc --no-owner --no-privileges -f "$WORK/$FILE"
 
 # Verify before trusting it: a structurally valid custom-format archive with a
 # non-trivial number of tables. Catches a truncated file, or a dump taken

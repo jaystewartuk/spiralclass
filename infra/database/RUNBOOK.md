@@ -29,15 +29,19 @@ any two real Postgres.
   Check the server, then install the newest client, which can dump any older
   server:
   ```sh
-  psql "$SOURCE_DATABASE_URL" -tAc 'SHOW server_version'   # what you must match or beat
-  sudo apt-get install -y postgresql-client                # newest PGDG major
+  # what you must match or beat (through `pg`, so the password stays off argv)
+  bash -c 'source infra/database/scripts/_common.sh && pg "$SOURCE_DATABASE_URL" psql -tAc "SHOW server_version"'
+  brew install libpq                                       # or: apt-get install postgresql-client
   ```
-  `backup-prod-db.yml` does exactly this, and hard-fails with a precise message
+  `scripts/local/backup-prod-db.sh` does exactly this, and hard-fails with a precise message
   if the newest available client is still behind the server.
-- Connection URLs for source (current prod) and target. Pass them as args or via
-  `SOURCE_DATABASE_URL` / `TARGET_DATABASE_URL`. **Treat them as secrets** — the
-  scripts never log them (only host/db), but your shell history will; prefer env
-  vars or a scoped `.env` you delete after.
+- Connection URLs for source (current prod) and target, **in the environment**:
+  `SOURCE_DATABASE_URL` / `TARGET_DATABASE_URL`. A URL carrying a password is
+  refused as an argument, because `ps` shows every process's arguments to every
+  user on the machine for as long as the run takes. The scripts pass them on
+  the same way, and hand each client its password in `PGPASSWORD` (`pg` in
+  `scripts/_common.sh`). Fill them from `neonctl connection-string` inside the
+  command, so the value never reaches your shell history either.
 - Do region work **outside lesson hours** and treat it as a Tier-2 change
   (`CLAUDE.md`): stage on preview, keep the old region readable until the new one
   is verified.
@@ -62,8 +66,8 @@ the verify against the migrated schema on every integration run.
 
 ```sh
 cd infra/database/scripts
-export SRC='postgresql://…prod…'          # current region (read-only here)
-export TGT='postgresql://…new-region…'    # provisioned by layer 1
+export SOURCE_DATABASE_URL="$(neonctl connection-string production --project-id <current>)"
+export TARGET_DATABASE_URL="$(neonctl connection-string production --project-id <new>)"
 
 # 1. Provision the target (layer 1): create a new Neon project in the target
 #    region via console.neon.tech — see ../neon/README.md. (Not Tofu — the
@@ -71,7 +75,7 @@ export TGT='postgresql://…new-region…'    # provisioned by layer 1
 #    retired along with Supabase itself, D-89.)
 # 2. Freeze writes to SRC (maintenance mode / scale app to 0).
 # 3. Clone schema+data into the EMPTY target. Auto-verifies; exits non-zero if parity fails.
-./db-clone-to-region.sh "$SRC" "$TGT"
+./db-clone-to-region.sh
 ```
 
 `--schema-and-data` (default) needs an **empty** target — `_prisma_migrations`
@@ -97,18 +101,19 @@ R=./db-logical-replication.sh
 
 # 1. Provision (layer 1) + migrate the target (layer 2) so its schema exists.
 # 2. Start replication: publish on source, subscribe on target (copies then streams).
-$R publish   "$SRC"
-$R subscribe  "$TGT" "$SRC"          # add --no-copy if you pre-seeded with db-clone --data-only
+# Both URLs come from SOURCE_DATABASE_URL / TARGET_DATABASE_URL, exported as in Path A.
+$R publish
+$R subscribe                         # add --no-copy if you pre-seeded with db-clone --data-only
 
 # 3. Watch until caught up (caught_up = t, slot "behind" ~ 0 bytes).
-$R status    "$TGT" "$SRC"
+$R status
 
 # 4. Cutover, briefly: freeze SRC writes → confirm 0 lag + parity → fix sequences → flip → teardown.
-$R status    "$TGT" "$SRC"                       # confirm caught_up
-./db-verify-clone.sh --exclude _prisma_migrations "$SRC" "$TGT"
-$R sync-sequences "$SRC" "$TGT"                  # logical repl does NOT replicate sequences!
+$R status                                        # confirm caught_up
+./db-verify-clone.sh --exclude _prisma_migrations
+$R sync-sequences                                # logical repl does NOT replicate sequences!
 #   → flip the app region pointer (DATABASE_URL / MIGRATE_REGIONS) now ←
-$R teardown  "$TGT" "$SRC"                       # drop subscription + publication
+$R teardown                                      # drop subscription + publication
 ```
 
 **Do not skip `sync-sequences`.** Sequences (serial ids) aren't replicated, so
@@ -122,9 +127,9 @@ Before trusting any of the above, rehearse a clone against a **throwaway** targe
 
 ```sh
 cd infra/database/scripts
-./db-rehearse-clone.sh "$SRC"                    # spins an ephemeral Docker postgres, clones, verifies, tears down
+./db-rehearse-clone.sh                           # spins an ephemeral Docker postgres, clones, verifies, tears down
 # …or against a Supabase/Neon branch instead of Docker:
-REHEARSE_TARGET_URL='postgresql://…branch…' ./db-rehearse-clone.sh "$SRC"
+REHEARSE_TARGET_URL="$(neonctl connection-string rehearsal --project-id <new>)" ./db-rehearse-clone.sh
 ```
 
 ## Rollback
