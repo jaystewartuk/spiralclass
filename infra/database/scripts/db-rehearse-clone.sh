@@ -6,7 +6,8 @@
 # the source; touches no real region.
 #
 # Usage:
-#   db-rehearse-clone.sh [--schemas "public"] <source-url>
+#   SOURCE_DATABASE_URL=… db-rehearse-clone.sh [--schemas "public"]
+#   (or the URL as an argument, only if it carries no password)
 #
 # Ephemeral target backend:
 #   - default: a local Docker `postgres:<major>` container (major matched to the
@@ -29,13 +30,15 @@ while [ $# -gt 0 ]; do
     *)         POSITIONAL+=("$1"); shift ;;
   esac
 done
+no_password_in_args ${POSITIONAL[@]+"${POSITIONAL[@]}"}
 SOURCE="${POSITIONAL[0]:-${SOURCE_DATABASE_URL:-}}"
 [ -n "$SOURCE" ] || die "no source URL (arg 1 or SOURCE_DATABASE_URL)."
 require_tools psql
 
 run_rehearsal() { # $1 = ephemeral target url
   echo "rehearsing clone into ephemeral target…" >&2
-  ASSUME_YES=1 "$SCRIPT_DIR/db-clone-to-region.sh" --schemas "$SCHEMAS" "$SOURCE" "$1"
+  ASSUME_YES=1 SOURCE_DATABASE_URL="$SOURCE" TARGET_DATABASE_URL="$1" \
+    "$SCRIPT_DIR/db-clone-to-region.sh" --schemas "$SCHEMAS"
   echo "REHEARSAL PASSED — a clone of this source restores + verifies cleanly." >&2
 }
 

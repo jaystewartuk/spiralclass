@@ -6,8 +6,10 @@
 # proprietary migration service (they re-lock you — D-49).
 #
 # Usage:
-#   db-clone-to-region.sh [options] <source-url> <target-url>
 #   SOURCE_DATABASE_URL=… TARGET_DATABASE_URL=… db-clone-to-region.sh [options]
+#   db-clone-to-region.sh [options] <source-url> <target-url>   (URLs WITHOUT a
+#     password only: one with a password is refused, since `ps` shows argv to
+#     every user — see no_password_in_args in _common.sh)
 #
 # Options:
 #   --schema-and-data  Clone schema + data (DEFAULT). Target schema(s) must be
@@ -67,6 +69,7 @@ while [ $# -gt 0 ]; do
   esac
 done
 
+no_password_in_args ${POSITIONAL[@]+"${POSITIONAL[@]}"}
 SOURCE="${POSITIONAL[0]:-${SOURCE_DATABASE_URL:-}}"
 TARGET="${POSITIONAL[1]:-${TARGET_DATABASE_URL:-}}"
 [ -n "$SOURCE" ] || die "no source URL (pass as arg 1 or SOURCE_DATABASE_URL)."
@@ -152,20 +155,20 @@ if [ "$MODE" = "data-only" ]; then
   _sel="select 'ALTER TABLE '||quote_ident(n.nspname)||'.'||quote_ident(c.relname)"
   _fk_from="from pg_constraint con join pg_class c on c.oid=con.conrelid join pg_namespace n on n.oid=c.relnamespace where con.contype='f' and n.nspname in (${SCHEMA_LIST})"
   _tbl_from="from pg_class c join pg_namespace n on n.oid=c.relnamespace where c.relkind='r' and n.nspname in (${SCHEMA_LIST})"
-  FK_DROP="$(psql "$TARGET" -tAXq -c "${_sel}||' DROP CONSTRAINT '||quote_ident(con.conname)||';' ${_fk_from}")"
-  FK_ADD="$(psql "$TARGET" -tAXq -c "${_sel}||' ADD CONSTRAINT '||quote_ident(con.conname)||' '||pg_get_constraintdef(con.oid)||';' ${_fk_from}")"
-  TRG_OFF="$(psql "$TARGET" -tAXq -c "${_sel}||' DISABLE TRIGGER USER;' ${_tbl_from}")"
-  TRG_ON="$(psql "$TARGET" -tAXq -c "${_sel}||' ENABLE TRIGGER USER;' ${_tbl_from}")"
-  _restore_integrity() { printf '%s\n%s\n' "$TRG_ON" "$FK_ADD" | psql "$TARGET" -q >/dev/null 2>&1 || true; }
+  FK_DROP="$(pg "$TARGET" psql -tAXq -c "${_sel}||' DROP CONSTRAINT '||quote_ident(con.conname)||';' ${_fk_from}")"
+  FK_ADD="$(pg "$TARGET" psql -tAXq -c "${_sel}||' ADD CONSTRAINT '||quote_ident(con.conname)||' '||pg_get_constraintdef(con.oid)||';' ${_fk_from}")"
+  TRG_OFF="$(pg "$TARGET" psql -tAXq -c "${_sel}||' DISABLE TRIGGER USER;' ${_tbl_from}")"
+  TRG_ON="$(pg "$TARGET" psql -tAXq -c "${_sel}||' ENABLE TRIGGER USER;' ${_tbl_from}")"
+  _restore_integrity() { printf '%s\n%s\n' "$TRG_ON" "$FK_ADD" | pg "$TARGET" psql -q >/dev/null 2>&1 || true; }
   trap _restore_integrity EXIT
   echo "dropping FK constraints + disabling user triggers on target for the load…" >&2
-  printf '%s\n%s\n' "$FK_DROP" "$TRG_OFF" | psql "$TARGET" -q -v ON_ERROR_STOP=1
-  pg_dump -Fc --data-only --no-owner --no-privileges \
-      --exclude-table='*._prisma_migrations' ${DUMP_EXCLUDE_ARGS[@]+"${DUMP_EXCLUDE_ARGS[@]}"} ${NS_ARGS[@]+"${NS_ARGS[@]}"} "$SOURCE" \
-    | pg_restore --data-only --single-transaction \
-        --no-owner --no-privileges -d "$TARGET"
+  printf '%s\n%s\n' "$FK_DROP" "$TRG_OFF" | pg "$TARGET" psql -q -v ON_ERROR_STOP=1
+  pg "$SOURCE" pg_dump -Fc --data-only --no-owner --no-privileges \
+      --exclude-table='*._prisma_migrations' ${DUMP_EXCLUDE_ARGS[@]+"${DUMP_EXCLUDE_ARGS[@]}"} ${NS_ARGS[@]+"${NS_ARGS[@]}"} \
+    | pg "$TARGET" pg_restore --data-only --single-transaction \
+        --no-owner --no-privileges
   echo "re-enabling user triggers + re-adding FK constraints on target…" >&2
-  printf '%s\n%s\n' "$TRG_ON" "$FK_ADD" | psql "$TARGET" -q -v ON_ERROR_STOP=1
+  printf '%s\n%s\n' "$TRG_ON" "$FK_ADD" | pg "$TARGET" psql -q -v ON_ERROR_STOP=1
   trap - EXIT
   VERIFY_EXCLUDES+=(--exclude _prisma_migrations)
 else
@@ -187,11 +190,11 @@ else
       where e.extname <> 'plpgsql' order by e.extname")"
   if [ -n "$EXT_SQL" ]; then
     echo "creating the source's extensions on the target…" >&2
-    printf '%s\n' "$EXT_SQL" | psql "$TARGET" -q -v ON_ERROR_STOP=1
+    printf '%s\n' "$EXT_SQL" | pg "$TARGET" psql -q -v ON_ERROR_STOP=1
   fi
   set +e
-  err="$({ pg_dump -Fc --no-owner --no-privileges ${DUMP_EXCLUDE_ARGS[@]+"${DUMP_EXCLUDE_ARGS[@]}"} ${NS_ARGS[@]+"${NS_ARGS[@]}"} "$SOURCE" \
-          | pg_restore --no-owner --no-privileges -d "$TARGET"; } 2>&1 1>/dev/null)"
+  err="$({ pg "$SOURCE" pg_dump -Fc --no-owner --no-privileges ${DUMP_EXCLUDE_ARGS[@]+"${DUMP_EXCLUDE_ARGS[@]}"} ${NS_ARGS[@]+"${NS_ARGS[@]}"} \
+          | pg "$TARGET" pg_restore --no-owner --no-privileges; } 2>&1 1>/dev/null)"
   set -e
   # pg_restore prints a benign "schema public already exists" error plus a
   # trailing "errors ignored on restore: N" summary. Tolerate exactly that one
@@ -207,8 +210,9 @@ fi
 
 if [ "${DO_VERIFY:-1}" = "1" ]; then
   echo "verifying parity…" >&2
-  ASSUME_YES=1 "$SCRIPT_DIR/db-verify-clone.sh" --schemas "$SCHEMAS" \
-    ${VERIFY_EXCLUDES[@]+"${VERIFY_EXCLUDES[@]}"} "$SOURCE" "$TARGET" \
+  ASSUME_YES=1 SOURCE_DATABASE_URL="$SOURCE" TARGET_DATABASE_URL="$TARGET" \
+    "$SCRIPT_DIR/db-verify-clone.sh" --schemas "$SCHEMAS" \
+    ${VERIFY_EXCLUDES[@]+"${VERIFY_EXCLUDES[@]}"} \
     || die "clone completed but verification FAILED — do not cut over to this target."
   echo "clone verified." >&2
 else

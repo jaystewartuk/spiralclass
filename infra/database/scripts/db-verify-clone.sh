@@ -5,7 +5,8 @@
 # logical-replication cutover) you cannot verify is a clone you cannot trust.
 #
 # Usage:
-#   db-verify-clone.sh [--schemas "public"] <source-url> <target-url>
+#   SOURCE_DATABASE_URL=… TARGET_DATABASE_URL=… db-verify-clone.sh [--schemas "public"]
+#   (or the two URLs as arguments, only if neither carries a password)
 #
 # Exit code: 0 = every table matches; 1 = at least one mismatch (or a table is
 # missing on one side). Prints a per-table PASS/FAIL table to stderr.
@@ -35,6 +36,7 @@ while [ $# -gt 0 ]; do
   esac
 done
 
+no_password_in_args ${POSITIONAL[@]+"${POSITIONAL[@]}"}
 SOURCE="${POSITIONAL[0]:-${SOURCE_DATABASE_URL:-}}"
 TARGET="${POSITIONAL[1]:-${TARGET_DATABASE_URL:-}}"
 [ -n "$SOURCE" ] || die "no source URL (arg 1 or SOURCE_DATABASE_URL)."
