@@ -6,6 +6,9 @@ import { __resetVertexAccessTokenCacheForTests, getVertexAccessToken } from "./g
 vi.mock("server-only", () => ({}));
 vi.mock("@/lib/env", () => ({
   geminiVertexServiceAccount: vi.fn(),
+  // Off Cloud Run: this file covers the key path. The metadata-server path is
+  // covered in tests/social-preview/google-vertex-auth.test.ts.
+  runsOnCloudRun: vi.fn(() => false),
 }));
 
 // A real RSA key so signJwt's createSign(...).sign(privateKey) doesn't throw
@@ -71,8 +74,8 @@ describe("getVertexAccessToken", () => {
   // AbortSignal at all, so a slow/unresponsive token endpoint held the
   // request open indefinitely. A burst of concurrent generate calls (a
   // teacher retrying a stuck "Generate" button) each hanging forever was
-  // enough to pin every concurrency slot Fly's proxy allows the machine,
-  // which read as a full site outage rather than "image generation is slow."
+  // enough to pin every concurrency slot Fly's proxy allowed the machine
+  // production then ran on, which read as a full site outage rather than "image generation is slow."
   it("gives up and returns undefined instead of hanging forever when the token endpoint never responds", async () => {
     const fetchMock = vi.fn().mockImplementation((_url, init: RequestInit) => {
       return new Promise((_resolve, reject) => {

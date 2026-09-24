@@ -21,9 +21,13 @@ prose than as state that drifts from a console nobody remembers using.
 Three identities, and the separation between them is what makes the deploy
 safe to run from CI:
 
-- **`web-runtime`** — what the container runs as. It holds **no project role at
-  all**: the app reaches Neon, Stripe, LiveKit and R2 over the network and
-  needs no Google API. Its one grant is `secretAccessor` on a single secret.
+- **`web-runtime`** — what the container runs as. It holds **one project
+  role, `roles/aiplatform.user`**, because the one Google API the app calls is
+  Vertex AI ("Generate with AI"): the metadata server mints that token for
+  this identity, so the app needs no stored service account key
+  ([D-127](../../docs/decisions/D-127.md)'s 2026-09-24 addendum). Everything
+  else — Neon, Stripe, LiveKit, R2 — it reaches over the network with its own
+  credentials. Its only other grant is `secretAccessor` on a single secret.
   Not the default Compute Engine service account, which usually carries
   project-wide Editor.
 - **`github-deploy`** — what Actions impersonates. It can push an image and

@@ -69,6 +69,8 @@ const NOT_A_PROCESSOR: Record<string, string> = {
   DIRECT_URL: "Points at Neon, which IS registered.",
   TEST_DATABASE_URL: "A local test database. Never holds real personal data.",
   NODE_ENV: "Not a vendor.",
+  K_SERVICE:
+    "Set by Cloud Run (registered) on its own instances; names our own service, sends nothing.",
   RTC_PROVIDER: "Selects between video providers; LiveKit IS registered.",
   JOBS_BACKEND: "Selects between job backends; Inngest IS registered.",
   EMAIL_PROVIDER: "Selects between email providers; both are registered.",
