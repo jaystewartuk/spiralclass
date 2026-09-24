@@ -1,7 +1,16 @@
-import { execFileSync } from "node:child_process";
+import { execFileSync, spawnSync } from "node:child_process";
 import { describe, expect, it } from "vitest";
 
-import { SOURCE, pushedEntries, r2Entries } from "../../../../scripts/cloudrun-env.mjs";
+import {
+  APP_SOURCE_DIRS,
+  RUNTIME_BUILT_PREFIXES,
+  SOURCE,
+  appSourceNames,
+  partitionByUse,
+  pushedEntries,
+  r2Entries,
+} from "../../../../scripts/cloudrun-env.mjs";
+import { SERVER_ENV_KEYS } from "@/lib/env";
 import { REPO_ROOT } from "../../../../scripts/env-config.mjs";
 
 /**
@@ -99,5 +108,87 @@ describe("the secret set is exactly what the two sources hold", () => {
   it("refuses a key that is not an environment variable name", () => {
     const bad = { infisical: [{ key: "NOT-A-NAME", value: "x" }], r2: SOURCES.r2 };
     expect(() => pushedEntries(bad)).toThrow("not an environment variable name");
+  });
+});
+
+/**
+ * `/` is the running app's environment (D-163), and everything in it used to
+ * reach every instance. On 2026-09-24 that was 73 names, four of which nothing
+ * in the app reads.
+ */
+describe("the secret carries only names the app reads", () => {
+  const readable = new Set(["STRIPE_SECRET_KEY", "GOOGLE_CLIENT_ID"]);
+
+  it("keeps a name the app's source names and leaves out one it never does", () => {
+    const { kept, omitted } = partitionByUse(
+      [...SOURCES.infisical, { key: "SEED_ONLY_VALUE", value: "x" }],
+      readable,
+    );
+    expect(kept.map((e) => e.key)).toEqual(["STRIPE_SECRET_KEY", "GOOGLE_CLIENT_ID"]);
+    expect(omitted).toEqual(["SEED_ONLY_VALUE"]);
+  });
+
+  it("keeps a family the app builds at run time", () => {
+    const { kept } = partitionByUse([{ key: "RATE_LIMIT_SIGN_IN_EMAIL", value: "5" }], readable);
+    expect(kept).toHaveLength(1);
+  });
+
+  it("finds every name env.ts parses in the app's source", async () => {
+    const names = await appSourceNames(REPO_ROOT);
+    const missing = SERVER_ENV_KEYS.filter((k) => !names.has(k));
+    expect(missing).toEqual([]);
+    // Read with process.env directly rather than through the schema.
+    expect(names.has("COMMISSION_RATE_PERCENT")).toBe(true);
+  });
+
+  it("accounts for every env name the app builds at run time", () => {
+    // A template-built read names no variable a scan can find. Each family must
+    // be the R2 set (from the Tofu source, `${prefix}_…`), a build-time
+    // NEXT_PUBLIC_ value (never in this secret), or declared in
+    // RUNTIME_BUILT_PREFIXES — or the push would silently drop it.
+    const reads = execFileSync(
+      "git",
+      ["grep", "-hoE", "process\\.env\\[`[^`]*`\\]", "--", ...APP_SOURCE_DIRS],
+      { cwd: REPO_ROOT, encoding: "utf8" },
+    )
+      .split("\n")
+      .filter(Boolean);
+    expect(reads.length).toBeGreaterThan(0);
+    const unaccounted = reads.filter((read) => {
+      const template = read.slice("process.env[`".length);
+      return !(
+        template.startsWith("${") ||
+        template.startsWith("NEXT_PUBLIC_") ||
+        RUNTIME_BUILT_PREFIXES.some((p) => template.startsWith(p))
+      );
+    });
+    expect(unaccounted).toEqual([]);
+  });
+
+  it("leaves an unread name out of the file and says so, without refusing the push", () => {
+    const sources = {
+      ...SOURCES,
+      infisical: [...SOURCES.infisical, { key: "stray_unread_credential", value: "do-not-ship" }],
+    };
+    const r = spawnSync("node", ["scripts/cloudrun-env.mjs", "compose"], {
+      cwd: REPO_ROOT,
+      input: JSON.stringify(sources),
+      encoding: "utf8",
+    });
+    expect(r.status).toBe(0);
+    expect(r.stdout).toContain("STRIPE_SECRET_KEY=");
+    expect(r.stdout).not.toContain("do-not-ship");
+    expect(r.stderr).toContain("LEFT OUT 1, which no app source reads: stray_unread_credential");
+  });
+
+  it("still refuses one name from both sources, R2-shaped names counting as read", () => {
+    const clash = { ...SOURCES, infisical: [{ key: "CHAT_AUDIO_R2_SECRET", value: "x" }] };
+    const r = spawnSync("node", ["scripts/cloudrun-env.mjs", "compose"], {
+      cwd: REPO_ROOT,
+      input: JSON.stringify(clash),
+      encoding: "utf8",
+    });
+    expect(r.status).not.toBe(0);
+    expect(r.stderr).toContain("comes from both");
   });
 });
