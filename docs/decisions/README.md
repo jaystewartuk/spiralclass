@@ -490,7 +490,7 @@ records removed before publication — see [What is not here](#what-is-not-here)
 | [D-123](./D-123.md) | Social previews on the share link; we render every character          | Active (billing path → D-127)        |
 | [D-124](./D-124.md) | Any country, via a per-country bank-scheme registry                   | Active (`bank_account` → D-145)      |
 | [D-125](./D-125.md) | A student-acquisition assistant with a pure planner                   | Active                               |
-| [D-127](./D-127.md) | Image generation moves to Vertex AI                                   | Active                               |
+| [D-127](./D-127.md) | Image generation moves to Vertex AI                                   | Active (key → runtime identity)      |
 | [D-128](./D-128.md) | UK GDPR privacy layer; the supplier register becomes code             | Active                               |
 | [D-129](./D-129.md) | Every workflow deleted; the laptop runs everything                    | Superseded in part by D-157          |
 | [D-131](./D-131.md) | Recording and transcription back on; the policy corrected             | Reversed by D-187                    |

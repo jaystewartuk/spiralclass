@@ -27,6 +27,7 @@ const env = vi.hoisted(() => ({
   geminiVertexServiceAccount: vi.fn(
     (): { clientEmail: string; privateKey: string } | undefined => undefined,
   ),
+  runsOnCloudRun: vi.fn((): boolean => false),
 }));
 vi.mock("@/lib/env", () => env);
 vi.mock("@/lib/logger", () => ({
@@ -59,6 +60,7 @@ beforeEach(async () => {
   vi.clearAllMocks();
   vi.useRealTimers();
   env.geminiVertexServiceAccount.mockReturnValue(undefined);
+  env.runsOnCloudRun.mockReturnValue(false);
   const { __resetVertexAccessTokenCacheForTests } = await import("@/lib/ai/google-vertex-auth");
   __resetVertexAccessTokenCacheForTests();
 });
@@ -146,5 +148,146 @@ describe("getVertexAccessToken", () => {
     );
     const { getVertexAccessToken } = await import("@/lib/ai/google-vertex-auth");
     expect(await getVertexAccessToken()).toBeUndefined();
+  });
+});
+
+// Production runs on Cloud Run (D-184), whose metadata server hands the
+// service's own runtime identity a token on request — so the stored key D-127
+// needed on Fly can be retired. Same bounded, cached, never-throwing posture
+// as the key exchange above; what differs is where the token comes from and
+// which header proves the request came from inside the instance.
+describe("getVertexAccessToken on Cloud Run, with no key stored", () => {
+  const METADATA_TOKEN_URL =
+    "http://metadata.google.internal/computeMetadata/v1/instance/service-accounts/default/token";
+
+  beforeEach(() => {
+    env.runsOnCloudRun.mockReturnValue(true);
+  });
+
+  it("asks the metadata server for the runtime identity's token, with Metadata-Flavor: Google", async () => {
+    const fetchSpy = vi.fn(async (_url: string, _init: RequestInit) =>
+      jsonResponse({ access_token: "identity-token", expires_in: 3599, token_type: "Bearer" }),
+    );
+    vi.stubGlobal("fetch", fetchSpy);
+    const { getVertexAccessToken } = await import("@/lib/ai/google-vertex-auth");
+    expect(await getVertexAccessToken()).toBe("identity-token");
+
+    expect(fetchSpy).toHaveBeenCalledTimes(1);
+    const [url, init] = fetchSpy.mock.calls[0];
+    expect(url).toBe(METADATA_TOKEN_URL);
+    expect(new Headers(init.headers).get("Metadata-Flavor")).toBe("Google");
+    // Bounded like the key exchange: a wedged metadata server must not hold a
+    // teacher's request (and a concurrency slot) open forever.
+    expect(init.signal).toBeInstanceOf(AbortSignal);
+    // Nothing signed, nothing posted: no key material exists on this path.
+    expect(init.method).toBe("GET");
+    expect(init.body).toBeUndefined();
+  });
+
+  it("caches the token across calls instead of asking the metadata server per request", async () => {
+    const fetchSpy = vi.fn(async () => jsonResponse({ access_token: "m1", expires_in: 3600 }));
+    vi.stubGlobal("fetch", fetchSpy);
+    const { getVertexAccessToken } = await import("@/lib/ai/google-vertex-auth");
+    expect(await getVertexAccessToken()).toBe("m1");
+    expect(await getVertexAccessToken()).toBe("m1");
+    expect(fetchSpy).toHaveBeenCalledTimes(1);
+  });
+
+  it("refreshes once the cached token is within the skew window of expiring", async () => {
+    vi.useFakeTimers();
+    const fetchSpy = vi
+      .fn()
+      .mockResolvedValueOnce(jsonResponse({ access_token: "m1", expires_in: 3600 }))
+      .mockResolvedValueOnce(jsonResponse({ access_token: "m2", expires_in: 3600 }));
+    vi.stubGlobal("fetch", fetchSpy);
+    const { getVertexAccessToken } = await import("@/lib/ai/google-vertex-auth");
+    expect(await getVertexAccessToken()).toBe("m1");
+    // 3600s expiry, 60s skew: 3539s in is still fresh, 3541.5s is inside skew.
+    vi.advanceTimersByTime(3539_000);
+    expect(await getVertexAccessToken()).toBe("m1");
+    vi.advanceTimersByTime(2_500);
+    expect(await getVertexAccessToken()).toBe("m2");
+    expect(fetchSpy).toHaveBeenCalledTimes(2);
+  });
+
+  it("returns undefined rather than throwing when the metadata server is unreachable", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => {
+        throw new TypeError("fetch failed");
+      }),
+    );
+    const { getVertexAccessToken } = await import("@/lib/ai/google-vertex-auth");
+    await expect(getVertexAccessToken()).resolves.toBeUndefined();
+  });
+
+  it("returns undefined when the metadata server times out", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => {
+        throw new DOMException("The operation was aborted due to timeout", "TimeoutError");
+      }),
+    );
+    const { getVertexAccessToken } = await import("@/lib/ai/google-vertex-auth");
+    await expect(getVertexAccessToken()).resolves.toBeUndefined();
+  });
+
+  it("returns undefined on a non-2xx from the metadata server, and does not cache the failure", async () => {
+    const fetchSpy = vi
+      .fn()
+      .mockResolvedValueOnce(new Response("Not Found", { status: 404 }))
+      .mockResolvedValueOnce(jsonResponse({ access_token: "m-retry", expires_in: 3600 }));
+    vi.stubGlobal("fetch", fetchSpy);
+    const { getVertexAccessToken } = await import("@/lib/ai/google-vertex-auth");
+    expect(await getVertexAccessToken()).toBeUndefined();
+    expect(await getVertexAccessToken()).toBe("m-retry");
+  });
+
+  it("returns undefined on an unparseable metadata response", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => new Response("<html>oops</html>", { status: 200 })),
+    );
+    const { getVertexAccessToken } = await import("@/lib/ai/google-vertex-auth");
+    expect(await getVertexAccessToken()).toBeUndefined();
+  });
+
+  it("uses the stored key, not the metadata server, while a key is still configured", async () => {
+    // The deploy is safe to land before the operator removes the key: until
+    // then, production keeps authenticating exactly as it did.
+    env.geminiVertexServiceAccount.mockReturnValue(TEST_ACCOUNT);
+    const fetchSpy = vi.fn(async (_url: string, _init: RequestInit) =>
+      jsonResponse({ access_token: "key-token", expires_in: 3600 }),
+    );
+    vi.stubGlobal("fetch", fetchSpy);
+    const { getVertexAccessToken } = await import("@/lib/ai/google-vertex-auth");
+    expect(await getVertexAccessToken()).toBe("key-token");
+    expect(fetchSpy).toHaveBeenCalledTimes(1);
+    expect(fetchSpy.mock.calls[0][0]).toBe("https://oauth2.googleapis.com/token");
+  });
+
+  it("never serves a token cached for the key once the key is gone", async () => {
+    env.geminiVertexServiceAccount.mockReturnValue(TEST_ACCOUNT);
+    const fetchSpy = vi
+      .fn()
+      .mockResolvedValueOnce(jsonResponse({ access_token: "key-token", expires_in: 3600 }))
+      .mockResolvedValueOnce(jsonResponse({ access_token: "identity-token", expires_in: 3600 }));
+    vi.stubGlobal("fetch", fetchSpy);
+    const { getVertexAccessToken } = await import("@/lib/ai/google-vertex-auth");
+    expect(await getVertexAccessToken()).toBe("key-token");
+    env.geminiVertexServiceAccount.mockReturnValue(undefined);
+    expect(await getVertexAccessToken()).toBe("identity-token");
+    expect(fetchSpy.mock.calls[1][0]).toBe(METADATA_TOKEN_URL);
+  });
+});
+
+describe("getVertexAccessToken off Cloud Run, with no key stored", () => {
+  it("returns undefined without calling anything, since a laptop has no metadata server", async () => {
+    env.runsOnCloudRun.mockReturnValue(false);
+    const fetchSpy = vi.fn();
+    vi.stubGlobal("fetch", fetchSpy);
+    const { getVertexAccessToken } = await import("@/lib/ai/google-vertex-auth");
+    expect(await getVertexAccessToken()).toBeUndefined();
+    expect(fetchSpy).not.toHaveBeenCalled();
   });
 });

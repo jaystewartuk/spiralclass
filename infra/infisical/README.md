@@ -217,7 +217,6 @@ DEEPGRAM_API_KEY
 ASSEMBLYAI_API_KEY
 AZURE_SPEECH_KEY
 FIELD_ENCRYPTION_KEY
-GEMINI_VERTEX_SERVICE_ACCOUNT_KEY_BASE64
 VAPID_PUBLIC_KEY
 VAPID_PRIVATE_KEY
 VAPID_SUBJECT
@@ -301,24 +300,28 @@ vendor's dashboard):
 - `INNGEST_EVENT_KEY` — Manage → Event Keys.
 - `INNGEST_SIGNING_KEY` — Manage → Signing Key.
 
-**Vertex AI (Gemini image generation, D-127)** — NOT a plain "create an API
-key" flow, because Vertex has no bare-API-key auth surface:
+**Vertex AI (Gemini image generation, D-127)** — **no secret in
+production.** Vertex has no bare-API-key auth surface, so every call carries
+an OAuth2 token, and on Cloud Run `lib/ai/google-vertex-auth.ts` gets that
+token from the metadata server for the service's own runtime identity
+(`web-runtime`, which holds `roles/aiplatform.user` — granted by
+`infra/gcp/setup-deploy-identity.sh`). Nothing to store, nothing to rotate.
+`GEMINI_VERTEX_PROJECT_ID`/`GEMINI_VERTEX_LOCATION` are non-secret — they
+live in `config/env/*.runtime.env`, not here.
 
-- `GEMINI_VERTEX_SERVICE_ACCOUNT_KEY_BASE64` — a GCP service account key,
-  base64-encoded onto one line. Create the service account (`gcloud iam
-service-accounts create <name> --project=example-project-00000`), grant it
-  `roles/aiplatform.user` scoped to that project (`gcloud projects
-add-iam-policy-binding example-project-00000 --member=serviceAccount:<email>
---role=roles/aiplatform.user`), download a key (`gcloud iam
-service-accounts keys create key.json --iam-account=<email>`), then
-  `base64 -i key.json` and paste the single-line output as the secret value.
-  Used only by `lib/ai/google-vertex-auth.ts` to sign a self-issued JWT and
-  exchange it for a Vertex bearer token — see D-127 for why this exists
-  instead of the simpler `X-Goog-Api-Key` the public Gemini API offers (that
-  surface gates every call on a separate Prepay balance a linked Cloud
-  Billing account doesn't satisfy; Vertex bills through ordinary postpaid
-  Cloud Billing instead). `GEMINI_VERTEX_PROJECT_ID`/`GEMINI_VERTEX_LOCATION`
-  are non-secret — they live in `config/env/*.runtime.env`, not here.
+- `GEMINI_VERTEX_SERVICE_ACCOUNT_KEY_BASE64` — **off-GCP only** (a laptop,
+  where there is no metadata server), so it belongs in your own
+  `apps/web/.env.local`, not in Infisical `production`. It is a GCP service
+  account key holding `roles/aiplatform.user` on the project, base64-encoded
+  onto one line (`base64 -i key.json`). When it IS set it wins over the
+  runtime identity, which is what made the switch safe to deploy before the
+  key was removed — so a copy left in Infisical `production` keeps a
+  long-lived key live in the running service for no benefit. If you find one
+  there, it is the pre-2026-09-24 key; D-127's addendum says how it is
+  retired. D-127 also says why Vertex rather than the simpler
+  `X-Goog-Api-Key` the public Gemini API offers (that surface gates every
+  call on a separate Prepay balance a linked Cloud Billing account doesn't
+  satisfy).
 
 **PostHog:**
 

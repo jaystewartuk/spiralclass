@@ -124,9 +124,35 @@ describe("the deploy can ship production and cannot read it", () => {
 
   it("runs as a dedicated identity, not Compute Engine's default", () => {
     // The default compute service account usually carries project-wide Editor.
-    // This app needs no Google API at all.
+    // This app calls one Google API (Vertex AI), and holds one role for it.
     expect(SCRIPT).toContain("--service-account");
     expect(shape.RUNTIME_SA_ID).toBeTruthy();
+  });
+
+  it("gives the runtime identity exactly one project role, the Vertex AI caller", () => {
+    // "Generate with AI" authenticates as web-runtime through the metadata
+    // server rather than with a stored key (D-127's 2026-09-24 addendum), so
+    // the grant that makes it work has to be one the setup script re-creates —
+    // a grant made once by hand is the one a rebuilt project silently lacks,
+    // and the feature then fails on the first click rather than at deploy.
+    // Exactly one, and this one: aiplatform.user calls models and cannot read
+    // a secret, act as another identity or change IAM. A wider role here would
+    // hand every dependency in the running image the same reach.
+    // One logical command per line: comments dropped, `\`-continuations joined.
+    const commands = read("infra/gcp/setup-deploy-identity.sh")
+      .split("\n")
+      .filter((line) => !line.trim().startsWith("#"))
+      .join("\n")
+      .replace(/\\\n\s*/g, " ")
+      .split("\n");
+    const runtimeProjectRoles = commands
+      .filter((cmd) => cmd.includes("gcloud projects add-iam-policy-binding"))
+      .filter((cmd) => cmd.includes("$RUNTIME_SA"))
+      .map((cmd) => /--role=["']?([^\s"']+)/.exec(cmd)?.[1]);
+    expect(runtimeProjectRoles).toEqual(["roles/aiplatform.user"]);
+    expect(commands.join("\n"), "the Vertex AI API is never enabled").toContain(
+      "aiplatform.googleapis.com",
+    );
   });
 
   it("the operator scripts read the shape file rather than retyping it", () => {

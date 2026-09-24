@@ -342,6 +342,89 @@ describe("hasGeminiImageCreds", () => {
     const { hasGeminiImageCreds } = await import("@/lib/env");
     expect(hasGeminiImageCreds()).toBe(false);
   });
+
+  // Production runs on Cloud Run, whose runtime identity authenticates without
+  // a stored key (lib/ai/google-vertex-auth.ts). The whole table, because the
+  // two ways this goes wrong are opposite: requiring the key would hide the
+  // feature the moment the operator retires it, and dropping the project-id
+  // requirement would offer a control that cannot name what it calls.
+  it.each([
+    { key: true, cloudRun: false, project: true, expected: true },
+    { key: false, cloudRun: true, project: true, expected: true },
+    { key: true, cloudRun: true, project: true, expected: true },
+    { key: false, cloudRun: false, project: true, expected: false },
+    { key: true, cloudRun: false, project: false, expected: false },
+    { key: false, cloudRun: true, project: false, expected: false },
+    { key: true, cloudRun: true, project: false, expected: false },
+    { key: false, cloudRun: false, project: false, expected: false },
+  ])(
+    "key=$key, on Cloud Run=$cloudRun, project id=$project → $expected",
+    async ({ key, cloudRun, project, expected }) => {
+      setEnv(
+        withBaseRequired({
+          GEMINI_VERTEX_SERVICE_ACCOUNT_KEY_BASE64: key ? validAccount : undefined,
+          K_SERVICE: cloudRun ? "web" : undefined,
+          GEMINI_VERTEX_PROJECT_ID: project ? "example-project-00000" : undefined,
+        }),
+      );
+      const { hasGeminiImageCreds } = await import("@/lib/env");
+      expect(hasGeminiImageCreds()).toBe(expected);
+    },
+  );
+
+  it("does not count a malformed key as a credential off Cloud Run", async () => {
+    setEnv(
+      withBaseRequired({
+        GEMINI_VERTEX_SERVICE_ACCOUNT_KEY_BASE64: "not-valid-base64-json!!",
+        GEMINI_VERTEX_PROJECT_ID: "example-project-00000",
+      }),
+    );
+    const { hasGeminiImageCreds } = await import("@/lib/env");
+    expect(hasGeminiImageCreds()).toBe(false);
+  });
+});
+
+describe("runsOnCloudRun", () => {
+  it("is true when Cloud Run's K_SERVICE is set", async () => {
+    setEnv(withBaseRequired({ K_SERVICE: "web" }));
+    const { runsOnCloudRun } = await import("@/lib/env");
+    expect(runsOnCloudRun()).toBe(true);
+  });
+
+  it("is false when K_SERVICE is unset or blank — a laptop, CI, a test", async () => {
+    setEnv(withBaseRequired({ K_SERVICE: undefined }));
+    expect((await import("@/lib/env")).runsOnCloudRun()).toBe(false);
+    vi.resetModules();
+    setEnv(withBaseRequired({ K_SERVICE: "" }));
+    expect((await import("@/lib/env")).runsOnCloudRun()).toBe(false);
+  });
+});
+
+describe("socialPreviewAiEnabled on Cloud Run with no stored key", () => {
+  it("stays on once the key is retired, as long as the flag and project id are set", async () => {
+    setEnv(
+      withBaseRequired({
+        SOCIAL_PREVIEW_AI_ENABLED: "1",
+        K_SERVICE: "web",
+        GEMINI_VERTEX_PROJECT_ID: "example-project-00000",
+        GEMINI_VERTEX_SERVICE_ACCOUNT_KEY_BASE64: undefined,
+      }),
+    );
+    const { socialPreviewAiEnabled } = await import("@/lib/env");
+    expect(socialPreviewAiEnabled()).toBe(true);
+  });
+
+  it("is still off without the flag — an ambient credential switches nothing on (D-114)", async () => {
+    setEnv(
+      withBaseRequired({
+        SOCIAL_PREVIEW_AI_ENABLED: undefined,
+        K_SERVICE: "web",
+        GEMINI_VERTEX_PROJECT_ID: "example-project-00000",
+      }),
+    );
+    const { socialPreviewAiEnabled } = await import("@/lib/env");
+    expect(socialPreviewAiEnabled()).toBe(false);
+  });
 });
 
 describe("geminiVertexLocation", () => {

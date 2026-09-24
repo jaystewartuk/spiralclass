@@ -16,9 +16,9 @@ const log = logger({ surface: "ai" });
 // `generateContent`'s request/response shape is IDENTICAL between the two
 // surfaces for this model (confirmed against a live call) — only the
 // endpoint URL and the auth header differ. Auth is a Bearer token from
-// google-vertex-auth.ts (a service account, since this runs on Fly, not
-// GCP) rather than X-Goog-Api-Key, because Vertex has no API-key surface at
-// all — every call is OAuth2.
+// google-vertex-auth.ts (the Cloud Run runtime identity in production, a
+// service account key off-GCP) rather than X-Goog-Api-Key, because Vertex has
+// no API-key surface at all — every call is OAuth2.
 //
 // The response carries the image as base64 `inlineData` on a content part,
 // alongside any text parts the model felt like adding; we take the first

@@ -73,6 +73,7 @@ gcloud services enable \
   run.googleapis.com \
   artifactregistry.googleapis.com \
   secretmanager.googleapis.com \
+  aiplatform.googleapis.com \
   --project "$PROJECT"
 
 say "Artifact Registry repository ($REGION)"
@@ -98,7 +99,7 @@ gcloud artifacts repositories set-cleanup-policies "$ARTIFACT_REPO" \
   --policy="$REPO_ROOT/config/cloudrun/artifact-cleanup.json" \
   --no-dry-run
 
-say "Runtime identity ($RUNTIME_SA_ID) — holds NO project role"
+say "Runtime identity ($RUNTIME_SA_ID) — one project role, roles/aiplatform.user"
 # ⚠️ $RUNTIME_SA_ID, never the literal name. Everything below binds roles to
 # "$RUNTIME_SA_ID@…", so a literal here that stopped matching the config would
 # create one account and grant the other — leaving the service deployable and
@@ -123,6 +124,17 @@ gcloud secrets add-iam-policy-binding "$SECRET_NAME" \
   --member="serviceAccount:$RUNTIME_SA" \
   --role=roles/secretmanager.secretAccessor \
   --project "$PROJECT" --condition=None --format=none
+
+say "The one Google API the app calls — Vertex AI, for \"Generate with AI\""
+# The runtime identity's ONLY project-level role. It is what lets
+# lib/ai/google-vertex-auth.ts take a token from the metadata server instead of
+# holding a long-lived service account key (D-127's 2026-09-24 addendum).
+# aiplatform.user can call models and cannot change IAM, read a secret or touch
+# the service — so it widens nothing the secret boundary above protects.
+gcloud projects add-iam-policy-binding "$PROJECT" \
+  --member="serviceAccount:$RUNTIME_SA" \
+  --role=roles/aiplatform.user \
+  --condition=None --format=none
 
 say "What the deploy identity may do — note what is absent"
 for role in roles/run.admin roles/artifactregistry.writer; do

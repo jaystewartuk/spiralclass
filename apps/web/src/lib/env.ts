@@ -158,16 +158,25 @@ const serverSchema = z.object({
   // AI Studio's API-key surface gates every call on a separate "Prepay"
   // balance with no postpaid option, while Vertex bills the SAME model
   // through ordinary Cloud Billing — the account already used for every
-  // other GCP charge here. Off-GCP (Fly, not GCP) means no ambient
-  // credential, so a service account key is the only auth path; see
-  // lib/ai/google-vertex-auth.ts. All optional, exactly like
-  // ANTHROPIC_API_KEY/GOOGLE_TTS_API_KEY: missing means the "Generate with
-  // AI" control is hidden and the server refuses, while uploading an image
-  // and every existing share link keep working.
+  // other GCP charge here. Vertex is OAuth2-only, and the credential comes
+  // from one of two places (lib/ai/google-vertex-auth.ts): on Cloud Run, the
+  // service's own runtime identity via the metadata server, with no stored
+  // key at all; anywhere else (a laptop), a service account key in
+  // GEMINI_VERTEX_SERVICE_ACCOUNT_KEY_BASE64. A key that IS set wins, so it
+  // can be removed from production after the identity path is live rather
+  // than before. All optional, exactly like ANTHROPIC_API_KEY/
+  // GOOGLE_TTS_API_KEY: no project id, or no credential from either source,
+  // means the "Generate with AI" control is hidden and the server refuses,
+  // while uploading an image and every existing share link keep working.
   GEMINI_VERTEX_SERVICE_ACCOUNT_KEY_BASE64: blankAsAbsent(z.string().min(1).optional()),
   GEMINI_VERTEX_PROJECT_ID: blankAsAbsent(z.string().min(1).optional()),
   GEMINI_VERTEX_LOCATION: blankAsAbsent(z.string().min(1).optional()),
   GEMINI_IMAGE_MODEL: blankAsAbsent(z.string().min(1).optional()),
+  // Set by Cloud Run itself on every instance (the service's name — `web` in
+  // production), never by us and never in a committed or secret env file. Its
+  // presence is how the app knows a metadata server is there to hand out the
+  // runtime identity's tokens; see runsOnCloudRun().
+  K_SERVICE: blankAsAbsent(z.string().min(1).optional()),
   GOOGLE_TTS_API_KEY: blankAsAbsent(z.string().min(1).optional()),
   GOOGLE_TTS_VOICE: blankAsAbsent(z.string().min(1).optional()),
   GOOGLE_TTS_LANGUAGE_CODE: blankAsAbsent(z.string().min(1).optional()),
@@ -637,10 +646,11 @@ function dequote(raw: string): string {
   return quoted ? raw.slice(1, -1).trim() : raw;
 }
 
-/** The service account credential Vertex AI calls sign with. `undefined`
- * when unset, malformed base64, or the decoded JSON is missing either
- * field — any of which must degrade to "AI generation hidden", never a
- * boot-time crash, per the same D-114 two-condition shape every other AI
+/** The service account key Vertex AI calls sign with, when one is stored —
+ * the off-GCP path (on Cloud Run the runtime identity needs no key; see
+ * runsOnCloudRun()). `undefined` when unset, malformed base64, or the decoded
+ * JSON is missing either field — any of which must degrade to "no key", never
+ * a boot-time crash, per the same D-114 two-condition shape every other AI
  * capability here uses. */
 export function geminiVertexServiceAccount():
   { clientEmail: string; privateKey: string } | undefined {
@@ -672,8 +682,23 @@ export function geminiVertexLocation(): string {
   return serverEnv().GEMINI_VERTEX_LOCATION ?? "global";
 }
 
+// True inside a Cloud Run container, where the metadata server can mint an
+// access token for the service's runtime identity (`web-runtime`, see
+// infra/gcp/README.md). Cloud Run sets K_SERVICE on every instance; nothing
+// else this app runs on does, so its absence means "no ambient Google
+// credential here" — a laptop, CI, a test.
+export function runsOnCloudRun(): boolean {
+  return Boolean(serverEnv().K_SERVICE);
+}
+
+// A project to call, AND a way to authenticate: a service account key when one
+// is configured, else the Cloud Run runtime identity. Credential detection
+// only — whether that identity actually holds `roles/aiplatform.user` is a
+// fact about the project's IAM, which a token request cannot see and a failed
+// generation reports.
 export function hasGeminiImageCreds(): boolean {
-  return Boolean(geminiVertexServiceAccount() && geminiVertexProjectId());
+  if (!geminiVertexProjectId()) return false;
+  return Boolean(geminiVertexServiceAccount()) || runsOnCloudRun();
 }
 
 // The image model used for social previews. Overridable via env so a cheaper
