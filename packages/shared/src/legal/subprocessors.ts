@@ -77,7 +77,9 @@ export const SUBPROCESSORS: readonly Subprocessor[] = [
     purpose: "Hosts the PostgreSQL database that stores your account and class records.",
     dataShared: "Account details, class and payment history, messages, homework.",
     location: "United States",
-    // infra/database/neon/README.md pins the production project to aws-us-east-2 (Ohio).
+    // infra/database/neon/README.md pins the production project to aws-us-east-1
+    // (N. Virginia); it was aws-us-east-2 (Ohio) until 2026-09-24. Both are
+    // "United States", so the published location did not change.
     gate: null,
     evidence: "infra/database/neon/README.md",
   },

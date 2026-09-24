@@ -35,11 +35,12 @@ so a mis-sequenced adoption fails loudly rather than corrupting anything.
 ## Provisioning a Neon project
 
 1. **Create the project** at [console.neon.tech](https://console.neon.tech).
-   Region: `aws-us-east-2` (Ohio) — chosen as the closest Neon-supported
-   region to the app host of the day, which is what actually matters for
-   latency (the app talks to the DB on every request). Production's host is
-   now Cloud Run `us-east4` (N. Virginia); [D-184](../../../docs/decisions/D-184.md)
-   carries the measurement.
+   Region: `aws-us-east-1` (N. Virginia) — the Neon region nearest the app
+   host, which is what actually matters for latency (the app talks to the DB
+   on every request). The host is Cloud Run `us-east4`, in the same Ashburn
+   area: 4.6 ms p50 per round trip against 20 ms to `aws-us-east-2`, where
+   production sat until 2026-09-24. [D-184](../../../docs/decisions/D-184.md)'s
+   second addendum carries the measurement and the move.
 2. **Get two connection strings** from the project's Connection Details panel:
    - **Pooled** (has `-pooler` in the hostname) → `DATABASE_URL`.
    - **Direct** (no pooler) → `DIRECT_URL`. Prisma's migration engine needs
@@ -91,12 +92,11 @@ The org has to be named on every non-interactive call or the CLI stops to ask:
 neonctl projects list --org-id "$NEON_ORG_ID" --output json
 ```
 
-The two projects:
-
-| Project                  | Id                            | Notes                                                          |
-| ------------------------ | ----------------------------- | -------------------------------------------------------------- |
-| `agendaprofe-preview`    | _see `neonctl projects list`_ | disposable, reseedable via `seed:preview` — nothing to protect |
-| `agendaprofe-production` | _see `neonctl projects list`_ | real student data; read-only for agents, see below             |
+The production project is `spiralclass-use1`, id from `neonctl projects list`.
+There is no preview project: preview has no host
+([D-184](../../../docs/decisions/D-184.md)'s addendum). The table that stood
+here named two projects, `agendaprofe-preview` and `agendaprofe-production`,
+long after neither existed under those names.
 
 ### Running SQL — `neonctl` cannot, `psql` can
 

@@ -7,7 +7,8 @@
 > the dev machine — so **everything below is still the only description of the
 > box and is still the procedure to follow.** D-150 also carries the
 > measurement that shaped it: this box is in `mx-queretaro-1`, 58 ms from
-> Neon's `aws-us-east-2` against the Fly machine's 12 ms. When the module
+> Neon's `aws-us-east-2` against the Fly machine's 12 ms (production has since
+> moved to `aws-us-east-1`, which is ~55 ms from there). When the module
 > lands, this file's "Rebuild" section is what it replaces.
 
 > [!IMPORTANT]
