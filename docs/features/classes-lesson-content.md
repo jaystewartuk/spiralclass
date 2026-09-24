@@ -43,6 +43,9 @@ as historical rationale, not current schema truth.
 - As a teacher, I want AI to draft a lesson plan for a specific student and
   class, using what I already know about them, so I don't start from a blank
   page every time.
+- As a teacher, I want one page for the day with every student and what I'll
+  cover with each, the way I keep it in my notebook, so I can plan the whole
+  day at once instead of opening each class.
 - As a teacher, I want to reuse a lesson structure I've built before instead
   of retyping the same skeleton every class.
 - As a teacher, I want to check off my private teaching cues live during the
@@ -148,6 +151,37 @@ as historical rationale, not current schema truth.
   any time — enforced at the query layer, not just the UI.
 - Cascades: both `LessonNote` and `LessonSummary` are deleted if their parent
   booking is deleted.
+
+### Day plan (`/dashboard/classes/plan`)
+
+A teacher's planning notebook laid out the way teachers keep one on paper: one
+page per day, one section per class, a few bullets of what she means to cover.
+It is **a view, not a table** — each bullet is a private teacher cue
+(`LessonNote`, `audience: "teacher"`, `kind: "text"`) on that class, so what she
+plans here is the same list she ticks off during the call and the one "copy from
+last class" carries forward.
+
+- The day is a calendar day on the **teacher's** wall clock, bounded by her
+  local midnights. `?d=YYYY-MM-DD` picks the day; a missing, malformed or
+  calendar-impossible value falls back to her today rather than erroring.
+- Lists her classes that start that day in `scheduled`, `completed` or
+  `no_show` status, earliest first. Cancelled and rescheduled classes have no
+  plan and are not shown.
+- Shows only the teacher column. Student-facing instructions, materials and
+  class content stay on the class page — the plan is deliberately separate from
+  materials.
+- Read like a notebook page: each cue is a checkbox and one line of text.
+  Tapping a line turns that line alone into an editor (save, cancel, move
+  up/down, remove); ticking it is immediate. The class page keeps its fuller
+  editor, which suits working on one class.
+- Every note rule above applies unchanged (500 characters, free on every plan,
+  done-state, move up/down, copy from last class). The page calls the same
+  actions with `from=plan` so each refreshes the page it came from; the field
+  chooses between two fixed paths and never carries one.
+- A class is flagged **last of its package** when the package is fully
+  committed (`classesUsed ≥ classesTotal`) and no later class in it is still
+  booked — the moment to raise renewal. A class with no package is never
+  flagged.
 
 ### Lesson summary (`LessonSummary`)
 
@@ -271,6 +305,7 @@ as historical rationale, not current schema truth.
 | Write/edit/delete lesson notes (both columns) | Yes (free)              | No            | No                                |
 | View student-facing note                      | Yes                     | No            | Yes, time-windowed only           |
 | View teacher cue                              | Yes                     | No            | Never                             |
+| Use the day plan                              | Yes (free)              | No            | No — teacher surface only         |
 | Generate/regenerate lesson summary            | Yes (Pro)               | No            | No                                |
 | View lesson summary                           | Yes                     | No            | Never — no student surface exists |
 

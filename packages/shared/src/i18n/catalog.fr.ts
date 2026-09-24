@@ -2630,6 +2630,23 @@ export const fr = {
   "web.dashboard.classes.upcomingAndRecentInZone":
     "À venir et récents dans votre fuseau horaire ({tz}).",
   "web.dashboard.classes.calendarView": "Vue calendrier",
+  "web.dashboard.classes.plan.cta": "Planifier la journée",
+  "web.dashboard.classes.plan.title": "Planning de la journée",
+  "web.dashboard.classes.plan.help":
+    "Ce que vous voulez voir avec chaque élève. Vous seul voyez ces notes, et vous pouvez les cocher pendant le cours.",
+  "web.dashboard.classes.plan.placeholder": "Ajouter un point…",
+  "web.dashboard.classes.plan.addLabel": "Nouveau point pour {name}",
+  "web.dashboard.classes.plan.markDone": "Fait : {cue}",
+  "web.dashboard.classes.plan.editHint": "modifier",
+  "web.dashboard.classes.plan.editLabel": "Modifier le point",
+  "web.dashboard.classes.plan.dayNav": "Choisir un jour",
+  "web.dashboard.classes.plan.previousDay": "Jour précédent",
+  "web.dashboard.classes.plan.nextDay": "Jour suivant",
+  "web.dashboard.classes.plan.today": "Aujourd'hui",
+  "web.dashboard.classes.plan.lastOfPackage": "Dernier cours du forfait",
+  "web.dashboard.classes.plan.lastOfPackageHelp": "Bon moment pour parler du prochain forfait.",
+  "web.dashboard.classes.plan.emptyTitle": "Aucun cours ce jour-là",
+  "web.dashboard.classes.plan.emptyBody": "Choisissez un autre jour pour planifier ses cours.",
   "web.dashboard.classes.tapToMarkCancelAdjust":
     "Touchez un cours pour le marquer, l'annuler ou l'ajuster.",
   "web.dashboard.classes.noneScheduled":

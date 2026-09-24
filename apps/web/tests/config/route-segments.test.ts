@@ -141,6 +141,7 @@ const ALLOWED_SEGMENTS: readonly string[] = [
   "participants",
   "payments",
   "pdf",
+  "plan",
   "preview",
   "pricing",
   "privacy-notice",

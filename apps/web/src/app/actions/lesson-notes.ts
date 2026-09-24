@@ -12,6 +12,7 @@ import { formatZonedDateTime } from "@/lib/date-display";
 import { logger } from "@/lib/logger";
 import { revalidateAfterAction } from "@/lib/revalidate";
 import { usesEnglishCopy } from "@spiralclass/shared";
+import { DAY_PLAN_PATH } from "@/lib/lesson-notes/day-plan";
 
 const log = logger({ surface: "lesson-notes" });
 
@@ -37,6 +38,15 @@ async function ownedBookingId(bookingId: string, teacherId: string): Promise<str
     select: { id: true },
   });
   return booking?.id ?? null;
+}
+
+// The page a note action was submitted from — the one path it may revalidate
+// (lib/revalidate.ts, D-174). The same cue forms are rendered on the class page
+// and on the day plan, which marks its forms `from=plan`. Anything else,
+// including a hand-edited value, means the class page: the field only picks
+// between two fixed paths and never carries one of its own.
+function notesPagePath(bookingId: string, formData: FormData): string {
+  return formData.get("from") === "plan" ? DAY_PLAN_PATH : `/dashboard/classes/${bookingId}`;
 }
 
 // Pull the notes from this student's previous class into the current one, so a
@@ -106,7 +116,7 @@ export async function copyNotesFromLastClass(
     })),
   });
 
-  revalidateAfterAction(`/dashboard/classes/${current.id}`);
+  revalidateAfterAction(notesPagePath(current.id, formData));
   return { ok: true };
 }
 
@@ -171,7 +181,7 @@ export async function createLessonNote(
   });
   await flushAnalytics();
 
-  revalidateAfterAction(`/dashboard/classes/${ownedId}`);
+  revalidateAfterAction(notesPagePath(ownedId, formData));
   return { ok: true };
 }
 
@@ -194,7 +204,7 @@ export async function updateLessonNote(formData: FormData): Promise<void> {
   if (!note) return;
 
   await prisma.lessonNote.update({ where: { id: note.id }, data: { body } });
-  revalidateAfterAction(`/dashboard/classes/${note.bookingId}`);
+  revalidateAfterAction(notesPagePath(note.bookingId, formData));
 }
 
 export async function deleteLessonNote(formData: FormData): Promise<void> {
@@ -209,7 +219,7 @@ export async function deleteLessonNote(formData: FormData): Promise<void> {
   if (!note) return;
 
   await prisma.lessonNote.delete({ where: { id: note.id } });
-  revalidateAfterAction(`/dashboard/classes/${note.bookingId}`);
+  revalidateAfterAction(notesPagePath(note.bookingId, formData));
 }
 
 // Teacher checks a cue off (or back on) mid-class. Student-audience notes have
@@ -229,7 +239,7 @@ export async function toggleLessonNoteDone(formData: FormData): Promise<void> {
     where: { id: note.id },
     data: { doneAt: note.doneAt ? null : new Date() },
   });
-  revalidateAfterAction(`/dashboard/classes/${note.bookingId}`);
+  revalidateAfterAction(notesPagePath(note.bookingId, formData));
 }
 
 // Swap a note with its neighbour in the same audience column. Simple position
@@ -262,7 +272,7 @@ export async function moveLessonNote(formData: FormData): Promise<void> {
     prisma.lessonNote.update({ where: { id: note.id }, data: { position: neighbour.position } }),
     prisma.lessonNote.update({ where: { id: neighbour.id }, data: { position: note.position } }),
   ]);
-  revalidateAfterAction(`/dashboard/classes/${note.bookingId}`);
+  revalidateAfterAction(notesPagePath(note.bookingId, formData));
 }
 
 // AI post-class summary (live-notes-panel.md "step 2", D-15). Generates a short

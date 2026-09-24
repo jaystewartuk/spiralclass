@@ -408,3 +408,66 @@ describe("generateLessonSummary", () => {
     expect(summaryUpsert).not.toHaveBeenCalled();
   });
 });
+
+// The same cue forms render on the class page and on the day plan. An action
+// may revalidate exactly one path (lib/revalidate.ts, D-174), and it has to be
+// the page the form was submitted from or the teacher's edit never appears.
+describe("which page a note action refreshes", () => {
+  it("refreshes the class page by default", async () => {
+    const { revalidatePath } = await import("next/cache");
+    await createLessonNote(undefined, fd({ bookingId: "b1", audience: "teacher", body: "cue" }));
+    expect(revalidatePath).toHaveBeenCalledTimes(1);
+    expect(revalidatePath).toHaveBeenCalledWith("/dashboard/classes/b1");
+  });
+
+  it("refreshes the day plan when the form came from it", async () => {
+    const { revalidatePath } = await import("next/cache");
+    await createLessonNote(
+      undefined,
+      fd({ bookingId: "b1", audience: "teacher", body: "cue", from: "plan" }),
+    );
+    expect(revalidatePath).toHaveBeenCalledTimes(1);
+    expect(revalidatePath).toHaveBeenCalledWith("/dashboard/classes/plan");
+  });
+
+  it("never revalidates a path supplied by the form", async () => {
+    const { revalidatePath } = await import("next/cache");
+    state.note = { id: "n1", bookingId: "b1" };
+    await updateLessonNote(fd({ noteId: "n1", body: "edited", from: "/admin" }));
+    expect(revalidatePath).toHaveBeenCalledWith("/dashboard/classes/b1");
+  });
+
+  it.each([
+    ["update", () => updateLessonNote(fd({ noteId: "n1", body: "x", from: "plan" }))],
+    ["delete", () => deleteLessonNote(fd({ noteId: "n1", from: "plan" }))],
+    ["toggle", () => toggleLessonNoteDone(fd({ noteId: "n1", from: "plan" }))],
+  ])("%s from the day plan refreshes the day plan", async (_name, run) => {
+    const { revalidatePath } = await import("next/cache");
+    state.note = { id: "n1", bookingId: "b1", audience: "teacher", doneAt: null };
+    await run();
+    expect(revalidatePath).toHaveBeenCalledWith("/dashboard/classes/plan");
+  });
+
+  it("move from the day plan refreshes the day plan", async () => {
+    const { revalidatePath } = await import("next/cache");
+    state.note = { id: "n2", bookingId: "b1", audience: "teacher", position: 1 };
+    state.neighbour = { id: "n1", position: 0 };
+    await moveLessonNote(fd({ noteId: "n2", direction: "up", from: "plan" }));
+    expect(revalidatePath).toHaveBeenCalledWith("/dashboard/classes/plan");
+  });
+
+  it("copy from last class on the day plan refreshes the day plan", async () => {
+    const { revalidatePath } = await import("next/cache");
+    bookingFindFirst.mockResolvedValueOnce({
+      id: "b2",
+      studentId: "s1",
+      scheduledStart: new Date("2026-06-23T15:00:00Z"),
+    } as never);
+    bookingFindFirst.mockResolvedValueOnce({
+      lessonNotes: [{ audience: "teacher", body: "cue A", position: 0 }],
+    } as never);
+    const res = await copyNotesFromLastClass(undefined, fd({ bookingId: "b2", from: "plan" }));
+    expect(res?.ok).toBeTruthy();
+    expect(revalidatePath).toHaveBeenCalledWith("/dashboard/classes/plan");
+  });
+});
