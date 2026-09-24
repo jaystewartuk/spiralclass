@@ -53,9 +53,9 @@ fi
 # shellcheck source=./livekit-credentials.sh
 source "$REPO_ROOT/docs/deployment/livekit-credentials.sh"
 if [ "$ONCE" -eq 1 ]; then
-  lk room list "${ARGS[@]}"
+  lk room list ${ARGS[@]+"${ARGS[@]}"}
 else
   # -x execs `lk` directly (no intermediate shell), so ARGS need no extra
   # quoting/escaping even if they contain spaces.
-  watch -n "$WATCH_INTERVAL" -x lk room list "${ARGS[@]}"
+  watch -n "$WATCH_INTERVAL" -x lk room list ${ARGS[@]+"${ARGS[@]}"}
 fi

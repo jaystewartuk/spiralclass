@@ -224,7 +224,7 @@ gcloud auth configure-docker "$REGION-docker.pkg.dev" --quiet --project "$GCP_PR
 
 docker buildx build \
   --platform linux/amd64 \
-  "${BUILD_ARGS[@]}" \
+  ${BUILD_ARGS[@]+"${BUILD_ARGS[@]}"} \
   --tag "$IMAGE" \
   --push \
   .
@@ -262,7 +262,7 @@ gcloud run deploy "$SERVICE" \
   --memory "$MEMORY" \
   --min-instances "$MIN_INSTANCES" \
   --max-instances "$MAX_INSTANCES" \
-  "${BOOST[@]}" \
+  ${BOOST[@]+"${BOOST[@]}"} \
   --service-account "$RUNTIME_SA_ID@$GCP_PROJECT_ID.iam.gserviceaccount.com" \
   --set-secrets "$SECRETS_PATH=$SECRET_NAME:latest" \
   --update-env-vars "APP_ENV=$ENVIRONMENT,SECRETS_ENV_FILE=$SECRETS_PATH" \

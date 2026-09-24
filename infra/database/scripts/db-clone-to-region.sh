@@ -124,11 +124,13 @@ confirm "Clone into $(url_summary "$TARGET")?"
 echo "cloning…" >&2
 # User-supplied --exclude-table names → pg_dump exclude patterns + verify
 # excludes, so a table that exists in the source but not the target's schema
-# can't abort the restore or fail the parity check. Empty-array expansion is
-# safe under `set -u` here (same as NS_ARGS / VERIFY_EXCLUDES below).
+# can't abort the restore or fail the parity check. These arrays are usually
+# empty, and macOS /bin/bash 3.2 aborts on a bare empty-array expansion under
+# `set -u` — hence `${a[@]+"${a[@]}"}` throughout, enforced by
+# apps/web/tests/config/shell-empty-arrays.test.ts.
 DUMP_EXCLUDE_ARGS=()
 VERIFY_EXCLUDES=()
-for t in "${EXCLUDE_TABLES[@]}"; do
+for t in ${EXCLUDE_TABLES[@]+"${EXCLUDE_TABLES[@]}"}; do
   DUMP_EXCLUDE_ARGS+=(--exclude-table="*.${t}")
   VERIFY_EXCLUDES+=(--exclude "$t")
 done
@@ -159,7 +161,7 @@ if [ "$MODE" = "data-only" ]; then
   echo "dropping FK constraints + disabling user triggers on target for the load…" >&2
   printf '%s\n%s\n' "$FK_DROP" "$TRG_OFF" | psql "$TARGET" -q -v ON_ERROR_STOP=1
   pg_dump -Fc --data-only --no-owner --no-privileges \
-      --exclude-table='*._prisma_migrations' "${DUMP_EXCLUDE_ARGS[@]}" "${NS_ARGS[@]}" "$SOURCE" \
+      --exclude-table='*._prisma_migrations' ${DUMP_EXCLUDE_ARGS[@]+"${DUMP_EXCLUDE_ARGS[@]}"} ${NS_ARGS[@]+"${NS_ARGS[@]}"} "$SOURCE" \
     | pg_restore --data-only --single-transaction \
         --no-owner --no-privileges -d "$TARGET"
   echo "re-enabling user triggers + re-adding FK constraints on target…" >&2
@@ -173,8 +175,22 @@ else
   # here precisely because that one benign error would otherwise roll back the
   # whole load; the mandatory verify below is what guarantees a partial restore
   # can't pass unnoticed.)
+  #
+  # Extensions first. `pg_dump -n <schema>` dumps what is IN the schema, and an
+  # extension is not — so btree_gist never arrived, and the restore failed on
+  # the bookings exclusion constraints that need it (found by the first
+  # rehearsal, 2026-09-23). Create whatever the source has, where it has it.
+  EXT_SQL="$(psql_scalar "$SOURCE" "
+    select format('SET client_min_messages = warning; CREATE SCHEMA IF NOT EXISTS %I; CREATE EXTENSION IF NOT EXISTS %I WITH SCHEMA %I;',
+                  n.nspname, e.extname, n.nspname)
+      from pg_extension e join pg_namespace n on n.oid = e.extnamespace
+      where e.extname <> 'plpgsql' order by e.extname")"
+  if [ -n "$EXT_SQL" ]; then
+    echo "creating the source's extensions on the target…" >&2
+    printf '%s\n' "$EXT_SQL" | psql "$TARGET" -q -v ON_ERROR_STOP=1
+  fi
   set +e
-  err="$({ pg_dump -Fc --no-owner --no-privileges "${DUMP_EXCLUDE_ARGS[@]}" "${NS_ARGS[@]}" "$SOURCE" \
+  err="$({ pg_dump -Fc --no-owner --no-privileges ${DUMP_EXCLUDE_ARGS[@]+"${DUMP_EXCLUDE_ARGS[@]}"} ${NS_ARGS[@]+"${NS_ARGS[@]}"} "$SOURCE" \
           | pg_restore --no-owner --no-privileges -d "$TARGET"; } 2>&1 1>/dev/null)"
   set -e
   # pg_restore prints a benign "schema public already exists" error plus a
@@ -192,7 +208,7 @@ fi
 if [ "${DO_VERIFY:-1}" = "1" ]; then
   echo "verifying parity…" >&2
   ASSUME_YES=1 "$SCRIPT_DIR/db-verify-clone.sh" --schemas "$SCHEMAS" \
-    "${VERIFY_EXCLUDES[@]}" "$SOURCE" "$TARGET" \
+    ${VERIFY_EXCLUDES[@]+"${VERIFY_EXCLUDES[@]}"} "$SOURCE" "$TARGET" \
     || die "clone completed but verification FAILED — do not cut over to this target."
   echo "clone verified." >&2
 else

@@ -48,7 +48,7 @@ done
 if [ ${#missing[@]} -gt 0 ]; then
   # shellcheck source=/dev/null
   source "$REPO_ROOT/infra/infisical/with-secret.sh"
-  infisical_export_secrets --env production "${missing[@]}"
+  infisical_export_secrets --env production ${missing[@]+"${missing[@]}"}
 fi
 
 for name in "${REQUIRED[@]}"; do

@@ -118,7 +118,7 @@ done < <(
   exit 1
 }
 echo "› ${#NAMES[@]} secret(s) to push, read from $WORKFLOW:" >&2
-printf '    %s\n' "${NAMES[@]}" >&2
+printf '    %s\n' ${NAMES[@]+"${NAMES[@]}"} >&2
 
 # ── The values, from Infisical ───────────────────────────────────────────
 # THREE paths, and the split is by CONSUMER rather than by how secret a value
@@ -156,7 +156,7 @@ VALUES="$(
 
 # ── Push ─────────────────────────────────────────────────────────────────
 missing=()
-for name in "${NAMES[@]}"; do
+for name in ${NAMES[@]+"${NAMES[@]}"}; do
   if ! jq -e --arg k "$name" 'has($k)' >/dev/null <<<"$VALUES"; then
     missing+=("$name")
     continue
@@ -170,7 +170,7 @@ done
 if [ "${#missing[@]}" -gt 0 ]; then
   echo "" >&2
   echo "  Not in Infisical's \`${ENVIRONMENT}\` environment at / or /config:" >&2
-  printf '    %s\n' "${missing[@]}" >&2
+  printf '    %s\n' ${missing[@]+"${missing[@]}"} >&2
   echo "" >&2
   echo "  The deploy reads these, and an unset GitHub secret is the EMPTY STRING" >&2
   echo "  rather than an error — so add them to Infisical and re-run, rather than" >&2
@@ -188,12 +188,12 @@ fi
 echo "› Verifying against what GitHub now holds…" >&2
 HELD="$(gh secret list --repo "$REPO" --env "$GH_ENV" --json name -q '.[].name' | sort)"
 absent=()
-for name in "${NAMES[@]}"; do
+for name in ${NAMES[@]+"${NAMES[@]}"}; do
   grep -qx "$name" <<<"$HELD" || absent+=("$name")
 done
 if [ "${#absent[@]}" -gt 0 ]; then
   echo "  Pushed, but GitHub does not list:" >&2
-  printf '    %s\n' "${absent[@]}" >&2
+  printf '    %s\n' ${absent[@]+"${absent[@]}"} >&2
   exit 1
 fi
 
@@ -209,21 +209,23 @@ fi
 # A here-string rather than `printf | grep -q`: under pipefail, grep exiting on
 # its first match can SIGPIPE the printf, fail the pipeline, and report a name
 # the workflow DOES read as stale — the one mistake this step must never make.
-READ_NAMES="$(printf '%s\n' "${NAMES[@]}")"
+READ_NAMES="$(printf '%s\n' ${NAMES[@]+"${NAMES[@]}"})"
 stale=()
 while IFS= read -r name; do
   [ -n "$name" ] || continue
   grep -qxF "$name" <<<"$READ_NAMES" || stale+=("$name")
 done <<<"$HELD"
 
-# `${stale[@]}` is only expanded behind a length check: bash 3.2 treats an
-# empty array as unbound under `set -u`.
+# bash 3.2 treats an empty array as unbound under `set -u`, so every empty-
+# initialised array is expanded as `${a[@]+"${a[@]}"}` — enforced by
+# apps/web/tests/config/shell-empty-arrays.test.ts. The length check is for
+# the message, no longer for safety.
 if [ "${#stale[@]}" -gt 0 ]; then
   echo "" >&2
   echo "  On \`${GH_ENV}\` but not read by $WORKFLOW:" >&2
-  printf '    %s\n' "${stale[@]}" >&2
+  printf '    %s\n' ${stale[@]+"${stale[@]}"} >&2
   if [ "$DELETE_STALE" = 1 ]; then
-    for name in "${stale[@]}"; do
+    for name in ${stale[@]+"${stale[@]}"}; do
       gh secret delete "$name" --repo "$REPO" --env "$GH_ENV"
       echo "    deleted $name" >&2
     done
@@ -231,12 +233,12 @@ if [ "${#stale[@]}" -gt 0 ]; then
     # step exists: what GitHub lists is the only evidence of what it holds.
     HELD="$(gh secret list --repo "$REPO" --env "$GH_ENV" --json name -q '.[].name' | sort)"
     remaining=()
-    for name in "${stale[@]}"; do
+    for name in ${stale[@]+"${stale[@]}"}; do
       if grep -qxF "$name" <<<"$HELD"; then remaining+=("$name"); fi
     done
     if [ "${#remaining[@]}" -gt 0 ]; then
       echo "  Deleted, but GitHub still lists:" >&2
-      printf '    %s\n' "${remaining[@]}" >&2
+      printf '    %s\n' ${remaining[@]+"${remaining[@]}"} >&2
       exit 1
     fi
   else

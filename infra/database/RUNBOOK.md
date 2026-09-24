@@ -51,7 +51,10 @@ any two real Postgres.
   unacceptable (must not drop an in-flight booking).
 
 Both are backed by **`db-verify-clone.sh`** (per-table row count + order-
-independent content checksum). A move you can't verify is a move you can't trust.
+independent content checksum, then every extension, constraint, index, trigger
+and function compared by definition). A move you can't verify is a move you
+can't trust. `apps/web/tests/db/db-clone.integration.test.ts` runs the clone and
+the verify against the migrated schema on every integration run.
 
 ---
 
