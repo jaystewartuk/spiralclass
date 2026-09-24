@@ -4,20 +4,25 @@
 
 Every scheduled class has a corresponding live video call, joined by the
 teacher and student from a per-booking room. Calls run on **self-hosted
-LiveKit** (a single Oracle free-tier box — see decision D-94, 2026-07-21).
-**Preview has no video** (see "Joining / connection" below). On top of the core
-call (mute/camera/screen-share/leave), the product layers three Pro-gated,
-legal/consent-sensitive capabilities: **recording** (teacher-controlled A/V
-capture of the whole class), **live captions** (real-time speech-to-text +
-translation of both people, run in their browsers — [D-185](../decisions/D-185.md)),
-and **post-call
+LiveKit** at `livekit.spiralclass.com`: one free Compute Engine `e2-micro`
+running `livekit-server` and Caddy, with no egress —
+[D-187](../decisions/D-187.md), [`infra/gcp-livekit/`](../../infra/gcp-livekit/README.md).
+It carries one class at a time comfortably; a second overlapping class is the
+trigger for a bigger machine. **Preview has no video** (see "Joining /
+connection" below). On top of the core call (mute/camera/screen-share/leave),
+the product layers three Pro-gated, legal/consent-sensitive capabilities:
+**recording** (teacher-controlled capture of the whole class, audio-only since
+D-135), **live captions** (real-time speech-to-text + translation of both
+people, run in their browsers — [D-185](../decisions/D-185.md)), and **post-call
 transcription** (derived from separate per-participant audio, feeding a
-downstream lesson-insights pipeline). All three were re-enabled in production by
-D-94 after having initially been held back.
+downstream lesson-insights pipeline). **Only captions are on in production
+today**: recording and transcription both need egress, which the box cannot
+carry, so D-187 switched them off. The behaviour below is what they do when
+on.
 
 Source: `apps/web/src/lib/video/*`, `apps/web/src/lib/captions/*`,
-`apps/web/src/lib/transcription/*`, `docs/decisions/D-94.md`,
-`docs/deployment/ORACLE_LIVEKIT_PRODUCTION.md`.
+`apps/web/src/lib/transcription/*`, `docs/decisions/D-187.md`,
+`infra/gcp-livekit/README.md`.
 
 ## User Stories
 
