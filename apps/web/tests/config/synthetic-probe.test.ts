@@ -93,7 +93,8 @@ function earlyExitGrep(): string {
   return dir;
 }
 
-type Pages = Record<string, { status?: number; body: string }>;
+/** `resets`: drop the connection with no HTTP answer this many times before serving. */
+type Pages = Record<string, { status?: number; body: string; resets?: number }>;
 
 function pages(overrides: Pages = {}): Pages {
   return {
@@ -116,9 +117,19 @@ afterEach(async () => {
   server = undefined;
 });
 
+/** Requests the server received, by `METHOD /path` — including the ones it reset. */
+let hits: Record<string, number> = {};
+
 async function probe(served: Pages, extraEnv: Record<string, string> = {}): Promise<string> {
+  hits = {};
   server = createServer((req, res) => {
-    const page = served[`${req.method} ${req.url}`];
+    const key = `${req.method} ${req.url}`;
+    hits[key] = (hits[key] ?? 0) + 1;
+    const page = served[key];
+    if (page?.resets && hits[key] <= page.resets) {
+      req.socket.resetAndDestroy();
+      return;
+    }
     res.writeHead(page?.status ?? (page ? 200 : 404));
     res.end(page?.body ?? "");
   });
@@ -134,6 +145,7 @@ async function probe(served: Pages, extraEnv: Record<string, string> = {}): Prom
       TEACHER_SLUG: SLUG,
       // Nothing listens on 127.0.0.1:443, so that one probe fails fast; it is not under test.
       LIVEKIT_ORIGIN_IP: "127.0.0.1",
+      PROBE_RETRY_DELAY: "0",
       ...extraEnv,
     },
     maxBuffer: 16 * 1024 * 1024,
@@ -159,6 +171,45 @@ describe("the production probe reads a large page correctly", () => {
   it("still fails a large page that carries no purchasable package", async () => {
     const output = await probe(pages({ [`GET /b/${SLUG}`]: { body: PADDING } }));
     expect(output).toContain(`✗ /b/${SLUG} rendered no purchasable package`);
+  }, 30_000);
+});
+
+/**
+ * The 2026-09-27 deploy of f50beac shipped, then went red on
+ * `curl: (35) Recv failure: Connection reset by peer` fetching the sitemap,
+ * which listed the teacher when fetched again seconds later. These hold both
+ * halves of the fix: a dropped connection is retried, and an HTTP answer —
+ * however wrong — is not, so a retry can never turn a real failure green.
+ */
+describe("the production probe survives a dropped connection and nothing else", () => {
+  it("retries a connection reset with no HTTP answer, then judges the page", async () => {
+    const sitemap = pages()["GET /sitemap.xml"];
+    const output = await probe(pages({ "GET /sitemap.xml": { ...sitemap, resets: 1 } }));
+    expect(hits["GET /sitemap.xml"]).toBe(2);
+    expect(output).toContain("no HTTP answer");
+    expect(output).toContain(`✓ sitemap lists /b/${SLUG}`);
+  }, 30_000);
+
+  it("still fails a probe whose connection never answers", async () => {
+    const sitemap = pages()["GET /sitemap.xml"];
+    const output = await probe(pages({ "GET /sitemap.xml": { ...sitemap, resets: 99 } }));
+    expect(hits["GET /sitemap.xml"]).toBe(3);
+    expect(output).toContain(`✗ /sitemap.xml does not list /b/${SLUG}`);
+  }, 30_000);
+
+  it("never retries an HTTP error answer into a pass", async () => {
+    const output = await probe(
+      pages({ "GET /api/health": { status: 500, body: '{"status":"ok","db":"ok"}' } }),
+    );
+    expect(hits["GET /api/health"]).toBe(1);
+    expect(output).toContain("✗ /api/health returned 500");
+  }, 30_000);
+
+  it("reports a reset webhook probe as 000, not a doubled status", async () => {
+    const output = await probe(
+      pages({ "POST /api/stripe/webhook": { status: 401, body: "", resets: 99 } }),
+    );
+    expect(output).toContain("(status 000, expected 401)");
   }, 30_000);
 });
 

@@ -124,10 +124,41 @@ fail() { printf '  ✗ %s\n' "$1" >&2; failures=$((failures + 1)); }
 # the kind of sentence nothing verifies that CLAUDE.md's fourth rule is about.
 skip() { printf '  – %s\n' "$1"; }
 
+# ── curl, retried only when NO HTTP answer came back ─────────────────────────
+# The 2026-09-27 deploy of f50beac shipped cleanly, then went red on
+# `curl: (35) Recv failure: Connection reset by peer` fetching the sitemap — a
+# page that listed the teacher when fetched again seconds later. One dropped
+# connection between the runner and the edge is not a regression the deploy
+# introduced, and a probe that reports it as one teaches people to ignore red.
+#
+# ⚠️ Retries are for the TRANSPORT only. curl without -f exits 0 on any HTTP
+# answer, 500 included, so a non-zero exit means the request never got one:
+# reset, refused, TLS failure, timeout. An HTTP answer — however wrong — is
+# returned on the first attempt and judged by the probe, never retried into a
+# pass. Not `curl --retry`: that also retries 5xx answers, which would turn an
+# intermittent 500 on a freshly deployed page green.
+PROBE_ATTEMPTS="${PROBE_ATTEMPTS:-3}"
+PROBE_RETRY_DELAY="${PROBE_RETRY_DELAY:-2}"
+probe_curl() {
+  local attempt=1 out code
+  while :; do
+    out=$(curl -sS "$@")
+    code=$?
+    if [ "$code" -eq 0 ] || [ "$attempt" -ge "$PROBE_ATTEMPTS" ]; then
+      printf '%s\n' "$out"
+      return "$code"
+    fi
+    printf '    (no HTTP answer, curl exit %s — attempt %s of %s, retrying)\n' \
+      "$code" "$attempt" "$PROBE_ATTEMPTS" >&2
+    attempt=$((attempt + 1))
+    sleep "$PROBE_RETRY_DELAY"
+  done
+}
+
 echo "Probing $BASE_URL"
 
 # ── homepage renders with sign-in / sign-up CTAs ─────────────────────────────
-response=$(curl -sS -w "\n%{http_code}" --max-time 15 "${BASE_URL}/" || true)
+response=$(probe_curl -w "\n%{http_code}" --max-time 15 "${BASE_URL}/" || true)
 body=$(printf '%s\n' "$response" | sed '$d')
 status=$(printf '%s\n' "$response" | tail -n1)
 if [ "$status" != "200" ]; then
@@ -141,7 +172,7 @@ else
 fi
 
 # ── health endpoint reports db ok ────────────────────────────────────────────
-response=$(curl -sS -w "\n%{http_code}" --max-time 15 "${BASE_URL}/api/health" || true)
+response=$(probe_curl -w "\n%{http_code}" --max-time 15 "${BASE_URL}/api/health" || true)
 body=$(printf '%s\n' "$response" | sed '$d')
 status=$(printf '%s\n' "$response" | tail -n1)
 if [ "$status" != "200" ]; then
@@ -158,7 +189,7 @@ fi
 # Body-marked, not status-only. A 200 proves the route handler ran; it does not
 # prove the page is sellable. The landing page links each package at
 # /b/<slug>/buy?package=<id> — no link means nothing is for sale.
-response=$(curl -sS -w "\n%{http_code}" --max-time 20 "${BASE_URL}/b/${TEACHER_SLUG}" || true)
+response=$(probe_curl -w "\n%{http_code}" --max-time 20 "${BASE_URL}/b/${TEACHER_SLUG}" || true)
 body=$(printf '%s\n' "$response" | sed '$d')
 status=$(printf '%s\n' "$response" | tail -n1)
 if [ "$status" != "200" ]; then
@@ -197,7 +228,7 @@ fi
 # kept there for the installed app. Readiness here mirrors purchase-flow.tsx's
 # own `stripeReady || instruments.length > 0`: a non-empty `instruments` array
 # starts with `[{`, so that's the marker for "at least one manual instrument".
-response=$(curl -sS -w "\n%{http_code}" --max-time 20 "${BASE_URL}/b/${TEACHER_SLUG}/buy" || true)
+response=$(probe_curl -w "\n%{http_code}" --max-time 20 "${BASE_URL}/b/${TEACHER_SLUG}/buy" || true)
 body=$(printf '%s\n' "$response" | sed '$d')
 status=$(printf '%s\n' "$response" | tail -n1)
 if [ "$status" != "200" ]; then
@@ -214,7 +245,7 @@ fi
 # proves the deployed pair agree on real production data — which is what
 # silently broke on 2026-07-26, when a gate change de-listed every teacher who
 # had onboarded before it and the sitemap emptied out unnoticed.
-body=$(curl -sS --max-time 20 "${BASE_URL}/sitemap.xml" || true)
+body=$(probe_curl --max-time 20 "${BASE_URL}/sitemap.xml" || true)
 if ! grep -q "/b/${TEACHER_SLUG}<" <<<"$body"; then
   fail "/sitemap.xml does not list /b/${TEACHER_SLUG}"
 else
@@ -229,7 +260,7 @@ fi
 # is several times the weight of the photoless generic one (~50KB vs ~95KB,
 # measured 2026-07-29). A loose floor on purpose: this catches "fell back to the
 # brand card", not a photo swap.
-read -r status bytes < <(curl -sS -o /dev/null \
+read -r status bytes < <(probe_curl -o /dev/null \
   -w "%{http_code} %{size_download}\n" --max-time 30 \
   "${BASE_URL}/b/${TEACHER_SLUG}/opengraph-image" || echo "000 0")
 if [ "$status" != "200" ]; then
@@ -354,11 +385,11 @@ fi
 #   200 → verification BYPASSED (hard incident)
 #   503 → STRIPE_WEBHOOK_SECRET missing on the deploy
 #   401 → correct refusal
-status=$(curl -sS -o /dev/null -w "%{http_code}" --max-time 15 \
+status=$(probe_curl -o /dev/null -w "%{http_code}" --max-time 15 \
   -X POST "${BASE_URL}/api/stripe/webhook" \
   -H "Content-Type: application/json" \
   -H "stripe-signature: t=1,v1=garbage" \
-  -d '{"id":"evt_synthetic","type":"ping"}' || echo 000)
+  -d '{"id":"evt_synthetic","type":"ping"}' || true)
 if [ "$status" != "401" ]; then
   fail "/api/stripe/webhook accepted a forged signature (status $status, expected 401)"
 else
