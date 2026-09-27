@@ -1,6 +1,12 @@
 import { test, expect } from "@playwright/test";
 
-import { applyE2ESkipGuards, bookAClass, deleteStudentsByEmail, getPrisma } from "./_helpers";
+import {
+  applyE2ESkipGuards,
+  bookAClass,
+  deleteStudentsByEmail,
+  getPrisma,
+  missingEnv,
+} from "./_helpers";
 
 // A written material the teacher attached to a class is READ on the student's
 // class page, not handed over as its PDF. The page used to link every such
@@ -13,9 +19,16 @@ applyE2ESkipGuards({ extended: true });
 const created: string[] = [];
 const materialIds: string[] = [];
 
+// Best-effort, like every other spec's cleanup: a booked student still has a
+// package pointing at them, so deleting them can hit packages_student_id_fkey,
+// and a cleanup that throws fails a test whose assertions all passed.
 test.afterAll(async () => {
-  await getPrisma().libraryMaterial.deleteMany({ where: { id: { in: materialIds } } });
-  await deleteStudentsByEmail(created);
+  if (missingEnv.length > 0 || process.env.E2E_EXTENDED !== "1") return;
+  await getPrisma()
+    .libraryMaterial.deleteMany({ where: { id: { in: materialIds } } })
+    .catch(() => undefined);
+  await deleteStudentsByEmail(created).catch(() => undefined);
+  await getPrisma().$disconnect();
 });
 
 test("a written class material opens in the page, with its PDF as a second action", async ({
