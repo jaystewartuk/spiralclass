@@ -41,15 +41,15 @@ else
     # absent-value behaviour, which degrades the feature cleanly instead.
     eval "current=\${$key-__ENTRYPOINT_UNSET__}"
     if [ "$value" = "__LOCAL__" ]; then
-      # Only warn when the value really is missing. This branch used to warn
-      # unconditionally, including for keys the container env HAD supplied, so
-      # every boot printed all nine lines and the warning could not tell a
-      # configured box from a broken one. On Fly that never mattered — a
-      # __LOCAL__ with no matching secret was refused before the deploy by the
-      # Fly script's preflight. The Cloud Run deploy cannot read the secret to
-      # check it (D-184), so this line is the only boot-time signal there is.
+      # Only warn when the value really is missing — and only once every source
+      # has had its turn, so the warning is deferred to the end of the script.
+      # On Cloud Run the value arrives from the secret FILE sourced below, so a
+      # warning printed here fired on every boot for keys that were in fact
+      # set, and could not tell a configured box from a broken one. The Cloud
+      # Run deploy cannot read the secret to check it (D-184), so this line is
+      # the only boot-time signal there is.
       if [ "$current" = "__ENTRYPOINT_UNSET__" ]; then
-        echo "docker-entrypoint: $key is __LOCAL__ and no override was supplied — leaving it unset" >&2
+        unset_local="${unset_local:-} $key"
       fi
       continue
     fi
@@ -99,5 +99,14 @@ if [ -n "${SECRETS_ENV_FILE:-}" ]; then
     fi
   done < "$SECRETS_ENV_FILE"
 fi
+
+# The deferred __LOCAL__ warning: a key the committed file left to a secret,
+# which no source supplied after all.
+for key in ${unset_local:-}; do
+  eval "current=\${$key-__ENTRYPOINT_UNSET__}"
+  if [ "$current" = "__ENTRYPOINT_UNSET__" ]; then
+    echo "docker-entrypoint: $key is __LOCAL__ and no override was supplied — leaving it unset" >&2
+  fi
+done
 
 exec "$@"
