@@ -4676,6 +4676,7 @@ export const en = {
   "web.myClasses.detail.joinVideoCall": "Join video call",
   "web.myClasses.detail.contentDescription": "What you'll cover in this class.",
   "web.myClasses.detail.openSaveAsPdf": "Open / save as PDF",
+  "web.myClasses.detail.downloadPdf": "Download PDF",
   "web.myClasses.detail.classMaterials": "Class materials",
   "web.myClasses.detail.materialsDescription": "What your teacher attached for this class.",
   "web.myClasses.detail.atLevelDescription": "From your teacher's library, matched to your level.",
