@@ -333,7 +333,8 @@ answers from students" but "never send them":
 - **Every student-facing producer serves the stripped copy**, cut at any
   nesting depth (an answer inside a question callout, or under a list item,
   goes too) before the bytes leave the server: her in-call materials list, her
-  materials page, and her class page and its print view.
+  materials page, her class page and its print view, and the PDF downloaded from
+  that page, which ignores `?answers=1`.
 - **The in-call data channel strips at both ends.** A material the teacher
   opens on the student's screen may come straight from her library and so never
   passed a server-side resolver at all — so the encoder makes the cut, and the
@@ -450,6 +451,10 @@ Rules:
   PDF — a pure file/link material has nothing to render and the route
   returns 404 the same way it would for a not-found or not-owned material
   (never leaking which reason applied).
+- The owning teacher can export any of her content materials. A **student**
+  can export one only when it is attached to one of their own classes and its
+  send time on that class has elapsed — exactly what their class page shows
+  them — and always gets the student copy. Anything else is the same 404.
 - The exported filename is derived from the material's label, ASCII-folded
   and slug-safe, capped at 60 characters, falling back to `"material.pdf"` if
   empty.

@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { materialSendTimeElapsed } from "@/lib/materials/timing";
 
 // The read behind the PDF-download route (/api/materials/[id]/pdf), which it
 // fetch a teacher-owned library material that has a Markdown `body` to render — the
@@ -15,6 +16,38 @@ export async function findDownloadableLibraryMaterial(materialId: string, teache
   });
   if (!material || !material.body) return null;
   return { id: material.id, label: material.label, body: material.body };
+}
+
+// The student half of the same route. A student reaches a content material's
+// PDF from their class page, which links every visible body-bearing library
+// item to /api/materials/[id]/pdf — so the route has to answer them, or the
+// "Download" on their own class opens a bare `no-session` JSON error.
+//
+// The rule is the class page's own: the material is attached to a booking
+// that belongs to this student (across their identity set — see
+// lib/students/identity.ts), and its send time on that booking has elapsed.
+// Anything the page would not show them, this does not serve. One material
+// can sit on several of their classes with different send times, so it is
+// enough for ANY one of those attachments to have been sent.
+export async function findStudentDownloadableLibraryMaterial(
+  materialId: string,
+  studentIds: string[],
+  now: Date,
+) {
+  if (studentIds.length === 0) return null;
+  const attachments = await prisma.bookingLibraryMaterial.findMany({
+    where: { libraryMaterialId: materialId, booking: { studentId: { in: studentIds } } },
+    select: {
+      sendTiming: true,
+      booking: { select: { scheduledStart: true } },
+      material: { select: { id: true, label: true, body: true } },
+    },
+  });
+  const sent = attachments.find((a) =>
+    materialSendTimeElapsed(a.sendTiming, a.booking.scheduledStart, now),
+  );
+  if (!sent || !sent.material.body) return null;
+  return { id: sent.material.id, label: sent.material.label, body: sent.material.body };
 }
 
 // A safe, short ASCII filename stem for Content-Disposition — strips
