@@ -4663,6 +4663,7 @@ export const fr = {
   "web.myClasses.detail.joinVideoCall": "Rejoindre l'appel vidéo",
   "web.myClasses.detail.contentDescription": "Ce que vous verrez dans ce cours.",
   "web.myClasses.detail.openSaveAsPdf": "Ouvrir / enregistrer en PDF",
+  "web.myClasses.detail.downloadPdf": "Télécharger le PDF",
   "web.myClasses.detail.classMaterials": "Supports du cours",
   "web.myClasses.detail.materialsDescription": "Ce que votre professeur a joint pour ce cours.",
   "web.myClasses.detail.atLevelDescription":

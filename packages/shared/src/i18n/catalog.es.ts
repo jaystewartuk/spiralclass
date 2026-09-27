@@ -4707,6 +4707,7 @@ export const esMX = {
   "web.myClasses.detail.joinVideoCall": "Entrar a la videollamada",
   "web.myClasses.detail.contentDescription": "Lo que verás en esta clase.",
   "web.myClasses.detail.openSaveAsPdf": "Abrir / guardar como PDF",
+  "web.myClasses.detail.downloadPdf": "Descargar PDF",
   "web.myClasses.detail.classMaterials": "Materiales de la clase",
   "web.myClasses.detail.materialsDescription": "Lo que tu profe adjuntó para esta clase.",
   "web.myClasses.detail.atLevelDescription": "De la biblioteca de tu profe, según tu nivel.",

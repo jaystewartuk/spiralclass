@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ChevronDown } from "lucide-react";
 import { PageShell } from "@/components/ui/page-shell";
 import { notFound } from "next/navigation";
 import { requireStudent } from "@/lib/auth";
@@ -32,6 +33,9 @@ import { toWireAssignmentSummary } from "@/lib/homework/wire";
 import { StudentLiveNotes } from "./student-live-notes";
 import { StudentCancelForm } from "./cancel-form";
 import { getStudentClassContent } from "@/lib/materials/class-content";
+import { studentClassAttachment } from "@/lib/materials/student-class-attachments";
+import { studentMaterialTitle, type StudentMaterialKind } from "@/lib/materials/student-materials";
+import { MaterialDetails } from "../materials/material-tracking";
 
 // Past this many attached materials, the list collapses to avoid pushing
 // homework/notes below the fold — see the class-detail redesign audit.
@@ -259,6 +263,10 @@ export default async function StudentBookingDetailPage({
         id: m.id,
         label: m.label,
         attachmentKind: (m.storagePath ? "file" : "link") as "file" | "link",
+        body: null,
+        fileUrl: null,
+        linkUrl: null,
+        pdfUrl: null,
         isImage: isImageFileName(m.storagePath),
         viewUrl: await pickMaterialsUrl(materialsStorage, {
           storagePath: m.storagePath,
@@ -267,19 +275,12 @@ export default async function StudentBookingDetailPage({
         levelLabel: (m.levelId ? levelLabelById.get(m.levelId) : undefined) ?? "",
         tags: tagsOf(m.focusTags),
       })),
+      // A written material is read here, not handed over as its PDF — see
+      // student-class-attachments.ts, which also cuts the answer key.
       ...visibleLibraryMaterials.map(async (a) => ({
-        id: a.libraryMaterialId,
-        label: a.material.label,
-        attachmentKind: (a.material.storagePath ? "file" : "link") as "file" | "link",
-        // A body-bearing item resolves to its PDF below, so it is never an
-        // inline image even when it also carries an image file.
-        isImage: !a.material.body && isImageFileName(a.material.storagePath),
-        viewUrl: a.material.body
-          ? `/api/materials/${a.libraryMaterialId}/pdf`
-          : await pickMaterialsUrl(materialsStorage, {
-              storagePath: a.material.storagePath,
-              linkUrl: a.material.linkUrl,
-            }),
+        ...(await studentClassAttachment(a, (storagePath) =>
+          pickMaterialsUrl(materialsStorage, { storagePath, linkUrl: null }),
+        )),
         levelLabel: (a.material.levelId ? levelLabelById.get(a.material.levelId) : undefined) ?? "",
         tags: tagsOf(a.material.focusTags),
       })),
@@ -657,14 +658,35 @@ export default async function StudentBookingDetailPage({
   );
 }
 
+// The shelf's own title resolver, so a material is called the same thing here
+// as on the student's materials page: the teacher's label, then a written
+// lesson's first heading, then the kind of thing it is.
 function materialTitle(
-  m: { label: string | null; attachmentKind: "file" | "link" },
+  m: { label: string | null; body: string | null; attachmentKind: StudentMaterialKind },
   t: TFunction,
 ): string {
-  if (m.label) return m.label;
-  if (m.attachmentKind === "file") return t("web.myClasses.detail.materialFile");
-  return t("web.myClasses.detail.materialLink");
+  return studentMaterialTitle(m, {
+    content: t("web.studentMaterials.typeLesson"),
+    file: t("web.myClasses.detail.materialFile"),
+    link: t("web.myClasses.detail.materialLink"),
+  });
 }
+
+type ClassMaterialItem = {
+  id: string;
+  label: string | null;
+  attachmentKind: StudentMaterialKind;
+  body: string | null;
+  viewUrl: string | null;
+  fileUrl: string | null;
+  linkUrl: string | null;
+  pdfUrl: string | null;
+  // Set by the callers that resolve a real storage path; the preview is
+  // simply skipped where it's absent.
+  isImage?: boolean;
+  levelLabel: string;
+  tags: MaterialTag[];
+};
 
 // Extracted so the collapsed and expanded render paths share one
 // implementation instead of drifting apart.
@@ -675,17 +697,7 @@ function StudentMaterialGroups({
   groups: {
     categoryId: string | null;
     categoryLabel: string;
-    items: {
-      id: string;
-      label: string | null;
-      attachmentKind: "file" | "link";
-      viewUrl: string | null;
-      // Set by the callers that resolve a real storage path; the preview is
-      // simply skipped where it's absent.
-      isImage?: boolean;
-      levelLabel: string;
-      tags: MaterialTag[];
-    }[];
+    items: ClassMaterialItem[];
   }[];
   t: TFunction;
 }) {
@@ -696,42 +708,95 @@ function StudentMaterialGroups({
           <p className="text-xs font-semibold text-muted-foreground">
             {g.categoryId === null ? t("library.otherCategory") : g.categoryLabel}
           </p>
-          {g.items.map((m) => (
-            <div key={m.id} className="rounded-md border px-3 py-2 text-sm">
-              {m.viewUrl ? (
-                <a
-                  href={m.viewUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="truncate font-medium underline"
-                >
-                  {materialTitle(m, t)}
-                </a>
-              ) : (
-                <span className="truncate font-medium">{materialTitle(m, t)}</span>
-              )}
-              {m.isImage && m.viewUrl && (
-                <MaterialImagePreview viewUrl={m.viewUrl} label={m.label} className="mt-2" />
-              )}
-              {(m.levelLabel || m.tags.length > 0) && (
-                <div className="mt-1 flex flex-wrap gap-1">
-                  {[m.levelLabel, ...m.tags.map((tag) => tag.label)]
-                    .filter(Boolean)
-                    .map((chip, i) => (
-                      <span
-                        key={`${chip}-${i}`}
-                        className="rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground"
-                      >
-                        {chip}
-                      </span>
-                    ))}
-                </div>
-              )}
-            </div>
-          ))}
+          {g.items.map((m) =>
+            m.body ? (
+              <ReadableMaterial key={m.id} m={m} body={m.body} t={t} />
+            ) : (
+              <div key={m.id} className="rounded-md border px-3 py-2 text-sm">
+                {m.viewUrl ? (
+                  <a
+                    href={m.viewUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="truncate font-medium underline"
+                  >
+                    {materialTitle(m, t)}
+                  </a>
+                ) : (
+                  <span className="truncate font-medium">{materialTitle(m, t)}</span>
+                )}
+                {m.isImage && m.viewUrl && (
+                  <MaterialImagePreview viewUrl={m.viewUrl} label={m.label} className="mt-2" />
+                )}
+                <MaterialChips m={m} />
+              </div>
+            ),
+          )}
         </div>
       ))}
     </>
+  );
+}
+
+// A lesson written in the app — generated or typed by the teacher — opens in
+// place, as it does on the materials shelf. Its PDF is a second action, and any
+// file or link riding on the same row sits beside it.
+function ReadableMaterial({ m, body, t }: { m: ClassMaterialItem; body: string; t: TFunction }) {
+  return (
+    <MaterialDetails
+      materialId={m.id}
+      className="group rounded-md border text-sm [&_summary::-webkit-details-marker]:hidden"
+      summary={
+        <summary className="flex cursor-pointer list-none items-start justify-between gap-2 px-3 py-2">
+          <span className="min-w-0">
+            <span className="block truncate font-medium underline">{materialTitle(m, t)}</span>
+            <MaterialChips m={m} />
+          </span>
+          <ChevronDown
+            className="mt-0.5 size-4 shrink-0 text-muted-foreground transition-transform group-open:rotate-180"
+            aria-hidden
+          />
+        </summary>
+      }
+    >
+      <div className="space-y-3 border-t px-3 py-3">
+        <ClassContentMarkdown body={body} />
+        {m.isImage && m.fileUrl && <MaterialImagePreview viewUrl={m.fileUrl} label={m.label} />}
+        <div className="flex flex-wrap gap-3">
+          {m.fileUrl && (
+            <a href={m.fileUrl} target="_blank" rel="noreferrer" className="text-sm underline">
+              {t("web.myClasses.detail.materialFile")}
+            </a>
+          )}
+          {m.linkUrl && (
+            <a href={m.linkUrl} target="_blank" rel="noreferrer" className="text-sm underline">
+              {t("web.myClasses.detail.materialLink")}
+            </a>
+          )}
+          {m.pdfUrl && (
+            <a href={m.pdfUrl} className="text-sm underline">
+              {t("web.myClasses.detail.downloadPdf")}
+            </a>
+          )}
+        </div>
+      </div>
+    </MaterialDetails>
+  );
+}
+
+function MaterialChips({ m }: { m: ClassMaterialItem }) {
+  if (!m.levelLabel && m.tags.length === 0) return null;
+  return (
+    <span className="mt-1 flex flex-wrap gap-1">
+      {[m.levelLabel, ...m.tags.map((tag) => tag.label)].filter(Boolean).map((chip, i) => (
+        <span
+          key={`${chip}-${i}`}
+          className="rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground"
+        >
+          {chip}
+        </span>
+      ))}
+    </span>
   );
 }
 

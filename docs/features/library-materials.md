@@ -455,6 +455,10 @@ Rules:
   can export one only when it is attached to one of their own classes and its
   send time on that class has elapsed — exactly what their class page shows
   them — and always gets the student copy. Anything else is the same 404.
+- The PDF is never how a student **reads** a content material. On their class
+  page, as on their materials page, a material with a body opens in place and
+  the PDF is a second "Download PDF" action beside it; only a file or link
+  material opens somewhere else.
 - The exported filename is derived from the material's label, ASCII-folded
   and slug-safe, capped at 60 characters, falling back to `"material.pdf"` if
   empty.
