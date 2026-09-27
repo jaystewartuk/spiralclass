@@ -22,6 +22,8 @@ import { TemplatesForm } from "@/app/(app)/onboarding/templates/templates-form";
 //     `gateTemplateSet` AFTER filling the whole card in. The cap comes from
 //     the same entitlements resolver the gate uses, so the editor can say so
 //     before she types.
+//   * PACKAGES FOR TWO (D-188): the teacher's percent, which suggests each
+//     price for two, and whether her plan lets her switch a new one on.
 //   * SALES PER TEMPLATE. Removing a package archives the template; it does
 //     not touch the packages already bought from it. That is the one fact a
 //     teacher needs before she removes one, and nothing on the screen said it.
@@ -95,6 +97,8 @@ export default async function TemplatesSettingsPage() {
           classDurationMin: tpl.classDurationMin,
           priceMinorUnits: tpl.priceMinorUnits,
           transferPriceMinorUnits: tpl.transferPriceMinorUnits,
+          twoPersonPriceMinorUnits: tpl.twoPersonPriceMinorUnits,
+          twoPersonTransferPriceMinorUnits: tpl.twoPersonTransferPriceMinorUnits,
           expirationMonths: tpl.expirationMonths,
         }))}
         redirectTo="/settings/templates"
@@ -103,6 +107,10 @@ export default async function TemplatesSettingsPage() {
         stickyActions
         cap={cap}
         soldByTemplateId={soldByTemplateId}
+        twoPerson={{
+          percent: teacher.twoPersonPricePercent,
+          canSell: entitlements.canSellForTwo,
+        }}
       />
     </div>
   );

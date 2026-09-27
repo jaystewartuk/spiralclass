@@ -16,10 +16,17 @@ function fakeDb(rows: { templateId: string; priceMinorUnits: number }[]) {
   };
 }
 
-const tpl = (id: string, price: number, transfer: number | null = null) => ({
+const tpl = (
+  id: string,
+  price: number,
+  transfer: number | null = null,
+  twoPerson: number | null = null,
+) => ({
   id,
   priceMinorUnits: price,
   transferPriceMinorUnits: transfer,
+  twoPersonPriceMinorUnits: twoPerson,
+  twoPersonTransferPriceMinorUnits: null,
 });
 
 describe("effectivePriceMinorUnits", () => {
@@ -59,6 +66,22 @@ describe("effectivePriceMinorUnits", () => {
   it("honours an agreed price of zero rather than falling through to catalog", () => {
     const prices = new Map([["a", 0]]);
     expect(effectivePriceMinorUnits(prices, tpl("a", 185_000), "stripe")).toBe(0);
+  });
+
+  // D-188: an agreed price was agreed for one person. Letting it price the
+  // package bought for two would sell two people the class at one person's
+  // old rate.
+  it("never applies a one-person agreed price to the package bought for two", () => {
+    const prices = new Map([["a", 130_000]]);
+    const forTwo = tpl("a", 185_000, null, 277_500);
+    expect(effectivePriceMinorUnits(prices, forTwo, "stripe", 1)).toBe(130_000);
+    expect(effectivePriceMinorUnits(prices, forTwo, "stripe", 2)).toBe(277_500);
+  });
+
+  it("has no price for two when the package is not sold for two", () => {
+    expect(
+      effectivePriceMinorUnits(NO_GRANDFATHERED_PRICES, tpl("a", 185_000), "stripe", 2),
+    ).toBeNull();
   });
 });
 

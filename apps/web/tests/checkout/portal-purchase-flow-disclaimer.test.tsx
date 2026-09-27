@@ -35,6 +35,8 @@ const TEMPLATES = [
     classDurationMin: 60,
     priceMinorUnits: 100_000,
     transferPriceMinorUnits: 90_000,
+    twoPersonPriceMinorUnits: null,
+    twoPersonTransferPriceMinorUnits: null,
     expirationMonths: null,
   },
 ];
@@ -79,6 +81,7 @@ describe("PortalPurchaseFlow — seller disclaimer", () => {
         React.createElement(PortalPurchaseFlow, {
           teacherId: "t1",
           templates: TEMPLATES,
+          currency: "MXN",
           agreedPrices: {},
           stripeReady,
           instruments: transferReady ? [WISE_INSTRUMENT] : [],

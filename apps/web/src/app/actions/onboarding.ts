@@ -6,7 +6,10 @@ import {
   createT,
   currencyForTeacher,
   isConnectCountrySupported,
+  isValidTwoPersonPricePercent,
   majorToMinorUnits,
+  MAX_TWO_PERSON_PRICE_PERCENT,
+  MIN_TWO_PERSON_PRICE_PERCENT,
   type StringKey,
   usesEnglishCopy,
 } from "@spiralclass/shared";
@@ -16,7 +19,7 @@ import { getPreferredLocale, type AppLocale } from "@/lib/i18n";
 import { availabilitySchema, templatesSchema, timezoneSchema } from "@/lib/validators";
 import { flushAnalytics, trackServerEvent } from "@/lib/analytics/posthog";
 import { ensureTeacherFocusTags } from "@/lib/focus-tags";
-import { gateTemplateSet, upgradeNudge } from "@/lib/subscriptions/enforce";
+import { gateTemplateSet, gateTwoPersonSet, upgradeNudge } from "@/lib/subscriptions/enforce";
 import { normalizeE164 } from "@/lib/phone";
 import { maybeEmitMarketplaceReady } from "@/lib/marketplace-ready";
 import { revalidateAfterAction } from "@/lib/revalidate";
@@ -58,6 +61,8 @@ export type SavedTemplate = {
   classDurationMin: number;
   priceMinorUnits: number;
   transferPriceMinorUnits: number | null;
+  twoPersonPriceMinorUnits: number | null;
+  twoPersonTransferPriceMinorUnits: number | null;
   expirationMonths: number | null;
 };
 
@@ -355,6 +360,10 @@ export async function saveTemplatesAction(
   // back to the Stripe price at checkout. We never store 0 to mean
   // "fallback" — that would make a free Wise checkout impossible to express.
   const wisePrices = formData.getAll("tpl_wise_price") as string[];
+  // The price for two people and its non-card price (D-188), major units like
+  // the rest. Empty = not sold for two / same price on every rail.
+  const twoPrices = formData.getAll("tpl_two_price") as string[];
+  const twoWisePrices = formData.getAll("tpl_two_wise_price") as string[];
   const expirations = formData.getAll("tpl_expiration") as string[];
   const keeps = formData.getAll("tpl_keep") as string[]; // "1" if the keep checkbox was checked
 
@@ -391,6 +400,16 @@ export async function saveTemplatesAction(
       wiseSplitAvailable && wisePrices[i] && wisePrices[i] !== ""
         ? majorToMinorUnits(Number(wisePrices[i]), currency)
         : undefined,
+    twoPersonPriceMinorUnits:
+      twoPrices[i] && twoPrices[i] !== ""
+        ? majorToMinorUnits(Number(twoPrices[i]), currency)
+        : undefined,
+    // Same invariant as the one-person transfer price above: no card rail, no
+    // second price.
+    twoPersonTransferPriceMinorUnits:
+      wiseSplitAvailable && twoWisePrices[i] && twoWisePrices[i] !== ""
+        ? majorToMinorUnits(Number(twoWisePrices[i]), currency)
+        : undefined,
     expirationMonths: expirations[i] ? Number(expirations[i]) : null,
     keep: keeps[i] === "1",
   }));
@@ -398,6 +417,39 @@ export async function saveTemplatesAction(
   const parsed = templatesSchema.safeParse({ templates: rows });
   if (!parsed.success) {
     return describeTemplateError(parsed.error, locale);
+  }
+
+  // The teacher-wide suggestion for what two people pay (D-188). Only the
+  // settings screen renders the field; a submit without it (onboarding) leaves
+  // the saved value alone rather than resetting it to the default.
+  const rawPercent = formData.get("two_person_percent");
+  const twoPersonPricePercent =
+    rawPercent === null || rawPercent === "" ? null : Number(rawPercent);
+  if (twoPersonPricePercent !== null && !isValidTwoPersonPricePercent(twoPersonPricePercent)) {
+    return {
+      error: createT(locale)("web.settings.packages.twoPerson.percentInvalid", {
+        min: MIN_TWO_PERSON_PRICE_PERCENT,
+        max: MAX_TWO_PERSON_PRICE_PERCENT,
+      }),
+    };
+  }
+
+  // Selling for two is Pro (D-149, D-188), gated like the template cap: only
+  // switching a NEW one on is refused, so a downgraded teacher keeps every
+  // two-person price already on her booking page.
+  const alreadyForTwo = await prisma.packageTemplate.findMany({
+    where: { teacherId: teacher.id, archived: false, twoPersonPriceMinorUnits: { not: null } },
+    select: { id: true },
+  });
+  const forTwoGate = await gateTwoPersonSet(
+    teacher.id,
+    parsed.data.templates
+      .filter((t) => t.keep && t.twoPersonPriceMinorUnits !== undefined)
+      .map((t) => t.id),
+    new Set(alreadyForTwo.map((t) => t.id)),
+  );
+  if (!forTwoGate.ok) {
+    return { error: upgradeNudge(forTwoGate.limit, locale) };
   }
 
   // Free-cap enforcement (replace-set aware): a Free teacher can't raise the
@@ -423,7 +475,10 @@ export async function saveTemplatesAction(
     // customized their offer, distinct from the untouched starter-template seed.
     await tx.teacher.update({
       where: { id: teacher.id },
-      data: { templatesTouchedAt: new Date() },
+      data: {
+        templatesTouchedAt: new Date(),
+        ...(twoPersonPricePercent !== null ? { twoPersonPricePercent } : {}),
+      },
     });
     for (const t of parsed.data.templates) {
       if (!t.id) {
@@ -441,6 +496,8 @@ export async function saveTemplatesAction(
             priceMinorUnits: t.priceMinorUnits,
             currency: teacherCurrency,
             transferPriceMinorUnits: t.transferPriceMinorUnits ?? null,
+            twoPersonPriceMinorUnits: t.twoPersonPriceMinorUnits ?? null,
+            twoPersonTransferPriceMinorUnits: t.twoPersonTransferPriceMinorUnits ?? null,
             expirationMonths: t.expirationMonths ?? null,
           },
           select: { id: true },
@@ -470,6 +527,8 @@ export async function saveTemplatesAction(
           classDurationMin: t.classDurationMin,
           priceMinorUnits: t.priceMinorUnits,
           transferPriceMinorUnits: t.transferPriceMinorUnits ?? null,
+          twoPersonPriceMinorUnits: t.twoPersonPriceMinorUnits ?? null,
+          twoPersonTransferPriceMinorUnits: t.twoPersonTransferPriceMinorUnits ?? null,
           expirationMonths: t.expirationMonths ?? null,
           archived: false,
         },
@@ -522,6 +581,8 @@ export async function saveTemplatesAction(
       classDurationMin: true,
       priceMinorUnits: true,
       transferPriceMinorUnits: true,
+      twoPersonPriceMinorUnits: true,
+      twoPersonTransferPriceMinorUnits: true,
       expirationMonths: true,
     },
   });

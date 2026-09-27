@@ -276,7 +276,7 @@ describe("teacher booking page /b/[slug]", () => {
     const meta = await page.generateMetadata({ params, searchParams });
     expect(meta.robots).toEqual({ index: false, follow: false });
 
-    await expect(page.default({ params })).rejects.toThrow("NOT_FOUND");
+    await expect(page.default({ params, searchParams })).rejects.toThrow("NOT_FOUND");
   });
 
   it("disabled teacher: metadata is noindex AND the page body 404s (regression: it used to render)", async () => {
@@ -303,12 +303,12 @@ describe("teacher booking page /b/[slug]", () => {
     const meta = await page.generateMetadata({ params, searchParams });
     expect(meta.robots).toEqual({ index: false, follow: false });
 
-    await expect(page.default({ params })).rejects.toThrow("NOT_FOUND");
+    await expect(page.default({ params, searchParams })).rejects.toThrow("NOT_FOUND");
   });
 
   it("unknown slug: page body 404s", async () => {
     teacherFindUnique.mockResolvedValue(null);
     const page = await import("@/app/b/[slug]/page");
-    await expect(page.default({ params })).rejects.toThrow("NOT_FOUND");
+    await expect(page.default({ params, searchParams })).rejects.toThrow("NOT_FOUND");
   });
 });

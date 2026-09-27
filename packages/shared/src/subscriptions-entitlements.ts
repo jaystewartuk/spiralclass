@@ -57,6 +57,12 @@ export type Entitlements = {
   // always free; only the AI-assist draft is gated, same "AI analysis is Pro"
   // pattern as canUseIntroVideoCoach.
   canUseHomeworkAiReview: boolean;
+  // Selling a package for two people (D-188). Pro, as D-149 makes every
+  // multi-person offering: it multiplies what a teacher earns per hour. Gated
+  // at the package editor only — a two-person offer already on a template
+  // stays buyable after a downgrade, because the booking page and checkout
+  // never paywall getting paid.
+  canSellForTwo: boolean;
   // Caps — Infinity for Pro, the Free constants otherwise.
   studentLimit: number;
   templateLimit: number;
@@ -97,6 +103,7 @@ const PRO_ENTITLEMENTS = {
   canUseLiveNotes: true,
   canUseIntroVideoCoach: true,
   canUseHomeworkAiReview: true,
+  canSellForTwo: true,
   studentLimit: Number.POSITIVE_INFINITY,
   templateLimit: Number.POSITIVE_INFINITY,
 } as const;
@@ -107,6 +114,7 @@ const FREE_ENTITLEMENTS = {
   canUseLiveNotes: false,
   canUseIntroVideoCoach: false,
   canUseHomeworkAiReview: false,
+  canSellForTwo: false,
   studentLimit: FREE_MAX_ACTIVE_STUDENTS,
   templateLimit: FREE_MAX_PACKAGE_TEMPLATES,
 } as const;

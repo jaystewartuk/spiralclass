@@ -121,6 +121,8 @@ async function createCheckoutIntentCore(
     instrumentId: formData.get("instrumentId"),
     posthogSessionId: formData.get("posthogSessionId"),
     discountCode: formData.get("discountCode"),
+    seats: formData.get("seats"),
+    partnerConsent: formData.get("partnerConsent"),
   });
   if (!parsed.success) {
     return {
@@ -215,6 +217,8 @@ async function createCheckoutIntentCore(
     teacher,
     student: { id: student.id, email: student.email, name: student.name },
     template,
+    seats: input.seats,
+    partnerConsent: input.partnerConsent,
     paymentMethod: input.paymentMethod,
     instrumentId: input.instrumentId,
     posthogSessionId: input.posthogSessionId,
@@ -260,6 +264,8 @@ export async function createPortalCheckoutIntent(
     instrumentId: formData.get("instrumentId"),
     posthogSessionId: formData.get("posthogSessionId"),
     discountCode: formData.get("discountCode"),
+    seats: formData.get("seats"),
+    partnerConsent: formData.get("partnerConsent"),
   });
   if (!parsed.success) {
     return { error: en ? "Invalid data" : "Datos inválidos" };
@@ -342,6 +348,8 @@ export async function createPortalCheckoutIntent(
     teacher,
     student: { id: buyer.id, email: buyer.email, name: buyer.name },
     template,
+    seats: input.seats,
+    partnerConsent: input.partnerConsent,
     paymentMethod: input.paymentMethod,
     instrumentId: input.instrumentId,
     posthogSessionId: input.posthogSessionId,

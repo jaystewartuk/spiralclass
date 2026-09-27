@@ -5,6 +5,7 @@ import {
   hasOfferableInstrument,
   stripeMinChargeMinorUnits,
   type InstrumentReadiness,
+  type Seats,
   usesEnglishCopy,
 } from "@spiralclass/shared";
 import { prisma } from "@/lib/prisma";
@@ -81,12 +82,20 @@ export type CheckoutTemplate = {
   classDurationMin: number;
   priceMinorUnits: number;
   transferPriceMinorUnits: number | null;
+  twoPersonPriceMinorUnits: number | null;
+  twoPersonTransferPriceMinorUnits: number | null;
 };
 
 export type StartCheckoutArgs = {
   teacher: CheckoutTeacher;
   student: { id: string; email: string | null; name: string };
   template: CheckoutTemplate;
+  // How many people the package is for (D-188). Two is refused unless the
+  // template is sold for two, and unless `partnerConsent` is set.
+  seats: Seats;
+  // The buyer confirmed the second person agrees to the lesson-insights
+  // terms the buyer chooses. Stored as `Package.partnerConsentAt`.
+  partnerConsent: boolean;
   paymentMethod: "stripe" | "manual_transfer";
   // Which payee instructions the student picked. Required for
   // `manual_transfer` and ignored for Stripe. Verified against this teacher
@@ -238,8 +247,32 @@ export async function startCheckout(args: StartCheckoutArgs): Promise<StartCheck
   // package the student picked, so a student held at an old 4-class price
   // could buy the 20-class package at it.
   const grandfathered = await grandfatheredPricesFor(prisma, teacher.id, student.id);
-  // Base price before any discount.
-  const basePriceMinorUnits = effectivePriceMinorUnits(grandfathered, template, paymentMethod);
+  // Base price before any discount. Null only when two people were asked for
+  // on a package that is not sold for two — a stale page, or a tampered form.
+  const basePriceMinorUnits = effectivePriceMinorUnits(
+    grandfathered,
+    template,
+    paymentMethod,
+    args.seats,
+  );
+  if (basePriceMinorUnits === null) {
+    return {
+      error: en
+        ? "This package isn't sold for two people. Pick another one."
+        : "Este paquete no se vende para dos personas. Elige otro.",
+    };
+  }
+  // A package for two is bought by one person on behalf of two. The second
+  // person has no account and so no consent row of her own; the buyer's
+  // confirmation is what stands in for it (D-188), and it is recorded on the
+  // package so the insights capture can check it.
+  if (args.seats === 2 && !args.partnerConsent) {
+    return {
+      error: en
+        ? "Confirm that the second person agrees before you pay."
+        : "Confirma que la otra persona está de acuerdo antes de pagar.",
+    };
+  }
   // The actual charge; a valid discount code (resolved below, after supersede)
   // reduces it. Reassigned in one place so every downstream use — Package,
   // Payment, the Stripe line item, and the funnel event — stays in sync.
@@ -412,6 +445,8 @@ export async function startCheckout(args: StartCheckoutArgs): Promise<StartCheck
           classesTotal: template.classCount,
           classesUsed: 0,
           classDurationMin: template.classDurationMin,
+          seats: args.seats,
+          partnerConsentAt: args.seats === 2 ? new Date() : null,
           pricePaidMinorUnits: priceMinorUnits,
           currency,
           purchasedAt: new Date(),
@@ -539,6 +574,7 @@ export async function startCheckout(args: StartCheckoutArgs): Promise<StartCheck
       // carry it keep meaning what they meant.
       method: instrument ? railForKind(instrument.kind) : "stripe",
       priceMinorUnits,
+      seats: args.seats,
       source: args.source,
       // Carried from the first-touch cookie so the purchase can be attributed
       // to the channel that produced it without a cross-event join. Empty on
@@ -686,7 +722,12 @@ export async function startCheckout(args: StartCheckoutArgs): Promise<StartCheck
       // country, not the student's — offerable methods are the MERCHANT's.
       ...(teacher.country ? { merchantCountry: teacher.country } : {}),
       lineItem: {
-        name: `${template.name} — ${teacher.name}`,
+        // The receipt has to say it was bought for two: it is the one
+        // record of the purchase the buyer keeps outside SpiralClass.
+        name:
+          args.seats === 2
+            ? `${template.name} (${en ? "for 2 people" : "para 2 personas"}) — ${teacher.name}`
+            : `${template.name} — ${teacher.name}`,
         description: `${template.classCount} ${
           template.classCount === 1 ? "clase" : "clases"
         } de ${template.classDurationMin} minutos`,

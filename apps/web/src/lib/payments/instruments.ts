@@ -5,6 +5,7 @@ import {
   type StudentBuyInstrument,
   railForKind,
   isInstrumentOfferable,
+  priceForSeats,
   sortInstruments,
 } from "@spiralclass/shared";
 
@@ -135,12 +136,16 @@ export function instrumentDisplayName(instrument: { kind: PayoutInstrumentKind }
 // every manual instrument rather than per-instrument: the discount exists to
 // pass on the card-processing saving, which is the same saving whichever
 // transfer the student uses.
+//
+// One person. The price for two lives in `priceForSeats` (@spiralclass/shared),
+// which this delegates to, so both seat counts share one fallback rule.
 export function priceForMethod(
   template: { priceMinorUnits: number; transferPriceMinorUnits: number | null },
   method: "stripe" | "manual_transfer",
 ): number {
-  if (method === "manual_transfer") {
-    return template.transferPriceMinorUnits ?? template.priceMinorUnits;
-  }
-  return template.priceMinorUnits;
+  return priceForSeats(
+    { ...template, twoPersonPriceMinorUnits: null, twoPersonTransferPriceMinorUnits: null },
+    1,
+    method,
+  )!;
 }

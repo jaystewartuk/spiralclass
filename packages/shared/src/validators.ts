@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { parseSeats } from "./two-person";
 import { usesEnglishCopy } from "./i18n/locales";
 import type { LocaleCode as AppLocale } from "./api";
 import { isLanguageCode } from "./languages";
@@ -286,12 +287,28 @@ export const packageTemplateSchema = z
     transferPriceMinorUnits: z
       .union([z.literal("").transform(() => undefined), z.coerce.number().int().nonnegative()])
       .optional(),
+    // The price for two people (D-188). Absent = not sold for two. Never a
+    // stand-in 0: a free two-person package is expressible, "not offered" is
+    // the absence of a price.
+    twoPersonPriceMinorUnits: z
+      .union([z.literal("").transform(() => undefined), z.coerce.number().int().nonnegative()])
+      .optional(),
+    // The non-card price for two. Only meaningful with a two-person price —
+    // dropped below when there is none, mirroring the database CHECK.
+    twoPersonTransferPriceMinorUnits: z
+      .union([z.literal("").transform(() => undefined), z.coerce.number().int().nonnegative()])
+      .optional(),
     // null = teacher left validity blank. Nullable so an unkept row can carry
     // it; a kept row is required to fill it in (enforced in the superRefine).
     expirationMonths: z.coerce.number().int().nullable().default(null),
     keep: z.coerce.boolean().default(true),
   })
   .transform((t) => (t.singleClass ? { ...t, classCount: 1 } : t))
+  .transform((t) =>
+    t.twoPersonPriceMinorUnits === undefined
+      ? { ...t, twoPersonTransferPriceMinorUnits: undefined }
+      : t,
+  )
   .superRefine((t, ctx) => {
     // Unselected/removed rows carry no package to validate.
     if (!t.keep) return;
@@ -407,6 +424,15 @@ export const checkoutIntentSchema = (locale: AppLocale = "en") => {
       (v) => (v === null || v === "" ? undefined : v),
       z.string().trim().max(40).optional(),
     ),
+    // How many people the package is for (D-188). Absent, "", or anything but
+    // an exact 2 is one person — see parseSeats — so a missing field can
+    // never make a checkout dearer. Whether the template is actually sold for
+    // two is checked server-side against the database.
+    seats: z.unknown().transform(parseSeats),
+    // The buyer's confirmation that the second person agrees to the
+    // lesson-insights terms the buyer chooses (D-188). Required for two
+    // people; startCheckout refuses a two-person checkout without it.
+    partnerConsent: z.unknown().transform((v) => v === "1" || v === "on" || v === true),
   });
 };
 export type CheckoutIntentInput = z.infer<ReturnType<typeof checkoutIntentSchema>>;
@@ -733,6 +759,9 @@ export const portalCheckoutIntentSchema = z.object({
     (v) => (v === null || v === "" ? undefined : v),
     z.string().trim().max(40).optional(),
   ),
+  // See checkoutIntentSchema.seats / partnerConsent.
+  seats: z.unknown().transform(parseSeats),
+  partnerConsent: z.unknown().transform((v) => v === "1" || v === "on" || v === true),
 });
 export type PortalCheckoutIntentInput = z.infer<typeof portalCheckoutIntentSchema>;
 

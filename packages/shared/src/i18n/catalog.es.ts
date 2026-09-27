@@ -5013,6 +5013,50 @@ export const esMX = {
   "web.bookingLanding.fromPrice": "Desde {price}.",
   "web.bookingLanding.metaDescription":
     "Reserva, paga y recibe recordatorios de tus clases con {name}.",
+  "billing.limit.sellForTwo":
+    "Vender paquetes para dos personas es parte de Pro. Mejora tu plan para activar uno nuevo; los que ya vendes para dos siguen a la venta.",
+  "web.settings.billing.featureSellForTwo": "Paquetes para dos personas",
+  "web.settings.packages.twoPerson.percentInvalid":
+    "El precio para dos tiene que estar entre {min} % y {max} % del precio para una persona.",
+  "web.packages.twoPerson.badge": "Para dos",
+  "web.packages.twoPerson.summary": "Para dos: {amount}",
+  "web.packages.twoPerson.section": "Para dos personas",
+  "web.packages.twoPerson.label": "Vender también este paquete para dos personas",
+  "web.packages.twoPerson.hint":
+    "Dos personas que toman todas las clases juntas: una pareja, dos hermanos. Una de ellas paga una sola vez, cada clase usa una clase del paquete y su saldo se lleva aparte del de los paquetes para una persona.",
+  "web.packages.twoPerson.proOnly": "Vender para dos personas es parte de Pro.",
+  "web.packages.twoPerson.priceStripe": "Precio Stripe para dos",
+  "web.packages.twoPerson.price": "Precio para dos",
+  "web.packages.twoPerson.suggested": "Sugerido: {percent} % del precio para una persona.",
+  "web.packages.twoPerson.custom": "Tu propio precio.",
+  "web.packages.twoPerson.perPersonPerClass": "{amount} por persona, por clase.",
+  "web.packages.twoPerson.warnBelowOne":
+    "Es menos que el precio para una persona, así que dos personas pagarían menos que una.",
+  "web.packages.twoPerson.priceWise": "Precio Wise para dos",
+  "web.packages.twoPerson.percentLabel": "Precio para dos personas, como % del precio para una",
+  "web.packages.twoPerson.percentHint":
+    "Sugiere el precio cuando activas un paquete para dos y ajusta los precios que no has cambiado tú. Todos los precios siguen siendo editables.",
+  "web.bookingLanding.taglineWithPartner":
+    "Clases en línea para una persona o para dos juntas, al ritmo que te acomode.",
+  "web.bookingLanding.seats.one": "Solo yo",
+  "web.bookingLanding.seats.two": "Somos dos",
+  "web.bookingLanding.seats.twoExplainer":
+    "Para dos personas que toman todas las clases juntas. Una de ustedes paga una sola vez por las dos.",
+  "web.bookingLanding.seats.forTwoShort": "Para dos",
+  "web.bookingLanding.perPersonPerClass": "{price} por persona, por clase",
+  "web.buyFlow.package.forTwo": "Para dos personas",
+  "web.buyFlow.seats.legend": "¿Quién toma las clases?",
+  "web.buyFlow.seats.one": "Solo yo",
+  "web.buyFlow.seats.two": "Somos dos",
+  "web.buyFlow.seats.twoHint":
+    "Pagas una sola vez por las dos personas. Las dos entran juntas a cada clase desde una sola cuenta: la tuya.",
+  "web.checkoutForm.partnerConsentLabel":
+    "La otra persona está de acuerdo con las mismas condiciones de clase que yo elija",
+  "web.checkoutForm.partnerConsentHint":
+    "Estará en todas las clases, pero no tendrá una cuenta propia. Si activas el análisis de clases, las clases se graban y se analizan con las dos personas presentes, así que confirma que está de acuerdo.",
+  "web.dashboard.students.package.forTwoLabel": "Este paquete es para dos personas",
+  "web.dashboard.students.package.forTwoHint":
+    "Sus clases salen de un saldo aparte para dos. El análisis de clases queda desactivado para sus clases, porque nadie confirmó al pagar que la otra persona está de acuerdo.",
   "web.bookingLanding.tagline": "Clases uno a uno en línea, al ritmo que te acomode.",
   // La tarjeta social por profesora (apps/web/src/app/b/[slug]/opengraph-image.tsx).
   // Fijada a PUBLIC_FUNNEL_LOCALE igual que la página que previsualiza.

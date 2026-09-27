@@ -1,5 +1,5 @@
 import type { Prisma, PrismaClient } from "@prisma/client";
-import { priceForMethod } from "@/lib/payments/instruments";
+import { priceForSeats, type Seats } from "@spiralclass/shared";
 
 // Grandfathering, per package. ONE resolver, because the old flat column
 // was read in six places and displayed in four, and the display and the charge
@@ -40,20 +40,29 @@ type PricedTemplate = {
   id: string;
   priceMinorUnits: number;
   transferPriceMinorUnits: number | null;
+  twoPersonPriceMinorUnits: number | null;
+  twoPersonTransferPriceMinorUnits: number | null;
 };
 
 /**
- * What this student pays for this package, on this rail.
+ * What this student pays for this package, on this rail, for this many people
+ * — or null when the template is not sold for that many.
  *
  * An agreed price wins over the catalog price on BOTH rails — there is no
  * grandfathered transfer price, so the rail only matters when no agreed price
  * exists. Same call the flat column made.
+ *
+ * An agreed price is a price for ONE person (D-188): it was agreed for the
+ * package as she has always bought it, so it never prices the package bought
+ * for two. A student held at an old one-person rate who buys for two pays the
+ * two-person catalog price.
  */
 export function effectivePriceMinorUnits(
   prices: GrandfatheredPrices,
   template: PricedTemplate,
   method: "stripe" | "manual_transfer",
-): number {
-  const agreed = prices.get(template.id);
-  return agreed ?? priceForMethod(template, method);
+  seats: Seats = 1,
+): number | null {
+  const agreed = seats === 1 ? prices.get(template.id) : undefined;
+  return agreed ?? priceForSeats(template, seats, method);
 }

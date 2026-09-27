@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   PACKAGE_NAME_MAX_CHARS,
+  deriveTwoAuto,
   deriveWiseAuto,
   duplicatePackageName,
   packageRowIssue,
@@ -8,6 +9,7 @@ import {
   pendingPackageChanges,
   pricePerClassMinorUnits,
   transferPriceIsNotADiscount,
+  twoPersonPriceIsBelowOnePerson,
   type PackageDraft,
   type PackageRow,
 } from "@/lib/pricing/package-editor";
@@ -26,6 +28,8 @@ const DRAFT: PackageDraft = {
   classDurationMin: 50,
   priceMinorUnits: 240_000,
   transferPriceMinorUnits: null,
+  twoPersonPriceMinorUnits: null,
+  twoPersonTransferPriceMinorUnits: null,
   expirationMonths: 2,
 };
 
@@ -34,6 +38,8 @@ const row = (patch: Partial<PackageRow> = {}): PackageRow => ({
   localKey: DRAFT.id,
   keep: true,
   wiseAuto: false,
+  twoAuto: false,
+  twoWiseAuto: false,
   ...patch,
 });
 
@@ -205,5 +211,53 @@ describe("duplicatePackageName", () => {
   it("clamps to the column limit so the shown name is the stored name", () => {
     const long = "x".repeat(PACKAGE_NAME_MAX_CHARS);
     expect(duplicatePackageName(long, [long]).length).toBeLessThanOrEqual(PACKAGE_NAME_MAX_CHARS);
+  });
+});
+
+// Packages for two (D-188).
+describe("deriveTwoAuto — is the price for two still the suggested one?", () => {
+  it("is true while it equals the percent of the one-person price", () => {
+    expect(deriveTwoAuto(240_000, 360_000, 150, "MXN")).toBe(true);
+  });
+
+  it("is false once she typed her own price for two, or none is set", () => {
+    expect(deriveTwoAuto(240_000, 350_000, 150, "MXN")).toBe(false);
+    expect(deriveTwoAuto(240_000, null, 150, "MXN")).toBe(false);
+  });
+
+  it("is currency-aware: a 0-decimal price is suggested in whole yen", () => {
+    expect(deriveTwoAuto(4_999, 7_499, 150, "JPY")).toBe(true);
+  });
+});
+
+describe("twoPersonPriceIsBelowOnePerson — a warning, not an issue", () => {
+  it("warns when two people would pay less than one", () => {
+    expect(twoPersonPriceIsBelowOnePerson(row({ twoPersonPriceMinorUnits: 200_000 }))).toBe(true);
+  });
+
+  it("stays quiet for a real price for two, none at all, or a removed row", () => {
+    expect(twoPersonPriceIsBelowOnePerson(row({ twoPersonPriceMinorUnits: 360_000 }))).toBe(false);
+    expect(twoPersonPriceIsBelowOnePerson(row())).toBe(false);
+    expect(twoPersonPriceIsBelowOnePerson(row({ twoPersonPriceMinorUnits: 1, keep: false }))).toBe(
+      false,
+    );
+  });
+
+  it("is never a row issue — the server accepts it", () => {
+    expect(packageRowIssue(row({ twoPersonPriceMinorUnits: 1 }))).toBeNull();
+  });
+});
+
+describe("pendingPackageChanges — a price for two is an edit", () => {
+  it("counts switching a package on for two, or repricing it, as an unsaved edit", () => {
+    expect(
+      pendingPackageChanges([DRAFT], [row({ twoPersonPriceMinorUnits: 360_000 })]).edited,
+    ).toBe(1);
+    expect(
+      pendingPackageChanges(
+        [{ ...DRAFT, twoPersonPriceMinorUnits: 360_000 }],
+        [row({ twoPersonPriceMinorUnits: 360_000, twoPersonTransferPriceMinorUnits: 340_000 })],
+      ).edited,
+    ).toBe(1);
   });
 });

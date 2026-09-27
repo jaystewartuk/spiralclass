@@ -37,6 +37,8 @@ export default async function TemplatesStepPage() {
           classDurationMin: t.classDurationMin,
           priceMinorUnits: t.priceMinorUnits,
           transferPriceMinorUnits: t.transferPriceMinorUnits,
+          twoPersonPriceMinorUnits: t.twoPersonPriceMinorUnits,
+          twoPersonTransferPriceMinorUnits: t.twoPersonTransferPriceMinorUnits,
           expirationMonths: t.expirationMonths,
         }))}
         payoutCountrySupported={payoutCountrySupported}

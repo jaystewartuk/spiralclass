@@ -86,6 +86,7 @@ describeIntegration("credit ledger FIFO (real DB)", () => {
       teacherId: TEACHER_ID,
       studentIds: [studentId],
       classDurationMin: 50,
+      seats: 1,
     };
 
     const claimed = await prisma.$transaction((tx) =>
@@ -125,6 +126,7 @@ describeIntegration("credit ledger FIFO (real DB)", () => {
       teacherId: TEACHER_ID,
       studentIds: [studentId],
       classDurationMin: 50,
+      seats: 1,
     };
 
     const results = await Promise.all(

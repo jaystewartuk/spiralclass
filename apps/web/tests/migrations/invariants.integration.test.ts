@@ -47,7 +47,7 @@ describeIntegration("database invariants (D-168)", () => {
     "web_push_subscriptions_active_idx",
   ] as const;
 
-  // Two GiST exclusion constraints (contype 'x') and 33 CHECKs (contype 'c').
+  // Two GiST exclusion constraints (contype 'x') and 37 CHECKs (contype 'c').
   const EXCLUSION_CONSTRAINTS = [
     "bookings_no_overlap_active",
     "bookings_no_overlap_buffered",
@@ -66,10 +66,13 @@ describeIntegration("database invariants (D-168)", () => {
     "package_templates_duration_positive",
     "package_templates_price_nonneg",
     "package_templates_transfer_price_nonnegative",
+    "package_templates_two_person_price_nonneg",
+    "package_templates_two_person_transfer_needs_price",
     "packages_classes_used_bounds",
     "packages_custom_price_nonneg",
     "packages_price_nonneg",
     "packages_schedule_changes_used_nonneg",
+    "packages_seats_one_or_two",
     "payments_amount_nonneg",
     "payments_billing_country_iso_format",
     "payments_instrument_only_for_manual_transfer",
@@ -86,6 +89,7 @@ describeIntegration("database invariants (D-168)", () => {
     "teachers_phone_e164_format",
     "teachers_pricing_currency_iso_format",
     "teachers_public_whatsapp_e164_format",
+    "teachers_two_person_price_percent_range",
     "testimonials_verified_shape",
   ] as const;
 

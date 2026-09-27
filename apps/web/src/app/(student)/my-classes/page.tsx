@@ -34,6 +34,7 @@ type PackageSummary = {
   id: string;
   templateName: string | null;
   subject: string | null;
+  seats: number;
   classesTotal: number;
   classesUsed: number;
   expiresAt: Date | null;
@@ -180,6 +181,7 @@ export default async function StudentPortalPage({
     id: p.id,
     templateName: p.template?.name ?? null,
     subject: p.template?.subject ?? null,
+    seats: p.seats,
     classesTotal: p.classesTotal,
     classesUsed: p.classesUsed,
     expiresAt: p.expiresAt,
@@ -422,7 +424,11 @@ function PackageRow({
   const remaining = pkg.classesTotal - pkg.classesUsed;
   // Teacher name leads (the differentiator across teachers). The detail line
   // pairs the subject with the size label, e.g. "Conversación · 8 clases / 1 mes".
-  const detail = [pkg.subject, pkg.teacherName ? pkg.templateName : null]
+  const detail = [
+    pkg.seats === 2 ? t("web.buyFlow.package.forTwo") : null,
+    pkg.subject,
+    pkg.teacherName ? pkg.templateName : null,
+  ]
     .filter(Boolean)
     .join(" · ");
   return (

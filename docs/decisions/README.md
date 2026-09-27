@@ -71,7 +71,7 @@ another way" about anything that still exists.
   both reversed by [D-40](./D-40.md)).
 
 **Numbering is never reused and never renumbered**, so `D-01` is still the
-first decision and `D-187` the most recent. A gap means a record was removed,
+first decision and `D-188` the most recent. A gap means a record was removed,
 not that one is missing.
 
 **Everything kept is unedited**, except where a record named an account
@@ -196,6 +196,7 @@ someone worked out what they actually cost a student.
 | [D-53](./D-53.md)   | Each availability rule is frozen in the zone it was written in                                 |
 | [D-111](./D-111.md) | Package guest booking is "pick your first class" — full guest booking needs a third auth state |
 | [D-149](./D-149.md) | Group classes are one booking with many attendees, because the exclusion constraint says so    |
+| [D-188](./D-188.md) | **A package can be sold for two** — one buyer, one account, its own credit balance             |
 
 ### Identity, authentication and access
 
@@ -510,7 +511,7 @@ records removed before publication — see [What is not here](#what-is-not-here)
 | [D-145](./D-145.md) | The manual bank-account rail is removed; Wise stays                   | Active                               |
 | [D-146](./D-146.md) | One heavy job at a time; the laptop becomes a queue                   | Active (in part → D-157/D-161)       |
 | [D-147](./D-147.md) | Regulatory position                                                   | Content removed; finding kept        |
-| [D-149](./D-149.md) | Group classes: one booking, many attendees                            | Scoped; not built                    |
+| [D-149](./D-149.md) | Group classes: one booking, many attendees                            | Scoped; narrowed by D-188 for two    |
 | [D-150](./D-150.md) | Hosting measured; the app stays where the database is                 | Decided; partly executed             |
 | [D-151](./D-151.md) | Verified student testimonials the teacher cannot write                | Active                               |
 | [D-152](./D-152.md) | Disclose Stripe's fee, and that we receive none of it                 | Active                               |
@@ -544,6 +545,7 @@ records removed before publication — see [What is not here](#what-is-not-here)
 | [D-185](./D-185.md) | Live captions run in the browsers; a computer covers a phone          | Active (supersedes D-106, D-108)     |
 | [D-186](./D-186.md) | The Vercel failover is retired; Cloud Run is the only target          | Active (reverses D-177)              |
 | [D-187](./D-187.md) | Video on a free e2-micro; recording and transcription off again       | Active (reverses D-182, D-131)       |
+| [D-188](./D-188.md) | Packages for two: one buyer, one account, a separate credit balance   | Active (narrows D-149)               |
 
 ---
 

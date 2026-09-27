@@ -70,6 +70,10 @@ export function PlanScope({
       label: t("web.settings.billing.featureHomeworkReview"),
       included: entitlements.canUseHomeworkAiReview,
     },
+    {
+      label: t("web.settings.billing.featureSellForTwo"),
+      included: entitlements.canSellForTwo,
+    },
   ];
 
   return (

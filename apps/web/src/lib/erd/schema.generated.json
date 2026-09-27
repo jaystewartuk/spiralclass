@@ -8197,6 +8197,30 @@
           "default": null
         },
         {
+          "name": "twoPersonPriceMinorUnits",
+          "type": "Int",
+          "note": null,
+          "isPrimaryKey": false,
+          "isForeignKey": false,
+          "isUnique": false,
+          "isNotNull": false,
+          "isEnum": false,
+          "enumName": null,
+          "default": null
+        },
+        {
+          "name": "twoPersonTransferPriceMinorUnits",
+          "type": "Int",
+          "note": null,
+          "isPrimaryKey": false,
+          "isForeignKey": false,
+          "isUnique": false,
+          "isNotNull": false,
+          "isEnum": false,
+          "enumName": null,
+          "default": null
+        },
+        {
           "name": "expirationMonths",
           "type": "Int",
           "note": null,
@@ -8375,6 +8399,30 @@
           "isEnum": false,
           "enumName": null,
           "default": "50"
+        },
+        {
+          "name": "seats",
+          "type": "Int",
+          "note": null,
+          "isPrimaryKey": false,
+          "isForeignKey": false,
+          "isUnique": false,
+          "isNotNull": true,
+          "isEnum": false,
+          "enumName": null,
+          "default": "1"
+        },
+        {
+          "name": "partnerConsentAt",
+          "type": "DateTime",
+          "note": null,
+          "isPrimaryKey": false,
+          "isForeignKey": false,
+          "isUnique": false,
+          "isNotNull": false,
+          "isEnum": false,
+          "enumName": null,
+          "default": null
         },
         {
           "name": "pricePaidMinorUnits",
@@ -12830,6 +12878,18 @@
           "isEnum": false,
           "enumName": null,
           "default": "MXN"
+        },
+        {
+          "name": "twoPersonPricePercent",
+          "type": "Int",
+          "note": null,
+          "isPrimaryKey": false,
+          "isForeignKey": false,
+          "isUnique": false,
+          "isNotNull": true,
+          "isEnum": false,
+          "enumName": null,
+          "default": "150"
         },
         {
           "name": "locale",

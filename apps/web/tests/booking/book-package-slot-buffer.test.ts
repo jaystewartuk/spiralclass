@@ -72,6 +72,7 @@ const PKG = {
   classesUsed: 0,
   classesTotal: 10,
   classDurationMin: 50,
+  seats: 1,
   expiresAt: null,
 };
 const TEACHER = {

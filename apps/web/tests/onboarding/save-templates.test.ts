@@ -963,3 +963,44 @@ describe("saveTemplatesAction — the settings return path", () => {
     expect(result?.templateIndex).toBe(0);
   });
 });
+
+// Packages for two (D-188). The editor posts the price for two alongside each
+// row, index-aligned, and the teacher-wide percent once.
+describe("saveTemplatesAction — prices for two", () => {
+  const rows = ["tpl-1", "tpl-2", "tpl-3", "tpl-4"].map((id) => ({
+    id,
+    name: `Package ${id}`,
+    classCount: "4",
+    duration: "50",
+    price: "1850",
+    expiration: "1",
+    keep: "1" as const,
+  }));
+
+  function twoPersonForm(twoPrices: string[], percent: string): FormData {
+    const fd = form(rows);
+    fd.append("redirectTo", "/settings/templates");
+    for (const price of twoPrices) {
+      fd.append("tpl_two_price", price);
+      fd.append("tpl_two_wise_price", "");
+    }
+    fd.append("two_person_percent", percent);
+    return fd;
+  }
+
+  type WithTwo = { twoPersonPriceMinorUnits?: number | null };
+
+  it("stores the price for two in minor units, and none where it is switched off", async () => {
+    const result = await saveTemplatesAction(undefined, twoPersonForm(["2775", "", "", ""], "150"));
+    expect(result?.ok).toBe(true);
+    expect((state.templates.get("tpl-1") as WithTwo).twoPersonPriceMinorUnits).toBe(277_500);
+    expect((state.templates.get("tpl-2") as WithTwo).twoPersonPriceMinorUnits).toBeNull();
+  });
+
+  it("refuses a percent outside 100–300 before writing anything", async () => {
+    const result = await saveTemplatesAction(undefined, twoPersonForm(["2775", "", "", ""], "90"));
+    expect(result?.error).toBeTruthy();
+    expect(result?.ok).toBeUndefined();
+    expect((state.templates.get("tpl-1") as WithTwo).twoPersonPriceMinorUnits).toBeUndefined();
+  });
+});

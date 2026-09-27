@@ -91,7 +91,7 @@ imported by anything.
 
 ## Data model
 
-82 models, 5 migrations, 128 indexes and 23 unique constraints. Postgres on
+82 models, 6 migrations, 128 indexes and 23 unique constraints. Postgres on
 Neon, through Prisma. **[`data-model.md`](data-model.md) is the full
 treatment**; four properties matter for the shape of everything above it.
 

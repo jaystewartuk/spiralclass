@@ -84,6 +84,8 @@ export type BookablePackage = {
   classesUsed: number;
   classesTotal: number;
   classDurationMin: number;
+  // One person or two (D-188) — part of the pool the class is paid from.
+  seats: number;
   expiresAt: Date | null;
 };
 
@@ -136,6 +138,7 @@ export async function bookPackageSlot(
     teacherId: pkg.teacherId,
     studentIds: input.studentIds ?? [pkg.studentId],
     classDurationMin: pkg.classDurationMin,
+    seats: pkg.seats,
   };
 
   const startUtc = input.startUtc;

@@ -94,6 +94,7 @@ describe("entitlementsFor — Pro grant", () => {
       expect(e.canUseLiveNotes).toBe(true);
       expect(e.canUseIntroVideoCoach).toBe(true);
       expect(e.canUseHomeworkAiReview).toBe(true);
+      expect(e.canSellForTwo).toBe(true);
       expect(e.studentLimit).toBe(Number.POSITIVE_INFINITY);
       expect(e.templateLimit).toBe(Number.POSITIVE_INFINITY);
     }
@@ -104,6 +105,7 @@ describe("entitlementsFor — Pro grant", () => {
       const e = entitlementsFor(sub({ status }), NOW);
       expect(e.isPro).toBe(false);
       expect(e.canScheduleMaterials).toBe(false);
+      expect(e.canSellForTwo).toBe(false);
       expect(e.studentLimit).toBe(FREE_MAX_ACTIVE_STUDENTS);
       expect(e.templateLimit).toBe(FREE_MAX_PACKAGE_TEMPLATES);
     }

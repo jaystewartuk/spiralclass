@@ -14,7 +14,7 @@
 // server would accept is the same bug as one that accepts what the server
 // refuses, just quieter.
 
-import { computeWisePriceFromStripe } from "@spiralclass/shared";
+import { computeWisePriceFromStripe, suggestTwoPersonPrice } from "@spiralclass/shared";
 
 /** A package as the server knows it. `id` is "" for a row added this session. */
 export type PackageDraft = {
@@ -29,6 +29,10 @@ export type PackageDraft = {
   priceMinorUnits: number;
   /** null = no manual-rail discount (the transfer price inherits the card price). */
   transferPriceMinorUnits: number | null;
+  /** The price for two people (D-188). null = not sold for two. */
+  twoPersonPriceMinorUnits: number | null;
+  /** The non-card price for two. null = the two-person price on every rail. */
+  twoPersonTransferPriceMinorUnits: number | null;
   expirationMonths: number | null;
 };
 
@@ -42,6 +46,14 @@ export type PackageRow = PackageDraft & {
    * doesn't blow away her override.
    */
   wiseAuto: boolean;
+  /**
+   * True while the two-person price tracks the teacher's percent of the
+   * one-person price, so repricing the package — or changing the percent —
+   * moves it along. Flips false the moment she types a price for two herself.
+   */
+  twoAuto: boolean;
+  /** The same, for the two-person transfer price against the two-person price. */
+  twoWiseAuto: boolean;
 };
 
 /** Column limits from `packageTemplateSchema`, so the field stops where
@@ -63,6 +75,35 @@ export function deriveWiseAuto(
 ): boolean {
   if (transferPriceMinorUnits === null) return false;
   return transferPriceMinorUnits === computeWisePriceFromStripe(priceMinorUnits, currency);
+}
+
+/**
+ * Is this two-person price still the one the percent would suggest? The
+ * two-person twin of `deriveWiseAuto`, and currency-aware for the same reason.
+ */
+export function deriveTwoAuto(
+  priceMinorUnits: number,
+  twoPersonPriceMinorUnits: number | null,
+  percent: number,
+  currency: string,
+): boolean {
+  if (twoPersonPriceMinorUnits === null) return false;
+  return twoPersonPriceMinorUnits === suggestTwoPersonPrice(priceMinorUnits, percent, currency);
+}
+
+/**
+ * The two-person price is below the one-person price — two people would pay
+ * less than one.
+ *
+ * A WARNING, like `transferPriceIsNotADiscount`: the server accepts it and a
+ * teacher may mean it, but it is almost always a typo in the wrong field, and
+ * nothing downstream would ever say so.
+ */
+export function twoPersonPriceIsBelowOnePerson(
+  row: Pick<PackageRow, "priceMinorUnits" | "twoPersonPriceMinorUnits" | "keep">,
+): boolean {
+  if (!row.keep || row.twoPersonPriceMinorUnits === null) return false;
+  return row.twoPersonPriceMinorUnits < row.priceMinorUnits;
 }
 
 // --- Validating a row -----------------------------------------------------
@@ -167,6 +208,8 @@ function isEdited(row: PackageRow, original: PackageDraft): boolean {
     row.classDurationMin !== original.classDurationMin ||
     row.priceMinorUnits !== original.priceMinorUnits ||
     row.transferPriceMinorUnits !== original.transferPriceMinorUnits ||
+    row.twoPersonPriceMinorUnits !== original.twoPersonPriceMinorUnits ||
+    row.twoPersonTransferPriceMinorUnits !== original.twoPersonTransferPriceMinorUnits ||
     row.expirationMonths !== original.expirationMonths
   );
 }

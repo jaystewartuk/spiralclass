@@ -23,6 +23,7 @@ type Row = {
   classesUsed: number;
   classesTotal: number;
   classDurationMin: number;
+  seats: number;
   expiresAt: Date | null;
   purchasedAt: Date;
   status: string;
@@ -35,6 +36,7 @@ function row(over: Partial<Row> & { id: string }): Row {
     classesUsed: 0,
     classesTotal: 10,
     classDurationMin: 50,
+    seats: 1,
     expiresAt: null,
     purchasedAt: new Date("2026-06-01T00:00:00.000Z"),
     status: "active",
@@ -56,6 +58,7 @@ function fakeClient(rows: Row[]) {
             r.classDurationMin !== where.classDurationMin
           )
             return false;
+          if (where?.seats !== undefined && r.seats !== where.seats) return false;
           if (where?.status && r.status !== where.status) return false;
           return true;
         });
@@ -79,6 +82,7 @@ const pool: CreditPool = {
   teacherId: TEACHER,
   studentIds: [STUDENT],
   classDurationMin: 50,
+  seats: 1,
 };
 
 describe("compareCreditFifo", () => {
@@ -192,6 +196,45 @@ describe("summarizeCreditPools", () => {
     ]);
     expect(pools).toHaveLength(2);
     expect(new Set(pools.map((p) => p.classDurationMin))).toEqual(new Set([25, 50]));
+  });
+
+  // D-188: a class for two costs more per class than a class for one, so a
+  // one-person credit spent on a class for two would underpay the teacher.
+  it("keeps a package for two as its own balance, apart from the one-person one", () => {
+    const pools = summarizeCreditPools([
+      row({ id: "solo", classesTotal: 8 }),
+      row({ id: "pair", seats: 2, classesTotal: 4 }),
+    ]);
+    expect(pools).toHaveLength(2);
+    const pair = pools.find((p) => p.seats === 2);
+    expect(pair?.classesLeft).toBe(4);
+    expect(pair?.referencePackageId).toBe("pair");
+    expect(pools.find((p) => p.seats === 1)?.classesLeft).toBe(8);
+  });
+});
+
+describe("the seat axis (D-188)", () => {
+  it("never spends a one-person credit on a class for two", async () => {
+    const rows = [row({ id: "solo", expiresAt: new Date("2026-06-20T00:00:00Z") })];
+    const claimed = await claimNextCredit(fakeClient(rows), { ...pool, seats: 2 }, NOW, null);
+    expect(claimed).toBeNull();
+    expect(rows[0].classesUsed).toBe(0);
+  });
+
+  it("spends a credit for two on a class for two, even when a one-person credit expires sooner", async () => {
+    const rows = [
+      row({ id: "solo", expiresAt: new Date("2026-06-20T00:00:00Z") }),
+      row({ id: "pair", seats: 2, expiresAt: new Date("2026-08-01T00:00:00Z") }),
+    ];
+    const claimed = await claimNextCredit(fakeClient(rows), { ...pool, seats: 2 }, NOW, null);
+    expect(claimed?.packageId).toBe("pair");
+  });
+
+  it("reports a one-person balance as exhausted for a class for two", async () => {
+    const rows = [row({ id: "solo" })];
+    expect((await checkCreditAvailability(fakeClient(rows), { ...pool, seats: 2 }, NOW)).code).toBe(
+      "exhausted",
+    );
   });
 });
 

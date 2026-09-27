@@ -15,6 +15,7 @@ import {
 import { loadStripe } from "@stripe/stripe-js";
 import { EmbeddedCheckout, EmbeddedCheckoutProvider } from "@stripe/react-stripe-js";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { createCheckoutIntent, type CheckoutState } from "@/app/actions/checkout";
@@ -67,9 +68,14 @@ export function CheckoutForm({
   // `requireSlot` gates the pay button until a time is chosen.
   intendedStartUtc = null,
   requireSlot = false,
+  seats = 1,
 }: {
   slug: string;
   templateId: string;
+  // How many people the package is for (D-188). The prices above are already
+  // the ones for this many people; this only posts the count and asks the
+  // buyer to confirm for the second person.
+  seats?: 1 | 2;
   priceMinorUnits: number;
   transferPriceMinorUnits: number | null;
   currency: string;
@@ -136,6 +142,12 @@ export function CheckoutForm({
   // few who have a code. A code arriving via a shareable link (prefillCode)
   // opens it automatically so the buyer sees it's already applied.
   const [showDiscount, setShowDiscount] = useState(Boolean(prefillCode));
+  // The second person has no account and so no consent of her own; the buyer
+  // confirms for her. The server refuses a checkout for two without it, and the
+  // button stays disabled until it is ticked so that refusal is never a
+  // surprise after typing a name and an email.
+  const [partnerConsent, setPartnerConsent] = useState(false);
+  const needsPartnerConsent = seats === 2 && !partnerConsent;
 
   const displayPrice = priceForMethod({ priceMinorUnits, transferPriceMinorUnits }, method);
 
@@ -172,6 +184,7 @@ export function CheckoutForm({
         posthog?.capture("checkout_submitted", {
           slug,
           templateId,
+          seats,
           method: instrumentKind ? railForKind(instrumentKind) : "stripe",
           watched_intro_video: introVideo.watched,
           intro_video_max_percent: introVideo.maxPercent,
@@ -184,6 +197,8 @@ export function CheckoutForm({
       <input type="hidden" name="paymentMethod" value={method} />
       <input type="hidden" name="instrumentId" value={instrumentId ?? ""} />
       <input type="hidden" name="intendedStartUtc" value={intendedStartUtc ?? ""} />
+      <input type="hidden" name="seats" value={seats} />
+      <input type="hidden" name="partnerConsent" value={partnerConsent ? "1" : ""} />
       <input ref={sessionIdRef} type="hidden" name="posthogSessionId" defaultValue="" />
 
       <div className="space-y-1">
@@ -264,6 +279,26 @@ export function CheckoutForm({
           {t("web.checkoutForm.haveDiscountCode")}
         </button>
       )}
+      {seats === 2 && (
+        <div className="flex items-start gap-3 rounded-md border bg-muted/30 p-3">
+          <Checkbox
+            id={`partner-consent-${templateId}`}
+            checked={partnerConsent}
+            onCheckedChange={(v) => setPartnerConsent(v === true)}
+            disabled={noMethods || pending}
+            className="mt-0.5"
+            aria-describedby={`partner-consent-hint-${templateId}`}
+          />
+          <div className="min-w-0 space-y-1">
+            <Label htmlFor={`partner-consent-${templateId}`} className="text-sm">
+              {t("web.checkoutForm.partnerConsentLabel")}
+            </Label>
+            <p id={`partner-consent-hint-${templateId}`} className="text-xs text-muted-foreground">
+              {t("web.checkoutForm.partnerConsentHint")}
+            </p>
+          </div>
+        </div>
+      )}
       {errorMessage && (
         <p
           id={`checkout-error-${templateId}`}
@@ -280,7 +315,7 @@ export function CheckoutForm({
       <Button
         type="submit"
         className="w-full"
-        disabled={noMethods || pending || (requireSlot && !intendedStartUtc)}
+        disabled={noMethods || pending || (requireSlot && !intendedStartUtc) || needsPartnerConsent}
       >
         {pending
           ? t("web.checkoutForm.redirecting")
