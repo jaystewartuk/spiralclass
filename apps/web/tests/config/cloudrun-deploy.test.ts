@@ -556,6 +556,31 @@ describe("the entrypoint's secret file — the one new runtime behaviour", () =>
     );
   });
 
+  describe("the __LOCAL__ warning", () => {
+    const WARNING = "SECRET_ONE is __LOCAL__ and no override was supplied";
+
+    it("stays quiet when the secret file fills the key", () => {
+      // The regression: the warning used to print while the committed file was
+      // read, before the secret file had supplied the value, so every Cloud
+      // Run boot warned about keys that were in fact set.
+      const result = boot({ SECRETS_ENV_FILE: join(scratch, "secrets.env") });
+      expect(result.exported.SECRET_ONE).toBe("filled");
+      expect(result.stderr).not.toContain(WARNING);
+    });
+
+    it("stays quiet when the container environment supplies the key", () => {
+      expect(boot({ SECRET_ONE: "from-env" }).stderr).not.toContain(WARNING);
+    });
+
+    it("still warns when no source supplies the key", () => {
+      // The signal the warning exists for: the deploy cannot read the secret
+      // to check it (D-184), so a missing value is only visible at boot.
+      const result = boot({});
+      expect(result.status).toBe(0);
+      expect(result.stderr).toContain(WARNING);
+    });
+  });
+
   it("the container environment still wins over the file", () => {
     const result = boot({
       SECRETS_ENV_FILE: join(scratch, "secrets.env"),
