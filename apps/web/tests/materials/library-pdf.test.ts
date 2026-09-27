@@ -1,13 +1,18 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const findFirst = vi.fn(async (..._: unknown[]) => null as Record<string, unknown> | null);
+const attachmentsFindMany = vi.fn(async (..._: unknown[]) => [] as Record<string, unknown>[]);
 vi.mock("@/lib/prisma", () => ({
-  prisma: { libraryMaterial: { findFirst: (...a: unknown[]) => findFirst(...a) } },
+  prisma: {
+    libraryMaterial: { findFirst: (...a: unknown[]) => findFirst(...a) },
+    bookingLibraryMaterial: { findMany: (...a: unknown[]) => attachmentsFindMany(...a) },
+  },
 }));
 
 import {
   answerKeyRequested,
   findDownloadableLibraryMaterial,
+  findStudentDownloadableLibraryMaterial,
   materialPdfFilename,
 } from "@/lib/materials/library-pdf";
 
@@ -78,6 +83,63 @@ describe("findDownloadableLibraryMaterial", () => {
       linkUrl: null,
     });
     expect(await findDownloadableLibraryMaterial("m1", "t1")).toBeNull();
+  });
+});
+
+describe("findStudentDownloadableLibraryMaterial", () => {
+  const classStart = new Date("2026-10-01T15:00:00Z");
+  const material = { id: "m1", label: "Lesson 1", body: "Some **markdown**." };
+  const attachment = (sendTiming: string, body: string | null = material.body) => ({
+    sendTiming,
+    booking: { scheduledStart: classStart },
+    material: { ...material, body },
+  });
+
+  it("scopes the lookup to this material on the student's own classes", async () => {
+    attachmentsFindMany.mockResolvedValue([attachment("confirmation")]);
+    const result = await findStudentDownloadableLibraryMaterial("m1", ["s1", "s2"], classStart);
+    expect(result).toEqual(material);
+    expect(attachmentsFindMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { libraryMaterialId: "m1", booking: { studentId: { in: ["s1", "s2"] } } },
+      }),
+    );
+  });
+
+  it("returns null when it isn't attached to any of their classes", async () => {
+    attachmentsFindMany.mockResolvedValue([]);
+    expect(await findStudentDownloadableLibraryMaterial("m1", ["s1"], classStart)).toBeNull();
+  });
+
+  it("holds a material back until its send time has elapsed, like the class page", async () => {
+    attachmentsFindMany.mockResolvedValue([attachment("t_24h")]);
+    const twoDaysBefore = new Date(classStart.getTime() - 48 * 3600_000);
+    const twelveHoursBefore = new Date(classStart.getTime() - 12 * 3600_000);
+    expect(await findStudentDownloadableLibraryMaterial("m1", ["s1"], twoDaysBefore)).toBeNull();
+    expect(await findStudentDownloadableLibraryMaterial("m1", ["s1"], twelveHoursBefore)).toEqual(
+      material,
+    );
+  });
+
+  it("serves it when any one of several attachments has been sent", async () => {
+    attachmentsFindMany.mockResolvedValue([
+      { ...attachment("t_1h"), booking: { scheduledStart: new Date("2026-12-01T15:00:00Z") } },
+      attachment("t_5d"),
+    ]);
+    const fourDaysBefore = new Date(classStart.getTime() - 4 * 24 * 3600_000);
+    expect(await findStudentDownloadableLibraryMaterial("m1", ["s1"], fourDaysBefore)).toEqual(
+      material,
+    );
+  });
+
+  it("returns null for a file/link material with no body to render", async () => {
+    attachmentsFindMany.mockResolvedValue([attachment("confirmation", null)]);
+    expect(await findStudentDownloadableLibraryMaterial("m1", ["s1"], classStart)).toBeNull();
+  });
+
+  it("never queries with an empty identity set", async () => {
+    expect(await findStudentDownloadableLibraryMaterial("m1", [], classStart)).toBeNull();
+    expect(attachmentsFindMany).not.toHaveBeenCalled();
   });
 });
 
