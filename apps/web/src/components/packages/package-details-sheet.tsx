@@ -23,6 +23,7 @@ type PackageDetails = {
   id: string;
   templateName: string | null;
   subject: string | null;
+  seats: number;
   classesTotal: number;
   classesUsed: number;
   classesLeftToTeach: number;
@@ -120,9 +121,14 @@ export function PackageDetailsSheet({
 
         {data && status !== "loading" && (
           <div className="space-y-5">
-            <Badge variant={STATUS_VARIANT[data.status] ?? "secondary"}>
-              {t(STATUS_KEY[data.status] ?? "package.status.pending")}
-            </Badge>
+            <div className="flex flex-wrap gap-2">
+              <Badge variant={STATUS_VARIANT[data.status] ?? "secondary"}>
+                {t(STATUS_KEY[data.status] ?? "package.status.pending")}
+              </Badge>
+              {data.seats === 2 && (
+                <Badge variant="info">{t("web.packages.twoPerson.badge")}</Badge>
+              )}
+            </div>
 
             <div className="grid grid-cols-2 gap-3">
               <Stat

@@ -95,7 +95,7 @@ export default async function ReservarPage({
   }
 
   // Collapse the packages into one spendable balance per (teacher, class
-  // length). The student no longer picks an individual package — the server
+  // length, seats) — a package for two is its own balance (D-188). The student no longer picks an individual package — the server
   // always spends the soonest-to-expire credit in the chosen pool — so the UI
   // shows combined balances and the form submits a pool pointer.
   const pools = summarizeCreditPools(bookablePackages);
@@ -106,7 +106,8 @@ export default async function ReservarPage({
       ? pools.find(
           (pl) =>
             pl.teacherId === referenced.teacherId &&
-            pl.classDurationMin === referenced.classDurationMin,
+            pl.classDurationMin === referenced.classDurationMin &&
+            pl.seats === referenced.seats,
         )
       : undefined) ?? pools[0];
   const teacher = teacherById.get(selectedPool.teacherId)!;
@@ -243,16 +244,19 @@ export default async function ReservarPage({
                   const poolTeacher = teacherById.get(pl.teacherId)!;
                   const active =
                     pl.teacherId === selectedPool.teacherId &&
-                    pl.classDurationMin === selectedPool.classDurationMin;
+                    pl.classDurationMin === selectedPool.classDurationMin &&
+                    pl.seats === selectedPool.seats;
                   return (
                     <HardLink
-                      key={`${pl.teacherId}:${pl.classDurationMin}`}
+                      key={`${pl.teacherId}:${pl.classDurationMin}:${pl.seats}`}
                       href={`/my-classes/book?packageId=${pl.referencePackageId}&date=${date}`}
                       className={`rounded-md border px-3 py-1 text-sm ${
                         active ? "border-primary bg-primary/10" : ""
                       }`}
                     >
-                      {pl.classDurationMin} min · {poolTeacher.name} · {pl.classesLeft}
+                      {pl.classDurationMin} min
+                      {pl.seats === 2 && ` · ${t("web.buyFlow.package.forTwo")}`} ·{" "}
+                      {poolTeacher.name} · {pl.classesLeft}
                     </HardLink>
                   );
                 })}

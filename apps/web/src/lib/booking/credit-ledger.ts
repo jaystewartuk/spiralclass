@@ -22,7 +22,11 @@
 // in-memory test fakes.
 
 // Credits are fungible only within one (teacher, student-identity-set, class
-// length) pool — you can't spend a 50-minute credit on a 25-minute class.
+// length, seats) pool — you can't spend a 50-minute credit on a 25-minute
+// class, and you can't spend a one-person credit on a class for two (D-188).
+// The seat axis is D-149's "format" axis for the one multi-person shape that
+// ships: a class for two costs more per class than a class for one, so a
+// shared pool would let a cheaper credit pay for a dearer class.
 export type CreditPool = {
   teacherId: string;
   // The student identity set (multi-teacher inbox — studentIdentityIds). Only
@@ -30,6 +34,7 @@ export type CreditPool = {
   // so the pool resolves identically to how the caller looked the package up.
   studentIds: string[];
   classDurationMin: number;
+  seats: number;
 };
 
 // The package fields the ledger reasons over. A subset of the Package row.
@@ -101,6 +106,7 @@ async function loadPool(client: LedgerClient, pool: CreditPool): Promise<CreditR
       teacherId: pool.teacherId,
       studentId: { in: pool.studentIds },
       classDurationMin: pool.classDurationMin,
+      seats: pool.seats,
       status: "active",
     },
     select: {
@@ -180,6 +186,7 @@ export type BookablePackageLite = {
   id: string;
   teacherId: string;
   classDurationMin: number;
+  seats: number;
   classesTotal: number;
   classesUsed: number;
   expiresAt: Date | null;
@@ -187,12 +194,15 @@ export type BookablePackageLite = {
 };
 
 // One spendable balance the student sees, collapsing every package of the same
-// length with one teacher into a single bucket. `referencePackageId` is just a
+// length and seat count with one teacher into a single bucket. `referencePackageId` is just a
 // pool pointer for the form to submit — the server re-derives FIFO at claim
 // time, so it never decides which credit is actually spent.
 export type CreditPoolSummary = {
   teacherId: string;
   classDurationMin: number;
+  // 2 = the balance of packages bought for two (D-188), shown apart from the
+  // one-person balance so the split never reads as missing classes.
+  seats: number;
   classesLeft: number;
   // Soonest expiry among credits that still have capacity (null = some credit
   // in the pool never expires / nothing is expiring).
@@ -203,7 +213,7 @@ export type CreditPoolSummary = {
 export function summarizeCreditPools(packages: BookablePackageLite[]): CreditPoolSummary[] {
   const byKey = new Map<string, BookablePackageLite[]>();
   for (const p of packages) {
-    const key = `${p.teacherId}:${p.classDurationMin}`;
+    const key = `${p.teacherId}:${p.classDurationMin}:${p.seats}`;
     const arr = byKey.get(key);
     if (arr) arr.push(p);
     else byKey.set(key, [p]);
@@ -219,6 +229,7 @@ export function summarizeCreditPools(packages: BookablePackageLite[]): CreditPoo
     out.push({
       teacherId: sorted[0].teacherId,
       classDurationMin: sorted[0].classDurationMin,
+      seats: sorted[0].seats,
       classesLeft,
       nextExpiresAt,
       // FIFO front-runner = soonest to expire = what a booking would spend next.
@@ -231,6 +242,7 @@ export function summarizeCreditPools(packages: BookablePackageLite[]): CreditPoo
     const ax = a.nextExpiresAt ? a.nextExpiresAt.getTime() : Number.POSITIVE_INFINITY;
     const bx = b.nextExpiresAt ? b.nextExpiresAt.getTime() : Number.POSITIVE_INFINITY;
     if (ax !== bx) return ax - bx;
-    return a.classDurationMin - b.classDurationMin;
+    if (a.classDurationMin !== b.classDurationMin) return a.classDurationMin - b.classDurationMin;
+    return a.seats - b.seats;
   });
 }

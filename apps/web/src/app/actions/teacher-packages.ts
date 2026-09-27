@@ -11,6 +11,7 @@ import { writeOverride } from "@/lib/audit";
 import { flushAnalytics, trackServerEvent } from "@/lib/analytics/posthog";
 import { addMonthsEndOfDayInZone } from "@/lib/dates";
 import { revalidateAfterAction } from "@/lib/revalidate";
+import { gateProFeature, upgradeNudge } from "@/lib/subscriptions/enforce";
 
 // Record a package the teacher already sold off-platform — the heart of
 // onboarding a MID-PACKAGE student. She types in how many classes the student
@@ -53,6 +54,9 @@ const manualPackageSchema = z
       .max(1_000_000)
       .optional()
       .or(z.literal("").transform(() => undefined)),
+    // A package for two people (D-188). Its own credit balance; insights stay
+    // off for its classes, because no buyer confirmed for the second person.
+    forTwo: z.unknown().transform((v) => v === "1" || v === "on"),
   })
   .refine((v) => v.classesRemaining <= v.classesTotal, {
     message: "remaining-gt-total",
@@ -76,6 +80,7 @@ export async function createManualPackageAction(
     // Empty string would coerce to 0; treat blank as "not provided" so the
     // template price (if any) can stand in.
     amountPaidPesos: formData.get("amountPaidPesos") || undefined,
+    forTwo: formData.get("forTwo"),
   });
   if (!parsed.success) {
     const first = parsed.error.issues[0];
@@ -91,6 +96,13 @@ export async function createManualPackageAction(
 
   const teacher = await requireOnboardedTeacher();
   const data = parsed.data;
+
+  // Selling for two is Pro (D-149, D-188), and recording one is how a package
+  // for two is sold off-platform.
+  if (data.forTwo) {
+    const gate = await gateProFeature(teacher.id, "sell_for_two");
+    if (!gate.ok) return { error: upgradeNudge(gate.limit, locale) };
+  }
 
   // Confirm the student is on this teacher's roster (tenant isolation).
   const link = await prisma.teacherStudent.findUnique({
@@ -148,6 +160,7 @@ export async function createManualPackageAction(
         classesTotal: data.classesTotal,
         classesUsed,
         classDurationMin: data.classDurationMin,
+        seats: data.forTwo ? 2 : 1,
         pricePaidMinorUnits,
         currency: currencyForTeacher(teacher),
         purchasedAt: now,
@@ -170,6 +183,7 @@ export async function createManualPackageAction(
         classesTotal: data.classesTotal,
         classesUsed,
         classDurationMin: data.classDurationMin,
+        seats: data.forTwo ? 2 : 1,
         pricePaidMinorUnits,
         expiresAt: expiresAt?.toISOString() ?? null,
         templateId,
@@ -226,6 +240,8 @@ const editPackageSchema = z
       .max(1_000_000)
       .optional()
       .or(z.literal("").transform(() => undefined)),
+    // See manualPackageSchema.forTwo.
+    forTwo: z.unknown().transform((v) => v === "1" || v === "on"),
   })
   .refine((v) => v.classesRemaining <= v.classesTotal, {
     message: "remaining-gt-total",
@@ -246,6 +262,7 @@ export async function editManualPackageAction(
     classDurationMin: formData.get("classDurationMin") ?? undefined,
     expiresOn: formData.get("expiresOn") ?? undefined,
     amountPaidPesos: formData.get("amountPaidPesos") || undefined,
+    forTwo: formData.get("forTwo"),
   });
   if (!parsed.success) {
     const first = parsed.error.issues[0];
@@ -271,6 +288,7 @@ export async function editManualPackageAction(
       classesTotal: true,
       classesUsed: true,
       classDurationMin: true,
+      seats: true,
       pricePaidMinorUnits: true,
       expiresAt: true,
       status: true,
@@ -279,6 +297,13 @@ export async function editManualPackageAction(
   });
   if (!pkg) {
     return { error: en ? "Package not found." : "Paquete no encontrado." };
+  }
+  // Turning a package INTO one for two is selling for two (Pro, D-188);
+  // keeping or undoing it never is, so a downgrade never locks a correction.
+  const seats = data.forTwo ? 2 : 1;
+  if (seats === 2 && pkg.seats !== 2) {
+    const gate = await gateProFeature(teacher.id, "sell_for_two");
+    if (!gate.ok) return { error: upgradeNudge(gate.limit, locale) };
   }
   if (pkg.status !== "active" && pkg.status !== "paused") {
     return {
@@ -335,6 +360,7 @@ export async function editManualPackageAction(
     classesTotal: pkg.classesTotal,
     classesUsed: pkg.classesUsed,
     classDurationMin: pkg.classDurationMin,
+    seats: pkg.seats,
     pricePaidMinorUnits: pkg.pricePaidMinorUnits,
     expiresAt: pkg.expiresAt?.toISOString() ?? null,
   };
@@ -342,6 +368,7 @@ export async function editManualPackageAction(
     classesTotal: data.classesTotal,
     classesUsed: newClassesUsed,
     classDurationMin: data.classDurationMin,
+    seats,
     pricePaidMinorUnits,
     expiresAt: expiresAt?.toISOString() ?? null,
   };
@@ -353,6 +380,7 @@ export async function editManualPackageAction(
         classesTotal: data.classesTotal,
         classesUsed: newClassesUsed,
         classDurationMin: data.classDurationMin,
+        seats,
         pricePaidMinorUnits,
         expiresAt,
       },

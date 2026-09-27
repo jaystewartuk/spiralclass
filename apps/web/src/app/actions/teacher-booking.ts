@@ -78,6 +78,7 @@ export async function createTeacherBooking(
       classesUsed: true,
       classesTotal: true,
       classDurationMin: true,
+      seats: true,
       expiresAt: true,
       templateId: true,
       template: { select: { name: true, singleClass: true } },

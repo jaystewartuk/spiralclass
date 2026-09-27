@@ -156,6 +156,8 @@ function template(over: Partial<Record<string, unknown>> = {}) {
     classDurationMin: 50,
     priceMinorUnits: 150_000,
     transferPriceMinorUnits: 140_000,
+    twoPersonPriceMinorUnits: null,
+    twoPersonTransferPriceMinorUnits: null,
     ...over,
   } as Parameters<typeof startCheckout>[0]["template"];
 }
@@ -176,6 +178,8 @@ function args(over: Partial<Parameters<typeof startCheckout>[0]> = {}) {
     teacher: teacher(),
     student,
     template: template(),
+    seats: 1 as const,
+    partnerConsent: false,
     paymentMethod: "stripe" as const,
     source: "public" as const,
     locale: "es" as const,
@@ -555,5 +559,70 @@ describe("startCheckout — intended slot", () => {
   it("leaves the slot null when a package is bought without picking a time", async () => {
     await startCheckout(args({ template: template({ classCount: 10 }) }));
     expect(stored()).toBeNull();
+  });
+});
+
+// --- Packages for two (D-188) ------------------------------------------------
+
+describe("startCheckout — a package bought for two", () => {
+  const forTwo = () =>
+    template({ twoPersonPriceMinorUnits: 225_000, twoPersonTransferPriceMinorUnits: 210_000 });
+  const pkg = () =>
+    state.created.pkg as {
+      seats: number;
+      partnerConsentAt: Date | null;
+      pricePaidMinorUnits: number;
+    };
+
+  it("charges the two-person price and records the package as for two", async () => {
+    await startCheckout(args({ template: forTwo(), seats: 2, partnerConsent: true }));
+    expect(pkg().seats).toBe(2);
+    expect(pkg().pricePaidMinorUnits).toBe(225_000);
+    expect(pkg().partnerConsentAt).toBeInstanceOf(Date);
+    const call = createCheckoutSession.mock.calls[0][0] as {
+      lineItem: { amountMinorUnits: number; name: string };
+    };
+    expect(call.lineItem.amountMinorUnits).toBe(225_000);
+    // The receipt is the buyer's one record of the purchase outside the product.
+    expect(call.lineItem.name).toContain("2 personas");
+  });
+
+  it("charges the two-person transfer price on the transfer rail", async () => {
+    await startCheckout(
+      args({
+        template: forTwo(),
+        seats: 2,
+        partnerConsent: true,
+        paymentMethod: "manual_transfer",
+        instrumentId: "inst-wise-1",
+      }),
+    );
+    expect(pkg().pricePaidMinorUnits).toBe(210_000);
+  });
+
+  it("refuses two people on a package not sold for two, before writing anything", async () => {
+    const res = await startCheckout(args({ seats: 2, partnerConsent: true }));
+    expect(res).toHaveProperty("error");
+    expect(state.created.pkg).toBeUndefined();
+    expect(createCheckoutSession).not.toHaveBeenCalled();
+  });
+
+  it("refuses a package for two without the buyer's confirmation for the second person", async () => {
+    const res = await startCheckout(args({ template: forTwo(), seats: 2, partnerConsent: false }));
+    expect(res).toHaveProperty("error");
+    expect(state.created.pkg).toBeUndefined();
+  });
+
+  it("never applies a one-person agreed price to a package for two", async () => {
+    state.agreedPrices = { tpl1: 100_000 };
+    await startCheckout(args({ template: forTwo(), seats: 2, partnerConsent: true }));
+    expect(pkg().pricePaidMinorUnits).toBe(225_000);
+  });
+
+  it("records a one-person package with no partner consent", async () => {
+    await startCheckout(args({ template: forTwo() }));
+    expect(pkg().seats).toBe(1);
+    expect(pkg().partnerConsentAt).toBeNull();
+    expect(pkg().pricePaidMinorUnits).toBe(150_000);
   });
 });

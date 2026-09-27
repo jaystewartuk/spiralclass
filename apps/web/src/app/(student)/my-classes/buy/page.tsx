@@ -72,6 +72,8 @@ export default async function PortalComprarPage({
               classDurationMin: true,
               priceMinorUnits: true,
               transferPriceMinorUnits: true,
+              twoPersonPriceMinorUnits: true,
+              twoPersonTransferPriceMinorUnits: true,
               expirationMonths: true,
             },
           },
@@ -167,6 +169,7 @@ export default async function PortalComprarPage({
         <PortalPurchaseFlow
           teacherId={teacher.id}
           templates={teacher.packageTemplates}
+          currency={currencyForTeacher(teacher)}
           agreedPrices={agreedPrices}
           stripeReady={stripeReady}
           instruments={instruments}

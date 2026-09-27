@@ -50,6 +50,8 @@ const JPY_ROW: {
   classDurationMin: number;
   priceMinorUnits: number;
   transferPriceMinorUnits: number | null;
+  twoPersonPriceMinorUnits: number | null;
+  twoPersonTransferPriceMinorUnits: number | null;
   expirationMonths: number;
 } = {
   id: "tpl-1",
@@ -60,6 +62,8 @@ const JPY_ROW: {
   classDurationMin: 50,
   priceMinorUnits: 1_500,
   transferPriceMinorUnits: 1_400,
+  twoPersonPriceMinorUnits: null,
+  twoPersonTransferPriceMinorUnits: null,
   expirationMonths: 1,
 };
 

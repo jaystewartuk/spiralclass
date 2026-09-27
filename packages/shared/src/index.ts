@@ -58,6 +58,7 @@ export * from "./booking-url";
 export * from "./reorder";
 export * from "./booking-page";
 export * from "./class-offering";
+export * from "./two-person";
 export * from "./referrals";
 export * from "./brand/mark";
 export * from "./source-code";

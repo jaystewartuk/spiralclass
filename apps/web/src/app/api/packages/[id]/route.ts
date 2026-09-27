@@ -23,6 +23,9 @@ function toDetails(pkg: PackageWithRelations, viewer: "teacher" | "student") {
     id: pkg.id,
     templateName: pkg.template?.name ?? null,
     subject: pkg.template?.subject ?? null,
+    // 2 = bought for two people (D-188). Shown to both sides: the student
+    // bought it for two, the teacher teaches two.
+    seats: pkg.seats,
     classesTotal: pkg.classesTotal,
     classesUsed: pkg.classesUsed,
     classesLeftToTeach: classesLeftToTeach({

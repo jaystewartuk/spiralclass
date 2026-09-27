@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   isValidTimezone,
   checkoutIntentSchema,
+  portalCheckoutIntentSchema,
   blockedDateSchema,
   packageTemplateSchema,
   materialStyleSchema,
@@ -190,5 +191,78 @@ describe("materialStyleSchema (shared)", () => {
         customInstructions: "x".repeat(MATERIAL_CUSTOM_INSTRUCTIONS_MAX + 1),
       }).success,
     ).toBe(false);
+  });
+});
+
+// Packages for two (D-188): a missing or garbled seat count is one person, so
+// nothing a stale page posts can make a checkout dearer.
+describe("checkout intents — seats and the partner confirmation", () => {
+  const base = {
+    slug: "ana",
+    templateId: "11111111-1111-4111-8111-111111111111",
+    studentName: "Mira",
+    studentEmail: "mira@example.com",
+    paymentMethod: "stripe",
+  };
+
+  it("reads an absent seat count as one person, unconfirmed", () => {
+    const parsed = checkoutIntentSchema("en").parse({ ...base, seats: null, partnerConsent: null });
+    expect(parsed.seats).toBe(1);
+    expect(parsed.partnerConsent).toBe(false);
+  });
+
+  it("reads two people and the confirmation from the form", () => {
+    const parsed = checkoutIntentSchema("en").parse({ ...base, seats: "2", partnerConsent: "1" });
+    expect(parsed.seats).toBe(2);
+    expect(parsed.partnerConsent).toBe(true);
+  });
+
+  it("never reads more than two", () => {
+    expect(checkoutIntentSchema("en").parse({ ...base, seats: "3" }).seats).toBe(1);
+  });
+
+  it("does the same on the in-portal repurchase", () => {
+    const parsed = portalCheckoutIntentSchema.parse({
+      teacherId: "22222222-2222-4222-8222-222222222222",
+      templateId: base.templateId,
+      seats: "2",
+      partnerConsent: "1",
+    });
+    expect(parsed.seats).toBe(2);
+    expect(parsed.partnerConsent).toBe(true);
+  });
+});
+
+describe("packageTemplateSchema — prices for two", () => {
+  const tpl = {
+    name: "4 classes",
+    classCount: 4,
+    priceMinorUnits: 185_000,
+    expirationMonths: 2,
+  };
+
+  it("keeps a price for two and its transfer price", () => {
+    const parsed = packageTemplateSchema.parse({
+      ...tpl,
+      twoPersonPriceMinorUnits: 277_500,
+      twoPersonTransferPriceMinorUnits: 262_000,
+    });
+    expect(parsed.twoPersonPriceMinorUnits).toBe(277_500);
+    expect(parsed.twoPersonTransferPriceMinorUnits).toBe(262_000);
+  });
+
+  it("drops a transfer price for two with no price for two, as the database CHECK would", () => {
+    const parsed = packageTemplateSchema.parse({
+      ...tpl,
+      twoPersonTransferPriceMinorUnits: 262_000,
+    });
+    expect(parsed.twoPersonPriceMinorUnits).toBeUndefined();
+    expect(parsed.twoPersonTransferPriceMinorUnits).toBeUndefined();
+  });
+
+  it("refuses a negative price for two", () => {
+    expect(packageTemplateSchema.safeParse({ ...tpl, twoPersonPriceMinorUnits: -1 }).success).toBe(
+      false,
+    );
   });
 });

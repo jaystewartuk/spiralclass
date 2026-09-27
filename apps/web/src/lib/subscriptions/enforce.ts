@@ -27,7 +27,8 @@ export type PlanLimit =
   | "class_content"
   | "custom_price"
   | "lesson_notes"
-  | "homework_review";
+  | "homework_review"
+  | "sell_for_two";
 
 export type GateResult = { ok: true } | { ok: false; limit: PlanLimit; cap?: number };
 
@@ -90,13 +91,41 @@ export async function gateTemplateSet(
   return { ok: false, limit: "templates", cap: ent.templateLimit };
 }
 
+// Replace-set gate for packages sold for two (D-188), in the same shape as
+// gateTemplateSet: it only blocks ADDING. A Free teacher keeps — and may
+// reprice — every two-person offer she already had, so a downgrade never
+// takes a price off her booking page; she cannot switch a new one on.
+// `alreadyOffered` is the ids of templates that carried a two-person price
+// before this save.
+export async function gateTwoPersonSet(
+  teacherId: string,
+  resultingOffered: ReadonlyArray<string | undefined>,
+  alreadyOffered: ReadonlySet<string>,
+  tx: Tx = prisma,
+): Promise<GateResult> {
+  const adding = resultingOffered.some((id) => !id || !alreadyOffered.has(id));
+  if (!adding) return { ok: true };
+  const ent = await loadEntitlements(teacherId, new Date(), tx);
+  if (ent.canSellForTwo) return { ok: true };
+  emitLimitHit(teacherId, "sell_for_two");
+  return { ok: false, limit: "sell_for_two" };
+}
+
 // Pro-only feature gate (class-materials scheduling, class-content authoring +
 // AI compose, per-student custom price, live-notes present mode + realtime
 // student panel — D-15/D-17). class_content rides the same Pro entitlement as
 // materials — both are content-authoring tools, free to view and Pro to author.
+// sell_for_two covers a package for two recorded by hand (D-188); the package
+// editor's replace-set uses gateTwoPersonSet above instead.
 export async function gateProFeature(
   teacherId: string,
-  feature: "materials" | "class_content" | "custom_price" | "lesson_notes" | "homework_review",
+  feature:
+    | "materials"
+    | "class_content"
+    | "custom_price"
+    | "lesson_notes"
+    | "homework_review"
+    | "sell_for_two",
   tx: Tx = prisma,
 ): Promise<GateResult> {
   const ent = await loadEntitlements(teacherId, new Date(), tx);
@@ -107,7 +136,9 @@ export async function gateProFeature(
         ? ent.canCustomPrice
         : feature === "homework_review"
           ? ent.canUseHomeworkAiReview
-          : ent.canUseLiveNotes;
+          : feature === "sell_for_two"
+            ? ent.canSellForTwo
+            : ent.canUseLiveNotes;
   if (allowed) return { ok: true };
   emitLimitHit(teacherId, feature);
   return { ok: false, limit: feature };
@@ -145,5 +176,7 @@ export function upgradeNudge(limit: PlanLimit, locale: AppLocale): string {
       return t("billing.limit.lessonNotes");
     case "homework_review":
       return t("billing.limit.homeworkReview");
+    case "sell_for_two":
+      return t("billing.limit.sellForTwo");
   }
 }

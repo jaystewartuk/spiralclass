@@ -4,6 +4,7 @@ import {
   gateAddTemplate,
   gateProFeature,
   gateTemplateSet,
+  gateTwoPersonSet,
   upgradeNudge,
 } from "@/lib/subscriptions/enforce";
 import { FREE_MAX_ACTIVE_STUDENTS } from "@/lib/subscriptions/config";
@@ -126,6 +127,7 @@ describe("upgradeNudge", () => {
       "custom_price",
       "lesson_notes",
       "homework_review",
+      "sell_for_two",
     ] as const;
     for (const locale of ["en", "es", "fr"] as const) {
       const messages = limits.map((l) => upgradeNudge(l, locale));
@@ -135,5 +137,47 @@ describe("upgradeNudge", () => {
       expect(messages.some((m) => m.startsWith("billing."))).toBe(false);
       expect(new Set(messages).size).toBe(limits.length);
     }
+  });
+});
+
+// Packages for two (D-188) are Pro, gated like the template cap: only
+// switching a NEW one on is refused, so a downgrade never takes a price for two
+// off a booking page.
+describe("gateTwoPersonSet (replace-set, grandfathered)", () => {
+  it("refuses a Free teacher switching a package on for two", async () => {
+    const fake = makeFakePrisma({ subs: [freeSub("t1")] });
+    expect(await gateTwoPersonSet("t1", ["tpl-a"], new Set(), fake.db)).toMatchObject({
+      ok: false,
+      limit: "sell_for_two",
+    });
+  });
+
+  it("refuses a Free teacher adding a brand-new package for two", async () => {
+    const fake = makeFakePrisma({ subs: [freeSub("t1")] });
+    expect(await gateTwoPersonSet("t1", [undefined], new Set(["tpl-a"]), fake.db)).toMatchObject({
+      ok: false,
+    });
+  });
+
+  it("lets a downgraded teacher keep and reprice what she already sold for two", async () => {
+    const fake = makeFakePrisma({ subs: [freeSub("t1")] });
+    expect(await gateTwoPersonSet("t1", ["tpl-a"], new Set(["tpl-a"]), fake.db)).toEqual({
+      ok: true,
+    });
+    expect(await gateTwoPersonSet("t1", [], new Set(["tpl-a"]), fake.db)).toEqual({ ok: true });
+  });
+
+  it("lets Pro switch on as many as she likes", async () => {
+    const fake = makeFakePrisma({ subs: [proSub("t1")] });
+    expect(await gateTwoPersonSet("t1", ["a", "b", undefined], new Set(), fake.db)).toEqual({
+      ok: true,
+    });
+  });
+
+  it("gates recording a package for two by hand the same way", async () => {
+    const free = makeFakePrisma({ subs: [freeSub("t1")] });
+    const pro = makeFakePrisma({ subs: [proSub("t2")] });
+    expect(await gateProFeature("t1", "sell_for_two", free.db)).toMatchObject({ ok: false });
+    expect(await gateProFeature("t2", "sell_for_two", pro.db)).toEqual({ ok: true });
   });
 });

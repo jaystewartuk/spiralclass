@@ -350,6 +350,9 @@ export type ServerEvent = WithSessionId<
         // still measurable.
         scheme?: string;
         priceMinorUnits: number;
+        // How many people the package was bought for (D-188) — 1, or 2 for a
+        // package for two — so the two prices can be told apart in a funnel.
+        seats?: number;
         // Which surface initiated the purchase: the anonymous booking-page
         // funnel, or the signed-in repurchase flow in the student portal.
         // Splitting the funnel by source shows whether renewals actually
@@ -923,7 +926,8 @@ export type ServerEvent = WithSessionId<
           | "class_content"
           | "custom_price"
           | "lesson_notes"
-          | "homework_review";
+          | "homework_review"
+          | "sell_for_two";
       };
     }
   | {

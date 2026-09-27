@@ -12,6 +12,7 @@ import { editManualPackageAction, type ManualPackageState } from "@/app/actions/
 import { FormStatus } from "@/components/ui/form-status";
 import { useLocale, useT } from "@/components/locale-provider";
 import { usePricingCurrency } from "@/components/pricing-currency-context";
+import { ForTwoField } from "./for-two-field";
 
 // Inline edit control for a package the teacher already recorded — the
 // counterpart to AddPackageForm. An "Edit" button expands a prefilled form;
@@ -28,6 +29,7 @@ export function EditPackageForm({
   expiresOn,
   pricePesos,
   committedBookings,
+  seats,
 }: {
   packageId: string;
   classesTotal: number;
@@ -36,6 +38,7 @@ export function EditPackageForm({
   expiresOn: string;
   pricePesos: string;
   committedBookings: number;
+  seats: number;
 }) {
   const locale = useLocale();
   const en = usesEnglishCopy(locale);
@@ -193,6 +196,8 @@ export function EditPackageForm({
           onChange={(e) => setPrice(e.target.value)}
         />
       </div>
+
+      <ForTwoField id={`pkg-edit-for-two-${packageId}`} defaultChecked={seats === 2} />
 
       <div className="flex items-center gap-2">
         <Button type="submit" size="sm" disabled={pending}>

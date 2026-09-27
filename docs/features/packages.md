@@ -152,6 +152,36 @@ remaining` so the booking/credit ledger treats it identically to a
   template's `expirationMonths` (if any) is applied from "now"; otherwise no
   expiry is set. An explicit date must be in the future.
 
+### Packages for two people ([D-188](../decisions/D-188.md))
+
+- A template may also be sold **for two people who take every class
+  together** — a couple, two siblings. It then carries a price for two
+  (`twoPersonPriceMinorUnits`, null = not sold for two) and an optional
+  non-card price for two, which falls back to the price for two — never to the
+  one-person transfer price.
+- The price for two is **stored**, never derived at checkout. The teacher's
+  `twoPersonPricePercent` (100–300, default 150) only suggests it in the
+  editor, and moves the suggested prices she has not typed over herself.
+- One buyer pays once, on one account. The purchased package records
+  `seats = 2`. Each class is one booking and uses one class.
+- **Credits are fungible only within one (teacher, class length, seats)
+  pool.** A one-person credit never pays for a class for two, or the reverse.
+  A student holding both sees two balances.
+- A **grandfathered (agreed) price is a one-person price** and never prices a
+  package for two.
+- Buying for two requires the buyer to confirm that the second person agrees
+  to the same class terms (`partnerConsentAt`). Lesson-insights capture for a
+  class paid from a package for two needs that confirmation as well as the
+  buyer's own consent. A package for two recorded by the teacher has none, so
+  its classes are never captured.
+- **Selling for two is Pro** (`canSellForTwo`). Only switching a new one on is
+  gated. After a downgrade, prices for two already on sale stay on sale and
+  stay editable, and a teacher can still untick "for two" on a recorded
+  package.
+- The booking page shows a "Just me / Two of us" switch only when something is
+  sold for two. `?seats=2` opens it on "Two of us". Each list has its own
+  "best value".
+
 ### Booking against a package (summary — full detail in the scheduling doc)
 
 - A booking always references exactly one package (`Booking.packageId`); the

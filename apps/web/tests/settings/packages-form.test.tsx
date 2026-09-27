@@ -51,6 +51,8 @@ const ROW = {
   classDurationMin: 50,
   priceMinorUnits: 240_000,
   transferPriceMinorUnits: null as number | null,
+  twoPersonPriceMinorUnits: null as number | null,
+  twoPersonTransferPriceMinorUnits: null as number | null,
   expirationMonths: 2,
 };
 

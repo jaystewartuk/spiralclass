@@ -9,7 +9,12 @@ import { Card, CardContent } from "@/components/ui/card";
 import { CheckoutForm, type CheckoutPrefill } from "./checkout-form";
 import { ClassSlotPicker } from "./class-slot-picker";
 import type { SlotInputsWire } from "@/lib/booking/slot-inputs";
-import { formatPriceForBuyer } from "@spiralclass/shared";
+import {
+  formatPriceForBuyer,
+  offersTwoPerson,
+  perPersonPerClassMinorUnits,
+  type Seats,
+} from "@spiralclass/shared";
 import { priceForMethod } from "@/lib/payments/instruments";
 import { type PayoutInstrument } from "@spiralclass/shared";
 import { useT, useLocale } from "@/components/locale-provider";
@@ -30,6 +35,9 @@ type Template = {
   classDurationMin: number;
   priceMinorUnits: number;
   transferPriceMinorUnits: number | null;
+  // The prices for two people (D-188); null when not sold for two.
+  twoPersonPriceMinorUnits: number | null;
+  twoPersonTransferPriceMinorUnits: number | null;
   expirationMonths: number | null;
   currency: string;
   // Approximate US cents for this package's headline price, or null when the
@@ -37,7 +45,22 @@ type Template = {
   // stored FX rate is too old to quote. Computed on the server (the rate lives
   // in the database) so this component stays presentational.
   approxUsdCents: number | null;
+  twoPersonApproxUsdCents: number | null;
 };
+
+// A template as priced for a seat count: the same shape, with the prices a
+// buyer of that many places actually pays. Everything below reads prices only
+// through this, so a package for two can never show one price and charge the
+// other.
+function pricedFor(tpl: Template, seats: Seats): Template {
+  if (seats === 1) return tpl;
+  return {
+    ...tpl,
+    priceMinorUnits: tpl.twoPersonPriceMinorUnits!,
+    transferPriceMinorUnits: tpl.twoPersonTransferPriceMinorUnits,
+    approxUsdCents: tpl.twoPersonApproxUsdCents,
+  };
+}
 
 // Teacher booking settings needed to generate slots for a single class.
 export type SlotTeacherConfig = {
@@ -55,7 +78,12 @@ export type CheckoutTestimonial = {
   authorNote: string | null;
 };
 
-function describe(tpl: Template, t: ReturnType<typeof useT>): string {
+function describe(tpl: Template, t: ReturnType<typeof useT>, seats: Seats = 1): string {
+  const described = describeShape(tpl, t);
+  return seats === 2 ? `${t("web.buyFlow.package.forTwo")} · ${described}` : described;
+}
+
+function describeShape(tpl: Template, t: ReturnType<typeof useT>): string {
   if (tpl.singleClass) {
     return t("web.buyFlow.package.singleClass", { min: tpl.classDurationMin });
   }
@@ -102,6 +130,7 @@ export function PurchaseFlow({
   testimonial,
   templates,
   initialTemplateId,
+  initialSeats = 1,
   stripeReady,
   instruments,
   prefill,
@@ -115,6 +144,8 @@ export function PurchaseFlow({
   testimonial: CheckoutTestimonial | null;
   templates: Template[];
   initialTemplateId?: string;
+  // `?seats=2` from the booking page's "Two of us" list (D-188).
+  initialSeats?: Seats;
   stripeReady: boolean;
   // Already filtered to the offerable ones by the page (D-113). One option is
   // rendered per instrument, so a teacher with Wise and SPEI shows both.
@@ -133,9 +164,19 @@ export function PurchaseFlow({
 
   // Honor a ?package=<id> deep link from the profile page when it matches a
   // live template; otherwise fall back to the cheapest (first) package.
-  const initialId = templates.find((t) => t.id === initialTemplateId)?.id ?? templates[0]?.id ?? "";
+  // Two people is offered only when some package is sold for two, and asked
+  // for only then — a teacher who sells nothing for two keeps a page with no
+  // new question on it.
+  const forTwoAvailable = templates.some(offersTwoPerson);
+  const [seats, setSeats] = useState<Seats>(initialSeats === 2 && forTwoAvailable ? 2 : 1);
+  const offered = (s: Seats) =>
+    (s === 2 ? templates.filter(offersTwoPerson) : templates).map((tpl) => pricedFor(tpl, s));
+  const visibleTemplates = offered(seats);
+
+  const initialId =
+    visibleTemplates.find((t) => t.id === initialTemplateId)?.id ?? visibleTemplates[0]?.id ?? "";
   const [selectedId, setSelectedId] = useState(initialId);
-  const selected = templates.find((t) => t.id === selectedId) ?? templates[0];
+  const selected = visibleTemplates.find((t) => t.id === selectedId) ?? visibleTemplates[0];
 
   // Chosen class time (UTC ISO) — the reservation for a single class, the
   // first class for a package. Cleared whenever the student switches to a
@@ -149,11 +190,23 @@ export function PurchaseFlow({
   const method: Method = selection === STRIPE_SELECTION ? "stripe" : "manual_transfer";
   const selectedInstrument = instruments.find((i) => i.id === selection) ?? null;
 
-  const single = templates.length === 1;
+  const single = visibleTemplates.length === 1;
   // Whether the package list is expanded. Collapsed by default — the choice
   // arrived with the visitor — and there is nothing to expand for a teacher
   // selling exactly one thing.
   const [showPackages, setShowPackages] = useState(false);
+
+  // Switching between one person and two keeps the chosen package when it is
+  // sold for both, and otherwise moves to the first one that is.
+  const chooseSeats = (next: Seats) => {
+    setSeats(next);
+    const list = offered(next);
+    if (!list.some((t) => t.id === selectedId)) {
+      setSelectedId(list[0]?.id ?? "");
+      setIntendedStart(null);
+    }
+    posthog?.capture("package_seats_selected", { slug, seats: next });
+  };
 
   const selectTemplate = (id: string) => {
     setSelectedId(id);
@@ -167,7 +220,7 @@ export function PurchaseFlow({
     // is. Client-side for the same reason as checkout_submitted below it in
     // the funnel: selecting a package hits no server, so there is nothing to
     // hang a server event on.
-    const tpl = templates.find((t) => t.id === id);
+    const tpl = visibleTemplates.find((t) => t.id === id);
     if (tpl) {
       posthog?.capture("package_selected", {
         slug,
@@ -175,6 +228,7 @@ export function PurchaseFlow({
         templateName: tpl.name,
         classCount: tpl.classCount,
         singleClass: tpl.singleClass,
+        seats,
         // The price for the rail currently selected — what she is actually
         // being quoted, not the headline Stripe price.
         priceMinorUnits: priceForMethod(tpl, method),
@@ -267,12 +321,43 @@ export function PurchaseFlow({
             </Heading>
           </div>
 
+          {forTwoAvailable && (
+            <fieldset className="space-y-2">
+              <legend className="mb-2 text-sm font-medium">{t("web.buyFlow.seats.legend")}</legend>
+              <div className="grid grid-cols-2 gap-2">
+                {([1, 2] as const).map((s) => (
+                  <label
+                    key={s}
+                    className={`flex cursor-pointer items-center gap-2 rounded-md border p-3 text-sm transition-colors ${
+                      seats === s ? "border-foreground bg-muted/40" : "hover:bg-muted/30"
+                    }`}
+                  >
+                    <input
+                      type="radio"
+                      name="seats-choice"
+                      value={s}
+                      checked={seats === s}
+                      onChange={() => chooseSeats(s)}
+                      className="size-4 cursor-pointer accent-foreground"
+                    />
+                    <span className="font-medium">
+                      {s === 1 ? t("web.buyFlow.seats.one") : t("web.buyFlow.seats.two")}
+                    </span>
+                  </label>
+                ))}
+              </div>
+              {seats === 2 && (
+                <p className="text-xs text-muted-foreground">{t("web.buyFlow.seats.twoHint")}</p>
+              )}
+            </fieldset>
+          )}
+
           {showPackages || single ? (
             <fieldset className="space-y-2">
               <legend className="mb-2 text-sm font-medium">
                 {single ? t("web.buyFlow.yourPackage") : t("buy.choosePackage")}
               </legend>
-              {templates.map((tpl) => {
+              {visibleTemplates.map((tpl) => {
                 const checked = tpl.id === selected.id;
                 const price = priceForMethod(tpl, method);
                 return (
@@ -295,7 +380,9 @@ export function PurchaseFlow({
                       )}
                       <div>
                         <div className="font-medium">{tpl.name}</div>
-                        <div className="text-xs text-muted-foreground">{describe(tpl, t)}</div>
+                        <div className="text-xs text-muted-foreground">
+                          {describe(tpl, t, seats)}
+                        </div>
                       </div>
                     </div>
                     <div className="text-right">
@@ -314,6 +401,19 @@ export function PurchaseFlow({
                           })}
                         </div>
                       )}
+                      {seats === 2 &&
+                        perPersonPerClassMinorUnits(price, tpl.classCount, 2) !== null && (
+                          <div className="text-xs text-muted-foreground tabular-nums">
+                            {t("web.bookingLanding.perPersonPerClass", {
+                              price: formatPriceForBuyer(
+                                perPersonPerClassMinorUnits(price, tpl.classCount, 2)!,
+                                tpl.currency,
+                                locale,
+                                tpl.currency,
+                              ),
+                            })}
+                          </div>
+                        )}
                     </div>
                   </label>
                 );
@@ -323,7 +423,7 @@ export function PurchaseFlow({
             <div className="flex items-start justify-between gap-3 border-t pt-4">
               <div className="min-w-0">
                 <div className="font-medium">{selected.name}</div>
-                <div className="text-xs text-muted-foreground">{describe(selected, t)}</div>
+                <div className="text-xs text-muted-foreground">{describe(selected, t, seats)}</div>
                 <Button
                   type="button"
                   variant="link"
@@ -367,9 +467,10 @@ export function PurchaseFlow({
               for the chosen package. Method changes don't remount, so typed
               details survive a method switch. */}
           <CheckoutForm
-            key={selected.id}
+            key={`${selected.id}:${seats}`}
             slug={slug}
             templateId={selected.id}
+            seats={seats}
             priceMinorUnits={selected.priceMinorUnits}
             transferPriceMinorUnits={selected.transferPriceMinorUnits}
             currency={selected.currency}

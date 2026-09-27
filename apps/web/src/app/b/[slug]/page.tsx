@@ -27,7 +27,11 @@ import {
   hasOfferableInstrument,
   initialsFrom,
   isOneClassOffering,
+  perPersonPerClassMinorUnits,
+  parseSeats,
+  type Seats,
 } from "@spiralclass/shared";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { JsonLd } from "@/components/json-ld";
 import { flushAnalytics, trackServerEvent } from "@/lib/analytics/posthog";
 import { attributionProperties, currentAttribution } from "@/lib/analytics/attribution";
@@ -100,6 +104,7 @@ const getTeacherBySlug = cache((slug: string) =>
           singleClass: true,
           classDurationMin: true,
           priceMinorUnits: true,
+          twoPersonPriceMinorUnits: true,
           currency: true,
         },
       },
@@ -273,10 +278,15 @@ export async function generateMetadata({
 
 export default async function BookingLandingPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ slug: string }>;
+  // `?seats=2` opens the package list on "Two of us", so a teacher can send a
+  // couple a link that starts where they are (D-188).
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const { slug } = await params;
+  const initialSeats: Seats = parseSeats((await searchParams).seats);
   // The funnel locale is the teacher's own booking_page_locale. It picks the
   // catalog AND the price formatting, so a buyer never sees a currency
   // symbol rendered for a market that isn't the one she sells into.
@@ -335,22 +345,41 @@ export default async function BookingLandingPage({
    * student can check with a calculator. The per-class figure is printed on
    * every row for exactly that reason: the claim is verifiable in place.
    */
+  //
+  // Packages for two (D-188) are a second list with its own best value: a
+  // package for two is dearer per class than one for one, so ranking the two
+  // together would crown a one-person package over every package for two, and
+  // measure a couple's options against a price they cannot buy.
+  type Offer = {
+    id: string;
+    name: string;
+    classCount: number;
+    singleClass: boolean;
+    classDurationMin: number;
+    currency: string;
+    seats: Seats;
+    priceMinorUnits: number;
+  };
+  const oneOffers: Offer[] = teacher.packageTemplates.map((p) => ({ ...p, seats: 1 as const }));
+  const twoOffers: Offer[] = teacher.packageTemplates
+    .filter((p) => p.twoPersonPriceMinorUnits !== null)
+    .map((p) => ({ ...p, seats: 2 as const, priceMinorUnits: p.twoPersonPriceMinorUnits! }))
+    .sort((a, b) => a.priceMinorUnits - b.priceMinorUnits);
+  const offersForTwo = twoOffers.length > 0;
   const perClass = (pkg: { priceMinorUnits: number; classCount: number }) =>
     pkg.classCount > 0 ? pkg.priceMinorUnits / pkg.classCount : Infinity;
-  const multiClass = teacher.packageTemplates.filter((p) => !isOneClassOffering(p));
-  const singleRate = Math.min(
-    ...teacher.packageTemplates.filter(isOneClassOffering).map(perClass),
-    Infinity,
-  );
-  const bestValue =
-    multiClass.length > 0
-      ? multiClass.reduce((best, p) => (perClass(p) < perClass(best) ? p : best))
-      : null;
-  // A discount worth naming. Under ~3% is rounding, not an offer.
-  const bestValueId =
-    bestValue && Number.isFinite(singleRate) && perClass(bestValue) <= singleRate * 0.97
+  const bestValueIdOf = (offers: Offer[]): string | null => {
+    const multiClass = offers.filter((p) => !isOneClassOffering(p));
+    const singleRate = Math.min(...offers.filter(isOneClassOffering).map(perClass), Infinity);
+    const bestValue =
+      multiClass.length > 0
+        ? multiClass.reduce((best, p) => (perClass(p) < perClass(best) ? p : best))
+        : null;
+    // A discount worth naming. Under ~3% is rounding, not an offer.
+    return bestValue && Number.isFinite(singleRate) && perClass(bestValue) <= singleRate * 0.97
       ? bestValue.id
       : null;
+  };
   const stripeReady = Boolean(teacher.stripeAccountId && teacher.stripeChargesEnabled);
   // Any offerable instrument, not Wise specifically (D-113).
   const transferReady = hasOfferableInstrument(
@@ -492,6 +521,123 @@ export default async function BookingLandingPage({
   // response is already on its way out.
   after(() => flushAnalytics());
 
+  // One list of offers — the one-person packages, or the packages for two.
+  // A function rather than a component so it stays a server render with the
+  // page's own `t`, formatting locale and approximate-USD rule in scope.
+  const offerList = (offers: Offer[]) => {
+    const bestValueId = bestValueIdOf(offers);
+    return (
+      <ul className="space-y-2">
+        {offers.map((pkg) => (
+          <li key={`${pkg.id}:${pkg.seats}`}>
+            <Link
+              href={
+                pkg.seats === 2
+                  ? `/b/${slug}/buy?package=${pkg.id}&seats=2`
+                  : `/b/${slug}/buy?package=${pkg.id}`
+              }
+              className={
+                pkg.id === bestValueId
+                  ? "flex items-center justify-between gap-3 rounded-md border-2 border-primary bg-background p-3 text-sm transition-colors hover:bg-muted/40"
+                  : "flex items-center justify-between gap-3 rounded-md border bg-background p-3 text-sm transition-colors hover:bg-muted/40"
+              }
+            >
+              <span className="min-w-0">
+                <span className="font-medium">{pkg.name}</span>
+                {pkg.id === bestValueId && (
+                  <Badge variant="success" className="ml-2 align-middle">
+                    {t("web.bookingLanding.bestValue")}
+                  </Badge>
+                )}
+                <span className="block text-xs text-muted-foreground lg:ml-2 lg:inline">
+                  {pkg.seats === 2 && `${t("web.bookingLanding.seats.forTwoShort")} · `}
+                  {isOneClassOffering(pkg)
+                    ? t("web.bookingLanding.singleClassDuration", {
+                        min: pkg.classDurationMin,
+                      })
+                    : t("web.bookingLanding.classCountDurationShort", {
+                        count: pkg.classCount,
+                        min: pkg.classDurationMin,
+                      })}
+                </span>
+              </span>
+              <span className="shrink-0 text-right whitespace-nowrap">
+                <span className="block font-semibold tabular-nums">
+                  {formatPriceForBuyer(
+                    pkg.priceMinorUnits,
+                    pkg.currency,
+                    funnelLocale,
+                    pkg.currency,
+                  )}
+                </span>
+                {/* An approximate USD figure, for a page the
+                    teacher chose to sell in English. See the note
+                    at approxUsdCentsFor for why that condition and
+                    not the visitor's IP.
+
+                    It sits DIRECTLY under the total and above the
+                    per-class line, because it approximates the
+                    total. Below the per-class line — where it was
+                    first written — "325 pesos per class / about
+                    $75.00" reads as seventy-five dollars per class,
+                    which is four times the real figure. An
+                    approximation has to touch the number it
+                    approximates. */}
+                {approxUsdCentsFor(pkg.priceMinorUnits, pkg.currency) !== null && (
+                  <span className="block text-xs text-muted-foreground tabular-nums">
+                    {t("web.buyFlow.approxPrice", {
+                      price: formatPriceForBuyer(
+                        approxUsdCentsFor(pkg.priceMinorUnits, pkg.currency)!,
+                        "USD",
+                        funnelLocale,
+                        pkg.currency,
+                      ),
+                    })}
+                  </span>
+                )}
+                {/* The per-class figure makes the "best value"
+                    mark checkable instead of asserted, and lets a
+                    student compare two packages without doing the
+                    division herself. */}
+                {pkg.seats === 1 && pkg.classCount > 1 && (
+                  <span className="block text-xs text-muted-foreground tabular-nums">
+                    {t("web.bookingLanding.perClass", {
+                      price: formatPriceForBuyer(
+                        Math.round(pkg.priceMinorUnits / pkg.classCount),
+                        pkg.currency,
+                        funnelLocale,
+                        pkg.currency,
+                      ),
+                    })}
+                  </span>
+                )}
+                {/* For two, the figure a couple compares is what
+                    ONE of them pays for one class — the number
+                    that sits beside a one-person package's
+                    per-class price. The package-per-class figure
+                    alone made every package for two look like the
+                    dearest thing on the page. */}
+                {pkg.seats === 2 &&
+                  perPersonPerClassMinorUnits(pkg.priceMinorUnits, pkg.classCount, 2) !== null && (
+                    <span className="block text-xs text-muted-foreground tabular-nums">
+                      {t("web.bookingLanding.perPersonPerClass", {
+                        price: formatPriceForBuyer(
+                          perPersonPerClassMinorUnits(pkg.priceMinorUnits, pkg.classCount, 2)!,
+                          pkg.currency,
+                          funnelLocale,
+                          pkg.currency,
+                        ),
+                      })}
+                    </span>
+                  )}
+              </span>
+            </Link>
+          </li>
+        ))}
+      </ul>
+    );
+  };
+
   return (
     <main className="container py-8 lg:max-w-5xl lg:py-12">
       {/* schema.org Person + Offers for rich results. Deliberately NO
@@ -532,7 +678,11 @@ export default async function BookingLandingPage({
                 ? teacher.headline
                 : t("web.bookingLanding.classesWith", { name: teacher.name })}
             </Heading>
-            <p className="text-sm text-muted-foreground">{t("web.bookingLanding.tagline")}</p>
+            <p className="text-sm text-muted-foreground">
+              {offersForTwo
+                ? t("web.bookingLanding.taglineWithPartner")
+                : t("web.bookingLanding.tagline")}
+            </p>
           </div>
           {photoUrl ? (
             <Image
@@ -673,90 +823,25 @@ export default async function BookingLandingPage({
                       </p>
                     </div>
                   )}
-                  <ul className="space-y-2">
-                    {teacher.packageTemplates.map((pkg) => (
-                      <li key={pkg.id}>
-                        <Link
-                          href={`/b/${slug}/buy?package=${pkg.id}`}
-                          className={
-                            pkg.id === bestValueId
-                              ? "flex items-center justify-between gap-3 rounded-md border-2 border-primary bg-background p-3 text-sm transition-colors hover:bg-muted/40"
-                              : "flex items-center justify-between gap-3 rounded-md border bg-background p-3 text-sm transition-colors hover:bg-muted/40"
-                          }
-                        >
-                          <span className="min-w-0">
-                            <span className="font-medium">{pkg.name}</span>
-                            {pkg.id === bestValueId && (
-                              <Badge variant="success" className="ml-2 align-middle">
-                                {t("web.bookingLanding.bestValue")}
-                              </Badge>
-                            )}
-                            <span className="block text-xs text-muted-foreground lg:ml-2 lg:inline">
-                              {isOneClassOffering(pkg)
-                                ? t("web.bookingLanding.singleClassDuration", {
-                                    min: pkg.classDurationMin,
-                                  })
-                                : t("web.bookingLanding.classCountDurationShort", {
-                                    count: pkg.classCount,
-                                    min: pkg.classDurationMin,
-                                  })}
-                            </span>
-                          </span>
-                          <span className="shrink-0 text-right whitespace-nowrap">
-                            <span className="block font-semibold tabular-nums">
-                              {formatPriceForBuyer(
-                                pkg.priceMinorUnits,
-                                pkg.currency,
-                                funnelLocale,
-                                pkg.currency,
-                              )}
-                            </span>
-                            {/* An approximate USD figure, for a page the
-                                teacher chose to sell in English. See the note
-                                at approxUsdCentsFor for why that condition and
-                                not the visitor's IP.
-
-                                It sits DIRECTLY under the total and above the
-                                per-class line, because it approximates the
-                                total. Below the per-class line — where it was
-                                first written — "325 pesos per class / about
-                                $75.00" reads as seventy-five dollars per class,
-                                which is four times the real figure. An
-                                approximation has to touch the number it
-                                approximates. */}
-                            {approxUsdCentsFor(pkg.priceMinorUnits, pkg.currency) !== null && (
-                              <span className="block text-xs text-muted-foreground tabular-nums">
-                                {t("web.buyFlow.approxPrice", {
-                                  price: formatPriceForBuyer(
-                                    approxUsdCentsFor(pkg.priceMinorUnits, pkg.currency)!,
-                                    "USD",
-                                    funnelLocale,
-                                    pkg.currency,
-                                  ),
-                                })}
-                              </span>
-                            )}
-                            {/* The per-class figure makes the "best value"
-                                mark checkable instead of asserted, and lets a
-                                student compare two packages without doing the
-                                division herself. */}
-                            {pkg.classCount > 1 && (
-                              <span className="block text-xs text-muted-foreground tabular-nums">
-                                {t("web.bookingLanding.perClass", {
-                                  price: formatPriceForBuyer(
-                                    Math.round(pkg.priceMinorUnits / pkg.classCount),
-                                    pkg.currency,
-                                    funnelLocale,
-                                    pkg.currency,
-                                  ),
-                                })}
-                              </span>
-                            )}
-                          </span>
-                        </Link>
-                      </li>
-                    ))}
-                  </ul>
+                  {offersForTwo ? (
+                    <Tabs defaultValue={String(initialSeats)} className="space-y-3">
+                      <TabsList className="grid w-full grid-cols-2">
+                        <TabsTrigger value="1">{t("web.bookingLanding.seats.one")}</TabsTrigger>
+                        <TabsTrigger value="2">{t("web.bookingLanding.seats.two")}</TabsTrigger>
+                      </TabsList>
+                      <TabsContent value="1" className="mt-0">
+                        {offerList(oneOffers)}
+                      </TabsContent>
+                      <TabsContent value="2" className="mt-0 space-y-2">
+                        <p className="text-xs text-muted-foreground">
+                          {t("web.bookingLanding.seats.twoExplainer")}
+                        </p>
+                        {offerList(twoOffers)}
+                      </TabsContent>
+                    </Tabs>
+                  ) : (
+                    offerList(oneOffers)
+                  )}
                   {/* Sign-in is a returning student's errand, not an offer.
                       As a full-width button it outranked the free intro for
                       every stranger on the page; as a text line it stays

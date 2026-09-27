@@ -424,6 +424,12 @@ model Teacher {
   // teachers_pricing_currency_iso_format) still guards against garbage
   // values, mirroring teachers_country_iso_format.
   pricingCurrency String    @default("MXN") @map("pricing_currency")
+  // What a package bought for two costs, as a percent of the one-person price
+  // (D-188). Only ever a SUGGESTION: the package editor fills a new two-person
+  // price from it, and every price is then stored explicitly on the template.
+  // 150 = the second person pays half. `teachers_two_person_price_percent_range`
+  // (migration 20260927120000_packages_for_two) keeps it within 100..300.
+  twoPersonPricePercent Int @default(150) @map("two_person_price_percent")
   // Preferred locale for outbound email templates. The product UI
   // toggle persists locale in a cookie; this column captures the teacher's
   // last-confirmed preference so server-side dispatch (no request context)
@@ -1574,6 +1580,18 @@ model PackageTemplate {
   // D-113 — it was always the non-card price, and it applies to every
   // manual-transfer instrument, not just Wise.
   transferPriceMinorUnits Int?     @map("transfer_price_minor_units")
+  // The price of this package bought for TWO people who take every class
+  // together — a couple, two siblings — paid once by one buyer (D-188). Null =
+  // not offered for two. Stored explicitly rather than derived from
+  // `Teacher.twoPersonPricePercent` at checkout: the percent only suggests a
+  // price in the editor, and a charge is always a number someone saw.
+  // `package_templates_two_person_price_nonneg` (migration
+  // 20260927120000_packages_for_two) keeps it non-negative.
+  twoPersonPriceMinorUnits         Int? @map("two_person_price_minor_units")
+  // The non-card price for two, as `transferPriceMinorUnits` is for one. Null
+  // = the two-person price on every rail. Set only alongside a two-person
+  // price — `package_templates_two_person_transfer_needs_price` enforces it.
+  twoPersonTransferPriceMinorUnits Int? @map("two_person_transfer_price_minor_units")
   // Every fixed package carries an expiration in months from
   // purchase. Required at the application layer (`packageTemplateSchema`).
   // Stays nullable in the schema so legacy rows without an expiration
@@ -1611,6 +1629,17 @@ model Package {
   // reschedule_count cap allowed. See lib/cancellation/classify.ts.
   scheduleChangesUsed Int           @default(0) @map("schedule_changes_used")
   classDurationMin    Int           @default(50) @map("class_duration_min")
+  // How many people take each class on this package: 1, or 2 for a package
+  // bought for two (D-188). Snapshotted at purchase like the price. Credits
+  // are fungible only within one (teacher, class length, seats) pool — see
+  // lib/booking/credit-ledger.ts. `packages_seats_one_or_two` (migration
+  // 20260927120000_packages_for_two) keeps it to those two values.
+  seats               Int           @default(1)
+  // When the buyer confirmed the second person agrees to the lesson-insights
+  // terms the buyer chooses (D-188). Null on every one-person package, and on
+  // a two-person package recorded by the teacher rather than bought — for
+  // which insights capture stays off (lib/video/call-recording.ts).
+  partnerConsentAt    DateTime?     @map("partner_consent_at") @db.Timestamptz
   pricePaidMinorUnits   Int           @map("price_paid_minor_units")
   currency            String        @default("MXN")
   customPriceMinorUnits Int?          @map("custom_price_minor_units")

@@ -6,12 +6,17 @@ import { Lock } from "lucide-react";
 import { loadStripe } from "@stripe/stripe-js";
 import { EmbeddedCheckout, EmbeddedCheckoutProvider } from "@stripe/react-stripe-js";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { createPortalCheckoutIntent, type CheckoutState } from "@/app/actions/checkout";
 import { formatMinorUnits } from "@/lib/money";
-import { priceForMethod } from "@/lib/payments/instruments";
-import type { PayoutInstrument } from "@spiralclass/shared";
+import {
+  offersTwoPerson,
+  priceForSeats,
+  type PayoutInstrument,
+  type Seats,
+} from "@spiralclass/shared";
 import { currentSessionId } from "@/lib/analytics/posthog-browser";
 import { useT } from "@/components/locale-provider";
 import type { TFunction } from "@/lib/i18n-translate";
@@ -38,6 +43,9 @@ type Template = {
   classDurationMin: number;
   priceMinorUnits: number;
   transferPriceMinorUnits: number | null;
+  // The prices for two people (D-188); null when not sold for two.
+  twoPersonPriceMinorUnits: number | null;
+  twoPersonTransferPriceMinorUnits: number | null;
   expirationMonths: number | null;
 };
 
@@ -57,12 +65,17 @@ type Template = {
 export function PortalPurchaseFlow({
   teacherId,
   templates,
+  currency,
   agreedPrices,
   stripeReady,
   instruments,
 }: {
   teacherId: string;
   templates: Template[];
+  // The teacher's own pricing currency. Every price here used to format with
+  // formatMinorUnits' MXN default, so a teacher pricing in GBP showed her
+  // returning students "$1,850.00 MXN".
+  currency: string;
   /** Agreed price per template id. A missing key means the catalog price. */
   agreedPrices: Record<string, number>;
   stripeReady: boolean;
@@ -71,8 +84,16 @@ export function PortalPurchaseFlow({
   instruments: PayoutInstrument[];
 }) {
   const t = useT();
+  const money = (minorUnits: number) => formatMinorUnits(minorUnits, currency);
+
+  // One person or two (D-188) — asked only when something is sold for two.
+  const forTwoAvailable = templates.some(offersTwoPerson);
+  const [seats, setSeats] = useState<Seats>(1);
+  const visibleTemplates = seats === 2 ? templates.filter(offersTwoPerson) : templates;
+  const [partnerConsent, setPartnerConsent] = useState(false);
+
   const [selectedId, setSelectedId] = useState(templates[0]?.id ?? "");
-  const selected = templates.find((t) => t.id === selectedId) ?? templates[0];
+  const selected = visibleTemplates.find((t) => t.id === selectedId) ?? visibleTemplates[0];
 
   const transferReady = instruments.length > 0;
   const [selection, setSelection] = useState<string>(
@@ -103,7 +124,7 @@ export function PortalPurchaseFlow({
 
   if (!selected) return null;
 
-  const single = templates.length === 1;
+  const single = visibleTemplates.length === 1;
   // Show the picker whenever there is more than one thing to pick, not just
   // when Stripe and a transfer coexist — two transfer instruments and no
   // Stripe is a real configuration (a teacher with Wise and SPEI).
@@ -111,7 +132,12 @@ export function PortalPurchaseFlow({
   const showToggle = optionCount > 1;
   const noMethods = optionCount === 0;
 
-  const effectivePrice = (t: Template): number => agreedPrices[t.id] ?? priceForMethod(t, method);
+  // An agreed price is a price for one person — it never prices a package for
+  // two, the same rule the server charges by (effectivePriceMinorUnits).
+  const agreedFor = (tpl: Template): number | undefined =>
+    seats === 1 ? agreedPrices[tpl.id] : undefined;
+  const catalogPrice = (tpl: Template, m: Method): number => priceForSeats(tpl, seats, m) ?? 0;
+  const effectivePrice = (tpl: Template): number => agreedFor(tpl) ?? catalogPrice(tpl, method);
 
   if (clientSecret && stripePromise) {
     return (
@@ -140,6 +166,33 @@ export function PortalPurchaseFlow({
         value={selection === STRIPE_SELECTION ? "" : selection}
       />
       <input ref={sessionIdRef} type="hidden" name="posthogSessionId" defaultValue="" />
+      <input type="hidden" name="seats" value={seats} />
+      <input type="hidden" name="partnerConsent" value={partnerConsent ? "1" : ""} />
+
+      {forTwoAvailable && (
+        <fieldset className="space-y-2">
+          <legend className="mb-2 text-sm font-medium">{t("web.buyFlow.seats.legend")}</legend>
+          <div className="grid grid-cols-2 gap-2">
+            {([1, 2] as const).map((s) => (
+              <MethodOption
+                key={s}
+                id={`seats-${s}`}
+                name="seats-choice"
+                label={s === 1 ? t("web.buyFlow.seats.one") : t("web.buyFlow.seats.two")}
+                checked={seats === s}
+                onSelect={() => {
+                  setSeats(s);
+                  const list = s === 2 ? templates.filter(offersTwoPerson) : templates;
+                  if (!list.some((tpl) => tpl.id === selectedId)) setSelectedId(list[0]?.id ?? "");
+                }}
+              />
+            ))}
+          </div>
+          {seats === 2 && (
+            <p className="text-xs text-muted-foreground">{t("web.buyFlow.seats.twoHint")}</p>
+          )}
+        </fieldset>
+      )}
 
       {showToggle && (
         <fieldset className="space-y-2 rounded-md border p-3">
@@ -178,13 +231,13 @@ export function PortalPurchaseFlow({
         <legend className="mb-2 text-sm font-medium">
           {single ? t("web.studentBuy.yourPackage") : t("buyAnother.choosePackage")}
         </legend>
-        {templates.map((tpl) => {
+        {visibleTemplates.map((tpl) => {
           const price = effectivePrice(tpl);
-          const agreed = agreedPrices[tpl.id];
-          const transferPrice = priceForMethod(tpl, "manual_transfer");
+          const agreed = agreedFor(tpl);
+          const transferPrice = catalogPrice(tpl, "manual_transfer");
           // The transfer saving is a property of the CATALOG price split, so
           // it is meaningless once an agreed price overrides both rails.
-          const savings = agreed === undefined ? priceForMethod(tpl, "stripe") - transferPrice : 0;
+          const savings = agreed === undefined ? catalogPrice(tpl, "stripe") - transferPrice : 0;
           const hasTransferDiscount = transferReady && savings > 0;
           const checked = tpl.id === selected.id;
           return (
@@ -207,11 +260,14 @@ export function PortalPurchaseFlow({
                 )}
                 <div>
                   <div className="font-medium">{tpl.name}</div>
-                  <div className="text-xs text-muted-foreground">{describe(tpl, t)}</div>
+                  <div className="text-xs text-muted-foreground">
+                    {seats === 2 && `${t("web.buyFlow.package.forTwo")} · `}
+                    {describe(tpl, t)}
+                  </div>
                 </div>
               </div>
               <div className="text-right">
-                <div className="font-semibold tabular-nums">{formatMinorUnits(price)}</div>
+                <div className="font-semibold tabular-nums">{money(price)}</div>
                 {agreed !== undefined && (
                   <div className="text-xs text-muted-foreground">
                     {t("web.studentBuy.yourAgreedPrice")}
@@ -220,15 +276,15 @@ export function PortalPurchaseFlow({
                 {hasTransferDiscount &&
                   (method === "manual_transfer" ? (
                     <div className="text-xs text-success">
-                      {t("web.studentBuy.youSave", { amount: formatMinorUnits(savings) })}
+                      {t("web.studentBuy.youSave", { amount: money(savings) })}
                     </div>
                   ) : (
                     // Card selected: reveal the cheaper transfer price upfront
                     // so the saving is visible before the student decides.
                     <div className="text-xs text-success">
                       {t("web.studentBuy.wisePriceWithSavings", {
-                        wisePrice: formatMinorUnits(transferPrice),
-                        savings: formatMinorUnits(savings),
+                        wisePrice: money(transferPrice),
+                        savings: money(savings),
                       })}
                     </div>
                   ))}
@@ -270,16 +326,41 @@ export function PortalPurchaseFlow({
         </Button>
       )}
 
+      {seats === 2 && (
+        <div className="flex items-start gap-3 rounded-md border bg-muted/30 p-3">
+          <Checkbox
+            id="portal-partner-consent"
+            checked={partnerConsent}
+            onCheckedChange={(v) => setPartnerConsent(v === true)}
+            disabled={noMethods || pending}
+            className="mt-0.5"
+            aria-describedby="portal-partner-consent-hint"
+          />
+          <div className="min-w-0 space-y-1">
+            <Label htmlFor="portal-partner-consent" className="text-sm">
+              {t("web.checkoutForm.partnerConsentLabel")}
+            </Label>
+            <p id="portal-partner-consent-hint" className="text-xs text-muted-foreground">
+              {t("web.checkoutForm.partnerConsentHint")}
+            </p>
+          </div>
+        </div>
+      )}
+
       {errorMessage && (
         <p role="alert" aria-live="polite" className="text-sm text-destructive">
           {errorMessage}
         </p>
       )}
 
-      <Button type="submit" className="w-full" disabled={noMethods || pending}>
+      <Button
+        type="submit"
+        className="w-full"
+        disabled={noMethods || pending || (seats === 2 && !partnerConsent)}
+      >
         {pending
           ? t("web.studentBuy.redirecting")
-          : ctaCopy(method, formatMinorUnits(effectivePrice(selected)), t)}
+          : ctaCopy(method, money(effectivePrice(selected)), t)}
       </Button>
       {method === "stripe" && (
         <p className="flex items-center justify-center gap-1 text-xs text-muted-foreground">
@@ -318,11 +399,13 @@ function ctaCopy(method: Method, price: string, t: TFunction): string {
 
 function MethodOption({
   id,
+  name = "method-toggle",
   label,
   checked,
   onSelect,
 }: {
   id: string;
+  name?: string;
   label: string;
   checked: boolean;
   onSelect: () => void;
@@ -337,7 +420,7 @@ function MethodOption({
       <input
         id={id}
         type="radio"
-        name="method-toggle"
+        name={name}
         checked={checked}
         onChange={onSelect}
         className="size-4 cursor-pointer accent-foreground"

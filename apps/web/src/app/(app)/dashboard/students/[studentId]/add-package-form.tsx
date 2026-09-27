@@ -12,6 +12,7 @@ import { createManualPackageAction, type ManualPackageState } from "@/app/action
 import { FormStatus } from "@/components/ui/form-status";
 import { useLocale, useT } from "@/components/locale-provider";
 import { usePricingCurrency } from "@/components/pricing-currency-context";
+import { ForTwoField } from "./for-two-field";
 
 export type PackageTemplateOption = {
   id: string;
@@ -201,6 +202,8 @@ export function AddPackageForm({
           onChange={(e) => setPrice(e.target.value)}
         />
       </div>
+
+      <ForTwoField id="pkg-for-two" />
 
       <div className="flex items-center gap-2">
         <Button type="submit" size="sm" disabled={pending}>

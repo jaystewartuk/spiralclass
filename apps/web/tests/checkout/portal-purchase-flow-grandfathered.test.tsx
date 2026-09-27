@@ -39,6 +39,8 @@ const FOUR = {
   classDurationMin: 50,
   priceMinorUnits: 185_000,
   transferPriceMinorUnits: null,
+  twoPersonPriceMinorUnits: null,
+  twoPersonTransferPriceMinorUnits: null,
   expirationMonths: 2,
 };
 const TWENTY = {
@@ -48,6 +50,8 @@ const TWENTY = {
   classDurationMin: 50,
   priceMinorUnits: 800_000,
   transferPriceMinorUnits: null,
+  twoPersonPriceMinorUnits: null,
+  twoPersonTransferPriceMinorUnits: null,
   expirationMonths: 7,
 };
 
@@ -72,6 +76,7 @@ describe("PortalPurchaseFlow — per-package grandfathered prices", () => {
         React.createElement(PortalPurchaseFlow, {
           teacherId: "t1",
           templates: [FOUR, TWENTY],
+          currency: "MXN",
           agreedPrices,
           stripeReady: true,
           instruments: [],

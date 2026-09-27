@@ -4985,6 +4985,50 @@ export const en = {
   // came to buy lessons: nobody chooses a Spanish teacher for the reminders.
   // The subhead's job is to say what she does and who for, and then get out of
   // the way — the platform's features have their own section further down.
+  "billing.limit.sellForTwo":
+    "Selling packages for two people is part of Pro. Upgrade to switch a new one on — the packages you already sell for two keep selling.",
+  "web.settings.billing.featureSellForTwo": "Packages for two people",
+  "web.settings.packages.twoPerson.percentInvalid":
+    "The price for two has to be between {min}% and {max}% of the price for one.",
+  "web.packages.twoPerson.badge": "For two",
+  "web.packages.twoPerson.summary": "For two: {amount}",
+  "web.packages.twoPerson.section": "For two people",
+  "web.packages.twoPerson.label": "Also sell this package for two people",
+  "web.packages.twoPerson.hint":
+    "Two people who take every class together — a couple, two siblings. One of them pays once, each class uses one class from the package, and their balance is kept apart from packages for one.",
+  "web.packages.twoPerson.proOnly": "Selling for two people is part of Pro.",
+  "web.packages.twoPerson.priceStripe": "Stripe price for two",
+  "web.packages.twoPerson.price": "Price for two",
+  "web.packages.twoPerson.suggested": "Suggested: {percent}% of the price for one.",
+  "web.packages.twoPerson.custom": "Your own price.",
+  "web.packages.twoPerson.perPersonPerClass": "{amount} per person, per class.",
+  "web.packages.twoPerson.warnBelowOne":
+    "This is less than the price for one person, so two people would pay less than one.",
+  "web.packages.twoPerson.priceWise": "Wise price for two",
+  "web.packages.twoPerson.percentLabel": "Price for two people, as a % of the price for one",
+  "web.packages.twoPerson.percentHint":
+    "Suggests the price when you switch a package on for two, and moves the prices you haven't changed yourself. Every price stays editable.",
+  "web.bookingLanding.taglineWithPartner":
+    "Online classes for one, or for two of you together, at a pace that fits your week.",
+  "web.bookingLanding.seats.one": "Just me",
+  "web.bookingLanding.seats.two": "Two of us",
+  "web.bookingLanding.seats.twoExplainer":
+    "For two people who take every class together. One of you pays once for both.",
+  "web.bookingLanding.seats.forTwoShort": "For two",
+  "web.bookingLanding.perPersonPerClass": "{price} per person, per class",
+  "web.buyFlow.package.forTwo": "For two people",
+  "web.buyFlow.seats.legend": "Who's taking the classes?",
+  "web.buyFlow.seats.one": "Just me",
+  "web.buyFlow.seats.two": "Two of us",
+  "web.buyFlow.seats.twoHint":
+    "You pay once for both of you. You'll both join every class together from one account — yours.",
+  "web.checkoutForm.partnerConsentLabel":
+    "The second person agrees to the same class terms I choose",
+  "web.checkoutForm.partnerConsentHint":
+    "They'll be in every class but won't have an account of their own. If you turn on lesson insights, your classes are recorded and analysed with both of you in them — so confirm they're happy with that.",
+  "web.dashboard.students.package.forTwoLabel": "This package is for two people",
+  "web.dashboard.students.package.forTwoHint":
+    "Its classes come out of a separate balance for two. Lesson insights stay off for its classes, because nobody confirmed at checkout that the second person agrees.",
   "web.bookingLanding.tagline": "One-to-one classes online, at a pace that fits your week.",
   // The per-teacher social card (apps/web/src/app/b/[slug]/opengraph-image.tsx).
   // Pinned to PUBLIC_FUNNEL_LOCALE like the page it previews — a card in one

@@ -35,7 +35,11 @@ export async function startBookingRecording(
 ): Promise<RecordingResult> {
   const booking = await prisma.booking.findFirst({
     where: { id: bookingId, teacherId },
-    select: { id: true, studentId: true },
+    select: {
+      id: true,
+      studentId: true,
+      package: { select: { seats: true, partnerConsentAt: true } },
+    },
   });
   if (!booking) return { ok: false, reason: "not-found" };
 
@@ -100,6 +104,7 @@ export async function startBookingRecording(
       isMinor: insightsLink.isMinor,
       insightsConsentAt: insightsLink.insightsConsentAt,
       guardianConsentAt: insightsLink.guardianConsentAt,
+      classPackage: booking.package,
     });
   if (!consentOk) {
     log.info("lesson-audio captures skipped — no insights consent", { bookingId: booking.id });
@@ -195,7 +200,12 @@ export async function maybeStartLessonAudioCapture(
 
   const booking = await prisma.booking.findUnique({
     where: { id: bookingId },
-    select: { id: true, teacherId: true, studentId: true },
+    select: {
+      id: true,
+      teacherId: true,
+      studentId: true,
+      package: { select: { seats: true, partnerConsentAt: true } },
+    },
   });
   if (!booking) return;
 
@@ -209,6 +219,7 @@ export async function maybeStartLessonAudioCapture(
       isMinor: insightsLink.isMinor,
       insightsConsentAt: insightsLink.insightsConsentAt,
       guardianConsentAt: insightsLink.guardianConsentAt,
+      classPackage: booking.package,
     })
   ) {
     return;

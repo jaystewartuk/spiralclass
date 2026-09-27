@@ -4,7 +4,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
-import { currencyForTeacher } from "@spiralclass/shared";
+import { currencyForTeacher, parseSeats } from "@spiralclass/shared";
 import { prisma } from "@/lib/prisma";
 import { teacherPhotoPublicUrl } from "@/lib/storage/teacher-photo";
 import { approxUsdAssumptions, approxUsdFrom } from "@/lib/pricing/approx-usd";
@@ -26,10 +26,10 @@ export default async function PurchasePage({
   searchParams,
 }: {
   params: Promise<{ slug: string }>;
-  searchParams: Promise<{ package?: string; ref?: string }>;
+  searchParams: Promise<{ package?: string; ref?: string; seats?: string }>;
 }) {
   const { slug } = await params;
-  const { package: requestedPackageId, ref: refCode } = await searchParams;
+  const { package: requestedPackageId, ref: refCode, seats } = await searchParams;
 
   // The public booking page is the NEW-student acquisition funnel — every buyer
   // types their own email (the identity + magic-link address). We deliberately
@@ -80,6 +80,8 @@ export default async function PurchasePage({
           classDurationMin: true,
           priceMinorUnits: true,
           transferPriceMinorUnits: true,
+          twoPersonPriceMinorUnits: true,
+          twoPersonTransferPriceMinorUnits: true,
           expirationMonths: true,
           currency: true,
         },
@@ -139,11 +141,16 @@ export default async function PurchasePage({
   // to pay. Gated on the funnel locale rather than the visitor — see the longer
   // note at the landing page's call site.
   const approxAssumptions = funnelLocale === "en" ? await approxUsdAssumptions() : null;
+  const approxUsdCents = (minorUnits: number | null, currency: string) =>
+    approxAssumptions && minorUnits !== null
+      ? (approxUsdFrom(minorUnits, currency, approxAssumptions, now)?.centsUsd ?? null)
+      : null;
   const templatesWithApprox = teacher.packageTemplates.map((tpl) => ({
     ...tpl,
-    approxUsdCents: approxAssumptions
-      ? (approxUsdFrom(tpl.priceMinorUnits, tpl.currency, approxAssumptions, now)?.centsUsd ?? null)
-      : null,
+    approxUsdCents: approxUsdCents(tpl.priceMinorUnits, tpl.currency),
+    // The same approximation for the price for two (D-188), so switching to
+    // "Two of us" never drops the dollar figure the buyer was reading.
+    twoPersonApproxUsdCents: approxUsdCents(tpl.twoPersonPriceMinorUnits, tpl.currency),
   }));
 
   return (
@@ -176,6 +183,7 @@ export default async function PurchasePage({
             testimonial={teacher.testimonials[0] ?? null}
             templates={templatesWithApprox}
             initialTemplateId={requestedPackageId}
+            initialSeats={parseSeats(seats)}
             stripeReady={stripeReady}
             instruments={instruments}
             prefillCode={refCode}

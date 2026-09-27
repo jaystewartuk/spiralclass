@@ -104,6 +104,7 @@ export async function autoBookIntendedSlot(
       classesUsed: pkg.classesUsed,
       classesTotal: pkg.classesTotal,
       classDurationMin: pkg.classDurationMin,
+      seats: pkg.seats,
       expiresAt: pkg.expiresAt,
     },
     teacher: pkg.teacher,
