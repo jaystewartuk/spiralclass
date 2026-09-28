@@ -71,7 +71,7 @@ another way" about anything that still exists.
   both reversed by [D-40](./D-40.md)).
 
 **Numbering is never reused and never renumbered**, so `D-01` is still the
-first decision and `D-188` the most recent. A gap means a record was removed,
+first decision and `D-189` the most recent. A gap means a record was removed,
 not that one is missing.
 
 **Everything kept is unedited**, except where a record named an account
@@ -234,6 +234,7 @@ on it.
 | [D-182](./D-182.md) | Production goes back to LiveKit Cloud while Oracle refuses to rebuild the box                                             |
 | [D-185](./D-185.md) | **Captions move into the browsers**, and a computer in the call covers a phone that cannot; two phones stream to Deepgram |
 | [D-187](./D-187.md) | **Production video moves to a free `e2-micro`** — measured to carry a class, not its recording, so recording goes off     |
+| [D-189](./D-189.md) | **The lesson transcript is the caption text the browsers already recognise**, kept with consent — no audio, no egress     |
 
 ### The lesson-AI pipeline, and the consent that gates it
 
@@ -544,8 +545,9 @@ records removed before publication — see [What is not here](#what-is-not-here)
 | [D-184](./D-184.md) | Cloud Run serves production; Fly is retired                           | Active (revisits D-150's premise)    |
 | [D-185](./D-185.md) | Live captions run in the browsers; a computer covers a phone          | Active (supersedes D-106, D-108)     |
 | [D-186](./D-186.md) | The Vercel failover is retired; Cloud Run is the only target          | Active (reverses D-177)              |
-| [D-187](./D-187.md) | Video on a free e2-micro; recording and transcription off again       | Active (reverses D-182, D-131)       |
+| [D-187](./D-187.md) | Video on a free e2-micro; recording and transcription off again       | Active (transcription → D-189)       |
 | [D-188](./D-188.md) | Packages for two: one buyer, one account, a separate credit balance   | Active (narrows D-149)               |
+| [D-189](./D-189.md) | The transcript is the browsers' caption text; no audio is captured    | Active (partly reverses D-187)       |
 
 ---
 

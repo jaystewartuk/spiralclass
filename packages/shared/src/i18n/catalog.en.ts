@@ -706,6 +706,7 @@ export const en = {
   "call.captionsNoticeDismiss": "Got it",
   "call.captionsEnabledToast": "Live captions enabled.",
   "call.captionsNeedComputer": "Captions need one of you on Chrome on a computer.",
+  "call.transcriptKept": "Transcript kept for learning insights",
   "call.captionsStopped": "Captions stopped on this device — check the microphone permission.",
   "call.captionsServiceUnavailable":
     "Captions stopped on this device — the captioning service couldn't be reached.",

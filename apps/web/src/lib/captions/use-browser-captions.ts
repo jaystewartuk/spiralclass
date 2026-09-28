@@ -74,6 +74,10 @@ export function useBrowserCaptions({
   status: BrowserCaptionsStatus;
   // 0..1 while an on-device translation model downloads, else null.
   downloadProgress: number | null;
+  // D-189: captions are on and this class's lines are being kept as its
+  // transcript for lesson insights. Rendered to both participants, since a
+  // capture nobody can see is what D-21 forbids.
+  transcriptKept: boolean;
   // Call synchronously inside the teacher's toggle click (see
   // installOnDeviceModels for why it cannot wait).
   prepareOnDevice: () => void;
@@ -212,6 +216,15 @@ export function useBrowserCaptions({
         });
       },
       showLocal: (line) => showLocalRef.current(line),
+      keep: (line) => {
+        // Fire-and-forget: a lost line is a gap in the transcript, never a
+        // stalled caption. The server re-checks everything before storing it.
+        void fetch("/api/captions/transcript", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify(line),
+        }).catch(() => {});
+      },
       onStatus: setStatus,
       onRefused: () => setRefetchKey((k) => k + 1),
     });
@@ -251,5 +264,7 @@ export function useBrowserCaptions({
     });
   }, []);
 
-  return { captionsOn, status, downloadProgress, prepareOnDevice };
+  const transcriptKept = captionsOn && Boolean(session?.transcriptCapture);
+
+  return { captionsOn, status, downloadProgress, prepareOnDevice, transcriptKept };
 }

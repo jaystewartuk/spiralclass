@@ -182,6 +182,7 @@ const ALLOWED_SEGMENTS: readonly string[] = [
   "testimonials",
   "threads",
   "timezone",
+  "transcript",
   "transfer",
   "translate",
   "uat",

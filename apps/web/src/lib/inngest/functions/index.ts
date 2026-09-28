@@ -18,6 +18,7 @@ import { subscriptionSweepCronFn } from "./subscription-sweep";
 import { syncGoogleCalendarsCronFn } from "./sync-google-calendars";
 import { onLessonAudioReadyFn } from "./on-lesson-audio-ready";
 import { onLessonTranscriptReadyFn } from "./on-lesson-transcript-ready";
+import { onLessonTranscriptCapturingFn } from "./on-lesson-transcript-capturing";
 import { onLessonInsightsReadyFn } from "./on-lesson-insights-ready";
 import { onMaterialPodcastRequestedFn } from "./on-material-podcast-requested";
 import { onIntroVideoReadyFn } from "./on-intro-video-ready";
@@ -44,6 +45,7 @@ export const eventFunctions = [
   autoBookOnPaidFn,
   onLessonAudioReadyFn,
   onLessonTranscriptReadyFn,
+  onLessonTranscriptCapturingFn,
   onLessonInsightsReadyFn,
   onMaterialPodcastRequestedFn,
   onIntroVideoReadyFn,

@@ -40,8 +40,24 @@ function enablementFlagOn(): boolean {
   return raw === "1" || raw === "true" || raw === "on";
 }
 
-// The single gate the pipeline checks. Both a vendor AND the flag are required —
-// see the module note on why the flag exists.
+// The gate for the transcript that lesson insights read today (D-189): the
+// participants' browsers already recognise both speakers for live captions,
+// and with this flag on that recognised text is KEPT as the class's
+// LessonTranscript instead of being thrown away with the captions. No audio
+// is captured and no vendor is called for it, so the flag alone decides —
+// captions' own gates (LIVE_CAPTIONS_ENABLED, the teacher's toggle, the Pro
+// plan) and the per-pairing insights consent (D-22) still apply on top,
+// resolved per class in lib/captions/class-access.ts.
+export function browserTranscriptEnabled(): boolean {
+  return enablementFlagOn();
+}
+
+// The gate for the AUDIO pipeline (Phase B): per-speaker audio captured by a
+// LiveKit egress, sent to an ASR vendor, then discarded. Both a vendor AND the
+// flag are required — see the module note on why the flag exists. Since D-189
+// this path is dormant in production: the box has no egress (D-187), and
+// call-recording.ts's maybeStartLessonAudioCapture additionally requires
+// recording to be enabled before it starts one.
 export function transcriptionEnabled(): boolean {
   return enablementFlagOn() && transcriptionConfig() !== null;
 }

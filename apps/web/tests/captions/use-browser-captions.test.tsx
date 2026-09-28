@@ -106,6 +106,7 @@ const SESSION = (
   recognitionLocales: { teacher: "es-MX", student: "en" },
   studentConsent: true,
   cloudRecognition: false,
+  transcriptCapture: false,
   ...over,
 });
 
@@ -119,6 +120,9 @@ const fetchMock = vi.fn(async (url: string, init?: RequestInit) => {
     return new Response(JSON.stringify({ ok: true, token: "jwt", url: "wss://dg.test/listen" }), {
       status: 200,
     });
+  }
+  if (url === "/api/captions/transcript") {
+    return new Response(JSON.stringify({ ok: true, kept: true }), { status: 200 });
   }
   const { text } = JSON.parse(String(init?.body)) as { text: string };
   return new Response(JSON.stringify({ ok: true, text: `T(${text})` }), { status: 200 });
@@ -360,6 +364,70 @@ describe("useBrowserCaptions — recognising and delivering", () => {
     FakeRecognition.instances[0].final("hola");
     await settle();
     expect(configCalls().length).toBe(before + 1);
+  });
+});
+
+describe("useBrowserCaptions — keeping the transcript (D-189)", () => {
+  const transcriptCalls = () =>
+    fetchMock.mock.calls.filter(([u]) => u === "/api/captions/transcript");
+
+  it("posts each recognised line to the transcript route when the session says it is kept", async () => {
+    configReplies = [
+      { ok: true, enabled: true, session: SESSION("teacher", { transcriptCapture: true }) },
+    ];
+    const room = new FakeRoom("t1");
+    room.join(new FakeParticipant("s1", { id: "s1-mic", readyState: "live" }));
+    room.remoteParticipants.get("s1")!.attributes.captionsAsr = "1";
+    await render({ room, role: "teacher", teacherCaptionsOn: true, prefetchSession: true });
+    expect(latest.transcriptKept).toBe(true);
+
+    FakeRecognition.instances[0].final("hola");
+    await settle();
+    expect(transcriptCalls()).toHaveLength(1);
+    expect(JSON.parse(String(transcriptCalls()[0][1]?.body))).toEqual({
+      bookingId: "b1",
+      speaker: "teacher",
+      text: "hola",
+      durationMs: expect.any(Number),
+    });
+    // And the caption itself still went out.
+    expect(room.localParticipant.publishData).toHaveBeenCalledTimes(1);
+  });
+
+  it("posts nothing, and reports nothing kept, when the session says otherwise", async () => {
+    const room = new FakeRoom("t1");
+    room.join(new FakeParticipant("s1", { id: "s1-mic", readyState: "live" }));
+    room.remoteParticipants.get("s1")!.attributes.captionsAsr = "1";
+    await render({ room, role: "teacher", teacherCaptionsOn: true, prefetchSession: true });
+    FakeRecognition.instances[0].final("hola");
+    await settle();
+    expect(transcriptCalls()).toHaveLength(0);
+    expect(latest.transcriptKept).toBe(false);
+  });
+
+  it("reports nothing kept while captions are off, whatever the session says", async () => {
+    configReplies = [
+      { ok: true, enabled: true, session: SESSION("teacher", { transcriptCapture: true }) },
+    ];
+    const room = new FakeRoom("t1");
+    await render({ room, role: "teacher", teacherCaptionsOn: false, prefetchSession: true });
+    expect(latest.transcriptKept).toBe(false);
+  });
+
+  it("keeps captioning when the transcript route fails", async () => {
+    configReplies = [
+      { ok: true, enabled: true, session: SESSION("teacher", { transcriptCapture: true }) },
+    ];
+    const room = new FakeRoom("t1");
+    room.join(new FakeParticipant("s1", { id: "s1-mic", readyState: "live" }));
+    room.remoteParticipants.get("s1")!.attributes.captionsAsr = "1";
+    await render({ room, role: "teacher", teacherCaptionsOn: true, prefetchSession: true });
+    fetchMock.mockImplementationOnce(async () => {
+      throw new Error("offline");
+    });
+    FakeRecognition.instances[0].final("hola");
+    await settle();
+    expect(room.localParticipant.publishData).toHaveBeenCalledTimes(1);
   });
 });
 

@@ -715,6 +715,7 @@ export const esMX = {
   "call.captionsEnabledToast": "Subtítulos en vivo activados.",
   "call.captionsNeedComputer":
     "Los subtítulos necesitan que uno de los dos use Chrome en una computadora.",
+  "call.transcriptKept": "Transcripción guardada para las notas de aprendizaje",
   "call.captionsStopped":
     "Los subtítulos se detuvieron en este dispositivo — revisa el permiso del micrófono.",
   "call.captionsServiceUnavailable":

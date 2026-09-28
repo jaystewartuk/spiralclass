@@ -34,6 +34,11 @@ vi.mock("@/lib/prisma", () => ({
   },
 }));
 
+const lessonTranscriptCaptureOk = vi.hoisted(() => vi.fn(async (..._a: unknown[]) => false));
+vi.mock("@/lib/transcription/browser-transcript", () => ({
+  lessonTranscriptCaptureOk: (...a: unknown[]) => lessonTranscriptCaptureOk(...a),
+}));
+
 const trackServerEvent = vi.hoisted(() => vi.fn());
 vi.mock("@/lib/analytics/posthog", () => ({
   trackServerEvent,
@@ -224,6 +229,24 @@ describe("resolveCaptionSession", () => {
     bookingFindFirst.mockResolvedValue(bookingRow());
     teacherStudentFindUnique.mockResolvedValue(null);
     expect(await resolveCaptionSession("b1", TEACHER)).toMatchObject({ studentConsent: false });
+  });
+
+  it("asks whether the class's transcript is kept, with the package for a class for two", async () => {
+    bookingFindFirst.mockResolvedValue(
+      bookingRow({ package: { seats: 2, partnerConsentAt: new Date("2026-09-01") } }),
+    );
+    teacherStudentFindUnique.mockResolvedValue(null);
+    lessonTranscriptCaptureOk.mockResolvedValueOnce(true);
+    expect(await resolveCaptionSession("b1", TEACHER)).toMatchObject({ transcriptCapture: true });
+    expect(lessonTranscriptCaptureOk).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        teacherId: "t1",
+        studentId: "s1",
+        package: { seats: 2, partnerConsentAt: new Date("2026-09-01") },
+      }),
+    );
+    expect(await resolveCaptionSession("b1", STUDENT)).toMatchObject({ transcriptCapture: false });
   });
 
   it("offers the phone-to-phone fallback only when its key is configured", async () => {

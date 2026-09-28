@@ -1780,6 +1780,12 @@ export function ClassCall({
                 {roomCaptionsOn && browserCaptions.status.uncaptioned.length > 0 && (
                   <StatusPill tone="attention" label={t("call.captionsNeedComputer")} />
                 )}
+                {/* The recognised lines are being kept as this class's
+                transcript for lesson insights (D-189). Shown to both people:
+                a capture with no visible indicator is what D-21 forbids. */}
+                {browserCaptions.transcriptKept && (
+                  <StatusPill tone="info" label={t("call.transcriptKept")} />
+                )}
                 {/* A recogniser here gave up for good — the microphone
                 permission, a language this browser cannot recognise, or the
                 phone-to-phone fallback's service out of reach. */}

@@ -10,6 +10,7 @@ import { prisma } from "@/lib/prisma";
 import { flushAnalytics, trackServerEvent } from "@/lib/analytics/posthog";
 import { cloudCaptionsConfigured } from "@/lib/captions/config";
 import { captionsConsentOk } from "@/lib/captions/consent";
+import { lessonTranscriptCaptureOk } from "@/lib/transcription/browser-transcript";
 
 // Class-booking caption language/consent resolution. Captions run in the
 // participants' browsers (D-185), and every fact a browser needs to caption a
@@ -21,6 +22,7 @@ import { captionsConsentOk } from "@/lib/captions/consent";
 type BookingWithLanguages = Booking & {
   teacher: Pick<Teacher, "id" | "teachingLanguage" | "country">;
   student: Pick<Student, "nativeLanguage">;
+  package: { seats: number; partnerConsentAt: Date | null } | null;
 };
 
 function findBookingWithLanguages(
@@ -31,6 +33,9 @@ function findBookingWithLanguages(
     include: {
       teacher: { select: { id: true, teachingLanguage: true, country: true } },
       student: { select: { nativeLanguage: true } },
+      // For the transcript consent (D-188): a class for two needs the buyer's
+      // confirmation for the second person as well.
+      package: { select: { seats: true, partnerConsentAt: true } },
     },
   }) as Promise<BookingWithLanguages | null>;
 }
@@ -102,6 +107,7 @@ export async function resolveCaptionSession(
     },
     studentConsent: await captionsPublishConsentOk(booking, "student"),
     cloudRecognition: cloudCaptionsConfigured(),
+    transcriptCapture: await lessonTranscriptCaptureOk(prisma, booking),
   };
 }
 

@@ -2,26 +2,28 @@
 
 ## Overview
 
-**Status: fully built; OFF in both environments since
-[D-187](../decisions/D-187.md) (2026-09-24)**, for capacity: the free video box
-production runs on cannot carry the egress that captures the audio. The
-reasoning for the feature itself lives in
-[D-19](../decisions/D-19.md), [D-21](../decisions/D-21.md) and
-[D-22](../decisions/D-22.md).
-The flag history is: off at first ship, on at
-[D-94](../decisions/D-94.md) (2026-07-21), off again at
-[D-114](../decisions/D-114.md) (2026-08-08) ahead of first promotion, on
-again at [D-131](../decisions/D-131.md) (2026-08-26), and off again at D-187
-(2026-09-24). **This pipeline captures student voice, including
-minors.** What decides whether any given student is captured is the recorded
-per-pairing consent (D-22), which is guardian-only for a student under 18 —
-never the flag. Read D-131 and D-187 before turning it back on.
+**Status: ON in both environments since [D-189](../decisions/D-189.md)
+(2026-09-28), fed by the browsers' caption recognisers rather than by egress
+audio.** The free video box production runs on cannot carry egress
+([D-187](../decisions/D-187.md)), so the transcript is now the caption text
+the participants' browsers already produce ([D-185](../decisions/D-185.md)),
+kept — text only, never audio — for a class whose pairing has recorded
+insights consent, while the teacher has captions on. The reasoning for the
+feature itself lives in [D-19](../decisions/D-19.md),
+[D-21](../decisions/D-21.md) and [D-22](../decisions/D-22.md). The flag
+history is: off at first ship, on at [D-94](../decisions/D-94.md)
+(2026-07-21), off again at [D-114](../decisions/D-114.md) (2026-08-08) ahead
+of first promotion, on again at [D-131](../decisions/D-131.md) (2026-08-26),
+off again at D-187 (2026-09-24), and on again at D-189 (2026-09-28). **This
+pipeline reads student speech, including minors'.** What decides whether any
+given student's words are kept is the recorded per-pairing consent (D-22),
+which is guardian-only for a student under 18 — never the flag.
 
-Two operational facts D-131 records and this document must not contradict: the
-**teacher's Record tap is the reliable trigger** for insights capture (the
-automatic `participant_joined` path races LiveKit track publication and is
-best-effort), and **preview cannot rehearse the pipeline end-to-end** because
-the shared LiveKit box posts webhooks to production's URL only.
+Two operational facts this document must not contradict: **the teacher's
+captions toggle is the trigger** — no captions, no transcript, no insights
+for that class — and **preview cannot rehearse the pipeline end-to-end**,
+because it has no LiveKit pair and the shared box posts webhooks to
+production's URL only.
 
 `config/env/{preview,production}.runtime.env` is the source of truth on what
 is actually enabled — see the flag-by-flag breakdown under the consent gate
@@ -77,28 +79,28 @@ the pass/fail record of attendance or payments.
   `config/env/{preview,production}.runtime.env` is the source of truth — read
   it rather than assuming this document's description means a given half is
   live:
-  - `LESSON_INSIGHTS_TRANSCRIPTION_ENABLED` is **off** in both environments
-    ([D-187](../decisions/D-187.md)). It was held off from the start, turned on
+  - `LESSON_INSIGHTS_TRANSCRIPTION_ENABLED` is **on** in both environments
+    ([D-189](../decisions/D-189.md)). It was held off from the start, turned on
     by [D-94](../decisions/D-94.md) (2026-07-21), turned back off by
     [D-114](../decisions/D-114.md) (2026-08-08) ahead of first promotion,
-    turned on again by [D-131](../decisions/D-131.md) (2026-08-26), and off
-    again by D-187 (2026-09-24), because the video box has no room for
-    egress. When it is on, **the
-    flag is necessary, not sufficient**: without `DEEPGRAM_API_KEY` in
-    Infisical, `transcriptionEnabled()` is false and the pipeline is dormant
-    with green CI. (The older spec this
-    bullet used to point at was deleted in the
-    [D-110](../decisions/D-110.md) reset.)
+    turned on again by [D-131](../decisions/D-131.md) (2026-08-26), off again
+    by D-187 (2026-09-24) because the video box has no room for egress, and on
+    again by D-189, which sources the transcript from the browsers instead.
+    What it enables is `browserTranscriptEnabled()`
+    (`lib/transcription/config.ts`): the class's caption session carries
+    `transcriptCapture` when the flag is on and the pairing's consent is
+    recorded, and the recognising browser posts each line to
+    `POST /api/captions/transcript`. It needs no vendor key of its own; the
+    focus areas it feeds need `ANTHROPIC_API_KEY`. The legacy audio path
+    behind the same flag (`transcriptionEnabled()`, egress → R2 → Deepgram)
+    is dormant: it additionally requires recording to be enabled.
   - `CLASS_RECORDING_ENABLED` is **off** in both environments (D-187), so the
     teacher's Record control is hidden. When it is on, the server starts a
-    room-composite recording — provided `LIVEKIT_EGRESS_S3_*` is set on the Fly
-    app (Tofu-owned, in no file in this repo) and the teacher is on Pro. Note
-    it is _not_ what gates insights capture: as of D-114
-    `maybeStartLessonAudioCapture` requires `transcriptionEnabled()`, so the
-    transcription flag above is the one that decides whether any lesson audio
-    is captured at all. In practice the Record tap is nonetheless the reliable
-    way to get insights audio, because the automatic path races track
-    publication — see D-131.
+    room-composite recording — provided `LIVEKIT_EGRESS_S3_*` is set (Tofu-owned,
+    in no file in this repo) and the teacher is on Pro. It does _not_ gate the
+    transcript: since D-189 that comes from the browsers. It does gate the
+    legacy egress capture of per-speaker audio (`maybeStartLessonAudioCapture`
+    requires both flags), so with it off no lesson audio is captured at all.
   - `LESSON_INSIGHTS_PRONUNCIATION_ENABLED` is **off everywhere** — unset in
     production, a commented example on preview — so `pronunciationEnabled()`
     is false and no phoneme score has ever reached a student. Its own gate is
@@ -110,20 +112,28 @@ the pass/fail record of attendance or payments.
 
 ### Pipeline (async, post-class)
 
-- Fully asynchronous, background-job driven: call → per-participant audio
-  capture → uploaded to storage → transcribed (Deepgram is the only
-  implemented vendor; a second vendor was designed for but never built) →
+- **The transcript is written during the class by the browsers** (D-189).
+  While captions are on, the browser that recognised a finished utterance
+  (D-185's assignment: the speaker's own, the other participant's computer, or
+  the Deepgram stream for a phone) posts its source text, speaker and an
+  estimated duration to `/api/captions/transcript`; the server re-checks
+  access and consent and appends it atomically to the booking's
+  `LessonTranscript` (provider `browser-live`). On the LiveKit `room_finished`
+  webhook — or, failing that, an Inngest job that wakes 30 minutes after the
+  scheduled end — the row is rebased to a 0-based timeline, marked `browser`,
+  and `lesson.transcript.ready` fires. From there the pipeline is as before:
   Claude-based analysis produces `LessonInsight` rows (all tagged
   `source: "ai"`) → teacher reviews/confirms → the student's profile is
-  recomputed.
-- Pronunciation scoring runs from the audio (via Azure) before the
-  derive-then-discard step, since scoring needs the raw audio, not just the
-  transcript.
-- **Retention default is derive-then-discard**: raw audio is deleted once
-  the transcript and pronunciation score are extracted, unless the teacher
-  has opted in to retaining it (`Teacher.lessonAudioRetentionOptIn`). No
-  explicit time-bound retention window for the opted-in, kept-audio path was
-  found — only the boolean opt-in itself.
+  recomputed. Both participants see a "Transcript kept for learning insights"
+  pill while lines are being kept.
+- **No audio is captured for it.** The legacy path (per-participant egress →
+  R2 → Deepgram batch → derive-then-discard, `lib/transcription/pipeline.ts`)
+  still exists in code but requires recording to be enabled, which it is not.
+- Pronunciation scoring needs raw audio (via Azure), so it cannot run from a
+  browser-written transcript; it was never on (see the flag above).
+- A transcript is kept while the teacher's account is open and deleted with
+  it ([D-136](../decisions/D-136.md)); there is no audio to retain, so
+  `Teacher.lessonAudioRetentionOptIn` only ever applies to the legacy path.
 
 ### Insight generation and caps
 
@@ -186,8 +196,9 @@ NULL`) — a confirmed insight is never touched or removed by regeneration.
   ordered newest-first.
 - A **speaking-balance** metric (teacher-share vs. student-share of talk
   time across lessons, D-97) is computed independently of confirmed insights
-  — from any lesson that has both a recording and a transcript, averaged
-  across lessons.
+  — from any lesson with a transcript, averaged across lessons. The lesson's
+  length is the audio duration where a legacy audio row exists, otherwise the
+  last utterance's end.
 - If a student ends up with zero confirmed insights and no speaking-balance
   data, the stale profile row is **deleted** outright rather than left as an
   empty shell.
@@ -345,10 +356,11 @@ functions, so these rules cannot drift between entry points.
   teacher at a given moment must be checked against the deployed flag values
   (`config/env/*.runtime.env`) and the vendor keys in Infisical, not assumed
   from this document's description of built behavior.
-- **Transcription vendor is Deepgram-only today.** A second vendor
-  (AssemblyAI) is named in the design doc as a fallback option, but no
-  adapter for it exists in code — treat it as "designed for," not shipped.
-- **Retention window for opted-in audio** is a boolean
-  (`lessonAudioRetentionOptIn`), not a bounded time window — no explicit
-  "kept for N days then deleted" policy was found for teachers who opt in to
-  retaining raw audio past the derive-then-discard default.
+- **Transcript quality on learner speech is unmeasured.** The browser
+  recognisers and Deepgram both tend to tidy grammar, which is what the
+  grammar category looks for; the teacher-confirm loop bounds the damage, but
+  the first real class's findings should be read before the feature is
+  trusted (D-189).
+- **The legacy audio path is dead code in production** — `LessonAudio`, the
+  egress capture, the Deepgram batch adapter and the admin pipeline-health
+  counts for it — and awaits its own change.

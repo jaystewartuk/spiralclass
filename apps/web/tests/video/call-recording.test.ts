@@ -7,8 +7,9 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 // of waiting for the teacher's next Record attempt on that booking.
 
 const stopRoomRecording = vi.fn(async (_id: string) => {});
+const recordingEnabled = vi.fn((): boolean => true);
 vi.mock("@/lib/video/recording", () => ({
-  recordingEnabled: () => true,
+  recordingEnabled: () => recordingEnabled(),
   startRoomRecording: vi.fn(),
   stopRoomRecording: (...a: unknown[]) => stopRoomRecording(...(a as [string])),
 }));
@@ -103,7 +104,20 @@ describe("maybeStartLessonAudioCapture", () => {
     expect(startLessonAudioCaptures).not.toHaveBeenCalled();
   });
 
-  it("starts capture when the provider can record and consent is on record — regardless of CLASS_RECORDING_ENABLED", async () => {
+  // D-189: the browsers write the transcript now, and this egress capture only
+  // has somewhere to run where an egress service exists — which is what
+  // recording being enabled stands for. Turning the transcription flag on for
+  // the browser path must not start an egress on a box that has none (D-187).
+  it("no-ops when recording (an egress service) is not enabled, even with the transcription flag on", async () => {
+    recordingEnabled.mockReturnValueOnce(false);
+
+    await maybeStartLessonAudioCapture(prisma, "b1");
+
+    expect(bookingFindUnique).not.toHaveBeenCalled();
+    expect(startLessonAudioCaptures).not.toHaveBeenCalled();
+  });
+
+  it("starts capture when recording is enabled, the provider can record and consent is on record", async () => {
     bookingFindUnique.mockResolvedValueOnce(booking);
     teacherStudentFindUnique.mockResolvedValueOnce(consentedLink);
 

@@ -177,9 +177,9 @@ export const SUBPROCESSORS: readonly Subprocessor[] = [
     id: "anthropic",
     name: "Anthropic",
     purpose:
-      "Powers the AI features: drafting lesson materials, reviewing homework, and writing promotional posts.",
+      "Powers the AI features: drafting lesson materials, reviewing homework, writing promotional posts, and — where learning insights are on — reading a class transcript to suggest what to work on next.",
     dataShared:
-      "Only the text you submit to that feature — a material you are drafting, a homework answer, or your own teaching profile.",
+      "Only the text you submit to that feature — a material you are drafting, a homework answer, or your own teaching profile — or, with the student's consent, the written transcript of a class.",
     location: "United States",
     gate: "ANTHROPIC_API_KEY",
     evidence: "vendor documentation",
@@ -191,9 +191,9 @@ export const SUBPROCESSORS: readonly Subprocessor[] = [
     // for a class where no device can recognise speech, streamed from the
     // speaker's own browser and opted out of Deepgram's model training.
     purpose:
-      "Converts speech to text for intro-video coaching; where the student has consented, for post-class lesson transcripts; and for live captions in a class where no device in the call can recognise speech itself.",
+      "Converts speech to text for intro-video coaching, and for live captions in a class where no device in the call can recognise speech itself. Where learning insights are on, those caption lines also form the class's written transcript (D-189).",
     dataShared:
-      "The audio of the teacher's intro video, of a consenting student's side of a class, or — for live captions — the speech of the teacher or a consenting student while captions are on.",
+      "The audio of the teacher's intro video, or — for live captions — the speech of the teacher or a consenting student while captions are on.",
     location: "United States",
     gate: "DEEPGRAM_API_KEY",
     evidence: "vendor documentation",

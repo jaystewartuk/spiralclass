@@ -40,6 +40,13 @@ import {
 // viewer is the one reading it. Lines per speaker keep their spoken order even
 // though translations resolve at different speeds.
 //
+// When the session says the class's transcript is being kept (D-189:
+// `transcriptCapture`, the flag plus this pairing's insights consent), each
+// piece is also handed to `keep` — source text, speaker, and this browser's
+// estimate of how long it took to say — BEFORE translation, so the transcript
+// never depends on a translation succeeding. The recogniser that produced a
+// line is the only one that keeps it, so a line reaches the server once.
+//
 // No React and no livekit-client here: the hook (use-browser-captions.ts)
 // feeds it plain values, which is what makes it testable against fakes.
 
@@ -72,6 +79,22 @@ export type BrowserCaptionsStatus = {
   stopped: RecognizerStopReason | null;
 };
 
+// One recognised line to keep as part of the class's transcript (D-189).
+export type KeptLine = {
+  bookingId: string;
+  speaker: CallRole;
+  // The source text, verbatim — never the translation.
+  text: string;
+  // How long this piece took to say, estimated as the gap since the same
+  // speaker's previous line (capped), shared across a split utterance's
+  // pieces by length.
+  durationMs: number;
+};
+
+// A recogniser can hold a final back, and a first line after a long silence
+// would otherwise claim the silence as speech.
+export const MAX_KEPT_LINE_MS = 60_000;
+
 export type BrowserCaptionsDeps = {
   SpeechRecognition: SpeechRecognitionCtorLike | null;
   Translator: TranslatorApiLike | null;
@@ -83,6 +106,9 @@ export type BrowserCaptionsDeps = {
   publish: (line: CaptionLine) => Promise<void>;
   // Show a line to this viewer.
   showLocal: (line: CaptionLine) => void;
+  // Keep a line as part of the class's transcript (D-189). Only called while
+  // the session's `transcriptCapture` is true.
+  keep: (line: KeptLine) => void;
   onStatus: (status: BrowserCaptionsStatus) => void;
   // The server refused a translation for a reason retrying cannot fix; the
   // hook re-reads the config, which re-runs the assignment.
@@ -97,6 +123,9 @@ type Running = {
   recognizer: { start(): void; stop(): void };
   // Serialises this speaker's lines so they are shown in the order spoken.
   chain: Promise<void>;
+  // When this speaker's previous line finished (or the recogniser started):
+  // the base for the next line's duration estimate.
+  lastFinalAt: number;
 };
 
 const SPEAKERS: readonly CallRole[] = ["teacher", "student"];
@@ -238,8 +267,13 @@ export class BrowserCaptions {
       key: args.key,
       chain: Promise.resolve(),
       recognizer: { start() {}, stop() {} },
+      lastFinalAt: this.now(),
     };
     const onFinal = (text: string) => {
+      const at = this.now();
+      const durationMs = Math.min(Math.max(0, at - run.lastFinalAt), MAX_KEPT_LINE_MS);
+      run.lastFinalAt = at;
+      if (args.session.transcriptCapture) this.keep(text, durationMs, args);
       run.chain = run.chain.then(() => this.deliver(text, translator, args)).catch(() => {});
     };
     const onStopped = (reason: RecognizerStopReason) => {
@@ -274,6 +308,25 @@ export class BrowserCaptions {
     }
     run.recognizer.start();
     return run;
+  }
+
+  // Hand a finished utterance to the transcript, piece by piece, with the
+  // duration shared out by length so the pieces' timings still add up.
+  private keep(
+    text: string,
+    durationMs: number,
+    args: { session: CaptionSession; speaker: CallRole },
+  ): void {
+    const pieces = splitUtterance(text);
+    const total = pieces.reduce((n, p) => n + p.length, 0);
+    for (const piece of pieces) {
+      this.deps.keep({
+        bookingId: args.session.bookingId,
+        speaker: args.speaker,
+        text: piece,
+        durationMs: total > 0 ? Math.round((durationMs * piece.length) / total) : 0,
+      });
+    }
   }
 
   private async deliver(
