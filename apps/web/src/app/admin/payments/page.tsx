@@ -3,6 +3,7 @@ import { PageHeader } from "@/components/ui/page-header";
 import { buildPaymentWhere, PAYMENT_STATUSES } from "@/lib/admin-filters";
 import { prisma } from "@/lib/prisma";
 import { formatMinorUnits } from "@/lib/money";
+import { stripePaymentIntentUrl } from "@/lib/external-links";
 import { resolveSort, type SortColumns } from "@/lib/table-sort";
 import { resolvePage } from "@/lib/pagination";
 import { Button } from "@/components/ui/button";
@@ -135,7 +136,10 @@ export default async function AdminPaymentsPage({
       </Card>
 
       <PaymentsTable
-        initialPayments={payments}
+        initialPayments={payments.map((p) => ({
+          ...p,
+          stripeUrl: stripePaymentIntentUrl(p.providerPaymentId),
+        }))}
         statusLabels={statusLabels}
         canRefund={actor.role !== "support"}
         params={params}
