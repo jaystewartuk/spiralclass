@@ -137,6 +137,7 @@ describe("ChatRoom — MessageBubble memoization", () => {
           myRole: "teacher",
           peerName: "Mira",
           locale: "es",
+          timeZone: "America/Mexico_City",
           initialMessages: MESSAGES,
         }),
       );

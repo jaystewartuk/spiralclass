@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { ChevronLeft } from "lucide-react";
-import { formatTimeInZone } from "@spiralclass/shared";
+import { FALLBACK_TIMEZONE, formatTimeInZone } from "@spiralclass/shared";
 import { Button } from "@/components/ui/button";
 import { Heading } from "@/components/ui/heading";
 import { getCurrentStudent, requireStudent } from "@/lib/auth";
@@ -114,6 +114,7 @@ export default async function StudentChatPage({
         peerName={ts.teacher.name}
         peerPhotoUrl={teacherPhotoUrl}
         locale={locale}
+        timeZone={student.timezone ?? FALLBACK_TIMEZONE}
         initialMessages={initialMessages}
       />
     </main>

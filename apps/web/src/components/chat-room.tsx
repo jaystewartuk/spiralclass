@@ -101,6 +101,7 @@ export function ChatRoom({
   peerName,
   peerPhotoUrl,
   locale,
+  timeZone,
   initialMessages,
 }: {
   messagesUrl: string;
@@ -118,6 +119,9 @@ export function ChatRoom({
    * and a repeated 32px face down one edge is noise. */
   peerPhotoUrl?: string | null;
   locale: AppLocale;
+  /** The viewer's IANA zone. Every timestamp and day divider is drawn in it,
+   * so the server render and the browser's hydration agree. */
+  timeZone: string;
   initialMessages: ChatMessage[];
 }) {
   const t = useT();
@@ -629,7 +633,10 @@ export function ChatRoom({
     cancelSelection();
   }, [selectedIds, messagesUrl, replaceMessage, cancelSelection]);
 
-  const days = useMemo(() => groupRowsByDay(buildChatRows(messages)), [messages]);
+  const days = useMemo(
+    () => groupRowsByDay(buildChatRows(messages, timeZone)),
+    [messages, timeZone],
+  );
   const isEmpty = messages.length === 0;
 
   return (
@@ -726,7 +733,7 @@ export function ChatRoom({
                 )}
               </div>
               {days.map((day) => {
-                const label = dayDividerLabel(day.rows[0].message.createdAt, t, locale);
+                const label = dayDividerLabel(day.rows[0].message.createdAt, t, locale, timeZone);
                 return (
                   <section key={day.key} aria-label={label}>
                     {/* Sticky within its own day, so the date you are reading
@@ -743,6 +750,7 @@ export function ChatRoom({
                         myRole={myRole}
                         peerName={peerName}
                         locale={locale}
+                        timeZone={timeZone}
                         t={t}
                         startsRun={startsRun}
                         endsRun={endsRun}

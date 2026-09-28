@@ -174,6 +174,8 @@ export type MessageBubbleProps = {
    * to useless read aloud. */
   peerName: string;
   locale: AppLocale;
+  /** The viewer's IANA zone, for the timestamp. */
+  timeZone: string;
   t: TFunction;
   startsRun: boolean;
   endsRun: boolean;
@@ -196,6 +198,7 @@ export const MessageBubble = memo(function MessageBubble({
   myRole,
   peerName,
   locale,
+  timeZone,
   t,
   startsRun,
   endsRun,
@@ -473,9 +476,9 @@ export const MessageBubble = memo(function MessageBubble({
               have scrolled past the divider that did. */}
           <time
             dateTime={message.createdAt}
-            title={formatMessageDateTime(message.createdAt, locale)}
+            title={formatMessageDateTime(message.createdAt, locale, timeZone)}
           >
-            {formatMessageTime(message.createdAt, locale)}
+            {formatMessageTime(message.createdAt, locale, timeZone)}
           </time>
           {message.editedAt && !message.deletedAt ? (
             <span>{t("chat.edit.editedLabel")}</span>

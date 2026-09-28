@@ -5,6 +5,7 @@
 
 import type { AppLocale, ChatMessage, ChatMessageKind, TFunction } from "@spiralclass/shared";
 import { intlLocale, timeOptionsFor } from "@spiralclass/shared";
+import { daysApartInZone, toYMD } from "@/lib/tz";
 
 export type { ChatMessageKind } from "@spiralclass/shared";
 
@@ -81,7 +82,8 @@ export function emojiCategoryLabel(t: TFunction, key: string): string {
 }
 
 /**
- * A message's wall-clock time, in the APP's resolved locale.
+ * A message's wall-clock time, in the APP's resolved locale and the VIEWER's
+ * zone.
  *
  * It used to resolve against `new Intl.DateTimeFormat().resolvedOptions()` —
  * the browser's own locale — on the stated grounds that the component "has
@@ -89,23 +91,37 @@ export function emojiCategoryLabel(t: TFunction, key: string): string {
  * the day dividers started taking a `locale` prop, and the result was one
  * thread rendering "Yesterday" in the app's language directly above a
  * timestamp in the operating system's. One locale decides both.
+ *
+ * The zone is a parameter for the same reason: the thread is server-rendered
+ * on a UTC host and hydrated in a browser in the viewer's zone, and a runtime
+ * default made the two disagree about every timestamp — a hydration error on
+ * every chat thread outside UTC (AGENDAPROFE-1K).
  */
-export function formatMessageTime(iso: string, locale: AppLocale): string {
-  return new Date(iso).toLocaleTimeString(intlLocale(locale), timeOptionsFor(locale));
+export function formatMessageTime(iso: string, locale: AppLocale, tz: string): string {
+  return new Date(iso).toLocaleTimeString(intlLocale(locale), {
+    ...timeOptionsFor(locale),
+    timeZone: tz,
+  });
 }
 
-/** "Today" / "Yesterday" / a written date, for the sticky day divider. */
-export function dayDividerLabel(iso: string, t: TFunction, locale: AppLocale): string {
+/** "Today" / "Yesterday" / a written date in `tz`, for the sticky day divider. */
+export function dayDividerLabel(
+  iso: string,
+  t: TFunction,
+  locale: AppLocale,
+  tz: string,
+  now: Date = new Date(),
+): string {
   const d = new Date(iso);
-  const now = new Date();
-  const startOfDay = (x: Date) => new Date(x.getFullYear(), x.getMonth(), x.getDate()).getTime();
-  const diffDays = Math.round((startOfDay(now) - startOfDay(d)) / 86_400_000);
+  const diffDays = daysApartInZone(d, now, tz);
   if (diffDays === 0) return t("chat.day.today");
   if (diffDays === 1) return t("chat.day.yesterday");
+  const sameYear = toYMD(d, tz).slice(0, 4) === toYMD(now, tz).slice(0, 4);
   return d.toLocaleDateString(intlLocale(locale), {
     day: "numeric",
     month: "long",
-    year: d.getFullYear() !== now.getFullYear() ? "numeric" : undefined,
+    year: sameYear ? undefined : "numeric",
+    timeZone: tz,
   });
 }
 
@@ -161,9 +177,10 @@ function countGraphemes(text: string): number {
  * pointer reveals: the row itself shows only a wall-clock time, and "10:36"
  * six screens up a thread does not say which day.
  */
-export function formatMessageDateTime(iso: string, locale: AppLocale): string {
+export function formatMessageDateTime(iso: string, locale: AppLocale, tz: string): string {
   return new Date(iso).toLocaleString(intlLocale(locale), {
     dateStyle: "long",
     timeStyle: "short",
+    timeZone: tz,
   });
 }

@@ -48,50 +48,75 @@ function msg(
   };
 }
 
+// The viewer's zone, deliberately not UTC — see the day-split case below.
+const MX = "America/Mexico_City";
+
 describe("buildChatRows", () => {
   it("opens a run on the first message and closes it on the last", () => {
-    const rows = buildChatRows([msg("a", "student", "2026-09-01T10:00:00.000Z")]);
+    const rows = buildChatRows([msg("a", "student", "2026-09-01T10:00:00.000Z")], MX);
     expect(rows[0]).toMatchObject({ startsDay: true, startsRun: true, endsRun: true });
   });
 
   it("groups consecutive messages from one sender inside the gap window", () => {
-    const rows = buildChatRows([
-      msg("a", "student", "2026-09-01T10:00:00.000Z"),
-      msg("b", "student", "2026-09-01T10:01:00.000Z"),
-      msg("c", "student", "2026-09-01T10:02:00.000Z"),
-    ]);
+    const rows = buildChatRows(
+      [
+        msg("a", "student", "2026-09-01T10:00:00.000Z"),
+        msg("b", "student", "2026-09-01T10:01:00.000Z"),
+        msg("c", "student", "2026-09-01T10:02:00.000Z"),
+      ],
+      MX,
+    );
     expect(rows.map((r) => r.startsRun)).toEqual([true, false, false]);
     expect(rows.map((r) => r.endsRun)).toEqual([false, false, true]);
   });
 
   it("breaks the run when the sender changes", () => {
-    const rows = buildChatRows([
-      msg("a", "student", "2026-09-01T10:00:00.000Z"),
-      msg("b", "teacher", "2026-09-01T10:00:30.000Z"),
-    ]);
+    const rows = buildChatRows(
+      [
+        msg("a", "student", "2026-09-01T10:00:00.000Z"),
+        msg("b", "teacher", "2026-09-01T10:00:30.000Z"),
+      ],
+      MX,
+    );
     expect(rows.map((r) => r.startsRun)).toEqual([true, true]);
     expect(rows.map((r) => r.endsRun)).toEqual([true, true]);
   });
 
   it("breaks the run after a long pause, even from the same sender", () => {
-    const rows = buildChatRows([
-      msg("a", "student", "2026-09-01T10:00:00.000Z"),
-      msg("b", "student", "2026-09-01T10:06:00.000Z"),
-    ]);
+    const rows = buildChatRows(
+      [
+        msg("a", "student", "2026-09-01T10:00:00.000Z"),
+        msg("b", "student", "2026-09-01T10:06:00.000Z"),
+      ],
+      MX,
+    );
     expect(rows.map((r) => r.startsRun)).toEqual([true, true]);
   });
 
   it("starts a new day, and a new run, across a calendar boundary", () => {
-    // Local-day boundaries, built from local components so the assertion does
-    // not depend on the runner's zone.
-    const monday = new Date(2026, 8, 1, 23, 58);
-    const tuesday = new Date(2026, 8, 2, 0, 1);
-    const rows = buildChatRows([
-      msg("a", "student", monday.toISOString()),
-      msg("b", "student", tuesday.toISOString()),
-    ]);
+    // 23:58 and 00:01 across midnight on 1 September in Mexico City.
+    const rows = buildChatRows(
+      [
+        msg("a", "student", "2026-09-02T05:58:00.000Z"),
+        msg("b", "student", "2026-09-02T06:01:00.000Z"),
+      ],
+      MX,
+    );
     expect(rows.map((r) => r.startsDay)).toEqual([true, true]);
     expect(rows.map((r) => r.startsRun)).toEqual([true, true]);
+  });
+
+  // AGENDAPROFE-1K: the day split followed the runtime's zone, so the server
+  // (UTC) and the browser (the viewer's) grouped the same thread into different
+  // days, and the page failed to hydrate.
+  it("splits days in the viewer's zone, not the runtime's", () => {
+    // 23:30 and 00:30 UTC: two UTC days, one evening in Mexico City.
+    const thread = [
+      msg("a", "student", "2026-09-01T23:30:00.000Z"),
+      msg("b", "student", "2026-09-02T00:30:00.000Z"),
+    ];
+    expect(buildChatRows(thread, MX).map((r) => r.startsDay)).toEqual([true, false]);
+    expect(buildChatRows(thread, "UTC").map((r) => r.startsDay)).toEqual([true, true]);
   });
 });
 
@@ -297,15 +322,15 @@ describe("CHAT_PAGE_SIZE", () => {
 
 describe("groupRowsByDay", () => {
   it("puts each calendar day in its own section, so the divider can stick", () => {
-    const monday = new Date(2026, 8, 1, 9, 0);
-    const mondayLater = new Date(2026, 8, 1, 18, 0);
-    const tuesday = new Date(2026, 8, 2, 9, 0);
     const sections = groupRowsByDay(
-      buildChatRows([
-        msg("a", "student", monday.toISOString()),
-        msg("b", "teacher", mondayLater.toISOString()),
-        msg("c", "student", tuesday.toISOString()),
-      ]),
+      buildChatRows(
+        [
+          msg("a", "student", "2026-09-01T15:00:00.000Z"),
+          msg("b", "teacher", "2026-09-02T00:00:00.000Z"),
+          msg("c", "student", "2026-09-02T15:00:00.000Z"),
+        ],
+        MX,
+      ),
     );
     expect(sections.map((s) => s.rows.map((r) => r.message.id))).toEqual([["a", "b"], ["c"]]);
     expect(sections.map((s) => s.key)).toEqual(["a", "c"]);

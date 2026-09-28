@@ -30,6 +30,13 @@ export function toYMD(d: Date, tz: string): string {
   return `${get("year")}-${get("month")}-${get("day")}`;
 }
 
+/** Whole days between two instants, counted by calendar day in `tz`. */
+export function daysApartInZone(a: Date, b: Date, tz: string): number {
+  const dayA = Date.parse(`${toYMD(a, tz)}T00:00:00Z`);
+  const dayB = Date.parse(`${toYMD(b, tz)}T00:00:00Z`);
+  return Math.round((dayB - dayA) / 86_400_000);
+}
+
 /** Return the weekday (0 = Sunday … 6 = Saturday) of a UTC Date in the given IANA zone. */
 export function weekdayInZone(d: Date, tz: string): number {
   const name = new Intl.DateTimeFormat("en-US", {
