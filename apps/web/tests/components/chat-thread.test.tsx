@@ -131,6 +131,7 @@ describe("ChatRoom", () => {
           myRole: "student",
           peerName: "Mira",
           locale: "es",
+          timeZone: "America/Mexico_City",
           initialMessages,
         }),
       );

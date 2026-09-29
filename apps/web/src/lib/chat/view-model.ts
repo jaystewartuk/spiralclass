@@ -10,6 +10,7 @@
 // tests/components/chat-room-memoization.test.ts for the guard).
 
 import type { ChatMessage } from "@spiralclass/shared";
+import { toYMD } from "@/lib/tz";
 import { intlLocale } from "@spiralclass/shared";
 
 /**
@@ -48,34 +49,32 @@ export type ChatRow = {
   endsRun: boolean;
 };
 
-function isSameLocalDay(a: string, b: string): boolean {
-  const da = new Date(a);
-  const db = new Date(b);
-  return (
-    da.getFullYear() === db.getFullYear() &&
-    da.getMonth() === db.getMonth() &&
-    da.getDate() === db.getDate()
-  );
+// The calendar day in the VIEWER's zone, not the runtime's: the server renders
+// the thread in UTC and the browser hydrates it in the viewer's zone, so a
+// runtime-local day split the same messages into different days on each side
+// (AGENDAPROFE-1K).
+function isSameDayInZone(a: string, b: string, tz: string): boolean {
+  return toYMD(new Date(a), tz) === toYMD(new Date(b), tz);
 }
 
-function joinsRun(earlier: ChatMessage, later: ChatMessage): boolean {
+function joinsRun(earlier: ChatMessage, later: ChatMessage, tz: string): boolean {
   return (
     earlier.senderRole === later.senderRole &&
-    isSameLocalDay(earlier.createdAt, later.createdAt) &&
+    isSameDayInZone(earlier.createdAt, later.createdAt, tz) &&
     Date.parse(later.createdAt) - Date.parse(earlier.createdAt) <= CHAT_RUN_GAP_MS
   );
 }
 
 /** Annotate an ascending message list with day and run boundaries. */
-export function buildChatRows(messages: ChatMessage[]): ChatRow[] {
+export function buildChatRows(messages: ChatMessage[], tz: string): ChatRow[] {
   return messages.map((message, i) => {
     const previous = messages[i - 1];
     const next = messages[i + 1];
     return {
       message,
-      startsDay: !previous || !isSameLocalDay(previous.createdAt, message.createdAt),
-      startsRun: !previous || !joinsRun(previous, message),
-      endsRun: !next || !joinsRun(message, next),
+      startsDay: !previous || !isSameDayInZone(previous.createdAt, message.createdAt, tz),
+      startsRun: !previous || !joinsRun(previous, message, tz),
+      endsRun: !next || !joinsRun(message, next, tz),
     };
   });
 }

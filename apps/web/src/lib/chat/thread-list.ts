@@ -5,7 +5,7 @@
 
 import type { AppLocale, ChatMessageKind, ChatThread, TFunction } from "@spiralclass/shared";
 import { intlLocale, timeOptionsFor } from "@spiralclass/shared";
-import { toYMD } from "@/lib/tz";
+import { daysApartInZone, toYMD } from "@/lib/tz";
 
 /** The subset of a thread summary the shared row helpers read. */
 export type ThreadSummary = Pick<ChatThread, "lastMessage" | "lastMessageKind">;
@@ -109,13 +109,6 @@ export function formatThreadTimestamp(
     year: sameYearInZone(at, now, tz) ? undefined : "numeric",
     timeZone: tz,
   });
-}
-
-/** Whole days between two instants, counted by calendar day in `tz`. */
-function daysApartInZone(a: Date, b: Date, tz: string): number {
-  const dayA = Date.parse(`${toYMD(a, tz)}T00:00:00Z`);
-  const dayB = Date.parse(`${toYMD(b, tz)}T00:00:00Z`);
-  return Math.round((dayB - dayA) / 86_400_000);
 }
 
 function sameYearInZone(a: Date, b: Date, tz: string): boolean {

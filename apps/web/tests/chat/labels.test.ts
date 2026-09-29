@@ -106,29 +106,52 @@ describe("replyPreviewText", () => {
   });
 });
 
+// The viewer's zone, deliberately not UTC: the server renders in UTC, so a
+// formatter that ignored its zone argument would still pass a UTC case.
+const MX = "America/Mexico_City";
+
 describe("formatMessageTime", () => {
   it("follows the APP's locale, not the operating system's", () => {
-    const iso = new Date(2026, 8, 1, 15, 30).toISOString();
+    const iso = "2026-09-01T20:30:00.000Z"; // 14:30 in Mexico City
     // en-US style is 12-hour; French is 24-hour. One thread must not mix a
     // localized day divider with a system-localized clock.
-    expect(formatMessageTime(iso, "en")).toMatch(/PM/i);
-    expect(formatMessageTime(iso, "fr")).toMatch(/15/);
+    expect(formatMessageTime(iso, "en", MX)).toMatch(/PM/i);
+    expect(formatMessageTime(iso, "fr", MX)).toMatch(/14/);
+  });
+
+  // AGENDAPROFE-1K: the server (UTC) and the browser (the viewer's zone)
+  // rendered different clock times for the same message, so every chat thread
+  // outside UTC failed to hydrate.
+  it("draws the time in the viewer's zone, whatever the runtime's is", () => {
+    expect(formatMessageTime("2026-09-24T02:00:00.000Z", "fr", MX)).toBe("20:00");
+    expect(formatMessageTime("2026-09-24T02:00:00.000Z", "fr", "UTC")).toBe("02:00");
   });
 });
 
 describe("dayDividerLabel", () => {
+  const now = new Date("2026-09-24T18:00:00.000Z"); // midday on the 24th in MX
+
   it("names today and yesterday in words", () => {
-    const now = new Date();
-    const yesterday = new Date(now.getTime() - 24 * 60 * 60 * 1000);
-    expect(dayDividerLabel(now.toISOString(), t, "en")).toBe(t("chat.day.today"));
-    expect(dayDividerLabel(yesterday.toISOString(), t, "en")).toBe(t("chat.day.yesterday"));
+    expect(dayDividerLabel("2026-09-24T15:00:00.000Z", t, "en", MX, now)).toBe(t("chat.day.today"));
+    expect(dayDividerLabel("2026-09-23T15:00:00.000Z", t, "en", MX, now)).toBe(
+      t("chat.day.yesterday"),
+    );
+  });
+
+  it("counts days in the viewer's zone, not UTC", () => {
+    // 02:00 UTC on the 24th is 20:00 on the 23rd in Mexico City: yesterday
+    // there, though already today in UTC.
+    expect(dayDividerLabel("2026-09-24T02:00:00.000Z", t, "en", MX, now)).toBe(
+      t("chat.day.yesterday"),
+    );
+    expect(dayDividerLabel("2026-09-24T02:00:00.000Z", t, "en", "UTC", now)).toBe(
+      t("chat.day.today"),
+    );
   });
 
   it("writes the date out for anything older, adding the year only across one", () => {
-    const thisYear = new Date(new Date().getFullYear(), 0, 15);
-    expect(dayDividerLabel(thisYear.toISOString(), t, "en")).toBe("January 15");
-    const longAgo = new Date(2021, 4, 3);
-    expect(dayDividerLabel(longAgo.toISOString(), t, "en")).toContain("2021");
+    expect(dayDividerLabel("2026-01-15T18:00:00.000Z", t, "en", MX, now)).toBe("January 15");
+    expect(dayDividerLabel("2021-05-03T18:00:00.000Z", t, "en", MX, now)).toContain("2021");
   });
 });
 
@@ -181,8 +204,12 @@ describe("isEmojiOnly", () => {
 
 describe("formatMessageDateTime", () => {
   it("names the day as well as the time, which the visible label cannot", () => {
-    const full = formatMessageDateTime("2026-09-01T10:00:00.000Z", "en");
+    const full = formatMessageDateTime("2026-09-01T10:00:00.000Z", "en", MX);
     expect(full).toContain("2026");
     expect(full).toMatch(/September/);
+  });
+
+  it("names the viewer's day, which can differ from UTC's", () => {
+    expect(formatMessageDateTime("2026-09-01T02:00:00.000Z", "en", MX)).toMatch(/August 31/);
   });
 });

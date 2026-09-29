@@ -120,6 +120,7 @@ export default async function TeacherChatPage({
         peerName={ts.student.name}
         peerPhotoUrl={photoUrl}
         locale={locale}
+        timeZone={teacher.timezone}
         initialMessages={initialMessages}
       />
     </main>
