@@ -7,11 +7,13 @@ import {
   summarizeRevenueSeries,
   otherCurrencyRevenueTotals,
   summarizeGmvSeries,
+  summarizeGmvByCurrency,
   summarizeExpenseSeries,
   otherCurrencyExpenseTotals,
   summarizeNetProfitSeries,
   type PaidInvoice,
   type PaidPayment,
+  type PaidPaymentInCurrency,
   type PlatformExpenseRow,
   type RevenuePoint,
   type ExpensePoint,
@@ -387,5 +389,63 @@ describe("summarizeNetProfitSeries", () => {
       [expensePoint({ month: "2026-07", totalMinorUnits: 5_000 })],
     );
     expect(s[0].netProfitMinorUnits).toBe(-4_000);
+  });
+});
+
+// #27: GMV used to sum every teacher's payments into one number, whatever
+// currency each was in.
+describe("summarizeGmvByCurrency", () => {
+  const months = recentMonths(NOW, 2); // 2026-06, 2026-07
+
+  function pay(over: Partial<PaidPaymentInCurrency> = {}): PaidPaymentInCurrency {
+    return {
+      paidAt: new Date("2026-07-10T00:00:00.000Z"),
+      amountMinorUnits: 100_000,
+      rail: "card",
+      currency: "GBP",
+      ...over,
+    };
+  }
+
+  it("never adds two currencies into one total", () => {
+    const slices = summarizeGmvByCurrency(
+      [
+        pay({ currency: "GBP", amountMinorUnits: 5_000 }),
+        pay({ currency: "COP", amountMinorUnits: 20_000_000 }),
+        pay({ currency: "GBP", amountMinorUnits: 3_000, rail: "wise" }),
+      ],
+      months,
+    );
+    const gbp = slices.find((s) => s.currency === "GBP")!;
+    const cop = slices.find((s) => s.currency === "COP")!;
+    expect(gbp.windowTotalMinorUnits).toBe(8_000);
+    expect(gbp.series.at(-1)).toMatchObject({ cardMinorUnits: 5_000, wiseMinorUnits: 3_000 });
+    expect(cop.windowTotalMinorUnits).toBe(20_000_000);
+    expect(slices).toHaveLength(2);
+  });
+
+  it("leads with the largest pile in its own minor units", () => {
+    const slices = summarizeGmvByCurrency(
+      [
+        pay({ currency: "GBP", amountMinorUnits: 5_000 }),
+        pay({ currency: "MXN", amountMinorUnits: 90_000 }),
+      ],
+      months,
+    );
+    expect(slices.map((s) => s.currency)).toEqual(["MXN", "GBP"]);
+  });
+
+  it("returns one zero-filled slice in the fallback currency when nothing was paid", () => {
+    const slices = summarizeGmvByCurrency([], months, "USD");
+    expect(slices).toEqual([
+      {
+        currency: "USD",
+        windowTotalMinorUnits: 0,
+        series: [
+          { month: "2026-06", cardMinorUnits: 0, wiseMinorUnits: 0, totalMinorUnits: 0 },
+          { month: "2026-07", cardMinorUnits: 0, wiseMinorUnits: 0, totalMinorUnits: 0 },
+        ],
+      },
+    ]);
   });
 });

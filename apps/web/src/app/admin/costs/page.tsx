@@ -159,7 +159,11 @@ export default async function AdminCostsPage() {
             <p className="mb-3 text-sm text-muted-foreground">
               {t("web.admin.costs.expenseChartBody", { months: WINDOW_MONTHS })}
             </p>
-            <CategoryBarChart data={expenseChart} valueFormat="minorUnits" />
+            <CategoryBarChart
+              data={expenseChart}
+              valueFormat="minorUnits"
+              currency={PLATFORM_MONEY_CURRENCY}
+            />
           </CardContent>
         </Card>
         <Card>
@@ -170,7 +174,11 @@ export default async function AdminCostsPage() {
             <p className="mb-3 text-sm text-muted-foreground">
               {t("web.admin.costs.netProfitChartBody")}
             </p>
-            <CategoryBarChart data={netProfitChart} valueFormat="minorUnits" />
+            <CategoryBarChart
+              data={netProfitChart}
+              valueFormat="minorUnits"
+              currency={PLATFORM_MONEY_CURRENCY}
+            />
           </CardContent>
         </Card>
       </div>
@@ -182,7 +190,11 @@ export default async function AdminCostsPage() {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <CategoryBarChart data={categoryChart} valueFormat="minorUnits" />
+          <CategoryBarChart
+            data={categoryChart}
+            valueFormat="minorUnits"
+            currency={PLATFORM_MONEY_CURRENCY}
+          />
         </CardContent>
       </Card>
 

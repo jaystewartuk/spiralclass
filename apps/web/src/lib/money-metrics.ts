@@ -5,7 +5,7 @@
 //   1. Collected subscription revenue over time — since D-143 the platform's
 //      ONLY revenue line, from PAID subscription invoices (not run-rate MRR,
 //      which is a snapshot).
-//   2. GMV over time — gross payment volume flowing to teachers, split by
+//   2. GMV over time, per currency — gross payment volume flowing to teachers, split by
 //      rail. This is a scale metric and NOT revenue in any part: direct
 //      charges settle on the teacher's own Stripe account, so none of it ever
 //      reaches the platform's balance. The commission series that used to sit
@@ -203,7 +203,8 @@ export type PaidPayment = {
   rail: string;
 };
 
-// Pure: bucket PAID payments into months, splitting by rail.
+// Pure: bucket PAID payments into months, splitting by rail. The payments must
+// all be in one currency; summarizeGmvByCurrency is what guarantees that.
 export function summarizeGmvSeries(payments: PaidPayment[], months: string[]): GmvPoint[] {
   const byMonth = new Map<string, GmvPoint>(
     months.map((month) => [
@@ -221,17 +222,61 @@ export function summarizeGmvSeries(payments: PaidPayment[], months: string[]): G
   return months.map((month) => byMonth.get(month)!);
 }
 
-export async function getGmvSeries(monthsBack = 6, now: Date = new Date()): Promise<GmvPoint[]> {
+// One currency's GMV series. Payments are summed only within a currency:
+// minor units of two currencies do not add up to anything, and this app has
+// no FX rate to convert them with (#27, and D-99 for the same bug in
+// subscription revenue).
+export type GmvCurrencySlice = {
+  currency: string;
+  series: GmvPoint[];
+  windowTotalMinorUnits: number;
+};
+
+export type PaidPaymentInCurrency = PaidPayment & { currency: string };
+
+// Pure: one GMV series per currency paid in, largest window total first — the
+// same "biggest pile leads" rule as the deferred-revenue roll-up below. An
+// empty window still returns one zero-filled slice in `fallbackCurrency`, so a
+// caller always has a series to draw.
+export function summarizeGmvByCurrency(
+  payments: PaidPaymentInCurrency[],
+  months: string[],
+  fallbackCurrency: string = DEFAULT_PRICING_CURRENCY,
+): GmvCurrencySlice[] {
+  const byCurrency = new Map<string, PaidPayment[]>();
+  for (const p of payments) {
+    const list = byCurrency.get(p.currency) ?? [];
+    list.push(p);
+    byCurrency.set(p.currency, list);
+  }
+  if (byCurrency.size === 0) byCurrency.set(fallbackCurrency, []);
+  return [...byCurrency.entries()]
+    .map(([currency, list]) => {
+      const series = summarizeGmvSeries(list, months);
+      return {
+        currency,
+        series,
+        windowTotalMinorUnits: series.reduce((sum, p) => sum + p.totalMinorUnits, 0),
+      };
+    })
+    .sort((a, b) => b.windowTotalMinorUnits - a.windowTotalMinorUnits);
+}
+
+export async function getGmvSeries(
+  monthsBack = 6,
+  now: Date = new Date(),
+): Promise<GmvCurrencySlice[]> {
   const months = recentMonths(now, monthsBack);
   const payments = await prisma.payment.findMany({
     where: { status: "paid", paidAt: { not: null, gte: monthWindowStart(now, monthsBack) } },
-    select: { paidAt: true, amountMinorUnits: true, rail: true },
+    select: { paidAt: true, amountMinorUnits: true, rail: true, currency: true },
   });
-  return summarizeGmvSeries(
+  return summarizeGmvByCurrency(
     payments.map((p) => ({
       paidAt: p.paidAt as Date,
       amountMinorUnits: p.amountMinorUnits,
       rail: p.rail,
+      currency: p.currency,
     })),
     months,
   );

@@ -5955,6 +5955,8 @@ export const esMX = {
   "web.admin.money.gmvChartTitle": "GMV (volumen bruto de pagos)",
   "web.admin.money.gmvChartBody":
     "Total de pagos de paquetes de clases pagados que fluyen a los profesores. Últimos {months} meses: {amount}.",
+  "web.admin.money.gmvOtherCurrencies":
+    "También pagado en otras monedas en los últimos {months} meses, no incluido arriba:",
   "web.admin.money.gmvByRailTitle": "GMV por método ({months} meses)",
   "web.admin.money.railCard": "Tarjeta (Stripe)",
   "web.admin.money.railWise": "Transferencia Wise",

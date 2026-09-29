@@ -14,26 +14,16 @@ import {
   YAxis,
 } from "recharts";
 import { cn } from "@/lib/utils";
-import { formatMinorUnits, formatGbp, type ChartDatum } from "@spiralclass/shared";
+import type { ChartDatum } from "@spiralclass/shared";
 import { CHART_SERIES_COLOR } from "./chart-tokens";
+// Server Components cannot pass a formatter function across the RSC boundary,
+// so callers name a format, and a currency for money (chart-format.ts).
+import { chartValueFormatter, type ChartValueFormat } from "./chart-format";
 
 // The recharts-backed chart implementations. Split out of chart.tsx so recharts
 // (and its d3 transitive deps — one of the largest client dependencies) lands in
 // its own lazily-loaded chunk instead of every admin route's initial JS. The
 // barrel in chart.tsx loads this on demand via next/dynamic.
-
-// Server Components can't pass functions as props to Client Components (RSC
-// serialization boundary), so callers pick a formatter by name instead of
-// handing one in directly.
-const VALUE_FORMATTERS = {
-  number: (n: number) => n.toLocaleString(),
-  minorUnits: formatMinorUnits,
-  // Always pence — the Financial Intelligence estimate layer (D-86) is
-  // GBP-only, so its charts need a formatter that never consults a row's
-  // currency, distinct from the MXN-default `minorUnits` one.
-  gbp: formatGbp,
-} as const;
-export type ValueFormat = keyof typeof VALUE_FORMATTERS;
 
 const BAR_HEIGHT = 32;
 
@@ -43,15 +33,14 @@ const BAR_HEIGHT = 32;
 export function CategoryBarChart({
   data,
   height,
-  valueFormat = "number",
   className,
+  ...format
 }: {
   data: ChartDatum[];
   height?: number;
-  valueFormat?: ValueFormat;
   className?: string;
-}) {
-  const valueFormatter = VALUE_FORMATTERS[valueFormat];
+} & ChartValueFormat) {
+  const valueFormatter = chartValueFormatter(format);
   const resolvedHeight = height ?? Math.max(120, data.length * (BAR_HEIGHT + 12) + 16);
 
   return (
@@ -104,15 +93,14 @@ export function CategoryBarChart({
 export function TrendLineChart({
   data,
   height = 220,
-  valueFormat = "number",
   className,
+  ...format
 }: {
   data: ChartDatum[];
   height?: number;
-  valueFormat?: ValueFormat;
   className?: string;
-}) {
-  const valueFormatter = VALUE_FORMATTERS[valueFormat];
+} & ChartValueFormat) {
+  const valueFormatter = chartValueFormatter(format);
 
   return (
     <div className={cn("w-full", className)} style={{ height }}>
