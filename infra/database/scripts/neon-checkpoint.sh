@@ -57,13 +57,13 @@
 # neonctl that can authenticate: either its own stored credential from
 # `neonctl auth`, or an explicit `NEON_API_KEY`. The key is no longer required
 # — see ensure_neon_auth in _common.sh. Uses `npx neonctl` rather than
-# requiring a local install — always resolves the newest CLI, which matters
-# less here than it did for pg_dump (neonctl has no
-# client-must-be->=-server-version failure mode), so pinning to `@latest` is
-# safe and avoids the CLI itself rotting out from under this script.
-# (Verified 2026-08-31: `npx neonctl@latest` resolved 4.13.0 and read the
-# credential a locally-installed 3.6.0 had written, so the OAuth path survives
-# the version skew `@latest` deliberately allows.)
+# requiring a local install, at the exact version pinned in _common.sh
+# (NEONCTL_VERSION). It used to be `@latest`, on the reasoning that neonctl has
+# no client-must-be->=-server-version failure mode; what that missed is that
+# `@latest` also takes a broken release the minute it ships, which is what
+# stopped the 2026-09-29 deploy. (Verified 2026-08-31: a newer npx neonctl read
+# the credential a locally-installed 3.6.0 had written, so the OAuth path
+# survives version skew between the pin and a laptop's own install.)
 set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=_common.sh
@@ -102,7 +102,6 @@ require_tools npx
 # NEON_CLI is the bare CLI: `neonctl api` takes the project id in the request
 # PATH, and passing --project-id alongside it is meaningless. Everything else
 # goes through NEON, which pins the project for `branches …`.
-NEON_CLI=(npx --yes neonctl@latest)
 NEON=("${NEON_CLI[@]}" --project-id "$PROJECT_ID")
 
 # NEON_API_KEY if it is set, otherwise neonctl's own stored credential
