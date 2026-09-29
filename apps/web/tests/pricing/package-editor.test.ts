@@ -6,6 +6,7 @@ import {
   duplicatePackageName,
   packageRowIssue,
   packageRowIssues,
+  offersTransferDiscount,
   pendingPackageChanges,
   pricePerClassMinorUnits,
   transferPriceIsNotADiscount,
@@ -227,6 +228,25 @@ describe("deriveTwoAuto — is the price for two still the suggested one?", () =
 
   it("is currency-aware: a 0-decimal price is suggested in whole yen", () => {
     expect(deriveTwoAuto(4_999, 7_499, 150, "JPY")).toBe(true);
+  });
+});
+
+// Switching a package on for two copies its transfer discount, if it has one.
+// A transfer price equal to the card price is not one: that shape suggested a
+// 2,629 MXN transfer price for a 2,775 MXN package for two on a real teacher's
+// page, a discount she had never offered.
+describe("offersTransferDiscount — is there a discount to copy onto the price for two?", () => {
+  it("is false for a transfer price equal to the card price", () => {
+    expect(offersTransferDiscount(row({ transferPriceMinorUnits: 240_000 }))).toBe(false);
+  });
+
+  it("is false with no transfer price, and for one above the card price", () => {
+    expect(offersTransferDiscount(row({ transferPriceMinorUnits: null }))).toBe(false);
+    expect(offersTransferDiscount(row({ transferPriceMinorUnits: 250_000 }))).toBe(false);
+  });
+
+  it("is true for a real transfer discount", () => {
+    expect(offersTransferDiscount(row({ transferPriceMinorUnits: 230_000 }))).toBe(true);
   });
 });
 

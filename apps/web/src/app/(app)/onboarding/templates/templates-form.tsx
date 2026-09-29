@@ -45,6 +45,7 @@ import {
   packageRowIssues,
   pendingPackageChanges,
   pricePerClassMinorUnits,
+  offersTransferDiscount,
   transferPriceIsNotADiscount,
   twoPersonPriceIsBelowOnePerson,
   type PackageDraft,
@@ -448,7 +449,7 @@ export function TemplatesForm({
             };
           }
           const two = suggestTwoPersonPrice(r.priceMinorUnits, percent, currency);
-          const discounted = r.transferPriceMinorUnits !== null;
+          const discounted = offersTransferDiscount(r);
           return {
             ...r,
             twoPersonPriceMinorUnits: two,
