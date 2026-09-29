@@ -71,7 +71,7 @@ another way" about anything that still exists.
   both reversed by [D-40](./D-40.md)).
 
 **Numbering is never reused and never renumbered**, so `D-01` is still the
-first decision and `D-189` the most recent. A gap means a record was removed,
+first decision and `D-190` the most recent. A gap means a record was removed,
 not that one is missing.
 
 **Everything kept is unedited**, except where a record named an account
@@ -357,6 +357,7 @@ and exercised for real when the provider actually changed.
 | [D-183](./D-183.md) | **The Oracle tenancy goes Pay As You Go** to buy A1 capacity priority; the free ceilings now bill instead of refusing                                     |
 | [D-184](./D-184.md) | **Cloud Run `us-east4` takes production from Fly** — measured at +9 ms to Neon, against the +46 ms D-150 refused; serving since 2026-09-23, Fly destroyed |
 | [D-186](./D-186.md) | **The Vercel failover is retired** — it never served a request; Cloud Run is the only target and the coupling bans stay                                   |
+| [D-190](./D-190.md) | **A wedged Cloud Run instance is restarted by a liveness probe** on the no-database health route, not routed around by a second instance                  |
 
 ### CI, the gate and releasing
 
@@ -548,6 +549,7 @@ records removed before publication — see [What is not here](#what-is-not-here)
 | [D-187](./D-187.md) | Video on a free e2-micro; recording and transcription off again       | Active (transcription → D-189)       |
 | [D-188](./D-188.md) | Packages for two: one buyer, one account, a separate credit balance   | Active (narrows D-149)               |
 | [D-189](./D-189.md) | The transcript is the browsers' caption text; no audio is captured    | Active (partly reverses D-187)       |
+| [D-190](./D-190.md) | A liveness probe restarts a wedged Cloud Run instance                 | Active                               |
 
 ---
 

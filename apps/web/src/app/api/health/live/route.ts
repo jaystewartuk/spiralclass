@@ -5,9 +5,11 @@ export const dynamic = "force-dynamic";
 
 // Process-liveness probe — no Postgres query, deliberately. This is what
 // the external uptime monitor hits about once a minute (it keeps a Cloud Run
-// instance warm — D-184). Fly's health checks pointed here too, until Fly was
-// retired. `/api/health` (the sibling route) does the real DB
-// readiness check and stays the target for external uptime monitors
+// instance warm — D-184), and it is Cloud Run's liveness probe (D-190): an
+// instance that stops answering it for about a minute is restarted, so this
+// must stay cheap and must never touch Postgres. Fly's health checks pointed
+// here too, until Fly was retired. `/api/health` (the sibling route) does the
+// real DB readiness check and stays the target for external uptime monitors
 // (UptimeRobot/BetterStack) and synthetic.yml, which poll far less often.
 //
 // Why split them: Neon suspends an idle compute after ~5 minutes with no
@@ -20,8 +22,8 @@ export const dynamic = "force-dynamic";
 // continuous 0.25 CU floor across two projects was the primary driver of an
 // unexpectedly large Neon bill (diagnosed 2026-08-07).
 //
-// Trade-off this accepts: Fly's own health check can no longer detect
-// "this machine can't reach Postgres" and replace it on that basis. In
+// Trade-off this accepts: the platform's health check cannot detect
+// "this instance can't reach Postgres" and replace it on that basis. In
 // practice that isn't much of a safety net — restarting one machine doesn't
 // fix a real Neon outage (every machine sees the same DB), and a genuine
 // per-machine network fault still fails the process's other liveness

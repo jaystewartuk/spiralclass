@@ -148,7 +148,7 @@ set -a && . "./$SHAPE" && set +a
 # ---------------------------------------------------------------------------
 missing=""
 [ -n "${GCP_PROJECT_ID:-}" ] || missing="$missing GCP_PROJECT_ID"
-for v in SERVICE REGION CPU MEMORY MIN_INSTANCES MAX_INSTANCES ARTIFACT_REPO SECRET_NAME SECRETS_PATH RUNTIME_SA_ID; do
+for v in SERVICE REGION CPU MEMORY MIN_INSTANCES MAX_INSTANCES LIVENESS_PROBE ARTIFACT_REPO SECRET_NAME SECRETS_PATH RUNTIME_SA_ID; do
   eval "val=\${$v:-}"
   [ -n "$val" ] || missing="$missing $v(from $SHAPE)"
 done
@@ -262,6 +262,7 @@ gcloud run deploy "$SERVICE" \
   --memory "$MEMORY" \
   --min-instances "$MIN_INSTANCES" \
   --max-instances "$MAX_INSTANCES" \
+  --liveness-probe "$LIVENESS_PROBE" \
   ${BOOST[@]+"${BOOST[@]}"} \
   --service-account "$RUNTIME_SA_ID@$GCP_PROJECT_ID.iam.gserviceaccount.com" \
   --set-secrets "$SECRETS_PATH=$SECRET_NAME:latest" \
