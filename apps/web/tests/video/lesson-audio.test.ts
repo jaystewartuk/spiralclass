@@ -9,6 +9,7 @@ import {
   finalizeLessonAudio,
   speakerFor,
   startLessonAudioCaptures,
+  ORPHANED_CAPTURE_AFTER_MS,
   stopLessonAudioCaptures,
   type LessonAudioDeps,
 } from "@/lib/video/lesson-audio";
@@ -33,6 +34,7 @@ type Row = {
   storageKey: string;
   status: string;
   durationMs: number | null;
+  startedAt?: Date;
   endedAt: Date | null;
 };
 
@@ -297,6 +299,7 @@ describe("stopLessonAudioCaptures", () => {
         storageKey: "k",
         status: "recording",
         durationMs: null,
+        startedAt: new Date(),
         endedAt: null,
       },
       {
@@ -308,6 +311,7 @@ describe("stopLessonAudioCaptures", () => {
         storageKey: "k",
         status: "ready",
         durationMs: null,
+        startedAt: new Date(),
         endedAt: null,
       },
     );
@@ -330,6 +334,7 @@ describe("stopLessonAudioCaptures", () => {
       storageKey: "k",
       status: "recording",
       durationMs: null,
+      startedAt: new Date(),
       endedAt: null,
     });
     const deps = makeDeps({
@@ -339,5 +344,63 @@ describe("stopLessonAudioCaptures", () => {
     });
 
     await expect(stopLessonAudioCaptures(db as any, BOOKING, deps)).resolves.toBeUndefined();
+  });
+
+  // AGENDAPROFE-3R: a capture whose egress_ended never arrived stayed
+  // `recording`, and every later room_finished for the booking asked a LiveKit
+  // server that no longer ran it to stop it — and logged the failure — forever.
+  it("marks an orphaned capture failed instead of stopping it again", async () => {
+    const db = makeDb();
+    const now = new Date("2026-09-25T01:32:00Z");
+    db.rows.push({
+      id: "a",
+      bookingId: BOOKING,
+      teacherId: TEACHER,
+      speaker: "teacher",
+      egressId: "EG_a",
+      storageKey: "k",
+      status: "recording",
+      durationMs: null,
+      startedAt: new Date(now.getTime() - ORPHANED_CAPTURE_AFTER_MS),
+      endedAt: null,
+    });
+    const deps = makeDeps({
+      stopEgress: vi.fn(async () => {
+        throw new Error("egress not connected (redis required)");
+      }),
+    });
+
+    await stopLessonAudioCaptures(db as any, BOOKING, deps, now);
+
+    expect(deps.stopEgress).not.toHaveBeenCalled();
+    expect(db.rows[0]).toMatchObject({ status: "failed", endedAt: now });
+    expect(deps.inngest.send).not.toHaveBeenCalled();
+
+    // The next sweep finds nothing left to do.
+    await stopLessonAudioCaptures(db as any, BOOKING, deps, now);
+    expect(deps.stopEgress).not.toHaveBeenCalled();
+  });
+
+  it("still stops a capture just inside the orphan cutoff", async () => {
+    const db = makeDb();
+    const now = new Date("2026-09-25T01:32:00Z");
+    db.rows.push({
+      id: "a",
+      bookingId: BOOKING,
+      teacherId: TEACHER,
+      speaker: "teacher",
+      egressId: "EG_a",
+      storageKey: "k",
+      status: "recording",
+      durationMs: null,
+      startedAt: new Date(now.getTime() - ORPHANED_CAPTURE_AFTER_MS + 1),
+      endedAt: null,
+    });
+    const deps = makeDeps();
+
+    await stopLessonAudioCaptures(db as any, BOOKING, deps, now);
+
+    expect(deps.stopEgress).toHaveBeenCalledWith("EG_a");
+    expect(db.rows[0]!.status).toBe("recording");
   });
 });

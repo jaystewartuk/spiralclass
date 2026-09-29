@@ -178,21 +178,42 @@ export async function finalizeLessonAudio(
   return { code: "finalized", audioId: row.id, status: nextStatus };
 }
 
+// A capture still `recording` this long after it started is orphaned: no class
+// runs six hours, so its `egress_ended` webhook was lost and the egress is gone
+// — possibly with the LiveKit server that ran it. Stopping it can only fail
+// (AGENDAPROFE-3R: a server that never ran it answers "egress not connected"),
+// and without this cutoff every later `room_finished` for the booking would try
+// again, forever.
+export const ORPHANED_CAPTURE_AFTER_MS = 6 * 60 * 60 * 1000;
+
 // Stop every still-recording capture for a booking. Used by stopCallRecording and
 // by the `room_finished` webhook path (the call-ended-without-Stop case), so
 // audio always finalises. Best-effort: a failed stopEgress is logged, not thrown
 // — the row stays `recording` until its own `egress_ended` lands (or LiveKit
-// finalises it on room close).
+// finalises it on room close). An orphaned row is marked `failed` without a
+// stop call: nothing is left to stop, and no webhook will ever finalise it.
 export async function stopLessonAudioCaptures(
   db: Db,
   bookingId: string,
   deps: LessonAudioDeps = defaultDeps,
+  now: Date = new Date(),
 ): Promise<void> {
   const active = await db.lessonAudio.findMany({
     where: { bookingId, status: "recording" },
-    select: { egressId: true },
+    select: { id: true, egressId: true, startedAt: true },
   });
   for (const row of active) {
+    if (now.getTime() - row.startedAt.getTime() >= ORPHANED_CAPTURE_AFTER_MS) {
+      await db.lessonAudio.updateMany({
+        where: { id: row.id, bookingId, status: "recording" },
+        data: { status: "failed", endedAt: now },
+      });
+      log.warn("orphaned lesson-audio capture marked failed", {
+        bookingId,
+        egressId: row.egressId,
+      });
+      continue;
+    }
     try {
       await deps.stopEgress(row.egressId);
     } catch (err) {

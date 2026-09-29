@@ -13,7 +13,17 @@ const startRoomCompositeEgress = vi.fn(
     egressId: "EG_av",
   }),
 );
-const stopEgressFn = vi.fn(async () => {});
+const stopEgressFn = vi.fn(async (_egressId: string): Promise<void> => {});
+
+class TwirpError extends Error {
+  status: number;
+  code?: string;
+  constructor(name: string, message: string, status: number, code?: string) {
+    super(message);
+    this.status = status;
+    this.code = code;
+  }
+}
 // `new` on a vi.fn() mock forwards to its implementation since vitest 5, and an
 // arrow function is not constructible — so these SDK client stubs are plain
 // functions returning the stub object, which `new` then yields.
@@ -38,6 +48,7 @@ vi.mock("livekit-server-sdk", () => ({
   EncodedFileOutput,
   EncodedFileType: { MP4: 1 },
   S3Upload,
+  TwirpError,
 }));
 
 const {
@@ -194,5 +205,34 @@ describe("stopEgress", () => {
     configureEgress();
     await stopEgress("EG_x");
     expect(stopEgressFn).toHaveBeenCalledWith("EG_x");
+  });
+
+  // AGENDAPROFE-3N: the egress had already completed, so there was nothing to
+  // stop — but the refusal was logged as a failed stop.
+  it("treats an egress that has already ended as stopped", async () => {
+    configureEgress();
+    stopEgressFn.mockRejectedValueOnce(
+      new TwirpError(
+        "Precondition Failed",
+        "egress with status EGRESS_COMPLETE cannot be stopped",
+        412,
+        "failed_precondition",
+      ),
+    );
+    await expect(stopEgress("EG_x")).resolves.toBeUndefined();
+  });
+
+  it("treats an egress the server no longer knows as stopped", async () => {
+    configureEgress();
+    stopEgressFn.mockRejectedValueOnce(new TwirpError("twirp", "not found", 404, "not_found"));
+    await expect(stopEgress("EG_x")).resolves.toBeUndefined();
+  });
+
+  it("still rethrows a genuine failure", async () => {
+    configureEgress();
+    stopEgressFn.mockRejectedValueOnce(
+      new TwirpError("twirp", "egress not connected (redis required)", 500, "unknown"),
+    );
+    await expect(stopEgress("EG_x")).rejects.toThrow("egress not connected");
   });
 });

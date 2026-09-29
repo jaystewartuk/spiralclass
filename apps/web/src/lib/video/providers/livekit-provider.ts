@@ -121,6 +121,16 @@ function isNotFoundError(err: unknown): boolean {
   return err instanceof TwirpError && (err.status === 404 || err.code === "not_found");
 }
 
+// True when stopping an egress failed because it has already stopped —
+// LiveKit answers `412 egress with status EGRESS_COMPLETE cannot be stopped`
+// (AGENDAPROFE-3N). The stop's goal is already met, so it is not a failure.
+function isAlreadyEndedEgressError(err: unknown): boolean {
+  return (
+    isNotFoundError(err) ||
+    (err instanceof TwirpError && (err.status === 412 || err.code === "failed_precondition"))
+  );
+}
+
 export class LiveKitProvider implements VideoProvider {
   readonly id = "livekit" as const;
 
@@ -293,7 +303,11 @@ export class LiveKitProvider implements VideoProvider {
     const cfg = egressConfig();
     if (!cfg) return; // nothing configured to stop against — best-effort.
     const client = new EgressClient(cfg.url, cfg.apiKey, cfg.apiSecret);
-    await client.stopEgress(providerRecordingId);
+    try {
+      await client.stopEgress(providerRecordingId);
+    } catch (err) {
+      if (!isAlreadyEndedEgressError(err)) throw err;
+    }
   }
 
   async parseWebhookEvent(rawBody: string, authHeader: string | null): Promise<ParsedWebhookEvent> {
