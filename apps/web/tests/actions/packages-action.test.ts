@@ -11,12 +11,12 @@ vi.mock("@/lib/auth", () => ({
   requireOnboardedTeacher: vi.fn(async () => ({ id: "t1" })),
 }));
 
-const packageUpdate = vi.fn(async () => ({}));
+const packageUpdate = vi.fn(async () => ({ count: 1 }));
 vi.mock("@/lib/prisma", () => ({
   prisma: {
     package: {
       findFirst: vi.fn(async () => state.pkg),
-      update: packageUpdate,
+      updateMany: packageUpdate,
     },
   },
 }));
@@ -63,7 +63,7 @@ describe("togglePackagePauseAction", () => {
     const res = await togglePackagePauseAction(undefined, fd("pause"));
     expect(res).toEqual({ ok: true });
     expect(packageUpdate).toHaveBeenCalledWith({
-      where: { id: PKG_ID },
+      where: { id: PKG_ID, teacherId: "t1", status: "active" },
       data: { status: "paused" },
     });
     expect(revalidatePath).toHaveBeenCalledWith("/dashboard/students/s1");
@@ -81,7 +81,7 @@ describe("togglePackagePauseAction", () => {
     const res = await togglePackagePauseAction(undefined, fd("resume"));
     expect(res).toEqual({ ok: true });
     expect(packageUpdate).toHaveBeenCalledWith({
-      where: { id: PKG_ID },
+      where: { id: PKG_ID, teacherId: "t1", status: "paused" },
       data: { status: "active" },
     });
   });
@@ -91,5 +91,26 @@ describe("togglePackagePauseAction", () => {
     const res = await togglePackagePauseAction(undefined, fd("resume"));
     expect(res).toHaveProperty("error");
     expect(packageUpdate).not.toHaveBeenCalled();
+  });
+
+  // #87: a refund commits between this action's read and its write.
+  it("does not pause a package a refund moved on after the check", async () => {
+    packageUpdate.mockResolvedValueOnce({ count: 0 });
+    const res = await togglePackagePauseAction(undefined, fd("pause"));
+
+    // The same answer a stale tab gets for a package that is no longer active.
+    state.pkg = { id: PKG_ID, status: "refunded", studentId: "s1" };
+    const stale = await togglePackagePauseAction(undefined, fd("pause"));
+    expect(res).toEqual(stale);
+    expect(res).toHaveProperty("error");
+    expect(revalidatePath).not.toHaveBeenCalled();
+  });
+
+  it("does not resume a package whose status moved on after the check", async () => {
+    state.pkg = { id: PKG_ID, status: "paused", studentId: "s1" };
+    packageUpdate.mockResolvedValueOnce({ count: 0 });
+    const res = await togglePackagePauseAction(undefined, fd("resume"));
+    expect(res).toHaveProperty("error");
+    expect(res).not.toHaveProperty("ok");
   });
 });
