@@ -18,7 +18,7 @@
 // because marketing copy and a production feature flag had drifted apart with
 // nothing joining them.
 //
-// LOCATIONS. Four are verifiable from this repository and are cited inline.
+// LOCATIONS. Those this repository proves cite the path that proves them.
 // The rest are the vendor's own published primary processing region, read on
 // the date in `SUBPROCESSORS_REVIEWED` below. Re-read them when that date gets
 // old; do not guess, and do not widen a location to "global" to avoid checking.
@@ -164,12 +164,15 @@ export const SUBPROCESSORS: readonly Subprocessor[] = [
   },
   {
     id: "livekit",
+    // Self-hosted on Compute Engine since D-187. The name follows where
+    // production's LIVEKIT_URL points — LiveKit Cloud is a different company —
+    // and subprocessors.test.ts fails if the two disagree (#104).
     name: "LiveKit (self-hosted)",
     purpose: "Carries the audio and video of a live class between the two participants.",
     dataShared: "Live audio and video, in transit. Nothing is stored on this server.",
-    location: "Global",
+    location: "United States",
     gate: null,
-    evidence: "config/env/production.runtime.env",
+    evidence: "infra/gcp-livekit/README.md",
   },
 
   // ---- Feature-gated: nothing reaches these unless the feature is on ------
