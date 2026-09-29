@@ -59,7 +59,7 @@ overrides:
   # identically on origin/main. Reached only through @sentry/nextjs >
   # @sentry/webpack-plugin > webpack > schema-utils > ajv, i.e. build tooling,
   # but the gate does not grade on reachability.
-  fast-uri@>=3.0.0 <3.1.6: "3.1.6" # GHSA-4c8g-83qw-93j6, GHSA-v2hh-gcrm-f6hx, GHSA-7p8r-x3mc-p8w7, GHSA-5jgf-p345-68v8, GHSA-jqff-g426-hqxp
+  fast-uri@>=3.0.0 <3.1.8: "3.1.8" # GHSA-qw65-cvwx-89v3, GHSA-58mr-gqgx-xq4g, GHSA-4c8g-83qw-93j6, GHSA-v2hh-gcrm-f6hx, GHSA-7p8r-x3mc-p8w7, GHSA-5jgf-p345-68v8, GHSA-jqff-g426-hqxp
   # 2026-09-08: the pin below WAS `sharp@<0.35.0: "0.35.3"`, and 0.35.3 is now
   # itself the vulnerable version — GHSA-rgj7-g3m4-5g8c (libheif, high) reaches
   # `<0.35.4`. Same shape as the nanoid and fast-uri re-bumps above: a new
@@ -144,7 +144,11 @@ overrides:
   # Exposure is build-time only: fast-uri is ajv's URI parser, reached through
   # schema-utils > webpack > @sentry/webpack-plugin > @sentry/nextjs. It is
   # never on a request path and never ships to a browser.
-  fast-uri@<3.1.6: "3.1.6" # GHSA-jqff-g426-hqxp, GHSA-5jgf-p345-68v8, GHSA-f65p-4m7j-42xc, GHSA-fph4-wmhf-6fwf
+  #
+  # 2026-09-29: same again — GHSA-qw65-cvwx-89v3 and GHSA-58mr-gqgx-xq4g made
+  # the pinned 3.1.6 itself vulnerable, red on origin/main with an unchanged
+  # lockfile. Both pins (this one and the one above) move to 3.1.8.
+  fast-uri@<3.1.8: "3.1.8" # GHSA-qw65-cvwx-89v3, GHSA-58mr-gqgx-xq4g, GHSA-jqff-g426-hqxp, GHSA-5jgf-p345-68v8, GHSA-f65p-4m7j-42xc, GHSA-fph4-wmhf-6fwf
   # 2026-09-06, arrived with the Prisma 7 upgrade. Prisma 7 moved `prisma` into
   # @prisma/client's own dependencies, and `prisma` depends on BOTH database
   # drivers — so a Postgres-only application acquired mysql2 in its PRODUCTION
