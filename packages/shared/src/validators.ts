@@ -50,7 +50,7 @@ export function isValidTimezone(tz: string): boolean {
 export const signUpSchema = (locale: AppLocale = "en") => {
   const loc = t(locale);
   return z.object({
-    name: z.string().min(1, loc("Tu nombre es requerido", "Your name is required")).max(80),
+    name: z.string().trim().min(1, loc("Tu nombre es requerido", "Your name is required")).max(80),
     email: emailField(loc),
   });
 };
@@ -393,7 +393,11 @@ export const checkoutIntentSchema = (locale: AppLocale = "en") => {
       (v) => (v == null || v === "" ? undefined : v),
       z.string().datetime().optional(),
     ),
-    studentName: z.string().min(1, loc("Tu nombre es requerido", "Your name is required")).max(80),
+    studentName: z
+      .string()
+      .trim()
+      .min(1, loc("Tu nombre es requerido", "Your name is required"))
+      .max(80),
     studentEmail: emailField(loc),
     studentPhone: optionalPhoneInput(loc),
     paymentMethod: z.enum(["stripe", "manual_transfer"]).default("stripe"),

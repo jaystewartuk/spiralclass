@@ -56,77 +56,82 @@ import { WhatsIncluded } from "./whats-included";
 // Cross-request copies (opengraph-image.tsx, buy/page.tsx) are separate
 // requests React.cache can't reach — left as-is to avoid staleness risk.
 const getTeacherBySlug = cache((slug: string) =>
-  prisma.teacher.findUnique({
-    where: { bookingSlug: slug },
-    select: {
-      id: true,
-      name: true,
-      headline: true,
-      bio: true,
-      publicWhatsappE164: true,
-      photoPath: true,
-      introVideoPath: true,
-      introVideoDurationMs: true,
-      introVideoTranscriptPublicOptIn: true,
-      updatedAt: true,
-      timezone: true,
-      country: true,
-      // The subject/medium of instruction (D-72) — legible-to-AI JSON-LD facts
-      // (booking-page-ai-readability), null-safe: a teacher who never set
-      // targetLanguage produces no "teaches X" claim at all.
-      targetLanguage: true,
-      teachingLanguage: true,
-      onboardingCompleteAt: true,
-      disabledAt: true,
-      // Gates the vocabulary-review line in the reassurance band: her own
-      // "share progress with my students" setting, no platform flag involved.
-      shareProgressByDefault: true,
-      stripeAccountId: true,
-      stripeChargesEnabled: true,
-      pricingCurrency: true,
-      payoutInstruments: { select: INSTRUMENT_READINESS_SELECT },
-      templatesTouchedAt: true,
-      availabilityTouchedAt: true,
-      // Non-archived levels, in rank order — feeds the Course's
-      // educationalLevel claim. Empty = no such claim (never inferred).
-      levels: {
-        where: { archived: false },
-        orderBy: { position: "asc" },
-        select: { label: true },
-      },
-      packageTemplates: {
-        where: { archived: false },
-        orderBy: { priceMinorUnits: "asc" },
-        select: {
-          id: true,
-          name: true,
-          classCount: true,
-          singleClass: true,
-          classDurationMin: true,
-          priceMinorUnits: true,
-          twoPersonPriceMinorUnits: true,
-          currency: true,
+  prisma.teacher
+    .findUnique({
+      where: { bookingSlug: slug },
+      select: {
+        id: true,
+        name: true,
+        headline: true,
+        bio: true,
+        publicWhatsappE164: true,
+        photoPath: true,
+        introVideoPath: true,
+        introVideoDurationMs: true,
+        introVideoTranscriptPublicOptIn: true,
+        updatedAt: true,
+        timezone: true,
+        country: true,
+        // The subject/medium of instruction (D-72) — legible-to-AI JSON-LD facts
+        // (booking-page-ai-readability), null-safe: a teacher who never set
+        // targetLanguage produces no "teaches X" claim at all.
+        targetLanguage: true,
+        teachingLanguage: true,
+        onboardingCompleteAt: true,
+        disabledAt: true,
+        // Gates the vocabulary-review line in the reassurance band: her own
+        // "share progress with my students" setting, no platform flag involved.
+        shareProgressByDefault: true,
+        stripeAccountId: true,
+        stripeChargesEnabled: true,
+        pricingCurrency: true,
+        payoutInstruments: { select: INSTRUMENT_READINESS_SELECT },
+        templatesTouchedAt: true,
+        availabilityTouchedAt: true,
+        // Non-archived levels, in rank order — feeds the Course's
+        // educationalLevel claim. Empty = no such claim (never inferred).
+        levels: {
+          where: { archived: false },
+          orderBy: { position: "asc" },
+          select: { label: true },
+        },
+        packageTemplates: {
+          where: { archived: false },
+          orderBy: { priceMinorUnits: "asc" },
+          select: {
+            id: true,
+            name: true,
+            classCount: true,
+            singleClass: true,
+            classDurationMin: true,
+            priceMinorUnits: true,
+            twoPersonPriceMinorUnits: true,
+            currency: true,
+          },
+        },
+        // Social proof. Published only, in the teacher's manual order. `source`
+        // and `studentId` carry the two kinds apart: a `student_submitted` row
+        // earns the verified badge below, a curated one renders exactly as it
+        // always has.
+        testimonials: {
+          where: { published: true },
+          orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
+          select: {
+            id: true,
+            authorName: true,
+            authorNote: true,
+            body: true,
+            photoPath: true,
+            source: true,
+            studentId: true,
+          },
         },
       },
-      // Social proof. Published only, in the teacher's manual order. `source`
-      // and `studentId` carry the two kinds apart: a `student_submitted` row
-      // earns the verified badge below, a curated one renders exactly as it
-      // always has.
-      testimonials: {
-        where: { published: true },
-        orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
-        select: {
-          id: true,
-          authorName: true,
-          authorNote: true,
-          body: true,
-          photoPath: true,
-          source: true,
-          studentId: true,
-        },
-      },
-    },
-  }),
+    })
+    // Trimmed once, here, for every use below. Sign-up stored names untrimmed
+    // until signUpSchema learned to, so "Mira López " rendered as "Message Mira
+    // Solis , ask anything" on the page strangers arrive at.
+    .then((teacher) => (teacher ? { ...teacher, name: teacher.name.trim() } : teacher)),
 );
 
 // The phone-country the lead form should PREFILL.
@@ -549,8 +554,10 @@ export default async function BookingLandingPage({
                     {t("web.bookingLanding.bestValue")}
                   </Badge>
                 )}
-                <span className="block text-xs text-muted-foreground lg:ml-2 lg:inline">
-                  {pkg.seats === 2 && `${t("web.bookingLanding.seats.forTwoShort")} · `}
+                {/* Always its own line. Inline beside the name it squeezed the
+                    left column once the price column grew a second line — a
+                    package for two read "4 classes / 2 / months 4 × / 50 min". */}
+                <span className="block text-xs text-muted-foreground">
                   {isOneClassOffering(pkg)
                     ? t("web.bookingLanding.singleClassDuration", {
                         min: pkg.classDurationMin,
@@ -725,7 +732,7 @@ export default async function BookingLandingPage({
             {cheapestPrice != null && (
               <Badge variant="outline" className="gap-1">
                 <CalendarClock className="h-3 w-3" aria-hidden />{" "}
-                {t("web.bookingLanding.fromPrice", {
+                {t("web.bookingLanding.fromPriceShort", {
                   price: formatPriceForBuyer(
                     cheapestPrice,
                     cheapest.currency,

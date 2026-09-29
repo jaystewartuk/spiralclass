@@ -3,6 +3,7 @@ import {
   isValidTimezone,
   checkoutIntentSchema,
   portalCheckoutIntentSchema,
+  signUpSchema,
   blockedDateSchema,
   packageTemplateSchema,
   materialStyleSchema,
@@ -264,5 +265,31 @@ describe("packageTemplateSchema — prices for two", () => {
     expect(packageTemplateSchema.safeParse({ ...tpl, twoPersonPriceMinorUnits: -1 }).success).toBe(
       false,
     );
+  });
+});
+
+// A name typed with a trailing space was stored with it, and the booking page
+// then read "Message Mira López , ask anything". Every other name field trims.
+describe("names are stored trimmed", () => {
+  it("trims the teacher's name at sign-up", () => {
+    expect(signUpSchema("en").parse({ name: "Mira López ", email: "mira@example.com" }).name).toBe(
+      "Mira López",
+    );
+  });
+
+  it("refuses a name that is only spaces", () => {
+    expect(signUpSchema("en").safeParse({ name: "   ", email: "mira@example.com" }).success).toBe(
+      false,
+    );
+  });
+
+  it("trims the buyer's name at checkout", () => {
+    const parsed = checkoutIntentSchema("en").parse({
+      slug: "ana",
+      templateId: "11111111-1111-4111-8111-111111111111",
+      studentName: "  Mira ",
+      studentEmail: "mira@example.com",
+    });
+    expect(parsed.studentName).toBe("Mira");
   });
 });

@@ -5015,7 +5015,6 @@ export const en = {
   "web.bookingLanding.seats.two": "Two of us",
   "web.bookingLanding.seats.twoExplainer":
     "For two people who take every class together. One of you pays once for both.",
-  "web.bookingLanding.seats.forTwoShort": "For two",
   "web.bookingLanding.perPersonPerClass": "{price} per person, per class",
   "web.buyFlow.package.forTwo": "For two people",
   "web.buyFlow.seats.legend": "Who's taking the classes?",
@@ -5030,6 +5029,7 @@ export const en = {
   "web.dashboard.students.package.forTwoLabel": "This package is for two people",
   "web.dashboard.students.package.forTwoHint":
     "Its classes come out of a separate balance for two. Lesson insights stay off for its classes, because nobody confirmed at checkout that the second person agrees.",
+  "web.bookingLanding.fromPriceShort": "From {price}",
   "web.bookingLanding.tagline": "One-to-one classes online, at a pace that fits your week.",
   // The per-teacher social card (apps/web/src/app/b/[slug]/opengraph-image.tsx).
   // Pinned to PUBLIC_FUNNEL_LOCALE like the page it previews — a card in one

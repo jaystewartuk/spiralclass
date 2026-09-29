@@ -5043,7 +5043,6 @@ export const esMX = {
   "web.bookingLanding.seats.two": "Somos dos",
   "web.bookingLanding.seats.twoExplainer":
     "Para dos personas que toman todas las clases juntas. Una de ustedes paga una sola vez por las dos.",
-  "web.bookingLanding.seats.forTwoShort": "Para dos",
   "web.bookingLanding.perPersonPerClass": "{price} por persona, por clase",
   "web.buyFlow.package.forTwo": "Para dos personas",
   "web.buyFlow.seats.legend": "¿Quién toma las clases?",
@@ -5058,6 +5057,7 @@ export const esMX = {
   "web.dashboard.students.package.forTwoLabel": "Este paquete es para dos personas",
   "web.dashboard.students.package.forTwoHint":
     "Sus clases salen de un saldo aparte para dos. El análisis de clases queda desactivado para sus clases, porque nadie confirmó al pagar que la otra persona está de acuerdo.",
+  "web.bookingLanding.fromPriceShort": "Desde {price}",
   "web.bookingLanding.tagline": "Clases uno a uno en línea, al ritmo que te acomode.",
   // La tarjeta social por profesora (apps/web/src/app/b/[slug]/opengraph-image.tsx).
   // Fijada a PUBLIC_FUNNEL_LOCALE igual que la página que previsualiza.
