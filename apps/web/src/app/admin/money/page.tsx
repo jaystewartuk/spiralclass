@@ -43,7 +43,7 @@ export default async function AdminMoneyPage() {
     founding: t("web.admin.plan.founding"),
   };
 
-  const [overview, revenue, gmvSeries, deferred] = await Promise.all([
+  const [overview, revenue, gmvByCurrency, deferred] = await Promise.all([
     getSubscriptionOverview(),
     getSubscriptionRevenueSeries(WINDOW_MONTHS),
     getGmvSeries(WINDOW_MONTHS),
@@ -54,6 +54,12 @@ export default async function AdminMoneyPage() {
     ...Object.entries(overview.mrrOtherCurrencyMinorUnits),
     ...Object.entries(revenue.otherCurrencyTotals),
   ];
+
+  // GMV per currency, largest first (#27). The headline, the chart and the
+  // rail split are the biggest currency's; the rest are listed beside them,
+  // never added in — there is no exchange rate to add them with.
+  const [gmvPrimary, ...gmvOthers] = gmvByCurrency;
+  const gmvSeries = gmvPrimary.series;
 
   // Headline "this month so far" figures = the last (current, partial) bucket.
   const currentRevenue = revenueSeries.at(-1)!;
@@ -140,7 +146,7 @@ export default async function AdminMoneyPage() {
         />
         <StatCard
           label={t("web.admin.money.gmv")}
-          value={formatMinorUnits(currentGmv.totalMinorUnits)}
+          value={formatMinorUnits(currentGmv.totalMinorUnits, gmvPrimary.currency)}
           hint={t("web.admin.money.gmvHint")}
         />
         {/* The biggest currency's liability, not every teacher's added
@@ -166,7 +172,11 @@ export default async function AdminMoneyPage() {
                 amount: formatMinorUnits(collectedWindowNet, PLATFORM_MONEY_CURRENCY),
               })}
             </p>
-            <CategoryBarChart data={revenueChart} valueFormat="minorUnits" />
+            <CategoryBarChart
+              data={revenueChart}
+              valueFormat="minorUnits"
+              currency={PLATFORM_MONEY_CURRENCY}
+            />
           </CardContent>
         </Card>
       </div>
@@ -180,10 +190,22 @@ export default async function AdminMoneyPage() {
             <p className="mb-3 text-sm text-muted-foreground">
               {t("web.admin.money.gmvChartBody", {
                 months: WINDOW_MONTHS,
-                amount: formatMinorUnits(gmvWindowTotal),
+                amount: formatMinorUnits(gmvWindowTotal, gmvPrimary.currency),
               })}
             </p>
-            <CategoryBarChart data={gmvChart} valueFormat="minorUnits" />
+            <CategoryBarChart
+              data={gmvChart}
+              valueFormat="minorUnits"
+              currency={gmvPrimary.currency}
+            />
+            {gmvOthers.length > 0 ? (
+              <p className="mt-3 text-sm text-muted-foreground">
+                {t("web.admin.money.gmvOtherCurrencies", { months: WINDOW_MONTHS })}{" "}
+                {gmvOthers
+                  .map((slice) => formatMinorUnits(slice.windowTotalMinorUnits, slice.currency))
+                  .join(", ")}
+              </p>
+            ) : null}
           </CardContent>
         </Card>
         <Card>
@@ -193,7 +215,11 @@ export default async function AdminMoneyPage() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <CategoryBarChart data={railChart} valueFormat="minorUnits" />
+            <CategoryBarChart
+              data={railChart}
+              valueFormat="minorUnits"
+              currency={gmvPrimary.currency}
+            />
           </CardContent>
         </Card>
       </div>

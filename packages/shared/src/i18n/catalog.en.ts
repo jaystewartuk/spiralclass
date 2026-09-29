@@ -5949,6 +5949,8 @@ export const en = {
   "web.admin.money.gmvChartTitle": "GMV (gross payment volume)",
   "web.admin.money.gmvChartBody":
     "Total paid lesson-package payments flowing to teachers. Last {months} months: {amount}.",
+  "web.admin.money.gmvOtherCurrencies":
+    "Also paid in other currencies over the last {months} months, not included above:",
   "web.admin.money.gmvByRailTitle": "GMV by rail ({months} mo)",
   "web.admin.money.railCard": "Card (Stripe)",
   "web.admin.money.railWise": "Wise transfer",

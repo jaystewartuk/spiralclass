@@ -5931,6 +5931,8 @@ export const fr = {
   "web.admin.money.gmvChartTitle": "GMV (volume brut de paiements)",
   "web.admin.money.gmvChartBody":
     "Total des paiements de forfaits de cours reversés aux enseignants. {months} derniers mois : {amount}.",
+  "web.admin.money.gmvOtherCurrencies":
+    "Également payé dans d'autres devises sur les {months} derniers mois, non inclus ci-dessus :",
   "web.admin.money.gmvByRailTitle": "GMV par canal ({months} mois)",
   "web.admin.money.railCard": "Carte (Stripe)",
   "web.admin.money.railWise": "Virement Wise",
