@@ -50,6 +50,31 @@ const buttonVariants = cva(
   },
 );
 
+// A caller's own height or width wins at every breakpoint. twMerge only
+// replaces a utility with one of the same variant, so `h-auto` from a caller
+// never removed the size variant's `lg:h-10` — above lg the variant won again.
+// A collapsed package card on /settings/templates was a Button with `h-auto`
+// and a two-line summary: pinned at 40px while its content needed 58, so every
+// card's second line ran out over its border on desktop and nowhere else.
+const RESPONSIVE_HEIGHT = /^(?:sm|md|lg|xl|2xl):(?:h|size)-/;
+const RESPONSIVE_WIDTH = /^(?:sm|md|lg|xl|2xl):(?:w|size)-/;
+
+export function buttonClassName({
+  variant,
+  size,
+  className,
+}: VariantProps<typeof buttonVariants> & { className?: string }): string {
+  const base = buttonVariants({ variant, size }).split(" ");
+  const callerSetsHeight = /(?:^|\s)(?:h|size)-/.test(className ?? "");
+  const callerSetsWidth = /(?:^|\s)(?:w|size)-/.test(className ?? "");
+  const kept = base.filter(
+    (c) =>
+      !(callerSetsHeight && RESPONSIVE_HEIGHT.test(c)) &&
+      !(callerSetsWidth && RESPONSIVE_WIDTH.test(c)),
+  );
+  return cn(kept.join(" "), className);
+}
+
 export interface ButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement>, VariantProps<typeof buttonVariants> {
   asChild?: boolean;
@@ -58,9 +83,7 @@ export interface ButtonProps
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant, size, asChild = false, ...props }, ref) => {
     const Comp = asChild ? Slot : "button";
-    return (
-      <Comp className={cn(buttonVariants({ variant, size, className }))} ref={ref} {...props} />
-    );
+    return <Comp className={buttonClassName({ variant, size, className })} ref={ref} {...props} />;
   },
 );
 Button.displayName = "Button";
