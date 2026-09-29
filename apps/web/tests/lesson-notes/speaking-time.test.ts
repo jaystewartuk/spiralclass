@@ -7,9 +7,31 @@ function utt(speaker: "teacher" | "student", startMs: number, endMs: number): Sp
 }
 
 describe("computeSpeakingTime", () => {
-  it("returns null when there's no audio duration to anchor a total", () => {
+  it("returns null when there's neither an audio duration nor an utterance to anchor a total", () => {
     expect(computeSpeakingTime([], [])).toBeNull();
     expect(computeSpeakingTime([{ durationMs: null }], [])).toBeNull();
+  });
+
+  // D-189: a transcript the browsers wrote has no LessonAudio row, so the last
+  // line's end anchors the lesson's length instead.
+  it("anchors the total on the last utterance when there is no audio row", () => {
+    const summary = computeSpeakingTime(
+      [],
+      [utt("teacher", 0, 20_000), utt("student", 30_000, 50_000)],
+    );
+    expect(summary).toEqual({
+      totalMs: 50_000,
+      teacherSpeakingMs: 20_000,
+      studentSpeakingMs: 20_000,
+      teacherSharePct: 40,
+      studentSharePct: 40,
+    });
+  });
+
+  it("prefers the audio duration when it is longer, since it counts the trailing silence", () => {
+    expect(
+      computeSpeakingTime([{ durationMs: 90_000 }], [utt("teacher", 0, 20_000)])?.totalMs,
+    ).toBe(90_000);
   });
 
   it("sums per-speaker utterance durations and shares them against the lesson total", () => {
@@ -32,7 +54,12 @@ describe("computeSpeakingTime", () => {
   });
 
   it("clamps a speaker's speaking time to the lesson total", () => {
-    const summary = computeSpeakingTime([{ durationMs: 10_000 }], [utt("teacher", 0, 50_000)]);
+    // Two overlapping utterances (an ASR quirk) would otherwise sum past the
+    // lesson's own length.
+    const summary = computeSpeakingTime(
+      [{ durationMs: 10_000 }],
+      [utt("teacher", 0, 10_000), utt("teacher", 2_000, 10_000)],
+    );
     expect(summary?.teacherSpeakingMs).toBe(10_000);
     expect(summary?.teacherSharePct).toBe(100);
   });

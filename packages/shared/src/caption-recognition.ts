@@ -44,6 +44,11 @@ export type CaptionSession = {
   // a speaker no browser here can recognise may be assigned "cloud". Both
   // clients read it from the same answer, so they agree on the assignment.
   cloudRecognition: boolean;
+  // D-189: whether each recognised line is also kept, as the class's
+  // transcript for lesson insights — the flag is on and this pairing's
+  // insights consent (D-22) is recorded. The recognising browser posts the
+  // line to /api/captions/transcript; both browsers show that it is kept.
+  transcriptCapture: boolean;
 };
 
 // ---------------------------------------------------------------------------

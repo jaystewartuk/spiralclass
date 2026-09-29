@@ -2,8 +2,10 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { CaptionLine, CaptionSession } from "@spiralclass/shared";
 import {
   BrowserCaptions,
+  MAX_KEPT_LINE_MS,
   type BrowserCaptionsDeps,
   type BrowserCaptionsInput,
+  type KeptLine,
 } from "@/lib/captions/browser-captions";
 import type { CloudRecognizerOptions } from "@/lib/captions/cloud-recognizer";
 import type { RecognizerOptions, SpeechRecognitionCtorLike } from "@/lib/captions/recognizer";
@@ -30,6 +32,7 @@ const SESSION = (over: Partial<CaptionSession> = {}): CaptionSession => ({
   recognitionLocales: { teacher: "es-MX", student: "en" },
   studentConsent: true,
   cloudRecognition: false,
+  transcriptCapture: false,
   ...over,
 });
 
@@ -53,6 +56,7 @@ function input(over: Partial<BrowserCaptionsInput> = {}): BrowserCaptionsInput {
 function setup(over: Partial<BrowserCaptionsDeps> = {}) {
   const published: CaptionLine[] = [];
   const shown: CaptionLine[] = [];
+  const kept: KeptLine[] = [];
   const statuses: unknown[] = [];
   const fetch = vi.fn(async (_u: string | URL | Request, init?: RequestInit) => {
     const { text } = JSON.parse(String(init?.body)) as { text: string };
@@ -68,6 +72,7 @@ function setup(over: Partial<BrowserCaptionsDeps> = {}) {
       published.push(line);
     },
     showLocal: (line) => shown.push(line),
+    keep: (line) => kept.push(line),
     onStatus: (s) => statuses.push(s),
     onRefused: vi.fn(),
     now: () => 1_000,
@@ -97,7 +102,7 @@ function setup(over: Partial<BrowserCaptionsDeps> = {}) {
     },
     ...over,
   };
-  return { c: new BrowserCaptions(deps), published, shown, statuses, fetch, deps };
+  return { c: new BrowserCaptions(deps), published, shown, kept, statuses, fetch, deps };
 }
 
 const live = () => recognizers.filter((r) => r.started && !r.stopped);
@@ -291,6 +296,81 @@ describe("BrowserCaptions — the cloud fallback (two phones)", () => {
     c.sync(phones());
     c.dispose();
     expect(liveClouds()).toHaveLength(0);
+  });
+});
+
+describe("BrowserCaptions — keeping the transcript (D-189)", () => {
+  const keptSession = () => SESSION({ transcriptCapture: true });
+
+  it("keeps nothing while the session does not say the transcript is kept", async () => {
+    const { c, kept, published } = setup();
+    c.sync(input());
+    live()[0].onFinal("Hola");
+    await flush();
+    expect(published).toHaveLength(1);
+    expect(kept).toEqual([]);
+  });
+
+  it("keeps each recognised line, source text and speaker, before translating it", () => {
+    const { c, kept, fetch } = setup();
+    c.sync(input({ session: keptSession() }));
+    live()[0].onFinal("Buenos días");
+    // Synchronously, ahead of the translation round-trip.
+    expect(kept).toEqual([
+      { bookingId: "b1", speaker: "teacher", text: "Buenos días", durationMs: 0 },
+    ]);
+    expect(fetch).not.toHaveBeenCalled();
+  });
+
+  it("keeps the other person's line too when this browser recognised her", () => {
+    const { c, kept } = setup();
+    c.sync(
+      input({
+        session: keptSession(),
+        room: { ...input().room, remote: { identity: "s1", micTrack: remoteMic, capable: false } },
+      }),
+    );
+    live()[1].onFinal("how are you");
+    expect(kept).toEqual([expect.objectContaining({ speaker: "student", text: "how are you" })]);
+  });
+
+  it("estimates a line's duration as the gap since the speaker's previous line, capped", () => {
+    let t = 1_000;
+    const { c, kept } = setup({ now: () => t });
+    c.sync(input({ session: keptSession() }));
+    t = 3_500;
+    live()[0].onFinal("uno");
+    t = 5_000;
+    live()[0].onFinal("dos");
+    t = 5_000 + MAX_KEPT_LINE_MS + 99_999;
+    live()[0].onFinal("tres");
+    expect(kept.map((k) => k.durationMs)).toEqual([2_500, 1_500, MAX_KEPT_LINE_MS]);
+  });
+
+  it("splits a long utterance the way the route requires and shares the duration by length", () => {
+    let t = 1_000;
+    const { c, kept } = setup({ now: () => t });
+    c.sync(input({ session: keptSession() }));
+    t = 11_000;
+    const sentence = "palabra ".repeat(80).trim(); // ~640 chars, over MAX_CAPTION_CHARS
+    live()[0].onFinal(sentence);
+    expect(kept.length).toBeGreaterThan(1);
+    for (const k of kept) expect(k.text.length).toBeLessThanOrEqual(500);
+    expect(kept.reduce((n, k) => n + k.durationMs, 0)).toBeGreaterThanOrEqual(9_990);
+    expect(kept.reduce((n, k) => n + k.durationMs, 0)).toBeLessThanOrEqual(10_010);
+  });
+
+  it("keeps a cloud-recognised line the same way", () => {
+    const { c, kept } = setup();
+    c.sync(
+      input({
+        selfCapable: false,
+        session: SESSION({ cloudRecognition: true, transcriptCapture: true }),
+        room: { ...input().room, remote: { identity: "s1", micTrack: remoteMic, capable: false } },
+      }),
+    );
+    clouds[0].onFinal("Hola");
+    expect(kept).toEqual([expect.objectContaining({ speaker: "teacher", text: "Hola" })]);
   });
 });
 

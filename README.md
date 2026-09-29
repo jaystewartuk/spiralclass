@@ -118,7 +118,7 @@ One consequence worth knowing before you read the code:
 | Payments               | Stripe Connect (Accounts v2, direct charges) and a Wise transfer rail with API reconciliation                                                                                        |
 | Video                  | Self-hosted [LiveKit](https://livekit.io) — WebRTC lessons, room-composite recording via Egress                                                                                      |
 | Speech / AI            | Deepgram (transcription and live captions), Anthropic Claude (lesson insights, translation, material composition), Azure Speech (pronunciation), Google Vertex AI (image generation) |
-| Background jobs        | [Inngest](https://inngest.com) — 30 background functions                                                                                                                             |
+| Background jobs        | [Inngest](https://inngest.com) — 31 background functions                                                                                                                             |
 | Storage                | Cloudflare R2 (S3-compatible), signed via `aws4fetch`                                                                                                                                |
 | Email                  | Resend, with Amazon SES as a swappable second provider                                                                                                                               |
 | Observability          | Sentry, PostHog                                                                                                                                                                      |
@@ -134,7 +134,7 @@ graph TB
 
     subgraph app["apps/web — the only server"]
         RSC["Server Components<br/>+ 71 server-action modules"]
-        API["59 route handlers<br/>by audience: teacher · student · public · internal"]
+        API["60 route handlers<br/>by audience: teacher · student · public · internal"]
         MW["middleware.ts<br/>CSP nonce · session gate · ?ref= attribution"]
         LIB["src/lib/** — one folder per bounded concern<br/>payments · booking · cancellation · subscriptions<br/>auth · notifications · chat · homework · video"]
     end

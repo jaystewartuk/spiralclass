@@ -10,6 +10,7 @@ import {
 } from "@/lib/video/call-recording";
 import { trackServerEvent } from "@/lib/analytics/posthog";
 import { logger } from "@/lib/logger";
+import { finalizeBrowserTranscript } from "@/lib/transcription/browser-transcript";
 
 const log = logger({ surface: "video-webhook-events" });
 
@@ -114,6 +115,18 @@ export async function handleNormalizedEvent(
     // closed at this point, so any row still marked "recording" is definitely
     // orphaned (see finalizeDanglingRecording's own comment for why).
     await finalizeDanglingRecording(prisma, bookingId);
+    // The transcript the browsers wrote during the class (D-189) is complete
+    // once the room is: rebase it and hand it to Phase C. Idempotent against
+    // the Inngest fallback that does the same after the scheduled end.
+    try {
+      // Imported here rather than at the top: constructing the Inngest client
+      // reads the server env, which the webhook module must not require at
+      // load time.
+      const { inngest } = await import("@/lib/inngest/client");
+      await finalizeBrowserTranscript(prisma, inngest, bookingId);
+    } catch (err) {
+      log.error("finalize browser transcript failed", err, { bookingId });
+    }
     // Low-priority PostHog forward, same rationale as recording_ended above.
     await trackCallEvent(prisma, bookingId, (teacherId) => ({
       name: "call_room_finished",

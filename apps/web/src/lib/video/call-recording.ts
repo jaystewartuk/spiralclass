@@ -189,11 +189,19 @@ export async function stopBookingRecording(
 // must never surface as a webhook error. `startLessonAudioCaptures` is
 // idempotent per (bookingId, speaker), so a duplicate `participant_joined`
 // (e.g. a reconnect) is a safe no-op.
+//
+// Since D-189 the transcript lesson insights read is written by the browsers
+// (lib/transcription/browser-transcript.ts), and this egress capture is the
+// legacy path: it ALSO requires recordingEnabled() — a video box with an
+// egress service, which CLASS_RECORDING_ENABLED stands for — so turning the
+// transcription flag on for the browser path does not start an egress on a
+// box that has none (D-187). Its retirement is a separate change.
 export async function maybeStartLessonAudioCapture(
   prisma: PrismaClient,
   bookingId: string,
 ): Promise<void> {
   if (!transcriptionEnabled()) return;
+  if (!recordingEnabled()) return;
 
   const provider = getVideoProvider();
   if (!provider || !provider.recordingConfigured()) return;

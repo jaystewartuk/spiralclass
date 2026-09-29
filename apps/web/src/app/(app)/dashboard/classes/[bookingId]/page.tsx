@@ -35,6 +35,7 @@ import { LessonSummaryCard } from "./lesson-summary-card";
 import { FocusAreasCard } from "./focus-areas-card";
 import { SpeakingTimeCard } from "./speaking-time-card";
 import { computeSpeakingTime } from "@/lib/lesson-notes/speaking-time";
+import { BROWSER_TRANSCRIPT_LIVE } from "@/lib/transcription/browser-transcript";
 import type { SpeakerUtterance } from "@/lib/transcription/types";
 import { PrepareCard } from "./prepare-card";
 import { getOrGenerateBrief } from "@/lib/lesson-notes/brief-service";
@@ -200,9 +201,10 @@ export default async function TeacherClassDetailPage({
             select: { id: true },
             take: 1,
           },
-          lessonTranscript: { select: { bookingId: true, utterances: true } },
+          lessonTranscript: { select: { bookingId: true, utterances: true, provider: true } },
           // Speaking-time analytics (D-97) — LessonAudio.durationMs anchors the
-          // lesson's total length; utterances above give per-speaker talk time.
+          // lesson's total length where the legacy audio path wrote one;
+          // otherwise the transcript's last line does (D-189).
           lessonAudio: { select: { durationMs: true } },
         },
       }),
@@ -251,10 +253,16 @@ export default async function TeacherClassDetailPage({
     submissionCount: a._count.submissions,
   }));
 
-  const hasReplay = booking.callRecordings.length > 0 || booking.lessonTranscript != null;
+  // A transcript the browsers are still writing (D-189) is not a replay yet,
+  // and its timestamps are not on the lesson timeline until it is finalised.
+  const transcript =
+    booking.lessonTranscript && booking.lessonTranscript.provider !== BROWSER_TRANSCRIPT_LIVE
+      ? booking.lessonTranscript
+      : null;
+  const hasReplay = booking.callRecordings.length > 0 || transcript != null;
   const speakingTime = computeSpeakingTime(
     booking.lessonAudio,
-    (booking.lessonTranscript?.utterances as unknown as SpeakerUtterance[] | undefined) ?? [],
+    (transcript?.utterances as unknown as SpeakerUtterance[] | undefined) ?? [],
   );
 
   const lessonNoteRows = booking.lessonNotes.map((n) => ({

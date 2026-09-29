@@ -13,12 +13,12 @@ connection" below). On top of the core call (mute/camera/screen-share/leave),
 the product layers three Pro-gated, legal/consent-sensitive capabilities:
 **recording** (teacher-controlled capture of the whole class, audio-only since
 D-135), **live captions** (real-time speech-to-text + translation of both
-people, run in their browsers — [D-185](../decisions/D-185.md)), and **post-call
-transcription** (derived from separate per-participant audio, feeding a
-downstream lesson-insights pipeline). **Only captions are on in production
-today**: recording and transcription both need egress, which the box cannot
-carry, so D-187 switched them off. The behaviour below is what they do when
-on.
+people, run in their browsers — [D-185](../decisions/D-185.md)), and the
+**lesson transcript** (the caption lines, kept with the student's insights
+consent as the class's transcript for the lesson-insights pipeline —
+[D-189](../decisions/D-189.md)). **Captions and the transcript are on in
+production; recording is off**: it needs egress, which the box cannot carry,
+so D-187 switched it off. The behaviour below is what each does when on.
 
 Source: `apps/web/src/lib/video/*`, `apps/web/src/lib/captions/*`,
 `apps/web/src/lib/transcription/*`, `docs/decisions/D-187.md`,
@@ -198,32 +198,34 @@ That lasts until preview has a LiveKit server of its own.
     routes re-check the flag, the key, the class's participants and the
     teacher's Pro plan on every call.
 
-### Post-call transcription & lesson insights
+### The lesson transcript & lesson insights
 
-20. Transcription is derived from **separate per-participant audio
-    captures** (one file per speaker), **not** from the A/V room-composite
-    recording — these are two independent capture pipelines with different
-    retention rules.
-21. Per-participant audio capture (and therefore transcription) for a given
-    student's voice requires that **specific student's own recorded
-    insights-consent** to exist. For a **minor student**, the student's own
-    consent is explicitly **not sufficient by itself** — a guardian's consent
-    must also be on file, or capture is skipped for that student entirely.
-22. A missing teacher-student pairing record also blocks capture outright.
-23. Once a speaker's audio file lands, it is transcribed and **merged** into
-    one running per-booking transcript (each file's own relative timestamps
-    are offset onto a single absolute timeline); once no participant's audio
-    is still pending, the transcript is rebased to a clean timeline and a
-    downstream "transcript ready" event fires for further analysis (lesson
-    insights, pronunciation scoring).
-24. **Retention**: raw per-speaker audio is deleted from storage after
-    processing **unless** the teacher has explicitly opted in to audio
-    retention (`Teacher.lessonAudioRetentionOptIn`) — the transcript itself
-    is always kept; the source audio is derive-then-discard by default.
-25. Not every call is transcribed — only when the transcription flag AND a
-    configured ASR vendor key exist, AND the specific student's consent (or
-    guardian consent, for a minor) is on file. No consent → no capture at
-    all for that student, not merely a lesser-quality result.
+20. The transcript is the **caption text** (D-189): while captions are on,
+    the browser that recognised a finished utterance also posts its source
+    text, speaker and estimated duration to `POST /api/captions/transcript`.
+    It is **not** derived from the A/V recording and **no audio is captured**
+    for it.
+21. A class's lines are kept only when its caption session says
+    `transcriptCapture`: the transcription flag is on AND that **specific
+    student's recorded insights consent** exists. For a **minor student**, the
+    student's own consent is explicitly **not sufficient by itself** — a
+    guardian's consent must be on file. A class for two also needs the buyer's
+    confirmation for the second person (D-188). The route re-checks this per
+    line; without it, nothing of either speaker is kept.
+22. A missing teacher-student pairing record blocks keeping outright.
+23. Lines are appended atomically to one per-booking `LessonTranscript`
+    (provider `browser-live`), stamped at receipt. On the LiveKit
+    `room_finished` webhook — or an Inngest fallback 30 minutes after the
+    scheduled end — the transcript is rebased to a 0-based timeline, marked
+    `browser`, and "transcript ready" fires for lesson insights. A line that
+    arrives after that is dropped.
+24. **Both participants see "Transcript kept for learning insights"** while
+    lines are being kept (D-21). The transcript is kept while the teacher's
+    account is open and deleted with it.
+25. Not every call gets a transcript — only when captions are on, the flag is
+    on, and the consent above is on file. The legacy egress-audio path
+    (`lib/transcription/pipeline.ts`) additionally requires recording to be
+    enabled, so it is dormant.
 
 ### Materials on the call
 

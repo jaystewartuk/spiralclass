@@ -4,6 +4,7 @@ import type { InsightCategory } from "@prisma/client";
 
 import { normaliseSkill } from "./skills";
 import { computeSpeakingTime, type SpeakingTimeSummary } from "./speaking-time";
+import { BROWSER_TRANSCRIPT_LIVE } from "@/lib/transcription/browser-transcript";
 import type { SpeakerUtterance } from "@/lib/transcription/types";
 
 // The longitudinal learning profile (lesson-insights Phase E,
@@ -180,7 +181,13 @@ export async function recomputeStudentProfile(
       orderBy: { scheduledStart: "asc" },
     }),
     prisma.booking.findMany({
-      where: { teacherId, studentId, lessonTranscript: { isNot: null } },
+      // A finalised transcript only: one the browsers are still writing
+      // (D-189) is not on the lesson timeline yet.
+      where: {
+        teacherId,
+        studentId,
+        lessonTranscript: { is: { provider: { not: BROWSER_TRANSCRIPT_LIVE } } },
+      },
       select: {
         lessonAudio: { select: { durationMs: true } },
         lessonTranscript: { select: { utterances: true } },

@@ -138,16 +138,17 @@ const NON_AI_CLAIMS = new Set([
 // Podcasts joined pronunciation here in D-114, because podcasts had no flag at
 // all until D-114 added one, so the only way to turn them off was to pull a
 // vendor secret. Insights were here under D-114, moved up to CLAIM_GATES when
-// D-131 turned the transcription flag back on, and are back here since D-187
-// turned it off again: the video box production now runs on has no room for
-// the egress that captures the audio.
+// D-131 turned the transcription flag back on, came back here under D-187,
+// and left again with D-189: the transcript now comes from the browsers'
+// caption recognisers, so the flag is on without any egress. The insights
+// cards themselves were not re-added to the marketing pages in that change —
+// re-adding one means listing it in CLAIM_GATES under
+// LESSON_INSIGHTS_TRANSCRIPTION_ENABLED.
 const GATED_OFF_CLAIMS: Record<string, string> = {
   "web.landing.ai.pronunciation": "LESSON_INSIGHTS_PRONUNCIATION_ENABLED",
   "web.features.item.pronunciation": "LESSON_INSIGHTS_PRONUNCIATION_ENABLED",
   "web.landing.ai.podcast": "MATERIAL_PODCASTS_ENABLED",
   "web.features.item.podcast": "MATERIAL_PODCASTS_ENABLED",
-  "web.landing.ai.insights": "LESSON_INSIGHTS_TRANSCRIPTION_ENABLED",
-  "web.features.item.aiInsights": "LESSON_INSIGHTS_TRANSCRIPTION_ENABLED",
 };
 
 const production = parseEnvFile(envFilePath("production", "runtime")).map as Record<string, string>;
@@ -257,27 +258,34 @@ describe("public AI claims match production enablement flags", () => {
     });
   }
 
-  // D-187 turned recording and transcription off again (D-131 had turned them
-  // on). Stated out loud for the same reason D-114 and D-131 did: these two
+  // Stated out loud for the same reason D-114, D-131 and D-187 did: these two
   // decide whether a student's voice is captured at all, so their state is
   // something a test says rather than something you learn by reading an env
-  // file. Turning either back on is a real decision — change this test in the
-  // same commit, and correct the "switched off" sentences in
+  // file. D-187 turned both off because the box has no egress. D-189 turned
+  // TRANSCRIPTION back on without one: the transcript is the caption text the
+  // participants' browsers already recognise, kept with the pairing's insights
+  // consent. Recording stays off — it still needs egress. Changing either is a
+  // real decision — change this test in the same commit, and the sentences in
   // packages/shared/src/legal/privacy-policy.ts with it.
-  it("class recording and transcription are off in production (D-187)", () => {
+  it("class recording is off and transcription is on in production (D-187, D-189)", () => {
     expect(flagOn("CLASS_RECORDING_ENABLED")).toBe(false);
-    expect(flagOn("LESSON_INSIGHTS_TRANSCRIPTION_ENABLED")).toBe(false);
+    expect(flagOn("LESSON_INSIGHTS_TRANSCRIPTION_ENABLED")).toBe(true);
   });
 
-  // Both directions, so the policy and the flags cannot drift apart either way:
-  // while the flags are off the policy must say so, and the moment they come
-  // back on the "switched off" prose has to go with them.
-  it("the privacy policy says recording and transcription are switched off exactly when they are", () => {
+  // Both directions for each flag, so the policy and the flags cannot drift
+  // apart either way: while recording is off the policy must say so, and the
+  // moment it comes back on that sentence has to go; while transcription is on
+  // the policy must describe the browser-written transcript, and if it goes off
+  // again that description has to go with it.
+  it("the privacy policy says recording is switched off, and describes the kept transcript, exactly when they are", () => {
     const prose = JSON.stringify(PRIVACY_POLICY_SECTIONS);
-    const saysOff = /switched off in production/.test(prose);
-    const flagsOff =
-      !flagOn("CLASS_RECORDING_ENABLED") && !flagOn("LESSON_INSIGHTS_TRANSCRIPTION_ENABLED");
-    expect(saysOff).toBe(flagsOff);
+    expect(/[Cc]lass recording is switched off in production/.test(prose)).toBe(
+      !flagOn("CLASS_RECORDING_ENABLED"),
+    );
+    expect(/kept as a written transcript/.test(prose)).toBe(
+      flagOn("LESSON_INSIGHTS_TRANSCRIPTION_ENABLED"),
+    );
+    expect(prose).not.toMatch(/transcription and learning insights are switched off/);
     expect(prose).not.toMatch(/Not stored at all/);
   });
 });

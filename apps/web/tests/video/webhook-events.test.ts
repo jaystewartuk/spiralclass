@@ -39,6 +39,18 @@ vi.mock("@/lib/video/call-recording", () => ({
 const trackServerEvent = vi.fn();
 vi.mock("@/lib/analytics/posthog", () => ({ trackServerEvent }));
 
+const finalizeBrowserTranscript = vi.fn(async (..._a: unknown[]) => ({
+  code: "finalized",
+  utteranceCount: 2,
+}));
+vi.mock("@/lib/transcription/browser-transcript", () => ({
+  finalizeBrowserTranscript: (...a: unknown[]) => finalizeBrowserTranscript(...a),
+}));
+vi.mock("@/lib/inngest/client", () => ({ inngest: { tag: "inngest" } }));
+vi.mock("@/lib/logger", () => ({
+  logger: () => ({ info: vi.fn(), warn: vi.fn(), error: vi.fn() }),
+}));
+
 const { handleNormalizedEvent } = await import("@/lib/video/webhook-events");
 const { prisma } = await import("@/lib/prisma");
 
@@ -170,6 +182,8 @@ describe("handleNormalizedEvent — room_finished", () => {
     expect(outcome).toEqual({ code: "room-finished-swept", bookingId: "booking-9" });
     expect(stopLessonAudioCaptures).toHaveBeenCalledWith(prisma, "booking-9");
     expect(finalizeDanglingRecording).toHaveBeenCalledWith(prisma, "booking-9");
+    // The transcript the browsers wrote during the class (D-189).
+    expect(finalizeBrowserTranscript).toHaveBeenCalledWith(prisma, { tag: "inngest" }, "booking-9");
     expect(trackServerEvent).toHaveBeenCalledWith({
       name: "call_room_finished",
       distinctId: "teacher-9",
@@ -186,6 +200,21 @@ describe("handleNormalizedEvent — room_finished", () => {
     expect(outcome).toEqual({ code: "ignored", reason: "not-a-class-room" });
     expect(stopLessonAudioCaptures).not.toHaveBeenCalled();
     expect(finalizeDanglingRecording).not.toHaveBeenCalled();
+    expect(finalizeBrowserTranscript).not.toHaveBeenCalled();
+  });
+
+  it("still sweeps and answers 'swept' when finalising the transcript throws", async () => {
+    // A webhook must never fail on a side effect: LiveKit would retry the
+    // whole event, and the recording sweep already ran.
+    finalizeBrowserTranscript.mockRejectedValueOnce(new Error("db down"));
+    const outcome = await handleNormalizedEvent(prisma, {
+      kind: "room_finished",
+      room: "class-booking-9",
+    });
+    expect(outcome).toEqual({ code: "room-finished-swept", bookingId: "booking-9" });
+    expect(trackServerEvent).toHaveBeenCalledWith(
+      expect.objectContaining({ name: "call_room_finished" }),
+    );
   });
 });
 

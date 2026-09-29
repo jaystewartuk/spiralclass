@@ -58,6 +58,12 @@ export type Events = {
   "lesson.transcript.ready": {
     data: { bookingId: string };
   };
+  // D-189: the participants' browsers have begun writing a class's transcript
+  // (the first caption line was kept). The handler waits until the class is
+  // over and finalises the transcript if the room_finished webhook did not.
+  "lesson.transcript.capturing": {
+    data: { bookingId: string };
+  };
   // Intro-video coach Layer 2 (D-73): a teacher recorded/uploaded their public
   // intro video. The handler transcribes it (Pro-gated, flag-gated) into the
   // teacher's IntroVideoAnalysis row. `videoPath` pins the object the event was
