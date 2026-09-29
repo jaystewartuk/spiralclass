@@ -82,7 +82,6 @@ done
 [ -n "$PROJECT_ID" ] || die "NEON_PROJECT_ID is not set (and no --project-id given)."
 require_tools npx
 
-NEON_CLI=(npx --yes neonctl@latest)
 NEON=("${NEON_CLI[@]}" --project-id "$PROJECT_ID")
 
 # NEON_API_KEY if set, otherwise neonctl's stored credential (`neonctl auth`).

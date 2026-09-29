@@ -207,6 +207,24 @@ describe("neon auth (D-146 follow-up)", () => {
     }
   });
 
+  // 2026-09-29: `npx neonctl@latest` resolved a release published five minutes
+  // earlier whose own dependency was not on npm, and the production deploy died
+  // at the checkpoint. The CLI is pinned once, in _common.sh, to an exact
+  // version; neither script may define its own or reach for a floating tag.
+  it("runs the Neon CLI at one exact, shared version", () => {
+    expect(common()).toMatch(/^NEONCTL_VERSION="\d+\.\d+\.\d+"$/m);
+    expect(common()).toMatch(/^NEON_CLI=\(npx --yes "neonctl@\$\{NEONCTL_VERSION\}"\)$/m);
+    for (const [name, src] of [
+      ["neon-checkpoint.sh", checkpoint()],
+      ["neon-rollback.sh", rollback()],
+    ] as const) {
+      expect(src, `${name} defines its own NEON_CLI`).not.toMatch(/^NEON_CLI=/m);
+      expect(src, `${name} runs neonctl at a floating version`).not.toMatch(
+        /neonctl@(latest|next|\^|~)/,
+      );
+    }
+  });
+
   it("both scripts authenticate through the one shared helper", () => {
     // Separately-implemented auth is how a rollback tool ends up failing
     // during the incident it exists for, having looked fine every other day.

@@ -4,6 +4,19 @@
 # Print to stderr and exit non-zero.
 die() { echo "error: $*" >&2; exit 1; }
 
+# The Neon CLI, pinned to an exact release, for the checkpoint and the rollback.
+#
+# It was `neonctl@latest`, and on 2026-09-29 that broke a production deploy:
+# neonctl 6.4.0 was published at 18:06 UTC depending on a `neon@6.4.0` that
+# npm did not have, and the promote five minutes later died installing it, at
+# the checkpoint, before any migration. An unpinned CLI makes every deploy —
+# and, worse, every rollback — depend on whatever Neon shipped that minute.
+# Bump this on purpose: `npx --yes neonctl@<new> --version` must print the
+# version before it goes here. Guarded by
+# apps/web/tests/config/neon-checkpoint-retention.test.ts.
+NEONCTL_VERSION="6.3.0"
+NEON_CLI=(npx --yes "neonctl@${NEONCTL_VERSION}")
+
 # Fail early if any required CLI tool is missing.
 require_tools() {
   local missing=0 t
