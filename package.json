@@ -52,8 +52,8 @@
     "gate:lock": "node scripts/ci/lock.mjs status"
   },
   "devDependencies": {
-    "prettier": "^3.9.6",
+    "prettier": "^3.9.9",
     "prettier-plugin-tailwindcss": "^0.8.1",
-    "turbo": "^2.10.12"
+    "turbo": "^2.11.4"
   }
 }
