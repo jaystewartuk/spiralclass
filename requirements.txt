@@ -3,5 +3,5 @@
 # part of the pnpm web/mobile build. See docs/deployment/DOCS_SITE.md.
 mkdocs-material==9.7.7
 mkdocs-awesome-nav==3.3.0
-mkdocs-git-revision-date-localized-plugin==1.5.4
+mkdocs-git-revision-date-localized-plugin==1.6.0
 mkdocs-redirects==1.2.3
