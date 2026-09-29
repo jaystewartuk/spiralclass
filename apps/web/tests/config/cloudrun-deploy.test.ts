@@ -86,6 +86,40 @@ describe("the service shape is the one that was measured", () => {
     expect(Number(shape.MAX_INSTANCES)).toBeLessThanOrEqual(10);
   });
 
+  describe("a wedged instance is replaced without anyone awake (D-190, #94)", () => {
+    const probe = Object.fromEntries(
+      (shape.LIVENESS_PROBE ?? "").split(",").map((kv) => kv.split("=") as [string, string]),
+    );
+
+    it("the deploy passes a liveness probe on every release", () => {
+      // Without one, Cloud Run's only check is a TCP startup probe, and a
+      // process whose event loop has wedged still holds its port. That is the
+      // outage Fly had twice with one machine and no replacement path.
+      expect(EXECUTABLE).toContain('--liveness-probe "$LIVENESS_PROBE"');
+      expect(EXECUTABLE).toMatch(/for v in [^;]*\bLIVENESS_PROBE\b/);
+    });
+
+    it("probes the route with no database behind it, on the container's port", () => {
+      // A Postgres-backed probe would restart every instance during a Neon
+      // outage, fixing nothing, and would keep Neon's compute from suspending.
+      expect(probe["httpGet.path"]).toBe("/api/health/live");
+      expect(probe["httpGet.port"]).toBe("3000");
+    });
+
+    it("waits most of a minute before restarting, and never longer than two", () => {
+      // A restart drops the requests in flight, so one slow render must not
+      // trigger it. The 2026-09-21 wedge answered one probe in 15s and none
+      // after, so a 15s reply has to count as a failure.
+      const period = Number(probe.periodSeconds);
+      const threshold = Number(probe.failureThreshold);
+      const timeout = Number(probe.timeoutSeconds);
+      expect(timeout).toBeLessThan(15);
+      expect(timeout).toBeLessThanOrEqual(period);
+      expect(period * threshold).toBeGreaterThanOrEqual(45);
+      expect(period * threshold).toBeLessThanOrEqual(120);
+    });
+  });
+
   it("names no account identifier — this repository is public (D-158)", () => {
     // The project id reaches the deploy as a secret. A project id here would be
     // published on the next push, and could not be taken back.
