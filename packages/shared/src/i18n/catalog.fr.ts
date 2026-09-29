@@ -5008,7 +5008,6 @@ export const fr = {
   "web.bookingLanding.seats.two": "À deux",
   "web.bookingLanding.seats.twoExplainer":
     "Pour deux personnes qui suivent tous les cours ensemble. L'une de vous paie une seule fois pour les deux.",
-  "web.bookingLanding.seats.forTwoShort": "Pour deux",
   "web.bookingLanding.perPersonPerClass": "{price} par personne et par cours",
   "web.buyFlow.package.forTwo": "Pour deux personnes",
   "web.buyFlow.seats.legend": "Qui suit les cours ?",
@@ -5023,6 +5022,7 @@ export const fr = {
   "web.dashboard.students.package.forTwoLabel": "Ce forfait est pour deux personnes",
   "web.dashboard.students.package.forTwoHint":
     "Ses cours sont décomptés d'un solde séparé pour deux. L'analyse des cours reste désactivée pour ses cours, car personne n'a confirmé au paiement que la deuxième personne est d'accord.",
+  "web.bookingLanding.fromPriceShort": "À partir de {price}",
   "web.bookingLanding.tagline": "Des cours particuliers en ligne, au rythme qui vous convient.",
   // La carte sociale par professeure (apps/web/src/app/b/[slug]/opengraph-image.tsx).
   // Fixée à PUBLIC_FUNNEL_LOCALE comme la page qu'elle prévisualise.
