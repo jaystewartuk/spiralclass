@@ -67,6 +67,13 @@ export type DeepgramFetch = typeof fetch;
 // Thin network wrapper. `fetch` is injectable so the call is testable without a
 // real key. Deepgram pulls the audio from `audioUrl` itself (a short-lived R2
 // presigned URL), so no bytes pass through our server.
+//
+// mip_opt_out keeps the audio out of Deepgram's Model Improvement Program, as
+// the live-captions fallback already does (lib/captions/deepgram-live.ts):
+// without it Deepgram may keep part of the request to train its models, which
+// the privacy notice's "Nothing here is used to train anybody's AI models"
+// does not allow. Every recorded-audio path — intro-video coaching, homework,
+// lesson transcripts — reaches Deepgram through this one function.
 export async function transcribeWithDeepgram(
   apiKey: string,
   input: { audioUrl: string; language: string },
@@ -77,6 +84,7 @@ export async function transcribeWithDeepgram(
   url.searchParams.set("language", input.language);
   url.searchParams.set("utterances", "true");
   url.searchParams.set("punctuate", "true");
+  url.searchParams.set("mip_opt_out", "true");
 
   const res = await fetchImpl(url.toString(), {
     method: "POST",

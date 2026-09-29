@@ -67,6 +67,20 @@ describe("transcribeWithDeepgram", () => {
     expect(JSON.parse(String(init!.body))).toEqual({ url: "https://r2.example/audio.ogg" });
   });
 
+  // #114: without mip_opt_out Deepgram may keep part of the audio to train
+  // its models, and the privacy notice says nothing here trains anybody's.
+  it("opts every request out of Deepgram's model training", async () => {
+    const fetchImpl = vi.fn(
+      async (_url: string | URL | Request, _init?: RequestInit) =>
+        ({ ok: true, json: async () => FIXTURE }) as Response,
+    );
+
+    await transcribeWithDeepgram("k", { audioUrl: "u", language: "en" }, fetchImpl);
+
+    const url = new URL(String(fetchImpl.mock.calls[0][0]));
+    expect(url.searchParams.get("mip_opt_out")).toBe("true");
+  });
+
   it("throws on a non-OK vendor response", async () => {
     const fetchImpl = vi.fn(async () => ({ ok: false, status: 429 }) as Response);
     await expect(
