@@ -152,6 +152,22 @@ export function packageRowIssues(rows: Array<PackageRow>): Map<string, PackageRo
 }
 
 /**
+ * Does this package actually charge less by transfer? Decides whether switching
+ * it on for two suggests a transfer discount for two as well.
+ *
+ * A transfer price is not the same as a discount. A teacher whose transfer
+ * price EQUALS her card price (the first live teacher's whole ladder) charges
+ * the same on both rails. Treating any non-null transfer price as a discount
+ * gave her 4-class package for two a 2,629 MXN transfer price against a 2,775
+ * card price: a discount she had never offered on anything.
+ */
+export function offersTransferDiscount(
+  row: Pick<PackageRow, "priceMinorUnits" | "transferPriceMinorUnits">,
+): boolean {
+  return row.transferPriceMinorUnits !== null && row.transferPriceMinorUnits < row.priceMinorUnits;
+}
+
+/**
  * The transfer price is at or above the card price — so the rail sold as
  * "pay by transfer and save" costs the student the same or more.
  *
