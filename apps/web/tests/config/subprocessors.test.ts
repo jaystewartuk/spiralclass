@@ -1,4 +1,4 @@
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 import {
@@ -204,7 +204,7 @@ describe("sub-processor register", () => {
     const prodEnv = parseEnvFile(envFilePath("production", "runtime"));
     const bogus = gatedSubprocessors()
       .filter((s) => s.gate !== null)
-      .filter((s) => !envSrc.includes(s.gate as string) && !(s.gate! in prodEnv))
+      .filter((s) => !envSrc.includes(s.gate as string) && !(s.gate! in prodEnv.map))
       .map((s) => `${s.id} cites gate ${s.gate}`);
     expect(
       bogus,
@@ -234,6 +234,34 @@ describe("sub-processor register", () => {
     expect(coreSubprocessors().length + gatedSubprocessors().length).toBe(SUBPROCESSORS.length);
     expect(coreSubprocessors().every((s) => s.gate === null)).toBe(true);
     expect(gatedSubprocessors().every((s) => s.gate !== null)).toBe(true);
+  });
+
+  it("cites a path that exists wherever the repository is the evidence", () => {
+    const vendorSourced = new Set(["vendor documentation", "not published by the browser vendor"]);
+    const missing = SUBPROCESSORS.filter((s) => !vendorSourced.has(s.evidence))
+      .filter((s) => !existsSync(resolve(REPO_ROOT, s.evidence)))
+      .map((s) => `${s.id} cites ${s.evidence}`);
+    expect(missing, `Evidence paths that do not exist:\n${missing.join("\n")}`).toEqual([]);
+  });
+
+  // #104: production video moved to LiveKit Cloud (D-182) and back to our own
+  // box (D-187), and the register kept saying "self-hosted" through the first
+  // move. LiveKit Cloud is a separate company with its own location, so the
+  // entry has to follow production's LIVEKIT_URL, in both directions.
+  it("names the LiveKit that production's LIVEKIT_URL actually points at", () => {
+    const livekitUrl = parseEnvFile(envFilePath("production", "runtime")).map.LIVEKIT_URL;
+    expect(livekitUrl, "production.runtime.env sets no LIVEKIT_URL").toBeTruthy();
+    const onCloud = new URL(livekitUrl).hostname.endsWith(".livekit.cloud");
+    const entries = SUBPROCESSORS.filter((s) => s.name.startsWith("LiveKit"));
+    expect(entries.map((s) => s.name)).toEqual([
+      onCloud ? "LiveKit Cloud" : "LiveKit (self-hosted)",
+    ]);
+    if (!onCloud) {
+      expect(
+        entries[0].evidence,
+        "A self-hosted box has a region this repository states; cite it rather than a vendor page",
+      ).not.toBe("vendor documentation");
+    }
   });
 
   it("carries a review date in ISO form", () => {
