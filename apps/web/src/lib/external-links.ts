@@ -1,3 +1,4 @@
+import "server-only";
 import { serverEnv } from "@/lib/env";
 
 // Stripe dashboard prefixes live and test resources at different paths.

@@ -6,6 +6,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 const env = { STRIPE_SECRET_KEY: "sk_live_abc" as string | undefined };
 
+vi.mock("server-only", () => ({}));
 vi.mock("@/lib/env", () => ({
   serverEnv: () => env,
 }));

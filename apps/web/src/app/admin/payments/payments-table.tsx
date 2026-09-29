@@ -9,7 +9,6 @@ import { FilterBar, FilterField, FilterSelect } from "@/components/ui/filter-bar
 import { TableShell } from "@/components/ui/table";
 import { matchesPaymentFilters, PAYMENT_STATUSES } from "@/lib/admin-filters";
 import { formatMinorUnits } from "@/lib/money";
-import { stripePaymentIntentUrl } from "@/lib/external-links";
 import { useDebouncedSubmit } from "@/lib/use-debounced-submit";
 import { useT } from "@/components/locale-provider";
 import { RefundButton } from "./refund-form";
@@ -22,7 +21,11 @@ export type PaymentRow = {
   status: PaymentStatus;
   provider: string;
   providerPaymentId: string | null;
+  // Built on the server by page.tsx: the dashboard base depends on the
+  // secret key's mode, and this component runs in the browser (AGENDAPROFE-2A).
+  stripeUrl: string | null;
   amountMinorUnits: number;
+  currency: string;
   createdAt: Date;
   package: {
     id: string;
@@ -139,7 +142,7 @@ export function PaymentsTable({
           sortable: true,
           className: "text-right font-medium",
         },
-        cell: ({ row }) => formatMinorUnits(row.original.amountMinorUnits),
+        cell: ({ row }) => formatMinorUnits(row.original.amountMinorUnits, row.original.currency),
       },
       {
         id: "actions",
@@ -148,7 +151,7 @@ export function PaymentsTable({
         cell: ({ row }) => {
           const p = row.original;
           const isStripe = p.provider === "stripe";
-          const stripeUrl = isStripe ? stripePaymentIntentUrl(p.providerPaymentId) : null;
+          const stripeUrl = isStripe ? p.stripeUrl : null;
           return (
             <div className="flex items-center justify-end gap-2">
               {stripeUrl ? (
