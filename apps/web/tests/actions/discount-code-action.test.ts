@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createT, type AppLocale } from "@spiralclass/shared";
 
 // createDiscountCode's parsing of the FormData the Discounts form actually
@@ -40,9 +40,21 @@ function fd(entries: Record<string, string>): FormData {
   return f;
 }
 
+// The fixtures below use calendar dates ("expires 2026-09-29"), and the action
+// refuses an expiry that has already passed. Against the real clock that made
+// this suite a time bomb: it went red on 2026-09-30 with no code change. The
+// clock is pinned to a day before every fixture date instead.
+const NOW = new Date("2026-09-01T12:00:00Z");
+
 beforeEach(() => {
   vi.clearAllMocks();
   locale.current = "en";
+  vi.useFakeTimers({ toFake: ["Date"] });
+  vi.setSystemTime(NOW);
+});
+
+afterEach(() => {
+  vi.useRealTimers();
 });
 
 describe("createDiscountCode", () => {
