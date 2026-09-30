@@ -31,7 +31,7 @@ overrides:
   # All dev-toolchain-only transitive deps (eslint/expo-cli), with a real
   # patched line available — bumped rather than added to ignoreGhsas below,
   # per that list's own "no available fix path" criterion.
-  brace-expansion@>=3.0.0 <5.0.9: "5.0.9" # GHSA-3jxr-9vmj-r5cp, GHSA-rgw5-rvv9-x895
+  brace-expansion@>=3.0.0 <5.0.11: "5.0.11" # GHSA-3jxr-9vmj-r5cp, GHSA-rgw5-rvv9-x895, GHSA-6j4f-fj2g-mc7p, GHSA-qhr7-859c-m2p7
   js-yaml@>=4.0.0 <4.3.0: ">=4.3.0" # GHSA-52cp-r559-cp3m
   "eslint>js-yaml": "5.2.2" # GHSA-pm4m-ph32-ghv5
   "@eslint/eslintrc>js-yaml": "5.2.2" # GHSA-pm4m-ph32-ghv5
@@ -80,7 +80,7 @@ overrides:
   # compiled `__importDefault(...).default(...)` requires. That is exactly
   # what forcing the 5.x line onto this chain broke (see the ignoreGhsas note
   # below), so pin INSIDE 2.x rather than reaching for 5.x again.
-  brace-expansion@>=2.0.0 <2.1.4: "2.1.4" # GHSA-rgw5-rvv9-x895
+  brace-expansion@>=2.0.0 <2.1.6: "2.1.6" # GHSA-rgw5-rvv9-x895, GHSA-6j4f-fj2g-mc7p, GHSA-qhr7-859c-m2p7
   # 2026-07-24 dependency maintenance pass overrides
   cross-spawn@>=7.0.0 <7.0.5: "7.0.5" # GHSA-3xgq-45jj-v275
   tmp@<0.2.7: "0.2.7" # GHSA-52f5-9888-hmc6, GHSA-ph9p-34f9-6g65, GHSA-7c78-jf6q-g5cm
