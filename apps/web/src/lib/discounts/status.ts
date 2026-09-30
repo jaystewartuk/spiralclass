@@ -219,6 +219,21 @@ export type CurrencyTotal = { currency: string } & Omit<CodeTotals, "used">;
  * onboarding, so this is a one-element array — but it degrades into two honest
  * lines rather than one wrong number if that ever stops being true.
  */
+/**
+ * Which parts of the page's summary row to show.
+ *
+ * The row appears once a code has been used, and the money tile only once a
+ * purchase with one has been paid. Gating the whole row on the money — which
+ * PR 162 made settled-only — hid "Live codes" and "Times used" from a teacher
+ * whose codes were all mid-checkout, though both were real numbers.
+ */
+export function discountSummary(
+  usedCount: number,
+  settledCurrencies: number,
+): { showRow: boolean; showMoney: boolean } {
+  return { showRow: usedCount > 0, showMoney: settledCurrencies > 0 };
+}
+
 export function totalsByCurrency(rows: readonly RedemptionFact[]): CurrencyTotal[] {
   const out = new Map<string, CurrencyTotal>();
   for (const row of rows) {

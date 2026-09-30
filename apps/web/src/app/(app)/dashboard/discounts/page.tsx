@@ -12,6 +12,7 @@ import {
   NO_TOTALS,
   compareForList,
   discountState,
+  discountSummary,
   totalsByCode,
   totalsByCurrency,
   type RedemptionFact,
@@ -105,6 +106,7 @@ export default async function DiscountsPage() {
   const live = rows.filter((r) => r.state === "live");
   const inactive = rows.filter((r) => r.state !== "live");
   const money = totalsByCurrency(facts);
+  const summary = discountSummary(redemptions.length, money.length);
   // Settled money only, and only where there is some: an unconfirmed transfer
   // is a use spent, not a sale made.
   const sales = money
@@ -199,8 +201,12 @@ export default async function DiscountsPage() {
       {/* The numbers appear the moment there is a number — and not before. A
           KPI row reading "1 code · 0 uses · 0.00" on the day she makes her
           first code is furniture that teaches her the page is empty. */}
-      {money.length > 0 && (
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
+      {summary.showRow && (
+        <div
+          className={
+            summary.showMoney ? "grid grid-cols-2 gap-4 sm:grid-cols-3" : "grid grid-cols-2 gap-4"
+          }
+        >
           <StatCard label={t("web.dashboard.discounts.summary.liveCodes")} value={live.length} />
           <StatCard
             label={t("web.dashboard.discounts.summary.timesUsed")}
@@ -208,21 +214,25 @@ export default async function DiscountsPage() {
           />
           {/* The money needs the whole row on a phone: two counts fit side by
               side, a formatted amount with its ISO code does not. */}
-          <div className="col-span-2 sm:col-span-1">
-            <StatCard
-              label={t("web.dashboard.discounts.summary.givenAway")}
-              // One line per currency rather than one total: there is no exchange
-              // rate in this codebase, and inventing one to fill a tile would be
-              // making up her money. In practice her pricing currency is chosen
-              // once at onboarding, so this is one line.
-              value={money.map((m) => formatMinorUnits(m.givenMinorUnits, m.currency)).join(" · ")}
-              hint={
-                sales.length > 0
-                  ? t("web.dashboard.discounts.summary.onSales", { amount: sales.join(" · ") })
-                  : undefined
-              }
-            />
-          </div>
+          {summary.showMoney && (
+            <div className="col-span-2 sm:col-span-1">
+              <StatCard
+                label={t("web.dashboard.discounts.summary.givenAway")}
+                // One line per currency rather than one total: there is no exchange
+                // rate in this codebase, and inventing one to fill a tile would be
+                // making up her money. In practice her pricing currency is chosen
+                // once at onboarding, so this is one line.
+                value={money
+                  .map((m) => formatMinorUnits(m.givenMinorUnits, m.currency))
+                  .join(" · ")}
+                hint={
+                  sales.length > 0
+                    ? t("web.dashboard.discounts.summary.onSales", { amount: sales.join(" · ") })
+                    : undefined
+                }
+              />
+            </div>
+          )}
         </div>
       )}
 
