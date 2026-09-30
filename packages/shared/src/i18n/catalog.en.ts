@@ -5016,6 +5016,7 @@ export const en = {
   "web.bookingLanding.seats.twoExplainer":
     "For two people who take every class together. One of you pays once for both.",
   "web.bookingLanding.perPersonPerClass": "{price} per person, per class",
+  "checkout.lineItem.forTwo": "for 2 people",
   "web.buyFlow.package.forTwo": "For two people",
   "web.buyFlow.seats.legend": "Who's taking the classes?",
   "web.buyFlow.seats.one": "Just me",

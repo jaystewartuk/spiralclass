@@ -15,6 +15,7 @@ import { railReadinessError, startCheckout } from "@/lib/payments/start-checkout
 import { flushAnalytics } from "@/lib/analytics/posthog";
 import { INSTRUMENT_READINESS_SELECT, isPubliclyListed } from "@/lib/marketplace-ready";
 import { hasStripeEmbeddedCheckout } from "@/lib/env";
+import { funnelLocaleForSlug } from "@/lib/booking/funnel-locale";
 import { usesEnglishCopy } from "@spiralclass/shared";
 
 // Wise stays a redirect (thrown by next/navigation's redirect() — never
@@ -105,7 +106,12 @@ async function createCheckoutIntentCore(
   _prev: CheckoutState,
   formData: FormData,
 ): Promise<CheckoutState> {
-  const locale = await getPreferredLocale();
+  // The public funnel speaks the teacher's booking-page language, never the
+  // visitor's (CLAUDE.md, D-133): its errors and the Stripe line item the
+  // buyer keeps as a receipt included. Reading the visitor's cookie here put
+  // "para 2 personas" on a Spanish-browser buyer's receipt from an English
+  // page. An unknown slug resolves to the fallback; the lookup below 404s it.
+  const locale = await funnelLocaleForSlug(String(formData.get("slug") ?? ""));
   const en = usesEnglishCopy(locale);
   const parsed = checkoutIntentSchema(locale).safeParse({
     slug: formData.get("slug"),

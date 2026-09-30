@@ -626,3 +626,30 @@ describe("startCheckout — a package bought for two", () => {
     expect(pkg().pricePaidMinorUnits).toBe(150_000);
   });
 });
+
+// The Stripe line item is the buyer's receipt. Its description was a
+// hard-coded Spanish sentence for every buyer, and "for 2 people" followed the
+// caller's locale only in the name.
+describe("startCheckout — the Stripe line item speaks the checkout's language", () => {
+  const lineItem = () =>
+    (createCheckoutSession.mock.calls[0][0] as { lineItem: { name: string; description: string } })
+      .lineItem;
+  const forTwo = () => template({ classCount: 8, twoPersonPriceMinorUnits: 225_000 });
+
+  it("is English on an English checkout", async () => {
+    await startCheckout(args({ template: forTwo(), seats: 2, partnerConsent: true, locale: "en" }));
+    expect(lineItem().name).toContain("(for 2 people)");
+    expect(lineItem().description).toBe("8 classes of 50 minutes");
+  });
+
+  it("is Spanish on a Spanish checkout", async () => {
+    await startCheckout(args({ template: forTwo(), seats: 2, partnerConsent: true, locale: "es" }));
+    expect(lineItem().name).toContain("(para 2 personas)");
+    expect(lineItem().description).toBe("8 clases de 50 minutos");
+  });
+
+  it("says one class, not one classes", async () => {
+    await startCheckout(args({ template: template({ classCount: 1 }), locale: "en" }));
+    expect(lineItem().description).toBe("1 class of 50 minutes");
+  });
+});

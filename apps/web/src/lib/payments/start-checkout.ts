@@ -6,6 +6,7 @@ import {
   stripeMinChargeMinorUnits,
   type InstrumentReadiness,
   type Seats,
+  createT,
   usesEnglishCopy,
 } from "@spiralclass/shared";
 import { prisma } from "@/lib/prisma";
@@ -192,6 +193,7 @@ async function instrumentsFor(teacherId: string): Promise<InstrumentReadiness[]>
 export async function startCheckout(args: StartCheckoutArgs): Promise<StartCheckoutResult> {
   const { teacher, student, template, paymentMethod, locale } = args;
   const en = usesEnglishCopy(locale);
+  const lineT = createT(locale);
   const env = serverEnv();
   const appUrl = env.APP_URL.replace(/\/$/, "");
   // The settlement currency for this teacher's rows — the teacher's own
@@ -723,14 +725,21 @@ export async function startCheckout(args: StartCheckoutArgs): Promise<StartCheck
       ...(teacher.country ? { merchantCountry: teacher.country } : {}),
       lineItem: {
         // The receipt has to say it was bought for two: it is the one
-        // record of the purchase the buyer keeps outside SpiralClass.
+        // record of the purchase the buyer keeps outside SpiralClass. Both
+        // lines come from the catalog in the caller's locale — the booking
+        // page's for the public funnel, the student's own in the portal. The
+        // description was a hard-coded Spanish sentence on every receipt.
         name:
           args.seats === 2
-            ? `${template.name} (${en ? "for 2 people" : "para 2 personas"}) — ${teacher.name}`
+            ? `${template.name} (${lineT("checkout.lineItem.forTwo")}) — ${teacher.name}`
             : `${template.name} — ${teacher.name}`,
-        description: `${template.classCount} ${
-          template.classCount === 1 ? "clase" : "clases"
-        } de ${template.classDurationMin} minutos`,
+        description:
+          template.classCount === 1
+            ? lineT("web.buyFlow.package.singleClass", { min: template.classDurationMin })
+            : lineT("web.buyFlow.package.multiClass", {
+                count: template.classCount,
+                min: template.classDurationMin,
+              }),
         amountMinorUnits: priceMinorUnits,
         // Charge in the row's settlement currency (lowercase for Stripe). Matches
         // the Payment.currency the webhook guard validates against; "mxn" today.

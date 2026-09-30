@@ -5044,6 +5044,7 @@ export const esMX = {
   "web.bookingLanding.seats.twoExplainer":
     "Para dos personas que toman todas las clases juntas. Una de ustedes paga una sola vez por las dos.",
   "web.bookingLanding.perPersonPerClass": "{price} por persona, por clase",
+  "checkout.lineItem.forTwo": "para 2 personas",
   "web.buyFlow.package.forTwo": "Para dos personas",
   "web.buyFlow.seats.legend": "¿Quién toma las clases?",
   "web.buyFlow.seats.one": "Solo yo",
