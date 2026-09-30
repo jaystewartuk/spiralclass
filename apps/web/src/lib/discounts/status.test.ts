@@ -10,6 +10,7 @@ import {
   discountUrgency,
   totalsByCode,
   totalsByCurrency,
+  discountSummary,
   usesLeft,
   type RedemptionFact,
 } from "./status";
@@ -277,5 +278,21 @@ describe("compareForList", () => {
       "new-dead",
       "old-dead",
     ]);
+  });
+});
+
+describe("discountSummary", () => {
+  it("shows nothing before any code has been used", () => {
+    expect(discountSummary(0, 0)).toEqual({ showRow: false, showMoney: false });
+  });
+
+  // The regression: with every redemption still mid-checkout, gating the row on
+  // settled money hid the live-code and use counts along with it.
+  it("shows the counts, without the money, while every use is unpaid", () => {
+    expect(discountSummary(4, 0)).toEqual({ showRow: true, showMoney: false });
+  });
+
+  it("shows the money once a purchase with a code has been paid", () => {
+    expect(discountSummary(4, 1)).toEqual({ showRow: true, showMoney: true });
   });
 });
