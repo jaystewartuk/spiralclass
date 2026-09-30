@@ -33,6 +33,7 @@ import type { StringKey } from "@/lib/i18n-translate";
 import { stepActiveIndex, useListKeyboardNav } from "@/lib/keyboard-list-nav";
 import {
   indexSearchEntries,
+  meaningfulQuery,
   searchEntries,
   type SearchEntry,
   type SearchKind,
@@ -162,10 +163,12 @@ export function SiteSearch({
   const trimmed = query.trim();
   const rows: Row[] = useMemo(() => {
     if (!trimmed) return destinations.filter((d) => d.suggested);
-    const within: Row[] = searchWithinLinks(audience, trimmed).map((link) => ({
+    // Handed on without its filler words: the page searches for a substring.
+    const handoff = meaningfulQuery(trimmed);
+    const within: Row[] = searchWithinLinks(audience, handoff).map((link) => ({
       id: `within.${link.id}`,
       kind: "action",
-      label: t(link.label, { query: trimmed }),
+      label: t(link.label, { query: handoff }),
       href: link.href,
       icon: Search,
     }));
@@ -243,7 +246,11 @@ export function SiteSearch({
           <div className="flex items-center gap-2 border-b border-border px-3">
             <Search className="h-5 w-5 shrink-0 text-muted-foreground" aria-hidden />
             <input
-              type="search"
+              // "text" + inputMode, not type="search": the browser's own clear
+              // button would sit beside the dialog's close button as a second ✕.
+              type="text"
+              inputMode="search"
+              enterKeyHint="go"
               role="combobox"
               aria-expanded={rows.length > 0}
               aria-controls={listId}
@@ -293,12 +300,16 @@ export function SiteSearch({
                       onClick={() => go(row)}
                       className={cn(
                         "flex min-h-11 cursor-pointer items-center gap-3 rounded-md px-2 py-2",
-                        i === activeIndex && "bg-accent text-accent-foreground",
+                        // Neutral, like every other hover in the app — the gold
+                        // accent is reserved for emphasis, not selection.
+                        i === activeIndex && "bg-muted",
                       )}
                     >
                       <Icon className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden />
                       <span className="min-w-0 flex-1">
-                        <span className="block truncate text-sm font-medium">
+                        {/* Two lines, not one: a help question cut at a
+                        phone's width stops saying what it asks. */}
+                        <span className="line-clamp-2 block text-sm font-medium">
                           {row.label}
                           {row.archived ? (
                             <span className="ml-2 text-xs font-normal text-muted-foreground">

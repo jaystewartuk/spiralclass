@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   indexSearchEntries,
+  meaningfulQuery,
   PER_KIND_LIMIT,
   queryTerms,
   searchEntries,
@@ -102,6 +103,14 @@ describe("searchEntries", () => {
   it("still searches for a filler word when it is all she typed", () => {
     expect(queryTerms("the")).toEqual(["the"]);
     expect(queryTerms("Where is MY packet")).toEqual(["packet"]);
+  });
+
+  it("hands a page only the meaningful words, spelled as she typed them", () => {
+    expect(meaningfulQuery("where is my packet")).toBe("packet");
+    expect(meaningfulQuery("¿dónde está Marco López?")).toBe("Marco López");
+    expect(meaningfulQuery("  Camila  Peña ")).toBe("Camila Peña");
+    // All filler: nothing better to send than what she typed.
+    expect(meaningfulQuery("the")).toBe("the");
   });
 
   it("keeps the characters of an email address in a term", () => {

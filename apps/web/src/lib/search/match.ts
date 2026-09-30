@@ -114,6 +114,21 @@ export function queryTerms(query: string): string[] {
   return meaningful.length > 0 ? meaningful : words;
 }
 
+/**
+ * `query` without its filler words, spelled as she typed it. For handing a
+ * query to a page that searches by substring: "where is Marco López" must reach
+ * the roster as "Marco López" (accents intact, for a server-side filter that
+ * does not fold them), not as the whole sentence, which matches nothing.
+ */
+export function meaningfulQuery(query: string): string {
+  const words = query.trim().split(/\s+/).filter(Boolean);
+  const kept = words.filter((word) => {
+    const folded = queryTerms(word);
+    return !(folded.length === 1 && FILLER_WORDS.has(folded[0] ?? ""));
+  });
+  return (kept.length > 0 ? kept : words).join(" ").replace(/[¿?¡!]/g, "");
+}
+
 function wordStarts(label: string, term: string): boolean {
   return label.startsWith(term) || label.includes(` ${term}`);
 }
