@@ -24,7 +24,8 @@
 // notification-recipient resolver, the admin-role lookup and a force-update
 // gate. What is left is what the web code actually calls, plus a
 // call-participant gate added when the live-caption routes gave a student's
-// browser something to call (D-185).
+// browser something to call (D-185), and a student gate that came back with
+// the portal's site search.
 
 import * as Sentry from "@sentry/nextjs";
 import { auth } from "@/lib/auth/server";
@@ -99,6 +100,21 @@ export async function requireApiOnboardedTeacher(req: Request): Promise<Teacher>
   const teacher = await requireApiTeacher(req);
   if (!teacher.onboardingCompleteAt) throw new ApiAuthError(409, "onboarding-incomplete");
   return teacher;
+}
+
+// The signed-in student, for a plain-`Request` route only the portal calls
+// (the site search index). Mirrors `requireStudent()` in `lib/auth.ts` minus
+// its claim-on-first-visit linking, for the reason given on
+// `requireApiCallParticipant` below: the caller is a portal page, which has
+// already linked her. A teacher's session is refused rather than read as
+// "no student" — the two roles are mutually exclusive per sign-in.
+export async function requireApiStudent(req: Request): Promise<Student> {
+  const user = await requireApiUser(req);
+  const student = await prisma.student.findUnique({ where: { authUserId: user.authUserId } });
+  if (!student) throw new ApiAuthError(403, "no-student-row");
+  if (student.disabledAt) throw new ApiAuthError(403, "student-disabled");
+  attachActorToObservability(student, "student");
+  return student;
 }
 
 // Either participant of a class, for the few plain-`Request` routes both

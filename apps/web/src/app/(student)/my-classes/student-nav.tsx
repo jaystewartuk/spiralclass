@@ -8,6 +8,7 @@ import { Logo } from "@/components/brand/logo";
 import { useLocale, useT } from "@/components/locale-provider";
 import { AccountMenu } from "@/components/account-menu";
 import { NavBarLink } from "@/components/nav/nav-row";
+import { SiteSearch } from "@/components/search/site-search";
 import {
   MobileNavDrawer,
   MobileNavToggle,
@@ -82,29 +83,34 @@ export function StudentNav({
           ))}
         </nav>
 
-        {/* Desktop: account, language, appearance and sign out in one menu. */}
-        <div className="hidden shrink-0 items-center desktop:flex">
-          <AccountMenu
-            account={account}
-            accountHref={STUDENT_ACCOUNT_HREF}
-            localeToggle={localeToggle}
-            links={accountLinks.map((link) => ({
-              href: link.href,
-              label: link.label,
-              active: link.active,
-              icon: link.icon,
-            }))}
+        <div className="flex shrink-0 items-center gap-1">
+          {/* Search at every width, as in the teacher header. */}
+          <SiteSearch audience="student" />
+
+          {/* Desktop: account, language, appearance and sign out in one menu. */}
+          <div className="hidden shrink-0 items-center desktop:flex">
+            <AccountMenu
+              account={account}
+              accountHref={STUDENT_ACCOUNT_HREF}
+              localeToggle={localeToggle}
+              links={accountLinks.map((link) => ({
+                href: link.href,
+                label: link.label,
+                active: link.active,
+                icon: link.icon,
+              }))}
+            />
+          </div>
+
+          {/* Mobile: a single roomy toggle keeps the bar uncluttered. */}
+          <MobileNavToggle
+            open={open}
+            onToggle={() => setOpen((v) => !v)}
+            controls={MOBILE_MENU_ID}
+            openLabel={t("web.studentNav.openMenu")}
+            closeLabel={t("web.studentNav.closeMenu")}
           />
         </div>
-
-        {/* Mobile: a single roomy toggle keeps the bar uncluttered. */}
-        <MobileNavToggle
-          open={open}
-          onToggle={() => setOpen((v) => !v)}
-          controls={MOBILE_MENU_ID}
-          openLabel={t("web.studentNav.openMenu")}
-          closeLabel={t("web.studentNav.closeMenu")}
-        />
       </div>
 
       <MobileNavDrawer

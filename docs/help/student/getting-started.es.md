@@ -38,6 +38,8 @@ Video sugerido: **"Tus primeros pasos como alumno (1 minuto)"**
 
 **¿Necesito una contraseña?** No. SpiralClass te da acceso con un código por correo o, donde esté disponible, con Google.
 
+**¿Cómo encuentro rápido una clase, un profesor o una página?** Usa el botón de búsqueda (la lupa) en la parte superior de cualquier página, o presiona ⌘K en una Mac o Ctrl+K en otros equipos. Escribe lo que buscas, como el nombre de tu profesor, "agendar" o una pregunta, y presiona Enter.
+
 ## Artículos relacionados
 
 - [Compra paquetes y paga](buying-packages-and-payments.es.md)

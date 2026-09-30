@@ -38,6 +38,8 @@ Suggested video: **“Your First Steps as a Student (1 minute)”**
 
 **Do I need a password?** No. SpiralClass signs you in with an email code or, where available, Google.
 
+**How do I find a class, a teacher or a page quickly?** Use the search button (the magnifying glass) at the top of any page, or press ⌘K on a Mac or Ctrl+K elsewhere. Type what you are looking for, such as your teacher's name, "book" or a question, and press Enter.
+
 ## Related articles
 
 - [Buy packages and pay](buying-packages-and-payments.md)

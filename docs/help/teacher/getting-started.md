@@ -38,6 +38,8 @@ Suggested video: **“Set Up Your Teaching Account (3 minutes)”**
 
 **Can I change this later?** Yes. Open Settings to edit your profile, availability, and packages.
 
+**How do I find a page, a student or a class quickly?** Use the search button (the magnifying glass) at the top of any page, or press ⌘K on a Mac or Ctrl+K elsewhere. Type what you are looking for in your own words, such as a student's name, "packages", "plan my day" or a question, and press Enter.
+
 **Do I need a paid plan to start?** No. New teachers begin with a 30-day Pro trial and no card is required.
 
 ## Related articles
