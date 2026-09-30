@@ -156,10 +156,11 @@ function DiscountRowView({ row, ctx }: { row: DiscountRow; ctx: ListContext }) {
       : null,
   ].filter((part): part is string => Boolean(part));
 
-  // What it has actually cost, and what it sold. Absent until there is
-  // something to say, rather than a row of zeroes on every unused code.
+  // What it has actually cost, and what it sold. Absent until a purchase with
+  // it has been paid — a checkout in progress spends a use but costs nothing —
+  // rather than a row of zeroes on every unused or unpaid code.
   const money =
-    row.totals.used > 0
+    row.totals.givenMinorUnits > 0 || row.totals.salesMinorUnits > 0
       ? row.totals.salesMinorUnits > 0
         ? t("web.dashboard.discounts.gaveAwayOnSales", {
             amount: formatMinorUnits(row.totals.givenMinorUnits, row.currency),

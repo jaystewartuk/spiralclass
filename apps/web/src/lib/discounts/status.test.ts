@@ -198,11 +198,12 @@ describe("totalsByCode", () => {
     expect(totalsByCode([]).get("c1")).toBeUndefined();
   });
 
-  it("counts an unsettled purchase as a use but not as a sale", () => {
+  it("counts an unsettled purchase as a use, but not as a sale or as money given away", () => {
     // The manual-transfer rail creates the package the moment the student
-    // commits. Its use is spent; its money has not arrived.
+    // commits, and an abandoned card checkout sits pending until cleanup. Its
+    // use is spent; nothing was given away, because nothing was paid.
     const totals = totalsByCode([fact({ paidMinorUnits: null, paidCurrency: null })]);
-    expect(totals.get("c1")).toEqual({ used: 1, givenMinorUnits: 1000, salesMinorUnits: 0 });
+    expect(totals.get("c1")).toEqual({ used: 1, givenMinorUnits: 0, salesMinorUnits: 0 });
   });
 
   it("refuses to add a sale denominated in another currency", () => {
@@ -238,8 +239,23 @@ describe("totalsByCurrency", () => {
     ];
     expect(totalsByCurrency(rows)).toEqual([
       { currency: "MXN", givenMinorUnits: 20000, salesMinorUnits: 150000 },
-      { currency: "GBP", givenMinorUnits: 1200, salesMinorUnits: 4000 },
+      // The unpaid GBP checkout (700) is not money given away.
+      { currency: "GBP", givenMinorUnits: 500, salesMinorUnits: 4000 },
     ]);
+  });
+
+  it("leaves out a currency whose only redemptions are unpaid", () => {
+    expect(
+      totalsByCurrency([
+        {
+          discountCodeId: "t",
+          amountMinorUnits: 78_750,
+          currency: "MXN",
+          paidMinorUnits: null,
+          paidCurrency: null,
+        },
+      ]),
+    ).toEqual([]);
   });
 
   it("is empty when nothing has been redeemed", () => {

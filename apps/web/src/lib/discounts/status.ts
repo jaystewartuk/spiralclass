@@ -175,8 +175,14 @@ export type RedemptionFact = {
 };
 
 export type CodeTotals = {
+  /** Live redemptions, settled or not — a checkout in progress holds its use. */
   used: number;
-  /** Sum of the discounts given, in the code's own currency. */
+  /**
+   * Sum of the discounts on SETTLED purchases, in the code's own currency.
+   * A checkout nobody paid for gave nothing away: counting it reported
+   * MX$787.50 "given away" on a code whose only use was an abandoned test
+   * checkout. The use is still spent (above), so a capped code stays capped.
+   */
   givenMinorUnits: number;
   /** Sum of the settled payments those redemptions belong to. */
   salesMinorUnits: number;
@@ -190,7 +196,7 @@ export function totalsByCode(rows: readonly RedemptionFact[]): Map<string, CodeT
   for (const row of rows) {
     const acc = out.get(row.discountCodeId) ?? { ...NO_TOTALS };
     acc.used += 1;
-    acc.givenMinorUnits += row.amountMinorUnits;
+    if (row.paidMinorUnits != null) acc.givenMinorUnits += row.amountMinorUnits;
     // Only when the payment settled AND it settled in the same currency the
     // discount was denominated in. Adding a GBP sale to an MXN discount would
     // produce a number that is not money in any currency.
@@ -221,13 +227,18 @@ export function totalsByCurrency(rows: readonly RedemptionFact[]): CurrencyTotal
       givenMinorUnits: 0,
       salesMinorUnits: 0,
     };
-    acc.givenMinorUnits += row.amountMinorUnits;
+    // Settled purchases only — see CodeTotals.givenMinorUnits.
+    if (row.paidMinorUnits != null) acc.givenMinorUnits += row.amountMinorUnits;
     if (row.paidMinorUnits != null && row.paidCurrency === row.currency) {
       acc.salesMinorUnits += row.paidMinorUnits;
     }
     out.set(row.currency, acc);
   }
-  return [...out.values()].sort((a, b) => b.givenMinorUnits - a.givenMinorUnits);
+  // A currency whose only redemptions are unpaid checkouts has nothing to say
+  // yet, and a tile reading "0.00 given away" would say it anyway.
+  return [...out.values()]
+    .filter((c) => c.givenMinorUnits > 0 || c.salesMinorUnits > 0)
+    .sort((a, b) => b.givenMinorUnits - a.givenMinorUnits);
 }
 
 // ---------------------------------------------------------------------------
