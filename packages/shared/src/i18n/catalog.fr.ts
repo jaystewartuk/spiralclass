@@ -731,7 +731,11 @@ export const fr = {
     "Une autre application utilise votre caméra ou votre micro. Fermez-la, puis réessayez.",
   "call.preJoinUnknown":
     "La caméra ou le micro n'a pas pu démarrer. Vous pouvez quand même rejoindre.",
-  "call.transcriptKept": "Transcription conservée pour les notes d'apprentissage",
+  "call.notesOn": "Notes d'apprentissage activées",
+  "call.notesStartedTitle": "Les notes d'apprentissage sont activées",
+  "call.notesExplain":
+    "Les sous-titres de ce cours sont enregistrés sous forme de texte pour suggérer sur quoi travailler ensuite. Aucun audio n'est enregistré.",
+  "call.notesLearnMore": "En savoir plus",
   "call.captionsStopped":
     "Les sous-titres se sont arrêtés sur cet appareil — vérifiez l'autorisation du micro.",
   "call.captionsServiceUnavailable":

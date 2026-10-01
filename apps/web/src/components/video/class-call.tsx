@@ -57,6 +57,7 @@ import {
 import { CaptionBand, CaptionTranscript } from "./caption-band";
 import { CaptionsConsentAsk } from "./captions-consent-ask";
 import { CallTopBar } from "./call-top-bar";
+import { LearningNotesIndicator, useLearningNotesNotice } from "./learning-notes-indicator";
 import { CallMoreMenu, type CallMoreItem } from "./call-more-menu";
 import { ParticipantPlaceholder } from "./participant-placeholder";
 import { CallPreJoin, type JoinChoice } from "./call-pre-join";
@@ -917,6 +918,9 @@ export function ClassCall({
     prefetchSession: Boolean(canCaption),
     showLocal: captions.addLine,
   });
+  // Announced here rather than by the top-bar icon, which unmounts while the
+  // call is minimised (learning-notes-indicator.tsx).
+  useLearningNotesNotice(browserCaptions.transcriptKept);
   // The band follows the room's switch: turning captions off clears it on
   // both screens at once, without waiting for the last line to age out.
   const setCaptionsActive = captions.setActive;
@@ -1778,6 +1782,11 @@ export function ClassCall({
               otherName={remote?.name ?? null}
               startAt={scheduledStartAt}
               endAt={scheduledEndAt}
+              // The recognised lines are being kept as this class's
+              // transcript for lesson insights (D-189). Shown to both
+              // people: a capture with no visible indicator is what D-21
+              // forbids.
+              indicators={browserCaptions.transcriptKept && <LearningNotesIndicator />}
               controls={
                 <>
                   {/* Pop-out (Document Picture-in-Picture) — a real OS-level
@@ -1899,12 +1908,6 @@ export function ClassCall({
                 left as a band that listens forever. */}
               {roomCaptionsOn && browserCaptions.status.uncaptioned.length > 0 && (
                 <StatusPill tone="attention" label={t("call.captionsNeedComputer")} />
-              )}
-              {/* The recognised lines are being kept as this class's
-                transcript for lesson insights (D-189). Shown to both people:
-                a capture with no visible indicator is what D-21 forbids. */}
-              {browserCaptions.transcriptKept && (
-                <StatusPill tone="info" label={t("call.transcriptKept")} />
               )}
               {/* A recogniser here gave up for good — the microphone
                 permission, a language this browser cannot recognise, or the

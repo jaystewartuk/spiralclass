@@ -745,7 +745,11 @@ export const esMX = {
   "call.preJoinInUse":
     "Otra aplicación está usando tu cámara o tu micrófono. Ciérrala e inténtalo de nuevo.",
   "call.preJoinUnknown": "No se pudo iniciar la cámara o el micrófono. Aun así puedes entrar.",
-  "call.transcriptKept": "Transcripción guardada para las notas de aprendizaje",
+  "call.notesOn": "Notas de aprendizaje activadas",
+  "call.notesStartedTitle": "Las notas de aprendizaje están activadas",
+  "call.notesExplain":
+    "Los subtítulos de esta clase se guardan como texto para sugerir qué trabajar a continuación. No se graba audio.",
+  "call.notesLearnMore": "Más información",
   "call.captionsStopped":
     "Los subtítulos se detuvieron en este dispositivo — revisa el permiso del micrófono.",
   "call.captionsServiceUnavailable":

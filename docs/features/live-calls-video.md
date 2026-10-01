@@ -252,8 +252,10 @@ That lasts until preview has a LiveKit server of its own.
     scheduled end — the transcript is rebased to a 0-based timeline, marked
     `browser`, and "transcript ready" fires for lesson insights. A line that
     arrives after that is dropped.
-24. **Both participants see "Transcript kept for learning insights"** while
-    lines are being kept (D-21). The transcript is kept while the teacher's
+24. **Both participants are told "Learning notes are on"** each time lines
+    start being kept, and see a small notes icon beside the lesson clock for
+    as long as they are; tapping it says what is kept (caption text, no
+    audio) and links to the privacy notice (D-21). The transcript is kept while the teacher's
     account is open and deleted with it.
 25. Not every call gets a transcript — only when captions are on, the flag is
     on, and the consent above is on file. The legacy egress-audio path

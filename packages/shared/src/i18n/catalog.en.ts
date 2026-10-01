@@ -736,7 +736,11 @@ export const en = {
   "call.preJoinNoDevice": "No camera or microphone was found. You can still join.",
   "call.preJoinInUse": "Another app is using your camera or microphone. Close it, then try again.",
   "call.preJoinUnknown": "The camera or microphone couldn't start. You can still join.",
-  "call.transcriptKept": "Transcript kept for learning insights",
+  "call.notesOn": "Learning notes on",
+  "call.notesStartedTitle": "Learning notes are on",
+  "call.notesExplain":
+    "This class's captions are saved as text to suggest what to work on next. No audio is recorded.",
+  "call.notesLearnMore": "Learn more",
   "call.captionsStopped": "Captions stopped on this device — check the microphone permission.",
   "call.captionsServiceUnavailable":
     "Captions stopped on this device — the captioning service couldn't be reached.",

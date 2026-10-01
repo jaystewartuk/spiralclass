@@ -124,8 +124,8 @@ the pass/fail record of attendance or payments.
   and `lesson.transcript.ready` fires. From there the pipeline is as before:
   Claude-based analysis produces `LessonInsight` rows (all tagged
   `source: "ai"`) → teacher reviews/confirms → the student's profile is
-  recomputed. Both participants see a "Transcript kept for learning insights"
-  pill while lines are being kept.
+  recomputed. Both participants are told when learning notes start and see a
+  notes icon in the call's top bar while lines are being kept.
 - **No audio is captured for it.** The legacy path (per-participant egress →
   R2 → Deepgram batch → derive-then-discard, `lib/transcription/pipeline.ts`)
   still exists in code but requires recording to be enabled, which it is not.
