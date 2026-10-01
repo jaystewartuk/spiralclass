@@ -731,6 +731,20 @@ export const esMX = {
   "call.more": "Más",
   "call.cameraOffNamed": "{name}: cámara apagada",
   "call.micOffBadge": "Micrófono apagado",
+  "call.preJoinTitle": "Revisa tu cámara y tu micrófono",
+  "call.preJoinJoin": "Entrar a la clase",
+  "call.preJoinBack": "Volver",
+  "call.preJoinCameraOff": "Cámara apagada",
+  "call.preJoinMicLevel": "Micrófono",
+  "call.preJoinHint": "Di algo: la barra debería moverse.",
+  "call.preJoinMicrophone": "Micrófono",
+  "call.preJoinCamera": "Cámara",
+  "call.preJoinDenied":
+    "Tu navegador está bloqueando la cámara y el micrófono. Permítelos desde el icono de la barra de direcciones, o entra sin ellos.",
+  "call.preJoinNoDevice": "No se encontró cámara ni micrófono. Aun así puedes entrar.",
+  "call.preJoinInUse":
+    "Otra aplicación está usando tu cámara o tu micrófono. Ciérrala e inténtalo de nuevo.",
+  "call.preJoinUnknown": "No se pudo iniciar la cámara o el micrófono. Aun así puedes entrar.",
   "call.transcriptKept": "Transcripción guardada para las notas de aprendizaje",
   "call.captionsStopped":
     "Los subtítulos se detuvieron en este dispositivo — revisa el permiso del micrófono.",
