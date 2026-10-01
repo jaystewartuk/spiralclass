@@ -414,6 +414,15 @@ template)`.
   on packages that can still be redeemed. It becomes earned as each class is
   taught. A refund would come out of it. This is the "held" amount in the
   code.
+- **The classes she still owes** on a package are the classes not yet used
+  (`classesTotal − classesUsed`, the same count the students page shows), plus
+  the classes booked but not yet taught.
+  - A booking uses its class when it is made, but the class is still owed
+    until it is taught.
+  - A class lost to a late cancellation is used, and not owed.
+  - Classes recorded as used off-platform (taught before she moved her
+    students here, or corrected by editing "classes remaining") are not owed,
+    although SpiralClass has no record of them being taught (`classesOwed()`).
 - **Amounts are what students paid.** The screens say so, and say that card
   payments reach her a little lower after Stripe's own fee, which SpiralClass
   does not receive ([D-152](../decisions/D-152.md)). No net-of-fee figure is

@@ -5317,6 +5317,7 @@ export const en = {
   "web.cashflow.paidInAdvance": "Paid in advance",
   "web.cashflow.toTeachOne": "{count} class still to teach",
   "web.cashflow.toTeach": "{count} classes still to teach",
+  "web.cashflow.toTeachBooked": "{toTeach} · {booked} already booked",
   "web.cashflow.paidInAdvanceHelp":
     "“Paid in advance” is money students have already paid you for classes you haven't taught yet. It becomes earnings as you teach each one — and a refund would come out of it, so it isn't spare money yet.",
   "web.cashflow.whatStudentsPaid":

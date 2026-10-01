@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   EARNINGS_HISTORY_MONTHS,
   apportion,
+  classesOwed,
   summarizeCashFlow,
   summarizeOneCurrency,
   type BookedLesson,
@@ -20,14 +21,14 @@ function pkg(over: Partial<CashFlowPackage> = {}): CashFlowPackage {
     currency: "MXN",
     status: "active",
     expiresAt: null,
-    deliveredLessons: 0,
+    classesOwed: 10,
     ...over,
   };
 }
 
 describe("summarizeOneCurrency — earned vs held split", () => {
   it("splits a half-delivered active package pro-rata", () => {
-    const s = summarizeOneCurrency([pkg({ deliveredLessons: 4 })], [], null, NOW, "MXN", "UTC");
+    const s = summarizeOneCurrency([pkg({ classesOwed: 6 })], [], null, NOW, "MXN", "UTC");
     expect(s.totalPaidCents).toBe(100_000);
     // 4 of 10 delivered → 40_000 earned, 6 undelivered → 60_000 held
     expect(s.earnedCents).toBe(40_000);
@@ -36,8 +37,8 @@ describe("summarizeOneCurrency — earned vs held split", () => {
   });
 
   it("counts a no-show as delivered (forfeited time is earned, not held)", () => {
-    // deliveredLessons already folds completed + no_show together upstream.
-    const s = summarizeOneCurrency([pkg({ deliveredLessons: 10 })], [], null, NOW, "MXN", "UTC");
+    // classesOwed already counts a no-show as used, upstream.
+    const s = summarizeOneCurrency([pkg({ classesOwed: 0 })], [], null, NOW, "MXN", "UTC");
     expect(s.earnedCents).toBe(100_000);
     expect(s.heldCents).toBe(0);
     expect(s.heldLessons).toBe(0);
@@ -45,7 +46,7 @@ describe("summarizeOneCurrency — earned vs held split", () => {
 
   it("treats an expired package as fully earned — nothing is owed anymore", () => {
     const s = summarizeOneCurrency(
-      [pkg({ status: "expired", deliveredLessons: 3 })],
+      [pkg({ status: "expired", classesOwed: 7 })],
       [],
       null,
       NOW,
@@ -62,7 +63,7 @@ describe("summarizeOneCurrency — earned vs held split", () => {
     const s = summarizeOneCurrency(
       [
         pkg({
-          deliveredLessons: 2,
+          classesOwed: 8,
           expiresAt: new Date("2026-04-01T00:00:00.000Z"), // before NOW
         }),
       ],
@@ -81,7 +82,7 @@ describe("summarizeOneCurrency — earned vs held split", () => {
       [
         pkg({
           status: "paused",
-          deliveredLessons: 1,
+          classesOwed: 9,
           expiresAt: new Date("2026-09-01T00:00:00.000Z"), // after NOW
         }),
       ],
@@ -98,9 +99,9 @@ describe("summarizeOneCurrency — earned vs held split", () => {
 
   it("earned + held always reconciles to total received", () => {
     const pkgs = [
-      pkg({ deliveredLessons: 4 }),
-      pkg({ status: "expired", deliveredLessons: 1 }),
-      pkg({ pricePaidMinorUnits: 33_333, classesTotal: 7, deliveredLessons: 2 }),
+      pkg({ classesOwed: 6 }),
+      pkg({ status: "expired", classesOwed: 9 }),
+      pkg({ pricePaidMinorUnits: 33_333, classesTotal: 7, classesOwed: 5 }),
     ];
     const s = summarizeOneCurrency(pkgs, [], null, NOW, "MXN", "UTC");
     expect(s.earnedCents + s.heldCents).toBe(s.totalPaidCents);
@@ -312,6 +313,27 @@ describe("summarizeOneCurrency — a month, student by student", () => {
   });
 });
 
+describe("classesOwed", () => {
+  it("is what is left on the package, not what SpiralClass saw taught", () => {
+    // All 30 taught before she moved her students here: used, no booking rows.
+    expect(classesOwed({ classesTotal: 30, classesUsed: 30, bookedNotTaught: 0 })).toBe(0);
+  });
+
+  it("adds back classes booked but not yet taught — used at booking, still owed", () => {
+    expect(classesOwed({ classesTotal: 20, classesUsed: 3, bookedNotTaught: 3 })).toBe(20);
+  });
+
+  it("does not owe a class lost to a late cancellation", () => {
+    // 10 classes: 2 taught, 1 lost to a late cancellation, 1 booked → 4 used.
+    expect(classesOwed({ classesTotal: 10, classesUsed: 4, bookedNotTaught: 1 })).toBe(7);
+  });
+
+  it("never owes more than the package holds, or less than nothing", () => {
+    expect(classesOwed({ classesTotal: 10, classesUsed: 0, bookedNotTaught: 3 })).toBe(10);
+    expect(classesOwed({ classesTotal: 10, classesUsed: 12, bookedNotTaught: 0 })).toBe(0);
+  });
+});
+
 describe("apportion", () => {
   it("splits a total into integers that add up to it exactly", () => {
     expect(apportion(100, [1, 1, 1])).toEqual([34, 33, 33]);
@@ -451,7 +473,7 @@ describe("summarizeOneCurrency — earnings history", () => {
 
 describe("summarizeCashFlow — one currency (every teacher today)", () => {
   it("returns exactly one slice, and it is the primary", () => {
-    const cf = summarizeCashFlow([pkg({ currency: "GBP", deliveredLessons: 4 })], [], null, NOW, {
+    const cf = summarizeCashFlow([pkg({ currency: "GBP", classesOwed: 6 })], [], null, NOW, {
       fallbackCurrency: "GBP",
       preferCurrency: "GBP",
       timeZone: "UTC",
@@ -481,8 +503,8 @@ describe("summarizeCashFlow — more than one currency", () => {
     // rate. Two slices, each exact, and no figure anywhere is 40000.
     const cf = summarizeCashFlow(
       [
-        pkg({ currency: "JPY", pricePaidMinorUnits: 20_000, deliveredLessons: 10 }),
-        pkg({ currency: "GBP", pricePaidMinorUnits: 20_000, deliveredLessons: 10 }),
+        pkg({ currency: "JPY", pricePaidMinorUnits: 20_000, classesOwed: 0 }),
+        pkg({ currency: "GBP", pricePaidMinorUnits: 20_000, classesOwed: 0 }),
       ],
       [],
       null,
@@ -501,9 +523,9 @@ describe("summarizeCashFlow — more than one currency", () => {
     const cf = summarizeCashFlow(
       [
         // Old GBP money, half delivered.
-        pkg({ currency: "GBP", deliveredLessons: 5 }),
+        pkg({ currency: "GBP", classesOwed: 5 }),
         // New EUR money, nothing delivered yet.
-        pkg({ currency: "EUR", pricePaidMinorUnits: 60_000, deliveredLessons: 0 }),
+        pkg({ currency: "EUR", pricePaidMinorUnits: 60_000, classesOwed: 10 }),
       ],
       [
         lesson("2026-03-10T00:00:00Z", 30_000, "GBP"),

@@ -5326,6 +5326,7 @@ export const esMX = {
   "web.cashflow.paidInAdvance": "Pagado por adelantado",
   "web.cashflow.toTeachOne": "{count} clase por impartir",
   "web.cashflow.toTeach": "{count} clases por impartir",
+  "web.cashflow.toTeachBooked": "{toTeach} · {booked} ya agendadas",
   "web.cashflow.paidInAdvanceHelp":
     "«Pagado por adelantado» es dinero que tus alumnos ya te pagaron por clases que aún no impartes. Se vuelve ganancia a medida que das cada clase; y si hubiera un reembolso, saldría de ahí, así que todavía no es dinero libre.",
   "web.cashflow.whatStudentsPaid":
