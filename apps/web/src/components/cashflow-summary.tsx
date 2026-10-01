@@ -65,7 +65,6 @@ function classesToTeach(count: number, t: TFunction): string {
 /** "+ $2,400 in 8 classes booked for the rest of October", or nothing. */
 function bookedLine(summary: CashFlowSummary, locale: string, t: TFunction): string | null {
   if (summary.bookedRestOfMonthLessons === 0) return null;
-  const current = summary.months[0]?.month;
   return t(
     summary.bookedRestOfMonthLessons === 1
       ? "web.cashflow.bookedRestOne"
@@ -73,17 +72,17 @@ function bookedLine(summary: CashFlowSummary, locale: string, t: TFunction): str
     {
       amount: formatMinorUnits(summary.bookedRestOfMonthCents, summary.currency),
       count: summary.bookedRestOfMonthLessons,
-      month: current ? monthName(current, locale) : "",
+      month: monthName(summary.currentMonth, locale),
     },
   );
 }
 
 /** The label over this month's figure: "October so far". */
 function soFarLabel(summary: CashFlowSummary, locale: string, t: TFunction): string {
-  const current = summary.months[0]?.month;
-  return current
-    ? label(t("web.cashflow.monthSoFar", { month: monthName(current, locale) }), locale)
-    : t("web.cashflow.thisMonth");
+  return label(
+    t("web.cashflow.monthSoFar", { month: monthName(summary.currentMonth, locale) }),
+    locale,
+  );
 }
 
 /* ------------------------------------------------------------------------ */
@@ -156,12 +155,16 @@ export async function EarningsTile({ cashFlow }: { cashFlow: CashFlow }) {
         {/* Underlined rather than `text-primary`: that token is verified only
             as a button FILL and measures 3.48:1 as text on a raised card in
             dark mode. See the note in dashboard-view.tsx. */}
-        <Link
-          href="/payments#earned-by-month"
-          className="inline-block text-sm font-medium underline underline-offset-4"
-        >
-          {t("web.cashflow.seeByMonth")}
-        </Link>
+        {/* Only once there is a month to see: the history renders nothing
+            until she has taught. */}
+        {summary.months.length > 0 && (
+          <Link
+            href="/payments#earned-by-month"
+            className="inline-block text-sm font-medium underline underline-offset-4"
+          >
+            {t("web.cashflow.seeByMonth")}
+          </Link>
+        )}
       </CardContent>
     </Card>
   );

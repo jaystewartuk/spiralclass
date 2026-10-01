@@ -131,6 +131,10 @@ export type CashFlowSummary = {
   heldLessons: number;
   // What she earned teaching so far this calendar month, and how many classes.
   // The headline figure (D-191).
+  // `YYYY-MM` of the current month on her calendar. Its own field because
+  // `months` is empty until she has taught, and a teacher who has been paid
+  // but not yet taught still has a current month to name.
+  currentMonth: string;
   currentMonthEarnedCents: number;
   currentMonthLessons: number;
   // What the rest of this month adds if it is taught as booked: classes still
@@ -383,6 +387,7 @@ export function summarizeOneCurrency(
     earnedCents,
     heldCents,
     heldLessons,
+    currentMonth,
     currentMonthEarnedCents: Math.round(revenueIn(currentMonth)),
     currentMonthLessons: byMonth.get(currentMonth)?.lessons ?? 0,
     previousMonthEarnedCents: Math.round(previousMonth?.revenue ?? 0),

@@ -5305,7 +5305,6 @@ export const en = {
   "web.calendarSync.google.resume": "Resume",
   "web.calendarSync.google.disconnecting": "Disconnecting…",
   "web.cashflow.title": "Your earnings",
-  "web.cashflow.thisMonth": "This month so far",
   "web.cashflow.monthSoFar": "{month} so far",
   "web.cashflow.classesTaughtOne": "{count} class taught",
   "web.cashflow.classesTaught": "{count} classes taught",

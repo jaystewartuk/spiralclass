@@ -5287,7 +5287,6 @@ export const fr = {
   "web.calendarSync.google.resume": "Reprendre",
   "web.calendarSync.google.disconnecting": "Déconnexion…",
   "web.cashflow.title": "Vos revenus",
-  "web.cashflow.thisMonth": "Ce mois-ci jusqu'à présent",
   "web.cashflow.monthSoFar": "{month} jusqu'à présent",
   "web.cashflow.classesTaughtOne": "{count} cours donné",
   "web.cashflow.classesTaught": "{count} cours donnés",

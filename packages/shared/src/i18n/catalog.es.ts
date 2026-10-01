@@ -5314,7 +5314,6 @@ export const esMX = {
   "web.calendarSync.google.resume": "Reanudar",
   "web.calendarSync.google.disconnecting": "Desconectando…",
   "web.cashflow.title": "Tus ingresos",
-  "web.cashflow.thisMonth": "Este mes hasta hoy",
   "web.cashflow.monthSoFar": "{month} hasta hoy",
   "web.cashflow.classesTaughtOne": "{count} clase impartida",
   "web.cashflow.classesTaught": "{count} clases impartidas",

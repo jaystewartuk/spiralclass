@@ -206,6 +206,17 @@ describe("summarizeOneCurrency — a typical month, stated as a fact", () => {
   it("is null for a teacher who has never taught", () => {
     expect(summarizeOneCurrency([], [], null, NOW, "MXN", "UTC").typicalMonth).toBeNull();
   });
+
+  it("still names the current month for a teacher who has been paid but not yet taught", () => {
+    // `months` is empty for her, and the booked line ("…for the rest of
+    // October") once read "…for the rest of" with nothing after it.
+    const s = summarizeOneCurrency([pkg()], [], null, NOW, "MXN", "America/Mexico_City", [
+      booked("2026-05-20T15:00:00Z", 10_000),
+    ]);
+    expect(s.months).toEqual([]);
+    expect(s.currentMonth).toBe("2026-05");
+    expect(s.bookedRestOfMonthLessons).toBe(1);
+  });
 });
 
 const booked = (iso: string, cents: number, currency = "MXN"): BookedLesson => ({
