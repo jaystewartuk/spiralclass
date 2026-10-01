@@ -27,6 +27,7 @@ export function CallTopBar({
   otherName,
   startAt,
   endAt,
+  indicators,
   controls,
 }: {
   notes: ReactNode;
@@ -34,6 +35,8 @@ export function CallTopBar({
   otherName: string | null;
   startAt?: string;
   endAt?: string;
+  // Small, ongoing states shown beside the clock (learning notes being kept).
+  indicators?: ReactNode;
   controls: ReactNode;
 }) {
   const t = useT();
@@ -87,6 +90,7 @@ export function CallTopBar({
             {clockLabel}
           </span>
         )}
+        {indicators}
       </div>
 
       <div className="flex min-w-0 flex-1 items-center justify-end gap-2">{controls}</div>
