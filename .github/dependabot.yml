@@ -100,6 +100,18 @@ updates:
     labels:
       - dependencies
       - ci
+    ignore:
+      # The Node MAJOR moves by hand, never from here. Dependabot bumps
+      # `node:24-slim` to the newest major as if it were a digest, and neither
+      # major after 24 can build this image: 25 and 26 ship no Corepack (#100),
+      # and Prisma's preinstall supports only 20, 22 and 24 (#102). #95 (25)
+      # and #173 (26) were both red on arrival, and closing one only invites
+      # the next. Digest, minor and patch updates still flow — they are what
+      # the pin above exists for. Moving the major is a PR that passes
+      # apps/web/tests/config/node-version.test.ts, which also holds this
+      # rule in place.
+      - dependency-name: node
+        update-types: ["version-update:semver-major"]
 
   - package-ecosystem: pip
     directory: /
