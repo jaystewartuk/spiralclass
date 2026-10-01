@@ -174,7 +174,7 @@ function Row({ term, detail, value }: { term: string; detail?: string; value: st
         {term}
         {detail && <span className="block text-xs">{detail}</span>}
       </dt>
-      <dd className="font-medium tabular-nums">{value}</dd>
+      <dd className="shrink-0 font-medium whitespace-nowrap tabular-nums">{value}</dd>
     </div>
   );
 }
@@ -399,7 +399,7 @@ function MonthRow({
             <div className="text-sm text-muted-foreground">{classesTaught(month.lessons, t)}</div>
           </div>
           <div className="flex items-center gap-2">
-            <span className="font-semibold tabular-nums">
+            <span className="font-semibold whitespace-nowrap tabular-nums">
               {formatMinorUnits(month.earnedCents, currency)}
             </span>
             <ChevronDown
@@ -420,12 +420,19 @@ function MonthRow({
       ) : (
         <ul className="space-y-1.5 pb-3 pl-3 text-sm">
           {month.byStudent.map((s) => (
-            <li key={s.studentId} className="flex items-baseline justify-between gap-3">
-              <span className="min-w-0 truncate">
-                {s.name}{" "}
-                <span className="text-muted-foreground">· {classesTaught(s.lessons, t)}</span>
+            // Name over class count, amount pinned right and never wrapped: on
+            // one line at 390px the count was truncated mid-word and the
+            // amount broke across "$900.00" / "MXN".
+            <li key={s.studentId} className="flex items-start justify-between gap-3">
+              <span className="min-w-0">
+                <span className="block truncate">{s.name}</span>
+                <span className="block text-xs text-muted-foreground">
+                  {classesTaught(s.lessons, t)}
+                </span>
               </span>
-              <span className="tabular-nums">{formatMinorUnits(s.earnedCents, currency)}</span>
+              <span className="shrink-0 whitespace-nowrap tabular-nums">
+                {formatMinorUnits(s.earnedCents, currency)}
+              </span>
             </li>
           ))}
         </ul>
