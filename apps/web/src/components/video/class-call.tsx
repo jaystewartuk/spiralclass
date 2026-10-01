@@ -59,6 +59,7 @@ import { CaptionsConsentAsk } from "./captions-consent-ask";
 import { CallTopBar } from "./call-top-bar";
 import { CallMoreMenu, type CallMoreItem } from "./call-more-menu";
 import { ParticipantPlaceholder } from "./participant-placeholder";
+import { CallPreJoin, type JoinChoice } from "./call-pre-join";
 import { useT } from "@/components/locale-provider";
 import type { TFunction } from "@/lib/i18n-translate";
 import { cn } from "@/lib/utils";
@@ -488,6 +489,20 @@ export function ClassCall({
   // the call (black screen + dead caption session) the instant she pressed Record.
   // We connect once per mount and reconnect only on an explicit Retry; the latest
   // grant is read from a ref at connect time so a Retry still uses a fresh token.
+  // What the pre-join check (call-pre-join.tsx) handed over: null until the
+  // person taps Join. Nothing connects before that — the room, the device
+  // capture and the "in the call" presence the other side sees all start
+  // from that tap. A Retry after a failed connect keeps the choice and does
+  // not ask again.
+  const [joinChoice, setJoinChoice] = useState<JoinChoice | null>(null);
+  const joined = joinChoice !== null;
+  // Read by the connect effect below, which must not re-run when the object
+  // changes — only when `joined` flips. Synced in an effect declared before
+  // it, so it is current by the time that effect runs.
+  const joinChoiceRef = useRef<JoinChoice | null>(null);
+  useEffect(() => {
+    joinChoiceRef.current = joinChoice;
+  }, [joinChoice]);
   const connKey = callConnectionKey(grant, retryKey);
   const grantRef = useRef(grant);
   useEffect(() => {
@@ -499,16 +514,19 @@ export function ClassCall({
   // restarts the clock rather than showing the buttons instantly.
   const [connectingStalled, setConnectingStalled] = useState(false);
   useEffect(() => {
-    if (status !== "connecting") {
+    if (status !== "connecting" || !joined) {
       setConnectingStalled(false);
       return;
     }
     setConnectingStalled(false);
     const timer = setTimeout(() => setConnectingStalled(true), CONNECTING_ESCAPE_HATCH_MS);
     return () => clearTimeout(timer);
-  }, [status, connKey]);
+  }, [status, connKey, joined]);
 
   useEffect(() => {
+    // Not before the Join tap (see joinChoice above).
+    const choice = joinChoiceRef.current;
+    if (!choice) return;
     const { url, token } = grantRef.current;
     // dynacast is OFF on purpose. It only helps a publisher fanning out to many
     // subscribers at different qualities; this is a 1:1 call. Worse, with it on,
@@ -692,10 +710,8 @@ export function ClassCall({
       });
 
     (async () => {
-      // This product has no separate join/waiting-room step (docs/architecture/
-      // the call-analytics review) — mounting the call page IS the join
-      // gesture, so the funnel's top-of-funnel event fires right here rather
-      // than behind a button that doesn't exist.
+      // The Join tap on the pre-join check (call-pre-join.tsx) is what runs
+      // this effect, so the funnel's top-of-funnel event is a real click.
       posthog?.capture("call_join_clicked", analyticsProps({ minutesBeforeStart }));
       connectStartedAtRef.current = Date.now();
       posthog?.capture("call_connection_started", analyticsProps());
@@ -750,24 +766,34 @@ export function ClassCall({
       // way a failure must never tear down a working room or escape as an
       // unhandled rejection — and the "media is off" hint below tells the user
       // exactly what to do, regardless of why the auto-start didn't take.
-      posthog?.capture("microphone_permission_requested", analyticsProps());
-      try {
-        await room.localParticipant.setMicrophoneEnabled(true);
-        if (!cancelled) {
-          setMicOn(true);
-          posthog?.capture("microphone_permission_granted", analyticsProps());
-          posthog?.capture("call_local_audio_enabled", analyticsProps({ auto: true }));
+      // Only what the person left on in the check, on the devices they picked.
+      if (choice.mic) {
+        posthog?.capture("microphone_permission_requested", analyticsProps());
+        try {
+          await room.localParticipant.setMicrophoneEnabled(
+            true,
+            choice.micDeviceId ? { deviceId: choice.micDeviceId } : undefined,
+          );
+          if (!cancelled) {
+            setMicOn(true);
+            posthog?.capture("microphone_permission_granted", analyticsProps());
+            posthog?.capture("call_local_audio_enabled", analyticsProps({ auto: true }));
+          }
+        } catch {
+          /* stays off; user taps Mic to enable */
+          posthog?.capture(
+            "microphone_permission_denied",
+            analyticsProps({ reason: "auto-publish" }),
+          );
         }
-      } catch {
-        /* stays off; user taps Mic to enable */
-        posthog?.capture(
-          "microphone_permission_denied",
-          analyticsProps({ reason: "auto-publish" }),
-        );
       }
+      if (!choice.cam) return;
       posthog?.capture("camera_permission_requested", analyticsProps());
       try {
-        await room.localParticipant.setCameraEnabled(true);
+        await room.localParticipant.setCameraEnabled(
+          true,
+          choice.camDeviceId ? { deviceId: choice.camDeviceId } : undefined,
+        );
         if (cancelled) return;
         setCamOn(true);
         posthog?.capture("camera_permission_granted", analyticsProps());
@@ -787,8 +813,8 @@ export function ClassCall({
       setRoom(null);
     };
     // Pinned to connKey (media-server URL + retry), never to the volatile token —
-    // see the note above and lib/video/call-connection.ts.
-  }, [connKey]);
+    // see the note above and lib/video/call-connection.ts — and to the Join tap.
+  }, [connKey, joined]);
 
   // Keep the self-view bound to the CURRENT local camera track. Attaching once
   // at connect time is fragile: LiveKit can swap the underlying track out from
@@ -908,6 +934,17 @@ export function ClassCall({
     otherPresent: browserCaptions.otherPresent,
     dismissed: consentAskDismissed,
   });
+  // Whether THIS person is being heard right now — a ring on the microphone
+  // button, so "is my mic working?" is answered without asking the other side.
+  const [localSpeaking, setLocalSpeaking] = useState(false);
+  useEffect(() => {
+    if (!room) return;
+    const sync = () => setLocalSpeaking(room.localParticipant.isSpeaking);
+    room.on(RoomEvent.ActiveSpeakersChanged, sync);
+    return () => {
+      room.off(RoomEvent.ActiveSpeakersChanged, sync);
+    };
+  }, [room]);
   // The other person's camera, microphone and speaking state, for the
   // camera-off placeholder and the top bar's name.
   const remote = useRemoteParticipant(room);
@@ -1669,6 +1706,23 @@ export function ClassCall({
 
   if (typeof document === "undefined") return null;
 
+  if (!joinChoice) {
+    return createPortal(
+      <div className="fixed inset-0 z-50">
+        <CallPreJoin
+          startAt={scheduledStartAt}
+          endAt={scheduledEndAt}
+          onJoin={setJoinChoice}
+          onBack={() => {
+            onLeave?.();
+            router.push(backHref);
+          }}
+        />
+      </div>,
+      document.body,
+    );
+  }
+
   return (
     <>
       {createPortal(
@@ -2260,6 +2314,7 @@ export function ClassCall({
                   <CallButton
                     onClick={toggleMic}
                     active={micOn}
+                    speaking={micOn && localSpeaking}
                     icon={micOn ? Mic : MicOff}
                     label={micOn ? t("call.mute") : t("call.unmute")}
                     shortcut="m"
@@ -2695,6 +2750,7 @@ function CallButton({
   label,
   shortcut,
   secondary,
+  speaking,
 }: {
   onClick: () => void;
   active?: boolean;
@@ -2704,6 +2760,8 @@ function CallButton({
   label: string;
   // Lives in the More menu below `sm` (CallMoreMenu) instead of the row.
   secondary?: boolean;
+  // A ring while this person's own voice is coming through (the mic button).
+  speaking?: boolean;
   // The single-key shortcut this control also answers to, if any. Surfaced in
   // the tooltip and as `aria-keyshortcuts`, because a shortcut nobody is told
   // about is a shortcut nobody uses — and the visible caption under each icon
@@ -2734,7 +2792,8 @@ function CallButton({
     >
       <span
         className={cn(
-          "flex h-12 w-12 items-center justify-center rounded-full shadow-lg transition-colors",
+          "flex h-12 w-12 items-center justify-center rounded-full shadow-lg transition-all",
+          speaking && "ring-2 ring-success ring-offset-2 ring-offset-black",
           danger
             ? "bg-destructive text-destructive-foreground hover:bg-destructive/90"
             : active

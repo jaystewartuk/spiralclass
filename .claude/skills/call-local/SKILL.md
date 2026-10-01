@@ -24,8 +24,16 @@ operations only.
    `http://preview.localhost:3000/sign-in` as the student. For each, click
    "Email me a code", run `pnpm call:local code <email>`, type `424242`.
    (Seeded test accounts on a local host — the test-credentials exception.)
-4. Open the two call URLs the script printed. **Turn both cameras off before
-   any screenshot** — both sides are the user's own webcam.
+4. Open the two call URLs the script printed. Each opens on the pre-join
+   check with the camera preview ON. **Turn both cameras off before any
+   screenshot** — both sides are the user's own webcam. Click the toggle
+   through the DOM (`[data-testid="call-pre-join"]` → the button labelled
+   "Camera off"), not by coordinates: the layout shifts when the device
+   picker appears, and a coordinate click lands beside it.
+   - If `document.visibilityState` is `hidden` (Chrome behind another
+     window), the call mounts late and `requestAnimationFrame` never fires —
+     the mic meter reads flat for that reason alone. A screenshot of a corner
+     the preview does not cover brings the tab forward.
 5. Put the data in the state the change is about with single-statement
    `psql` updates against `spiralclass-dev-db` (the doc says why single).
 6. Check desktop, and phone width where the window allows it. Report what you

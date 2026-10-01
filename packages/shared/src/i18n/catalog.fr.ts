@@ -716,6 +716,21 @@ export const fr = {
   "call.more": "Plus",
   "call.cameraOffNamed": "{name} — caméra coupée",
   "call.micOffBadge": "Micro coupé",
+  "call.preJoinTitle": "Vérifiez votre caméra et votre micro",
+  "call.preJoinJoin": "Rejoindre le cours",
+  "call.preJoinBack": "Retour",
+  "call.preJoinCameraOff": "Caméra coupée",
+  "call.preJoinMicLevel": "Micro",
+  "call.preJoinHint": "Dites quelque chose — la barre doit bouger.",
+  "call.preJoinMicrophone": "Micro",
+  "call.preJoinCamera": "Caméra",
+  "call.preJoinDenied":
+    "Votre navigateur bloque la caméra et le micro. Autorisez-les depuis l'icône de la barre d'adresse, ou rejoignez sans.",
+  "call.preJoinNoDevice": "Aucune caméra ni aucun micro trouvés. Vous pouvez quand même rejoindre.",
+  "call.preJoinInUse":
+    "Une autre application utilise votre caméra ou votre micro. Fermez-la, puis réessayez.",
+  "call.preJoinUnknown":
+    "La caméra ou le micro n'a pas pu démarrer. Vous pouvez quand même rejoindre.",
   "call.transcriptKept": "Transcription conservée pour les notes d'apprentissage",
   "call.captionsStopped":
     "Les sous-titres se sont arrêtés sur cet appareil — vérifiez l'autorisation du micro.",

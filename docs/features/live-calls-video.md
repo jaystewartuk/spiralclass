@@ -58,6 +58,14 @@ Source: `apps/web/src/lib/video/*`, `apps/web/src/lib/captions/*`,
    purposes). This was a real fix for a regression where tapping Record
    (which triggers a page re-render via `revalidatePath`) would otherwise
    tear down and reconnect the whole call.
+   - **Nothing connects before a Join tap.** Opening the call shows a check
+     first: a camera preview, a live microphone bar, a camera and microphone
+     picker where there is more than one, and on/off toggles. A blocked
+     permission, a missing device or one another app holds is explained
+     there, and joining without media is always possible. The call then
+     starts with exactly what was left on, on the devices picked. A Retry
+     after a failed connect does not ask again. In the call, the microphone
+     button carries a ring while the person's own voice is coming through.
 3. The active call session lives in a React context mounted once at the app
    root, not tied to the call page's own component lifecycle — navigating to
    another screen (e.g. chat) does not hang up the call; this is what powers
