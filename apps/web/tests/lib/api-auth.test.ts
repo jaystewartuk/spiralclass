@@ -41,6 +41,7 @@ const {
   requireApiTeacher,
   requireApiOnboardedTeacher,
   requireApiCallParticipant,
+  requireApiStudent,
 } = await import("@/lib/api/auth");
 
 const req = () => new Request("https://x.test/api/teacher/thing");
@@ -234,6 +235,44 @@ describe("requireApiCallParticipant", () => {
     findUnique.mockResolvedValue(null);
     findStudent.mockResolvedValue({ ...STUDENT, disabledAt: new Date() });
     await expect(requireApiCallParticipant(req())).rejects.toMatchObject({
+      status: 403,
+      reason: "student-disabled",
+    });
+    expect(identifyServerUser).not.toHaveBeenCalled();
+  });
+});
+
+describe("requireApiStudent", () => {
+  const STUDENT = { id: "s1", email: "ana@example.com", disabledAt: null };
+
+  it("resolves the student linked to the session and identifies her as a student", async () => {
+    findStudent.mockResolvedValue(STUDENT);
+    await expect(requireApiStudent(req())).resolves.toEqual(STUDENT);
+    expect(findStudent).toHaveBeenCalledWith({ where: { authUserId: "t1" } });
+    expect(identifyServerUser).toHaveBeenCalledWith("s1", {
+      email: "ana@example.com",
+      role: "student",
+    });
+  });
+
+  it("never reads a teacher row — a teacher's session is simply not a student", async () => {
+    findStudent.mockResolvedValue(null);
+    await expect(requireApiStudent(req())).rejects.toMatchObject({
+      status: 403,
+      reason: "no-student-row",
+    });
+    expect(findUnique).not.toHaveBeenCalled();
+  });
+
+  it("refuses a request with no session as 401", async () => {
+    getSession.mockResolvedValue(null);
+    await expect(requireApiStudent(req())).rejects.toMatchObject({ status: 401 });
+    expect(findStudent).not.toHaveBeenCalled();
+  });
+
+  it("refuses a moderated student row and identifies nobody", async () => {
+    findStudent.mockResolvedValue({ ...STUDENT, disabledAt: new Date() });
+    await expect(requireApiStudent(req())).rejects.toMatchObject({
       status: 403,
       reason: "student-disabled",
     });

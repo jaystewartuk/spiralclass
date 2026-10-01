@@ -10,6 +10,7 @@ import { Logo } from "@/components/brand/logo";
 import { useLocale, useT } from "@/components/locale-provider";
 import { AccountMenu } from "@/components/account-menu";
 import { PageMenu } from "@/components/page-menu";
+import { SiteSearch } from "@/components/search/site-search";
 import { NavBarLink } from "@/components/nav/nav-row";
 import {
   MobileNavDrawer,
@@ -159,9 +160,11 @@ export function AppNav({
             <PageMenu links={contenido} label={contenidoLabel} />
           </nav>
 
-          {/* The alerts bell sits beside the account menu at every width — it's
-          a primary affordance, not something to bury in the menu. */}
+          {/* Search and the alerts bell sit beside the account menu at every
+          width — both are primary affordances, not things to bury in a menu.
+          Search is how a page no menu lists gets found at all. */}
           <div className="flex shrink-0 items-center gap-1">
+            <SiteSearch audience="teacher" bookingSlug={bookingSlug} />
             {bell}
             <div className="hidden desktop:block">
               <AccountMenu

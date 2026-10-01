@@ -38,6 +38,8 @@ Video sugerido: **"Configura tu cuenta de profesor (3 minutos)"**
 
 **¿Puedo cambiar esto después?** Sí. Abre Configuración para editar tu perfil, disponibilidad y paquetes.
 
+**¿Cómo encuentro rápido una página, un alumno o una clase?** Usa el botón de búsqueda (la lupa) en la parte superior de cualquier página, o presiona ⌘K en una Mac o Ctrl+K en otros equipos. Escribe lo que buscas con tus propias palabras, como el nombre de un alumno, "paquetes", "planear mi día" o una pregunta, y presiona Enter.
+
 **¿Necesito un plan de pago para empezar?** No. Los nuevos profesores comienzan con una prueba gratuita de Pro de 30 días y no se requiere tarjeta.
 
 ## Artículos relacionados

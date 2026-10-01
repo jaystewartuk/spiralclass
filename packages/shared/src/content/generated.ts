@@ -52,6 +52,8 @@ Suggested video: **“Set Up Your Teaching Account (3 minutes)”**
 
 **Can I change this later?** Yes. Open Settings to edit your profile, availability, and packages.
 
+**How do I find a page, a student or a class quickly?** Use the search button (the magnifying glass) at the top of any page, or press ⌘K on a Mac or Ctrl+K elsewhere. Type what you are looking for in your own words, such as a student's name, "packages", "plan my day" or a question, and press Enter.
+
 **Do I need a paid plan to start?** No. New teachers begin with a 30-day Pro trial and no card is required.
 `,
       es: `## Propósito
@@ -91,6 +93,8 @@ Video sugerido: **"Configura tu cuenta de profesor (3 minutos)"**
 ## Preguntas
 
 **¿Puedo cambiar esto después?** Sí. Abre Configuración para editar tu perfil, disponibilidad y paquetes.
+
+**¿Cómo encuentro rápido una página, un alumno o una clase?** Usa el botón de búsqueda (la lupa) en la parte superior de cualquier página, o presiona ⌘K en una Mac o Ctrl+K en otros equipos. Escribe lo que buscas con tus propias palabras, como el nombre de un alumno, "paquetes", "planear mi día" o una pregunta, y presiona Enter.
 
 **¿Necesito un plan de pago para empezar?** No. Los nuevos profesores comienzan con una prueba gratuita de Pro de 30 días y no se requiere tarjeta.
 `,
@@ -1348,6 +1352,8 @@ Suggested video: **“Your First Steps as a Student (1 minute)”**
 ## Questions
 
 **Do I need a password?** No. SpiralClass signs you in with an email code or, where available, Google.
+
+**How do I find a class, a teacher or a page quickly?** Use the search button (the magnifying glass) at the top of any page, or press ⌘K on a Mac or Ctrl+K elsewhere. Type what you are looking for, such as your teacher's name, "book" or a question, and press Enter.
 `,
       es: `## Propósito
 
@@ -1386,6 +1392,8 @@ Video sugerido: **"Tus primeros pasos como alumno (1 minuto)"**
 ## Preguntas
 
 **¿Necesito una contraseña?** No. SpiralClass te da acceso con un código por correo o, donde esté disponible, con Google.
+
+**¿Cómo encuentro rápido una clase, un profesor o una página?** Usa el botón de búsqueda (la lupa) en la parte superior de cualquier página, o presiona ⌘K en una Mac o Ctrl+K en otros equipos. Escribe lo que buscas, como el nombre de tu profesor, "agendar" o una pregunta, y presiona Enter.
 `,
     },
   },
