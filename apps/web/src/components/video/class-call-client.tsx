@@ -20,7 +20,6 @@ export function ClassCallClient({
   overlay,
   canRecord,
   canCaption,
-  captionsConsentMissing,
   bookingId,
   role,
   scheduledStartAt,
@@ -43,7 +42,6 @@ export function ClassCallClient({
   overlay?: React.ReactNode;
   canRecord?: boolean;
   canCaption?: boolean;
-  captionsConsentMissing?: boolean;
   bookingId?: string;
   role?: "teacher" | "student";
   scheduledStartAt?: string;
@@ -61,7 +59,6 @@ export function ClassCallClient({
       overlay={overlay}
       canRecord={canRecord}
       canCaption={canCaption}
-      captionsConsentMissing={captionsConsentMissing}
       bookingId={bookingId}
       role={role}
       scheduledStartAt={scheduledStartAt}

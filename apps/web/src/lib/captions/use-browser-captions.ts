@@ -5,6 +5,7 @@ import { Room, RoomEvent, Track } from "livekit-client";
 import {
   baseLanguage,
   CAPTION_TOPIC,
+  CAPTIONS_CONSENT_ATTRIBUTE,
   CAPTIONS_ON_ATTRIBUTE,
   CAPTIONS_RECOGNIZER_ATTRIBUTE,
   encodeCaption,
@@ -81,6 +82,15 @@ export function useBrowserCaptions({
   // Call synchronously inside the teacher's toggle click (see
   // installOnDeviceModels for why it cannot wait).
   prepareOnDevice: () => void;
+  // The class's caption session as last read, or null before the first read
+  // and while captions are off for this class.
+  session: CaptionSession | null;
+  // Whether the other participant is in the room.
+  otherPresent: boolean;
+  // The student just gave her captions consent from the call: re-read the
+  // config here, and nudge the other browser to re-read it too, so both start
+  // captioning her within seconds rather than at the next minute's poll.
+  consentGiven: () => void;
 } {
   const selfCapable = useMemo(
     () => typeof window !== "undefined" && browserCanRecognizeDuringCall(window),
@@ -164,8 +174,18 @@ export function useBrowserCaptions({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [role, teacherCaptionsOn, room, roomVersion, session]);
 
+  // The other browser's consent nudge (CAPTIONS_CONSENT_ATTRIBUTE): a change
+  // re-reads the config below. Never read as the consent itself.
+  const remoteConsentNudge = useMemo(() => {
+    if (!room) return null;
+    const remote = [...room.remoteParticipants.values()][0];
+    return remote?.attributes?.[CAPTIONS_CONSENT_ATTRIBUTE] ?? null;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [room, roomVersion]);
+
   // The class's caption session: fetched when needed, re-read every minute
-  // while captions are on, and re-read at once after a refusal.
+  // while captions are on, and re-read at once after a refusal or a consent
+  // given from the call.
   const wantSession = Boolean(room && bookingId && (captionsOn || prefetchSession));
   useEffect(() => {
     if (!wantSession || !bookingId) return;
@@ -194,7 +214,7 @@ export function useBrowserCaptions({
       cancelled = true;
       if (timer) clearInterval(timer);
     };
-  }, [wantSession, bookingId, captionsOn, refetchKey]);
+  }, [wantSession, bookingId, captionsOn, refetchKey, remoteConsentNudge]);
 
   // One controller per room.
   const controllerRef = useRef<BrowserCaptions | null>(null);
@@ -264,7 +284,26 @@ export function useBrowserCaptions({
     });
   }, []);
 
-  const transcriptKept = captionsOn && Boolean(session?.transcriptCapture);
+  const consentGiven = useCallback(() => {
+    setRefetchKey((k) => k + 1);
+    void room?.localParticipant
+      .setAttributes({ [CAPTIONS_CONSENT_ATTRIBUTE]: String(Date.now()) })
+      .catch(() => {
+        // The other browser still picks the consent up at its next poll.
+      });
+  }, [room]);
 
-  return { captionsOn, status, downloadProgress, prepareOnDevice, transcriptKept };
+  const transcriptKept = captionsOn && Boolean(session?.transcriptCapture);
+  const otherPresent = view?.remote != null;
+
+  return {
+    captionsOn,
+    status,
+    downloadProgress,
+    prepareOnDevice,
+    transcriptKept,
+    session,
+    otherPresent,
+    consentGiven,
+  };
 }

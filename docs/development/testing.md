@@ -194,7 +194,8 @@ ESM wrappers.
   by unit tests. It cannot move here — the handler re-fetches canonical state
   through the Stripe client and the stub's subscription map lives inside the
   `next start` process, so an out-of-process replay throws.
-- **The video call**, which needs two live participants and a media stack.
+- **The video call**, which needs two live participants and a media stack —
+  see it by hand instead ([below](#the-video-call-by-hand)).
 - **Voice and video messages**, which need a real `MediaRecorder` capture and a
   storage stub.
 - **Inngest jobs and PostHog analytics** — neither runs in the hermetic gate.
@@ -202,6 +203,47 @@ ESM wrappers.
   here, and pinning that would encode "Inngest is absent" as an expectation.
 
 Those gaps are hand-checked against the `/admin/uat` runbook before a promote.
+
+## The video call, by hand
+
+A change to the call screen is seen rendered, with a teacher and a student in
+the same room, before its PR opens. One command sets that up:
+
+```bash
+pnpm call:local                           # Alicia teaches Carlos, class starting now
+pnpm call:local --student maria@alumno.test
+pnpm call:local --no-build                # reuse the last build
+pnpm call:local code <email>              # after "Email me a code": the code is 424242
+```
+
+It brings up the dev database and a LiveKit dev server, moves the pair's next
+class to now, builds, and serves on :3000. Open the teacher at
+`http://localhost:3000` and the student at `http://preview.localhost:3000` —
+two hosts, because cookies are per host and that is what keeps the two
+sign-ins apart in one Chrome. Turn both cameras off before taking screenshots:
+it is your webcam on both sides.
+
+Every setting in it is there because the obvious thing failed:
+
+| Obvious thing                                | What happens                                                                                                                                         | So the script…                                                            |
+| -------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------- |
+| `pnpm dev`, second user on another host      | `next dev` blocks its client scripts for any host but `localhost` ("Blocked cross-origin request to Next.js dev resource"); that page never hydrates | runs a production build (`next build` + `next start`)                     |
+| `next start` with the local `APP_URL`        | a production build on a non-preview `APP_URL` demands production credentials; every request is a 500                                                 | sets `APP_URL=http://preview.localhost:3000`, as `scripts/ci/e2e.sh` does |
+| the enforced CSP                             | `connect-src` has no `ws://localhost:7880`; the LiveKit socket is refused and the call says "Couldn't connect"                                       | sets `CSP_ENFORCE=0` (report-only)                                        |
+| `livekit-server --dev` in Docker             | on a Mac it advertises the container's address for media: signalling works, ICE never does, the page sits on "Connecting…"                           | passes `--node-ip 127.0.0.1`                                              |
+| reading the sign-in code from the server log | only `next dev` prints the stub email; `next start` logs that it sent nothing                                                                        | plants a known code over the real send (`code`), as the E2E helper does   |
+| the captions toggle with no Translate key    | hidden (live-calls-video.md rule 19)                                                                                                                 | sets a placeholder key — desktop Chrome translates on the device          |
+
+Two database traps for anyone editing fixture rows by hand: `psql -c "a; b"`
+runs as **one transaction**, so a failure in `b` silently undoes `a`; and a
+booking's `buffered_end` must move with its times, because
+`bookings_no_overlap_buffered` is an exclusion constraint over it.
+
+What this cannot show: anything that needs speech. Recognition needs a real
+voice in a real microphone, so caption lines themselves are checked in unit
+tests (`tests/captions/`, `tests/video/caption-band.test.tsx`), and the
+rendered check covers everything around them — the toggle, the notice, the
+consent prompts, the "Listening…" band.
 
 ## The rule
 

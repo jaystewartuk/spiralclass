@@ -41,6 +41,7 @@
     "release:status": "node scripts/ci/release-status.mjs",
     "local": "node scripts/local/run.mjs",
     "local:status": "node scripts/local/status.mjs",
+    "call:local": "bash scripts/local-call.sh",
     "format": "prettier --write .",
     "format:check": "node scripts/format-check.mjs",
     "check:leaks": "node scripts/check-leaks.mjs",

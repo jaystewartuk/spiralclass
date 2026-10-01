@@ -117,6 +117,17 @@ describe("what the band shows", () => {
     expect(translation?.className).toContain("text-sm");
   });
 
+  it("is a size larger on a computer screen at the default size", () => {
+    // A student on a desktop could not read the default-size subtitles and
+    // never found the size control; the default now scales up from `md`.
+    const el = render({ prefs: DEFAULT_CAPTION_PREFERENCES });
+    const line = [...el.querySelectorAll("p")].find((p) =>
+      p.textContent?.includes("How are you today?"),
+    );
+    expect(line?.className).toContain("text-lg");
+    expect(line?.className).toContain("md:text-2xl");
+  });
+
   it("names the speaker", () => {
     expect(render().textContent).toContain("Mira");
   });

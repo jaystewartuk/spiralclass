@@ -31,6 +31,7 @@ const SESSION = (over: Partial<CaptionSession> = {}): CaptionSession => ({
   },
   recognitionLocales: { teacher: "es-MX", student: "en" },
   studentConsent: true,
+  studentConsentGiver: "student",
   cloudRecognition: false,
   transcriptCapture: false,
   ...over,

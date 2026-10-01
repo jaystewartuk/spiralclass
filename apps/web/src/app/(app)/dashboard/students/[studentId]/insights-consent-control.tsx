@@ -12,23 +12,31 @@ import { setCaptionsGuardianConsent } from "@/app/actions/captions-consent";
 // whether the student is a minor (then a guardian's consent is the one that
 // counts). Off by default — capture stays disabled until consent is recorded.
 //
-// Also hosts the sibling live-captions GUARDIAN consent control (docs/
-// architecture/LIVEKIT_CAPTIONS_AUDIT.md P0) — a separate consent record from
-// insights above, but sharing this component because both branch on the same
-// `isMinor` flag for this pairing. Only meaningful when isMinor is checked:
-// an adult student consents to captions herself, from her own account page
-// (see components/account/captions-consent-toggle.tsx), never via the
-// teacher.
+// Also hosts the sibling live-captions consent — a separate consent record
+// from insights above, but sharing this component because both branch on the
+// same `isMinor` flag for this pairing. For a minor the teacher records the
+// guardian's consent here; an adult student gives her own, never via the
+// teacher (on her account page, or with one tap when a class's captions come
+// on — components/video/captions-consent-ask.tsx), so for an adult this only
+// SHOWS whether she has.
+//
+// Each consent sits under its own heading. They used to share one row, where
+// the insights button's bare "✓ Consent on file" sat right above a captions
+// note and read as the captions consent — a teacher looking at a student who
+// had never turned captions on was told, in effect, that he had.
 export function InsightsConsentControl({
   studentId,
   consented: consentedInit,
   isMinor: isMinorInit,
   captionsGuardianConsented: captionsConsentedInit,
+  captionsSelfConsented,
 }: {
   studentId: string;
   consented: boolean;
   isMinor: boolean;
   captionsGuardianConsented: boolean;
+  // The adult student's own captions consent (read-only here).
+  captionsSelfConsented: boolean;
 }) {
   const t = useT();
   const [consented, setConsented] = useState(consentedInit);
@@ -66,7 +74,7 @@ export function InsightsConsentControl({
   }
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-3">
       <label className="flex items-center gap-2 text-xs text-muted-foreground">
         <Checkbox
           checked={isMinor}
@@ -76,7 +84,8 @@ export function InsightsConsentControl({
         {t("web.insightsConsent.minorLabel")}
       </label>
 
-      <div className="flex flex-wrap gap-2">
+      <div className="space-y-1">
+        <h4 className="text-sm font-medium">{t("web.insightsConsent.heading")}</h4>
         <Button
           size="sm"
           variant={consented ? "secondary" : "outline"}
@@ -85,7 +94,11 @@ export function InsightsConsentControl({
         >
           {consented ? t("web.insightsConsent.recorded") : t("web.insightsConsent.record")}
         </Button>
+        <p className="text-xs text-muted-foreground">{t("web.studentProfile.consentNote")}</p>
+      </div>
 
+      <div className="space-y-1">
+        <h4 className="text-sm font-medium">{t("web.captionsConsent.heading")}</h4>
         {isMinor ? (
           <Button
             size="sm"
@@ -98,7 +111,11 @@ export function InsightsConsentControl({
               : t("web.captionsConsent.record")}
           </Button>
         ) : (
-          <p className="text-xs text-muted-foreground">{t("web.captionsConsent.adultNote")}</p>
+          <p className="text-xs text-muted-foreground">
+            {captionsSelfConsented
+              ? t("web.captionsConsent.selfOn")
+              : t("web.captionsConsent.selfOff")}
+          </p>
         )}
       </div>
       {error && <p className="text-xs text-destructive">{error}</p>}

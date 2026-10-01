@@ -80,11 +80,16 @@ export type CaptionBandProps = {
 // text is roughly a dozen lines of wrapped copy — it stops being a subtitle
 // band and becomes a wall across the other person's face. Someone who has
 // asked for bigger text has asked to read, not to read MORE at once.
+//
+// Each step is a size larger from `md` up. One size for every screen made the
+// default right for a phone held at arm's length and too small for a monitor
+// across a desk — a student on a computer reported the subtitles as too small
+// to read, at the default, never having found the size control.
 const SIZE_CLASSES: Record<CaptionSize, { primary: string; secondary: string; maxLines: number }> =
   {
-    m: { primary: "text-lg", secondary: "text-sm", maxLines: 3 },
-    l: { primary: "text-2xl", secondary: "text-base", maxLines: 2 },
-    xl: { primary: "text-3xl", secondary: "text-xl", maxLines: 2 },
+    m: { primary: "text-lg md:text-2xl", secondary: "text-sm md:text-base", maxLines: 3 },
+    l: { primary: "text-2xl md:text-3xl", secondary: "text-base md:text-xl", maxLines: 2 },
+    xl: { primary: "text-3xl md:text-4xl", secondary: "text-xl md:text-2xl", maxLines: 2 },
   };
 
 export function CaptionBand({

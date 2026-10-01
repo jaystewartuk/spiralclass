@@ -387,7 +387,7 @@ export const fr = {
     "Votre langue — utilisée pour les sous-titres en direct pendant vos cours.",
   "myDetails.captionsConsent": "Sous-titres en direct",
   "myDetails.captionsConsentDescription":
-    "Activez ceci pour que votre cours ait aussi des sous-titres en direct de VOTRE voix — tant que c'est actif, un navigateur de l'appel reconnaît votre voix (sur l'appareil ou avec le service vocal de ce navigateur ; ou, quand aucun appareil de l'appel ne le peut, votre propre navigateur l'envoie à Deepgram) et elle est traduite sur l'appareil ou par Google. Rien n'est stocké.",
+    "Activez ceci pour que votre cours ait aussi des sous-titres en direct de VOTRE voix — tant que c'est actif, un navigateur de l'appel reconnaît votre voix (sur l'appareil ou avec le service vocal de ce navigateur ; ou, quand aucun appareil de l'appel ne le peut, votre propre navigateur l'envoie à Deepgram) et elle est traduite sur l'appareil ou par Google. Les sous-titres ne sont pas enregistrés — sauf si votre professeur a votre consentement distinct pour conserver les transcriptions des cours pour l'analyse d'apprentissage ; le texte reconnu est alors conservé, et l'appel l'indique à l'écran.",
   "myDetails.captionsConsentEnable": "Activer les sous-titres en direct pour ma voix",
   "myDetails.captionsConsentEnabled": "Sous-titres en direct activés",
   "email.title": "Changer l'adresse e-mail",
@@ -691,10 +691,20 @@ export const fr = {
   "call.captionsMicOff": "Activez votre micro pour sous-titrer.",
   "web.call.captionsMicOffDetailed":
     "Activez votre micro pour sous-titrer ce que vous dites pour l'élève.",
-  "call.captionsConsentHint":
-    "Les sous-titres en direct sont disponibles — activez-les dans les paramètres de votre compte.",
+  "call.captionsConsentAskTitle": "Votre professeur a activé les sous-titres en direct",
+  "call.captionsConsentAskBody":
+    "Activez-les aussi pour votre voix, pour que votre professeur puisse lire ce que vous dites. Un navigateur de l'appel reconnaît votre voix (ou Deepgram, quand aucun appareil ne le peut) et elle est traduite sur l'appareil ou par Google. Les sous-titres ne sont pas enregistrés, sauf comme transcription du cours quand votre professeur a votre consentement pour l'analyse d'apprentissage. Cela vaut pour tous vos cours ; vous pouvez le désactiver à tout moment dans votre compte.",
+  "call.captionsConsentAskAccept": "Activer",
+  "call.captionsConsentAskLater": "Pas maintenant",
+  "call.captionsConsentAskFailed": "Échec de l'enregistrement. Réessayez.",
+  "call.captionsConsentGuardian":
+    "Les sous-titres de votre voix nécessitent le consentement d'un parent ou tuteur — votre professeur peut l'enregistrer.",
+  "call.captionsStudentAsked":
+    "La voix de votre élève n'est pas encore sous-titrée — la question lui est posée sur son écran.",
+  "call.captionsStudentNeedsGuardian":
+    "La voix de votre élève n'est pas sous-titrée — enregistrez le consentement de son tuteur sur sa page élève.",
   "call.captionsDisclosure":
-    "Les sous-titres sont produits dans vos navigateurs : la voix est reconnue sur l'appareil ou par le service vocal du navigateur — ou par Deepgram quand aucun de vos appareils ne le peut — et traduite sur l'appareil ou par Google. Rien n'est stocké.",
+    "Les sous-titres sont produits dans vos navigateurs : la voix est reconnue sur l'appareil ou par le service vocal du navigateur — ou par Deepgram quand aucun de vos appareils ne le peut — et traduite sur l'appareil ou par Google. Les sous-titres eux-mêmes ne sont pas enregistrés ; mais si la transcription du cours est conservée pour l'analyse d'apprentissage (avec le consentement distinct de l'élève), le texte reconnu est conservé, et l'appel l'indique à l'écran.",
   "call.captionsNoticeTitle": "Avant d'activer les sous-titres",
   "call.captionsNoticeDismiss": "Compris",
   "call.captionsEnabledToast": "Sous-titres en direct activés.",
@@ -2421,8 +2431,11 @@ export const fr = {
   "web.captionsConsent.recorded": "✓ Consentement aux sous-titres en direct enregistré",
   "web.captionsConsent.record":
     "Enregistrer le consentement du tuteur pour les sous-titres en direct",
-  "web.captionsConsent.adultNote":
-    "Les élèves adultes consentent eux-mêmes aux sous-titres en direct, depuis leur propre compte.",
+  "web.insightsConsent.heading": "Analyse vocale",
+  "web.captionsConsent.heading": "Sous-titres en direct de sa voix",
+  "web.captionsConsent.selfOn": "✓ Activés par l'élève",
+  "web.captionsConsent.selfOff":
+    "Pas encore activés. L'élève sera invité à les activer sur son écran la prochaine fois que vous activerez les sous-titres en cours.",
   "web.dashboard.classes.calendarEventTitle": "Cours : {name}",
   "web.dashboard.classes.call.myCues": "Mes notes",
   "web.dashboard.classes.call.noCues": "Aucune note.",
@@ -4617,7 +4630,7 @@ export const fr = {
   "web.myClasses.account.nativeLanguage.savedMessage": "Enregistré.",
   "web.myClasses.account.captionsConsent.title": "Sous-titres en direct",
   "web.myClasses.account.captionsConsent.description":
-    "Activez ceci pour que votre cours ait aussi des sous-titres en direct de VOTRE voix — tant que c'est actif, un navigateur de l'appel reconnaît votre voix (sur l'appareil ou avec le service vocal de ce navigateur ; ou, quand aucun appareil de l'appel ne le peut, votre propre navigateur l'envoie à Deepgram) et elle est traduite sur l'appareil ou par Google. Rien n'est stocké.",
+    "Activez ceci pour que votre cours ait aussi des sous-titres en direct de VOTRE voix — tant que c'est actif, un navigateur de l'appel reconnaît votre voix (sur l'appareil ou avec le service vocal de ce navigateur ; ou, quand aucun appareil de l'appel ne le peut, votre propre navigateur l'envoie à Deepgram) et elle est traduite sur l'appareil ou par Google. Les sous-titres ne sont pas enregistrés — sauf si votre professeur a votre consentement distinct pour conserver les transcriptions des cours pour l'analyse d'apprentissage ; le texte reconnu est alors conservé, et l'appel l'indique à l'écran.",
   "web.myClasses.account.captionsConsent.record": "Activer les sous-titres en direct pour ma voix",
   "web.myClasses.account.captionsConsent.recorded": "✓ Sous-titres en direct activés",
   "web.myClasses.account.signInEmail.title": "E-mail de connexion",

@@ -13,6 +13,7 @@ import { nudgeFromTeacher } from "@/app/actions/call-nudge";
 import { createLessonBookmark } from "@/app/actions/lesson-notes";
 import { Button } from "@/components/ui/button";
 import { CallSessionBootstrap } from "@/components/video/call-session-bootstrap";
+import { CallNotesCard } from "@/components/video/call-notes-card";
 
 // Teacher's in-class video call (live-notes-panel.md step 3, D-16). A platform-
 // owned room with her private cues overlaid on the video. A Pro live surface,
@@ -119,8 +120,11 @@ function CueOverlay({
   // wrapper) precisely so that returning null shows no container at all.
   if (cues.length === 0) return null;
   return (
-    <div className="space-y-2 rounded-lg bg-background/90 p-3 text-foreground shadow-lg backdrop-blur">
-      <h3 className="text-sm font-medium text-muted-foreground">{myCuesLabel}</h3>
+    <CallNotesCard
+      title={myCuesLabel}
+      count={cues.length}
+      storageKey="spiralclass.callNotes.teacher"
+    >
       <ul className="space-y-1 text-sm">
         {cues.map((c) => (
           <li key={c.id} className={c.doneAt ? "text-muted-foreground line-through" : ""}>
@@ -128,7 +132,7 @@ function CueOverlay({
           </li>
         ))}
       </ul>
-    </div>
+    </CallNotesCard>
   );
 }
 

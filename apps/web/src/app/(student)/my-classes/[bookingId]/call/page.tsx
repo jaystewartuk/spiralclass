@@ -6,8 +6,6 @@ import { prisma } from "@/lib/prisma";
 import { getPreferredLocale, getT } from "@/lib/i18n";
 import type { TFunction } from "@/lib/i18n-translate";
 import { gateProFeature } from "@/lib/subscriptions/enforce";
-import { liveCaptionsEnabled } from "@/lib/captions/config";
-import { captionsPublishConsentOk } from "@/lib/captions/class-access";
 import { lessonNoteStudentVisible } from "@/lib/lesson-notes/visibility";
 import { studentIdentityIds } from "@/lib/students/identity";
 import { getVideoProvider, classCallRoom } from "@/lib/video/provider";
@@ -89,19 +87,10 @@ export default async function StudentCallPage({
   // in the renderer (this array is serialized straight into her RSC payload).
   const materials = await getCallMaterials(booking.id, { audience: "student" });
 
-  // Consent gate (the captions architecture review P0): her own
-  // speech may only be captioned if she's consented (or her guardian
-  // has, via the teacher) — the teacher's captions toggle (D-27,
-  // teacher-toggled) covers both directions, but can never bypass this
-  // (D-185). Distinguished from "feature off entirely" so the call UI can
-  // explain why her own speech isn't being captioned even while the
-  // teacher's toggle is on. No `canCaption` is passed here — only the
-  // teacher's own call page renders the toggle; see class-call.tsx's
-  // canCaption doc comment.
-  const captionsFeatureOn = liveCaptionsEnabled();
-  const captionsConsent = captionsFeatureOn
-    ? await captionsPublishConsentOk(booking, "student")
-    : false;
+  // No `canCaption` here — only the teacher's own call page renders the
+  // captions toggle (see class-call.tsx's canCaption doc comment). Whether her
+  // own speech may be captioned, and asking her when it may not, comes from
+  // the live caption session in the call itself (consent-prompt.ts).
 
   return (
     <CallSessionBootstrap
@@ -112,7 +101,6 @@ export default async function StudentCallPage({
       bookingId={booking.id}
       role="student"
       scheduledStartAt={booking.scheduledStart.toISOString()}
-      captionsConsentMissing={captionsFeatureOn && !captionsConsent}
       materials={materials}
       onNudge={nudgeFromStudent.bind(null, booking.id)}
       overlay={

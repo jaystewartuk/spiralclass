@@ -101,14 +101,15 @@ infra/              OpenTofu; each module documents itself
 Agents call `pnpm` directly. `just --list` is a human front door that delegates
 to these and adds no logic of its own.
 
-| Command                            | What it does                                                   |
-| ---------------------------------- | -------------------------------------------------------------- |
-| `pnpm gate --allow-dirty`          | **The fast tier, mid-work. Run it before you say you're done** |
-| `pnpm dev`                         | Next.js dev server (port 3000)                                 |
-| `pnpm typecheck` / `lint` / `test` | One check across every workspace (turbo-cached)                |
-| `pnpm test:integration:local`      | Integration suite, booting the Postgres test container         |
-| `pnpm gate:lock`                   | Who holds the machine, and who is queued                       |
-| `pnpm pr`                          | Branch → push (runs the gate) → open the PR. Use `/pr`         |
+| Command                            | What it does                                                         |
+| ---------------------------------- | -------------------------------------------------------------------- |
+| `pnpm gate --allow-dirty`          | **The fast tier, mid-work. Run it before you say you're done**       |
+| `pnpm dev`                         | Next.js dev server (port 3000)                                       |
+| `pnpm typecheck` / `lint` / `test` | One check across every workspace (turbo-cached)                      |
+| `pnpm test:integration:local`      | Integration suite, booting the Postgres test container               |
+| `pnpm gate:lock`                   | Who holds the machine, and who is queued                             |
+| `pnpm call:local`                  | A teacher and a student in one local call, for Chrome. `/call-local` |
+| `pnpm pr`                          | Branch → push (runs the gate) → open the PR. Use `/pr`               |
 
 Single file, single workspace — turbo tasks take no file arguments, so target a
 workspace and forward after `--`:

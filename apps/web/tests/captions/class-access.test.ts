@@ -228,7 +228,36 @@ describe("resolveCaptionSession", () => {
   it("reports no consent when the pairing has none", async () => {
     bookingFindFirst.mockResolvedValue(bookingRow());
     teacherStudentFindUnique.mockResolvedValue(null);
-    expect(await resolveCaptionSession("b1", TEACHER)).toMatchObject({ studentConsent: false });
+    expect(await resolveCaptionSession("b1", TEACHER)).toMatchObject({
+      studentConsent: false,
+      studentConsentGiver: "student",
+    });
+  });
+
+  it("names the student as the one to ask when an adult has not consented", async () => {
+    bookingFindFirst.mockResolvedValue(bookingRow());
+    teacherStudentFindUnique.mockResolvedValue({
+      isMinor: false,
+      captionsConsentAt: null,
+      captionsGuardianConsentAt: null,
+    });
+    expect(await resolveCaptionSession("b1", STUDENT)).toMatchObject({
+      studentConsent: false,
+      studentConsentGiver: "student",
+    });
+  });
+
+  it("names the guardian for a minor — even one whose own consent is on file", async () => {
+    bookingFindFirst.mockResolvedValue(bookingRow());
+    teacherStudentFindUnique.mockResolvedValue({
+      isMinor: true,
+      captionsConsentAt: new Date(),
+      captionsGuardianConsentAt: null,
+    });
+    expect(await resolveCaptionSession("b1", STUDENT)).toMatchObject({
+      studentConsent: false,
+      studentConsentGiver: "guardian",
+    });
   });
 
   it("asks whether the class's transcript is kept, with the package for a class for two", async () => {

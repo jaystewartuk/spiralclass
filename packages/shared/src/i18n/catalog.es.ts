@@ -402,7 +402,7 @@ export const esMX = {
     "Tu idioma — se usa para los subtítulos en vivo durante tus clases.",
   "myDetails.captionsConsent": "Subtítulos en vivo",
   "myDetails.captionsConsentDescription":
-    "Actívalo para que tu clase también tenga subtítulos en vivo de TU voz — mientras esté activo, un navegador de la llamada reconoce tu voz (en el dispositivo o con el servicio de voz de ese navegador; o, cuando ningún dispositivo de la llamada puede, tu propio navegador la envía a Deepgram) y se traduce en el dispositivo o con Google. No se guarda nada.",
+    "Actívalo para que tu clase también tenga subtítulos en vivo de TU voz — mientras esté activo, un navegador de la llamada reconoce tu voz (en el dispositivo o con el servicio de voz de ese navegador; o, cuando ningún dispositivo de la llamada puede, tu propio navegador la envía a Deepgram) y se traduce en el dispositivo o con Google. Los subtítulos no se guardan, salvo que tu profe tenga tu consentimiento aparte para conservar la transcripción de las clases para el análisis de aprendizaje; en ese caso el texto reconocido se guarda, y la llamada lo indica en pantalla.",
   "myDetails.captionsConsentEnable": "Activar subtítulos en vivo para mi voz",
   "myDetails.captionsConsentEnabled": "Subtítulos en vivo activados",
 
@@ -706,10 +706,20 @@ export const esMX = {
   "call.captionsMicOff": "Activa tu micrófono para subtitular.",
   "web.call.captionsMicOffDetailed":
     "Enciende tu micrófono para subtitular lo que dices para el alumno.",
-  "call.captionsConsentHint":
-    "Los subtítulos en vivo están disponibles — actívalos en la configuración de tu cuenta.",
+  "call.captionsConsentAskTitle": "Tu profe activó los subtítulos en vivo",
+  "call.captionsConsentAskBody":
+    "Actívalos también para tu voz, así tu profe puede leer lo que dices. Un navegador de la llamada reconoce tu voz (o Deepgram, cuando ningún dispositivo puede) y se traduce en el dispositivo o con Google. Los subtítulos no se guardan, salvo como transcripción de la clase cuando tu profe tiene tu consentimiento para el análisis de aprendizaje. Aplica a todas tus clases; puedes desactivarlo cuando quieras en tu cuenta.",
+  "call.captionsConsentAskAccept": "Activar",
+  "call.captionsConsentAskLater": "Ahora no",
+  "call.captionsConsentAskFailed": "No se pudo guardar. Inténtalo de nuevo.",
+  "call.captionsConsentGuardian":
+    "Los subtítulos de tu voz necesitan el consentimiento de tu madre, padre o tutor; tu profe puede registrarlo.",
+  "call.captionsStudentAsked":
+    "La voz de tu alumno aún no tiene subtítulos: se le está preguntando en su pantalla.",
+  "call.captionsStudentNeedsGuardian":
+    "La voz de tu alumno no tiene subtítulos: registra el consentimiento de su tutor en su página de alumno.",
   "call.captionsDisclosure":
-    "Los subtítulos se hacen en sus navegadores: la voz se reconoce en el dispositivo o con el servicio de voz del propio navegador —o con Deepgram cuando ninguno de sus dispositivos puede— y se traduce en el dispositivo o con Google. No se guarda nada.",
+    "Los subtítulos se hacen en sus navegadores: la voz se reconoce en el dispositivo o con el servicio de voz del propio navegador —o con Deepgram cuando ninguno de sus dispositivos puede— y se traduce en el dispositivo o con Google. Los subtítulos en sí no se guardan; pero si la transcripción de la clase se conserva para el análisis de aprendizaje (con el consentimiento aparte del alumno), el texto reconocido se guarda, y la llamada lo indica en pantalla.",
   "call.captionsNoticeTitle": "Antes de activar los subtítulos",
   "call.captionsNoticeDismiss": "Entendido",
   "call.captionsEnabledToast": "Subtítulos en vivo activados.",
@@ -2481,8 +2491,11 @@ export const esMX = {
   "web.insightsConsent.record": "Registrar consentimiento para análisis de voz",
   "web.captionsConsent.recorded": "✓ Consentimiento de subtítulos en vivo registrado",
   "web.captionsConsent.record": "Registrar consentimiento del tutor para subtítulos en vivo",
-  "web.captionsConsent.adultNote":
-    "Los alumnos adultos dan su consentimiento para los subtítulos en vivo ellos mismos, desde su propia cuenta.",
+  "web.insightsConsent.heading": "Análisis de voz",
+  "web.captionsConsent.heading": "Subtítulos en vivo de su voz",
+  "web.captionsConsent.selfOn": "✓ Activados por el alumno",
+  "web.captionsConsent.selfOff":
+    "Aún no los activa. Se le preguntará en su pantalla la próxima vez que actives los subtítulos en una clase.",
 
   // --- full i18n sweep (dashboard/settings/student-portal/booking/components/admin/legal) ---
   "web.dashboard.classes.calendarEventTitle": "Clase: {name}",
@@ -4661,7 +4674,7 @@ export const esMX = {
   "web.myClasses.account.nativeLanguage.savedMessage": "Guardado.",
   "web.myClasses.account.captionsConsent.title": "Subtítulos en vivo",
   "web.myClasses.account.captionsConsent.description":
-    "Actívalo para que tu clase también tenga subtítulos en vivo de TU voz — mientras esté activo, un navegador de la llamada reconoce tu voz (en el dispositivo o con el servicio de voz de ese navegador; o, cuando ningún dispositivo de la llamada puede, tu propio navegador la envía a Deepgram) y se traduce en el dispositivo o con Google. No se guarda nada.",
+    "Actívalo para que tu clase también tenga subtítulos en vivo de TU voz — mientras esté activo, un navegador de la llamada reconoce tu voz (en el dispositivo o con el servicio de voz de ese navegador; o, cuando ningún dispositivo de la llamada puede, tu propio navegador la envía a Deepgram) y se traduce en el dispositivo o con Google. Los subtítulos no se guardan, salvo que tu profe tenga tu consentimiento aparte para conservar la transcripción de las clases para el análisis de aprendizaje; en ese caso el texto reconocido se guarda, y la llamada lo indica en pantalla.",
   "web.myClasses.account.captionsConsent.record": "Activar subtítulos en vivo para mi voz",
   "web.myClasses.account.captionsConsent.recorded": "✓ Subtítulos en vivo activados",
   "web.myClasses.account.signInEmail.title": "Correo de acceso",
