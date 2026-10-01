@@ -710,6 +710,12 @@ export const fr = {
   "call.captionsEnabledToast": "Sous-titres en direct activés.",
   "call.captionsNeedComputer":
     "Les sous-titres nécessitent que l'un de vous utilise Chrome sur un ordinateur.",
+  "call.clockStartsIn": "Commence dans {minutes} min",
+  "call.clockLeft": "Encore {minutes} min",
+  "call.clockOver": "{minutes} min de dépassement",
+  "call.more": "Plus",
+  "call.cameraOffNamed": "{name} — caméra coupée",
+  "call.micOffBadge": "Micro coupé",
   "call.transcriptKept": "Transcription conservée pour les notes d'apprentissage",
   "call.captionsStopped":
     "Les sous-titres se sont arrêtés sur cet appareil — vérifiez l'autorisation du micro.",

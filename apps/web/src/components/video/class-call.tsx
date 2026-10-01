@@ -47,6 +47,7 @@ import { startCallRecording, stopCallRecording } from "@/app/actions/call-record
 import { useCaptionFeed, useRoomCaptionsEnabled } from "@/lib/captions/use-caption-feed";
 import { useBrowserCaptions } from "@/lib/captions/use-browser-captions";
 import { captionsConsentPrompt } from "@/lib/captions/consent-prompt";
+import { useRemoteParticipant } from "@/lib/video/use-remote-participant";
 import { useCaptionPreferences } from "@/lib/captions/use-caption-preferences";
 import {
   CAPTIONS_NOTICE_STORAGE_KEY,
@@ -55,6 +56,9 @@ import {
 } from "@/lib/captions/notice";
 import { CaptionBand, CaptionTranscript } from "./caption-band";
 import { CaptionsConsentAsk } from "./captions-consent-ask";
+import { CallTopBar } from "./call-top-bar";
+import { CallMoreMenu, type CallMoreItem } from "./call-more-menu";
+import { ParticipantPlaceholder } from "./participant-placeholder";
 import { useT } from "@/components/locale-provider";
 import type { TFunction } from "@/lib/i18n-translate";
 import { cn } from "@/lib/utils";
@@ -131,6 +135,7 @@ export function ClassCall({
   bookingId,
   role,
   scheduledStartAt,
+  scheduledEndAt,
   materials = [],
   canBrowseLibrary,
   onNudge,
@@ -148,6 +153,8 @@ export function ClassCall({
   // ISO timestamp of the booking's scheduled start — used only to compute
   // minutesBeforeStart on the join analytics event below.
   scheduledStartAt?: string;
+  // ISO end of the class, for the lesson clock in the top bar. Absent → no clock.
+  scheduledEndAt?: string;
   // Chat thread with the other party (D-… go-to-chat, WhatsApp parity).
   // Present → a Message control shows in the controls row; tapping it
   // minimizes the call (so it keeps running) and navigates there. Absent →
@@ -901,6 +908,9 @@ export function ClassCall({
     otherPresent: browserCaptions.otherPresent,
     dismissed: consentAskDismissed,
   });
+  // The other person's camera, microphone and speaking state, for the
+  // camera-off placeholder and the top bar's name.
+  const remote = useRemoteParticipant(room);
   const { prefs: captionPrefs, setPrefs: setCaptionPrefs } = useCaptionPreferences();
   const [transcriptOpen, setTranscriptOpen] = useState(false);
   // Resolve a caption's speaker identity to the name the room knows them by.
@@ -1538,6 +1548,9 @@ export function ClassCall({
     swapped,
   });
   const remoteIsBig = stage.main === "remote";
+  // A material or a screen share fills the stage; the status stack then takes
+  // a row of its own instead of floating over that content.
+  const contentOwnsStage = Boolean(activeMaterial) || screenShareActive;
   const localIsBig = stage.main === "local";
   // Minimized mode shows exactly one tile (the current primary) and nothing
   // else — see canMinimize above for why material/screen-share are excluded
@@ -1600,6 +1613,60 @@ export function ClassCall({
   // the call route) instead of the viewport, collapsing the video pane to nothing
   // and pushing the controls to the top. Portaling to <body> escapes the
   // transformed ancestor so the overlay is truly viewport-sized.
+  // The phone's overflow: exactly the controls marked `secondary` in the row
+  // below, under the same conditions, so the two can never offer different
+  // things.
+  const moreItems: CallMoreItem[] = [
+    ...(videoInputCount > 1
+      ? [
+          {
+            key: "flip",
+            icon: SwitchCamera,
+            label: t("call.flipCamera"),
+            onSelect: () => {
+              void flipCamera();
+            },
+            disabled: !camOn || flippingCamera,
+          },
+        ]
+      : []),
+    ...(chatHref
+      ? [{ key: "message", icon: MessageCircle, label: t("call.message"), onSelect: goToChat }]
+      : []),
+    {
+      key: "share",
+      icon: screenShareOn ? MonitorX : MonitorUp,
+      label: screenShareOn ? t("call.screenShareOff") : t("call.screenShareOn"),
+      onSelect: toggleScreenShare,
+      disabled: remoteScreenShareOn && !screenShareOn,
+      active: screenShareOn,
+    },
+    ...(canRecord && bookingId
+      ? [
+          {
+            key: "record",
+            icon: recording ? Square : Circle,
+            label: recording ? t("call.stopRecording") : t("call.record"),
+            onSelect: toggleRecording,
+            disabled: recordPending,
+            active: recording,
+          },
+        ]
+      : []),
+    ...(onBookmark && bookingId
+      ? [
+          {
+            key: "bookmark",
+            icon: Bookmark,
+            label: bookmarked ? t("call.bookmarked") : t("call.bookmark"),
+            onSelect: addBookmark,
+            disabled: bookmarkPending,
+            active: bookmarked,
+          },
+        ]
+      : []),
+  ];
+
   if (typeof document === "undefined") return null;
 
   return (
@@ -1646,6 +1713,194 @@ export function ClassCall({
           of four roles per tile. Both tiles stay mounted at all times so a
           swap (or a minimize) is purely a CSS position/size change: no
           track ever gets detached or re-attached to move it. */}
+          {/* The top bar: notes, who and how long, window controls — a row
+          above the stage, so nothing it holds ever covers the stage's content
+          (call-top-bar.tsx). The minimise and pop-out buttons used to float at
+          the stage's top-right, over the transcript panel's own close button;
+          up here they cannot collide with anything the stage opens. */}
+          {!minimized && (
+            <CallTopBar
+              notes={overlay}
+              otherName={remote?.name ?? null}
+              startAt={scheduledStartAt}
+              endAt={scheduledEndAt}
+              controls={
+                <>
+                  {/* Pop-out (Document Picture-in-Picture) — a real OS-level
+                  floating window, distinct from the in-page bubble.
+                  Feature-detected (pipSupported), so it simply doesn't render
+                  on browsers without it rather than showing a button that
+                  would always fail. */}
+                  {canMinimize && pipSupported && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        void openPip();
+                      }}
+                      aria-label={t("call.popOut")}
+                      title={t("call.popOut")}
+                      className="flex h-9 w-9 items-center justify-center rounded-full bg-overlay-1 text-white backdrop-blur-md hover:bg-overlay-2"
+                    >
+                      <PictureInPicture2 className="h-4 w-4" aria-hidden />
+                    </button>
+                  )}
+                  {/* Minimise — hidden while a material or screen share owns
+                  the stage (see canMinimize): the bubble can only ever show one
+                  plain video tile. */}
+                  {canMinimize && (
+                    <button
+                      type="button"
+                      onClick={() => setMinimized(true)}
+                      aria-label={t("call.minimize")}
+                      title={t("call.minimize")}
+                      className="flex h-9 w-9 items-center justify-center rounded-full bg-overlay-1 text-white backdrop-blur-md hover:bg-overlay-2"
+                    >
+                      <Minimize2 className="h-4 w-4" aria-hidden />
+                    </button>
+                  )}
+                </>
+              }
+            />
+          )}
+
+          {/* THE STATUS STACK — one column, top-centre, that owns every
+            transient message on the stage.
+
+            Floating just under the top bar over a video; its own row between
+            the bar and the stage while a material or a screen share fills it,
+            so a message pushes the content down instead of covering its first
+            lines (a teacher could not read the top of a worksheet she was
+            teaching from). `empty:hidden` keeps that row from costing any
+            height when there is nothing to say.
+
+            These were six independent absolutely-positioned banners at
+            `top-4` and `top-16`, and they collided: recording and
+            screen-sharing both sat at top-4 (a recorded lesson with a shared
+            worksheet drew one exactly on top of the other), while
+            reconnecting, the flip-camera error and the captions-consent hint
+            all shared top-16. Each was correct alone and the set was not,
+            because nothing owned the arrangement. A stack does: whatever is
+            true is shown, in a fixed order of urgency, and two true things
+            are two rows rather than one overdraw.
+
+            Ordered most-actionable first — a message the user must act on
+            (allow the camera, give consent) sits above one that is purely
+            informational (something is being recorded). Note pointer-events
+            stay off the COLUMN so it never blocks the video beneath it; a row
+            that is itself a control turns them back on for its own box, and
+            nothing else. */}
+          {!minimized && (
+            <div
+              className={cn(
+                "flex flex-col items-center gap-2",
+                contentOwnsStage
+                  ? "relative z-20 px-4 pb-2 empty:hidden"
+                  : "pointer-events-none absolute inset-x-4 top-18 z-20",
+              )}
+            >
+              {/* The browser is refusing to play the other person's audio —
+                the lesson is silent on this side and on no other. Top of the
+                stack because it is the one row that is both the most damaging
+                (a lesson you cannot hear) and the cheapest to fix: the tap
+                that dismisses it is the tap that fixes it. Held back until
+                someone is actually there to be inaudible: the block often
+                lands during a solo join, where "you can't hear them" names a
+                problem the user does not have yet. The flag itself is not
+                cleared by that — it surfaces the moment they arrive. */}
+              {audioBlocked && remoteCount > 0 && (
+                <StatusPill
+                  tone="attention"
+                  label={t("call.audioBlocked")}
+                  onActivate={restoreAudio}
+                />
+              )}
+              {/* Connected but neither camera nor mic is on — the "I just
+                see a blank screen" case. Almost always a mobile browser that
+                would not auto-start media; the fix is to tap a control. */}
+              {mediaOff && <StatusPill tone="attention" label={t("web.classCall.mediaOff")} />}
+              {/* Captions are on but the student's own speech may not be
+                captioned yet (D-22). Her screen asks her, with one tap; the
+                teacher's says she is being asked — or, for a minor, that the
+                guardian's consent is the one to record. Silence here is what
+                made captions look broken for a class whose student had simply
+                never been asked. */}
+              {consentPrompt === "ask-student" && (
+                <CaptionsConsentAsk
+                  onGiven={browserCaptions.consentGiven}
+                  onDismiss={() => setConsentAskDismissed(true)}
+                />
+              )}
+              {consentPrompt === "student-guardian" && (
+                <StatusPill tone="attention" label={t("call.captionsConsentGuardian")} />
+              )}
+              {consentPrompt === "teacher-asked" && (
+                <StatusPill tone="attention" label={t("call.captionsStudentAsked")} />
+              )}
+              {consentPrompt === "teacher-guardian" && (
+                <StatusPill tone="attention" label={t("call.captionsStudentNeedsGuardian")} />
+              )}
+              {/* Captions are on, but neither browser in this call can
+                recognise speech (two phones, measured in D-185) and the paid
+                fallback for that case is not configured. Said rather than
+                left as a band that listens forever. */}
+              {roomCaptionsOn && browserCaptions.status.uncaptioned.length > 0 && (
+                <StatusPill tone="attention" label={t("call.captionsNeedComputer")} />
+              )}
+              {/* The recognised lines are being kept as this class's
+                transcript for lesson insights (D-189). Shown to both people:
+                a capture with no visible indicator is what D-21 forbids. */}
+              {browserCaptions.transcriptKept && (
+                <StatusPill tone="info" label={t("call.transcriptKept")} />
+              )}
+              {/* A recogniser here gave up for good — the microphone
+                permission, a language this browser cannot recognise, or the
+                phone-to-phone fallback's service out of reach. */}
+              {roomCaptionsOn && browserCaptions.status.stopped && (
+                <StatusPill
+                  tone="attention"
+                  label={t(
+                    browserCaptions.status.stopped === "unavailable"
+                      ? "call.captionsServiceUnavailable"
+                      : "call.captionsStopped",
+                  )}
+                />
+              )}
+              {/* Camera-switch failure — brief, non-blocking (the camera
+                keeps working on whichever device it already had). */}
+              {flipCameraError && <StatusPill tone="attention" label={t("call.flipCameraError")} />}
+              {/* A transient drop, not a fatal error. */}
+              {reconnecting && status === "connected" && (
+                <StatusPill tone="warning" pulse label={t("web.classCall.reconnecting")} />
+              )}
+              {/* Shown to BOTH parties whenever the room is being recorded
+                (driven by LiveKit's own state), so nobody is recorded
+                silently. */}
+              {recording && <StatusPill tone="recording" pulse label={t("call.recording")} />}
+              {/* Which side is sharing, for the party on the receiving end
+                (the sharer's own button already reads as active). */}
+              {screenShareActive && (
+                <StatusPill tone="info" pulse label={t("call.screenSharing")} />
+              )}
+              {/* Subtitles are on but the reader has hidden the band on her
+                own screen. Without this the Subtitles control looks off and
+                the feature looks broken; with it, the way back is one tap. */}
+              {roomCaptionsOn && !captionPrefs.visible && (
+                <StatusPill tone="info" label={t("call.captionsHiddenHint")} />
+              )}
+              {/* The on-device translation model is downloading — once, on
+                the teacher's first captioned class on this computer. Lines
+                go through the server meanwhile, so nothing is waiting on it. */}
+              {roomCaptionsOn && browserCaptions.downloadProgress !== null && (
+                <StatusPill
+                  tone="info"
+                  label={t("call.captionsDownloading", {
+                    percent: Math.round(browserCaptions.downloadProgress * 100),
+                  })}
+                />
+              )}
+            </div>
+          )}
+
           <div className="relative flex-1 overflow-hidden">
             <div
               ref={remoteRef}
@@ -1705,6 +1960,25 @@ export function ClassCall({
               }
             />
 
+            {/* The other person's camera is off (or not here yet): their
+            initials, name, microphone state and a speaking ring in the same
+            box the video would fill, instead of a black stage. One layer above
+            the video container and pointer-transparent, so tap-to-swap and
+            dragging still land on the tile beneath. */}
+            {remote && !remote.camOn && remoteRole !== "hidden" && (
+              <ParticipantPlaceholder
+                view={remote}
+                size={remoteRole === "big" ? "big" : "tile"}
+                style={{
+                  ...computeStageTileStyle(remoteRole, {
+                    position: remoteTilePos,
+                    dragging: draggingTile === "remote",
+                  }),
+                  zIndex: remoteRole === "big" ? 1 : 21,
+                }}
+              />
+            )}
+
             {/* Material viewer replaces the remote video (fills the stage under the
             chrome below, which is bumped to z-20 so it stays visible over it). */}
             {activeMaterial && !minimized && (
@@ -1730,132 +2004,6 @@ export function ClassCall({
                 screenShareActive && !minimized ? "" : "hidden",
               )}
             />
-
-            {/* THE STATUS STACK — one column, top-centre, that owns every
-            transient message on the stage.
-
-            These were six independent absolutely-positioned banners at
-            `top-4` and `top-16`, and they collided: recording and
-            screen-sharing both sat at top-4 (a recorded lesson with a shared
-            worksheet drew one exactly on top of the other), while
-            reconnecting, the flip-camera error and the captions-consent hint
-            all shared top-16. Each was correct alone and the set was not,
-            because nothing owned the arrangement. A stack does: whatever is
-            true is shown, in a fixed order of urgency, and two true things
-            are two rows rather than one overdraw.
-
-            Ordered most-actionable first — a message the user must act on
-            (allow the camera, give consent) sits above one that is purely
-            informational (something is being recorded). Note pointer-events
-            stay off the COLUMN so it never blocks the video beneath it; a row
-            that is itself a control turns them back on for its own box, and
-            nothing else. */}
-            {!minimized && (
-              <div className="pointer-events-none absolute inset-x-4 top-4 z-20 flex flex-col items-center gap-2">
-                {/* The browser is refusing to play the other person's audio —
-                the lesson is silent on this side and on no other. Top of the
-                stack because it is the one row that is both the most damaging
-                (a lesson you cannot hear) and the cheapest to fix: the tap
-                that dismisses it is the tap that fixes it. Held back until
-                someone is actually there to be inaudible: the block often
-                lands during a solo join, where "you can't hear them" names a
-                problem the user does not have yet. The flag itself is not
-                cleared by that — it surfaces the moment they arrive. */}
-                {audioBlocked && remoteCount > 0 && (
-                  <StatusPill
-                    tone="attention"
-                    label={t("call.audioBlocked")}
-                    onActivate={restoreAudio}
-                  />
-                )}
-                {/* Connected but neither camera nor mic is on — the "I just
-                see a blank screen" case. Almost always a mobile browser that
-                would not auto-start media; the fix is to tap a control. */}
-                {mediaOff && <StatusPill tone="attention" label={t("web.classCall.mediaOff")} />}
-                {/* Captions are on but the student's own speech may not be
-                captioned yet (D-22). Her screen asks her, with one tap; the
-                teacher's says she is being asked — or, for a minor, that the
-                guardian's consent is the one to record. Silence here is what
-                made captions look broken for a class whose student had simply
-                never been asked. */}
-                {consentPrompt === "ask-student" && (
-                  <CaptionsConsentAsk
-                    onGiven={browserCaptions.consentGiven}
-                    onDismiss={() => setConsentAskDismissed(true)}
-                  />
-                )}
-                {consentPrompt === "student-guardian" && (
-                  <StatusPill tone="attention" label={t("call.captionsConsentGuardian")} />
-                )}
-                {consentPrompt === "teacher-asked" && (
-                  <StatusPill tone="attention" label={t("call.captionsStudentAsked")} />
-                )}
-                {consentPrompt === "teacher-guardian" && (
-                  <StatusPill tone="attention" label={t("call.captionsStudentNeedsGuardian")} />
-                )}
-                {/* Captions are on, but neither browser in this call can
-                recognise speech (two phones, measured in D-185) and the paid
-                fallback for that case is not configured. Said rather than
-                left as a band that listens forever. */}
-                {roomCaptionsOn && browserCaptions.status.uncaptioned.length > 0 && (
-                  <StatusPill tone="attention" label={t("call.captionsNeedComputer")} />
-                )}
-                {/* The recognised lines are being kept as this class's
-                transcript for lesson insights (D-189). Shown to both people:
-                a capture with no visible indicator is what D-21 forbids. */}
-                {browserCaptions.transcriptKept && (
-                  <StatusPill tone="info" label={t("call.transcriptKept")} />
-                )}
-                {/* A recogniser here gave up for good — the microphone
-                permission, a language this browser cannot recognise, or the
-                phone-to-phone fallback's service out of reach. */}
-                {roomCaptionsOn && browserCaptions.status.stopped && (
-                  <StatusPill
-                    tone="attention"
-                    label={t(
-                      browserCaptions.status.stopped === "unavailable"
-                        ? "call.captionsServiceUnavailable"
-                        : "call.captionsStopped",
-                    )}
-                  />
-                )}
-                {/* Camera-switch failure — brief, non-blocking (the camera
-                keeps working on whichever device it already had). */}
-                {flipCameraError && (
-                  <StatusPill tone="attention" label={t("call.flipCameraError")} />
-                )}
-                {/* A transient drop, not a fatal error. */}
-                {reconnecting && status === "connected" && (
-                  <StatusPill tone="warning" pulse label={t("web.classCall.reconnecting")} />
-                )}
-                {/* Shown to BOTH parties whenever the room is being recorded
-                (driven by LiveKit's own state), so nobody is recorded
-                silently. */}
-                {recording && <StatusPill tone="recording" pulse label={t("call.recording")} />}
-                {/* Which side is sharing, for the party on the receiving end
-                (the sharer's own button already reads as active). */}
-                {screenShareActive && (
-                  <StatusPill tone="info" pulse label={t("call.screenSharing")} />
-                )}
-                {/* Subtitles are on but the reader has hidden the band on her
-                own screen. Without this the Subtitles control looks off and
-                the feature looks broken; with it, the way back is one tap. */}
-                {roomCaptionsOn && !captionPrefs.visible && (
-                  <StatusPill tone="info" label={t("call.captionsHiddenHint")} />
-                )}
-                {/* The on-device translation model is downloading — once, on
-                the teacher's first captioned class on this computer. Lines
-                go through the server meanwhile, so nothing is waiting on it. */}
-                {roomCaptionsOn && browserCaptions.downloadProgress !== null && (
-                  <StatusPill
-                    tone="info"
-                    label={t("call.captionsDownloading", {
-                      percent: Math.round(browserCaptions.downloadProgress * 100),
-                    })}
-                  />
-                )}
-              </div>
-            )}
 
             {status === "connecting" && !minimized && (
               <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 px-8 text-center text-lg text-on-dark-muted">
@@ -2060,84 +2208,6 @@ export function ClassCall({
                 </button>
               </div>
             )}
-
-            {/* The live-notes panel, overlaid. This wrapper is position/size ONLY —
-            the visible card (background, padding, shadow) lives inside the
-            overlay component itself so that when it has nothing to show it
-            renders null and NOTHING here is visible. An always-present
-            background box here was exactly the "empty translucent panel" bug:
-            the student's InstructionsOverlay returns null with no notes, yet
-            this box stayed painted, reserving space over the video. Mobile
-            already solved this by only passing an overlay when it has content
-            (see NativeCall's overlay note); web collapses the same way now.
-            An empty wrapper is 0-height and paints nothing, so it neither shows
-            nor blocks the video underneath. */}
-            {/* pointer-events-none on the wrapper, back on inside the card
-            (CallNotesCard): a collapsed card is narrower than this box, and
-            the empty rest of it must not swallow clicks meant for the shared
-            material underneath. */}
-            {overlay && !minimized && (
-              <div className="pointer-events-none absolute top-4 left-4 z-20 max-h-over-stage w-72 overflow-y-auto">
-                {overlay}
-              </div>
-            )}
-
-            {/* Minimize control, top-right — the one control kept reachable
-            without wrapping the main row, matching where Meet/Zoom/FaceTime
-            all place it. Hidden while a material/screen-share owns the stage
-            (see canMinimize) since the bubble can only ever show one plain
-            video tile.
-
-            ALSO HIDDEN WHILE THE TRANSCRIPT IS OPEN, and that condition is
-            load-bearing rather than tidy. The transcript panel is a sibling
-            of this button at `top-0 right-0 z-30`, and this button sits at
-            `top-4 right-4 z-30`: same stacking context, same z-index, and
-            this button is LATER in the DOM, so it paints on top. Where it
-            lands is exactly the transcript's own close button, which sits in
-            that panel's header at the same inset. The reader taps the × she
-            can see, minimises the entire call instead, and — on a phone,
-            where there is no Escape key to fall back on — has no way left to
-            put the transcript away. Raising the panel's z-index would fix the
-            paint order and leave two circles stacked on one another, so the
-            control that cannot be used while a panel owns the right edge is
-            simply not rendered. Same reasoning as canMinimize above: the
-            button is suppressed by whatever owns the stage. */}
-            {!minimized && canMinimize && !transcriptOpen && (
-              <button
-                type="button"
-                onClick={() => setMinimized(true)}
-                aria-label={t("call.minimize")}
-                title={t("call.minimize")}
-                className="absolute top-4 right-4 z-30 flex h-9 w-9 items-center justify-center rounded-full bg-overlay-1 text-white backdrop-blur-md hover:bg-overlay-2"
-              >
-                <Minimize2 className="h-4 w-4" aria-hidden />
-              </button>
-            )}
-
-            {/* Pop-out (Document Picture-in-Picture) — a real OS-level floating
-            window, distinct from the in-page bubble above it. Feature-detected
-            (pipSupported), so this simply doesn't render on browsers without
-            it (Safari, Firefox as of this writing) rather than showing a
-            button that would always fail.
-
-            Suppressed with the transcript for the same reason as the button
-            above — at `right-16 top-4` it lands inside that panel's header
-            row, over the title. It is also why the collision reads as two
-            floating icons on top of each other on a browser that supports
-            PiP, and as one stuck × on a browser that does not. */}
-            {!minimized && canMinimize && pipSupported && !transcriptOpen && (
-              <button
-                type="button"
-                onClick={() => {
-                  void openPip();
-                }}
-                aria-label={t("call.popOut")}
-                title={t("call.popOut")}
-                className="absolute top-4 right-16 z-30 flex h-9 w-9 items-center justify-center rounded-full bg-overlay-1 text-white backdrop-blur-md hover:bg-overlay-2"
-              >
-                <PictureInPicture2 className="h-4 w-4" aria-hidden />
-              </button>
-            )}
           </div>
 
           {minimized ? (
@@ -2207,12 +2277,18 @@ export function ClassCall({
                         void flipCamera();
                       }}
                       disabled={!camOn || flippingCamera}
+                      secondary
                       icon={SwitchCamera}
                       label={t("call.flipCamera")}
                     />
                   )}
                   {chatHref && (
-                    <CallButton onClick={goToChat} icon={MessageCircle} label={t("call.message")} />
+                    <CallButton
+                      onClick={goToChat}
+                      secondary
+                      icon={MessageCircle}
+                      label={t("call.message")}
+                    />
                   )}
                   <CallButton
                     onClick={toggleScreenShare}
@@ -2221,6 +2297,7 @@ export function ClassCall({
                     // other's stage. Never disabled for the sharer themselves so they
                     // can always stop their own share.
                     disabled={remoteScreenShareOn && !screenShareOn}
+                    secondary
                     active={screenShareOn}
                     icon={screenShareOn ? MonitorX : MonitorUp}
                     label={screenShareOn ? t("call.screenShareOff") : t("call.screenShareOn")}
@@ -2262,6 +2339,7 @@ export function ClassCall({
                       onClick={toggleRecording}
                       active={recording}
                       disabled={recordPending}
+                      secondary
                       icon={recording ? Square : Circle}
                       label={recording ? t("call.stopRecording") : t("call.record")}
                     />
@@ -2271,6 +2349,7 @@ export function ClassCall({
                       onClick={addBookmark}
                       active={bookmarked}
                       disabled={bookmarkPending}
+                      secondary
                       icon={Bookmark}
                       label={bookmarked ? t("call.bookmarked") : t("call.bookmark")}
                     />
@@ -2291,6 +2370,7 @@ export function ClassCall({
                       onSendToRemote={sendMaterialToOther}
                     />
                   )}
+                  <CallMoreMenu items={moreItems} />
                   <CallButton onClick={leave} danger icon={PhoneOff} label={t("call.leave")} />
                 </div>
               </CallControlsDrawer>
@@ -2614,6 +2694,7 @@ function CallButton({
   icon: Icon,
   label,
   shortcut,
+  secondary,
 }: {
   onClick: () => void;
   active?: boolean;
@@ -2621,6 +2702,8 @@ function CallButton({
   disabled?: boolean;
   icon: LucideIcon;
   label: string;
+  // Lives in the More menu below `sm` (CallMoreMenu) instead of the row.
+  secondary?: boolean;
   // The single-key shortcut this control also answers to, if any. Surfaced in
   // the tooltip and as `aria-keyshortcuts`, because a shortcut nobody is told
   // about is a shortcut nobody uses — and the visible caption under each icon
@@ -2642,7 +2725,12 @@ function CallButton({
       // that reads clearly against this black stage. An override here would
       // be re-implementing it slightly differently, which is the drift the
       // base-layer rule exists to prevent.
-      className="flex w-16 flex-col items-center gap-1.5 rounded-lg disabled:opacity-50"
+      // Icon-only below `sm`: a phone's row fits five 48px controls and no
+      // captions; the label stays the accessible name and the tooltip.
+      className={cn(
+        "flex w-12 flex-col items-center gap-1.5 rounded-lg disabled:opacity-50 sm:w-16",
+        secondary && "hidden sm:flex",
+      )}
     >
       <span
         className={cn(
@@ -2656,7 +2744,9 @@ function CallButton({
       >
         <Icon className="h-5 w-5" aria-hidden />
       </span>
-      <span className="text-center text-sm leading-tight text-on-dark-muted">{label}</span>
+      <span className="sr-only text-center text-sm leading-tight text-on-dark-muted sm:not-sr-only">
+        {label}
+      </span>
     </button>
   );
 }

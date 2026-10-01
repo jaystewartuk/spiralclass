@@ -101,6 +101,7 @@ export default async function StudentCallPage({
       bookingId={booking.id}
       role="student"
       scheduledStartAt={booking.scheduledStart.toISOString()}
+      scheduledEndAt={booking.scheduledEnd.toISOString()}
       materials={materials}
       onNudge={nudgeFromStudent.bind(null, booking.id)}
       overlay={
