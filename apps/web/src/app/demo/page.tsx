@@ -45,6 +45,14 @@ const DEMO_CASH_FLOW: CashFlowSummary = {
   provisionalMonths: 0,
   currentMonthEarnedCents: 680_00,
   currentMonthLessons: 17,
+  previousMonthEarnedCents: 640_00,
+  previousMonthLessons: 16,
+  months: [
+    { month: "2026-09", earnedCents: 680_00, lessons: 17 },
+    { month: "2026-08", earnedCents: 640_00, lessons: 16 },
+    { month: "2026-07", earnedCents: 560_00, lessons: 14 },
+    { month: "2026-06", earnedCents: 660_00, lessons: 17 },
+  ],
 };
 
 export const metadata: Metadata = {

@@ -5347,6 +5347,11 @@ export const en = {
   "web.cashflow.seeEarnedVsHeld": "See earned vs held",
   "web.cashflow.inCurrency": "In {currency}",
   "web.cashflow.otherCurrencies": "Safe to spend in your other currencies",
+  "web.cashflow.seeByMonth": "See every month",
+  "web.cashflow.byMonth.title": "Earned by month",
+  "web.cashflow.byMonth.description":
+    "What the classes you taught each month earned, counted on your own calendar. A month you taught nothing in shows as zero.",
+  "web.cashflow.byMonth.soFar": "so far",
   "web.chatRoom.messageActions": "Message actions",
   "web.chatRoom.voiceSendFailed": "Failed to send voice message. Please try again.",
   "web.chatRoom.cameraPermissionDenied":

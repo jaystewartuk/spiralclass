@@ -5328,6 +5328,11 @@ export const fr = {
   "web.cashflow.seeEarnedVsHeld": "Voir gagné vs retenu",
   "web.cashflow.inCurrency": "En {currency}",
   "web.cashflow.otherCurrencies": "Disponible dans vos autres devises",
+  "web.cashflow.seeByMonth": "Voir tous les mois",
+  "web.cashflow.byMonth.title": "Gagné par mois",
+  "web.cashflow.byMonth.description":
+    "Ce que les cours donnés chaque mois vous ont rapporté, selon votre propre calendrier. Un mois sans cours s'affiche à zéro.",
+  "web.cashflow.byMonth.soFar": "en cours",
   "web.chatRoom.messageActions": "Actions du message",
   "web.chatRoom.voiceSendFailed": "Échec de l'envoi du message vocal. Veuillez réessayer.",
   "web.chatRoom.cameraPermissionDenied":

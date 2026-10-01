@@ -1,9 +1,11 @@
 import Link from "next/link";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { intlLocale } from "@spiralclass/shared";
 import { formatMinorUnits } from "@/lib/money";
-import { getT } from "@/lib/i18n";
+import { capitalizeFirst } from "@/lib/date-display";
+import { getPreferredLocale, getT } from "@/lib/i18n";
 import type { TFunction } from "@/lib/i18n-translate";
-import type { CashFlow, CashFlowSummary } from "@/lib/cashflow";
+import type { CashFlow, CashFlowSummary, MonthEarnings } from "@/lib/cashflow";
 
 // Both renderers below take the whole `CashFlow` rather than one summary,
 // because cash flow is per currency: a teacher who changed her pricing currency
@@ -52,12 +54,7 @@ function CashFlowStats({ summary, t }: { summary: CashFlowSummary; t: TFunction 
       <Stat
         label={t("web.cashflow.thisMonth")}
         value={formatMinorUnits(summary.currentMonthEarnedCents, summary.currency)}
-        sub={t(
-          summary.currentMonthLessons === 1
-            ? "web.cashflow.classesTaughtOne"
-            : "web.cashflow.classesTaught",
-          { count: summary.currentMonthLessons },
-        )}
+        sub={classesTaught(summary.currentMonthLessons, t)}
       />
       <Stat
         label={t("web.cashflow.safeToSpendMonthly")}
@@ -92,6 +89,119 @@ function CashFlowStats({ summary, t }: { summary: CashFlowSummary; t: TFunction 
 // Explains *why* the figure is provisional while warming up — that it's
 // averaged over only the few months of classes on record so far, and will
 // settle as more history builds. Nothing once steady.
+/**
+ * "September", from a `YYYY-MM` key — or "September 2025" when the year has to
+ * be said. Formatted from MIDDAY UTC on the 1st, in UTC: the key is already a
+ * month on her calendar, and formatting a real midnight in a zone behind UTC
+ * would name the month before (see `LedgerMonth.date` in payments-list.ts).
+ */
+function monthName(key: string, locale: string, withYear: boolean): string {
+  const [year, month] = key.split("-").map(Number);
+  const label = new Intl.DateTimeFormat(intlLocale(locale), {
+    timeZone: "UTC",
+    month: "long",
+    ...(withYear ? { year: "numeric" } : {}),
+  }).format(new Date(Date.UTC(year, month - 1, 1, 12)));
+  // ICU lower-cases month names in Spanish and French, and a label should not.
+  return capitalizeFirst(label, locale);
+}
+
+function classesTaught(count: number, t: TFunction): string {
+  return t(count === 1 ? "web.cashflow.classesTaughtOne" : "web.cashflow.classesTaught", {
+    count,
+  });
+}
+
+/**
+ * What each month of teaching earned, newest first, for the Payments page.
+ *
+ * Exists because "this month" resets to nothing on the 1st, and a teacher who
+ * used to close each month in a notebook had nowhere to read what the month
+ * she just finished came to — let alone compare it with the one before. Every
+ * month from her first class (up to a year back) is listed, a month she taught
+ * nothing in as a zero, because a gap would hide the very month worth seeing.
+ *
+ * The figures are the same basis as "this month" — classes taught, filed by the
+ * month on HER calendar — so the September row here is exactly what "this
+ * month" read on the 30th. The bar is a relative-size cue only and carries no
+ * information the number beside it does not, so it is hidden from assistive
+ * technology.
+ */
+export async function EarningsByMonth({ cashFlow }: { cashFlow: CashFlow }) {
+  const [t, locale] = await Promise.all([getT(), getPreferredLocale()]);
+  const slices = cashFlow.byCurrency.filter((s) => s.months.length > 0);
+  if (slices.length === 0) return null;
+  const perCurrency = slices.length > 1;
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="scroll-mt-24 text-lg" as="h2" id="earned-by-month">
+          {t("web.cashflow.byMonth.title")}
+        </CardTitle>
+        <CardDescription>{t("web.cashflow.byMonth.description")}</CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        {slices.map((summary) => (
+          <div key={summary.currency} className="space-y-2">
+            {perCurrency && (
+              <h3 className="text-xs font-medium text-muted-foreground">
+                {t("web.cashflow.inCurrency", { currency: summary.currency })}
+              </h3>
+            )}
+            <MonthList months={summary.months} currency={summary.currency} locale={locale} t={t} />
+          </div>
+        ))}
+      </CardContent>
+    </Card>
+  );
+}
+
+function MonthList({
+  months,
+  currency,
+  locale,
+  t,
+}: {
+  months: MonthEarnings[];
+  currency: string;
+  locale: string;
+  t: TFunction;
+}) {
+  const best = Math.max(...months.map((m) => m.earnedCents));
+  // The year is said only where it is not obvious: on every row once the list
+  // reaches back past January, so "December" is never left to be guessed.
+  const spansYears = months[0].month.slice(0, 4) !== months[months.length - 1].month.slice(0, 4);
+  return (
+    <ol className="divide-y divide-border">
+      {months.map((m, index) => (
+        <li key={m.month} className="space-y-1.5 py-2.5 first:pt-0 last:pb-0">
+          <div className="flex items-baseline justify-between gap-3">
+            <div className="min-w-0">
+              <span className="font-medium">{monthName(m.month, locale, spansYears)}</span>
+              {index === 0 && (
+                <span className="text-sm text-muted-foreground">
+                  {" "}
+                  · {t("web.cashflow.byMonth.soFar")}
+                </span>
+              )}
+              <div className="text-sm text-muted-foreground">{classesTaught(m.lessons, t)}</div>
+            </div>
+            <div className="font-semibold tabular-nums">
+              {formatMinorUnits(m.earnedCents, currency)}
+            </div>
+          </div>
+          <div className="h-1.5 overflow-hidden rounded-full bg-muted" aria-hidden>
+            <div
+              className="h-full rounded-full bg-success"
+              style={{ width: best > 0 ? `${(m.earnedCents / best) * 100}%` : 0 }}
+            />
+          </div>
+        </li>
+      ))}
+    </ol>
+  );
+}
+
 function provisionalNote(provisionalMonths: number, t: TFunction): string | undefined {
   if (provisionalMonths <= 0) return undefined;
   return t(provisionalMonths === 1 ? "web.cashflow.provisionalOne" : "web.cashflow.provisional", {
@@ -120,8 +230,13 @@ function provisionalNote(provisionalMonths: number, t: TFunction): string | unde
  * themselves across visits.
  */
 export async function SafeToSpendTile({ cashFlow }: { cashFlow: CashFlow }) {
-  const t = await getT();
+  const [t, locale] = await Promise.all([getT(), getPreferredLocale()]);
   const summary = cashFlow.primary;
+  // The month she just closed, named — on the 1st "this month" is nothing yet,
+  // and this is the figure she opened the screen for. Shown once she has
+  // taught for longer than the current month, so a teacher in her first month
+  // is not shown an empty "August" she was never here for.
+  const previous = summary.months[1];
   const others = cashFlow.byCurrency.filter((s) => s.currency !== summary.currency);
   return (
     <Card>
@@ -135,13 +250,31 @@ export async function SafeToSpendTile({ cashFlow }: { cashFlow: CashFlow }) {
         <CardDescription>{t("web.cashflow.safeToSpendHelp")}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-2">
-        <dl className="space-y-1 text-sm">
+        {/* Each month's class count sits under that month's label. As a
+            free-standing line below the list it read as a footnote to
+            whichever row happened to be last — "Held", once the closed month
+            joined the list. */}
+        <dl className="space-y-1.5 text-sm">
           <div className="flex items-baseline justify-between gap-3">
-            <dt className="text-muted-foreground">{t("web.cashflow.thisMonth")}</dt>
+            <dt className="text-muted-foreground">
+              {t("web.cashflow.thisMonth")}
+              <span className="block text-xs">{classesTaught(summary.currentMonthLessons, t)}</span>
+            </dt>
             <dd className="font-medium tabular-nums">
               {formatMinorUnits(summary.currentMonthEarnedCents, summary.currency)}
             </dd>
           </div>
+          {previous && (
+            <div className="flex items-baseline justify-between gap-3">
+              <dt className="text-muted-foreground">
+                {monthName(previous.month, locale, false)}
+                <span className="block text-xs">{classesTaught(previous.lessons, t)}</span>
+              </dt>
+              <dd className="font-medium tabular-nums">
+                {formatMinorUnits(previous.earnedCents, summary.currency)}
+              </dd>
+            </div>
+          )}
           <div className="flex items-baseline justify-between gap-3">
             <dt className="text-muted-foreground">{t("web.cashflow.held")}</dt>
             <dd className="font-medium text-warning tabular-nums">
@@ -149,14 +282,6 @@ export async function SafeToSpendTile({ cashFlow }: { cashFlow: CashFlow }) {
             </dd>
           </div>
         </dl>
-        <p className="text-sm text-muted-foreground">
-          {t(
-            summary.currentMonthLessons === 1
-              ? "web.cashflow.classesTaughtOne"
-              : "web.cashflow.classesTaught",
-            { count: summary.currentMonthLessons },
-          )}
-        </p>
         {summary.provisionalMonths > 0 && (
           <p className="text-sm text-muted-foreground">
             {provisionalNote(summary.provisionalMonths, t)}
@@ -182,12 +307,22 @@ export async function SafeToSpendTile({ cashFlow }: { cashFlow: CashFlow }) {
         {/* Underlined rather than `text-primary`: that token is verified only
             as a button FILL and measures 3.48:1 as text on a raised card in
             dark mode. See the note in dashboard-view.tsx. */}
-        <Link
-          href="/payments"
-          className="inline-block text-sm font-medium underline underline-offset-4"
-        >
-          {t("web.cashflow.seeEarnedVsHeld")}
-        </Link>
+        <div className="flex flex-wrap gap-x-4 gap-y-1">
+          <Link
+            href="/payments"
+            className="inline-block text-sm font-medium underline underline-offset-4"
+          >
+            {t("web.cashflow.seeEarnedVsHeld")}
+          </Link>
+          {previous && (
+            <Link
+              href="/payments#earned-by-month"
+              className="inline-block text-sm font-medium underline underline-offset-4"
+            >
+              {t("web.cashflow.seeByMonth")}
+            </Link>
+          )}
+        </div>
       </CardContent>
     </Card>
   );

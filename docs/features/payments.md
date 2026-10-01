@@ -403,6 +403,31 @@ template)`.
   legal/business gate (the platform must be tax-registered first), not
   something this capture alone enables.
 
+### What the teacher sees she earned (`lib/cashflow.ts`)
+
+- **Earned** is money for classes taught, as opposed to **held**: money
+  received for classes she still owes. A class earns its package price
+  divided by the package's class count.
+- **A class belongs to the month it was taught** (`scheduledStart`), not the
+  month its status flipped to completed. **Months are cut on the teacher's own
+  timezone**, never UTC. In a zone behind UTC, an evening class on the last
+  day of a month would otherwise land in the next month.
+- **This month so far**, **last month** (named, e.g. "September", on the
+  dashboard tile once she has taught for more than one month) and **earned by
+  month** (Payments page) are all the same figure. The September row in the
+  history equals what "this month" read on 30 September.
+- **Earned by month** lists every month from her first taught class, up to 12
+  months back, newest first. A month with no classes shows as zero, so a quiet
+  month is never hidden. It renders nothing until she has taught a class.
+- **Safe to spend** is the average over the three previous full months on her
+  calendar. While she has fewer than four months of history, it is a
+  provisional average that includes the current month.
+- Every figure is per currency and is never blended across currencies (see
+  the module header).
+- The ledger's per-month **received** subtotals measure something different:
+  cash landing, by payment date. A package paid in August and taught in
+  September is received in August and earned in September.
+
 ## User Flow
 
 **Student buys a package (card):**

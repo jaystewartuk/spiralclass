@@ -31,9 +31,26 @@
 // for mixed-currency subscription revenue: never blend, report per currency.
 // `summarizeCashFlow` partitions and returns one exact `CashFlowSummary` per
 // currency.
+//
+// EVERY MONTH IS THE TEACHER'S MONTH, AND A LESSON BELONGS TO THE MONTH IT WAS
+// TAUGHT. Both halves were once wrong. Months were cut in UTC, so for a teacher
+// in Mexico City every class ending after 6pm on the last day of a month was
+// filed under the next one — "this month" reset on the evening of the 30th,
+// straight after her last class of September, and the September total she
+// wanted to close the month on was nowhere on screen. And a lesson was dated by
+// `completedAt`, which is when the auto-complete sweep (or a teacher's manual
+// override, possibly days later) flipped its status, not when it was taught.
+// So a lesson is dated by `scheduledStart` and filed by `monthKey()` in her
+// timezone — the same rule the payments ledger already used for money received.
 
-import { currencyForTeacher } from "@spiralclass/shared";
+import { currencyForTeacher, FALLBACK_TIMEZONE } from "@spiralclass/shared";
 import { prisma } from "@/lib/prisma";
+import { monthKey, monthsBetween, shiftMonthKey } from "@/lib/payments-list";
+
+// How many months of earnings history a teacher sees, the current one
+// included. A year is the span she compares across, and it bounds the one
+// query that feeds it.
+export const EARNINGS_HISTORY_MONTHS = 12;
 
 // Only PAID packages carry received cash. `pending` = not yet paid (no cash),
 // `refunded` = money returned (reversed). `active`/`paused`/`expired` are the
@@ -56,12 +73,22 @@ export type CashFlowPackage = {
 };
 
 export type CompletedLesson = {
-  completedAt: Date;
+  // When the class was taught — its `scheduledStart` — NOT `completedAt`, which
+  // is when the status flipped (see the header).
+  taughtAt: Date;
   pricePerLessonMinorUnits: number;
   // The currency of the package this lesson was sold under — the same per-row
   // stamp `CashFlowPackage.currency` carries, and what keeps a lesson in the
   // right slice when a teacher has sold in two.
   currency: string;
+};
+
+// What one calendar month of teaching earned, in one currency.
+export type MonthEarnings = {
+  // `YYYY-MM` on the teacher's calendar.
+  month: string;
+  earnedCents: number;
+  lessons: number;
 };
 
 // One currency's worth of cash flow. Every figure is denominated in `currency`
@@ -100,6 +127,16 @@ export type CashFlowSummary = {
   // "what you earned this month", it's a 3-month smoothing of that.
   currentMonthEarnedCents: number;
   currentMonthLessons: number;
+  // The month before this one, closed. What she reads on the 1st, when "this
+  // month" has just reset to nothing, to see what the month she finished made.
+  previousMonthEarnedCents: number;
+  previousMonthLessons: number;
+  // Every month from her first taught month (or `EARNINGS_HISTORY_MONTHS`
+  // back, whichever is later) through the current one, NEWEST FIRST, with a
+  // month she taught nothing in present as a zero rather than missing — a gap
+  // in the list would hide exactly the month she most needs to see. Empty for a
+  // teacher who has never taught a class. `months[0]` is the current month.
+  months: MonthEarnings[];
 };
 
 // Cash flow split by the currency it was actually taken in.
@@ -124,6 +161,10 @@ type SummarizeOptions = {
   // Omitted by the platform roll-up, which has no such thing and leads with the
   // largest pile instead.
   preferCurrency?: string;
+  // The IANA zone whose calendar months every monthly figure is cut on: the
+  // teacher's own. Required rather than defaulted to UTC, because UTC is the
+  // default that filed her evening classes under the wrong month.
+  timeZone: string;
 };
 
 /**
@@ -136,15 +177,15 @@ type SummarizeOptions = {
  */
 export function summarizeCashFlow(
   packages: CashFlowPackage[],
-  // Completed lessons from the start of the 3rd-prior full month through now
-  // (the current partial month included — the steady-state path filters it out
-  // itself).
+  // Completed lessons covering at least the last `EARNINGS_HISTORY_MONTHS` of
+  // her calendar through now. Anything older is ignored, so over-fetching is
+  // harmless and under-fetching is not.
   completedLessons: CompletedLesson[],
-  // Earliest completed lesson ever, or null if she's never delivered one. Used
-  // only to decide warm-up vs steady-state.
+  // When her first completed lesson was taught, or null if she's never
+  // delivered one. Decides warm-up vs steady state and where history begins.
   firstDeliveredAt: Date | null,
   now: Date,
-  { fallbackCurrency, preferCurrency }: SummarizeOptions,
+  { fallbackCurrency, preferCurrency, timeZone }: SummarizeOptions,
 ): CashFlow {
   const currencies = new Set<string>();
   for (const p of packages) currencies.add(p.currency);
@@ -164,6 +205,7 @@ export function summarizeCashFlow(
         firstDeliveredAt,
         now,
         currency,
+        timeZone,
       ),
     )
     .sort((a, b) => b.totalPaidCents - a.totalPaidCents || a.currency.localeCompare(b.currency));
@@ -190,6 +232,7 @@ export function summarizeOneCurrency(
   firstDeliveredAt: Date | null,
   now: Date,
   currency: string,
+  timeZone: string,
 ): CashFlowSummary {
   let totalPaidCents = 0;
   let heldCents = 0;
@@ -217,29 +260,39 @@ export function summarizeOneCurrency(
   // rounded term), so earned + held === totalPaid always.
   const earnedCents = totalPaidCents - heldCents;
 
-  // Calendar-month boundaries (UTC). `startOf3PriorFull` opens the steady-state
-  // trailing window; `startOfCurrent` is where the current partial month begins.
-  const startOf3PriorFull = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - 3, 1));
-  const startOfCurrent = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1));
+  // Every month below is a `YYYY-MM` key on HER calendar, never a UTC instant.
+  const currentMonth = monthKey(now, timeZone);
+  const firstMonth = firstDeliveredAt === null ? null : monthKey(firstDeliveredAt, timeZone);
 
   // How many calendar months of history exist, inclusive of both the first
   // delivered month and the current one (same month → 1).
-  const monthsElapsed =
-    firstDeliveredAt === null
-      ? 0
-      : now.getUTCFullYear() * 12 +
-        now.getUTCMonth() -
-        (firstDeliveredAt.getUTCFullYear() * 12 + firstDeliveredAt.getUTCMonth()) +
-        1;
+  const monthsElapsed = firstMonth === null ? 0 : monthsBetween(firstMonth, currentMonth) + 1;
 
-  let currentMonthEarnedCents = 0;
-  let currentMonthLessons = 0;
+  // Revenue and lesson count per month, summed unrounded — a per-lesson price
+  // is the package price over its class count and need not be whole — and
+  // rounded once per month below.
+  const byMonth = new Map<string, { revenue: number; lessons: number }>();
   for (const l of completedLessons) {
-    if (l.completedAt >= startOfCurrent) {
-      currentMonthEarnedCents += l.pricePerLessonMinorUnits;
-      currentMonthLessons += 1;
-    }
+    const key = monthKey(l.taughtAt, timeZone);
+    const month = byMonth.get(key) ?? { revenue: 0, lessons: 0 };
+    month.revenue += l.pricePerLessonMinorUnits;
+    month.lessons += 1;
+    byMonth.set(key, month);
   }
+  const revenueIn = (key: string) => byMonth.get(key)?.revenue ?? 0;
+
+  const historyLength = Math.min(monthsElapsed, EARNINGS_HISTORY_MONTHS);
+  const months: MonthEarnings[] = [];
+  for (let back = 0; back < historyLength; back++) {
+    const key = shiftMonthKey(currentMonth, -back);
+    const month = byMonth.get(key);
+    months.push({
+      month: key,
+      earnedCents: Math.round(month?.revenue ?? 0),
+      lessons: month?.lessons ?? 0,
+    });
+  }
+  const previousMonth = byMonth.get(shiftMonthKey(currentMonth, -1));
 
   let safeMonthlySpendCents = 0;
   let provisionalMonths = 0;
@@ -247,22 +300,18 @@ export function summarizeOneCurrency(
   if (monthsElapsed >= 4) {
     // Steady state: clean trailing-3-full-month average. The current partial
     // month is excluded so a slow first week doesn't deflate the figure.
-    let revenue = 0;
-    for (const l of completedLessons) {
-      if (l.completedAt >= startOf3PriorFull && l.completedAt < startOfCurrent) {
-        revenue += l.pricePerLessonMinorUnits;
-      }
-    }
+    const revenue = [1, 2, 3].reduce(
+      (sum, back) => sum + revenueIn(shiftMonthKey(currentMonth, -back)),
+      0,
+    );
     safeMonthlySpendCents = Math.round(revenue / 3);
   } else if (monthsElapsed >= 1) {
     // Warm-up: fewer than 3 full months of history. Include the current partial
     // month and divide by the months she's actually been delivering, so the
     // number is non-zero from week one. Shown as provisional until it settles.
-    // (Her first lesson is at most 2 months back here, so every fetched lesson
-    // is in range — no extra lower-bound filter needed.)
     let revenue = 0;
-    for (const l of completedLessons) {
-      revenue += l.pricePerLessonMinorUnits;
+    for (let back = 0; back < monthsElapsed; back++) {
+      revenue += revenueIn(shiftMonthKey(currentMonth, -back));
     }
     safeMonthlySpendCents = Math.round(revenue / monthsElapsed);
     provisionalMonths = monthsElapsed;
@@ -276,8 +325,11 @@ export function summarizeOneCurrency(
     heldLessons,
     safeMonthlySpendCents,
     provisionalMonths,
-    currentMonthEarnedCents,
-    currentMonthLessons,
+    currentMonthEarnedCents: Math.round(revenueIn(currentMonth)),
+    currentMonthLessons: byMonth.get(currentMonth)?.lessons ?? 0,
+    previousMonthEarnedCents: Math.round(previousMonth?.revenue ?? 0),
+    previousMonthLessons: previousMonth?.lessons ?? 0,
+    months,
   };
 }
 
@@ -286,10 +338,14 @@ export async function computeTeacherCashFlow(
   teacherId: string,
   now: Date = new Date(),
 ): Promise<CashFlow> {
-  // Fetch from the start of the 3rd-prior full month through now — the current
-  // partial month is included so warm-up can use it; steady-state filters it
-  // out in the pure function.
-  const windowStart = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - 3, 1));
+  // The history window, cut in UTC and one month wider than it needs to be:
+  // her zone is not known until the parallel read below returns, and no zone
+  // is more than a day from UTC, so a whole spare month covers every one of
+  // them. The pure function files each lesson on her calendar and drops the
+  // overhang.
+  const windowStart = new Date(
+    Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - EARNINGS_HISTORY_MONTHS, 1),
+  );
 
   const [packages, deliveredGroups, completed, firstDelivered, teacher] = await Promise.all([
     prisma.package.findMany({
@@ -309,17 +365,18 @@ export async function computeTeacherCashFlow(
       where: { teacherId, status: { in: ["completed", "no_show"] } },
       _count: { _all: true },
     }),
-    // Completed lessons in the trailing window (through now), with their
-    // package price and currency — the price to derive per-lesson revenue, the
-    // currency to file it under the right slice.
+    // Completed lessons taught in the window (through now), with their package
+    // price and currency — the price to derive per-lesson revenue, the
+    // currency to file it under the right slice. Served by the
+    // (teacher_id, scheduled_start) index.
     prisma.booking.findMany({
       where: {
         teacherId,
         status: "completed",
-        completedAt: { gte: windowStart, lte: now },
+        scheduledStart: { gte: windowStart, lte: now },
       },
       select: {
-        completedAt: true,
+        scheduledStart: true,
         package: {
           select: {
             pricePaidMinorUnits: true,
@@ -331,15 +388,18 @@ export async function computeTeacherCashFlow(
     }),
     // Her very first delivered lesson, ever — decides warm-up vs steady-state.
     prisma.booking.findFirst({
-      where: { teacherId, status: "completed", completedAt: { not: null } },
-      orderBy: { completedAt: "asc" },
-      select: { completedAt: true },
+      where: { teacherId, status: "completed" },
+      orderBy: { scheduledStart: "asc" },
+      select: { scheduledStart: true },
     }),
-    // Her configured pricing currency: which slice to lead with, and the
-    // answer for a teacher with no packages at all. Looked up here rather than
-    // taken as an argument so all three call sites (payments page, dashboard,
-    // mobile cashflow route) keep working unchanged.
-    prisma.teacher.findUnique({ where: { id: teacherId }, select: { pricingCurrency: true } }),
+    // Her configured pricing currency — which slice to lead with, and the
+    // answer for a teacher with no packages at all — and her timezone, whose
+    // calendar every month is cut on. Looked up here rather than taken as
+    // arguments so the call sites (payments page, dashboard) stay one line.
+    prisma.teacher.findUnique({
+      where: { id: teacherId },
+      select: { pricingCurrency: true, timezone: true },
+    }),
   ]);
 
   const deliveredByPkg = new Map(deliveredGroups.map((g) => [g.packageId, g._count._all]));
@@ -354,9 +414,9 @@ export async function computeTeacherCashFlow(
   }));
 
   const completedLessons: CompletedLesson[] = completed
-    .filter((b) => b.completedAt !== null && b.package.classesTotal > 0)
+    .filter((b) => b.package.classesTotal > 0)
     .map((b) => ({
-      completedAt: b.completedAt as Date,
+      taughtAt: b.scheduledStart,
       pricePerLessonMinorUnits: b.package.pricePaidMinorUnits / b.package.classesTotal,
       currency: b.package.currency,
     }));
@@ -369,8 +429,14 @@ export async function computeTeacherCashFlow(
   return summarizeCashFlow(
     cashPackages,
     completedLessons,
-    firstDelivered?.completedAt ?? null,
+    firstDelivered?.scheduledStart ?? null,
     now,
-    { fallbackCurrency: configured, preferCurrency: configured },
+    {
+      fallbackCurrency: configured,
+      preferCurrency: configured,
+      // Same reasoning as the currency fallback above: a vanished row is not
+      // worth crashing over, and UTC cannot be mistaken for a resolved zone.
+      timeZone: teacher?.timezone ?? FALLBACK_TIMEZONE,
+    },
   );
 }

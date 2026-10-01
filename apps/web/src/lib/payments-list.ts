@@ -204,9 +204,25 @@ export function monthKey(at: Date, timeZone: string): string {
  * the call site, which is where an off-by-one silently drops December.
  */
 export function nextMonthKey(key: string): string {
+  return shiftMonthKey(key, 1);
+}
+
+/**
+ * A `YYYY-MM` key moved by `delta` whole months, either way, rolling the year
+ * over at either end. The general form of `nextMonthKey`, for the cash-flow
+ * history that walks back a year of months from the current one.
+ */
+export function shiftMonthKey(key: string, delta: number): string {
   const [year, month] = key.split("-").map(Number);
-  const next = new Date(Date.UTC(year, month, 1, 12));
-  return `${next.getUTCFullYear()}-${String(next.getUTCMonth() + 1).padStart(2, "0")}`;
+  const shifted = new Date(Date.UTC(year, month - 1 + delta, 1, 12));
+  return `${shifted.getUTCFullYear()}-${String(shifted.getUTCMonth() + 1).padStart(2, "0")}`;
+}
+
+/** Whole months from one `YYYY-MM` key to another — `to` minus `from`. */
+export function monthsBetween(from: string, to: string): number {
+  const [fromYear, fromMonth] = from.split("-").map(Number);
+  const [toYear, toMonth] = to.split("-").map(Number);
+  return toYear * 12 + toMonth - (fromYear * 12 + fromMonth);
 }
 
 /**

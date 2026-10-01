@@ -5356,6 +5356,11 @@ export const esMX = {
   "web.cashflow.seeEarnedVsHeld": "Ver ganado vs retenido",
   "web.cashflow.inCurrency": "En {currency}",
   "web.cashflow.otherCurrencies": "Disponible en tus otras monedas",
+  "web.cashflow.seeByMonth": "Ver todos los meses",
+  "web.cashflow.byMonth.title": "Ganado por mes",
+  "web.cashflow.byMonth.description":
+    "Lo que ganaste con las clases que impartiste cada mes, según tu propio calendario. Un mes sin clases aparece en cero.",
+  "web.cashflow.byMonth.soFar": "en curso",
   "web.chatRoom.messageActions": "Acciones del mensaje",
   "web.chatRoom.voiceSendFailed": "No se pudo enviar el mensaje de voz. Inténtalo de nuevo.",
   "web.chatRoom.cameraPermissionDenied":

@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  EARNINGS_HISTORY_MONTHS,
   summarizeCashFlow,
   summarizeOneCurrency,
   type CashFlowPackage,
@@ -24,7 +25,7 @@ function pkg(over: Partial<CashFlowPackage> = {}): CashFlowPackage {
 
 describe("summarizeOneCurrency — earned vs held split", () => {
   it("splits a half-delivered active package pro-rata", () => {
-    const s = summarizeOneCurrency([pkg({ deliveredLessons: 4 })], [], null, NOW, "MXN");
+    const s = summarizeOneCurrency([pkg({ deliveredLessons: 4 })], [], null, NOW, "MXN", "UTC");
     expect(s.totalPaidCents).toBe(100_000);
     // 4 of 10 delivered → 40_000 earned, 6 undelivered → 60_000 held
     expect(s.earnedCents).toBe(40_000);
@@ -34,7 +35,7 @@ describe("summarizeOneCurrency — earned vs held split", () => {
 
   it("counts a no-show as delivered (forfeited time is earned, not held)", () => {
     // deliveredLessons already folds completed + no_show together upstream.
-    const s = summarizeOneCurrency([pkg({ deliveredLessons: 10 })], [], null, NOW, "MXN");
+    const s = summarizeOneCurrency([pkg({ deliveredLessons: 10 })], [], null, NOW, "MXN", "UTC");
     expect(s.earnedCents).toBe(100_000);
     expect(s.heldCents).toBe(0);
     expect(s.heldLessons).toBe(0);
@@ -47,6 +48,7 @@ describe("summarizeOneCurrency — earned vs held split", () => {
       null,
       NOW,
       "MXN",
+      "UTC",
     );
     // 7 lessons unused, but expired → no held liability, all earned.
     expect(s.earnedCents).toBe(100_000);
@@ -66,6 +68,7 @@ describe("summarizeOneCurrency — earned vs held split", () => {
       null,
       NOW,
       "MXN",
+      "UTC",
     );
     expect(s.heldCents).toBe(0);
     expect(s.earnedCents).toBe(100_000);
@@ -84,6 +87,7 @@ describe("summarizeOneCurrency — earned vs held split", () => {
       null,
       NOW,
       "MXN",
+      "UTC",
     );
     expect(s.earnedCents).toBe(10_000);
     expect(s.heldCents).toBe(90_000);
@@ -96,7 +100,7 @@ describe("summarizeOneCurrency — earned vs held split", () => {
       pkg({ status: "expired", deliveredLessons: 1 }),
       pkg({ pricePaidMinorUnits: 33_333, classesTotal: 7, deliveredLessons: 2 }),
     ];
-    const s = summarizeOneCurrency(pkgs, [], null, NOW, "MXN");
+    const s = summarizeOneCurrency(pkgs, [], null, NOW, "MXN", "UTC");
     expect(s.earnedCents + s.heldCents).toBe(s.totalPaidCents);
   });
 
@@ -107,6 +111,7 @@ describe("summarizeOneCurrency — earned vs held split", () => {
       null,
       NOW,
       "MXN",
+      "UTC",
     );
     expect(s.totalPaidCents).toBe(5_000);
     expect(s.heldCents).toBe(0);
@@ -114,7 +119,7 @@ describe("summarizeOneCurrency — earned vs held split", () => {
   });
 
   it("is empty for a teacher with no paid packages", () => {
-    const s = summarizeOneCurrency([], [], null, NOW, "MXN");
+    const s = summarizeOneCurrency([], [], null, NOW, "MXN", "UTC");
     expect(s).toMatchObject({
       totalPaidCents: 0,
       earnedCents: 0,
@@ -126,7 +131,7 @@ describe("summarizeOneCurrency — earned vs held split", () => {
 });
 
 const lesson = (iso: string, cents: number, currency = "MXN"): CompletedLesson => ({
-  completedAt: new Date(iso),
+  taughtAt: new Date(iso),
   pricePerLessonMinorUnits: cents,
   currency,
 });
@@ -143,7 +148,7 @@ describe("summarizeOneCurrency — safe monthly spend (steady state)", () => {
       lesson("2026-04-10T00:00:00Z", 30_000),
     ];
     // Total in-window = 70_000 over 3 months → ~23,333.
-    const s = summarizeOneCurrency([], lessons, firstInFeb, NOW, "MXN");
+    const s = summarizeOneCurrency([], lessons, firstInFeb, NOW, "MXN", "UTC");
     expect(s.safeMonthlySpendCents).toBe(Math.round(70_000 / 3));
     expect(s.provisionalMonths).toBe(0);
   });
@@ -154,7 +159,7 @@ describe("summarizeOneCurrency — safe monthly spend (steady state)", () => {
       lesson("2026-05-10T00:00:00Z", 99_999), // current partial month (May)
       lesson("2026-03-15T00:00:00Z", 30_000), // in window
     ];
-    const s = summarizeOneCurrency([], lessons, firstInFeb, NOW, "MXN");
+    const s = summarizeOneCurrency([], lessons, firstInFeb, NOW, "MXN", "UTC");
     expect(s.safeMonthlySpendCents).toBe(Math.round(30_000 / 3));
     expect(s.provisionalMonths).toBe(0);
   });
@@ -164,7 +169,14 @@ describe("summarizeOneCurrency — safe monthly spend (warm-up)", () => {
   it("month 1: divides by 1 and includes the current partial month", () => {
     // First (and only) lesson is this month → non-zero from week one.
     const lessons = [lesson("2026-05-08T00:00:00Z", 40_000)];
-    const s = summarizeOneCurrency([], lessons, new Date("2026-05-08T00:00:00Z"), NOW, "MXN");
+    const s = summarizeOneCurrency(
+      [],
+      lessons,
+      new Date("2026-05-08T00:00:00Z"),
+      NOW,
+      "MXN",
+      "UTC",
+    );
     expect(s.safeMonthlySpendCents).toBe(40_000);
     expect(s.provisionalMonths).toBe(1);
   });
@@ -174,7 +186,14 @@ describe("summarizeOneCurrency — safe monthly spend (warm-up)", () => {
       lesson("2026-04-10T00:00:00Z", 30_000),
       lesson("2026-05-09T00:00:00Z", 50_000), // current month still counts
     ];
-    const s = summarizeOneCurrency([], lessons, new Date("2026-04-10T00:00:00Z"), NOW, "MXN");
+    const s = summarizeOneCurrency(
+      [],
+      lessons,
+      new Date("2026-04-10T00:00:00Z"),
+      NOW,
+      "MXN",
+      "UTC",
+    );
     expect(s.safeMonthlySpendCents).toBe(Math.round(80_000 / 2));
     expect(s.provisionalMonths).toBe(2);
   });
@@ -185,13 +204,20 @@ describe("summarizeOneCurrency — safe monthly spend (warm-up)", () => {
       lesson("2026-04-05T00:00:00Z", 30_000),
       lesson("2026-05-05T00:00:00Z", 30_000),
     ];
-    const s = summarizeOneCurrency([], lessons, new Date("2026-03-05T00:00:00Z"), NOW, "MXN");
+    const s = summarizeOneCurrency(
+      [],
+      lessons,
+      new Date("2026-03-05T00:00:00Z"),
+      NOW,
+      "MXN",
+      "UTC",
+    );
     expect(s.safeMonthlySpendCents).toBe(30_000);
     expect(s.provisionalMonths).toBe(3);
   });
 
   it("never delivered: $0 and not flagged provisional", () => {
-    const s = summarizeOneCurrency([], [], null, NOW, "MXN");
+    const s = summarizeOneCurrency([], [], null, NOW, "MXN", "UTC");
     expect(s.safeMonthlySpendCents).toBe(0);
     expect(s.provisionalMonths).toBe(0);
   });
@@ -206,16 +232,121 @@ describe("summarizeOneCurrency — current month actuals", () => {
       lesson("2026-05-03T00:00:00Z", 10_000), // current month
       lesson("2026-05-12T00:00:00Z", 20_000), // current month
     ];
-    const s = summarizeOneCurrency([], lessons, firstInFeb, NOW, "MXN");
+    const s = summarizeOneCurrency([], lessons, firstInFeb, NOW, "MXN", "UTC");
     expect(s.currentMonthEarnedCents).toBe(30_000);
     expect(s.currentMonthLessons).toBe(2);
   });
 
   it("is zero when nothing has been taught this month yet", () => {
     const lessons = [lesson("2026-04-10T00:00:00Z", 30_000)];
-    const s = summarizeOneCurrency([], lessons, firstInFeb, NOW, "MXN");
+    const s = summarizeOneCurrency([], lessons, firstInFeb, NOW, "MXN", "UTC");
     expect(s.currentMonthEarnedCents).toBe(0);
     expect(s.currentMonthLessons).toBe(0);
+  });
+});
+
+describe("summarizeOneCurrency — months are hers, and a lesson is filed where it was taught", () => {
+  // A teacher in Mexico City (UTC−6, no DST since 2022). Her last class of
+  // September starts at 6pm on the 30th — midnight on 1 October in UTC.
+  const MX = "America/Mexico_City";
+  const lastClassOfSeptember = "2026-10-01T00:00:00Z";
+  const firstInJune = new Date("2026-06-03T15:00:00Z");
+
+  it("keeps an evening class on the last day of the month in that month", () => {
+    // Read at 8pm on 30 September, her time, straight after the class. Cut in
+    // UTC this was already October: "this month" read as one class, and the
+    // September she was closing was nowhere on screen.
+    const evening = new Date("2026-10-01T02:00:00Z");
+    const lessons = [lesson("2026-09-10T15:00:00Z", 50_000), lesson(lastClassOfSeptember, 50_000)];
+    const s = summarizeOneCurrency([], lessons, firstInJune, evening, "MXN", MX);
+    expect(s.currentMonthEarnedCents).toBe(100_000);
+    expect(s.currentMonthLessons).toBe(2);
+    expect(s.months[0]).toEqual({ month: "2026-09", earnedCents: 100_000, lessons: 2 });
+  });
+
+  it("still shows the month she just closed once the new one starts", () => {
+    // The morning of 1 October, her time: this month is empty, and September
+    // is right there — on the tile and at the head of the history.
+    const nextMorning = new Date("2026-10-01T15:00:00Z");
+    const lessons = [lesson("2026-09-10T15:00:00Z", 50_000), lesson(lastClassOfSeptember, 50_000)];
+    const s = summarizeOneCurrency([], lessons, firstInJune, nextMorning, "MXN", MX);
+    expect(s.currentMonthEarnedCents).toBe(0);
+    expect(s.previousMonthEarnedCents).toBe(100_000);
+    expect(s.previousMonthLessons).toBe(2);
+    expect(s.months.slice(0, 2)).toEqual([
+      { month: "2026-10", earnedCents: 0, lessons: 0 },
+      { month: "2026-09", earnedCents: 100_000, lessons: 2 },
+    ]);
+  });
+
+  it("cuts the trailing average on her calendar too", () => {
+    // On 15 November the window is August, September and October. Cut in UTC,
+    // the 6pm class on 31 July was August's and put 90.00 into a window it
+    // was never taught in.
+    const midNovember = new Date("2026-11-15T15:00:00Z");
+    const lessons = [
+      lesson("2026-08-01T00:00:00Z", 90_000), // 6pm 31 July, her time — outside
+      lesson(lastClassOfSeptember, 30_000), // 6pm 30 September — inside
+    ];
+    const s = summarizeOneCurrency([], lessons, firstInJune, midNovember, "MXN", MX);
+    expect(s.provisionalMonths).toBe(0);
+    expect(s.safeMonthlySpendCents).toBe(10_000);
+  });
+});
+
+describe("summarizeOneCurrency — earnings history", () => {
+  const firstInFeb = new Date("2026-02-01T00:00:00Z");
+
+  it("lists every month since her first, newest first, a quiet month as zero", () => {
+    const lessons = [
+      lesson("2026-02-10T00:00:00Z", 10_000),
+      // Nothing in March: she was away. The month is listed, not skipped.
+      lesson("2026-04-10T00:00:00Z", 20_000),
+      lesson("2026-04-20T00:00:00Z", 20_000),
+      lesson("2026-05-03T00:00:00Z", 5_000),
+    ];
+    const s = summarizeOneCurrency([], lessons, firstInFeb, NOW, "MXN", "UTC");
+    expect(s.months).toEqual([
+      { month: "2026-05", earnedCents: 5_000, lessons: 1 },
+      { month: "2026-04", earnedCents: 40_000, lessons: 2 },
+      { month: "2026-03", earnedCents: 0, lessons: 0 },
+      { month: "2026-02", earnedCents: 10_000, lessons: 1 },
+    ]);
+  });
+
+  it("reaches back a year at most, across the turn of the year", () => {
+    const s = summarizeOneCurrency(
+      [],
+      [lesson("2025-06-10T00:00:00Z", 10_000), lesson("2025-06-10T00:00:00Z", 10_000)],
+      new Date("2024-01-10T00:00:00Z"),
+      NOW,
+      "MXN",
+      "UTC",
+    );
+    expect(s.months).toHaveLength(EARNINGS_HISTORY_MONTHS);
+    expect(s.months[0].month).toBe("2026-05");
+    expect(s.months.at(-1)!.month).toBe("2025-06");
+    expect(s.months.at(-1)!.earnedCents).toBe(20_000);
+  });
+
+  it("is empty for a teacher who has never taught", () => {
+    const s = summarizeOneCurrency([], [], null, NOW, "MXN", "UTC");
+    expect(s.months).toEqual([]);
+    expect(s.previousMonthEarnedCents).toBe(0);
+  });
+
+  it("rounds a month once, not each fractional lesson", () => {
+    // 100.00 over three classes is 33.333… a lesson. Three of them are the
+    // whole 100.00, which per-lesson rounding would print as 99.99.
+    const third = 10_000 / 3;
+    const lessons = [
+      lesson("2026-05-02T00:00:00Z", third),
+      lesson("2026-05-03T00:00:00Z", third),
+      lesson("2026-05-04T00:00:00Z", third),
+    ];
+    const s = summarizeOneCurrency([], lessons, firstInFeb, NOW, "MXN", "UTC");
+    expect(s.currentMonthEarnedCents).toBe(10_000);
+    expect(s.months[0].earnedCents).toBe(10_000);
   });
 });
 
@@ -224,6 +355,7 @@ describe("summarizeCashFlow — one currency (every teacher today)", () => {
     const cf = summarizeCashFlow([pkg({ currency: "GBP", deliveredLessons: 4 })], [], null, NOW, {
       fallbackCurrency: "GBP",
       preferCurrency: "GBP",
+      timeZone: "UTC",
     });
     expect(cf.byCurrency).toHaveLength(1);
     expect(cf.byCurrency[0]).toBe(cf.primary);
@@ -236,7 +368,7 @@ describe("summarizeCashFlow — one currency (every teacher today)", () => {
   });
 
   it("falls back to the configured currency when there is no money at all", () => {
-    const cf = summarizeCashFlow([], [], null, NOW, { fallbackCurrency: "EUR" });
+    const cf = summarizeCashFlow([], [], null, NOW, { fallbackCurrency: "EUR", timeZone: "UTC" });
     expect(cf.byCurrency).toHaveLength(1);
     expect(cf.primary).toMatchObject({ currency: "EUR", totalPaidCents: 0 });
   });
@@ -256,7 +388,7 @@ describe("summarizeCashFlow — more than one currency", () => {
       [],
       null,
       NOW,
-      { fallbackCurrency: "GBP", preferCurrency: "GBP" },
+      { fallbackCurrency: "GBP", preferCurrency: "GBP", timeZone: "UTC" },
     );
     expect(cf.byCurrency.map((s) => [s.currency, s.totalPaidCents])).toEqual([
       ["GBP", 20_000],
@@ -280,7 +412,7 @@ describe("summarizeCashFlow — more than one currency", () => {
       ],
       firstInFeb,
       NOW,
-      { fallbackCurrency: "EUR", preferCurrency: "EUR" },
+      { fallbackCurrency: "EUR", preferCurrency: "EUR", timeZone: "UTC" },
     );
     const gbp = cf.byCurrency.find((s) => s.currency === "GBP")!;
     const eur = cf.byCurrency.find((s) => s.currency === "EUR")!;
@@ -311,7 +443,7 @@ describe("summarizeCashFlow — more than one currency", () => {
       [],
       null,
       NOW,
-      { fallbackCurrency: "EUR", preferCurrency: "EUR" },
+      { fallbackCurrency: "EUR", preferCurrency: "EUR", timeZone: "UTC" },
     );
     expect(cf.primary.currency).toBe("EUR");
     expect(cf.byCurrency.map((s) => s.currency)).toEqual(["EUR", "GBP"]);
@@ -326,7 +458,7 @@ describe("summarizeCashFlow — more than one currency", () => {
       [],
       null,
       NOW,
-      { fallbackCurrency: "MXN" },
+      { fallbackCurrency: "MXN", timeZone: "UTC" },
     );
     expect(cf.primary.currency).toBe("MXN");
     expect(cf.byCurrency.map((s) => s.currency)).toEqual(["MXN", "GBP"]);
@@ -338,6 +470,7 @@ describe("summarizeCashFlow — more than one currency", () => {
     const cf = summarizeCashFlow([pkg({ currency: "GBP" })], [], null, NOW, {
       fallbackCurrency: "JPY",
       preferCurrency: "JPY",
+      timeZone: "UTC",
     });
     expect(cf.byCurrency.map((s) => s.currency)).toEqual(["GBP"]);
   });
@@ -352,7 +485,7 @@ describe("summarizeCashFlow — more than one currency", () => {
       [lesson("2026-03-10T00:00:00Z", 30_000, "USD")],
       new Date("2026-02-01T00:00:00Z"),
       NOW,
-      { fallbackCurrency: "MXN", preferCurrency: "MXN" },
+      { fallbackCurrency: "MXN", preferCurrency: "MXN", timeZone: "UTC" },
     );
     const usd = cf.byCurrency.find((s) => s.currency === "USD")!;
     expect(usd.safeMonthlySpendCents).toBe(10_000);
@@ -369,7 +502,7 @@ describe("summarizeCashFlow — more than one currency", () => {
       [lesson("2026-05-10T00:00:00Z", 30_000, "GBP")],
       new Date("2026-02-01T00:00:00Z"),
       NOW,
-      { fallbackCurrency: "EUR", preferCurrency: "EUR" },
+      { fallbackCurrency: "EUR", preferCurrency: "EUR", timeZone: "UTC" },
     );
     for (const slice of cf.byCurrency) {
       expect(slice.provisionalMonths).toBe(0);
