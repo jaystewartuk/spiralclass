@@ -16,7 +16,6 @@
   "app/actions/library.ts": 4,
   "app/actions/onboarding.ts": 1,
   "app/actions/overrides.ts": 9,
-  "app/actions/packages.ts": 1,
   "app/actions/student-notes.ts": 2,
   "app/actions/teacher-packages.ts": 2,
   "app/actions/wise-confirm.ts": 1,

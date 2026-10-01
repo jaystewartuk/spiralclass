@@ -40,26 +40,30 @@ export async function togglePackagePauseAction(
   });
   if (!pkg) return { error: en ? "Package not found" : "Paquete no encontrado" };
 
-  if (parsed.data.intent === "pause") {
-    if (pkg.status !== "active") {
-      return {
-        error: en
-          ? "Only an active package can be paused"
-          : "Solo se puede pausar un paquete activo",
-      };
-    }
-  } else if (pkg.status !== "paused") {
-    return {
-      error: en
+  const pausing = parsed.data.intent === "pause";
+  const from = pausing ? "active" : "paused";
+  const wrongState = {
+    error: pausing
+      ? en
+        ? "Only an active package can be paused"
+        : "Solo se puede pausar un paquete activo"
+      : en
         ? "Only a paused package can be resumed"
         : "Solo se puede reactivar un paquete en pausa",
-    };
-  }
+  };
+  if (pkg.status !== from) return wrongState;
 
-  await prisma.package.update({
-    where: { id: pkg.id },
-    data: { status: parsed.data.intent === "pause" ? "paused" : "active" },
+  // The write is conditioned on the status just checked (#87). applyRefund
+  // sets `refunded` in its own transaction; if that lands between the read
+  // above and this write, an unconditioned update would put `paused` over
+  // `refunded`, and a later resume would make a refunded package bookable
+  // again. A status that moved in between is answered the way a stale tab
+  // is: the package is no longer in the state this action acts on.
+  const { count } = await prisma.package.updateMany({
+    where: { id: pkg.id, teacherId: teacher.id, status: from },
+    data: { status: pausing ? "paused" : "active" },
   });
+  if (count === 0) return wrongState;
 
   revalidateAfterAction(`/dashboard/students/${pkg.studentId}`);
   return { ok: true };
