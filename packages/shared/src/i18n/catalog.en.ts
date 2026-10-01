@@ -1137,24 +1137,6 @@ export const en = {
   "payments.detail.markNotReceived": "Mark not received",
   "payments.viewCashflow": "See your money",
 
-  "cashflow.title": "Your money",
-  "cashflow.explainer":
-    "“Held” is money you've received but still owe in classes. “Safe to spend” is your average monthly income from classes actually taught, smoothed over your last 3 months — steadier to budget on than any single month.",
-  "cashflow.footnote":
-    "Why an average? A package is paid up front but taught over weeks, so any single month swings with when you happened to teach — the average smooths that into a number you can actually budget on. Payments taken through Stripe also arrive a little lower after Stripe's own processing fee, which SpiralClass does not receive.",
-  "cashflow.thisMonth": "This month so far",
-  "cashflow.safeToSpend": "Safe to spend / month (3-mo avg)",
-  "cashflow.earned": "Earned (yours)",
-  "cashflow.held": "Held (owed in classes)",
-  "cashflow.classTaughtOne": "{count} class taught",
-  "cashflow.classTaughtMany": "{count} classes taught",
-  "cashflow.classHeldOne": "{count} class not yet taught",
-  "cashflow.classHeldMany": "{count} classes not yet taught",
-  "cashflow.provisionalOne":
-    "provisional — based on just {count} month of classes so far; it settles as you teach more",
-  "cashflow.provisionalMany":
-    "provisional — based on just {count} months of classes so far; it settles as you teach more",
-
   "settings.payments": "Payments",
 
   "settings.availability.help":
@@ -5326,31 +5308,30 @@ export const en = {
   "web.calendarSync.google.pause": "Pause",
   "web.calendarSync.google.resume": "Resume",
   "web.calendarSync.google.disconnecting": "Disconnecting…",
-  "web.cashflow.title": "Your money",
-  "web.cashflow.explainer":
-    "“Held” is money you've received but still owe in classes. “Safe to spend” is your average monthly income from classes actually taught, smoothed over your last 3 months — steadier to budget on than any single month.",
-  "web.cashflow.thisMonth": "This month so far",
+  "web.cashflow.title": "Your earnings",
+  "web.cashflow.monthSoFar": "{month} so far",
   "web.cashflow.classesTaughtOne": "{count} class taught",
   "web.cashflow.classesTaught": "{count} classes taught",
-  "web.cashflow.safeToSpendMonthly": "Safe to spend each month",
-  "web.cashflow.earned": "Earned (yours)",
-  "web.cashflow.held": "Held (owed in classes)",
-  "web.cashflow.classesNotYetTaughtOne": "{count} class not yet taught",
-  "web.cashflow.classesNotYetTaught": "{count} classes not yet taught",
-  "web.cashflow.whyAverage":
-    "Why an average? A package is paid up front but taught over weeks, so any single month swings with when you happened to teach — the average smooths that into a number you can actually budget on. Payments taken through Stripe also arrive a little lower after Stripe's own processing fee, which SpiralClass does not receive.",
-  "web.cashflow.provisionalOne":
-    "provisional — based on just {count} month of classes so far; it settles as you teach more",
-  "web.cashflow.provisional":
-    "provisional — based on just {count} months of classes so far; it settles as you teach more",
-  "web.cashflow.safeToSpendHelp":
-    "Your average monthly income from classes actually taught, over your last 3 months.",
-  "web.cashflow.thisMonthSoFarOne": "This month so far: {count} class taught → {amount}",
-  "web.cashflow.thisMonthSoFar": "This month so far: {count} classes taught → {amount}",
-  "web.cashflow.heldInUnfinished": "{amount} held in unfinished classes — see breakdown",
-  "web.cashflow.seeEarnedVsHeld": "See earned vs held",
+  "web.cashflow.bookedRestOne": "+ {amount} in 1 class booked for the rest of {month}",
+  "web.cashflow.bookedRest": "+ {amount} in {count} classes booked for the rest of {month}",
+  "web.cashflow.paidInAdvance": "Paid in advance",
+  "web.cashflow.toTeachOne": "{count} class still to teach",
+  "web.cashflow.toTeach": "{count} classes still to teach",
+  "web.cashflow.paidInAdvanceHelp":
+    "“Paid in advance” is money students have already paid you for classes you haven't taught yet. It becomes earnings as you teach each one — and a refund would come out of it, so it isn't spare money yet.",
+  "web.cashflow.whatStudentsPaid":
+    "Amounts are what your students paid. Card payments reach you a little lower after Stripe's own processing fee, which SpiralClass does not receive.",
+  "web.cashflow.seeByMonth": "See every month",
   "web.cashflow.inCurrency": "In {currency}",
-  "web.cashflow.otherCurrencies": "Safe to spend in your other currencies",
+  "web.cashflow.otherCurrencies": "This month in your other currencies",
+  "web.cashflow.byMonth.title": "Earned by month",
+  "web.cashflow.byMonth.description":
+    "Every month you've taught, counted on your own calendar. Open a month to see it by student.",
+  "web.cashflow.byMonth.soFar": "so far",
+  "web.cashflow.byMonth.yearTotal": "{year} so far: {amount}",
+  "web.cashflow.byMonth.typical":
+    "A typical month: {average} (the average of your last {count} complete months). Your lowest was {month}, at {lowest}.",
+  "web.cashflow.byMonth.noClasses": "No classes this month.",
   "web.chatRoom.messageActions": "Message actions",
   "web.chatRoom.voiceSendFailed": "Failed to send voice message. Please try again.",
   "web.chatRoom.cameraPermissionDenied":

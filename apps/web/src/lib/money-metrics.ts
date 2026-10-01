@@ -34,6 +34,7 @@ import { summarizeCashFlow, type CashFlow } from "@/lib/cashflow";
 import {
   DEFAULT_PRICING_CURRENCY,
   EXPENSE_CATEGORIES,
+  FALLBACK_TIMEZONE,
   PLATFORM_MONEY_CURRENCY,
   type ExpenseCategory,
 } from "@spiralclass/shared";
@@ -450,7 +451,8 @@ export async function computePlatformDeferredRevenue(now: Date = new Date()): Pr
     now,
     // No `preferCurrency`: there is no "the platform's pricing currency" to
     // lead with, so the biggest pile leads. The fallback only decides what an
-    // empty platform is denominated in.
-    { fallbackCurrency: DEFAULT_PRICING_CURRENCY },
+    // empty platform is denominated in. The zone is moot — no lessons are
+    // passed, so no month is ever cut — and UTC says so.
+    { fallbackCurrency: DEFAULT_PRICING_CURRENCY, timeZone: FALLBACK_TIMEZONE },
   );
 }

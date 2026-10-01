@@ -41,10 +41,27 @@ const DEMO_CASH_FLOW: CashFlowSummary = {
   earnedCents: 1_960_00,
   heldCents: 470_00,
   heldLessons: 11,
-  safeMonthlySpendCents: 620_00,
-  provisionalMonths: 0,
-  currentMonthEarnedCents: 680_00,
-  currentMonthLessons: 17,
+  // The demo's clock is pinned to the morning of 1 September (`DEMO_NOW`), so
+  // September has one class behind it and the rest of the month booked.
+  currentMonth: "2026-09",
+  currentMonthEarnedCents: 40_00,
+  currentMonthLessons: 1,
+  bookedRestOfMonthCents: 600_00,
+  bookedRestOfMonthLessons: 15,
+  previousMonthEarnedCents: 640_00,
+  previousMonthLessons: 16,
+  months: [
+    { month: "2026-09", earnedCents: 40_00, lessons: 1, byStudent: [] },
+    { month: "2026-08", earnedCents: 640_00, lessons: 16, byStudent: [] },
+    { month: "2026-07", earnedCents: 560_00, lessons: 14, byStudent: [] },
+    { month: "2026-06", earnedCents: 660_00, lessons: 17, byStudent: [] },
+  ],
+  yearToDateCents: 3_420_00,
+  typicalMonth: {
+    averageCents: 620_00,
+    lowest: { month: "2026-07", earnedCents: 560_00 },
+    months: 3,
+  },
 };
 
 export const metadata: Metadata = {

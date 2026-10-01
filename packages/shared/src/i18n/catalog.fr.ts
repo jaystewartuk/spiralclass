@@ -1137,23 +1137,6 @@ export const fr = {
   "payments.detail.confirmWise": "Marquer comme reçu",
   "payments.detail.markNotReceived": "Marquer comme non reçu",
   "payments.viewCashflow": "Voir votre argent",
-  "cashflow.title": "Votre argent",
-  "cashflow.explainer":
-    "« Retenu » correspond à l'argent que vous avez reçu mais que vous devez encore en cours. « Disponible à dépenser » correspond à votre revenu mensuel moyen des cours réellement donnés, lissé sur vos 3 derniers mois — plus stable pour établir un budget qu'un seul mois.",
-  "cashflow.footnote":
-    "Pourquoi une moyenne ? Un forfait est payé d'avance mais donné sur plusieurs semaines, si bien qu'un seul mois varie selon le moment où vous avez donné vos cours — la moyenne lisse tout cela en un chiffre sur lequel vous pouvez réellement établir un budget. Les paiements encaissés via Stripe arrivent aussi un peu plus bas après ses frais de traitement, que SpiralClass ne reçoit pas.",
-  "cashflow.thisMonth": "Ce mois-ci jusqu'à présent",
-  "cashflow.safeToSpend": "Disponible à dépenser / mois (moy. 3 mois)",
-  "cashflow.earned": "Gagné (à vous)",
-  "cashflow.held": "Retenu (dû en cours)",
-  "cashflow.classTaughtOne": "{count} cours donné",
-  "cashflow.classTaughtMany": "{count} cours donnés",
-  "cashflow.classHeldOne": "{count} cours pas encore donné",
-  "cashflow.classHeldMany": "{count} cours pas encore donnés",
-  "cashflow.provisionalOne":
-    "provisoire — basé sur seulement {count} mois de cours jusqu'à présent ; cela s'ajuste à mesure que vous enseignez davantage",
-  "cashflow.provisionalMany":
-    "provisoire — basé sur seulement {count} mois de cours jusqu'à présent ; cela s'ajuste à mesure que vous enseignez davantage",
   "settings.payments": "Paiements",
   "settings.availability.help":
     "Définissez les jours et heures où vous acceptez les réservations. S'applique à partir d'aujourd'hui.",
@@ -5307,31 +5290,30 @@ export const fr = {
   "web.calendarSync.google.pause": "Mettre en pause",
   "web.calendarSync.google.resume": "Reprendre",
   "web.calendarSync.google.disconnecting": "Déconnexion…",
-  "web.cashflow.title": "Votre argent",
-  "web.cashflow.explainer":
-    "« Retenu » correspond à l'argent que vous avez reçu mais que vous devez encore en cours. « Disponible à dépenser » correspond à votre revenu mensuel moyen des cours réellement donnés, lissé sur vos 3 derniers mois — plus stable pour établir un budget qu'un seul mois.",
-  "web.cashflow.thisMonth": "Ce mois-ci jusqu'à présent",
+  "web.cashflow.title": "Vos revenus",
+  "web.cashflow.monthSoFar": "{month} jusqu'à présent",
   "web.cashflow.classesTaughtOne": "{count} cours donné",
   "web.cashflow.classesTaught": "{count} cours donnés",
-  "web.cashflow.safeToSpendMonthly": "Disponible chaque mois",
-  "web.cashflow.earned": "Gagné (à vous)",
-  "web.cashflow.held": "Retenu (dû en cours)",
-  "web.cashflow.classesNotYetTaughtOne": "{count} cours pas encore donné",
-  "web.cashflow.classesNotYetTaught": "{count} cours pas encore donnés",
-  "web.cashflow.whyAverage":
-    "Pourquoi une moyenne ? Un forfait est payé d'avance mais donné sur plusieurs semaines, donc un mois isolé varie selon le moment où vous avez donné les cours — la moyenne lisse cela en un chiffre sur lequel vous pouvez vraiment établir un budget. Les paiements encaissés via Stripe arrivent aussi un peu plus bas après ses frais de traitement, que SpiralClass ne reçoit pas.",
-  "web.cashflow.provisionalOne":
-    "provisoire — calculé sur seulement {count} mois de cours jusqu'ici ; il s'ajuste à mesure que vous donnez plus de cours",
-  "web.cashflow.provisional":
-    "provisoire — calculé sur seulement {count} mois de cours jusqu'ici ; il s'ajuste à mesure que vous donnez plus de cours",
-  "web.cashflow.safeToSpendHelp":
-    "Votre revenu mensuel moyen des cours réellement donnés, sur vos 3 derniers mois.",
-  "web.cashflow.thisMonthSoFarOne": "Ce mois-ci jusqu'à présent : {count} cours donné → {amount}",
-  "web.cashflow.thisMonthSoFar": "Ce mois-ci jusqu'à présent : {count} cours donnés → {amount}",
-  "web.cashflow.heldInUnfinished": "{amount} retenu dans des cours non terminés — voir le détail",
-  "web.cashflow.seeEarnedVsHeld": "Voir gagné vs retenu",
+  "web.cashflow.bookedRestOne": "+ {amount} pour 1 cours réservé d'ici la fin de {month}",
+  "web.cashflow.bookedRest": "+ {amount} pour {count} cours réservés d'ici la fin de {month}",
+  "web.cashflow.paidInAdvance": "Payé d'avance",
+  "web.cashflow.toTeachOne": "{count} cours encore à donner",
+  "web.cashflow.toTeach": "{count} cours encore à donner",
+  "web.cashflow.paidInAdvanceHelp":
+    "« Payé d'avance », c'est l'argent que vos élèves vous ont déjà versé pour des cours que vous n'avez pas encore donnés. Il devient un revenu à mesure que vous donnez chaque cours — et un remboursement en serait déduit, ce n'est donc pas encore de l'argent disponible.",
+  "web.cashflow.whatStudentsPaid":
+    "Les montants sont ce que vos élèves ont payé. Les paiements par carte vous arrivent un peu moins élevés après les frais de traitement de Stripe, que SpiralClass ne perçoit pas.",
+  "web.cashflow.seeByMonth": "Voir tous les mois",
   "web.cashflow.inCurrency": "En {currency}",
-  "web.cashflow.otherCurrencies": "Disponible dans vos autres devises",
+  "web.cashflow.otherCurrencies": "Ce mois-ci dans vos autres devises",
+  "web.cashflow.byMonth.title": "Gagné par mois",
+  "web.cashflow.byMonth.description":
+    "Chaque mois où vous avez donné des cours, selon votre propre calendrier. Ouvrez un mois pour le voir par élève.",
+  "web.cashflow.byMonth.soFar": "en cours",
+  "web.cashflow.byMonth.yearTotal": "En {year} jusqu'à présent : {amount}",
+  "web.cashflow.byMonth.typical":
+    "Un mois type : {average} (la moyenne de vos {count} derniers mois complets). Le plus bas était {month}, avec {lowest}.",
+  "web.cashflow.byMonth.noClasses": "Aucun cours ce mois-ci.",
   "web.chatRoom.messageActions": "Actions du message",
   "web.chatRoom.voiceSendFailed": "Échec de l'envoi du message vocal. Veuillez réessayer.",
   "web.chatRoom.cameraPermissionDenied":

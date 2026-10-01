@@ -5,12 +5,14 @@ import {
   TRANSFER_OVERDUE_HOURS,
   groupPaymentsByMonth,
   monthKey,
+  monthsBetween,
   nextMonthKey,
   normalizePaymentSearch,
   paymentsHref,
   paymentsQuery,
   receivedByMonth,
   resolvePaymentsScope,
+  shiftMonthKey,
   transferState,
   transferWaitLabel,
   type LedgerEntry,
@@ -218,6 +220,26 @@ describe("nextMonthKey", () => {
   it("rolls the year over at December, zero-padding the month", () => {
     expect(nextMonthKey("2026-12")).toBe("2027-01");
     expect(nextMonthKey("2026-09")).toBe("2026-10");
+  });
+});
+
+describe("shiftMonthKey", () => {
+  it("walks back across a year boundary", () => {
+    expect(shiftMonthKey("2026-01", -1)).toBe("2025-12");
+    expect(shiftMonthKey("2026-09", -11)).toBe("2025-10");
+  });
+
+  it("walks forward and stands still", () => {
+    expect(shiftMonthKey("2026-11", 3)).toBe("2027-02");
+    expect(shiftMonthKey("2026-09", 0)).toBe("2026-09");
+  });
+});
+
+describe("monthsBetween", () => {
+  it("counts whole months, across years and backwards", () => {
+    expect(monthsBetween("2026-09", "2026-09")).toBe(0);
+    expect(monthsBetween("2025-12", "2026-02")).toBe(2);
+    expect(monthsBetween("2026-02", "2025-12")).toBe(-2);
   });
 });
 

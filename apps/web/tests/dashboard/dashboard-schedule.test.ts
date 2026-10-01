@@ -82,7 +82,7 @@ vi.mock("@/lib/prisma", () => ({
   },
 }));
 
-vi.mock("@/components/cashflow-summary", () => ({ SafeToSpendTile: () => null }));
+vi.mock("@/components/cashflow-summary", () => ({ EarningsTile: () => null }));
 vi.mock("@/components/copy-link-button", () => ({ CopyLinkButton: () => null }));
 vi.mock("@/components/growth-checklist", () => ({ GrowthChecklist: () => null }));
 
