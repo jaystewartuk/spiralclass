@@ -23,6 +23,7 @@ export function ClassCallClient({
   bookingId,
   role,
   scheduledStartAt,
+  scheduledEndAt,
   materials,
   canBrowseLibrary,
   onNudge,
@@ -45,6 +46,7 @@ export function ClassCallClient({
   bookingId?: string;
   role?: "teacher" | "student";
   scheduledStartAt?: string;
+  scheduledEndAt?: string;
   materials?: CallMaterial[];
   canBrowseLibrary?: boolean;
   onNudge?: () => Promise<NudgeResult>;
@@ -62,6 +64,7 @@ export function ClassCallClient({
       bookingId={bookingId}
       role={role}
       scheduledStartAt={scheduledStartAt}
+      scheduledEndAt={scheduledEndAt}
       materials={materials}
       canBrowseLibrary={canBrowseLibrary}
       onNudge={onNudge}

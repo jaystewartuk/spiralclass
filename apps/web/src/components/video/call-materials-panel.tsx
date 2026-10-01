@@ -179,7 +179,7 @@ export function CallMaterialsPanel({
         onClick={() => setListOpen((v) => !v)}
         aria-label={t("call.materials")}
         aria-pressed={listOpen}
-        className="flex w-16 flex-col items-center gap-1.5"
+        className="flex w-12 flex-col items-center gap-1.5 sm:w-16"
       >
         <span
           className={cn(
@@ -191,7 +191,7 @@ export function CallMaterialsPanel({
         >
           <Files className="h-5 w-5" aria-hidden />
         </span>
-        <span className="text-center text-sm leading-tight text-on-dark-muted">
+        <span className="sr-only text-center text-sm leading-tight text-on-dark-muted sm:not-sr-only">
           {t("call.materials")}
         </span>
       </button>

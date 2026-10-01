@@ -49,6 +49,7 @@ export default async function TeacherCallPage({
       id: true,
       studentId: true,
       scheduledStart: true,
+      scheduledEnd: true,
       student: { select: { name: true } },
       lessonNotes: {
         where: { audience: "teacher", kind: "text" },
@@ -98,6 +99,7 @@ export default async function TeacherCallPage({
       bookingId={booking.id}
       role="teacher"
       scheduledStartAt={booking.scheduledStart.toISOString()}
+      scheduledEndAt={booking.scheduledEnd.toISOString()}
       materials={materials}
       canBrowseLibrary
       onNudge={nudgeFromTeacher.bind(null, booking.id)}

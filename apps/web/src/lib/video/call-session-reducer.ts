@@ -23,6 +23,8 @@ export type CallSessionInput = {
   // client-side join event instead of firing from the call page itself) —
   // this is a plain prop read once at connect time.
   scheduledStartAt?: string;
+  // ISO end of the class — the top bar's lesson clock (lib/video/lesson-clock.ts).
+  scheduledEndAt?: string;
   chatHref?: string;
   overlay?: React.ReactNode;
   canRecord?: boolean;

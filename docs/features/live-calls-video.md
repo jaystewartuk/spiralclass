@@ -97,6 +97,21 @@ That lasts until preview has a LiveKit server of its own.
    call, for later review via a replay view.
 9. Additional controls: leave/hang-up, minimize, picture-in-picture,
    camera-flip/swap, materials viewer, "go to chat" shortcut.
+   - On a phone (below `sm`) the row is icons only and keeps microphone,
+     camera, captions, materials and leave; the rest (flip camera, message,
+     screen share, record, bookmark) sit behind **More**, so the row is one
+     line instead of a third of the screen.
+   - **The top bar**, a row above the stage that never covers it: each
+     side's notes on the left (collapsible), the other person's name and the
+     **lesson clock** in the middle ("Starts in 3 min", "23 min left", "4 min
+     over" — warning-coloured from the last five minutes), minimise and
+     pop-out on the right. Status messages float just below it over a video,
+     and take a row of their own while a material or screen share fills the
+     stage, so nothing sits on top of the material's title or first lines.
+   - **A camera that is off is not a black screen.** The other person's tile
+     shows their initials and name, a badge while their microphone is off,
+     and a ring while they are speaking — on the stage and in the corner
+     tile.
 
 ### Recording
 

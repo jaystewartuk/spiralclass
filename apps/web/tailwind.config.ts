@@ -383,6 +383,11 @@ const config: Config = {
         // A panel docked over the video stage: never more than two-thirds, so
         // the person you are talking to is always visible.
         "over-stage": "70%",
+        // A panel hanging down from the call's top bar (the in-call notes).
+        // Viewport-relative because its containing block is the bar's 36px
+        // slot, and `over-stage`'s 70% of that clipped the notes to their
+        // title — the card "opened" and showed nothing.
+        "under-bar": "60vh",
         // A popover that opens UPWARD out of the call's bottom chrome (the
         // subtitle settings). Its anchor already sits low on the stage, and
         // the stage clips its own overflow, so on a short window an

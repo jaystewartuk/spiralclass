@@ -717,6 +717,12 @@ export const en = {
   "call.captionsNoticeDismiss": "Got it",
   "call.captionsEnabledToast": "Live captions enabled.",
   "call.captionsNeedComputer": "Captions need one of you on Chrome on a computer.",
+  "call.clockStartsIn": "Starts in {minutes} min",
+  "call.clockLeft": "{minutes} min left",
+  "call.clockOver": "{minutes} min over",
+  "call.more": "More",
+  "call.cameraOffNamed": "{name} — camera off",
+  "call.micOffBadge": "Microphone off",
   "call.transcriptKept": "Transcript kept for learning insights",
   "call.captionsStopped": "Captions stopped on this device — check the microphone permission.",
   "call.captionsServiceUnavailable":
