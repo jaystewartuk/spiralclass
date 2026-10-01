@@ -79,7 +79,7 @@ vi.mock("@/lib/prisma", () => ({
 
 // Client sub-components aren't under test here — stub them so the server
 // component renders without their client internals.
-vi.mock("@/components/cashflow-summary", () => ({ SafeToSpendTile: () => null }));
+vi.mock("@/components/cashflow-summary", () => ({ EarningsTile: () => null }));
 vi.mock("@/components/copy-link-button", () => ({ CopyLinkButton: () => null }));
 vi.mock("@/components/growth-checklist", () => ({ GrowthChecklist: () => null }));
 

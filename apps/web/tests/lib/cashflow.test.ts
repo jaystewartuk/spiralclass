@@ -1,8 +1,10 @@
 import { describe, expect, it } from "vitest";
 import {
   EARNINGS_HISTORY_MONTHS,
+  apportion,
   summarizeCashFlow,
   summarizeOneCurrency,
+  type BookedLesson,
   type CashFlowPackage,
   type CompletedLesson,
 } from "@/lib/cashflow";
@@ -125,101 +127,189 @@ describe("summarizeOneCurrency — earned vs held split", () => {
       earnedCents: 0,
       heldCents: 0,
       heldLessons: 0,
-      safeMonthlySpendCents: 0,
+      currentMonthEarnedCents: 0,
+      months: [],
+      typicalMonth: null,
     });
   });
 });
 
-const lesson = (iso: string, cents: number, currency = "MXN"): CompletedLesson => ({
+const lesson = (
+  iso: string,
+  cents: number,
+  currency = "MXN",
+  student: { id: string; name: string } = { id: "s-farid", name: "Farid" },
+): CompletedLesson => ({
   taughtAt: new Date(iso),
+  pricePerLessonMinorUnits: cents,
+  currency,
+  studentId: student.id,
+  studentName: student.name,
+});
+
+describe("summarizeOneCurrency — a typical month, stated as a fact", () => {
+  const firstInFeb = new Date("2026-02-10T00:00:00Z");
+
+  it("averages her complete months and names the lowest — not this month, not her first", () => {
+    const lessons = [
+      lesson("2026-02-10T00:00:00Z", 10_000), // her first month: she started part-way
+      lesson("2026-03-10T00:00:00Z", 30_000),
+      lesson("2026-04-10T00:00:00Z", 10_000),
+      lesson("2026-05-10T00:00:00Z", 99_000), // this month: not over yet
+    ];
+    const s = summarizeOneCurrency([], lessons, firstInFeb, NOW, "MXN", "UTC");
+    expect(s.typicalMonth).toEqual({
+      averageCents: 20_000,
+      lowest: { month: "2026-04", earnedCents: 10_000 },
+      months: 2,
+    });
+  });
+
+  it("counts a month she taught nothing in — it is the one to budget from", () => {
+    const lessons = [
+      lesson("2026-01-10T00:00:00Z", 30_000),
+      lesson("2026-03-10T00:00:00Z", 30_000),
+      lesson("2026-04-10T00:00:00Z", 30_000),
+    ];
+    const s = summarizeOneCurrency(
+      [],
+      lessons,
+      new Date("2026-01-10T00:00:00Z"),
+      NOW,
+      "MXN",
+      "UTC",
+    );
+    expect(s.typicalMonth).toEqual({
+      averageCents: 20_000,
+      lowest: { month: "2026-02", earnedCents: 0 },
+      months: 3,
+    });
+  });
+
+  it("says nothing until two complete months exist", () => {
+    const lessons = [
+      lesson("2026-03-10T00:00:00Z", 30_000),
+      lesson("2026-04-10T00:00:00Z", 30_000),
+    ];
+    const s = summarizeOneCurrency(
+      [],
+      lessons,
+      new Date("2026-03-10T00:00:00Z"),
+      NOW,
+      "MXN",
+      "UTC",
+    );
+    // March is her first month and May is not over: April alone is not "typical".
+    expect(s.typicalMonth).toBeNull();
+  });
+
+  it("is null for a teacher who has never taught", () => {
+    expect(summarizeOneCurrency([], [], null, NOW, "MXN", "UTC").typicalMonth).toBeNull();
+  });
+});
+
+const booked = (iso: string, cents: number, currency = "MXN"): BookedLesson => ({
+  startsAt: new Date(iso),
   pricePerLessonMinorUnits: cents,
   currency,
 });
 
-describe("summarizeOneCurrency — safe monthly spend (steady state)", () => {
-  // First delivered in Feb → 4 months of history at NOW (May) → steady state.
+describe("summarizeOneCurrency — the rest of this month, as booked", () => {
   const firstInFeb = new Date("2026-02-01T00:00:00Z");
 
-  it("averages delivered revenue over the 3 full prior months once history ≥ 3 months", () => {
-    const lessons = [
-      lesson("2026-02-10T00:00:00Z", 10_000),
-      lesson("2026-03-10T00:00:00Z", 10_000),
-      lesson("2026-03-20T00:00:00Z", 20_000),
-      lesson("2026-04-10T00:00:00Z", 30_000),
-    ];
-    // Total in-window = 70_000 over 3 months → ~23,333.
-    const s = summarizeOneCurrency([], lessons, firstInFeb, NOW, "MXN", "UTC");
-    expect(s.safeMonthlySpendCents).toBe(Math.round(70_000 / 3));
-    expect(s.provisionalMonths).toBe(0);
+  it("adds only classes still to come before her month ends", () => {
+    const s = summarizeOneCurrency([], [], firstInFeb, NOW, "MXN", "UTC", [
+      booked("2026-05-20T15:00:00Z", 30_000), // later this month
+      booked("2026-05-28T15:00:00Z", 30_000), // later this month
+      booked("2026-05-15T11:00:00Z", 30_000), // already started (NOW is 12:00)
+      booked("2026-06-02T15:00:00Z", 30_000), // next month
+    ]);
+    expect(s.bookedRestOfMonthCents).toBe(60_000);
+    expect(s.bookedRestOfMonthLessons).toBe(2);
   });
 
-  it("excludes the current partial month and anything older than the window", () => {
-    const lessons = [
-      lesson("2026-01-31T23:59:59Z", 99_999), // older than window (Jan)
-      lesson("2026-05-10T00:00:00Z", 99_999), // current partial month (May)
-      lesson("2026-03-15T00:00:00Z", 30_000), // in window
-    ];
-    const s = summarizeOneCurrency([], lessons, firstInFeb, NOW, "MXN", "UTC");
-    expect(s.safeMonthlySpendCents).toBe(Math.round(30_000 / 3));
-    expect(s.provisionalMonths).toBe(0);
+  it("cuts the month on her calendar", () => {
+    // 8pm on 30 September in Mexico City; a 9pm class that evening is still
+    // September's, though it is 1 October in UTC.
+    const s = summarizeOneCurrency(
+      [],
+      [],
+      firstInFeb,
+      new Date("2026-10-01T02:00:00Z"),
+      "MXN",
+      "America/Mexico_City",
+      [booked("2026-10-01T03:00:00Z", 30_000)],
+    );
+    expect(s.months[0].month).toBe("2026-09");
+    expect(s.bookedRestOfMonthLessons).toBe(1);
   });
 });
 
-describe("summarizeOneCurrency — safe monthly spend (warm-up)", () => {
-  it("month 1: divides by 1 and includes the current partial month", () => {
-    // First (and only) lesson is this month → non-zero from week one.
-    const lessons = [lesson("2026-05-08T00:00:00Z", 40_000)];
-    const s = summarizeOneCurrency(
-      [],
-      lessons,
-      new Date("2026-05-08T00:00:00Z"),
-      NOW,
-      "MXN",
-      "UTC",
-    );
-    expect(s.safeMonthlySpendCents).toBe(40_000);
-    expect(s.provisionalMonths).toBe(1);
-  });
-
-  it("month 2: divides by 2 across last month and the current partial month", () => {
+describe("summarizeOneCurrency — the year so far", () => {
+  it("adds this calendar year's months and nothing from last year", () => {
     const lessons = [
-      lesson("2026-04-10T00:00:00Z", 30_000),
-      lesson("2026-05-09T00:00:00Z", 50_000), // current month still counts
+      lesson("2025-12-10T00:00:00Z", 50_000),
+      lesson("2026-01-10T00:00:00Z", 10_000),
+      lesson("2026-03-10T00:00:00Z", 20_000),
+      lesson("2026-05-10T00:00:00Z", 5_000),
     ];
     const s = summarizeOneCurrency(
       [],
       lessons,
-      new Date("2026-04-10T00:00:00Z"),
+      new Date("2025-12-10T00:00:00Z"),
       NOW,
       "MXN",
       "UTC",
     );
-    expect(s.safeMonthlySpendCents).toBe(Math.round(80_000 / 2));
-    expect(s.provisionalMonths).toBe(2);
+    expect(s.yearToDateCents).toBe(35_000);
+  });
+});
+
+describe("summarizeOneCurrency — a month, student by student", () => {
+  const firstInFeb = new Date("2026-02-01T00:00:00Z");
+  const sofia = { id: "s-sofia", name: "Sofía" };
+
+  it("groups a month by student, largest first, adding up to the month exactly", () => {
+    // 100.00 over three classes is 33.333… each. Rounded one by one, two
+    // classes and one class print 66.67 + 33.33 — fine here — but three
+    // students at a third each would print 99.99 under a 100.00 total.
+    const third = 10_000 / 3;
+    const lessons = [
+      lesson("2026-05-02T00:00:00Z", third, "MXN", sofia),
+      lesson("2026-05-03T00:00:00Z", third),
+      lesson("2026-05-04T00:00:00Z", third),
+    ];
+    const s = summarizeOneCurrency([], lessons, firstInFeb, NOW, "MXN", "UTC");
+    expect(s.months[0].byStudent).toEqual([
+      { studentId: "s-farid", name: "Farid", earnedCents: 6_667, lessons: 2 },
+      { studentId: "s-sofia", name: "Sofía", earnedCents: 3_333, lessons: 1 },
+    ]);
+    const sum = s.months[0].byStudent.reduce((a, st) => a + st.earnedCents, 0);
+    expect(sum).toBe(s.months[0].earnedCents);
   });
 
-  it("month 3: divides by 3, current month included, still provisional", () => {
-    const lessons = [
-      lesson("2026-03-05T00:00:00Z", 30_000),
-      lesson("2026-04-05T00:00:00Z", 30_000),
-      lesson("2026-05-05T00:00:00Z", 30_000),
-    ];
+  it("is empty for a month she taught nothing in", () => {
     const s = summarizeOneCurrency(
       [],
-      lessons,
-      new Date("2026-03-05T00:00:00Z"),
+      [lesson("2026-03-10T00:00:00Z", 10_000)],
+      firstInFeb,
       NOW,
       "MXN",
       "UTC",
     );
-    expect(s.safeMonthlySpendCents).toBe(30_000);
-    expect(s.provisionalMonths).toBe(3);
+    expect(s.months.find((m) => m.month === "2026-04")!.byStudent).toEqual([]);
+  });
+});
+
+describe("apportion", () => {
+  it("splits a total into integers that add up to it exactly", () => {
+    expect(apportion(100, [1, 1, 1])).toEqual([34, 33, 33]);
+    expect(apportion(10_000, [2, 1])).toEqual([6_667, 3_333]);
   });
 
-  it("never delivered: $0 and not flagged provisional", () => {
-    const s = summarizeOneCurrency([], [], null, NOW, "MXN", "UTC");
-    expect(s.safeMonthlySpendCents).toBe(0);
-    expect(s.provisionalMonths).toBe(0);
+  it("handles nothing to split and nothing to split by", () => {
+    expect(apportion(0, [])).toEqual([]);
+    expect(apportion(500, [0, 0])).toEqual([0, 0]);
   });
 });
 
@@ -261,7 +351,7 @@ describe("summarizeOneCurrency — months are hers, and a lesson is filed where 
     const s = summarizeOneCurrency([], lessons, firstInJune, evening, "MXN", MX);
     expect(s.currentMonthEarnedCents).toBe(100_000);
     expect(s.currentMonthLessons).toBe(2);
-    expect(s.months[0]).toEqual({ month: "2026-09", earnedCents: 100_000, lessons: 2 });
+    expect(s.months[0]).toMatchObject({ month: "2026-09", earnedCents: 100_000, lessons: 2 });
   });
 
   it("still shows the month she just closed once the new one starts", () => {
@@ -273,24 +363,22 @@ describe("summarizeOneCurrency — months are hers, and a lesson is filed where 
     expect(s.currentMonthEarnedCents).toBe(0);
     expect(s.previousMonthEarnedCents).toBe(100_000);
     expect(s.previousMonthLessons).toBe(2);
-    expect(s.months.slice(0, 2)).toEqual([
+    expect(s.months.slice(0, 2)).toMatchObject([
       { month: "2026-10", earnedCents: 0, lessons: 0 },
       { month: "2026-09", earnedCents: 100_000, lessons: 2 },
     ]);
   });
 
-  it("cuts the trailing average on her calendar too", () => {
-    // On 15 November the window is August, September and October. Cut in UTC,
-    // the 6pm class on 31 July was August's and put 90.00 into a window it
-    // was never taught in.
+  it("files every month of the history on her calendar", () => {
+    // Cut in UTC, the 6pm class on 31 July was August's.
     const midNovember = new Date("2026-11-15T15:00:00Z");
     const lessons = [
-      lesson("2026-08-01T00:00:00Z", 90_000), // 6pm 31 July, her time — outside
-      lesson(lastClassOfSeptember, 30_000), // 6pm 30 September — inside
+      lesson("2026-08-01T00:00:00Z", 90_000), // 6pm 31 July, her time
+      lesson(lastClassOfSeptember, 30_000), // 6pm 30 September, her time
     ];
     const s = summarizeOneCurrency([], lessons, firstInJune, midNovember, "MXN", MX);
-    expect(s.provisionalMonths).toBe(0);
-    expect(s.safeMonthlySpendCents).toBe(10_000);
+    const earned = Object.fromEntries(s.months.map((m) => [m.month, m.earnedCents]));
+    expect(earned).toMatchObject({ "2026-07": 90_000, "2026-08": 0, "2026-09": 30_000 });
   });
 });
 
@@ -306,7 +394,7 @@ describe("summarizeOneCurrency — earnings history", () => {
       lesson("2026-05-03T00:00:00Z", 5_000),
     ];
     const s = summarizeOneCurrency([], lessons, firstInFeb, NOW, "MXN", "UTC");
-    expect(s.months).toEqual([
+    expect(s.months).toMatchObject([
       { month: "2026-05", earnedCents: 5_000, lessons: 1 },
       { month: "2026-04", earnedCents: 40_000, lessons: 2 },
       { month: "2026-03", earnedCents: 0, lessons: 0 },
@@ -421,20 +509,22 @@ describe("summarizeCashFlow — more than one currency", () => {
       earnedCents: 50_000,
       heldCents: 50_000,
       heldLessons: 5,
-      safeMonthlySpendCents: 10_000, // 30_000 over 3 months
     });
     expect(eur).toMatchObject({
       totalPaidCents: 60_000,
       earnedCents: 0,
       heldCents: 60_000,
       heldLessons: 10,
-      safeMonthlySpendCents: 20_000, // 60_000 over 3 months
     });
+    const earnedIn = (slice: typeof gbp, month: string) =>
+      slice.months.find((m) => m.month === month)!.earnedCents;
+    expect([earnedIn(gbp, "2026-03"), earnedIn(gbp, "2026-04")]).toEqual([30_000, 0]);
+    expect([earnedIn(eur, "2026-03"), earnedIn(eur, "2026-04")]).toEqual([0, 60_000]);
   });
 
   it("leads with the currency she prices in now, not the biggest pile", () => {
-    // She moved to euros; the pounds are history. "Safe to spend" is a claim
-    // about what she is selling in today, so that is the hero.
+    // She moved to euros; the pounds are history. The hero is about what she
+    // is selling in today.
     const cf = summarizeCashFlow(
       [
         pkg({ currency: "GBP", pricePaidMinorUnits: 900_000 }),
@@ -488,15 +578,15 @@ describe("summarizeCashFlow — more than one currency", () => {
       { fallbackCurrency: "MXN", preferCurrency: "MXN", timeZone: "UTC" },
     );
     const usd = cf.byCurrency.find((s) => s.currency === "USD")!;
-    expect(usd.safeMonthlySpendCents).toBe(10_000);
+    expect(usd.months.find((m) => m.month === "2026-03")!.earnedCents).toBe(30_000);
     expect(usd.totalPaidCents).toBe(0);
-    expect(cf.byCurrency.find((s) => s.currency === "MXN")!.safeMonthlySpendCents).toBe(0);
+    const mxn = cf.byCurrency.find((s) => s.currency === "MXN")!;
+    expect(mxn.months.every((m) => m.earnedCents === 0)).toBe(true);
   });
 
-  it("dates warm-up from her first lesson ever, not the slice's first", () => {
-    // Four months of history means steady state in BOTH currencies. Dating the
-    // retired currency's slice from its own last lesson would divide its
-    // near-zero recent revenue by one month and call it a monthly income.
+  it("starts every currency's history at her first lesson ever, not the slice's first", () => {
+    // Dating a slice from its own first lesson would hide the months it was
+    // quiet, and call a currency she barely used "typical".
     const cf = summarizeCashFlow(
       [pkg({ currency: "GBP" }), pkg({ currency: "EUR" })],
       [lesson("2026-05-10T00:00:00Z", 30_000, "GBP")],
@@ -505,10 +595,13 @@ describe("summarizeCashFlow — more than one currency", () => {
       { fallbackCurrency: "EUR", preferCurrency: "EUR", timeZone: "UTC" },
     );
     for (const slice of cf.byCurrency) {
-      expect(slice.provisionalMonths).toBe(0);
-      // The one lesson is in the current partial month, which steady state
-      // excludes — so nothing is averaged into a monthly figure anywhere.
-      expect(slice.safeMonthlySpendCents).toBe(0);
+      expect(slice.months.map((m) => m.month)).toEqual([
+        "2026-05",
+        "2026-04",
+        "2026-03",
+        "2026-02",
+      ]);
     }
+    expect(cf.byCurrency.find((s) => s.currency === "GBP")!.currentMonthEarnedCents).toBe(30_000);
   });
 });

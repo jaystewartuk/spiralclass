@@ -52,6 +52,7 @@ function completedBooking(
 ) {
   return {
     scheduledStart: new Date(scheduledStart),
+    student: { id: "student-1", name: "Farid" },
     package: { pricePaidMinorUnits: 100_000, classesTotal: 10, currency, ...over },
   };
 }
@@ -180,9 +181,28 @@ describe("computeTeacherCashFlow — after she changes pricing currency", () => 
     const cashFlow = await computeTeacherCashFlow("teacher-1", NOW);
     const gbp = cashFlow.byCurrency.find((s) => s.currency === "GBP")!;
     const mxn = cashFlow.byCurrency.find((s) => s.currency === "MXN")!;
-    // Steady state (first lesson in May, now September): trailing Jun/Jul/Aug.
-    expect(gbp.safeMonthlySpendCents).toBe(Math.round(20_000 / 3));
-    expect(mxn.safeMonthlySpendCents).toBe(Math.round(10_000 / 3));
+    const earnedIn = (slice: typeof gbp, month: string) =>
+      slice.months.find((m) => m.month === month)!.earnedCents;
+    expect(earnedIn(gbp, "2026-07")).toBe(20_000);
+    expect(earnedIn(mxn, "2026-08")).toBe(10_000);
+    expect(earnedIn(mxn, "2026-07")).toBe(0);
+  });
+
+  it("reads the rest of the month from scheduled classes on paid packages only", async () => {
+    await computeTeacherCashFlow("teacher-1", NOW);
+    const upcoming = bookingFindManyMock.mock.calls
+      .map(([args]) => args as { where: Record<string, unknown> })
+      .find((args) => args.where.status === "scheduled")!;
+    expect(upcoming.where).toMatchObject({
+      teacherId: "teacher-1",
+      package: { status: { in: ["active", "paused", "expired"] } },
+    });
+  });
+
+  it("counts a no-show as earned in its month, as the earned/held split always has", async () => {
+    await computeTeacherCashFlow("teacher-1", NOW);
+    const [taught] = bookingFindManyMock.mock.calls[0] as [{ where: Record<string, unknown> }];
+    expect(taught.where.status).toEqual({ in: ["completed", "no_show"] });
   });
 });
 

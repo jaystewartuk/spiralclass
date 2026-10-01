@@ -403,30 +403,61 @@ template)`.
   legal/business gate (the platform must be tax-registered first), not
   something this capture alone enables.
 
-### What the teacher sees she earned (`lib/cashflow.ts`)
+### What the teacher sees she earned (`lib/cashflow.ts`, [D-191](../decisions/D-191.md))
 
-- **Earned** is money for classes taught, as opposed to **held**: money
-  received for classes she still owes. A class earns its package price
-  divided by the package's class count.
+**What counts as earned**
+
+- **Earned** is money for classes taught. Each class earns its package price
+  divided by the package's class count. A **no-show counts as earned**, as it
+  does for the earned/paid-in-advance split ([D-12](../decisions/D-12.md)).
+- **Paid in advance** is money received for classes she has still to teach,
+  on packages that can still be redeemed. It becomes earned as each class is
+  taught. A refund would come out of it. This is the "held" amount in the
+  code.
+- **Amounts are what students paid.** The screens say so, and say that card
+  payments reach her a little lower after Stripe's own fee, which SpiralClass
+  does not receive ([D-152](../decisions/D-152.md)). No net-of-fee figure is
+  ever shown.
+
+**Which month a class belongs to**
+
 - **A class belongs to the month it was taught** (`scheduledStart`), not the
-  month its status flipped to completed. **Months are cut on the teacher's own
-  timezone**, never UTC. In a zone behind UTC, an evening class on the last
-  day of a month would otherwise land in the next month.
-- **This month so far**, **last month** (named, e.g. "September", on the
-  dashboard tile once she has taught for more than one month) and **earned by
-  month** (Payments page) are all the same figure. The September row in the
-  history equals what "this month" read on 30 September.
-- **Earned by month** lists every month from her first taught class, up to 12
-  months back, newest first. A month with no classes shows as zero, so a quiet
-  month is never hidden. It renders nothing until she has taught a class.
-- **Safe to spend** is the average over the three previous full months on her
-  calendar. While she has fewer than four months of history, it is a
-  provisional average that includes the current month.
-- Every figure is per currency and is never blended across currencies (see
-  the module header).
-- The ledger's per-month **received** subtotals measure something different:
-  cash landing, by payment date. A package paid in August and taught in
-  September is received in August and earned in September.
+  month its status flipped.
+- **Months are cut on the teacher's own timezone**, never UTC. In a zone
+  behind UTC, an evening class on the last day of a month would otherwise land
+  in the next month.
+
+**What the screens show**
+
+- **The hero is this month so far**: earned, with the class count.
+- **Booked for the rest of the month**: under the hero, the classes still
+  scheduled before her month ends, on paid packages. It is real bookings, not
+  a forecast, and is labelled as booked.
+- **Last month**: named and closed (e.g. "September"). It shows once she has
+  taught for longer than the current month.
+- **Earned by month** lists every month from her first taught class:
+  - up to 12 months back, newest first;
+  - a month with no classes shows as zero, so a quiet month is never hidden;
+  - each month opens to the students it was taught to, largest first, and
+    those rows add up to the month exactly (largest-remainder apportioning);
+  - the list carries the total so far this calendar year;
+  - it renders nothing until she has taught a class.
+- **A typical month** is the mean and the lowest of her complete months in
+  the history. That leaves out the current month and her first month, which
+  she started part-way through. It is stated as a fact and only once two such
+  months exist. No figure is presented as what she can safely spend.
+
+**Rules that hold across all of it**
+
+- **One figure, many views.** This month, last month, each history row, each
+  student row, the year so far and the typical month all follow the rules
+  above. The September row in the history equals what "this month" read on
+  30 September.
+- **Per currency.** Every figure is per currency and is never blended across
+  currencies (see the module header).
+- **Received is a different measure.** The ledger's per-month **received**
+  subtotals are cash landing, by payment date. A package paid in August and
+  taught in September is received in August and earned in September.
 
 ## User Flow
 

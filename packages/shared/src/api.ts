@@ -690,21 +690,6 @@ export type Payment = {
   classesTotal?: number;
 };
 
-// The teacher's cashflow summary — mirrors
-// `CashFlowSummary` from apps/web/src/lib/cashflow.ts field-for-field (the
-// teacher's earned-vs-held split, computed on her actual net post-commission
-// where known — see D-58 marketplace-commission pivot).
-export type CashFlowSummary = {
-  totalPaidCents: number;
-  earnedCents: number;
-  heldCents: number;
-  heldLessons: number;
-  safeMonthlySpendCents: number;
-  provisionalMonths: number;
-  currentMonthEarnedCents: number;
-  currentMonthLessons: number;
-};
-
 // ---------------------------------------------------------------------------
 // Students
 // ---------------------------------------------------------------------------

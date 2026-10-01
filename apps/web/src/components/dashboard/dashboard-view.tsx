@@ -10,7 +10,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { getT } from "@/lib/i18n";
 import { getDualZoneTime, formatZonedDate, timezoneCityLabel } from "@/lib/date-display";
-import { SafeToSpendTile } from "@/components/cashflow-summary";
+import { EarningsTile } from "@/components/cashflow-summary";
 import { CopyLinkButton } from "@/components/copy-link-button";
 import { GrowthChecklist } from "@/components/growth-checklist";
 import type { MarketplaceSignalKey } from "@spiralclass/shared";
@@ -95,7 +95,7 @@ export type DashboardViewModel = {
   transferConnected: boolean;
   stripeAvailable: boolean;
   growth: ComponentProps<typeof GrowthChecklist>["checklist"];
-  cashFlow: ComponentProps<typeof SafeToSpendTile>["cashFlow"] | null;
+  cashFlow: ComponentProps<typeof EarningsTile>["cashFlow"] | null;
   /** The soonest scheduled classes, ascending, plus the week's total. */
   schedule: { upcoming: DashboardUpcomingClass[]; weekAhead: number };
   visibleTileKeys: Parameters<typeof webNavLinks>[0];
@@ -210,7 +210,7 @@ export async function DashboardView(vm: DashboardViewModel) {
 
         <aside className="min-w-0 space-y-6">
           {vm.cashFlow && vm.cashFlow.byCurrency.some((s) => s.totalPaidCents > 0) && (
-            <SafeToSpendTile cashFlow={vm.cashFlow} />
+            <EarningsTile cashFlow={vm.cashFlow} />
           )}
           {!linkLeads && <BookingLinkCard vm={vm} t={t} readOnly={readOnly} />}
           <PaymentsStatus vm={vm} t={t} readOnly={readOnly} />

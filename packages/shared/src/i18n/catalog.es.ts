@@ -1153,24 +1153,6 @@ export const esMX = {
   "payments.detail.markNotReceived": "Marcar como no recibido",
   "payments.viewCashflow": "Ver tu dinero",
 
-  "cashflow.title": "Tu dinero",
-  "cashflow.explainer":
-    "«Retenido» es dinero que ya recibiste pero que aún debes en clases. «Para gastar» es tu ingreso mensual promedio por clases ya impartidas, calculado sobre tus últimos 3 meses: más estable para presupuestar que un solo mes.",
-  "cashflow.footnote":
-    "¿Por qué un promedio? Un paquete se paga por adelantado pero se imparte durante semanas, así que un solo mes varía según cuándo diste clases — el promedio lo suaviza en un número con el que sí puedes presupuestar. Los pagos hechos por Stripe también llegan un poco más bajos tras su comisión de procesamiento, que SpiralClass no recibe.",
-  "cashflow.thisMonth": "Este mes",
-  "cashflow.safeToSpend": "Para gastar al mes (prom. 3 meses)",
-  "cashflow.earned": "Ganado (tuyo)",
-  "cashflow.held": "Retenido (clases pendientes)",
-  "cashflow.classTaughtOne": "{count} clase impartida",
-  "cashflow.classTaughtMany": "{count} clases impartidas",
-  "cashflow.classHeldOne": "{count} clase sin impartir",
-  "cashflow.classHeldMany": "{count} clases sin impartir",
-  "cashflow.provisionalOne":
-    "provisional — calculado con solo {count} mes de clases hasta ahora; se ajusta conforme das más",
-  "cashflow.provisionalMany":
-    "provisional — calculado con solo {count} meses de clases hasta ahora; se ajusta conforme das más",
-
   "settings.payments": "Cobros",
 
   "settings.availability.help":
@@ -5331,36 +5313,31 @@ export const esMX = {
   "web.calendarSync.google.pause": "Pausar",
   "web.calendarSync.google.resume": "Reanudar",
   "web.calendarSync.google.disconnecting": "Desconectando…",
-  "web.cashflow.title": "Tu dinero",
-  "web.cashflow.explainer":
-    "«Retenido» es dinero que ya recibiste pero que aún debes en clases. «Para gastar» es tu ingreso mensual promedio por clases ya impartidas, calculado sobre tus últimos 3 meses: más estable para presupuestar que un solo mes.",
-  "web.cashflow.thisMonth": "Este mes",
+  "web.cashflow.title": "Tus ingresos",
+  "web.cashflow.thisMonth": "Este mes hasta hoy",
+  "web.cashflow.monthSoFar": "{month} hasta hoy",
   "web.cashflow.classesTaughtOne": "{count} clase impartida",
   "web.cashflow.classesTaught": "{count} clases impartidas",
-  "web.cashflow.safeToSpendMonthly": "Para gastar cada mes",
-  "web.cashflow.earned": "Ganado (tuyo)",
-  "web.cashflow.held": "Retenido (clases pendientes)",
-  "web.cashflow.classesNotYetTaughtOne": "{count} clase sin impartir",
-  "web.cashflow.classesNotYetTaught": "{count} clases sin impartir",
-  "web.cashflow.whyAverage":
-    "¿Por qué un promedio? Un paquete se paga por adelantado pero se imparte durante semanas, así que un solo mes varía según cuándo diste clases — el promedio lo suaviza en un número con el que sí puedes presupuestar. Los pagos hechos por Stripe también llegan un poco más bajos tras su comisión de procesamiento, que SpiralClass no recibe.",
-  "web.cashflow.provisionalOne":
-    "provisional — calculado con solo {count} mes de clases hasta ahora; se ajusta conforme das más",
-  "web.cashflow.provisional":
-    "provisional — calculado con solo {count} meses de clases hasta ahora; se ajusta conforme das más",
-  "web.cashflow.safeToSpendHelp":
-    "Tu ingreso mensual promedio por clases ya impartidas, sobre tus últimos 3 meses.",
-  "web.cashflow.thisMonthSoFarOne": "Este mes: {count} clase impartida → {amount}",
-  "web.cashflow.thisMonthSoFar": "Este mes: {count} clases impartidas → {amount}",
-  "web.cashflow.heldInUnfinished": "{amount} retenido en clases pendientes — ver desglose",
-  "web.cashflow.seeEarnedVsHeld": "Ver ganado vs retenido",
-  "web.cashflow.inCurrency": "En {currency}",
-  "web.cashflow.otherCurrencies": "Disponible en tus otras monedas",
+  "web.cashflow.bookedRestOne": "+ {amount} en 1 clase agendada para lo que queda de {month}",
+  "web.cashflow.bookedRest": "+ {amount} en {count} clases agendadas para lo que queda de {month}",
+  "web.cashflow.paidInAdvance": "Pagado por adelantado",
+  "web.cashflow.toTeachOne": "{count} clase por impartir",
+  "web.cashflow.toTeach": "{count} clases por impartir",
+  "web.cashflow.paidInAdvanceHelp":
+    "«Pagado por adelantado» es dinero que tus alumnos ya te pagaron por clases que aún no impartes. Se vuelve ganancia a medida que das cada clase; y si hubiera un reembolso, saldría de ahí, así que todavía no es dinero libre.",
+  "web.cashflow.whatStudentsPaid":
+    "Las cantidades son lo que pagaron tus alumnos. Los pagos con tarjeta te llegan un poco más bajos por la comisión de procesamiento de Stripe, que SpiralClass no recibe.",
   "web.cashflow.seeByMonth": "Ver todos los meses",
+  "web.cashflow.inCurrency": "En {currency}",
+  "web.cashflow.otherCurrencies": "Este mes en tus otras monedas",
   "web.cashflow.byMonth.title": "Ganado por mes",
   "web.cashflow.byMonth.description":
-    "Lo que ganaste con las clases que impartiste cada mes, según tu propio calendario. Un mes sin clases aparece en cero.",
+    "Cada mes en que has dado clases, según tu propio calendario. Abre un mes para verlo por alumno.",
   "web.cashflow.byMonth.soFar": "en curso",
+  "web.cashflow.byMonth.yearTotal": "En {year} hasta hoy: {amount}",
+  "web.cashflow.byMonth.typical":
+    "Un mes típico: {average} (el promedio de tus últimos {count} meses completos). El más bajo fue {month}, con {lowest}.",
+  "web.cashflow.byMonth.noClasses": "Sin clases este mes.",
   "web.chatRoom.messageActions": "Acciones del mensaje",
   "web.chatRoom.voiceSendFailed": "No se pudo enviar el mensaje de voz. Inténtalo de nuevo.",
   "web.chatRoom.cameraPermissionDenied":

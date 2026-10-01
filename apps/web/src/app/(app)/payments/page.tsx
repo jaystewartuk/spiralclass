@@ -12,7 +12,7 @@ import { requireOnboardedTeacher } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { serverEnv } from "@/lib/env";
 import { computeTeacherCashFlow } from "@/lib/cashflow";
-import { CashFlowPanel, EarningsByMonth } from "@/components/cashflow-summary";
+import { EarningsByMonth, EarningsSummary } from "@/components/cashflow-summary";
 import { getPreferredLocale, getT } from "@/lib/i18n";
 import { resolvePage } from "@/lib/pagination";
 import { zonedWallClockToUtc } from "@/lib/tz";
@@ -265,7 +265,7 @@ export default async function PaymentsListPage({
       />
 
       {cashFlow.byCurrency.some((s) => s.totalPaidCents > 0) && (
-        <CashFlowPanel cashFlow={cashFlow} />
+        <EarningsSummary cashFlow={cashFlow} />
       )}
 
       {/* Earned by month sits with "how am I doing", ahead of the queue. It is

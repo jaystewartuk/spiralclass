@@ -1,25 +1,20 @@
-// Teacher cash-flow ("earned vs held" deferred revenue).
+// What a teacher earned, and what she has been paid for but not yet taught.
 //
 // A package is sold and paid up front, but the lessons are delivered over
-// weeks or months. So the cash a teacher holds is part *earned* (lessons
-// already taught — hers to keep) and part *held* liability (lessons paid for
-// but not yet taught — she still owes the work). A sole-income teacher who
-// spends to her bank balance over-spends the held portion. This module makes
-// that split visible and derives a steadier "safe to spend per month" figure.
+// weeks or months. So the money a teacher has received is part *earned*
+// (classes already taught — hers to keep) and part *paid in advance* (classes
+// paid for but not yet taught — she still owes the work, and a refund would
+// come out of it). This module makes that split visible, and files what she
+// earned by the month she taught it, which is the question she actually asks:
+// "what did September come to?" (D-191).
 //
-// Basis is the teacher's actual net (`Payment.teacherNetMinorUnits` — the
-// settled Stripe net). There is no marketplace commission in that figure any
-// more and no `lib/payments/transfer.ts` to point at: D-143 made her the
-// merchant of record, so the only thing between gross and net is STRIPE's own
-// processing fee, charged on her own account and never seen by the platform.
-// A manual-rail payment carries no processing fee at all, and a card payment
-// whose net has not settled yet hasn't recorded one, so both fall back to the
-// gross package price (`pricePaidMinorUnits`) — exactly right for the manual
-// rail, and a slight over-estimate for the brief pre-settlement card window.
-//
-// That over-estimate is why `web.cashflow.whyAverage` tells the teacher card
-// payments land a little lower after Stripe's fee, and says in the same breath
-// that SpiralClass does not receive it (D-152).
+// Basis is what the student paid: the package price (`pricePaidMinorUnits`)
+// over its class count. D-143 made her the merchant of record, so the only
+// thing between that and what reaches her bank is Stripe's own processing fee
+// on a card payment — charged on her own account and never seen by the
+// platform, so never estimated here. That is why the money screens say the
+// figures are what students paid, and that card payments land a little lower
+// after Stripe's fee, which SpiralClass does not receive (D-152).
 //
 // EVERY FIGURE IS SCOPED TO ONE CURRENCY. `packages.currency` is stamped per
 // package at purchase, so a teacher who changes her pricing currency with paid
@@ -72,6 +67,14 @@ export type CashFlowPackage = {
   deliveredLessons: number;
 };
 
+// A class still to come this month, on a package already paid for — what the
+// rest of the month will add if it is taught as booked.
+export type BookedLesson = {
+  startsAt: Date;
+  pricePerLessonMinorUnits: number;
+  currency: string;
+};
+
 export type CompletedLesson = {
   // When the class was taught — its `scheduledStart` — NOT `completedAt`, which
   // is when the status flipped (see the header).
@@ -81,6 +84,17 @@ export type CompletedLesson = {
   // stamp `CashFlowPackage.currency` carries, and what keeps a lesson in the
   // right slice when a teacher has sold in two.
   currency: string;
+  // Who it was taught to — what a month's breakdown is grouped by.
+  studentId: string;
+  studentName: string;
+};
+
+// One student's share of one month.
+export type StudentEarnings = {
+  studentId: string;
+  name: string;
+  earnedCents: number;
+  lessons: number;
 };
 
 // What one calendar month of teaching earned, in one currency.
@@ -89,6 +103,10 @@ export type MonthEarnings = {
   month: string;
   earnedCents: number;
   lessons: number;
+  // The month split by student, largest first — the page of the notebook a
+  // teacher used to keep. Apportioned so the rows add up to `earnedCents`
+  // exactly, never a cent off the total printed above them.
+  byStudent: StudentEarnings[];
 };
 
 // One currency's worth of cash flow. Every figure is denominated in `currency`
@@ -111,22 +129,15 @@ export type CashFlowSummary = {
   heldCents: number;
   // Number of undelivered lessons backing `heldCents`.
   heldLessons: number;
-  // Average monthly delivered (completed) revenue — the number to budget
-  // living costs on, since it smooths spiky package sales into a steady "this
-  // is what you actually earn by teaching each month".
-  safeMonthlySpendCents: number;
-  // Warm-up signal. 0 = steady state (a clean trailing-3-full-month average).
-  // 1–3 = fewer than 3 months of history exist, so the figure is averaged over
-  // that many months (current partial month included) and should be shown as
-  // provisional. Lets a brand-new teacher see a real number from week one
-  // instead of $0 for three months, while it converges to the smooth version.
-  provisionalMonths: number;
-  // Revenue from lessons actually completed so far *this* calendar month, and
-  // how many of them. Shown next to `safeMonthlySpendCents` so the teacher can
-  // see why the two differ instead of just distrusting the average — it's not
-  // "what you earned this month", it's a 3-month smoothing of that.
+  // What she earned teaching so far this calendar month, and how many classes.
+  // The headline figure (D-191).
   currentMonthEarnedCents: number;
   currentMonthLessons: number;
+  // What the rest of this month adds if it is taught as booked: classes still
+  // scheduled before the month ends, on packages already paid for. Real
+  // bookings, not a projection from an average.
+  bookedRestOfMonthCents: number;
+  bookedRestOfMonthLessons: number;
   // The month before this one, closed. What she reads on the 1st, when "this
   // month" has just reset to nothing, to see what the month she finished made.
   previousMonthEarnedCents: number;
@@ -137,6 +148,19 @@ export type CashFlowSummary = {
   // in the list would hide exactly the month she most needs to see. Empty for a
   // teacher who has never taught a class. `months[0]` is the current month.
   months: MonthEarnings[];
+  // Earned so far this calendar year — the figure she needs at tax time.
+  // Within the history window by construction: January is never more than
+  // eleven months back.
+  yearToDateCents: number;
+  // Her typical month, as a fact rather than advice: the mean and the lowest
+  // of her COMPLETE months in the history — not the current month (not over),
+  // and not her first month (she started part-way through it). Null until two
+  // such months exist; one month is not a typical anything.
+  typicalMonth: {
+    averageCents: number;
+    lowest: { month: string; earnedCents: number };
+    months: number;
+  } | null;
 };
 
 // Cash flow split by the currency it was actually taken in.
@@ -165,6 +189,9 @@ type SummarizeOptions = {
   // teacher's own. Required rather than defaulted to UTC, because UTC is the
   // default that filed her evening classes under the wrong month.
   timeZone: string;
+  // Classes still booked for the rest of the current month. Anything outside
+  // the current month is ignored.
+  booked?: BookedLesson[];
 };
 
 /**
@@ -185,11 +212,12 @@ export function summarizeCashFlow(
   // delivered one. Decides warm-up vs steady state and where history begins.
   firstDeliveredAt: Date | null,
   now: Date,
-  { fallbackCurrency, preferCurrency, timeZone }: SummarizeOptions,
+  { fallbackCurrency, preferCurrency, timeZone, booked = [] }: SummarizeOptions,
 ): CashFlow {
   const currencies = new Set<string>();
   for (const p of packages) currencies.add(p.currency);
   for (const l of completedLessons) currencies.add(l.currency);
+  for (const l of booked) currencies.add(l.currency);
   if (currencies.size === 0) currencies.add(fallbackCurrency);
 
   const slices = [...currencies]
@@ -206,6 +234,7 @@ export function summarizeCashFlow(
         now,
         currency,
         timeZone,
+        booked.filter((l) => l.currency === currency),
       ),
     )
     .sort((a, b) => b.totalPaidCents - a.totalPaidCents || a.currency.localeCompare(b.currency));
@@ -233,6 +262,7 @@ export function summarizeOneCurrency(
   now: Date,
   currency: string,
   timeZone: string,
+  booked: BookedLesson[] = [],
 ): CashFlowSummary {
   let totalPaidCents = 0;
   let heldCents = 0;
@@ -268,16 +298,23 @@ export function summarizeOneCurrency(
   // delivered month and the current one (same month → 1).
   const monthsElapsed = firstMonth === null ? 0 : monthsBetween(firstMonth, currentMonth) + 1;
 
-  // Revenue and lesson count per month, summed unrounded — a per-lesson price
-  // is the package price over its class count and need not be whole — and
-  // rounded once per month below.
-  const byMonth = new Map<string, { revenue: number; lessons: number }>();
+  // Revenue and lesson count per month (and per student within it), summed
+  // unrounded — a per-lesson price is the package price over its class count
+  // and need not be whole — and rounded once per month below.
+  type Tally = { revenue: number; lessons: number };
+  const byMonth = new Map<string, Tally & { students: Map<string, Tally & { name: string }> }>();
   for (const l of completedLessons) {
     const key = monthKey(l.taughtAt, timeZone);
-    const month = byMonth.get(key) ?? { revenue: 0, lessons: 0 };
+    let month = byMonth.get(key);
+    if (!month) byMonth.set(key, (month = { revenue: 0, lessons: 0, students: new Map() }));
     month.revenue += l.pricePerLessonMinorUnits;
     month.lessons += 1;
-    byMonth.set(key, month);
+    let student = month.students.get(l.studentId);
+    if (!student) {
+      month.students.set(l.studentId, (student = { revenue: 0, lessons: 0, name: l.studentName }));
+    }
+    student.revenue += l.pricePerLessonMinorUnits;
+    student.lessons += 1;
   }
   const revenueIn = (key: string) => byMonth.get(key)?.revenue ?? 0;
 
@@ -286,35 +323,58 @@ export function summarizeOneCurrency(
   for (let back = 0; back < historyLength; back++) {
     const key = shiftMonthKey(currentMonth, -back);
     const month = byMonth.get(key);
+    const earned = Math.round(month?.revenue ?? 0);
+    const students = [...(month?.students ?? new Map()).entries()];
+    const shares = apportion(
+      earned,
+      students.map(([, st]) => st.revenue),
+    );
     months.push({
       month: key,
-      earnedCents: Math.round(month?.revenue ?? 0),
+      earnedCents: earned,
       lessons: month?.lessons ?? 0,
+      byStudent: students
+        .map(([studentId, st], i) => ({
+          studentId,
+          name: st.name,
+          earnedCents: shares[i],
+          lessons: st.lessons,
+        }))
+        .sort((a, b) => b.earnedCents - a.earnedCents || a.name.localeCompare(b.name)),
     });
   }
   const previousMonth = byMonth.get(shiftMonthKey(currentMonth, -1));
 
-  let safeMonthlySpendCents = 0;
-  let provisionalMonths = 0;
-
-  if (monthsElapsed >= 4) {
-    // Steady state: clean trailing-3-full-month average. The current partial
-    // month is excluded so a slow first week doesn't deflate the figure.
-    const revenue = [1, 2, 3].reduce(
-      (sum, back) => sum + revenueIn(shiftMonthKey(currentMonth, -back)),
-      0,
-    );
-    safeMonthlySpendCents = Math.round(revenue / 3);
-  } else if (monthsElapsed >= 1) {
-    // Warm-up: fewer than 3 full months of history. Include the current partial
-    // month and divide by the months she's actually been delivering, so the
-    // number is non-zero from week one. Shown as provisional until it settles.
-    let revenue = 0;
-    for (let back = 0; back < monthsElapsed; back++) {
-      revenue += revenueIn(shiftMonthKey(currentMonth, -back));
+  // The rest of this month, as booked.
+  let bookedRestOfMonth = 0;
+  let bookedRestOfMonthLessons = 0;
+  for (const l of booked) {
+    if (l.startsAt > now && monthKey(l.startsAt, timeZone) === currentMonth) {
+      bookedRestOfMonth += l.pricePerLessonMinorUnits;
+      bookedRestOfMonthLessons += 1;
     }
-    safeMonthlySpendCents = Math.round(revenue / monthsElapsed);
-    provisionalMonths = monthsElapsed;
+  }
+
+  const currentYear = currentMonth.slice(0, 4);
+  const yearToDateCents = Math.round(
+    [...byMonth.entries()]
+      .filter(([key]) => key.startsWith(currentYear) && key <= currentMonth)
+      .reduce((sum, [, m]) => sum + m.revenue, 0),
+  );
+
+  // Complete months: everything in the history but the current month and her
+  // first-ever month.
+  const complete = months.filter((m) => m.month !== currentMonth && m.month !== firstMonth);
+  let typicalMonth: CashFlowSummary["typicalMonth"] = null;
+  if (complete.length >= 2) {
+    const lowest = complete.reduce((low, m) => (m.earnedCents < low.earnedCents ? m : low));
+    typicalMonth = {
+      averageCents: Math.round(
+        complete.reduce((sum, m) => sum + m.earnedCents, 0) / complete.length,
+      ),
+      lowest: { month: lowest.month, earnedCents: lowest.earnedCents },
+      months: complete.length,
+    };
   }
 
   return {
@@ -323,15 +383,47 @@ export function summarizeOneCurrency(
     earnedCents,
     heldCents,
     heldLessons,
-    safeMonthlySpendCents,
-    provisionalMonths,
     currentMonthEarnedCents: Math.round(revenueIn(currentMonth)),
     currentMonthLessons: byMonth.get(currentMonth)?.lessons ?? 0,
     previousMonthEarnedCents: Math.round(previousMonth?.revenue ?? 0),
     previousMonthLessons: previousMonth?.lessons ?? 0,
     months,
+    bookedRestOfMonthCents: Math.round(bookedRestOfMonth),
+    bookedRestOfMonthLessons,
+    yearToDateCents,
+    typicalMonth,
   };
 }
+
+/**
+ * Split an integer `total` across `weights` so the parts are integers that add
+ * up to exactly `total` (largest-remainder). Rounding each share on its own can
+ * leave a month's students a cent short of — or over — the month total printed
+ * above them; this hands the leftover cents to the largest fractional parts.
+ */
+export function apportion(total: number, weights: number[]): number[] {
+  const sum = weights.reduce((a, b) => a + b, 0);
+  if (weights.length === 0) return [];
+  if (sum <= 0) return weights.map(() => 0);
+  const exact = weights.map((w) => (w / sum) * total);
+  const parts = exact.map(Math.floor);
+  let leftover = total - parts.reduce((a, b) => a + b, 0);
+  const byRemainder = exact
+    .map((e, i) => ({ i, rem: e - Math.floor(e) }))
+    .sort((a, b) => b.rem - a.rem || a.i - b.i);
+  for (const { i } of byRemainder) {
+    if (leftover <= 0) break;
+    parts[i] += 1;
+    leftover -= 1;
+  }
+  return parts;
+}
+
+// A no-show is forfeited time the teacher earned (D-12): it is delivered for
+// the earned/held split, so it is earned in the month it was booked for too.
+// One list, so the monthly figures and the all-time split cannot disagree
+// about what counts.
+const DELIVERED_STATUSES = ["completed", "no_show"] as const;
 
 // Prisma-bound wrapper: fetch the inputs for one teacher, then summarize.
 export async function computeTeacherCashFlow(
@@ -347,60 +439,76 @@ export async function computeTeacherCashFlow(
     Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - EARNINGS_HISTORY_MONTHS, 1),
   );
 
-  const [packages, deliveredGroups, completed, firstDelivered, teacher] = await Promise.all([
-    prisma.package.findMany({
-      where: { teacherId, status: { in: [...PAID_STATUSES] } },
-      select: {
-        id: true,
-        classesTotal: true,
-        pricePaidMinorUnits: true,
-        currency: true,
-        status: true,
-        expiresAt: true,
-      },
-    }),
-    // Lessons delivered (or forfeited) per package, all-time.
-    prisma.booking.groupBy({
-      by: ["packageId"],
-      where: { teacherId, status: { in: ["completed", "no_show"] } },
-      _count: { _all: true },
-    }),
-    // Completed lessons taught in the window (through now), with their package
-    // price and currency — the price to derive per-lesson revenue, the
-    // currency to file it under the right slice. Served by the
-    // (teacher_id, scheduled_start) index.
-    prisma.booking.findMany({
-      where: {
-        teacherId,
-        status: "completed",
-        scheduledStart: { gte: windowStart, lte: now },
-      },
-      select: {
-        scheduledStart: true,
-        package: {
-          select: {
-            pricePaidMinorUnits: true,
-            classesTotal: true,
-            currency: true,
+  const [packages, deliveredGroups, completed, firstDelivered, teacher, upcoming] =
+    await Promise.all([
+      prisma.package.findMany({
+        where: { teacherId, status: { in: [...PAID_STATUSES] } },
+        select: {
+          id: true,
+          classesTotal: true,
+          pricePaidMinorUnits: true,
+          currency: true,
+          status: true,
+          expiresAt: true,
+        },
+      }),
+      // Lessons delivered (or forfeited) per package, all-time.
+      prisma.booking.groupBy({
+        by: ["packageId"],
+        where: { teacherId, status: { in: [...DELIVERED_STATUSES] } },
+        _count: { _all: true },
+      }),
+      // Delivered lessons taught in the window (through now), with their package
+      // price and currency — the price to derive per-lesson revenue, the
+      // currency to file it under the right slice — and the student, for the
+      // month's breakdown. Served by the (teacher_id, scheduled_start) index.
+      prisma.booking.findMany({
+        where: {
+          teacherId,
+          status: { in: [...DELIVERED_STATUSES] },
+          scheduledStart: { gte: windowStart, lte: now },
+        },
+        select: {
+          scheduledStart: true,
+          student: { select: { id: true, name: true } },
+          package: {
+            select: {
+              pricePaidMinorUnits: true,
+              classesTotal: true,
+              currency: true,
+            },
           },
         },
-      },
-    }),
-    // Her very first delivered lesson, ever — decides warm-up vs steady-state.
-    prisma.booking.findFirst({
-      where: { teacherId, status: "completed" },
-      orderBy: { scheduledStart: "asc" },
-      select: { scheduledStart: true },
-    }),
-    // Her configured pricing currency — which slice to lead with, and the
-    // answer for a teacher with no packages at all — and her timezone, whose
-    // calendar every month is cut on. Looked up here rather than taken as
-    // arguments so the call sites (payments page, dashboard) stay one line.
-    prisma.teacher.findUnique({
-      where: { id: teacherId },
-      select: { pricingCurrency: true, timezone: true },
-    }),
-  ]);
+      }),
+      // Her very first delivered lesson, ever — decides warm-up vs steady-state.
+      prisma.booking.findFirst({
+        where: { teacherId, status: { in: [...DELIVERED_STATUSES] } },
+        orderBy: { scheduledStart: "asc" },
+        select: { scheduledStart: true },
+      }),
+      // Her configured pricing currency — which slice to lead with, and the
+      // answer for a teacher with no packages at all — and her timezone, whose
+      // calendar every month is cut on. Looked up here rather than taken as
+      // arguments so the call sites (payments page, dashboard) stay one line.
+      prisma.teacher.findUnique({
+        where: { id: teacherId },
+        select: { pricingCurrency: true, timezone: true },
+      }),
+      // Classes still to come in the next month and a bit, on paid packages —
+      // the pure function keeps the ones left in HER current month.
+      prisma.booking.findMany({
+        where: {
+          teacherId,
+          status: "scheduled",
+          scheduledStart: { gt: now, lt: new Date(now.getTime() + 32 * 24 * 60 * 60 * 1000) },
+          package: { status: { in: [...PAID_STATUSES] } },
+        },
+        select: {
+          scheduledStart: true,
+          package: { select: { pricePaidMinorUnits: true, classesTotal: true, currency: true } },
+        },
+      }),
+    ]);
 
   const deliveredByPkg = new Map(deliveredGroups.map((g) => [g.packageId, g._count._all]));
 
@@ -417,6 +525,16 @@ export async function computeTeacherCashFlow(
     .filter((b) => b.package.classesTotal > 0)
     .map((b) => ({
       taughtAt: b.scheduledStart,
+      pricePerLessonMinorUnits: b.package.pricePaidMinorUnits / b.package.classesTotal,
+      currency: b.package.currency,
+      studentId: b.student.id,
+      studentName: b.student.name,
+    }));
+
+  const booked: BookedLesson[] = upcoming
+    .filter((b) => b.package.classesTotal > 0)
+    .map((b) => ({
+      startsAt: b.scheduledStart,
       pricePerLessonMinorUnits: b.package.pricePaidMinorUnits / b.package.classesTotal,
       currency: b.package.currency,
     }));
@@ -437,6 +555,7 @@ export async function computeTeacherCashFlow(
       // Same reasoning as the currency fallback above: a vanished row is not
       // worth crashing over, and UTC cannot be mistaken for a resolved zone.
       timeZone: teacher?.timezone ?? FALLBACK_TIMEZONE,
+      booked,
     },
   );
 }
