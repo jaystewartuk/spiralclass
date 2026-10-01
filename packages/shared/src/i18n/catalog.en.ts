@@ -396,7 +396,7 @@ export const en = {
   "myDetails.languageDescription": "Your language — used for live captions during your classes.",
   "myDetails.captionsConsent": "Live captions",
   "myDetails.captionsConsentDescription":
-    "Turn this on to let your teacher's class have live captions of YOUR speech too — while it's on, a web browser in the call recognises your speech (on the device, or with that browser's speech service; or, when no device in the call can, your own browser sends it to Deepgram) and it is translated on the device or by Google. Nothing is stored.",
+    "Turn this on to let your teacher's class have live captions of YOUR speech too — while it's on, a web browser in the call recognises your speech (on the device, or with that browser's speech service; or, when no device in the call can, your own browser sends it to Deepgram) and it is translated on the device or by Google. Captions aren't saved — unless your teacher has your separate consent to keep class transcripts for learning insights; then the recognised text is kept, and the call says so on screen.",
   "myDetails.captionsConsentEnable": "Turn on live captions for my speech",
   "myDetails.captionsConsentEnabled": "Live captions enabled",
 
@@ -699,9 +699,20 @@ export const en = {
   "web.call.captionsMicOffDetailed":
     "Turn your microphone on to caption your speech for the student.",
   "web.call.captionsStartFailed": "Couldn't start subtitles. Check your connection and try again.",
-  "call.captionsConsentHint": "Live captions are available — enable them in your account settings.",
+  "call.captionsConsentAskTitle": "Your teacher turned on live captions",
+  "call.captionsConsentAskBody":
+    "Turn them on for your speech too, so your teacher can read what you say. A browser in the call recognises your speech (or Deepgram, when no device here can) and it is translated on the device or by Google. Captions aren't saved, except as the class transcript when your teacher has your consent for learning insights. This applies to all your classes — you can turn it off any time in your account.",
+  "call.captionsConsentAskAccept": "Turn on",
+  "call.captionsConsentAskLater": "Not now",
+  "call.captionsConsentAskFailed": "Couldn't save. Try again.",
+  "call.captionsConsentGuardian":
+    "Captions of your speech need a parent's or guardian's consent — your teacher can record it.",
+  "call.captionsStudentAsked":
+    "Your student's speech isn't captioned yet — they've been asked on their screen.",
+  "call.captionsStudentNeedsGuardian":
+    "Your student's speech isn't captioned — record their guardian's consent on their student page.",
   "call.captionsDisclosure":
-    "Captions are made in your browsers: speech is recognised on the device or by the browser's own speech service — or by Deepgram when neither of your devices can — and translated on the device or by Google. Nothing is stored.",
+    "Captions are made in your browsers: speech is recognised on the device or by the browser's own speech service — or by Deepgram when neither of your devices can — and translated on the device or by Google. Captions themselves aren't saved — but when a class's transcript is kept for learning insights (with the student's separate consent), the recognised text is kept, and the call says so on screen.",
   "call.captionsNoticeTitle": "Before you turn on captions",
   "call.captionsNoticeDismiss": "Got it",
   "call.captionsEnabledToast": "Live captions enabled.",
@@ -2455,8 +2466,11 @@ export const en = {
   // minor checkbox is on (an adult student consents herself, in her account).
   "web.captionsConsent.recorded": "✓ Live-captions consent on file",
   "web.captionsConsent.record": "Record guardian consent for live captions",
-  "web.captionsConsent.adultNote":
-    "Adult students consent to live captions themselves, from their own account page.",
+  "web.insightsConsent.heading": "Voice insights",
+  "web.captionsConsent.heading": "Live captions of their speech",
+  "web.captionsConsent.selfOn": "✓ Turned on by the student",
+  "web.captionsConsent.selfOff":
+    "Not turned on yet. The student is asked on their screen the next time you turn on captions in a class.",
 
   // --- full i18n sweep (dashboard/settings/student-portal/booking/components/admin/legal) ---
   "web.dashboard.classes.calendarEventTitle": "Class: {name}",
@@ -4630,7 +4644,7 @@ export const en = {
   "web.myClasses.account.nativeLanguage.savedMessage": "Saved.",
   "web.myClasses.account.captionsConsent.title": "Live captions",
   "web.myClasses.account.captionsConsent.description":
-    "Turn this on to let your teacher's class have live captions of YOUR speech too — while it's on, a web browser in the call recognises your speech (on the device, or with that browser's speech service; or, when no device in the call can, your own browser sends it to Deepgram) and it is translated on the device or by Google. Nothing is stored.",
+    "Turn this on to let your teacher's class have live captions of YOUR speech too — while it's on, a web browser in the call recognises your speech (on the device, or with that browser's speech service; or, when no device in the call can, your own browser sends it to Deepgram) and it is translated on the device or by Google. Captions aren't saved — unless your teacher has your separate consent to keep class transcripts for learning insights; then the recognised text is kept, and the call says so on screen.",
   "web.myClasses.account.captionsConsent.record": "Turn on live captions for my speech",
   "web.myClasses.account.captionsConsent.recorded": "✓ Live captions enabled",
   "web.myClasses.account.signInEmail.title": "Sign-in email",

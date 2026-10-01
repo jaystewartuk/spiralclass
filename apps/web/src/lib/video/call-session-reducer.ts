@@ -27,12 +27,6 @@ export type CallSessionInput = {
   overlay?: React.ReactNode;
   canRecord?: boolean;
   canCaption?: boolean;
-  // True when captions are otherwise available but THIS student hasn't given
-  // her own consent yet (the captions architecture review P0) —
-  // distinct from canCaption=false (feature off entirely), so the call UI can
-  // show a hint pointing at her account settings instead of just hiding the
-  // toggle with no explanation. Always false/undefined for the teacher role.
-  captionsConsentMissing?: boolean;
   materials?: CallMaterial[];
   canBrowseLibrary?: boolean;
   onNudge?: () => Promise<NudgeResult>;

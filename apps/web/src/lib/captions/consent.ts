@@ -6,7 +6,8 @@
 // more direct, real-time case than the post-call lesson-insights pipeline
 // (see lib/lesson-notes/consent.ts) — so this is a SEPARATE consent, not a
 // reuse of insightsConsentAt: an adult student must consent HERSELF
-// (self-service, on her own account page), not via teacher attestation. The
+// (self-service — on her own account page, or with one tap on her own call
+// screen when captions come on), not via teacher attestation. The
 // minor path stays teacher-attested, exactly like the insights gate, and
 // shares the same `isMinor` flag (one concept, not duplicated per feature).
 //

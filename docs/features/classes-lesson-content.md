@@ -149,6 +149,10 @@ as historical rationale, not current schema truth.
   `scheduledStart` and remain visible until **30 minutes after**
   `scheduledEnd`. Teacher-audience notes are never visible to the student at
   any time — enforced at the query layer, not just the UI.
+- **In the call**, each side's notes (the teacher's cues, the student's
+  instructions) show in a card over the top-left of the stage. The card
+  collapses to its title and note count, so it never has to cover a shared
+  material, and each browser remembers whether it was left collapsed.
 - Cascades: both `LessonNote` and `LessonSummary` are deleted if their parent
   booking is deleted.
 

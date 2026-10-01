@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useVisibilityPolling } from "@/hooks/use-visibility-polling";
+import { CallNotesCard } from "@/components/video/call-notes-card";
 
 type LiveNote = { id: string; body: string };
 
@@ -39,15 +40,16 @@ export function InstructionsOverlay({
 
   if (notes.length === 0) return null;
   return (
-    <div className="space-y-2 rounded-lg bg-background/90 p-3 text-foreground shadow-lg backdrop-blur">
-      <h3 className="text-sm font-medium text-muted-foreground">
-        {en ? "During your class" : "Durante tu clase"}
-      </h3>
+    <CallNotesCard
+      title={en ? "During your class" : "Durante tu clase"}
+      count={notes.length}
+      storageKey="spiralclass.callNotes.student"
+    >
       <ul className="space-y-1 text-sm">
         {notes.map((n) => (
           <li key={n.id}>{n.body}</li>
         ))}
       </ul>
-    </div>
+    </CallNotesCard>
   );
 }

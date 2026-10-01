@@ -170,10 +170,20 @@ That lasts until preview has a LiveKit server of its own.
     only with her recorded captions consent** (her guardian's, for a minor —
     D-22), whichever browser would recognise it, and
     `/api/captions/translate` refuses her speech without it. A student
-    without consent still receives captions of the teacher. (This rule
-    previously read "one-way only, the teacher's mic"; the retired agent
-    already captioned both sides under the same switch and consent, and the
-    browser design keeps that.)
+    without consent still receives captions of the teacher.
+    - **The consent is asked for where it matters.** While captions are on
+      and an adult student has not consented, her call screen asks her —
+      "Turn on" records her own consent (the same self-service write as her
+      account page's toggle, across all her teachers) and captioning of her
+      speech starts within seconds; "Not now" lasts for that call. The
+      teacher's screen says her student's speech is not captioned yet and
+      that she is being asked; for a minor, it says the guardian's consent is
+      the one to record, and the student is never asked to consent for
+      herself. The teacher's student page shows each consent under its own
+      heading, including whether an adult has turned captions on. (This rule
+      previously read "one-way only, the teacher's mic"; the retired agent
+      already captioned both sides under the same switch and consent, and the
+      browser design keeps that.)
 17. **Per-class language override**: `Booking.teacherLanguageOverride` /
     `studentLanguageOverride` — if the teacher has set a class-specific
     override, it wins over the teacher's/student's own profile default

@@ -46,6 +46,7 @@ import { guardAudioPlaybackResume } from "@/lib/video/audio-playback";
 import { startCallRecording, stopCallRecording } from "@/app/actions/call-recording";
 import { useCaptionFeed, useRoomCaptionsEnabled } from "@/lib/captions/use-caption-feed";
 import { useBrowserCaptions } from "@/lib/captions/use-browser-captions";
+import { captionsConsentPrompt } from "@/lib/captions/consent-prompt";
 import { useCaptionPreferences } from "@/lib/captions/use-caption-preferences";
 import {
   CAPTIONS_NOTICE_STORAGE_KEY,
@@ -53,6 +54,7 @@ import {
   parseCaptionsNoticeSeen,
 } from "@/lib/captions/notice";
 import { CaptionBand, CaptionTranscript } from "./caption-band";
+import { CaptionsConsentAsk } from "./captions-consent-ask";
 import { useT } from "@/components/locale-provider";
 import type { TFunction } from "@/lib/i18n-translate";
 import { cn } from "@/lib/utils";
@@ -126,7 +128,6 @@ export function ClassCall({
   overlay,
   canRecord,
   canCaption,
-  captionsConsentMissing,
   bookingId,
   role,
   scheduledStartAt,
@@ -169,12 +170,6 @@ export function ClassCall({
   // only ever captioned if she's separately consented (below) — the
   // teacher's switch covers both directions, but can't bypass her consent.
   canCaption?: boolean;
-  // Student-only: true when captions are enabled/available room-wide but SHE
-  // hasn't consented yet, so her own speech won't be transcribed for the
-  // teacher even while the teacher's toggle is on
-  // (the captions architecture review P0) — worth explaining
-  // rather than silently doing nothing.
-  captionsConsentMissing?: boolean;
   bookingId?: string;
   // The class's materials, shown in the in-call viewer. The teacher gets every
   // attached item; the student gets only released ones (resolved server-side in
@@ -895,6 +890,17 @@ export function ClassCall({
   useEffect(() => {
     if (!roomCaptionsOn) setCaptionsActive(false);
   }, [roomCaptionsOn, setCaptionsActive]);
+  // The student's captions consent, when captions are on and it is missing:
+  // asked of her on her screen, explained on the teacher's (consent-prompt.ts).
+  // Read from the live caption session, so it clears on both screens as soon
+  // as she says yes.
+  const [consentAskDismissed, setConsentAskDismissed] = useState(false);
+  const consentPrompt = captionsConsentPrompt({
+    session: browserCaptions.session,
+    captionsOn: roomCaptionsOn,
+    otherPresent: browserCaptions.otherPresent,
+    dismissed: consentAskDismissed,
+  });
   const { prefs: captionPrefs, setPrefs: setCaptionPrefs } = useCaptionPreferences();
   const [transcriptOpen, setTranscriptOpen] = useState(false);
   // Resolve a caption's speaker identity to the name the room knows them by.
@@ -1376,7 +1382,7 @@ export function ClassCall({
   // the teacher (see canCaption's doc comment); it sets the participant
   // attribute both browsers read before recognising EITHER side's speech
   // (D-185), and the student's speech still separately requires her consent
-  // (captionsConsentMissing).
+  // (consentPrompt, below).
   //
   // Not a functional state update: turning captions on has to start the
   // on-device model downloads INSIDE this click, because Chrome refuses
@@ -1766,12 +1772,26 @@ export function ClassCall({
                 see a blank screen" case. Almost always a mobile browser that
                 would not auto-start media; the fix is to tap a control. */}
                 {mediaOff && <StatusPill tone="attention" label={t("web.classCall.mediaOff")} />}
-                {/* Captions are available room-wide but THIS student has not
-                consented, so her own speech is not transcribed (the captions
-                architecture review P0) — say so rather than silently doing
-                nothing. Only worth saying while captions are actually on. */}
-                {captionsConsentMissing && roomCaptionsOn && (
-                  <StatusPill tone="attention" label={t("call.captionsConsentHint")} />
+                {/* Captions are on but the student's own speech may not be
+                captioned yet (D-22). Her screen asks her, with one tap; the
+                teacher's says she is being asked — or, for a minor, that the
+                guardian's consent is the one to record. Silence here is what
+                made captions look broken for a class whose student had simply
+                never been asked. */}
+                {consentPrompt === "ask-student" && (
+                  <CaptionsConsentAsk
+                    onGiven={browserCaptions.consentGiven}
+                    onDismiss={() => setConsentAskDismissed(true)}
+                  />
+                )}
+                {consentPrompt === "student-guardian" && (
+                  <StatusPill tone="attention" label={t("call.captionsConsentGuardian")} />
+                )}
+                {consentPrompt === "teacher-asked" && (
+                  <StatusPill tone="attention" label={t("call.captionsStudentAsked")} />
+                )}
+                {consentPrompt === "teacher-guardian" && (
+                  <StatusPill tone="attention" label={t("call.captionsStudentNeedsGuardian")} />
                 )}
                 {/* Captions are on, but neither browser in this call can
                 recognise speech (two phones, measured in D-185) and the paid
@@ -2052,8 +2072,12 @@ export function ClassCall({
             (see NativeCall's overlay note); web collapses the same way now.
             An empty wrapper is 0-height and paints nothing, so it neither shows
             nor blocks the video underneath. */}
+            {/* pointer-events-none on the wrapper, back on inside the card
+            (CallNotesCard): a collapsed card is narrower than this box, and
+            the empty rest of it must not swallow clicks meant for the shared
+            material underneath. */}
             {overlay && !minimized && (
-              <div className="absolute top-4 left-4 z-20 max-h-over-stage w-72 overflow-y-auto">
+              <div className="pointer-events-none absolute top-4 left-4 z-20 max-h-over-stage w-72 overflow-y-auto">
                 {overlay}
               </div>
             )}

@@ -70,6 +70,7 @@ export function StudentLearningProfileCard({
   insightsConsented,
   isMinor,
   captionsGuardianConsented,
+  captionsSelfConsented,
   t,
 }: {
   profile: unknown;
@@ -78,6 +79,7 @@ export function StudentLearningProfileCard({
   insightsConsented: boolean;
   isMinor: boolean;
   captionsGuardianConsented: boolean;
+  captionsSelfConsented: boolean;
   t: TFunction;
 }) {
   const parsed = raw ? profileSchema.safeParse(raw) : null;
@@ -150,10 +152,8 @@ export function StudentLearningProfileCard({
             consented={insightsConsented}
             isMinor={isMinor}
             captionsGuardianConsented={captionsGuardianConsented}
+            captionsSelfConsented={captionsSelfConsented}
           />
-          <p className="mt-1 text-xs text-muted-foreground">
-            {t("web.studentProfile.consentNote")}
-          </p>
         </div>
 
         <div className="border-t pt-3">

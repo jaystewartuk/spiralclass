@@ -105,6 +105,7 @@ const SESSION = (
   },
   recognitionLocales: { teacher: "es-MX", student: "en" },
   studentConsent: true,
+  studentConsentGiver: "student",
   cloudRecognition: false,
   transcriptCapture: false,
   ...over,
@@ -473,5 +474,69 @@ describe("useBrowserCaptions — on-device models", () => {
     await render({ room, role: "teacher", teacherCaptionsOn: false, prefetchSession: false });
     act(() => latest.prepareOnDevice());
     expect(install).not.toHaveBeenCalled();
+  });
+});
+
+describe("useBrowserCaptions — a consent given from the call", () => {
+  it("re-reads the config at once, nudges the other browser, and starts captioning her", async () => {
+    configReplies = [
+      { ok: true, enabled: true, session: SESSION("student", { studentConsent: false }) },
+      { ok: true, enabled: true, session: SESSION("student", { studentConsent: true }) },
+    ];
+    const room = new FakeRoom("s1");
+    const teacher = new FakeParticipant("t1", { id: "t1-mic", readyState: "live" });
+    teacher.attributes.captionsOn = "true";
+    room.join(teacher);
+    await render({ room, role: "student", teacherCaptionsOn: false, prefetchSession: false });
+    expect(latest.session?.studentConsent).toBe(false);
+    expect(latest.otherPresent).toBe(true);
+    // Before: this capable browser recognises only the teacher, from her track.
+    const tracks = () => FakeRecognition.instances.map((r) => (r.track as { id: string }).id);
+    expect(tracks()).not.toContain("s1-mic");
+    const before = configCalls().length;
+
+    act(() => latest.consentGiven());
+    await settle();
+
+    expect(configCalls().length).toBe(before + 1);
+    expect(latest.session?.studentConsent).toBe(true);
+    expect(room.localParticipant.setAttributes).toHaveBeenCalledWith({
+      captionsConsent: expect.any(String),
+    });
+    expect(tracks()).toContain("s1-mic");
+  });
+
+  it("re-reads the config at once when the other browser nudges", async () => {
+    const room = new FakeRoom("t1");
+    const student = new FakeParticipant("s1", { id: "s1-mic", readyState: "live" });
+    room.join(student);
+    await render({ room, role: "teacher", teacherCaptionsOn: true, prefetchSession: true });
+    const before = configCalls().length;
+
+    student.attributes.captionsConsent = "1700000000000";
+    act(() => room.emit("participantAttributesChanged"));
+    await settle();
+
+    expect(configCalls().length).toBe(before + 1);
+  });
+
+  it("does not re-read the config for an attribute change that is not the nudge", async () => {
+    const room = new FakeRoom("t1");
+    const student = new FakeParticipant("s1", { id: "s1-mic", readyState: "live" });
+    room.join(student);
+    await render({ room, role: "teacher", teacherCaptionsOn: true, prefetchSession: true });
+    const before = configCalls().length;
+
+    student.attributes.captionsAsr = "1";
+    act(() => room.emit("participantAttributesChanged"));
+    await settle();
+
+    expect(configCalls().length).toBe(before);
+  });
+
+  it("says nobody else is here before the other participant joins", async () => {
+    const room = new FakeRoom("t1");
+    await render({ room, role: "teacher", teacherCaptionsOn: true, prefetchSession: true });
+    expect(latest.otherPresent).toBe(false);
   });
 });

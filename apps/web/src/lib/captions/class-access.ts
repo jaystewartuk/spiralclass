@@ -67,12 +67,22 @@ export async function captionsPublishConsentOk(
   role: "teacher" | "student",
 ): Promise<boolean> {
   if (role === "teacher") return true;
+  return (await studentCaptionsConsent(booking)).ok;
+}
+
+// The student's captions consent for this booking's pairing, and who can give
+// it while it is missing: the student herself, or — for a minor — her
+// guardian through the teacher. The call screens read `giver` to ask the
+// right person; only `ok` ever decides whether her speech is captioned.
+export async function studentCaptionsConsent(
+  booking: Pick<Booking, "teacherId" | "studentId">,
+): Promise<{ ok: boolean; giver: "student" | "guardian" }> {
   const pairing = await prisma.teacherStudent.findUnique({
     where: { teacherId_studentId: { teacherId: booking.teacherId, studentId: booking.studentId } },
     select: { isMinor: true, captionsConsentAt: true, captionsGuardianConsentAt: true },
   });
-  if (!pairing) return false;
-  return captionsConsentOk(pairing);
+  if (!pairing) return { ok: false, giver: "student" };
+  return { ok: captionsConsentOk(pairing), giver: pairing.isMinor ? "guardian" : "student" };
 }
 
 // Who is asking, proven by the route's session gate: the teacher by her own
@@ -96,6 +106,7 @@ export async function resolveCaptionSession(
   if (!booking) return null;
   const teacherDirection = directionForBooking(booking, "teacher");
   const studentDirection = directionForBooking(booking, "student");
+  const consent = await studentCaptionsConsent(booking);
   return {
     bookingId: booking.id,
     role: caller.role,
@@ -105,7 +116,8 @@ export async function resolveCaptionSession(
       teacher: recognitionLocale(teacherDirection.source, booking.teacher.country),
       student: recognitionLocale(studentDirection.source),
     },
-    studentConsent: await captionsPublishConsentOk(booking, "student"),
+    studentConsent: consent.ok,
+    studentConsentGiver: consent.giver,
     cloudRecognition: cloudCaptionsConfigured(),
     transcriptCapture: await lessonTranscriptCaptureOk(prisma, booking),
   };

@@ -102,6 +102,7 @@ export async function LearningTab({
           captionsConsentAt: link.captionsConsentAt,
           captionsGuardianConsentAt: link.captionsGuardianConsentAt,
         })}
+        captionsSelfConsented={link.captionsConsentAt != null}
         t={t}
       />
     </div>

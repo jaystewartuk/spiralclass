@@ -40,6 +40,10 @@ export type CaptionSession = {
   recognitionLocales: Record<CallRole, string>;
   // D-22: whether the student's speech may be captioned at all.
   studentConsent: boolean;
+  // Who can give that consent while it is missing: the student herself (an
+  // adult, one tap on her own screen) or her guardian, recorded by the
+  // teacher (a minor). Decides what each screen says, never whether to caption.
+  studentConsentGiver: "student" | "guardian";
   // Whether the paid speech-to-text fallback is configured on the server, so
   // a speaker no browser here can recognise may be assigned "cloud". Both
   // clients read it from the same answer, so they agree on the assignment.
@@ -159,6 +163,12 @@ export const CAPTIONS_RECOGNIZER_ATTRIBUTE = "captionsAsr";
 // The teacher's room-wide captions switch (D-27: teacher-toggled). Only the
 // teacher's own attribute is ever trusted as the switch.
 export const CAPTIONS_ON_ATTRIBUTE = "captionsOn";
+
+// Set by the student's browser the moment she gives her captions consent from
+// the call. Only a nudge: it makes the other browser re-read the caption
+// config at once instead of at its next minute's poll. The config route's
+// answer — never this attribute — is what says she has consented.
+export const CAPTIONS_CONSENT_ATTRIBUTE = "captionsConsent";
 
 // ---------------------------------------------------------------------------
 // Who recognises whom
