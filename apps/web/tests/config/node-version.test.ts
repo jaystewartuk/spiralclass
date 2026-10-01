@@ -145,3 +145,42 @@ describe("the image's Node major can build the image and run Prisma", () => {
     ).toContain(major);
   });
 });
+
+/**
+ * Who is allowed to move the major.
+ *
+ * Dependabot's docker entry watches the `FROM` for its digest, and left to
+ * itself it also proposes every new Node major there. Both it has proposed so
+ * far — #95 (25) and #173 (26) — failed the two checks above on arrival, and a
+ * closed one is followed by the next. The major is a hand-made change that has
+ * to pass this file, so the docker entry ignores semver-major updates to
+ * `node` and goes on proposing digests.
+ */
+describe("Dependabot moves the image's digest, never its Node major", () => {
+  /** The docker entry of dependabot.yml, from its `package-ecosystem` line to the next entry. */
+  function dockerEntry(): string {
+    const config = read(".github", "dependabot.yml");
+    const match =
+      /^ {2}- package-ecosystem: docker\n([\s\S]*?)(?=^ {2}- package-ecosystem:|(?![\s\S]))/m.exec(
+        config,
+      );
+    expect(match, "dependabot.yml has no `package-ecosystem: docker` entry").not.toBeNull();
+    return match![1];
+  }
+
+  it("finds the docker entry and only that entry", () => {
+    // Guards the guard: a slice that ran on into the next entry could find the
+    // rule somewhere it does not apply.
+    const entry = dockerEntry();
+    expect(entry).toContain("directory: /");
+    expect(entry).not.toContain("package-ecosystem");
+  });
+
+  it("ignores semver-major updates to node", () => {
+    expect(
+      dockerEntry(),
+      "dependabot.yml's docker entry no longer ignores Node majors. It will open a PR for " +
+        "each new major (#95, #173), and none past 24 can build the image yet.",
+    ).toMatch(/- dependency-name: node\n\s+update-types: \["version-update:semver-major"\]/);
+  });
+});
