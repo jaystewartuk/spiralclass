@@ -58,8 +58,18 @@ function classesTaught(count: number, t: TFunction): string {
   });
 }
 
-function classesToTeach(count: number, t: TFunction): string {
-  return t(count === 1 ? "web.cashflow.toTeachOne" : "web.cashflow.toTeach", { count });
+/**
+ * "38 classes still to teach · 6 already booked". The booked part is what makes
+ * this agree with the students page, which counts only the classes left to
+ * book — without it the two screens show different numbers with nothing to
+ * say why.
+ */
+function classesToTeach(summary: CashFlowSummary, t: TFunction): string {
+  const count = summary.heldLessons;
+  const toTeach = t(count === 1 ? "web.cashflow.toTeachOne" : "web.cashflow.toTeach", { count });
+  return summary.heldBookedLessons > 0
+    ? t("web.cashflow.toTeachBooked", { toTeach, booked: summary.heldBookedLessons })
+    : toTeach;
 }
 
 /** "+ $2,400 in 8 classes booked for the rest of October", or nothing. */
@@ -131,7 +141,7 @@ export async function EarningsTile({ cashFlow }: { cashFlow: CashFlow }) {
           )}
           <Row
             term={t("web.cashflow.paidInAdvance")}
-            detail={summary.heldLessons > 0 ? classesToTeach(summary.heldLessons, t) : undefined}
+            detail={summary.heldLessons > 0 ? classesToTeach(summary, t) : undefined}
             value={formatMinorUnits(summary.heldCents, summary.currency)}
           />
         </dl>
@@ -248,7 +258,7 @@ function SummaryStats({
       <Stat
         label={t("web.cashflow.paidInAdvance")}
         value={formatMinorUnits(summary.heldCents, summary.currency)}
-        sub={summary.heldLessons > 0 ? classesToTeach(summary.heldLessons, t) : undefined}
+        sub={summary.heldLessons > 0 ? classesToTeach(summary, t) : undefined}
       />
     </div>
   );

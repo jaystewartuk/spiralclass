@@ -41,6 +41,7 @@ const DEMO_CASH_FLOW: CashFlowSummary = {
   earnedCents: 1_960_00,
   heldCents: 470_00,
   heldLessons: 11,
+  heldBookedLessons: 0,
   // The demo's clock is pinned to the morning of 1 September (`DEMO_NOW`), so
   // September has one class behind it and the rest of the month booked.
   currentMonth: "2026-09",

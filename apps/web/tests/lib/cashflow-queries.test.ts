@@ -39,6 +39,7 @@ function pkg(over: Record<string, unknown> = {}) {
     currency: "MXN",
     status: "active",
     expiresAt: null,
+    classesUsed: 0,
     ...over,
   };
 }
@@ -96,9 +97,8 @@ describe("computeTeacherCashFlow — currency", () => {
 
   it("still splits earned from held while carrying the currency", async () => {
     // The currency is additive to the wrapper, not a replacement for what it
-    // already did — four of ten classes delivered is 40/60.
-    packageFindManyMock.mockResolvedValue([pkg({ currency: "USD" })]);
-    bookingGroupByMock.mockResolvedValue([{ packageId: "pkg-1", _count: { _all: 4 } }]);
+    // already did — four of ten classes used is 40/60.
+    packageFindManyMock.mockResolvedValue([pkg({ currency: "USD", classesUsed: 4 })]);
     teacherFindUniqueMock.mockResolvedValue({ pricingCurrency: "USD" });
 
     const cashFlow = await computeTeacherCashFlow("teacher-1", NOW);
@@ -106,6 +106,40 @@ describe("computeTeacherCashFlow — currency", () => {
       currency: "USD",
       earnedCents: 40_000,
       heldCents: 60_000,
+    });
+  });
+});
+
+describe("computeTeacherCashFlow — what is paid in advance", () => {
+  it("does not call classes taught before SpiralClass still owed", async () => {
+    // A 30-class package whose classes were all taught before she moved her
+    // students here: `classesUsed` says 30, and there is not one booking row.
+    // Counting booking rows called all 30 owed — 173 classes, for one teacher
+    // whose students page correctly said 27.
+    packageFindManyMock.mockResolvedValue([pkg({ classesTotal: 30, classesUsed: 30 })]);
+    const { primary } = await computeTeacherCashFlow("teacher-1", NOW);
+    expect(primary.heldLessons).toBe(0);
+    expect(primary.heldCents).toBe(0);
+    expect(primary.earnedCents).toBe(100_000);
+  });
+
+  it("still owes the classes that are booked but not yet taught", async () => {
+    // 4 of 10 used: 2 taught, 2 booked for next week. Owed: 6 unused + 2 booked.
+    packageFindManyMock.mockResolvedValue([pkg({ classesUsed: 4 })]);
+    bookingGroupByMock.mockResolvedValue([{ packageId: "pkg-1", _count: { _all: 2 } }]);
+    const { primary } = await computeTeacherCashFlow("teacher-1", NOW);
+    expect(primary.heldLessons).toBe(8);
+    // The 2 booked are named, so the figure squares with the students page's 6 left.
+    expect(primary.heldBookedLessons).toBe(2);
+    expect(primary.heldCents).toBe(80_000);
+  });
+
+  it("counts booked classes from the bookings that hold a class on the package", async () => {
+    await computeTeacherCashFlow("teacher-1", NOW);
+    expect(bookingGroupByMock).toHaveBeenCalledWith({
+      by: ["packageId"],
+      where: { teacherId: "teacher-1", status: "scheduled", countsAgainstPackage: true },
+      _count: { _all: true },
     });
   });
 });

@@ -5299,6 +5299,7 @@ export const fr = {
   "web.cashflow.paidInAdvance": "Payé d'avance",
   "web.cashflow.toTeachOne": "{count} cours encore à donner",
   "web.cashflow.toTeach": "{count} cours encore à donner",
+  "web.cashflow.toTeachBooked": "{toTeach} · dont {booked} déjà réservés",
   "web.cashflow.paidInAdvanceHelp":
     "« Payé d'avance », c'est l'argent que vos élèves vous ont déjà versé pour des cours que vous n'avez pas encore donnés. Il devient un revenu à mesure que vous donnez chaque cours — et un remboursement en serait déduit, ce n'est donc pas encore de l'argent disponible.",
   "web.cashflow.whatStudentsPaid":

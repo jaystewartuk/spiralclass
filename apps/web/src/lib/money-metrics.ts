@@ -30,7 +30,7 @@
 // can't drift.
 
 import { prisma } from "@/lib/prisma";
-import { summarizeCashFlow, type CashFlow } from "@/lib/cashflow";
+import { classesOwed, summarizeCashFlow, type CashFlow } from "@/lib/cashflow";
 import {
   DEFAULT_PRICING_CURRENCY,
   EXPENSE_CATEGORIES,
@@ -416,7 +416,7 @@ export function summarizeNetProfitSeries(
 // Scans every paid package platform-wide. Fine at current scale; if the table
 // grows large this is the first thing to move to a windowed/materialized query.
 export async function computePlatformDeferredRevenue(now: Date = new Date()): Promise<CashFlow> {
-  const [packages, deliveredGroups] = await Promise.all([
+  const [packages, bookedGroups] = await Promise.all([
     prisma.package.findMany({
       where: { status: { in: [...PAID_PACKAGE_STATUSES] } },
       select: {
@@ -426,16 +426,18 @@ export async function computePlatformDeferredRevenue(now: Date = new Date()): Pr
         currency: true,
         status: true,
         expiresAt: true,
+        classesUsed: true,
       },
     }),
+    // Booked but not yet taught, per package — still owed (see `classesOwed`).
     prisma.booking.groupBy({
       by: ["packageId"],
-      where: { status: { in: ["completed", "no_show"] } },
+      where: { status: "scheduled", countsAgainstPackage: true },
       _count: { _all: true },
     }),
   ]);
 
-  const deliveredByPkg = new Map(deliveredGroups.map((g) => [g.packageId, g._count._all]));
+  const bookedByPkg = new Map(bookedGroups.map((g) => [g.packageId, g._count._all]));
 
   return summarizeCashFlow(
     packages.map((p) => ({
@@ -444,7 +446,11 @@ export async function computePlatformDeferredRevenue(now: Date = new Date()): Pr
       currency: p.currency,
       status: p.status as (typeof PAID_PACKAGE_STATUSES)[number],
       expiresAt: p.expiresAt,
-      deliveredLessons: deliveredByPkg.get(p.id) ?? 0,
+      classesOwed: classesOwed({
+        classesTotal: p.classesTotal,
+        classesUsed: p.classesUsed,
+        bookedNotTaught: bookedByPkg.get(p.id) ?? 0,
+      }),
     })),
     [],
     null,
