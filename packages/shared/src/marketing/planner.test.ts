@@ -250,6 +250,29 @@ describe("planReasonText", () => {
       "1 student.",
     );
   });
+
+  // The plurals were endings pasted onto a word, which gave English
+  // "1 enquiries"-shaped bugs the moment a word did not take an "s".
+  it.each([
+    ["en", 1, "X produced 1 enquiry."],
+    ["en", 3, "X produced 3 enquiries."],
+    ["es", 1, "X generó 1 mensaje de interesados."],
+    ["fr", 2, "X a généré 2 demandes."],
+  ] as const)("counts enquiries in %s (%i)", (locale, enquiries, copy) => {
+    expect(planReasonText({ code: "promising_community", community: "X", enquiries }, locale)).toBe(
+      copy,
+    );
+  });
+
+  it("says a referral moment as one sentence in each language", () => {
+    const reason = { code: "referral_moment", student: "Mira", trigger: "renewal" } as const;
+    expect(planReasonText(reason, "en")).toBe(
+      "Mira renewed their package — the best moment to ask for a referral.",
+    );
+    expect(planReasonText(reason, "fr")).toBe(
+      "Mira a renouvelé son forfait. C'est le meilleur moment pour demander une recommandation.",
+    );
+  });
 });
 
 describe("estimatedMinutesFor", () => {

@@ -7966,4 +7966,45 @@ export const en = {
   "email.chatMessageTeacher.textBody":
     '{studentName} sent you a message: "{preview}".\n\nView conversation: {actionLink}',
   "email.chatMessageTeacher.quote": '"{preview}"',
+  "marketing.reason.bestCommunity": "{community} has already brought you {count} students.",
+  "marketing.reason.bestCommunity_one": "{community} has already brought you {count} student.",
+  "marketing.reason.promisingCommunity": "{community} produced {count} enquiries.",
+  "marketing.reason.promisingCommunity_one": "{community} produced {count} enquiry.",
+  "marketing.reason.quietCommunity": "You haven't posted in {community} for {count} days.",
+  "marketing.reason.quietCommunity_one": "You haven't posted in {community} for {count} day.",
+  "marketing.reason.untriedCommunity":
+    "You haven't tried {community} yet — worth seeing what happens.",
+  "marketing.reason.educationalFirst": "In {community}, something useful lands better than an ad.",
+  "marketing.reason.referralMoment.firstLesson":
+    "{student} just had their first lesson — the best moment to ask for a referral.",
+  "marketing.reason.referralMoment.packageComplete":
+    "{student} finished their package — the best moment to ask for a referral.",
+  "marketing.reason.referralMoment.renewal":
+    "{student} renewed their package — the best moment to ask for a referral.",
+  "marketing.reason.referralMoment.testimonial":
+    "{student} left you a testimonial — the best moment to ask for a referral.",
+  "marketing.reason.noCommunities": "Add a community so we can prepare actions for you.",
+  "marketing.insight.confidence.observed": "Observed",
+  "marketing.insight.confidence.pattern": "Pattern",
+  "marketing.insight.confidence.suggestion": "Suggestion",
+  "marketing.insight.noData":
+    "No visits yet. As soon as you share your link, this will show where people come from.",
+  "marketing.insight.topChannel":
+    "{label} has brought you {count} students — your best channel so far.",
+  "marketing.insight.topChannel_one":
+    "{label} has brought you {count} student — your best channel so far.",
+  "marketing.insight.channelOutperforms": "{winner} converts {ratio}x better than {loser}.",
+  "marketing.insight.trafficNoEnquiries":
+    "{label} sends you people ({count} visits) but nobody has enquired yet — that's the audience, or the page.",
+  "marketing.insight.trafficNoEnquiries_one":
+    "{label} sends you people ({count} visit) but nobody has enquired yet — that's the audience, or the page.",
+  "marketing.insight.referralsConvertBest":
+    "Referrals convert {ratio}x better than your other channels.",
+  "marketing.insight.needsMoreData":
+    "You have {count} visits so far. A few more and we can tell you which channel works best.",
+  "marketing.insight.needsMoreData_one":
+    "You have {count} visit so far. A few more and we can tell you which channel works best.",
+  "marketing.insight.repeatWhatWorks": "Worth posting more often in {label}.",
+  "marketing.insight.tryUntriedCommunity":
+    "You haven't posted in {label} yet. One try tells you whether it's worth it.",
 } as const;

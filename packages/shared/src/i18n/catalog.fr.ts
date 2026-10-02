@@ -8047,4 +8047,49 @@ export const fr = {
   "email.chatMessageTeacher.textBody":
     "{studentName} vous a envoyé un message : « {preview} ».\n\nVoir la conversation : {actionLink}",
   "email.chatMessageTeacher.quote": "« {preview} »",
+  "marketing.reason.bestCommunity": "{community} vous a déjà amené {count} élèves.",
+  "marketing.reason.bestCommunity_one": "{community} vous a déjà amené {count} élève.",
+  "marketing.reason.promisingCommunity": "{community} a généré {count} demandes.",
+  "marketing.reason.promisingCommunity_one": "{community} a généré {count} demande.",
+  "marketing.reason.quietCommunity":
+    "Vous n'avez rien publié dans {community} depuis {count} jours.",
+  "marketing.reason.quietCommunity_one":
+    "Vous n'avez rien publié dans {community} depuis {count} jour.",
+  "marketing.reason.untriedCommunity":
+    "Vous n'avez pas encore essayé {community}. Cela vaut la peine de voir.",
+  "marketing.reason.educationalFirst":
+    "Dans {community}, un contenu utile marche mieux qu'une annonce.",
+  "marketing.reason.referralMoment.firstLesson":
+    "{student} vient de suivre son premier cours. C'est le meilleur moment pour demander une recommandation.",
+  "marketing.reason.referralMoment.packageComplete":
+    "{student} a terminé son forfait. C'est le meilleur moment pour demander une recommandation.",
+  "marketing.reason.referralMoment.renewal":
+    "{student} a renouvelé son forfait. C'est le meilleur moment pour demander une recommandation.",
+  "marketing.reason.referralMoment.testimonial":
+    "{student} vous a laissé un témoignage. C'est le meilleur moment pour demander une recommandation.",
+  "marketing.reason.noCommunities":
+    "Ajoutez une communauté pour que nous puissions préparer vos actions.",
+  "marketing.insight.confidence.observed": "Constaté",
+  "marketing.insight.confidence.pattern": "Tendance",
+  "marketing.insight.confidence.suggestion": "Piste",
+  "marketing.insight.noData":
+    "Aucune visite pour l'instant. Dès que vous partagerez votre lien, vous verrez ici d'où viennent les gens.",
+  "marketing.insight.topChannel":
+    "{label} vous a amené {count} élèves — votre meilleur canal jusqu'ici.",
+  "marketing.insight.topChannel_one":
+    "{label} vous a amené {count} élève — votre meilleur canal jusqu'ici.",
+  "marketing.insight.channelOutperforms": "{winner} convertit {ratio} fois mieux que {loser}.",
+  "marketing.insight.trafficNoEnquiries":
+    "{label} vous envoie du monde ({count} visites) mais personne n'écrit encore. C'est le public, ou la page.",
+  "marketing.insight.trafficNoEnquiries_one":
+    "{label} vous envoie du monde ({count} visite) mais personne n'écrit encore. C'est le public, ou la page.",
+  "marketing.insight.referralsConvertBest":
+    "Les recommandations convertissent {ratio} fois mieux que vos autres canaux.",
+  "marketing.insight.needsMoreData":
+    "Vous avez {count} visites. Encore quelques-unes et nous pourrons comparer vos canaux.",
+  "marketing.insight.needsMoreData_one":
+    "Vous avez {count} visite. Encore quelques-unes et nous pourrons comparer vos canaux.",
+  "marketing.insight.repeatWhatWorks": "Cela vaut la peine de publier plus souvent dans {label}.",
+  "marketing.insight.tryUntriedCommunity":
+    "Vous n'avez pas encore publié dans {label}. Un essai vous dira si cela vaut la peine.",
 } as const;

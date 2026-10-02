@@ -19,6 +19,8 @@
 // spending one slot on something untried.
 
 import type { AppLocale } from "../i18n/locales";
+import { createT } from "../i18n/translate";
+import type { StringKey } from "../i18n/catalog";
 import { allowsDirectPromotion, type MarketingPlatform, type PromoPolicy } from "./channels";
 import {
   CONTENT_KIND_SPECS,
@@ -385,73 +387,47 @@ export function planProgress(
 
 // ── Reason rendering ───────────────────────────────────────────────────────
 
-const TRIGGER_TEXT: Record<ReferralCandidate["trigger"], Record<AppLocale, string>> = {
-  first_lesson: {
-    es: "acaba de tomar su primera clase",
-    en: "just had their first lesson",
-    fr: "vient de suivre son premier cours",
-  },
-  package_complete: {
-    es: "terminó su paquete",
-    en: "finished their package",
-    fr: "a terminé son forfait",
-  },
-  renewal: {
-    es: "renovó su paquete",
-    en: "renewed their package",
-    fr: "a renouvelé son forfait",
-  },
-  testimonial: {
-    es: "te dejó una reseña",
-    en: "left you a testimonial",
-    fr: "vous a laissé un témoignage",
-  },
-};
-
-/** One sentence explaining why this action is in the plan. */
+/**
+ * One sentence explaining why this action is in the plan.
+ *
+ * Each reason is a whole sentence in the catalog, with its plural chosen by
+ * the catalog. They were built here from three-way ternaries and pasted-on
+ * endings — "alumno" + "s", "enquir" + "ies" — which only ever works for the
+ * languages it was written in, and the referral sentence glued a phrase from
+ * one table onto a sentence from another.
+ */
 export function planReasonText(reason: PlanReason, locale: AppLocale): string {
+  const t = createT(locale);
   switch (reason.code) {
     case "best_community":
-      return locale === "es"
-        ? `${reason.community} ya te trajo ${reason.students} alumno${reason.students === 1 ? "" : "s"}.`
-        : locale === "fr"
-          ? `${reason.community} vous a déjà amené ${reason.students} élève${reason.students === 1 ? "" : "s"}.`
-          : `${reason.community} has already brought you ${reason.students} student${reason.students === 1 ? "" : "s"}.`;
+      return t("marketing.reason.bestCommunity", {
+        community: reason.community,
+        count: reason.students,
+      });
     case "promising_community":
-      return locale === "es"
-        ? `${reason.community} generó ${reason.enquiries} mensaje${reason.enquiries === 1 ? "" : "s"} de interesados.`
-        : locale === "fr"
-          ? `${reason.community} a généré ${reason.enquiries} demande${reason.enquiries === 1 ? "" : "s"}.`
-          : `${reason.community} produced ${reason.enquiries} enquir${reason.enquiries === 1 ? "y" : "ies"}.`;
+      return t("marketing.reason.promisingCommunity", {
+        community: reason.community,
+        count: reason.enquiries,
+      });
     case "quiet_community":
-      return locale === "es"
-        ? `No publicas en ${reason.community} desde hace ${reason.days} días.`
-        : locale === "fr"
-          ? `Vous n'avez rien publié dans ${reason.community} depuis ${reason.days} jours.`
-          : `You haven't posted in ${reason.community} for ${reason.days} days.`;
+      return t("marketing.reason.quietCommunity", {
+        community: reason.community,
+        count: reason.days,
+      });
     case "untried_community":
-      return locale === "es"
-        ? `Todavía no pruebas ${reason.community}. Vale la pena ver qué pasa.`
-        : locale === "fr"
-          ? `Vous n'avez pas encore essayé ${reason.community}. Cela vaut la peine de voir.`
-          : `You haven't tried ${reason.community} yet — worth seeing what happens.`;
+      return t("marketing.reason.untriedCommunity", { community: reason.community });
     case "educational_first":
-      return locale === "es"
-        ? `En ${reason.community} algo útil funciona mejor que un anuncio.`
-        : locale === "fr"
-          ? `Dans ${reason.community}, un contenu utile marche mieux qu'une annonce.`
-          : `In ${reason.community}, something useful lands better than an ad.`;
+      return t("marketing.reason.educationalFirst", { community: reason.community });
     case "referral_moment":
-      return locale === "es"
-        ? `${reason.student} ${TRIGGER_TEXT[reason.trigger]["es"]}. Es el mejor momento para pedir una recomendación.`
-        : locale === "fr"
-          ? `${reason.student} ${TRIGGER_TEXT[reason.trigger].fr}. C'est le meilleur moment pour demander une recommandation.`
-          : `${reason.student} ${TRIGGER_TEXT[reason.trigger].en} — the best moment to ask for a referral.`;
+      return t(REFERRAL_MOMENT[reason.trigger], { student: reason.student });
     case "no_communities":
-      return locale === "es"
-        ? "Agrega una comunidad para que podamos prepararte acciones."
-        : locale === "fr"
-          ? "Ajoutez une communauté pour que nous puissions préparer vos actions."
-          : "Add a community so we can prepare actions for you.";
+      return t("marketing.reason.noCommunities");
   }
 }
+
+const REFERRAL_MOMENT: Record<ReferralCandidate["trigger"], StringKey> = {
+  first_lesson: "marketing.reason.referralMoment.firstLesson",
+  package_complete: "marketing.reason.referralMoment.packageComplete",
+  renewal: "marketing.reason.referralMoment.renewal",
+  testimonial: "marketing.reason.referralMoment.testimonial",
+};

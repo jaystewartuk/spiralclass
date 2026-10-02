@@ -12,6 +12,8 @@
 //      floor we say "not enough data yet" instead of ranking noise.
 
 import type { AppLocale } from "../i18n/locales";
+import { createT } from "../i18n/translate";
+import type { StringKey } from "../i18n/catalog";
 
 export type FunnelTotals = {
   visits: number;
@@ -250,67 +252,46 @@ export function deriveObservations(input: InsightsInput): Observation[] {
   return out;
 }
 
-const CONFIDENCE_LABELS: Record<ObservationConfidence, Record<AppLocale, string>> = {
-  observed: { es: "Dato", en: "Observed", fr: "Constaté" },
-  pattern: { es: "Patrón", en: "Pattern", fr: "Tendance" },
-  suggestion: { es: "Sugerencia", en: "Suggestion", fr: "Suggestion" },
+const CONFIDENCE_LABELS: Record<ObservationConfidence, StringKey> = {
+  observed: "marketing.insight.confidence.observed",
+  pattern: "marketing.insight.confidence.pattern",
+  suggestion: "marketing.insight.confidence.suggestion",
 };
 
 export function confidenceLabel(c: ObservationConfidence, locale: AppLocale): string {
-  return CONFIDENCE_LABELS[c][locale];
+  return createT(locale)(CONFIDENCE_LABELS[c]);
 }
 
+/**
+ * The sentence for an observation, in the reader's language.
+ *
+ * Whole sentences from the catalog, plurals chosen by the catalog. They were
+ * three-way ternaries with endings pasted on ("alumno" + "s"), so a fourth
+ * language would have meant a fourth arm in every case, and nothing would have
+ * said so.
+ */
 export function observationText(o: Observation, locale: AppLocale): string {
-  const es = locale === "es";
-  const fr = locale === "fr";
+  const t = createT(locale);
   switch (o.code) {
     case "no_data":
-      return es
-        ? "Todavía no hay visitas a tu página. En cuanto compartas tu enlace, aquí verás de dónde llega la gente."
-        : fr
-          ? "Aucune visite pour l'instant. Dès que vous partagerez votre lien, vous verrez ici d'où viennent les gens."
-          : "No visits yet. As soon as you share your link, this will show where people come from.";
+      return t("marketing.insight.noData");
     case "top_channel":
-      return es
-        ? `${o.label} te ha traído ${o.students} alumno${o.students === 1 ? "" : "s"} — es tu mejor canal hasta ahora.`
-        : fr
-          ? `${o.label} vous a amené ${o.students} élève${o.students === 1 ? "" : "s"} — votre meilleur canal jusqu'ici.`
-          : `${o.label} has brought you ${o.students} student${o.students === 1 ? "" : "s"} — your best channel so far.`;
+      return t("marketing.insight.topChannel", { label: o.label, count: o.students });
     case "channel_outperforms":
-      return es
-        ? `${o.winner} convierte ${o.ratio}× mejor que ${o.loser}.`
-        : fr
-          ? `${o.winner} convertit ${o.ratio} fois mieux que ${o.loser}.`
-          : `${o.winner} converts ${o.ratio}x better than ${o.loser}.`;
+      return t("marketing.insight.channelOutperforms", {
+        winner: o.winner,
+        loser: o.loser,
+        ratio: o.ratio,
+      });
     case "traffic_no_enquiries":
-      return es
-        ? `${o.label} te manda gente (${o.visits} visitas) pero nadie escribe todavía. Puede ser el público, o tu página.`
-        : fr
-          ? `${o.label} vous envoie du monde (${o.visits} visites) mais personne n'écrit encore.`
-          : `${o.label} sends you people (${o.visits} visits) but nobody has enquired yet — that's the audience, or the page.`;
+      return t("marketing.insight.trafficNoEnquiries", { label: o.label, count: o.visits });
     case "referrals_convert_best":
-      return es
-        ? `Las recomendaciones convierten ${o.ratio}× mejor que el resto de tus canales.`
-        : fr
-          ? `Les recommandations convertissent ${o.ratio} fois mieux que vos autres canaux.`
-          : `Referrals convert ${o.ratio}x better than your other channels.`;
+      return t("marketing.insight.referralsConvertBest", { ratio: o.ratio });
     case "needs_more_data":
-      return es
-        ? `Llevas ${o.visits} visita${o.visits === 1 ? "" : "s"}. Con unas cuantas más podremos decirte qué canal funciona mejor.`
-        : fr
-          ? `Vous avez ${o.visits} visite${o.visits === 1 ? "" : "s"}. Encore quelques-unes et nous pourrons comparer vos canaux.`
-          : `You have ${o.visits} visit${o.visits === 1 ? "" : "s"} so far. A few more and we can tell you which channel works best.`;
+      return t("marketing.insight.needsMoreData", { count: o.visits });
     case "repeat_what_works":
-      return es
-        ? `Vale la pena publicar más seguido en ${o.label}.`
-        : fr
-          ? `Cela vaut la peine de publier plus souvent dans ${o.label}.`
-          : `Worth posting more often in ${o.label}.`;
+      return t("marketing.insight.repeatWhatWorks", { label: o.label });
     case "try_untried_community":
-      return es
-        ? `Todavía no publicas en ${o.label}. Una prueba te dice si vale la pena.`
-        : fr
-          ? `Vous n'avez pas encore publié dans ${o.label}. Un essai vous dira si cela vaut la peine.`
-          : `You haven't posted in ${o.label} yet. One try tells you whether it's worth it.`;
+      return t("marketing.insight.tryUntriedCommunity", { label: o.label });
   }
 }
