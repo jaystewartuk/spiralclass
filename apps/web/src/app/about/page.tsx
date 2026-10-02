@@ -6,7 +6,7 @@ import type { Metadata } from "next";
 import { Code2, GraduationCap, Globe, Heart, ShieldCheck, Sparkles, Wallet } from "lucide-react";
 import { SOURCE_CODE_LICENCE, SOURCE_CODE_URL } from "@spiralclass/shared";
 import { Button } from "@/components/ui/button";
-import { getPreferredLocale, getT } from "@/lib/i18n";
+import { getT } from "@/lib/i18n";
 import type { StringKey } from "@/lib/i18n-translate";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -36,7 +36,6 @@ const FOUNDERS: Array<{
 ];
 
 export default async function AboutPage() {
-  const locale = await getPreferredLocale();
   const t = await getT();
 
   const TRUST_POINTS = [

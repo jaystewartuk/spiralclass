@@ -34,7 +34,7 @@ import {
 import { removeUnreferencedMaterialImages } from "@/lib/materials/image-cleanup";
 import { syncLibraryMaterialFocusTags } from "@/lib/materials/tags";
 import { revalidateAfterAction } from "@/lib/revalidate";
-import { createT, usesEnglishCopy } from "@spiralclass/shared";
+import { createT } from "@spiralclass/shared";
 
 // The material library (docs/features/library-materials.md;
 // merged with per-class materials at D-69, docs/features/library-materials.md).

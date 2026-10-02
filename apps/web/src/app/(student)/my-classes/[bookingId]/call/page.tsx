@@ -3,7 +3,7 @@ import { PageHeader } from "@/components/ui/page-header";
 import { notFound } from "next/navigation";
 import { requireStudent } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { getPreferredLocale, getT } from "@/lib/i18n";
+import { getT } from "@/lib/i18n";
 import type { TFunction } from "@/lib/i18n-translate";
 import { gateProFeature } from "@/lib/subscriptions/enforce";
 import { lessonNoteStudentVisible } from "@/lib/lesson-notes/visibility";
@@ -31,7 +31,6 @@ export default async function StudentCallPage({
   const { bookingId } = await params;
   const student = await requireStudent();
   const t = await getT();
-  const locale = await getPreferredLocale();
   const backHref = `/my-classes/${bookingId}`;
 
   const booking = await prisma.booking.findFirst({

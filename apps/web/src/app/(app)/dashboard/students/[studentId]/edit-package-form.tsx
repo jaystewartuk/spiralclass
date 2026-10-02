@@ -10,7 +10,7 @@ import { useFieldErrors } from "@/hooks/use-field-errors";
 import { packageFieldMessage } from "./package-field-message";
 import { editManualPackageAction, type ManualPackageState } from "@/app/actions/teacher-packages";
 import { FormStatus } from "@/components/ui/form-status";
-import { useLocale, useT } from "@/components/locale-provider";
+import { useT } from "@/components/locale-provider";
 import { usePricingCurrency } from "@/components/pricing-currency-context";
 import { ForTwoField } from "./for-two-field";
 
@@ -40,7 +40,6 @@ export function EditPackageForm({
   committedBookings: number;
   seats: number;
 }) {
-  const locale = useLocale();
   const t = useT();
   const currency = usePricingCurrency();
   const [open, setOpen] = useState(false);
