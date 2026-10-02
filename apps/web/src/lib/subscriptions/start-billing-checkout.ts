@@ -2,6 +2,7 @@ import { createT } from "@spiralclass/shared";
 import { prisma } from "@/lib/prisma";
 import { billingPriceIds, hasBillingCreds, serverEnv } from "@/lib/env";
 import { getStripeClient } from "@/lib/stripe";
+import { stripeCheckoutLocale } from "@/lib/stripe/locale";
 import { stripeTaxEnabled } from "@/lib/stripe/tax";
 import { trackServerEvent } from "@/lib/analytics/posthog";
 import { logger } from "@/lib/logger";
@@ -202,6 +203,9 @@ export async function startBillingCheckout(
     priceId,
     clientReferenceId: teacher.id,
     uiMode,
+    // The language she reads the app in, so the upgrade page she is sent to
+    // matches the screen she left rather than her browser.
+    locale: stripeCheckoutLocale(args.locale),
     // She already had a 30-day in-app Pro trial; the subscription charges
     // immediately on upgrade (no second Stripe trial).
     ...(uiMode === "embedded"

@@ -13,6 +13,7 @@ import { prisma } from "@/lib/prisma";
 import { serverEnv } from "@/lib/env";
 import type { AppLocale } from "@/lib/i18n";
 import { getStripeClient } from "@/lib/stripe";
+import { stripeCheckoutLocale } from "@/lib/stripe/locale";
 import { stripeTaxEnabled } from "@/lib/stripe/tax";
 import { generatePaymentReference } from "@/lib/payments/reference";
 import { railForKind, resolveOfferableInstrument } from "@/lib/payments/instruments";
@@ -678,12 +679,20 @@ export async function startCheckout(args: StartCheckoutArgs): Promise<StartCheck
   // here must not cost the student the checkout they can already complete on a
   // card. Failing soft drops bank transfer for this one session and nothing
   // else.
+  // The language Stripe speaks for this purchase: the one this checkout was
+  // rendered in — the booking page's for the public funnel, the student's own
+  // in the portal. Without it Stripe follows the browser, and the buyer reads
+  // one language up to the payment form and another on it.
+  const stripeLocale = stripeCheckoutLocale(locale);
+
   let checkoutCustomerId: string | undefined;
   try {
     checkoutCustomerId = await stripe.ensureCheckoutCustomer({
       connectedAccountId: teacher.stripeAccountId as string,
       email: student.email as string,
       name: student.name,
+      // The receipt Stripe emails follows the Customer, not the session.
+      preferredLocale: stripeLocale,
     });
   } catch (error) {
     log.warn("checkout customer lookup failed", {
@@ -717,6 +726,7 @@ export async function startCheckout(args: StartCheckoutArgs): Promise<StartCheck
       connectedAccountId: teacher.stripeAccountId as string,
       clientReferenceId: externalReference,
       uiMode,
+      locale: stripeLocale,
       ...(uiMode === "embedded" ? { returnUrl } : { successUrl, cancelUrl }),
       customerEmail: student.email as string,
       ...(checkoutCustomerId ? { customerId: checkoutCustomerId } : {}),

@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import { loadConnectAndInitialize } from "@stripe/connect-js";
 import { ConnectAccountOnboarding, ConnectComponentsProvider } from "@stripe/react-connect-js";
 import { startEmbeddedConnectOnboarding } from "@/app/actions/stripe-connect";
+import { useLocale } from "@/components/locale-provider";
+import { stripeConnectLocale } from "@/lib/stripe/locale";
 
 // The instance type isn't re-exported from the package root, so derive it
 // rather than importing from @stripe/connect-js/dist/*.
@@ -19,6 +21,7 @@ type ConnectInstance = ReturnType<typeof loadConnectAndInitialize>;
 // otherwise the page falls back to the existing <form action=...> buttons.
 export function StripeConnectEmbeddedOnboarding({ publishableKey }: { publishableKey: string }) {
   const router = useRouter();
+  const connectLocale = stripeConnectLocale(useLocale());
   const [connectInstance, setConnectInstance] = useState<ConnectInstance | null>(null);
 
   // Initialization is deliberately in an effect, NOT in render (it was a
@@ -46,6 +49,10 @@ export function StripeConnectEmbeddedOnboarding({ publishableKey }: { publishabl
     setConnectInstance(
       loadConnectAndInitialize({
         publishableKey,
+        // The language she reads the app in. Left out, Connect.js follows the
+        // browser, so a teacher using the app in Spanish on an English laptop
+        // got her identity verification in English.
+        locale: connectLocale,
         fetchClientSecret: async () => {
           const result = await startEmbeddedConnectOnboarding();
           if ("clientSecret" in result) return result.clientSecret;
@@ -61,7 +68,12 @@ export function StripeConnectEmbeddedOnboarding({ publishableKey }: { publishabl
     // Component and never changes for a mounted instance; re-initializing on
     // a change would mean minting against a different platform account, which
     // is a redeploy, not a re-render.
-  }, [publishableKey]);
+    //
+    // connectLocale is listed because the effect reads it, not to re-run on
+    // it: the ref guard above returns first, so a language change can never
+    // initialize a second time. The mounted flow keeps the language it opened
+    // in until the page is next loaded.
+  }, [publishableKey, connectLocale]);
 
   // First paint, before the effect has run. A plain reserved box rather than
   // null so the card doesn't visibly jump when the iframe mounts.

@@ -103,8 +103,16 @@ vi.mock("@/lib/env", () => ({
   }),
 }));
 
+// Rejects, which is what this suite always did here: the mocked client had no
+// such method, the call threw inside its best-effort try/catch, and checkout
+// went ahead on the email alone. Making it a recording mock keeps that path and
+// lets a test see what the Customer would have been created with.
+const ensureCheckoutCustomer = vi.fn(async (_args: Record<string, unknown>): Promise<string> => {
+  throw new Error("no checkout Customer in this suite");
+});
+
 vi.mock("@/lib/stripe", () => ({
-  getStripeClient: () => ({ createCheckoutSession, createPaymentIntent }),
+  getStripeClient: () => ({ createCheckoutSession, createPaymentIntent, ensureCheckoutCustomer }),
 }));
 
 vi.mock("@/lib/payments/reference", () => ({
@@ -651,5 +659,27 @@ describe("startCheckout — the Stripe line item speaks the checkout's language"
   it("says one class, not one classes", async () => {
     await startCheckout(args({ template: template({ classCount: 1 }), locale: "en" }));
     expect(lineItem().description).toBe("1 class of 50 minutes");
+  });
+});
+
+// The line item was the only part of the Stripe page that followed the
+// checkout's language. The page around it, and the receipt Stripe emails
+// afterwards, followed the buyer's BROWSER — so a booking page a teacher had
+// set to Spanish handed its buyer to an English payment form.
+describe("startCheckout — Stripe is told the checkout's language", () => {
+  it.each([
+    ["es", "es-419"],
+    ["en", "en"],
+    ["fr", "fr"],
+  ] as const)("renders Checkout in %s as %s", async (locale, stripeLocale) => {
+    await startCheckout(args({ locale }));
+    const call = createCheckoutSession.mock.calls[0][0] as { locale?: string };
+    expect(call.locale).toBe(stripeLocale);
+  });
+
+  it("creates the buyer's Customer with the same language, for the receipt", async () => {
+    await startCheckout(args({ locale: "fr" }));
+    expect(ensureCheckoutCustomer).toHaveBeenCalledTimes(1);
+    expect(ensureCheckoutCustomer.mock.calls[0][0]).toMatchObject({ preferredLocale: "fr" });
   });
 });
