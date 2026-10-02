@@ -1,5 +1,6 @@
 "use server";
 
+import { issueMessage } from "@spiralclass/shared";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireOnboardedTeacher } from "@/lib/auth";
@@ -231,7 +232,7 @@ export async function saveMaterialContentAction(
     } else {
       const parsed = materialLinkSchema.safeParse(raw);
       if (!parsed.success) {
-        return { error: parsed.error.issues[0]?.message ?? t("web.action.library.invalidUrl") };
+        return { error: issueMessage(parsed.error, t, "web.action.library.invalidUrl") };
       }
       linkUrl = parsed.data;
     }

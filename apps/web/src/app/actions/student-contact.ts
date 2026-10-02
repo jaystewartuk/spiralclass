@@ -1,5 +1,6 @@
 "use server";
 
+import { issueMessage } from "@spiralclass/shared";
 import { z } from "zod";
 import { createT, isCaptionLanguage, type TFunction } from "@spiralclass/shared";
 import { requireOnboardedTeacher, requireStudent } from "@/lib/auth";
@@ -46,7 +47,7 @@ export async function updateMyContactInfoAction(
   });
   if (!parsed.success) {
     return {
-      error: parsed.error.issues[0]?.message ?? t("web.action.invalidData"),
+      error: issueMessage(parsed.error, t, "web.action.invalidData"),
     };
   }
 
@@ -88,7 +89,7 @@ export async function updateStudentContactAsTeacherAction(
   });
   if (!parsed.success) {
     return {
-      error: parsed.error.issues[0]?.message ?? t("web.action.invalidData"),
+      error: issueMessage(parsed.error, t, "web.action.invalidData"),
     };
   }
 
@@ -137,7 +138,7 @@ export async function requestEmailChangeAction(
     .max(254)
     .safeParse(formData.get("newEmail"));
   if (!parsed.success) {
-    return { error: parsed.error.issues[0]?.message ?? t("email.invalid") };
+    return { error: issueMessage(parsed.error, t, "email.invalid") };
   }
 
   // Keyed on the student (the endpoint is authenticated), not the IP: each

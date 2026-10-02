@@ -1,5 +1,6 @@
 "use server";
 
+import { issueMessage } from "@spiralclass/shared";
 import { prisma } from "@/lib/prisma";
 import { requireOnboardedTeacher } from "@/lib/auth";
 import { getPreferredLocale } from "@/lib/i18n";
@@ -54,7 +55,7 @@ export async function captureLead(
   });
   if (!parsed.success) {
     return {
-      error: parsed.error.issues[0]?.message ?? t("web.action.invalidData"),
+      error: issueMessage(parsed.error, t, "web.action.invalidData"),
     };
   }
   const input = parsed.data;

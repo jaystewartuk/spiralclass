@@ -1,5 +1,6 @@
 "use server";
 
+import { issueMessage } from "@spiralclass/shared";
 import { intlLocale, weekdayLabels } from "@spiralclass/shared";
 import { redirect } from "next/navigation";
 import type { ZodError } from "zod";
@@ -97,7 +98,7 @@ export async function saveTimezoneAction(
   });
   if (!parsed.success) {
     return {
-      error: parsed.error.issues[0]?.message ?? t("web.action.invalidData"),
+      error: issueMessage(parsed.error, t, "web.action.invalidData"),
     };
   }
   // Required on web, where there is no such thing as a stale client — the

@@ -1,5 +1,6 @@
 "use server";
 
+import { issueMessage, type TFunction } from "@spiralclass/shared";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/admin";
@@ -9,7 +10,7 @@ import {
   KNOWN_EXPENSE_VENDORS,
   EXPENSE_CATEGORIES,
   type ExpenseVendor,
-  usesEnglishCopy,
+  createT,
 } from "@spiralclass/shared";
 import { revalidateAfterAction } from "@/lib/revalidate";
 
@@ -22,7 +23,7 @@ const EXPENSE_CURRENCIES = ["MXN", "USD", "GBP"] as const;
 
 const periodMonthSchema = z
   .string()
-  .regex(/^\d{4}-\d{2}$/, "Mes inválido")
+  .regex(/^\d{4}-\d{2}$/, "web.action.admin.invalidMonth")
   .transform((v) => new Date(`${v}-01T00:00:00.000Z`));
 
 const baseExpenseSchema = z.object({
@@ -39,10 +40,10 @@ const baseExpenseSchema = z.object({
 // — every other vendor already has one via KNOWN_EXPENSE_VENDORS + i18n.
 function missingVendorLabelError(
   data: { vendor: ExpenseVendor; vendorLabel?: string },
-  en: boolean,
+  t: TFunction,
 ): string | null {
   if (data.vendor === "other" && !data.vendorLabel) {
-    return en ? "Enter a vendor name" : "Escribe el nombre del proveedor";
+    return t("admin.costs.missingVendorLabel");
   }
   return null;
 }
@@ -65,12 +66,12 @@ export async function createExpenseAction(
 ): Promise<AdminCostsActionState> {
   await requireAdmin("finance");
   const locale = await getPreferredLocale();
-  const en = usesEnglishCopy(locale);
+  const t = createT(locale);
   const parsed = baseExpenseSchema.safeParse(readExpenseFields(formData));
   if (!parsed.success) {
-    return { error: parsed.error.issues[0]?.message ?? (en ? "Invalid data" : "Datos inválidos") };
+    return { error: issueMessage(parsed.error, t, "web.action.invalidData") };
   }
-  const vendorLabelError = missingVendorLabelError(parsed.data, en);
+  const vendorLabelError = missingVendorLabelError(parsed.data, t);
   if (vendorLabelError) return { error: vendorLabelError };
 
   await prisma.platformExpense.create({
@@ -97,20 +98,20 @@ export async function updateExpenseAction(
 ): Promise<AdminCostsActionState> {
   await requireAdmin("finance");
   const locale = await getPreferredLocale();
-  const en = usesEnglishCopy(locale);
+  const t = createT(locale);
   const parsed = updateExpenseSchema.safeParse({
     id: formData.get("id"),
     ...readExpenseFields(formData),
   });
   if (!parsed.success) {
-    return { error: parsed.error.issues[0]?.message ?? (en ? "Invalid data" : "Datos inválidos") };
+    return { error: issueMessage(parsed.error, t, "web.action.invalidData") };
   }
-  const vendorLabelError = missingVendorLabelError(parsed.data, en);
+  const vendorLabelError = missingVendorLabelError(parsed.data, t);
   if (vendorLabelError) return { error: vendorLabelError };
 
   const existing = await prisma.platformExpense.findUnique({ where: { id: parsed.data.id } });
   if (!existing) {
-    return { error: en ? "Expense not found" : "Gasto no encontrado" };
+    return { error: t("web.action.admin.expenseNotFound") };
   }
 
   await prisma.platformExpense.update({
@@ -138,15 +139,15 @@ export async function deleteExpenseAction(
 ): Promise<AdminCostsActionState> {
   await requireAdmin("finance");
   const locale = await getPreferredLocale();
-  const en = usesEnglishCopy(locale);
+  const t = createT(locale);
   const parsed = deleteExpenseSchema.safeParse({ id: formData.get("id") });
   if (!parsed.success) {
-    return { error: en ? "Invalid data" : "Datos inválidos" };
+    return { error: t("web.action.invalidData") };
   }
 
   const existing = await prisma.platformExpense.findUnique({ where: { id: parsed.data.id } });
   if (!existing) {
-    return { error: en ? "Expense not found" : "Gasto no encontrado" };
+    return { error: t("web.action.admin.expenseNotFound") };
   }
 
   await prisma.platformExpense.delete({ where: { id: parsed.data.id } });

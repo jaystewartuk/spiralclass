@@ -1,5 +1,6 @@
 "use server";
 
+import { issueMessage } from "@spiralclass/shared";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { isBootstrapActor, requireAdmin } from "@/lib/admin";
@@ -8,17 +9,17 @@ import { getPreferredLocale } from "@/lib/i18n";
 import { adminSetStudentEmail } from "@/lib/students/email-change";
 import { flushAnalytics } from "@/lib/analytics/posthog";
 import { revalidateAfterAction } from "@/lib/revalidate";
-import { usesEnglishCopy } from "@spiralclass/shared";
+import { createT } from "@spiralclass/shared";
 
 export type AdminStudentActionState = { error?: string; ok?: boolean } | undefined;
 
 const disableSchema = z.object({
-  studentId: z.string().uuid("ID inválido"),
+  studentId: z.string().uuid("web.action.invalidId"),
   reason: z.string().trim().min(1, "Motivo requerido").max(280),
 });
 
 const enableSchema = z.object({
-  studentId: z.string().uuid("ID inválido"),
+  studentId: z.string().uuid("web.action.invalidId"),
 });
 
 // Picks the teacher most recently linked to this student so the audit row
@@ -40,14 +41,14 @@ export async function disableStudentAction(
 ): Promise<AdminStudentActionState> {
   const actor = await requireAdmin("support");
   const locale = await getPreferredLocale();
-  const en = usesEnglishCopy(locale);
+  const t = createT(locale);
   const parsed = disableSchema.safeParse({
     studentId: formData.get("studentId"),
     reason: formData.get("reason"),
   });
   if (!parsed.success) {
     return {
-      error: parsed.error.issues[0]?.message ?? (en ? "Invalid data" : "Datos inválidos"),
+      error: issueMessage(parsed.error, t, "web.action.invalidData"),
     };
   }
 
@@ -82,8 +83,8 @@ export async function disableStudentAction(
 }
 
 const changeEmailSchema = z.object({
-  studentId: z.string().uuid("ID inválido"),
-  newEmail: z.string().trim().email("Correo inválido").max(254),
+  studentId: z.string().uuid("web.action.invalidId"),
+  newEmail: z.string().trim().email("email.invalid").max(254),
 });
 
 // Support escape hatch for the verified email-change flow: the student lost
@@ -97,14 +98,14 @@ export async function adminChangeStudentEmailAction(
 ): Promise<AdminStudentActionState> {
   const actor = await requireAdmin("support");
   const locale = await getPreferredLocale();
-  const en = usesEnglishCopy(locale);
+  const t = createT(locale);
   const parsed = changeEmailSchema.safeParse({
     studentId: formData.get("studentId"),
     newEmail: formData.get("newEmail"),
   });
   if (!parsed.success) {
     return {
-      error: parsed.error.issues[0]?.message ?? (en ? "Invalid data" : "Datos inválidos"),
+      error: issueMessage(parsed.error, t, "web.action.invalidData"),
     };
   }
 
@@ -118,18 +119,14 @@ export async function adminChangeStudentEmailAction(
   if (!result.ok) {
     switch (result.error) {
       case "not-found":
-        return { error: en ? "Student not found." : "Alumno no encontrada." };
+        return { error: t("web.action.admin.studentNotFound") };
       case "email-taken":
         return {
-          error: en
-            ? "Another student on the same teacher's roster already uses that email."
-            : "Otro alumno en la lista de la misma maestra ya usa ese correo.",
+          error: t("web.action.admin.students.emailTakenOnRoster"),
         };
       case "unavailable":
         return {
-          error: en
-            ? "That email can't be used (it may already belong to another account)."
-            : "Ese correo no se puede usar (puede pertenecer a otra cuenta).",
+          error: t("web.action.admin.students.emailUnusable"),
         };
     }
   }
@@ -148,13 +145,13 @@ export async function enableStudentAction(
 ): Promise<AdminStudentActionState> {
   const actor = await requireAdmin("support");
   const locale = await getPreferredLocale();
-  const en = usesEnglishCopy(locale);
+  const t = createT(locale);
   const parsed = enableSchema.safeParse({
     studentId: formData.get("studentId"),
   });
   if (!parsed.success) {
     return {
-      error: parsed.error.issues[0]?.message ?? (en ? "Invalid data" : "Datos inválidos"),
+      error: issueMessage(parsed.error, t, "web.action.invalidData"),
     };
   }
 

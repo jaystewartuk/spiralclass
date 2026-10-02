@@ -1,5 +1,6 @@
 "use server";
 
+import { issueMessage } from "@spiralclass/shared";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
@@ -43,7 +44,7 @@ export async function createStudentAction(
   });
   if (!parsed.success) {
     return {
-      error: parsed.error.issues[0]?.message ?? t("web.action.invalidData"),
+      error: issueMessage(parsed.error, t, "web.action.invalidData"),
     };
   }
 

@@ -1,5 +1,6 @@
 "use server";
 
+import { issueMessage } from "@spiralclass/shared";
 import { fromZonedTime } from "date-fns-tz";
 import { prisma } from "@/lib/prisma";
 import { requireOnboardedTeacher } from "@/lib/auth";
@@ -53,7 +54,7 @@ export async function createBlockedDateAction(
   });
   if (!parsed.success) {
     return {
-      error: parsed.error.issues[0]?.message ?? t("web.settings.blockedDates.invalid"),
+      error: issueMessage(parsed.error, t, "web.settings.blockedDates.invalid"),
     };
   }
 

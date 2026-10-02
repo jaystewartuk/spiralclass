@@ -1,5 +1,6 @@
 "use server";
 
+import { issueMessage } from "@spiralclass/shared";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/admin";
@@ -8,13 +9,13 @@ import { getPreferredLocale } from "@/lib/i18n";
 import { emitNotificationQueued } from "@/lib/notifications/events";
 import { getEmailClient } from "@/lib/email";
 import { revalidateAfterAction } from "@/lib/revalidate";
-import { usesEnglishCopy } from "@spiralclass/shared";
+import { createT } from "@spiralclass/shared";
 
 export type AdminNotificationActionState =
   { error?: string; ok?: boolean; info?: string } | undefined;
 
 const retrySchema = z.object({
-  notificationId: z.string().uuid("ID inválido"),
+  notificationId: z.string().uuid("web.action.invalidId"),
 });
 
 // Resets a failed/stale notification to `queued` and re-emits the
@@ -28,13 +29,13 @@ export async function retryNotificationAction(
 ): Promise<AdminNotificationActionState> {
   await requireAdmin("support");
   const locale = await getPreferredLocale();
-  const en = usesEnglishCopy(locale);
+  const t = createT(locale);
   const parsed = retrySchema.safeParse({
     notificationId: formData.get("notificationId"),
   });
   if (!parsed.success) {
     return {
-      error: parsed.error.issues[0]?.message ?? (en ? "Invalid data" : "Datos inválidos"),
+      error: issueMessage(parsed.error, t, "web.action.invalidData"),
     };
   }
 
@@ -42,12 +43,10 @@ export async function retryNotificationAction(
     where: { id: parsed.data.notificationId },
     select: { id: true, status: true, teacherId: true },
   });
-  if (!existing) return { error: en ? "Notification not found" : "Notificación no encontrada" };
+  if (!existing) return { error: t("web.action.admin.notificationNotFound") };
   if (existing.status === "sent" || existing.status === "delivered") {
     return {
-      error: en
-        ? `Already in "${existing.status}" state`
-        : `Ya está en estado "${existing.status}"`,
+      error: t("web.action.admin.notificationAlreadyInState", { status: existing.status }),
     };
   }
 
@@ -65,7 +64,7 @@ export async function retryNotificationAction(
   });
 
   revalidateAfterAction("/admin/notifications");
-  return { ok: true, info: en ? "Re-queued" : "Re-encolado" };
+  return { ok: true, info: t("web.action.admin.requeued") };
 }
 
 const broadcastSchema = z.object({
@@ -94,7 +93,7 @@ export async function sendAdminBroadcastAction(
 ): Promise<AdminNotificationActionState> {
   const actor = await requireAdmin("superadmin");
   const locale = await getPreferredLocale();
-  const en = usesEnglishCopy(locale);
+  const t = createT(locale);
   const parsed = broadcastSchema.safeParse({
     audience: formData.get("audience"),
     subject: formData.get("subject"),
@@ -102,7 +101,7 @@ export async function sendAdminBroadcastAction(
   });
   if (!parsed.success) {
     return {
-      error: parsed.error.issues[0]?.message ?? (en ? "Invalid data" : "Datos inválidos"),
+      error: issueMessage(parsed.error, t, "web.action.invalidData"),
     };
   }
 
@@ -125,7 +124,7 @@ export async function sendAdminBroadcastAction(
     recipients = rows.filter((r): r is { email: string } => Boolean(r.email));
   }
 
-  if (recipients.length === 0) return { error: en ? "No recipients" : "No hay destinatarios" };
+  if (recipients.length === 0) return { error: t("web.action.admin.noRecipients") };
 
   const email = getEmailClient();
   let sent = 0;
@@ -164,8 +163,8 @@ export async function sendAdminBroadcastAction(
   revalidateAfterAction("/admin/notifications");
   return {
     ok: true,
-    info: en
-      ? `Sent: ${sent}/${recipients.length}${failed ? ` · ${failed} failed` : ""}`
-      : `Enviados: ${sent}/${recipients.length}${failed ? ` · ${failed} fallaron` : ""}`,
+    info: failed
+      ? t("web.action.admin.broadcastSentSomeFailed", { sent, total: recipients.length, failed })
+      : t("web.action.admin.broadcastSent", { sent, total: recipients.length }),
   };
 }

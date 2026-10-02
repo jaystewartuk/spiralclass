@@ -1,5 +1,6 @@
 "use server";
 
+import { issueMessage } from "@spiralclass/shared";
 import { getAuthUser, requireOnboardedTeacher } from "@/lib/auth";
 import { acceptInvitation } from "@/lib/invitations/accept";
 import { getPreferredLocale } from "@/lib/i18n";
@@ -67,7 +68,7 @@ export async function previewInvitesAction(
   });
   if (!parsed.success) {
     return {
-      error: parsed.error.issues[0]?.message ?? t("web.action.invalidData"),
+      error: issueMessage(parsed.error, t, "web.action.invalidData"),
     };
   }
 
@@ -107,7 +108,7 @@ export async function sendInvitesAction(
   });
   if (!parsed.success) {
     return {
-      error: parsed.error.issues[0]?.message ?? t("web.action.invalidData"),
+      error: issueMessage(parsed.error, t, "web.action.invalidData"),
     };
   }
   const source = (formData.get("source") === "single" ? "single" : "bulk") as "single" | "bulk";
@@ -180,7 +181,7 @@ export async function inviteSingleAction(
   });
   if (!parsed.success) {
     return {
-      error: parsed.error.issues[0]?.message ?? t("web.action.invalidData"),
+      error: issueMessage(parsed.error, t, "web.action.invalidData"),
     };
   }
   const forwarded = new FormData();

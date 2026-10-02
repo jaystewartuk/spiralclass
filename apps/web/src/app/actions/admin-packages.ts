@@ -1,5 +1,6 @@
 "use server";
 
+import { issueMessage } from "@spiralclass/shared";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/admin";
@@ -7,12 +8,12 @@ import { writeOverride } from "@/lib/audit";
 import { getPreferredLocale } from "@/lib/i18n";
 import { addMonths } from "@/lib/dates";
 import { revalidateAfterAction } from "@/lib/revalidate";
-import { usesEnglishCopy } from "@spiralclass/shared";
+import { createT } from "@spiralclass/shared";
 
 export type AdminPackageActionState = { error?: string; ok?: boolean } | undefined;
 
 const cancelSchema = z.object({
-  packageId: z.string().uuid("ID inválido"),
+  packageId: z.string().uuid("web.action.invalidId"),
   reason: z.string().trim().min(1, "Motivo requerido").max(280),
 });
 
@@ -29,14 +30,14 @@ export async function cancelPackageAction(
 ): Promise<AdminPackageActionState> {
   const actor = await requireAdmin("support");
   const locale = await getPreferredLocale();
-  const en = usesEnglishCopy(locale);
+  const t = createT(locale);
   const parsed = cancelSchema.safeParse({
     packageId: formData.get("packageId"),
     reason: formData.get("reason"),
   });
   if (!parsed.success) {
     return {
-      error: parsed.error.issues[0]?.message ?? (en ? "Invalid data" : "Datos inválidos"),
+      error: issueMessage(parsed.error, t, "web.action.invalidData"),
     };
   }
 
@@ -44,8 +45,8 @@ export async function cancelPackageAction(
     where: { id: parsed.data.packageId },
     select: { id: true, status: true, teacherId: true },
   });
-  if (!pkg) return { error: en ? "Package not found" : "Paquete no encontrado" };
-  if (pkg.status === "refunded") return { error: en ? "Already canceled" : "Ya está cancelado" };
+  if (!pkg) return { error: t("web.action.packageNotFound") };
+  if (pkg.status === "refunded") return { error: t("web.action.admin.alreadyCanceled") };
 
   await prisma.$transaction(async (tx) => {
     await tx.package.update({
@@ -70,8 +71,12 @@ export async function cancelPackageAction(
 }
 
 const extendSchema = z.object({
-  packageId: z.string().uuid("ID inválido"),
-  months: z.coerce.number().int().min(1, "1 mes mínimo").max(24, "Máximo 24 meses"),
+  packageId: z.string().uuid("web.action.invalidId"),
+  months: z.coerce
+    .number()
+    .int()
+    .min(1, "web.action.admin.minOneMonth")
+    .max(24, "web.action.admin.max24Months"),
   reason: z.string().trim().min(1, "Motivo requerido").max(280),
 });
 
@@ -84,7 +89,7 @@ export async function extendPackageExpirationAction(
 ): Promise<AdminPackageActionState> {
   const actor = await requireAdmin("support");
   const locale = await getPreferredLocale();
-  const en = usesEnglishCopy(locale);
+  const t = createT(locale);
   const parsed = extendSchema.safeParse({
     packageId: formData.get("packageId"),
     months: formData.get("months"),
@@ -92,7 +97,7 @@ export async function extendPackageExpirationAction(
   });
   if (!parsed.success) {
     return {
-      error: parsed.error.issues[0]?.message ?? (en ? "Invalid data" : "Datos inválidos"),
+      error: issueMessage(parsed.error, t, "web.action.invalidData"),
     };
   }
 
@@ -100,12 +105,10 @@ export async function extendPackageExpirationAction(
     where: { id: parsed.data.packageId },
     select: { id: true, expiresAt: true, teacherId: true },
   });
-  if (!pkg) return { error: en ? "Package not found" : "Paquete no encontrado" };
+  if (!pkg) return { error: t("web.action.packageNotFound") };
   if (!pkg.expiresAt) {
     return {
-      error: en
-        ? "This package doesn't expire; there's nothing to extend"
-        : "Este paquete no expira; no hay nada que extender",
+      error: t("web.action.admin.packageNoExpiry"),
     };
   }
 

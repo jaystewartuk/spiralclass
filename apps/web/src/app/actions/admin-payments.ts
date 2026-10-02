@@ -1,5 +1,6 @@
 "use server";
 
+import { issueMessage } from "@spiralclass/shared";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/admin";
@@ -9,7 +10,7 @@ import { getStripeClient } from "@/lib/stripe";
 import { applyRefund } from "@/lib/payments/refund";
 import { logger } from "@/lib/logger";
 import { revalidateAfterAction } from "@/lib/revalidate";
-import { usesEnglishCopy } from "@spiralclass/shared";
+import { createT } from "@spiralclass/shared";
 
 const log = logger({ surface: "admin-refund" });
 
@@ -17,7 +18,7 @@ export type AdminPaymentActionState =
   { error?: string; ok?: boolean; refundId?: string } | undefined;
 
 const refundSchema = z.object({
-  paymentId: z.string().uuid("ID inválido"),
+  paymentId: z.string().uuid("web.action.invalidId"),
   reason: z.string().trim().min(1, "Motivo requerido").max(280),
 });
 
@@ -35,14 +36,14 @@ export async function adminRefundPaymentAction(
 ): Promise<AdminPaymentActionState> {
   const actor = await requireAdmin("finance");
   const locale = await getPreferredLocale();
-  const en = usesEnglishCopy(locale);
+  const t = createT(locale);
   const parsed = refundSchema.safeParse({
     paymentId: formData.get("paymentId"),
     reason: formData.get("reason"),
   });
   if (!parsed.success) {
     return {
-      error: parsed.error.issues[0]?.message ?? (en ? "Invalid data" : "Datos inválidos"),
+      error: issueMessage(parsed.error, t, "web.action.invalidData"),
     };
   }
 
@@ -62,28 +63,23 @@ export async function adminRefundPaymentAction(
       },
     },
   });
-  if (!payment) return { error: en ? "Payment not found" : "Pago no encontrado" };
-  if (payment.status === "refunded")
-    return { error: en ? "Already refunded" : "Ya fue reembolsado" };
+  if (!payment) return { error: t("web.action.admin.paymentNotFound") };
+  if (payment.status === "refunded") return { error: t("web.action.admin.alreadyRefunded") };
   if (payment.status !== "paid") {
     return {
-      error: en ? "Only paid payments can be refunded" : "Solo se pueden reembolsar pagos cobrados",
+      error: t("web.action.admin.onlyPaidRefundable"),
     };
   }
   // Wise transfers settle off-platform; Stripe can't refund them. Refund
   // them manually in Wise instead.
   if (payment.provider !== "stripe") {
     return {
-      error: en
-        ? "Wise payments must be refunded manually in Wise"
-        : "Los pagos Wise se reembolsan manualmente en Wise",
+      error: t("web.action.admin.wiseRefundManual"),
     };
   }
   if (!payment.providerPaymentId) {
     return {
-      error: en
-        ? "Missing payment_intent — can't refund via Stripe"
-        : "Falta payment_intent — no se puede reembolsar vía Stripe",
+      error: t("web.action.admin.missingPaymentIntent"),
     };
   }
 
@@ -98,7 +94,7 @@ export async function adminRefundPaymentAction(
     refundProviderId = refund.id;
   } catch (err) {
     log.error("Stripe rejected", err, { paymentId: payment.id });
-    return { error: en ? "Stripe rejected the refund" : "Stripe rechazó el reembolso" };
+    return { error: t("web.action.admin.stripeRejectedRefund") };
   }
 
   // No clawback. Under direct charges (D-143) the charge lives on the teacher's

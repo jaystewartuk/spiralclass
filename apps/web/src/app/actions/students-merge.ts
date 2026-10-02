@@ -1,5 +1,6 @@
 "use server";
 
+import { issueMessage } from "@spiralclass/shared";
 import type { TFunction } from "@spiralclass/shared";
 import { z } from "zod";
 import { requireOnboardedTeacher } from "@/lib/auth";
@@ -52,7 +53,7 @@ export async function mergeRosterStudents(
   });
   if (!parsed.success) {
     return {
-      error: parsed.error.issues[0]?.message ?? t("web.action.invalidData"),
+      error: issueMessage(parsed.error, t, "web.action.invalidData"),
     };
   }
   const { keepStudentId, mergeStudentId } = parsed.data;

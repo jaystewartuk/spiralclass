@@ -1,5 +1,6 @@
 "use server";
 
+import { issueMessage } from "@spiralclass/shared";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { getPreferredLocale } from "@/lib/i18n";
@@ -132,7 +133,7 @@ async function createCheckoutIntentCore(
   });
   if (!parsed.success) {
     return {
-      error: parsed.error.issues[0]?.message ?? t("web.action.invalidData"),
+      error: issueMessage(parsed.error, t, "web.action.invalidData"),
     };
   }
   const input = parsed.data;

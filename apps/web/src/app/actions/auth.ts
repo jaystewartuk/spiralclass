@@ -1,5 +1,6 @@
 "use server";
 
+import { issueMessage } from "@spiralclass/shared";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth/server";
@@ -46,7 +47,7 @@ export async function requestSignInCodeAction(
 
   const parsed = signInSchema(locale).safeParse({ email: formData.get("email") });
   if (!parsed.success) {
-    return { error: parsed.error.issues[0]?.message ?? t("email.invalid") };
+    return { error: issueMessage(parsed.error, t, "email.invalid") };
   }
 
   // Per-email window (on top of the per-IP one above) thwarts repeated
@@ -90,7 +91,7 @@ export async function requestTeacherSignupCodeAction(
     email: formData.get("email"),
   });
   if (!parsed.success) {
-    return { error: parsed.error.issues[0]?.message ?? t("web.action.invalidData") };
+    return { error: issueMessage(parsed.error, t, "web.action.invalidData") };
   }
 
   // Per-email window — see requestSignInCodeAction for the rationale.

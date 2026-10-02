@@ -1,5 +1,6 @@
 "use server";
 
+import { issueMessage } from "@spiralclass/shared";
 import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { requireTeacher } from "@/lib/auth";
@@ -356,7 +357,7 @@ export async function saveBookingPageWhatsappAction(
   });
   if (!parsed.success) {
     return {
-      error: parsed.error.issues[0]?.message ?? t("web.action.profile.invalidPhone"),
+      error: issueMessage(parsed.error, t, "web.action.profile.invalidPhone"),
     };
   }
 
@@ -408,7 +409,7 @@ export async function saveMaterialStyleAction(
   });
   if (!parsed.success) {
     return {
-      error: parsed.error.issues[0]?.message ?? t("web.action.invalidInput"),
+      error: issueMessage(parsed.error, t, "web.action.invalidInput"),
     };
   }
   const { tone, learnerAge, vocabulary, languageVariety, customInstructions } = parsed.data;
