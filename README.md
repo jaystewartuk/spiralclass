@@ -133,7 +133,7 @@ graph TB
     WEB["Next.js 15 web app<br/>teacher · student · public booking · admin"]
 
     subgraph app["apps/web — the only server"]
-        RSC["Server Components<br/>+ 71 server-action modules"]
+        RSC["Server Components<br/>+ 72 server-action modules"]
         API["62 route handlers<br/>by audience: teacher · student · public · internal"]
         MW["middleware.ts<br/>CSP nonce · session gate · ?ref= attribution"]
         LIB["src/lib/** — one folder per bounded concern<br/>payments · booking · cancellation · subscriptions<br/>auth · notifications · chat · homework · video"]
