@@ -422,7 +422,13 @@ template)`.
   - A class lost to a late cancellation is used, and not owed.
   - Classes recorded as used off-platform (taught before she moved her
     students here, or corrected by editing "classes remaining") are not owed,
-    although SpiralClass has no record of them being taught (`classesOwed()`).
+    although SpiralClass has no record of them being taught.
+  - This is `classesLeftToTeach()` (`lib/package-usage.ts`), the one rule the
+    students page and the money screens share.
+- **The class count under "paid in advance" counts only priced packages.** A
+  package recorded at $0 (a gift, or history brought over with no price)
+  still owes its classes, but holds no money. The line describes money, so
+  those classes are left out of it.
 - **Amounts are what students paid.** The screens say so, and say that card
   payments reach her a little lower after Stripe's own fee, which SpiralClass
   does not receive ([D-152](../decisions/D-152.md)). No net-of-fee figure is

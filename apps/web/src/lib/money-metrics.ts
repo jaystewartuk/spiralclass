@@ -30,7 +30,8 @@
 // can't drift.
 
 import { prisma } from "@/lib/prisma";
-import { classesOwed, summarizeCashFlow, type CashFlow } from "@/lib/cashflow";
+import { summarizeCashFlow, type CashFlow } from "@/lib/cashflow";
+import { classesLeftToTeach } from "@/lib/package-usage";
 import {
   DEFAULT_PRICING_CURRENCY,
   EXPENSE_CATEGORIES,
@@ -429,7 +430,7 @@ export async function computePlatformDeferredRevenue(now: Date = new Date()): Pr
         classesUsed: true,
       },
     }),
-    // Booked but not yet taught, per package — still owed (see `classesOwed`).
+    // Booked but not yet taught, per package — still owed (see `classesLeftToTeach`).
     prisma.booking.groupBy({
       by: ["packageId"],
       where: { status: "scheduled", countsAgainstPackage: true },
@@ -446,10 +447,10 @@ export async function computePlatformDeferredRevenue(now: Date = new Date()): Pr
       currency: p.currency,
       status: p.status as (typeof PAID_PACKAGE_STATUSES)[number],
       expiresAt: p.expiresAt,
-      classesOwed: classesOwed({
+      classesOwed: classesLeftToTeach({
         classesTotal: p.classesTotal,
         classesUsed: p.classesUsed,
-        bookedNotTaught: bookedByPkg.get(p.id) ?? 0,
+        scheduled: bookedByPkg.get(p.id) ?? 0,
       }),
     })),
     [],

@@ -2,7 +2,6 @@ import { describe, expect, it } from "vitest";
 import {
   EARNINGS_HISTORY_MONTHS,
   apportion,
-  classesOwed,
   summarizeCashFlow,
   summarizeOneCurrency,
   type BookedLesson,
@@ -105,6 +104,22 @@ describe("summarizeOneCurrency — earned vs held split", () => {
     ];
     const s = summarizeOneCurrency(pkgs, [], null, NOW, "MXN", "UTC");
     expect(s.earnedCents + s.heldCents).toBe(s.totalPaidCents);
+  });
+
+  it("counts only classes something was paid for under paid in advance", () => {
+    // A $0 package (a gift, or history brought over with no price) still owes
+    // its classes, but holds no money: "$600.00 · 16 classes" would claim the
+    // free ten were paid for.
+    const s = summarizeOneCurrency(
+      [pkg({ classesOwed: 6 }), pkg({ pricePaidMinorUnits: 0, classesOwed: 10 })],
+      [],
+      null,
+      NOW,
+      "MXN",
+      "UTC",
+    );
+    expect(s.heldCents).toBe(60_000);
+    expect(s.heldLessons).toBe(6);
   });
 
   it("guards against a zero-class package (no divide-by-zero)", () => {
@@ -310,27 +325,6 @@ describe("summarizeOneCurrency — a month, student by student", () => {
       "UTC",
     );
     expect(s.months.find((m) => m.month === "2026-04")!.byStudent).toEqual([]);
-  });
-});
-
-describe("classesOwed", () => {
-  it("is what is left on the package, not what SpiralClass saw taught", () => {
-    // All 30 taught before she moved her students here: used, no booking rows.
-    expect(classesOwed({ classesTotal: 30, classesUsed: 30, bookedNotTaught: 0 })).toBe(0);
-  });
-
-  it("adds back classes booked but not yet taught — used at booking, still owed", () => {
-    expect(classesOwed({ classesTotal: 20, classesUsed: 3, bookedNotTaught: 3 })).toBe(20);
-  });
-
-  it("does not owe a class lost to a late cancellation", () => {
-    // 10 classes: 2 taught, 1 lost to a late cancellation, 1 booked → 4 used.
-    expect(classesOwed({ classesTotal: 10, classesUsed: 4, bookedNotTaught: 1 })).toBe(7);
-  });
-
-  it("never owes more than the package holds, or less than nothing", () => {
-    expect(classesOwed({ classesTotal: 10, classesUsed: 0, bookedNotTaught: 3 })).toBe(10);
-    expect(classesOwed({ classesTotal: 10, classesUsed: 12, bookedNotTaught: 0 })).toBe(0);
   });
 });
 
