@@ -204,6 +204,25 @@ template)`.
 - Prices are always computed and stored in the **teacher's own chosen
   pricing currency** (see D-64) — never a hardcoded currency.
 
+### The language Stripe speaks
+
+- **Stripe's own surfaces render in the language the checkout was rendered
+  in**, never the browser's: the booking page's language on the public funnel
+  (`booking_page_locale`), the student's own in the portal. Left unset, Stripe
+  follows the browser, and a buyer reads one language up to the payment form
+  and another on it.
+- That language is sent as the Checkout Session's `locale`, and as
+  `preferred_locales` on the buyer's Customer **when the Customer is created**,
+  because the receipt Stripe emails follows the Customer and not the session.
+  A Customer the teacher already has is never rewritten: she is the merchant,
+  and a language she set for a buyer in her own dashboard is hers.
+- A teacher's own Stripe surfaces — the subscription checkout and the embedded
+  onboarding in Settings → Payments — render in the language she reads the app
+  in.
+- The mapping from an app locale to Stripe's vocabulary is
+  `lib/stripe/locale.ts`. It is exhaustive, so a newly registered language does
+  not compile until someone has chosen what Stripe speaks for it.
+
 ### Cross-rail double-charge guard
 
 - Starting a new checkout **supersedes** any other still-pending checkout

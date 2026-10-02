@@ -12,7 +12,8 @@ import {
   type TimeZoneParty,
   type DualZoneTime,
   type TFunction,
-  usesEnglishCopy,
+  createT,
+  type AppLocale,
 } from "@spiralclass/shared";
 
 export type { TimeZoneParty, DualZoneTime };
@@ -192,7 +193,7 @@ export function formatBothZones(
   if (!studentTz || studentTz === teacherTz) return teacherStr;
   const studentStr = formatZonedDateTime(d, studentTz, locale);
   if (studentStr === teacherStr) return teacherStr;
-  const yourZone = usesEnglishCopy(locale) ? "your zone" : "tu zona";
+  const yourZone = createT(locale as AppLocale)("web.dateDisplay.yourZone");
   return `${teacherStr} · ${studentStr} (${yourZone})`;
 }
 

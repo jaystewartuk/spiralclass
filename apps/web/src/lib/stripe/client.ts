@@ -1,5 +1,6 @@
 import Stripe from "stripe";
 import { bankTransferTypeFor, localPaymentCapabilitiesFor } from "@spiralclass/shared";
+import type { StripeCheckoutLocale } from "./locale";
 import {
   stripeAccountLinkSchema,
   stripeAccountSchema,
@@ -167,6 +168,11 @@ export type CreateCheckoutSessionInput = {
   // collected/remitted without an explicit business decision.
   billingAddressCollection?: "auto" | "required";
   automaticTax?: boolean;
+  // The language Checkout renders in (see lib/stripe/locale.ts). Omitted,
+  // Stripe follows the BROWSER, which is how a student could read the booking
+  // page in one language and the payment form in another. The caller passes
+  // the same locale it rendered the page in.
+  locale?: StripeCheckoutLocale;
 };
 
 export type EnsureCheckoutCustomerInput = {
@@ -175,6 +181,12 @@ export type EnsureCheckoutCustomerInput = {
   connectedAccountId: string;
   email: string;
   name?: string;
+  // Set as `preferred_locales` when the Customer is CREATED. Stripe picks the
+  // language of the receipt it emails from this, before the account default
+  // and before the browser, so it is what makes the receipt match the page.
+  // An existing Customer is left exactly as it is: she belongs to the teacher,
+  // who may have set a language for her in her own dashboard.
+  preferredLocale?: StripeCheckoutLocale;
 };
 
 // Raw PaymentIntent (no Checkout Session) — the mobile native flow.
@@ -249,6 +261,9 @@ export type CreateBillingCheckoutSessionInput = {
   // themselves are created/enabled in the Stripe Dashboard (Coupons +
   // Promotion Codes) — this only opts the session into showing the field.
   allowPromotionCodes?: boolean;
+  // The language Checkout renders in — the teacher's own UI locale. See
+  // CreateCheckoutSessionInput.
+  locale?: StripeCheckoutLocale;
 };
 
 export type CreateBillingPortalSessionInput = {
@@ -576,7 +591,11 @@ export function fetchStripeClient(deps: {
       if (found) return found.id;
 
       const created = await stripe.customers.create(
-        { email: input.email, ...(input.name ? { name: input.name } : {}) },
+        {
+          email: input.email,
+          ...(input.name ? { name: input.name } : {}),
+          ...(input.preferredLocale ? { preferred_locales: [input.preferredLocale] } : {}),
+        },
         account,
       );
       return created.id;
@@ -610,6 +629,7 @@ export function fetchStripeClient(deps: {
             {
               mode: "payment",
               client_reference_id: input.clientReferenceId,
+              ...(input.locale ? { locale: input.locale } : {}),
               // Exactly one of these — Stripe rejects a session carrying both.
               // The Customer wins when present because it is the only shape
               // that can offer bank transfer.
@@ -855,6 +875,7 @@ export function fetchStripeClient(deps: {
             {
               mode: "subscription",
               client_reference_id: input.clientReferenceId,
+              ...(input.locale ? { locale: input.locale } : {}),
               line_items: [{ price: input.priceId, quantity: 1 }],
               payment_method_types: ["card"],
               ...urlParams,
@@ -902,7 +923,16 @@ export function fetchStripeClient(deps: {
             // Folding priceId in still dedupes a same-plan double-submit
             // (the original intent) while giving a genuinely different
             // checkout its own key.
-            idem(`bcs-${input.clientReferenceId}-${input.priceId}`),
+            //
+            // The locale is folded in for the same reason, and it is not
+            // optional: it is a request parameter, so a teacher who switches
+            // language and retries inside that window would otherwise replay
+            // the old key with a different body and be refused the same way.
+            // It also means the first deploy to send a locale cannot collide
+            // with a key minted an hour earlier without one.
+            idem(
+              `bcs-${input.clientReferenceId}-${input.priceId}${input.locale ? `-${input.locale}` : ""}`,
+            ),
           ),
         stripeCheckoutSessionSchema,
       );

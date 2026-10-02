@@ -113,6 +113,27 @@ describe("nudgeCounterparty", () => {
     expect(batch.payload.body).toContain("Prof");
   });
 
+  // The language was decided by "is the locale anything but English?", so a
+  // French reader was nudged in Spanish.
+  it.each([
+    ["fr", "Votre cours vous attend"],
+    ["fr-CA", "Votre cours vous attend"],
+    ["de", "Your class is waiting"],
+  ])("nudges a reader whose locale is %s in their own language", async (locale, title) => {
+    const d = deps();
+    await nudgeCounterparty(
+      fakeDb({ endpoints: ["https://push.example/s"], studentLocale: locale }),
+      {
+        bookingId: BOOKING,
+        callerIdentity: TEACHER,
+        callerName: "Prof",
+        to: { type: "student", id: STUDENT },
+      },
+      d,
+    );
+    expect(d.webPush.sentBatches[0].payload.title).toBe(title);
+  });
+
   it("returns cooldown and sends nothing when rate-limited", async () => {
     const d = deps({ cooldown: true });
     const res = await nudgeCounterparty(

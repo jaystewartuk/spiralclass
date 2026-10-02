@@ -1,7 +1,7 @@
 "use client";
 
 import { useActionState, useRef, useState, type FormEvent } from "react";
-import { usesEnglishCopy, hasFieldErrors, validateManualPackageFields } from "@spiralclass/shared";
+import { hasFieldErrors, validateManualPackageFields } from "@spiralclass/shared";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -10,7 +10,7 @@ import { useFieldErrors } from "@/hooks/use-field-errors";
 import { packageFieldMessage } from "./package-field-message";
 import { editManualPackageAction, type ManualPackageState } from "@/app/actions/teacher-packages";
 import { FormStatus } from "@/components/ui/form-status";
-import { useLocale, useT } from "@/components/locale-provider";
+import { useT } from "@/components/locale-provider";
 import { usePricingCurrency } from "@/components/pricing-currency-context";
 import { ForTwoField } from "./for-two-field";
 
@@ -40,8 +40,6 @@ export function EditPackageForm({
   committedBookings: number;
   seats: number;
 }) {
-  const locale = useLocale();
-  const en = usesEnglishCopy(locale);
   const t = useT();
   const currency = usePricingCurrency();
   const [open, setOpen] = useState(false);
@@ -77,8 +75,8 @@ export function EditPackageForm({
       maxRemaining,
     });
     setErrors({
-      classesTotal: packageFieldMessage(fieldErrors.classesTotal, en),
-      classesRemaining: packageFieldMessage(fieldErrors.classesRemaining, en, maxRemaining),
+      classesTotal: packageFieldMessage(fieldErrors.classesTotal, t),
+      classesRemaining: packageFieldMessage(fieldErrors.classesRemaining, t, maxRemaining),
     });
     if (hasFieldErrors(fieldErrors)) {
       e.preventDefault();

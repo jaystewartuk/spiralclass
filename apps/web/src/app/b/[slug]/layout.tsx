@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { localeDirection } from "@spiralclass/shared";
 import { LocaleProvider } from "@/components/locale-provider";
 import { funnelLocaleForSlug } from "@/lib/booking/funnel-locale";
 
@@ -47,8 +48,12 @@ export default async function PublicFunnelLayout({
           this correctly scopes the teacher's language to the funnel while the
           rest of the document keeps the visitor's. A plain <div> is safe here: the
           root layout's #main-content is an ordinary block container, so the
-          extra element drives no layout of its own. */}
-      <div lang={locale}>{children}</div>
+          extra element drives no layout of its own.
+          `dir` travels with it for the same reason: the funnel's direction is
+          its own language's, not the visitor's. */}
+      <div lang={locale} dir={localeDirection(locale)}>
+        {children}
+      </div>
     </LocaleProvider>
   );
 }

@@ -1,5 +1,6 @@
 "use server";
 
+import { issueMessage } from "@spiralclass/shared";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth/server";
@@ -11,7 +12,7 @@ import { safeNextPath } from "@/lib/auth/safe-next";
 import { logger } from "@/lib/logger";
 import { allowRateLimitBypass } from "@/lib/env";
 import { revalidateAfterAction } from "@/lib/revalidate";
-import { usesEnglishCopy } from "@spiralclass/shared";
+import { createT } from "@spiralclass/shared";
 
 const log = logger({ surface: "auth" });
 
@@ -30,28 +31,23 @@ export type ActionState = { error?: string; ok?: boolean; retryAfterMs?: number 
 // sends, not on whether the email happens to be unmatched: /sign-in never
 // mints a Teacher for a brand-new identity, only /sign-up does.
 
-const tooMany = (en: boolean) =>
-  en
-    ? "Too many attempts. Try again in a minute."
-    : "Demasiados intentos. Intenta de nuevo en un minuto.";
-
 export async function requestSignInCodeAction(
   _prev: ActionState,
   formData: FormData,
 ): Promise<ActionState> {
   const locale = await getPreferredLocale();
-  const en = usesEnglishCopy(locale);
+  const t = createT(locale);
   const bypass = allowRateLimitBypass();
 
   const ip = await clientIp();
   const rl = bypass
     ? { ok: true, retryAfterMs: 0 }
     : await rateLimit(ip, { scope: "sign-in", limit: 8, windowMs: 60_000 });
-  if (!rl.ok) return { error: tooMany(en), retryAfterMs: rl.retryAfterMs };
+  if (!rl.ok) return { error: t("web.action.auth.tooMany"), retryAfterMs: rl.retryAfterMs };
 
   const parsed = signInSchema(locale).safeParse({ email: formData.get("email") });
   if (!parsed.success) {
-    return { error: parsed.error.issues[0]?.message ?? (en ? "Invalid email" : "Correo inválido") };
+    return { error: issueMessage(parsed.error, t, "email.invalid") };
   }
 
   // Per-email window (on top of the per-IP one above) thwarts repeated
@@ -64,7 +60,8 @@ export async function requestSignInCodeAction(
         limit: 4,
         windowMs: 5 * 60_000,
       });
-  if (!emailRl.ok) return { error: tooMany(en), retryAfterMs: emailRl.retryAfterMs };
+  if (!emailRl.ok)
+    return { error: t("web.action.auth.tooMany"), retryAfterMs: emailRl.retryAfterMs };
 
   try {
     await auth.api.sendVerificationOTP({
@@ -84,17 +81,17 @@ export async function requestTeacherSignupCodeAction(
   formData: FormData,
 ): Promise<ActionState> {
   const locale = await getPreferredLocale();
-  const en = usesEnglishCopy(locale);
+  const t = createT(locale);
   const ip = await clientIp();
   const rl = await rateLimit(ip, { scope: "sign-up", limit: 6, windowMs: 60_000 });
-  if (!rl.ok) return { error: tooMany(en), retryAfterMs: rl.retryAfterMs };
+  if (!rl.ok) return { error: t("web.action.auth.tooMany"), retryAfterMs: rl.retryAfterMs };
 
   const parsed = signUpSchema(locale).safeParse({
     name: formData.get("name"),
     email: formData.get("email"),
   });
   if (!parsed.success) {
-    return { error: parsed.error.issues[0]?.message ?? (en ? "Invalid data" : "Datos inválidos") };
+    return { error: issueMessage(parsed.error, t, "web.action.invalidData") };
   }
 
   // Per-email window — see requestSignInCodeAction for the rationale.
@@ -103,7 +100,8 @@ export async function requestTeacherSignupCodeAction(
     limit: 4,
     windowMs: 5 * 60_000,
   });
-  if (!emailRl.ok) return { error: tooMany(en), retryAfterMs: emailRl.retryAfterMs };
+  if (!emailRl.ok)
+    return { error: t("web.action.auth.tooMany"), retryAfterMs: emailRl.retryAfterMs };
 
   try {
     await auth.api.sendVerificationOTP({
@@ -121,12 +119,12 @@ export async function verifySignInCodeAction(
   formData: FormData,
 ): Promise<ActionState> {
   const locale = await getPreferredLocale();
-  const en = usesEnglishCopy(locale);
+  const t = createT(locale);
   const ip = await clientIp();
   const rl = allowRateLimitBypass()
     ? { ok: true, retryAfterMs: 0 }
     : await rateLimit(ip, { scope: "verify-web-code", limit: 8, windowMs: 60_000 });
-  if (!rl.ok) return { error: tooMany(en) };
+  if (!rl.ok) return { error: t("web.action.auth.tooMany") };
 
   const email = formData.get("email");
   const code = formData.get("code");
@@ -139,7 +137,7 @@ export async function verifySignInCodeAction(
   const intent = formData.get("intent") === "sign-up" ? "sign-up" : "sign-in";
 
   if (typeof email !== "string" || typeof code !== "string" || !email || !code) {
-    return { error: en ? "Missing email or code." : "Falta correo o código." };
+    return { error: t("web.action.missingEmailOrCode") };
   }
 
   let signedInUser: { id: string; email: string } | null = null;
@@ -156,9 +154,7 @@ export async function verifySignInCodeAction(
       error: err instanceof Error ? err.message : String(err),
     });
     return {
-      error: en
-        ? "Invalid or expired code. Request a new one."
-        : "Código inválido o expirado. Solicita uno nuevo.",
+      error: t("web.action.invalidOrExpiredCode"),
     };
   }
 

@@ -3,7 +3,7 @@ import { renderBrandedEmailHtml } from "@/lib/email/html-shell";
 import { serverEnv } from "@/lib/env";
 import { logger } from "@/lib/logger";
 import type { AppLocale } from "@/lib/i18n";
-import { usesEnglishCopy } from "@spiralclass/shared";
+import { createT, localeToLanguageCode } from "@spiralclass/shared";
 
 const log = logger({ surface: "referrals" });
 
@@ -20,33 +20,31 @@ export async function notifyReferrerReward(input: {
   expiresAt: Date | null;
   locale: AppLocale;
 }): Promise<void> {
-  const en = usesEnglishCopy(input.locale);
+  const t = createT(input.locale);
   const appUrl = serverEnv().APP_URL.replace(/\/$/, "");
   const portalUrl = `${appUrl}/my-classes`;
 
-  const heading = en
-    ? "Your referral earned you a reward"
-    : "Tu recomendación te ganó una recompensa";
-  const subject = en
-    ? `You earned ${input.rewardLabel} off with ${input.teacherName}`
-    : `Ganaste ${input.rewardLabel} de descuento con ${input.teacherName}`;
-  const intro = en
-    ? `Someone you referred just booked with ${input.teacherName} — thank you! Here's ${input.rewardLabel} off your next package.`
-    : `Alguien que recomendaste acaba de reservar con ${input.teacherName} — ¡gracias! Aquí tienes ${input.rewardLabel} de descuento en tu próximo paquete.`;
-  const codeLine = en ? `Your code: ${input.rewardCode}` : `Tu código: ${input.rewardCode}`;
+  const heading = t("email.referralReward.heading");
+  const subject = t("email.referralReward.subject", {
+    rewardLabel: input.rewardLabel,
+    teacherName: input.teacherName,
+  });
+  const intro = t("email.referralReward.intro", {
+    teacherName: input.teacherName,
+    rewardLabel: input.rewardLabel,
+  });
+  const codeLine = t("email.referralReward.codeLine", { rewardCode: input.rewardCode });
   const expiryLine = input.expiresAt
-    ? en
-      ? `Use it before ${input.expiresAt.toISOString().slice(0, 10)}.`
-      : `Úsalo antes del ${input.expiresAt.toISOString().slice(0, 10)}.`
+    ? t("email.referralReward.expiryLine", { date: input.expiresAt.toISOString().slice(0, 10) })
     : null;
-  const cta = en ? "Book your next classes" : "Reserva tus próximas clases";
+  const cta = t("email.referralReward.cta");
 
   const paragraphs = [intro, codeLine, ...(expiryLine ? [expiryLine] : [])];
   const html = renderBrandedEmailHtml(
     { preheader: codeLine, heading, paragraphs, cta: { label: cta, url: portalUrl } },
-    { languageCode: en ? "en" : "es", appUrl },
+    { languageCode: localeToLanguageCode(input.locale), appUrl },
   );
-  const body = `${intro}\n\n${codeLine}${expiryLine ? `\n${expiryLine}` : ""}\n\n${cta}: ${portalUrl}`;
+  const body = `${intro}\n\n${codeLine}${expiryLine ? `\n${expiryLine}` : ""}\n\n${t("email.labelledValue", { label: cta, value: portalUrl })}`;
 
   const res = await getEmailClient().send({ to: input.to, subject, body, html });
   if (!res.ok) log.warn("referrer reward notify failed", { error: res.error });

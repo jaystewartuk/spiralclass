@@ -129,6 +129,9 @@ describe("public booking funnel renders in one language", () => {
     const english = await render("en");
     expect(english).toContain('lang="en"');
     expect(english).not.toContain('lang="es"');
+    // The writing direction travels with the language, from the same registry
+    // row, so a right-to-left funnel is not laid out by the visitor's locale.
+    expect(english).toContain('dir="ltr"');
   });
 
   it("keeps the card's static alt on the fallback locale", async () => {

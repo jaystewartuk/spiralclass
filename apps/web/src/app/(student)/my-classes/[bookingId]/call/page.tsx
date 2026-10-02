@@ -3,7 +3,7 @@ import { PageHeader } from "@/components/ui/page-header";
 import { notFound } from "next/navigation";
 import { requireStudent } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { getPreferredLocale, getT } from "@/lib/i18n";
+import { getT } from "@/lib/i18n";
 import type { TFunction } from "@/lib/i18n-translate";
 import { gateProFeature } from "@/lib/subscriptions/enforce";
 import { lessonNoteStudentVisible } from "@/lib/lesson-notes/visibility";
@@ -14,7 +14,6 @@ import { nudgeFromStudent } from "@/app/actions/call-nudge";
 import { Button } from "@/components/ui/button";
 import { CallSessionBootstrap } from "@/components/video/call-session-bootstrap";
 import { InstructionsOverlay } from "./instructions-overlay";
-import { usesEnglishCopy } from "@spiralclass/shared";
 
 // Student's in-class video call (live-notes-panel.md step 3, D-16). Mirrors the
 // teacher side: gated only by the *teacher's* Pro plan (a student of a Free
@@ -32,8 +31,6 @@ export default async function StudentCallPage({
   const { bookingId } = await params;
   const student = await requireStudent();
   const t = await getT();
-  const locale = await getPreferredLocale();
-  const en = usesEnglishCopy(locale);
   const backHref = `/my-classes/${bookingId}`;
 
   const booking = await prisma.booking.findFirst({
@@ -108,7 +105,6 @@ export default async function StudentCallPage({
         <InstructionsOverlay
           notes={notesVisible ? booking.lessonNotes : []}
           windowOpen={notesVisible}
-          en={en}
         />
       }
     />

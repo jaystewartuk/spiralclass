@@ -17,7 +17,7 @@ import {
 } from "@/lib/materials/config";
 import { resolveClassContentTemplateBody } from "@/lib/materials/templates";
 import { resolveFocusTagsWithCategory } from "@/lib/focus-tags";
-import { usesEnglishCopy, languageName, resolveVocabulary } from "@spiralclass/shared";
+import { createT, languageName, resolveVocabulary } from "@spiralclass/shared";
 import type { MaterialVocabulary } from "@spiralclass/shared";
 import type { MaterialPromptInput } from "@/lib/materials/prompt";
 import { materialSendTimeElapsed } from "@/lib/materials/timing";
@@ -172,7 +172,7 @@ export async function saveClassContentForBooking(input: {
   linkUrl?: string | null;
   locale: AppLocale;
 }): Promise<SaveClassContentResult> {
-  const en = usesEnglishCopy(input.locale);
+  const t = createT(input.locale);
 
   // Authoring class content is a Pro feature (viewing stays free).
   const gate = await gateProFeature(input.teacherId, "class_content");
@@ -187,7 +187,7 @@ export async function saveClassContentForBooking(input: {
     return {
       ok: false,
       code: "not-found",
-      message: en ? "Class not found." : "Clase no encontrada.",
+      message: t("web.action.classNotFound"),
     };
   }
 
@@ -487,7 +487,7 @@ export async function generateClassContentForBooking(input: {
   // "continue from" context. Absent/empty = today's behavior, unchanged.
   continueFromMaterialIds?: string[];
 }): Promise<GenerateClassContentResult> {
-  const en = usesEnglishCopy(input.locale);
+  const t = createT(input.locale);
 
   const gate = await gateProFeature(input.teacherId, "class_content");
   if (!gate.ok)
@@ -508,9 +508,7 @@ export async function generateClassContentForBooking(input: {
     return {
       ok: false,
       code: "invalid",
-      message: en
-        ? "Pick a focus or describe what this class should cover."
-        : "Elige un enfoque o describe de qué trata esta clase.",
+      message: t("materials.ai.topicRequired"),
     };
   }
 
@@ -531,7 +529,7 @@ export async function generateClassContentForBooking(input: {
     return {
       ok: false,
       code: "not-found",
-      message: en ? "Class not found." : "Clase no encontrada.",
+      message: t("web.action.classNotFound"),
     };
   }
 
@@ -556,9 +554,7 @@ export async function generateClassContentForBooking(input: {
     return {
       ok: false,
       code: "cap",
-      message: en
-        ? `You've reached this month's AI generation limit (${CLASS_CONTENT_AI_MONTHLY_CAP}). You can still write content yourself.`
-        : `Alcanzaste el límite de generaciones con IA de este mes (${CLASS_CONTENT_AI_MONTHLY_CAP}). Aún puedes escribir el contenido tú mismo.`,
+      message: t("materials.ai.classLimitReached", { cap: CLASS_CONTENT_AI_MONTHLY_CAP }),
     };
   }
 
@@ -617,17 +613,13 @@ export async function generateClassContentForBooking(input: {
       return {
         ok: false,
         code: "not-configured",
-        message: en
-          ? "AI generation isn't available right now. You can still write the content yourself."
-          : "La generación con IA no está disponible ahora. Aún puedes escribir el contenido tú mismo.",
+        message: t("materials.ai.classUnavailable"),
       };
     }
     return {
       ok: false,
       code: "error",
-      message: en
-        ? "Couldn't generate content. Please try again."
-        : "No se pudo generar el contenido. Inténtalo de nuevo.",
+      message: t("materials.ai.classFailed"),
     };
   }
 
@@ -678,13 +670,13 @@ export async function restoreClassContentRevisionForBooking(input: {
   revisionId: string;
   locale: AppLocale;
 }): Promise<SaveClassContentResult> {
-  const en = usesEnglishCopy(input.locale);
+  const t = createT(input.locale);
   const booking = await findOwnedBooking(input.teacherId, input.bookingId);
   if (!booking) {
     return {
       ok: false,
       code: "not-found",
-      message: en ? "Class not found." : "Clase no encontrada.",
+      message: t("web.action.classNotFound"),
     };
   }
 
@@ -696,7 +688,7 @@ export async function restoreClassContentRevisionForBooking(input: {
     return {
       ok: false,
       code: "not-found",
-      message: en ? "That version is no longer available." : "Esa versión ya no está disponible.",
+      message: t("materials.ai.revisionGone"),
     };
   }
 
@@ -740,7 +732,7 @@ export async function generateLibraryMaterialForTeacher(input: {
   // (no picker yet) relies on.
   language?: string | null;
 }): Promise<GenerateLibraryMaterialResult> {
-  const en = usesEnglishCopy(input.locale);
+  const t = createT(input.locale);
 
   const gate = await gateProFeature(input.teacherId, "class_content");
   if (!gate.ok)
@@ -760,9 +752,7 @@ export async function generateLibraryMaterialForTeacher(input: {
     return {
       ok: false,
       code: "invalid",
-      message: en
-        ? "Describe the material or pick a format/focus first."
-        : "Describe el material o elige un formato/enfoque primero.",
+      message: t("materials.ai.libraryTopicRequired"),
     };
   }
 
@@ -773,9 +763,7 @@ export async function generateLibraryMaterialForTeacher(input: {
     return {
       ok: false,
       code: "cap",
-      message: en
-        ? `You've reached this month's AI generation limit (${CLASS_CONTENT_AI_MONTHLY_CAP}). You can still write the material yourself.`
-        : `Alcanzaste el límite de generaciones con IA de este mes (${CLASS_CONTENT_AI_MONTHLY_CAP}). Aún puedes escribir el material tú mismo.`,
+      message: t("materials.ai.libraryLimitReached", { cap: CLASS_CONTENT_AI_MONTHLY_CAP }),
     };
   }
 
@@ -812,17 +800,13 @@ export async function generateLibraryMaterialForTeacher(input: {
       return {
         ok: false,
         code: "not-configured",
-        message: en
-          ? "AI generation isn't available right now. You can still write the material yourself."
-          : "La generación con IA no está disponible ahora. Aún puedes escribir el material tú mismo.",
+        message: t("materials.ai.libraryUnavailable"),
       };
     }
     return {
       ok: false,
       code: "error",
-      message: en
-        ? "Couldn't generate the material. Please try again."
-        : "No se pudo generar el material. Inténtalo de nuevo.",
+      message: t("classContent.author.generateError"),
     };
   }
 
@@ -874,7 +858,7 @@ export async function prepareLibraryMaterialPrompt(input: {
   locale: AppLocale;
   language?: string | null;
 }): Promise<PrepareLibraryPromptResult> {
-  const en = usesEnglishCopy(input.locale);
+  const t = createT(input.locale);
 
   const gate = await gateProFeature(input.teacherId, "class_content");
   if (!gate.ok)
@@ -890,9 +874,7 @@ export async function prepareLibraryMaterialPrompt(input: {
     return {
       ok: false,
       code: "invalid",
-      message: en
-        ? "Describe the material or pick a format/focus first."
-        : "Describe el material o elige un formato/enfoque primero.",
+      message: t("materials.ai.libraryTopicRequired"),
     };
   }
 
@@ -903,9 +885,7 @@ export async function prepareLibraryMaterialPrompt(input: {
     return {
       ok: false,
       code: "cap",
-      message: en
-        ? `You've reached this month's AI generation limit (${CLASS_CONTENT_AI_MONTHLY_CAP}). You can still write the material yourself.`
-        : `Alcanzaste el límite de generaciones con IA de este mes (${CLASS_CONTENT_AI_MONTHLY_CAP}). Aún puedes escribir el material tú mismo.`,
+      message: t("materials.ai.libraryLimitReached", { cap: CLASS_CONTENT_AI_MONTHLY_CAP }),
     };
   }
 
@@ -988,7 +968,7 @@ export async function refineMaterialForTeacher(input: {
   // Omitted → the locale default, same axis as the generate paths.
   language?: string | null;
 }): Promise<RefineMaterialResult> {
-  const en = usesEnglishCopy(input.locale);
+  const t = createT(input.locale);
 
   // Same gate as authoring class content / library content (viewing stays free).
   const gate = await gateProFeature(input.teacherId, "class_content");
@@ -1000,9 +980,7 @@ export async function refineMaterialForTeacher(input: {
     return {
       ok: false,
       code: "invalid",
-      message: en
-        ? "Describe the change you want the AI to make."
-        : "Describe el cambio que quieres que haga la IA.",
+      message: t("materials.ai.refineInstructionRequired"),
     };
   }
   // The body must be present and within the ceiling — a refine edits what's
@@ -1017,9 +995,7 @@ export async function refineMaterialForTeacher(input: {
     return {
       ok: false,
       code: "cap",
-      message: en
-        ? `You've reached this month's AI generation limit (${CLASS_CONTENT_AI_MONTHLY_CAP}). You can still edit the material yourself.`
-        : `Alcanzaste el límite de generaciones con IA de este mes (${CLASS_CONTENT_AI_MONTHLY_CAP}). Aún puedes editar el material tú mismo.`,
+      message: t("materials.ai.refineLimitReached", { cap: CLASS_CONTENT_AI_MONTHLY_CAP }),
     };
   }
 
@@ -1037,17 +1013,13 @@ export async function refineMaterialForTeacher(input: {
       return {
         ok: false,
         code: "not-configured",
-        message: en
-          ? "AI editing isn't available right now. You can still edit the material yourself."
-          : "La edición con IA no está disponible ahora. Aún puedes editar el material tú mismo.",
+        message: t("materials.ai.refineUnavailable"),
       };
     }
     return {
       ok: false,
       code: "error",
-      message: en
-        ? "Couldn't apply the change. Please try again."
-        : "No se pudo aplicar el cambio. Inténtalo de nuevo.",
+      message: t("materials.ai.refineFailed"),
     };
   }
 
@@ -1147,7 +1119,7 @@ export async function saveLibraryContentMaterial(input: {
   linkUrl?: string | null;
   locale: AppLocale;
 }): Promise<SaveLibraryContentResult> {
-  const en = usesEnglishCopy(input.locale);
+  const t = createT(input.locale);
 
   const gate = await gateProFeature(input.teacherId, "class_content");
   if (!gate.ok)
@@ -1160,8 +1132,7 @@ export async function saveLibraryContentMaterial(input: {
     where: { id: input.levelId, teacherId: input.teacherId, archived: false },
     select: { id: true },
   });
-  if (!level)
-    return { ok: false, code: "invalid", message: en ? "Choose a level." : "Elige un nivel." };
+  if (!level) return { ok: false, code: "invalid", message: t("libManage.chooseLevel") };
 
   const label = input.label?.trim().slice(0, 80) || null;
 
@@ -1182,7 +1153,7 @@ export async function saveLibraryContentMaterial(input: {
       return {
         ok: false,
         code: "not-found",
-        message: en ? "Material not found." : "Material no encontrado.",
+        message: t("web.action.library.materialNotFound"),
       };
     }
     if (existing.body != null && existing.body !== validation.body) {
@@ -1266,7 +1237,7 @@ export async function restoreLibraryMaterialRevision(input: {
   revisionId: string;
   locale: AppLocale;
 }): Promise<SaveLibraryContentResult> {
-  const en = usesEnglishCopy(input.locale);
+  const t = createT(input.locale);
   const material = await prisma.libraryMaterial.findFirst({
     where: {
       id: input.materialId,
@@ -1280,7 +1251,7 @@ export async function restoreLibraryMaterialRevision(input: {
     return {
       ok: false,
       code: "not-found",
-      message: en ? "Material not found." : "Material no encontrado.",
+      message: t("web.action.library.materialNotFound"),
     };
   }
 
@@ -1292,7 +1263,7 @@ export async function restoreLibraryMaterialRevision(input: {
     return {
       ok: false,
       code: "not-found",
-      message: en ? "That version is no longer available." : "Esa versión ya no está disponible.",
+      message: t("materials.ai.revisionGone"),
     };
   }
 
@@ -1337,7 +1308,7 @@ export async function saveMaterialAttachment(input: {
   sendTiming?: MaterialSendTiming | null;
   locale: AppLocale;
 }): Promise<SaveMaterialAttachmentResult> {
-  const en = usesEnglishCopy(input.locale);
+  const t = createT(input.locale);
   const label = input.label?.trim().slice(0, 80) || null;
 
   if (input.bookingId) {
@@ -1353,7 +1324,7 @@ export async function saveMaterialAttachment(input: {
       return {
         ok: false,
         code: "not-found",
-        message: en ? "Class not found." : "Clase no encontrada.",
+        message: t("web.action.classNotFound"),
       };
     }
 
@@ -1410,14 +1381,14 @@ export async function saveMaterialAttachment(input: {
 
   // Library-scoped: free, level-required, no notification.
   if (!input.levelId) {
-    return { ok: false, code: "invalid", message: en ? "Choose a level." : "Elige un nivel." };
+    return { ok: false, code: "invalid", message: t("libManage.chooseLevel") };
   }
   const level = await prisma.level.findFirst({
     where: { id: input.levelId, teacherId: input.teacherId, archived: false },
     select: { id: true },
   });
   if (!level) {
-    return { ok: false, code: "invalid", message: en ? "Choose a level." : "Elige un nivel." };
+    return { ok: false, code: "invalid", message: t("libManage.chooseLevel") };
   }
 
   const created = await prisma.libraryMaterial.create({

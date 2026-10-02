@@ -1,5 +1,12 @@
 import type { BookingStatus } from "@prisma/client";
-import { getDualZoneTime } from "@spiralclass/shared";
+import {
+  getDualZoneTime,
+  createT,
+  matchAcceptLanguage,
+  DEFAULT_LOCALE,
+  type AppLocale,
+  type TFunction,
+} from "@spiralclass/shared";
 import { prisma } from "@/lib/prisma";
 import { studentIdentityIds } from "@/lib/students/identity";
 import { buildVcalendar, type IcsEvent } from "@/lib/calendar/ics";
@@ -15,16 +22,16 @@ function otherPartyIcsLine(
   start: Date,
   viewerTz: string,
   other: { tz: string; name: string },
-  en: boolean,
+  locale: AppLocale,
 ): string {
   const dz = getDualZoneTime(
     start,
     { tz: viewerTz, label: "" },
     { tz: other.tz, label: other.name },
-    en ? "en" : "es",
+    locale,
   );
   const time = `${dz.other.dateLabel}, ${dz.other.timeLabel} (${dz.other.tzDisplay})`;
-  return en ? `${other.name}'s time: ${time}` : `Hora de ${other.name}: ${time}`;
+  return createT(locale)("web.dualZone.otherPartyTime", { name: other.name, time });
 }
 
 // Builds the subscribable iCal feed for a teacher or student. Emits UTC
@@ -42,8 +49,11 @@ function isCancelledStatus(status: BookingStatus): boolean {
   );
 }
 
-function isEnglish(locale: string | null | undefined): boolean {
-  return Boolean(locale && locale.toLowerCase().startsWith("en"));
+// The feed is read by a calendar app with no session, so the language is the
+// owner's stored locale. This was `isEnglish()`, which gave every other
+// locale — French included — the Spanish feed.
+function feedLocale(locale: string | null | undefined): AppLocale {
+  return matchAcceptLanguage(locale) ?? DEFAULT_LOCALE;
 }
 
 export async function buildCalendarFeed(
@@ -70,8 +80,9 @@ export async function buildCalendarFeed(
         include: { student: { select: { name: true, timezone: true } } },
       }),
     ]);
-    const en = isEnglish(teacher?.locale);
-    const calName = en ? "My classes — SpiralClass" : "Mis clases — SpiralClass";
+    const locale = feedLocale(teacher?.locale);
+    const t = createT(locale);
+    const calName = t("calendarFeed.calName");
     const teacherTz = teacher?.timezone ?? "UTC";
 
     const events = bookings.map((b) =>
@@ -80,9 +91,9 @@ export async function buildCalendarFeed(
         start: b.scheduledStart,
         end: b.scheduledEnd,
         status: b.status,
-        summary: en ? `Class: ${b.student.name}` : `Clase: ${b.student.name}`,
+        summary: t("web.dashboard.classes.calendarEventTitle", { name: b.student.name }),
         url: `${appUrl}/dashboard/classes/${b.id}`,
-        en,
+        t,
         otherPartyLine: otherPartyIcsLine(
           b.scheduledStart,
           teacherTz,
@@ -90,7 +101,7 @@ export async function buildCalendarFeed(
             tz: b.student.timezone ?? teacherTz,
             name: b.student.name,
           },
-          en,
+          locale,
         ),
       }),
     );
@@ -102,8 +113,9 @@ export async function buildCalendarFeed(
     where: { id: owner.id },
     select: { id: true, email: true, locale: true, timezone: true },
   });
-  const en = isEnglish(student?.locale);
-  const calName = en ? "My classes — SpiralClass" : "Mis clases — SpiralClass";
+  const locale = feedLocale(student?.locale);
+  const t = createT(locale);
+  const calName = t("calendarFeed.calName");
   if (!student) return { ics: buildVcalendar([], { name: calName, refresh: REFRESH }), calName };
 
   const studentIds = await studentIdentityIds(student);
@@ -120,9 +132,9 @@ export async function buildCalendarFeed(
       start: b.scheduledStart,
       end: b.scheduledEnd,
       status: b.status,
-      summary: en ? `Class with ${b.teacher.name}` : `Clase con ${b.teacher.name}`,
+      summary: t("web.myClasses.confirmation.calendarTitle", { name: b.teacher.name }),
       url: `${appUrl}/my-classes/${b.id}`,
-      en,
+      t,
       otherPartyLine: otherPartyIcsLine(
         b.scheduledStart,
         viewerTz,
@@ -130,7 +142,7 @@ export async function buildCalendarFeed(
           tz: b.teacher.timezone,
           name: b.teacher.name,
         },
-        en,
+        locale,
       ),
     });
   });
@@ -144,10 +156,10 @@ function toIcsEvent(input: {
   status: BookingStatus;
   summary: string;
   url: string;
-  en: boolean;
+  t: TFunction;
   otherPartyLine: string;
 }): IcsEvent {
-  const base = input.en ? "Booked through SpiralClass." : "Reservada en SpiralClass.";
+  const base = input.t("calendarFeed.bookedThrough");
   return {
     uid: `booking-${input.id}@spiralclass.com`,
     start: input.start,

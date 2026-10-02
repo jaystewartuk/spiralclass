@@ -7,7 +7,7 @@ import {
   CLASS_CONTENT_TEMPLATE_MAX_PER_TEACHER,
   validateClassContentBody,
 } from "@/lib/materials/config";
-import { usesEnglishCopy } from "@spiralclass/shared";
+import { createT } from "@spiralclass/shared";
 
 type Db = PrismaClient | Prisma.TransactionClient;
 
@@ -60,7 +60,7 @@ export async function saveClassContentTemplate(input: {
   body: string;
   locale: AppLocale;
 }): Promise<SaveClassContentTemplateResult> {
-  const en = usesEnglishCopy(input.locale);
+  const t = createT(input.locale);
 
   const gate = await gateProFeature(input.teacherId, "class_content");
   if (!gate.ok)
@@ -74,7 +74,7 @@ export async function saveClassContentTemplate(input: {
     return {
       ok: false,
       code: "invalid",
-      message: en ? "Name this template." : "Ponle un nombre a esta plantilla.",
+      message: t("materials.templates.nameRequired"),
     };
   }
 
@@ -148,7 +148,7 @@ export async function saveClassContentTemplatesForTeacher(
   },
   db: Db = prisma,
 ): Promise<SaveClassContentTemplatesResult> {
-  const en = usesEnglishCopy(input.locale);
+  const t = createT(input.locale);
 
   // Pass `db` through so this reuses the caller's transaction connection
   // instead of opening a second one on the global client — with a
@@ -165,9 +165,7 @@ export async function saveClassContentTemplatesForTeacher(
     return {
       ok: false,
       code: "invalid",
-      message: en
-        ? "Too many templates in one save."
-        : "Demasiadas plantillas en un solo guardado.",
+      message: t("materials.templates.tooMany"),
     };
   }
 
@@ -181,7 +179,7 @@ export async function saveClassContentTemplatesForTeacher(
       return {
         ok: false,
         code: "invalid",
-        message: en ? "Every template needs a name." : "Cada plantilla necesita un nombre.",
+        message: t("materials.templates.everyNeedsName"),
       };
     }
     const validation = validateClassContentBody(row.body, input.locale);

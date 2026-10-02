@@ -1,0 +1,1333 @@
+=== booking_confirmation · email · with every variable
+subject: Your class with ⟦teacherName⟧ is confirmed
+text: Hi, I'm ⟦teacherName⟧. Your class on ⟦classDateTime⟧ is confirmed. You have ⟦classesRemaining⟧ classes left.
+
+Join the video call at class time.
+
+Join video call: https://app.test/action
+
+Add to calendar: https://calendar.test/add
+
+—
+Manage notification settings: https://app.test/r/notif-settings/token
+To stop receiving emails: https://app.test/r/email-uns/token
+html: Class confirmed ⟦classDateTime⟧ · ⟦classesRemaining⟧ classes left SpiralClass Class confirmed Hi, I&#39;m ⟦teacherName⟧. Your class on ⟦classDateTime⟧ is confirmed. You have ⟦classesRemaining⟧ classes left. Join the video call at class time. Join video call Add to calendar Manage notification settings · Unsubscribe from these emails Classes, payments and reminders without the mental load. Sent by SpiralClass · spiralclass.com
+
+=== booking_confirmation · push · with every variable
+title: Class confirmed
+body: Your class with ⟦teacherName⟧ is on ⟦classDateTime⟧ · ⟦classesRemaining⟧ classes left
+
+=== booking_confirmation · email · with no variables
+subject: Your class with  is confirmed
+text: Hi, I'm . Your class on  is confirmed. You have  classes left.
+
+We'll meet on WhatsApp at that time.
+html: Class confirmed · classes left SpiralClass Class confirmed Hi, I&#39;m . Your class on is confirmed. You have classes left. We&#39;ll meet on WhatsApp at that time. Classes, payments and reminders without the mental load. Sent by SpiralClass · spiralclass.com
+
+=== booking_confirmation · push · with no variables
+title: Class confirmed
+body: Your class with  is on  ·  classes left
+
+=== reminder_24h · email · with every variable
+subject: Reminder: class tomorrow with ⟦teacherName⟧
+text: Hi, I'm ⟦teacherName⟧. Reminder for our class tomorrow, ⟦classDateTime⟧.
+
+Join the video call at class time.
+
+Join video call: https://app.test/action
+
+Add to calendar: https://calendar.test/add
+
+—
+Manage notification settings: https://app.test/r/notif-settings/token
+To stop receiving emails: https://app.test/r/email-uns/token
+html: Your class is tomorrow Class tomorrow — ⟦classDateTime⟧ SpiralClass Your class is tomorrow Hi, I&#39;m ⟦teacherName⟧. Reminder for our class tomorrow, ⟦classDateTime⟧. Join the video call at class time. Join video call Add to calendar Manage notification settings · Unsubscribe from these emails Classes, payments and reminders without the mental load. Sent by SpiralClass · spiralclass.com
+
+=== reminder_24h · push · with every variable
+title: Reminder: Tomorrow
+body: Class with ⟦teacherName⟧ on ⟦classDateTime⟧
+
+=== reminder_24h · email · with no variables
+subject: Reminder: class tomorrow with 
+text: Hi, I'm . Reminder for our class tomorrow, .
+
+We'll meet on WhatsApp at that time.
+html: Your class is tomorrow Class tomorrow — SpiralClass Your class is tomorrow Hi, I&#39;m . Reminder for our class tomorrow, . We&#39;ll meet on WhatsApp at that time. Classes, payments and reminders without the mental load. Sent by SpiralClass · spiralclass.com
+
+=== reminder_24h · push · with no variables
+title: Reminder: Tomorrow
+body: Class with  on 
+
+=== reminder_1h · email · with every variable
+subject: Class with ⟦teacherName⟧ starts in 1 hour
+text: Hi, I'm ⟦teacherName⟧. See you in 1 hour, ⟦classDateTime⟧. Join the video call at class time.
+
+Join video call: https://app.test/action
+
+Add to calendar: https://calendar.test/add
+
+—
+Manage notification settings: https://app.test/r/notif-settings/token
+To stop receiving emails: https://app.test/r/email-uns/token
+html: Your class starts in 1 hour In 1 hour — ⟦classDateTime⟧ SpiralClass Your class starts in 1 hour Hi, I&#39;m ⟦teacherName⟧. See you in 1 hour, ⟦classDateTime⟧. Join the video call at class time. Join video call Add to calendar Manage notification settings · Unsubscribe from these emails Classes, payments and reminders without the mental load. Sent by SpiralClass · spiralclass.com
+
+=== reminder_1h · push · with every variable
+title: Reminder: In 1 hour
+body: Class with ⟦teacherName⟧ on ⟦classDateTime⟧
+
+=== reminder_1h · email · with no variables
+subject: Class with  starts in 1 hour
+text: Hi, I'm . See you in 1 hour, , on WhatsApp.
+html: Your class starts in 1 hour In 1 hour — SpiralClass Your class starts in 1 hour Hi, I&#39;m . See you in 1 hour, , on WhatsApp. Classes, payments and reminders without the mental load. Sent by SpiralClass · spiralclass.com
+
+=== reminder_1h · push · with no variables
+title: Reminder: In 1 hour
+body: Class with  on 
+
+=== reminder_15m · email · with every variable
+subject: Class with ⟦teacherName⟧ starts in 15 minutes
+text: Hi, I'm ⟦teacherName⟧. Your class starts in 15 minutes, ⟦classDateTime⟧. Join the video call at class time.
+
+Join video call: https://app.test/action
+
+—
+Manage notification settings: https://app.test/r/notif-settings/token
+To stop receiving emails: https://app.test/r/email-uns/token
+html: Your class starts in 15 minutes In 15 minutes — ⟦classDateTime⟧ SpiralClass Your class starts in 15 minutes Hi, I&#39;m ⟦teacherName⟧. Your class starts in 15 minutes, ⟦classDateTime⟧. Join the video call at class time. Join video call Manage notification settings · Unsubscribe from these emails Classes, payments and reminders without the mental load. Sent by SpiralClass · spiralclass.com
+
+=== reminder_15m · push · with every variable
+title: Reminder: In 15 minutes
+body: Class with ⟦teacherName⟧ on ⟦classDateTime⟧
+
+=== reminder_15m · email · with no variables
+subject: Class with  starts in 15 minutes
+text: Hi, I'm . Your class starts in 15 minutes, , on WhatsApp.
+html: Your class starts in 15 minutes In 15 minutes — SpiralClass Your class starts in 15 minutes Hi, I&#39;m . Your class starts in 15 minutes, , on WhatsApp. Classes, payments and reminders without the mental load. Sent by SpiralClass · spiralclass.com
+
+=== reminder_15m · push · with no variables
+title: Reminder: In 15 minutes
+body: Class with  on 
+
+=== reminder_24h_teacher · email · with every variable
+subject: Reminder: class tomorrow with ⟦studentName⟧
+text: Reminder: your class with ⟦studentName⟧ is tomorrow, ⟦classDateTime⟧.
+
+Join the video call at class time.
+
+Join video call: https://app.test/action
+
+Add to calendar: https://calendar.test/add
+
+—
+Manage notification settings: https://app.test/r/notif-settings/token
+To stop receiving emails: https://app.test/r/email-uns/token
+html: Your class is tomorrow Class tomorrow — ⟦classDateTime⟧ SpiralClass Your class is tomorrow Reminder: your class with ⟦studentName⟧ is tomorrow, ⟦classDateTime⟧. Join the video call at class time. Join video call Add to calendar Manage notification settings · Unsubscribe from these emails Classes, payments and reminders without the mental load. Sent by SpiralClass · spiralclass.com
+
+=== reminder_24h_teacher · push · with every variable
+title: Reminder: Tomorrow
+body: Class with ⟦studentName⟧ on ⟦classDateTime⟧
+
+=== reminder_24h_teacher · email · with no variables
+subject: Reminder: class tomorrow with 
+text: Reminder: your class with  is tomorrow, .
+html: Your class is tomorrow Class tomorrow — SpiralClass Your class is tomorrow Reminder: your class with is tomorrow, . Classes, payments and reminders without the mental load. Sent by SpiralClass · spiralclass.com
+
+=== reminder_24h_teacher · push · with no variables
+title: Reminder: Tomorrow
+body: Class with  on 
+
+=== reminder_1h_teacher · email · with every variable
+subject: Class with ⟦studentName⟧ starts in 1 hour
+text: Your class with ⟦studentName⟧ starts in 1 hour, ⟦classDateTime⟧.
+
+Join the video call at class time.
+
+Join video call: https://app.test/action
+
+Add to calendar: https://calendar.test/add
+
+—
+Manage notification settings: https://app.test/r/notif-settings/token
+To stop receiving emails: https://app.test/r/email-uns/token
+html: Your class starts in 1 hour In 1 hour — ⟦classDateTime⟧ SpiralClass Your class starts in 1 hour Your class with ⟦studentName⟧ starts in 1 hour, ⟦classDateTime⟧. Join the video call at class time. Join video call Add to calendar Manage notification settings · Unsubscribe from these emails Classes, payments and reminders without the mental load. Sent by SpiralClass · spiralclass.com
+
+=== reminder_1h_teacher · push · with every variable
+title: Reminder: In 1 hour
+body: Class with ⟦studentName⟧ on ⟦classDateTime⟧
+
+=== reminder_1h_teacher · email · with no variables
+subject: Class with  starts in 1 hour
+text: Your class with  starts in 1 hour, .
+html: Your class starts in 1 hour In 1 hour — SpiralClass Your class starts in 1 hour Your class with starts in 1 hour, . Classes, payments and reminders without the mental load. Sent by SpiralClass · spiralclass.com
+
+=== reminder_1h_teacher · push · with no variables
+title: Reminder: In 1 hour
+body: Class with  on 
+
+=== reminder_15m_teacher · email · with every variable
+subject: Class with ⟦studentName⟧ starts in 15 minutes
+text: Your class with ⟦studentName⟧ starts in 15 minutes, ⟦classDateTime⟧.
+
+Join the video call at class time.
+
+Join video call: https://app.test/action
+
+—
+Manage notification settings: https://app.test/r/notif-settings/token
+To stop receiving emails: https://app.test/r/email-uns/token
+html: Your class starts in 15 minutes In 15 minutes — ⟦classDateTime⟧ SpiralClass Your class starts in 15 minutes Your class with ⟦studentName⟧ starts in 15 minutes, ⟦classDateTime⟧. Join the video call at class time. Join video call Manage notification settings · Unsubscribe from these emails Classes, payments and reminders without the mental load. Sent by SpiralClass · spiralclass.com
+
+=== reminder_15m_teacher · push · with every variable
+title: Reminder: In 15 minutes
+body: Class with ⟦studentName⟧ on ⟦classDateTime⟧
+
+=== reminder_15m_teacher · email · with no variables
+subject: Class with  starts in 15 minutes
+text: Your class with  starts in 15 minutes, .
+html: Your class starts in 15 minutes In 15 minutes — SpiralClass Your class starts in 15 minutes Your class with starts in 15 minutes, . Classes, payments and reminders without the mental load. Sent by SpiralClass · spiralclass.com
+
+=== reminder_15m_teacher · push · with no variables
+title: Reminder: In 15 minutes
+body: Class with  on 
+
+=== cancel_lt24h · email · with every variable
+subject: Late cancellation — ⟦teacherName⟧
+text: Hi, I'm ⟦teacherName⟧. You canceled the ⟦originalDateTime⟧ class with less than 24h notice, so it's deducted from your package per the cancellation policy.
+
+Cancellation policy: https://app.test/terms#cancellation-policy
+
+—
+Manage notification settings: https://app.test/r/notif-settings/token
+To stop receiving emails: https://app.test/r/email-uns/token
+html: Late cancellation (&lt;24h) Late cancellation · ⟦originalDateTime⟧ SpiralClass Late cancellation (&lt;24h) Hi, I&#39;m ⟦teacherName⟧. You canceled the ⟦originalDateTime⟧ class with less than 24h notice, so it&#39;s deducted from your package per the cancellation policy. View cancellation policy Manage notification settings · Unsubscribe from these emails Classes, payments and reminders without the mental load. Sent by SpiralClass · spiralclass.com
+
+=== cancel_lt24h · push · with every variable
+title: Class canceled
+body: Your class on ⟦originalDateTime⟧ with ⟦teacherName⟧ was canceled (less than 24 h).
+
+=== cancel_lt24h · email · with no variables
+subject: Late cancellation — 
+text: Hi, I'm . You canceled the  class with less than 24h notice, so it's deducted from your package per the cancellation policy.
+
+Cancellation policy: https://app.test/terms#cancellation-policy
+html: Late cancellation (&lt;24h) Late cancellation · SpiralClass Late cancellation (&lt;24h) Hi, I&#39;m . You canceled the class with less than 24h notice, so it&#39;s deducted from your package per the cancellation policy. View cancellation policy Classes, payments and reminders without the mental load. Sent by SpiralClass · spiralclass.com
+
+=== cancel_lt24h · push · with no variables
+title: Class canceled
+body: Your class on  with  was canceled (less than 24 h).
+
+=== cancel_gte24h_with_reschedule · email · with every variable
+subject: Reschedule your class — ⟦teacherName⟧
+text: Hi, I'm ⟦teacherName⟧. You canceled the ⟦originalDateTime⟧ class on time. You can reschedule your class whenever you like.
+
+Reschedule: https://app.test/action
+
+—
+Manage notification settings: https://app.test/r/notif-settings/token
+To stop receiving emails: https://app.test/r/email-uns/token
+html: Reschedule your class Reschedule your class SpiralClass Reschedule your class Hi, I&#39;m ⟦teacherName⟧. You canceled the ⟦originalDateTime⟧ class on time. You can reschedule your class whenever you like. Reschedule class Manage notification settings · Unsubscribe from these emails Classes, payments and reminders without the mental load. Sent by SpiralClass · spiralclass.com
+
+=== cancel_gte24h_with_reschedule · push · with every variable
+title: Class canceled
+body: Class on ⟦originalDateTime⟧ with ⟦teacherName⟧. Reschedule anytime.
+
+=== cancel_gte24h_with_reschedule · email · with no variables
+subject: Reschedule your class — 
+text: Hi, I'm . You canceled the  class on time. You can reschedule your class whenever you like.
+
+Reschedule: (link pending)
+html: Reschedule your class Reschedule your class SpiralClass Reschedule your class Hi, I&#39;m . You canceled the class on time. You can reschedule your class whenever you like. Classes, payments and reminders without the mental load. Sent by SpiralClass · spiralclass.com
+
+=== cancel_gte24h_with_reschedule · push · with no variables
+title: Class canceled
+body: Class on  with . Reschedule anytime.
+
+=== teacher_cancel · email · with every variable
+subject: Class canceled — please reschedule — ⟦teacherName⟧
+text: Hi, I'm ⟦teacherName⟧. I had to cancel the ⟦originalDateTime⟧ class. The class is restored in your package; let's reschedule.
+
+Reschedule: https://app.test/action
+
+—
+Manage notification settings: https://app.test/r/notif-settings/token
+To stop receiving emails: https://app.test/r/email-uns/token
+html: Your class was canceled Class canceled — let&#39;s reschedule SpiralClass Your class was canceled Hi, I&#39;m ⟦teacherName⟧. I had to cancel the ⟦originalDateTime⟧ class. The class is restored in your package; let&#39;s reschedule. Reschedule class Manage notification settings · Unsubscribe from these emails Classes, payments and reminders without the mental load. Sent by SpiralClass · spiralclass.com
+
+=== teacher_cancel · push · with every variable
+title: Your teacher canceled
+body: Class on ⟦originalDateTime⟧ with ⟦teacherName⟧. Reschedule anytime.
+
+=== teacher_cancel · email · with no variables
+subject: Class canceled — please reschedule — 
+text: Hi, I'm . I had to cancel the  class. The class is restored in your package; let's reschedule.
+
+Reschedule: (link pending)
+html: Your class was canceled Class canceled — let&#39;s reschedule SpiralClass Your class was canceled Hi, I&#39;m . I had to cancel the class. The class is restored in your package; let&#39;s reschedule. Classes, payments and reminders without the mental load. Sent by SpiralClass · spiralclass.com
+
+=== teacher_cancel · push · with no variables
+title: Your teacher canceled
+body: Class on  with . Reschedule anytime.
+
+=== reschedule_confirm · email · with every variable
+subject: Rescheduled — ⟦teacherName⟧
+text: Hi, I'm ⟦teacherName⟧. Moved your class from ⟦oldDateTime⟧ to ⟦newDateTime⟧.
+
+We'll meet on WhatsApp at that time.
+
+—
+Manage notification settings: https://app.test/r/notif-settings/token
+To stop receiving emails: https://app.test/r/email-uns/token
+html: Class rescheduled New time: ⟦newDateTime⟧ SpiralClass Class rescheduled Hi, I&#39;m ⟦teacherName⟧. Moved your class from ⟦oldDateTime⟧ to ⟦newDateTime⟧. We&#39;ll meet on WhatsApp at that time. Manage notification settings · Unsubscribe from these emails Classes, payments and reminders without the mental load. Sent by SpiralClass · spiralclass.com
+
+=== reschedule_confirm · push · with every variable
+title: Class rescheduled
+body: Was ⟦oldDateTime⟧. Now ⟦newDateTime⟧ with ⟦teacherName⟧.
+
+=== reschedule_confirm · email · with no variables
+subject: Rescheduled — 
+text: Hi, I'm . Moved your class from  to .
+
+We'll meet on WhatsApp at that time.
+html: Class rescheduled New time: SpiralClass Class rescheduled Hi, I&#39;m . Moved your class from to . We&#39;ll meet on WhatsApp at that time. Classes, payments and reminders without the mental load. Sent by SpiralClass · spiralclass.com
+
+=== reschedule_confirm · push · with no variables
+title: Class rescheduled
+body: Was . Now  with .
+
+=== payment_received · email · with every variable
+subject: Payment received — ⟦teacherName⟧
+text: Hi, I'm ⟦teacherName⟧. Got your payment for ⟦packageName⟧ (⟦amount⟧). Your package is active.
+
+Portal: https://app.test/action
+
+—
+Manage notification settings: https://app.test/r/notif-settings/token
+To stop receiving emails: https://app.test/r/email-uns/token
+html: Payment received ⟦packageName⟧ · ⟦amount⟧ SpiralClass Payment received Hi, I&#39;m ⟦teacherName⟧. Got your payment for ⟦packageName⟧ (⟦amount⟧). Your package is active. Open my portal Manage notification settings · Unsubscribe from these emails Classes, payments and reminders without the mental load. Sent by SpiralClass · spiralclass.com
+
+=== payment_received · push · with every variable
+title: Payment received
+body: ⟦packageName⟧ with ⟦teacherName⟧ — ⟦amount⟧.
+
+=== payment_received · email · with no variables
+subject: Payment received — 
+text: Hi, I'm . Got your payment for  (). Your package is active.
+
+Portal: (link pending)
+html: Payment received undefined · undefined SpiralClass Payment received Hi, I&#39;m . Got your payment for (). Your package is active. Classes, payments and reminders without the mental load. Sent by SpiralClass · spiralclass.com
+
+=== payment_received · push · with no variables
+title: Payment received
+body:  with  — .
+
+=== magic_link · email · with every variable
+subject: Your sign-in link with ⟦teacherName⟧
+text: Hi, I'm ⟦teacherName⟧. Here's your sign-in link (valid for ⟦expiryMinutes⟧ minutes):
+
+https://app.test/action
+
+—
+Manage notification settings: https://app.test/r/notif-settings/token
+To stop receiving emails: https://app.test/r/email-uns/token
+html: Your sign-in link Valid for ⟦expiryMinutes⟧ minutes SpiralClass Your sign-in link Hi, I&#39;m ⟦teacherName⟧. Here&#39;s your sign-in link. It&#39;s valid for ⟦expiryMinutes⟧ minutes. Sign in Manage notification settings · Unsubscribe from these emails Classes, payments and reminders without the mental load. Sent by SpiralClass · spiralclass.com
+
+=== magic_link · push · with every variable
+title: Your sign-in link
+body: Tap to open ⟦teacherName⟧'s portal. Expires in ⟦expiryMinutes⟧ min.
+
+=== magic_link · email · with no variables
+subject: Your sign-in link with 
+text: Hi, I'm . Here's your sign-in link (valid for  minutes):
+
+(link pending)
+html: Your sign-in link Valid for minutes SpiralClass Your sign-in link Hi, I&#39;m . Here&#39;s your sign-in link. It&#39;s valid for minutes. Classes, payments and reminders without the mental load. Sent by SpiralClass · spiralclass.com
+
+=== magic_link · push · with no variables
+title: Your sign-in link
+body: Tap to open 's portal. Expires in  min.
+
+=== materials_send · email · with every variable
+subject: Class materials — ⟦teacherName⟧
+text: Hi, I'm ⟦teacherName⟧. Materials for the ⟦classDateTime⟧ class.
+
+Download: https://app.test/action
+
+—
+Manage notification settings: https://app.test/r/notif-settings/token
+To stop receiving emails: https://app.test/r/email-uns/token
+html: Your class materials Materials for ⟦classDateTime⟧ SpiralClass Your class materials Hi, I&#39;m ⟦teacherName⟧. Materials for the ⟦classDateTime⟧ class. Download materials Manage notification settings · Unsubscribe from these emails Classes, payments and reminders without the mental load. Sent by SpiralClass · spiralclass.com
+
+=== materials_send · push · with every variable
+title: Class materials
+body: Materials for your class on ⟦classDateTime⟧ with ⟦teacherName⟧.
+
+=== materials_send · email · with no variables
+subject: Class materials — 
+text: Hi, I'm . Materials for the  class.
+
+Download: (link pending)
+html: Your class materials Materials for SpiralClass Your class materials Hi, I&#39;m . Materials for the class. Classes, payments and reminders without the mental load. Sent by SpiralClass · spiralclass.com
+
+=== materials_send · push · with no variables
+title: Class materials
+body: Materials for your class on  with .
+
+=== payment_pending_teacher · email · with every variable
+subject: Wise payment pending — ⟦studentName⟧
+text: Hi ⟦teacherName⟧, ⟦studentName⟧ just started buying ⟦packageName⟧ for ⟦amount⟧ via Wise.
+
+Reference: ⟦wiseReference⟧
+
+When the transfer lands in Wise, confirm it here: https://app.test/action
+
+—
+Manage notification settings: https://app.test/r/notif-settings/token
+To stop receiving emails: https://app.test/r/email-uns/token
+html: Wise payment pending ⟦studentName⟧ · ⟦amount⟧ · ⟦wiseReference⟧ SpiralClass Wise payment pending Hi ⟦teacherName⟧, ⟦studentName⟧ just started buying ⟦packageName⟧ for ⟦amount⟧ via Wise. Wise reference: ⟦wiseReference⟧ When the transfer lands in Wise, confirm it to activate the package. Confirm payment Manage notification settings · Unsubscribe from these emails Classes, payments and reminders without the mental load. Sent by SpiralClass · spiralclass.com
+
+=== payment_pending_teacher · push · with every variable
+title: Wise payment started
+body: ⟦studentName⟧ is buying ⟦packageName⟧ (⟦amount⟧). Ref: ⟦wiseReference⟧.
+
+=== payment_pending_teacher · email · with no variables
+subject: Wise payment pending — 
+text: Hi ,  just started buying  for  via Wise.
+
+Reference: 
+
+When the transfer lands in Wise, confirm it here: (link pending)
+html: Wise payment pending undefined · undefined · undefined SpiralClass Wise payment pending Hi , just started buying for via Wise. Wise reference: When the transfer lands in Wise, confirm it to activate the package. Classes, payments and reminders without the mental load. Sent by SpiralClass · spiralclass.com
+
+=== payment_pending_teacher · push · with no variables
+title: Wise payment started
+body:  is buying  (). Ref: .
+
+=== payment_marked_sent_teacher · email · with every variable
+subject: ⟦studentName⟧ says the Wise transfer is on the way
+text: Hi ⟦teacherName⟧, ⟦studentName⟧ marked the ⟦amount⟧ transfer for ⟦packageName⟧ as sent.
+
+Reference: ⟦wiseReference⟧
+
+Check your Wise inbox and confirm receipt to activate the package: https://app.test/action
+
+—
+Manage notification settings: https://app.test/r/notif-settings/token
+To stop receiving emails: https://app.test/r/email-uns/token
+html: ⟦studentName⟧ sent the payment ⟦studentName⟧ · ⟦amount⟧ · ⟦wiseReference⟧ SpiralClass ⟦studentName⟧ sent the payment Hi ⟦teacherName⟧, ⟦studentName⟧ marked the ⟦amount⟧ transfer for ⟦packageName⟧ as sent. Wise reference: ⟦wiseReference⟧ Check your Wise inbox and confirm receipt to activate the package. Confirm receipt Manage notification settings · Unsubscribe from these emails Classes, payments and reminders without the mental load. Sent by SpiralClass · spiralclass.com
+
+=== payment_marked_sent_teacher · push · with every variable
+title: Wise payment sent
+body: ⟦studentName⟧ sent ⟦amount⟧ for ⟦packageName⟧. Check Wise.
+
+=== payment_marked_sent_teacher · email · with no variables
+subject:  says the Wise transfer is on the way
+text: Hi ,  marked the  transfer for  as sent.
+
+Reference: 
+
+Check your Wise inbox and confirm receipt to activate the package: (link pending)
+html: sent the payment undefined · undefined · undefined SpiralClass sent the payment Hi , marked the transfer for as sent. Wise reference: Check your Wise inbox and confirm receipt to activate the package. Classes, payments and reminders without the mental load. Sent by SpiralClass · spiralclass.com
+
+=== payment_marked_sent_teacher · push · with no variables
+title: Wise payment sent
+body:  sent  for . Check Wise.
+
+=== payment_failed_student · email · with every variable
+subject: Your payment didn't go through — ⟦teacherName⟧
+text: Hi, I'm ⟦teacherName⟧. Your payment for ⟦packageName⟧ couldn't be processed, so the package wasn't activated.
+
+Try again here — you can pay by card or bank transfer (Wise): https://app.test/action
+
+—
+Manage notification settings: https://app.test/r/notif-settings/token
+To stop receiving emails: https://app.test/r/email-uns/token
+html: Payment didn&#39;t complete Payment didn&#39;t complete SpiralClass Payment didn&#39;t complete Hi, I&#39;m ⟦teacherName⟧. Your payment for ⟦packageName⟧ couldn&#39;t be processed, so the package wasn&#39;t activated. You can try again whenever you&#39;re ready — by card or bank transfer (Wise), whichever is easier. Try again Manage notification settings · Unsubscribe from these emails Classes, payments and reminders without the mental load. Sent by SpiralClass · spiralclass.com
+
+=== payment_failed_student · push · with every variable
+title: Payment didn't complete
+body: Your payment for ⟦packageName⟧ with ⟦teacherName⟧ didn't go through.
+
+=== payment_failed_student · email · with no variables
+subject: Your payment didn't go through — 
+text: Hi, I'm . Your payment for  couldn't be processed, so the package wasn't activated.
+
+Try again here — you can pay by card or bank transfer (Wise): (link pending)
+html: Payment didn&#39;t complete Payment didn&#39;t complete SpiralClass Payment didn&#39;t complete Hi, I&#39;m . Your payment for couldn&#39;t be processed, so the package wasn&#39;t activated. You can try again whenever you&#39;re ready — by card or bank transfer (Wise), whichever is easier. Classes, payments and reminders without the mental load. Sent by SpiralClass · spiralclass.com
+
+=== payment_failed_student · push · with no variables
+title: Payment didn't complete
+body: Your payment for  with  didn't go through.
+
+=== refund_issued_student · email · with every variable
+subject: Refund issued — ⟦teacherName⟧
+text: Hi, I'm ⟦teacherName⟧. Your refund of ⟦amount⟧ for ⟦packageName⟧ was processed. The money goes back to the same payment method, usually within 5 to 10 business days depending on your bank.
+
+—
+Manage notification settings: https://app.test/r/notif-settings/token
+To stop receiving emails: https://app.test/r/email-uns/token
+html: Refund issued Refund of ⟦amount⟧ SpiralClass Refund issued Hi, I&#39;m ⟦teacherName⟧. Your refund of ⟦amount⟧ for ⟦packageName⟧ was processed. The money goes back to the same payment method, usually within 5 to 10 business days depending on your bank. Manage notification settings · Unsubscribe from these emails Classes, payments and reminders without the mental load. Sent by SpiralClass · spiralclass.com
+
+=== refund_issued_student · push · with every variable
+title: Refund issued
+body: ⟦amount⟧ for ⟦packageName⟧ with ⟦teacherName⟧.
+
+=== refund_issued_student · email · with no variables
+subject: Refund issued — 
+text: Hi, I'm . Your refund of  for  was processed. The money goes back to the same payment method, usually within 5 to 10 business days depending on your bank.
+html: Refund issued Refund of SpiralClass Refund issued Hi, I&#39;m . Your refund of for was processed. The money goes back to the same payment method, usually within 5 to 10 business days depending on your bank. Classes, payments and reminders without the mental load. Sent by SpiralClass · spiralclass.com
+
+=== refund_issued_student · push · with no variables
+title: Refund issued
+body:  for  with .
+
+=== refund_issued_teacher · email · with every variable
+subject: Refund issued — ⟦studentName⟧
+text: Hi ⟦teacherName⟧, a refund of ⟦amount⟧ was processed for ⟦studentName⟧'s ⟦packageName⟧.
+
+Payment details: https://app.test/action
+
+—
+Manage notification settings: https://app.test/r/notif-settings/token
+To stop receiving emails: https://app.test/r/email-uns/token
+html: Refund issued ⟦studentName⟧ · ⟦amount⟧ SpiralClass Refund issued Hi ⟦teacherName⟧, a refund of ⟦amount⟧ was processed for ⟦studentName⟧&#39;s ⟦packageName⟧. The package is now marked refunded in your dashboard. View payment Manage notification settings · Unsubscribe from these emails Classes, payments and reminders without the mental load. Sent by SpiralClass · spiralclass.com
+
+=== refund_issued_teacher · push · with every variable
+title: Refund issued
+body: ⟦amount⟧ to ⟦studentName⟧ for ⟦packageName⟧.
+
+=== refund_issued_teacher · email · with no variables
+subject: Refund issued — 
+text: Hi , a refund of  was processed for 's .
+
+Payment details: (link pending)
+html: Refund issued undefined · undefined SpiralClass Refund issued Hi , a refund of was processed for &#39;s . The package is now marked refunded in your dashboard. Classes, payments and reminders without the mental load. Sent by SpiralClass · spiralclass.com
+
+=== refund_issued_teacher · push · with no variables
+title: Refund issued
+body:  to  for .
+
+=== dispute_lost_student · email · with every variable
+subject: Your payment was reversed — ⟦teacherName⟧
+text: Hi, I'm ⟦teacherName⟧. Your card issuer reversed the ⟦amount⟧ payment for ⟦packageName⟧, so the remaining classes on that package are no longer available. If you think this is a mistake, message me and we'll sort it out.
+
+—
+Manage notification settings: https://app.test/r/notif-settings/token
+To stop receiving emails: https://app.test/r/email-uns/token
+html: Your payment was reversed Payment reversed · ⟦amount⟧ SpiralClass Your payment was reversed Hi, I&#39;m ⟦teacherName⟧. Your card issuer reversed the ⟦amount⟧ payment for ⟦packageName⟧. The remaining classes on that package are no longer available. If you think this is a mistake, message me and we&#39;ll sort it out. Manage notification settings · Unsubscribe from these emails Classes, payments and reminders without the mental load. Sent by SpiralClass · spiralclass.com
+
+=== dispute_lost_student · push · with every variable
+title: Your payment was reversed
+body: ⟦amount⟧ for ⟦packageName⟧. The remaining classes are no longer available.
+
+=== dispute_lost_student · email · with no variables
+subject: Your payment was reversed — 
+text: Hi, I'm . Your card issuer reversed the  payment for , so the remaining classes on that package are no longer available. If you think this is a mistake, message me and we'll sort it out.
+html: Your payment was reversed Payment reversed · SpiralClass Your payment was reversed Hi, I&#39;m . Your card issuer reversed the payment for . The remaining classes on that package are no longer available. If you think this is a mistake, message me and we&#39;ll sort it out. Classes, payments and reminders without the mental load. Sent by SpiralClass · spiralclass.com
+
+=== dispute_lost_student · push · with no variables
+title: Your payment was reversed
+body:  for . The remaining classes are no longer available.
+
+=== dispute_lost_teacher · email · with every variable
+subject: Chargeback lost — ⟦studentName⟧
+text: Hi ⟦teacherName⟧, a ⟦amount⟧ chargeback on ⟦studentName⟧'s ⟦packageName⟧ was decided against you. Stripe took that amount and its dispute fee out of your balance, and ⟦studentName⟧'s remaining classes on that package have been removed.
+
+Payment details: https://app.test/action
+
+—
+Manage notification settings: https://app.test/r/notif-settings/token
+To stop receiving emails: https://app.test/r/email-uns/token
+html: Chargeback lost ⟦studentName⟧ · ⟦amount⟧ SpiralClass Chargeback lost Hi ⟦teacherName⟧, a ⟦amount⟧ chargeback on ⟦studentName⟧&#39;s ⟦packageName⟧ was decided against you. Stripe took that amount and its dispute fee out of your balance, and ⟦studentName⟧&#39;s remaining classes on that package have been removed. View payment Manage notification settings · Unsubscribe from these emails Classes, payments and reminders without the mental load. Sent by SpiralClass · spiralclass.com
+
+=== dispute_lost_teacher · push · with every variable
+title: Chargeback lost
+body: ⟦amount⟧ from ⟦studentName⟧ for ⟦packageName⟧.
+
+=== dispute_lost_teacher · email · with no variables
+subject: Chargeback lost — 
+text: Hi , a  chargeback on 's  was decided against you. Stripe took that amount and its dispute fee out of your balance, and 's remaining classes on that package have been removed.
+
+Payment details: (link pending)
+html: Chargeback lost undefined · undefined SpiralClass Chargeback lost Hi , a chargeback on &#39;s was decided against you. Stripe took that amount and its dispute fee out of your balance, and &#39;s remaining classes on that package have been removed. Classes, payments and reminders without the mental load. Sent by SpiralClass · spiralclass.com
+
+=== dispute_lost_teacher · push · with no variables
+title: Chargeback lost
+body:  from  for .
+
+=== stripe_ready_teacher · email · with every variable
+subject: Your Stripe is ready
+text: Hi ⟦teacherName⟧, Stripe finished verifying your account — you can now accept card payments.
+
+Share your booking link: https://app.test/action
+
+—
+Manage notification settings: https://app.test/r/notif-settings/token
+To stop receiving emails: https://app.test/r/email-uns/token
+html: Your Stripe is ready Stripe is now accepting payments SpiralClass Your Stripe is ready Hi ⟦teacherName⟧, Stripe finished verifying your account — you can now accept card payments. Your booking link is ready to take card payments. Open my link Manage notification settings · Unsubscribe from these emails Classes, payments and reminders without the mental load. Sent by SpiralClass · spiralclass.com
+
+=== stripe_ready_teacher · push · with every variable
+title: Stripe is ready
+body: You can now accept card payments.
+
+=== stripe_ready_teacher · email · with no variables
+subject: Your Stripe is ready
+text: Hi , Stripe finished verifying your account — you can now accept card payments.
+
+Share your booking link: (link pending)
+html: Your Stripe is ready Stripe is now accepting payments SpiralClass Your Stripe is ready Hi , Stripe finished verifying your account — you can now accept card payments. Your booking link is ready to take card payments. Classes, payments and reminders without the mental load. Sent by SpiralClass · spiralclass.com
+
+=== stripe_ready_teacher · push · with no variables
+title: Stripe is ready
+body: You can now accept card payments.
+
+=== stripe_requirements_teacher · email · with every variable
+subject: Stripe needs more information
+text: Hi ⟦teacherName⟧, Stripe paused card payments on your account because more information is needed. New card payments won't complete until you fix this.
+
+Review the requirements: https://app.test/action
+
+—
+Manage notification settings: https://app.test/r/notif-settings/token
+To stop receiving emails: https://app.test/r/email-uns/token
+html: Stripe needs more info Stripe paused your card payments SpiralClass Stripe needs more info Hi ⟦teacherName⟧, Stripe paused card payments on your account because more information is needed. New card payments won&#39;t complete until you fix this. Review requirements Manage notification settings · Unsubscribe from these emails Classes, payments and reminders without the mental load. Sent by SpiralClass · spiralclass.com
+
+=== stripe_requirements_teacher · push · with every variable
+title: Stripe needs more info
+body: Card payments are paused.
+
+=== stripe_requirements_teacher · email · with no variables
+subject: Stripe needs more information
+text: Hi , Stripe paused card payments on your account because more information is needed. New card payments won't complete until you fix this.
+
+Review the requirements: (link pending)
+html: Stripe needs more info Stripe paused your card payments SpiralClass Stripe needs more info Hi , Stripe paused card payments on your account because more information is needed. New card payments won&#39;t complete until you fix this. Classes, payments and reminders without the mental load. Sent by SpiralClass · spiralclass.com
+
+=== stripe_requirements_teacher · push · with no variables
+title: Stripe needs more info
+body: Card payments are paused.
+
+=== account_disabled_teacher · email · with every variable
+subject: Your SpiralClass account was disabled
+text: Hi ⟦teacherName⟧, your SpiralClass account has been disabled.
+
+Reason: ⟦reason⟧
+
+If you believe this is a mistake, reply to this email and we'll review.
+
+—
+Manage notification settings: https://app.test/r/notif-settings/token
+To stop receiving emails: https://app.test/r/email-uns/token
+html: Your account was disabled Account disabled SpiralClass Your account was disabled Hi ⟦teacherName⟧, your SpiralClass account has been disabled. Reason: ⟦reason⟧ If you believe this is a mistake, reply to this email and we&#39;ll review. Manage notification settings · Unsubscribe from these emails Classes, payments and reminders without the mental load. Sent by SpiralClass · spiralclass.com
+
+=== account_disabled_teacher · push · with every variable
+title: Account disabled
+body: Your SpiralClass account was disabled. Check your email.
+
+=== account_disabled_teacher · email · with no variables
+subject: Your SpiralClass account was disabled
+text: Hi , your SpiralClass account has been disabled.
+
+Reason: 
+
+If you believe this is a mistake, reply to this email and we'll review.
+html: Your account was disabled Account disabled SpiralClass Your account was disabled Hi , your SpiralClass account has been disabled. Reason: If you believe this is a mistake, reply to this email and we&#39;ll review. Classes, payments and reminders without the mental load. Sent by SpiralClass · spiralclass.com
+
+=== account_disabled_teacher · push · with no variables
+title: Account disabled
+body: Your SpiralClass account was disabled. Check your email.
+
+=== booking_created_teacher · email · with every variable
+subject: New class booked — ⟦studentName⟧
+text: Hi ⟦teacherName⟧, ⟦studentName⟧ booked a class on ⟦classDateTime⟧.
+
+Open dashboard: https://app.test/action
+
+Add to calendar: https://calendar.test/add
+
+—
+Manage notification settings: https://app.test/r/notif-settings/token
+To stop receiving emails: https://app.test/r/email-uns/token
+html: New class booked ⟦studentName⟧ · ⟦classDateTime⟧ SpiralClass New class booked Hi ⟦teacherName⟧, ⟦studentName⟧ booked a class on ⟦classDateTime⟧. Open dashboard Add to calendar Manage notification settings · Unsubscribe from these emails Classes, payments and reminders without the mental load. Sent by SpiralClass · spiralclass.com
+
+=== booking_created_teacher · push · with every variable
+title: New class booked
+body: ⟦studentName⟧ booked ⟦classDateTime⟧
+
+=== booking_created_teacher · email · with no variables
+subject: New class booked — 
+text: Hi ,  booked a class on .
+
+Open dashboard: (link pending)
+html: New class booked undefined · undefined SpiralClass New class booked Hi , booked a class on . Classes, payments and reminders without the mental load. Sent by SpiralClass · spiralclass.com
+
+=== booking_created_teacher · push · with no variables
+title: New class booked
+body:  booked 
+
+=== cancel_lt24h_teacher · email · with every variable
+subject: ⟦studentName⟧ canceled late (<24h)
+text: Hi ⟦teacherName⟧, ⟦studentName⟧ canceled the ⟦originalDateTime⟧ class with less than 24h notice. The class was deducted from their package per the cancellation policy.
+
+Note: ⟦studentName⟧ did not receive a notice for this cancellation because they're archived on your roster. Reactivate them from their profile if you want them to get notices again.
+
+Cancellation policy: https://app.test/terms#cancellation-policy
+
+—
+Manage notification settings: https://app.test/r/notif-settings/token
+To stop receiving emails: https://app.test/r/email-uns/token
+html: Late cancellation ⟦studentName⟧ · ⟦originalDateTime⟧ SpiralClass Late cancellation Hi ⟦teacherName⟧, ⟦studentName⟧ canceled the ⟦originalDateTime⟧ class with less than 24h notice. The class was deducted from their package per the cancellation policy. Note: ⟦studentName⟧ did not receive a notice for this cancellation because they&#39;re archived on your roster. Reactivate them from their profile if you want them to get notices again. View cancellation policy Manage notification settings · Unsubscribe from these emails Classes, payments and reminders without the mental load. Sent by SpiralClass · spiralclass.com
+
+=== cancel_lt24h_teacher · push · with every variable
+title: Late cancellation
+body: ⟦studentName⟧ canceled ⟦originalDateTime⟧ (<24h).
+
+=== cancel_lt24h_teacher · email · with no variables
+subject:  canceled late (<24h)
+text: Hi ,  canceled the  class with less than 24h notice. The class was deducted from their package per the cancellation policy.
+
+Cancellation policy: https://app.test/terms#cancellation-policy
+html: Late cancellation undefined · undefined SpiralClass Late cancellation Hi , canceled the class with less than 24h notice. The class was deducted from their package per the cancellation policy. View cancellation policy Classes, payments and reminders without the mental load. Sent by SpiralClass · spiralclass.com
+
+=== cancel_lt24h_teacher · push · with no variables
+title: Late cancellation
+body:  canceled  (<24h).
+
+=== cancel_gte24h_teacher · email · with every variable
+subject: ⟦studentName⟧ canceled their class
+text: Hi ⟦teacherName⟧, ⟦studentName⟧ canceled the ⟦originalDateTime⟧ class on time. The class remains available to reschedule; nothing was deducted.
+
+Note: ⟦studentName⟧ did not receive a notice for this cancellation because they're archived on your roster. Reactivate them from their profile if you want them to get notices again.
+
+—
+Manage notification settings: https://app.test/r/notif-settings/token
+To stop receiving emails: https://app.test/r/email-uns/token
+html: Class canceled ⟦studentName⟧ · ⟦originalDateTime⟧ SpiralClass Class canceled Hi ⟦teacherName⟧, ⟦studentName⟧ canceled the ⟦originalDateTime⟧ class on time. The class remains available to reschedule; nothing was deducted. Note: ⟦studentName⟧ did not receive a notice for this cancellation because they&#39;re archived on your roster. Reactivate them from their profile if you want them to get notices again. Manage notification settings · Unsubscribe from these emails Classes, payments and reminders without the mental load. Sent by SpiralClass · spiralclass.com
+
+=== cancel_gte24h_teacher · push · with every variable
+title: Class canceled
+body: ⟦studentName⟧ canceled ⟦originalDateTime⟧.
+
+=== cancel_gte24h_teacher · email · with no variables
+subject:  canceled their class
+text: Hi ,  canceled the  class on time. The class remains available to reschedule; nothing was deducted.
+html: Class canceled undefined · undefined SpiralClass Class canceled Hi , canceled the class on time. The class remains available to reschedule; nothing was deducted. Classes, payments and reminders without the mental load. Sent by SpiralClass · spiralclass.com
+
+=== cancel_gte24h_teacher · push · with no variables
+title: Class canceled
+body:  canceled .
+
+=== reschedule_confirm_teacher · email · with every variable
+subject: ⟦studentName⟧ rescheduled their class
+text: Hi ⟦teacherName⟧, ⟦studentName⟧ moved their class from ⟦oldDateTime⟧ to ⟦newDateTime⟧.
+
+—
+Manage notification settings: https://app.test/r/notif-settings/token
+To stop receiving emails: https://app.test/r/email-uns/token
+html: Class rescheduled ⟦studentName⟧ → ⟦newDateTime⟧ SpiralClass Class rescheduled Hi ⟦teacherName⟧, ⟦studentName⟧ moved their class from ⟦oldDateTime⟧ to ⟦newDateTime⟧. Manage notification settings · Unsubscribe from these emails Classes, payments and reminders without the mental load. Sent by SpiralClass · spiralclass.com
+
+=== reschedule_confirm_teacher · push · with every variable
+title: Class rescheduled
+body: ⟦studentName⟧: ⟦oldDateTime⟧ → ⟦newDateTime⟧.
+
+=== reschedule_confirm_teacher · email · with no variables
+subject:  rescheduled their class
+text: Hi ,  moved their class from  to .
+html: Class rescheduled undefined → undefined SpiralClass Class rescheduled Hi , moved their class from to . Classes, payments and reminders without the mental load. Sent by SpiralClass · spiralclass.com
+
+=== reschedule_confirm_teacher · push · with no variables
+title: Class rescheduled
+body: :  → .
+
+=== no_show_student · email · with every variable
+subject: Class on ⟦originalDateTime⟧ marked as no-show
+text: Hi, I'm ⟦teacherName⟧. I marked the ⟦originalDateTime⟧ class as a no-show, so it was deducted from your package per the cancellation policy.
+
+If you think this is a mistake, message me on WhatsApp.
+
+Cancellation policy: https://app.test/terms#cancellation-policy
+
+—
+Manage notification settings: https://app.test/r/notif-settings/token
+To stop receiving emails: https://app.test/r/email-uns/token
+html: No-show recorded Class marked as no-show SpiralClass No-show recorded Hi, I&#39;m ⟦teacherName⟧. I marked the ⟦originalDateTime⟧ class as a no-show, so it was deducted from your package per the cancellation policy. If you think this is a mistake, message me on WhatsApp. View cancellation policy Manage notification settings · Unsubscribe from these emails Classes, payments and reminders without the mental load. Sent by SpiralClass · spiralclass.com
+
+=== no_show_student · push · with every variable
+title: No-show recorded
+body: ⟦teacherName⟧ marked the ⟦originalDateTime⟧ class as a no-show.
+
+=== no_show_student · email · with no variables
+subject: Class on  marked as no-show
+text: Hi, I'm . I marked the  class as a no-show, so it was deducted from your package per the cancellation policy.
+
+If you think this is a mistake, message me on WhatsApp.
+
+Cancellation policy: https://app.test/terms#cancellation-policy
+html: No-show recorded Class marked as no-show SpiralClass No-show recorded Hi, I&#39;m . I marked the class as a no-show, so it was deducted from your package per the cancellation policy. If you think this is a mistake, message me on WhatsApp. View cancellation policy Classes, payments and reminders without the mental load. Sent by SpiralClass · spiralclass.com
+
+=== no_show_student · push · with no variables
+title: No-show recorded
+body:  marked the  class as a no-show.
+
+=== package_expiry_nudge · email · with every variable
+subject: You still have classes to use with ⟦teacherName⟧
+text: Hi, I'm ⟦teacherName⟧. Your "⟦packageName⟧" package expires on ⟦expiryDate⟧ and you still have ⟦classesRemaining⟧ class(es) left. Book now so you don't lose them.
+
+Book: https://app.test/action
+
+—
+Manage notification settings: https://app.test/r/notif-settings/token
+To stop receiving emails: https://app.test/r/email-uns/token
+html: Don&#39;t lose your classes Expires ⟦expiryDate⟧ · ⟦classesRemaining⟧ class(es) left SpiralClass Don&#39;t lose your classes Hi, I&#39;m ⟦teacherName⟧. Your &quot;⟦packageName⟧&quot; package expires on ⟦expiryDate⟧ and you still have ⟦classesRemaining⟧ class(es) left. Book now to use them before they expire. Book my class Manage notification settings · Unsubscribe from these emails Classes, payments and reminders without the mental load. Sent by SpiralClass · spiralclass.com
+
+=== package_expiry_nudge · push · with every variable
+title: Don't lose your classes
+body: You have ⟦classesRemaining⟧ class(es) left with ⟦teacherName⟧; they expire ⟦expiryDate⟧.
+
+=== package_expiry_nudge · email · with no variables
+subject: You still have classes to use with 
+text: Hi, I'm . Your "" package expires on  and you still have  class(es) left. Book now so you don't lose them.
+
+Book: (link pending)
+html: Don&#39;t lose your classes Expires · class(es) left SpiralClass Don&#39;t lose your classes Hi, I&#39;m . Your &quot;&quot; package expires on and you still have class(es) left. Book now to use them before they expire. Classes, payments and reminders without the mental load. Sent by SpiralClass · spiralclass.com
+
+=== package_expiry_nudge · push · with no variables
+title: Don't lose your classes
+body: You have  class(es) left with ; they expire .
+
+=== wise_confirm_reminder_teacher · email · with every variable
+subject: Reminder: confirm ⟦studentName⟧'s Wise payment
+text: Hi ⟦teacherName⟧, ⟦studentName⟧ marked the ⟦amount⟧ transfer for ⟦packageName⟧ as sent and it's still unconfirmed. The package won't activate until you confirm receipt in your Wise.
+
+Reference: ⟦wiseReference⟧
+
+Confirm: https://app.test/action
+
+—
+Manage notification settings: https://app.test/r/notif-settings/token
+To stop receiving emails: https://app.test/r/email-uns/token
+html: Wise payment awaiting confirmation ⟦studentName⟧ · ⟦amount⟧ · awaiting confirmation SpiralClass Wise payment awaiting confirmation Hi ⟦teacherName⟧, ⟦studentName⟧ marked the ⟦amount⟧ transfer for ⟦packageName⟧ as sent and it&#39;s still unconfirmed. Wise reference: ⟦wiseReference⟧ The package won&#39;t activate until you confirm receipt in your Wise. Confirm payment Manage notification settings · Unsubscribe from these emails Classes, payments and reminders without the mental load. Sent by SpiralClass · spiralclass.com
+
+=== wise_confirm_reminder_teacher · push · with every variable
+title: Confirm Wise payment
+body: ⟦studentName⟧: ⟦amount⟧ is still unconfirmed. Confirm it to activate the package.
+
+=== wise_confirm_reminder_teacher · email · with no variables
+subject: Reminder: confirm 's Wise payment
+text: Hi ,  marked the  transfer for  as sent and it's still unconfirmed. The package won't activate until you confirm receipt in your Wise.
+
+Reference: 
+
+Confirm: (link pending)
+html: Wise payment awaiting confirmation · · awaiting confirmation SpiralClass Wise payment awaiting confirmation Hi , marked the transfer for as sent and it&#39;s still unconfirmed. Wise reference: The package won&#39;t activate until you confirm receipt in your Wise. Classes, payments and reminders without the mental load. Sent by SpiralClass · spiralclass.com
+
+=== wise_confirm_reminder_teacher · push · with no variables
+title: Confirm Wise payment
+body: :  is still unconfirmed. Confirm it to activate the package.
+
+=== payment_received_teacher · email · with every variable
+subject: New sale — ⟦studentName⟧ bought ⟦packageName⟧
+text: Hi ⟦teacherName⟧, ⟦studentName⟧ bought ⟦packageName⟧ for ⟦amount⟧ by card. The package is already active and the money is on its way to your account.
+
+View payment: https://app.test/action
+
+—
+Manage notification settings: https://app.test/r/notif-settings/token
+To stop receiving emails: https://app.test/r/email-uns/token
+html: New sale ⟦studentName⟧ · ⟦packageName⟧ · ⟦amount⟧ SpiralClass New sale Hi ⟦teacherName⟧, ⟦studentName⟧ bought ⟦packageName⟧ for ⟦amount⟧ by card. The package is already active and the money is on its way to your account. View payment Manage notification settings · Unsubscribe from these emails Classes, payments and reminders without the mental load. Sent by SpiralClass · spiralclass.com
+
+=== payment_received_teacher · push · with every variable
+title: New sale
+body: ⟦studentName⟧ bought ⟦packageName⟧ (⟦amount⟧).
+
+=== payment_received_teacher · email · with no variables
+subject: New sale —  bought 
+text: Hi ,  bought  for  by card. The package is already active and the money is on its way to your account.
+
+View payment: (link pending)
+html: New sale undefined · undefined · undefined SpiralClass New sale Hi , bought for by card. The package is already active and the money is on its way to your account. Classes, payments and reminders without the mental load. Sent by SpiralClass · spiralclass.com
+
+=== payment_received_teacher · push · with no variables
+title: New sale
+body:  bought  ().
+
+=== wise_marked_sent_student · email · with every variable
+subject: We got your payment notice
+text: Hi, I'm ⟦teacherName⟧. Thanks for letting me know you sent your Wise transfer (reference ⟦wiseReference⟧) for ⟦packageName⟧.
+
+As soon as it shows up I'll confirm the payment and your package goes active — you'll get another email then.
+
+—
+Manage notification settings: https://app.test/r/notif-settings/token
+To stop receiving emails: https://app.test/r/email-uns/token
+html: We got your payment notice Reference ⟦wiseReference⟧ · ⟦packageName⟧ SpiralClass We got your payment notice Hi, I&#39;m ⟦teacherName⟧. Thanks for letting me know you sent your Wise transfer (reference ⟦wiseReference⟧) for ⟦packageName⟧. As soon as it shows up I&#39;ll confirm the payment and your package goes active — you&#39;ll get another email then. Manage notification settings · Unsubscribe from these emails Classes, payments and reminders without the mental load. Sent by SpiralClass · spiralclass.com
+
+=== wise_marked_sent_student · push · with every variable
+title: Your teacher was notified
+body: We told ⟦teacherName⟧ you sent your transfer (⟦wiseReference⟧). Your package activates once they confirm it.
+
+=== wise_marked_sent_student · email · with no variables
+subject: We got your payment notice
+text: Hi, I'm . Thanks for letting me know you sent your Wise transfer (reference ) for .
+
+As soon as it shows up I'll confirm the payment and your package goes active — you'll get another email then.
+html: We got your payment notice Reference · SpiralClass We got your payment notice Hi, I&#39;m . Thanks for letting me know you sent your Wise transfer (reference ) for . As soon as it shows up I&#39;ll confirm the payment and your package goes active — you&#39;ll get another email then. Classes, payments and reminders without the mental load. Sent by SpiralClass · spiralclass.com
+
+=== wise_marked_sent_student · push · with no variables
+title: Your teacher was notified
+body: We told  you sent your transfer (). Your package activates once they confirm it.
+
+=== package_consumed_student · email · with every variable
+subject: You've used all your classes with ⟦teacherName⟧
+text: Hi, I'm ⟦teacherName⟧. You've used all the classes in your "⟦packageName⟧" package — thanks for learning with me! Want to keep going? You can buy your next package from your portal, no need to re-enter your details.
+
+Buy: https://app.test/action
+
+—
+Manage notification settings: https://app.test/r/notif-settings/token
+To stop receiving emails: https://app.test/r/email-uns/token
+html: Shall we keep going? Your &quot;⟦packageName⟧&quot; package is complete SpiralClass Shall we keep going? Hi, I&#39;m ⟦teacherName⟧. You&#39;ve used all the classes in your &quot;⟦packageName⟧&quot; package — thanks for learning with me! Want to keep going? You can buy your next package from your portal, no need to re-enter your details. Buy another package Manage notification settings · Unsubscribe from these emails Classes, payments and reminders without the mental load. Sent by SpiralClass · spiralclass.com
+
+=== package_consumed_student · push · with every variable
+title: Shall we keep going?
+body: You've used all the classes in "⟦packageName⟧" with ⟦teacherName⟧. Buy your next package from your portal.
+
+=== package_consumed_student · email · with no variables
+subject: You've used all your classes with 
+text: Hi, I'm . You've used all the classes in your "" package — thanks for learning with me! Want to keep going? You can buy your next package from your portal, no need to re-enter your details.
+
+Buy: (link pending)
+html: Shall we keep going? Your &quot;&quot; package is complete SpiralClass Shall we keep going? Hi, I&#39;m . You&#39;ve used all the classes in your &quot;&quot; package — thanks for learning with me! Want to keep going? You can buy your next package from your portal, no need to re-enter your details. Classes, payments and reminders without the mental load. Sent by SpiralClass · spiralclass.com
+
+=== package_consumed_student · push · with no variables
+title: Shall we keep going?
+body: You've used all the classes in "" with . Buy your next package from your portal.
+
+=== package_consumed_teacher · email · with every variable
+subject: ⟦studentName⟧ finished their package
+text: Hi ⟦teacherName⟧, ⟦studentName⟧ has used all the classes in their "⟦packageName⟧" package. We sent them a renewal link to their portal; a personal WhatsApp message from you usually helps close the renewal.
+
+—
+Manage notification settings: https://app.test/r/notif-settings/token
+To stop receiving emails: https://app.test/r/email-uns/token
+html: Renewal opportunity ⟦studentName⟧ · &quot;⟦packageName⟧&quot; complete SpiralClass Renewal opportunity Hi ⟦teacherName⟧, ⟦studentName⟧ has used all the classes in their &quot;⟦packageName⟧&quot; package. We sent them a renewal link to their portal; a personal WhatsApp message from you usually helps close the renewal. View student Manage notification settings · Unsubscribe from these emails Classes, payments and reminders without the mental load. Sent by SpiralClass · spiralclass.com
+
+=== package_consumed_teacher · push · with every variable
+title: Renewal opportunity
+body: ⟦studentName⟧ finished their "⟦packageName⟧" package.
+
+=== package_consumed_teacher · email · with no variables
+subject:  finished their package
+text: Hi ,  has used all the classes in their "" package. They don't get automatic notices from us, so a personal WhatsApp message from you is the best way to invite them to renew.
+html: Renewal opportunity · &quot;&quot; complete SpiralClass Renewal opportunity Hi , has used all the classes in their &quot;&quot; package. They don&#39;t get automatic notices from us, so a personal WhatsApp message from you is the best way to invite them to renew. Classes, payments and reminders without the mental load. Sent by SpiralClass · spiralclass.com
+
+=== package_consumed_teacher · push · with no variables
+title: Renewal opportunity
+body:  finished their "" package.
+
+=== subscription_trial_ending · email · with every variable
+subject: Your Pro trial ends in ⟦daysRemaining⟧ days
+text: Hi ⟦teacherName⟧, your free SpiralClass Pro trial ends in ⟦daysRemaining⟧ days. If you don't subscribe, your account moves to the Free plan (you keep your booking page and both payment rails; you lose WhatsApp reminders, unlimited students, and materials).
+
+Choose a plan: https://app.test/action
+
+—
+Manage notification settings: https://app.test/r/notif-settings/token
+To stop receiving emails: https://app.test/r/email-uns/token
+html: Your Pro trial is ending Your Pro trial ends in ⟦daysRemaining⟧ days SpiralClass Your Pro trial is ending Hi ⟦teacherName⟧, your free SpiralClass Pro trial ends in ⟦daysRemaining⟧ days. If you don&#39;t subscribe, your account moves to the Free plan — you keep your booking page and both payment rails, but you lose WhatsApp reminders, unlimited students, and materials. Choose a plan Manage notification settings · Unsubscribe from these emails Classes, payments and reminders without the mental load. Sent by SpiralClass · spiralclass.com
+
+=== subscription_trial_ending · push · with every variable
+title: Your Pro trial ends soon
+body: ⟦daysRemaining⟧ days left in your trial. Pick a plan to keep Pro.
+
+=== subscription_trial_ending · email · with no variables
+subject: Your Pro trial ends in  days
+text: Hi , your free SpiralClass Pro trial ends in  days. If you don't subscribe, your account moves to the Free plan (you keep your booking page and both payment rails; you lose WhatsApp reminders, unlimited students, and materials).
+
+Choose a plan: (link pending)
+html: Your Pro trial is ending Your Pro trial ends in days SpiralClass Your Pro trial is ending Hi , your free SpiralClass Pro trial ends in days. If you don&#39;t subscribe, your account moves to the Free plan — you keep your booking page and both payment rails, but you lose WhatsApp reminders, unlimited students, and materials. Classes, payments and reminders without the mental load. Sent by SpiralClass · spiralclass.com
+
+=== subscription_trial_ending · push · with no variables
+title: Your Pro trial ends soon
+body:  days left in your trial. Pick a plan to keep Pro.
+
+=== subscription_payment_succeeded · email · with every variable
+subject: SpiralClass Pro receipt — ⟦amount⟧
+text: Hi ⟦teacherName⟧, we received your ⟦amount⟧ payment for SpiralClass Pro. Your next charge date is ⟦nextChargeDate⟧.
+
+View billing: https://app.test/action
+
+—
+Manage notification settings: https://app.test/r/notif-settings/token
+To stop receiving emails: https://app.test/r/email-uns/token
+html: Payment received Payment received · ⟦amount⟧ SpiralClass Payment received Hi ⟦teacherName⟧, we received your ⟦amount⟧ payment for SpiralClass Pro. Your next charge date is ⟦nextChargeDate⟧. View billing Manage notification settings · Unsubscribe from these emails Classes, payments and reminders without the mental load. Sent by SpiralClass · spiralclass.com
+
+=== subscription_payment_succeeded · push · with every variable
+title: Payment received
+body: ⟦amount⟧ for SpiralClass Pro. Next charge: ⟦nextChargeDate⟧.
+
+=== subscription_payment_succeeded · email · with no variables
+subject: SpiralClass Pro receipt — 
+text: Hi , we received your  payment for SpiralClass Pro. Your next charge date is .
+
+View billing: (link pending)
+html: Payment received Payment received · SpiralClass Payment received Hi , we received your payment for SpiralClass Pro. Your next charge date is . Classes, payments and reminders without the mental load. Sent by SpiralClass · spiralclass.com
+
+=== subscription_payment_succeeded · push · with no variables
+title: Payment received
+body:  for SpiralClass Pro. Next charge: .
+
+=== subscription_payment_failed · email · with every variable
+subject: We couldn't process your Pro payment
+text: Hi ⟦teacherName⟧, we couldn't process your SpiralClass Pro subscription charge. You keep all Pro features for ⟦graceDays⟧ days while you update your payment method; after that your account moves to the Free plan.
+
+Update payment: https://app.test/action
+
+—
+Manage notification settings: https://app.test/r/notif-settings/token
+To stop receiving emails: https://app.test/r/email-uns/token
+html: We couldn&#39;t process your payment Update your payment method SpiralClass We couldn&#39;t process your payment Hi ⟦teacherName⟧, we couldn&#39;t process your SpiralClass Pro subscription charge. You keep all Pro features for ⟦graceDays⟧ days while you update your payment method; after that your account moves to the Free plan. Update payment Manage notification settings · Unsubscribe from these emails Classes, payments and reminders without the mental load. Sent by SpiralClass · spiralclass.com
+
+=== subscription_payment_failed · push · with every variable
+title: Update your payment method
+body: We couldn't charge your subscription. You have ⟦graceDays⟧ days to fix it.
+
+=== subscription_payment_failed · email · with no variables
+subject: We couldn't process your Pro payment
+text: Hi , we couldn't process your SpiralClass Pro subscription charge. You keep all Pro features for  days while you update your payment method; after that your account moves to the Free plan.
+
+Update payment: (link pending)
+html: We couldn&#39;t process your payment Update your payment method SpiralClass We couldn&#39;t process your payment Hi , we couldn&#39;t process your SpiralClass Pro subscription charge. You keep all Pro features for days while you update your payment method; after that your account moves to the Free plan. Classes, payments and reminders without the mental load. Sent by SpiralClass · spiralclass.com
+
+=== subscription_payment_failed · push · with no variables
+title: Update your payment method
+body: We couldn't charge your subscription. You have  days to fix it.
+
+=== subscription_canceled · email · with every variable
+subject: Your Pro subscription ended
+text: Hi ⟦teacherName⟧, your SpiralClass Pro subscription ended and your account is now on the Free plan. Don't worry: your students, packages, and booking page keep working. Only WhatsApp, unlimited students, and materials pause until you go Pro again.
+
+Go Pro again: https://app.test/action
+
+—
+Manage notification settings: https://app.test/r/notif-settings/token
+To stop receiving emails: https://app.test/r/email-uns/token
+html: Your Pro subscription ended You&#39;re now on the Free plan SpiralClass Your Pro subscription ended Hi ⟦teacherName⟧, your SpiralClass Pro subscription ended and your account is now on the Free plan. Your students, packages, and booking page keep working. Only WhatsApp, unlimited students, and materials pause until you go Pro again. Go Pro again Manage notification settings · Unsubscribe from these emails Classes, payments and reminders without the mental load. Sent by SpiralClass · spiralclass.com
+
+=== subscription_canceled · push · with every variable
+title: Your Pro subscription ended
+body: You're on the Free plan. Your students and bookings stay active.
+
+=== subscription_canceled · email · with no variables
+subject: Your Pro subscription ended
+text: Hi , your SpiralClass Pro subscription ended and your account is now on the Free plan. Don't worry: your students, packages, and booking page keep working. Only WhatsApp, unlimited students, and materials pause until you go Pro again.
+
+Go Pro again: (link pending)
+html: Your Pro subscription ended You&#39;re now on the Free plan SpiralClass Your Pro subscription ended Hi , your SpiralClass Pro subscription ended and your account is now on the Free plan. Your students, packages, and booking page keep working. Only WhatsApp, unlimited students, and materials pause until you go Pro again. Classes, payments and reminders without the mental load. Sent by SpiralClass · spiralclass.com
+
+=== subscription_canceled · push · with no variables
+title: Your Pro subscription ended
+body: You're on the Free plan. Your students and bookings stay active.
+
+=== subscription_founding_price_locked · email · with every variable
+subject: Welcome to founding pricing — ⟦amount⟧/mo for life
+text: Hi ⟦teacherName⟧, you're in the founding group! Your ⟦amount⟧/mo price is locked for the life of your subscription — it never increases, even when Pro prices change.
+
+View billing: https://app.test/action
+
+—
+Manage notification settings: https://app.test/r/notif-settings/token
+To stop receiving emails: https://app.test/r/email-uns/token
+html: Founding price locked Founding price locked · ⟦amount⟧/mo SpiralClass Founding price locked Hi ⟦teacherName⟧, you&#39;re in the founding group! Your ⟦amount⟧/mo price is locked for the life of your subscription — it never increases, even when Pro prices change. View billing Manage notification settings · Unsubscribe from these emails Classes, payments and reminders without the mental load. Sent by SpiralClass · spiralclass.com
+
+=== subscription_founding_price_locked · push · with every variable
+title: Founding price locked
+body: Your ⟦amount⟧/mo price is locked for life.
+
+=== subscription_founding_price_locked · email · with no variables
+subject: Welcome to founding pricing — /mo for life
+text: Hi , you're in the founding group! Your /mo price is locked for the life of your subscription — it never increases, even when Pro prices change.
+
+View billing: (link pending)
+html: Founding price locked Founding price locked · /mo SpiralClass Founding price locked Hi , you&#39;re in the founding group! Your /mo price is locked for the life of your subscription — it never increases, even when Pro prices change. Classes, payments and reminders without the mental load. Sent by SpiralClass · spiralclass.com
+
+=== subscription_founding_price_locked · push · with no variables
+title: Founding price locked
+body: Your /mo price is locked for life.
+
+=== library_material_assigned · email · with every variable
+subject: New material — ⟦teacherName⟧
+text: Hi, I'm ⟦teacherName⟧. I assigned you a new material: "⟦materialLabel⟧". You'll find it in the materials section of your portal.
+
+View materials: https://app.test/action
+
+—
+Manage notification settings: https://app.test/r/notif-settings/token
+To stop receiving emails: https://app.test/r/email-uns/token
+html: A new material for you New material: ⟦materialLabel⟧ SpiralClass A new material for you Hi, I&#39;m ⟦teacherName⟧. I assigned you a new material: &quot;⟦materialLabel⟧&quot;. You&#39;ll find it in the materials section of your portal. View materials Manage notification settings · Unsubscribe from these emails Classes, payments and reminders without the mental load. Sent by SpiralClass · spiralclass.com
+
+=== library_material_assigned · push · with every variable
+title: New material
+body: ⟦teacherName⟧ assigned you "⟦materialLabel⟧". Open it in your materials.
+
+=== library_material_assigned · email · with no variables
+subject: New material — 
+text: Hi, I'm . I assigned you a new material: "". You'll find it in the materials section of your portal.
+
+View materials: (link pending)
+html: A new material for you New material: SpiralClass A new material for you Hi, I&#39;m . I assigned you a new material: &quot;&quot;. You&#39;ll find it in the materials section of your portal. Classes, payments and reminders without the mental load. Sent by SpiralClass · spiralclass.com
+
+=== library_material_assigned · push · with no variables
+title: New material
+body:  assigned you "". Open it in your materials.
+
+=== lesson_insights_review_teacher · email · with every variable
+subject: Focus areas ready — ⟦studentName⟧
+text: Hi ⟦teacherName⟧, your assistant drafted focus areas from your class with ⟦studentName⟧. Review them and confirm the ones worth keeping (they build the student's profile).
+
+Review: https://app.test/action
+
+—
+Manage notification settings: https://app.test/r/notif-settings/token
+To stop receiving emails: https://app.test/r/email-uns/token
+html: Focus areas ready to review ⟦studentName⟧ · focus areas to review SpiralClass Focus areas ready to review Hi ⟦teacherName⟧, your assistant drafted focus areas from your class with ⟦studentName⟧. Review them in a few seconds and confirm the ones worth keeping; confirmed ones build the student&#39;s learning profile. Review focus areas Manage notification settings · Unsubscribe from these emails Classes, payments and reminders without the mental load. Sent by SpiralClass · spiralclass.com
+
+=== lesson_insights_review_teacher · push · with every variable
+title: Focus areas ready
+body: Review the focus areas from your class with ⟦studentName⟧.
+
+=== lesson_insights_review_teacher · email · with no variables
+subject: Focus areas ready — 
+text: Hi , your assistant drafted focus areas from your class with . Review them and confirm the ones worth keeping (they build the student's profile).
+
+Review: (link pending)
+html: Focus areas ready to review · focus areas to review SpiralClass Focus areas ready to review Hi , your assistant drafted focus areas from your class with . Review them in a few seconds and confirm the ones worth keeping; confirmed ones build the student&#39;s learning profile. Classes, payments and reminders without the mental load. Sent by SpiralClass · spiralclass.com
+
+=== lesson_insights_review_teacher · push · with no variables
+title: Focus areas ready
+body: Review the focus areas from your class with .
+
+=== facebook_groups_nudge_teacher · email · with every variable
+subject: Time to post in your groups again?
+text: Hi ⟦teacherName⟧, it's been a couple of weeks since your last reminder. Posting your link in your groups on Facebook is one of the best ways to fill your schedule.
+
+Open your group list and share: https://app.test/action
+
+—
+Manage notification settings: https://app.test/r/notif-settings/token
+To stop receiving emails: https://app.test/r/email-uns/token
+html: Time to share again Posting in your groups again fills your schedule SpiralClass Time to share again Hi ⟦teacherName⟧, it&#39;s been a couple of weeks since your last reminder. Posting your link in your groups on Facebook is one of the best ways to fill your schedule — post in each group&#39;s voice, like always. View my groups Manage notification settings · Unsubscribe from these emails Classes, payments and reminders without the mental load. Sent by SpiralClass · spiralclass.com
+
+=== facebook_groups_nudge_teacher · push · with every variable
+title: Time to share again
+body: Post your link in your Facebook groups again — that's how you fill your schedule.
+
+=== facebook_groups_nudge_teacher · email · with no variables
+subject: Time to post in your groups again?
+text: Hi , it's been a couple of weeks since your last reminder. Posting your link in your groups on Facebook is one of the best ways to fill your schedule.
+
+Open your group list and share: (link pending)
+html: Time to share again Posting in your groups again fills your schedule SpiralClass Time to share again Hi , it&#39;s been a couple of weeks since your last reminder. Posting your link in your groups on Facebook is one of the best ways to fill your schedule — post in each group&#39;s voice, like always. Classes, payments and reminders without the mental load. Sent by SpiralClass · spiralclass.com
+
+=== facebook_groups_nudge_teacher · push · with no variables
+title: Time to share again
+body: Post your link in your Facebook groups again — that's how you fill your schedule.
+
+=== student_acquisition_plan_teacher · email · with every variable
+subject: Your plan this week: ⟦actionCount⟧ actions
+text: Hi ⟦teacherName⟧, this week's plan is ready: ⟦actionCount⟧ actions, about ⟦minutes⟧ minutes in total.
+
+Start here: ⟦firstAction⟧
+
+https://app.test/action
+
+—
+Manage notification settings: https://app.test/r/notif-settings/token
+To stop receiving emails: https://app.test/r/email-uns/token
+html: Your plan this week The text, the image and the link are already prepared SpiralClass Your plan this week Hi ⟦teacherName⟧, we&#39;ve prepared ⟦actionCount⟧ actions to get you students — about ⟦minutes⟧ minutes in total. Start here: ⟦firstAction⟧. The text, the image and the link are already prepared — you just review and post. See my plan Manage notification settings · Unsubscribe from these emails Classes, payments and reminders without the mental load. Sent by SpiralClass · spiralclass.com
+
+=== student_acquisition_plan_teacher · push · with every variable
+title: Your plan for the week
+body: ⟦firstAction⟧
+
+=== student_acquisition_plan_teacher · email · with no variables
+subject: Your plan this week:  actions
+text: Hi , this week's plan is ready:  actions, about  minutes in total.
+
+Start here: your first action of the week
+
+(link pending)
+html: Your plan this week The text, the image and the link are already prepared SpiralClass Your plan this week Hi , we&#39;ve prepared actions to get you students — about minutes in total. Start here: your first action of the week. The text, the image and the link are already prepared — you just review and post. Classes, payments and reminders without the mental load. Sent by SpiralClass · spiralclass.com
+
+=== student_acquisition_plan_teacher · push · with no variables
+title: Your plan for the week
+body: You have prepared actions ready to get students.
+
+=== chat_message · email · with every variable
+subject: Message from ⟦teacherName⟧
+text: ⟦teacherName⟧ sent you a message: "⟦preview⟧".
+
+View conversation: https://app.test/action
+
+—
+Manage notification settings: https://app.test/r/notif-settings/token
+To stop receiving emails: https://app.test/r/email-uns/token
+html: Message from ⟦teacherName⟧ ⟦preview⟧ SpiralClass Message from ⟦teacherName⟧ &quot;⟦preview⟧&quot; View conversation Manage notification settings · Unsubscribe from these emails Classes, payments and reminders without the mental load. Sent by SpiralClass · spiralclass.com
+
+=== chat_message · push · with every variable
+title: Message from ⟦teacherName⟧
+body: ⟦preview⟧
+
+THREW Cannot read properties of undefined (reading 'replace')
+=== chat_message · push · with no variables
+title: Message from 
+body: undefined
+
+=== chat_message_teacher · email · with every variable
+subject: Message from ⟦studentName⟧
+text: ⟦studentName⟧ sent you a message: "⟦preview⟧".
+
+View conversation: https://app.test/action
+
+—
+Manage notification settings: https://app.test/r/notif-settings/token
+To stop receiving emails: https://app.test/r/email-uns/token
+html: Message from ⟦studentName⟧ ⟦preview⟧ SpiralClass Message from ⟦studentName⟧ &quot;⟦preview⟧&quot; View conversation Manage notification settings · Unsubscribe from these emails Classes, payments and reminders without the mental load. Sent by SpiralClass · spiralclass.com
+
+=== chat_message_teacher · push · with every variable
+title: Message from ⟦studentName⟧
+body: ⟦preview⟧
+
+THREW Cannot read properties of undefined (reading 'replace')
+=== chat_message_teacher · push · with no variables
+title: Message from 
+body: undefined
+
+=== homework_submitted_teacher · email · with every variable
+subject: Homework submitted — ⟦studentName⟧
+text: Hi ⟦teacherName⟧, ⟦studentName⟧ submitted the assignment “⟦assignmentTitle⟧”.
+
+Review the class: https://app.test/action
+
+—
+Manage notification settings: https://app.test/r/notif-settings/token
+To stop receiving emails: https://app.test/r/email-uns/token
+html: Homework submitted ⟦studentName⟧ · ⟦assignmentTitle⟧ SpiralClass Homework submitted Hi ⟦teacherName⟧, ⟦studentName⟧ submitted the assignment “⟦assignmentTitle⟧”. Review the class Manage notification settings · Unsubscribe from these emails Classes, payments and reminders without the mental load. Sent by SpiralClass · spiralclass.com
+
+=== homework_submitted_teacher · push · with every variable
+title: Homework submitted
+body: ⟦studentName⟧ submitted “⟦assignmentTitle⟧”.
+
+=== homework_submitted_teacher · email · with no variables
+subject: Homework submitted — 
+text: Hi ,  submitted homework.
+
+Review the class: (link pending)
+html: Homework submitted · Homework SpiralClass Homework submitted Hi , submitted homework. Classes, payments and reminders without the mental load. Sent by SpiralClass · spiralclass.com
+
+=== homework_submitted_teacher · push · with no variables
+title: Homework submitted
+body:  submitted homework.
+
+=== homework_assigned_student · email · with every variable
+subject: New homework from ⟦teacherName⟧
+text: ⟦teacherName⟧ assigned you “⟦assignmentTitle⟧”.
+
+View the class: https://app.test/action
+
+—
+Manage notification settings: https://app.test/r/notif-settings/token
+To stop receiving emails: https://app.test/r/email-uns/token
+html: New homework ⟦assignmentTitle⟧ SpiralClass New homework ⟦teacherName⟧ assigned you “⟦assignmentTitle⟧”. View the class Manage notification settings · Unsubscribe from these emails Classes, payments and reminders without the mental load. Sent by SpiralClass · spiralclass.com
+
+=== homework_assigned_student · push · with every variable
+title: New homework
+body: ⟦teacherName⟧ assigned you "⟦assignmentTitle⟧".
+
+=== homework_assigned_student · email · with no variables
+subject: New homework from 
+text:  assigned you homework.
+
+View the class: (link pending)
+html: New homework New homework SpiralClass New homework assigned you homework. Classes, payments and reminders without the mental load. Sent by SpiralClass · spiralclass.com
+
+=== homework_assigned_student · push · with no variables
+title: New homework
+body:  assigned you "".
+
+=== homework_feedback_available_student · email · with every variable
+subject: Feedback from ⟦teacherName⟧
+text: ⟦teacherName⟧ left feedback on "⟦assignmentTitle⟧".
+
+View the class: https://app.test/action
+
+—
+Manage notification settings: https://app.test/r/notif-settings/token
+To stop receiving emails: https://app.test/r/email-uns/token
+html: Feedback on your homework Feedback on your homework SpiralClass Feedback on your homework ⟦teacherName⟧ left feedback on &quot;⟦assignmentTitle⟧&quot;. View the class Manage notification settings · Unsubscribe from these emails Classes, payments and reminders without the mental load. Sent by SpiralClass · spiralclass.com
+
+=== homework_feedback_available_student · push · with every variable
+title: Feedback on your homework
+body: ⟦teacherName⟧ left feedback on "⟦assignmentTitle⟧".
+
+=== homework_feedback_available_student · email · with no variables
+subject: Feedback from 
+text:  left feedback on your homework.
+
+View the class: (link pending)
+html: Feedback on your homework Feedback on your homework SpiralClass Feedback on your homework left feedback on your homework. Classes, payments and reminders without the mental load. Sent by SpiralClass · spiralclass.com
+
+=== homework_feedback_available_student · push · with no variables
+title: Feedback on your homework
+body:  left feedback on "".
+
+=== homework_due_soon_student · email · with every variable
+subject: Homework due soon
+text: "⟦assignmentTitle⟧" is due ⟦dueDate⟧.
+
+View the class: https://app.test/action
+
+—
+Manage notification settings: https://app.test/r/notif-settings/token
+To stop receiving emails: https://app.test/r/email-uns/token
+html: Homework due soon Homework due soon SpiralClass Homework due soon &quot;⟦assignmentTitle⟧&quot; is due ⟦dueDate⟧. View the class Manage notification settings · Unsubscribe from these emails Classes, payments and reminders without the mental load. Sent by SpiralClass · spiralclass.com
+
+=== homework_due_soon_student · push · with every variable
+title: Homework due soon
+body: "⟦assignmentTitle⟧" is due ⟦dueDate⟧.
+
+=== homework_due_soon_student · email · with no variables
+subject: Homework due soon
+text: your homework is due .
+
+View the class: (link pending)
+html: Homework due soon Homework due soon SpiralClass Homework due soon your homework is due . Classes, payments and reminders without the mental load. Sent by SpiralClass · spiralclass.com
+
+=== homework_due_soon_student · push · with no variables
+title: Homework due soon
+body: "" is due .
+
+=== homework_overdue_student · email · with every variable
+subject: Homework overdue
+text: "⟦assignmentTitle⟧" is overdue. You can still submit it.
+
+View the class: https://app.test/action
+
+—
+Manage notification settings: https://app.test/r/notif-settings/token
+To stop receiving emails: https://app.test/r/email-uns/token
+html: Homework overdue Homework overdue SpiralClass Homework overdue &quot;⟦assignmentTitle⟧&quot; is overdue. You can still submit it. View the class Manage notification settings · Unsubscribe from these emails Classes, payments and reminders without the mental load. Sent by SpiralClass · spiralclass.com
+
+=== homework_overdue_student · push · with every variable
+title: Homework overdue
+body: "⟦assignmentTitle⟧" is overdue. You can still submit it.
+
+=== homework_overdue_student · email · with no variables
+subject: Homework overdue
+text: your homework is overdue. You can still submit it.
+
+View the class: (link pending)
+html: Homework overdue Homework overdue SpiralClass Homework overdue your homework is overdue. You can still submit it. Classes, payments and reminders without the mental load. Sent by SpiralClass · spiralclass.com
+
+=== homework_overdue_student · push · with no variables
+title: Homework overdue
+body: "" is overdue. You can still submit it.

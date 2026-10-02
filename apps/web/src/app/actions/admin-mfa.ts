@@ -8,7 +8,7 @@ import { getAuthUser } from "@/lib/auth";
 import { enrollAdminTotp, verifyAdminTotpEnrollment } from "@/lib/auth/admin-mfa";
 import { setAdminStepUp } from "@/lib/auth/admin-stepup";
 import { getPreferredLocale } from "@/lib/i18n";
-import { usesEnglishCopy } from "@spiralclass/shared";
+import { createT } from "@spiralclass/shared";
 
 // TOTP enrolment + per-session step-up for ADMIN sessions
 // (docs/decisions/D-25.md, narrowed by D-40 to TOTP-only, no
@@ -31,7 +31,7 @@ export type AdminMfaState =
 
 export async function startAdminMfaEnrollmentAction(_prev: AdminMfaState): Promise<AdminMfaState> {
   await resolveAdminActor();
-  const en = usesEnglishCopy(await getPreferredLocale());
+  const t = createT(await getPreferredLocale());
   try {
     const r = await enrollAdminTotp();
     // The `secret=` query param on an otpauth:// URI is the manual-entry key
@@ -40,8 +40,7 @@ export async function startAdminMfaEnrollmentAction(_prev: AdminMfaState): Promi
     return { enrolled: { totpURI: r.totpURI, secret } };
   } catch (err) {
     return {
-      error:
-        err instanceof Error ? err.message : en ? "Error starting 2FA" : "Error al iniciar 2FA",
+      error: err instanceof Error ? err.message : t("web.action.admin.mfa.startFailed"),
     };
   }
 }
@@ -51,15 +50,15 @@ export async function verifyAdminMfaEnrollmentAction(
   formData: FormData,
 ): Promise<AdminMfaState> {
   await resolveAdminActor();
-  const en = usesEnglishCopy(await getPreferredLocale());
+  const t = createT(await getPreferredLocale());
   const code = String(formData.get("code") ?? "").trim();
   if (!/^\d{6}$/.test(code)) {
     return {
-      error: en ? "Invalid code. Enter the 6 digits." : "Código inválido. Ingresa los 6 dígitos.",
+      error: t("web.action.admin.mfa.invalidCode"),
     };
   }
   const r = await verifyAdminTotpEnrollment(code);
-  if (!r.ok) return { error: r.error ?? (en ? "Incorrect code." : "Código incorrecto.") };
+  if (!r.ok) return { error: r.error ?? t("web.action.admin.mfa.incorrectCode") };
   // verifyAdminTotpEnrollment flipped user.twoFactorEnabled. Also mint the
   // session step-up proof so the just-enrolled admin isn't immediately bounced
   // back here by the gate's per-session check. The client navigates on ok.
@@ -77,15 +76,15 @@ export async function verifyAdminMfaStepUpAction(
   formData: FormData,
 ): Promise<AdminMfaState> {
   await resolveAdminActor();
-  const en = usesEnglishCopy(await getPreferredLocale());
+  const t = createT(await getPreferredLocale());
   const code = String(formData.get("code") ?? "").trim();
   if (!/^\d{6}$/.test(code)) {
     return {
-      error: en ? "Invalid code. Enter the 6 digits." : "Código inválido. Ingresa los 6 dígitos.",
+      error: t("web.action.admin.mfa.invalidCode"),
     };
   }
   const r = await verifyAdminTotpEnrollment(code);
-  if (!r.ok) return { error: r.error ?? (en ? "Incorrect code." : "Código incorrecto.") };
+  if (!r.ok) return { error: r.error ?? t("web.action.admin.mfa.incorrectCode") };
   const user = await getAuthUser();
   if (user) await setAdminStepUp(user.id);
   return { verified: true };

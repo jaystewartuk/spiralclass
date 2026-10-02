@@ -12,6 +12,9 @@ import {
   matchAcceptLanguage,
   localeToLanguageCode,
   languageCodeToLocale,
+  intlLocale,
+  ogLocale,
+  localeDirection,
 } from "./locales";
 import { createT, interpolate, translate } from "./translate";
 
@@ -55,10 +58,64 @@ describe("locale registry", () => {
     expect(localeToLanguageCode("en-US")).toBe("en");
     expect(localeToLanguageCode("fr")).toBe("fr");
     expect(localeToLanguageCode("fr-FR")).toBe("fr");
-    // Unknown input preserves the historical Spanish default.
-    expect(localeToLanguageCode("de")).toBe("es");
-    expect(localeToLanguageCode(null)).toBe("es");
-    expect(LANGUAGE_CODES).toContain(DEFAULT_LOCALE === "en" ? "en" : "es");
+    expect(LANGUAGE_CODES).toContain(localeToLanguageCode(DEFAULT_LOCALE));
+  });
+
+  it("still reads a regional or underscore-separated Spanish tag as Spanish", () => {
+    // `es_MX` matched no registry row and only ever reached Spanish through
+    // the old first-row fallback. Fixing the fallback must not move it.
+    for (const spanish of ["es-MX", "es_MX", "es-419", "ES", " es "]) {
+      expect(localeToLanguageCode(spanish), `locale ${JSON.stringify(spanish)}`).toBe("es");
+    }
+    expect(localeToLanguageCode("fr_CA")).toBe("fr");
+  });
+
+  it("writes to a reader with no recognisable locale in DEFAULT_LOCALE, not in Spanish", () => {
+    // It used to resolve to the registry's first row, which is Spanish, so a
+    // reader whose stored locale matched nothing was emailed in a language
+    // nobody had chosen for her.
+    expect(localeToLanguageCode(DEFAULT_LOCALE)).toBe("en");
+    for (const unknown of ["de", "pl", "", "   ", "system", null, undefined]) {
+      expect(localeToLanguageCode(unknown), `locale ${JSON.stringify(unknown)}`).toBe("en");
+    }
+  });
+
+  // What is one value per language lives on the language's row. These used to
+  // be dictionaries kept beside their consumers, so a new language had to be
+  // added to each, and nothing checked the value once it was.
+  it("gives every locale a formatting tag Intl accepts, in its own language", () => {
+    for (const locale of LOCALES) {
+      expect(intlLocale(locale.tag)).toBe(locale.intl);
+      const resolved = new Intl.NumberFormat(locale.intl).resolvedOptions().locale;
+      expect(new Intl.Locale(resolved).language, `${locale.tag} formats as ${resolved}`).toBe(
+        new Intl.Locale(locale.tag).language,
+      );
+    }
+    // Spanish readers get Latin American conventions, not CLDR's root `es`.
+    expect(intlLocale("es")).toBe("es-419");
+    // A tag outside the registry still means itself.
+    expect(intlLocale("en-CA")).toBe("en-CA");
+  });
+
+  it("gives every locale a region-qualified Open Graph tag in its own language", () => {
+    for (const locale of LOCALES) {
+      expect(ogLocale(locale.tag), locale.tag).toMatch(/^[a-z]{2,3}_[A-Z]{2}$/);
+      expect(ogLocale(locale.tag).split("_")[0]).toBe(new Intl.Locale(locale.tag).language);
+    }
+    expect(new Set(LOCALES.map((l) => l.og)).size).toBe(LOCALES.length);
+  });
+
+  it("gives every locale the writing direction of its script", () => {
+    for (const locale of LOCALES) {
+      // `textInfo` (or `getTextInfo()`) is CLDR's own answer where the engine
+      // has it; every locale registered today is left-to-right either way.
+      const cldr = new Intl.Locale(locale.tag) as Intl.Locale & {
+        textInfo?: { direction?: string };
+        getTextInfo?: () => { direction?: string };
+      };
+      const expected = cldr.getTextInfo?.().direction ?? cldr.textInfo?.direction ?? "ltr";
+      expect(localeDirection(locale.tag), locale.tag).toBe(expected);
+    }
   });
 
   it("languageCodeToLocale bridges the languageCode back to a tag", () => {

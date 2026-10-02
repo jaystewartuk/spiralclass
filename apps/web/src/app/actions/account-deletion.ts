@@ -20,7 +20,7 @@ import {
   studentsHaveUnusedActivePackages,
 } from "@/lib/account-deletion/requests";
 import { revalidateAfterAction } from "@/lib/revalidate";
-import { usesEnglishCopy } from "@spiralclass/shared";
+import { createT } from "@spiralclass/shared";
 
 // docs/security.md.
 //
@@ -50,7 +50,7 @@ export async function requestTeacherDeletionAction(
 ): Promise<AccountDeletionState> {
   const teacher = await requireTeacher();
   const locale = await getPreferredLocale();
-  const en = usesEnglishCopy(locale);
+  const t = createT(locale);
 
   // Block deletion if the teacher has any active package with classes
   // remaining. Students would lose paid-for sessions; refund the
@@ -58,9 +58,7 @@ export async function requestTeacherDeletionAction(
   // disputes that the platform isn't equipped to mediate.
   if (await teacherHasUnusedActivePackages(teacher.id)) {
     return {
-      error: en
-        ? "You have active packages with classes left. Cancel or refund them before deleting your account."
-        : "Tienes paquetes activos con clases pendientes. Cancela o reembólsalos antes de eliminar tu cuenta.",
+      error: t("web.action.accountDeletion.teacherActivePackages"),
     };
   }
 
@@ -97,12 +95,10 @@ export async function requestStudentDeletionAction(
 ): Promise<AccountDeletionState> {
   const student = await requireStudent();
   const locale = await getPreferredLocale();
-  const en = usesEnglishCopy(locale);
+  const t = createT(locale);
   if (!student.email) {
     return {
-      error: en
-        ? "Your account has no email on file. Contact us."
-        : "Tu cuenta no tiene un correo asociado. Contáctanos.",
+      error: t("account.delete.noEmail"),
     };
   }
 
@@ -113,9 +109,7 @@ export async function requestStudentDeletionAction(
   // whole set since the whole set is what gets anonymized.
   if (await studentsHaveUnusedActivePackages(identityIds)) {
     return {
-      error: en
-        ? "You still have classes left in a package. Once they're done, you can delete your account."
-        : "Aún tienes clases pendientes en un paquete. Cuando termines, podrás eliminar tu cuenta.",
+      error: t("web.action.accountDeletion.studentClassesLeft"),
     };
   }
 

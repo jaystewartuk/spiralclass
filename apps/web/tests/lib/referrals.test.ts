@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { Prisma } from "@prisma/client";
-import { previewRewardMinorUnits } from "@spiralclass/shared";
+import { createT, previewRewardMinorUnits } from "@spiralclass/shared";
 import { computeDiscountMinorUnits } from "@/lib/discounts";
 import { resolveReferralForCheckout, referralRejectMessage } from "@/lib/referrals";
 
@@ -183,13 +183,14 @@ describe("resolveReferralForCheckout", () => {
 
 describe("referralRejectMessage", () => {
   it("localizes self-referral", () => {
-    expect(referralRejectMessage("self_referral", true)).toMatch(/own referral/i);
-    expect(referralRejectMessage("self_referral", false)).toMatch(/propio/i);
+    expect(referralRejectMessage("self_referral", createT("en"))).toMatch(/own referral/i);
+    expect(referralRejectMessage("self_referral", createT("es"))).toMatch(/propio/i);
   });
 
   it("localizes already-redeemed", () => {
-    expect(referralRejectMessage("already_redeemed", true)).toMatch(/first purchase/i);
-    expect(referralRejectMessage("already_redeemed", false)).toMatch(/primera compra/i);
+    expect(referralRejectMessage("already_redeemed", createT("en"))).toMatch(/first purchase/i);
+    expect(referralRejectMessage("already_redeemed", createT("es"))).toMatch(/primera compra/i);
+    expect(referralRejectMessage("already_redeemed", createT("fr"))).toMatch(/premier achat/i);
   });
 });
 

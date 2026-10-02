@@ -10,7 +10,7 @@ import {
   FOCUS_TAG_LABEL_MAX_CHARS,
   FOCUS_TAG_MAX_PER_TEACHER,
 } from "@/lib/focus-tag-editing";
-import { usesEnglishCopy } from "@spiralclass/shared";
+import { createT } from "@spiralclass/shared";
 
 // Focus tags — the teacher's "what to work on" taxonomy that seeds AI
 // class-content compose (docs/features/classes-lesson-content.md, D-20).
@@ -69,12 +69,12 @@ export async function ensureTeacherFocusCategories(
   locale: AppLocale,
   db: Db = defaultPrisma,
 ): Promise<void> {
-  const en = usesEnglishCopy(locale);
+  const t = createT(locale);
   await db.focusTagCategory.createMany({
     data: FOCUS_TAG_BUILTIN_CATEGORIES.map((c, i) => ({
       teacherId,
       code: c.code,
-      label: en ? c.labelEn : c.labelEs,
+      label: t(c.labelKey),
       position: i,
     })),
     skipDuplicates: true,
@@ -134,7 +134,7 @@ export async function ensureTeacherFocusTags(
     ...seeds.map((s) => ({ ...s, pack })),
     ...FORMAT_TAG_SEEDS.map((s) => ({
       key: s.key,
-      label: usesEnglishCopy(locale) ? s.labelEn : s.labelEs,
+      label: createT(locale)(s.labelKey),
       category: "format" as const,
       pack: "format",
     })),
@@ -353,7 +353,7 @@ export async function saveFocusTagsForTeacher(
   },
   db: Db = defaultPrisma,
 ): Promise<SaveFocusTagsResult> {
-  const en = usesEnglishCopy(input.locale);
+  const t = createT(input.locale);
 
   // Pass `db` through so this reuses the caller's transaction connection
   // instead of opening a second one on the global client — with a
@@ -369,7 +369,7 @@ export async function saveFocusTagsForTeacher(
     return {
       ok: false,
       code: "invalid",
-      message: en ? "Too many focus tags in one save." : "Demasiados enfoques en un solo guardado.",
+      message: t("web.action.focusTags.tooManyTags"),
     };
   }
 
@@ -390,25 +390,21 @@ export async function saveFocusTagsForTeacher(
         return {
           ok: false,
           code: "invalid",
-          message: en ? "Every focus tag needs a name." : "Cada enfoque necesita un nombre.",
+          message: t("web.action.focusTags.tagNeedsName"),
         };
       }
       if (label.length > FOCUS_TAG_LABEL_MAX_CHARS) {
         return {
           ok: false,
           code: "invalid",
-          message: en
-            ? "A focus tag name is too long."
-            : "Un nombre de enfoque es demasiado largo.",
+          message: t("web.action.focusTags.tagNameTooLong"),
         };
       }
       if (!row.categoryId || !validCategoryIds.has(row.categoryId)) {
         return {
           ok: false,
           code: "invalid",
-          message: en
-            ? "Every focus tag needs a valid category."
-            : "Cada enfoque necesita una categoría válida.",
+          message: t("web.action.focusTags.tagNeedsCategory"),
         };
       }
     }
@@ -487,7 +483,7 @@ export async function saveFocusCategoriesForTeacher(
   },
   db: Db = defaultPrisma,
 ): Promise<SaveFocusTagCategoriesResult> {
-  const en = usesEnglishCopy(input.locale);
+  const t = createT(input.locale);
 
   // Pass `db` through so this reuses the caller's transaction connection
   // instead of opening a second one on the global client — with a
@@ -503,9 +499,7 @@ export async function saveFocusCategoriesForTeacher(
     return {
       ok: false,
       code: "invalid",
-      message: en
-        ? "Too many categories in one save."
-        : "Demasiadas categorías en un solo guardado.",
+      message: t("web.action.focusTags.tooManyCategories"),
     };
   }
 
@@ -516,14 +510,14 @@ export async function saveFocusCategoriesForTeacher(
       return {
         ok: false,
         code: "invalid",
-        message: en ? "Every category needs a name." : "Cada categoría necesita un nombre.",
+        message: t("web.action.focusTags.categoryNeedsName"),
       };
     }
     if (label.length > FOCUS_TAG_CATEGORY_LABEL_MAX_CHARS) {
       return {
         ok: false,
         code: "invalid",
-        message: en ? "A category name is too long." : "Un nombre de categoría es demasiado largo.",
+        message: t("web.action.focusTags.categoryNameTooLong"),
       };
     }
   }
@@ -545,9 +539,7 @@ export async function saveFocusCategoriesForTeacher(
       return {
         ok: false,
         code: "in-use",
-        message: en
-          ? `Can't delete ${parts.join(", ")} — still has focus tags. Move or delete them first.`
-          : `No se puede eliminar ${parts.join(", ")} — todavía tiene enfoques. Muévelos o elimínalos primero.`,
+        message: t("web.action.focusTags.cantDeleteCategories", { names: parts.join(", ") }),
       };
     }
   }

@@ -1,5 +1,6 @@
 "use server";
 
+import { issueMessage } from "@spiralclass/shared";
 import { z } from "zod";
 import { requireTeacher } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
@@ -20,7 +21,7 @@ import {
   DEFAULT_DASHBOARD_TILE_KEYS,
   resolveDashboardTiles,
   type DashboardTilePref,
-  usesEnglishCopy,
+  createT,
 } from "@spiralclass/shared";
 import { revalidateAfterAction } from "@/lib/revalidate";
 
@@ -39,7 +40,7 @@ export async function updateMyTeacherContactAction(
 ): Promise<TeacherContactFormState> {
   const teacher = await requireTeacher();
   const locale = await getPreferredLocale();
-  const en = usesEnglishCopy(locale);
+  const t = createT(locale);
 
   const parsed = teacherContactSchema(locale).safeParse({
     name: formData.get("name"),
@@ -49,7 +50,7 @@ export async function updateMyTeacherContactAction(
   });
   if (!parsed.success) {
     return {
-      error: parsed.error.issues[0]?.message ?? (en ? "Invalid data." : "Datos inválidos."),
+      error: issueMessage(parsed.error, t, "web.action.invalidData"),
     };
   }
 
@@ -98,12 +99,10 @@ export async function updateMyTeacherContactAction(
   }
 
   revalidateAfterAction("/settings/account");
-  const saved = en ? "Details saved." : "Datos guardados.";
+  const saved = t("web.action.contact.saved");
   if (staleZone) {
     return {
-      ok: en
-        ? `${saved} Heads up: your working hours are still set in ${staleZone}. Open Working hours to review them if you've moved.`
-        : `${saved} Aviso: tu horario de trabajo sigue en ${staleZone}. Abre Horario de trabajo para revisarlo si te mudaste.`,
+      ok: t("myDetails.staleAvailabilityZone", { zone: staleZone }),
     };
   }
   return { ok: saved };
@@ -120,13 +119,11 @@ export async function updateMyTeacherCountryAction(
 ): Promise<TeacherCountryFormState> {
   const teacher = await requireTeacher();
   const locale = await getPreferredLocale();
-  const en = usesEnglishCopy(locale);
+  const t = createT(locale);
 
   if (teacher.stripeAccountId) {
     return {
-      error: en
-        ? "Disconnect Stripe before changing your country — your payout account is tied to it."
-        : "Desconecta Stripe antes de cambiar tu país — tu cuenta de cobro está ligada a él.",
+      error: t("web.action.teacherAccount.disconnectStripeFirst"),
     };
   }
 
@@ -137,7 +134,7 @@ export async function updateMyTeacherCountryAction(
     .refine((v) => (COUNTRY_CODES as readonly string[]).includes(v))
     .safeParse(formData.get("country"));
   if (!parsed.success) {
-    return { error: en ? "Invalid country." : "País inválido." };
+    return { error: t("web.action.teacherAccount.invalidCountry") };
   }
 
   if (parsed.data !== teacher.country) {
@@ -154,7 +151,7 @@ export async function updateMyTeacherCountryAction(
   }
 
   revalidateAfterAction("/settings/account");
-  return { ok: en ? "Country saved." : "País guardado." };
+  return { ok: t("web.action.teacherAccount.countrySaved") };
 }
 
 // Step 1 of the verified teacher email change: the signed-in teacher names a
@@ -167,22 +164,22 @@ export async function requestTeacherEmailChangeAction(
 ): Promise<TeacherEmailChangeFormState> {
   const teacher = await requireTeacher();
   const locale = await getPreferredLocale();
-  const en = usesEnglishCopy(locale);
+  const t = createT(locale);
 
   // requireTeacher already redirects disabled teachers, but guard explicitly:
   // never hand a moderated account an identity-moving tool.
   if (teacher.disabledAt) {
-    return { error: en ? "This account is disabled." : "Esta cuenta está deshabilitada." };
+    return { error: t("web.action.accountDisabled") };
   }
 
   const parsed = z
     .string()
     .trim()
-    .email(en ? "Invalid email" : "Correo inválido")
+    .email(t("email.invalid"))
     .max(254)
     .safeParse(formData.get("newEmail"));
   if (!parsed.success) {
-    return { error: parsed.error.issues[0]?.message ?? (en ? "Invalid email" : "Correo inválido") };
+    return { error: issueMessage(parsed.error, t, "email.invalid") };
   }
 
   // Keyed on the teacher (the endpoint is authenticated), not the IP: each
@@ -194,9 +191,7 @@ export async function requestTeacherEmailChangeAction(
   });
   if (!rl.ok) {
     return {
-      error: en
-        ? "Too many attempts. Wait a few minutes and try again."
-        : "Demasiados intentos. Espera unos minutos y vuelve a intentarlo.",
+      error: t("web.action.contact.tooMany"),
     };
   }
 
@@ -207,20 +202,16 @@ export async function requestTeacherEmailChangeAction(
   if (!result.ok) {
     switch (result.error) {
       case "same-email":
-        return { error: en ? "That's already your email." : "Ese ya es tu correo." };
+        return { error: t("web.action.contact.sameEmail") };
       case "send-failed":
         return {
-          error: en
-            ? "We couldn't send the confirmation email. Try again."
-            : "No pudimos enviar el correo de confirmación. Intenta de nuevo.",
+          error: t("web.action.contact.sendFailed"),
         };
       // "unavailable" covers addresses already in use — kept generic on
       // purpose so the form doesn't confirm which emails have accounts.
       case "unavailable":
         return {
-          error: en
-            ? "We couldn't use that email. Try another one, or write to us from the Help page."
-            : "No pudimos usar ese correo. Intenta con otro o escríbenos desde la página de ayuda.",
+          error: t("web.action.contact.emailUnusable"),
         };
     }
   }
@@ -237,16 +228,16 @@ export async function verifyTeacherEmailChangeAction(
 ): Promise<TeacherEmailChangeFormState> {
   const teacher = await requireTeacher();
   const locale = await getPreferredLocale();
-  const en = usesEnglishCopy(locale);
+  const t = createT(locale);
 
   if (teacher.disabledAt) {
-    return { error: en ? "This account is disabled." : "Esta cuenta está deshabilitada." };
+    return { error: t("web.action.accountDisabled") };
   }
 
   const newEmail = formData.get("newEmail");
   const code = formData.get("code");
   if (typeof newEmail !== "string" || typeof code !== "string" || !newEmail || !code) {
-    return { error: en ? "Missing email or code." : "Falta correo o código." };
+    return { error: t("web.action.missingEmailOrCode") };
   }
 
   const result = await verifyTeacherEmailChange({
@@ -258,23 +249,15 @@ export async function verifyTeacherEmailChangeAction(
     return {
       error:
         result.error === "invalid-code"
-          ? en
-            ? "Invalid or expired code. Request a new one."
-            : "Código inválido o expirado. Solicita uno nuevo."
-          : en
-            ? "We couldn't confirm that email. Try again."
-            : "No pudimos confirmar ese correo. Intenta de nuevo.",
+          ? t("web.action.invalidOrExpiredCode")
+          : t("web.action.contact.confirmFailed"),
     };
   }
 
   revalidateAfterAction("/settings/account");
   const ok = result.googleDisconnected
-    ? en
-      ? "Email updated. Your Google account was disconnected for security — reconnect it below with your new Google account if you'd like to keep using Google Sign-In."
-      : "Correo actualizado. Tu cuenta de Google se desconectó por seguridad — puedes volver a conectarla abajo con tu nueva cuenta de Google si quieres seguir usando el inicio de sesión con Google."
-    : en
-      ? "Email updated."
-      : "Correo actualizado.";
+    ? t("web.action.contact.emailUpdatedGoogleDisconnected")
+    : t("web.action.contact.emailUpdated");
   return { ok };
 }
 
@@ -341,21 +324,21 @@ export async function saveDashboardTilesAction(
 ): Promise<TeacherPrefsActionState> {
   const teacher = await requireTeacher();
   const locale = await getPreferredLocale();
-  const en = usesEnglishCopy(locale);
+  const t = createT(locale);
 
   const raw = formData.get("tiles");
   if (typeof raw !== "string") {
-    return { error: en ? "Invalid data." : "Datos inválidos." };
+    return { error: t("web.action.invalidData") };
   }
 
   let parsed: unknown;
   try {
     parsed = JSON.parse(raw);
   } catch {
-    return { error: en ? "Invalid data." : "Datos inválidos." };
+    return { error: t("web.action.invalidData") };
   }
   if (!Array.isArray(parsed)) {
-    return { error: en ? "Invalid data." : "Datos inválidos." };
+    return { error: t("web.action.invalidData") };
   }
 
   const validKeys = new Set(DEFAULT_DASHBOARD_TILE_KEYS);

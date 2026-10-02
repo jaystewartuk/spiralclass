@@ -4,9 +4,9 @@ import { PersonAvatar } from "@/components/teacher-identity";
 import Link from "next/link";
 import type { Metadata } from "next";
 import { Code2, GraduationCap, Globe, Heart, ShieldCheck, Sparkles, Wallet } from "lucide-react";
-import { usesEnglishCopy, SOURCE_CODE_LICENCE, SOURCE_CODE_URL } from "@spiralclass/shared";
+import { SOURCE_CODE_LICENCE, SOURCE_CODE_URL } from "@spiralclass/shared";
 import { Button } from "@/components/ui/button";
-import { getPreferredLocale, getT } from "@/lib/i18n";
+import { getT } from "@/lib/i18n";
 import type { StringKey } from "@/lib/i18n-translate";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -20,8 +20,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
 const FOUNDERS: Array<{
   photo: string;
-  nameEs: string;
-  nameEn: string;
+  name: string;
   roleKey: StringKey;
   bioKey: StringKey;
 }> = [
@@ -30,16 +29,13 @@ const FOUNDERS: Array<{
     // something a public repository should carry, and the card falls back to
     // a monogram. Set a URL if a deployment wants one.
     photo: "",
-    nameEs: "Jay Stewart",
-    nameEn: "Jay Stewart",
+    name: "Jay Stewart",
     roleKey: "web.about.founders.jay.role",
     bioKey: "web.about.founders.jay.bio",
   },
 ];
 
 export default async function AboutPage() {
-  const locale = await getPreferredLocale();
-  const en = usesEnglishCopy(locale);
   const t = await getT();
 
   const TRUST_POINTS = [
@@ -103,7 +99,7 @@ export default async function AboutPage() {
         </Heading>
         <div className="mx-auto mt-8 grid max-w-reading gap-6">
           {FOUNDERS.map((f) => (
-            <div key={f.nameEn} className="rounded-2xl border bg-card p-6 shadow-xs">
+            <div key={f.name} className="rounded-2xl border bg-card p-6 shadow-xs">
               <div className="flex items-center gap-4">
                 {/* The shared avatar, not a copy of it. The copy that used to
                     live here painted its monogram fallback as `text-primary` on
@@ -115,9 +111,9 @@ export default async function AboutPage() {
                     started rendering when the founder photograph came out of
                     this file, which is the general shape worth keeping: a
                     fallback nobody exercises is a fallback nobody has checked. */}
-                <PersonAvatar name={en ? f.nameEn : f.nameEs} photoUrl={f.photo} size={56} />
+                <PersonAvatar name={f.name} photoUrl={f.photo} size={56} />
                 <div>
-                  <h3 className="font-display text-lg font-semibold">{en ? f.nameEn : f.nameEs}</h3>
+                  <h3 className="font-display text-lg font-semibold">{f.name}</h3>
                   <p className="text-sm text-muted-foreground">{t(f.roleKey)}</p>
                 </div>
               </div>

@@ -6,7 +6,7 @@ import { getPreferredLocale } from "@/lib/i18n";
 import { gateProFeature, upgradeNudge } from "@/lib/subscriptions/enforce";
 import { setShareProgressFor } from "@/lib/lesson-notes/student-prefs";
 import { revalidateAfterAction } from "@/lib/revalidate";
-import { usesEnglishCopy } from "@spiralclass/shared";
+import { createT } from "@spiralclass/shared";
 
 // Phase F, Half 2. The teacher opts
 // a student in (or out) of seeing their own learning profile. Wrapper around
@@ -18,7 +18,7 @@ export type ShareState = { ok?: boolean; error?: string };
 export async function setShareProgress(studentId: string, share: boolean): Promise<ShareState> {
   const teacher = await requireOnboardedTeacher();
   const locale = await getPreferredLocale();
-  const en = usesEnglishCopy(locale);
+  const t = createT(locale);
 
   const gate = await gateProFeature(teacher.id, "lesson_notes");
   if (!gate.ok) return { error: upgradeNudge(gate.limit, locale) };
@@ -27,13 +27,7 @@ export async function setShareProgress(studentId: string, share: boolean): Promi
   if (!res.ok) {
     return {
       error:
-        res.reason === "not-found"
-          ? en
-            ? "Student not found."
-            : "Alumno no encontrado."
-          : en
-            ? "Couldn't save. Please try again."
-            : "No se pudo guardar. Inténtalo de nuevo.",
+        res.reason === "not-found" ? t("web.action.studentNotFound") : t("web.action.couldntSave"),
     };
   }
 

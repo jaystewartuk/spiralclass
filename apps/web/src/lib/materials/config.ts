@@ -7,7 +7,7 @@
 // nothing drifts.
 
 import type { AppLocale } from "@/lib/i18n";
-import { intlLocale, usesEnglishCopy } from "@spiralclass/shared";
+import { intlLocale, createT } from "@spiralclass/shared";
 
 // How a material's body was authored — typed by the teacher, or drafted by
 // the AI compose action and reviewed/edited before saving (provenance only).
@@ -120,20 +120,20 @@ export type ClassContentValidation = { ok: true; body: string } | { ok: false; e
 // body. Trims, rejects empty, and enforces the ceiling. The body is never
 // rendered as raw HTML, so this is a length/empty gate, not an HTML sanitizer.
 export function validateClassContentBody(raw: string, locale: AppLocale): ClassContentValidation {
-  const en = usesEnglishCopy(locale);
+  const t = createT(locale);
   const body = raw.replace(/\r\n/g, "\n").trim();
   if (body.length === 0) {
     return {
       ok: false,
-      error: en ? "Write some content first." : "Escribe primero algo de contenido.",
+      error: t("web.action.classContent.writeFirst"),
     };
   }
   if (body.length > CLASS_CONTENT_MAX_CHARS) {
     return {
       ok: false,
-      error: en
-        ? `Content is too long (max ${CLASS_CONTENT_MAX_CHARS.toLocaleString("en")} characters).`
-        : `El contenido es demasiado largo (máx. ${CLASS_CONTENT_MAX_CHARS.toLocaleString(intlLocale("es"))} caracteres).`,
+      error: t("web.action.classContent.tooLong", {
+        max: CLASS_CONTENT_MAX_CHARS.toLocaleString(intlLocale(locale)),
+      }),
     };
   }
   return { ok: true, body };

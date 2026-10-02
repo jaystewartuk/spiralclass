@@ -14,7 +14,7 @@ import {
 import { studentIdentityIds } from "@/lib/students/identity";
 import { flushAnalytics, trackServerEvent } from "@/lib/analytics/posthog";
 import { revalidateAfterAction } from "@/lib/revalidate";
-import { usesEnglishCopy } from "@spiralclass/shared";
+import { createT, issueMessage } from "@spiralclass/shared";
 
 export type CancelState = { error?: string; ok?: string } | undefined;
 
@@ -43,12 +43,12 @@ export async function cancelBookingAsStudent(
   formData: FormData,
 ): Promise<CancelState> {
   const locale = await getPreferredLocale();
-  const en = usesEnglishCopy(locale);
+  const t = createT(locale);
   const parsed = cancelInputSchema.safeParse({
     bookingId: formData.get("bookingId"),
     reason: formData.get("reason") || undefined,
   });
-  if (!parsed.success) return { error: en ? "Invalid booking." : "Reserva inválida." };
+  if (!parsed.success) return { error: t("web.action.cancel.invalidBooking") };
 
   const student = await requireStudent();
 
@@ -58,20 +58,16 @@ export async function cancelBookingAsStudent(
   );
 
   if (outcome.code === "not-found") {
-    return { error: en ? "We couldn't find that booking." : "No encontramos esa reserva." };
+    return { error: t("web.action.bookingNotFound") };
   }
   if (outcome.code === "wrong-status") {
     return {
-      error: en
-        ? "This class can no longer be canceled from here. Ask your teacher to adjust it."
-        : "Esta clase ya no se puede cancelar desde aquí. Pide a tu profe que la ajuste.",
+      error: t("web.action.cancel.student.wrongStatus"),
     };
   }
   if (outcome.code === "schedule-changes-exhausted") {
     return {
-      error: en
-        ? "You've used all the schedule changes included with this package, so this class can't be refunded. To cancel it, ask your teacher."
-        : "Ya usaste todos los cambios de horario incluidos en este paquete, así que esta clase no se puede reembolsar. Para cancelarla, pide a tu profe.",
+      error: t("web.action.cancel.student.changesExhausted"),
     };
   }
 
@@ -90,19 +86,19 @@ export async function cancelBookingAsStudent(
 
   revalidateAfterAction(`/my-classes/${outcome.bookingId}`);
   return {
-    ok: en
-      ? outcome.timing === "lt24h"
-        ? "Canceled under 24h. The class is deducted from the package."
-        : "Canceled. You can reschedule your class."
-      : outcome.timing === "lt24h"
-        ? "Cancelaste con menos de 24h. La clase se descuenta del paquete."
-        : "Cancelada. Puedes reagendar tu clase.",
+    ok:
+      outcome.timing === "lt24h"
+        ? t("web.action.cancel.student.doneLate")
+        : t("web.action.cancel.student.done"),
   };
 }
 
+// The message is a catalog key, turned into words by issueMessage(). It was a
+// Spanish literal: a teacher reading the app in English or French who typed a
+// two-letter reason was answered in Spanish.
 const teacherCancelSchema = z.object({
   bookingId: z.string().uuid(),
-  reason: z.string().trim().min(3, "Da una razón breve.").max(500),
+  reason: z.string().trim().min(3, "web.action.reasonTooShort").max(500),
 });
 
 export async function cancelBookingAsTeacher(
@@ -110,14 +106,14 @@ export async function cancelBookingAsTeacher(
   formData: FormData,
 ): Promise<CancelState> {
   const locale = await getPreferredLocale();
-  const en = usesEnglishCopy(locale);
+  const t = createT(locale);
   const parsed = teacherCancelSchema.safeParse({
     bookingId: formData.get("bookingId"),
     reason: formData.get("reason"),
   });
   if (!parsed.success) {
     return {
-      error: parsed.error.issues[0]?.message ?? (en ? "Invalid data." : "Datos inválidos."),
+      error: issueMessage(parsed.error, t, "web.action.invalidData"),
     };
   }
 
@@ -133,13 +129,11 @@ export async function cancelBookingAsTeacher(
   );
 
   if (outcome.code === "not-found") {
-    return { error: en ? "We couldn't find that class." : "No encontramos esa clase." };
+    return { error: t("web.action.cancel.teacher.classNotFound") };
   }
   if (outcome.code === "wrong-status") {
     return {
-      error: en
-        ? "This class is already off the calendar."
-        : "Esta clase ya está fuera del calendario.",
+      error: t("web.action.cancel.teacher.wrongStatus"),
     };
   }
 
@@ -158,8 +152,6 @@ export async function cancelBookingAsTeacher(
 
   revalidateAfterAction(`/dashboard/classes/${outcome.bookingId}`);
   return {
-    ok: en
-      ? "Class canceled and restored to the student's package."
-      : "Clase cancelada y restaurada al paquete del alumno.",
+    ok: t("web.action.cancel.teacher.done"),
   };
 }

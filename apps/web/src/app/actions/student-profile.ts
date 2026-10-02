@@ -7,7 +7,7 @@ import { getPreferredLocale } from "@/lib/i18n";
 import { flushAnalytics, trackServerEvent } from "@/lib/analytics/posthog";
 import { STUDENT_PROFILE_MAX_CHARS, type StudentProfileState } from "@/lib/student-profile-fields";
 import { revalidateAfterAction } from "@/lib/revalidate";
-import { usesEnglishCopy } from "@spiralclass/shared";
+import { createT } from "@spiralclass/shared";
 
 // Durable student profile — interests + goals (docs/product/roadmap/
 // CLASS_CONTENT_INPUTS.md, D-20, Layer 1).
@@ -39,7 +39,7 @@ export async function setStudentProfile(
   formData: FormData,
 ): Promise<StudentProfileState> {
   const locale = await getPreferredLocale();
-  const en = usesEnglishCopy(locale);
+  const t = createT(locale);
   const parsed = schema.safeParse({
     studentId: formData.get("studentId"),
     interests: formData.get("interests") ?? "",
@@ -47,9 +47,7 @@ export async function setStudentProfile(
   });
   if (!parsed.success) {
     return {
-      error: en
-        ? `Keep each field under ${STUDENT_PROFILE_MAX_CHARS} characters.`
-        : `Mantén cada campo por debajo de ${STUDENT_PROFILE_MAX_CHARS} caracteres.`,
+      error: t("web.action.studentProfile.fieldTooLong", { max: STUDENT_PROFILE_MAX_CHARS }),
     };
   }
 
@@ -61,7 +59,7 @@ export async function setStudentProfile(
     select: { studentId: true },
   });
   if (!link) {
-    return { error: en ? "This student isn't in your list." : "Este alumno no está en tu lista." };
+    return { error: t("web.action.studentNotInList") };
   }
 
   await prisma.teacherStudent.update({
@@ -82,5 +80,5 @@ export async function setStudentProfile(
   await flushAnalytics();
 
   revalidateAfterAction(`/dashboard/students/${studentId}`);
-  return { ok: en ? "Profile saved." : "Perfil guardado." };
+  return { ok: t("students.profile.saved") };
 }

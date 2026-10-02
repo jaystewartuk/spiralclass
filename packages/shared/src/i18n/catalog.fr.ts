@@ -7044,4 +7044,1088 @@ export const fr = {
   "web.search.keywords.student.account": "profil nom e-mail fuseau horaire langue paramètres",
   "web.search.keywords.student.book": "programmer réserver cours créneau",
   "web.search.keywords.student.buy": "forfait plus de cours acheter payer renouveler",
+  "web.action.invalidData": "Données invalides.",
+  "web.action.invalidSelection": "Sélection invalide.",
+  "web.action.accountNotFound": "Compte introuvable.",
+  "web.action.accountDisabled": "Ce compte est désactivé.",
+  "web.action.accountDisabledContactSupport":
+    "Ce compte est désactivé. Écrivez à l'assistance si vous pensez qu'il s'agit d'une erreur.",
+  "web.action.teacherUnavailable": "Ce professeur n'est pas disponible.",
+  "web.action.studentNotFound": "Élève introuvable.",
+  "web.action.couldntSave": "Enregistrement impossible. Veuillez réessayer.",
+  "web.action.missingEmailOrCode": "Adresse e-mail ou code manquant.",
+  "web.action.invalidOrExpiredCode": "Code invalide ou expiré. Demandez-en un nouveau.",
+  "web.action.bookingNotFound": "Nous n'avons pas trouvé cette réservation.",
+  "web.action.slotTaken": "Ce créneau vient d'être réservé par quelqu'un d'autre.",
+  "web.action.slotUnavailable": "Ce créneau n'est plus disponible.",
+  "web.action.auth.tooMany": "Trop de tentatives. Réessayez dans une minute.",
+  "web.action.leads.tooMany": "Trop de messages. Patientez un instant et réessayez.",
+  "web.action.leads.notFound": "Nous n'avons pas trouvé ce contact.",
+  "web.action.checkout.packageMissing": "Ce forfait n'existe pas.",
+  "web.action.checkout.teacherEmail":
+    "Cette adresse e-mail appartient à un compte enseignant et ne peut pas servir à acheter des cours.",
+  "web.action.checkout.unexpectedResponse": "Réponse de paiement inattendue.",
+  "web.action.cancel.invalidBooking": "Réservation invalide.",
+  "web.action.cancel.student.wrongStatus":
+    "Ce cours ne peut plus être annulé d'ici. Demandez à votre professeur de le modifier.",
+  "web.action.cancel.student.changesExhausted":
+    "Vous avez utilisé tous les changements d'horaire inclus dans ce forfait : ce cours ne peut donc pas être remboursé. Pour l'annuler, adressez-vous à votre professeur.",
+  "web.action.cancel.student.doneLate": "Annulé à moins de 24 h. Le cours est déduit du forfait.",
+  "web.action.cancel.student.done": "Annulé. Vous pouvez reprogrammer votre cours.",
+  "web.action.cancel.teacher.classNotFound": "Nous n'avons pas trouvé ce cours.",
+  "web.action.cancel.teacher.wrongStatus": "Ce cours n'est déjà plus au calendrier.",
+  "web.action.cancel.teacher.done": "Cours annulé et recrédité sur le forfait de l'élève.",
+  "web.action.reschedule.futureSlot": "Choisissez un créneau à venir.",
+  "web.action.reschedule.beforeExpiry":
+    "Le nouvel horaire doit précéder l'expiration de votre forfait.",
+  "web.action.reschedule.packageGone":
+    "Ce forfait de cours n'est plus disponible. Actualisez la page et réessayez.",
+  "web.action.reschedule.notScheduled": "Ce cours ne peut plus être reprogrammé.",
+  "web.action.reschedule.changesExhausted":
+    "Vous avez utilisé tous les changements d'horaire inclus dans ce forfait. Demandez un ajustement à votre professeur.",
+  "web.action.reschedule.lt24h": "Un cours se reprogramme plus de 24 heures à l'avance.",
+  "web.action.reschedule.notAllowed": "Ce cours ne peut pas être reprogrammé.",
+  "web.action.booking.packageUnavailable": "Forfait indisponible.",
+  "web.action.booking.packageExhausted": "Vous avez utilisé tous les cours de ce forfait.",
+  "web.action.booking.packageExpired": "Ce forfait a expiré.",
+  "web.action.photo.choose": "Choisissez d'abord une image.",
+  "web.action.photo.type": "Utilisez une image JPG, PNG ou WebP.",
+  "web.action.photo.tooLarge": "L'image doit faire moins de 5 Mo.",
+  "web.action.photo.uploadFailed": "Nous n'avons pas pu téléverser l'image : {error}",
+  "web.action.testimonial.bodyLength":
+    "Écrivez quelques mots sur vos cours (moins de {max} caractères).",
+  "web.action.testimonial.notEligible":
+    "Vous pourrez écrire un témoignage après avoir terminé un cours avec ce professeur.",
+  "web.action.testimonial.nameFirst":
+    "Ajoutez d'abord votre nom dans les paramètres de votre compte, afin que votre professeur puisse vous citer.",
+  "web.action.testimonial.teacherNotFound": "Nous n'avons pas trouvé ce professeur.",
+  "web.action.contact.emailLocked":
+    "Cet élève se connecte déjà avec son adresse e-mail : elle ne peut donc être modifiée que depuis son compte.",
+  "web.action.contact.emailTaken": "Un autre de vos élèves utilise déjà cette adresse e-mail.",
+  "web.action.contact.saved": "Informations enregistrées.",
+  "web.action.contact.teacherSaved": "Coordonnées enregistrées.",
+  "web.action.contact.tooMany": "Trop de tentatives. Patientez quelques minutes et réessayez.",
+  "web.action.contact.sameEmail": "C'est déjà votre adresse e-mail.",
+  "web.action.contact.sendFailed":
+    "Nous n'avons pas pu envoyer l'e-mail de confirmation. Réessayez.",
+  "web.action.contact.emailUnusable":
+    "Nous n'avons pas pu utiliser cette adresse e-mail. Essayez-en une autre ou écrivez-nous depuis la page d'aide.",
+  "web.action.contact.noAccount": "Aucun compte à vérifier.",
+  "web.action.contact.confirmFailed":
+    "Nous n'avons pas pu confirmer cette adresse e-mail. Réessayez.",
+  "web.action.contact.emailUpdated": "Adresse e-mail mise à jour.",
+  "web.action.contact.emailUpdatedGoogleDisconnected":
+    "Adresse e-mail mise à jour. Votre compte Google a été déconnecté par sécurité — reconnectez-le ci-dessous avec votre nouveau compte Google si vous souhaitez continuer à vous connecter avec Google.",
+  "web.action.contact.unknownLanguage": "Langue inconnue.",
+  "web.action.contact.languageSaved": "Langue enregistrée.",
+  "web.action.accountDeletion.teacherActivePackages":
+    "Vous avez des forfaits actifs avec des cours restants. Annulez-les ou remboursez-les avant de supprimer votre compte.",
+  "web.action.accountDeletion.studentClassesLeft":
+    "Il vous reste des cours dans un forfait. Une fois ces cours terminés, vous pourrez supprimer votre compte.",
+  "web.action.materials.chooseFirst": "Choisissez d'abord un support.",
+  "web.action.materials.chooseWhen": "Choisissez quand envoyer le support.",
+  "web.action.classNotFound": "Cours introuvable.",
+  "web.action.materials.noLongerAvailable": "Ces supports ne sont plus disponibles.",
+  "web.action.homework.feedbackRequired": "Saisissez un commentaire.",
+  "web.action.homework.submissionNotFound": "Remise introuvable.",
+  "web.action.invitations.noValidEmails": "Aucune adresse e-mail valide trouvée.",
+  "web.action.invitations.nothingToSend":
+    "Rien à envoyer — ces élèves sont déjà connectés ou invités.",
+  "web.action.invitations.notFound": "Invitation introuvable.",
+  "web.action.invitations.alreadySettled": "Cette invitation a déjà été acceptée ou annulée.",
+  "web.action.invitations.sendFailed": "Impossible d'envoyer l'e-mail d'invitation.",
+  "web.action.invitations.resent": "Invitation renvoyée.",
+  "web.action.invitations.alreadyAccepted": "Cet élève a déjà accepté.",
+  "web.action.invitations.cancelled": "Invitation annulée.",
+  "web.action.invitations.linkReady": "Lien prêt.",
+  "web.action.insights.focusNotFound": "Point à travailler introuvable.",
+  "web.action.checkFields": "Vérifiez les champs et réessayez.",
+  "web.action.lessonNotes.noEarlierClass": "Aucun cours précédent avec des notes à copier.",
+  "web.action.lessonNotes.bookmark": "Marque-page",
+  "web.action.lessonNotes.pickRecipient": "Choisissez à qui s'adresse la note.",
+  "web.action.lessonNotes.writeFirst": "Écrivez d'abord quelque chose.",
+  "web.action.lessonNotes.summaryNotStarted":
+    "Vous pourrez résumer le cours une fois qu'il aura commencé.",
+  "web.action.lessonNotes.summaryNoNotes":
+    "Ajoutez d'abord des notes au cours : il n'y a encore rien à résumer.",
+  "web.action.lessonNotes.summaryUnavailable":
+    "Les résumés ne sont pas disponibles pour le moment.",
+  "web.action.lessonNotes.summaryFailed": "Impossible de générer le résumé. Veuillez réessayer.",
+  "web.action.lessonNotes.summaryEmpty": "Le résumé est revenu vide.",
+  "web.action.levels.unknown": "Niveau inconnu.",
+  "web.action.levels.saved": "Niveau enregistré.",
+  "web.action.library.invalidVisibility": "Visibilité invalide.",
+  "web.action.library.invalidUrl": "URL invalide",
+  "web.action.library.contentRequired": "Ajoutez du contenu, un fichier ou un lien.",
+  "web.action.library.materialNotFound": "Support introuvable.",
+  "web.action.library.materialOrStudentGone":
+    "Ce support ou cet élève n'est plus disponible. Rechargez la page et réessayez.",
+  "web.action.tryAgain": "Cela n'a pas fonctionné. Réessayez.",
+  "web.action.marketing.nameRequired":
+    "Ajoutez un nom (et un lien valide, si vous en indiquez un).",
+  "web.action.notificationPrefs.enabled": "Notifications activées.",
+  "web.action.notificationPrefs.paused": "Notifications suspendues.",
+  "web.action.onboarding.countryLocked":
+    "Vous ne pouvez pas changer de pays après avoir connecté Stripe. Déconnectez d'abord Stripe si nécessaire.",
+  "web.action.onboarding.invalidSchedule": "Horaires invalides",
+  "web.action.overrides.classNotFound": "Nous n'avons pas trouvé le cours.",
+  "web.action.overrides.onlyScheduledComplete":
+    "Seuls les cours programmés peuvent être marqués comme terminés.",
+  "web.action.overrides.changedElsewhere":
+    "Ce cours a déjà été modifié par une autre action. Actualisez la page et réessayez.",
+  "web.action.overrides.markedComplete": "Cours marqué comme terminé.",
+  "web.action.overrides.onlyScheduledOrCompletedNoShow":
+    "Seuls les cours programmés ou terminés peuvent être signalés comme absence.",
+  "web.action.overrides.markedNoShow":
+    "Absence enregistrée. Le cours reste décompté (sans remboursement).",
+  "web.action.overrides.onlyCanceledOrNoShowRestore":
+    "Seuls les cours annulés par l'élève ou signalés comme absence peuvent être rétablis.",
+  "web.action.overrides.slotTakenCancelOther":
+    "Ce créneau est déjà occupé par un autre cours. Annulez d'abord l'autre, ou demandez à l'élève de reprogrammer.",
+  "web.action.overrides.noClassesToRestore": "Ce forfait n'a plus de cours disponibles à rétablir.",
+  "web.action.overrides.slotTakenByClass": "Ce créneau est déjà occupé par un autre cours.",
+  "web.action.overrides.restored": "Cours rétabli.",
+  "web.action.overrides.onlyDeductedWaive":
+    "Seules les annulations de l'élève ayant entraîné une déduction peuvent être levées.",
+  "web.action.overrides.waived": "Pénalité levée. 1 cours a été recrédité sur le forfait.",
+  "web.action.packageNotFound": "Forfait introuvable.",
+  "web.action.overrides.dateInFuture": "La nouvelle date doit être dans le futur.",
+  "web.action.overrides.dateAfterCurrent":
+    "La nouvelle date doit être postérieure à la date actuelle.",
+  "web.action.overrides.expirationUpdated": "Date d'expiration mise à jour.",
+  "web.action.overrides.unknownPackage": "Forfait inconnu.",
+  "web.action.overrides.alreadyArchived": "Cet élève est déjà archivé.",
+  "web.action.overrides.alreadyActive": "Cet élève est déjà actif.",
+  "web.action.audit.archivedFromRoster": "Archivé de la liste",
+  "web.action.audit.reactivatedOnRoster": "Réactivé dans la liste",
+  "web.action.overrides.studentArchived": "Élève archivé.",
+  "web.action.overrides.studentReactivated": "Élève réactivé.",
+  "web.action.overrides.classLanguageUpdated": "Langue du cours mise à jour.",
+  "web.action.packages.onlyActivePause": "Seul un forfait actif peut être mis en pause",
+  "web.action.packages.onlyPausedResume": "Seul un forfait en pause peut être réactivé",
+  "web.action.profile.slugTooShort": "Utilisez au moins {min} lettres ou chiffres.",
+  "web.action.profile.maxChars": "Ne dépassez pas {max} caractères.",
+  "web.action.profile.invalidPhone": "Numéro de téléphone invalide.",
+  "web.action.invalidInput": "Saisie invalide",
+  "web.action.profile.videoUnavailable":
+    "Le téléversement de vidéo n'est pas disponible pour le moment.",
+  "web.action.profile.uploadIncomplete": "Le téléversement n'a pas abouti — veuillez réessayer.",
+  "web.action.profile.videoTooLarge":
+    "La vidéo doit faire moins de 50 Mo — essayez un extrait plus court.",
+  "web.action.profile.noVideo": "Il n'y a pas de vidéo à analyser.",
+  "web.action.shareGroups.nameRequired":
+    "Ajoutez un nom de groupe (et un lien valide, si vous en indiquez un).",
+  "web.action.shareGroups.notFound": "Nous n'avons pas trouvé ce groupe.",
+  "web.action.socialPreview.aiUnavailable":
+    "La génération d'images par IA n'est pas disponible pour le moment. Vous pouvez toujours importer votre propre image.",
+  "web.action.socialPreview.tooFast":
+    "Vous générez trop vite — patientez quelques minutes et réessayez.",
+  "web.action.socialPreview.quotaUsed":
+    "Vous avez utilisé les {limit} images IA de ce mois-ci. Vous pouvez toujours importer les vôtres.",
+  "web.action.socialPreview.refused":
+    "Le service d'images n'a pas voulu créer celle-ci. Essayez de la décrire autrement.",
+  "web.action.socialPreview.timedOut":
+    "Cela a pris trop de temps. Réessayez — rien n'a été décompté.",
+  "web.action.socialPreview.createFailed":
+    "Nous n'avons pas pu créer l'image. Réessayez — rien n'a été décompté.",
+  "web.action.socialPreview.chooseType": "Choisissez une image JPG, PNG ou WebP.",
+  "web.action.socialPreview.empty": "Cette image est vide.",
+  "web.action.socialPreview.tooLarge": "L'image ne peut pas dépasser 5 Mo.",
+  "web.action.socialPreview.pickStyle": "Choisissez un style pour l'image.",
+  "web.action.socialPreview.chooseUpload": "Choisissez une image à importer.",
+  "web.action.socialPreview.unusable": "Nous n'avons pas pu utiliser cette image.",
+  "web.action.socialPreview.imageNotFound": "Nous n'avons pas trouvé cette image.",
+  "web.action.socialPreview.resetFailed": "Nous n'avons pas pu réinitialiser cet aperçu.",
+  "web.action.socialPreview.previewNotFound": "Nous n'avons pas trouvé cet aperçu.",
+  "web.action.socialPreview.renameFailed": "Nous n'avons pas pu renommer cette image.",
+  "web.action.socialPreview.deleteFailed": "Nous n'avons pas pu supprimer cette image.",
+  "web.action.socialPreview.partOfDonePost":
+    "Cette image fait partie d'une publication que vous avez déjà marquée comme faite : elle est donc conservée.",
+  "web.action.studentNotes.added": "Note ajoutée.",
+  "web.action.studentNotes.notFound": "Nous n'avons pas trouvé cette note.",
+  "web.action.studentNotes.updated": "Note mise à jour.",
+  "web.action.studentNotes.deleted": "Note supprimée.",
+  "web.action.studentProfile.fieldTooLong": "Limitez chaque champ à {max} caractères.",
+  "web.action.merge.bothOnRoster": "Les deux élèves doivent figurer dans votre liste.",
+  "web.action.merge.accountDisabled":
+    "L'un de ces comptes est désactivé — contactez l'assistance pour les fusionner.",
+  "web.action.merge.differentAccounts":
+    "Les deux élèves se sont connectés avec des comptes différents : il pourrait donc s'agir de deux personnes distinctes. Contactez l'assistance si vous êtes certain qu'il s'agit de la même.",
+  "web.action.merge.otherTeacher":
+    "Le doublon est aussi inscrit auprès d'un autre professeur — contactez l'assistance pour les fusionner.",
+  "web.action.merge.pendingDeletion":
+    "Le doublon fait l'objet d'une demande de suppression en attente et ne peut pas être fusionné.",
+  "web.action.merge.failed":
+    "La fusion n'a pas pu être effectuée. Rien n'a été modifié — contactez l'assistance.",
+  "web.action.merge.done":
+    "Élèves fusionnés — les forfaits et les cours sont désormais réunis sous un seul profil.",
+  "web.action.teacherAccount.disconnectStripeFirst":
+    "Déconnectez Stripe avant de changer de pays — votre compte de paiement y est rattaché.",
+  "web.action.teacherAccount.invalidCountry": "Pays invalide.",
+  "web.action.teacherAccount.countrySaved": "Pays enregistré.",
+  "web.action.audit.bookedByTeacher": "Cours réservé par le professeur au nom de l'élève.",
+  "web.action.teacherPackages.remainingExceedsTotal":
+    "Le nombre de cours restants ne peut pas dépasser le total du forfait.",
+  "web.action.teacherPackages.expirationInFuture": "La date d'expiration doit être dans le futur.",
+  "web.action.audit.offPlatformPackage": "Forfait hors plateforme enregistré par le professeur.",
+  "web.action.teacherPackages.added": "Forfait ajouté — {remaining} cours restants sur {total}.",
+  "web.action.teacherPackages.onlyActiveOrPausedEdit":
+    "Seul un forfait actif ou en pause peut être modifié.",
+  "web.action.audit.packageCorrected": "Détails du forfait corrigés par le professeur.",
+  "web.action.teacherPackages.updated":
+    "Forfait mis à jour — {remaining} cours restants sur {total}.",
+  "web.action.invalidRequest": "Requête invalide.",
+  "web.action.teacherPackages.hasBookings":
+    "Ce forfait comporte des cours réservés ou suivis : il ne peut donc pas être supprimé. Mettez-le plutôt en pause, ou annulez d'abord ses cours.",
+  "web.action.teacherPackages.hasPayment":
+    "Ce forfait est associé à un paiement enregistré : il ne peut donc pas être supprimé. Remboursez plutôt le paiement.",
+  "web.action.audit.accidentalPackageDeleted":
+    "Forfait créé par erreur, supprimé par le professeur.",
+  "web.action.teacherStudents.teacherEmail":
+    "Cette adresse e-mail appartient à un compte enseignant et ne peut pas être ajoutée comme élève.",
+  "web.action.audit.studentAddedSilently": "Élève ajouté à la liste (ajout silencieux).",
+  "web.action.teacherStudents.alreadyLive": "Cet élève reçoit déjà les notifications.",
+  "web.action.audit.studentWentLive": "Élève activé — les notifications sont désormais envoyées.",
+  "web.action.teacherStudents.nowLive":
+    "L'élève est activé. Il recevra désormais les notifications.",
+  "web.action.audit.wiseNotReceived": "Wise : paiement non reçu",
+  "web.action.invitations.sent": "{count} invitations envoyées.",
+  "web.action.invitations.sent_one": "{count} invitation envoyée.",
+  "web.action.invitations.sentSomeFailed":
+    "{count} invitations envoyées. ({failed} n'ont pas pu être remises)",
+  "web.action.invitations.sentSomeFailed_one":
+    "{count} invitation envoyée. ({failed} n'ont pas pu être remises)",
+  "web.action.teacherPackages.committedExceeds":
+    "Ce forfait compte déjà {count} cours réservés ou suivis : il ne peut donc pas afficher plus de {max} cours restants.",
+  "web.action.teacherPackages.committedExceeds_one":
+    "Ce forfait compte déjà {count} cours réservé ou suivi : il ne peut donc pas afficher plus de {max} cours restants.",
+  "web.action.overrides.customPricesRemoved": "Tarifs personnalisés supprimés.",
+  "web.action.overrides.customPricesUpdated":
+    "Tarifs personnalisés mis à jour pour les prochains achats.",
+  "web.action.reasonTooShort": "Indiquez brièvement la raison.",
+  "web.action.overrides.invalidDate": "Date invalide (AAAA-MM-JJ)",
+  "web.action.studentNotes.empty": "La note ne peut pas être vide.",
+  "web.action.studentNotInList": "Cet élève ne figure pas dans votre liste.",
+  "web.action.admin.expenseNotFound": "Dépense introuvable",
+  "web.action.admin.integrationNotFound": "Intégration introuvable",
+  "web.action.admin.usageEntryNotFound": "Entrée d'utilisation introuvable",
+  "web.action.admin.mfa.startFailed": "Erreur lors de l'activation de la double authentification",
+  "web.action.admin.mfa.invalidCode": "Code invalide. Saisissez les 6 chiffres.",
+  "web.action.admin.mfa.incorrectCode": "Code incorrect.",
+  "web.action.admin.notificationNotFound": "Notification introuvable",
+  "web.action.admin.notificationAlreadyInState": "Déjà à l'état « {status} »",
+  "web.action.admin.requeued": "Remise en file d'attente",
+  "web.action.admin.noRecipients": "Aucun destinataire",
+  "web.action.admin.alreadyCanceled": "Déjà annulé",
+  "web.action.admin.packageNoExpiry": "Ce forfait n'expire pas : il n'y a rien à prolonger",
+  "web.action.admin.paymentNotFound": "Paiement introuvable",
+  "web.action.admin.alreadyRefunded": "Déjà remboursé",
+  "web.action.admin.onlyPaidRefundable": "Seuls les paiements réglés peuvent être remboursés",
+  "web.action.admin.wiseRefundManual":
+    "Les paiements Wise doivent être remboursés manuellement dans Wise",
+  "web.action.admin.missingPaymentIntent":
+    "payment_intent manquant — remboursement via Stripe impossible",
+  "web.action.admin.stripeRejectedRefund": "Stripe a refusé le remboursement",
+  "web.action.admin.staff.emailExists": "Cette adresse e-mail existe déjà",
+  "web.action.admin.staff.cantDemoteSelf": "Vous ne pouvez pas rétrograder votre propre compte",
+  "web.action.admin.staff.notFound": "Administrateur introuvable",
+  "web.action.admin.staff.lastSuperadminRemove":
+    "Vous ne pouvez pas retirer le dernier super-administrateur actif.",
+  "web.action.admin.staff.cantDisableSelf": "Vous ne pouvez pas désactiver votre propre compte",
+  "web.action.admin.staff.lastSuperadminDisable":
+    "Vous ne pouvez pas désactiver le dernier super-administrateur actif.",
+  "web.action.admin.studentNotFound": "Élève introuvable.",
+  "web.action.admin.students.emailTakenOnRoster":
+    "Un autre élève de la liste de ce professeur utilise déjà cette adresse e-mail.",
+  "web.action.admin.students.emailUnusable":
+    "Cette adresse e-mail ne peut pas être utilisée (elle appartient peut-être déjà à un autre compte).",
+  "web.action.admin.teacherNotFound": "Professeur introuvable",
+  "web.action.admin.emailSendFailed": "Impossible d'envoyer l'e-mail",
+  "web.action.admin.emailSentTo": "E-mail envoyé à {email}",
+  "web.action.invalidId": "Identifiant invalide",
+  "web.action.admin.invalidMonth": "Mois invalide",
+  "web.action.admin.invalidCurrency": "Devise invalide",
+  "web.action.admin.keyFormat": "Utilisez des minuscules, des chiffres et des tirets bas",
+  "web.action.admin.invalidDate": "Date invalide",
+  "web.action.admin.minOneMonth": "1 mois minimum",
+  "web.action.admin.max24Months": "24 mois maximum",
+  "web.action.admin.pricingModelInvalidDetail": "Modèle de tarification invalide : {detail}",
+  "web.action.admin.schemaMismatch": "ne correspond pas au schéma",
+  "web.action.admin.broadcastSent": "Envoyés : {sent}/{total}",
+  "web.action.admin.broadcastSentSomeFailed": "Envoyés : {sent}/{total} · {failed} en échec",
+  "web.action.checkout.stripeUnavailable":
+    "Nous n'avons pas pu joindre le prestataire de paiement par carte. Réessayez, ou payez plutôt par virement bancaire.",
+  "web.action.checkout.cardNotAccepted":
+    "Ce professeur n'accepte pas encore les paiements par carte. Demandez-lui de terminer la configuration de Stripe, ou choisissez un virement bancaire.",
+  "web.action.checkout.transfersNotAccepted":
+    "Ce professeur n'accepte pas les virements bancaires pour le moment.",
+  "web.action.checkout.tooMany":
+    "Trop de tentatives de paiement. Patientez une minute et réessayez.",
+  "web.action.checkout.noEmail":
+    "Votre compte n'a pas d'adresse e-mail. Demandez à votre professeur d'en ajouter une.",
+  "web.action.checkout.notForTwo":
+    "Ce forfait n'est pas proposé pour deux personnes. Choisissez-en un autre.",
+  "web.action.checkout.partnerConsent":
+    "Confirmez que la deuxième personne est d'accord avant de payer.",
+  "web.action.checkout.freeWithCode":
+    "Avec ce code, le cours est gratuit — demandez à votre professeur de le réserver directement pour vous.",
+  "web.action.checkout.chooseTransfer": "Choisissez comment vous souhaitez effectuer le virement.",
+  "web.action.checkout.optionGone":
+    "Ce moyen de paiement n'est plus disponible. Choisissez-en un autre.",
+  "web.action.checkout.cardUnavailable":
+    "Les paiements par carte ne sont pas disponibles pour le moment. Essayez un virement bancaire, ou revenez plus tard.",
+  "web.action.checkout.noPaymentForm":
+    "Stripe n'a pas renvoyé de formulaire de paiement. Réessayez.",
+  "web.action.checkout.noPaymentLink": "Stripe n'a pas renvoyé de lien de paiement. Réessayez.",
+  "web.action.focusTags.tooManyTags": "Trop d'étiquettes dans un même enregistrement.",
+  "web.action.focusTags.tagNeedsName": "Chaque étiquette doit avoir un nom.",
+  "web.action.focusTags.tagNameTooLong": "Le nom d'une étiquette est trop long.",
+  "web.action.focusTags.tagNeedsCategory": "Chaque étiquette doit avoir une catégorie valide.",
+  "web.action.focusTags.tooManyCategories": "Trop de catégories dans un même enregistrement.",
+  "web.action.focusTags.categoryNeedsName": "Chaque catégorie doit avoir un nom.",
+  "web.action.focusTags.categoryNameTooLong": "Le nom d'une catégorie est trop long.",
+  "web.action.focusTags.cantDeleteCategories":
+    "Impossible de supprimer {names} : des étiquettes y sont encore rattachées. Déplacez-les ou supprimez-les d'abord.",
+  "web.action.discount.invalid": "Ce code n'est pas valide.",
+  "web.action.discount.inactive": "Ce code n'est plus actif.",
+  "web.action.discount.expired": "Ce code a expiré.",
+  "web.action.discount.limitReached": "Ce code a atteint sa limite d'utilisation.",
+  "web.action.discount.alreadyUsed": "Vous avez déjà utilisé ce code.",
+  "web.action.packageField.invalidNumber": "Saisissez un nombre valide",
+  "web.action.packageField.exceedsTotal":
+    "Le nombre de cours restants ne peut pas dépasser le total.",
+  "web.action.packageField.atMost": "Il peut rester au maximum {max} cours pour ce forfait.",
+  "web.action.materialImage.chooseType": "Choisissez une image JPG, PNG, WebP ou GIF.",
+  "web.action.materialImage.tooLarge": "L'image ne peut pas dépasser {mb} Mo.",
+  "web.action.materialImage.uploadFailed": "Nous n'avons pas pu téléverser l'image : {message}",
+  "web.action.materialFile.tooLarge": "Le fichier ne peut pas dépasser 25 Mo.",
+  "web.action.materialFile.uploadFailed": "Nous n'avons pas pu téléverser le fichier : {message}",
+  "web.action.referral.ownCode": "Vous ne pouvez pas utiliser votre propre code de parrainage.",
+  "web.action.referral.firstPurchaseOnly":
+    "Les codes de parrainage ne s'appliquent qu'à votre premier achat.",
+  "web.action.classContent.writeFirst": "Rédigez d'abord du contenu.",
+  "web.dateDisplay.yourZone": "votre fuseau",
+  "web.action.checkout.belowCardMinimum":
+    "Ce total est inférieur au minimum pour un paiement par carte ({min} {currency}).",
+  "web.action.checkout.belowCardMinimumUseTransfer":
+    "Ce total est inférieur au minimum pour un paiement par carte ({min} {currency}). Choisissez un virement bancaire pour l'utiliser.",
+  "web.action.classContent.tooLong": "Le contenu est trop long ({max} caractères maximum).",
+  "focusTags.builtin.category.grammar": "Grammaire",
+  "focusTags.builtin.category.vocabulary": "Vocabulaire",
+  "focusTags.builtin.category.skill": "Compétences",
+  "focusTags.builtin.category.activity": "Activités",
+  "focusTags.builtin.category.theme": "Thèmes",
+  "focusTags.builtin.category.format": "Format",
+  "focusTags.builtin.format.actividad_breve": "Activité courte",
+  "focusTags.builtin.format.presentacion": "Présentation",
+  "focusTags.builtin.format.lecturas": "Lectures",
+  "focusTags.builtin.format.ponte_al_dia": "Actualités",
+  "focusTags.builtin.format.unidad_didactica": "Unité didactique",
+  "focusTags.builtin.format.test": "Quiz",
+  "focusTags.builtin.format.cancion": "Chanson",
+  "focusTags.builtin.format.podcast": "Podcast",
+  "focusTags.builtin.format.escape_room": "Escape game",
+  "focusTags.builtin.format.kahoot": "Kahoot",
+  "validation.timeFormat": "Utilisez le format HH:MM",
+  "validation.invalidCode": "Code invalide",
+  "validation.invalidTimezone": "Fuseau horaire invalide",
+  "validation.phoneRequired": "Votre numéro de téléphone est requis",
+  "validation.invalidCountry": "Pays invalide",
+  "validation.invalidCurrency": "Devise invalide",
+  "validation.unknownLanguage": "Langue inconnue",
+  "validation.endAfterStart": "L'heure de fin doit être postérieure à l'heure de début",
+  "validation.addTimeSlot": "Ajoutez au moins un créneau",
+  "validation.rangeOverlaps": "Cette plage horaire en chevauche une autre le même jour",
+  "validation.invalidDate": "Date invalide",
+  "validation.reasonTooLong": "Motif trop long",
+  "validation.endDateAfterStart":
+    "La date de fin doit être identique ou postérieure à la date de début",
+  "validation.under1000": "Ne dépassez pas 1000 caractères.",
+  "validation.maxChars": "{max} caractères maximum",
+  "validation.nameRequired": "Le nom est requis",
+  "validation.nameTooLong": "Nom trop long",
+  "validation.invalidWisetag": "Wisetag invalide (2 à 32 caractères)",
+  "validation.wisetagRequired": "Un Wisetag est nécessaire pour activer Wise.",
+  "validation.chooseTransferMethod": "Choisissez un mode de virement.",
+  "validation.invalidPaymentSelection": "Sélection de paiement invalide.",
+  "validation.noteTooLong": "Note trop longue",
+  "validation.listTooLong": "La liste est trop longue",
+  "validation.addStudent": "Ajoutez au moins un élève.",
+  "push.bookingConfirmation.title": "Cours confirmé",
+  "push.bookingConfirmation.body":
+    "Votre cours avec {teacherName} a lieu le {classDateTime} · Il vous reste {classesRemaining} cours",
+  "push.reminder24h.lead": "Dans 1 heure",
+  "push.reminder24h.lead2": "Dans 15 minutes",
+  "push.reminder24h.title": "Rappel : {lead}",
+  "push.reminder24h.body": "Cours avec {teacherName} le {classDateTime}",
+  "push.reminder24hTeacher.body": "Cours avec {studentName} le {classDateTime}",
+  "push.cancelLt24h.title": "Cours annulé",
+  "push.cancelLt24h.body":
+    "Votre cours du {originalDateTime} avec {teacherName} a été annulé (moins de 24 h avant).",
+  "push.cancelGte24hWithReschedule.title": "Votre professeur a annulé",
+  "push.cancelGte24hWithReschedule.body":
+    "Cours du {originalDateTime} avec {teacherName}. Reprogrammez quand vous voulez.",
+  "push.rescheduleConfirm.title": "Cours reprogrammé",
+  "push.rescheduleConfirm.body":
+    "Initialement le {oldDateTime}. Désormais le {newDateTime} avec {teacherName}.",
+  "push.paymentReceived.title": "Paiement reçu",
+  "push.paymentReceived.body": "{packageName} avec {teacherName} — {amount}.",
+  "push.magicLink.title": "Votre lien de connexion",
+  "push.magicLink.body":
+    "Touchez pour ouvrir le portail de {teacherName}. Expire dans {expiryMinutes} min.",
+  "push.materialsSend.body": "Supports pour votre cours du {classDateTime} avec {teacherName}.",
+  "push.paymentPendingTeacher.title": "Paiement Wise commencé",
+  "push.paymentPendingTeacher.body":
+    "{studentName} achète {packageName} ({amount}). Réf. : {wiseReference}.",
+  "push.paymentMarkedSentTeacher.title": "Paiement Wise envoyé",
+  "push.paymentMarkedSentTeacher.body":
+    "{studentName} a envoyé {amount} pour {packageName}. Vérifiez Wise.",
+  "push.lessonInsightsReviewTeacher.title": "Points à travailler prêts",
+  "push.lessonInsightsReviewTeacher.body":
+    "Relisez les points à travailler de votre cours avec {studentName}.",
+  "push.wiseConfirmReminderTeacher.title": "Confirmez le paiement Wise",
+  "push.wiseConfirmReminderTeacher.body":
+    "{studentName} : {amount} n'est toujours pas confirmé. Confirmez-le pour activer le forfait.",
+  "push.paymentFailedStudent.title": "Le paiement n'a pas abouti",
+  "push.paymentFailedStudent.body":
+    "Votre paiement pour {packageName} avec {teacherName} n'est pas passé.",
+  "push.refundIssuedStudent.title": "Remboursement effectué",
+  "push.refundIssuedStudent.body": "{amount} pour {packageName} avec {teacherName}.",
+  "push.refundIssuedTeacher.body": "{amount} à {studentName} pour {packageName}.",
+  "push.disputeLostStudent.title": "Votre paiement a été annulé",
+  "push.disputeLostStudent.body":
+    "{amount} pour {packageName}. Les cours restants ne sont plus disponibles.",
+  "push.disputeLostTeacher.title": "Contestation perdue",
+  "push.disputeLostTeacher.body": "{amount} de {studentName} pour {packageName}.",
+  "push.stripeReadyTeacher.title": "Stripe est prêt",
+  "push.stripeReadyTeacher.body": "Vous pouvez désormais accepter les paiements par carte.",
+  "push.stripeRequirementsTeacher.title": "Stripe a besoin d'informations",
+  "push.stripeRequirementsTeacher.body": "Les paiements par carte sont suspendus.",
+  "push.accountDisabledTeacher.body":
+    "Votre compte SpiralClass a été désactivé. Consultez vos e-mails.",
+  "push.bookingCreatedTeacher.title": "Nouveau cours réservé",
+  "push.bookingCreatedTeacher.body": "{studentName} a réservé le {classDateTime}",
+  "push.cancelLt24hTeacher.title": "Annulation tardive",
+  "push.cancelLt24hTeacher.body": "{studentName} a annulé le {originalDateTime} (moins de 24 h).",
+  "push.cancelGte24hTeacher.body": "{studentName} a annulé le {originalDateTime}.",
+  "push.rescheduleConfirmTeacher.body": "{studentName} : {oldDateTime} → {newDateTime}.",
+  "push.paymentReceivedTeacher.title": "Nouvelle vente",
+  "push.paymentReceivedTeacher.body": "{studentName} a acheté {packageName} ({amount}).",
+  "push.wiseMarkedSentStudent.title": "Votre professeur a été prévenu",
+  "push.wiseMarkedSentStudent.body":
+    "Nous avons informé {teacherName} que vous avez envoyé votre virement ({wiseReference}). Votre forfait sera activé dès sa confirmation.",
+  "push.noShowStudent.title": "Absence enregistrée",
+  "push.noShowStudent.body":
+    "{teacherName} a signalé une absence pour le cours du {originalDateTime}.",
+  "push.packageExpiryNudge.title": "Ne perdez pas vos cours",
+  "push.packageExpiryNudge.body":
+    "Il vous reste {classesRemaining} cours avec {teacherName} ; ils expirent le {expiryDate}.",
+  "push.packageConsumedStudent.title": "On continue ?",
+  "push.packageConsumedStudent.body":
+    "Vous avez utilisé tous les cours de « {packageName} » avec {teacherName}. Achetez votre prochain forfait depuis votre portail.",
+  "push.packageConsumedTeacher.title": "Occasion de renouvellement",
+  "push.packageConsumedTeacher.body": "{studentName} a terminé son forfait « {packageName} ».",
+  "push.subscriptionTrialEnding.title": "Votre essai Pro se termine bientôt",
+  "push.subscriptionTrialEnding.body":
+    "Il reste {daysRemaining} jours à votre essai. Choisissez une formule pour garder Pro.",
+  "push.subscriptionPaymentSucceeded.body":
+    "{amount} pour SpiralClass Pro. Prochain prélèvement : {nextChargeDate}.",
+  "push.subscriptionPaymentFailed.title": "Mettez à jour votre moyen de paiement",
+  "push.subscriptionPaymentFailed.body":
+    "Nous n'avons pas pu prélever votre abonnement. Vous avez {graceDays} jours pour régulariser.",
+  "push.subscriptionCanceled.title": "Votre abonnement Pro a pris fin",
+  "push.subscriptionCanceled.body":
+    "Vous êtes sur la formule Gratuite. Vos élèves et vos réservations restent actifs.",
+  "push.subscriptionFoundingPriceLocked.title": "Tarif fondateur bloqué",
+  "push.subscriptionFoundingPriceLocked.body": "Votre tarif de {amount}/mois est bloqué à vie.",
+  "push.libraryMaterialAssigned.title": "Nouveau support",
+  "push.libraryMaterialAssigned.body":
+    "{teacherName} vous a attribué « {materialLabel} ». Ouvrez-le dans vos supports.",
+  "push.homeworkAssignedStudent.title": "Nouveau devoir",
+  "push.homeworkAssignedStudent.body": "{teacherName} vous a donné « {assignmentTitle} ».",
+  "push.homeworkFeedbackAvailableStudent.title": "Devoir validé",
+  "push.homeworkFeedbackAvailableStudent.title2": "Renvoyez votre devoir",
+  "push.homeworkFeedbackAvailableStudent.title3": "Commentaire sur votre devoir",
+  "push.homeworkFeedbackAvailableStudent.body":
+    "{teacherName} a validé « {assignmentTitle} ». Consultez son commentaire.",
+  "push.homeworkFeedbackAvailableStudent.body2":
+    "{teacherName} vous demande de renvoyer « {assignmentTitle} ».",
+  "push.homeworkFeedbackAvailableStudent.body3":
+    "{teacherName} a laissé un commentaire sur « {assignmentTitle} ».",
+  "push.homeworkDueSoonStudent.title": "Devoir à rendre bientôt",
+  "push.homeworkDueSoonStudent.body": "« {assignmentTitle} » est à rendre le {dueDate}.",
+  "push.homeworkOverdueStudent.title": "Devoir en retard",
+  "push.homeworkOverdueStudent.body":
+    "« {assignmentTitle} » est en retard. Vous pouvez encore le rendre.",
+  "push.facebookGroupsNudgeTeacher.title": "C'est le moment de repartager",
+  "push.facebookGroupsNudgeTeacher.body":
+    "Publiez à nouveau votre lien dans vos groupes Facebook — c'est ainsi que vous remplissez votre agenda.",
+  "push.studentAcquisitionPlanTeacher.title": "Votre plan de la semaine",
+  "push.studentAcquisitionPlanTeacher.body":
+    "Des actions sont prêtes pour vous aider à trouver des élèves.",
+  "push.chatMessage.title": "Message de {teacherName}",
+  "push.chatMessageTeacher.title": "Message de {studentName}",
+  "push.homeworkSubmittedTeacher.body": "{studentName} a rendu « {assignmentTitle} ».",
+  "push.homeworkSubmittedTeacher.body2": "{studentName} a rendu un devoir.",
+  "email.footerLine.text": "Pour ne plus recevoir ces e-mails : {unsubscribeUrl}",
+  "email.notificationSettingsLine.text": "Gérer les notifications : {notificationSettingsUrl}",
+  "email.archivedSuppressionNote.text":
+    "Remarque : {studentName} n'a reçu aucun avis de cette annulation, car cet élève est archivé dans votre liste. Réactivez-le depuis sa fiche si vous voulez qu'il reçoive à nouveau les avis.",
+  "email.meetingMedium.sentence": "Rejoignez l'appel vidéo à l'heure du cours.",
+  "email.meetingMedium.sentence2": "Nous nous retrouvons sur WhatsApp à cette heure-là.",
+  "email.linkPending": "(lien à venir)",
+  "email.bookingConfirmation.subject": "Votre cours avec {teacherName} est confirmé",
+  "email.bookingConfirmation.textBody":
+    "Bonjour, ici {teacherName}. Votre cours du {classDateTime} est confirmé. Il vous reste {classesRemaining} cours.\n\n{sentence}{textLink}{calLine}",
+  "email.bookingConfirmation.htmlPreheader": "{classDateTime} · {classesRemaining} cours restants",
+  "email.bookingConfirmation.htmlParagraphs0":
+    "Bonjour, ici {teacherName}. Votre cours du {classDateTime} est confirmé. Il vous reste {classesRemaining} cours.",
+  "email.reminder24h.subject": "Rappel : cours demain avec {teacherName}",
+  "email.reminder24h.textBody":
+    "Bonjour, ici {teacherName}. Petit rappel pour notre cours de demain, {classDateTime}.\n\n{sentence}{textLink}{calLine}",
+  "email.reminder24h.htmlPreheader": "Cours demain — {classDateTime}",
+  "email.reminder24h.htmlHeading": "Votre cours a lieu demain",
+  "email.reminder24h.htmlParagraphs0":
+    "Bonjour, ici {teacherName}. Petit rappel pour notre cours de demain, {classDateTime}.",
+  "email.reminder1h.greeting1h":
+    "Bonjour, ici {teacherName}. On se retrouve dans 1 heure, {classDateTime}.",
+  "email.reminder1h.greeting1h2":
+    "Bonjour, ici {teacherName}. On se retrouve dans 1 heure, {classDateTime}, sur WhatsApp.",
+  "email.reminder1h.subject": "Le cours avec {teacherName} commence dans 1 heure",
+  "email.reminder1h.htmlPreheader": "Dans 1 heure — {classDateTime}",
+  "email.reminder1h.htmlHeading": "Votre cours commence dans 1 heure",
+  "email.reminder15m.greeting5m":
+    "Bonjour, ici {teacherName}. Votre cours commence dans 15 minutes, {classDateTime}.",
+  "email.reminder15m.greeting5m2":
+    "Bonjour, ici {teacherName}. Votre cours commence dans 15 minutes, {classDateTime}, sur WhatsApp.",
+  "email.reminder15m.subject": "Le cours avec {teacherName} commence dans 15 minutes",
+  "email.reminder15m.htmlPreheader": "Dans 15 minutes — {classDateTime}",
+  "email.reminder15m.htmlHeading": "Votre cours commence dans 15 minutes",
+  "email.reminder24hTeacher.subject": "Rappel : cours demain avec {studentName}",
+  "email.reminder24hTeacher.textBody":
+    "Rappel : votre cours avec {studentName} a lieu demain, {classDateTime}.{meetTail}{calLine}",
+  "email.reminder24hTeacher.htmlParagraphs0":
+    "Rappel : votre cours avec {studentName} a lieu demain, {classDateTime}.",
+  "email.reminder1hTeacher.subject": "Le cours avec {studentName} commence dans 1 heure",
+  "email.reminder1hTeacher.textBody":
+    "Votre cours avec {studentName} commence dans 1 heure, {classDateTime}.{meetTail}{calLine}",
+  "email.reminder1hTeacher.htmlParagraphs0":
+    "Votre cours avec {studentName} commence dans 1 heure, {classDateTime}.",
+  "email.reminder15mTeacher.subject": "Le cours avec {studentName} commence dans 15 minutes",
+  "email.reminder15mTeacher.textBody":
+    "Votre cours avec {studentName} commence dans 15 minutes, {classDateTime}.{meetTail}",
+  "email.reminder15mTeacher.htmlParagraphs0":
+    "Votre cours avec {studentName} commence dans 15 minutes, {classDateTime}.",
+  "email.cancelLt24h.subject": "Annulation tardive — {teacherName}",
+  "email.cancelLt24h.textBody":
+    "Bonjour, ici {teacherName}. Vous avez annulé le cours du {originalDateTime} moins de 24 h à l'avance : il est donc déduit de votre forfait, conformément à la politique d'annulation.\n\nPolitique d'annulation : {policyUrl}",
+  "email.cancelLt24h.htmlPreheader": "Annulation tardive · {originalDateTime}",
+  "email.cancelLt24h.htmlHeading": "Annulation tardive (moins de 24 h)",
+  "email.cancelLt24h.htmlParagraphs0":
+    "Bonjour, ici {teacherName}. Vous avez annulé le cours du {originalDateTime} moins de 24 h à l'avance : il est donc déduit de votre forfait, conformément à la politique d'annulation.",
+  "email.cancelLt24h.htmlCtaLabel": "Voir la politique d'annulation",
+  "email.cancelGte24hWithReschedule.subject": "Reprogrammez votre cours — {teacherName}",
+  "email.cancelGte24hWithReschedule.textBody":
+    "Bonjour, ici {teacherName}. Vous avez annulé le cours du {originalDateTime} à temps. Vous pouvez le reprogrammer quand vous voulez.\n\nReprogrammer : {actionLink}",
+  "email.cancelGte24hWithReschedule.htmlPreheader": "Reprogrammez votre cours",
+  "email.cancelGte24hWithReschedule.htmlParagraphs0":
+    "Bonjour, ici {teacherName}. Vous avez annulé le cours du {originalDateTime} à temps. Vous pouvez le reprogrammer quand vous voulez.",
+  "email.cancelGte24hWithReschedule.htmlCtaLabel": "Reprogrammer le cours",
+  "email.teacherCancel.subject": "Cours annulé — à reprogrammer — {teacherName}",
+  "email.teacherCancel.textBody":
+    "Bonjour, ici {teacherName}. J'ai dû annuler le cours du {originalDateTime}. Le cours est recrédité sur votre forfait ; reprogrammons-le.\n\nReprogrammer : {actionLink}",
+  "email.teacherCancel.htmlPreheader": "Cours annulé — reprogrammons-le",
+  "email.teacherCancel.htmlHeading": "Votre cours a été annulé",
+  "email.teacherCancel.htmlParagraphs0":
+    "Bonjour, ici {teacherName}. J'ai dû annuler le cours du {originalDateTime}.",
+  "email.teacherCancel.htmlParagraphs1":
+    "Le cours est recrédité sur votre forfait ; reprogrammons-le.",
+  "email.rescheduleConfirm.subject": "Cours reprogrammé — {teacherName}",
+  "email.rescheduleConfirm.textBody":
+    "Bonjour, ici {teacherName}. J'ai déplacé votre cours du {oldDateTime} au {newDateTime}.\n\nNous nous retrouvons sur WhatsApp à cette heure-là.",
+  "email.rescheduleConfirm.htmlPreheader": "Nouvel horaire : {newDateTime}",
+  "email.rescheduleConfirm.htmlParagraphs0":
+    "Bonjour, ici {teacherName}. J'ai déplacé votre cours du {oldDateTime} au {newDateTime}.",
+  "email.paymentReceived.subject": "Paiement reçu — {teacherName}",
+  "email.paymentReceived.textBody":
+    "Bonjour, ici {teacherName}. J'ai bien reçu votre paiement pour {packageName} ({amount}). Votre forfait est actif.\n\nPortail : {actionLink}",
+  "email.paymentReceived.htmlParagraphs0":
+    "Bonjour, ici {teacherName}. J'ai bien reçu votre paiement pour {packageName} ({amount}).",
+  "email.paymentReceived.htmlParagraphs1": "Votre forfait est actif.",
+  "email.paymentReceived.htmlCtaLabel": "Ouvrir mon portail",
+  "email.magicLink.subject": "Votre lien de connexion avec {teacherName}",
+  "email.magicLink.textBody":
+    "Bonjour, ici {teacherName}. Voici votre lien de connexion (valable {expiryMinutes} minutes) :\n\n{actionLink}",
+  "email.magicLink.htmlPreheader": "Valable {expiryMinutes} minutes",
+  "email.magicLink.htmlHeading": "Votre lien de connexion",
+  "email.magicLink.htmlParagraphs0":
+    "Bonjour, ici {teacherName}. Voici votre lien de connexion. Il est valable {expiryMinutes} minutes.",
+  "email.magicLink.htmlCtaLabel": "Se connecter",
+  "email.materialsSend.subject": "Supports de cours — {teacherName}",
+  "email.materialsSend.textBody":
+    "Bonjour, ici {teacherName}. Voici les supports pour le cours du {classDateTime}.\n\nTélécharger : {actionLink}",
+  "email.materialsSend.htmlPreheader": "Supports pour le {classDateTime}",
+  "email.materialsSend.htmlHeading": "Vos supports de cours",
+  "email.materialsSend.htmlParagraphs0":
+    "Bonjour, ici {teacherName}. Voici les supports pour le cours du {classDateTime}.",
+  "email.materialsSend.htmlCtaLabel": "Télécharger les supports",
+  "email.wiseMarkedSentStudent.subject": "Nous avons bien reçu votre avis de paiement",
+  "email.wiseMarkedSentStudent.textBody":
+    "Bonjour, ici {teacherName}. Merci de m'avoir prévenu que vous avez envoyé votre virement Wise (référence {wiseReference}) pour {packageName}.\n\nDès qu'il arrive, je confirme le paiement et votre forfait est activé — vous recevrez alors un autre e-mail.",
+  "email.wiseMarkedSentStudent.htmlPreheader": "Référence {wiseReference} · {packageName}",
+  "email.wiseMarkedSentStudent.htmlParagraphs0":
+    "Bonjour, ici {teacherName}. Merci de m'avoir prévenu que vous avez envoyé votre virement Wise (référence {wiseReference}) pour {packageName}.",
+  "email.wiseMarkedSentStudent.htmlParagraphs1":
+    "Dès qu'il arrive, je confirme le paiement et votre forfait est activé — vous recevrez alors un autre e-mail.",
+  "email.paymentReceivedTeacher.subject": "Nouvelle vente — {studentName} a acheté {packageName}",
+  "email.paymentReceivedTeacher.textBody":
+    "Bonjour {teacherName}, {studentName} a acheté {packageName} pour {amount} par carte. Le forfait est déjà actif et l'argent est en route vers votre compte.\n\nVoir le paiement : {actionLink}",
+  "email.paymentReceivedTeacher.htmlParagraphs0":
+    "Bonjour {teacherName}, {studentName} a acheté {packageName} pour {amount} par carte.",
+  "email.paymentReceivedTeacher.htmlParagraphs1":
+    "Le forfait est déjà actif et l'argent est en route vers votre compte.",
+  "email.paymentReceivedTeacher.htmlCtaLabel": "Voir le paiement",
+  "email.paymentPendingTeacher.subject": "Paiement Wise en attente — {studentName}",
+  "email.paymentPendingTeacher.textBody":
+    "Bonjour {teacherName}, {studentName} vient de commencer l'achat de {packageName} pour {amount} via Wise.\n\nRéférence : {wiseReference}\n\nQuand le virement arrive sur Wise, confirmez-le ici : {actionLink}",
+  "email.paymentPendingTeacher.htmlHeading": "Paiement Wise en attente",
+  "email.paymentPendingTeacher.htmlParagraphs0":
+    "Bonjour {teacherName}, {studentName} vient de commencer l'achat de {packageName} pour {amount} via Wise.",
+  "email.paymentPendingTeacher.htmlParagraphs1": "Référence Wise : {wiseReference}",
+  "email.paymentPendingTeacher.htmlParagraphs2":
+    "Quand le virement arrive sur Wise, confirmez-le pour activer le forfait.",
+  "email.paymentPendingTeacher.htmlCtaLabel": "Confirmer le paiement",
+  "email.paymentMarkedSentTeacher.subject":
+    "{studentName} indique que le virement Wise est en route",
+  "email.paymentMarkedSentTeacher.textBody":
+    "Bonjour {teacherName}, {studentName} a indiqué avoir envoyé le virement de {amount} pour {packageName}.\n\nRéférence : {wiseReference}\n\nVérifiez votre compte Wise et confirmez la réception pour activer le forfait : {actionLink}",
+  "email.paymentMarkedSentTeacher.htmlHeading": "{studentName} a envoyé le paiement",
+  "email.paymentMarkedSentTeacher.htmlParagraphs0":
+    "Bonjour {teacherName}, {studentName} a indiqué avoir envoyé le virement de {amount} pour {packageName}.",
+  "email.paymentMarkedSentTeacher.htmlParagraphs2":
+    "Vérifiez votre compte Wise et confirmez la réception pour activer le forfait.",
+  "email.paymentMarkedSentTeacher.htmlCtaLabel": "Confirmer la réception",
+  "email.wiseConfirmReminderTeacher.subject":
+    "Rappel : confirmez le paiement Wise de {studentName}",
+  "email.wiseConfirmReminderTeacher.textBody":
+    "Bonjour {teacherName}, {studentName} a indiqué avoir envoyé le virement de {amount} pour {packageName}, et il n'est toujours pas confirmé. Le forfait ne sera pas activé tant que vous n'aurez pas confirmé la réception sur Wise.\n\nRéférence : {wiseReference}\n\nConfirmer : {actionLink}",
+  "email.wiseConfirmReminderTeacher.htmlPreheader":
+    "{studentName} · {amount} · en attente de confirmation",
+  "email.wiseConfirmReminderTeacher.htmlHeading": "Paiement Wise en attente de confirmation",
+  "email.wiseConfirmReminderTeacher.htmlParagraphs0":
+    "Bonjour {teacherName}, {studentName} a indiqué avoir envoyé le virement de {amount} pour {packageName}, et il n'est toujours pas confirmé.",
+  "email.wiseConfirmReminderTeacher.htmlParagraphs2":
+    "Le forfait ne sera pas activé tant que vous n'aurez pas confirmé la réception sur Wise.",
+  "email.lessonInsightsReviewTeacher.subject": "Points à travailler prêts — {studentName}",
+  "email.lessonInsightsReviewTeacher.textBody":
+    "Bonjour {teacherName}, votre assistant a préparé des points à travailler à partir de votre cours avec {studentName}. Relisez-les et confirmez ceux qui méritent d'être gardés (ils constituent le profil de l'élève).\n\nRelire : {actionLink}",
+  "email.lessonInsightsReviewTeacher.htmlPreheader": "{studentName} · points à travailler à relire",
+  "email.lessonInsightsReviewTeacher.htmlHeading": "Points à travailler prêts à relire",
+  "email.lessonInsightsReviewTeacher.htmlParagraphs0":
+    "Bonjour {teacherName}, votre assistant a préparé des points à travailler à partir de votre cours avec {studentName}.",
+  "email.lessonInsightsReviewTeacher.htmlParagraphs1":
+    "Relisez-les en quelques secondes et confirmez ceux qui méritent d'être gardés ; les points confirmés constituent le profil d'apprentissage de l'élève.",
+  "email.lessonInsightsReviewTeacher.htmlCtaLabel": "Relire les points à travailler",
+  "email.studentAcquisitionPlanTeacher.firstAction": "votre première action de la semaine",
+  "email.studentAcquisitionPlanTeacher.htmlPreheader":
+    "Le texte, l'image et le lien sont déjà prêts",
+  "email.studentAcquisitionPlanTeacher.htmlHeading": "Votre plan de la semaine",
+  "email.studentAcquisitionPlanTeacher.htmlParagraphs1":
+    "Commencez par : {firstAction}. Le texte, l'image et le lien sont déjà prêts — il ne vous reste qu'à relire et publier.",
+  "email.studentAcquisitionPlanTeacher.htmlCtaLabel": "Voir mon plan",
+  "email.facebookGroupsNudgeTeacher.groups2": "vos groupes",
+  "email.facebookGroupsNudgeTeacher.subject": "Prêt à republier dans vos groupes ?",
+  "email.facebookGroupsNudgeTeacher.textBody":
+    "Bonjour {teacherName}, cela fait quelques semaines depuis votre dernier rappel. Publier votre lien dans {groups} sur Facebook est l'un des meilleurs moyens de remplir votre agenda.\n\nOuvrez votre liste de groupes et partagez : {actionLink}",
+  "email.facebookGroupsNudgeTeacher.htmlPreheader":
+    "Republier dans vos groupes remplit votre agenda",
+  "email.facebookGroupsNudgeTeacher.htmlParagraphs0":
+    "Bonjour {teacherName}, cela fait quelques semaines depuis votre dernier rappel.",
+  "email.facebookGroupsNudgeTeacher.htmlParagraphs1":
+    "Publier votre lien dans {groups} sur Facebook est l'un des meilleurs moyens de remplir votre agenda — publiez dans le ton de chaque groupe, comme toujours.",
+  "email.facebookGroupsNudgeTeacher.htmlCtaLabel": "Voir mes groupes",
+  "email.paymentFailedStudent.subject": "Votre paiement n'est pas passé — {teacherName}",
+  "email.paymentFailedStudent.textBody":
+    "Bonjour, ici {teacherName}. Votre paiement pour {packageName} n'a pas pu être traité : le forfait n'a donc pas été activé.\n\nRéessayez ici — vous pouvez payer par carte ou par virement bancaire (Wise) : {actionLink}",
+  "email.paymentFailedStudent.htmlPreheader": "Le paiement n'a pas abouti",
+  "email.paymentFailedStudent.htmlParagraphs0":
+    "Bonjour, ici {teacherName}. Votre paiement pour {packageName} n'a pas pu être traité : le forfait n'a donc pas été activé.",
+  "email.paymentFailedStudent.htmlParagraphs1":
+    "Vous pouvez réessayer quand vous voulez — par carte ou par virement bancaire (Wise), selon ce qui vous arrange.",
+  "email.paymentFailedStudent.htmlCtaLabel": "Réessayer",
+  "email.refundIssuedStudent.subject": "Remboursement effectué — {teacherName}",
+  "email.refundIssuedStudent.textBody":
+    "Bonjour, ici {teacherName}. Votre remboursement de {amount} pour {packageName} a été effectué. L'argent revient sur le même moyen de paiement, généralement sous 5 à 10 jours ouvrés selon votre banque.",
+  "email.refundIssuedStudent.htmlPreheader": "Remboursement de {amount}",
+  "email.refundIssuedStudent.htmlParagraphs0":
+    "Bonjour, ici {teacherName}. Votre remboursement de {amount} pour {packageName} a été effectué.",
+  "email.refundIssuedStudent.htmlParagraphs1":
+    "L'argent revient sur le même moyen de paiement, généralement sous 5 à 10 jours ouvrés selon votre banque.",
+  "email.refundIssuedTeacher.subject": "Remboursement effectué — {studentName}",
+  "email.refundIssuedTeacher.textBody":
+    "Bonjour {teacherName}, un remboursement de {amount} a été effectué pour le forfait {packageName} de {studentName}.\n\nDétails du paiement : {actionLink}",
+  "email.refundIssuedTeacher.htmlParagraphs0":
+    "Bonjour {teacherName}, un remboursement de {amount} a été effectué pour le forfait {packageName} de {studentName}.",
+  "email.refundIssuedTeacher.htmlParagraphs1":
+    "Le forfait apparaît désormais comme remboursé dans votre tableau de bord.",
+  "email.refundIssuedTeacher.htmlCtaLabel": "Voir le paiement",
+  "email.disputeLostStudent.subject": "Votre paiement a été annulé — {teacherName}",
+  "email.disputeLostStudent.textBody":
+    "Bonjour, ici {teacherName}. Votre banque a annulé le paiement de {amount} pour {packageName} : les cours restants de ce forfait ne sont donc plus disponibles. Si vous pensez qu'il s'agit d'une erreur, écrivez-moi et nous trouverons une solution.",
+  "email.disputeLostStudent.htmlPreheader": "Paiement annulé · {amount}",
+  "email.disputeLostStudent.htmlParagraphs0":
+    "Bonjour, ici {teacherName}. Votre banque a annulé le paiement de {amount} pour {packageName}.",
+  "email.disputeLostStudent.htmlParagraphs1":
+    "Les cours restants de ce forfait ne sont plus disponibles. Si vous pensez qu'il s'agit d'une erreur, écrivez-moi et nous trouverons une solution.",
+  "email.disputeLostTeacher.subject": "Contestation perdue — {studentName}",
+  "email.disputeLostTeacher.textBody":
+    "Bonjour {teacherName}, une contestation de {amount} sur le forfait {packageName} de {studentName} a été tranchée en votre défaveur. Stripe a prélevé ce montant et ses frais de contestation sur votre solde, et les cours restants de {studentName} sur ce forfait ont été retirés.\n\nDétails du paiement : {actionLink}",
+  "email.disputeLostTeacher.htmlParagraphs0":
+    "Bonjour {teacherName}, une contestation de {amount} sur le forfait {packageName} de {studentName} a été tranchée en votre défaveur.",
+  "email.disputeLostTeacher.htmlParagraphs1":
+    "Stripe a prélevé ce montant et ses frais de contestation sur votre solde, et les cours restants de {studentName} sur ce forfait ont été retirés.",
+  "email.stripeReadyTeacher.subject": "Votre compte Stripe est prêt",
+  "email.stripeReadyTeacher.textBody":
+    "Bonjour {teacherName}, Stripe a terminé la vérification de votre compte — vous pouvez désormais accepter les paiements par carte.\n\nPartagez votre lien de réservation : {actionLink}",
+  "email.stripeReadyTeacher.htmlPreheader": "Stripe accepte désormais les paiements",
+  "email.stripeReadyTeacher.htmlHeading": "Votre compte Stripe est prêt",
+  "email.stripeReadyTeacher.htmlParagraphs0":
+    "Bonjour {teacherName}, Stripe a terminé la vérification de votre compte — vous pouvez désormais accepter les paiements par carte.",
+  "email.stripeReadyTeacher.htmlParagraphs1":
+    "Votre lien de réservation peut maintenant encaisser des paiements par carte.",
+  "email.stripeReadyTeacher.htmlCtaLabel": "Ouvrir mon lien",
+  "email.stripeRequirementsTeacher.subject": "Stripe a besoin d'informations supplémentaires",
+  "email.stripeRequirementsTeacher.textBody":
+    "Bonjour {teacherName}, Stripe a suspendu les paiements par carte sur votre compte, car des informations supplémentaires sont nécessaires. Les nouveaux paiements par carte n'aboutiront pas tant que ce n'est pas réglé.\n\nVoir ce qui est demandé : {actionLink}",
+  "email.stripeRequirementsTeacher.htmlPreheader": "Stripe a suspendu vos paiements par carte",
+  "email.stripeRequirementsTeacher.htmlParagraphs0":
+    "Bonjour {teacherName}, Stripe a suspendu les paiements par carte sur votre compte, car des informations supplémentaires sont nécessaires.",
+  "email.stripeRequirementsTeacher.htmlParagraphs1":
+    "Les nouveaux paiements par carte n'aboutiront pas tant que ce n'est pas réglé.",
+  "email.stripeRequirementsTeacher.htmlCtaLabel": "Voir ce qui est demandé",
+  "email.accountDisabledTeacher.subject": "Votre compte SpiralClass a été désactivé",
+  "email.accountDisabledTeacher.textBody":
+    "Bonjour {teacherName}, votre compte SpiralClass a été désactivé.\n\nMotif : {reason}\n\nSi vous pensez qu'il s'agit d'une erreur, répondez à cet e-mail et nous réexaminerons la situation.",
+  "email.accountDisabledTeacher.htmlPreheader": "Compte désactivé",
+  "email.accountDisabledTeacher.htmlHeading": "Votre compte a été désactivé",
+  "email.accountDisabledTeacher.htmlParagraphs0":
+    "Bonjour {teacherName}, votre compte SpiralClass a été désactivé.",
+  "email.accountDisabledTeacher.htmlParagraphs1": "Motif : {reason}",
+  "email.accountDisabledTeacher.htmlParagraphs2":
+    "Si vous pensez qu'il s'agit d'une erreur, répondez à cet e-mail et nous réexaminerons la situation.",
+  "email.bookingCreatedTeacher.subject": "Nouveau cours réservé — {studentName}",
+  "email.bookingCreatedTeacher.textBody":
+    "Bonjour {teacherName}, {studentName} a réservé un cours le {classDateTime}.\n\nOuvrir le tableau de bord : {actionLink}{calLine}",
+  "email.bookingCreatedTeacher.htmlParagraphs0":
+    "Bonjour {teacherName}, {studentName} a réservé un cours le {classDateTime}.",
+  "email.bookingCreatedTeacher.htmlCtaLabel": "Ouvrir le tableau de bord",
+  "email.homeworkSubmittedTeacher.what": "a rendu le devoir « {assignmentTitle} »",
+  "email.homeworkSubmittedTeacher.what2": "a rendu un devoir",
+  "email.homeworkSubmittedTeacher.subject": "Devoir rendu — {studentName}",
+  "email.homeworkSubmittedTeacher.textBody":
+    "Bonjour {teacherName}, {studentName} {what}.\n\nVoir le cours : {actionLink}",
+  "email.homeworkSubmittedTeacher.htmlParagraphs0": "Bonjour {teacherName}, {studentName} {what}.",
+  "email.homeworkSubmittedTeacher.htmlCtaLabel": "Voir le cours",
+  "email.cancelLt24hTeacher.subject": "{studentName} a annulé tardivement (moins de 24 h)",
+  "email.cancelLt24hTeacher.textBody":
+    "Bonjour {teacherName}, {studentName} a annulé le cours du {originalDateTime} moins de 24 h à l'avance. Le cours a été déduit de son forfait, conformément à la politique d'annulation.",
+  "email.cancelLt24hTeacher.textBody2": "\n\nPolitique d'annulation : {policyUrl}",
+  "email.cancelLt24hTeacher.htmlParagraphs0":
+    "Bonjour {teacherName}, {studentName} a annulé le cours du {originalDateTime} moins de 24 h à l'avance.",
+  "email.cancelLt24hTeacher.htmlParagraphs1":
+    "Le cours a été déduit de son forfait, conformément à la politique d'annulation.",
+  "email.cancelGte24hTeacher.subject": "{studentName} a annulé son cours",
+  "email.cancelGte24hTeacher.textBody":
+    "Bonjour {teacherName}, {studentName} a annulé le cours du {originalDateTime} à temps. Le cours reste disponible pour être reprogrammé ; rien n'a été déduit.",
+  "email.cancelGte24hTeacher.htmlParagraphs0":
+    "Bonjour {teacherName}, {studentName} a annulé le cours du {originalDateTime} à temps.",
+  "email.cancelGte24hTeacher.htmlParagraphs1":
+    "Le cours reste disponible pour être reprogrammé ; rien n'a été déduit.",
+  "email.rescheduleConfirmTeacher.subject": "{studentName} a reprogrammé son cours",
+  "email.rescheduleConfirmTeacher.textBody":
+    "Bonjour {teacherName}, {studentName} a déplacé son cours du {oldDateTime} au {newDateTime}.",
+  "email.packageExpiryNudge.subject": "Il vous reste des cours à utiliser avec {teacherName}",
+  "email.packageExpiryNudge.textBody":
+    "Bonjour, ici {teacherName}. Votre forfait « {packageName} » expire le {expiryDate} et il vous reste {classesRemaining} cours. Réservez maintenant pour ne pas les perdre.\n\nRéserver : {actionLink}",
+  "email.packageExpiryNudge.htmlPreheader":
+    "Expire le {expiryDate} · {classesRemaining} cours restants",
+  "email.packageExpiryNudge.htmlParagraphs0":
+    "Bonjour, ici {teacherName}. Votre forfait « {packageName} » expire le {expiryDate} et il vous reste {classesRemaining} cours.",
+  "email.packageExpiryNudge.htmlParagraphs1":
+    "Réservez maintenant pour les utiliser avant leur expiration.",
+  "email.packageExpiryNudge.htmlCtaLabel": "Réserver mon cours",
+  "email.packageConsumedStudent.subject": "Vous avez utilisé tous vos cours avec {teacherName}",
+  "email.packageConsumedStudent.textBody":
+    "Bonjour, ici {teacherName}. Vous avez utilisé tous les cours de votre forfait « {packageName} » — merci d'apprendre avec moi ! Vous voulez continuer ? Vous pouvez acheter votre prochain forfait depuis votre portail, sans ressaisir vos informations.\n\nAcheter : {actionLink}",
+  "email.packageConsumedStudent.htmlPreheader": "Votre forfait « {packageName} » est terminé",
+  "email.packageConsumedStudent.htmlParagraphs0":
+    "Bonjour, ici {teacherName}. Vous avez utilisé tous les cours de votre forfait « {packageName} » — merci d'apprendre avec moi !",
+  "email.packageConsumedStudent.htmlParagraphs1":
+    "Vous voulez continuer ? Vous pouvez acheter votre prochain forfait depuis votre portail, sans ressaisir vos informations.",
+  "email.packageConsumedTeacher.secondLine":
+    "Nous lui avons envoyé un lien de renouvellement vers son portail ; un message personnel de votre part sur WhatsApp aide souvent à conclure.",
+  "email.packageConsumedTeacher.secondLine2":
+    "Cet élève ne reçoit pas nos avis automatiques : un message personnel de votre part sur WhatsApp est donc le meilleur moyen de lui proposer de renouveler.",
+  "email.packageConsumedTeacher.subject": "{studentName} a terminé son forfait",
+  "email.packageConsumedTeacher.textBody":
+    "Bonjour {teacherName}, {studentName} a utilisé tous les cours de son forfait « {packageName} ». {secondLine}",
+  "email.packageConsumedTeacher.htmlPreheader": "{studentName} · « {packageName} » terminé",
+  "email.packageConsumedTeacher.htmlParagraphs0":
+    "Bonjour {teacherName}, {studentName} a utilisé tous les cours de son forfait « {packageName} ».",
+  "email.packageConsumedTeacher.htmlCtaLabel": "Voir l'élève",
+  "email.noShowStudent.subject": "Cours du {originalDateTime} signalé comme absence",
+  "email.noShowStudent.textBody":
+    "Bonjour, ici {teacherName}. J'ai signalé une absence pour le cours du {originalDateTime} : il a donc été déduit de votre forfait, conformément à la politique d'annulation.\n\nSi vous pensez qu'il s'agit d'une erreur, écrivez-moi sur WhatsApp.\n\nPolitique d'annulation : {policyUrl}",
+  "email.noShowStudent.htmlPreheader": "Absence signalée pour le cours",
+  "email.noShowStudent.htmlParagraphs0":
+    "Bonjour, ici {teacherName}. J'ai signalé une absence pour le cours du {originalDateTime} : il a donc été déduit de votre forfait, conformément à la politique d'annulation.",
+  "email.noShowStudent.htmlParagraphs1":
+    "Si vous pensez qu'il s'agit d'une erreur, écrivez-moi sur WhatsApp.",
+  "email.subscriptionTrialEnding.subject": "Votre essai Pro se termine dans {daysRemaining} jours",
+  "email.subscriptionTrialEnding.textBody":
+    "Bonjour {teacherName}, votre essai gratuit de SpiralClass Pro se termine dans {daysRemaining} jours. Sans abonnement, votre compte passe à la formule Gratuite (vous gardez votre page de réservation et les deux moyens d'encaissement ; vous perdez les rappels WhatsApp, les élèves illimités et les supports).\n\nChoisir une formule : {actionLink}",
+  "email.subscriptionTrialEnding.htmlHeading": "Votre essai Pro touche à sa fin",
+  "email.subscriptionTrialEnding.htmlParagraphs0":
+    "Bonjour {teacherName}, votre essai gratuit de SpiralClass Pro se termine dans {daysRemaining} jours.",
+  "email.subscriptionTrialEnding.htmlParagraphs1":
+    "Sans abonnement, votre compte passe à la formule Gratuite — vous gardez votre page de réservation et les deux moyens d'encaissement, mais vous perdez les rappels WhatsApp, les élèves illimités et les supports.",
+  "email.subscriptionPaymentSucceeded.subject": "Reçu SpiralClass Pro — {amount}",
+  "email.subscriptionPaymentSucceeded.textBody":
+    "Bonjour {teacherName}, nous avons bien reçu votre paiement de {amount} pour SpiralClass Pro. Votre prochain prélèvement aura lieu le {nextChargeDate}.\n\nVoir la facturation : {actionLink}",
+  "email.subscriptionPaymentSucceeded.htmlPreheader": "Paiement reçu · {amount}",
+  "email.subscriptionPaymentSucceeded.htmlParagraphs0":
+    "Bonjour {teacherName}, nous avons bien reçu votre paiement de {amount} pour SpiralClass Pro.",
+  "email.subscriptionPaymentSucceeded.htmlParagraphs1":
+    "Votre prochain prélèvement aura lieu le {nextChargeDate}.",
+  "email.subscriptionPaymentSucceeded.htmlCtaLabel": "Voir la facturation",
+  "email.subscriptionPaymentFailed.subject": "Nous n'avons pas pu traiter votre paiement Pro",
+  "email.subscriptionPaymentFailed.textBody":
+    "Bonjour {teacherName}, nous n'avons pas pu prélever votre abonnement SpiralClass Pro. Vous gardez toutes les fonctions Pro pendant {graceDays} jours, le temps de mettre à jour votre moyen de paiement ; ensuite, votre compte passe à la formule Gratuite.\n\nMettre à jour le paiement : {actionLink}",
+  "email.subscriptionPaymentFailed.htmlHeading": "Nous n'avons pas pu traiter votre paiement",
+  "email.subscriptionPaymentFailed.htmlParagraphs0":
+    "Bonjour {teacherName}, nous n'avons pas pu prélever votre abonnement SpiralClass Pro.",
+  "email.subscriptionPaymentFailed.htmlParagraphs1":
+    "Vous gardez toutes les fonctions Pro pendant {graceDays} jours, le temps de mettre à jour votre moyen de paiement ; ensuite, votre compte passe à la formule Gratuite.",
+  "email.subscriptionPaymentFailed.htmlCtaLabel": "Mettre à jour le paiement",
+  "email.subscriptionCanceled.textBody":
+    "Bonjour {teacherName}, votre abonnement SpiralClass Pro a pris fin et votre compte est désormais sur la formule Gratuite. Pas d'inquiétude : vos élèves, vos forfaits et votre page de réservation continuent de fonctionner. Seuls WhatsApp, les élèves illimités et les supports sont en pause jusqu'à votre retour à Pro.\n\nRepasser à Pro : {actionLink}",
+  "email.subscriptionCanceled.htmlPreheader": "Vous êtes désormais sur la formule Gratuite",
+  "email.subscriptionCanceled.htmlParagraphs0":
+    "Bonjour {teacherName}, votre abonnement SpiralClass Pro a pris fin et votre compte est désormais sur la formule Gratuite.",
+  "email.subscriptionCanceled.htmlParagraphs1":
+    "Vos élèves, vos forfaits et votre page de réservation continuent de fonctionner. Seuls WhatsApp, les élèves illimités et les supports sont en pause jusqu'à votre retour à Pro.",
+  "email.subscriptionCanceled.htmlCtaLabel": "Repasser à Pro",
+  "email.subscriptionFoundingPriceLocked.subject":
+    "Bienvenue au tarif fondateur — {amount}/mois à vie",
+  "email.subscriptionFoundingPriceLocked.textBody":
+    "Bonjour {teacherName}, vous faites partie du groupe fondateur ! Votre tarif de {amount}/mois est bloqué pour toute la durée de votre abonnement — il n'augmentera jamais, même si les prix de Pro changent.\n\nVoir la facturation : {actionLink}",
+  "email.subscriptionFoundingPriceLocked.htmlPreheader": "Tarif fondateur bloqué · {amount}/mois",
+  "email.subscriptionFoundingPriceLocked.htmlParagraphs0":
+    "Bonjour {teacherName}, vous faites partie du groupe fondateur !",
+  "email.subscriptionFoundingPriceLocked.htmlParagraphs1":
+    "Votre tarif de {amount}/mois est bloqué pour toute la durée de votre abonnement — il n'augmentera jamais, même si les prix de Pro changent.",
+  "email.libraryMaterialAssigned.subject": "Nouveau support — {teacherName}",
+  "email.libraryMaterialAssigned.textBody":
+    "Bonjour, ici {teacherName}. Je vous ai attribué un nouveau support : « {materialLabel} ». Vous le trouverez dans la section Supports de votre portail.\n\nVoir les supports : {actionLink}",
+  "email.libraryMaterialAssigned.htmlPreheader": "Nouveau support : {materialLabel}",
+  "email.libraryMaterialAssigned.htmlHeading": "Un nouveau support pour vous",
+  "email.libraryMaterialAssigned.htmlParagraphs0":
+    "Bonjour, ici {teacherName}. Je vous ai attribué un nouveau support : « {materialLabel} ».",
+  "email.libraryMaterialAssigned.htmlParagraphs1":
+    "Vous le trouverez dans la section Supports de votre portail.",
+  "email.libraryMaterialAssigned.htmlCtaLabel": "Voir les supports",
+  "email.chatMessage.textBody":
+    "{teacherName} vous a envoyé un message : « {preview} ».\n\nVoir la conversation : {actionLink}",
+  "email.chatMessage.htmlCtaLabel": "Voir la conversation",
+  "email.homeworkAssignedStudent.what": "un devoir",
+  "email.homeworkAssignedStudent.subject": "Nouveau devoir de {teacherName}",
+  "email.homeworkAssignedStudent.textBody":
+    "{teacherName} vous a donné {what}.\n\nVoir le cours : {actionLink}",
+  "email.homeworkAssignedStudent.htmlParagraphs0": "{teacherName} vous a donné {what}.",
+  "email.homeworkAssignedStudent.htmlCtaLabel": "Voir le cours",
+  "email.homeworkFeedbackAvailableStudent.title": "votre devoir",
+  "email.homeworkFeedbackAvailableStudent.subject": "{teacherName} a validé votre devoir",
+  "email.homeworkFeedbackAvailableStudent.textBody":
+    "{teacherName} a validé {title}. Consultez son commentaire.\n\nVoir le cours : {actionLink}",
+  "email.homeworkFeedbackAvailableStudent.htmlParagraphs0":
+    "{teacherName} a validé {title}. Consultez son commentaire.",
+  "email.homeworkFeedbackAvailableStudent.subject2":
+    "{teacherName} vous demande de renvoyer votre devoir",
+  "email.homeworkFeedbackAvailableStudent.textBody2":
+    "{teacherName} vous demande de renvoyer {title}.\n\nVoir le cours : {actionLink}",
+  "email.homeworkFeedbackAvailableStudent.htmlParagraphs02":
+    "{teacherName} vous demande de renvoyer {title}.",
+  "email.homeworkFeedbackAvailableStudent.subject3": "Commentaire de {teacherName}",
+  "email.homeworkFeedbackAvailableStudent.textBody3":
+    "{teacherName} a laissé un commentaire sur {title}.\n\nVoir le cours : {actionLink}",
+  "email.homeworkFeedbackAvailableStudent.htmlParagraphs03":
+    "{teacherName} a laissé un commentaire sur {title}.",
+  "email.homeworkDueSoonStudent.textBody":
+    "{what} est à rendre le {dueDate}.\n\nVoir le cours : {actionLink}",
+  "email.homeworkDueSoonStudent.htmlParagraphs0": "{what} est à rendre le {dueDate}.",
+  "email.homeworkOverdueStudent.textBody":
+    "{what} est en retard. Vous pouvez encore le rendre.\n\nVoir le cours : {actionLink}",
+  "email.homeworkOverdueStudent.htmlParagraphs0":
+    "{what} est en retard. Vous pouvez encore le rendre.",
+  "email.shell.tagline": "Cours, paiements et rappels, sans charge mentale.",
+  "email.shell.sentBy": "Envoyé par SpiralClass · spiralclass.com",
+  "email.shell.unsubLabel": "Se désabonner de ces e-mails",
+  "email.shell.notificationSettingsLabel": "Gérer les notifications",
+  "email.shell.codeLabel": "Votre code de connexion",
+  "email.shell.copyHint": "Touchez pour sélectionner et copier",
+  "email.invitation.hello": "Bonjour {greetingName},",
+  "email.invitation.hello2": "Bonjour,",
+  "email.invitation.subject": "{teacherName} vous invite sur SpiralClass",
+  "email.invitation.preheader": "{teacherName} souhaite gérer vos cours ensemble sur SpiralClass.",
+  "email.invitation.intro":
+    "{teacherName} utilise SpiralClass pour organiser ses cours et vous invite à le rejoindre. Tout ce que vous faites avec {teacherName} y est réuni :",
+  "email.invitation.closing":
+    "Touchez le bouton pour accepter et créer votre compte — cela prend moins d'une minute.",
+  "email.pendingInviteNudge.heading": "Invitations en attente",
+  "email.pendingInviteNudge.ctaLabel": "Voir les invitations",
+  "email.leadAlert.heading": "Nouveau contact depuis votre page de réservation",
+  "email.leadAlert.subject": "Nouveau contact : {name}",
+  "email.leadAlert.intro":
+    "{name} vous a écrit depuis votre page de réservation et aimerait que vous le recontactiez.",
+  "email.leadAlert.ctaLabel": "Voir vos contacts",
+  "email.referralReward.heading": "Votre parrainage vous a valu une récompense",
+  "email.referralReward.subject": "Vous avez gagné {rewardLabel} de réduction avec {teacherName}",
+  "email.referralReward.intro":
+    "Une personne que vous avez recommandée vient de réserver avec {teacherName} — merci ! Voici {rewardLabel} de réduction sur votre prochain forfait.",
+  "email.referralReward.codeLine": "Votre code : {rewardCode}",
+  "email.referralReward.expiryLine": "Utilisez-le avant le {date}.",
+  "email.referralReward.cta": "Réserver vos prochains cours",
+  "email.emailChanged.heading": "Votre adresse de connexion a changé",
+  "email.emailChanged.subject": "Votre adresse de connexion SpiralClass a été modifiée",
+  "email.emailChanged.intro":
+    "L'adresse de connexion de votre compte SpiralClass est désormais {newEmail}. Les prochains liens de connexion et notifications y seront envoyés.",
+  "email.emailChanged.googleNote":
+    "Dans le cadre de ce changement, tout compte Google utilisé pour vous connecter a été déconnecté, et vos autres appareils ont été déconnectés. Vous pouvez reconnecter Google avec la nouvelle adresse depuis les paramètres du compte.",
+  "email.emailChanged.warn":
+    "Si vous n'êtes pas à l'origine de ce changement, écrivez-nous immédiatement à {supportEmail}.",
+  "email.otp.heading": "Confirmez votre nouvelle adresse e-mail",
+  "email.otp.heading2": "Votre code de connexion",
+  "email.otp.subject": "Confirmez votre nouvelle adresse e-mail SpiralClass",
+  "email.otp.subject2": "Votre code de connexion SpiralClass",
+  "email.otp.intro":
+    "Saisissez ce code pour confirmer qu'il s'agit bien de votre nouvelle adresse e-mail. Il est valable 5 minutes.",
+  "email.otp.intro2": "Saisissez ce code pour vous connecter. Il est valable 5 minutes.",
+  "email.otp.ignore": "Si vous n'avez rien demandé, vous pouvez ignorer cet e-mail.",
+  "push.callNudge.title": "Votre cours vous attend",
+  "push.callNudge.body": "{callerName} est déjà dans l'appel vidéo. Touchez pour le rejoindre.",
+  "calendarFeed.calName": "Mes cours — SpiralClass",
+  "calendarEvent.text": "Cours : {studentName}",
+  "calendarEvent.text2": "Cours avec {studentName}",
+  "email.packagePlaceholder.text": "votre forfait",
+  "email.packagePlaceholder.text2": "un forfait",
+  "inbox.fallback.title": "Notification",
+  "email.studentAcquisitionPlanTeacher.subject": "Votre plan de la semaine : {count} actions",
+  "email.studentAcquisitionPlanTeacher.subject_one": "Votre plan de la semaine : {count} action",
+  "email.studentAcquisitionPlanTeacher.textBody":
+    "Bonjour {teacherName}, le plan de la semaine est prêt : {count} actions, environ {minutes} minutes au total.\n\nCommencez par : {firstAction}\n\n{actionLink}",
+  "email.studentAcquisitionPlanTeacher.textBody_one":
+    "Bonjour {teacherName}, le plan de la semaine est prêt : {count} action, environ {minutes} minutes au total.\n\nCommencez par : {firstAction}\n\n{actionLink}",
+  "email.studentAcquisitionPlanTeacher.htmlParagraphs0":
+    "Bonjour {teacherName}, nous vous avons préparé {count} actions pour trouver des élèves — environ {minutes} minutes au total.",
+  "email.studentAcquisitionPlanTeacher.htmlParagraphs0_one":
+    "Bonjour {teacherName}, nous vous avons préparé {count} action pour trouver des élèves — environ {minutes} minutes au total.",
+  "email.facebookGroupsNudgeTeacher.groupsCount": "vos {count} groupes",
+  "email.facebookGroupsNudgeTeacher.groupsCount_one": "votre groupe",
+  "email.homeworkSubmittedTeacher.htmlPreheader": "{studentName} · {title}",
+  "email.homeworkSubmittedTeacher.defaultTitle": "Devoir",
+  "email.homeworkSubmittedTeacher.htmlHeading": "Devoir rendu",
+  "email.pendingInviteNudge.subject": "{count} élèves n'ont pas encore accepté votre invitation",
+  "email.pendingInviteNudge.subject_one": "{count} élève n'a pas encore accepté votre invitation",
+  "email.pendingInviteNudge.intro":
+    "Bonjour {name}, {count} élèves que vous avez invités n'ont pas encore accepté. Vous pouvez renvoyer l'invitation en un geste depuis votre tableau de bord.",
+  "email.pendingInviteNudge.intro_one":
+    "Bonjour {name}, un élève que vous avez invité n'a pas encore accepté. Vous pouvez renvoyer l'invitation en un geste depuis votre tableau de bord.",
+  "calendarFeed.bookedThrough": "Réservé via SpiralClass.",
+  "email.labelledValue": "{label} : {value}",
+  "email.leadAlert.phoneLabel": "Téléphone",
+  "email.leadAlert.messageLabel": "Message",
+  "email.chatMessageTeacher.textBody":
+    "{studentName} vous a envoyé un message : « {preview} ».\n\nVoir la conversation : {actionLink}",
+  "email.chatMessageTeacher.quote": "« {preview} »",
+  "marketing.reason.bestCommunity": "{community} vous a déjà amené {count} élèves.",
+  "marketing.reason.bestCommunity_one": "{community} vous a déjà amené {count} élève.",
+  "marketing.reason.promisingCommunity": "{community} a généré {count} demandes.",
+  "marketing.reason.promisingCommunity_one": "{community} a généré {count} demande.",
+  "marketing.reason.quietCommunity":
+    "Vous n'avez rien publié dans {community} depuis {count} jours.",
+  "marketing.reason.quietCommunity_one":
+    "Vous n'avez rien publié dans {community} depuis {count} jour.",
+  "marketing.reason.untriedCommunity":
+    "Vous n'avez pas encore essayé {community}. Cela vaut la peine de voir.",
+  "marketing.reason.educationalFirst":
+    "Dans {community}, un contenu utile marche mieux qu'une annonce.",
+  "marketing.reason.referralMoment.firstLesson":
+    "{student} vient de suivre son premier cours. C'est le meilleur moment pour demander une recommandation.",
+  "marketing.reason.referralMoment.packageComplete":
+    "{student} a terminé son forfait. C'est le meilleur moment pour demander une recommandation.",
+  "marketing.reason.referralMoment.renewal":
+    "{student} a renouvelé son forfait. C'est le meilleur moment pour demander une recommandation.",
+  "marketing.reason.referralMoment.testimonial":
+    "{student} vous a laissé un témoignage. C'est le meilleur moment pour demander une recommandation.",
+  "marketing.reason.noCommunities":
+    "Ajoutez une communauté pour que nous puissions préparer vos actions.",
+  "marketing.insight.confidence.observed": "Constaté",
+  "marketing.insight.confidence.pattern": "Tendance",
+  "marketing.insight.confidence.suggestion": "Piste",
+  "marketing.insight.noData":
+    "Aucune visite pour l'instant. Dès que vous partagerez votre lien, vous verrez ici d'où viennent les gens.",
+  "marketing.insight.topChannel":
+    "{label} vous a amené {count} élèves — votre meilleur canal jusqu'ici.",
+  "marketing.insight.topChannel_one":
+    "{label} vous a amené {count} élève — votre meilleur canal jusqu'ici.",
+  "marketing.insight.channelOutperforms": "{winner} convertit {ratio} fois mieux que {loser}.",
+  "marketing.insight.trafficNoEnquiries":
+    "{label} vous envoie du monde ({count} visites) mais personne n'écrit encore. C'est le public, ou la page.",
+  "marketing.insight.trafficNoEnquiries_one":
+    "{label} vous envoie du monde ({count} visite) mais personne n'écrit encore. C'est le public, ou la page.",
+  "marketing.insight.referralsConvertBest":
+    "Les recommandations convertissent {ratio} fois mieux que vos autres canaux.",
+  "marketing.insight.needsMoreData":
+    "Vous avez {count} visites. Encore quelques-unes et nous pourrons comparer vos canaux.",
+  "marketing.insight.needsMoreData_one":
+    "Vous avez {count} visite. Encore quelques-unes et nous pourrons comparer vos canaux.",
+  "marketing.insight.repeatWhatWorks": "Cela vaut la peine de publier plus souvent dans {label}.",
+  "marketing.insight.tryUntriedCommunity":
+    "Vous n'avez pas encore publié dans {label}. Un essai vous dira si cela vaut la peine.",
+  "materials.ai.topicRequired":
+    "Choisissez un point à travailler ou décrivez ce que ce cours doit couvrir.",
+  "materials.ai.classLimitReached":
+    "Vous avez atteint la limite mensuelle de génération par IA ({cap}). Vous pouvez toujours rédiger le contenu vous-même.",
+  "materials.ai.classUnavailable":
+    "La génération par IA n'est pas disponible pour le moment. Vous pouvez toujours rédiger le contenu vous-même.",
+  "materials.ai.classFailed": "Impossible de générer le contenu. Veuillez réessayer.",
+  "materials.ai.revisionGone": "Cette version n'est plus disponible.",
+  "materials.ai.libraryTopicRequired":
+    "Décrivez d'abord le support ou choisissez un format ou un point à travailler.",
+  "materials.ai.libraryLimitReached":
+    "Vous avez atteint la limite mensuelle de génération par IA ({cap}). Vous pouvez toujours rédiger le support vous-même.",
+  "materials.ai.libraryUnavailable":
+    "La génération par IA n'est pas disponible pour le moment. Vous pouvez toujours rédiger le support vous-même.",
+  "materials.ai.refineInstructionRequired": "Décrivez la modification que l'IA doit apporter.",
+  "materials.ai.refineLimitReached":
+    "Vous avez atteint la limite mensuelle de génération par IA ({cap}). Vous pouvez toujours modifier le support vous-même.",
+  "materials.ai.refineUnavailable":
+    "La modification par IA n'est pas disponible pour le moment. Vous pouvez toujours modifier le support vous-même.",
+  "materials.ai.refineFailed": "Impossible d'appliquer la modification. Veuillez réessayer.",
+  "materials.ai.podcastLimitReached":
+    "Vous avez atteint la limite mensuelle de génération par IA ({cap}). Vous pouvez toujours rédiger et enregistrer le contenu vous-même.",
+  "materials.ai.podcastUnavailable":
+    "La génération de podcast n'est pas disponible pour le moment.",
+  "materials.ai.podcastNeedsContent": "Ajoutez du contenu écrit avant de générer un podcast.",
+  "materials.ai.podcastInProgress": "Un podcast est déjà en cours de génération.",
+  "materials.templates.nameRequired": "Donnez un nom à ce modèle.",
+  "materials.templates.tooMany": "Trop de modèles dans un même enregistrement.",
+  "materials.templates.everyNeedsName": "Chaque modèle doit avoir un nom.",
+  "homework.ai.limitReached":
+    "Vous avez atteint la limite mensuelle de corrections par IA ({cap}). Vous pouvez toujours corriger et noter vous-même.",
+  "homework.ai.unavailable":
+    "La correction par IA n'est pas disponible pour le moment. Vous pouvez toujours corriger et noter vous-même.",
+  "homework.ai.failed": "Impossible de générer une correction par IA. Veuillez réessayer.",
+  "web.action.admin.reasonRequired": "Un motif est requis.",
+  "web.action.admin.notFound": "Introuvable.",
 } as const;

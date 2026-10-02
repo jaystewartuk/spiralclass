@@ -9,6 +9,7 @@ import {
   isConnectCountrySupported,
   isIsoCountryCode,
 } from "./countries";
+import { LOCALES } from "./i18n/locales";
 
 describe("isConnectCountrySupported", () => {
   it("accepts the old cross-border circle (GB, US, CA, CH, EEA)", () => {
@@ -131,13 +132,16 @@ describe("country catalog", () => {
 
 describe("countryLabel / countryOptions", () => {
   it("returns the static localized name per locale (device-independent)", () => {
-    // Reads the shipped COUNTRY_NAMES catalog, not runtime Intl — so mobile
-    // (Hermes, no reliable Intl.DisplayNames) renders the same real names as web
-    // instead of raw codes.
+    // Reads the shipped COUNTRY_NAMES catalog, not runtime Intl — so the
+    // server and the browser, each with its own CLDR, render the same name.
     expect(countryLabel("PE", "en")).toBe("Peru");
     expect(countryLabel("PE", "es")).toBe("Perú");
     expect(countryLabel("US", "es")).toBe("Estados Unidos");
     expect(countryLabel("GB", "en")).toBe("United Kingdom");
+    // The catalog held English and Spanish only, so every other reader was
+    // given the English name.
+    expect(countryLabel("DE", "fr")).toBe("Allemagne");
+    expect(countryLabel("US", "fr")).toBe("États-Unis");
   });
 
   it("never returns a bare 2-letter code for a real country", () => {
@@ -149,11 +153,24 @@ describe("countryLabel / countryOptions", () => {
     }
   });
 
-  it("every catalog code has a non-empty name in both locales", () => {
-    for (const code of COUNTRY_CODES) {
-      expect(countryLabel(code, "en")).toBeTruthy();
-      expect(countryLabel(code, "es")).toBeTruthy();
+  it("every catalog code has a name of its own in every registered locale", () => {
+    // The type already demands a column per locale. This demands that the
+    // column was filled by the generator and not by pasting the code in.
+    for (const { tag } of LOCALES) {
+      for (const code of COUNTRY_CODES) {
+        const name = countryLabel(code, tag);
+        expect(name.trim(), `${code} in ${tag}`).not.toBe("");
+        expect(name, `${code} in ${tag}`).not.toBe(code);
+      }
     }
+  });
+
+  it("sorts the picker by the reader's own alphabet", () => {
+    // É sorts with E in French; a byte-order sort would send États-Unis to
+    // the bottom of the list.
+    const labels = countryOptions("fr").map((o) => o.label);
+    expect(labels.indexOf("États-Unis")).toBeLessThan(labels.indexOf("Finlande"));
+    expect(labels.indexOf("États-Unis")).toBeGreaterThan(labels.indexOf("Danemark"));
   });
 
   it("falls back to the uppercased code for a code outside the catalog", () => {

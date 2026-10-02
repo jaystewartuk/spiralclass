@@ -3,7 +3,7 @@ import { getCurrentTeacher } from "@/lib/auth";
 import { getPreferredLocale } from "@/lib/i18n";
 import { gateProFeature, upgradeNudge } from "@/lib/subscriptions/enforce";
 import { uploadMaterialImage } from "@/lib/storage/material-images";
-import { usesEnglishCopy } from "@spiralclass/shared";
+import { createT } from "@spiralclass/shared";
 
 // Uploads one image for embedding in a material body, from the WEB block
 // editor. Returns the `material-image:` src the editor writes into the block —
@@ -24,7 +24,7 @@ export async function POST(req: Request): Promise<Response> {
   }
 
   const locale = await getPreferredLocale();
-  const en = usesEnglishCopy(locale);
+  const t = createT(locale);
 
   const gate = await gateProFeature(teacher.id, "class_content");
   if (!gate.ok) {
@@ -41,13 +41,13 @@ export async function POST(req: Request): Promise<Response> {
       {
         ok: false,
         reason: "invalid-body",
-        message: en ? "Choose an image to upload." : "Elige una imagen para subir.",
+        message: t("web.action.socialPreview.chooseUpload"),
       },
       { status: 400 },
     );
   }
 
-  const result = await uploadMaterialImage({ teacherId: teacher.id, file, en });
+  const result = await uploadMaterialImage({ teacherId: teacher.id, file, t });
   if ("error" in result) {
     return NextResponse.json(
       { ok: false, reason: "upload-failed", message: result.error },

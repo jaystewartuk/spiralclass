@@ -1,5 +1,6 @@
 "use server";
 
+import { issueMessage } from "@spiralclass/shared";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireOnboardedTeacher } from "@/lib/auth";
@@ -33,7 +34,7 @@ import {
 import { removeUnreferencedMaterialImages } from "@/lib/materials/image-cleanup";
 import { syncLibraryMaterialFocusTags } from "@/lib/materials/tags";
 import { revalidateAfterAction } from "@/lib/revalidate";
-import { usesEnglishCopy } from "@spiralclass/shared";
+import { createT } from "@spiralclass/shared";
 
 // The material library (docs/features/library-materials.md;
 // merged with per-class materials at D-69, docs/features/library-materials.md).
@@ -90,7 +91,7 @@ export async function saveMaterialAttachmentAction(
 ): Promise<MaterialsState> {
   const teacher = await requireOnboardedTeacher();
   const locale = await getPreferredLocale();
-  const en = usesEnglishCopy(locale);
+  const t = createT(locale);
 
   const bookingId = String(formData.get("bookingId") ?? "") || null;
   const levelId = String(formData.get("levelId") ?? "") || null;
@@ -106,11 +107,11 @@ export async function saveMaterialAttachmentAction(
   const sendTiming = optionalSendTimingSchema.safeParse(formData.get("sendTiming") ?? "");
   if (!sendTiming.success) {
     return {
-      error: en ? "Choose when to send the material." : "Selecciona cuándo enviar el material.",
+      error: t("web.action.materials.chooseWhen"),
     };
   }
   if (!visibility.success) {
-    return { error: en ? "Invalid visibility." : "Visibilidad inválida." };
+    return { error: t("web.action.library.invalidVisibility") };
   }
 
   //: tenant-scope every booking lookup before touching storage.
@@ -120,14 +121,14 @@ export async function saveMaterialAttachmentAction(
       where: { id: bookingId, teacherId: teacher.id },
       select: { id: true },
     });
-    if (!booking) return { error: en ? "Class not found." : "Clase no encontrada." };
+    if (!booking) return { error: t("web.action.classNotFound") };
   }
 
   const attachment = await resolveMaterialAttachment({
     file,
     linkUrl: linkUrlRaw,
     pathPrefix: booking ? `${teacher.id}/${booking.id}` : `${teacher.id}/library`,
-    en,
+    t,
   });
   if ("error" in attachment) return { error: attachment.error };
 
@@ -183,7 +184,7 @@ export async function saveMaterialContentAction(
 ): Promise<SaveMaterialContentState> {
   const teacher = await requireOnboardedTeacher();
   const locale = await getPreferredLocale();
-  const en = usesEnglishCopy(locale);
+  const t = createT(locale);
 
   const bookingId = String(formData.get("bookingId") ?? "") || null;
   const materialId = String(formData.get("materialId") ?? "") || null;
@@ -204,7 +205,7 @@ export async function saveMaterialContentAction(
       where: { id: bookingId, teacherId: teacher.id },
       select: { id: true },
     });
-    if (!owned) return { error: en ? "Class not found." : "Clase no encontrada." };
+    if (!owned) return { error: t("web.action.classNotFound") };
   }
 
   // Resolve the file and link pieces independently — either, both, or neither
@@ -217,7 +218,7 @@ export async function saveMaterialContentAction(
       file,
       linkUrl: "",
       pathPrefix: bookingId ? `${teacher.id}/${bookingId}` : `${teacher.id}/library`,
-      en,
+      t,
     });
     if ("error" in uploaded) return { error: uploaded.error };
     storagePath = uploaded.ok.kind === "file" ? uploaded.ok.storagePath : undefined;
@@ -231,7 +232,7 @@ export async function saveMaterialContentAction(
     } else {
       const parsed = materialLinkSchema.safeParse(raw);
       if (!parsed.success) {
-        return { error: parsed.error.issues[0]?.message ?? (en ? "Invalid URL" : "URL inválida") };
+        return { error: issueMessage(parsed.error, t, "web.action.library.invalidUrl") };
       }
       linkUrl = parsed.data;
     }
@@ -287,13 +288,13 @@ export async function saveMaterialContentAction(
   // No body → a plain file/link attachment. Require at least one piece.
   if (!storagePath && !linkUrl) {
     return {
-      error: en ? "Add content, a file, or a link." : "Agrega contenido, un archivo o un enlace.",
+      error: t("web.action.library.contentRequired"),
     };
   }
   const sendTiming = optionalSendTimingSchema.safeParse(formData.get("sendTiming") ?? "");
   if (!sendTiming.success) {
     return {
-      error: en ? "Choose when to send the material." : "Selecciona cuándo enviar el material.",
+      error: t("web.action.materials.chooseWhen"),
     };
   }
   const unit =
@@ -573,7 +574,7 @@ export async function saveContentToLibraryAction(
 ): Promise<LibraryState> {
   const teacher = await requireOnboardedTeacher();
   const locale = await getPreferredLocale();
-  const en = usesEnglishCopy(locale);
+  const t = createT(locale);
 
   const gate = await gateProFeature(teacher.id, "class_content");
   if (!gate.ok) return { error: upgradeNudge(gate.limit, locale) };
@@ -588,14 +589,14 @@ export async function saveContentToLibraryAction(
   const validation = validateClassContentBody(String(formData.get("body") ?? ""), locale);
   if (!validation.ok) return { error: validation.error };
   if (!visibility.success) {
-    return { error: en ? "Invalid visibility." : "Visibilidad inválida." };
+    return { error: t("web.action.library.invalidVisibility") };
   }
 
   const level = await prisma.level.findFirst({
     where: { id: levelId, teacherId: teacher.id, archived: false },
     select: { id: true },
   });
-  if (!level) return { error: en ? "Choose a level." : "Elige un nivel." };
+  if (!level) return { error: t("libManage.chooseLevel") };
 
   const created = await prisma.libraryMaterial.create({
     data: {
@@ -630,7 +631,7 @@ export async function saveContentToLibraryAction(
 
   revalidateAfterAction("/dashboard/materials");
   return {
-    ok: en ? "Saved to your library." : "Guardado en tu biblioteca.",
+    ok: t("classContent.author.savedToLibrary"),
   };
 }
 
@@ -647,7 +648,7 @@ export async function updateLibraryMaterialAction(
 ): Promise<LibraryState> {
   const teacher = await requireOnboardedTeacher();
   const locale = await getPreferredLocale();
-  const en = usesEnglishCopy(locale);
+  const t = createT(locale);
 
   const id = String(formData.get("materialId") ?? "");
   const levelId = String(formData.get("levelId") ?? "");
@@ -662,7 +663,7 @@ export async function updateLibraryMaterialAction(
       .trim() || null;
 
   if (!visibility.success) {
-    return { error: en ? "Invalid visibility." : "Visibilidad inválida." };
+    return { error: t("web.action.library.invalidVisibility") };
   }
 
   // The item must be this teacher's.
@@ -671,7 +672,7 @@ export async function updateLibraryMaterialAction(
     select: { id: true, levelId: true },
   });
   if (!material) {
-    return { error: en ? "Material not found." : "Material no encontrado." };
+    return { error: t("web.action.library.materialNotFound") };
   }
 
   // The (possibly new) level must belong to this teacher and be active.
@@ -680,7 +681,7 @@ export async function updateLibraryMaterialAction(
     select: { id: true },
   });
   if (!level) {
-    return { error: en ? "Choose a level." : "Elige un nivel." };
+    return { error: t("libManage.chooseLevel") };
   }
 
   const levelChanged = level.id !== material.levelId;
@@ -707,7 +708,7 @@ export async function updateLibraryMaterialAction(
   }
 
   revalidateAfterAction("/dashboard/materials");
-  return { ok: en ? "Material updated." : "Material actualizado." };
+  return { ok: t("materials.edit.saved") };
 }
 
 // ---------- archive / unarchive ----------
@@ -833,7 +834,7 @@ export async function assignLibraryMaterialAction(
 ): Promise<AssignMaterialState> {
   const teacher = await requireOnboardedTeacher();
   const locale = await getPreferredLocale();
-  const en = usesEnglishCopy(locale);
+  const t = createT(locale);
   const studentId = String(formData.get("studentId") ?? "");
   const materialId = String(formData.get("materialId") ?? "");
   // Every failure surfaces — this action used to return silently, which
@@ -841,14 +842,12 @@ export async function assignLibraryMaterialAction(
   // (review item 8).
   if (!studentId || !materialId) {
     return {
-      error: en ? "Choose a material first." : "Primero elige un material.",
+      error: t("web.action.materials.chooseFirst"),
     };
   }
   if (!(await verifyAssignmentTargets(teacher.id, studentId, materialId))) {
     return {
-      error: en
-        ? "That material or student is no longer available. Reload the page and try again."
-        : "Ese material o alumno ya no está disponible. Recarga la página e intenta de nuevo.",
+      error: t("web.action.library.materialOrStudentGone"),
     };
   }
 

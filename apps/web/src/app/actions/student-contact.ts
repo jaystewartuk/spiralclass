@@ -1,7 +1,8 @@
 "use server";
 
+import { issueMessage } from "@spiralclass/shared";
 import { z } from "zod";
-import { usesEnglishCopy, isCaptionLanguage } from "@spiralclass/shared";
+import { createT, isCaptionLanguage, type TFunction } from "@spiralclass/shared";
 import { requireOnboardedTeacher, requireStudent } from "@/lib/auth";
 import { getPreferredLocale } from "@/lib/i18n";
 import { prisma } from "@/lib/prisma";
@@ -16,18 +17,14 @@ export type ContactFormState = { ok?: string; error?: string } | undefined;
 export type EmailChangeFormState =
   { pendingEmail?: string; ok?: string; error?: string } | undefined;
 
-function contactErrorMessage(error: ContactUpdateError, en: boolean): string {
+function contactErrorMessage(error: ContactUpdateError, t: TFunction): string {
   switch (error) {
     case "not-found":
-      return en ? "This student isn't in your list." : "Este alumno no está en tu lista.";
+      return t("web.action.studentNotInList");
     case "email-locked":
-      return en
-        ? "This student already signs in with their email, so it can only be changed from their account."
-        : "Este alumno ya inicia sesión con su correo, así que solo puede cambiarse desde su cuenta.";
+      return t("web.action.contact.emailLocked");
     case "email-taken":
-      return en
-        ? "Another of your students already uses that email."
-        : "Otro de tus alumnos ya usa ese correo.";
+      return t("web.action.contact.emailTaken");
   }
 }
 
@@ -40,7 +37,7 @@ export async function updateMyContactInfoAction(
 ): Promise<ContactFormState> {
   const student = await requireStudent();
   const locale = await getPreferredLocale();
-  const en = usesEnglishCopy(locale);
+  const t = createT(locale);
 
   const parsed = studentContactSchema(locale).safeParse({
     name: formData.get("name"),
@@ -50,7 +47,7 @@ export async function updateMyContactInfoAction(
   });
   if (!parsed.success) {
     return {
-      error: parsed.error.issues[0]?.message ?? (en ? "Invalid data." : "Datos inválidos."),
+      error: issueMessage(parsed.error, t, "web.action.invalidData"),
     };
   }
 
@@ -65,12 +62,12 @@ export async function updateMyContactInfoAction(
       ...(parsed.data.timezone ? { timezone: parsed.data.timezone } : {}),
     },
   });
-  if (!result.ok) return { error: contactErrorMessage(result.error, en) };
+  if (!result.ok) return { error: contactErrorMessage(result.error, t) };
   // Drain student_contact_updated before the action returns / lambda freezes.
   await flushAnalytics();
 
   revalidateAfterAction("/my-classes", "layout");
-  return { ok: en ? "Details saved." : "Datos guardados." };
+  return { ok: t("web.action.contact.saved") };
 }
 
 // Teacher roster fix: name, email (only while the student has never signed
@@ -81,7 +78,7 @@ export async function updateStudentContactAsTeacherAction(
 ): Promise<ContactFormState> {
   const teacher = await requireOnboardedTeacher();
   const locale = await getPreferredLocale();
-  const en = usesEnglishCopy(locale);
+  const t = createT(locale);
 
   const parsed = teacherEditStudentContactSchema(locale).safeParse({
     studentId: formData.get("studentId"),
@@ -92,7 +89,7 @@ export async function updateStudentContactAsTeacherAction(
   });
   if (!parsed.success) {
     return {
-      error: parsed.error.issues[0]?.message ?? (en ? "Invalid data." : "Datos inválidos."),
+      error: issueMessage(parsed.error, t, "web.action.invalidData"),
     };
   }
 
@@ -110,11 +107,11 @@ export async function updateStudentContactAsTeacherAction(
       phoneCountry: parsed.data.phoneCountry ?? teacher.country,
     },
   });
-  if (!result.ok) return { error: contactErrorMessage(result.error, en) };
+  if (!result.ok) return { error: contactErrorMessage(result.error, t) };
   await flushAnalytics();
 
   revalidateAfterAction(`/dashboard/students/${parsed.data.studentId}`);
-  return { ok: en ? "Contact details saved." : "Datos de contacto guardados." };
+  return { ok: t("web.action.contact.teacherSaved") };
 }
 
 // Step 1 of the verified email change: the signed-in student names a new
@@ -126,22 +123,22 @@ export async function requestEmailChangeAction(
 ): Promise<EmailChangeFormState> {
   const student = await requireStudent();
   const locale = await getPreferredLocale();
-  const en = usesEnglishCopy(locale);
+  const t = createT(locale);
 
   // requireStudent doesn't gate moderation; don't hand a moderated account
   // an identity-moving tool (mirrors the checkout / magic-link refusals).
   if (student.disabledAt) {
-    return { error: en ? "This account is disabled." : "Esta cuenta está deshabilitada." };
+    return { error: t("web.action.accountDisabled") };
   }
 
   const parsed = z
     .string()
     .trim()
-    .email(en ? "Invalid email" : "Correo inválido")
+    .email(t("email.invalid"))
     .max(254)
     .safeParse(formData.get("newEmail"));
   if (!parsed.success) {
-    return { error: parsed.error.issues[0]?.message ?? (en ? "Invalid email" : "Correo inválido") };
+    return { error: issueMessage(parsed.error, t, "email.invalid") };
   }
 
   // Keyed on the student (the endpoint is authenticated), not the IP: each
@@ -154,9 +151,7 @@ export async function requestEmailChangeAction(
   });
   if (!rl.ok) {
     return {
-      error: en
-        ? "Too many attempts. Wait a few minutes and try again."
-        : "Demasiados intentos. Espera unos minutos y vuelve a intentarlo.",
+      error: t("web.action.contact.tooMany"),
     };
   }
 
@@ -171,21 +166,17 @@ export async function requestEmailChangeAction(
   if (!result.ok) {
     switch (result.error) {
       case "same-email":
-        return { error: en ? "That's already your email." : "Ese ya es tu correo." };
+        return { error: t("web.action.contact.sameEmail") };
       case "send-failed":
         return {
-          error: en
-            ? "We couldn't send the confirmation email. Try again."
-            : "No pudimos enviar el correo de confirmación. Intenta de nuevo.",
+          error: t("web.action.contact.sendFailed"),
         };
       // "unavailable" covers addresses already in use — kept generic on
       // purpose so the form doesn't confirm which emails have accounts.
       case "not-linked":
       case "unavailable":
         return {
-          error: en
-            ? "We couldn't use that email. Try another one, or write to us from the Help page."
-            : "No pudimos usar ese correo. Intenta con otro o escríbenos desde la página de ayuda.",
+          error: t("web.action.contact.emailUnusable"),
         };
     }
   }
@@ -202,19 +193,19 @@ export async function verifyEmailChangeAction(
 ): Promise<EmailChangeFormState> {
   const student = await requireStudent();
   const locale = await getPreferredLocale();
-  const en = usesEnglishCopy(locale);
+  const t = createT(locale);
 
   if (student.disabledAt) {
-    return { error: en ? "This account is disabled." : "Esta cuenta está deshabilitada." };
+    return { error: t("web.action.accountDisabled") };
   }
   if (!student.authUserId) {
-    return { error: en ? "No account to verify." : "No hay cuenta que verificar." };
+    return { error: t("web.action.contact.noAccount") };
   }
 
   const newEmail = formData.get("newEmail");
   const code = formData.get("code");
   if (typeof newEmail !== "string" || typeof code !== "string" || !newEmail || !code) {
-    return { error: en ? "Missing email or code." : "Falta correo o código." };
+    return { error: t("web.action.missingEmailOrCode") };
   }
 
   const result = await verifyStudentEmailChange({
@@ -226,23 +217,15 @@ export async function verifyEmailChangeAction(
     return {
       error:
         result.error === "invalid-code"
-          ? en
-            ? "Invalid or expired code. Request a new one."
-            : "Código inválido o expirado. Solicita uno nuevo."
-          : en
-            ? "We couldn't confirm that email. Try again."
-            : "No pudimos confirmar ese correo. Intenta de nuevo.",
+          ? t("web.action.invalidOrExpiredCode")
+          : t("web.action.contact.confirmFailed"),
     };
   }
 
   revalidateAfterAction("/my-classes/account");
   const ok = result.googleDisconnected
-    ? en
-      ? "Email updated. Your Google account was disconnected for security — reconnect it below with your new Google account if you'd like to keep using Google Sign-In."
-      : "Correo actualizado. Tu cuenta de Google se desconectó por seguridad — puedes volver a conectarla abajo con tu nueva cuenta de Google si quieres seguir usando el inicio de sesión con Google."
-    : en
-      ? "Email updated."
-      : "Correo actualizado.";
+    ? t("web.action.contact.emailUpdatedGoogleDisconnected")
+    : t("web.action.contact.emailUpdated");
   return { ok };
 }
 
@@ -256,11 +239,11 @@ export async function saveNativeLanguageAction(
 ): Promise<ContactFormState> {
   const student = await requireStudent();
   const locale = await getPreferredLocale();
-  const en = usesEnglishCopy(locale);
+  const t = createT(locale);
 
   const nativeLanguage = (formData.get("nativeLanguage") ?? "").toString().trim();
   if (!isCaptionLanguage(nativeLanguage)) {
-    return { error: en ? "Unknown language." : "Idioma desconocido." };
+    return { error: t("web.action.contact.unknownLanguage") };
   }
 
   await prisma.student.update({
@@ -269,5 +252,5 @@ export async function saveNativeLanguageAction(
   });
 
   revalidateAfterAction("/my-classes/account");
-  return { ok: en ? "Language saved." : "Idioma guardado." };
+  return { ok: t("web.action.contact.languageSaved") };
 }

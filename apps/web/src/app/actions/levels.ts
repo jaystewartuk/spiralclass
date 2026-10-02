@@ -7,7 +7,7 @@ import { getPreferredLocale } from "@/lib/i18n";
 import { flushAnalytics, trackServerEvent } from "@/lib/analytics/posthog";
 import { ensureTeacherLevels } from "@/lib/levels";
 import { revalidateAfterAction } from "@/lib/revalidate";
-import { usesEnglishCopy } from "@spiralclass/shared";
+import { createT } from "@spiralclass/shared";
 
 // Level-gated material library — docs/features/library-materials.md.
 //
@@ -29,13 +29,13 @@ export async function setStudentLevel(
   formData: FormData,
 ): Promise<LevelFormState> {
   const locale = await getPreferredLocale();
-  const en = usesEnglishCopy(locale);
+  const t = createT(locale);
   const parsed = setStudentLevelSchema.safeParse({
     studentId: formData.get("studentId"),
     levelId: formData.get("levelId") ?? "",
   });
   if (!parsed.success) {
-    return { error: en ? "Invalid data." : "Datos inválidos." };
+    return { error: t("web.action.invalidData") };
   }
 
   const teacher = await requireOnboardedTeacher();
@@ -46,7 +46,7 @@ export async function setStudentLevel(
     select: { studentId: true },
   });
   if (!link) {
-    return { error: en ? "This student isn't in your list." : "Este alumno no está en tu lista." };
+    return { error: t("web.action.studentNotInList") };
   }
 
   // A non-empty level must belong to THIS teacher — never trust the posted id.
@@ -56,7 +56,7 @@ export async function setStudentLevel(
       select: { id: true },
     });
     if (!owned) {
-      return { error: en ? "Unknown level." : "Nivel desconocido." };
+      return { error: t("web.action.levels.unknown") };
     }
   }
 
@@ -73,7 +73,7 @@ export async function setStudentLevel(
   await flushAnalytics();
 
   revalidateAfterAction(`/dashboard/students/${studentId}`);
-  return { ok: en ? "Level saved." : "Nivel guardado." };
+  return { ok: t("web.action.levels.saved") };
 }
 
 // Convenience used by the student detail page to render the selector. Seeds

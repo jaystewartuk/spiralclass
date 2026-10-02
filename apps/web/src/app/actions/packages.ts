@@ -5,7 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { requireOnboardedTeacher } from "@/lib/auth";
 import { getPreferredLocale } from "@/lib/i18n";
 import { revalidateAfterAction } from "@/lib/revalidate";
-import { usesEnglishCopy } from "@spiralclass/shared";
+import { createT } from "@spiralclass/shared";
 
 export type PackagePauseState = { error?: string; ok?: boolean } | undefined;
 
@@ -25,31 +25,27 @@ export async function togglePackagePauseAction(
   formData: FormData,
 ): Promise<PackagePauseState> {
   const teacher = await requireOnboardedTeacher();
-  const en = usesEnglishCopy(await getPreferredLocale());
+  const t = createT(await getPreferredLocale());
   const parsed = schema.safeParse({
     packageId: formData.get("packageId"),
     intent: formData.get("intent"),
   });
   if (!parsed.success) {
-    return { error: en ? "Invalid request" : "Solicitud inválida" };
+    return { error: t("web.action.invalidRequest") };
   }
 
   const pkg = await prisma.package.findFirst({
     where: { id: parsed.data.packageId, teacherId: teacher.id },
     select: { id: true, status: true, studentId: true },
   });
-  if (!pkg) return { error: en ? "Package not found" : "Paquete no encontrado" };
+  if (!pkg) return { error: t("web.action.packageNotFound") };
 
   const pausing = parsed.data.intent === "pause";
   const from = pausing ? "active" : "paused";
   const wrongState = {
     error: pausing
-      ? en
-        ? "Only an active package can be paused"
-        : "Solo se puede pausar un paquete activo"
-      : en
-        ? "Only a paused package can be resumed"
-        : "Solo se puede reactivar un paquete en pausa",
+      ? t("web.action.packages.onlyActivePause")
+      : t("web.action.packages.onlyPausedResume"),
   };
   if (pkg.status !== from) return wrongState;
 

@@ -1,3 +1,4 @@
+import { type TFunction, issueMessage } from "@spiralclass/shared";
 import { z } from "zod";
 import { getStorageProvider } from "./provider";
 import { MATERIALS_BUCKET } from "./signed-urls";
@@ -13,7 +14,7 @@ const log = logger({ surface: "materials" });
 
 export const MAX_MATERIAL_BYTES = 25 * 1024 * 1024; // 25 MB
 
-export const materialLinkSchema = z.string().url("URL inválida");
+export const materialLinkSchema = z.string().url("web.action.library.invalidUrl");
 
 export type MaterialAttachment =
   { kind: "file"; storagePath: string } | { kind: "link"; linkUrl: string };
@@ -29,16 +30,14 @@ export async function resolveMaterialAttachment(opts: {
   file: unknown;
   linkUrl: string;
   pathPrefix: string;
-  en: boolean;
+  t: TFunction;
 }): Promise<MaterialAttachmentResult> {
-  const { file, linkUrl, pathPrefix, en } = opts;
+  const { file, linkUrl, pathPrefix, t } = opts;
 
   if (file instanceof File && file.size > 0) {
     if (file.size > MAX_MATERIAL_BYTES) {
       return {
-        error: en
-          ? "The file can't be larger than 25 MB."
-          : "El archivo no puede pesar más de 25 MB.",
+        error: t("web.action.materialFile.tooLarge"),
       };
     }
     const path = `${pathPrefix}/${Date.now()}-${file.name}`;
@@ -49,9 +48,7 @@ export async function resolveMaterialAttachment(opts: {
     if (upErr) {
       log.warn("upload failed", { error: upErr.message });
       return {
-        error: en
-          ? `We couldn't upload the file: ${upErr.message}`
-          : `No pudimos subir el archivo: ${upErr.message}`,
+        error: t("web.action.materialFile.uploadFailed", { message: upErr.message }),
       };
     }
     return { ok: { kind: "file", storagePath: path } };
@@ -61,13 +58,13 @@ export async function resolveMaterialAttachment(opts: {
   if (trimmed) {
     const parsed = materialLinkSchema.safeParse(trimmed);
     if (!parsed.success) {
-      return { error: parsed.error.issues[0]?.message ?? (en ? "Invalid URL" : "URL inválida") };
+      return { error: issueMessage(parsed.error, t, "web.action.library.invalidUrl") };
     }
     return { ok: { kind: "link", linkUrl: parsed.data } };
   }
 
   return {
-    error: en ? "Attach a file or paste a link." : "Adjunta un archivo o pega un enlace.",
+    error: t("materials.noAttachment"),
   };
 }
 

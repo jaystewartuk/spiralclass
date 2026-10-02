@@ -2,7 +2,8 @@
 
 import { Heading } from "@/components/ui/heading";
 import { useEffect, useState } from "react";
-import { DEFAULT_LOCALE, type AppLocale } from "@spiralclass/shared";
+import { DEFAULT_LOCALE, localeDirection, type AppLocale } from "@spiralclass/shared";
+import { detectClientLocale } from "@/lib/client-locale";
 import { useSkewRecoveryOrReport } from "@/components/use-server-action-recovery";
 // global-error renders outside the root layout, so it must pull in the
 // global stylesheet itself for the Tailwind design tokens below to apply.
@@ -35,19 +36,14 @@ const COPY = {
   },
 } as const;
 
+// When nothing matches, detectClientLocale answers DEFAULT_LOCALE — which is
+// what "we don't know" is for, on the one screen the reader cannot navigate
+// away from.
 function detectLocale(): AppLocale {
-  if (typeof document !== "undefined") {
-    const match = document.cookie.match(/(?:^|;\s*)locale=(en|es|fr)/);
-    if (match) return match[1] as AppLocale;
-  }
-  if (typeof navigator !== "undefined") {
-    if (/^fr\b/i.test(navigator.language)) return "fr";
-    if (/^es\b/i.test(navigator.language)) return "es";
-  }
-  // Nothing matched, so this is the answer to "we don't know" — which is what
-  // DEFAULT_LOCALE is for, on the one screen the reader cannot navigate away
-  // from.
-  return DEFAULT_LOCALE;
+  return detectClientLocale(
+    typeof document !== "undefined" ? document.cookie : null,
+    typeof navigator !== "undefined" ? navigator.language : null,
+  );
 }
 
 export default function GlobalError({ error }: { error: Error & { digest?: string } }) {
@@ -67,7 +63,7 @@ export default function GlobalError({ error }: { error: Error & { digest?: strin
   if (recovering) return null;
 
   return (
-    <html lang={locale}>
+    <html lang={locale} dir={localeDirection(locale)}>
       <body className="m-0 flex min-h-dvh items-center justify-center bg-background p-8 text-center font-sans text-foreground">
         <div className="max-w-md space-y-4">
           <Heading level={1}>SpiralClass</Heading>

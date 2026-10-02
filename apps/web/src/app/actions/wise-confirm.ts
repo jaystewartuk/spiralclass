@@ -9,7 +9,7 @@ import { getPreferredLocale } from "@/lib/i18n";
 import { enqueueEvent } from "@/lib/jobs/enqueue";
 import { flushAnalytics } from "@/lib/analytics/posthog";
 import { revalidateAfterAction } from "@/lib/revalidate";
-import { usesEnglishCopy } from "@spiralclass/shared";
+import { createT } from "@spiralclass/shared";
 
 // Teacher action: marks a Wise-pending payment as received.
 //
@@ -79,7 +79,7 @@ export async function confirmTransferPaymentAction(formData: FormData): Promise<
 export async function failWisePaymentAction(formData: FormData): Promise<void> {
   const teacher = await requireOnboardedTeacher();
   const locale = await getPreferredLocale();
-  const en = usesEnglishCopy(locale);
+  const t = createT(locale);
   const parsed = transferConfirmSchema(locale).safeParse({
     paymentId: formData.get("paymentId"),
     note: formData.get("note"),
@@ -124,7 +124,7 @@ export async function failWisePaymentAction(formData: FormData): Promise<void> {
         targetType: "payment",
         targetId: payment.id,
         action: "wise_fail",
-        reason: input.note ?? (en ? "Wise: payment not received" : "Wise: pago no recibido"),
+        reason: input.note ?? t("web.action.audit.wiseNotReceived"),
         beforeJson: { status: "pending" },
         afterJson: { status: "failed" },
       },

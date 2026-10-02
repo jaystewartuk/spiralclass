@@ -1,8 +1,9 @@
 "use server";
 
+import { issueMessage } from "@spiralclass/shared";
 import { z } from "zod";
 import { fromZonedTime } from "date-fns-tz";
-import { usesEnglishCopy, currencyForTeacher, isCaptionLanguage } from "@spiralclass/shared";
+import { createT, currencyForTeacher, isCaptionLanguage } from "@spiralclass/shared";
 import { prisma } from "@/lib/prisma";
 import { requireOnboardedTeacher } from "@/lib/auth";
 import { getPreferredLocale } from "@/lib/i18n";
@@ -39,7 +40,9 @@ const log = logger({ surface: "overrides" });
 
 export type OverrideState = { error?: string; ok?: string } | undefined;
 
-const reasonField = z.string().trim().min(3, "Da una razón breve.").max(500);
+// Schema messages are catalog keys; issueMessage() turns them into words in
+// the reader's language. These two were Spanish literals shown to everyone.
+const reasonField = z.string().trim().min(3, "web.action.reasonTooShort").max(500);
 const bookingIdField = z.string().uuid();
 const packageIdField = z.string().uuid();
 const studentIdField = z.string().uuid();
@@ -56,14 +59,14 @@ export async function markBookingComplete(
   formData: FormData,
 ): Promise<OverrideState> {
   const locale = await getPreferredLocale();
-  const en = usesEnglishCopy(locale);
+  const t = createT(locale);
   const parsed = markCompleteSchema.safeParse({
     bookingId: formData.get("bookingId"),
     reason: formData.get("reason"),
   });
   if (!parsed.success) {
     return {
-      error: parsed.error.issues[0]?.message ?? (en ? "Invalid data." : "Datos inválidos."),
+      error: issueMessage(parsed.error, t, "web.action.invalidData"),
     };
   }
 
@@ -78,12 +81,10 @@ export async function markBookingComplete(
       scheduledEnd: true,
     },
   });
-  if (!booking) return { error: en ? "We couldn't find the class." : "No encontramos la clase." };
+  if (!booking) return { error: t("web.action.overrides.classNotFound") };
   if (booking.status !== "scheduled") {
     return {
-      error: en
-        ? "Only scheduled classes can be marked complete."
-        : "Sólo se pueden marcar como completas las clases agendadas.",
+      error: t("web.action.overrides.onlyScheduledComplete"),
     };
   }
 
@@ -114,9 +115,7 @@ export async function markBookingComplete(
   });
   if (!completed) {
     return {
-      error: en
-        ? "That class was already changed by another action. Refresh and try again."
-        : "Esa clase ya fue modificada por otra acción. Actualiza e inténtalo de nuevo.",
+      error: t("web.action.overrides.changedElsewhere"),
     };
   }
 
@@ -133,7 +132,7 @@ export async function markBookingComplete(
   await flushAnalytics();
 
   revalidateAfterAction(`/dashboard/classes/${booking.id}`);
-  return { ok: en ? "Class marked complete." : "Clase marcada como completa." };
+  return { ok: t("web.action.overrides.markedComplete") };
 }
 
 // ---------- mark_no_show ----------
@@ -157,14 +156,14 @@ export async function markBookingNoShow(
   formData: FormData,
 ): Promise<OverrideState> {
   const locale = await getPreferredLocale();
-  const en = usesEnglishCopy(locale);
+  const t = createT(locale);
   const parsed = markNoShowSchema.safeParse({
     bookingId: formData.get("bookingId"),
     reason: formData.get("reason"),
   });
   if (!parsed.success) {
     return {
-      error: parsed.error.issues[0]?.message ?? (en ? "Invalid data." : "Datos inválidos."),
+      error: issueMessage(parsed.error, t, "web.action.invalidData"),
     };
   }
 
@@ -179,12 +178,10 @@ export async function markBookingNoShow(
       scheduledStart: true,
     },
   });
-  if (!booking) return { error: en ? "We couldn't find the class." : "No encontramos la clase." };
+  if (!booking) return { error: t("web.action.overrides.classNotFound") };
   if (booking.status !== "scheduled" && booking.status !== "completed") {
     return {
-      error: en
-        ? "Only scheduled or completed classes can be marked as no-show."
-        : "Sólo se pueden marcar como no asistencia las clases agendadas o completadas.",
+      error: t("web.action.overrides.onlyScheduledOrCompletedNoShow"),
     };
   }
 
@@ -220,9 +217,7 @@ export async function markBookingNoShow(
 
   if (notificationId === null) {
     return {
-      error: en
-        ? "That class was already changed by another action. Refresh and try again."
-        : "Esa clase ya fue modificada por otra acción. Actualiza e inténtalo de nuevo.",
+      error: t("web.action.overrides.changedElsewhere"),
     };
   }
 
@@ -246,9 +241,7 @@ export async function markBookingNoShow(
 
   revalidateAfterAction(`/dashboard/classes/${booking.id}`);
   return {
-    ok: en
-      ? "Class recorded as no-show. The class still counts (no refund)."
-      : "Clase registrada como no asistencia. La clase cuenta igual (sin reembolso).",
+    ok: t("web.action.overrides.markedNoShow"),
   };
 }
 
@@ -264,14 +257,14 @@ export async function restoreClass(
   formData: FormData,
 ): Promise<OverrideState> {
   const locale = await getPreferredLocale();
-  const en = usesEnglishCopy(locale);
+  const t = createT(locale);
   const parsed = restoreSchema.safeParse({
     bookingId: formData.get("bookingId"),
     reason: formData.get("reason"),
   });
   if (!parsed.success) {
     return {
-      error: parsed.error.issues[0]?.message ?? (en ? "Invalid data." : "Datos inválidos."),
+      error: issueMessage(parsed.error, t, "web.action.invalidData"),
     };
   }
 
@@ -288,15 +281,13 @@ export async function restoreClass(
       scheduledEnd: true,
     },
   });
-  if (!booking) return { error: en ? "We couldn't find the class." : "No encontramos la clase." };
+  if (!booking) return { error: t("web.action.overrides.classNotFound") };
   // Only deducted-status bookings make sense for restore. Teacher cancels
   // didn't deduct, so "restoring" a teacher_cancel is a different intent
   // (probably "uncancel"); we keep MVP scope to deducted statuses.
   if (booking.status !== "canceled_by_student" && booking.status !== "no_show") {
     return {
-      error: en
-        ? "Only student-canceled or no-show classes can be restored."
-        : "Sólo se pueden restaurar clases canceladas por el alumno o registradas como no asistencia.",
+      error: t("web.action.overrides.onlyCanceledOrNoShowRestore"),
     };
   }
 
@@ -314,9 +305,7 @@ export async function restoreClass(
   });
   if (conflict) {
     return {
-      error: en
-        ? "That slot is already taken by another class. Cancel the other one first, or ask the student to reschedule."
-        : "Ese horario ya está ocupado por otra clase. Cancela la otra primero o pide al alumno que reagende.",
+      error: t("web.action.overrides.slotTakenCancelOther"),
     };
   }
 
@@ -332,9 +321,7 @@ export async function restoreClass(
     });
     if (pkg && pkg.classesUsed >= pkg.classesTotal) {
       return {
-        error: en
-          ? "This package has no classes left to restore into."
-          : "Este paquete ya no tiene clases disponibles para restaurar.",
+        error: t("web.action.overrides.noClassesToRestore"),
       };
     }
   }
@@ -383,22 +370,16 @@ export async function restoreClass(
       const kind = (err as { restoreKind: string }).restoreKind;
       if (kind === "capacity") {
         return {
-          error: en
-            ? "This package has no classes left to restore into."
-            : "Este paquete ya no tiene clases disponibles para restaurar.",
+          error: t("web.action.overrides.noClassesToRestore"),
         };
       }
       return {
-        error: en
-          ? "That class was already changed by another action. Refresh and try again."
-          : "Esa clase ya fue modificada por otra acción. Actualiza e inténtalo de nuevo.",
+        error: t("web.action.overrides.changedElsewhere"),
       };
     }
     if (isSlotConflictError(err)) {
       return {
-        error: en
-          ? "That slot is already taken by another class."
-          : "Ese horario ya está ocupado por otra clase.",
+        error: t("web.action.overrides.slotTakenByClass"),
       };
     }
     throw err;
@@ -435,7 +416,7 @@ export async function restoreClass(
   await flushAnalytics();
 
   revalidateAfterAction(`/dashboard/classes/${booking.id}`);
-  return { ok: en ? "Class restored." : "Clase restaurada." };
+  return { ok: t("web.action.overrides.restored") };
 }
 
 // ---------- waive_cancellation ----------
@@ -450,14 +431,14 @@ export async function waiveCancellation(
   formData: FormData,
 ): Promise<OverrideState> {
   const locale = await getPreferredLocale();
-  const en = usesEnglishCopy(locale);
+  const t = createT(locale);
   const parsed = waiveSchema.safeParse({
     bookingId: formData.get("bookingId"),
     reason: formData.get("reason"),
   });
   if (!parsed.success) {
     return {
-      error: parsed.error.issues[0]?.message ?? (en ? "Invalid data." : "Datos inválidos."),
+      error: issueMessage(parsed.error, t, "web.action.invalidData"),
     };
   }
 
@@ -466,12 +447,10 @@ export async function waiveCancellation(
     where: { id: parsed.data.bookingId, teacherId: teacher.id },
     select: { id: true, status: true, packageId: true, countsAgainstPackage: true },
   });
-  if (!booking) return { error: en ? "We couldn't find the class." : "No encontramos la clase." };
+  if (!booking) return { error: t("web.action.overrides.classNotFound") };
   if (booking.status !== "canceled_by_student") {
     return {
-      error: en
-        ? "Only student cancellations with a deduction applied can be waived."
-        : "Sólo se pueden perdonar cancelaciones del alumno con descuento aplicado.",
+      error: t("web.action.overrides.onlyDeductedWaive"),
     };
   }
 
@@ -540,9 +519,7 @@ export async function waiveCancellation(
 
   if (!waived) {
     return {
-      error: en
-        ? "That class was already changed by another action. Refresh and try again."
-        : "Esa clase ya fue modificada por otra acción. Actualiza e inténtalo de nuevo.",
+      error: t("web.action.overrides.changedElsewhere"),
     };
   }
 
@@ -560,9 +537,7 @@ export async function waiveCancellation(
 
   revalidateAfterAction(`/dashboard/classes/${booking.id}`);
   return {
-    ok: en
-      ? "Cancellation waived. 1 class restored to the package."
-      : "Cancelación perdonada. Se restauró 1 clase al paquete.",
+    ok: t("web.action.overrides.waived"),
   };
 }
 
@@ -573,7 +548,7 @@ const extendSchema = z.object({
   // ISO date (YYYY-MM-DD). Resolved to end-of-day in the teacher's IANA
   // tz (server-authoritative) — using UTC end-of-day shifted expirations by ±1 day for
   // tz-distant teachers near midnight.
-  newExpiresAt: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Fecha inválida (YYYY-MM-DD)"),
+  newExpiresAt: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "web.action.overrides.invalidDate"),
   reason: reasonField,
 });
 
@@ -582,7 +557,7 @@ export async function extendPackageExpiration(
   formData: FormData,
 ): Promise<OverrideState> {
   const locale = await getPreferredLocale();
-  const en = usesEnglishCopy(locale);
+  const t = createT(locale);
   const parsed = extendSchema.safeParse({
     packageId: formData.get("packageId"),
     newExpiresAt: formData.get("newExpiresAt"),
@@ -590,7 +565,7 @@ export async function extendPackageExpiration(
   });
   if (!parsed.success) {
     return {
-      error: parsed.error.issues[0]?.message ?? (en ? "Invalid data." : "Datos inválidos."),
+      error: issueMessage(parsed.error, t, "web.action.invalidData"),
     };
   }
 
@@ -599,21 +574,17 @@ export async function extendPackageExpiration(
     where: { id: parsed.data.packageId, teacherId: teacher.id },
     select: { id: true, expiresAt: true, status: true },
   });
-  if (!pkg) return { error: en ? "Package not found." : "Paquete no encontrado." };
+  if (!pkg) return { error: t("web.action.packageNotFound") };
 
   const newExpiresAt = fromZonedTime(`${parsed.data.newExpiresAt}T23:59:59`, teacher.timezone);
   if (newExpiresAt <= new Date()) {
     return {
-      error: en
-        ? "The new date must be in the future."
-        : "La nueva fecha debe ser una fecha futura.",
+      error: t("web.action.overrides.dateInFuture"),
     };
   }
   if (pkg.expiresAt && newExpiresAt <= pkg.expiresAt) {
     return {
-      error: en
-        ? "The new date must be after the current one."
-        : "La nueva fecha debe ser posterior a la actual.",
+      error: t("web.action.overrides.dateAfterCurrent"),
     };
   }
 
@@ -650,7 +621,7 @@ export async function extendPackageExpiration(
   await flushAnalytics();
 
   revalidateAfterAction(`/dashboard/students`);
-  return { ok: en ? "Expiration updated." : "Vencimiento actualizado." };
+  return { ok: t("web.action.overrides.expirationUpdated") };
 }
 
 // ---------- set_custom_price ----------
@@ -689,7 +660,7 @@ export async function setStudentCustomPrice(
   formData: FormData,
 ): Promise<OverrideState> {
   const locale = await getPreferredLocale();
-  const en = usesEnglishCopy(locale);
+  const t = createT(locale);
   const parsed = customPriceSchema.safeParse({
     studentId: formData.get("studentId"),
     prices: parsePricesJson(formData.get("pricesJson")),
@@ -697,7 +668,7 @@ export async function setStudentCustomPrice(
   });
   if (!parsed.success) {
     return {
-      error: parsed.error.issues[0]?.message ?? (en ? "Invalid data." : "Datos inválidos."),
+      error: issueMessage(parsed.error, t, "web.action.invalidData"),
     };
   }
 
@@ -724,7 +695,7 @@ export async function setStudentCustomPrice(
   });
   if (!link) {
     return {
-      error: en ? "This student isn't in your list." : "Este alumno no está en tu lista.",
+      error: t("web.action.studentNotInList"),
     };
   }
 
@@ -738,7 +709,7 @@ export async function setStudentCustomPrice(
     select: { id: true },
   });
   if (owned.length !== templateIds.length) {
-    return { error: en ? "Unknown package." : "Paquete desconocido." };
+    return { error: t("web.action.overrides.unknownPackage") };
   }
 
   const before = await prisma.teacherStudentTemplatePrice.findMany({
@@ -820,13 +791,9 @@ export async function setStudentCustomPrice(
   revalidateAfterAction(`/dashboard/students/${parsed.data.studentId}`);
   const cleared = Object.keys(afterMap).length === 0;
   return {
-    ok: en
-      ? cleared
-        ? "Custom prices removed."
-        : "Custom prices updated for future purchases."
-      : cleared
-        ? "Precios personalizados eliminados."
-        : "Precios personalizados actualizados para futuras compras.",
+    ok: cleared
+      ? t("web.action.overrides.customPricesRemoved")
+      : t("web.action.overrides.customPricesUpdated"),
   };
 }
 
@@ -852,7 +819,7 @@ export async function toggleStudentArchive(
   formData: FormData,
 ): Promise<OverrideState> {
   const locale = await getPreferredLocale();
-  const en = usesEnglishCopy(locale);
+  const t = createT(locale);
   const parsed = archiveSchema.safeParse({
     studentId: formData.get("studentId"),
     intent: formData.get("intent"),
@@ -860,7 +827,7 @@ export async function toggleStudentArchive(
   });
   if (!parsed.success) {
     return {
-      error: parsed.error.issues[0]?.message ?? (en ? "Invalid data." : "Datos inválidos."),
+      error: issueMessage(parsed.error, t, "web.action.invalidData"),
     };
   }
 
@@ -872,29 +839,25 @@ export async function toggleStudentArchive(
     select: { archivedAt: true },
   });
   if (!link) {
-    return { error: en ? "This student isn't in your list." : "Este alumno no está en tu lista." };
+    return { error: t("web.action.studentNotInList") };
   }
 
   const archiving = parsed.data.intent === "archive";
   if (archiving && link.archivedAt) {
     return {
-      error: en ? "This student is already archived." : "Este alumno ya está dado de baja.",
+      error: t("web.action.overrides.alreadyArchived"),
     };
   }
   if (!archiving && !link.archivedAt) {
-    return { error: en ? "This student is already active." : "Este alumno ya está activo." };
+    return { error: t("web.action.overrides.alreadyActive") };
   }
 
   const reason =
     parsed.data.reason && parsed.data.reason.length > 0
       ? parsed.data.reason
       : archiving
-        ? en
-          ? "Archived from roster"
-          : "Dado de baja del listado"
-        : en
-          ? "Reactivated on roster"
-          : "Reactivado en el listado";
+        ? t("web.action.audit.archivedFromRoster")
+        : t("web.action.audit.reactivatedOnRoster");
   const now = new Date();
 
   await prisma.$transaction(async (tx) => {
@@ -935,12 +898,8 @@ export async function toggleStudentArchive(
   revalidateAfterAction(`/dashboard/students/${parsed.data.studentId}`);
   return {
     ok: archiving
-      ? en
-        ? "Student archived."
-        : "Alumno dado de baja."
-      : en
-        ? "Student reactivated."
-        : "Alumno reactivado.",
+      ? t("web.action.overrides.studentArchived")
+      : t("web.action.overrides.studentReactivated"),
   };
 }
 
@@ -968,7 +927,7 @@ export async function updateBookingLanguageOverrideAction(
   formData: FormData,
 ): Promise<OverrideState> {
   const locale = await getPreferredLocale();
-  const en = usesEnglishCopy(locale);
+  const t = createT(locale);
   const parsed = languageOverrideSchema.safeParse({
     bookingId: formData.get("bookingId"),
     teacherLanguage: formData.get("teacherLanguage"),
@@ -977,7 +936,7 @@ export async function updateBookingLanguageOverrideAction(
   });
   if (!parsed.success) {
     return {
-      error: parsed.error.issues[0]?.message ?? (en ? "Invalid data." : "Datos inválidos."),
+      error: issueMessage(parsed.error, t, "web.action.invalidData"),
     };
   }
 
@@ -986,7 +945,7 @@ export async function updateBookingLanguageOverrideAction(
     where: { id: parsed.data.bookingId, teacherId: teacher.id },
     select: { id: true, teacherLanguageOverride: true, studentLanguageOverride: true },
   });
-  if (!booking) return { error: en ? "We couldn't find the class." : "No encontramos la clase." };
+  if (!booking) return { error: t("web.action.overrides.classNotFound") };
 
   const teacherLanguage = parsed.data.teacherLanguage === "" ? null : parsed.data.teacherLanguage;
   const studentLanguage = parsed.data.studentLanguage === "" ? null : parsed.data.studentLanguage;
@@ -1033,5 +992,5 @@ export async function updateBookingLanguageOverrideAction(
   await flushAnalytics();
 
   revalidateAfterAction(`/dashboard/classes/${booking.id}`);
-  return { ok: en ? "Class language updated." : "Idioma de la clase actualizado." };
+  return { ok: t("web.action.overrides.classLanguageUpdated") };
 }

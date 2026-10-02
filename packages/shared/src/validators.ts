@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { parseSeats } from "./two-person";
-import { usesEnglishCopy } from "./i18n/locales";
+import { createT, type TFunction } from "./i18n/translate";
 import type { LocaleCode as AppLocale } from "./api";
 import { isLanguageCode } from "./languages";
 import { isPricingCurrencySupported } from "./pricing-currency";
@@ -9,14 +9,16 @@ import { WISE_HANDLE_RE } from "./payout-instruments";
 // Each schema is a factory that takes the caller's locale so Zod's
 // per-field error messages render in the user's language. Defaults to
 // "en" matching the platform's i18n.ts default.
-type Loc = (es: string, en: string) => string;
-const t =
-  (locale: AppLocale): Loc =>
-  (es, en) =>
-    usesEnglishCopy(locale) ? en : es;
+//
+// The messages are catalog entries (`validation.*`). They used to be written
+// here as a Spanish string and an English one, chosen by a two-argument
+// helper — so every other language was shown the English, and nothing made a
+// new language notice it had no validation messages at all.
+type Loc = TFunction;
+const t = (locale: AppLocale): Loc => createT(locale);
 
 const hhmm = (loc: Loc) =>
-  z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/, loc("Formato HH:MM", "Use HH:MM format"));
+  z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/, loc("validation.timeFormat"));
 
 // Identity emails are normalized (trimmed + lowercased) at every input
 // boundary. Supabase lowercases auth emails and Postgres compares text
@@ -24,8 +26,7 @@ const hhmm = (loc: Loc) =>
 // student row the checkout dedupe can't find again and magic-link sign-in
 // can never link. The migration `normalize_student_emails` backfills rows
 // written before this rule existed.
-const emailField = (loc: Loc) =>
-  z.string().trim().toLowerCase().email(loc("Correo inválido", "Invalid email"));
+const emailField = (loc: Loc) => z.string().trim().toLowerCase().email(loc("email.invalid"));
 
 // Hoisted above every schema: the portal checkout schema below is a plain
 // top-level object rather than a factory, so it evaluates at module load and
@@ -50,7 +51,7 @@ export function isValidTimezone(tz: string): boolean {
 export const signUpSchema = (locale: AppLocale = "en") => {
   const loc = t(locale);
   return z.object({
-    name: z.string().trim().min(1, loc("Tu nombre es requerido", "Your name is required")).max(80),
+    name: z.string().trim().min(1, loc("myDetails.nameRequired")).max(80),
     email: emailField(loc),
   });
 };
@@ -76,7 +77,7 @@ const phoneField = (loc: Loc) =>
   z
     .string()
     .trim()
-    .regex(/^\+?\d{8,15}$/u, loc("Número de teléfono inválido", "Invalid phone number"));
+    .regex(/^\+?\d{8,15}$/u, loc("myDetails.whatsappInvalid"));
 
 export const phoneSignInSchema = (locale: AppLocale = "en") => {
   const loc = t(locale);
@@ -91,7 +92,7 @@ export const phoneCodeSchema = (locale: AppLocale = "en") => {
     code: z
       .string()
       .trim()
-      .regex(/^\d{4,10}$/u, loc("Código inválido", "Invalid code")),
+      .regex(/^\d{4,10}$/u, loc("validation.invalidCode")),
   });
 };
 export type PhoneCodeInput = z.infer<ReturnType<typeof phoneCodeSchema>>;
@@ -102,24 +103,24 @@ export const timezoneSchema = (locale: AppLocale = "en") => {
     timezone: z
       .string()
       .min(1)
-      .refine(isValidTimezone, { message: loc("Zona horaria inválida", "Invalid time zone") }),
+      .refine(isValidTimezone, { message: loc("validation.invalidTimezone") }),
     // Teacher-side contact phone, collected so the platform can reach
     // teachers for ops-side nudges. Required at onboarding.
     phoneE164: z
       .string({
-        required_error: loc("Tu teléfono es requerido", "Your phone is required"),
+        required_error: loc("validation.phoneRequired"),
       })
       .trim()
-      .min(1, loc("Tu teléfono es requerido", "Your phone is required"))
-      .regex(/^\+?\d{8,15}$/u, loc("Número de teléfono inválido", "Invalid phone number")),
+      .min(1, loc("validation.phoneRequired"))
+      .regex(/^\+?\d{8,15}$/u, loc("myDetails.whatsappInvalid")),
     // Teacher's country (ISO-3166-1 alpha-2). Required: it drives Stripe
     // Connect account creation, which is immutable after creation, and the
     // curated pricing-currency list.
     country: z
-      .string({ required_error: loc("País inválido", "Invalid country") })
+      .string({ required_error: loc("validation.invalidCountry") })
       .trim()
       .toUpperCase()
-      .regex(/^[A-Z]{2}$/u, loc("País inválido", "Invalid country")),
+      .regex(/^[A-Z]{2}$/u, loc("validation.invalidCountry")),
     // Teacher's pricing currency (ISO-4217), captured alongside country —
     // country decides which curated list (Connect-circle vs Wise-rail, see
     // @spiralclass/shared pricing-currency.ts) the picker offers. Optional at
@@ -130,7 +131,7 @@ export const timezoneSchema = (locale: AppLocale = "en") => {
       .string()
       .trim()
       .toUpperCase()
-      .refine(isPricingCurrencySupported, loc("Moneda inválida", "Invalid currency"))
+      .refine(isPricingCurrencySupported, loc("validation.invalidCurrency"))
       .optional(),
     // ISO-3166-1 alpha-2 hint for resolving a bare national-format phoneE164 —
     // picked independently next to the phone field. Deliberately NOT the same
@@ -162,7 +163,7 @@ export const timezoneSchema = (locale: AppLocale = "en") => {
     targetLanguage: z
       .string()
       .trim()
-      .refine(isLanguageCode, loc("Idioma desconocido", "Unknown language"))
+      .refine(isLanguageCode, loc("validation.unknownLanguage"))
       .optional(),
   });
 };
@@ -177,10 +178,7 @@ export const availabilityRangeSchema = (locale: AppLocale = "en") => {
       endTime: hhmm(loc),
     })
     .refine((r) => r.startTime < r.endTime, {
-      message: loc(
-        "La hora de fin debe ser posterior a la de inicio",
-        "End time must be after start time",
-      ),
+      message: loc("validation.endAfterStart"),
       path: ["endTime"],
     });
 };
@@ -193,7 +191,7 @@ export const availabilitySchema = (locale: AppLocale = "en") => {
     maxAdvanceDays: z.coerce.number().int().min(1).max(365),
     ranges: z
       .array(availabilityRangeSchema(locale))
-      .min(1, loc("Agrega al menos un horario", "Add at least one time slot"))
+      .min(1, loc("validation.addTimeSlot"))
       // Reject overlapping ranges on the same day. Two windows that touch at an
       // endpoint (09:00–10:00 and 10:00–11:00) are fine; genuine overlap
       // (09:00–11:00 and 10:00–12:00) would double-count the shared hour and is
@@ -217,10 +215,7 @@ export const availabilitySchema = (locale: AppLocale = "en") => {
               ctx.addIssue({
                 code: z.ZodIssueCode.custom,
                 path: [curr.index],
-                message: loc(
-                  "Este horario se encima con otro del mismo día",
-                  "This time range overlaps another on the same day",
-                ),
+                message: loc("validation.rangeOverlaps"),
               });
             }
           }
@@ -238,20 +233,17 @@ export const blockedDateSchema = (locale: AppLocale = "en") => {
   const loc = t(locale);
   return z
     .object({
-      startDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/u, loc("Fecha inválida", "Invalid date")),
-      endDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/u, loc("Fecha inválida", "Invalid date")),
+      startDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/u, loc("validation.invalidDate")),
+      endDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/u, loc("validation.invalidDate")),
       reason: z
         .string()
         .trim()
-        .max(120, loc("Motivo demasiado largo", "Reason too long"))
+        .max(120, loc("validation.reasonTooLong"))
         .optional()
         .or(z.literal("").transform(() => undefined)),
     })
     .refine((b) => b.startDate <= b.endDate, {
-      message: loc(
-        "La fecha final debe ser igual o posterior a la inicial",
-        "End date must be the same as or after the start date",
-      ),
+      message: loc("validation.endDateAfterStart"),
       path: ["endDate"],
     });
 };
@@ -371,7 +363,7 @@ const optionalPhoneInput = (loc: Loc) =>
     z
       .string()
       .trim()
-      .regex(/^\+?\d{8,15}$/u, loc("Número de teléfono inválido", "Invalid phone number"))
+      .regex(/^\+?\d{8,15}$/u, loc("myDetails.whatsappInvalid"))
       .optional()
       .or(z.literal("").transform(() => undefined)),
   );
@@ -393,11 +385,7 @@ export const checkoutIntentSchema = (locale: AppLocale = "en") => {
       (v) => (v == null || v === "" ? undefined : v),
       z.string().datetime().optional(),
     ),
-    studentName: z
-      .string()
-      .trim()
-      .min(1, loc("Tu nombre es requerido", "Your name is required"))
-      .max(80),
+    studentName: z.string().trim().min(1, loc("myDetails.nameRequired")).max(80),
     studentEmail: emailField(loc),
     studentPhone: optionalPhoneInput(loc),
     paymentMethod: z.enum(["stripe", "manual_transfer"]).default("stripe"),
@@ -450,7 +438,7 @@ export const leadCaptureSchema = (locale: AppLocale = "en") => {
   const loc = t(locale);
   return z.object({
     slug: z.string().min(1),
-    name: z.string().trim().min(1, loc("Tu nombre es requerido", "Your name is required")).max(80),
+    name: z.string().trim().min(1, loc("myDetails.nameRequired")).max(80),
     email: emailField(loc),
     phone: optionalPhoneInput(loc),
     // ISO-3166-1 alpha-2, picked next to the phone field — resolves a bare
@@ -466,7 +454,7 @@ export const leadCaptureSchema = (locale: AppLocale = "en") => {
     message: z
       .string()
       .trim()
-      .max(1000, loc("Máximo 1000 caracteres.", "Keep it under 1000 characters."))
+      .max(1000, loc("validation.under1000"))
       .optional()
       .transform((v) => (v ? v : undefined)),
     posthogSessionId: z
@@ -484,7 +472,7 @@ export type LeadCaptureInput = z.infer<ReturnType<typeof leadCaptureSchema>>;
 export const studentContactSchema = (locale: AppLocale = "en") => {
   const loc = t(locale);
   return z.object({
-    name: z.string().trim().min(1, loc("Tu nombre es requerido", "Your name is required")).max(80),
+    name: z.string().trim().min(1, loc("myDetails.nameRequired")).max(80),
     phone: optionalPhoneInput(loc),
     // ISO-3166-1 alpha-2, picked next to the phone field on the student's own
     // account page — a Student has no first-class country of its own, so this
@@ -497,7 +485,7 @@ export const studentContactSchema = (locale: AppLocale = "en") => {
     timezone: z
       .string()
       .max(64)
-      .refine(isValidTimezone, { message: loc("Zona horaria inválida", "Invalid time zone") })
+      .refine(isValidTimezone, { message: loc("validation.invalidTimezone") })
       .optional()
       .or(z.literal("").transform(() => undefined)),
   });
@@ -511,12 +499,12 @@ export type StudentContactInput = z.infer<ReturnType<typeof studentContactSchema
 export const teacherContactSchema = (locale: AppLocale = "en") => {
   const loc = t(locale);
   return z.object({
-    name: z.string().trim().min(1, loc("Tu nombre es requerido", "Your name is required")).max(80),
+    name: z.string().trim().min(1, loc("myDetails.nameRequired")).max(80),
     phone: optionalPhoneInput(loc),
     timezone: z
       .string()
       .max(64)
-      .refine(isValidTimezone, { message: loc("Zona horaria inválida", "Invalid time zone") })
+      .refine(isValidTimezone, { message: loc("validation.invalidTimezone") })
       .optional()
       .or(z.literal("").transform(() => undefined)),
     // ISO-3166-1 alpha-2, picked next to the phone field — independent of the
@@ -652,10 +640,7 @@ export const materialStyleSchema = (locale: AppLocale = "en") => {
           .string()
           .max(
             MATERIAL_LANGUAGE_VARIETY_MAX,
-            loc(
-              `Máximo ${MATERIAL_LANGUAGE_VARIETY_MAX} caracteres`,
-              `Maximum ${MATERIAL_LANGUAGE_VARIETY_MAX} characters`,
-            ),
+            loc("validation.maxChars", { max: MATERIAL_LANGUAGE_VARIETY_MAX }),
           )
           .nullable(),
       )
@@ -667,10 +652,7 @@ export const materialStyleSchema = (locale: AppLocale = "en") => {
           .string()
           .max(
             MATERIAL_CUSTOM_INSTRUCTIONS_MAX,
-            loc(
-              `Máximo ${MATERIAL_CUSTOM_INSTRUCTIONS_MAX} caracteres`,
-              `Maximum ${MATERIAL_CUSTOM_INSTRUCTIONS_MAX} characters`,
-            ),
+            loc("validation.maxChars", { max: MATERIAL_CUSTOM_INSTRUCTIONS_MAX }),
           )
           .nullable(),
       )
@@ -688,11 +670,11 @@ export const teacherEditStudentContactSchema = (locale: AppLocale = "en") => {
   const loc = t(locale);
   return z.object({
     studentId: z.string().uuid(),
-    name: z.string().trim().min(1, loc("El nombre es requerido", "The name is required")).max(80),
+    name: z.string().trim().min(1, loc("validation.nameRequired")).max(80),
     email: z
       .string()
       .trim()
-      .email(loc("Correo inválido", "Invalid email"))
+      .email(loc("email.invalid"))
       .max(254)
       .optional()
       .or(z.literal("").transform(() => undefined)),
@@ -718,12 +700,12 @@ export type TeacherEditStudentContactInput = z.infer<
 export const teacherCreateStudentSchema = (locale: AppLocale = "en") => {
   const loc = t(locale);
   return z.object({
-    name: z.string().trim().min(1, loc("El nombre es requerido", "The name is required")).max(80),
+    name: z.string().trim().min(1, loc("validation.nameRequired")).max(80),
     email: z
       .string()
       .trim()
       .toLowerCase()
-      .email(loc("Correo inválido", "Invalid email"))
+      .email(loc("email.invalid"))
       .max(254)
       .optional()
       .or(z.literal("").transform(() => undefined)),
@@ -781,10 +763,7 @@ export type PortalCheckoutIntentInput = z.infer<typeof portalCheckoutIntentSchem
 // `teacher_payout_instruments`.
 
 const accountHolderField = (loc: Loc) =>
-  z.preprocess(
-    emptyToUndef,
-    z.string().trim().max(120, loc("Nombre demasiado largo", "Name too long")).optional(),
-  );
+  z.preprocess(emptyToUndef, z.string().trim().max(120, loc("validation.nameTooLong")).optional());
 
 export const wiseInstrumentSchema = (locale: AppLocale = "en") => {
   const loc = t(locale);
@@ -793,23 +772,13 @@ export const wiseInstrumentSchema = (locale: AppLocale = "en") => {
       enabled: z.coerce.boolean().default(false),
       handle: z.preprocess(
         emptyToUndef,
-        z
-          .string()
-          .trim()
-          .regex(
-            WISE_HANDLE_RE,
-            loc("Wisetag inválido (2-32 caracteres)", "Invalid Wisetag (2-32 characters)"),
-          )
-          .optional(),
+        z.string().trim().regex(WISE_HANDLE_RE, loc("validation.invalidWisetag")).optional(),
       ),
       accountHolder: accountHolderField(loc),
-      email: z.preprocess(
-        emptyToUndef,
-        z.string().trim().email(loc("Correo inválido", "Invalid email")).optional(),
-      ),
+      email: z.preprocess(emptyToUndef, z.string().trim().email(loc("email.invalid")).optional()),
     })
     .refine((v) => !v.enabled || Boolean(v.handle), {
-      message: loc("Necesitas un Wisetag para activar Wise.", "You need a Wisetag to enable Wise."),
+      message: loc("validation.wisetagRequired"),
       path: ["handle"],
     });
 };
@@ -826,11 +795,11 @@ export const paymentSelectionSchema = (locale: AppLocale = "en") => {
       instrumentId: z.preprocess(nullishToUndef, z.string().uuid().optional()),
     })
     .refine((v) => v.paymentMethod !== "manual_transfer" || Boolean(v.instrumentId), {
-      message: loc("Elige un método de transferencia.", "Choose a transfer method."),
+      message: loc("validation.chooseTransferMethod"),
       path: ["instrumentId"],
     })
     .refine((v) => v.paymentMethod !== "stripe" || !v.instrumentId, {
-      message: loc("Selección de pago inválida.", "Invalid payment selection."),
+      message: loc("validation.invalidPaymentSelection"),
       path: ["instrumentId"],
     });
 };
@@ -845,7 +814,7 @@ export const transferConfirmSchema = (locale: AppLocale = "en") => {
     note: z
       .string()
       .trim()
-      .max(200, loc("Nota demasiado larga", "Note too long"))
+      .max(200, loc("validation.noteTooLong"))
       .optional()
       .or(z.literal("").transform(() => undefined)),
   });
@@ -862,7 +831,7 @@ export const singleInviteSchema = (locale: AppLocale = "en") => {
     name: z
       .string()
       .trim()
-      .max(80, loc("Nombre demasiado largo", "Name too long"))
+      .max(80, loc("validation.nameTooLong"))
       .optional()
       .or(z.literal("").transform(() => undefined)),
   });
@@ -879,7 +848,7 @@ export const bulkInviteSchema = (locale: AppLocale = "en") => {
     .object({
       list: z
         .string()
-        .max(50_000, loc("La lista es demasiado larga", "The list is too long"))
+        .max(50_000, loc("validation.listTooLong"))
         .optional()
         .or(z.literal("").transform(() => undefined)),
       studentIds: z.array(z.string().uuid()).max(500).optional(),
@@ -887,7 +856,7 @@ export const bulkInviteSchema = (locale: AppLocale = "en") => {
     .refine(
       (v) => (v.list && v.list.trim().length > 0) || (v.studentIds && v.studentIds.length > 0),
       {
-        message: loc("Agrega al menos un alumno.", "Add at least one student."),
+        message: loc("validation.addStudent"),
         path: ["list"],
       },
     );

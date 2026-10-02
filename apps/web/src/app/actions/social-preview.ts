@@ -1,5 +1,6 @@
 "use server";
 
+import type { TFunction } from "@spiralclass/shared";
 import { z } from "zod";
 import {
   isSocialPreviewAngle,
@@ -7,7 +8,7 @@ import {
   SOCIAL_PREVIEW_CAPTION_MAX_CHARS,
   SOCIAL_PREVIEW_TOPIC_MAX_CHARS,
   type SocialPreviewAngle,
-  usesEnglishCopy,
+  createT,
 } from "@spiralclass/shared";
 import { requireOnboardedTeacher } from "@/lib/auth";
 import { trackServerEvent } from "@/lib/analytics/posthog";
@@ -46,49 +47,37 @@ function revalidate() {
 
 // One table, so no two callers can describe the same failure differently.
 // Keyed by the reason unions the domain returns.
-function generateErrorMessage(reason: string, en: boolean, cap?: number): string {
+function generateErrorMessage(reason: string, t: TFunction, cap?: number): string {
   switch (reason) {
     case "not-configured":
-      return en
-        ? "AI image generation isn't available right now. You can still upload your own image."
-        : "La generación de imágenes con IA no está disponible ahora. Aún puedes subir tu propia imagen.";
+      return t("web.action.socialPreview.aiUnavailable");
     case "throttled":
-      return en
-        ? "You're generating too quickly — wait a few minutes and try again."
-        : "Estás generando demasiado rápido — espera unos minutos e inténtalo de nuevo.";
+      return t("web.action.socialPreview.tooFast");
     case "cap": {
       // The cap is always known when the domain returns "cap"; the fallback is
       // only so the message never reads "your undefined images".
       const limit = cap ?? SOCIAL_PREVIEW_AI_FREE_MONTHLY_ALLOWANCE;
-      return en
-        ? `You've used all ${limit} of this month's AI images. You can still upload your own.`
-        : `Ya usaste las ${limit} imágenes con IA de este mes. Aún puedes subir las tuyas.`;
+      return t("web.action.socialPreview.quotaUsed", { limit });
     }
     case "blocked":
-      return en
-        ? "The image service wouldn't make that one. Try describing it differently."
-        : "El servicio de imágenes no pudo crear esa. Intenta describirla de otra forma.";
+      return t("web.action.socialPreview.refused");
     case "timeout":
-      return en
-        ? "That took too long. Try again — nothing was used up."
-        : "Tardó demasiado. Inténtalo de nuevo — no se usó nada.";
+      return t("web.action.socialPreview.timedOut");
     default:
-      return en
-        ? "We couldn't create the image. Try again — nothing was used up."
-        : "No pudimos crear la imagen. Inténtalo de nuevo — no se usó nada.";
+      return t("web.action.socialPreview.createFailed");
   }
 }
 
-function uploadErrorMessage(reason: string, en: boolean): string {
+function uploadErrorMessage(reason: string, t: TFunction): string {
   switch (reason) {
     case "type":
-      return en ? "Choose a JPG, PNG or WebP image." : "Elige una imagen JPG, PNG o WebP.";
+      return t("web.action.socialPreview.chooseType");
     case "empty":
-      return en ? "That image is empty." : "Esa imagen está vacía.";
+      return t("web.action.socialPreview.empty");
     case "too-large":
-      return en ? "The image can't be larger than 5 MB." : "La imagen no puede pesar más de 5 MB.";
+      return t("web.action.socialPreview.tooLarge");
     default:
-      return en ? "We couldn't upload that image." : "No pudimos subir esa imagen.";
+      return t("material.editor.block.imageUploadFailed");
   }
 }
 
@@ -107,14 +96,14 @@ export async function generateSocialPreview(
   _prev: SocialPreviewState,
   formData: FormData,
 ): Promise<SocialPreviewState> {
-  const en = usesEnglishCopy(await getPreferredLocale());
+  const t = createT(await getPreferredLocale());
   const parsed = generateSchema.safeParse({
     angle: formData.get("angle"),
     topic: formData.get("topic") ?? undefined,
     communityId: formData.get("communityId") ?? undefined,
   });
   if (!parsed.success) {
-    return { error: en ? "Pick a style for the image." : "Elige un estilo para la imagen." };
+    return { error: t("web.action.socialPreview.pickStyle") };
   }
 
   const teacher = await requireOnboardedTeacher();
@@ -145,7 +134,7 @@ export async function generateSocialPreview(
   });
 
   if (!result.ok) {
-    return { error: generateErrorMessage(result.reason, en, result.quota?.cap) };
+    return { error: generateErrorMessage(result.reason, t, result.quota?.cap) };
   }
 
   revalidate();
@@ -158,15 +147,15 @@ export async function uploadSocialPreview(
   _prev: SocialPreviewState,
   formData: FormData,
 ): Promise<SocialPreviewState> {
-  const en = usesEnglishCopy(await getPreferredLocale());
+  const t = createT(await getPreferredLocale());
   const file = formData.get("file");
   if (!(file instanceof File)) {
-    return { error: en ? "Choose an image to upload." : "Elige una imagen para subir." };
+    return { error: t("web.action.socialPreview.chooseUpload") };
   }
 
   const teacher = await requireOnboardedTeacher();
   const result = await uploadSocialPreviewImage({ teacherId: teacher.id, file });
-  if (!result.ok) return { error: uploadErrorMessage(result.reason, en) };
+  if (!result.ok) return { error: uploadErrorMessage(result.reason, t) };
 
   revalidate();
   return { ok: true, imageId: result.image.id };
@@ -189,14 +178,14 @@ export async function useSocialPreview(
   _prev: SocialPreviewState,
   formData: FormData,
 ): Promise<SocialPreviewState> {
-  const en = usesEnglishCopy(await getPreferredLocale());
+  const t = createT(await getPreferredLocale());
   const parsed = selectSchema.safeParse({
     imageId: formData.get("imageId"),
     shareGroupId: formData.get("shareGroupId") ?? "",
     caption: formData.get("caption") ?? undefined,
   });
   if (!parsed.success) {
-    return { error: en ? "We couldn't use that image." : "No pudimos usar esa imagen." };
+    return { error: t("web.action.socialPreview.unusable") };
   }
 
   const teacher = await requireOnboardedTeacher();
@@ -210,7 +199,7 @@ export async function useSocialPreview(
   if (!result.ok) {
     // Both reasons mean "not yours or gone"; they are never distinguished for
     // the caller, so one teacher can't probe another's ids.
-    return { error: en ? "We couldn't find that image." : "No encontramos esa imagen." };
+    return { error: t("web.action.socialPreview.imageNotFound") };
   }
 
   trackServerEvent({
@@ -236,16 +225,16 @@ export async function removeSocialPreview(
   _prev: SocialPreviewState,
   formData: FormData,
 ): Promise<SocialPreviewState> {
-  const en = usesEnglishCopy(await getPreferredLocale());
+  const t = createT(await getPreferredLocale());
   const parsed = clearSchema.safeParse({ previewId: formData.get("previewId") });
   if (!parsed.success) {
-    return { error: en ? "We couldn't reset that preview." : "No pudimos restablecer esa vista." };
+    return { error: t("web.action.socialPreview.resetFailed") };
   }
 
   const teacher = await requireOnboardedTeacher();
   const ok = await clearSocialPreview(teacher.id, parsed.data.previewId);
   if (!ok) {
-    return { error: en ? "We couldn't find that preview." : "No encontramos esa vista." };
+    return { error: t("web.action.socialPreview.previewNotFound") };
   }
 
   revalidate();
@@ -264,13 +253,13 @@ export async function renameSocialPreviewImageAction(
   _prev: SocialPreviewState,
   formData: FormData,
 ): Promise<SocialPreviewState> {
-  const en = usesEnglishCopy(await getPreferredLocale());
+  const t = createT(await getPreferredLocale());
   const parsed = renameSchema.safeParse({
     imageId: formData.get("imageId"),
     topic: formData.get("topic") ?? "",
   });
   if (!parsed.success) {
-    return { error: en ? "We couldn't rename that image." : "No pudimos renombrar esa imagen." };
+    return { error: t("web.action.socialPreview.renameFailed") };
   }
 
   const teacher = await requireOnboardedTeacher();
@@ -280,7 +269,7 @@ export async function renameSocialPreviewImageAction(
     topic: parsed.data.topic,
   });
   if (!ok) {
-    return { error: en ? "We couldn't find that image." : "No encontramos esa imagen." };
+    return { error: t("web.action.socialPreview.imageNotFound") };
   }
 
   revalidate();
@@ -301,10 +290,10 @@ export async function deleteSocialPreviewImageAction(
   _prev: SocialPreviewState,
   formData: FormData,
 ): Promise<SocialPreviewState> {
-  const en = usesEnglishCopy(await getPreferredLocale());
+  const t = createT(await getPreferredLocale());
   const parsed = deleteSchema.safeParse({ imageId: formData.get("imageId") });
   if (!parsed.success) {
-    return { error: en ? "We couldn't delete that image." : "No pudimos borrar esa imagen." };
+    return { error: t("web.action.socialPreview.deleteFailed") };
   }
 
   const teacher = await requireOnboardedTeacher();
@@ -316,12 +305,10 @@ export async function deleteSocialPreviewImageAction(
   if (!result.ok) {
     if (result.reason === "posted") {
       return {
-        error: en
-          ? "This image is part of a post you already marked as done, so it stays."
-          : "Esta imagen es parte de una publicación que ya marcaste como hecha, así que se queda.",
+        error: t("web.action.socialPreview.partOfDonePost"),
       };
     }
-    return { error: en ? "We couldn't find that image." : "No encontramos esa imagen." };
+    return { error: t("web.action.socialPreview.imageNotFound") };
   }
 
   trackServerEvent({

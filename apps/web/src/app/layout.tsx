@@ -14,7 +14,7 @@ import { InstallPromptCapture } from "@/components/pwa/install-prompt-capture";
 import { CallSessionProvider } from "@/lib/video/call-session-context";
 import { CallSessionOverlay } from "@/components/video/call-session-overlay";
 import { getPreferredLocale, getT } from "@/lib/i18n";
-import { LOCALES, type AppLocale } from "@spiralclass/shared";
+import { LOCALES, localeDirection, ogLocale } from "@spiralclass/shared";
 import { readingStyle } from "@/lib/reading";
 import { getReadingPreferences } from "@/lib/reading-server";
 import "./globals.css";
@@ -48,15 +48,6 @@ const mono = JetBrains_Mono({
 
 const APP_URL = process.env.APP_URL ?? "https://spiralclass.com";
 
-// Open Graph wants region-qualified locale tags (`en_US`, not bare `en`),
-// which don't always match `LOCALES[].languageCode` — keyed separately so a
-// new `LOCALES` entry forces a deliberate OG tag choice here too.
-const OG_LOCALE: Record<AppLocale, string> = {
-  es: "es_LA",
-  en: "en_US",
-  fr: "fr_FR",
-};
-
 // Metadata follows the request locale so the meta description / og:locale
 // always match the language the page body actually renders in. Crawlers send
 // no locale cookie and resolve to the default (en) — a static Spanish
@@ -75,10 +66,10 @@ export async function generateMetadata(): Promise<Metadata> {
     openGraph: {
       type: "website",
       siteName: "SpiralClass",
-      locale: OG_LOCALE[locale],
-      alternateLocale: LOCALES.map((l) => l.tag)
-        .filter((tag) => tag !== locale)
-        .map((tag) => OG_LOCALE[tag as AppLocale]),
+      // The Open Graph tag is the registry row's `og`: region-qualified, so
+      // it cannot be derived from the locale tag.
+      locale: ogLocale(locale),
+      alternateLocale: LOCALES.filter((l) => l.tag !== locale).map((l) => l.og),
     },
     twitter: { card: "summary_large_image" },
   };
@@ -102,6 +93,7 @@ export default async function RootLayout({
   return (
     <html
       lang={locale}
+      dir={localeDirection(locale)}
       suppressHydrationWarning
       className={`${sans.variable} ${mono.variable}`}
       // Applied on the server so the first paint is already at the reader's

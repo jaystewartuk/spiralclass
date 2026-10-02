@@ -1,27 +1,23 @@
-import type { ManualPackageFieldErrorCode } from "@spiralclass/shared";
+import type { ManualPackageFieldErrorCode, TFunction } from "@spiralclass/shared";
 
 // Maps validateManualPackageFields' error codes to the localized copy shown
 // under the field. Shared between AddPackageForm and EditPackageForm so the
 // two forms' wording can't drift apart.
 export function packageFieldMessage(
   code: ManualPackageFieldErrorCode | undefined,
-  en: boolean,
+  t: TFunction,
   maxRemaining?: number,
 ): string | undefined {
   switch (code) {
     case "required":
-      return en ? "Required" : "Requerido";
+      return t("web.dashboard.classes.focusAreas.required");
     case "invalid-number":
-      return en ? "Enter a valid number" : "Ingresa un número válido";
+      return t("web.action.packageField.invalidNumber");
     case "remaining-gt-total":
-      return en
-        ? "Classes left can't exceed the total."
-        : "Las clases restantes no pueden superar el total.";
+      return t("web.action.packageField.exceedsTotal");
     case "remaining-gt-max": {
       const max = Math.max(maxRemaining ?? 0, 0);
-      return en
-        ? `Classes left can be at most ${max} for this package.`
-        : `Las clases restantes pueden ser como máximo ${max} para este paquete.`;
+      return t("web.action.packageField.atMost", { max });
     }
     default:
       return undefined;

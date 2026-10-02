@@ -1,4 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
+import { createT } from "@spiralclass/shared";
 
 // Mock the storage provider so file uploads don't hit a real backend. The
 // link / size / missing-attachment paths never call the provider.
@@ -23,7 +24,7 @@ describe("resolveMaterialAttachment", () => {
       file: null,
       linkUrl: "  https://example.com/x.pdf  ",
       pathPrefix: "t1/library",
-      en: true,
+      t: createT("en"),
     });
     expect(res).toEqual({ ok: { kind: "link", linkUrl: "https://example.com/x.pdf" } });
     expect(upload).not.toHaveBeenCalled();
@@ -34,9 +35,26 @@ describe("resolveMaterialAttachment", () => {
       file: null,
       linkUrl: "not-a-url",
       pathPrefix: "t1/library",
-      en: true,
+      t: createT("en"),
     });
     expect("error" in res).toBe(true);
+  });
+
+  // The link schema's message was a Spanish literal, so an English or French
+  // teacher who pasted a bad link was told so in Spanish. It is a catalog key
+  // now, turned into the reader's own words.
+  it.each([
+    ["en", "Invalid URL"],
+    ["es", "URL inválida"],
+    ["fr", "URL invalide"],
+  ] as const)("rejects an invalid link in %s", async (locale, copy) => {
+    const res = await resolveMaterialAttachment({
+      file: null,
+      linkUrl: "not-a-url",
+      pathPrefix: "t1/library",
+      t: createT(locale),
+    });
+    expect(res).toEqual({ error: copy });
   });
 
   it("errors when neither file nor link is provided", async () => {
@@ -44,7 +62,7 @@ describe("resolveMaterialAttachment", () => {
       file: null,
       linkUrl: "",
       pathPrefix: "t1/library",
-      en: true,
+      t: createT("en"),
     });
     expect("error" in res).toBe(true);
   });
@@ -55,7 +73,7 @@ describe("resolveMaterialAttachment", () => {
       file: big,
       linkUrl: "",
       pathPrefix: "t1/library",
-      en: true,
+      t: createT("en"),
     });
     expect("error" in res).toBe(true);
     expect(upload).not.toHaveBeenCalled();
@@ -67,7 +85,7 @@ describe("resolveMaterialAttachment", () => {
       file: small,
       linkUrl: "",
       pathPrefix: "teacher-1/library",
-      en: true,
+      t: createT("en"),
     });
     expect("ok" in res).toBe(true);
     if ("ok" in res && res.ok.kind === "file") {

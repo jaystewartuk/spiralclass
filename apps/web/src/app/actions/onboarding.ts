@@ -1,5 +1,7 @@
 "use server";
 
+import { issueMessage } from "@spiralclass/shared";
+import { intlLocale, weekdayLabels } from "@spiralclass/shared";
 import { redirect } from "next/navigation";
 import type { ZodError } from "zod";
 import {
@@ -11,7 +13,6 @@ import {
   MAX_TWO_PERSON_PRICE_PERCENT,
   MIN_TWO_PERSON_PRICE_PERCENT,
   type StringKey,
-  usesEnglishCopy,
 } from "@spiralclass/shared";
 import { prisma } from "@/lib/prisma";
 import { requireTeacher } from "@/lib/auth";
@@ -66,22 +67,15 @@ export type SavedTemplate = {
   expirationMonths: number | null;
 };
 
-// Mon-first labels, keyed by weekday value (0 = Sunday .. 6 = Saturday), used
-// to prefix a range-level availability error with the day it belongs to.
-const WEEKDAY_LABELS: Record<number, { es: string; en: string }> = {
-  1: { es: "Lunes", en: "Monday" },
-  2: { es: "Martes", en: "Tuesday" },
-  3: { es: "Miércoles", en: "Wednesday" },
-  4: { es: "Jueves", en: "Thursday" },
-  5: { es: "Viernes", en: "Friday" },
-  6: { es: "Sábado", en: "Saturday" },
-  0: { es: "Domingo", en: "Sunday" },
-};
-
-function weekdayLabel(weekday: number, en: boolean): string | undefined {
-  const label = WEEKDAY_LABELS[weekday];
-  if (!label) return undefined;
-  return en ? label.en : label.es;
+// The name of a weekday (0 = Sunday .. 6 = Saturday), used to prefix a
+// range-level availability error with the day it belongs to. From Intl, by
+// way of the shared helper: seven names per language is something the
+// platform already knows, and this was a table holding two languages of it.
+function weekdayLabel(weekday: number, locale: AppLocale): string | undefined {
+  const name = weekdayLabels(locale, "long")[weekday];
+  // Intl gives Spanish and French day names in lower case; this one starts
+  // a sentence.
+  return name ? name.charAt(0).toLocaleUpperCase(intlLocale(locale)) + name.slice(1) : undefined;
 }
 
 export async function saveTimezoneAction(
@@ -90,7 +84,7 @@ export async function saveTimezoneAction(
 ): Promise<OnboardingState> {
   const teacher = await requireTeacher();
   const locale = await getPreferredLocale();
-  const en = usesEnglishCopy(locale);
+  const t = createT(locale);
   const parsed = timezoneSchema(locale).safeParse({
     timezone: formData.get("timezone"),
     phoneE164: formData.get("phoneE164"),
@@ -104,7 +98,7 @@ export async function saveTimezoneAction(
   });
   if (!parsed.success) {
     return {
-      error: parsed.error.issues[0]?.message ?? (en ? "Invalid data" : "Datos inválidos"),
+      error: issueMessage(parsed.error, t, "web.action.invalidData"),
     };
   }
   // Required on web, where there is no such thing as a stale client — the
@@ -113,7 +107,7 @@ export async function saveTimezoneAction(
   // shipped builds can predate the field (D-112, and the schema comment).
   if (!parsed.data.targetLanguage) {
     return {
-      error: en ? "Pick the language you teach." : "Elige el idioma que enseñas.",
+      error: t("web.onboarding.timezone.targetLanguageRequired"),
     };
   }
   // Stripe fixes a connected account's country permanently at creation
@@ -123,9 +117,7 @@ export async function saveTimezoneAction(
   // payout circle. This route is the only place `country` is ever written.
   if (teacher.stripeAccountId && parsed.data.country && parsed.data.country !== teacher.country) {
     return {
-      error: en
-        ? "You can't change your country after connecting Stripe. Disconnect Stripe first if you need to."
-        : "No puedes cambiar tu país después de conectar Stripe. Desconecta Stripe primero si lo necesitas.",
+      error: t("web.action.onboarding.countryLocked"),
     };
   }
   // The phone's country is picked independently of the payout `country`
@@ -220,7 +212,7 @@ export async function saveAvailabilityAction(
 ): Promise<OnboardingState> {
   const teacher = await requireTeacher();
   const locale = await getPreferredLocale();
-  const en = usesEnglishCopy(locale);
+  const t = createT(locale);
 
   // Ranges come as parallel arrays: ranges[i][weekday], ranges[i][startTime], ranges[i][endTime].
   const weekdays = formData.getAll("range_weekday") as string[];
@@ -248,8 +240,10 @@ export async function saveAvailabilityAction(
     const rangeIndex =
       field === "ranges" && typeof issue?.path[1] === "number" ? issue.path[1] : undefined;
     const dayLabel =
-      rangeIndex !== undefined ? weekdayLabel(Number(ranges[rangeIndex]?.weekday), en) : undefined;
-    const baseMessage = issue?.message ?? (en ? "Invalid schedule" : "Horario inválido");
+      rangeIndex !== undefined
+        ? weekdayLabel(Number(ranges[rangeIndex]?.weekday), locale)
+        : undefined;
+    const baseMessage = issue?.message ?? t("web.action.onboarding.invalidSchedule");
     return {
       error: dayLabel ? `${dayLabel}: ${baseMessage}` : baseMessage,
       field,

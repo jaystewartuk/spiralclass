@@ -1,5 +1,6 @@
 "use server";
 
+import { issueMessage, type TFunction } from "@spiralclass/shared";
 import { Prisma } from "@prisma/client";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
@@ -7,7 +8,7 @@ import { requireAdmin } from "@/lib/admin";
 import { writeOverride } from "@/lib/audit";
 import { getPreferredLocale } from "@/lib/i18n";
 import {
-  usesEnglishCopy,
+  createT,
   INTEGRATION_CATEGORIES,
   USAGE_METRICS,
   pricingModelSchema,
@@ -31,11 +32,11 @@ const currencySchema = z
   .string()
   .trim()
   .toUpperCase()
-  .regex(/^[A-Z]{3}$/, "Moneda inválida");
+  .regex(/^[A-Z]{3}$/, "web.action.admin.invalidCurrency");
 
 const periodMonthSchema = z
   .string()
-  .regex(/^\d{4}-\d{2}$/, "Mes inválido")
+  .regex(/^\d{4}-\d{2}$/, "web.action.admin.invalidMonth")
   .transform((v) => new Date(`${v}-01T00:00:00.000Z`));
 
 function optionalText(max: number) {
@@ -56,7 +57,7 @@ const baseIntegrationSchema = z.object({
     .toLowerCase()
     .min(1)
     .max(64)
-    .regex(/^[a-z0-9_]+$/, "Usa minúsculas, números y guiones bajos"),
+    .regex(/^[a-z0-9_]+$/, "web.action.admin.keyFormat"),
   name: z.string().trim().min(1).max(120),
   category: z.enum(INTEGRATION_CATEGORIES),
   currency: currencySchema,
@@ -89,7 +90,7 @@ function readIntegrationFields(formData: FormData) {
 // the same shape as a Zod field error so the form can render one error slot.
 function parsePricingModelField(
   raw: string,
-  en: boolean,
+  t: TFunction,
 ): { ok: true; value: Prisma.InputJsonValue } | { ok: false; error: string } {
   let json: unknown;
   try {
@@ -97,16 +98,16 @@ function parsePricingModelField(
   } catch {
     return {
       ok: false,
-      error: en ? "Invalid pricing model JSON" : "JSON de modelo de precios inválido",
+      error: t("web.admin.economics.integrations.pricingModelInvalid"),
     };
   }
   const parsed = pricingModelSchema.safeParse(json);
   if (!parsed.success) {
     return {
       ok: false,
-      error: en
-        ? `Invalid pricing model: ${parsed.error.issues[0]?.message ?? "schema mismatch"}`
-        : `Modelo de precios inválido: ${parsed.error.issues[0]?.message ?? "no coincide con el esquema"}`,
+      error: t("web.action.admin.pricingModelInvalidDetail", {
+        detail: issueMessage(parsed.error, t, "web.action.admin.schemaMismatch"),
+      }),
     };
   }
   return { ok: true, value: parsed.data as Prisma.InputJsonValue };
@@ -118,12 +119,12 @@ export async function createIntegrationAction(
 ): Promise<AdminEconomicsActionState> {
   const actor = await requireAdmin("finance");
   const locale = await getPreferredLocale();
-  const en = usesEnglishCopy(locale);
+  const t = createT(locale);
   const parsed = baseIntegrationSchema.safeParse(readIntegrationFields(formData));
   if (!parsed.success) {
-    return { error: parsed.error.issues[0]?.message ?? (en ? "Invalid data" : "Datos inválidos") };
+    return { error: issueMessage(parsed.error, t, "web.action.invalidData") };
   }
-  const pricingModel = parsePricingModelField(parsed.data.pricingModelJson, en);
+  const pricingModel = parsePricingModelField(parsed.data.pricingModelJson, t);
   if (!pricingModel.ok) return { error: pricingModel.error };
 
   const { _max } = await prisma.integration.aggregate({ _max: { sortOrder: true } });
@@ -155,7 +156,7 @@ export async function createIntegrationAction(
     });
   } catch (err) {
     if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === "P2002") {
-      return { error: en ? "That key is already in use" : "Esa clave ya está en uso" };
+      return { error: t("web.admin.economics.integrations.keyInUse") };
     }
     throw err;
   }
@@ -172,20 +173,20 @@ export async function updateIntegrationAction(
 ): Promise<AdminEconomicsActionState> {
   const actor = await requireAdmin("finance");
   const locale = await getPreferredLocale();
-  const en = usesEnglishCopy(locale);
+  const t = createT(locale);
   const parsed = updateIntegrationSchema.safeParse({
     id: formData.get("id"),
     ...readIntegrationFields(formData),
   });
   if (!parsed.success) {
-    return { error: parsed.error.issues[0]?.message ?? (en ? "Invalid data" : "Datos inválidos") };
+    return { error: issueMessage(parsed.error, t, "web.action.invalidData") };
   }
-  const pricingModel = parsePricingModelField(parsed.data.pricingModelJson, en);
+  const pricingModel = parsePricingModelField(parsed.data.pricingModelJson, t);
   if (!pricingModel.ok) return { error: pricingModel.error };
 
   const existing = await prisma.integration.findUnique({ where: { id: parsed.data.id } });
   if (!existing) {
-    return { error: en ? "Integration not found" : "Integración no encontrada" };
+    return { error: t("web.action.admin.integrationNotFound") };
   }
 
   try {
@@ -206,7 +207,7 @@ export async function updateIntegrationAction(
     });
   } catch (err) {
     if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === "P2002") {
-      return { error: en ? "That key is already in use" : "Esa clave ya está en uso" };
+      return { error: t("web.admin.economics.integrations.keyInUse") };
     }
     throw err;
   }
@@ -237,15 +238,15 @@ export async function toggleIntegrationActiveAction(
 ): Promise<AdminEconomicsActionState> {
   const actor = await requireAdmin("finance");
   const locale = await getPreferredLocale();
-  const en = usesEnglishCopy(locale);
+  const t = createT(locale);
   const parsed = toggleIntegrationActiveSchema.safeParse({
     id: formData.get("id"),
     active: formData.get("active"),
   });
-  if (!parsed.success) return { error: en ? "Invalid data" : "Datos inválidos" };
+  if (!parsed.success) return { error: t("web.action.invalidData") };
 
   const existing = await prisma.integration.findUnique({ where: { id: parsed.data.id } });
-  if (!existing) return { error: en ? "Integration not found" : "Integración no encontrada" };
+  if (!existing) return { error: t("web.action.admin.integrationNotFound") };
 
   await prisma.integration.update({
     where: { id: parsed.data.id },
@@ -274,12 +275,12 @@ export async function deleteIntegrationAction(
 ): Promise<AdminEconomicsActionState> {
   const actor = await requireAdmin("finance");
   const locale = await getPreferredLocale();
-  const en = usesEnglishCopy(locale);
+  const t = createT(locale);
   const parsed = deleteIntegrationSchema.safeParse({ id: formData.get("id") });
-  if (!parsed.success) return { error: en ? "Invalid data" : "Datos inválidos" };
+  if (!parsed.success) return { error: t("web.action.invalidData") };
 
   const existing = await prisma.integration.findUnique({ where: { id: parsed.data.id } });
-  if (!existing) return { error: en ? "Integration not found" : "Integración no encontrada" };
+  if (!existing) return { error: t("web.action.admin.integrationNotFound") };
 
   await prisma.integration.delete({ where: { id: parsed.data.id } });
   await writeOverride({
@@ -311,7 +312,7 @@ export async function upsertUsageInputAction(
 ): Promise<AdminEconomicsActionState> {
   const actor = await requireAdmin("finance");
   const locale = await getPreferredLocale();
-  const en = usesEnglishCopy(locale);
+  const t = createT(locale);
   const parsed = usageInputSchema.safeParse({
     metric: formData.get("metric"),
     periodMonth: formData.get("periodMonth"),
@@ -319,7 +320,7 @@ export async function upsertUsageInputAction(
     notes: formData.get("notes") || undefined,
   });
   if (!parsed.success) {
-    return { error: parsed.error.issues[0]?.message ?? (en ? "Invalid data" : "Datos inválidos") };
+    return { error: issueMessage(parsed.error, t, "web.action.invalidData") };
   }
 
   const row = await prisma.usageInput.upsert({
@@ -364,12 +365,12 @@ export async function deleteUsageInputAction(
 ): Promise<AdminEconomicsActionState> {
   const actor = await requireAdmin("finance");
   const locale = await getPreferredLocale();
-  const en = usesEnglishCopy(locale);
+  const t = createT(locale);
   const parsed = deleteUsageInputSchema.safeParse({ id: formData.get("id") });
-  if (!parsed.success) return { error: en ? "Invalid data" : "Datos inválidos" };
+  if (!parsed.success) return { error: t("web.action.invalidData") };
 
   const existing = await prisma.usageInput.findUnique({ where: { id: parsed.data.id } });
-  if (!existing) return { error: en ? "Usage entry not found" : "Registro de uso no encontrado" };
+  if (!existing) return { error: t("web.action.admin.usageEntryNotFound") };
 
   await prisma.usageInput.delete({ where: { id: parsed.data.id } });
   await writeOverride({
@@ -395,7 +396,7 @@ const assumptionsSchema = z.object({
   allocationBasis: z.enum(["active_teachers", "lessons", "even"]),
   fxAsOf: z
     .string()
-    .regex(/^\d{4}-\d{2}-\d{2}$/, "Fecha inválida")
+    .regex(/^\d{4}-\d{2}-\d{2}$/, "web.action.admin.invalidDate")
     .transform((v) => new Date(`${v}T00:00:00.000Z`)),
 });
 
@@ -405,7 +406,7 @@ export async function updateAssumptionsAction(
 ): Promise<AdminEconomicsActionState> {
   const actor = await requireAdmin("finance");
   const locale = await getPreferredLocale();
-  const en = usesEnglishCopy(locale);
+  const t = createT(locale);
   const parsed = assumptionsSchema.safeParse({
     fxUsdToGbp: formData.get("fxUsdToGbp"),
     fxMxnToGbp: formData.get("fxMxnToGbp"),
@@ -414,7 +415,7 @@ export async function updateAssumptionsAction(
     fxAsOf: formData.get("fxAsOf"),
   });
   if (!parsed.success) {
-    return { error: parsed.error.issues[0]?.message ?? (en ? "Invalid data" : "Datos inválidos") };
+    return { error: issueMessage(parsed.error, t, "web.action.invalidData") };
   }
 
   const before = await prisma.economicsAssumptions.findUnique({ where: { id: "default" } });

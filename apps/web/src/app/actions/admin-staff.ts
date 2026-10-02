@@ -1,11 +1,12 @@
 "use server";
 
+import { issueMessage } from "@spiralclass/shared";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { isBootstrapActor, requireAdmin } from "@/lib/admin";
 import { getPreferredLocale } from "@/lib/i18n";
 import { revalidateAfterAction } from "@/lib/revalidate";
-import { usesEnglishCopy } from "@spiralclass/shared";
+import { createT } from "@spiralclass/shared";
 
 export type AdminStaffActionState = { error?: string; ok?: boolean } | undefined;
 
@@ -21,7 +22,7 @@ async function isLastActiveSuperadmin(adminId: string): Promise<boolean> {
 }
 
 const inviteSchema = z.object({
-  email: z.string().trim().email("Email inválido").toLowerCase(),
+  email: z.string().trim().email("email.invalid").toLowerCase(),
   role: z.enum(["superadmin", "finance", "support", "tester", "engineer"]),
 });
 
@@ -31,14 +32,14 @@ export async function inviteAdminAction(
 ): Promise<AdminStaffActionState> {
   const actor = await requireAdmin("superadmin");
   const locale = await getPreferredLocale();
-  const en = usesEnglishCopy(locale);
+  const t = createT(locale);
   const parsed = inviteSchema.safeParse({
     email: formData.get("email"),
     role: formData.get("role"),
   });
   if (!parsed.success) {
     return {
-      error: parsed.error.issues[0]?.message ?? (en ? "Invalid data" : "Datos inválidos"),
+      error: issueMessage(parsed.error, t, "web.action.invalidData"),
     };
   }
 
@@ -52,7 +53,7 @@ export async function inviteAdminAction(
     });
   } catch (err: unknown) {
     if ((err as { code?: string })?.code === "P2002") {
-      return { error: en ? "That email already exists" : "Ese email ya existe" };
+      return { error: t("web.action.admin.staff.emailExists") };
     }
     throw err;
   }
@@ -62,7 +63,7 @@ export async function inviteAdminAction(
 }
 
 const updateSchema = z.object({
-  adminId: z.string().uuid("ID inválido"),
+  adminId: z.string().uuid("web.action.invalidId"),
   role: z.enum(["superadmin", "finance", "support", "tester", "engineer"]),
 });
 
@@ -72,14 +73,14 @@ export async function updateAdminRoleAction(
 ): Promise<AdminStaffActionState> {
   const actor = await requireAdmin("superadmin");
   const locale = await getPreferredLocale();
-  const en = usesEnglishCopy(locale);
+  const t = createT(locale);
   const parsed = updateSchema.safeParse({
     adminId: formData.get("adminId"),
     role: formData.get("role"),
   });
   if (!parsed.success) {
     return {
-      error: parsed.error.issues[0]?.message ?? (en ? "Invalid data" : "Datos inválidos"),
+      error: issueMessage(parsed.error, t, "web.action.invalidData"),
     };
   }
 
@@ -89,7 +90,7 @@ export async function updateAdminRoleAction(
     parsed.data.role !== "superadmin"
   ) {
     return {
-      error: en ? "You can't demote your own account" : "No puedes degradar tu propia cuenta",
+      error: t("web.action.admin.staff.cantDemoteSelf"),
     };
   }
 
@@ -98,7 +99,7 @@ export async function updateAdminRoleAction(
     select: { role: true, disabledAt: true },
   });
   if (!target) {
-    return { error: en ? "Admin not found" : "Administrador no encontrado" };
+    return { error: t("web.action.admin.staff.notFound") };
   }
   if (
     target.role === "superadmin" &&
@@ -107,9 +108,7 @@ export async function updateAdminRoleAction(
     (await isLastActiveSuperadmin(parsed.data.adminId))
   ) {
     return {
-      error: en
-        ? "You can't remove the last active superadmin."
-        : "No puedes quitar al último superadministrador activo.",
+      error: t("web.action.admin.staff.lastSuperadminRemove"),
     };
   }
 
@@ -122,7 +121,7 @@ export async function updateAdminRoleAction(
 }
 
 const toggleSchema = z.object({
-  adminId: z.string().uuid("ID inválido"),
+  adminId: z.string().uuid("web.action.invalidId"),
   disable: z.enum(["true", "false"]),
 });
 
@@ -132,14 +131,14 @@ export async function toggleAdminDisabledAction(
 ): Promise<AdminStaffActionState> {
   const actor = await requireAdmin("superadmin");
   const locale = await getPreferredLocale();
-  const en = usesEnglishCopy(locale);
+  const t = createT(locale);
   const parsed = toggleSchema.safeParse({
     adminId: formData.get("adminId"),
     disable: formData.get("disable"),
   });
   if (!parsed.success) {
     return {
-      error: parsed.error.issues[0]?.message ?? (en ? "Invalid data" : "Datos inválidos"),
+      error: issueMessage(parsed.error, t, "web.action.invalidData"),
     };
   }
 
@@ -149,7 +148,7 @@ export async function toggleAdminDisabledAction(
     parsed.data.disable === "true"
   ) {
     return {
-      error: en ? "You can't disable your own account" : "No puedes deshabilitar tu propia cuenta",
+      error: t("web.action.admin.staff.cantDisableSelf"),
     };
   }
 
@@ -159,7 +158,7 @@ export async function toggleAdminDisabledAction(
       select: { role: true, disabledAt: true },
     });
     if (!target) {
-      return { error: en ? "Admin not found" : "Administrador no encontrado" };
+      return { error: t("web.action.admin.staff.notFound") };
     }
     if (
       target.role === "superadmin" &&
@@ -167,9 +166,7 @@ export async function toggleAdminDisabledAction(
       (await isLastActiveSuperadmin(parsed.data.adminId))
     ) {
       return {
-        error: en
-          ? "You can't disable the last active superadmin."
-          : "No puedes deshabilitar al último superadministrador activo.",
+        error: t("web.action.admin.staff.lastSuperadminDisable"),
       };
     }
   }

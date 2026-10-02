@@ -1,5 +1,6 @@
 "use server";
 
+import { issueMessage } from "@spiralclass/shared";
 import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { requireTeacher } from "@/lib/auth";
@@ -26,7 +27,7 @@ import {
   isCaptionLanguage,
   isLanguageCode,
   materialStyleSchema,
-  usesEnglishCopy,
+  createT,
 } from "@spiralclass/shared";
 import { teacherPublicWhatsappSchema } from "@/lib/validators";
 import { normalizeE164 } from "@/lib/phone";
@@ -66,19 +67,15 @@ export async function saveBookingSlugAction(
 ): Promise<SlugState> {
   const teacher = await requireTeacher();
   const locale = await getPreferredLocale();
-  const en = usesEnglishCopy(locale);
+  const t = createT(locale);
 
   const raw = (formData.get("bookingSlug") ?? "").toString();
   const result = validateBookingSlug(raw);
   if (!result.ok) {
     const error =
       result.reason === "reserved"
-        ? en
-          ? "That link is reserved — choose another."
-          : "Ese enlace está reservado — elige otro."
-        : en
-          ? `Use at least ${BOOKING_SLUG_MIN} letters or numbers.`
-          : `Usa al menos ${BOOKING_SLUG_MIN} letras o números.`;
+        ? t("bookingLink.error.slug-reserved")
+        : t("web.action.profile.slugTooShort", { min: BOOKING_SLUG_MIN });
     return { error };
   }
 
@@ -98,9 +95,7 @@ export async function saveBookingSlugAction(
   } catch (err) {
     if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === "P2002") {
       return {
-        error: en
-          ? "That link is already taken — choose another."
-          : "Ese enlace ya está en uso — elige otro.",
+        error: t("bookingLink.error.slug-taken"),
       };
     }
     throw err;
@@ -131,14 +126,14 @@ export async function saveTargetLanguageAction(
 ): Promise<ProfileState> {
   const teacher = await requireTeacher();
   const locale = await getPreferredLocale();
-  const en = usesEnglishCopy(locale);
+  const t = createT(locale);
 
   const raw = (formData.get("targetLanguage") ?? "").toString().trim();
   const targetLanguage = raw === "" ? null : raw;
   // Validated against the FULL registry, not the caption-capable subset: you can
   // teach Quechua even though nothing can caption it.
   if (targetLanguage && !isLanguageCode(targetLanguage)) {
-    return { error: en ? "Unknown language." : "Idioma desconocido." };
+    return { error: t("web.action.contact.unknownLanguage") };
   }
 
   await prisma.teacher.update({
@@ -176,11 +171,11 @@ export async function saveTeachingLanguageAction(
 ): Promise<ProfileState> {
   const teacher = await requireTeacher();
   const locale = await getPreferredLocale();
-  const en = usesEnglishCopy(locale);
+  const t = createT(locale);
 
   const teachingLanguage = (formData.get("teachingLanguage") ?? "").toString().trim();
   if (!isCaptionLanguage(teachingLanguage)) {
-    return { error: en ? "Unknown language." : "Idioma desconocido." };
+    return { error: t("web.action.contact.unknownLanguage") };
   }
 
   await prisma.teacher.update({
@@ -208,11 +203,11 @@ export async function saveBookingPageLocaleAction(
 ): Promise<ProfileState> {
   const teacher = await requireTeacher();
   const locale = await getPreferredLocale();
-  const en = usesEnglishCopy(locale);
+  const t = createT(locale);
 
   const raw = (formData.get("bookingPageLocale") ?? "").toString().trim();
   if (raw !== "" && !isAppLocale(raw)) {
-    return { error: en ? "Unknown language." : "Idioma desconocido." };
+    return { error: t("web.action.contact.unknownLanguage") };
   }
 
   await prisma.teacher.update({
@@ -295,14 +290,12 @@ export async function saveHeadlineAction(
 ): Promise<ProfileState> {
   const teacher = await requireTeacher();
   const locale = await getPreferredLocale();
-  const en = usesEnglishCopy(locale);
+  const t = createT(locale);
 
   const raw = (formData.get("headline") ?? "").toString().trim();
   if (raw.length > HEADLINE_MAX_LENGTH) {
     return {
-      error: en
-        ? `Keep it under ${HEADLINE_MAX_LENGTH} characters.`
-        : `Máximo ${HEADLINE_MAX_LENGTH} caracteres.`,
+      error: t("web.action.profile.maxChars", { max: HEADLINE_MAX_LENGTH }),
     };
   }
 
@@ -323,14 +316,12 @@ export async function saveBioAction(
 ): Promise<ProfileState> {
   const teacher = await requireTeacher();
   const locale = await getPreferredLocale();
-  const en = usesEnglishCopy(locale);
+  const t = createT(locale);
 
   const raw = (formData.get("bio") ?? "").toString().trim();
   if (raw.length > BIO_MAX_LENGTH) {
     return {
-      error: en
-        ? `Keep it under ${BIO_MAX_LENGTH} characters.`
-        : `Máximo ${BIO_MAX_LENGTH} caracteres.`,
+      error: t("web.action.profile.maxChars", { max: BIO_MAX_LENGTH }),
     };
   }
 
@@ -358,7 +349,7 @@ export async function saveBookingPageWhatsappAction(
 ): Promise<ProfileState> {
   const teacher = await requireTeacher();
   const locale = await getPreferredLocale();
-  const en = usesEnglishCopy(locale);
+  const t = createT(locale);
 
   const parsed = teacherPublicWhatsappSchema(locale).safeParse({
     whatsapp: formData.get("whatsapp"),
@@ -366,7 +357,7 @@ export async function saveBookingPageWhatsappAction(
   });
   if (!parsed.success) {
     return {
-      error: parsed.error.issues[0]?.message ?? (en ? "Invalid phone number." : "Número inválido."),
+      error: issueMessage(parsed.error, t, "web.action.profile.invalidPhone"),
     };
   }
 
@@ -404,6 +395,7 @@ export async function saveMaterialStyleAction(
 ): Promise<ProfileState> {
   const teacher = await requireTeacher();
   const locale = await getPreferredLocale();
+  const t = createT(locale);
 
   const parsed = materialStyleSchema(locale).safeParse({
     tone: formData.get("tone"),
@@ -417,9 +409,7 @@ export async function saveMaterialStyleAction(
   });
   if (!parsed.success) {
     return {
-      error:
-        parsed.error.issues[0]?.message ??
-        (usesEnglishCopy(locale) ? "Invalid input" : "Entrada inválida"),
+      error: issueMessage(parsed.error, t, "web.action.invalidInput"),
     };
   }
   const { tone, learnerAge, vocabulary, languageVariety, customInstructions } = parsed.data;
@@ -463,21 +453,21 @@ export async function saveTeacherPhotoAction(
 ): Promise<ProfileState> {
   const teacher = await requireTeacher();
   const locale = await getPreferredLocale();
-  const en = usesEnglishCopy(locale);
+  const t = createT(locale);
 
   const file = formData.get("photo");
   if (!(file instanceof File) || file.size === 0) {
-    return { error: en ? "Choose an image first." : "Elige una imagen primero." };
+    return { error: t("web.action.photo.choose") };
   }
   const ext = ALLOWED_PHOTO_TYPES[file.type];
   if (!ext) {
     return {
-      error: en ? "Use a JPG, PNG or WebP image." : "Usa una imagen JPG, PNG o WebP.",
+      error: t("web.action.photo.type"),
     };
   }
   if (file.size > MAX_PHOTO_BYTES) {
     return {
-      error: en ? "The image must be under 5 MB." : "La imagen debe pesar menos de 5 MB.",
+      error: t("web.action.photo.tooLarge"),
     };
   }
 
@@ -485,7 +475,7 @@ export async function saveTeacherPhotoAction(
   if (upErr) {
     log.warn("upload failed", { error: upErr });
     return {
-      error: en ? `We couldn't upload the image: ${upErr}` : `No pudimos subir la imagen: ${upErr}`,
+      error: t("web.action.photo.uploadFailed", { error: upErr }),
     };
   }
 
@@ -533,7 +523,7 @@ export type PresignState =
 export async function presignIntroVideoUploadAction(contentType: string): Promise<PresignState> {
   const teacher = await requireTeacher();
   const locale = await getPreferredLocale();
-  const en = usesEnglishCopy(locale);
+  const t = createT(locale);
 
   const presigned = presignTeacherVideoUpload(teacher.id, contentType);
   if ("error" in presigned) {
@@ -541,12 +531,8 @@ export async function presignIntroVideoUploadAction(contentType: string): Promis
       ok: false,
       error:
         presigned.error === "bad-type"
-          ? en
-            ? "Use an MP4, WebM or MOV video."
-            : "Usa un video MP4, WebM o MOV."
-          : en
-            ? "Video upload isn't available right now."
-            : "La subida de video no está disponible ahora.",
+          ? t("bookingPage.videoError.bad-type")
+          : t("web.action.profile.videoUnavailable"),
     };
   }
   return { ok: true, uploadUrl: presigned.uploadUrl, storagePath: presigned.storagePath };
@@ -565,23 +551,19 @@ export async function finalizeIntroVideoAction(
 ): Promise<ProfileState> {
   const teacher = await requireTeacher();
   const locale = await getPreferredLocale();
-  const en = usesEnglishCopy(locale);
+  const t = createT(locale);
 
   const key = teacherVideoStorageKey(teacher.id);
   const size = await headTeacherVideoObject(key);
   if (size === null) {
     return {
-      error: en
-        ? "The upload didn't finish — please try again."
-        : "La subida no se completó — inténtalo de nuevo.",
+      error: t("web.action.profile.uploadIncomplete"),
     };
   }
   if (size > MAX_VIDEO_BYTES) {
     await removeTeacherVideo(key);
     return {
-      error: en
-        ? "The video must be under 50 MB — try a shorter clip."
-        : "El video debe pesar menos de 50 MB — prueba un clip más corto.",
+      error: t("web.action.profile.videoTooLarge"),
     };
   }
 
@@ -666,9 +648,9 @@ export async function getIntroVideoAnalysisStateAction(): Promise<IntroVideoAnal
 export async function retryIntroVideoAnalysisAction(): Promise<ProfileState> {
   const teacher = await requireTeacher();
   const locale = await getPreferredLocale();
-  const en = usesEnglishCopy(locale);
+  const t = createT(locale);
   if (!teacher.introVideoPath) {
-    return { error: en ? "There's no video to analyze." : "No hay un video para analizar." };
+    return { error: t("web.action.profile.noVideo") };
   }
   await prisma.introVideoAnalysis.upsert({
     where: { teacherId: teacher.id },

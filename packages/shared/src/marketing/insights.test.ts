@@ -183,6 +183,16 @@ describe("copy", () => {
       }
     }
   });
+
+  it("chooses the plural by the count, in every language", () => {
+    const one = { code: "needs_more_data", confidence: "observed", visits: 1 } as const;
+    const many = { code: "needs_more_data", confidence: "observed", visits: 4 } as const;
+    expect(observationText(one, "en")).toContain("1 visit so far");
+    expect(observationText(many, "en")).toContain("4 visits so far");
+    expect(observationText(one, "es")).toContain("Llevas 1 visita.");
+    expect(observationText(one, "fr")).toContain("Vous avez 1 visite.");
+    expect(observationText(many, "fr")).toContain("Vous avez 4 visites.");
+  });
 });
 
 describe("funnelSteps", () => {

@@ -28,11 +28,14 @@
 
 import type { LocaleCode } from "./api";
 import { WORLD_LANGUAGES } from "./languages.data";
-import { intlLocale } from "./i18n/locales";
+import { intlLocale, type AppLocale } from "./i18n/locales";
 
 export type Language = {
   code: string;
-  label: { en: string; es: string };
+  // One name per registered UI locale. Keyed by AppLocale so that registering
+  // a locale fails the build until scripts/generate-locale-names.mjs has added
+  // its column.
+  label: Record<AppLocale, string>;
   // True when this language can carry live captions (streaming ASR +
   // translation quality). False = teachable but not captionable.
   asr: boolean;
@@ -95,7 +98,7 @@ export function isGenerationLanguage(code: string): boolean {
 export function languageLabel(code: string, locale: LocaleCode = "en"): string {
   const entry = languageEntry(code);
   if (!entry) return code;
-  return locale === "es" ? entry.label["es"] : entry.label.en;
+  return entry.label[locale] ?? entry.label.en;
 }
 
 /**

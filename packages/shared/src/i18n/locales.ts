@@ -27,6 +27,21 @@
 //                      list languages in English (docs, admin).
 //   * `match`        — matches an Accept-Language header / device languageTag
 //                      prefix for this locale.
+//   * `intl`         — the BCP-47 tag handed to `Intl` and `toLocale*`. The
+//                      `tag` names a catalog; this names a set of CLDR
+//                      conventions for numbers, currency symbols and clocks,
+//                      and the two differ whenever a language's root
+//                      conventions are not its readers' (see `intlLocale`).
+//   * `og`           — the Open Graph locale. Open Graph wants a
+//                      region-qualified, underscore-separated tag (`en_US`,
+//                      never bare `en`), so it cannot be derived from `tag`.
+//   * `dir`          — the writing direction, set on <html dir>.
+//
+// The last three used to be dictionaries kept beside their one consumer —
+// `INTL_LOCALE` here, `OG_LOCALE` in the root layout — which made "append one
+// row" untrue: a new language also had to be added to each of them, and only
+// the ones typed `Record<AppLocale, …>` said so. A fact that is one value per
+// language belongs on the language's row, where it cannot be forgotten.
 
 export type LocaleDefinition = {
   tag: string;
@@ -34,6 +49,9 @@ export type LocaleDefinition = {
   label: string;
   englishName: string;
   match: RegExp;
+  intl: string;
+  og: string;
+  dir: "ltr" | "rtl";
 };
 
 export const LOCALES = [
@@ -43,9 +61,32 @@ export const LOCALES = [
     label: "Español",
     englishName: "Spanish",
     match: /^es\b/i,
+    // Latin American conventions ("1,500.00", "5:00 p.m."), not CLDR's root
+    // `es` ("1500,00", "17:00").
+    intl: "es-419",
+    og: "es_LA",
+    dir: "ltr",
   },
-  { tag: "en", languageCode: "en", label: "English", englishName: "English", match: /^en\b/i },
-  { tag: "fr", languageCode: "fr", label: "Français", englishName: "French", match: /^fr\b/i },
+  {
+    tag: "en",
+    languageCode: "en",
+    label: "English",
+    englishName: "English",
+    match: /^en\b/i,
+    intl: "en",
+    og: "en_US",
+    dir: "ltr",
+  },
+  {
+    tag: "fr",
+    languageCode: "fr",
+    label: "Français",
+    englishName: "French",
+    match: /^fr\b/i,
+    intl: "fr",
+    og: "fr_FR",
+    dir: "ltr",
+  },
 ] as const satisfies readonly LocaleDefinition[];
 
 // The canonical in-app locale identifier (BCP-47). Widening the registry above
@@ -65,20 +106,57 @@ export const DEFAULT_LOCALE: AppLocale = "en";
 
 const LOCALE_TAGS = LOCALES.map((l) => l.tag) as AppLocale[];
 
+// DEFAULT_LOCALE's outbound code. Read off its registry row rather than
+// restated, so the two cannot come to name different languages.
+const DEFAULT_LANGUAGE_CODE: LanguageCode = (
+  LOCALES.find((l) => l.tag === DEFAULT_LOCALE) ?? LOCALES[0]
+).languageCode;
+
 export function isAppLocale(value: unknown): value is AppLocale {
   return typeof value === "string" && (LOCALE_TAGS as string[]).includes(value);
 }
 
-// The BCP-47 tag handed to `Intl` and `toLocale*` for an app locale. The app
-// locale names a catalog; the formatting tag names a set of CLDR conventions
-// for numbers, currency symbols and clocks. Spanish readers are formatted by
-// the Latin American conventions (`es-419`: "1,500.00", "5:00 p.m.") rather
-// than CLDR's root `es` ("1500,00", "17:00"). Anything not in the registry
-// passes through untouched, so a literal like "en-CA" still means itself.
-const INTL_LOCALE: Partial<Record<string, string>> = { es: "es-419" };
+function definitionFor(locale: AppLocale): LocaleDefinition {
+  // Total by construction: AppLocale is the union of the registry's own tags.
+  // A value that got past the types anyway (a stale database row cast on the
+  // way in) gets DEFAULT_LOCALE's row, like every other unforced choice,
+  // rather than a throw from a property read on undefined.
+  return (
+    LOCALES.find((l) => l.tag === locale) ??
+    LOCALES.find((l) => l.tag === DEFAULT_LOCALE) ??
+    LOCALES[0]
+  );
+}
 
+// The BCP-47 tag handed to `Intl` and `toLocale*` for an app locale — the
+// row's `intl`. Anything not in the registry passes through untouched, so a
+// literal like "en-CA" still means itself.
 export function intlLocale(locale: string): string {
-  return INTL_LOCALE[locale] ?? locale;
+  return isAppLocale(locale) ? definitionFor(locale).intl : locale;
+}
+
+/** The Open Graph locale (`og:locale`) for an app locale. */
+export function ogLocale(locale: AppLocale): string {
+  return definitionFor(locale).og;
+}
+
+/** The writing direction of an app locale, for `<html dir>`. */
+export function localeDirection(locale: AppLocale): "ltr" | "rtl" {
+  return definitionFor(locale).dir;
+}
+
+/**
+ * The English name of an app locale's language ("Spanish", "French").
+ *
+ * For the one place that needs it in English whatever the reader reads: a
+ * prompt telling a model which language to write in. It replaces
+ * `usesEnglishCopy(locale) ? "English" : "Spanish"`, which told the model to
+ * write English for every teacher who was not Spanish-speaking.
+ */
+export function localeEnglishName(locale: string): string {
+  // Takes a string because its callers hold a locale read off a database row;
+  // definitionFor answers an unrecognised one with DEFAULT_LOCALE's.
+  return definitionFor(locale as AppLocale).englishName;
 }
 
 /**
@@ -172,19 +250,24 @@ export function localeOptions(systemDefaultLabel: string): LocaleOption[] {
 }
 
 /** Bridge an AppLocale (or any locale-ish string, e.g. a DB value) to the
- * `languageCode` the email/push templates branch on. Unknown input
- * resolves to Spanish's code, preserving the historical outbound default. */
+ * `languageCode` the email/push templates branch on. Unknown input resolves
+ * to `DEFAULT_LOCALE`'s code, as every other unforced choice does. It used to
+ * resolve to the registry's first row, which is Spanish: a reader whose stored
+ * locale matched nothing was written to in a language nobody had chosen.
+ *
+ * An underscore-separated tag (`es_MX`) is read as its hyphenated form. The
+ * old fallback hid that such a value matched no row at all — it reached
+ * Spanish by accident — so the correct default must not turn it into English. */
 export function localeToLanguageCode(locale: string | null | undefined): LanguageCode {
-  const normalized = (locale ?? "").toLowerCase();
+  const normalized = (locale ?? "").trim().toLowerCase().replace(/_/g, "-");
   const hit = LOCALES.find((l) => normalized === l.tag.toLowerCase() || l.match.test(normalized));
-  return (hit ?? LOCALES[0]).languageCode;
+  return hit?.languageCode ?? DEFAULT_LANGUAGE_CODE;
 }
 
 /** The reverse bridge: an outbound `languageCode` (e.g. a persisted
  * `Notification.languageCode` row) back to its BCP-47 `AppLocale` tag, for
  * surfaces that display notification history. Unknown input falls back to
- * `DEFAULT_LOCALE`, not the first registry entry — this direction has no
- * historical outbound-default precedent to preserve. */
+ * `DEFAULT_LOCALE`, the same answer the forward bridge gives. */
 export function languageCodeToLocale(languageCode: string | null | undefined): AppLocale {
   const hit = LOCALES.find((l) => l.languageCode === languageCode);
   return hit?.tag ?? DEFAULT_LOCALE;

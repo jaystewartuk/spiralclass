@@ -1,3 +1,4 @@
+import { type TFunction } from "@spiralclass/shared";
 import { PackageStatus, type Prisma } from "@prisma/client";
 
 // Discount-code primitive (slice 2a, docs/features/referrals-discounts.md).
@@ -102,17 +103,17 @@ export async function resolveAndValidateDiscount(args: {
 }
 
 // Localized, student-facing message for a rejected code (shown at checkout).
-export function discountRejectMessage(reason: DiscountRejectReason, en: boolean): string {
+export function discountRejectMessage(reason: DiscountRejectReason, t: TFunction): string {
   switch (reason) {
     case "not_found":
-      return en ? "That code isn't valid." : "Ese código no es válido.";
+      return t("web.action.discount.invalid");
     case "inactive":
-      return en ? "That code is no longer active." : "Ese código ya no está activo.";
+      return t("web.action.discount.inactive");
     case "expired":
-      return en ? "That code has expired." : "Ese código ya venció.";
+      return t("web.action.discount.expired");
     case "max_redemptions":
-      return en ? "That code has reached its limit." : "Ese código alcanzó su límite.";
+      return t("web.action.discount.limitReached");
     case "per_student":
-      return en ? "You've already used that code." : "Ya usaste ese código.";
+      return t("web.action.discount.alreadyUsed");
   }
 }

@@ -1,5 +1,6 @@
 "use server";
 
+import { issueMessage } from "@spiralclass/shared";
 import { headers } from "next/headers";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
@@ -11,23 +12,23 @@ import { enqueueAccountDisabledTeacher } from "@/lib/notifications/enqueue";
 import { emitNotificationQueued } from "@/lib/notifications/events";
 import { logger } from "@/lib/logger";
 import { revalidateAfterAction } from "@/lib/revalidate";
-import { usesEnglishCopy } from "@spiralclass/shared";
+import { createT } from "@spiralclass/shared";
 
 const log = logger({ surface: "admin-teachers" });
 
 export type AdminTeacherActionState = { error?: string; ok?: boolean; info?: string } | undefined;
 
 const disableSchema = z.object({
-  teacherId: z.string().uuid("ID inválido"),
+  teacherId: z.string().uuid("web.action.invalidId"),
   reason: z.string().trim().min(1, "Motivo requerido").max(280),
 });
 
 const enableSchema = z.object({
-  teacherId: z.string().uuid("ID inválido"),
+  teacherId: z.string().uuid("web.action.invalidId"),
 });
 
 const resendSchema = z.object({
-  teacherId: z.string().uuid("ID inválido"),
+  teacherId: z.string().uuid("web.action.invalidId"),
 });
 
 export async function disableTeacherAction(
@@ -36,14 +37,14 @@ export async function disableTeacherAction(
 ): Promise<AdminTeacherActionState> {
   const actor = await requireAdmin("support");
   const locale = await getPreferredLocale();
-  const en = usesEnglishCopy(locale);
+  const t = createT(locale);
   const parsed = disableSchema.safeParse({
     teacherId: formData.get("teacherId"),
     reason: formData.get("reason"),
   });
   if (!parsed.success) {
     return {
-      error: parsed.error.issues[0]?.message ?? (en ? "Invalid data" : "Datos inválidos"),
+      error: issueMessage(parsed.error, t, "web.action.invalidData"),
     };
   }
 
@@ -89,13 +90,13 @@ export async function enableTeacherAction(
 ): Promise<AdminTeacherActionState> {
   const actor = await requireAdmin("support");
   const locale = await getPreferredLocale();
-  const en = usesEnglishCopy(locale);
+  const t = createT(locale);
   const parsed = enableSchema.safeParse({
     teacherId: formData.get("teacherId"),
   });
   if (!parsed.success) {
     return {
-      error: parsed.error.issues[0]?.message ?? (en ? "Invalid data" : "Datos inválidos"),
+      error: issueMessage(parsed.error, t, "web.action.invalidData"),
     };
   }
 
@@ -135,13 +136,13 @@ export async function resendTeacherMagicLinkAction(
 ): Promise<AdminTeacherActionState> {
   await requireAdmin("support");
   const locale = await getPreferredLocale();
-  const en = usesEnglishCopy(locale);
+  const t = createT(locale);
   const parsed = resendSchema.safeParse({
     teacherId: formData.get("teacherId"),
   });
   if (!parsed.success) {
     return {
-      error: parsed.error.issues[0]?.message ?? (en ? "Invalid data" : "Datos inválidos"),
+      error: issueMessage(parsed.error, t, "web.action.invalidData"),
     };
   }
 
@@ -149,7 +150,7 @@ export async function resendTeacherMagicLinkAction(
     where: { id: parsed.data.teacherId },
     select: { email: true },
   });
-  if (!teacher) return { error: en ? "Teacher not found" : "Maestra no encontrada" };
+  if (!teacher) return { error: t("web.action.admin.teacherNotFound") };
 
   try {
     await auth.api.sendVerificationOTP({
@@ -157,11 +158,11 @@ export async function resendTeacherMagicLinkAction(
       headers: await headers(),
     });
   } catch {
-    return { error: en ? "Couldn't send the email" : "No se pudo enviar el correo" };
+    return { error: t("web.action.admin.emailSendFailed") };
   }
 
   return {
     ok: true,
-    info: en ? `Email sent to ${teacher.email}` : `Correo enviado a ${teacher.email}`,
+    info: t("web.action.admin.emailSentTo", { email: teacher.email }),
   };
 }

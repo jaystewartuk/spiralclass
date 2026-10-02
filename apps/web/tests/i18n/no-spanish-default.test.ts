@@ -153,3 +153,41 @@ describe("locale resolvers", () => {
     expect(html).not.toContain("Tuvimos un problema");
   });
 });
+
+// The outbound half. A page resolves a locale from the request; an email has
+// no request, only the recipient's stored `locale`, bridged to the code the
+// templates branch on. That bridge used to answer "Spanish" for anything it
+// did not recognise — the registry's first row — so this was the one resolver
+// left whose unforced answer was not DEFAULT_LOCALE.
+describe("outbound copy", () => {
+  const signInEmail = async (storedLocale: string | null) => {
+    const { localeToLanguageCode } = await import("@spiralclass/shared");
+    const { renderEmail } = await import("@/lib/email/templates");
+    return renderEmail({
+      templateName: "magic_link",
+      languageCode: localeToLanguageCode(storedLocale),
+      variables: { teacherName: "Teacher", expiryMinutes: "15", magicLinkPathSuffix: "x" },
+      actionUrl: "https://app.test/m/x",
+      notificationSettingsUrl: "https://app.test/r/notif-settings/x",
+    });
+  };
+
+  it.each([["de"], ["pl"], [""], [null]])(
+    "writes to a recipient whose stored locale is %j in English",
+    async (storedLocale) => {
+      const email = await signInEmail(storedLocale);
+      expect(email.subject).toContain("Your");
+      expect(email.subject).not.toContain("Tu acceso");
+      expect(email.body).toContain("Manage notification settings");
+      expect(email.html).toContain('lang="en"');
+    },
+  );
+
+  it("still writes to a Spanish reader in Spanish, however her tag is spelled", async () => {
+    for (const storedLocale of ["es", "es-MX", "es_MX"]) {
+      const email = await signInEmail(storedLocale);
+      expect(email.subject, storedLocale).toContain("Tu acceso");
+      expect(email.html, storedLocale).toContain('lang="es"');
+    }
+  });
+});

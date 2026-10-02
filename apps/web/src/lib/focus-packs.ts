@@ -1,3 +1,4 @@
+import { type StringKey } from "@spiralclass/shared";
 // Focus-tag seed packs — docs/features/classes-lesson-content.md, D-20, narrowed to
 // language-first by D-72.
 //
@@ -44,15 +45,14 @@ export const FOCUS_TAG_CATEGORY_ORDER: FocusTagCategory[] = [
 // are gone; a category's `label` column IS the display string now.
 export const FOCUS_TAG_BUILTIN_CATEGORIES: {
   code: FocusTagCategory;
-  labelEn: string;
-  labelEs: string;
+  labelKey: StringKey;
 }[] = [
-  { code: "grammar", labelEn: "Grammar", labelEs: "Gramática" },
-  { code: "vocabulary", labelEn: "Vocabulary", labelEs: "Vocabulario" },
-  { code: "skill", labelEn: "Skills", labelEs: "Habilidades" },
-  { code: "activity", labelEn: "Activities", labelEs: "Actividades" },
-  { code: "theme", labelEn: "Themes", labelEs: "Temas" },
-  { code: "format", labelEn: "Format", labelEs: "Formato" },
+  { code: "grammar", labelKey: "focusTags.builtin.category.grammar" },
+  { code: "vocabulary", labelKey: "focusTags.builtin.category.vocabulary" },
+  { code: "skill", labelKey: "focusTags.builtin.category.skill" },
+  { code: "activity", labelKey: "focusTags.builtin.category.activity" },
+  { code: "theme", labelKey: "focusTags.builtin.category.theme" },
+  { code: "format", labelKey: "focusTags.builtin.category.format" },
 ];
 
 // ---- Format tags — subject-agnostic, seeded for every teacher -------------
@@ -63,21 +63,22 @@ export const FOCUS_TAG_BUILTIN_CATEGORIES: {
 // language (see ensureTeacherFocusTags in focus-tags.ts) rather than picked
 // per-pack. Sourced from the material types a working Spanish teacher
 // actually uses (profedeele.es); useful well beyond language teaching. Each
-// carries its own bilingual label (unlike the discipline packs, which are
-// frozen in one language) since the format axis itself is language-neutral.
-export type FormatTagSeed = { key: string; labelEs: string; labelEn: string };
+// label is a catalog key (unlike the discipline packs, which are frozen in
+// one language) since the format axis itself is language-neutral: a teacher
+// is seeded with it in whatever language she reads.
+export type FormatTagSeed = { key: string; labelKey: StringKey };
 
 export const FORMAT_TAG_SEEDS: FormatTagSeed[] = [
-  { key: "actividad_breve", labelEs: "Actividad breve", labelEn: "Short activity" },
-  { key: "presentacion", labelEs: "Presentación", labelEn: "Presentation" },
-  { key: "lecturas", labelEs: "Lecturas", labelEn: "Readings" },
-  { key: "ponte_al_dia", labelEs: "Ponte al día", labelEn: "Current events" },
-  { key: "unidad_didactica", labelEs: "Unidad didáctica", labelEn: "Teaching unit" },
-  { key: "test", labelEs: "Test", labelEn: "Quiz" },
-  { key: "cancion", labelEs: "Canción", labelEn: "Song" },
-  { key: "podcast", labelEs: "Pódcast", labelEn: "Podcast" },
-  { key: "escape_room", labelEs: "Escape Room", labelEn: "Escape Room" },
-  { key: "kahoot", labelEs: "Kahoot", labelEn: "Kahoot" },
+  { key: "actividad_breve", labelKey: "focusTags.builtin.format.actividad_breve" },
+  { key: "presentacion", labelKey: "focusTags.builtin.format.presentacion" },
+  { key: "lecturas", labelKey: "focusTags.builtin.format.lecturas" },
+  { key: "ponte_al_dia", labelKey: "focusTags.builtin.format.ponte_al_dia" },
+  { key: "unidad_didactica", labelKey: "focusTags.builtin.format.unidad_didactica" },
+  { key: "test", labelKey: "focusTags.builtin.format.test" },
+  { key: "cancion", labelKey: "focusTags.builtin.format.cancion" },
+  { key: "podcast", labelKey: "focusTags.builtin.format.podcast" },
+  { key: "escape_room", labelKey: "focusTags.builtin.format.escape_room" },
+  { key: "kahoot", labelKey: "focusTags.builtin.format.kahoot" },
 ];
 
 export type FocusTagSeed = {

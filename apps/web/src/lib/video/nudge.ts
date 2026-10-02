@@ -1,3 +1,4 @@
+import { createT, matchAcceptLanguage, DEFAULT_LOCALE, type AppLocale } from "@spiralclass/shared";
 import "server-only";
 import type { Prisma, PrismaClient } from "@prisma/client";
 import {
@@ -114,7 +115,7 @@ export async function nudgeCounterparty(
 
   // 3) Resolve the recipient's UI locale for the copy (Teacher.locale /
   //    Student.locale, both default "en").
-  const es = await recipientPrefersSpanish(db, input.to);
+  const t = createT(await recipientLocale(db, input.to));
 
   // 4) Fan out across the recipient's live browser push subscriptions. No
   //    teacher-id filter is needed because (recipientType, recipientId)
@@ -134,10 +135,8 @@ export async function nudgeCounterparty(
       : `s/class/${input.bookingId}`,
   );
 
-  const title = es ? "Tu clase te espera" : "Your class is waiting";
-  const body = es
-    ? `${input.callerName} ya está en la videollamada. Toca para unirte.`
-    : `${input.callerName} is already in the video call. Tap to join.`;
+  const title = t("push.callNudge.title");
+  const body = t("push.callNudge.body", { callerName: input.callerName });
 
   try {
     const result = await webPush.send({
@@ -172,13 +171,15 @@ export async function nudgeCounterparty(
   }
 }
 
-async function recipientPrefersSpanish(
+// It answered "does this reader prefer Spanish?" with "is the locale anything
+// but English?", so a French reader's nudge arrived in Spanish.
+async function recipientLocale(
   db: Tx,
   to: { type: "teacher" | "student"; id: string },
-): Promise<boolean> {
+): Promise<AppLocale> {
   const locale =
     to.type === "teacher"
       ? (await db.teacher.findUnique({ where: { id: to.id }, select: { locale: true } }))?.locale
       : (await db.student.findUnique({ where: { id: to.id }, select: { locale: true } }))?.locale;
-  return (locale ?? "en") !== "en";
+  return matchAcceptLanguage(locale) ?? DEFAULT_LOCALE;
 }

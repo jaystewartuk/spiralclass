@@ -12,7 +12,7 @@ import { flushAnalytics, trackServerEvent } from "@/lib/analytics/posthog";
 import { maybeEmitFirstBooking } from "@/lib/analytics/first-events";
 import { bookPackageSlot, type BookingEventEmitter } from "@/lib/booking/book-package-slot";
 import { revalidateAfterAction } from "@/lib/revalidate";
-import { usesEnglishCopy } from "@spiralclass/shared";
+import { createT } from "@spiralclass/shared";
 
 export type ActionState = { error?: string; ok?: string } | undefined;
 
@@ -31,13 +31,13 @@ const emitViaInngest: BookingEventEmitter = async (event) => {
 // a friendly error.
 export async function createBooking(_prev: ActionState, formData: FormData): Promise<ActionState> {
   const locale = await getPreferredLocale();
-  const en = usesEnglishCopy(locale);
+  const t = createT(locale);
   const parsed = bookingRequestSchema.safeParse({
     packageId: formData.get("packageId"),
     startUtc: formData.get("startUtc"),
   });
   if (!parsed.success) {
-    return { error: en ? "Invalid selection." : "Selección inválida." };
+    return { error: t("web.action.invalidSelection") };
   }
 
   const user = await getAuthUser();
@@ -47,9 +47,9 @@ export async function createBooking(_prev: ActionState, formData: FormData): Pro
     where: { authUserId: user.id },
     select: { id: true, name: true, email: true, disabledAt: true },
   });
-  if (!student) return { error: en ? "Account not found." : "Cuenta no encontrada." };
+  if (!student) return { error: t("web.action.accountNotFound") };
   if (student.disabledAt) {
-    return { error: en ? "This account is disabled." : "Esta cuenta está deshabilitada." };
+    return { error: t("web.action.accountDisabled") };
   }
 
   // The package may live on a sibling row (same inbox, another teacher's
@@ -65,7 +65,7 @@ export async function createBooking(_prev: ActionState, formData: FormData): Pro
     },
     include: { teacher: true, template: true },
   });
-  if (!pkg) return { error: en ? "Package unavailable." : "Paquete no disponible." };
+  if (!pkg) return { error: t("web.action.booking.packageUnavailable") };
 
   // Delegate slot generation re-validation, the Model-B capacity claim and the event
   // fan-out to the shared booking core (also used by the teacher self-serve
@@ -85,21 +85,17 @@ export async function createBooking(_prev: ActionState, formData: FormData): Pro
     switch (outcome.code) {
       case "package-exhausted":
         return {
-          error: en
-            ? "You've used all the classes in this package."
-            : "Ya usaste todas las clases de este paquete.",
+          error: t("web.action.booking.packageExhausted"),
         };
       case "package-expired":
-        return { error: en ? "This package has expired." : "Este paquete ya expiró." };
+        return { error: t("web.action.booking.packageExpired") };
       case "slot-taken":
         return {
-          error: en
-            ? "That slot was just booked by someone else."
-            : "Ese horario ya fue reservado por alguien más.",
+          error: t("web.action.slotTaken"),
         };
       default:
         return {
-          error: en ? "That slot is no longer available." : "Ese horario ya no está disponible.",
+          error: t("web.action.slotUnavailable"),
         };
     }
   }

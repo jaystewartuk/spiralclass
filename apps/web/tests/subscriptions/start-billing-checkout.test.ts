@@ -193,6 +193,25 @@ describe("startBillingCheckout — the double-subscription guard", () => {
   });
 });
 
+// The upgrade page is Stripe's, and it followed her browser: a teacher who
+// reads the app in Spanish on an English-language laptop was sent to an
+// English payment form for a plan she had just read about in Spanish.
+describe("startBillingCheckout — Stripe is told the language she reads the app in", () => {
+  it.each([
+    ["es", "es-419"],
+    ["en", "en"],
+    ["fr", "fr"],
+  ] as const)("renders Checkout in %s as %s", async (locale, stripeLocale) => {
+    state.status = "trialing";
+    state.trialEndsAt = new Date(Date.now() + 5 * 24 * 60 * 60 * 1000);
+
+    await startBillingCheckout({ teacherId: "t1", plan: "monthly", locale });
+
+    expect(createBillingCheckoutSession).toHaveBeenCalledTimes(1);
+    expect(createBillingCheckoutSession.mock.calls[0][0]).toMatchObject({ locale: stripeLocale });
+  });
+});
+
 // Every error string on the money path used to be `locale === "en" ? en : es`,
 // so a French teacher hit a Spanish wall at checkout — the same two-branch
 // shape that put "Pro Mensual" on her plan card.
