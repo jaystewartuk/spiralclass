@@ -8007,4 +8007,35 @@ export const en = {
   "marketing.insight.repeatWhatWorks": "Worth posting more often in {label}.",
   "marketing.insight.tryUntriedCommunity":
     "You haven't posted in {label} yet. One try tells you whether it's worth it.",
+  "materials.ai.topicRequired": "Pick a focus or describe what this class should cover.",
+  "materials.ai.classLimitReached":
+    "You've reached this month's AI generation limit ({cap}). You can still write content yourself.",
+  "materials.ai.classUnavailable":
+    "AI generation isn't available right now. You can still write the content yourself.",
+  "materials.ai.classFailed": "Couldn't generate content. Please try again.",
+  "materials.ai.revisionGone": "That version is no longer available.",
+  "materials.ai.libraryTopicRequired": "Describe the material or pick a format/focus first.",
+  "materials.ai.libraryLimitReached":
+    "You've reached this month's AI generation limit ({cap}). You can still write the material yourself.",
+  "materials.ai.libraryUnavailable":
+    "AI generation isn't available right now. You can still write the material yourself.",
+  "materials.ai.refineInstructionRequired": "Describe the change you want the AI to make.",
+  "materials.ai.refineLimitReached":
+    "You've reached this month's AI generation limit ({cap}). You can still edit the material yourself.",
+  "materials.ai.refineUnavailable":
+    "AI editing isn't available right now. You can still edit the material yourself.",
+  "materials.ai.refineFailed": "Couldn't apply the change. Please try again.",
+  "materials.ai.podcastLimitReached":
+    "You've reached this month's AI generation limit ({cap}). You can still write and record content yourself.",
+  "materials.ai.podcastUnavailable": "Podcast generation isn't available right now.",
+  "materials.ai.podcastNeedsContent": "Add some written content before generating a podcast.",
+  "materials.ai.podcastInProgress": "A podcast is already being generated.",
+  "materials.templates.nameRequired": "Name this template.",
+  "materials.templates.tooMany": "Too many templates in one save.",
+  "materials.templates.everyNeedsName": "Every template needs a name.",
+  "homework.ai.limitReached":
+    "You've reached this month's AI review limit ({cap}). You can still review and grade by hand.",
+  "homework.ai.unavailable":
+    "AI review isn't available right now. You can still review and grade by hand.",
+  "homework.ai.failed": "Couldn't generate an AI review. Please try again.",
 } as const;

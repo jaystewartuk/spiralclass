@@ -5,6 +5,7 @@ import {
   extractHomeworkExcerptText,
   parseMaterialDoc,
   type HomeworkAiReviewDraft,
+  createT,
   usesEnglishCopy,
 } from "@spiralclass/shared";
 import { prisma } from "@/lib/prisma";
@@ -64,7 +65,7 @@ export async function requestHomeworkAiReview(
   input: { instructions?: string | null },
   locale: AppLocale,
 ): Promise<RequestHomeworkAiReviewResult> {
-  const en = usesEnglishCopy(locale);
+  const t = createT(locale);
 
   const gate = await gateProFeature(teacher.id, "homework_review");
   if (!gate.ok) return { ok: false, code: "not-pro", message: upgradeNudge(gate.limit, locale) };
@@ -81,9 +82,7 @@ export async function requestHomeworkAiReview(
     return {
       ok: false,
       code: "cap",
-      message: en
-        ? `You've reached this month's AI review limit (${HOMEWORK_AI_REVIEW_MONTHLY_CAP}). You can still review and grade by hand.`
-        : `Alcanzaste el límite de revisiones con IA de este mes (${HOMEWORK_AI_REVIEW_MONTHLY_CAP}). Aún puedes revisar y calificar a mano.`,
+      message: t("homework.ai.limitReached", { cap: HOMEWORK_AI_REVIEW_MONTHLY_CAP }),
     };
   }
 
@@ -145,7 +144,7 @@ export async function requestHomeworkAiReview(
     attemptText: attempt.textResponse,
     attachmentTexts,
     teacherInstructions,
-    en,
+    en: usesEnglishCopy(locale),
   });
 
   if (!result.ok) {
@@ -153,17 +152,13 @@ export async function requestHomeworkAiReview(
       return {
         ok: false,
         code: "not-configured",
-        message: en
-          ? "AI review isn't available right now. You can still review and grade by hand."
-          : "La revisión con IA no está disponible ahora. Aún puedes revisar y calificar a mano.",
+        message: t("homework.ai.unavailable"),
       };
     }
     return {
       ok: false,
       code: "error",
-      message: en
-        ? "Couldn't generate an AI review. Please try again."
-        : "No se pudo generar la revisión con IA. Inténtalo de nuevo.",
+      message: t("homework.ai.failed"),
     };
   }
 

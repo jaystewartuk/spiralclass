@@ -3,7 +3,7 @@ import type { AppLocale } from "@/lib/i18n";
 import { gateProFeature, upgradeNudge } from "@/lib/subscriptions/enforce";
 import { trackServerEvent } from "@/lib/analytics/posthog";
 import { resolveFocusTagsWithCategory } from "@/lib/focus-tags";
-import { usesEnglishCopy, languageName, stripAnswerKeyMarkdown } from "@spiralclass/shared";
+import { createT, languageName, stripAnswerKeyMarkdown, type TFunction } from "@spiralclass/shared";
 import { logger } from "@/lib/logger";
 import { hasAnthropicCreds, podcastsEnabled } from "@/lib/env";
 import { enqueue } from "@/lib/jobs/enqueue";
@@ -52,10 +52,8 @@ async function usedThisMonth(teacherId: string): Promise<number> {
   });
 }
 
-function capMessage(en: boolean): string {
-  return en
-    ? `You've reached this month's AI generation limit (${CLASS_CONTENT_AI_MONTHLY_CAP}). You can still write and record content yourself.`
-    : `Alcanzaste el límite de generaciones con IA de este mes (${CLASS_CONTENT_AI_MONTHLY_CAP}). Aún puedes crear el contenido tú mismo.`;
+function capMessage(t: TFunction): string {
+  return t("materials.ai.podcastLimitReached", { cap: CLASS_CONTENT_AI_MONTHLY_CAP });
 }
 
 export type RequestPodcastResult =
@@ -78,7 +76,7 @@ export async function requestMaterialPodcast(input: {
   targetDurationMin?: number | null;
   locale: AppLocale;
 }): Promise<RequestPodcastResult> {
-  const en = usesEnglishCopy(input.locale);
+  const t = createT(input.locale);
 
   const gate = await gateProFeature(input.teacherId, "class_content");
   if (!gate.ok)
@@ -90,14 +88,12 @@ export async function requestMaterialPodcast(input: {
     return {
       ok: false,
       code: "not-configured",
-      message: en
-        ? "Podcast generation isn't available right now."
-        : "La generación de podcast no está disponible ahora.",
+      message: t("materials.ai.podcastUnavailable"),
     };
   }
 
   if ((await usedThisMonth(input.teacherId)) >= CLASS_CONTENT_AI_MONTHLY_CAP) {
-    return { ok: false, code: "cap", message: capMessage(en) };
+    return { ok: false, code: "cap", message: capMessage(t) };
   }
 
   const material = await prisma.libraryMaterial.findFirst({
@@ -108,23 +104,21 @@ export async function requestMaterialPodcast(input: {
     return {
       ok: false,
       code: "not-found",
-      message: en ? "Material not found." : "Material no encontrado.",
+      message: t("web.action.library.materialNotFound"),
     };
   }
   if (!material.body || material.body.trim().length === 0) {
     return {
       ok: false,
       code: "invalid",
-      message: en
-        ? "Add some written content before generating a podcast."
-        : "Agrega contenido escrito antes de generar un podcast.",
+      message: t("materials.ai.podcastNeedsContent"),
     };
   }
   if (material.podcast?.status === "pending") {
     return {
       ok: false,
       code: "already-pending",
-      message: en ? "A podcast is already being generated." : "Ya se está generando un podcast.",
+      message: t("materials.ai.podcastInProgress"),
     };
   }
 

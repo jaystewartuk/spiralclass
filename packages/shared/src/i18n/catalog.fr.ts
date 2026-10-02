@@ -8092,4 +8092,38 @@ export const fr = {
   "marketing.insight.repeatWhatWorks": "Cela vaut la peine de publier plus souvent dans {label}.",
   "marketing.insight.tryUntriedCommunity":
     "Vous n'avez pas encore publié dans {label}. Un essai vous dira si cela vaut la peine.",
+  "materials.ai.topicRequired":
+    "Choisissez un point à travailler ou décrivez ce que ce cours doit couvrir.",
+  "materials.ai.classLimitReached":
+    "Vous avez atteint la limite mensuelle de génération par IA ({cap}). Vous pouvez toujours rédiger le contenu vous-même.",
+  "materials.ai.classUnavailable":
+    "La génération par IA n'est pas disponible pour le moment. Vous pouvez toujours rédiger le contenu vous-même.",
+  "materials.ai.classFailed": "Impossible de générer le contenu. Veuillez réessayer.",
+  "materials.ai.revisionGone": "Cette version n'est plus disponible.",
+  "materials.ai.libraryTopicRequired":
+    "Décrivez d'abord le support ou choisissez un format ou un point à travailler.",
+  "materials.ai.libraryLimitReached":
+    "Vous avez atteint la limite mensuelle de génération par IA ({cap}). Vous pouvez toujours rédiger le support vous-même.",
+  "materials.ai.libraryUnavailable":
+    "La génération par IA n'est pas disponible pour le moment. Vous pouvez toujours rédiger le support vous-même.",
+  "materials.ai.refineInstructionRequired": "Décrivez la modification que l'IA doit apporter.",
+  "materials.ai.refineLimitReached":
+    "Vous avez atteint la limite mensuelle de génération par IA ({cap}). Vous pouvez toujours modifier le support vous-même.",
+  "materials.ai.refineUnavailable":
+    "La modification par IA n'est pas disponible pour le moment. Vous pouvez toujours modifier le support vous-même.",
+  "materials.ai.refineFailed": "Impossible d'appliquer la modification. Veuillez réessayer.",
+  "materials.ai.podcastLimitReached":
+    "Vous avez atteint la limite mensuelle de génération par IA ({cap}). Vous pouvez toujours rédiger et enregistrer le contenu vous-même.",
+  "materials.ai.podcastUnavailable":
+    "La génération de podcast n'est pas disponible pour le moment.",
+  "materials.ai.podcastNeedsContent": "Ajoutez du contenu écrit avant de générer un podcast.",
+  "materials.ai.podcastInProgress": "Un podcast est déjà en cours de génération.",
+  "materials.templates.nameRequired": "Donnez un nom à ce modèle.",
+  "materials.templates.tooMany": "Trop de modèles dans un même enregistrement.",
+  "materials.templates.everyNeedsName": "Chaque modèle doit avoir un nom.",
+  "homework.ai.limitReached":
+    "Vous avez atteint la limite mensuelle de corrections par IA ({cap}). Vous pouvez toujours corriger et noter vous-même.",
+  "homework.ai.unavailable":
+    "La correction par IA n'est pas disponible pour le moment. Vous pouvez toujours corriger et noter vous-même.",
+  "homework.ai.failed": "Impossible de générer une correction par IA. Veuillez réessayer.",
 } as const;

@@ -8041,4 +8041,35 @@ export const esMX = {
   "marketing.insight.repeatWhatWorks": "Vale la pena publicar más seguido en {label}.",
   "marketing.insight.tryUntriedCommunity":
     "Todavía no publicas en {label}. Una prueba te dice si vale la pena.",
+  "materials.ai.topicRequired": "Elige un enfoque o describe de qué trata esta clase.",
+  "materials.ai.classLimitReached":
+    "Alcanzaste el límite de generaciones con IA de este mes ({cap}). Aún puedes escribir el contenido tú mismo.",
+  "materials.ai.classUnavailable":
+    "La generación con IA no está disponible ahora. Aún puedes escribir el contenido tú mismo.",
+  "materials.ai.classFailed": "No se pudo generar el contenido. Inténtalo de nuevo.",
+  "materials.ai.revisionGone": "Esa versión ya no está disponible.",
+  "materials.ai.libraryTopicRequired": "Describe el material o elige un formato/enfoque primero.",
+  "materials.ai.libraryLimitReached":
+    "Alcanzaste el límite de generaciones con IA de este mes ({cap}). Aún puedes escribir el material tú mismo.",
+  "materials.ai.libraryUnavailable":
+    "La generación con IA no está disponible ahora. Aún puedes escribir el material tú mismo.",
+  "materials.ai.refineInstructionRequired": "Describe el cambio que quieres que haga la IA.",
+  "materials.ai.refineLimitReached":
+    "Alcanzaste el límite de generaciones con IA de este mes ({cap}). Aún puedes editar el material tú mismo.",
+  "materials.ai.refineUnavailable":
+    "La edición con IA no está disponible ahora. Aún puedes editar el material tú mismo.",
+  "materials.ai.refineFailed": "No se pudo aplicar el cambio. Inténtalo de nuevo.",
+  "materials.ai.podcastLimitReached":
+    "Alcanzaste el límite de generaciones con IA de este mes ({cap}). Aún puedes crear el contenido tú mismo.",
+  "materials.ai.podcastUnavailable": "La generación de podcast no está disponible ahora.",
+  "materials.ai.podcastNeedsContent": "Agrega contenido escrito antes de generar un podcast.",
+  "materials.ai.podcastInProgress": "Ya se está generando un podcast.",
+  "materials.templates.nameRequired": "Ponle un nombre a esta plantilla.",
+  "materials.templates.tooMany": "Demasiadas plantillas en un solo guardado.",
+  "materials.templates.everyNeedsName": "Cada plantilla necesita un nombre.",
+  "homework.ai.limitReached":
+    "Alcanzaste el límite de revisiones con IA de este mes ({cap}). Aún puedes revisar y calificar a mano.",
+  "homework.ai.unavailable":
+    "La revisión con IA no está disponible ahora. Aún puedes revisar y calificar a mano.",
+  "homework.ai.failed": "No se pudo generar la revisión con IA. Inténtalo de nuevo.",
 } as const;
