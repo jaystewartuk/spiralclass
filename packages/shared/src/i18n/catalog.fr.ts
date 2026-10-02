@@ -8126,4 +8126,6 @@ export const fr = {
   "homework.ai.unavailable":
     "La correction par IA n'est pas disponible pour le moment. Vous pouvez toujours corriger et noter vous-même.",
   "homework.ai.failed": "Impossible de générer une correction par IA. Veuillez réessayer.",
+  "web.action.admin.reasonRequired": "Un motif est requis.",
+  "web.action.admin.notFound": "Introuvable.",
 } as const;

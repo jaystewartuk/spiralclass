@@ -6,7 +6,7 @@ import { requireAdmin } from "@/lib/admin";
 import { writeOverride } from "@/lib/audit";
 import { getPreferredLocale } from "@/lib/i18n";
 import { revalidateAfterAction } from "@/lib/revalidate";
-import { usesEnglishCopy } from "@spiralclass/shared";
+import { createT } from "@spiralclass/shared";
 
 /**
  * Mark a teacher or a student as an operator's test account, or unmark it
@@ -32,7 +32,7 @@ export async function setTestAccountAction(
   formData: FormData,
 ): Promise<TestAccountActionState> {
   const actor = await requireAdmin("support");
-  const en = usesEnglishCopy(await getPreferredLocale());
+  const t = createT(await getPreferredLocale());
   const parsed = schema.safeParse({
     target: formData.get("target"),
     id: formData.get("id"),
@@ -40,7 +40,7 @@ export async function setTestAccountAction(
     reason: formData.get("reason"),
   });
   if (!parsed.success) {
-    return { error: en ? "A reason is required." : "Se requiere un motivo." };
+    return { error: t("web.action.admin.reasonRequired") };
   }
   const { target, id, reason } = parsed.data;
   const value = parsed.data.testAccount === "true";
@@ -81,7 +81,7 @@ export async function setTestAccountAction(
     });
     return true;
   });
-  if (!found) return { error: en ? "Not found." : "No encontrado." };
+  if (!found) return { error: t("web.action.admin.notFound") };
 
   revalidateAfterAction(`/admin/${target}s/${id}`);
   return { ok: true };

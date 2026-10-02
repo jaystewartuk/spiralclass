@@ -8038,4 +8038,6 @@ export const en = {
   "homework.ai.unavailable":
     "AI review isn't available right now. You can still review and grade by hand.",
   "homework.ai.failed": "Couldn't generate an AI review. Please try again.",
+  "web.action.admin.reasonRequired": "A reason is required.",
+  "web.action.admin.notFound": "Not found.",
 } as const;

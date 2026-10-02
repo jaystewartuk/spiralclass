@@ -8072,4 +8072,6 @@ export const esMX = {
   "homework.ai.unavailable":
     "La revisión con IA no está disponible ahora. Aún puedes revisar y calificar a mano.",
   "homework.ai.failed": "No se pudo generar la revisión con IA. Inténtalo de nuevo.",
+  "web.action.admin.reasonRequired": "Se requiere un motivo.",
+  "web.action.admin.notFound": "No encontrado.",
 } as const;
