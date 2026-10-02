@@ -25,7 +25,7 @@ import {
 import { loadEntitlements } from "@/lib/subscriptions/service";
 import { getVideoProvider } from "@/lib/video/provider";
 import { formatMinorUnits } from "@/lib/money";
-import { currencyForRegion } from "@spiralclass/shared";
+import { currencyForRegion, createT, languageCodeToLocale } from "@spiralclass/shared";
 import { SUPPORT_EMAIL } from "@/lib/support";
 import { formatDateTimeInZone } from "@/lib/tz";
 
@@ -1258,22 +1258,22 @@ function emailCalendarUrl(
     studentName?: string;
   };
   if (!v.calendarStartIso || !v.calendarEndIso) return null;
-  const es = languageCode === "es";
+  const t = createT(languageCodeToLocale(languageCode));
 
   let title: string;
   if (templateName === "booking_created_teacher") {
-    title = es ? `Clase: ${v.studentName}` : `Class: ${v.studentName}`;
+    title = t("calendarEvent.text", { studentName: v.studentName ?? "" });
   } else if (templateName === "reminder_24h_teacher" || templateName === "reminder_1h_teacher") {
     // Teacher-recipient reminders name the student (reminder_15m_teacher carries
     // no calendar ISO, so it never reaches this builder).
-    title = es ? `Clase con ${v.studentName}` : `Class with ${v.studentName}`;
+    title = t("calendarEvent.text2", { studentName: v.studentName ?? "" });
   } else if (
     templateName === "booking_confirmation" ||
     templateName === "reminder_24h" ||
     templateName === "reminder_1h" ||
     templateName === "reminder_15m"
   ) {
-    title = es ? `Clase con ${v.teacherName}` : `Class with ${v.teacherName}`;
+    title = t("classes.detail.calendarEventTitle", { teacherName: v.teacherName ?? "" });
   } else {
     return null;
   }
@@ -2523,12 +2523,11 @@ export type LoadedPayment = {
 // and the English copy, so a hardcoded Spanish one put Spanish inside an
 // English sentence — "Your refund of £20.00 for tu paquete" reached every
 // English-reading student. Render it in the RECIPIENT's language, through the
-// same locale-to-language bridge the templates themselves use: anything that
-// is not es reads English, exactly as those templates already do.
+// same locale-to-language bridge the templates themselves use.
 function packagePlaceholder(locale: string, form: "yours" | "indefinite"): string {
-  const es = localeToLanguageCode(locale) === "es";
-  if (form === "yours") return es ? "tu paquete" : "your package";
-  return es ? "un paquete" : "a package";
+  const t = createT(languageCodeToLocale(localeToLanguageCode(locale)));
+  if (form === "yours") return t("email.packagePlaceholder.text");
+  return t("email.packagePlaceholder.text2");
 }
 
 // Last resort for a SUBSCRIPTION notification queued before its metadata

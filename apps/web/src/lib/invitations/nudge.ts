@@ -4,7 +4,7 @@ import { getEmailClient } from "@/lib/email";
 import { renderBrandedEmailHtml } from "@/lib/email/html-shell";
 import { logger } from "@/lib/logger";
 import { SUPPORT_EMAIL } from "@/lib/support";
-import { localeToLanguageCode } from "@spiralclass/shared";
+import { localeToLanguageCode, createT, languageCodeToLocale } from "@spiralclass/shared";
 import { INVITATION_NUDGE_AFTER_DAYS } from "./constants";
 
 const log = logger({ surface: "invitations" });
@@ -62,23 +62,19 @@ export async function sendPendingInviteNudges(deps: {
 
     const count = invitationIds.length;
     const languageCode = localeToLanguageCode(teacher.locale);
-    const es = languageCode === "es";
+    const t = createT(languageCodeToLocale(languageCode));
     const dashUrl = `${appUrl}/dashboard/students/invitations`;
 
-    const subject = es
-      ? `${count} ${count === 1 ? "alumno no ha" : "alumnos no han"} aceptado tu invitación`
-      : `${count} student${count === 1 ? " hasn't" : "s haven't"} accepted your invitation`;
-    const heading = es ? "Invitaciones pendientes" : "Pending invitations";
-    const intro = es
-      ? `Hola ${teacher.name}, ${count === 1 ? "un alumno" : `${count} alumnos`} que invitaste aún no ${count === 1 ? "acepta" : "aceptan"} su invitación. Puedes reenviarla en un toque desde tu panel.`
-      : `Hi ${teacher.name}, ${count === 1 ? "a student" : `${count} students`} you invited ${count === 1 ? "hasn't" : "haven't"} accepted yet. You can resend in one tap from your dashboard.`;
-    const cta = { label: es ? "Ver invitaciones" : "View invitations", url: dashUrl };
+    const subject = t("email.pendingInviteNudge.subject", { count });
+    const heading = t("email.pendingInviteNudge.heading");
+    const intro = t("email.pendingInviteNudge.intro", { name: teacher.name, count });
+    const cta = { label: t("email.pendingInviteNudge.ctaLabel"), url: dashUrl };
 
     const html = renderBrandedEmailHtml(
       { preheader: subject, heading, paragraphs: [intro], cta },
       { languageCode, appUrl },
     );
-    const body = `${intro}\n\n${cta.label}: ${dashUrl}`;
+    const body = `${intro}\n\n${t("email.labelledValue", { label: cta.label, value: dashUrl })}`;
 
     try {
       const res = await getEmailClient().send({

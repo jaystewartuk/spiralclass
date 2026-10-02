@@ -1,3 +1,4 @@
+import { createT, languageCodeToLocale } from "@spiralclass/shared";
 import type { Prisma, PrismaClient } from "@prisma/client";
 
 import type { AppLocale } from "@/lib/i18n";
@@ -161,10 +162,10 @@ export async function renderInboxItem(
   });
 
   if (!built.ok) {
-    const es = languageCode === "es";
+    const t = createT(languageCodeToLocale(languageCode));
     return {
       ...base,
-      title: es ? "Notificación" : "Notification",
+      title: t("inbox.fallback.title"),
       body: "",
       href: null,
       deepLink: null,

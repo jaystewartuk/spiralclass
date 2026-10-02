@@ -99,6 +99,19 @@ describe("buildCalendarFeed — student", () => {
     expect(unfold(ics)).toContain("Prof's time");
   });
 
+  // `isEnglish()` sent every other locale the Spanish feed.
+  it("gives a French student a French feed", async () => {
+    state.student = { id: "s1", email: "a@b.com", locale: "fr", timezone: "Europe/Paris" };
+    state.bookings = [booking()];
+    const { ics, calName } = await buildCalendarFeed(
+      { kind: "student", id: "s1" },
+      { appUrl: "https://spiralclass.com" },
+    );
+    expect(calName).toBe("Mes cours — SpiralClass");
+    expect(unfold(ics)).toContain("Réservé via SpiralClass.");
+    expect(unfold(ics)).not.toContain("Reservada");
+  });
+
   it("returns an empty calendar for a missing student", async () => {
     state.student = null;
     const { ics } = await buildCalendarFeed(

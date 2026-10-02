@@ -3,7 +3,7 @@ import { renderBrandedEmailHtml } from "@/lib/email/html-shell";
 import { serverEnv } from "@/lib/env";
 import { logger } from "@/lib/logger";
 import type { AppLocale } from "@/lib/i18n";
-import { usesEnglishCopy } from "@spiralclass/shared";
+import { createT, localeToLanguageCode } from "@spiralclass/shared";
 
 const log = logger({ surface: "leads" });
 
@@ -20,25 +20,31 @@ export async function notifyTeacherOfLead(input: {
   locale: AppLocale;
   lead: { name: string; email: string; phone: string | null; message: string | null };
 }): Promise<void> {
-  const en = usesEnglishCopy(input.locale);
+  const t = createT(input.locale);
   const appUrl = serverEnv().APP_URL.replace(/\/$/, "");
   const leadsUrl = `${appUrl}/dashboard/leads`;
 
-  const heading = en ? "New lead from your booking page" : "Nuevo interesado en tu página";
-  const subject = en ? `New lead: ${input.lead.name}` : `Nuevo interesado: ${input.lead.name}`;
-  const intro = en
-    ? `${input.lead.name} reached out from your booking page and would like you to get in touch.`
-    : `${input.lead.name} te escribió desde tu página de reservas y quiere que le contactes.`;
+  const heading = t("email.leadAlert.heading");
+  const subject = t("email.leadAlert.subject", { name: input.lead.name });
+  const intro = t("email.leadAlert.intro", { name: input.lead.name });
 
   // Contact lines, spoken plainly so they read well in both the text and HTML
   // bodies. Phone/message are only included when present.
-  const contactLabel = en ? "Email" : "Correo";
-  const lines = [`${contactLabel}: ${input.lead.email}`];
-  if (input.lead.phone) lines.push(`${en ? "Phone" : "Teléfono"}: ${input.lead.phone}`);
+  const contactLabel = t("common.email");
+  const lines = [t("email.labelledValue", { label: contactLabel, value: input.lead.email })];
+  if (input.lead.phone)
+    lines.push(
+      t("email.labelledValue", { label: t("email.leadAlert.phoneLabel"), value: input.lead.phone }),
+    );
   if (input.lead.message) {
-    lines.push((en ? "Message: " : "Mensaje: ") + input.lead.message);
+    lines.push(
+      t("email.labelledValue", {
+        label: t("email.leadAlert.messageLabel"),
+        value: input.lead.message,
+      }),
+    );
   }
-  const ctaLabel = en ? "See your leads" : "Ver tus interesados";
+  const ctaLabel = t("email.leadAlert.ctaLabel");
 
   const html = renderBrandedEmailHtml(
     {
@@ -47,9 +53,9 @@ export async function notifyTeacherOfLead(input: {
       paragraphs: [intro, ...lines],
       cta: { label: ctaLabel, url: leadsUrl },
     },
-    { languageCode: en ? "en" : "es", appUrl },
+    { languageCode: localeToLanguageCode(input.locale), appUrl },
   );
-  const body = `${intro}\n\n${lines.join("\n")}\n\n${ctaLabel}: ${leadsUrl}`;
+  const body = `${intro}\n\n${lines.join("\n")}\n\n${t("email.labelledValue", { label: ctaLabel, value: leadsUrl })}`;
 
   const res = await getEmailClient().send({
     to: input.to,

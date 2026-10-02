@@ -4,7 +4,7 @@ import { getEmailClient, getEmailClientKind } from "@/lib/email";
 import { renderBrandedEmailHtml } from "@/lib/email/html-shell";
 import { logger } from "@/lib/logger";
 import type { AppLocale } from "@/lib/i18n";
-import { usesEnglishCopy, isAppLocale, DEFAULT_LOCALE } from "@spiralclass/shared";
+import { createT, isAppLocale, DEFAULT_LOCALE, localeToLanguageCode } from "@spiralclass/shared";
 
 const log = logger({ surface: "better-auth-email-otp" });
 
@@ -19,33 +19,13 @@ export async function sendBetterAuthEmailOtp(input: {
   type: "sign-in" | "email-verification" | "forget-password" | "change-email";
 }): Promise<void> {
   const locale = await resolveLocale(input.email);
-  const en = usesEnglishCopy(locale);
-  const languageCode = en ? "en" : "es";
+  const t = createT(locale);
+  const languageCode = localeToLanguageCode(locale);
   const isEmailChange = input.type === "change-email";
-  const heading = en
-    ? isEmailChange
-      ? "Confirm your new email"
-      : "Your sign-in code"
-    : isEmailChange
-      ? "Confirma tu nuevo correo"
-      : "Tu código para entrar";
-  const subject = en
-    ? isEmailChange
-      ? "Confirm your new SpiralClass email"
-      : "Your SpiralClass sign-in code"
-    : isEmailChange
-      ? "Confirma tu nuevo correo de SpiralClass"
-      : "Tu código para entrar a SpiralClass";
-  const intro = en
-    ? isEmailChange
-      ? "Enter this code to confirm this is your new email address. It's valid for 5 minutes."
-      : "Enter this code to sign in. It's valid for 5 minutes."
-    : isEmailChange
-      ? "Escribe este código para confirmar que este es tu nuevo correo. Es válido por 5 minutos."
-      : "Escribe este código para entrar. Es válido por 5 minutos.";
-  const ignore = en
-    ? "If you didn't request this, you can safely ignore this email."
-    : "Si no solicitaste esto, puedes ignorar este correo.";
+  const heading = isEmailChange ? t("email.otp.heading") : t("email.otp.heading2");
+  const subject = isEmailChange ? t("email.otp.subject") : t("email.otp.subject2");
+  const intro = isEmailChange ? t("email.otp.intro") : t("email.otp.intro2");
+  const ignore = t("email.otp.ignore");
 
   const html = renderBrandedEmailHtml(
     { preheader: heading, heading, paragraphs: [intro, ignore], codeBlock: input.otp },

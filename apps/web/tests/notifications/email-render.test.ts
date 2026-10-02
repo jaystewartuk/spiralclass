@@ -95,7 +95,9 @@ describe("renderEmail — payment_received (receipt, the payment receipt)", () =
     expect(r.body).toMatch(/https:\/\/app\.test\/my-classes/);
   });
 
-  it("falls back to '(pendiente)' / '(pending)' when actionUrl is null", () => {
+  // One marker for every template; it was "(pending)" in some and "(link
+  // pending)" in others.
+  it("falls back to '(enlace pendiente)' / '(link pending)' when actionUrl is null", () => {
     const es = renderEmail({
       templateName: "payment_received",
       languageCode: "es",
@@ -107,7 +109,7 @@ describe("renderEmail — payment_received (receipt, the payment receipt)", () =
       },
       actionUrl: null,
     });
-    expect(es.body).toMatch(/\(pendiente\)/);
+    expect(es.body).toMatch(/\(enlace pendiente\)/);
 
     const en = renderEmail({
       templateName: "payment_received",
@@ -120,7 +122,7 @@ describe("renderEmail — payment_received (receipt, the payment receipt)", () =
       },
       actionUrl: null,
     });
-    expect(en.body).toMatch(/\(pending\)/);
+    expect(en.body).toMatch(/\(link pending\)/);
   });
 });
 

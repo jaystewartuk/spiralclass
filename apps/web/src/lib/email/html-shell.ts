@@ -7,7 +7,13 @@
 // Color tokens are pulled from the shared brand palette (`@spiralclass/shared`)
 // — the same source web and mobile read from — so the brand voice stays
 // consistent across surfaces (web app, emails, unsubscribe page).
-import { MARK, palette, type LanguageCode } from "@spiralclass/shared";
+import {
+  MARK,
+  palette,
+  type LanguageCode,
+  createT,
+  languageCodeToLocale,
+} from "@spiralclass/shared";
 
 /**
  * The email type stack (D-140).
@@ -63,10 +69,8 @@ export type EmailHtmlContent = {
 };
 
 export type BrandedEmailOptions = {
-  // Outbound email/push copy is authored in Spanish + English only; any other
-  // registered language (e.g. fr) falls back to English via the `=== "es"`
-  // branches below. Typed as the full LanguageCode so a UI locale flows through
-  // without a narrowing cast at every call site.
+  // The recipient's language. Every word of the shell comes from the catalog
+  // in this language, and it is what <html lang> declares.
   languageCode: LanguageCode;
   unsubscribeUrl?: string | null;
   // Sent on every email (teacher and student alike), unlike unsubscribeUrl
@@ -85,21 +89,14 @@ export function renderBrandedEmailHtml(
   content: EmailHtmlContent,
   options: BrandedEmailOptions,
 ): string {
-  const lang = options.languageCode === "es" ? "es" : "en";
-  const tagline =
-    options.languageCode === "es"
-      ? "Clases, cobros y recordatorios sin la carga mental."
-      : "Classes, payments and reminders without the mental load.";
-  const sentBy =
-    options.languageCode === "es"
-      ? "Enviado por SpiralClass · spiralclass.com"
-      : "Sent by SpiralClass · spiralclass.com";
-  const unsubLabel =
-    options.languageCode === "es"
-      ? "Dejar de recibir estos correos"
-      : "Unsubscribe from these emails";
-  const notificationSettingsLabel =
-    options.languageCode === "es" ? "Configurar notificaciones" : "Manage notification settings";
+  // The reader's own locale, on <html lang> and for every word of the shell.
+  // This was `"es"` or `"en"`, so a French email declared itself English.
+  const lang = languageCodeToLocale(options.languageCode);
+  const t = createT(lang);
+  const tagline = t("email.shell.tagline");
+  const sentBy = t("email.shell.sentBy");
+  const unsubLabel = t("email.shell.unsubLabel");
+  const notificationSettingsLabel = t("email.shell.notificationSettingsLabel");
 
   const paragraphsHtml = content.paragraphs
     .map(
@@ -119,7 +116,7 @@ export function renderBrandedEmailHtml(
               </table>`
     : "";
 
-  const codeLabel = options.languageCode === "es" ? "Tu código de acceso" : "Your sign-in code";
+  const codeLabel = t("email.shell.codeLabel");
   // Real click-to-copy (a button invoking the Clipboard API) isn't achievable
   // here — Gmail, Outlook, and Apple Mail all strip <script> tags from email
   // HTML, so no JS can run inside the message. The best available substitute:
@@ -127,8 +124,7 @@ export function renderBrandedEmailHtml(
   // to be copied, and the code sits ALONE in its own paragraph/cell (no
   // surrounding label text) so a double/triple-tap or click-drag selects
   // exactly the digits and nothing else.
-  const copyHint =
-    options.languageCode === "es" ? "Toca para seleccionar y copiar" : "Tap to select and copy";
+  const copyHint = t("email.shell.copyHint");
   const codeBlockHtml = content.codeBlock
     ? `
               <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:20px 0 0 0;width:100%;">

@@ -111,4 +111,21 @@ describe("outbound copy", () => {
       `./__golden__/outbound-copy.${language}.txt`,
     );
   });
+
+  // Until this copy moved into the catalog, every language but Spanish was sent
+  // the English email: the templates asked "is this Spanish?" and nothing else.
+  // A language that renders a template exactly as English does has not been
+  // given that template.
+  it.each(LANGUAGE_CODES.filter((code) => code !== "en"))(
+    "gives %s a subject and a push title of its own for every template",
+    (language) => {
+      const english = everyRendering("en").split("\n");
+      const theirs = everyRendering(language).split("\n");
+      const shared = theirs.filter(
+        (line, i) =>
+          (line.startsWith("subject: ") || line.startsWith("title: ")) && line === english[i],
+      );
+      expect(shared, `${language} lines identical to English`).toEqual([]);
+    },
+  );
 });

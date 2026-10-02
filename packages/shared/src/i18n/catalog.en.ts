@@ -7384,4 +7384,586 @@ export const en = {
   "validation.noteTooLong": "Note too long",
   "validation.listTooLong": "The list is too long",
   "validation.addStudent": "Add at least one student.",
+  "push.bookingConfirmation.title": "Class confirmed",
+  "push.bookingConfirmation.body":
+    "Your class with {teacherName} is on {classDateTime} · {classesRemaining} classes left",
+  "push.reminder24h.lead": "In 1 hour",
+  "push.reminder24h.lead2": "In 15 minutes",
+  "push.reminder24h.title": "Reminder: {lead}",
+  "push.reminder24h.body": "Class with {teacherName} on {classDateTime}",
+  "push.reminder24hTeacher.body": "Class with {studentName} on {classDateTime}",
+  "push.cancelLt24h.title": "Class canceled",
+  "push.cancelLt24h.body":
+    "Your class on {originalDateTime} with {teacherName} was canceled (less than 24 h).",
+  "push.cancelGte24hWithReschedule.title": "Your teacher canceled",
+  "push.cancelGte24hWithReschedule.body":
+    "Class on {originalDateTime} with {teacherName}. Reschedule anytime.",
+  "push.rescheduleConfirm.title": "Class rescheduled",
+  "push.rescheduleConfirm.body": "Was {oldDateTime}. Now {newDateTime} with {teacherName}.",
+  "push.paymentReceived.title": "Payment received",
+  "push.paymentReceived.body": "{packageName} with {teacherName} — {amount}.",
+  "push.magicLink.title": "Your sign-in link",
+  "push.magicLink.body": "Tap to open {teacherName}'s portal. Expires in {expiryMinutes} min.",
+  "push.materialsSend.body": "Materials for your class on {classDateTime} with {teacherName}.",
+  "push.paymentPendingTeacher.title": "Wise payment started",
+  "push.paymentPendingTeacher.body":
+    "{studentName} is buying {packageName} ({amount}). Ref: {wiseReference}.",
+  "push.paymentMarkedSentTeacher.title": "Wise payment sent",
+  "push.paymentMarkedSentTeacher.body":
+    "{studentName} sent {amount} for {packageName}. Check Wise.",
+  "push.lessonInsightsReviewTeacher.title": "Focus areas ready",
+  "push.lessonInsightsReviewTeacher.body":
+    "Review the focus areas from your class with {studentName}.",
+  "push.wiseConfirmReminderTeacher.title": "Confirm Wise payment",
+  "push.wiseConfirmReminderTeacher.body":
+    "{studentName}: {amount} is still unconfirmed. Confirm it to activate the package.",
+  "push.paymentFailedStudent.title": "Payment didn't complete",
+  "push.paymentFailedStudent.body":
+    "Your payment for {packageName} with {teacherName} didn't go through.",
+  "push.refundIssuedStudent.title": "Refund issued",
+  "push.refundIssuedStudent.body": "{amount} for {packageName} with {teacherName}.",
+  "push.refundIssuedTeacher.body": "{amount} to {studentName} for {packageName}.",
+  "push.disputeLostStudent.title": "Your payment was reversed",
+  "push.disputeLostStudent.body":
+    "{amount} for {packageName}. The remaining classes are no longer available.",
+  "push.disputeLostTeacher.title": "Chargeback lost",
+  "push.disputeLostTeacher.body": "{amount} from {studentName} for {packageName}.",
+  "push.stripeReadyTeacher.title": "Stripe is ready",
+  "push.stripeReadyTeacher.body": "You can now accept card payments.",
+  "push.stripeRequirementsTeacher.title": "Stripe needs more info",
+  "push.stripeRequirementsTeacher.body": "Card payments are paused.",
+  "push.accountDisabledTeacher.body": "Your SpiralClass account was disabled. Check your email.",
+  "push.bookingCreatedTeacher.title": "New class booked",
+  "push.bookingCreatedTeacher.body": "{studentName} booked {classDateTime}",
+  "push.cancelLt24hTeacher.title": "Late cancellation",
+  "push.cancelLt24hTeacher.body": "{studentName} canceled {originalDateTime} (<24h).",
+  "push.cancelGte24hTeacher.body": "{studentName} canceled {originalDateTime}.",
+  "push.rescheduleConfirmTeacher.body": "{studentName}: {oldDateTime} → {newDateTime}.",
+  "push.paymentReceivedTeacher.title": "New sale",
+  "push.paymentReceivedTeacher.body": "{studentName} bought {packageName} ({amount}).",
+  "push.wiseMarkedSentStudent.title": "Your teacher was notified",
+  "push.wiseMarkedSentStudent.body":
+    "We told {teacherName} you sent your transfer ({wiseReference}). Your package activates once they confirm it.",
+  "push.noShowStudent.title": "No-show recorded",
+  "push.noShowStudent.body": "{teacherName} marked the {originalDateTime} class as a no-show.",
+  "push.packageExpiryNudge.title": "Don't lose your classes",
+  "push.packageExpiryNudge.body":
+    "You have {classesRemaining} class(es) left with {teacherName}; they expire {expiryDate}.",
+  "push.packageConsumedStudent.title": "Shall we keep going?",
+  "push.packageConsumedStudent.body":
+    'You\'ve used all the classes in "{packageName}" with {teacherName}. Buy your next package from your portal.',
+  "push.packageConsumedTeacher.title": "Renewal opportunity",
+  "push.packageConsumedTeacher.body": '{studentName} finished their "{packageName}" package.',
+  "push.subscriptionTrialEnding.title": "Your Pro trial ends soon",
+  "push.subscriptionTrialEnding.body":
+    "{daysRemaining} days left in your trial. Pick a plan to keep Pro.",
+  "push.subscriptionPaymentSucceeded.body":
+    "{amount} for SpiralClass Pro. Next charge: {nextChargeDate}.",
+  "push.subscriptionPaymentFailed.title": "Update your payment method",
+  "push.subscriptionPaymentFailed.body":
+    "We couldn't charge your subscription. You have {graceDays} days to fix it.",
+  "push.subscriptionCanceled.title": "Your Pro subscription ended",
+  "push.subscriptionCanceled.body":
+    "You're on the Free plan. Your students and bookings stay active.",
+  "push.subscriptionFoundingPriceLocked.title": "Founding price locked",
+  "push.subscriptionFoundingPriceLocked.body": "Your {amount}/mo price is locked for life.",
+  "push.libraryMaterialAssigned.title": "New material",
+  "push.libraryMaterialAssigned.body":
+    '{teacherName} assigned you "{materialLabel}". Open it in your materials.',
+  "push.homeworkAssignedStudent.title": "New homework",
+  "push.homeworkAssignedStudent.body": '{teacherName} assigned you "{assignmentTitle}".',
+  "push.homeworkFeedbackAvailableStudent.title": "Homework approved",
+  "push.homeworkFeedbackAvailableStudent.title2": "Resubmit your homework",
+  "push.homeworkFeedbackAvailableStudent.title3": "Feedback on your homework",
+  "push.homeworkFeedbackAvailableStudent.body":
+    '{teacherName} approved "{assignmentTitle}". See the feedback.',
+  "push.homeworkFeedbackAvailableStudent.body2":
+    '{teacherName} asked you to resubmit "{assignmentTitle}".',
+  "push.homeworkFeedbackAvailableStudent.body3":
+    '{teacherName} left feedback on "{assignmentTitle}".',
+  "push.homeworkDueSoonStudent.title": "Homework due soon",
+  "push.homeworkDueSoonStudent.body": '"{assignmentTitle}" is due {dueDate}.',
+  "push.homeworkOverdueStudent.title": "Homework overdue",
+  "push.homeworkOverdueStudent.body": '"{assignmentTitle}" is overdue. You can still submit it.',
+  "push.facebookGroupsNudgeTeacher.title": "Time to share again",
+  "push.facebookGroupsNudgeTeacher.body":
+    "Post your link in your Facebook groups again — that's how you fill your schedule.",
+  "push.studentAcquisitionPlanTeacher.title": "Your plan for the week",
+  "push.studentAcquisitionPlanTeacher.body": "You have prepared actions ready to get students.",
+  "push.chatMessage.title": "Message from {teacherName}",
+  "push.chatMessageTeacher.title": "Message from {studentName}",
+  "push.homeworkSubmittedTeacher.body": "{studentName} submitted “{assignmentTitle}”.",
+  "push.homeworkSubmittedTeacher.body2": "{studentName} submitted homework.",
+  "email.footerLine.text": "To stop receiving emails: {unsubscribeUrl}",
+  "email.notificationSettingsLine.text": "Manage notification settings: {notificationSettingsUrl}",
+  "email.archivedSuppressionNote.text":
+    "Note: {studentName} did not receive a notice for this cancellation because they're archived on your roster. Reactivate them from their profile if you want them to get notices again.",
+  "email.meetingMedium.sentence": "Join the video call at class time.",
+  "email.meetingMedium.sentence2": "We'll meet on WhatsApp at that time.",
+  "email.linkPending": "(link pending)",
+  "email.bookingConfirmation.subject": "Your class with {teacherName} is confirmed",
+  "email.bookingConfirmation.textBody":
+    "Hi, I'm {teacherName}. Your class on {classDateTime} is confirmed. You have {classesRemaining} classes left.\n\n{sentence}{textLink}{calLine}",
+  "email.bookingConfirmation.htmlPreheader": "{classDateTime} · {classesRemaining} classes left",
+  "email.bookingConfirmation.htmlParagraphs0":
+    "Hi, I'm {teacherName}. Your class on {classDateTime} is confirmed. You have {classesRemaining} classes left.",
+  "email.reminder24h.subject": "Reminder: class tomorrow with {teacherName}",
+  "email.reminder24h.textBody":
+    "Hi, I'm {teacherName}. Reminder for our class tomorrow, {classDateTime}.\n\n{sentence}{textLink}{calLine}",
+  "email.reminder24h.htmlPreheader": "Class tomorrow — {classDateTime}",
+  "email.reminder24h.htmlHeading": "Your class is tomorrow",
+  "email.reminder24h.htmlParagraphs0":
+    "Hi, I'm {teacherName}. Reminder for our class tomorrow, {classDateTime}.",
+  "email.reminder1h.greeting1h": "Hi, I'm {teacherName}. See you in 1 hour, {classDateTime}.",
+  "email.reminder1h.greeting1h2":
+    "Hi, I'm {teacherName}. See you in 1 hour, {classDateTime}, on WhatsApp.",
+  "email.reminder1h.subject": "Class with {teacherName} starts in 1 hour",
+  "email.reminder1h.htmlPreheader": "In 1 hour — {classDateTime}",
+  "email.reminder1h.htmlHeading": "Your class starts in 1 hour",
+  "email.reminder15m.greeting5m":
+    "Hi, I'm {teacherName}. Your class starts in 15 minutes, {classDateTime}.",
+  "email.reminder15m.greeting5m2":
+    "Hi, I'm {teacherName}. Your class starts in 15 minutes, {classDateTime}, on WhatsApp.",
+  "email.reminder15m.subject": "Class with {teacherName} starts in 15 minutes",
+  "email.reminder15m.htmlPreheader": "In 15 minutes — {classDateTime}",
+  "email.reminder15m.htmlHeading": "Your class starts in 15 minutes",
+  "email.reminder24hTeacher.subject": "Reminder: class tomorrow with {studentName}",
+  "email.reminder24hTeacher.textBody":
+    "Reminder: your class with {studentName} is tomorrow, {classDateTime}.{meetTail}{calLine}",
+  "email.reminder24hTeacher.htmlParagraphs0":
+    "Reminder: your class with {studentName} is tomorrow, {classDateTime}.",
+  "email.reminder1hTeacher.subject": "Class with {studentName} starts in 1 hour",
+  "email.reminder1hTeacher.textBody":
+    "Your class with {studentName} starts in 1 hour, {classDateTime}.{meetTail}{calLine}",
+  "email.reminder1hTeacher.htmlParagraphs0":
+    "Your class with {studentName} starts in 1 hour, {classDateTime}.",
+  "email.reminder15mTeacher.subject": "Class with {studentName} starts in 15 minutes",
+  "email.reminder15mTeacher.textBody":
+    "Your class with {studentName} starts in 15 minutes, {classDateTime}.{meetTail}",
+  "email.reminder15mTeacher.htmlParagraphs0":
+    "Your class with {studentName} starts in 15 minutes, {classDateTime}.",
+  "email.cancelLt24h.subject": "Late cancellation — {teacherName}",
+  "email.cancelLt24h.textBody":
+    "Hi, I'm {teacherName}. You canceled the {originalDateTime} class with less than 24h notice, so it's deducted from your package per the cancellation policy.\n\nCancellation policy: {policyUrl}",
+  "email.cancelLt24h.htmlPreheader": "Late cancellation · {originalDateTime}",
+  "email.cancelLt24h.htmlHeading": "Late cancellation (<24h)",
+  "email.cancelLt24h.htmlParagraphs0":
+    "Hi, I'm {teacherName}. You canceled the {originalDateTime} class with less than 24h notice, so it's deducted from your package per the cancellation policy.",
+  "email.cancelLt24h.htmlCtaLabel": "View cancellation policy",
+  "email.cancelGte24hWithReschedule.subject": "Reschedule your class — {teacherName}",
+  "email.cancelGte24hWithReschedule.textBody":
+    "Hi, I'm {teacherName}. You canceled the {originalDateTime} class on time. You can reschedule your class whenever you like.\n\nReschedule: {actionLink}",
+  "email.cancelGte24hWithReschedule.htmlPreheader": "Reschedule your class",
+  "email.cancelGte24hWithReschedule.htmlParagraphs0":
+    "Hi, I'm {teacherName}. You canceled the {originalDateTime} class on time. You can reschedule your class whenever you like.",
+  "email.cancelGte24hWithReschedule.htmlCtaLabel": "Reschedule class",
+  "email.teacherCancel.subject": "Class canceled — please reschedule — {teacherName}",
+  "email.teacherCancel.textBody":
+    "Hi, I'm {teacherName}. I had to cancel the {originalDateTime} class. The class is restored in your package; let's reschedule.\n\nReschedule: {actionLink}",
+  "email.teacherCancel.htmlPreheader": "Class canceled — let's reschedule",
+  "email.teacherCancel.htmlHeading": "Your class was canceled",
+  "email.teacherCancel.htmlParagraphs0":
+    "Hi, I'm {teacherName}. I had to cancel the {originalDateTime} class.",
+  "email.teacherCancel.htmlParagraphs1": "The class is restored in your package; let's reschedule.",
+  "email.rescheduleConfirm.subject": "Rescheduled — {teacherName}",
+  "email.rescheduleConfirm.textBody":
+    "Hi, I'm {teacherName}. Moved your class from {oldDateTime} to {newDateTime}.\n\nWe'll meet on WhatsApp at that time.",
+  "email.rescheduleConfirm.htmlPreheader": "New time: {newDateTime}",
+  "email.rescheduleConfirm.htmlParagraphs0":
+    "Hi, I'm {teacherName}. Moved your class from {oldDateTime} to {newDateTime}.",
+  "email.paymentReceived.subject": "Payment received — {teacherName}",
+  "email.paymentReceived.textBody":
+    "Hi, I'm {teacherName}. Got your payment for {packageName} ({amount}). Your package is active.\n\nPortal: {actionLink}",
+  "email.paymentReceived.htmlParagraphs0":
+    "Hi, I'm {teacherName}. Got your payment for {packageName} ({amount}).",
+  "email.paymentReceived.htmlParagraphs1": "Your package is active.",
+  "email.paymentReceived.htmlCtaLabel": "Open my portal",
+  "email.magicLink.subject": "Your sign-in link with {teacherName}",
+  "email.magicLink.textBody":
+    "Hi, I'm {teacherName}. Here's your sign-in link (valid for {expiryMinutes} minutes):\n\n{actionLink}",
+  "email.magicLink.htmlPreheader": "Valid for {expiryMinutes} minutes",
+  "email.magicLink.htmlHeading": "Your sign-in link",
+  "email.magicLink.htmlParagraphs0":
+    "Hi, I'm {teacherName}. Here's your sign-in link. It's valid for {expiryMinutes} minutes.",
+  "email.magicLink.htmlCtaLabel": "Sign in",
+  "email.materialsSend.subject": "Class materials — {teacherName}",
+  "email.materialsSend.textBody":
+    "Hi, I'm {teacherName}. Materials for the {classDateTime} class.\n\nDownload: {actionLink}",
+  "email.materialsSend.htmlPreheader": "Materials for {classDateTime}",
+  "email.materialsSend.htmlHeading": "Your class materials",
+  "email.materialsSend.htmlParagraphs0":
+    "Hi, I'm {teacherName}. Materials for the {classDateTime} class.",
+  "email.materialsSend.htmlCtaLabel": "Download materials",
+  "email.wiseMarkedSentStudent.subject": "We got your payment notice",
+  "email.wiseMarkedSentStudent.textBody":
+    "Hi, I'm {teacherName}. Thanks for letting me know you sent your Wise transfer (reference {wiseReference}) for {packageName}.\n\nAs soon as it shows up I'll confirm the payment and your package goes active — you'll get another email then.",
+  "email.wiseMarkedSentStudent.htmlPreheader": "Reference {wiseReference} · {packageName}",
+  "email.wiseMarkedSentStudent.htmlParagraphs0":
+    "Hi, I'm {teacherName}. Thanks for letting me know you sent your Wise transfer (reference {wiseReference}) for {packageName}.",
+  "email.wiseMarkedSentStudent.htmlParagraphs1":
+    "As soon as it shows up I'll confirm the payment and your package goes active — you'll get another email then.",
+  "email.paymentReceivedTeacher.subject": "New sale — {studentName} bought {packageName}",
+  "email.paymentReceivedTeacher.textBody":
+    "Hi {teacherName}, {studentName} bought {packageName} for {amount} by card. The package is already active and the money is on its way to your account.\n\nView payment: {actionLink}",
+  "email.paymentReceivedTeacher.htmlParagraphs0":
+    "Hi {teacherName}, {studentName} bought {packageName} for {amount} by card.",
+  "email.paymentReceivedTeacher.htmlParagraphs1":
+    "The package is already active and the money is on its way to your account.",
+  "email.paymentReceivedTeacher.htmlCtaLabel": "View payment",
+  "email.paymentPendingTeacher.subject": "Wise payment pending — {studentName}",
+  "email.paymentPendingTeacher.textBody":
+    "Hi {teacherName}, {studentName} just started buying {packageName} for {amount} via Wise.\n\nReference: {wiseReference}\n\nWhen the transfer lands in Wise, confirm it here: {actionLink}",
+  "email.paymentPendingTeacher.htmlHeading": "Wise payment pending",
+  "email.paymentPendingTeacher.htmlParagraphs0":
+    "Hi {teacherName}, {studentName} just started buying {packageName} for {amount} via Wise.",
+  "email.paymentPendingTeacher.htmlParagraphs1": "Wise reference: {wiseReference}",
+  "email.paymentPendingTeacher.htmlParagraphs2":
+    "When the transfer lands in Wise, confirm it to activate the package.",
+  "email.paymentPendingTeacher.htmlCtaLabel": "Confirm payment",
+  "email.paymentMarkedSentTeacher.subject": "{studentName} says the Wise transfer is on the way",
+  "email.paymentMarkedSentTeacher.textBody":
+    "Hi {teacherName}, {studentName} marked the {amount} transfer for {packageName} as sent.\n\nReference: {wiseReference}\n\nCheck your Wise inbox and confirm receipt to activate the package: {actionLink}",
+  "email.paymentMarkedSentTeacher.htmlHeading": "{studentName} sent the payment",
+  "email.paymentMarkedSentTeacher.htmlParagraphs0":
+    "Hi {teacherName}, {studentName} marked the {amount} transfer for {packageName} as sent.",
+  "email.paymentMarkedSentTeacher.htmlParagraphs2":
+    "Check your Wise inbox and confirm receipt to activate the package.",
+  "email.paymentMarkedSentTeacher.htmlCtaLabel": "Confirm receipt",
+  "email.wiseConfirmReminderTeacher.subject": "Reminder: confirm {studentName}'s Wise payment",
+  "email.wiseConfirmReminderTeacher.textBody":
+    "Hi {teacherName}, {studentName} marked the {amount} transfer for {packageName} as sent and it's still unconfirmed. The package won't activate until you confirm receipt in your Wise.\n\nReference: {wiseReference}\n\nConfirm: {actionLink}",
+  "email.wiseConfirmReminderTeacher.htmlPreheader":
+    "{studentName} · {amount} · awaiting confirmation",
+  "email.wiseConfirmReminderTeacher.htmlHeading": "Wise payment awaiting confirmation",
+  "email.wiseConfirmReminderTeacher.htmlParagraphs0":
+    "Hi {teacherName}, {studentName} marked the {amount} transfer for {packageName} as sent and it's still unconfirmed.",
+  "email.wiseConfirmReminderTeacher.htmlParagraphs2":
+    "The package won't activate until you confirm receipt in your Wise.",
+  "email.lessonInsightsReviewTeacher.subject": "Focus areas ready — {studentName}",
+  "email.lessonInsightsReviewTeacher.textBody":
+    "Hi {teacherName}, your assistant drafted focus areas from your class with {studentName}. Review them and confirm the ones worth keeping (they build the student's profile).\n\nReview: {actionLink}",
+  "email.lessonInsightsReviewTeacher.htmlPreheader": "{studentName} · focus areas to review",
+  "email.lessonInsightsReviewTeacher.htmlHeading": "Focus areas ready to review",
+  "email.lessonInsightsReviewTeacher.htmlParagraphs0":
+    "Hi {teacherName}, your assistant drafted focus areas from your class with {studentName}.",
+  "email.lessonInsightsReviewTeacher.htmlParagraphs1":
+    "Review them in a few seconds and confirm the ones worth keeping; confirmed ones build the student's learning profile.",
+  "email.lessonInsightsReviewTeacher.htmlCtaLabel": "Review focus areas",
+  "email.studentAcquisitionPlanTeacher.firstAction": "your first action of the week",
+  "email.studentAcquisitionPlanTeacher.htmlPreheader":
+    "The text, the image and the link are already prepared",
+  "email.studentAcquisitionPlanTeacher.htmlHeading": "Your plan this week",
+  "email.studentAcquisitionPlanTeacher.htmlParagraphs1":
+    "Start here: {firstAction}. The text, the image and the link are already prepared — you just review and post.",
+  "email.studentAcquisitionPlanTeacher.htmlCtaLabel": "See my plan",
+  "email.facebookGroupsNudgeTeacher.groups2": "your groups",
+  "email.facebookGroupsNudgeTeacher.subject": "Time to post in your groups again?",
+  "email.facebookGroupsNudgeTeacher.textBody":
+    "Hi {teacherName}, it's been a couple of weeks since your last reminder. Posting your link in {groups} on Facebook is one of the best ways to fill your schedule.\n\nOpen your group list and share: {actionLink}",
+  "email.facebookGroupsNudgeTeacher.htmlPreheader":
+    "Posting in your groups again fills your schedule",
+  "email.facebookGroupsNudgeTeacher.htmlParagraphs0":
+    "Hi {teacherName}, it's been a couple of weeks since your last reminder.",
+  "email.facebookGroupsNudgeTeacher.htmlParagraphs1":
+    "Posting your link in {groups} on Facebook is one of the best ways to fill your schedule — post in each group's voice, like always.",
+  "email.facebookGroupsNudgeTeacher.htmlCtaLabel": "View my groups",
+  "email.paymentFailedStudent.subject": "Your payment didn't go through — {teacherName}",
+  "email.paymentFailedStudent.textBody":
+    "Hi, I'm {teacherName}. Your payment for {packageName} couldn't be processed, so the package wasn't activated.\n\nTry again here — you can pay by card or bank transfer (Wise): {actionLink}",
+  "email.paymentFailedStudent.htmlPreheader": "Payment didn't complete",
+  "email.paymentFailedStudent.htmlParagraphs0":
+    "Hi, I'm {teacherName}. Your payment for {packageName} couldn't be processed, so the package wasn't activated.",
+  "email.paymentFailedStudent.htmlParagraphs1":
+    "You can try again whenever you're ready — by card or bank transfer (Wise), whichever is easier.",
+  "email.paymentFailedStudent.htmlCtaLabel": "Try again",
+  "email.refundIssuedStudent.subject": "Refund issued — {teacherName}",
+  "email.refundIssuedStudent.textBody":
+    "Hi, I'm {teacherName}. Your refund of {amount} for {packageName} was processed. The money goes back to the same payment method, usually within 5 to 10 business days depending on your bank.",
+  "email.refundIssuedStudent.htmlPreheader": "Refund of {amount}",
+  "email.refundIssuedStudent.htmlParagraphs0":
+    "Hi, I'm {teacherName}. Your refund of {amount} for {packageName} was processed.",
+  "email.refundIssuedStudent.htmlParagraphs1":
+    "The money goes back to the same payment method, usually within 5 to 10 business days depending on your bank.",
+  "email.refundIssuedTeacher.subject": "Refund issued — {studentName}",
+  "email.refundIssuedTeacher.textBody":
+    "Hi {teacherName}, a refund of {amount} was processed for {studentName}'s {packageName}.\n\nPayment details: {actionLink}",
+  "email.refundIssuedTeacher.htmlParagraphs0":
+    "Hi {teacherName}, a refund of {amount} was processed for {studentName}'s {packageName}.",
+  "email.refundIssuedTeacher.htmlParagraphs1":
+    "The package is now marked refunded in your dashboard.",
+  "email.refundIssuedTeacher.htmlCtaLabel": "View payment",
+  "email.disputeLostStudent.subject": "Your payment was reversed — {teacherName}",
+  "email.disputeLostStudent.textBody":
+    "Hi, I'm {teacherName}. Your card issuer reversed the {amount} payment for {packageName}, so the remaining classes on that package are no longer available. If you think this is a mistake, message me and we'll sort it out.",
+  "email.disputeLostStudent.htmlPreheader": "Payment reversed · {amount}",
+  "email.disputeLostStudent.htmlParagraphs0":
+    "Hi, I'm {teacherName}. Your card issuer reversed the {amount} payment for {packageName}.",
+  "email.disputeLostStudent.htmlParagraphs1":
+    "The remaining classes on that package are no longer available. If you think this is a mistake, message me and we'll sort it out.",
+  "email.disputeLostTeacher.subject": "Chargeback lost — {studentName}",
+  "email.disputeLostTeacher.textBody":
+    "Hi {teacherName}, a {amount} chargeback on {studentName}'s {packageName} was decided against you. Stripe took that amount and its dispute fee out of your balance, and {studentName}'s remaining classes on that package have been removed.\n\nPayment details: {actionLink}",
+  "email.disputeLostTeacher.htmlParagraphs0":
+    "Hi {teacherName}, a {amount} chargeback on {studentName}'s {packageName} was decided against you.",
+  "email.disputeLostTeacher.htmlParagraphs1":
+    "Stripe took that amount and its dispute fee out of your balance, and {studentName}'s remaining classes on that package have been removed.",
+  "email.stripeReadyTeacher.subject": "Your Stripe is ready",
+  "email.stripeReadyTeacher.textBody":
+    "Hi {teacherName}, Stripe finished verifying your account — you can now accept card payments.\n\nShare your booking link: {actionLink}",
+  "email.stripeReadyTeacher.htmlPreheader": "Stripe is now accepting payments",
+  "email.stripeReadyTeacher.htmlHeading": "Your Stripe is ready",
+  "email.stripeReadyTeacher.htmlParagraphs0":
+    "Hi {teacherName}, Stripe finished verifying your account — you can now accept card payments.",
+  "email.stripeReadyTeacher.htmlParagraphs1": "Your booking link is ready to take card payments.",
+  "email.stripeReadyTeacher.htmlCtaLabel": "Open my link",
+  "email.stripeRequirementsTeacher.subject": "Stripe needs more information",
+  "email.stripeRequirementsTeacher.textBody":
+    "Hi {teacherName}, Stripe paused card payments on your account because more information is needed. New card payments won't complete until you fix this.\n\nReview the requirements: {actionLink}",
+  "email.stripeRequirementsTeacher.htmlPreheader": "Stripe paused your card payments",
+  "email.stripeRequirementsTeacher.htmlParagraphs0":
+    "Hi {teacherName}, Stripe paused card payments on your account because more information is needed.",
+  "email.stripeRequirementsTeacher.htmlParagraphs1":
+    "New card payments won't complete until you fix this.",
+  "email.stripeRequirementsTeacher.htmlCtaLabel": "Review requirements",
+  "email.accountDisabledTeacher.subject": "Your SpiralClass account was disabled",
+  "email.accountDisabledTeacher.textBody":
+    "Hi {teacherName}, your SpiralClass account has been disabled.\n\nReason: {reason}\n\nIf you believe this is a mistake, reply to this email and we'll review.",
+  "email.accountDisabledTeacher.htmlPreheader": "Account disabled",
+  "email.accountDisabledTeacher.htmlHeading": "Your account was disabled",
+  "email.accountDisabledTeacher.htmlParagraphs0":
+    "Hi {teacherName}, your SpiralClass account has been disabled.",
+  "email.accountDisabledTeacher.htmlParagraphs1": "Reason: {reason}",
+  "email.accountDisabledTeacher.htmlParagraphs2":
+    "If you believe this is a mistake, reply to this email and we'll review.",
+  "email.bookingCreatedTeacher.subject": "New class booked — {studentName}",
+  "email.bookingCreatedTeacher.textBody":
+    "Hi {teacherName}, {studentName} booked a class on {classDateTime}.\n\nOpen dashboard: {actionLink}{calLine}",
+  "email.bookingCreatedTeacher.htmlParagraphs0":
+    "Hi {teacherName}, {studentName} booked a class on {classDateTime}.",
+  "email.bookingCreatedTeacher.htmlCtaLabel": "Open dashboard",
+  "email.homeworkSubmittedTeacher.what": "submitted the assignment “{assignmentTitle}”",
+  "email.homeworkSubmittedTeacher.what2": "submitted homework",
+  "email.homeworkSubmittedTeacher.subject": "Homework submitted — {studentName}",
+  "email.homeworkSubmittedTeacher.textBody":
+    "Hi {teacherName}, {studentName} {what}.\n\nReview the class: {actionLink}",
+  "email.homeworkSubmittedTeacher.htmlParagraphs0": "Hi {teacherName}, {studentName} {what}.",
+  "email.homeworkSubmittedTeacher.htmlCtaLabel": "Review the class",
+  "email.cancelLt24hTeacher.subject": "{studentName} canceled late (<24h)",
+  "email.cancelLt24hTeacher.textBody":
+    "Hi {teacherName}, {studentName} canceled the {originalDateTime} class with less than 24h notice. The class was deducted from their package per the cancellation policy.",
+  "email.cancelLt24hTeacher.textBody2": "\n\nCancellation policy: {policyUrl}",
+  "email.cancelLt24hTeacher.htmlParagraphs0":
+    "Hi {teacherName}, {studentName} canceled the {originalDateTime} class with less than 24h notice.",
+  "email.cancelLt24hTeacher.htmlParagraphs1":
+    "The class was deducted from their package per the cancellation policy.",
+  "email.cancelGte24hTeacher.subject": "{studentName} canceled their class",
+  "email.cancelGte24hTeacher.textBody":
+    "Hi {teacherName}, {studentName} canceled the {originalDateTime} class on time. The class remains available to reschedule; nothing was deducted.",
+  "email.cancelGte24hTeacher.htmlParagraphs0":
+    "Hi {teacherName}, {studentName} canceled the {originalDateTime} class on time.",
+  "email.cancelGte24hTeacher.htmlParagraphs1":
+    "The class remains available to reschedule; nothing was deducted.",
+  "email.rescheduleConfirmTeacher.subject": "{studentName} rescheduled their class",
+  "email.rescheduleConfirmTeacher.textBody":
+    "Hi {teacherName}, {studentName} moved their class from {oldDateTime} to {newDateTime}.",
+  "email.packageExpiryNudge.subject": "You still have classes to use with {teacherName}",
+  "email.packageExpiryNudge.textBody":
+    "Hi, I'm {teacherName}. Your \"{packageName}\" package expires on {expiryDate} and you still have {classesRemaining} class(es) left. Book now so you don't lose them.\n\nBook: {actionLink}",
+  "email.packageExpiryNudge.htmlPreheader":
+    "Expires {expiryDate} · {classesRemaining} class(es) left",
+  "email.packageExpiryNudge.htmlParagraphs0":
+    'Hi, I\'m {teacherName}. Your "{packageName}" package expires on {expiryDate} and you still have {classesRemaining} class(es) left.',
+  "email.packageExpiryNudge.htmlParagraphs1": "Book now to use them before they expire.",
+  "email.packageExpiryNudge.htmlCtaLabel": "Book my class",
+  "email.packageConsumedStudent.subject": "You've used all your classes with {teacherName}",
+  "email.packageConsumedStudent.textBody":
+    "Hi, I'm {teacherName}. You've used all the classes in your \"{packageName}\" package — thanks for learning with me! Want to keep going? You can buy your next package from your portal, no need to re-enter your details.\n\nBuy: {actionLink}",
+  "email.packageConsumedStudent.htmlPreheader": 'Your "{packageName}" package is complete',
+  "email.packageConsumedStudent.htmlParagraphs0":
+    "Hi, I'm {teacherName}. You've used all the classes in your \"{packageName}\" package — thanks for learning with me!",
+  "email.packageConsumedStudent.htmlParagraphs1":
+    "Want to keep going? You can buy your next package from your portal, no need to re-enter your details.",
+  "email.packageConsumedTeacher.secondLine":
+    "We sent them a renewal link to their portal; a personal WhatsApp message from you usually helps close the renewal.",
+  "email.packageConsumedTeacher.secondLine2":
+    "They don't get automatic notices from us, so a personal WhatsApp message from you is the best way to invite them to renew.",
+  "email.packageConsumedTeacher.subject": "{studentName} finished their package",
+  "email.packageConsumedTeacher.textBody":
+    'Hi {teacherName}, {studentName} has used all the classes in their "{packageName}" package. {secondLine}',
+  "email.packageConsumedTeacher.htmlPreheader": '{studentName} · "{packageName}" complete',
+  "email.packageConsumedTeacher.htmlParagraphs0":
+    'Hi {teacherName}, {studentName} has used all the classes in their "{packageName}" package.',
+  "email.packageConsumedTeacher.htmlCtaLabel": "View student",
+  "email.noShowStudent.subject": "Class on {originalDateTime} marked as no-show",
+  "email.noShowStudent.textBody":
+    "Hi, I'm {teacherName}. I marked the {originalDateTime} class as a no-show, so it was deducted from your package per the cancellation policy.\n\nIf you think this is a mistake, message me on WhatsApp.\n\nCancellation policy: {policyUrl}",
+  "email.noShowStudent.htmlPreheader": "Class marked as no-show",
+  "email.noShowStudent.htmlParagraphs0":
+    "Hi, I'm {teacherName}. I marked the {originalDateTime} class as a no-show, so it was deducted from your package per the cancellation policy.",
+  "email.noShowStudent.htmlParagraphs1": "If you think this is a mistake, message me on WhatsApp.",
+  "email.subscriptionTrialEnding.subject": "Your Pro trial ends in {daysRemaining} days",
+  "email.subscriptionTrialEnding.textBody":
+    "Hi {teacherName}, your free SpiralClass Pro trial ends in {daysRemaining} days. If you don't subscribe, your account moves to the Free plan (you keep your booking page and both payment rails; you lose WhatsApp reminders, unlimited students, and materials).\n\nChoose a plan: {actionLink}",
+  "email.subscriptionTrialEnding.htmlHeading": "Your Pro trial is ending",
+  "email.subscriptionTrialEnding.htmlParagraphs0":
+    "Hi {teacherName}, your free SpiralClass Pro trial ends in {daysRemaining} days.",
+  "email.subscriptionTrialEnding.htmlParagraphs1":
+    "If you don't subscribe, your account moves to the Free plan — you keep your booking page and both payment rails, but you lose WhatsApp reminders, unlimited students, and materials.",
+  "email.subscriptionPaymentSucceeded.subject": "SpiralClass Pro receipt — {amount}",
+  "email.subscriptionPaymentSucceeded.textBody":
+    "Hi {teacherName}, we received your {amount} payment for SpiralClass Pro. Your next charge date is {nextChargeDate}.\n\nView billing: {actionLink}",
+  "email.subscriptionPaymentSucceeded.htmlPreheader": "Payment received · {amount}",
+  "email.subscriptionPaymentSucceeded.htmlParagraphs0":
+    "Hi {teacherName}, we received your {amount} payment for SpiralClass Pro.",
+  "email.subscriptionPaymentSucceeded.htmlParagraphs1":
+    "Your next charge date is {nextChargeDate}.",
+  "email.subscriptionPaymentSucceeded.htmlCtaLabel": "View billing",
+  "email.subscriptionPaymentFailed.subject": "We couldn't process your Pro payment",
+  "email.subscriptionPaymentFailed.textBody":
+    "Hi {teacherName}, we couldn't process your SpiralClass Pro subscription charge. You keep all Pro features for {graceDays} days while you update your payment method; after that your account moves to the Free plan.\n\nUpdate payment: {actionLink}",
+  "email.subscriptionPaymentFailed.htmlHeading": "We couldn't process your payment",
+  "email.subscriptionPaymentFailed.htmlParagraphs0":
+    "Hi {teacherName}, we couldn't process your SpiralClass Pro subscription charge.",
+  "email.subscriptionPaymentFailed.htmlParagraphs1":
+    "You keep all Pro features for {graceDays} days while you update your payment method; after that your account moves to the Free plan.",
+  "email.subscriptionPaymentFailed.htmlCtaLabel": "Update payment",
+  "email.subscriptionCanceled.textBody":
+    "Hi {teacherName}, your SpiralClass Pro subscription ended and your account is now on the Free plan. Don't worry: your students, packages, and booking page keep working. Only WhatsApp, unlimited students, and materials pause until you go Pro again.\n\nGo Pro again: {actionLink}",
+  "email.subscriptionCanceled.htmlPreheader": "You're now on the Free plan",
+  "email.subscriptionCanceled.htmlParagraphs0":
+    "Hi {teacherName}, your SpiralClass Pro subscription ended and your account is now on the Free plan.",
+  "email.subscriptionCanceled.htmlParagraphs1":
+    "Your students, packages, and booking page keep working. Only WhatsApp, unlimited students, and materials pause until you go Pro again.",
+  "email.subscriptionCanceled.htmlCtaLabel": "Go Pro again",
+  "email.subscriptionFoundingPriceLocked.subject":
+    "Welcome to founding pricing — {amount}/mo for life",
+  "email.subscriptionFoundingPriceLocked.textBody":
+    "Hi {teacherName}, you're in the founding group! Your {amount}/mo price is locked for the life of your subscription — it never increases, even when Pro prices change.\n\nView billing: {actionLink}",
+  "email.subscriptionFoundingPriceLocked.htmlPreheader": "Founding price locked · {amount}/mo",
+  "email.subscriptionFoundingPriceLocked.htmlParagraphs0":
+    "Hi {teacherName}, you're in the founding group!",
+  "email.subscriptionFoundingPriceLocked.htmlParagraphs1":
+    "Your {amount}/mo price is locked for the life of your subscription — it never increases, even when Pro prices change.",
+  "email.libraryMaterialAssigned.subject": "New material — {teacherName}",
+  "email.libraryMaterialAssigned.textBody":
+    "Hi, I'm {teacherName}. I assigned you a new material: \"{materialLabel}\". You'll find it in the materials section of your portal.\n\nView materials: {actionLink}",
+  "email.libraryMaterialAssigned.htmlPreheader": "New material: {materialLabel}",
+  "email.libraryMaterialAssigned.htmlHeading": "A new material for you",
+  "email.libraryMaterialAssigned.htmlParagraphs0":
+    'Hi, I\'m {teacherName}. I assigned you a new material: "{materialLabel}".',
+  "email.libraryMaterialAssigned.htmlParagraphs1":
+    "You'll find it in the materials section of your portal.",
+  "email.libraryMaterialAssigned.htmlCtaLabel": "View materials",
+  "email.chatMessage.textBody":
+    '{teacherName} sent you a message: "{preview}".\n\nView conversation: {actionLink}',
+  "email.chatMessage.htmlCtaLabel": "View conversation",
+  "email.homeworkAssignedStudent.what": "homework",
+  "email.homeworkAssignedStudent.subject": "New homework from {teacherName}",
+  "email.homeworkAssignedStudent.textBody":
+    "{teacherName} assigned you {what}.\n\nView the class: {actionLink}",
+  "email.homeworkAssignedStudent.htmlParagraphs0": "{teacherName} assigned you {what}.",
+  "email.homeworkAssignedStudent.htmlCtaLabel": "View the class",
+  "email.homeworkFeedbackAvailableStudent.title": "your homework",
+  "email.homeworkFeedbackAvailableStudent.subject": "{teacherName} approved your homework",
+  "email.homeworkFeedbackAvailableStudent.textBody":
+    "{teacherName} approved {title}. See the feedback.\n\nView the class: {actionLink}",
+  "email.homeworkFeedbackAvailableStudent.htmlParagraphs0":
+    "{teacherName} approved {title}. See the feedback.",
+  "email.homeworkFeedbackAvailableStudent.subject2": "{teacherName} asked you to resubmit",
+  "email.homeworkFeedbackAvailableStudent.textBody2":
+    "{teacherName} asked you to resubmit {title}.\n\nView the class: {actionLink}",
+  "email.homeworkFeedbackAvailableStudent.htmlParagraphs02":
+    "{teacherName} asked you to resubmit {title}.",
+  "email.homeworkFeedbackAvailableStudent.subject3": "Feedback from {teacherName}",
+  "email.homeworkFeedbackAvailableStudent.textBody3":
+    "{teacherName} left feedback on {title}.\n\nView the class: {actionLink}",
+  "email.homeworkFeedbackAvailableStudent.htmlParagraphs03":
+    "{teacherName} left feedback on {title}.",
+  "email.homeworkDueSoonStudent.textBody":
+    "{what} is due {dueDate}.\n\nView the class: {actionLink}",
+  "email.homeworkDueSoonStudent.htmlParagraphs0": "{what} is due {dueDate}.",
+  "email.homeworkOverdueStudent.textBody":
+    "{what} is overdue. You can still submit it.\n\nView the class: {actionLink}",
+  "email.homeworkOverdueStudent.htmlParagraphs0": "{what} is overdue. You can still submit it.",
+  "email.shell.tagline": "Classes, payments and reminders without the mental load.",
+  "email.shell.sentBy": "Sent by SpiralClass · spiralclass.com",
+  "email.shell.unsubLabel": "Unsubscribe from these emails",
+  "email.shell.notificationSettingsLabel": "Manage notification settings",
+  "email.shell.codeLabel": "Your sign-in code",
+  "email.shell.copyHint": "Tap to select and copy",
+  "email.invitation.hello": "Hi {greetingName},",
+  "email.invitation.hello2": "Hi,",
+  "email.invitation.subject": "{teacherName} invited you to SpiralClass",
+  "email.invitation.preheader":
+    "{teacherName} wants to manage your classes together on SpiralClass.",
+  "email.invitation.intro":
+    "{teacherName} uses SpiralClass to run their classes and invited you to join. It keeps everything you and {teacherName} do in one place:",
+  "email.invitation.closing":
+    "Tap the button to accept and set up your account — it takes less than a minute.",
+  "email.pendingInviteNudge.heading": "Pending invitations",
+  "email.pendingInviteNudge.ctaLabel": "View invitations",
+  "email.leadAlert.heading": "New lead from your booking page",
+  "email.leadAlert.subject": "New lead: {name}",
+  "email.leadAlert.intro":
+    "{name} reached out from your booking page and would like you to get in touch.",
+  "email.leadAlert.ctaLabel": "See your leads",
+  "email.referralReward.heading": "Your referral earned you a reward",
+  "email.referralReward.subject": "You earned {rewardLabel} off with {teacherName}",
+  "email.referralReward.intro":
+    "Someone you referred just booked with {teacherName} — thank you! Here's {rewardLabel} off your next package.",
+  "email.referralReward.codeLine": "Your code: {rewardCode}",
+  "email.referralReward.expiryLine": "Use it before {date}.",
+  "email.referralReward.cta": "Book your next classes",
+  "email.emailChanged.heading": "Your sign-in email changed",
+  "email.emailChanged.subject": "Your SpiralClass sign-in email was changed",
+  "email.emailChanged.intro":
+    "Your SpiralClass account's sign-in email is now {newEmail}. Future sign-in links and notifications go there.",
+  "email.emailChanged.googleNote":
+    "As part of this change, any Google account previously connected to sign in was disconnected, and any other signed-in devices were signed out. You can reconnect Google under the new address from Account settings.",
+  "email.emailChanged.warn":
+    "If you didn't make this change, write to us right away at {supportEmail}.",
+  "email.otp.heading": "Confirm your new email",
+  "email.otp.heading2": "Your sign-in code",
+  "email.otp.subject": "Confirm your new SpiralClass email",
+  "email.otp.subject2": "Your SpiralClass sign-in code",
+  "email.otp.intro":
+    "Enter this code to confirm this is your new email address. It's valid for 5 minutes.",
+  "email.otp.intro2": "Enter this code to sign in. It's valid for 5 minutes.",
+  "email.otp.ignore": "If you didn't request this, you can safely ignore this email.",
+  "push.callNudge.title": "Your class is waiting",
+  "push.callNudge.body": "{callerName} is already in the video call. Tap to join.",
+  "calendarFeed.calName": "My classes — SpiralClass",
+  "calendarEvent.text": "Class: {studentName}",
+  "calendarEvent.text2": "Class with {studentName}",
+  "email.packagePlaceholder.text": "your package",
+  "email.packagePlaceholder.text2": "a package",
+  "inbox.fallback.title": "Notification",
+  "email.studentAcquisitionPlanTeacher.subject": "Your plan this week: {count} actions",
+  "email.studentAcquisitionPlanTeacher.subject_one": "Your plan this week: {count} action",
+  "email.studentAcquisitionPlanTeacher.textBody":
+    "Hi {teacherName}, this week's plan is ready: {count} actions, about {minutes} minutes in total.\n\nStart here: {firstAction}\n\n{actionLink}",
+  "email.studentAcquisitionPlanTeacher.textBody_one":
+    "Hi {teacherName}, this week's plan is ready: {count} action, about {minutes} minutes in total.\n\nStart here: {firstAction}\n\n{actionLink}",
+  "email.studentAcquisitionPlanTeacher.htmlParagraphs0":
+    "Hi {teacherName}, we've prepared {count} actions to get you students — about {minutes} minutes in total.",
+  "email.studentAcquisitionPlanTeacher.htmlParagraphs0_one":
+    "Hi {teacherName}, we've prepared {count} action to get you students — about {minutes} minutes in total.",
+  "email.facebookGroupsNudgeTeacher.groupsCount": "your {count} groups",
+  "email.facebookGroupsNudgeTeacher.groupsCount_one": "your group",
+  "email.homeworkSubmittedTeacher.htmlPreheader": "{studentName} · {title}",
+  "email.homeworkSubmittedTeacher.defaultTitle": "Homework",
+  "email.homeworkSubmittedTeacher.htmlHeading": "Homework submitted",
+  "email.pendingInviteNudge.subject": "{count} students haven't accepted your invitation",
+  "email.pendingInviteNudge.subject_one": "{count} student hasn't accepted your invitation",
+  "email.pendingInviteNudge.intro":
+    "Hi {name}, {count} students you invited haven't accepted yet. You can resend in one tap from your dashboard.",
+  "email.pendingInviteNudge.intro_one":
+    "Hi {name}, a student you invited hasn't accepted yet. You can resend in one tap from your dashboard.",
+  "calendarFeed.bookedThrough": "Booked through SpiralClass.",
+  "email.labelledValue": "{label}: {value}",
+  "email.leadAlert.phoneLabel": "Phone",
+  "email.leadAlert.messageLabel": "Message",
+  "email.chatMessageTeacher.textBody":
+    '{studentName} sent you a message: "{preview}".\n\nView conversation: {actionLink}',
+  "email.chatMessageTeacher.quote": '"{preview}"',
 } as const;

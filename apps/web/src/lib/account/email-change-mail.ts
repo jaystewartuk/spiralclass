@@ -4,7 +4,7 @@ import { renderBrandedEmailHtml } from "@/lib/email/html-shell";
 import { SUPPORT_EMAIL } from "@/lib/support";
 import { logger } from "@/lib/logger";
 import type { AppLocale } from "@/lib/i18n";
-import { usesEnglishCopy } from "@spiralclass/shared";
+import { createT, localeToLanguageCode } from "@spiralclass/shared";
 
 // Shared transactional mail for the verified email-change flow. The
 // confirmation CODE to the new address is sent by better-auth's own
@@ -28,26 +28,18 @@ export async function sendEmailChangedNotice(input: {
   // callers/tests are unaffected.
   disconnectedGoogle?: boolean;
 }): Promise<void> {
-  const en = usesEnglishCopy(input.locale);
-  const heading = en ? "Your sign-in email changed" : "Tu correo de acceso cambió";
-  const subject = en
-    ? "Your SpiralClass sign-in email was changed"
-    : "Tu correo de acceso a SpiralClass cambió";
-  const intro = en
-    ? `Your SpiralClass account's sign-in email is now ${input.newEmail}. Future sign-in links and notifications go there.`
-    : `El correo de acceso de tu cuenta de SpiralClass ahora es ${input.newEmail}. Tus enlaces de acceso y avisos llegarán ahí.`;
-  const googleNote = en
-    ? "As part of this change, any Google account previously connected to sign in was disconnected, and any other signed-in devices were signed out. You can reconnect Google under the new address from Account settings."
-    : "Como parte de este cambio, desconectamos cualquier cuenta de Google que estuviera conectada para iniciar sesión, y cerramos la sesión en cualquier otro dispositivo conectado. Puedes volver a conectar Google con tu nueva cuenta desde Configuración de la cuenta.";
-  const warn = en
-    ? `If you didn't make this change, write to us right away at ${SUPPORT_EMAIL}.`
-    : `Si tú no hiciste este cambio, escríbenos de inmediato a ${SUPPORT_EMAIL}.`;
+  const t = createT(input.locale);
+  const heading = t("email.emailChanged.heading");
+  const subject = t("email.emailChanged.subject");
+  const intro = t("email.emailChanged.intro", { newEmail: input.newEmail });
+  const googleNote = t("email.emailChanged.googleNote");
+  const warn = t("email.emailChanged.warn", { supportEmail: SUPPORT_EMAIL });
 
   const paragraphs = input.disconnectedGoogle ? [intro, googleNote, warn] : [intro, warn];
 
   const html = renderBrandedEmailHtml(
     { preheader: heading, heading, paragraphs },
-    { languageCode: en ? "en" : "es", appUrl: serverEnv().APP_URL },
+    { languageCode: localeToLanguageCode(input.locale), appUrl: serverEnv().APP_URL },
   );
   const body = paragraphs.join("\n\n");
 

@@ -3,7 +3,12 @@ import { getEmailClient } from "@/lib/email";
 import { renderBrandedEmailHtml, type EmailHtmlContent } from "@/lib/email/html-shell";
 import { logger } from "@/lib/logger";
 import { SUPPORT_EMAIL } from "@/lib/support";
-import { localeToLanguageCode, type LanguageCode } from "@spiralclass/shared";
+import {
+  localeToLanguageCode,
+  type LanguageCode,
+  createT,
+  languageCodeToLocale,
+} from "@spiralclass/shared";
 import { benefitEmailLines } from "./benefits";
 import { INVITATION_PATH_PREFIX } from "./constants";
 
@@ -48,35 +53,23 @@ export type BuiltEmail = { subject: string; body: string; html: string };
 // Pure builder (no IO) so the copy + rendering is unit-testable. The subject
 // names the teacher — the single most important trust signal for a cold invite.
 export function buildInvitationEmail(input: BuildInvitationEmailInput): BuiltEmail {
-  const es = input.languageCode === "es";
+  const t = createT(languageCodeToLocale(input.languageCode));
   const greetingName = input.studentName?.trim();
   const hello = greetingName
-    ? es
-      ? `Hola ${greetingName},`
-      : `Hi ${greetingName},`
-    : es
-      ? "Hola,"
-      : "Hi,";
+    ? t("email.invitation.hello", { greetingName })
+    : t("email.invitation.hello2");
 
-  const subject = es
-    ? `${input.teacherName} te invita a SpiralClass`
-    : `${input.teacherName} invited you to SpiralClass`;
-  const heading = es ? "Te invitaron a SpiralClass" : "You're invited to SpiralClass";
-  const preheader = es
-    ? `${input.teacherName} quiere organizar sus clases contigo en SpiralClass.`
-    : `${input.teacherName} wants to manage your classes together on SpiralClass.`;
+  const subject = t("email.invitation.subject", { teacherName: input.teacherName });
+  const heading = t("invitation.accept.title");
+  const preheader = t("email.invitation.preheader", { teacherName: input.teacherName });
 
-  const intro = es
-    ? `${input.teacherName} usa SpiralClass para organizar sus clases y te invitó a unirte. Así tú y ${input.teacherName} tienen todo en un solo lugar:`
-    : `${input.teacherName} uses SpiralClass to run their classes and invited you to join. It keeps everything you and ${input.teacherName} do in one place:`;
-  const closing = es
-    ? "Toca el botón para aceptar la invitación y crear tu cuenta — toma menos de un minuto."
-    : "Tap the button to accept and set up your account — it takes less than a minute.";
+  const intro = t("email.invitation.intro", { teacherName: input.teacherName });
+  const closing = t("email.invitation.closing");
 
   const bullets = benefitEmailLines(input.messagingEnabled, input.languageCode);
 
   const cta = {
-    label: es ? "Aceptar invitación" : "Accept invitation",
+    label: t("invitation.accept.acceptCta"),
     url: input.acceptUrl,
   };
 
@@ -97,7 +90,7 @@ export function buildInvitationEmail(input: BuildInvitationEmailInput): BuiltEma
     "",
     closing,
     "",
-    `${cta.label}: ${input.acceptUrl}`,
+    t("email.labelledValue", { label: cta.label, value: input.acceptUrl }),
   ].join("\n");
 
   // Derive the email-logo origin from the (absolute) accept URL rather than
