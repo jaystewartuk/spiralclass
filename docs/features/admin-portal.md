@@ -111,6 +111,20 @@ disabledAt }`. `role` is one of `superadmin`, `finance`, `support`,
   teacher's passwordless sign-in link), independent of the disable/enable
   toggle.
 
+### Test accounts ([D-192](../decisions/D-192.md))
+
+- A **support**-or-above operator can mark a Teacher or Student as a **test
+  account**, or unmark it. A reason is required either way, and the change is
+  audited.
+- It changes no access, booking, payment or entitlement. It decides which
+  figures the account counts in:
+  - **Platform totals** leave test teachers and test students out.
+  - **A real teacher** sees a test student listed and marked, but left out of
+    her earnings, paid in advance and roster figures.
+  - **A test teacher** sees everything.
+- Test in a test teacher. When a real teacher's live page has to be tested as
+  a buyer, mark that student first.
+
 ### Packages (admin)
 
 - **Cancel a package**: requires a free-text reason (kept on record, max

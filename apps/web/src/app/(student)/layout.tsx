@@ -15,6 +15,7 @@ export default async function StudentLayout({ children }: { children: React.Reac
           email={student.email}
           name={student.name}
           role="student"
+          testAccount={student.testAccount}
         />
       )}
       {children}

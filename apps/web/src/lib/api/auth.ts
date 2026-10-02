@@ -38,11 +38,11 @@ import type { Student, Teacher } from "@prisma/client";
 // lib/auth.ts's requireTeacher/requireAdmin do for page requests, so a request
 // authorized here identifies the SAME way.
 function attachActorToObservability(
-  actor: { id: string; email: string | null },
+  actor: { id: string; email: string | null; testAccount?: boolean },
   role: "teacher" | "student" | "admin",
 ): void {
   Sentry.setUser({ id: actor.id, ...(actor.email ? { email: actor.email } : {}) });
-  identifyServerUser(actor.id, { email: actor.email, role });
+  identifyServerUser(actor.id, { email: actor.email, role, testAccount: actor.testAccount });
 }
 
 export type ApiSessionUser = {

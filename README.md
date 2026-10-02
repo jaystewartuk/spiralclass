@@ -133,7 +133,7 @@ graph TB
     WEB["Next.js 15 web app<br/>teacher · student · public booking · admin"]
 
     subgraph app["apps/web — the only server"]
-        RSC["Server Components<br/>+ 71 server-action modules"]
+        RSC["Server Components<br/>+ 72 server-action modules"]
         API["62 route handlers<br/>by audience: teacher · student · public · internal"]
         MW["middleware.ts<br/>CSP nonce · session gate · ?ref= attribution"]
         LIB["src/lib/** — one folder per bounded concern<br/>payments · booking · cancellation · subscriptions<br/>auth · notifications · chat · homework · video"]
@@ -141,7 +141,7 @@ graph TB
 
     SH["packages/shared<br/>wire types · Zod validators · money<br/>pricing + entitlement config · i18n catalog"]
 
-    DB[("PostgreSQL / Neon<br/>82 models · 6 migrations")]
+    DB[("PostgreSQL / Neon<br/>82 models · 7 migrations")]
     JOBS["Inngest<br/>durable background execution"]
 
     subgraph external["External services"]
@@ -312,7 +312,7 @@ change.
 
 ### Database
 
-82 models, 6 migrations, 128 indexes, 23 unique constraints. Postgres via
+82 models, 7 migrations, 128 indexes, 23 unique constraints. Postgres via
 Prisma, on Neon.
 
 **The squashed history is two migrations, and the split is deliberate.** Every

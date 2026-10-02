@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { isTestAccount } from "@/lib/marketing/test-accounts";
+import {
+  EXCLUDE_TEST_ACCOUNTS_WHERE,
+  REAL_PACKAGE_WHERE,
+  isTestAccount,
+  realStudentsOf,
+} from "@/lib/marketing/test-accounts";
 
 /**
  * Keeping fixtures out of the sitemap.
@@ -49,5 +54,30 @@ describe("isTestAccount", () => {
     expect(isTestAccount({ bookingSlug: "TEST-Teacher", email: null })).toBe(true);
     expect(isTestAccount({ bookingSlug: null, email: null })).toBe(false);
     expect(isTestAccount({ bookingSlug: null, email: "a@b.TEST" })).toBe(true);
+  });
+});
+
+describe("a recorded test account (D-192)", () => {
+  it("is a test account whatever its slug and email look like", () => {
+    expect(
+      isTestAccount({ bookingSlug: "mira-lopez", email: "mira@correo.invalid", testAccount: true }),
+    ).toBe(true);
+    expect(isTestAccount({ bookingSlug: "mira-lopez", email: "mira@correo.invalid" })).toBe(false);
+  });
+
+  it("is left out by the same SQL fragment the sitemap uses", () => {
+    expect(EXCLUDE_TEST_ACCOUNTS_WHERE.NOT).toContainEqual({ testAccount: true });
+  });
+
+  it("keeps a real teacher's test students out of her figures, but not a test teacher's", () => {
+    expect(realStudentsOf({ testAccount: false })).toEqual({ student: { testAccount: false } });
+    expect(realStudentsOf({ testAccount: true })).toEqual({});
+  });
+
+  it("leaves both sides out of a platform roll-up", () => {
+    expect(REAL_PACKAGE_WHERE).toEqual({
+      teacher: { testAccount: false },
+      student: { testAccount: false },
+    });
   });
 });

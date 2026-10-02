@@ -176,6 +176,8 @@ export interface RosterStudent {
   activePackage: { total: number; left: number; expiresAt: Date | null } | null;
   /** Whether a class with this teacher is on the calendar ahead of now. */
   hasUpcomingClass: boolean;
+  /** An operator's test account (D-192): listed and marked, counted nowhere. */
+  testAccount: boolean;
 }
 
 export interface RosterFlags {

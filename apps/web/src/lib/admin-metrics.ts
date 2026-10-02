@@ -3,6 +3,7 @@
 // revenue). Reuses money-metrics.ts's month-bucketing helpers rather than
 // redefining them so the two can't drift on boundary rules.
 
+import { NOT_TEST_ACCOUNT } from "@/lib/marketing/test-accounts";
 import { prisma } from "@/lib/prisma";
 import { monthKey, monthLabel, monthWindowStart, recentMonths } from "@/lib/money-metrics";
 
@@ -31,7 +32,8 @@ export async function getTeacherSignupSeries(
 ): Promise<SignupPoint[]> {
   const months = recentMonths(now, monthsBack);
   const teachers = await prisma.teacher.findMany({
-    where: { createdAt: { gte: monthWindowStart(now, monthsBack) } },
+    // Operators' test teachers are not signups (D-192).
+    where: { createdAt: { gte: monthWindowStart(now, monthsBack) }, ...NOT_TEST_ACCOUNT },
     select: { createdAt: true },
   });
   return summarizeSignupSeries(

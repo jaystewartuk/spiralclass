@@ -40,6 +40,8 @@
 
 import { currencyForTeacher, FALLBACK_TIMEZONE } from "@spiralclass/shared";
 import { prisma } from "@/lib/prisma";
+import { classesLeftToTeach } from "@/lib/package-usage";
+import { realStudentsOf } from "@/lib/marketing/test-accounts";
 import { monthKey, monthsBetween, shiftMonthKey } from "@/lib/payments-list";
 
 // How many months of earnings history a teacher sees, the current one
@@ -62,36 +64,16 @@ export type CashFlowPackage = {
   currency: string;
   status: PaidStatus;
   expiresAt: Date | null;
-  // Classes she still owes on this package — see `classesOwed()`.
+  // Classes she still owes on this package: `classesLeftToTeach()` from
+  // lib/package-usage.ts, the same count the students page shows. NOT the
+  // package total minus classes SpiralClass saw taught, which called every
+  // class recorded off-platform still owed (173 for one teacher whose
+  // students page said 27).
   classesOwed: number;
   // How many of those are already booked. Optional because only the teacher's
   // own screens say it; the platform roll-up has no use for it.
   classesBooked?: number;
 };
-
-/**
- * How many classes a package still owes its student: the classes not yet used
- * (`classesTotal − classesUsed`), plus the ones already booked but not yet
- * taught — a booking uses its class at reservation (Model B), but the teaching
- * is still owed until it happens.
- *
- * NOT `classesTotal − classes taught on SpiralClass`, which is what this once
- * was. `classesUsed` also carries history a teacher records off-platform —
- * classes taught before she moved her students here, and corrections made by
- * editing "classes remaining" — and none of that has a booking row. Counting
- * only booking rows called every one of those classes still owed: one teacher
- * was told 173 classes were paid in advance while her students page, reading
- * `classesUsed`, correctly said 27. A class lost to a late cancellation is used
- * and not owed, and this counts it that way too.
- */
-export function classesOwed(pkg: {
-  classesTotal: number;
-  classesUsed: number;
-  bookedNotTaught: number;
-}): number {
-  const remaining = Math.max(0, pkg.classesTotal - pkg.classesUsed);
-  return Math.min(pkg.classesTotal, remaining + pkg.bookedNotTaught);
-}
 
 // A class still to come this month, on a package already paid for — what the
 // rest of the month will add if it is taught as booked.
@@ -317,6 +299,12 @@ export function summarizeOneCurrency(
     const undelivered = Math.min(p.classesTotal, Math.max(0, p.classesOwed));
     const pricePerLesson = p.pricePaidMinorUnits / p.classesTotal;
     heldCents += Math.round(undelivered * pricePerLesson);
+    // The class count sits under "paid in advance", so it counts only classes
+    // something was paid for. A package recorded at $0 — a gift, or history
+    // brought over with no price — owes its classes but holds no money, and
+    // counting them told one teacher "$6,900 · 126 classes" when the $6,900
+    // was 26 classes and the other 100 had been paid nothing.
+    if (p.pricePaidMinorUnits <= 0) continue;
     heldLessons += undelivered;
     heldBookedLessons += Math.min(undelivered, p.classesBooked ?? 0);
   }
@@ -476,9 +464,20 @@ export async function computeTeacherCashFlow(
     Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - EARNINGS_HISTORY_MONTHS, 1),
   );
 
-  const [packages, bookedGroups, completed, firstDelivered, teacher, upcoming] = await Promise.all([
+  // Her configured pricing currency — which slice to lead with, and the answer
+  // for a teacher with no packages at all — her timezone, whose calendar every
+  // month is cut on, and whether she is a test account. Read first, because
+  // that last one decides the queries below: a real teacher's figures leave
+  // out the operator's test students (D-192); a test teacher's do not.
+  const teacher = await prisma.teacher.findUnique({
+    where: { id: teacherId },
+    select: { pricingCurrency: true, timezone: true, testAccount: true },
+  });
+  const real = realStudentsOf(teacher ?? { testAccount: false });
+
+  const [packages, bookedGroups, completed, firstDelivered, upcoming] = await Promise.all([
     prisma.package.findMany({
-      where: { teacherId, status: { in: [...PAID_STATUSES] } },
+      where: { teacherId, status: { in: [...PAID_STATUSES] }, ...real },
       select: {
         id: true,
         classesTotal: true,
@@ -490,10 +489,10 @@ export async function computeTeacherCashFlow(
       },
     }),
     // Classes booked against each package but not yet taught: used at
-    // reservation, still owed until they happen (see `classesOwed`).
+    // reservation, still owed until they happen (see `classesLeftToTeach`).
     prisma.booking.groupBy({
       by: ["packageId"],
-      where: { teacherId, status: "scheduled", countsAgainstPackage: true },
+      where: { teacherId, status: "scheduled", countsAgainstPackage: true, ...real },
       _count: { _all: true },
     }),
     // Delivered lessons taught in the window (through now), with their package
@@ -505,6 +504,7 @@ export async function computeTeacherCashFlow(
         teacherId,
         status: { in: [...DELIVERED_STATUSES] },
         scheduledStart: { gte: windowStart, lte: now },
+        ...real,
       },
       select: {
         scheduledStart: true,
@@ -520,17 +520,9 @@ export async function computeTeacherCashFlow(
     }),
     // Her very first delivered lesson, ever — decides warm-up vs steady-state.
     prisma.booking.findFirst({
-      where: { teacherId, status: { in: [...DELIVERED_STATUSES] } },
+      where: { teacherId, status: { in: [...DELIVERED_STATUSES] }, ...real },
       orderBy: { scheduledStart: "asc" },
       select: { scheduledStart: true },
-    }),
-    // Her configured pricing currency — which slice to lead with, and the
-    // answer for a teacher with no packages at all — and her timezone, whose
-    // calendar every month is cut on. Looked up here rather than taken as
-    // arguments so the call sites (payments page, dashboard) stay one line.
-    prisma.teacher.findUnique({
-      where: { id: teacherId },
-      select: { pricingCurrency: true, timezone: true },
     }),
     // Classes still to come in the next month and a bit, on paid packages —
     // the pure function keeps the ones left in HER current month.
@@ -540,6 +532,7 @@ export async function computeTeacherCashFlow(
         status: "scheduled",
         scheduledStart: { gt: now, lt: new Date(now.getTime() + 32 * 24 * 60 * 60 * 1000) },
         package: { status: { in: [...PAID_STATUSES] } },
+        ...real,
       },
       select: {
         scheduledStart: true,
@@ -556,10 +549,10 @@ export async function computeTeacherCashFlow(
     currency: p.currency,
     status: p.status as PaidStatus,
     expiresAt: p.expiresAt,
-    classesOwed: classesOwed({
+    classesOwed: classesLeftToTeach({
       classesTotal: p.classesTotal,
       classesUsed: p.classesUsed,
-      bookedNotTaught: bookedByPkg.get(p.id) ?? 0,
+      scheduled: bookedByPkg.get(p.id) ?? 0,
     }),
     classesBooked: bookedByPkg.get(p.id) ?? 0,
   }));

@@ -1,3 +1,4 @@
+import { NOT_TEST_ACCOUNT } from "@/lib/marketing/test-accounts";
 import { prisma } from "@/lib/prisma";
 import { PLATFORM_MONEY_CURRENCY } from "@spiralclass/shared";
 import {
@@ -43,6 +44,8 @@ export async function getSubscriptionOverview(
   now: Date = new Date(),
 ): Promise<SubscriptionOverview> {
   const subs = await prisma.teacherSubscription.findMany({
+    // An operator's test teacher is not a subscriber (D-192).
+    where: { teacher: NOT_TEST_ACCOUNT },
     select: {
       plan: true,
       status: true,

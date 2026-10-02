@@ -42,6 +42,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         name={teacher.name}
         role="teacher"
         teacherId={teacher.id}
+        testAccount={teacher.testAccount}
       />
       <AppNav
         localeToggle={<LanguagePicker variant="field" />}

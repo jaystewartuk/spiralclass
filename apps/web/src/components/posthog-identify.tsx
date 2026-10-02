@@ -31,9 +31,13 @@ type Props = {
   // group analytics so usage can be sliced per teacher, not just per
   // user. Omitted for students (they can belong to several teachers).
   teacherId?: string | null;
+  // An operator's test account (D-192): set as the `is_test_account` person
+  // property on every mount — not only at identify, which fires once per
+  // person — so marking an account takes effect without a new sign-in.
+  testAccount?: boolean;
 };
 
-export function PostHogIdentify({ distinctId, email, name, role, teacherId }: Props) {
+export function PostHogIdentify({ distinctId, email, name, role, teacherId, testAccount }: Props) {
   const posthog = usePostHog();
 
   useEffect(() => {
@@ -50,6 +54,7 @@ export function PostHogIdentify({ distinctId, email, name, role, teacherId }: Pr
       });
     }
     if (teacherId) posthog.group("teacher", teacherId);
+    if (testAccount !== undefined) posthog.setPersonProperties({ is_test_account: testAccount });
 
     // Mirror the identity onto the client Sentry scope. `username` (not
     // `name`) is the key Sentry's own user model carries a display name in,
@@ -61,7 +66,7 @@ export function PostHogIdentify({ distinctId, email, name, role, teacherId }: Pr
       ...(email ? { email } : {}),
       ...(name ? { username: name } : {}),
     });
-  }, [posthog, distinctId, email, name, role, teacherId]);
+  }, [posthog, distinctId, email, name, role, teacherId, testAccount]);
 
   return null;
 }

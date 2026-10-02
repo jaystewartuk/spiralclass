@@ -30,11 +30,11 @@ import { getPreferredLocale } from "@/lib/i18n";
 // suite load; there are far fewer now, but two lines duplicated is still
 // cheaper than the coupling.
 function attachActorToObservability(
-  actor: { id: string; email: string | null },
+  actor: { id: string; email: string | null; testAccount?: boolean },
   role: "teacher" | "student",
 ): void {
   Sentry.setUser({ id: actor.id, ...(actor.email ? { email: actor.email } : {}) });
-  identifyServerUser(actor.id, { email: actor.email, role });
+  identifyServerUser(actor.id, { email: actor.email, role, testAccount: actor.testAccount });
   // The one moment this request's tenant is known. Everything downstream is
   // handed rows and ids and has no way to tell whose they are, which is why the
   // tenancy guard (lib/tenancy/) reads it from here rather than from a

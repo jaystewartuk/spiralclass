@@ -635,6 +635,12 @@ model Teacher {
   // and student data are preserved.
   disabledAt                       DateTime? @map("disabled_at") @db.Timestamptz
   disabledReason                   String?   @map("disabled_reason")
+  // An operator's own test account (D-192), not a customer. Set ONLY by an
+  // admin action, with a reason, audited. Read-side only: it never gates
+  // sign-in, booking, payment or entitlements. A test teacher's screens show
+  // her everything, because that account is her sandbox; platform roll-ups
+  // leave her out. Not `seededAt`, which means "the seed made this row".
+  testAccount                      Boolean   @default(false) @map("test_account")
   // Lightweight referral attribution (NOT the deferred referral engine — see
   // docs/features/referrals-discounts.md). Set at signup from `?ref=CODE` on the onboarding link
   // and/or by an admin tag. Drives the ambassador commission report. Null when
@@ -879,6 +885,12 @@ model Student {
   // so the teacher can finish out paid classes.
   disabledAt           DateTime? @map("disabled_at") @db.Timestamptz
   disabledReason       String?   @map("disabled_reason")
+  // An operator's own test account (D-192) — e.g. the operator booking a real
+  // teacher's live funnel as a student. Set ONLY by an admin action, with a
+  // reason, audited. Read-side only. A real teacher's earnings, paid-in-advance
+  // and roster counts leave this student out; the rows stay visible, marked,
+  // so her ledger still reconciles to her own Stripe account.
+  testAccount          Boolean   @default(false) @map("test_account")
   // Secret token for the read-only iCal subscription feed — see the matching
   // field on Teacher. A student's feed aggregates classes across every teacher
   // they study with (their identity set). Lazily minted on first access.

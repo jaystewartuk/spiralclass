@@ -35,6 +35,7 @@ function student(overrides: Partial<RosterStudent> = {}): RosterStudent {
     agreedPriceCount: 0,
     activePackage: { total: 8, left: 5, expiresAt: inDays(90) },
     hasUpcomingClass: true,
+    testAccount: false,
     ...overrides,
   };
 }

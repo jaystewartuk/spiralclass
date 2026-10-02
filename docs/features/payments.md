@@ -422,7 +422,13 @@ template)`.
   - A class lost to a late cancellation is used, and not owed.
   - Classes recorded as used off-platform (taught before she moved her
     students here, or corrected by editing "classes remaining") are not owed,
-    although SpiralClass has no record of them being taught (`classesOwed()`).
+    although SpiralClass has no record of them being taught.
+  - This is `classesLeftToTeach()` (`lib/package-usage.ts`), the one rule the
+    students page and the money screens share.
+- **The class count under "paid in advance" counts only priced packages.** A
+  package recorded at $0 (a gift, or history brought over with no price)
+  still owes its classes, but holds no money. The line describes money, so
+  those classes are left out of it.
 - **Amounts are what students paid.** The screens say so, and say that card
   payments reach her a little lower after Stripe's own fee, which SpiralClass
   does not receive ([D-152](../decisions/D-152.md)). No net-of-fee figure is
@@ -455,6 +461,15 @@ template)`.
   the history. That leaves out the current month and her first month, which
   she started part-way through. It is stated as a fact and only once two such
   months exist. No figure is presented as what she can safely spend.
+
+**Test accounts** ([D-192](../decisions/D-192.md))
+
+- A real teacher's figures leave out students an operator has marked as test
+  accounts. That covers earned, paid in advance, booked, the history and the
+  typical month.
+- Those students' payments stay in her ledger, marked, because they are real
+  charges on her own account.
+- A test teacher's figures include everything.
 
 **Rules that hold across all of it**
 

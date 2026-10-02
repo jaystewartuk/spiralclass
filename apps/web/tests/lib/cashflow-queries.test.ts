@@ -86,7 +86,7 @@ describe("computeTeacherCashFlow — currency", () => {
     expect((await computeTeacherCashFlow("teacher-1", NOW)).primary.currency).toBe("EUR");
     expect(teacherFindUniqueMock).toHaveBeenCalledWith({
       where: { id: "teacher-1" },
-      select: { pricingCurrency: true, timezone: true },
+      select: { pricingCurrency: true, timezone: true, testAccount: true },
     });
   });
 
@@ -138,9 +138,45 @@ describe("computeTeacherCashFlow — what is paid in advance", () => {
     await computeTeacherCashFlow("teacher-1", NOW);
     expect(bookingGroupByMock).toHaveBeenCalledWith({
       by: ["packageId"],
-      where: { teacherId: "teacher-1", status: "scheduled", countsAgainstPackage: true },
+      where: {
+        teacherId: "teacher-1",
+        status: "scheduled",
+        countsAgainstPackage: true,
+        student: { testAccount: false },
+      },
       _count: { _all: true },
     });
+  });
+});
+
+describe("computeTeacherCashFlow — operators' test students (D-192)", () => {
+  const whereOf = (mock: typeof packageFindManyMock) =>
+    (mock.mock.calls[0] as [{ where: Record<string, unknown> }])[0].where;
+
+  it("leaves a real teacher's test students out of every figure", async () => {
+    teacherFindUniqueMock.mockResolvedValue({
+      pricingCurrency: "MXN",
+      timezone: "UTC",
+      testAccount: false,
+    });
+    await computeTeacherCashFlow("teacher-1", NOW);
+    expect(whereOf(packageFindManyMock)).toMatchObject({ student: { testAccount: false } });
+    for (const [args] of bookingFindManyMock.mock.calls as [{ where: Record<string, unknown> }][]) {
+      expect(args.where).toMatchObject({ student: { testAccount: false } });
+    }
+    expect(
+      (bookingFindFirstMock.mock.calls[0] as [{ where: Record<string, unknown> }])[0].where,
+    ).toMatchObject({ student: { testAccount: false } });
+  });
+
+  it("shows a test teacher everything — her account is the sandbox", async () => {
+    teacherFindUniqueMock.mockResolvedValue({
+      pricingCurrency: "MXN",
+      timezone: "UTC",
+      testAccount: true,
+    });
+    await computeTeacherCashFlow("teacher-1", NOW);
+    expect(whereOf(packageFindManyMock)).not.toHaveProperty("student");
   });
 });
 

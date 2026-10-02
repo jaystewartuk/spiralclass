@@ -6,6 +6,7 @@ import { requireAdmin } from "@/lib/admin";
 import { prisma } from "@/lib/prisma";
 import { formatMinorUnits } from "@/lib/money";
 import { getTeacherSignupSeries } from "@/lib/admin-metrics";
+import { NOT_TEST_ACCOUNT, REAL_PACKAGE_WHERE } from "@/lib/marketing/test-accounts";
 import {
   CategoryBarChart,
   TrendLineChart,
@@ -36,16 +37,17 @@ export default async function AdminOverviewPage() {
     recentTeachers,
     recentPayments,
   ] = await Promise.all([
-    prisma.teacher.count(),
-    prisma.teacher.count({ where: { onboardingCompleteAt: { not: null } } }),
-    prisma.student.count(),
-    prisma.package.count({ where: { status: "active" } }),
+    // Platform totals leave out operators' test accounts (D-192).
+    prisma.teacher.count({ where: NOT_TEST_ACCOUNT }),
+    prisma.teacher.count({ where: { onboardingCompleteAt: { not: null }, ...NOT_TEST_ACCOUNT } }),
+    prisma.student.count({ where: NOT_TEST_ACCOUNT }),
+    prisma.package.count({ where: { status: "active", ...REAL_PACKAGE_WHERE } }),
     prisma.payment.aggregate({
-      where: { status: "paid" },
+      where: { status: "paid", package: REAL_PACKAGE_WHERE },
       _sum: { amountMinorUnits: true },
       _count: { _all: true },
     }),
-    prisma.payment.count({ where: { status: "refunded" } }),
+    prisma.payment.count({ where: { status: "refunded", package: REAL_PACKAGE_WHERE } }),
     prisma.notification.count({ where: { status: "queued" } }),
     prisma.notification.count({ where: { status: "failed" } }),
     prisma.override.count(),
