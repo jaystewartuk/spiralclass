@@ -27,6 +27,7 @@ import {
   hasOfferableInstrument,
   initialsFrom,
   isOneClassOffering,
+  ogLocale,
   perPersonPerClassMinorUnits,
   parseSeats,
   type Seats,
@@ -266,11 +267,14 @@ export async function generateMetadata({
       type: "website",
       siteName: "SpiralClass",
       ...(images ? { images } : {}),
-      // Pinned, like the page body: the share card must not claim Spanish for a
-      // page that renders in English. Facebook caches the first scrape, so a
-      // locale that varied by the scraper's Accept-Language would freeze
-      // whichever one Facebook happened to send first.
-      locale: "en_US",
+      // The funnel's locale, like the page body: the share card must not claim
+      // one language for a page that renders in another. Never the request's —
+      // Facebook caches the first scrape, so a locale that varied by the
+      // scraper's Accept-Language would freeze whichever one Facebook happened
+      // to send first. This was a hardcoded `en_US` from when the funnel was
+      // pinned to English, and it went on saying English after the funnel
+      // started following `booking_page_locale`.
+      locale: ogLocale(funnelLocale),
     },
     twitter: {
       card: "summary_large_image",

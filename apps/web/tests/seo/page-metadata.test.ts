@@ -246,6 +246,42 @@ describe("teacher booking page /b/[slug]", () => {
     expect(meta.openGraph?.locale).toBe("en_US");
   });
 
+  // The pin above was a hardcoded `en_US`, right while the funnel itself was
+  // pinned to English. The funnel has followed `booking_page_locale` since,
+  // and og:locale went on saying English: a teacher who sells in Spanish had a
+  // Spanish title and description on a card that declared itself English.
+  it.each([
+    ["es", "es_LA", "Clases con Alicia Moreno"],
+    ["fr", "fr_FR", "Cours avec Alicia Moreno"],
+  ])(
+    "declares og:locale in the language she chose for her booking page (%s)",
+    async (bookingPageLocale, ogLocale, title) => {
+      teacherFindUnique.mockResolvedValue({
+        name: "Alicia Moreno",
+        // No headline, so the title is the catalog's own line and shows which
+        // language the page resolved.
+        headline: null,
+        bio: "I teach one-on-one online.",
+        bookingPageLocale,
+        photoPath: "teachers/t1/photo.jpg",
+        onboardingCompleteAt: new Date("2026-01-01"),
+        disabledAt: null,
+        templatesTouchedAt: new Date("2026-01-01"),
+        availabilityTouchedAt: new Date("2026-01-01"),
+        stripeChargesEnabled: true,
+        pricingCurrency: "MXN",
+        payoutInstruments: [],
+        packageTemplates: [],
+      });
+      const { generateMetadata } = await import("@/app/b/[slug]/page");
+      const meta = await generateMetadata({ params, searchParams });
+      // The card and the copy on it agree, and neither follows the request:
+      // the suite's cookie says Spanish for every case here, French included.
+      expect(meta.openGraph?.locale).toBe(ogLocale);
+      expect(meta.title).toBe(title);
+    },
+  );
+
   it("onboarded but not Marketplace Ready (no payout rail): noindex AND the page body 404s", async () => {
     // finishing the 4-step wizard alone
     // no longer makes a teacher publicly listed — she also needs a real

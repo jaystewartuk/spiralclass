@@ -27,6 +27,21 @@
 //                      list languages in English (docs, admin).
 //   * `match`        — matches an Accept-Language header / device languageTag
 //                      prefix for this locale.
+//   * `intl`         — the BCP-47 tag handed to `Intl` and `toLocale*`. The
+//                      `tag` names a catalog; this names a set of CLDR
+//                      conventions for numbers, currency symbols and clocks,
+//                      and the two differ whenever a language's root
+//                      conventions are not its readers' (see `intlLocale`).
+//   * `og`           — the Open Graph locale. Open Graph wants a
+//                      region-qualified, underscore-separated tag (`en_US`,
+//                      never bare `en`), so it cannot be derived from `tag`.
+//   * `dir`          — the writing direction, set on <html dir>.
+//
+// The last three used to be dictionaries kept beside their one consumer —
+// `INTL_LOCALE` here, `OG_LOCALE` in the root layout — which made "append one
+// row" untrue: a new language also had to be added to each of them, and only
+// the ones typed `Record<AppLocale, …>` said so. A fact that is one value per
+// language belongs on the language's row, where it cannot be forgotten.
 
 export type LocaleDefinition = {
   tag: string;
@@ -34,6 +49,9 @@ export type LocaleDefinition = {
   label: string;
   englishName: string;
   match: RegExp;
+  intl: string;
+  og: string;
+  dir: "ltr" | "rtl";
 };
 
 export const LOCALES = [
@@ -43,9 +61,32 @@ export const LOCALES = [
     label: "Español",
     englishName: "Spanish",
     match: /^es\b/i,
+    // Latin American conventions ("1,500.00", "5:00 p.m."), not CLDR's root
+    // `es` ("1500,00", "17:00").
+    intl: "es-419",
+    og: "es_LA",
+    dir: "ltr",
   },
-  { tag: "en", languageCode: "en", label: "English", englishName: "English", match: /^en\b/i },
-  { tag: "fr", languageCode: "fr", label: "Français", englishName: "French", match: /^fr\b/i },
+  {
+    tag: "en",
+    languageCode: "en",
+    label: "English",
+    englishName: "English",
+    match: /^en\b/i,
+    intl: "en",
+    og: "en_US",
+    dir: "ltr",
+  },
+  {
+    tag: "fr",
+    languageCode: "fr",
+    label: "Français",
+    englishName: "French",
+    match: /^fr\b/i,
+    intl: "fr",
+    og: "fr_FR",
+    dir: "ltr",
+  },
 ] as const satisfies readonly LocaleDefinition[];
 
 // The canonical in-app locale identifier (BCP-47). Widening the registry above
@@ -75,16 +116,26 @@ export function isAppLocale(value: unknown): value is AppLocale {
   return typeof value === "string" && (LOCALE_TAGS as string[]).includes(value);
 }
 
-// The BCP-47 tag handed to `Intl` and `toLocale*` for an app locale. The app
-// locale names a catalog; the formatting tag names a set of CLDR conventions
-// for numbers, currency symbols and clocks. Spanish readers are formatted by
-// the Latin American conventions (`es-419`: "1,500.00", "5:00 p.m.") rather
-// than CLDR's root `es` ("1500,00", "17:00"). Anything not in the registry
-// passes through untouched, so a literal like "en-CA" still means itself.
-const INTL_LOCALE: Partial<Record<string, string>> = { es: "es-419" };
+function definitionFor(locale: AppLocale): LocaleDefinition {
+  // Total by construction: AppLocale is the union of the registry's own tags.
+  return LOCALES.find((l) => l.tag === locale) as LocaleDefinition;
+}
 
+// The BCP-47 tag handed to `Intl` and `toLocale*` for an app locale — the
+// row's `intl`. Anything not in the registry passes through untouched, so a
+// literal like "en-CA" still means itself.
 export function intlLocale(locale: string): string {
-  return INTL_LOCALE[locale] ?? locale;
+  return isAppLocale(locale) ? definitionFor(locale).intl : locale;
+}
+
+/** The Open Graph locale (`og:locale`) for an app locale. */
+export function ogLocale(locale: AppLocale): string {
+  return definitionFor(locale).og;
+}
+
+/** The writing direction of an app locale, for `<html dir>`. */
+export function localeDirection(locale: AppLocale): "ltr" | "rtl" {
+  return definitionFor(locale).dir;
 }
 
 /**
