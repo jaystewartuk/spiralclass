@@ -179,15 +179,19 @@ describe("captureLead — answers in the booking page's language", () => {
     expect(await refusal("")).toBe(fallback);
   });
 
-  it("validates the form in the page's language too", async () => {
-    // English page, Spanish cookie: the validator's message follows the page.
-    // (The shared validators are still an English/Spanish pair, so a French
-    // page reads English here until they move to the catalog.)
+  it.each([
+    ["en", "Invalid email"],
+    ["es", "Correo inválido"],
+    ["fr", "Adresse e-mail invalide"],
+  ])("validates the form in the page's language too (%s)", async (pageLocale, copy) => {
+    // The validator's message follows the page, not the Spanish cookie — and
+    // a French page gets French, which the validators could not say while
+    // their messages were an English/Spanish pair.
     const res = await captureLead(
       undefined,
-      leadForm({ ...validLead, email: "not-an-email", pageLocale: "en" }),
+      leadForm({ ...validLead, email: "not-an-email", pageLocale }),
     );
-    expect(res?.error).toBe("Invalid email");
+    expect(res?.error).toBe(copy);
   });
 
   it("still resolves the page's language without a database read", async () => {

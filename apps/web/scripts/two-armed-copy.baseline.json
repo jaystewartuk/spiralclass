@@ -26,10 +26,7 @@
   "apps/web/src/lib/pronunciation/config.ts": 1,
   "apps/web/src/lib/referrals/notify.ts": 1,
   "packages/shared/src/content/types.ts": 1,
-  "packages/shared/src/countries.ts": 1,
-  "packages/shared/src/languages.ts": 1,
   "packages/shared/src/marketing/insights.ts": 1,
   "packages/shared/src/marketing/planner.ts": 7,
-  "packages/shared/src/money.ts": 1,
-  "packages/shared/src/validators.ts": 1
+  "packages/shared/src/money.ts": 1
 }

@@ -154,16 +154,17 @@ export function isIsoCountryCode(value: string): boolean {
 
 /**
  * Localized display name for a country code, e.g. countryLabel("MX", "es")
- * → "México". Reads the STATIC COUNTRY_NAMES catalog first so web and mobile
- * render identical names on every device — React Native (Hermes) has no
- * reliable Intl.DisplayNames at runtime and would otherwise show raw codes.
+ * → "México". Reads the STATIC COUNTRY_NAMES catalog, which carries a name in
+ * every registered locale (see country-names.ts for why it is static). It used
+ * to hold English and Spanish only and answer English for everyone else, so a
+ * French teacher picked her country from an English list.
  * Falls back to runtime Intl (then the code) only for a code outside the
  * catalog, which shouldn't happen for COUNTRY_CODES.
  */
 export function countryLabel(code: string, locale: LocaleCode = "en"): string {
   const c = code.toUpperCase();
   const entry = COUNTRY_NAMES[c];
-  if (entry) return locale === "es" ? entry["es"] : entry.en;
+  if (entry) return entry[locale] ?? entry.en;
   try {
     // fallback: "none" makes `.of()` return undefined for a well-formed but
     // unassigned code instead of "Unknown Region", so the code fallback wins.

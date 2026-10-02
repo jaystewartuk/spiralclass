@@ -8,6 +8,7 @@ import {
   languageName,
   languageOptions,
 } from "./languages";
+import { LOCALES } from "./i18n/locales";
 
 // The one language registry (D-72). Replaces the old caption-languages /
 // material-languages split, whose whole failure mode was two lists of the same
@@ -20,10 +21,11 @@ describe("LANGUAGES", () => {
     for (const code of codes) expect(code).toBe(code.toLowerCase());
   });
 
-  it("labels every language in both locales", () => {
-    for (const l of LANGUAGES) {
-      expect(l.label.en.trim()).not.toBe("");
-      expect(l.label["es"].trim()).not.toBe("");
+  it("labels every language in every registered locale", () => {
+    for (const { tag } of LOCALES) {
+      for (const l of LANGUAGES) {
+        expect(l.label[tag]?.trim(), `${l.code} in ${tag}`).toBeTruthy();
+      }
     }
   });
 
@@ -50,7 +52,7 @@ describe("LANGUAGES", () => {
   // generator now drops the alias and fails loudly on a new collision; this pins
   // the property from the consuming side, where it actually matters.
   it("never renders two languages under the same label", () => {
-    for (const locale of ["en", "es"] as const) {
+    for (const { tag: locale } of LOCALES) {
       const byLabel = new Map<string, string>();
       for (const l of LANGUAGES) {
         const label = l.label[locale];
@@ -170,6 +172,9 @@ describe("languageLabel", () => {
     // concern, not this function's job.
     expect(languageLabel("pt", "es")).toBe("portugués");
     expect(languageLabel("pt", "en")).toBe("Portuguese");
+    // Every locale but Spanish used to get the English name.
+    expect(languageLabel("pt", "fr")).toBe("portugais");
+    expect(languageLabel("de", "fr")).toBe("allemand");
   });
 
   it("falls back to the raw code rather than throwing on a stray DB value", () => {
