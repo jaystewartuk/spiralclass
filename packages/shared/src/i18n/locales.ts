@@ -65,6 +65,12 @@ export const DEFAULT_LOCALE: AppLocale = "en";
 
 const LOCALE_TAGS = LOCALES.map((l) => l.tag) as AppLocale[];
 
+// DEFAULT_LOCALE's outbound code. Read off its registry row rather than
+// restated, so the two cannot come to name different languages.
+const DEFAULT_LANGUAGE_CODE: LanguageCode = (
+  LOCALES.find((l) => l.tag === DEFAULT_LOCALE) ?? LOCALES[0]
+).languageCode;
+
 export function isAppLocale(value: unknown): value is AppLocale {
   return typeof value === "string" && (LOCALE_TAGS as string[]).includes(value);
 }
@@ -172,19 +178,24 @@ export function localeOptions(systemDefaultLabel: string): LocaleOption[] {
 }
 
 /** Bridge an AppLocale (or any locale-ish string, e.g. a DB value) to the
- * `languageCode` the email/push templates branch on. Unknown input
- * resolves to Spanish's code, preserving the historical outbound default. */
+ * `languageCode` the email/push templates branch on. Unknown input resolves
+ * to `DEFAULT_LOCALE`'s code, as every other unforced choice does. It used to
+ * resolve to the registry's first row, which is Spanish: a reader whose stored
+ * locale matched nothing was written to in a language nobody had chosen.
+ *
+ * An underscore-separated tag (`es_MX`) is read as its hyphenated form. The
+ * old fallback hid that such a value matched no row at all — it reached
+ * Spanish by accident — so the correct default must not turn it into English. */
 export function localeToLanguageCode(locale: string | null | undefined): LanguageCode {
-  const normalized = (locale ?? "").toLowerCase();
+  const normalized = (locale ?? "").trim().toLowerCase().replace(/_/g, "-");
   const hit = LOCALES.find((l) => normalized === l.tag.toLowerCase() || l.match.test(normalized));
-  return (hit ?? LOCALES[0]).languageCode;
+  return hit?.languageCode ?? DEFAULT_LANGUAGE_CODE;
 }
 
 /** The reverse bridge: an outbound `languageCode` (e.g. a persisted
  * `Notification.languageCode` row) back to its BCP-47 `AppLocale` tag, for
  * surfaces that display notification history. Unknown input falls back to
- * `DEFAULT_LOCALE`, not the first registry entry — this direction has no
- * historical outbound-default precedent to preserve. */
+ * `DEFAULT_LOCALE`, the same answer the forward bridge gives. */
 export function languageCodeToLocale(languageCode: string | null | undefined): AppLocale {
   const hit = LOCALES.find((l) => l.languageCode === languageCode);
   return hit?.tag ?? DEFAULT_LOCALE;

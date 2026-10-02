@@ -55,10 +55,26 @@ describe("locale registry", () => {
     expect(localeToLanguageCode("en-US")).toBe("en");
     expect(localeToLanguageCode("fr")).toBe("fr");
     expect(localeToLanguageCode("fr-FR")).toBe("fr");
-    // Unknown input preserves the historical Spanish default.
-    expect(localeToLanguageCode("de")).toBe("es");
-    expect(localeToLanguageCode(null)).toBe("es");
-    expect(LANGUAGE_CODES).toContain(DEFAULT_LOCALE === "en" ? "en" : "es");
+    expect(LANGUAGE_CODES).toContain(localeToLanguageCode(DEFAULT_LOCALE));
+  });
+
+  it("still reads a regional or underscore-separated Spanish tag as Spanish", () => {
+    // `es_MX` matched no registry row and only ever reached Spanish through
+    // the old first-row fallback. Fixing the fallback must not move it.
+    for (const spanish of ["es-MX", "es_MX", "es-419", "ES", " es "]) {
+      expect(localeToLanguageCode(spanish), `locale ${JSON.stringify(spanish)}`).toBe("es");
+    }
+    expect(localeToLanguageCode("fr_CA")).toBe("fr");
+  });
+
+  it("writes to a reader with no recognisable locale in DEFAULT_LOCALE, not in Spanish", () => {
+    // It used to resolve to the registry's first row, which is Spanish, so a
+    // reader whose stored locale matched nothing was emailed in a language
+    // nobody had chosen for her.
+    expect(localeToLanguageCode(DEFAULT_LOCALE)).toBe("en");
+    for (const unknown of ["de", "pl", "", "   ", "system", null, undefined]) {
+      expect(localeToLanguageCode(unknown), `locale ${JSON.stringify(unknown)}`).toBe("en");
+    }
   });
 
   it("languageCodeToLocale bridges the languageCode back to a tag", () => {
