@@ -30,6 +30,10 @@ export type PaymentRowData = {
   amountMinorUnits: number;
   currency: string;
   studentName: string;
+  // An operator's test student (D-192). The row stays — it is a real charge on
+  // her own Stripe account, and the ledger has to reconcile to it — but it is
+  // marked, so she can tell the operator's test charge from a student's.
+  testAccount: boolean;
   packageName: string | null;
   paymentReference: string | null;
   studentMarkedSentAt: Date | null;
@@ -119,6 +123,12 @@ export function PaymentRow({
       >
         <span className="col-start-1 row-start-1 min-w-0 truncate font-medium">
           {payment.studentName}
+          {payment.testAccount && (
+            <span className="font-normal text-muted-foreground">
+              {" · "}
+              {t("web.dashboard.students.testAccount")}
+            </span>
+          )}
         </span>
 
         <span className="col-start-1 row-start-2 min-w-0 truncate text-xs text-muted-foreground lg:col-start-2 lg:row-start-1 lg:text-sm">

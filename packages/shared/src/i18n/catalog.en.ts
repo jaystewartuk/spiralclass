@@ -2771,6 +2771,7 @@ export const en = {
   "web.dashboard.students.title": "Students",
   "web.dashboard.students.subtitle": "Who you teach, what they have left, and who needs you.",
   "web.dashboard.students.noEmail": "no email",
+  "web.dashboard.students.testAccount": "Test account",
   "web.dashboard.students.notLive": "Not live",
   "web.dashboard.students.noActivePackage": "No package",
   "web.dashboard.students.empty.title": "No students yet",
@@ -6428,6 +6429,14 @@ export const en = {
   "web.admin.searchNameEmail": "Search name / email",
   "web.admin.statusLabel": "Status",
   "web.admin.teacherLabel": "Teacher",
+  "web.admin.testAccount.title": "Test account",
+  "web.admin.testAccount.onHint":
+    "Marked as a test account. Left out of platform totals, and out of a real teacher's earnings, paid-in-advance and student counts; its rows stay visible, marked. A test teacher still sees her whole sandbox.",
+  "web.admin.testAccount.offHint":
+    "A real account. Mark it as a test account to leave it out of the figures. It changes no access, booking or payment.",
+  "web.admin.testAccount.mark": "Mark as test account",
+  "web.admin.testAccount.unmark": "Unmark as test account",
+  "web.admin.testAccount.saved": "Saved.",
   "web.admin.moderation.reasonLabel": "Reason (kept on record)",
   "web.admin.students.title": "Students",
   "web.admin.students.active": "Active",

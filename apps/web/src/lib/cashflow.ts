@@ -41,6 +41,7 @@
 import { currencyForTeacher, FALLBACK_TIMEZONE } from "@spiralclass/shared";
 import { prisma } from "@/lib/prisma";
 import { classesLeftToTeach } from "@/lib/package-usage";
+import { realStudentsOf } from "@/lib/marketing/test-accounts";
 import { monthKey, monthsBetween, shiftMonthKey } from "@/lib/payments-list";
 
 // How many months of earnings history a teacher sees, the current one
@@ -463,9 +464,20 @@ export async function computeTeacherCashFlow(
     Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - EARNINGS_HISTORY_MONTHS, 1),
   );
 
-  const [packages, bookedGroups, completed, firstDelivered, teacher, upcoming] = await Promise.all([
+  // Her configured pricing currency — which slice to lead with, and the answer
+  // for a teacher with no packages at all — her timezone, whose calendar every
+  // month is cut on, and whether she is a test account. Read first, because
+  // that last one decides the queries below: a real teacher's figures leave
+  // out the operator's test students (D-192); a test teacher's do not.
+  const teacher = await prisma.teacher.findUnique({
+    where: { id: teacherId },
+    select: { pricingCurrency: true, timezone: true, testAccount: true },
+  });
+  const real = realStudentsOf(teacher ?? { testAccount: false });
+
+  const [packages, bookedGroups, completed, firstDelivered, upcoming] = await Promise.all([
     prisma.package.findMany({
-      where: { teacherId, status: { in: [...PAID_STATUSES] } },
+      where: { teacherId, status: { in: [...PAID_STATUSES] }, ...real },
       select: {
         id: true,
         classesTotal: true,
@@ -480,7 +492,7 @@ export async function computeTeacherCashFlow(
     // reservation, still owed until they happen (see `classesLeftToTeach`).
     prisma.booking.groupBy({
       by: ["packageId"],
-      where: { teacherId, status: "scheduled", countsAgainstPackage: true },
+      where: { teacherId, status: "scheduled", countsAgainstPackage: true, ...real },
       _count: { _all: true },
     }),
     // Delivered lessons taught in the window (through now), with their package
@@ -492,6 +504,7 @@ export async function computeTeacherCashFlow(
         teacherId,
         status: { in: [...DELIVERED_STATUSES] },
         scheduledStart: { gte: windowStart, lte: now },
+        ...real,
       },
       select: {
         scheduledStart: true,
@@ -507,17 +520,9 @@ export async function computeTeacherCashFlow(
     }),
     // Her very first delivered lesson, ever — decides warm-up vs steady-state.
     prisma.booking.findFirst({
-      where: { teacherId, status: { in: [...DELIVERED_STATUSES] } },
+      where: { teacherId, status: { in: [...DELIVERED_STATUSES] }, ...real },
       orderBy: { scheduledStart: "asc" },
       select: { scheduledStart: true },
-    }),
-    // Her configured pricing currency — which slice to lead with, and the
-    // answer for a teacher with no packages at all — and her timezone, whose
-    // calendar every month is cut on. Looked up here rather than taken as
-    // arguments so the call sites (payments page, dashboard) stay one line.
-    prisma.teacher.findUnique({
-      where: { id: teacherId },
-      select: { pricingCurrency: true, timezone: true },
     }),
     // Classes still to come in the next month and a bit, on paid packages —
     // the pure function keeps the ones left in HER current month.
@@ -527,6 +532,7 @@ export async function computeTeacherCashFlow(
         status: "scheduled",
         scheduledStart: { gt: now, lt: new Date(now.getTime() + 32 * 24 * 60 * 60 * 1000) },
         package: { status: { in: [...PAID_STATUSES] } },
+        ...real,
       },
       select: {
         scheduledStart: true,

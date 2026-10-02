@@ -71,7 +71,7 @@ another way" about anything that still exists.
   both reversed by [D-40](./D-40.md)).
 
 **Numbering is never reused and never renumbered**, so `D-01` is still the
-first decision and `D-191` the most recent. A gap means a record was removed,
+first decision and `D-192` the most recent. A gap means a record was removed,
 not that one is missing.
 
 **Everything kept is unedited**, except where a record named an account
@@ -181,6 +181,7 @@ closed the gap from the other side.
 | [D-152](./D-152.md) | Tell the teacher what Stripe charges her, and that the platform receives none of it              |
 | [D-153](./D-153.md) | Money columns say `minor_units` — eight supported currencies have no minor unit                  |
 | [D-191](./D-191.md) | **The money screens lead with what she earned this month**, not a "safe to spend" average        |
+| [D-192](./D-192.md) | **An operator's test accounts are marked**, and left out of every figure — never tested unmarked |
 
 ### Scheduling, packages and credits
 
@@ -552,6 +553,7 @@ records removed before publication — see [What is not here](#what-is-not-here)
 | [D-189](./D-189.md) | The transcript is the browsers' caption text; no audio is captured    | Active (partly reverses D-187)       |
 | [D-190](./D-190.md) | A liveness probe restarts a wedged Cloud Run instance                 | Active                               |
 | [D-191](./D-191.md) | Money screens lead with this month earned; "safe to spend" retired    | Active                               |
+| [D-192](./D-192.md) | Test accounts are a recorded flag, left out of every figure           | Active                               |
 
 ---
 

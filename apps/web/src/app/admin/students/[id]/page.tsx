@@ -10,6 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { CategoryBarChart } from "@/components/ui/chart";
 import { notificationStatusChartData } from "@/lib/notifications/chart";
 import { StudentModerationForm } from "./moderation-form";
+import { TestAccountForm } from "../../test-account-form";
 import { StudentEmailForm } from "./email-form";
 import { BackLink } from "@/components/back-link";
 import { getT } from "@/lib/i18n";
@@ -62,6 +63,11 @@ export default async function AdminStudentDetailPage({
           {t("web.admin.students.bookingsLabel")} · {student._count.packages}{" "}
           {t("web.admin.students.packagesLabel")}
         </p>
+        {student.testAccount && (
+          <p className="mt-2">
+            <Badge variant="info">{t("web.admin.testAccount.title")}</Badge>
+          </p>
+        )}
         {student.disabledAt && (
           <Alert variant="destructive" className="mt-2">
             <AlertTitle>{t("web.admin.disabledBadge")}</AlertTitle>
@@ -75,6 +81,13 @@ export default async function AdminStudentDetailPage({
       </header>
 
       <StudentModerationForm studentId={student.id} disabled={Boolean(student.disabledAt)} />
+
+      <section className="space-y-2">
+        <Heading level={3} as="h2">
+          {t("web.admin.testAccount.title")}
+        </Heading>
+        <TestAccountForm target="student" id={student.id} testAccount={student.testAccount} />
+      </section>
 
       <StudentEmailForm
         studentId={student.id}

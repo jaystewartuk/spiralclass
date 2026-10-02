@@ -11076,6 +11076,18 @@
           "default": null
         },
         {
+          "name": "testAccount",
+          "type": "Boolean",
+          "note": null,
+          "isPrimaryKey": false,
+          "isForeignKey": false,
+          "isUnique": false,
+          "isNotNull": true,
+          "isEnum": false,
+          "enumName": null,
+          "default": "false"
+        },
+        {
           "name": "calendarFeedToken",
           "type": "String",
           "note": null,
@@ -13334,6 +13346,18 @@
           "isEnum": false,
           "enumName": null,
           "default": null
+        },
+        {
+          "name": "testAccount",
+          "type": "Boolean",
+          "note": null,
+          "isPrimaryKey": false,
+          "isForeignKey": false,
+          "isUnique": false,
+          "isNotNull": true,
+          "isEnum": false,
+          "enumName": null,
+          "default": "false"
         },
         {
           "name": "referralSource",

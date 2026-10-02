@@ -2799,6 +2799,7 @@ export const esMX = {
   "web.dashboard.students.subtitle":
     "A qui\u00e9n le das clases, cu\u00e1ntas le quedan y qui\u00e9n necesita atenci\u00f3n.",
   "web.dashboard.students.noEmail": "sin correo",
+  "web.dashboard.students.testAccount": "Cuenta de prueba",
   "web.dashboard.students.notLive": "Sin activar",
   "web.dashboard.students.noActivePackage": "Sin paquete",
   "web.dashboard.students.empty.title": "Sin alumnos aún",
@@ -6440,6 +6441,14 @@ export const esMX = {
   "web.admin.searchNameEmail": "Buscar nombre / correo",
   "web.admin.statusLabel": "Estado",
   "web.admin.teacherLabel": "Profesor",
+  "web.admin.testAccount.title": "Cuenta de prueba",
+  "web.admin.testAccount.onHint":
+    "Marcada como cuenta de prueba. Queda fuera de los totales de la plataforma, y de los ingresos, lo pagado por adelantado y los conteos de alumnos de una profesora real; sus filas siguen visibles, marcadas. Una profesora de prueba sigue viendo todo su entorno.",
+  "web.admin.testAccount.offHint":
+    "Una cuenta real. Márcala como cuenta de prueba para dejarla fuera de las cifras. No cambia ningún acceso, reserva ni pago.",
+  "web.admin.testAccount.mark": "Marcar como cuenta de prueba",
+  "web.admin.testAccount.unmark": "Desmarcar como cuenta de prueba",
+  "web.admin.testAccount.saved": "Guardado.",
   "web.admin.moderation.reasonLabel": "Motivo (queda en el registro)",
   "web.admin.students.active": "Activo",
   "web.admin.students.title": "Estudiantes",

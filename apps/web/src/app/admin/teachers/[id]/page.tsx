@@ -11,6 +11,7 @@ import { formatMinorUnits } from "@/lib/money";
 import { entitlementsFor } from "@/lib/subscriptions/entitlements";
 import { notificationStatusChartData } from "@/lib/notifications/chart";
 import { TeacherModerationForm } from "./moderation-form";
+import { TestAccountForm } from "../../test-account-form";
 import { SubscriptionForm } from "./subscription-form";
 import { BackLink } from "@/components/back-link";
 import { getT } from "@/lib/i18n";
@@ -122,6 +123,11 @@ export default async function AdminTeacherDetailPage({
             {bookingUrl} ↗
           </a>
         </p>
+        {teacher.testAccount && (
+          <p className="mt-2">
+            <Badge variant="info">{t("web.admin.testAccount.title")}</Badge>
+          </p>
+        )}
         {teacher.disabledAt && (
           <p className="mt-2">
             <Badge variant="warning">
@@ -137,6 +143,13 @@ export default async function AdminTeacherDetailPage({
           {t("web.admin.teachers.moderationTitle")}
         </Heading>
         <TeacherModerationForm teacherId={teacher.id} disabled={Boolean(teacher.disabledAt)} />
+      </section>
+
+      <section className="space-y-2">
+        <Heading level={3} as="h2">
+          {t("web.admin.testAccount.title")}
+        </Heading>
+        <TestAccountForm target="teacher" id={teacher.id} testAccount={teacher.testAccount} />
       </section>
 
       <section className="space-y-2">

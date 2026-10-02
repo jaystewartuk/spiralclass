@@ -76,7 +76,7 @@ const PAYMENT_SELECT = {
   studentMarkedSentAt: true,
   package: {
     select: {
-      student: { select: { name: true } },
+      student: { select: { name: true, testAccount: true } },
       template: { select: { name: true } },
     },
   },
@@ -93,6 +93,7 @@ function toRow(payment: PaymentPayload): PaymentRowData {
     amountMinorUnits: payment.amountMinorUnits,
     currency: payment.currency,
     studentName: payment.package.student.name,
+    testAccount: payment.package.student.testAccount,
     packageName: payment.package.template?.name ?? null,
     paymentReference: payment.paymentReference,
     studentMarkedSentAt: payment.studentMarkedSentAt,

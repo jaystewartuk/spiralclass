@@ -63,6 +63,11 @@ same individual across teachers.
   teacher can stage a student in the system before the student knows the
   app exists.
 
+- A student an operator has marked as a **test account**
+  ([D-192](../decisions/D-192.md)) stays on the roster with a "Cuenta de
+  prueba" badge, but counts in none of the roster's figures and never needs
+  attention. In a test teacher's own roster everyone counts.
+
 ### Adding students in bulk ("CSV import")
 
 - There is no spreadsheet file-upload importer; bulk-adding students is a

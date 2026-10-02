@@ -2748,6 +2748,7 @@ export const fr = {
   "web.dashboard.students.subtitle":
     "Qui vous enseignez, ce qu\u2019il leur reste et qui a besoin de vous.",
   "web.dashboard.students.noEmail": "sans e-mail",
+  "web.dashboard.students.testAccount": "Compte de test",
   "web.dashboard.students.notLive": "Non activé",
   "web.dashboard.students.noActivePackage": "Aucun forfait",
   "web.dashboard.students.empty.title": "Aucun élève pour le moment",
@@ -6380,6 +6381,14 @@ export const fr = {
   "web.admin.searchNameEmail": "Rechercher nom / e-mail",
   "web.admin.statusLabel": "Statut",
   "web.admin.teacherLabel": "Enseignant",
+  "web.admin.testAccount.title": "Compte de test",
+  "web.admin.testAccount.onHint":
+    "Marqué comme compte de test. Exclu des totaux de la plateforme, ainsi que des revenus, du payé d'avance et du nombre d'élèves d'un enseignant réel ; ses lignes restent visibles, marquées. Un enseignant de test voit toujours tout son environnement.",
+  "web.admin.testAccount.offHint":
+    "Un compte réel. Marquez-le comme compte de test pour l'exclure des chiffres. Cela ne change aucun accès, aucune réservation ni aucun paiement.",
+  "web.admin.testAccount.mark": "Marquer comme compte de test",
+  "web.admin.testAccount.unmark": "Retirer le marquage de compte de test",
+  "web.admin.testAccount.saved": "Enregistré.",
   "web.admin.moderation.reasonLabel": "Motif (conservé au dossier)",
   "web.admin.students.active": "Actif",
   "web.admin.students.title": "Élèves",

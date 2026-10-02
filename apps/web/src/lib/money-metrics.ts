@@ -31,6 +31,7 @@
 
 import { prisma } from "@/lib/prisma";
 import { summarizeCashFlow, type CashFlow } from "@/lib/cashflow";
+import { NOT_TEST_ACCOUNT, REAL_PACKAGE_WHERE } from "@/lib/marketing/test-accounts";
 import { classesLeftToTeach } from "@/lib/package-usage";
 import {
   DEFAULT_PRICING_CURRENCY,
@@ -165,7 +166,12 @@ export async function getSubscriptionRevenueSeries(
 ): Promise<{ series: RevenuePoint[]; otherCurrencyTotals: Record<string, number> }> {
   const months = recentMonths(now, monthsBack);
   const invoices = await prisma.subscriptionInvoice.findMany({
-    where: { status: "paid", paidAt: { not: null, gte: monthWindowStart(now, monthsBack) } },
+    where: {
+      status: "paid",
+      paidAt: { not: null, gte: monthWindowStart(now, monthsBack) },
+      // An operator's test teacher's subscription is not revenue (D-192).
+      teacher: NOT_TEST_ACCOUNT,
+    },
     select: {
       paidAt: true,
       amountMinorUnits: true,
@@ -270,7 +276,12 @@ export async function getGmvSeries(
 ): Promise<GmvCurrencySlice[]> {
   const months = recentMonths(now, monthsBack);
   const payments = await prisma.payment.findMany({
-    where: { status: "paid", paidAt: { not: null, gte: monthWindowStart(now, monthsBack) } },
+    where: {
+      status: "paid",
+      paidAt: { not: null, gte: monthWindowStart(now, monthsBack) },
+      // Neither side an operator's test account (D-192).
+      package: REAL_PACKAGE_WHERE,
+    },
     select: { paidAt: true, amountMinorUnits: true, rail: true, currency: true },
   });
   return summarizeGmvByCurrency(
@@ -419,7 +430,7 @@ export function summarizeNetProfitSeries(
 export async function computePlatformDeferredRevenue(now: Date = new Date()): Promise<CashFlow> {
   const [packages, bookedGroups] = await Promise.all([
     prisma.package.findMany({
-      where: { status: { in: [...PAID_PACKAGE_STATUSES] } },
+      where: { status: { in: [...PAID_PACKAGE_STATUSES] }, ...REAL_PACKAGE_WHERE },
       select: {
         id: true,
         classesTotal: true,
@@ -433,7 +444,7 @@ export async function computePlatformDeferredRevenue(now: Date = new Date()): Pr
     // Booked but not yet taught, per package — still owed (see `classesLeftToTeach`).
     prisma.booking.groupBy({
       by: ["packageId"],
-      where: { status: "scheduled", countsAgainstPackage: true },
+      where: { status: "scheduled", countsAgainstPackage: true, package: REAL_PACKAGE_WHERE },
       _count: { _all: true },
     }),
   ]);

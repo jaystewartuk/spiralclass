@@ -462,6 +462,15 @@ template)`.
   she started part-way through. It is stated as a fact and only once two such
   months exist. No figure is presented as what she can safely spend.
 
+**Test accounts** ([D-192](../decisions/D-192.md))
+
+- A real teacher's figures leave out students an operator has marked as test
+  accounts. That covers earned, paid in advance, booked, the history and the
+  typical month.
+- Those students' payments stay in her ledger, marked, because they are real
+  charges on her own account.
+- A test teacher's figures include everything.
+
 **Rules that hold across all of it**
 
 - **One figure, many views.** This month, last month, each history row, each

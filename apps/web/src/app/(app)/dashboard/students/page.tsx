@@ -120,6 +120,7 @@ export default async function TeacherStudentsPage({
           phoneE164: true,
           authUserId: true,
           createdAt: true,
+          testAccount: true,
           // ACTIVE ONLY, AND ONE. This used to load every package the student
           // has ever bought from this teacher, in full, to find the one active
           // row — so a long-standing student cost thirty rows per render and a
@@ -224,6 +225,7 @@ export default async function TeacherStudentsPage({
           }
         : null,
       hasUpcomingClass: hasUpcoming.has(l.student.id),
+      testAccount: l.student.testAccount,
     };
   });
 
@@ -254,10 +256,21 @@ export default async function TeacherStudentsPage({
 
   // The standing figures, over the whole roster rather than the current view —
   // see note 3 in the header comment.
+  //
+  // An operator's test student (D-192) stays on the list, marked, but counts
+  // in none of the figures and never "needs attention" — the operator booking
+  // a real teacher's funnel to test it is not a student she is losing. A test
+  // teacher's own sandbox counts everyone, test students included.
+  const counts = (s: RosterStudent) => teacher.testAccount || !s.testAccount;
   const active = roster.filter((s) => !s.archived);
-  const archivedCount = roster.length - active.length;
-  const attention = active.filter((s) => needsAttention(rosterFlags(s, now, teacher.timezone)));
-  const classesLeft = active.reduce((sum, s) => sum + (s.activePackage?.left ?? 0), 0);
+  const archivedCount = roster.filter((s) => s.archived && counts(s)).length;
+  const activeCount = active.filter(counts).length;
+  const attention = active.filter(
+    (s) => counts(s) && needsAttention(rosterFlags(s, now, teacher.timezone)),
+  );
+  const classesLeft = active
+    .filter(counts)
+    .reduce((sum, s) => sum + (s.activePackage?.left ?? 0), 0);
 
   const inScope =
     scope === "archived"
@@ -370,7 +383,7 @@ export default async function TeacherStudentsPage({
                 <dl className="space-y-3">
                   <GlanceRow
                     label={t("web.dashboard.students.roster.glance.active")}
-                    value={active.length}
+                    value={activeCount}
                   />
                   <GlanceRow
                     label={t("web.dashboard.students.roster.glance.attention")}

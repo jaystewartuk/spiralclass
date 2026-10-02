@@ -167,6 +167,14 @@ function RowChips({
 
   if (note) chips.push(<NoteBadge key="note" note={note} t={t} />);
 
+  if (student.testAccount) {
+    chips.push(
+      <Badge key="test" variant="secondary">
+        {t("web.dashboard.students.testAccount")}
+      </Badge>,
+    );
+  }
+
   if (student.notLive) {
     chips.push(
       <Badge key="hold" variant="info">

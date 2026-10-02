@@ -1409,14 +1409,21 @@ export function aliasServerUser(distinctId: string, anonymousId: string): void {
 
 export function identifyServerUser(
   distinctId: string,
-  properties: { email?: string | null; role: "teacher" | "student" | "admin" },
+  properties: {
+    email?: string | null;
+    role: "teacher" | "student" | "admin";
+    // An operator's test account (D-192). Sent as `is_test_account` so
+    // PostHog's "filter out test accounts" switch can be keyed on it.
+    testAccount?: boolean;
+  },
 ): void {
   if (process.env.NODE_ENV === "test") return;
   if (identifiedThisProcess.has(distinctId)) return;
   identifiedThisProcess.add(distinctId);
 
-  const personProps: Record<string, string> = { role: properties.role };
+  const personProps: Record<string, string | boolean> = { role: properties.role };
   if (properties.email) personProps.email = properties.email;
+  if (properties.testAccount !== undefined) personProps.is_test_account = properties.testAccount;
 
   const client = getClient();
   if (!client) {

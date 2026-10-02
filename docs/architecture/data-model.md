@@ -1,6 +1,6 @@
 # Data model
 
-82 models, 6 migrations, 128 indexes and 23 unique constraints of PostgreSQL,
+82 models, 7 migrations, 128 indexes and 23 unique constraints of PostgreSQL,
 reached through Prisma, hosted on Neon. (Not two hundred — the history was
 squashed into a regenerable baseline plus a hand-authored invariants file, and
 changes since sit on top of them; see [Migrations](#migrations).) The schema
