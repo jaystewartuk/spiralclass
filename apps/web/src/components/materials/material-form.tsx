@@ -10,7 +10,6 @@ import {
   materialFieldMessages,
   materialSaveStatus,
   validateMaterialFields,
-  usesEnglishCopy,
 } from "@spiralclass/shared";
 import { useFieldErrors } from "@/hooks/use-field-errors";
 import { Combobox } from "@/components/ui/combobox";
@@ -344,7 +343,7 @@ export function MaterialForm({
   // Shared by both branches below: every AI compose surface offers it, streamed
   // or not. Defaults from the UI locale, which is only a guess at what she
   // writes in; `teachers.teaching_language` would be the better default.
-  const [language, setLanguage] = useState<string>(usesEnglishCopy(locale) ? "en" : "es");
+  const [language, setLanguage] = useState<string>(new Intl.Locale(locale).language);
   // `generatableOnly`: this picker feeds a Claude prompt, and the registry spans
   // every ISO 639-1 language — including extinct ones (Avestan) and very
   // low-resource ones the model would produce unusable material in. Teaching

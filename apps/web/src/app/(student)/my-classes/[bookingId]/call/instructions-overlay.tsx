@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { useT } from "@/components/locale-provider";
 import { useVisibilityPolling } from "@/hooks/use-visibility-polling";
 import { CallNotesCard } from "@/components/video/call-notes-card";
 
@@ -22,13 +23,12 @@ type LiveNote = { id: string; body: string };
 export function InstructionsOverlay({
   notes,
   windowOpen,
-  en,
 }: {
   notes: LiveNote[];
   windowOpen: boolean;
-  en: boolean;
 }) {
   const router = useRouter();
+  const t = useT();
 
   // Poll BEFORE the empty-early-return so this keeps running even with no notes
   // yet — a note the teacher adds mid-call appears on the next tick without a
@@ -41,7 +41,7 @@ export function InstructionsOverlay({
   if (notes.length === 0) return null;
   return (
     <CallNotesCard
-      title={en ? "During your class" : "Durante tu clase"}
+      title={t("lessonNotes.student.title")}
       count={notes.length}
       storageKey="spiralclass.callNotes.student"
     >

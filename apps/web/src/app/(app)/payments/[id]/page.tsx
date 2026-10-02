@@ -10,7 +10,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { RefundForm } from "./refund-form";
 import { WiseConfirmForm } from "./wise-confirm-form";
 import { PackageDetailsSheet } from "@/components/packages/package-details-sheet";
-import { intlLocale, usesEnglishCopy } from "@spiralclass/shared";
+import { intlLocale } from "@spiralclass/shared";
 
 export default async function PaymentDetailPage({
   params,
@@ -27,7 +27,6 @@ export default async function PaymentDetailPage({
   const { id } = await params;
   const teacher = await requireOnboardedTeacher();
   const locale = await getPreferredLocale();
-  const en = usesEnglishCopy(locale);
   const t = await getT();
   const sp = await searchParams;
 
@@ -131,7 +130,7 @@ export default async function PaymentDetailPage({
           {payment.confirmedAt && (
             <Row
               label={t("web.payments.detail.confirmed")}
-              value={new Intl.DateTimeFormat(intlLocale(en ? "en-US" : "es"), {
+              value={new Intl.DateTimeFormat(intlLocale(locale), {
                 dateStyle: "medium",
                 timeStyle: "short",
               }).format(payment.confirmedAt)}
@@ -140,7 +139,7 @@ export default async function PaymentDetailPage({
           {payment.refundedAt && (
             <Row
               label={t("web.payments.detail.refunded")}
-              value={new Intl.DateTimeFormat(intlLocale(en ? "en-US" : "es"), {
+              value={new Intl.DateTimeFormat(intlLocale(locale), {
                 dateStyle: "medium",
                 timeStyle: "short",
               }).format(payment.refundedAt)}

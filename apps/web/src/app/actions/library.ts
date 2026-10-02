@@ -128,7 +128,7 @@ export async function saveMaterialAttachmentAction(
     file,
     linkUrl: linkUrlRaw,
     pathPrefix: booking ? `${teacher.id}/${booking.id}` : `${teacher.id}/library`,
-    en: usesEnglishCopy(locale),
+    t,
   });
   if ("error" in attachment) return { error: attachment.error };
 
@@ -218,7 +218,7 @@ export async function saveMaterialContentAction(
       file,
       linkUrl: "",
       pathPrefix: bookingId ? `${teacher.id}/${bookingId}` : `${teacher.id}/library`,
-      en: usesEnglishCopy(locale),
+      t,
     });
     if ("error" in uploaded) return { error: uploaded.error };
     storagePath = uploaded.ok.kind === "file" ? uploaded.ok.storagePath : undefined;

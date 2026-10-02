@@ -7353,4 +7353,77 @@ export const fr = {
   "web.action.admin.schemaMismatch": "ne correspond pas au schéma",
   "web.action.admin.broadcastSent": "Envoyés : {sent}/{total}",
   "web.action.admin.broadcastSentSomeFailed": "Envoyés : {sent}/{total} · {failed} en échec",
+  "web.action.checkout.stripeUnavailable":
+    "Nous n'avons pas pu joindre le prestataire de paiement par carte. Réessayez, ou payez plutôt par virement bancaire.",
+  "web.action.checkout.cardNotAccepted":
+    "Ce professeur n'accepte pas encore les paiements par carte. Demandez-lui de terminer la configuration de Stripe, ou choisissez un virement bancaire.",
+  "web.action.checkout.transfersNotAccepted":
+    "Ce professeur n'accepte pas les virements bancaires pour le moment.",
+  "web.action.checkout.tooMany":
+    "Trop de tentatives de paiement. Patientez une minute et réessayez.",
+  "web.action.checkout.noEmail":
+    "Votre compte n'a pas d'adresse e-mail. Demandez à votre professeur d'en ajouter une.",
+  "web.action.checkout.notForTwo":
+    "Ce forfait n'est pas proposé pour deux personnes. Choisissez-en un autre.",
+  "web.action.checkout.partnerConsent":
+    "Confirmez que la deuxième personne est d'accord avant de payer.",
+  "web.action.checkout.freeWithCode":
+    "Avec ce code, le cours est gratuit — demandez à votre professeur de le réserver directement pour vous.",
+  "web.action.checkout.chooseTransfer": "Choisissez comment vous souhaitez effectuer le virement.",
+  "web.action.checkout.optionGone":
+    "Ce moyen de paiement n'est plus disponible. Choisissez-en un autre.",
+  "web.action.checkout.cardUnavailable":
+    "Les paiements par carte ne sont pas disponibles pour le moment. Essayez un virement bancaire, ou revenez plus tard.",
+  "web.action.checkout.noPaymentForm":
+    "Stripe n'a pas renvoyé de formulaire de paiement. Réessayez.",
+  "web.action.checkout.noPaymentLink": "Stripe n'a pas renvoyé de lien de paiement. Réessayez.",
+  "web.action.focusTags.tooManyTags": "Trop d'étiquettes dans un même enregistrement.",
+  "web.action.focusTags.tagNeedsName": "Chaque étiquette doit avoir un nom.",
+  "web.action.focusTags.tagNameTooLong": "Le nom d'une étiquette est trop long.",
+  "web.action.focusTags.tagNeedsCategory": "Chaque étiquette doit avoir une catégorie valide.",
+  "web.action.focusTags.tooManyCategories": "Trop de catégories dans un même enregistrement.",
+  "web.action.focusTags.categoryNeedsName": "Chaque catégorie doit avoir un nom.",
+  "web.action.focusTags.categoryNameTooLong": "Le nom d'une catégorie est trop long.",
+  "web.action.focusTags.cantDeleteCategories":
+    "Impossible de supprimer {names} : des étiquettes y sont encore rattachées. Déplacez-les ou supprimez-les d'abord.",
+  "web.action.discount.invalid": "Ce code n'est pas valide.",
+  "web.action.discount.inactive": "Ce code n'est plus actif.",
+  "web.action.discount.expired": "Ce code a expiré.",
+  "web.action.discount.limitReached": "Ce code a atteint sa limite d'utilisation.",
+  "web.action.discount.alreadyUsed": "Vous avez déjà utilisé ce code.",
+  "web.action.packageField.invalidNumber": "Saisissez un nombre valide",
+  "web.action.packageField.exceedsTotal":
+    "Le nombre de cours restants ne peut pas dépasser le total.",
+  "web.action.packageField.atMost": "Il peut rester au maximum {max} cours pour ce forfait.",
+  "web.action.materialImage.chooseType": "Choisissez une image JPG, PNG, WebP ou GIF.",
+  "web.action.materialImage.tooLarge": "L'image ne peut pas dépasser {mb} Mo.",
+  "web.action.materialImage.uploadFailed": "Nous n'avons pas pu téléverser l'image : {message}",
+  "web.action.materialFile.tooLarge": "Le fichier ne peut pas dépasser 25 Mo.",
+  "web.action.materialFile.uploadFailed": "Nous n'avons pas pu téléverser le fichier : {message}",
+  "web.action.referral.ownCode": "Vous ne pouvez pas utiliser votre propre code de parrainage.",
+  "web.action.referral.firstPurchaseOnly":
+    "Les codes de parrainage ne s'appliquent qu'à votre premier achat.",
+  "web.action.classContent.writeFirst": "Rédigez d'abord du contenu.",
+  "web.dateDisplay.yourZone": "votre fuseau",
+  "web.action.checkout.belowCardMinimum":
+    "Ce total est inférieur au minimum pour un paiement par carte ({min} {currency}).",
+  "web.action.checkout.belowCardMinimumUseTransfer":
+    "Ce total est inférieur au minimum pour un paiement par carte ({min} {currency}). Choisissez un virement bancaire pour l'utiliser.",
+  "web.action.classContent.tooLong": "Le contenu est trop long ({max} caractères maximum).",
+  "focusTags.builtin.category.grammar": "Grammaire",
+  "focusTags.builtin.category.vocabulary": "Vocabulaire",
+  "focusTags.builtin.category.skill": "Compétences",
+  "focusTags.builtin.category.activity": "Activités",
+  "focusTags.builtin.category.theme": "Thèmes",
+  "focusTags.builtin.category.format": "Format",
+  "focusTags.builtin.format.actividad_breve": "Activité courte",
+  "focusTags.builtin.format.presentacion": "Présentation",
+  "focusTags.builtin.format.lecturas": "Lectures",
+  "focusTags.builtin.format.ponte_al_dia": "Actualités",
+  "focusTags.builtin.format.unidad_didactica": "Unité didactique",
+  "focusTags.builtin.format.test": "Quiz",
+  "focusTags.builtin.format.cancion": "Chanson",
+  "focusTags.builtin.format.podcast": "Podcast",
+  "focusTags.builtin.format.escape_room": "Escape game",
+  "focusTags.builtin.format.kahoot": "Kahoot",
 } as const;

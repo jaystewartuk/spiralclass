@@ -1,3 +1,4 @@
+import { type TFunction } from "@spiralclass/shared";
 import crypto from "node:crypto";
 import { PackageStatus, Prisma } from "@prisma/client";
 import { computeDiscountMinorUnits, normalizeDiscountCode } from "@/lib/discounts";
@@ -232,20 +233,16 @@ export async function voidReferralRewardForPayment(
 
 export function referralRejectMessage(
   reason: Exclude<ReferralCheckout & { ok: false }, { ok: true }>["reason"],
-  en: boolean,
+  t: TFunction,
 ): string {
   switch (reason) {
     case "self_referral":
-      return en
-        ? "You can't use your own referral code."
-        : "No puedes usar tu propio código de referido.";
+      return t("web.action.referral.ownCode");
     case "already_redeemed":
-      return en
-        ? "Referral codes only apply to your first purchase."
-        : "Los códigos de referido solo aplican en tu primera compra.";
+      return t("web.action.referral.firstPurchaseOnly");
     case "program_off":
     case "inactive":
     case "not_a_referral":
-      return en ? "That code isn't valid." : "Ese código no es válido.";
+      return t("web.action.discount.invalid");
   }
 }

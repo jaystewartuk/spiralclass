@@ -30,13 +30,3 @@ export type PackageUsage = {
 export function classesLeftToTeach({ classesTotal, classesUsed, scheduled }: PackageUsage): number {
   return Math.min(classesTotal, Math.max(0, classesTotal - classesUsed + scheduled));
 }
-
-export function formatPackageUsage(usage: PackageUsage, en: boolean): string {
-  const left = classesLeftToTeach(usage);
-  const available = en
-    ? `${left} available`
-    : `${left} ${left === 1 ? "disponible" : "disponibles"}`;
-  return en
-    ? `Package of ${usage.classesTotal} · ${available}`
-    : `Paquete de ${usage.classesTotal} · ${available}`;
-}

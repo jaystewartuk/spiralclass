@@ -7316,4 +7316,75 @@ export const esMX = {
   "web.action.admin.schemaMismatch": "no coincide con el esquema",
   "web.action.admin.broadcastSent": "Enviados: {sent}/{total}",
   "web.action.admin.broadcastSentSomeFailed": "Enviados: {sent}/{total} · {failed} fallaron",
+  "web.action.checkout.stripeUnavailable":
+    "No pudimos conectar con el proveedor de pagos. Inténtalo de nuevo o paga por transferencia.",
+  "web.action.checkout.cardNotAccepted":
+    "Esta profe todavía no acepta pagos con tarjeta. Pídele que complete la conexión con Stripe o elige una transferencia.",
+  "web.action.checkout.transfersNotAccepted":
+    "Esta profe no está aceptando transferencias en este momento.",
+  "web.action.checkout.tooMany":
+    "Demasiados intentos de pago. Espera un minuto e inténtalo de nuevo.",
+  "web.action.checkout.noEmail":
+    "Tu cuenta no tiene correo registrado. Pídele a tu profe que lo agregue.",
+  "web.action.checkout.notForTwo": "Este paquete no se vende para dos personas. Elige otro.",
+  "web.action.checkout.partnerConsent":
+    "Confirma que la otra persona está de acuerdo antes de pagar.",
+  "web.action.checkout.freeWithCode":
+    "Este código deja la clase gratis — pídele a tu profe que la agende directamente.",
+  "web.action.checkout.chooseTransfer": "Elige cómo quieres hacer la transferencia.",
+  "web.action.checkout.optionGone": "Esa opción de pago ya no está disponible. Elige otra.",
+  "web.action.checkout.cardUnavailable":
+    "Los pagos con tarjeta no están disponibles en este momento. Intenta con una transferencia o vuelve más tarde.",
+  "web.action.checkout.noPaymentForm":
+    "Stripe no devolvió un formulario de pago. Vuelve a intentarlo.",
+  "web.action.checkout.noPaymentLink": "Stripe no devolvió un enlace de pago. Vuelve a intentarlo.",
+  "web.action.focusTags.tooManyTags": "Demasiados enfoques en un solo guardado.",
+  "web.action.focusTags.tagNeedsName": "Cada enfoque necesita un nombre.",
+  "web.action.focusTags.tagNameTooLong": "Un nombre de enfoque es demasiado largo.",
+  "web.action.focusTags.tagNeedsCategory": "Cada enfoque necesita una categoría válida.",
+  "web.action.focusTags.tooManyCategories": "Demasiadas categorías en un solo guardado.",
+  "web.action.focusTags.categoryNeedsName": "Cada categoría necesita un nombre.",
+  "web.action.focusTags.categoryNameTooLong": "Un nombre de categoría es demasiado largo.",
+  "web.action.focusTags.cantDeleteCategories":
+    "No se puede eliminar {names} — todavía tiene enfoques. Muévelos o elimínalos primero.",
+  "web.action.discount.invalid": "Ese código no es válido.",
+  "web.action.discount.inactive": "Ese código ya no está activo.",
+  "web.action.discount.expired": "Ese código ya venció.",
+  "web.action.discount.limitReached": "Ese código alcanzó su límite.",
+  "web.action.discount.alreadyUsed": "Ya usaste ese código.",
+  "web.action.packageField.invalidNumber": "Ingresa un número válido",
+  "web.action.packageField.exceedsTotal": "Las clases restantes no pueden superar el total.",
+  "web.action.packageField.atMost":
+    "Las clases restantes pueden ser como máximo {max} para este paquete.",
+  "web.action.materialImage.chooseType": "Elige una imagen JPG, PNG, WebP o GIF.",
+  "web.action.materialImage.tooLarge": "La imagen no puede pesar más de {mb} MB.",
+  "web.action.materialImage.uploadFailed": "No pudimos subir la imagen: {message}",
+  "web.action.materialFile.tooLarge": "El archivo no puede pesar más de 25 MB.",
+  "web.action.materialFile.uploadFailed": "No pudimos subir el archivo: {message}",
+  "web.action.referral.ownCode": "No puedes usar tu propio código de referido.",
+  "web.action.referral.firstPurchaseOnly":
+    "Los códigos de referido solo aplican en tu primera compra.",
+  "web.action.classContent.writeFirst": "Escribe primero algo de contenido.",
+  "web.dateDisplay.yourZone": "tu zona",
+  "web.action.checkout.belowCardMinimum":
+    "Ese total queda por debajo del mínimo para pago con tarjeta ({min} {currency}).",
+  "web.action.checkout.belowCardMinimumUseTransfer":
+    "Ese total queda por debajo del mínimo para pago con tarjeta ({min} {currency}). Elige una transferencia para usarlo.",
+  "web.action.classContent.tooLong": "El contenido es demasiado largo (máx. {max} caracteres).",
+  "focusTags.builtin.category.grammar": "Gramática",
+  "focusTags.builtin.category.vocabulary": "Vocabulario",
+  "focusTags.builtin.category.skill": "Habilidades",
+  "focusTags.builtin.category.activity": "Actividades",
+  "focusTags.builtin.category.theme": "Temas",
+  "focusTags.builtin.category.format": "Formato",
+  "focusTags.builtin.format.actividad_breve": "Actividad breve",
+  "focusTags.builtin.format.presentacion": "Presentación",
+  "focusTags.builtin.format.lecturas": "Lecturas",
+  "focusTags.builtin.format.ponte_al_dia": "Ponte al día",
+  "focusTags.builtin.format.unidad_didactica": "Unidad didáctica",
+  "focusTags.builtin.format.test": "Test",
+  "focusTags.builtin.format.cancion": "Canción",
+  "focusTags.builtin.format.podcast": "Pódcast",
+  "focusTags.builtin.format.escape_room": "Escape Room",
+  "focusTags.builtin.format.kahoot": "Kahoot",
 } as const;

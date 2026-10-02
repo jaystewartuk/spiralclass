@@ -6,10 +6,7 @@ import { getPreferredLocale, getT } from "@/lib/i18n";
 import { AvailabilityForm } from "@/app/(app)/onboarding/availability/availability-form";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { cn } from "@/lib/utils";
-import { usesEnglishCopy } from "@spiralclass/shared";
-
-const WEEKDAYS_ES = ["Do", "Lu", "Ma", "Mi", "Ju", "Vi", "Sá"];
-const WEEKDAYS_EN = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"];
+import { intlLocale, weekdayLabels as intlWeekdayLabels } from "@spiralclass/shared";
 
 export default async function AvailabilitySettingsPage({
   searchParams,
@@ -18,7 +15,6 @@ export default async function AvailabilitySettingsPage({
 }) {
   const teacher = await requireOnboardedTeacher();
   const locale = await getPreferredLocale();
-  const en = usesEnglishCopy(locale);
   const t = await getT();
   const params = await searchParams;
   const rules = await prisma.availabilityRule.findMany({
@@ -27,7 +23,12 @@ export default async function AvailabilitySettingsPage({
   });
 
   const activeWeekdays = new Set(rules.map((r) => r.weekday));
-  const weekdayLabels = en ? WEEKDAYS_EN : WEEKDAYS_ES;
+  // Two-letter day names, Sunday first, from Intl — this was a table holding
+  // English and Spanish. The first two letters of the short name are what
+  // those tables spelled out ("Su", "Do"), and what French abbreviates to.
+  const weekdayLabels = intlWeekdayLabels(locale, "short").map(
+    (name) => name.charAt(0).toLocaleUpperCase(intlLocale(locale)) + name.slice(1, 2),
+  );
 
   // D-53: rules are interpreted in the zone they were written in, frozen at
   // save. If the teacher later changed their account zone, existing hours stay

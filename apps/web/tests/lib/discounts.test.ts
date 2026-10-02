@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { createT } from "@spiralclass/shared";
 import type { Prisma } from "@prisma/client";
 import {
   computeDiscountMinorUnits,
@@ -147,8 +148,10 @@ describe("resolveAndValidateDiscount", () => {
 
 describe("discountRejectMessage", () => {
   it("localizes each reason", () => {
-    expect(discountRejectMessage("expired", true)).toMatch(/expired/i);
-    expect(discountRejectMessage("expired", false)).toMatch(/venc/i);
-    expect(discountRejectMessage("per_student", true)).toMatch(/already used/i);
+    expect(discountRejectMessage("expired", createT("en"))).toMatch(/expired/i);
+    expect(discountRejectMessage("expired", createT("es"))).toMatch(/venc/i);
+    expect(discountRejectMessage("per_student", createT("en"))).toMatch(/already used/i);
+    // A third language gets its own sentence, not the English one.
+    expect(discountRejectMessage("expired", createT("fr"))).toBe("Ce code a expiré.");
   });
 });

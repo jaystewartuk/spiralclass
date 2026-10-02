@@ -118,7 +118,14 @@ export function isAppLocale(value: unknown): value is AppLocale {
 
 function definitionFor(locale: AppLocale): LocaleDefinition {
   // Total by construction: AppLocale is the union of the registry's own tags.
-  return LOCALES.find((l) => l.tag === locale) as LocaleDefinition;
+  // A value that got past the types anyway (a stale database row cast on the
+  // way in) gets DEFAULT_LOCALE's row, like every other unforced choice,
+  // rather than a throw from a property read on undefined.
+  return (
+    LOCALES.find((l) => l.tag === locale) ??
+    LOCALES.find((l) => l.tag === DEFAULT_LOCALE) ??
+    LOCALES[0]
+  );
 }
 
 // The BCP-47 tag handed to `Intl` and `toLocale*` for an app locale — the
@@ -136,6 +143,20 @@ export function ogLocale(locale: AppLocale): string {
 /** The writing direction of an app locale, for `<html dir>`. */
 export function localeDirection(locale: AppLocale): "ltr" | "rtl" {
   return definitionFor(locale).dir;
+}
+
+/**
+ * The English name of an app locale's language ("Spanish", "French").
+ *
+ * For the one place that needs it in English whatever the reader reads: a
+ * prompt telling a model which language to write in. It replaces
+ * `usesEnglishCopy(locale) ? "English" : "Spanish"`, which told the model to
+ * write English for every teacher who was not Spanish-speaking.
+ */
+export function localeEnglishName(locale: string): string {
+  // Takes a string because its callers hold a locale read off a database row;
+  // definitionFor answers an unrecognised one with DEFAULT_LOCALE's.
+  return definitionFor(locale as AppLocale).englishName;
 }
 
 /**

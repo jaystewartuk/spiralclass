@@ -7,7 +7,7 @@ import {
   type InstrumentReadiness,
   type Seats,
   createT,
-  usesEnglishCopy,
+  type TFunction,
 } from "@spiralclass/shared";
 import { prisma } from "@/lib/prisma";
 import { serverEnv } from "@/lib/env";
@@ -43,10 +43,8 @@ const log = logger({ surface: "checkout" });
 // again, and if it keeps happening it is not your fault — and the raw text
 // ("The provided key 'sk_test_…' does not have access to account 'acct_…'")
 // leaks the shape of our Stripe setup to a stranger.
-function stripeUnavailableMessage(en: boolean): string {
-  return en
-    ? "We couldn't reach the card provider just now. Try again, or pay by bank transfer instead."
-    : "No pudimos conectar con el proveedor de pagos. Inténtalo de nuevo o paga por transferencia.";
+function stripeUnavailableMessage(t: TFunction): string {
+  return t("web.action.checkout.stripeUnavailable");
 }
 
 // Shared checkout core behind both purchase entry points:
@@ -156,19 +154,15 @@ export function railReadinessError(
   locale: AppLocale,
   instruments: readonly InstrumentReadiness[],
 ): string | null {
-  const en = usesEnglishCopy(locale);
+  const t = createT(locale);
   if (paymentMethod === "stripe") {
     if (!teacher.stripeAccountId || !teacher.stripeChargesEnabled) {
-      return en
-        ? "This teacher doesn't accept card payments yet. Ask them to finish Stripe setup, or choose a bank transfer."
-        : "Esta profe todavía no acepta pagos con tarjeta. Pídele que complete la conexión con Stripe o elige una transferencia.";
+      return t("web.action.checkout.cardNotAccepted");
     }
     return null;
   }
   if (!hasOfferableInstrument(instruments, currencyForTeacher(teacher))) {
-    return en
-      ? "This teacher isn't accepting bank transfers right now."
-      : "Esta profe no está aceptando transferencias en este momento.";
+    return t("web.action.checkout.transfersNotAccepted");
   }
   return null;
 }
@@ -193,7 +187,7 @@ async function instrumentsFor(teacherId: string): Promise<InstrumentReadiness[]>
 // anonymous first-time buyers and signed-in repurchasers alike.
 export async function startCheckout(args: StartCheckoutArgs): Promise<StartCheckoutResult> {
   const { teacher, student, template, paymentMethod, locale } = args;
-  const en = usesEnglishCopy(locale);
+  const t = createT(locale);
   const lineT = createT(locale);
   const env = serverEnv();
   const appUrl = env.APP_URL.replace(/\/$/, "");
@@ -225,9 +219,7 @@ export async function startCheckout(args: StartCheckoutArgs): Promise<StartCheck
     : ipRl;
   if (!ipRl.ok || !buyerRl.ok) {
     return {
-      error: en
-        ? "Too many checkout attempts. Wait a minute and try again."
-        : "Demasiados intentos de pago. Espera un minuto e inténtalo de nuevo.",
+      error: t("web.action.checkout.tooMany"),
     };
   }
 
@@ -237,9 +229,7 @@ export async function startCheckout(args: StartCheckoutArgs): Promise<StartCheck
   // here — refuse cleanly rather than let Stripe reject the session.
   if (paymentMethod === "stripe" && !student.email) {
     return {
-      error: en
-        ? "Your account has no email on file. Ask your teacher to add one."
-        : "Tu cuenta no tiene correo registrado. Pídele a tu profe que lo agregue.",
+      error: t("web.action.checkout.noEmail"),
     };
   }
 
@@ -260,9 +250,7 @@ export async function startCheckout(args: StartCheckoutArgs): Promise<StartCheck
   );
   if (basePriceMinorUnits === null) {
     return {
-      error: en
-        ? "This package isn't sold for two people. Pick another one."
-        : "Este paquete no se vende para dos personas. Elige otro.",
+      error: t("web.action.checkout.notForTwo"),
     };
   }
   // A package for two is bought by one person on behalf of two. The second
@@ -271,9 +259,7 @@ export async function startCheckout(args: StartCheckoutArgs): Promise<StartCheck
   // package so the insights capture can check it.
   if (args.seats === 2 && !args.partnerConsent) {
     return {
-      error: en
-        ? "Confirm that the second person agrees before you pay."
-        : "Confirma que la otra persona está de acuerdo antes de pagar.",
+      error: t("web.action.checkout.partnerConsent"),
     };
   }
   // The actual charge; a valid discount code (resolved below, after supersede)
@@ -359,12 +345,12 @@ export async function startCheckout(args: StartCheckoutArgs): Promise<StartCheck
           amountMinorUnits: ref.discountMinorUnits,
         };
       } else if (ref.reason === "not_a_referral") {
-        return { error: discountRejectMessage("not_found", usesEnglishCopy(locale)) };
+        return { error: discountRejectMessage("not_found", t) };
       } else {
-        return { error: referralRejectMessage(ref.reason, usesEnglishCopy(locale)) };
+        return { error: referralRejectMessage(ref.reason, t) };
       }
     } else {
-      return { error: discountRejectMessage(promo.reason, usesEnglishCopy(locale)) };
+      return { error: discountRejectMessage(promo.reason, t) };
     }
   }
 
@@ -377,9 +363,7 @@ export async function startCheckout(args: StartCheckoutArgs): Promise<StartCheck
   // in GBP/USD/EUR must not be blocked by MXN's 10.00 gate.
   if (priceMinorUnits === 0) {
     return {
-      error: en
-        ? "This code makes the class free — ask your teacher to book it for you directly."
-        : "Este código deja la clase gratis — pídele a tu profe que la agende directamente.",
+      error: t("web.action.checkout.freeWithCode"),
     };
   }
   // Resolve the chosen instrument before creating rows. Doing it here rather
@@ -390,9 +374,7 @@ export async function startCheckout(args: StartCheckoutArgs): Promise<StartCheck
   if (paymentMethod === "manual_transfer") {
     if (!args.instrumentId) {
       return {
-        error: en
-          ? "Choose how you'd like to transfer."
-          : "Elige cómo quieres hacer la transferencia.",
+        error: t("web.action.checkout.chooseTransfer"),
       };
     }
     instrument = await resolveOfferableInstrument(prisma, {
@@ -402,9 +384,7 @@ export async function startCheckout(args: StartCheckoutArgs): Promise<StartCheck
     });
     if (!instrument) {
       return {
-        error: en
-          ? "That payment option isn't available anymore. Pick another one."
-          : "Esa opción de pago ya no está disponible. Elige otra.",
+        error: t("web.action.checkout.optionGone"),
       };
     }
   }
@@ -413,7 +393,7 @@ export async function startCheckout(args: StartCheckoutArgs): Promise<StartCheck
   if (paymentMethod === "stripe" && priceMinorUnits < stripeMinMinorUnits) {
     // Format the minimum in the teacher's actual pricing currency.
     const minMajor = (stripeMinMinorUnits / 10 ** currencyExponent(currency)).toLocaleString(
-      intlLocale(en ? "en-US" : "es"),
+      intlLocale(locale),
       {
         minimumFractionDigits: 0,
         maximumFractionDigits: 2,
@@ -421,15 +401,14 @@ export async function startCheckout(args: StartCheckoutArgs): Promise<StartCheck
     );
     // Only point at a transfer when this teacher actually offers one
     // (Connect-circle teachers often don't).
-    const transferHint = hasOfferableInstrument(await instrumentsFor(teacher.id), currency)
-      ? en
-        ? " Choose a bank transfer to use it."
-        : " Elige una transferencia para usarlo."
-      : "";
+    const offersTransfer = hasOfferableInstrument(await instrumentsFor(teacher.id), currency);
     return {
-      error: en
-        ? `That total is below the card-payment minimum (${minMajor} ${currency}).${transferHint}`
-        : `Ese total queda por debajo del mínimo para pago con tarjeta (${minMajor} ${currency}).${transferHint}`,
+      error: t(
+        offersTransfer
+          ? "web.action.checkout.belowCardMinimumUseTransfer"
+          : "web.action.checkout.belowCardMinimum",
+        { min: minMajor, currency },
+      ),
     };
   }
 
@@ -649,9 +628,7 @@ export async function startCheckout(args: StartCheckoutArgs): Promise<StartCheck
     // teacher wouldn't have stripeChargesEnabled without platform creds).
     // Fail soft instead of crashing the checkout form.
     return {
-      error: en
-        ? "Card payments aren't available right now. Try a bank transfer, or come back later."
-        : "Los pagos con tarjeta no están disponibles en este momento. Intenta con una transferencia o vuelve más tarde.",
+      error: t("web.action.checkout.cardUnavailable"),
     };
   }
   const uiMode = args.stripeUiMode ?? "hosted";
@@ -787,7 +764,7 @@ export async function startCheckout(args: StartCheckoutArgs): Promise<StartCheck
       teacherId: teacher.id,
       externalReference,
     });
-    return { error: stripeUnavailableMessage(en) };
+    return { error: stripeUnavailableMessage(t) };
   }
 
   await prisma.payment.update({
@@ -798,18 +775,14 @@ export async function startCheckout(args: StartCheckoutArgs): Promise<StartCheck
   if (uiMode === "embedded") {
     if (!session.client_secret) {
       return {
-        error: en
-          ? "Stripe didn't return a payment form. Try again."
-          : "Stripe no devolvió un formulario de pago. Vuelve a intentarlo.",
+        error: t("web.action.checkout.noPaymentForm"),
       };
     }
     return { mode: "embedded", clientSecret: session.client_secret, externalReference };
   }
   if (!session.url) {
     return {
-      error: en
-        ? "Stripe didn't return a payment link. Try again."
-        : "Stripe no devolvió un enlace de pago. Vuelve a intentarlo.",
+      error: t("web.action.checkout.noPaymentLink"),
     };
   }
   return { mode: "redirect", redirectTo: session.url, externalReference };

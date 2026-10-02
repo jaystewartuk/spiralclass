@@ -4,6 +4,7 @@ import {
   materialImageSrc,
   materialImageStoragePath,
   MAX_MATERIAL_IMAGE_BYTES,
+  type TFunction,
 } from "@spiralclass/shared";
 import { logger } from "@/lib/logger";
 import { getStorageProvider } from "./provider";
@@ -32,29 +33,25 @@ export type MaterialImageUploadResult = { ok: { src: string; key: string } } | {
 export async function uploadMaterialImage(opts: {
   teacherId: string;
   file: File;
-  en: boolean;
+  t: TFunction;
 }): Promise<MaterialImageUploadResult> {
-  const { teacherId, file, en } = opts;
+  const { teacherId, file, t } = opts;
 
   const extension = materialImageExtension(file.type ?? "");
   if (!extension) {
     return {
-      error: en
-        ? "Choose a JPG, PNG, WebP or GIF image."
-        : "Elige una imagen JPG, PNG, WebP o GIF.",
+      error: t("web.action.materialImage.chooseType"),
     };
   }
 
   if (file.size <= 0) {
-    return { error: en ? "That image is empty." : "Esa imagen está vacía." };
+    return { error: t("web.action.socialPreview.empty") };
   }
 
   if (file.size > MAX_MATERIAL_IMAGE_BYTES) {
     const mb = Math.floor(MAX_MATERIAL_IMAGE_BYTES / (1024 * 1024));
     return {
-      error: en
-        ? `The image can't be larger than ${mb} MB.`
-        : `La imagen no puede pesar más de ${mb} MB.`,
+      error: t("web.action.materialImage.tooLarge", { mb }),
     };
   }
 
@@ -72,9 +69,7 @@ export async function uploadMaterialImage(opts: {
   if (error) {
     log.warn("upload failed", { error: error.message });
     return {
-      error: en
-        ? `We couldn't upload the image: ${error.message}`
-        : `No pudimos subir la imagen: ${error.message}`,
+      error: t("web.action.materialImage.uploadFailed", { message: error.message }),
     };
   }
 

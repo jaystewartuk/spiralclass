@@ -1,7 +1,7 @@
 "use client";
 
 import { useActionState, useRef, useState, type FormEvent } from "react";
-import { usesEnglishCopy, hasFieldErrors, validateManualPackageFields } from "@spiralclass/shared";
+import { hasFieldErrors, validateManualPackageFields } from "@spiralclass/shared";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -41,7 +41,6 @@ export function EditPackageForm({
   seats: number;
 }) {
   const locale = useLocale();
-  const en = usesEnglishCopy(locale);
   const t = useT();
   const currency = usePricingCurrency();
   const [open, setOpen] = useState(false);
@@ -77,8 +76,8 @@ export function EditPackageForm({
       maxRemaining,
     });
     setErrors({
-      classesTotal: packageFieldMessage(fieldErrors.classesTotal, en),
-      classesRemaining: packageFieldMessage(fieldErrors.classesRemaining, en, maxRemaining),
+      classesTotal: packageFieldMessage(fieldErrors.classesTotal, t),
+      classesRemaining: packageFieldMessage(fieldErrors.classesRemaining, t, maxRemaining),
     });
     if (hasFieldErrors(fieldErrors)) {
       e.preventDefault();
