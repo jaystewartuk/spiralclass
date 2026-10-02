@@ -13,7 +13,7 @@ import {
   upsertStudentTestimonial,
 } from "@/lib/testimonials/store";
 import { revalidateAfterAction } from "@/lib/revalidate";
-import { usesEnglishCopy } from "@spiralclass/shared";
+import { createT } from "@spiralclass/shared";
 
 // The student's own half of the testimonial feature — the half that makes the
 // verified badge mean anything.
@@ -33,7 +33,7 @@ export async function saveStudentTestimonial(
   _prev: StudentTestimonialState,
   formData: FormData,
 ): Promise<StudentTestimonialState> {
-  const en = usesEnglishCopy(await getPreferredLocale());
+  const t = createT(await getPreferredLocale());
   const parsed = z
     .object({ teacherId: teacherIdField })
     .merge(studentTestimonialInputSchema)
@@ -43,9 +43,7 @@ export async function saveStudentTestimonial(
     });
   if (!parsed.success) {
     return {
-      error: en
-        ? `Write a few words about your classes (under ${TESTIMONIAL_BODY_MAX} characters).`
-        : `Escribe unas palabras sobre tus clases (máximo ${TESTIMONIAL_BODY_MAX} caracteres).`,
+      error: t("web.action.testimonial.bodyLength", { max: TESTIMONIAL_BODY_MAX }),
     };
   }
 
@@ -59,9 +57,7 @@ export async function saveStudentTestimonial(
     // given account studies with, and neither case is actionable in a way the
     // other wording would help with.
     return {
-      error: en
-        ? "You can write a testimonial once you've finished a class with this teacher."
-        : "Puedes escribir un testimonio cuando hayas terminado una clase con esta profesora.",
+      error: t("web.action.testimonial.notEligible"),
     };
   }
 
@@ -73,9 +69,7 @@ export async function saveStudentTestimonial(
   const authorName = row?.name?.trim();
   if (!authorName) {
     return {
-      error: en
-        ? "Add your name in your account settings first, so your teacher can credit you."
-        : "Primero agrega tu nombre en la configuración de tu cuenta, para que tu profesora pueda acreditarte.",
+      error: t("web.action.testimonial.nameFirst"),
     };
   }
 
@@ -89,18 +83,18 @@ export async function removeStudentTestimonial(
   _prev: StudentTestimonialState,
   formData: FormData,
 ): Promise<StudentTestimonialState> {
-  const en = usesEnglishCopy(await getPreferredLocale());
+  const t = createT(await getPreferredLocale());
   const parsed = z
     .object({ teacherId: teacherIdField })
     .safeParse({ teacherId: formData.get("teacherId") });
   if (!parsed.success) {
-    return { error: en ? "Invalid data." : "Datos inválidos." };
+    return { error: t("web.action.invalidData") };
   }
 
   const student = await requireStudent();
   const eligibility = await testimonialEligibility(student, parsed.data.teacherId);
   if (!eligibility.studentId) {
-    return { error: en ? "We couldn't find that teacher." : "No encontramos a esa profesora." };
+    return { error: t("web.action.testimonial.teacherNotFound") };
   }
 
   // Note the missing eligibility check: withdrawing is always allowed, even for

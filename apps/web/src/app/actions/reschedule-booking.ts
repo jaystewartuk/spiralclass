@@ -6,7 +6,7 @@ import { prisma } from "@/lib/prisma";
 import { requireStudent } from "@/lib/auth";
 import { generateSlots } from "@/lib/slots";
 import { loadGoogleBusyBlocks } from "@/lib/calendar/google/busy";
-import { getPreferredLocale, type AppLocale } from "@/lib/i18n";
+import { getPreferredLocale } from "@/lib/i18n";
 import { canStudentRescheduleBooking, scheduleChangeBudget } from "@/lib/cancellation/classify";
 import { emitNotificationQueued } from "@/lib/notifications/events";
 import { inngest } from "@/lib/inngest/client";
@@ -17,7 +17,7 @@ import {
 import { studentIdentityIds } from "@/lib/students/identity";
 import { flushAnalytics, trackServerEvent } from "@/lib/analytics/posthog";
 import { revalidateAfterAction } from "@/lib/revalidate";
-import { usesEnglishCopy } from "@spiralclass/shared";
+import { createT, type TFunction } from "@spiralclass/shared";
 
 export type RescheduleState = { error?: string } | undefined;
 
@@ -42,13 +42,12 @@ export async function rescheduleBooking(
   _prev: RescheduleState,
   formData: FormData,
 ): Promise<RescheduleState> {
-  const locale = await getPreferredLocale();
-  const en = usesEnglishCopy(locale);
+  const t = createT(await getPreferredLocale());
   const parsed = rescheduleInputSchema.safeParse({
     bookingId: formData.get("bookingId"),
     startUtc: formData.get("startUtc"),
   });
-  if (!parsed.success) return { error: en ? "Invalid selection." : "Selección inválida." };
+  if (!parsed.success) return { error: t("web.action.invalidSelection") };
 
   const student = await requireStudent();
 
@@ -59,7 +58,7 @@ export async function rescheduleBooking(
       package: true,
     },
   });
-  if (!old) return { error: en ? "We couldn't find that booking." : "No encontramos esa reserva." };
+  if (!old) return { error: t("web.action.bookingNotFound") };
 
   const now = new Date();
   const eligibility = canStudentRescheduleBooking({
@@ -70,12 +69,11 @@ export async function rescheduleBooking(
     scheduleChangesAllowed: scheduleChangeBudget(old.package.classesTotal),
   });
   if (!eligibility.ok) {
-    return { error: rejectReason(eligibility.reason, locale) };
+    return { error: rejectReason(eligibility.reason, t) };
   }
 
   const newStartUtc = new Date(parsed.data.startUtc);
-  if (newStartUtc <= now)
-    return { error: en ? "Choose a future slot." : "Elige un horario futuro." };
+  if (newStartUtc <= now) return { error: t("web.action.reschedule.futureSlot") };
 
   const newEndUtc = new Date(newStartUtc.getTime() + old.package.classDurationMin * 60_000);
 
@@ -85,9 +83,7 @@ export async function rescheduleBooking(
   // were capped to the original week).
   if (old.package.expiresAt && newStartUtc > old.package.expiresAt) {
     return {
-      error: en
-        ? "The new time must be before your package expires."
-        : "El nuevo horario debe ser antes de que venza tu paquete.",
+      error: t("web.action.reschedule.beforeExpiry"),
     };
   }
 
@@ -137,7 +133,7 @@ export async function rescheduleBooking(
   const match = candidates.find((c) => c.startUtc.getTime() === newStartUtc.getTime());
   if (!match)
     return {
-      error: en ? "That slot is no longer available." : "Ese horario ya no está disponible.",
+      error: t("web.action.slotUnavailable"),
     };
 
   const outcome = await applyReschedule(
@@ -157,17 +153,13 @@ export async function rescheduleBooking(
 
   if (outcome.code === "slot-conflict") {
     return {
-      error: en
-        ? "That slot was just booked by someone else."
-        : "Ese horario ya fue reservado por alguien más.",
+      error: t("web.action.slotTaken"),
     };
   }
 
   if (outcome.code === "package-not-found") {
     return {
-      error: en
-        ? "This class package is no longer available. Please refresh and try again."
-        : "Este paquete de clases ya no está disponible. Actualiza e inténtalo de nuevo.",
+      error: t("web.action.reschedule.packageGone"),
     };
   }
 
@@ -186,22 +178,15 @@ export async function rescheduleBooking(
   redirect(`/my-classes/${outcome.newBookingId}`);
 }
 
-function rejectReason(reason: string, locale: AppLocale): string {
-  const en = usesEnglishCopy(locale);
+function rejectReason(reason: string, t: TFunction): string {
   switch (reason) {
     case "booking-not-scheduled":
-      return en
-        ? "This class can no longer be rescheduled."
-        : "Esta clase ya no se puede reagendar.";
+      return t("web.action.reschedule.notScheduled");
     case "schedule-changes-exhausted":
-      return en
-        ? "You've used all the schedule changes included with this package. Ask your teacher for an adjustment."
-        : "Ya usaste todos los cambios de horario incluidos en este paquete. Pide a tu profe un ajuste.";
+      return t("web.action.reschedule.changesExhausted");
     case "lt24h":
-      return en
-        ? "Rescheduling has to be done more than 24 hours ahead."
-        : "Para reagendar necesitas hacerlo con más de 24 horas de anticipación.";
+      return t("web.action.reschedule.lt24h");
     default:
-      return en ? "This class can't be rescheduled." : "No se puede reagendar esta clase.";
+      return t("web.action.reschedule.notAllowed");
   }
 }

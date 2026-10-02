@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { PhoneNumberField } from "@/components/phone-number-field";
-import { useT } from "@/components/locale-provider";
+import { useLocale, useT } from "@/components/locale-provider";
 import { captureLead, type LeadCaptureState } from "@/app/actions/leads";
 import { currentSessionId } from "@/lib/analytics/posthog-browser";
 import { CheckCircle2 } from "lucide-react";
@@ -26,6 +26,7 @@ export function LeadForm({
   defaultCountry: string | undefined;
 }) {
   const t = useT();
+  const locale = useLocale();
   const [state, formAction, pending] = useActionState<LeadCaptureState, FormData>(
     captureLead,
     undefined,
@@ -60,6 +61,10 @@ export function LeadForm({
       className="space-y-3"
     >
       <input type="hidden" name="slug" value={slug} />
+      {/* The language this page rendered in, so captureLead() answers in the
+          same one. It is the booking page's language, from the funnel's own
+          LocaleProvider, not the visitor's. */}
+      <input type="hidden" name="pageLocale" value={locale} />
       <input ref={sessionIdRef} type="hidden" name="posthogSessionId" defaultValue="" />
 
       {/* Honeypot — captureLead() silently discards any submission that fills

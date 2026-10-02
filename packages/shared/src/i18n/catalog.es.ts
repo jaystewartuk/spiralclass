@@ -7013,4 +7013,79 @@ export const esMX = {
   "web.search.keywords.student.account": "perfil nombre correo zona horaria idioma ajustes",
   "web.search.keywords.student.book": "agendar reservar clase horario",
   "web.search.keywords.student.buy": "paquete más clases comprar pagar renovar",
+  "web.action.invalidData": "Datos inválidos.",
+  "web.action.invalidSelection": "Selección inválida.",
+  "web.action.accountNotFound": "Cuenta no encontrada.",
+  "web.action.accountDisabled": "Esta cuenta está deshabilitada.",
+  "web.action.accountDisabledContactSupport":
+    "Esta cuenta está deshabilitada. Escríbenos a soporte si crees que es un error.",
+  "web.action.teacherUnavailable": "Esa maestra no está disponible.",
+  "web.action.studentNotFound": "Alumno no encontrado.",
+  "web.action.couldntSave": "No se pudo guardar. Inténtalo de nuevo.",
+  "web.action.missingEmailOrCode": "Falta correo o código.",
+  "web.action.invalidOrExpiredCode": "Código inválido o expirado. Solicita uno nuevo.",
+  "web.action.bookingNotFound": "No encontramos esa reserva.",
+  "web.action.slotTaken": "Ese horario ya fue reservado por alguien más.",
+  "web.action.slotUnavailable": "Ese horario ya no está disponible.",
+  "web.action.auth.tooMany": "Demasiados intentos. Intenta de nuevo en un minuto.",
+  "web.action.leads.tooMany": "Demasiados mensajes. Espera un momento e inténtalo de nuevo.",
+  "web.action.leads.notFound": "No encontramos ese interesado.",
+  "web.action.checkout.packageMissing": "El paquete no existe.",
+  "web.action.checkout.teacherEmail":
+    "Este correo pertenece a una cuenta de maestra y no puede usarse para comprar clases.",
+  "web.action.checkout.unexpectedResponse": "Respuesta de pago inesperada.",
+  "web.action.cancel.invalidBooking": "Reserva inválida.",
+  "web.action.cancel.student.wrongStatus":
+    "Esta clase ya no se puede cancelar desde aquí. Pide a tu profe que la ajuste.",
+  "web.action.cancel.student.changesExhausted":
+    "Ya usaste todos los cambios de horario incluidos en este paquete, así que esta clase no se puede reembolsar. Para cancelarla, pide a tu profe.",
+  "web.action.cancel.student.doneLate":
+    "Cancelaste con menos de 24h. La clase se descuenta del paquete.",
+  "web.action.cancel.student.done": "Cancelada. Puedes reagendar tu clase.",
+  "web.action.cancel.teacher.reasonTooShort": "Da una razón breve.",
+  "web.action.cancel.teacher.classNotFound": "No encontramos esa clase.",
+  "web.action.cancel.teacher.wrongStatus": "Esta clase ya está fuera del calendario.",
+  "web.action.cancel.teacher.done": "Clase cancelada y restaurada al paquete del alumno.",
+  "web.action.reschedule.futureSlot": "Elige un horario futuro.",
+  "web.action.reschedule.beforeExpiry": "El nuevo horario debe ser antes de que venza tu paquete.",
+  "web.action.reschedule.packageGone":
+    "Este paquete de clases ya no está disponible. Actualiza e inténtalo de nuevo.",
+  "web.action.reschedule.notScheduled": "Esta clase ya no se puede reagendar.",
+  "web.action.reschedule.changesExhausted":
+    "Ya usaste todos los cambios de horario incluidos en este paquete. Pide a tu profe un ajuste.",
+  "web.action.reschedule.lt24h":
+    "Para reagendar necesitas hacerlo con más de 24 horas de anticipación.",
+  "web.action.reschedule.notAllowed": "No se puede reagendar esta clase.",
+  "web.action.booking.packageUnavailable": "Paquete no disponible.",
+  "web.action.booking.packageExhausted": "Ya usaste todas las clases de este paquete.",
+  "web.action.booking.packageExpired": "Este paquete ya expiró.",
+  "web.action.photo.choose": "Elige una imagen primero.",
+  "web.action.photo.type": "Usa una imagen JPG, PNG o WebP.",
+  "web.action.photo.tooLarge": "La imagen debe pesar menos de 5 MB.",
+  "web.action.photo.uploadFailed": "No pudimos subir la imagen: {error}",
+  "web.action.testimonial.bodyLength":
+    "Escribe unas palabras sobre tus clases (máximo {max} caracteres).",
+  "web.action.testimonial.notEligible":
+    "Puedes escribir un testimonio cuando hayas terminado una clase con esta profesora.",
+  "web.action.testimonial.nameFirst":
+    "Primero agrega tu nombre en la configuración de tu cuenta, para que tu profesora pueda acreditarte.",
+  "web.action.testimonial.teacherNotFound": "No encontramos a esa profesora.",
+  "web.action.contact.notInList": "Este alumno no está en tu lista.",
+  "web.action.contact.emailLocked":
+    "Este alumno ya inicia sesión con su correo, así que solo puede cambiarse desde su cuenta.",
+  "web.action.contact.emailTaken": "Otro de tus alumnos ya usa ese correo.",
+  "web.action.contact.saved": "Datos guardados.",
+  "web.action.contact.teacherSaved": "Datos de contacto guardados.",
+  "web.action.contact.tooMany": "Demasiados intentos. Espera unos minutos y vuelve a intentarlo.",
+  "web.action.contact.sameEmail": "Ese ya es tu correo.",
+  "web.action.contact.sendFailed": "No pudimos enviar el correo de confirmación. Intenta de nuevo.",
+  "web.action.contact.emailUnusable":
+    "No pudimos usar ese correo. Intenta con otro o escríbenos desde la página de ayuda.",
+  "web.action.contact.noAccount": "No hay cuenta que verificar.",
+  "web.action.contact.confirmFailed": "No pudimos confirmar ese correo. Intenta de nuevo.",
+  "web.action.contact.emailUpdated": "Correo actualizado.",
+  "web.action.contact.emailUpdatedGoogleDisconnected":
+    "Correo actualizado. Tu cuenta de Google se desconectó por seguridad — puedes volver a conectarla abajo con tu nueva cuenta de Google si quieres seguir usando el inicio de sesión con Google.",
+  "web.action.contact.unknownLanguage": "Idioma desconocido.",
+  "web.action.contact.languageSaved": "Idioma guardado.",
 } as const;

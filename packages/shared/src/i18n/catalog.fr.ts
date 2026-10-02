@@ -7044,4 +7044,80 @@ export const fr = {
   "web.search.keywords.student.account": "profil nom e-mail fuseau horaire langue paramètres",
   "web.search.keywords.student.book": "programmer réserver cours créneau",
   "web.search.keywords.student.buy": "forfait plus de cours acheter payer renouveler",
+  "web.action.invalidData": "Données invalides.",
+  "web.action.invalidSelection": "Sélection invalide.",
+  "web.action.accountNotFound": "Compte introuvable.",
+  "web.action.accountDisabled": "Ce compte est désactivé.",
+  "web.action.accountDisabledContactSupport":
+    "Ce compte est désactivé. Écrivez à l'assistance si vous pensez qu'il s'agit d'une erreur.",
+  "web.action.teacherUnavailable": "Ce professeur n'est pas disponible.",
+  "web.action.studentNotFound": "Élève introuvable.",
+  "web.action.couldntSave": "Enregistrement impossible. Veuillez réessayer.",
+  "web.action.missingEmailOrCode": "Adresse e-mail ou code manquant.",
+  "web.action.invalidOrExpiredCode": "Code invalide ou expiré. Demandez-en un nouveau.",
+  "web.action.bookingNotFound": "Nous n'avons pas trouvé cette réservation.",
+  "web.action.slotTaken": "Ce créneau vient d'être réservé par quelqu'un d'autre.",
+  "web.action.slotUnavailable": "Ce créneau n'est plus disponible.",
+  "web.action.auth.tooMany": "Trop de tentatives. Réessayez dans une minute.",
+  "web.action.leads.tooMany": "Trop de messages. Patientez un instant et réessayez.",
+  "web.action.leads.notFound": "Nous n'avons pas trouvé ce contact.",
+  "web.action.checkout.packageMissing": "Ce forfait n'existe pas.",
+  "web.action.checkout.teacherEmail":
+    "Cette adresse e-mail appartient à un compte enseignant et ne peut pas servir à acheter des cours.",
+  "web.action.checkout.unexpectedResponse": "Réponse de paiement inattendue.",
+  "web.action.cancel.invalidBooking": "Réservation invalide.",
+  "web.action.cancel.student.wrongStatus":
+    "Ce cours ne peut plus être annulé d'ici. Demandez à votre professeur de le modifier.",
+  "web.action.cancel.student.changesExhausted":
+    "Vous avez utilisé tous les changements d'horaire inclus dans ce forfait : ce cours ne peut donc pas être remboursé. Pour l'annuler, adressez-vous à votre professeur.",
+  "web.action.cancel.student.doneLate": "Annulé à moins de 24 h. Le cours est déduit du forfait.",
+  "web.action.cancel.student.done": "Annulé. Vous pouvez reprogrammer votre cours.",
+  "web.action.cancel.teacher.reasonTooShort": "Indiquez brièvement la raison.",
+  "web.action.cancel.teacher.classNotFound": "Nous n'avons pas trouvé ce cours.",
+  "web.action.cancel.teacher.wrongStatus": "Ce cours n'est déjà plus au calendrier.",
+  "web.action.cancel.teacher.done": "Cours annulé et recrédité sur le forfait de l'élève.",
+  "web.action.reschedule.futureSlot": "Choisissez un créneau à venir.",
+  "web.action.reschedule.beforeExpiry":
+    "Le nouvel horaire doit précéder l'expiration de votre forfait.",
+  "web.action.reschedule.packageGone":
+    "Ce forfait de cours n'est plus disponible. Actualisez la page et réessayez.",
+  "web.action.reschedule.notScheduled": "Ce cours ne peut plus être reprogrammé.",
+  "web.action.reschedule.changesExhausted":
+    "Vous avez utilisé tous les changements d'horaire inclus dans ce forfait. Demandez un ajustement à votre professeur.",
+  "web.action.reschedule.lt24h": "Un cours se reprogramme plus de 24 heures à l'avance.",
+  "web.action.reschedule.notAllowed": "Ce cours ne peut pas être reprogrammé.",
+  "web.action.booking.packageUnavailable": "Forfait indisponible.",
+  "web.action.booking.packageExhausted": "Vous avez utilisé tous les cours de ce forfait.",
+  "web.action.booking.packageExpired": "Ce forfait a expiré.",
+  "web.action.photo.choose": "Choisissez d'abord une image.",
+  "web.action.photo.type": "Utilisez une image JPG, PNG ou WebP.",
+  "web.action.photo.tooLarge": "L'image doit faire moins de 5 Mo.",
+  "web.action.photo.uploadFailed": "Nous n'avons pas pu téléverser l'image : {error}",
+  "web.action.testimonial.bodyLength":
+    "Écrivez quelques mots sur vos cours (moins de {max} caractères).",
+  "web.action.testimonial.notEligible":
+    "Vous pourrez écrire un témoignage après avoir terminé un cours avec ce professeur.",
+  "web.action.testimonial.nameFirst":
+    "Ajoutez d'abord votre nom dans les paramètres de votre compte, afin que votre professeur puisse vous citer.",
+  "web.action.testimonial.teacherNotFound": "Nous n'avons pas trouvé ce professeur.",
+  "web.action.contact.notInList": "Cet élève ne figure pas dans votre liste.",
+  "web.action.contact.emailLocked":
+    "Cet élève se connecte déjà avec son adresse e-mail : elle ne peut donc être modifiée que depuis son compte.",
+  "web.action.contact.emailTaken": "Un autre de vos élèves utilise déjà cette adresse e-mail.",
+  "web.action.contact.saved": "Informations enregistrées.",
+  "web.action.contact.teacherSaved": "Coordonnées enregistrées.",
+  "web.action.contact.tooMany": "Trop de tentatives. Patientez quelques minutes et réessayez.",
+  "web.action.contact.sameEmail": "C'est déjà votre adresse e-mail.",
+  "web.action.contact.sendFailed":
+    "Nous n'avons pas pu envoyer l'e-mail de confirmation. Réessayez.",
+  "web.action.contact.emailUnusable":
+    "Nous n'avons pas pu utiliser cette adresse e-mail. Essayez-en une autre ou écrivez-nous depuis la page d'aide.",
+  "web.action.contact.noAccount": "Aucun compte à vérifier.",
+  "web.action.contact.confirmFailed":
+    "Nous n'avons pas pu confirmer cette adresse e-mail. Réessayez.",
+  "web.action.contact.emailUpdated": "Adresse e-mail mise à jour.",
+  "web.action.contact.emailUpdatedGoogleDisconnected":
+    "Adresse e-mail mise à jour. Votre compte Google a été déconnecté par sécurité — reconnectez-le ci-dessous avec votre nouveau compte Google si vous souhaitez continuer à vous connecter avec Google.",
+  "web.action.contact.unknownLanguage": "Langue inconnue.",
+  "web.action.contact.languageSaved": "Langue enregistrée.",
 } as const;

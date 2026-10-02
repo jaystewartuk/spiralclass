@@ -16,7 +16,7 @@ import { flushAnalytics } from "@/lib/analytics/posthog";
 import { INSTRUMENT_READINESS_SELECT, isPubliclyListed } from "@/lib/marketplace-ready";
 import { hasStripeEmbeddedCheckout } from "@/lib/env";
 import { funnelLocaleForSlug } from "@/lib/booking/funnel-locale";
-import { usesEnglishCopy } from "@spiralclass/shared";
+import { createT } from "@spiralclass/shared";
 
 // Wise stays a redirect (thrown by next/navigation's redirect() — never
 // reaches this return type). A Stripe checkout renders inline via
@@ -112,7 +112,7 @@ async function createCheckoutIntentCore(
   // "para 2 personas" on a Spanish-browser buyer's receipt from an English
   // page. An unknown slug resolves to the fallback; the lookup below 404s it.
   const locale = await funnelLocaleForSlug(String(formData.get("slug") ?? ""));
-  const en = usesEnglishCopy(locale);
+  const t = createT(locale);
   const parsed = checkoutIntentSchema(locale).safeParse({
     slug: formData.get("slug"),
     templateId: formData.get("templateId"),
@@ -132,7 +132,7 @@ async function createCheckoutIntentCore(
   });
   if (!parsed.success) {
     return {
-      error: parsed.error.issues[0]?.message ?? (en ? "Invalid data" : "Datos inválidos"),
+      error: parsed.error.issues[0]?.message ?? t("web.action.invalidData"),
     };
   }
   const input = parsed.data;
@@ -148,7 +148,7 @@ async function createCheckoutIntentCore(
   // relationship shouldn't break because the teacher's public profile isn't
   // "complete" by marketplace standards.
   if (!teacher || !isPubliclyListed(teacher)) {
-    return { error: en ? "That teacher isn't available." : "Esa maestra no está disponible." };
+    return { error: t("web.action.teacherUnavailable") };
   }
 
   const railError = railReadinessError(
@@ -163,7 +163,7 @@ async function createCheckoutIntentCore(
     where: { id: input.templateId, teacherId: teacher.id, archived: false },
   });
   if (!template) {
-    return { error: en ? "The package doesn't exist." : "El paquete no existe." };
+    return { error: t("web.action.checkout.packageMissing") };
   }
 
   // A disabled student should be blocked platform-wide, whatever teacher's
@@ -179,9 +179,7 @@ async function createCheckoutIntentCore(
   });
   if (platformDisabled) {
     return {
-      error: en
-        ? "This account is disabled. Email support if you think that's a mistake."
-        : "Esta cuenta está deshabilitada. Escríbenos a soporte si crees que es un error.",
+      error: t("web.action.accountDisabledContactSupport"),
     };
   }
 
@@ -211,9 +209,7 @@ async function createCheckoutIntentCore(
   } catch (err) {
     if (err instanceof TeacherEmailConflictError) {
       return {
-        error: en
-          ? "This email belongs to a teacher account and can't be used to buy classes."
-          : "Este correo pertenece a una cuenta de maestra y no puede usarse para comprar clases.",
+        error: t("web.action.checkout.teacherEmail"),
       };
     }
     throw err;
@@ -245,7 +241,7 @@ async function createCheckoutIntentCore(
     return { clientSecret: result.clientSecret, externalReference: result.externalReference };
   }
   if (result.mode !== "redirect") {
-    return { error: en ? "Unexpected checkout response." : "Respuesta de pago inesperada." };
+    return { error: t("web.action.checkout.unexpectedResponse") };
   }
   redirect(result.redirectTo);
 }
@@ -261,7 +257,7 @@ export async function createPortalCheckoutIntent(
   formData: FormData,
 ): Promise<CheckoutState> {
   const locale = await getPreferredLocale();
-  const en = usesEnglishCopy(locale);
+  const t = createT(locale);
   const parsed = portalCheckoutIntentSchema.safeParse({
     teacherId: formData.get("teacherId"),
     templateId: formData.get("templateId"),
@@ -274,7 +270,7 @@ export async function createPortalCheckoutIntent(
     partnerConsent: formData.get("partnerConsent"),
   });
   if (!parsed.success) {
-    return { error: en ? "Invalid data" : "Datos inválidos" };
+    return { error: t("web.action.invalidData") };
   }
   const input = parsed.data;
 
@@ -285,13 +281,11 @@ export async function createPortalCheckoutIntent(
     select: { id: true, email: true, name: true, disabledAt: true },
   });
   if (!student) {
-    return { error: en ? "Account not found." : "Cuenta no encontrada." };
+    return { error: t("web.action.accountNotFound") };
   }
   if (student.disabledAt) {
     return {
-      error: en
-        ? "This account is disabled. Email support if you think that's a mistake."
-        : "Esta cuenta está deshabilitada. Escríbenos a soporte si crees que es un error.",
+      error: t("web.action.accountDisabledContactSupport"),
     };
   }
 
@@ -314,7 +308,7 @@ export async function createPortalCheckoutIntent(
   // simultaneously offering.
   const link = await purchasingLinkFor(input.teacherId, await studentIdentityIds(student));
   if (!link) {
-    return { error: en ? "That teacher isn't available." : "Esa maestra no está disponible." };
+    return { error: t("web.action.teacherUnavailable") };
   }
   const buyer =
     link.studentId === student.id
@@ -324,7 +318,7 @@ export async function createPortalCheckoutIntent(
           select: { id: true, email: true, name: true, disabledAt: true },
         });
   if (!buyer || buyer.disabledAt) {
-    return { error: en ? "Account not found." : "Cuenta no encontrada." };
+    return { error: t("web.action.accountNotFound") };
   }
 
   const teacher = await prisma.teacher.findUnique({
@@ -332,7 +326,7 @@ export async function createPortalCheckoutIntent(
     select: CHECKOUT_TEACHER_SELECT,
   });
   if (!teacher || !teacher.onboardingCompleteAt || teacher.disabledAt) {
-    return { error: en ? "That teacher isn't available." : "Esa maestra no está disponible." };
+    return { error: t("web.action.teacherUnavailable") };
   }
 
   const railError = railReadinessError(
@@ -347,7 +341,7 @@ export async function createPortalCheckoutIntent(
     where: { id: input.templateId, teacherId: teacher.id, archived: false },
   });
   if (!template) {
-    return { error: en ? "The package doesn't exist." : "El paquete no existe." };
+    return { error: t("web.action.checkout.packageMissing") };
   }
 
   const result = await startCheckout({
@@ -371,7 +365,7 @@ export async function createPortalCheckoutIntent(
     return { clientSecret: result.clientSecret, externalReference: result.externalReference };
   }
   if (result.mode !== "redirect") {
-    return { error: en ? "Unexpected checkout response." : "Respuesta de pago inesperada." };
+    return { error: t("web.action.checkout.unexpectedResponse") };
   }
   redirect(result.redirectTo);
 }

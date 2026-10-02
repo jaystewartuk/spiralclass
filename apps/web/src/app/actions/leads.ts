@@ -9,7 +9,7 @@ import { z } from "zod";
 import { flushAnalytics, trackServerEvent } from "@/lib/analytics/posthog";
 import { notifyTeacherOfLead } from "@/lib/leads/notify-teacher";
 import { applyLeadStatus, leadStatusSchema } from "@/lib/leads/status";
-import { usesEnglishCopy, isAppLocale, DEFAULT_LOCALE } from "@spiralclass/shared";
+import { createT, isAppLocale, publicFunnelLocaleFor, DEFAULT_LOCALE } from "@spiralclass/shared";
 import { INSTRUMENT_READINESS_SELECT, isPubliclyListed } from "@/lib/marketplace-ready";
 import { clientIp, rateLimit } from "@/lib/rate-limit";
 import { attributionProperties, currentAttribution } from "@/lib/analytics/attribution";
@@ -28,8 +28,21 @@ export async function captureLead(
   _prev: LeadCaptureState,
   formData: FormData,
 ): Promise<LeadCaptureState> {
-  const locale = await getPreferredLocale();
-  const en = usesEnglishCopy(locale);
+  // This form lives on the public booking page, which speaks the language the
+  // teacher chose for her buyers and never the visitor's (publicFunnelLocaleFor).
+  // Its refusals used to follow the visitor's cookie, so a Spanish browser on
+  // an English booking page got a Spanish error under an English form.
+  //
+  // The page's language arrives WITH the form rather than from a lookup by
+  // slug, which is how checkout resolves it. A lookup would put a database read
+  // ahead of the rate limiter on an anonymous endpoint, and the limiter comes
+  // first here on purpose. The field is not trusted for anything but the
+  // language of this response: it only picks which translation of a refusal
+  // its own sender reads, and anything unrecognised falls back to the funnel's
+  // default.
+  const pageLocale = formData.get("pageLocale");
+  const locale = publicFunnelLocaleFor(typeof pageLocale === "string" ? pageLocale : null);
+  const t = createT(locale);
   const parsed = leadCaptureSchema(locale).safeParse({
     slug: formData.get("slug"),
     name: formData.get("name"),
@@ -41,7 +54,7 @@ export async function captureLead(
   });
   if (!parsed.success) {
     return {
-      error: parsed.error.issues[0]?.message ?? (en ? "Invalid data" : "Datos inválidos"),
+      error: parsed.error.issues[0]?.message ?? t("web.action.invalidData"),
     };
   }
   const input = parsed.data;
@@ -79,9 +92,7 @@ export async function captureLead(
     : ipRl;
   if (!ipRl.ok || !senderRl.ok) {
     return {
-      error: en
-        ? "Too many messages. Wait a moment and try again."
-        : "Demasiados mensajes. Espera un momento e inténtalo de nuevo.",
+      error: t("web.action.leads.tooMany"),
     };
   }
 
@@ -108,7 +119,7 @@ export async function captureLead(
   // — defense in
   // depth in case this action is ever POSTed to directly.
   if (!teacher || !isPubliclyListed(teacher)) {
-    return { error: en ? "That teacher isn't available." : "Esa maestra no está disponible." };
+    return { error: t("web.action.teacherUnavailable") };
   }
 
   const phoneE164 = input.phone ? normalizeE164(input.phone, input.phoneCountry) : null;
@@ -182,20 +193,20 @@ export async function setLeadStatus(
   _prev: LeadStatusState,
   formData: FormData,
 ): Promise<LeadStatusState> {
-  const en = usesEnglishCopy(await getPreferredLocale());
+  const t = createT(await getPreferredLocale());
   const parsed = statusSchema.safeParse({
     leadId: formData.get("leadId"),
     status: formData.get("status"),
   });
   if (!parsed.success) {
-    return { error: en ? "Invalid data." : "Datos inválidos." };
+    return { error: t("web.action.invalidData") };
   }
 
   const teacher = await requireOnboardedTeacher();
   // Shared core scopes the write by teacher_id and fires the transition event.
   const ok = await applyLeadStatus(teacher.id, parsed.data.leadId, parsed.data.status);
   if (!ok) {
-    return { error: en ? "We couldn't find that lead." : "No encontramos ese interesado." };
+    return { error: t("web.action.leads.notFound") };
   }
 
   revalidateAfterAction("/dashboard/leads");

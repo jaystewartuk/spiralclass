@@ -146,6 +146,54 @@ describe("captureLead — abuse protection", () => {
     await captureLead(undefined, leadForm(validLead));
     expect(teacherFindUnique).not.toHaveBeenCalled();
   });
+});
+
+// The form is on the public booking page, which speaks the language the
+// teacher chose for her buyers. Its refusals followed the VISITOR's cookie —
+// pinned to Spanish for this whole suite (tests/setup.ts) — so a Spanish
+// browser on an English booking page got a Spanish error under an English form.
+describe("captureLead — answers in the booking page's language", () => {
+  const refusal = async (pageLocale?: string) => {
+    rateLimit.mockResolvedValue({ ok: false });
+    const res = await captureLead(
+      undefined,
+      leadForm(pageLocale === undefined ? validLead : { ...validLead, pageLocale }),
+    );
+    return res?.error;
+  };
+
+  it("refuses in the page's language, whatever the visitor's cookie says", async () => {
+    expect(await refusal("en")).toBe("Too many messages. Wait a moment and try again.");
+    expect(await refusal("fr")).toBe("Trop de messages. Patientez un instant et réessayez.");
+    expect(await refusal("es")).toBe(
+      "Demasiados mensajes. Espera un momento e inténtalo de nuevo.",
+    );
+  });
+
+  it("falls back to the funnel's default, never to the visitor's language", async () => {
+    // A page cached from before the field existed sends none; a tampered one
+    // sends anything. Neither may reach the Spanish cookie.
+    const fallback = "Too many messages. Wait a moment and try again.";
+    expect(await refusal()).toBe(fallback);
+    expect(await refusal("xx")).toBe(fallback);
+    expect(await refusal("")).toBe(fallback);
+  });
+
+  it("validates the form in the page's language too", async () => {
+    // English page, Spanish cookie: the validator's message follows the page.
+    // (The shared validators are still an English/Spanish pair, so a French
+    // page reads English here until they move to the catalog.)
+    const res = await captureLead(
+      undefined,
+      leadForm({ ...validLead, email: "not-an-email", pageLocale: "en" }),
+    );
+    expect(res?.error).toBe("Invalid email");
+  });
+
+  it("still resolves the page's language without a database read", async () => {
+    await refusal("fr");
+    expect(teacherFindUnique).not.toHaveBeenCalled();
+  });
 
   it("buckets the sender by teacher + lowercased email", async () => {
     await captureLead(undefined, leadForm({ ...validLead, email: "Sofia@Example.COM" }));

@@ -18,6 +18,11 @@ vi.mock("@/lib/auth", () => ({
   requireOnboardedTeacher: vi.fn(async () => ({ id: "t1" })),
 }));
 
+// The reader's language, per test. Spanish unless a test says otherwise, which
+// is what the suite's cookie (tests/setup.ts) gave every test here before.
+const reader = { locale: "es" };
+vi.mock("@/lib/i18n", () => ({ getPreferredLocale: vi.fn(async () => reader.locale) }));
+
 const handleStudentCancel = vi.fn();
 const handleTeacherCancel = vi.fn();
 vi.mock("@/lib/cancellation/cancel-handler", () => ({
@@ -36,7 +41,10 @@ function fd(over: Record<string, string> = {}): FormData {
   return f;
 }
 
-beforeEach(() => vi.clearAllMocks());
+beforeEach(() => {
+  vi.clearAllMocks();
+  reader.locale = "es";
+});
 
 describe("cancelBookingAsStudent", () => {
   it("rejects a non-uuid booking id", async () => {
@@ -139,6 +147,54 @@ describe("cancelBookingAsTeacher", () => {
         name: "booking_canceled",
         properties: expect.objectContaining({ cancellationReason: "Estoy enferma" }),
       }),
+    );
+  });
+});
+
+// Every message here was an English/Spanish pair chosen at the call site, so a
+// French reader got English for all of them. One was worse: the too-short-reason
+// message was a Spanish literal inside the schema, shown to every teacher
+// whatever language she read.
+describe("cancel messages speak the reader's language", () => {
+  it.each([
+    ["es", "Da una razón breve."],
+    ["en", "Give a brief reason."],
+    ["fr", "Indiquez brièvement la raison."],
+  ])("asks a %s-reading teacher for a longer reason in her own language", async (locale, copy) => {
+    reader.locale = locale;
+    const res = await cancelBookingAsTeacher(undefined, fd({ reason: "no" }));
+    expect(res?.error).toBe(copy);
+  });
+
+  it.each([
+    ["es", "Esta clase ya no se puede cancelar desde aquí. Pide a tu profe que la ajuste."],
+    ["en", "This class can no longer be canceled from here. Ask your teacher to adjust it."],
+    ["fr", "Ce cours ne peut plus être annulé d'ici. Demandez à votre professeur de le modifier."],
+  ])("tells a %s-reading student why the class cannot be cancelled", async (locale, copy) => {
+    reader.locale = locale;
+    handleStudentCancel.mockResolvedValue({ code: "wrong-status" });
+    expect((await cancelBookingAsStudent(undefined, fd()))?.error).toBe(copy);
+  });
+
+  it("confirms a late cancel and an early one differently, in French", async () => {
+    reader.locale = "fr";
+    handleStudentCancel.mockResolvedValue({
+      code: "ok",
+      bookingId: BK,
+      teacherId: "t1",
+      timing: "lt24h",
+    });
+    expect((await cancelBookingAsStudent(undefined, fd()))?.ok).toBe(
+      "Annulé à moins de 24 h. Le cours est déduit du forfait.",
+    );
+    handleStudentCancel.mockResolvedValue({
+      code: "ok",
+      bookingId: BK,
+      teacherId: "t1",
+      timing: "gte24h",
+    });
+    expect((await cancelBookingAsStudent(undefined, fd()))?.ok).toBe(
+      "Annulé. Vous pouvez reprogrammer votre cours.",
     );
   });
 });

@@ -11,7 +11,7 @@ import {
 } from "@/lib/storage/student-photo";
 import { logger } from "@/lib/logger";
 import { revalidateAfterAction } from "@/lib/revalidate";
-import { usesEnglishCopy } from "@spiralclass/shared";
+import { createT } from "@spiralclass/shared";
 
 const log = logger({ surface: "student-photo" });
 
@@ -28,21 +28,21 @@ export async function saveStudentPhotoAction(
 ): Promise<ProfileState> {
   const student = await requireStudent();
   const locale = await getPreferredLocale();
-  const en = usesEnglishCopy(locale);
+  const t = createT(locale);
 
   const file = formData.get("photo");
   if (!(file instanceof File) || file.size === 0) {
-    return { error: en ? "Choose an image first." : "Elige una imagen primero." };
+    return { error: t("web.action.photo.choose") };
   }
   const ext = ALLOWED_PHOTO_TYPES[file.type];
   if (!ext) {
     return {
-      error: en ? "Use a JPG, PNG or WebP image." : "Usa una imagen JPG, PNG o WebP.",
+      error: t("web.action.photo.type"),
     };
   }
   if (file.size > MAX_PHOTO_BYTES) {
     return {
-      error: en ? "The image must be under 5 MB." : "La imagen debe pesar menos de 5 MB.",
+      error: t("web.action.photo.tooLarge"),
     };
   }
 
@@ -50,7 +50,7 @@ export async function saveStudentPhotoAction(
   if (upErr) {
     log.warn("upload failed", { error: upErr });
     return {
-      error: en ? `We couldn't upload the image: ${upErr}` : `No pudimos subir la imagen: ${upErr}`,
+      error: t("web.action.photo.uploadFailed", { error: upErr }),
     };
   }
 

@@ -7004,4 +7004,78 @@ export const en = {
   "web.search.keywords.student.account": "profile name email timezone language settings",
   "web.search.keywords.student.book": "schedule book class reserve time",
   "web.search.keywords.student.buy": "package more classes buy pay renew",
+  "web.action.invalidData": "Invalid data.",
+  "web.action.invalidSelection": "Invalid selection.",
+  "web.action.accountNotFound": "Account not found.",
+  "web.action.accountDisabled": "This account is disabled.",
+  "web.action.accountDisabledContactSupport":
+    "This account is disabled. Email support if you think that's a mistake.",
+  "web.action.teacherUnavailable": "That teacher isn't available.",
+  "web.action.studentNotFound": "Student not found.",
+  "web.action.couldntSave": "Couldn't save. Please try again.",
+  "web.action.missingEmailOrCode": "Missing email or code.",
+  "web.action.invalidOrExpiredCode": "Invalid or expired code. Request a new one.",
+  "web.action.bookingNotFound": "We couldn't find that booking.",
+  "web.action.slotTaken": "That slot was just booked by someone else.",
+  "web.action.slotUnavailable": "That slot is no longer available.",
+  "web.action.auth.tooMany": "Too many attempts. Try again in a minute.",
+  "web.action.leads.tooMany": "Too many messages. Wait a moment and try again.",
+  "web.action.leads.notFound": "We couldn't find that lead.",
+  "web.action.checkout.packageMissing": "The package doesn't exist.",
+  "web.action.checkout.teacherEmail":
+    "This email belongs to a teacher account and can't be used to buy classes.",
+  "web.action.checkout.unexpectedResponse": "Unexpected checkout response.",
+  "web.action.cancel.invalidBooking": "Invalid booking.",
+  "web.action.cancel.student.wrongStatus":
+    "This class can no longer be canceled from here. Ask your teacher to adjust it.",
+  "web.action.cancel.student.changesExhausted":
+    "You've used all the schedule changes included with this package, so this class can't be refunded. To cancel it, ask your teacher.",
+  "web.action.cancel.student.doneLate":
+    "Canceled under 24h. The class is deducted from the package.",
+  "web.action.cancel.student.done": "Canceled. You can reschedule your class.",
+  "web.action.cancel.teacher.reasonTooShort": "Give a brief reason.",
+  "web.action.cancel.teacher.classNotFound": "We couldn't find that class.",
+  "web.action.cancel.teacher.wrongStatus": "This class is already off the calendar.",
+  "web.action.cancel.teacher.done": "Class canceled and restored to the student's package.",
+  "web.action.reschedule.futureSlot": "Choose a future slot.",
+  "web.action.reschedule.beforeExpiry": "The new time must be before your package expires.",
+  "web.action.reschedule.packageGone":
+    "This class package is no longer available. Please refresh and try again.",
+  "web.action.reschedule.notScheduled": "This class can no longer be rescheduled.",
+  "web.action.reschedule.changesExhausted":
+    "You've used all the schedule changes included with this package. Ask your teacher for an adjustment.",
+  "web.action.reschedule.lt24h": "Rescheduling has to be done more than 24 hours ahead.",
+  "web.action.reschedule.notAllowed": "This class can't be rescheduled.",
+  "web.action.booking.packageUnavailable": "Package unavailable.",
+  "web.action.booking.packageExhausted": "You've used all the classes in this package.",
+  "web.action.booking.packageExpired": "This package has expired.",
+  "web.action.photo.choose": "Choose an image first.",
+  "web.action.photo.type": "Use a JPG, PNG or WebP image.",
+  "web.action.photo.tooLarge": "The image must be under 5 MB.",
+  "web.action.photo.uploadFailed": "We couldn't upload the image: {error}",
+  "web.action.testimonial.bodyLength":
+    "Write a few words about your classes (under {max} characters).",
+  "web.action.testimonial.notEligible":
+    "You can write a testimonial once you've finished a class with this teacher.",
+  "web.action.testimonial.nameFirst":
+    "Add your name in your account settings first, so your teacher can credit you.",
+  "web.action.testimonial.teacherNotFound": "We couldn't find that teacher.",
+  "web.action.contact.notInList": "This student isn't in your list.",
+  "web.action.contact.emailLocked":
+    "This student already signs in with their email, so it can only be changed from their account.",
+  "web.action.contact.emailTaken": "Another of your students already uses that email.",
+  "web.action.contact.saved": "Details saved.",
+  "web.action.contact.teacherSaved": "Contact details saved.",
+  "web.action.contact.tooMany": "Too many attempts. Wait a few minutes and try again.",
+  "web.action.contact.sameEmail": "That's already your email.",
+  "web.action.contact.sendFailed": "We couldn't send the confirmation email. Try again.",
+  "web.action.contact.emailUnusable":
+    "We couldn't use that email. Try another one, or write to us from the Help page.",
+  "web.action.contact.noAccount": "No account to verify.",
+  "web.action.contact.confirmFailed": "We couldn't confirm that email. Try again.",
+  "web.action.contact.emailUpdated": "Email updated.",
+  "web.action.contact.emailUpdatedGoogleDisconnected":
+    "Email updated. Your Google account was disconnected for security — reconnect it below with your new Google account if you'd like to keep using Google Sign-In.",
+  "web.action.contact.unknownLanguage": "Unknown language.",
+  "web.action.contact.languageSaved": "Language saved.",
 } as const;
