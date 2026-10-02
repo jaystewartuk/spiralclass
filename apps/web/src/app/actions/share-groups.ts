@@ -1,5 +1,6 @@
 "use server";
 
+import type { TFunction } from "@spiralclass/shared";
 import { z } from "zod";
 import { requireOnboardedTeacher } from "@/lib/auth";
 import { getPreferredLocale } from "@/lib/i18n";
@@ -10,7 +11,7 @@ import {
   updateShareGroup as updateShareGroupCore,
 } from "@/lib/share-groups/store";
 import { revalidateAfterAction } from "@/lib/revalidate";
-import { usesEnglishCopy } from "@spiralclass/shared";
+import { createT } from "@spiralclass/shared";
 
 // Legacy entry point for the community CRUD, kept for any caller that still
 // imports it. The rules moved to lib/marketing/communities
@@ -22,16 +23,14 @@ export type ShareGroupState = { error?: string; ok?: boolean } | undefined;
 
 const idField = z.string().uuid();
 
-function invalid(en: boolean): ShareGroupState {
+function invalid(t: TFunction): ShareGroupState {
   return {
-    error: en
-      ? "Add a group name (and a valid link, if you include one)."
-      : "Agrega el nombre del grupo (y un enlace válido, si lo incluyes).",
+    error: t("web.action.shareGroups.nameRequired"),
   };
 }
 
-function notFound(en: boolean): ShareGroupState {
-  return { error: en ? "We couldn't find that group." : "No encontramos ese grupo." };
+function notFound(t: TFunction): ShareGroupState {
+  return { error: t("web.action.shareGroups.notFound") };
 }
 
 // ---------- add ----------
@@ -40,12 +39,12 @@ export async function addShareGroup(
   _prev: ShareGroupState,
   formData: FormData,
 ): Promise<ShareGroupState> {
-  const en = usesEnglishCopy(await getPreferredLocale());
+  const t = createT(await getPreferredLocale());
   const parsed = shareGroupInputSchema.safeParse({
     name: formData.get("name"),
     url: formData.get("url"),
   });
-  if (!parsed.success) return invalid(en);
+  if (!parsed.success) return invalid(t);
 
   const teacher = await requireOnboardedTeacher();
   await addShareGroupCore(teacher.id, parsed.data);
@@ -62,18 +61,18 @@ export async function updateShareGroup(
   _prev: ShareGroupState,
   formData: FormData,
 ): Promise<ShareGroupState> {
-  const en = usesEnglishCopy(await getPreferredLocale());
+  const t = createT(await getPreferredLocale());
   const parsed = updateSchema.safeParse({
     id: formData.get("id"),
     name: formData.get("name"),
     url: formData.get("url"),
   });
-  if (!parsed.success) return invalid(en);
+  if (!parsed.success) return invalid(t);
 
   const { id, ...input } = parsed.data;
   const teacher = await requireOnboardedTeacher();
   const ok = await updateShareGroupCore(teacher.id, id, input);
-  if (!ok) return notFound(en);
+  if (!ok) return notFound(t);
 
   revalidateAfterAction("/dashboard/get-students/communities");
   return { ok: true };
@@ -87,13 +86,13 @@ export async function deleteShareGroup(
   _prev: ShareGroupState,
   formData: FormData,
 ): Promise<ShareGroupState> {
-  const en = usesEnglishCopy(await getPreferredLocale());
+  const t = createT(await getPreferredLocale());
   const parsed = deleteSchema.safeParse({ id: formData.get("id") });
-  if (!parsed.success) return invalid(en);
+  if (!parsed.success) return invalid(t);
 
   const teacher = await requireOnboardedTeacher();
   const ok = await deleteShareGroupCore(teacher.id, parsed.data.id);
-  if (!ok) return notFound(en);
+  if (!ok) return notFound(t);
 
   revalidateAfterAction("/dashboard/get-students/communities");
   return { ok: true };

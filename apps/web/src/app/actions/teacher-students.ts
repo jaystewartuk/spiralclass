@@ -12,7 +12,7 @@ import { normalizeE164 } from "@/lib/phone";
 import { gateAddStudent, upgradeNudge } from "@/lib/subscriptions/enforce";
 import { defaultNewStudentNotificationPrefs } from "@/lib/notifications/preferences";
 import { revalidateAfterAction } from "@/lib/revalidate";
-import { usesEnglishCopy } from "@spiralclass/shared";
+import { createT } from "@spiralclass/shared";
 
 // Silent onboarding (gradual go-live). A teacher can stage a student on her
 // roster by hand — replacing the paper notebook — before that student knows
@@ -33,7 +33,7 @@ export async function createStudentAction(
   formData: FormData,
 ): Promise<RosterActionState> {
   const locale = await getPreferredLocale();
-  const en = usesEnglishCopy(locale);
+  const t = createT(locale);
 
   const parsed = teacherCreateStudentSchema(locale).safeParse({
     name: formData.get("name"),
@@ -43,7 +43,7 @@ export async function createStudentAction(
   });
   if (!parsed.success) {
     return {
-      error: parsed.error.issues[0]?.message ?? (en ? "Invalid data." : "Datos inválidos."),
+      error: parsed.error.issues[0]?.message ?? t("web.action.invalidData"),
     };
   }
 
@@ -74,9 +74,7 @@ export async function createStudentAction(
     });
     if (existing) {
       return {
-        error: en
-          ? "You already have a student with that email."
-          : "Ya tienes un alumno con ese correo.",
+        error: t("students.new.emailTaken"),
       };
     }
 
@@ -91,9 +89,7 @@ export async function createStudentAction(
     });
     if (teacherConflict) {
       return {
-        error: en
-          ? "This email belongs to a teacher account and can't be added as a student."
-          : "Este correo pertenece a una cuenta de maestra y no se puede agregar como alumno.",
+        error: t("web.action.teacherStudents.teacherEmail"),
       };
     }
   }
@@ -126,9 +122,7 @@ export async function createStudentAction(
       targetType: "student",
       targetId: student.id,
       action: "create_student",
-      reason: en
-        ? "Student added to the roster (silent onboarding)."
-        : "Alumno agregada al listado (alta silenciosa).",
+      reason: t("web.action.audit.studentAddedSilently"),
       before: null,
       after: { onboardingHoldAt: now.toISOString() },
       actor: null,
@@ -161,10 +155,10 @@ export async function setStudentLiveAction(
   formData: FormData,
 ): Promise<RosterActionState> {
   const locale = await getPreferredLocale();
-  const en = usesEnglishCopy(locale);
+  const t = createT(locale);
   const parsed = goLiveSchema.safeParse({ studentId: formData.get("studentId") });
   if (!parsed.success) {
-    return { error: en ? "Invalid data." : "Datos inválidos." };
+    return { error: t("web.action.invalidData") };
   }
 
   const teacher = await requireOnboardedTeacher();
@@ -175,10 +169,10 @@ export async function setStudentLiveAction(
     select: { onboardingHoldAt: true },
   });
   if (!link) {
-    return { error: en ? "This student isn't in your list." : "Este alumno no está en tu lista." };
+    return { error: t("web.action.studentNotInList") };
   }
   if (!link.onboardingHoldAt) {
-    return { error: en ? "This student is already live." : "Este alumno ya está activo." };
+    return { error: t("web.action.teacherStudents.alreadyLive") };
   }
   const heldSince = link.onboardingHoldAt;
 
@@ -195,9 +189,7 @@ export async function setStudentLiveAction(
       targetType: "student",
       targetId: parsed.data.studentId,
       action: "go_live",
-      reason: en
-        ? "Student went live — notifications now flow."
-        : "Alumno activada — ahora recibe notificaciones.",
+      reason: t("web.action.audit.studentWentLive"),
       before: { onboardingHoldAt: heldSince.toISOString() },
       after: { onboardingHoldAt: null },
       actor: null,
@@ -218,8 +210,6 @@ export async function setStudentLiveAction(
 
   revalidateAfterAction(`/dashboard/students/${parsed.data.studentId}`);
   return {
-    ok: en
-      ? "Student is live. They'll receive notifications from now on."
-      : "Alumno activada. A partir de ahora recibirá notificaciones.",
+    ok: t("web.action.teacherStudents.nowLive"),
   };
 }

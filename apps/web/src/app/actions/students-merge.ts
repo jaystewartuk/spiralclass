@@ -1,5 +1,6 @@
 "use server";
 
+import type { TFunction } from "@spiralclass/shared";
 import { z } from "zod";
 import { requireOnboardedTeacher } from "@/lib/auth";
 import { getPreferredLocale } from "@/lib/i18n";
@@ -7,7 +8,7 @@ import { mergeRosterStudents as mergeCore, type MergeRefusal } from "@/lib/stude
 import { flushAnalytics, trackServerEvent } from "@/lib/analytics/posthog";
 import type { OverrideState } from "./overrides";
 import { revalidateAfterAction } from "@/lib/revalidate";
-import { usesEnglishCopy } from "@spiralclass/shared";
+import { createT } from "@spiralclass/shared";
 
 // Teacher-facing duplicate merge (see lib/students/merge.ts for the rules
 // and the full list of what moves). This wrapper owns auth, input parsing,
@@ -22,32 +23,20 @@ const mergeSchema = z
     message: "keep and merge must differ",
   });
 
-function refusalCopy(code: MergeRefusal, en: boolean): string {
+function refusalCopy(code: MergeRefusal, t: TFunction): string {
   switch (code) {
     case "not_on_roster":
-      return en
-        ? "Both students must be on your roster."
-        : "Ambos alumnos deben estar en tu listado.";
+      return t("web.action.merge.bothOnRoster");
     case "disabled":
-      return en
-        ? "One of these accounts is disabled — contact support to merge them."
-        : "Una de estas cuentas está deshabilitada — escribe a soporte para combinarlas.";
+      return t("web.action.merge.accountDisabled");
     case "two_logins":
-      return en
-        ? "Both students have signed in with different accounts, so they may be different people. Contact support if you're sure they're the same."
-        : "Ambos alumnos han iniciado sesión con cuentas distintas, así que podrían ser personas diferentes. Escribe a soporte si estás segura de que son la misma.";
+      return t("web.action.merge.differentAccounts");
     case "other_teacher":
-      return en
-        ? "The duplicate is also enrolled with another teacher — contact support to merge them."
-        : "El duplicado también está inscrito con otra maestra — escribe a soporte para combinarlos.";
+      return t("web.action.merge.otherTeacher");
     case "pending_deletion":
-      return en
-        ? "The duplicate has a pending deletion request and can't be merged."
-        : "El duplicado tiene una solicitud de eliminación pendiente y no se puede combinar.";
+      return t("web.action.merge.pendingDeletion");
     case "failed":
-      return en
-        ? "The merge couldn't be completed. Nothing was changed — contact support."
-        : "No se pudo completar la combinación. No se cambió nada — escribe a soporte.";
+      return t("web.action.merge.failed");
   }
 }
 
@@ -56,21 +45,21 @@ export async function mergeRosterStudents(
   formData: FormData,
 ): Promise<OverrideState> {
   const locale = await getPreferredLocale();
-  const en = usesEnglishCopy(locale);
+  const t = createT(locale);
   const parsed = mergeSchema.safeParse({
     keepStudentId: formData.get("keepStudentId"),
     mergeStudentId: formData.get("mergeStudentId"),
   });
   if (!parsed.success) {
     return {
-      error: parsed.error.issues[0]?.message ?? (en ? "Invalid data." : "Datos inválidos."),
+      error: parsed.error.issues[0]?.message ?? t("web.action.invalidData"),
     };
   }
   const { keepStudentId, mergeStudentId } = parsed.data;
 
   const teacher = await requireOnboardedTeacher();
   const result = await mergeCore({ teacherId: teacher.id, keepStudentId, mergeStudentId });
-  if (!result.ok) return { error: refusalCopy(result.code, en) };
+  if (!result.ok) return { error: refusalCopy(result.code, t) };
 
   trackServerEvent({
     name: "override_applied",
@@ -86,8 +75,6 @@ export async function mergeRosterStudents(
 
   revalidateAfterAction(`/dashboard/students/${keepStudentId}`);
   return {
-    ok: en
-      ? "Students merged — packages and classes now live under one profile."
-      : "Alumnos combinados — los paquetes y clases ahora viven en un solo perfil.",
+    ok: t("web.action.merge.done"),
   };
 }

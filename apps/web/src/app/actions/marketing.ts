@@ -1,5 +1,6 @@
 "use server";
 
+import type { TFunction } from "@spiralclass/shared";
 import { z } from "zod";
 import {
   isMarketingContentKind,
@@ -8,7 +9,7 @@ import {
   PROMO_POLICIES,
   type MarketingPlatform,
   type PromoPolicy,
-  usesEnglishCopy,
+  createT,
 } from "@spiralclass/shared";
 import { requireOnboardedTeacher } from "@/lib/auth";
 import { getPreferredLocale } from "@/lib/i18n";
@@ -49,8 +50,8 @@ const GET_STUDENTS_PATH = "/dashboard/get-students";
 
 export type MarketingState = { error?: string; ok?: boolean } | undefined;
 
-function failed(en: boolean): MarketingState {
-  return { error: en ? "That didn't work. Try again." : "No se pudo. Inténtalo otra vez." };
+function failed(t: TFunction): MarketingState {
+  return { error: t("web.action.tryAgain") };
 }
 
 // ── Communities ────────────────────────────────────────────────────────────
@@ -116,13 +117,11 @@ export async function addCommunityAction(
   _prev: MarketingState,
   formData: FormData,
 ): Promise<MarketingState> {
-  const en = usesEnglishCopy(await getPreferredLocale());
+  const t = createT(await getPreferredLocale());
   const parsed = communityFromForm(formData);
   if (!parsed.success) {
     return {
-      error: en
-        ? "Add a name (and a valid link, if you include one)."
-        : "Agrega un nombre (y un enlace válido, si lo incluyes).",
+      error: t("web.action.marketing.nameRequired"),
     };
   }
   const teacher = await requireOnboardedTeacher();
@@ -135,13 +134,13 @@ export async function updateCommunityAction(
   _prev: MarketingState,
   formData: FormData,
 ): Promise<MarketingState> {
-  const en = usesEnglishCopy(await getPreferredLocale());
+  const t = createT(await getPreferredLocale());
   const id = z.string().uuid().safeParse(formData.get("id"));
   const parsed = communityFromForm(formData);
-  if (!id.success || !parsed.success) return failed(en);
+  if (!id.success || !parsed.success) return failed(t);
   const teacher = await requireOnboardedTeacher();
   const ok = await updateCommunity(teacher.id, id.data, parsed.data);
-  if (!ok) return failed(en);
+  if (!ok) return failed(t);
   revalidateAfterAction(`${GET_STUDENTS_PATH}/communities`);
   return { ok: true };
 }
@@ -150,14 +149,14 @@ export async function archiveCommunityAction(
   _prev: MarketingState,
   formData: FormData,
 ): Promise<MarketingState> {
-  const en = usesEnglishCopy(await getPreferredLocale());
+  const t = createT(await getPreferredLocale());
   const id = z.string().uuid().safeParse(formData.get("id"));
-  if (!id.success) return failed(en);
+  if (!id.success) return failed(t);
   const teacher = await requireOnboardedTeacher();
   // Archive, never delete: the community's historical results are what the
   // planner ranks by, and deleting a row silently rewrites her own history.
   const ok = await archiveCommunity(teacher.id, id.data);
-  if (!ok) return failed(en);
+  if (!ok) return failed(t);
   revalidateAfterAction(`${GET_STUDENTS_PATH}/communities`);
   return { ok: true };
 }
@@ -166,12 +165,12 @@ export async function restoreCommunityAction(
   _prev: MarketingState,
   formData: FormData,
 ): Promise<MarketingState> {
-  const en = usesEnglishCopy(await getPreferredLocale());
+  const t = createT(await getPreferredLocale());
   const id = z.string().uuid().safeParse(formData.get("id"));
-  if (!id.success) return failed(en);
+  if (!id.success) return failed(t);
   const teacher = await requireOnboardedTeacher();
   const ok = await restoreCommunity(teacher.id, id.data);
-  if (!ok) return failed(en);
+  if (!ok) return failed(t);
   revalidateAfterAction(`${GET_STUDENTS_PATH}/communities`);
   return { ok: true };
 }
@@ -180,12 +179,12 @@ export async function deleteCommunityAction(
   _prev: MarketingState,
   formData: FormData,
 ): Promise<MarketingState> {
-  const en = usesEnglishCopy(await getPreferredLocale());
+  const t = createT(await getPreferredLocale());
   const id = z.string().uuid().safeParse(formData.get("id"));
-  if (!id.success) return failed(en);
+  if (!id.success) return failed(t);
   const teacher = await requireOnboardedTeacher();
   const ok = await deleteCommunity(teacher.id, id.data);
-  if (!ok) return failed(en);
+  if (!ok) return failed(t);
   revalidateAfterAction(`${GET_STUDENTS_PATH}/communities`);
   return { ok: true };
 }
@@ -206,7 +205,7 @@ export async function saveMarketingProfileAction(
   _prev: MarketingState,
   formData: FormData,
 ): Promise<MarketingState> {
-  const en = usesEnglishCopy(await getPreferredLocale());
+  const t = createT(await getPreferredLocale());
   const parsed = marketingProfileInputSchema.safeParse({
     audiences: listFromForm(formData.get("audiences")),
     learnerLocations: listFromForm(formData.get("learnerLocations")),
@@ -215,7 +214,7 @@ export async function saveMarketingProfileAction(
     weeklyMinutes: formData.get("weeklyMinutes"),
     goalNewStudentsPerMonth: formData.get("goalNewStudentsPerMonth"),
   });
-  if (!parsed.success) return failed(en);
+  if (!parsed.success) return failed(t);
   const teacher = await requireOnboardedTeacher();
   await saveMarketingProfile(teacher.id, parsed.data);
   revalidateAfterAction(`${GET_STUDENTS_PATH}/profile`);
@@ -230,9 +229,9 @@ export async function prepareActivityAction(
   _prev: PrepareState,
   formData: FormData,
 ): Promise<PrepareState> {
-  const en = usesEnglishCopy(await getPreferredLocale());
+  const t = createT(await getPreferredLocale());
   const id = z.string().uuid().safeParse(formData.get("id"));
-  if (!id.success) return failed(en);
+  if (!id.success) return failed(t);
   const teacher = await requireOnboardedTeacher();
   const entitlements = await loadEntitlements(teacher.id);
   const topic = formData.get("topic");
@@ -254,12 +253,12 @@ export async function markActivityDoneAction(
   _prev: MarketingState,
   formData: FormData,
 ): Promise<MarketingState> {
-  const en = usesEnglishCopy(await getPreferredLocale());
+  const t = createT(await getPreferredLocale());
   const id = z.string().uuid().safeParse(formData.get("id"));
-  if (!id.success) return failed(en);
+  if (!id.success) return failed(t);
   const teacher = await requireOnboardedTeacher();
   const ok = await markActivityDone(teacher.id, id.data);
-  if (!ok) return failed(en);
+  if (!ok) return failed(t);
   revalidateAfterAction(`${GET_STUDENTS_PATH}/${id.data}`);
   return { ok: true };
 }
@@ -268,12 +267,12 @@ export async function skipActivityAction(
   _prev: MarketingState,
   formData: FormData,
 ): Promise<MarketingState> {
-  const en = usesEnglishCopy(await getPreferredLocale());
+  const t = createT(await getPreferredLocale());
   const id = z.string().uuid().safeParse(formData.get("id"));
-  if (!id.success) return failed(en);
+  if (!id.success) return failed(t);
   const teacher = await requireOnboardedTeacher();
   const ok = await skipActivity(teacher.id, id.data);
-  if (!ok) return failed(en);
+  if (!ok) return failed(t);
   revalidateAfterAction(GET_STUDENTS_PATH);
   return { ok: true };
 }
@@ -282,13 +281,13 @@ export async function saveActivityBodyAction(
   _prev: MarketingState,
   formData: FormData,
 ): Promise<MarketingState> {
-  const en = usesEnglishCopy(await getPreferredLocale());
+  const t = createT(await getPreferredLocale());
   const id = z.string().uuid().safeParse(formData.get("id"));
   const body = z.string().trim().min(1).max(5000).safeParse(formData.get("body"));
-  if (!id.success || !body.success) return failed(en);
+  if (!id.success || !body.success) return failed(t);
   const teacher = await requireOnboardedTeacher();
   const ok = await updateActivityBody(teacher.id, id.data, body.data);
-  if (!ok) return failed(en);
+  if (!ok) return failed(t);
   revalidateAfterAction(`${GET_STUDENTS_PATH}/${id.data}`);
   return { ok: true };
 }
@@ -308,11 +307,11 @@ export async function addActivityAction(
   _prev: MarketingState,
   formData: FormData,
 ): Promise<MarketingState> {
-  const en = usesEnglishCopy(await getPreferredLocale());
+  const t = createT(await getPreferredLocale());
   const kind = formData.get("kind");
   const platform = formData.get("platform");
   const communityId = formData.get("communityId");
-  if (!isMarketingContentKind(kind) || !isMarketingPlatform(platform)) return failed(en);
+  if (!isMarketingContentKind(kind) || !isMarketingPlatform(platform)) return failed(t);
   const teacher = await requireOnboardedTeacher();
   const parsedCommunity = z.string().uuid().safeParse(communityId);
   await createActivity({
@@ -338,12 +337,12 @@ export async function saveMemeSettingsAction(
   _prev: MarketingState,
   formData: FormData,
 ): Promise<MarketingState> {
-  const en = usesEnglishCopy(await getPreferredLocale());
+  const t = createT(await getPreferredLocale());
   const parsed = memeSettingsInputSchema.safeParse({
     memeBrief: optionalField(formData, "memeBrief") ?? "",
     memeStyle: optionalField(formData, "memeStyle"),
   });
-  if (!parsed.success) return failed(en);
+  if (!parsed.success) return failed(t);
   const teacher = await requireOnboardedTeacher();
   await saveMemeSettings(teacher.id, parsed.data);
   revalidateAfterAction(`${GET_STUDENTS_PATH}/communities`);
@@ -367,12 +366,12 @@ export async function generateCommunityPostAction(
   _prev: PrepareState,
   formData: FormData,
 ): Promise<PrepareState> {
-  const en = usesEnglishCopy(await getPreferredLocale());
+  const t = createT(await getPreferredLocale());
   const communityId = z.string().uuid().safeParse(formData.get("communityId"));
   const kind = formData.get("kind");
   const platform = formData.get("platform");
   if (!communityId.success || !isMarketingContentKind(kind) || !isMarketingPlatform(platform)) {
-    return failed(en);
+    return failed(t);
   }
 
   const teacher = await requireOnboardedTeacher();
@@ -384,7 +383,7 @@ export async function generateCommunityPostAction(
   });
   // Null means the community is not hers (or is gone). Same message either
   // way, so an id cannot be probed from the outside.
-  if (!draft) return failed(en);
+  if (!draft) return failed(t);
 
   const entitlements = await loadEntitlements(teacher.id);
   const topic = formData.get("topic");

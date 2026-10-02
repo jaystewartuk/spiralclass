@@ -19,7 +19,7 @@ export type EmailChangeFormState =
 function contactErrorMessage(error: ContactUpdateError, t: TFunction): string {
   switch (error) {
     case "not-found":
-      return t("web.action.contact.notInList");
+      return t("web.action.studentNotInList");
     case "email-locked":
       return t("web.action.contact.emailLocked");
     case "email-taken":

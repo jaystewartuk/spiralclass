@@ -70,6 +70,36 @@ export function createT(locale: AppLocale): TFunction {
   };
 }
 
+/** Whether a string names a catalog entry. */
+export function isStringKey(value: unknown): value is StringKey {
+  return typeof value === "string" && Object.hasOwn(strings[DEFAULT_LOCALE], value);
+}
+
+/**
+ * The message for a failed validation, in the reader's language.
+ *
+ * A schema is a module-level constant: it is built once, with no request and
+ * so no reader. A message written into one is therefore in exactly one
+ * language for everybody — which is how "Da una razón breve." came to be the
+ * answer every teacher got, whatever she read. The alternative, rebuilding
+ * each schema per request with the locale passed in, works but has to be
+ * remembered at every schema and quietly is not.
+ *
+ * So a schema's message is a catalog KEY, and this is the one place it is
+ * turned into words. A message that is not a key is passed through untouched:
+ * the validators that are still built per locale already return finished
+ * sentences. No message at all gets the caller's fallback.
+ */
+export function issueMessage(
+  error: { issues: readonly { message?: string }[] },
+  t: TFunction,
+  fallback: StringKey,
+): string {
+  const message = error.issues[0]?.message;
+  if (!message) return t(fallback);
+  return isStringKey(message) ? t(message) : message;
+}
+
 /** Legacy inline-dictionary accessor: `translate({ en, "es" }, locale)`.
  * Retained for the handful of call sites that predate the key-based catalog;
  * prefer createT()/t(key) for new copy so the string lives in the catalog. */

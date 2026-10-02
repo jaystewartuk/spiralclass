@@ -21,7 +21,7 @@ import { teacherPhotoPublicUrl } from "@/lib/storage/teacher-photo";
 import { messagingBenefitEnabled } from "@/lib/invitations/service";
 import type { InviteeDisposition } from "@/lib/invitations/bulk";
 import { revalidateAfterAction } from "@/lib/revalidate";
-import { usesEnglishCopy } from "@spiralclass/shared";
+import { createT } from "@spiralclass/shared";
 
 // Server actions for the teacher-facing invitation flow. Every action is
 // teacher-scoped (requireOnboardedTeacher gates + scopes) and audited via the
@@ -58,7 +58,7 @@ export async function previewInvitesAction(
   formData: FormData,
 ): Promise<InviteFormState> {
   const locale = await getPreferredLocale();
-  const en = usesEnglishCopy(locale);
+  const t = createT(locale);
   const teacher = await requireOnboardedTeacher();
 
   const parsed = bulkInviteSchema(locale).safeParse({
@@ -67,14 +67,14 @@ export async function previewInvitesAction(
   });
   if (!parsed.success) {
     return {
-      error: parsed.error.issues[0]?.message ?? (en ? "Invalid data." : "Datos inválidos."),
+      error: parsed.error.issues[0]?.message ?? t("web.action.invalidData"),
     };
   }
 
   const collected = await collectInvitees(teacher.id, parsed.data);
   if (collected.entries.length === 0) {
     return {
-      error: en ? "No valid emails found." : "No se encontraron correos válidos.",
+      error: t("web.action.invitations.noValidEmails"),
     };
   }
   const classified = await classifyForTeacher(teacher.id, collected.entries);
@@ -98,7 +98,7 @@ export async function sendInvitesAction(
   formData: FormData,
 ): Promise<InviteFormState> {
   const locale = await getPreferredLocale();
-  const en = usesEnglishCopy(locale);
+  const t = createT(locale);
   const teacher = await requireOnboardedTeacher();
 
   const parsed = bulkInviteSchema(locale).safeParse({
@@ -107,7 +107,7 @@ export async function sendInvitesAction(
   });
   if (!parsed.success) {
     return {
-      error: parsed.error.issues[0]?.message ?? (en ? "Invalid data." : "Datos inválidos."),
+      error: parsed.error.issues[0]?.message ?? t("web.action.invalidData"),
     };
   }
   const source = (formData.get("source") === "single" ? "single" : "bulk") as "single" | "bulk";
@@ -116,9 +116,7 @@ export async function sendInvitesAction(
   const classified = await classifyForTeacher(teacher.id, collected.entries);
   if (classified.sendable.length === 0) {
     return {
-      error: en
-        ? "Nothing to send — those students are already connected or invited."
-        : "Nada que enviar — esos alumnos ya están conectados o invitados.",
+      error: t("web.action.invitations.nothingToSend"),
     };
   }
 
@@ -153,17 +151,18 @@ export async function sendInvitesAction(
   await flushAnalytics();
   revalidateAfterAction(DASH);
 
-  const failedNote =
-    summary.failed > 0
-      ? en
-        ? ` (${summary.failed} couldn't be delivered)`
-        : ` (${summary.failed} no se pudieron enviar)`
-      : "";
+  // One whole sentence per case, with the plural chosen by the catalog. This
+  // was assembled from pieces — "invitation" + "s", a verb picked by a
+  // ternary — which only ever works for the two languages it was written in.
   return {
     sentCount: summary.sent,
-    ok: en
-      ? `Sent ${summary.sent} invitation${summary.sent === 1 ? "" : "s"}.${failedNote}`
-      : `Se ${summary.sent === 1 ? "envió" : "enviaron"} ${summary.sent} invitación${summary.sent === 1 ? "" : "es"}.${failedNote}`,
+    ok:
+      summary.failed > 0
+        ? t("web.action.invitations.sentSomeFailed", {
+            count: summary.sent,
+            failed: summary.failed,
+          })
+        : t("web.action.invitations.sent", { count: summary.sent }),
   };
 }
 
@@ -174,14 +173,14 @@ export async function inviteSingleAction(
   formData: FormData,
 ): Promise<InviteFormState> {
   const locale = await getPreferredLocale();
-  const en = usesEnglishCopy(locale);
+  const t = createT(locale);
   const parsed = singleInviteSchema(locale).safeParse({
     email: formData.get("email"),
     name: formData.get("name") ?? undefined,
   });
   if (!parsed.success) {
     return {
-      error: parsed.error.issues[0]?.message ?? (en ? "Invalid data." : "Datos inválidos."),
+      error: parsed.error.issues[0]?.message ?? t("web.action.invalidData"),
     };
   }
   const forwarded = new FormData();
@@ -200,20 +199,18 @@ export async function resendInvitationAction(
   formData: FormData,
 ): Promise<RosterActionState> {
   const locale = await getPreferredLocale();
-  const en = usesEnglishCopy(locale);
+  const t = createT(locale);
   const parsed = invitationActionSchema.safeParse({ invitationId: formData.get("invitationId") });
-  if (!parsed.success) return { error: en ? "Invalid data." : "Datos inválidos." };
+  if (!parsed.success) return { error: t("web.action.invalidData") };
 
   const teacher = await requireOnboardedTeacher();
   const rotated = await rotateInvitationForResend(teacher.id, parsed.data.invitationId);
   if (rotated.status === "not_found") {
-    return { error: en ? "Invitation not found." : "Invitación no encontrada." };
+    return { error: t("web.action.invitations.notFound") };
   }
   if (rotated.status === "not_pending") {
     return {
-      error: en
-        ? "That invitation was already accepted or cancelled."
-        : "Esa invitación ya fue aceptada o cancelada.",
+      error: t("web.action.invitations.alreadySettled"),
     };
   }
 
@@ -230,9 +227,7 @@ export async function resendInvitationAction(
     await markInvitationSent(rotated.invitation.id, { resend: true });
   } catch {
     return {
-      error: en
-        ? "Couldn't send the invitation email."
-        : "No se pudo enviar el correo de invitación.",
+      error: t("web.action.invitations.sendFailed"),
     };
   }
 
@@ -243,7 +238,7 @@ export async function resendInvitationAction(
   });
   await flushAnalytics();
   revalidateAfterAction(DASH);
-  return { ok: en ? "Invitation resent." : "Invitación reenviada." };
+  return { ok: t("web.action.invitations.resent") };
 }
 
 export async function cancelInvitationAction(
@@ -251,18 +246,18 @@ export async function cancelInvitationAction(
   formData: FormData,
 ): Promise<RosterActionState> {
   const locale = await getPreferredLocale();
-  const en = usesEnglishCopy(locale);
+  const t = createT(locale);
   const parsed = invitationActionSchema.safeParse({ invitationId: formData.get("invitationId") });
-  if (!parsed.success) return { error: en ? "Invalid data." : "Datos inválidos." };
+  if (!parsed.success) return { error: t("web.action.invalidData") };
 
   const teacher = await requireOnboardedTeacher();
   const result = await cancelInvitation(teacher.id, parsed.data.invitationId);
   if (result.status === "not_found") {
-    return { error: en ? "Invitation not found." : "Invitación no encontrada." };
+    return { error: t("web.action.invitations.notFound") };
   }
   if (result.status === "already_accepted") {
     return {
-      error: en ? "That student already accepted." : "Ese alumno ya aceptó.",
+      error: t("web.action.invitations.alreadyAccepted"),
     };
   }
   trackServerEvent({
@@ -272,7 +267,7 @@ export async function cancelInvitationAction(
   });
   await flushAnalytics();
   revalidateAfterAction(DASH);
-  return { ok: en ? "Invitation cancelled." : "Invitación cancelada." };
+  return { ok: t("web.action.invitations.cancelled") };
 }
 
 // Copy link — rotates the token so the copied URL is always the current valid
@@ -283,16 +278,16 @@ export async function copyInvitationLinkAction(
   formData: FormData,
 ): Promise<RosterActionState> {
   const locale = await getPreferredLocale();
-  const en = usesEnglishCopy(locale);
+  const t = createT(locale);
   const parsed = invitationActionSchema.safeParse({ invitationId: formData.get("invitationId") });
-  if (!parsed.success) return { error: en ? "Invalid data." : "Datos inválidos." };
+  if (!parsed.success) return { error: t("web.action.invalidData") };
 
   const teacher = await requireOnboardedTeacher();
   const rotated = await rotateInvitationForResend(teacher.id, parsed.data.invitationId);
   if (rotated.status !== "ok") {
-    return { error: en ? "Invitation not found." : "Invitación no encontrada." };
+    return { error: t("web.action.invitations.notFound") };
   }
-  return { url: invitationAcceptUrl(rotated.rawToken), ok: en ? "Link ready." : "Enlace listo." };
+  return { url: invitationAcceptUrl(rotated.rawToken), ok: t("web.action.invitations.linkReady") };
 }
 
 // The multi-select-existing-students entry: invite every rostered student with

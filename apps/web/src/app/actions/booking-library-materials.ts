@@ -11,7 +11,7 @@ import { emitNotificationQueued } from "@/lib/notifications/events";
 import { gateProFeature, upgradeNudge } from "@/lib/subscriptions/enforce";
 import { logger } from "@/lib/logger";
 import { revalidateAfterAction } from "@/lib/revalidate";
-import { usesEnglishCopy } from "@spiralclass/shared";
+import { createT } from "@spiralclass/shared";
 
 const log = logger({ surface: "booking-library-materials" });
 
@@ -32,7 +32,7 @@ export async function attachLibraryMaterialToBookingAction(
 ): Promise<AttachLibraryMaterialState> {
   const teacher = await requireOnboardedTeacher();
   const locale = await getPreferredLocale();
-  const en = usesEnglishCopy(locale);
+  const t = createT(locale);
 
   // Same Pro gate as a fresh per-class upload (app/actions/materials.ts) —
   // attaching rides the identical delivery pipeline.
@@ -47,11 +47,11 @@ export async function attachLibraryMaterialToBookingAction(
   ];
   const sendTiming = sendTimingSchema.safeParse(formData.get("sendTiming") ?? "");
   if (!bookingId || libraryMaterialIds.length === 0) {
-    return { error: en ? "Choose a material first." : "Primero elige un material." };
+    return { error: t("web.action.materials.chooseFirst") };
   }
   if (!sendTiming.success) {
     return {
-      error: en ? "Choose when to send the material." : "Selecciona cuándo enviar el material.",
+      error: t("web.action.materials.chooseWhen"),
     };
   }
 
@@ -67,12 +67,10 @@ export async function attachLibraryMaterialToBookingAction(
       select: { id: true, storagePath: true, linkUrl: true },
     }),
   ]);
-  if (!booking) return { error: en ? "Class not found." : "Clase no encontrada." };
+  if (!booking) return { error: t("web.action.classNotFound") };
   if (materials.length === 0) {
     return {
-      error: en
-        ? "Those materials are no longer available."
-        : "Esos materiales ya no están disponibles.",
+      error: t("web.action.materials.noLongerAvailable"),
     };
   }
 

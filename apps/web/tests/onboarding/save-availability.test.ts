@@ -13,8 +13,10 @@ vi.mock("@/lib/auth", () => ({
   requireTeacher: vi.fn(async () => ({ id: TEACHER_ID })),
 }));
 
+// The reader's language, per test. English unless a test says otherwise.
+const reader = { locale: "en" };
 vi.mock("@/lib/i18n", () => ({
-  getPreferredLocale: vi.fn(async () => "en"),
+  getPreferredLocale: vi.fn(async () => reader.locale),
 }));
 
 vi.mock("next/cache", () => ({ revalidatePath: vi.fn() }));
@@ -65,6 +67,31 @@ describe("saveAvailabilityAction — error targeting", () => {
     expect(result?.field).toBe("ranges");
     expect(result?.error).toContain("Friday");
     expect(result?.error?.toLowerCase()).toContain("overlap");
+  });
+
+  // The day names were a table of English and Spanish, so a French teacher was
+  // told which day in English. They come from Intl now, for any locale.
+  it.each([
+    ["en", 5, "Friday: "],
+    ["es", 5, "Viernes: "],
+    ["fr", 5, "Vendredi: "],
+    // Both ends of the week: 0 is Sunday and 6 is Saturday in this form.
+    ["en", 0, "Sunday: "],
+    ["fr", 6, "Samedi: "],
+  ] as const)("names the day in %s (weekday %i)", async (locale, weekday, prefix) => {
+    reader.locale = locale;
+    try {
+      const result = await saveAvailabilityAction(
+        undefined,
+        form([
+          { weekday, start: "09:00", end: "11:00" },
+          { weekday, start: "10:00", end: "12:00" },
+        ]),
+      );
+      expect(result?.error?.startsWith(prefix), result?.error).toBe(true);
+    } finally {
+      reader.locale = "en";
+    }
   });
 
   it("points at the offending numeric field, not the first input", async () => {

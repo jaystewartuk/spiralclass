@@ -14,7 +14,7 @@ import {
 import { studentIdentityIds } from "@/lib/students/identity";
 import { flushAnalytics, trackServerEvent } from "@/lib/analytics/posthog";
 import { revalidateAfterAction } from "@/lib/revalidate";
-import { createT, type TFunction } from "@spiralclass/shared";
+import { createT, issueMessage } from "@spiralclass/shared";
 
 export type CancelState = { error?: string; ok?: string } | undefined;
 
@@ -93,14 +93,13 @@ export async function cancelBookingAsStudent(
   };
 }
 
-// Built per request, because the message is the reader's. It was a Spanish
-// literal: a teacher reading the app in English or French who typed a
+// The message is a catalog key, turned into words by issueMessage(). It was a
+// Spanish literal: a teacher reading the app in English or French who typed a
 // two-letter reason was answered in Spanish.
-const teacherCancelSchema = (t: TFunction) =>
-  z.object({
-    bookingId: z.string().uuid(),
-    reason: z.string().trim().min(3, t("web.action.cancel.teacher.reasonTooShort")).max(500),
-  });
+const teacherCancelSchema = z.object({
+  bookingId: z.string().uuid(),
+  reason: z.string().trim().min(3, "web.action.reasonTooShort").max(500),
+});
 
 export async function cancelBookingAsTeacher(
   _prev: CancelState,
@@ -108,13 +107,13 @@ export async function cancelBookingAsTeacher(
 ): Promise<CancelState> {
   const locale = await getPreferredLocale();
   const t = createT(locale);
-  const parsed = teacherCancelSchema(t).safeParse({
+  const parsed = teacherCancelSchema.safeParse({
     bookingId: formData.get("bookingId"),
     reason: formData.get("reason"),
   });
   if (!parsed.success) {
     return {
-      error: parsed.error.issues[0]?.message ?? t("web.action.invalidData"),
+      error: issueMessage(parsed.error, t, "web.action.invalidData"),
     };
   }
 

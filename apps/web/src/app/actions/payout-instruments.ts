@@ -1,7 +1,7 @@
 "use server";
 
 import { redirect } from "next/navigation";
-import { wiseInstrumentSchema, usesEnglishCopy } from "@spiralclass/shared";
+import { wiseInstrumentSchema, createT } from "@spiralclass/shared";
 import { requireOnboardedTeacher } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { getPreferredLocale } from "@/lib/i18n";
@@ -33,6 +33,7 @@ export async function updateWiseInstrument(
 ): Promise<PayoutInstrumentState> {
   const teacher = await requireOnboardedTeacher();
   const locale = await getPreferredLocale();
+  const t = createT(locale);
 
   const parsed = wiseInstrumentSchema(locale).safeParse({
     enabled: formData.get("enabled"),
@@ -42,9 +43,7 @@ export async function updateWiseInstrument(
   });
   if (!parsed.success) {
     return {
-      error:
-        parsed.error.issues[0]?.message ??
-        (usesEnglishCopy(locale) ? "Invalid data" : "Datos inválidos"),
+      error: parsed.error.issues[0]?.message ?? t("web.action.invalidData"),
     };
   }
 

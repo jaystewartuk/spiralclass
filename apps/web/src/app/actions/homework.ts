@@ -2,7 +2,7 @@
 
 import { z } from "zod";
 import { fromZonedTime } from "date-fns-tz";
-import { usesEnglishCopy, HOMEWORK_FEEDBACK_MAX_SCORE } from "@spiralclass/shared";
+import { createT, HOMEWORK_FEEDBACK_MAX_SCORE } from "@spiralclass/shared";
 import { prisma } from "@/lib/prisma";
 import { requireOnboardedTeacher } from "@/lib/auth";
 import { getPreferredLocale } from "@/lib/i18n";
@@ -43,14 +43,14 @@ export async function createAssignmentAction(
 ): Promise<CreateAssignmentState> {
   const teacher = await requireOnboardedTeacher();
   const locale = await getPreferredLocale();
-  const en = usesEnglishCopy(locale);
+  const t = createT(locale);
 
   const bookingId = String(formData.get("bookingId") ?? "");
   const booking = await prisma.booking.findFirst({
     where: { id: bookingId, teacherId: teacher.id },
     select: { id: true },
   });
-  if (!booking) return { error: en ? "Class not found." : "Clase no encontrada." };
+  if (!booking) return { error: t("web.action.classNotFound") };
 
   // <input type="datetime-local"> gives a naive "wall clock" string with no
   // timezone — fromZonedTime interprets it as the TEACHER's local time
@@ -64,7 +64,7 @@ export async function createAssignmentAction(
     dueAt: dueAtIso,
   });
   if (!parsed.success) {
-    return { error: en ? "Enter a title." : "Escribe un título." };
+    return { error: t("homework.teacher.titleRequired") };
   }
 
   const created = await prisma.assignment.create({
@@ -153,7 +153,7 @@ export async function createHomeworkFeedbackAction(
 ): Promise<CreateFeedbackState> {
   const teacher = await requireOnboardedTeacher();
   const locale = await getPreferredLocale();
-  const en = usesEnglishCopy(locale);
+  const t = createT(locale);
 
   const attemptId = String(formData.get("attemptId") ?? "");
   const bookingId = String(formData.get("bookingId") ?? "");
@@ -168,7 +168,7 @@ export async function createHomeworkFeedbackAction(
     score: scoreRaw ? Number(scoreRaw) : null,
   });
   if (!parsed.success) {
-    return { error: en ? "Enter feedback content." : "Escribe la retroalimentación." };
+    return { error: t("web.action.homework.feedbackRequired") };
   }
 
   try {
@@ -178,12 +178,8 @@ export async function createHomeworkFeedbackAction(
       return {
         error:
           err.reason === "already-reviewed"
-            ? en
-              ? "This submission was already reviewed."
-              : "Esta entrega ya fue revisada."
-            : en
-              ? "Submission not found."
-              : "Entrega no encontrada.",
+            ? t("homework.teacher.review.alreadyReviewed")
+            : t("web.action.homework.submissionNotFound"),
       };
     }
     throw err;
@@ -206,6 +202,7 @@ export async function requestAiReviewAction(
 ): Promise<RequestAiReviewState> {
   const teacher = await requireOnboardedTeacher();
   const locale = await getPreferredLocale();
+  const t = createT(locale);
 
   const attemptId = String(formData.get("attemptId") ?? "");
   const bookingId = String(formData.get("bookingId") ?? "");
@@ -221,7 +218,7 @@ export async function requestAiReviewAction(
   } catch (err) {
     if (err instanceof ApiAuthError) {
       return {
-        error: usesEnglishCopy(locale) ? "Submission not found." : "Entrega no encontrada.",
+        error: t("web.action.homework.submissionNotFound"),
       };
     }
     throw err;

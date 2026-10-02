@@ -7033,7 +7033,6 @@ export const en = {
   "web.action.cancel.student.doneLate":
     "Canceled under 24h. The class is deducted from the package.",
   "web.action.cancel.student.done": "Canceled. You can reschedule your class.",
-  "web.action.cancel.teacher.reasonTooShort": "Give a brief reason.",
   "web.action.cancel.teacher.classNotFound": "We couldn't find that class.",
   "web.action.cancel.teacher.wrongStatus": "This class is already off the calendar.",
   "web.action.cancel.teacher.done": "Class canceled and restored to the student's package.",
@@ -7060,7 +7059,6 @@ export const en = {
   "web.action.testimonial.nameFirst":
     "Add your name in your account settings first, so your teacher can credit you.",
   "web.action.testimonial.teacherNotFound": "We couldn't find that teacher.",
-  "web.action.contact.notInList": "This student isn't in your list.",
   "web.action.contact.emailLocked":
     "This student already signs in with their email, so it can only be changed from their account.",
   "web.action.contact.emailTaken": "Another of your students already uses that email.",
@@ -7078,4 +7076,179 @@ export const en = {
     "Email updated. Your Google account was disconnected for security — reconnect it below with your new Google account if you'd like to keep using Google Sign-In.",
   "web.action.contact.unknownLanguage": "Unknown language.",
   "web.action.contact.languageSaved": "Language saved.",
+  "web.action.accountDeletion.teacherActivePackages":
+    "You have active packages with classes left. Cancel or refund them before deleting your account.",
+  "web.action.accountDeletion.studentClassesLeft":
+    "You still have classes left in a package. Once they're done, you can delete your account.",
+  "web.action.materials.chooseFirst": "Choose a material first.",
+  "web.action.materials.chooseWhen": "Choose when to send the material.",
+  "web.action.classNotFound": "Class not found.",
+  "web.action.materials.noLongerAvailable": "Those materials are no longer available.",
+  "web.action.homework.feedbackRequired": "Enter feedback content.",
+  "web.action.homework.submissionNotFound": "Submission not found.",
+  "web.action.invitations.noValidEmails": "No valid emails found.",
+  "web.action.invitations.nothingToSend":
+    "Nothing to send — those students are already connected or invited.",
+  "web.action.invitations.notFound": "Invitation not found.",
+  "web.action.invitations.alreadySettled": "That invitation was already accepted or cancelled.",
+  "web.action.invitations.sendFailed": "Couldn't send the invitation email.",
+  "web.action.invitations.resent": "Invitation resent.",
+  "web.action.invitations.alreadyAccepted": "That student already accepted.",
+  "web.action.invitations.cancelled": "Invitation cancelled.",
+  "web.action.invitations.linkReady": "Link ready.",
+  "web.action.insights.focusNotFound": "Focus area not found.",
+  "web.action.checkFields": "Check the fields and try again.",
+  "web.action.lessonNotes.noEarlierClass": "No earlier class with notes to copy from.",
+  "web.action.lessonNotes.bookmark": "Bookmark",
+  "web.action.lessonNotes.pickRecipient": "Pick who the note is for.",
+  "web.action.lessonNotes.writeFirst": "Write something first.",
+  "web.action.lessonNotes.summaryNotStarted": "You can summarize the class once it has started.",
+  "web.action.lessonNotes.summaryNoNotes":
+    "Add some notes to the class first — there's nothing to summarize yet.",
+  "web.action.lessonNotes.summaryUnavailable": "Summaries aren't available right now.",
+  "web.action.lessonNotes.summaryFailed": "Couldn't generate the summary. Please try again.",
+  "web.action.lessonNotes.summaryEmpty": "The summary came back empty.",
+  "web.action.levels.unknown": "Unknown level.",
+  "web.action.levels.saved": "Level saved.",
+  "web.action.library.invalidVisibility": "Invalid visibility.",
+  "web.action.library.invalidUrl": "Invalid URL",
+  "web.action.library.contentRequired": "Add content, a file, or a link.",
+  "web.action.library.materialNotFound": "Material not found.",
+  "web.action.library.materialOrStudentGone":
+    "That material or student is no longer available. Reload the page and try again.",
+  "web.action.tryAgain": "That didn't work. Try again.",
+  "web.action.marketing.nameRequired": "Add a name (and a valid link, if you include one).",
+  "web.action.notificationPrefs.enabled": "Notifications enabled.",
+  "web.action.notificationPrefs.paused": "Notifications paused.",
+  "web.action.onboarding.countryLocked":
+    "You can't change your country after connecting Stripe. Disconnect Stripe first if you need to.",
+  "web.action.onboarding.invalidSchedule": "Invalid schedule",
+  "web.action.overrides.classNotFound": "We couldn't find the class.",
+  "web.action.overrides.onlyScheduledComplete": "Only scheduled classes can be marked complete.",
+  "web.action.overrides.changedElsewhere":
+    "That class was already changed by another action. Refresh and try again.",
+  "web.action.overrides.markedComplete": "Class marked complete.",
+  "web.action.overrides.onlyScheduledOrCompletedNoShow":
+    "Only scheduled or completed classes can be marked as no-show.",
+  "web.action.overrides.markedNoShow":
+    "Class recorded as no-show. The class still counts (no refund).",
+  "web.action.overrides.onlyCanceledOrNoShowRestore":
+    "Only student-canceled or no-show classes can be restored.",
+  "web.action.overrides.slotTakenCancelOther":
+    "That slot is already taken by another class. Cancel the other one first, or ask the student to reschedule.",
+  "web.action.overrides.noClassesToRestore": "This package has no classes left to restore into.",
+  "web.action.overrides.slotTakenByClass": "That slot is already taken by another class.",
+  "web.action.overrides.restored": "Class restored.",
+  "web.action.overrides.onlyDeductedWaive":
+    "Only student cancellations with a deduction applied can be waived.",
+  "web.action.overrides.waived": "Cancellation waived. 1 class restored to the package.",
+  "web.action.packageNotFound": "Package not found.",
+  "web.action.overrides.dateInFuture": "The new date must be in the future.",
+  "web.action.overrides.dateAfterCurrent": "The new date must be after the current one.",
+  "web.action.overrides.expirationUpdated": "Expiration updated.",
+  "web.action.overrides.unknownPackage": "Unknown package.",
+  "web.action.overrides.alreadyArchived": "This student is already archived.",
+  "web.action.overrides.alreadyActive": "This student is already active.",
+  "web.action.audit.archivedFromRoster": "Archived from roster",
+  "web.action.audit.reactivatedOnRoster": "Reactivated on roster",
+  "web.action.overrides.studentArchived": "Student archived.",
+  "web.action.overrides.studentReactivated": "Student reactivated.",
+  "web.action.overrides.classLanguageUpdated": "Class language updated.",
+  "web.action.packages.onlyActivePause": "Only an active package can be paused",
+  "web.action.packages.onlyPausedResume": "Only a paused package can be resumed",
+  "web.action.profile.slugTooShort": "Use at least {min} letters or numbers.",
+  "web.action.profile.maxChars": "Keep it under {max} characters.",
+  "web.action.profile.invalidPhone": "Invalid phone number.",
+  "web.action.invalidInput": "Invalid input",
+  "web.action.profile.videoUnavailable": "Video upload isn't available right now.",
+  "web.action.profile.uploadIncomplete": "The upload didn't finish — please try again.",
+  "web.action.profile.videoTooLarge": "The video must be under 50 MB — try a shorter clip.",
+  "web.action.profile.noVideo": "There's no video to analyze.",
+  "web.action.shareGroups.nameRequired": "Add a group name (and a valid link, if you include one).",
+  "web.action.shareGroups.notFound": "We couldn't find that group.",
+  "web.action.socialPreview.aiUnavailable":
+    "AI image generation isn't available right now. You can still upload your own image.",
+  "web.action.socialPreview.tooFast":
+    "You're generating too quickly — wait a few minutes and try again.",
+  "web.action.socialPreview.quotaUsed":
+    "You've used all {limit} of this month's AI images. You can still upload your own.",
+  "web.action.socialPreview.refused":
+    "The image service wouldn't make that one. Try describing it differently.",
+  "web.action.socialPreview.timedOut": "That took too long. Try again — nothing was used up.",
+  "web.action.socialPreview.createFailed":
+    "We couldn't create the image. Try again — nothing was used up.",
+  "web.action.socialPreview.chooseType": "Choose a JPG, PNG or WebP image.",
+  "web.action.socialPreview.empty": "That image is empty.",
+  "web.action.socialPreview.tooLarge": "The image can't be larger than 5 MB.",
+  "web.action.socialPreview.pickStyle": "Pick a style for the image.",
+  "web.action.socialPreview.chooseUpload": "Choose an image to upload.",
+  "web.action.socialPreview.unusable": "We couldn't use that image.",
+  "web.action.socialPreview.imageNotFound": "We couldn't find that image.",
+  "web.action.socialPreview.resetFailed": "We couldn't reset that preview.",
+  "web.action.socialPreview.previewNotFound": "We couldn't find that preview.",
+  "web.action.socialPreview.renameFailed": "We couldn't rename that image.",
+  "web.action.socialPreview.deleteFailed": "We couldn't delete that image.",
+  "web.action.socialPreview.partOfDonePost":
+    "This image is part of a post you already marked as done, so it stays.",
+  "web.action.studentNotes.added": "Note added.",
+  "web.action.studentNotes.notFound": "We couldn't find that note.",
+  "web.action.studentNotes.updated": "Note updated.",
+  "web.action.studentNotes.deleted": "Note deleted.",
+  "web.action.studentProfile.fieldTooLong": "Keep each field under {max} characters.",
+  "web.action.merge.bothOnRoster": "Both students must be on your roster.",
+  "web.action.merge.accountDisabled":
+    "One of these accounts is disabled — contact support to merge them.",
+  "web.action.merge.differentAccounts":
+    "Both students have signed in with different accounts, so they may be different people. Contact support if you're sure they're the same.",
+  "web.action.merge.otherTeacher":
+    "The duplicate is also enrolled with another teacher — contact support to merge them.",
+  "web.action.merge.pendingDeletion":
+    "The duplicate has a pending deletion request and can't be merged.",
+  "web.action.merge.failed":
+    "The merge couldn't be completed. Nothing was changed — contact support.",
+  "web.action.merge.done": "Students merged — packages and classes now live under one profile.",
+  "web.action.teacherAccount.disconnectStripeFirst":
+    "Disconnect Stripe before changing your country — your payout account is tied to it.",
+  "web.action.teacherAccount.invalidCountry": "Invalid country.",
+  "web.action.teacherAccount.countrySaved": "Country saved.",
+  "web.action.audit.bookedByTeacher": "Class booked by the teacher on the student's behalf.",
+  "web.action.teacherPackages.remainingExceedsTotal":
+    "Classes left can't exceed the package total.",
+  "web.action.teacherPackages.expirationInFuture": "The expiration date must be in the future.",
+  "web.action.audit.offPlatformPackage": "Off-platform package recorded by the teacher.",
+  "web.action.teacherPackages.added": "Package added — {remaining} of {total} classes left.",
+  "web.action.teacherPackages.onlyActiveOrPausedEdit":
+    "Only an active or paused package can be edited.",
+  "web.action.audit.packageCorrected": "Package details corrected by the teacher.",
+  "web.action.teacherPackages.updated": "Package updated — {remaining} of {total} classes left.",
+  "web.action.invalidRequest": "Invalid request.",
+  "web.action.teacherPackages.hasBookings":
+    "This package has classes booked or taken, so it can't be deleted. Pause it instead, or cancel its classes first.",
+  "web.action.teacherPackages.hasPayment":
+    "This package has a payment on record, so it can't be deleted. Refund the payment instead.",
+  "web.action.audit.accidentalPackageDeleted": "Accidental package deleted by the teacher.",
+  "web.action.teacherStudents.teacherEmail":
+    "This email belongs to a teacher account and can't be added as a student.",
+  "web.action.audit.studentAddedSilently": "Student added to the roster (silent onboarding).",
+  "web.action.teacherStudents.alreadyLive": "This student is already live.",
+  "web.action.audit.studentWentLive": "Student went live — notifications now flow.",
+  "web.action.teacherStudents.nowLive":
+    "Student is live. They'll receive notifications from now on.",
+  "web.action.audit.wiseNotReceived": "Wise: payment not received",
+  "web.action.invitations.sent": "Sent {count} invitations.",
+  "web.action.invitations.sent_one": "Sent {count} invitation.",
+  "web.action.invitations.sentSomeFailed":
+    "Sent {count} invitations. ({failed} couldn't be delivered)",
+  "web.action.invitations.sentSomeFailed_one":
+    "Sent {count} invitation. ({failed} couldn't be delivered)",
+  "web.action.teacherPackages.committedExceeds":
+    "This package already has {count} booked or taken classes, so it can't show more than {max} left.",
+  "web.action.teacherPackages.committedExceeds_one":
+    "This package already has {count} booked or taken class, so it can't show more than {max} left.",
+  "web.action.overrides.customPricesRemoved": "Custom prices removed.",
+  "web.action.overrides.customPricesUpdated": "Custom prices updated for future purchases.",
+  "web.action.reasonTooShort": "Give a brief reason.",
+  "web.action.overrides.invalidDate": "Invalid date (YYYY-MM-DD)",
+  "web.action.studentNotes.empty": "The note can't be empty.",
+  "web.action.studentNotInList": "This student isn't in your list.",
 } as const;

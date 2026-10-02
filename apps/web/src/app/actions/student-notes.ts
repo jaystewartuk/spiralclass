@@ -1,12 +1,13 @@
 "use server";
 
+import { issueMessage } from "@spiralclass/shared";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireOnboardedTeacher } from "@/lib/auth";
 import { getPreferredLocale } from "@/lib/i18n";
 import { flushAnalytics, trackServerEvent } from "@/lib/analytics/posthog";
 import { revalidateAfterAction } from "@/lib/revalidate";
-import { usesEnglishCopy } from "@spiralclass/shared";
+import { createT } from "@spiralclass/shared";
 
 // Teacher-private notes about a student. Scoped to (teacher, student) and never
 // shown to the student. Deliberately NOT routed through the Override audit
@@ -18,7 +19,7 @@ export type StudentNoteState = { error?: string; ok?: string } | undefined;
 
 const studentIdField = z.string().uuid();
 const noteIdField = z.string().uuid();
-const bodyField = z.string().trim().min(1, "La nota no puede estar vacía.").max(5000);
+const bodyField = z.string().trim().min(1, "web.action.studentNotes.empty").max(5000);
 
 async function ownsStudent(teacherId: string, studentId: string): Promise<boolean> {
   const link = await prisma.teacherStudent.findUnique({
@@ -36,20 +37,20 @@ export async function addStudentNote(
   _prev: StudentNoteState,
   formData: FormData,
 ): Promise<StudentNoteState> {
-  const en = usesEnglishCopy(await getPreferredLocale());
+  const t = createT(await getPreferredLocale());
   const parsed = addSchema.safeParse({
     studentId: formData.get("studentId"),
     body: formData.get("body"),
   });
   if (!parsed.success) {
     return {
-      error: parsed.error.issues[0]?.message ?? (en ? "Invalid data." : "Datos inválidos."),
+      error: issueMessage(parsed.error, t, "web.action.invalidData"),
     };
   }
 
   const teacher = await requireOnboardedTeacher();
   if (!(await ownsStudent(teacher.id, parsed.data.studentId))) {
-    return { error: en ? "This student isn't in your list." : "Este alumno no está en tu lista." };
+    return { error: t("web.action.studentNotInList") };
   }
 
   await prisma.studentNote.create({
@@ -68,7 +69,7 @@ export async function addStudentNote(
   await flushAnalytics();
 
   revalidateAfterAction(`/dashboard/students/${parsed.data.studentId}`);
-  return { ok: en ? "Note added." : "Nota agregada." };
+  return { ok: t("web.action.studentNotes.added") };
 }
 
 // ---------- update ----------
@@ -79,14 +80,14 @@ export async function updateStudentNote(
   _prev: StudentNoteState,
   formData: FormData,
 ): Promise<StudentNoteState> {
-  const en = usesEnglishCopy(await getPreferredLocale());
+  const t = createT(await getPreferredLocale());
   const parsed = updateSchema.safeParse({
     noteId: formData.get("noteId"),
     body: formData.get("body"),
   });
   if (!parsed.success) {
     return {
-      error: parsed.error.issues[0]?.message ?? (en ? "Invalid data." : "Datos inválidos."),
+      error: issueMessage(parsed.error, t, "web.action.invalidData"),
     };
   }
 
@@ -97,7 +98,7 @@ export async function updateStudentNote(
     data: { body: parsed.data.body },
   });
   if (updated.count === 0) {
-    return { error: en ? "We couldn't find that note." : "No encontramos esa nota." };
+    return { error: t("web.action.studentNotes.notFound") };
   }
 
   const note = await prisma.studentNote.findUnique({
@@ -114,7 +115,7 @@ export async function updateStudentNote(
     await flushAnalytics();
     revalidateAfterAction(`/dashboard/students/${note.studentId}`);
   }
-  return { ok: en ? "Note updated." : "Nota actualizada." };
+  return { ok: t("web.action.studentNotes.updated") };
 }
 
 // ---------- delete ----------
@@ -125,10 +126,10 @@ export async function deleteStudentNote(
   _prev: StudentNoteState,
   formData: FormData,
 ): Promise<StudentNoteState> {
-  const en = usesEnglishCopy(await getPreferredLocale());
+  const t = createT(await getPreferredLocale());
   const parsed = deleteSchema.safeParse({ noteId: formData.get("noteId") });
   if (!parsed.success) {
-    return { error: en ? "Invalid data." : "Datos inválidos." };
+    return { error: t("web.action.invalidData") };
   }
 
   const teacher = await requireOnboardedTeacher();
@@ -139,7 +140,7 @@ export async function deleteStudentNote(
     select: { studentId: true },
   });
   if (!note) {
-    return { error: en ? "We couldn't find that note." : "No encontramos esa nota." };
+    return { error: t("web.action.studentNotes.notFound") };
   }
 
   await prisma.studentNote.delete({ where: { id: parsed.data.noteId } });
@@ -152,5 +153,5 @@ export async function deleteStudentNote(
   await flushAnalytics();
 
   revalidateAfterAction(`/dashboard/students/${note.studentId}`);
-  return { ok: en ? "Note deleted." : "Nota eliminada." };
+  return { ok: t("web.action.studentNotes.deleted") };
 }

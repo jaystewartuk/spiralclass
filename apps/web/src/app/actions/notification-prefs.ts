@@ -12,7 +12,7 @@ import {
   type NotificationChannel,
 } from "@/lib/notifications/preferences";
 import { revalidateAfterAction } from "@/lib/revalidate";
-import { usesEnglishCopy } from "@spiralclass/shared";
+import { createT } from "@spiralclass/shared";
 
 export type PrefsActionState = { ok?: boolean; error?: string } | undefined;
 export type NotificationsToggleFormState = { ok?: string; error?: string } | undefined;
@@ -87,7 +87,7 @@ export async function setStudentNotificationsAsTeacherAction(
 ): Promise<NotificationsToggleFormState> {
   const teacher = await requireOnboardedTeacher();
   const locale = await getPreferredLocale();
-  const en = usesEnglishCopy(locale);
+  const t = createT(locale);
 
   const studentId = String(formData.get("studentId") ?? "");
   const enabled = formData.get("enabled") === "true";
@@ -99,17 +99,13 @@ export async function setStudentNotificationsAsTeacherAction(
     enabled,
   );
   if (!result.ok) {
-    return { error: en ? "This student isn't in your list." : "Este alumno no está en tu lista." };
+    return { error: t("web.action.studentNotInList") };
   }
 
   revalidateAfterAction(`/dashboard/students/${studentId}`);
   return {
     ok: enabled
-      ? en
-        ? "Notifications enabled."
-        : "Notificaciones activadas."
-      : en
-        ? "Notifications paused."
-        : "Notificaciones pausadas.",
+      ? t("web.action.notificationPrefs.enabled")
+      : t("web.action.notificationPrefs.paused"),
   };
 }

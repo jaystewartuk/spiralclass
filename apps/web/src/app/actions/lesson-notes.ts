@@ -11,7 +11,7 @@ import { createBookmark } from "@/lib/lesson-notes/bookmarks";
 import { formatZonedDateTime } from "@/lib/date-display";
 import { logger } from "@/lib/logger";
 import { revalidateAfterAction } from "@/lib/revalidate";
-import { usesEnglishCopy } from "@spiralclass/shared";
+import { createT, usesEnglishCopy } from "@spiralclass/shared";
 import { DAY_PLAN_PATH } from "@/lib/lesson-notes/day-plan";
 
 const log = logger({ surface: "lesson-notes" });
@@ -60,14 +60,14 @@ export async function copyNotesFromLastClass(
   formData: FormData,
 ): Promise<LessonNoteState> {
   const teacher = await requireOnboardedTeacher();
-  const en = usesEnglishCopy(await getPreferredLocale());
+  const t = createT(await getPreferredLocale());
 
   const bookingId = String(formData.get("bookingId") ?? "");
   const current = await prisma.booking.findFirst({
     where: { id: bookingId, teacherId: teacher.id },
     select: { id: true, studentId: true, scheduledStart: true },
   });
-  if (!current) return { error: en ? "Class not found." : "Clase no encontrada." };
+  if (!current) return { error: t("web.action.classNotFound") };
 
   // The most recent earlier class for this student that has any (non-bookmark)
   // notes — a bookmark is a call-instance-specific marker, not a reusable cue.
@@ -90,9 +90,7 @@ export async function copyNotesFromLastClass(
   });
   if (!source || source.lessonNotes.length === 0) {
     return {
-      error: en
-        ? "No earlier class with notes to copy from."
-        : "No hay una clase anterior con notas para copiar.",
+      error: t("web.action.lessonNotes.noEarlierClass"),
     };
   }
 
@@ -127,8 +125,8 @@ export async function createLessonBookmark(
   bookingId: string,
 ): Promise<{ ok: true } | { ok: false; reason: string }> {
   const teacher = await requireOnboardedTeacher();
-  const en = usesEnglishCopy(await getPreferredLocale());
-  const label = en ? "Bookmark" : "Marcador";
+  const t = createT(await getPreferredLocale());
+  const label = t("web.action.lessonNotes.bookmark");
   const result = await createBookmark(prisma, { bookingId, teacherId: teacher.id, label });
   if (result.ok) revalidateAfterAction(`/dashboard/classes/${bookingId}/replay`);
   return result;
@@ -139,7 +137,7 @@ export async function createLessonNote(
   formData: FormData,
 ): Promise<LessonNoteState> {
   const teacher = await requireOnboardedTeacher();
-  const en = usesEnglishCopy(await getPreferredLocale());
+  const t = createT(await getPreferredLocale());
 
   const bookingId = String(formData.get("bookingId") ?? "");
   const body = String(formData.get("body") ?? "")
@@ -148,13 +146,13 @@ export async function createLessonNote(
   const audience = audienceSchema.safeParse(String(formData.get("audience") ?? ""));
 
   if (!audience.success) {
-    return { error: en ? "Pick who the note is for." : "Elige para quién es la nota." };
+    return { error: t("web.action.lessonNotes.pickRecipient") };
   }
   if (!body) {
-    return { error: en ? "Write something first." : "Escribe algo primero." };
+    return { error: t("web.action.lessonNotes.writeFirst") };
   }
   const ownedId = await ownedBookingId(bookingId, teacher.id);
-  if (!ownedId) return { error: en ? "Class not found." : "Clase no encontrada." };
+  if (!ownedId) return { error: t("web.action.classNotFound") };
 
   // Append to the end of its own audience column.
   const last = await prisma.lessonNote.findFirst({
@@ -286,7 +284,7 @@ export async function generateLessonSummary(
 ): Promise<LessonNoteState> {
   const teacher = await requireOnboardedTeacher();
   const locale = await getPreferredLocale();
-  const en = usesEnglishCopy(locale);
+  const t = createT(locale);
 
   const gate = await gateProFeature(teacher.id, "lesson_notes");
   if (!gate.ok) return { error: upgradeNudge(gate.limit, locale) };
@@ -306,13 +304,11 @@ export async function generateLessonSummary(
       },
     },
   });
-  if (!booking) return { error: en ? "Class not found." : "Clase no encontrada." };
+  if (!booking) return { error: t("web.action.classNotFound") };
 
   if (booking.scheduledStart > new Date()) {
     return {
-      error: en
-        ? "You can summarize the class once it has started."
-        : "Puedes resumir la clase una vez que haya comenzado.",
+      error: t("web.action.lessonNotes.summaryNotStarted"),
     };
   }
 
@@ -325,9 +321,7 @@ export async function generateLessonSummary(
 
   if (teacherCues.length === 0 && studentNotes.length === 0) {
     return {
-      error: en
-        ? "Add some notes to the class first — there's nothing to summarize yet."
-        : "Agrega algunas notas a la clase primero; aún no hay nada que resumir.",
+      error: t("web.action.lessonNotes.summaryNoNotes"),
     };
   }
 
@@ -338,27 +332,23 @@ export async function generateLessonSummary(
       when: formatZonedDateTime(booking.scheduledStart, teacher.timezone, locale),
       teacherCues,
       studentNotes,
-      en,
+      en: usesEnglishCopy(locale),
     });
   } catch (err) {
     if (err instanceof SummaryUnavailableError) {
       return {
-        error: en
-          ? "Summaries aren't available right now."
-          : "Los resúmenes no están disponibles en este momento.",
+        error: t("web.action.lessonNotes.summaryUnavailable"),
       };
     }
     log.error("lesson summary generation failed", err);
     return {
-      error: en
-        ? "Couldn't generate the summary. Please try again."
-        : "No se pudo generar el resumen. Inténtalo de nuevo.",
+      error: t("web.action.lessonNotes.summaryFailed"),
     };
   }
 
   if (!result.body) {
     return {
-      error: en ? "The summary came back empty." : "El resumen llegó vacío.",
+      error: t("web.action.lessonNotes.summaryEmpty"),
     };
   }
 

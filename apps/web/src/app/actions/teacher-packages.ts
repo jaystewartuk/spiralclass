@@ -3,7 +3,7 @@
 import { z } from "zod";
 import { Prisma } from "@prisma/client";
 import { fromZonedTime, formatInTimeZone } from "date-fns-tz";
-import { usesEnglishCopy, currencyForTeacher, majorToMinorUnits } from "@spiralclass/shared";
+import { createT, currencyForTeacher, majorToMinorUnits } from "@spiralclass/shared";
 import { prisma } from "@/lib/prisma";
 import { requireOnboardedTeacher } from "@/lib/auth";
 import { getPreferredLocale } from "@/lib/i18n";
@@ -68,7 +68,7 @@ export async function createManualPackageAction(
   formData: FormData,
 ): Promise<ManualPackageState> {
   const locale = await getPreferredLocale();
-  const en = usesEnglishCopy(locale);
+  const t = createT(locale);
 
   const parsed = manualPackageSchema.safeParse({
     studentId: formData.get("studentId"),
@@ -86,12 +86,10 @@ export async function createManualPackageAction(
     const first = parsed.error.issues[0];
     if (first?.message === "remaining-gt-total") {
       return {
-        error: en
-          ? "Classes left can't exceed the package total."
-          : "Las clases restantes no pueden superar el total del paquete.",
+        error: t("web.action.teacherPackages.remainingExceedsTotal"),
       };
     }
-    return { error: en ? "Invalid data." : "Datos inválidos." };
+    return { error: t("web.action.invalidData") };
   }
 
   const teacher = await requireOnboardedTeacher();
@@ -112,7 +110,7 @@ export async function createManualPackageAction(
     select: { studentId: true },
   });
   if (!link) {
-    return { error: en ? "This student isn't in your list." : "Este alumno no está en tu lista." };
+    return { error: t("web.action.studentNotInList") };
   }
 
   // Template is optional; if given it must belong to this teacher. We use it
@@ -137,9 +135,7 @@ export async function createManualPackageAction(
     expiresAt = fromZonedTime(`${data.expiresOn}T23:59:59`, teacher.timezone);
     if (expiresAt <= now) {
       return {
-        error: en
-          ? "The expiration date must be in the future."
-          : "La fecha de vencimiento debe ser una fecha futura.",
+        error: t("web.action.teacherPackages.expirationInFuture"),
       };
     }
   } else if (template?.expirationMonths) {
@@ -175,9 +171,7 @@ export async function createManualPackageAction(
       targetType: "package",
       targetId: pkg.id,
       action: "create_manual_package",
-      reason: en
-        ? "Off-platform package recorded by the teacher."
-        : "Paquete fuera de la plataforma registrado por la profe.",
+      reason: t("web.action.audit.offPlatformPackage"),
       before: null,
       after: {
         classesTotal: data.classesTotal,
@@ -207,9 +201,10 @@ export async function createManualPackageAction(
 
   revalidateAfterAction(`/dashboard/students/${data.studentId}`);
   return {
-    ok: en
-      ? `Package added — ${data.classesRemaining} of ${data.classesTotal} classes left.`
-      : `Paquete agregado — ${data.classesRemaining} de ${data.classesTotal} clases restantes.`,
+    ok: t("web.action.teacherPackages.added", {
+      remaining: data.classesRemaining,
+      total: data.classesTotal,
+    }),
   };
 }
 
@@ -253,7 +248,7 @@ export async function editManualPackageAction(
   formData: FormData,
 ): Promise<ManualPackageState> {
   const locale = await getPreferredLocale();
-  const en = usesEnglishCopy(locale);
+  const t = createT(locale);
 
   const parsed = editPackageSchema.safeParse({
     packageId: formData.get("packageId"),
@@ -268,12 +263,10 @@ export async function editManualPackageAction(
     const first = parsed.error.issues[0];
     if (first?.message === "remaining-gt-total") {
       return {
-        error: en
-          ? "Classes left can't exceed the package total."
-          : "Las clases restantes no pueden superar el total del paquete.",
+        error: t("web.action.teacherPackages.remainingExceedsTotal"),
       };
     }
-    return { error: en ? "Invalid data." : "Datos inválidos." };
+    return { error: t("web.action.invalidData") };
   }
 
   const teacher = await requireOnboardedTeacher();
@@ -296,7 +289,7 @@ export async function editManualPackageAction(
     },
   });
   if (!pkg) {
-    return { error: en ? "Package not found." : "Paquete no encontrado." };
+    return { error: t("web.action.packageNotFound") };
   }
   // Turning a package INTO one for two is selling for two (Pro, D-188);
   // keeping or undoing it never is, so a downgrade never locks a correction.
@@ -307,9 +300,7 @@ export async function editManualPackageAction(
   }
   if (pkg.status !== "active" && pkg.status !== "paused") {
     return {
-      error: en
-        ? "Only an active or paused package can be edited."
-        : "Solo se puede editar un paquete activo o en pausa.",
+      error: t("web.action.teacherPackages.onlyActiveOrPausedEdit"),
     };
   }
 
@@ -323,9 +314,10 @@ export async function editManualPackageAction(
   const newClassesUsed = data.classesTotal - data.classesRemaining;
   if (newClassesUsed < committedBookings) {
     return {
-      error: en
-        ? `This package already has ${committedBookings} booked or taken class${committedBookings === 1 ? "" : "es"}, so it can't show more than ${data.classesTotal - committedBookings} left.`
-        : `Este paquete ya tiene ${committedBookings} clase${committedBookings === 1 ? "" : "s"} reservada${committedBookings === 1 ? "" : "s"} o tomada${committedBookings === 1 ? "" : "s"}, así que no puede mostrar más de ${data.classesTotal - committedBookings} restantes.`,
+      error: t("web.action.teacherPackages.committedExceeds", {
+        count: committedBookings,
+        max: data.classesTotal - committedBookings,
+      }),
     };
   }
 
@@ -344,9 +336,7 @@ export async function editManualPackageAction(
     const changed = data.expiresOn !== currentExpiresOn;
     if (changed && expiresAt <= now) {
       return {
-        error: en
-          ? "The expiration date must be in the future."
-          : "La fecha de vencimiento debe ser una fecha futura.",
+        error: t("web.action.teacherPackages.expirationInFuture"),
       };
     }
   }
@@ -391,9 +381,7 @@ export async function editManualPackageAction(
       targetType: "package",
       targetId: pkg.id,
       action: "edit_manual_package",
-      reason: en
-        ? "Package details corrected by the teacher."
-        : "Detalles del paquete corregidos por la profe.",
+      reason: t("web.action.audit.packageCorrected"),
       before,
       after,
       actor: null,
@@ -414,9 +402,10 @@ export async function editManualPackageAction(
 
   revalidateAfterAction(`/dashboard/students/${pkg.studentId}`);
   return {
-    ok: en
-      ? `Package updated — ${data.classesRemaining} of ${data.classesTotal} classes left.`
-      : `Paquete actualizado — ${data.classesRemaining} de ${data.classesTotal} clases restantes.`,
+    ok: t("web.action.teacherPackages.updated", {
+      remaining: data.classesRemaining,
+      total: data.classesTotal,
+    }),
   };
 }
 
@@ -443,13 +432,13 @@ export async function deleteManualPackageAction(
   _prev: ManualPackageState,
   formData: FormData,
 ): Promise<ManualPackageState> {
-  const en = usesEnglishCopy(await getPreferredLocale());
+  const t = createT(await getPreferredLocale());
 
   const parsed = deletePackageSchema.safeParse({
     packageId: formData.get("packageId"),
   });
   if (!parsed.success) {
-    return { error: en ? "Invalid request." : "Solicitud inválida." };
+    return { error: t("web.action.invalidRequest") };
   }
 
   const teacher = await requireOnboardedTeacher();
@@ -471,7 +460,7 @@ export async function deleteManualPackageAction(
     },
   });
   if (!pkg) {
-    return { error: en ? "Package not found." : "Paquete no encontrado." };
+    return { error: t("web.action.packageNotFound") };
   }
 
   // History guards — a package only qualifies as "created by accident" when
@@ -482,17 +471,13 @@ export async function deleteManualPackageAction(
     prisma.booking.count({ where: { packageId: pkg.id } }),
     prisma.payment.count({ where: { packageId: pkg.id } }),
   ]);
-  const hasClassesError = en
-    ? "This package has classes booked or taken, so it can't be deleted. Pause it instead, or cancel its classes first."
-    : "Este paquete tiene clases reservadas o tomadas, así que no se puede eliminar. Mejor pausa el paquete, o cancela sus clases primero.";
+  const hasClassesError = t("web.action.teacherPackages.hasBookings");
   if (bookingCount > 0) {
     return { error: hasClassesError };
   }
   if (paymentCount > 0) {
     return {
-      error: en
-        ? "This package has a payment on record, so it can't be deleted. Refund the payment instead."
-        : "Este paquete tiene un pago registrado, así que no se puede eliminar. Mejor reembolsa el pago.",
+      error: t("web.action.teacherPackages.hasPayment"),
     };
   }
 
@@ -518,9 +503,7 @@ export async function deleteManualPackageAction(
         targetType: "package",
         targetId: pkg.id,
         action: "delete_manual_package",
-        reason: en
-          ? "Accidental package deleted by the teacher."
-          : "Paquete creado por error eliminado por la profe.",
+        reason: t("web.action.audit.accidentalPackageDeleted"),
         before,
         after: null,
         actor: null,
@@ -551,5 +534,5 @@ export async function deleteManualPackageAction(
   await flushAnalytics();
 
   revalidateAfterAction(`/dashboard/students/${pkg.studentId}`);
-  return { ok: en ? "Package deleted." : "Paquete eliminado." };
+  return { ok: t("students.package.deleted") };
 }

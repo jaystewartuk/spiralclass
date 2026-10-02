@@ -12,7 +12,7 @@ import { maybeEmitFirstBooking } from "@/lib/analytics/first-events";
 import { bookPackageSlot, type BookingEventEmitter } from "@/lib/booking/book-package-slot";
 import type { TeacherBookingError } from "@/lib/booking/teacher-booking-errors";
 import { revalidateAfterAction } from "@/lib/revalidate";
-import { usesEnglishCopy } from "@spiralclass/shared";
+import { createT } from "@spiralclass/shared";
 
 // Item 10 — teacher self-serve booking. Teachers take bookings over WhatsApp
 // constantly; this lets a teacher put a class on her own calendar against one
@@ -58,7 +58,7 @@ export async function createTeacherBooking(
   formData: FormData,
 ): Promise<TeacherBookingState> {
   const locale = await getPreferredLocale();
-  const en = usesEnglishCopy(locale);
+  const t = createT(locale);
   const parsed = teacherBookingSchema.safeParse({
     packageId: formData.get("packageId"),
     startUtc: formData.get("startUtc"),
@@ -104,9 +104,7 @@ export async function createTeacherBooking(
       // Record the intervention like other teacher actions (teacher overrides audit trail).
       override: {
         action: "teacher_book_class",
-        reason: en
-          ? "Class booked by the teacher on the student's behalf."
-          : "Clase reservada por la profe a nombre del alumno.",
+        reason: t("web.action.audit.bookedByTeacher"),
       },
     },
   );

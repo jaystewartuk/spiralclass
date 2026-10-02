@@ -7072,7 +7072,6 @@ export const fr = {
     "Vous avez utilisé tous les changements d'horaire inclus dans ce forfait : ce cours ne peut donc pas être remboursé. Pour l'annuler, adressez-vous à votre professeur.",
   "web.action.cancel.student.doneLate": "Annulé à moins de 24 h. Le cours est déduit du forfait.",
   "web.action.cancel.student.done": "Annulé. Vous pouvez reprogrammer votre cours.",
-  "web.action.cancel.teacher.reasonTooShort": "Indiquez brièvement la raison.",
   "web.action.cancel.teacher.classNotFound": "Nous n'avons pas trouvé ce cours.",
   "web.action.cancel.teacher.wrongStatus": "Ce cours n'est déjà plus au calendrier.",
   "web.action.cancel.teacher.done": "Cours annulé et recrédité sur le forfait de l'élève.",
@@ -7100,7 +7099,6 @@ export const fr = {
   "web.action.testimonial.nameFirst":
     "Ajoutez d'abord votre nom dans les paramètres de votre compte, afin que votre professeur puisse vous citer.",
   "web.action.testimonial.teacherNotFound": "Nous n'avons pas trouvé ce professeur.",
-  "web.action.contact.notInList": "Cet élève ne figure pas dans votre liste.",
   "web.action.contact.emailLocked":
     "Cet élève se connecte déjà avec son adresse e-mail : elle ne peut donc être modifiée que depuis son compte.",
   "web.action.contact.emailTaken": "Un autre de vos élèves utilise déjà cette adresse e-mail.",
@@ -7120,4 +7118,192 @@ export const fr = {
     "Adresse e-mail mise à jour. Votre compte Google a été déconnecté par sécurité — reconnectez-le ci-dessous avec votre nouveau compte Google si vous souhaitez continuer à vous connecter avec Google.",
   "web.action.contact.unknownLanguage": "Langue inconnue.",
   "web.action.contact.languageSaved": "Langue enregistrée.",
+  "web.action.accountDeletion.teacherActivePackages":
+    "Vous avez des forfaits actifs avec des cours restants. Annulez-les ou remboursez-les avant de supprimer votre compte.",
+  "web.action.accountDeletion.studentClassesLeft":
+    "Il vous reste des cours dans un forfait. Une fois ces cours terminés, vous pourrez supprimer votre compte.",
+  "web.action.materials.chooseFirst": "Choisissez d'abord un support.",
+  "web.action.materials.chooseWhen": "Choisissez quand envoyer le support.",
+  "web.action.classNotFound": "Cours introuvable.",
+  "web.action.materials.noLongerAvailable": "Ces supports ne sont plus disponibles.",
+  "web.action.homework.feedbackRequired": "Saisissez un commentaire.",
+  "web.action.homework.submissionNotFound": "Remise introuvable.",
+  "web.action.invitations.noValidEmails": "Aucune adresse e-mail valide trouvée.",
+  "web.action.invitations.nothingToSend":
+    "Rien à envoyer — ces élèves sont déjà connectés ou invités.",
+  "web.action.invitations.notFound": "Invitation introuvable.",
+  "web.action.invitations.alreadySettled": "Cette invitation a déjà été acceptée ou annulée.",
+  "web.action.invitations.sendFailed": "Impossible d'envoyer l'e-mail d'invitation.",
+  "web.action.invitations.resent": "Invitation renvoyée.",
+  "web.action.invitations.alreadyAccepted": "Cet élève a déjà accepté.",
+  "web.action.invitations.cancelled": "Invitation annulée.",
+  "web.action.invitations.linkReady": "Lien prêt.",
+  "web.action.insights.focusNotFound": "Point à travailler introuvable.",
+  "web.action.checkFields": "Vérifiez les champs et réessayez.",
+  "web.action.lessonNotes.noEarlierClass": "Aucun cours précédent avec des notes à copier.",
+  "web.action.lessonNotes.bookmark": "Marque-page",
+  "web.action.lessonNotes.pickRecipient": "Choisissez à qui s'adresse la note.",
+  "web.action.lessonNotes.writeFirst": "Écrivez d'abord quelque chose.",
+  "web.action.lessonNotes.summaryNotStarted":
+    "Vous pourrez résumer le cours une fois qu'il aura commencé.",
+  "web.action.lessonNotes.summaryNoNotes":
+    "Ajoutez d'abord des notes au cours : il n'y a encore rien à résumer.",
+  "web.action.lessonNotes.summaryUnavailable":
+    "Les résumés ne sont pas disponibles pour le moment.",
+  "web.action.lessonNotes.summaryFailed": "Impossible de générer le résumé. Veuillez réessayer.",
+  "web.action.lessonNotes.summaryEmpty": "Le résumé est revenu vide.",
+  "web.action.levels.unknown": "Niveau inconnu.",
+  "web.action.levels.saved": "Niveau enregistré.",
+  "web.action.library.invalidVisibility": "Visibilité invalide.",
+  "web.action.library.invalidUrl": "URL invalide",
+  "web.action.library.contentRequired": "Ajoutez du contenu, un fichier ou un lien.",
+  "web.action.library.materialNotFound": "Support introuvable.",
+  "web.action.library.materialOrStudentGone":
+    "Ce support ou cet élève n'est plus disponible. Rechargez la page et réessayez.",
+  "web.action.tryAgain": "Cela n'a pas fonctionné. Réessayez.",
+  "web.action.marketing.nameRequired":
+    "Ajoutez un nom (et un lien valide, si vous en indiquez un).",
+  "web.action.notificationPrefs.enabled": "Notifications activées.",
+  "web.action.notificationPrefs.paused": "Notifications suspendues.",
+  "web.action.onboarding.countryLocked":
+    "Vous ne pouvez pas changer de pays après avoir connecté Stripe. Déconnectez d'abord Stripe si nécessaire.",
+  "web.action.onboarding.invalidSchedule": "Horaires invalides",
+  "web.action.overrides.classNotFound": "Nous n'avons pas trouvé le cours.",
+  "web.action.overrides.onlyScheduledComplete":
+    "Seuls les cours programmés peuvent être marqués comme terminés.",
+  "web.action.overrides.changedElsewhere":
+    "Ce cours a déjà été modifié par une autre action. Actualisez la page et réessayez.",
+  "web.action.overrides.markedComplete": "Cours marqué comme terminé.",
+  "web.action.overrides.onlyScheduledOrCompletedNoShow":
+    "Seuls les cours programmés ou terminés peuvent être signalés comme absence.",
+  "web.action.overrides.markedNoShow":
+    "Absence enregistrée. Le cours reste décompté (sans remboursement).",
+  "web.action.overrides.onlyCanceledOrNoShowRestore":
+    "Seuls les cours annulés par l'élève ou signalés comme absence peuvent être rétablis.",
+  "web.action.overrides.slotTakenCancelOther":
+    "Ce créneau est déjà occupé par un autre cours. Annulez d'abord l'autre, ou demandez à l'élève de reprogrammer.",
+  "web.action.overrides.noClassesToRestore": "Ce forfait n'a plus de cours disponibles à rétablir.",
+  "web.action.overrides.slotTakenByClass": "Ce créneau est déjà occupé par un autre cours.",
+  "web.action.overrides.restored": "Cours rétabli.",
+  "web.action.overrides.onlyDeductedWaive":
+    "Seules les annulations de l'élève ayant entraîné une déduction peuvent être levées.",
+  "web.action.overrides.waived": "Pénalité levée. 1 cours a été recrédité sur le forfait.",
+  "web.action.packageNotFound": "Forfait introuvable.",
+  "web.action.overrides.dateInFuture": "La nouvelle date doit être dans le futur.",
+  "web.action.overrides.dateAfterCurrent":
+    "La nouvelle date doit être postérieure à la date actuelle.",
+  "web.action.overrides.expirationUpdated": "Date d'expiration mise à jour.",
+  "web.action.overrides.unknownPackage": "Forfait inconnu.",
+  "web.action.overrides.alreadyArchived": "Cet élève est déjà archivé.",
+  "web.action.overrides.alreadyActive": "Cet élève est déjà actif.",
+  "web.action.audit.archivedFromRoster": "Archivé de la liste",
+  "web.action.audit.reactivatedOnRoster": "Réactivé dans la liste",
+  "web.action.overrides.studentArchived": "Élève archivé.",
+  "web.action.overrides.studentReactivated": "Élève réactivé.",
+  "web.action.overrides.classLanguageUpdated": "Langue du cours mise à jour.",
+  "web.action.packages.onlyActivePause": "Seul un forfait actif peut être mis en pause",
+  "web.action.packages.onlyPausedResume": "Seul un forfait en pause peut être réactivé",
+  "web.action.profile.slugTooShort": "Utilisez au moins {min} lettres ou chiffres.",
+  "web.action.profile.maxChars": "Ne dépassez pas {max} caractères.",
+  "web.action.profile.invalidPhone": "Numéro de téléphone invalide.",
+  "web.action.invalidInput": "Saisie invalide",
+  "web.action.profile.videoUnavailable":
+    "Le téléversement de vidéo n'est pas disponible pour le moment.",
+  "web.action.profile.uploadIncomplete": "Le téléversement n'a pas abouti — veuillez réessayer.",
+  "web.action.profile.videoTooLarge":
+    "La vidéo doit faire moins de 50 Mo — essayez un extrait plus court.",
+  "web.action.profile.noVideo": "Il n'y a pas de vidéo à analyser.",
+  "web.action.shareGroups.nameRequired":
+    "Ajoutez un nom de groupe (et un lien valide, si vous en indiquez un).",
+  "web.action.shareGroups.notFound": "Nous n'avons pas trouvé ce groupe.",
+  "web.action.socialPreview.aiUnavailable":
+    "La génération d'images par IA n'est pas disponible pour le moment. Vous pouvez toujours importer votre propre image.",
+  "web.action.socialPreview.tooFast":
+    "Vous générez trop vite — patientez quelques minutes et réessayez.",
+  "web.action.socialPreview.quotaUsed":
+    "Vous avez utilisé les {limit} images IA de ce mois-ci. Vous pouvez toujours importer les vôtres.",
+  "web.action.socialPreview.refused":
+    "Le service d'images n'a pas voulu créer celle-ci. Essayez de la décrire autrement.",
+  "web.action.socialPreview.timedOut":
+    "Cela a pris trop de temps. Réessayez — rien n'a été décompté.",
+  "web.action.socialPreview.createFailed":
+    "Nous n'avons pas pu créer l'image. Réessayez — rien n'a été décompté.",
+  "web.action.socialPreview.chooseType": "Choisissez une image JPG, PNG ou WebP.",
+  "web.action.socialPreview.empty": "Cette image est vide.",
+  "web.action.socialPreview.tooLarge": "L'image ne peut pas dépasser 5 Mo.",
+  "web.action.socialPreview.pickStyle": "Choisissez un style pour l'image.",
+  "web.action.socialPreview.chooseUpload": "Choisissez une image à importer.",
+  "web.action.socialPreview.unusable": "Nous n'avons pas pu utiliser cette image.",
+  "web.action.socialPreview.imageNotFound": "Nous n'avons pas trouvé cette image.",
+  "web.action.socialPreview.resetFailed": "Nous n'avons pas pu réinitialiser cet aperçu.",
+  "web.action.socialPreview.previewNotFound": "Nous n'avons pas trouvé cet aperçu.",
+  "web.action.socialPreview.renameFailed": "Nous n'avons pas pu renommer cette image.",
+  "web.action.socialPreview.deleteFailed": "Nous n'avons pas pu supprimer cette image.",
+  "web.action.socialPreview.partOfDonePost":
+    "Cette image fait partie d'une publication que vous avez déjà marquée comme faite : elle est donc conservée.",
+  "web.action.studentNotes.added": "Note ajoutée.",
+  "web.action.studentNotes.notFound": "Nous n'avons pas trouvé cette note.",
+  "web.action.studentNotes.updated": "Note mise à jour.",
+  "web.action.studentNotes.deleted": "Note supprimée.",
+  "web.action.studentProfile.fieldTooLong": "Limitez chaque champ à {max} caractères.",
+  "web.action.merge.bothOnRoster": "Les deux élèves doivent figurer dans votre liste.",
+  "web.action.merge.accountDisabled":
+    "L'un de ces comptes est désactivé — contactez l'assistance pour les fusionner.",
+  "web.action.merge.differentAccounts":
+    "Les deux élèves se sont connectés avec des comptes différents : il pourrait donc s'agir de deux personnes distinctes. Contactez l'assistance si vous êtes certain qu'il s'agit de la même.",
+  "web.action.merge.otherTeacher":
+    "Le doublon est aussi inscrit auprès d'un autre professeur — contactez l'assistance pour les fusionner.",
+  "web.action.merge.pendingDeletion":
+    "Le doublon fait l'objet d'une demande de suppression en attente et ne peut pas être fusionné.",
+  "web.action.merge.failed":
+    "La fusion n'a pas pu être effectuée. Rien n'a été modifié — contactez l'assistance.",
+  "web.action.merge.done":
+    "Élèves fusionnés — les forfaits et les cours sont désormais réunis sous un seul profil.",
+  "web.action.teacherAccount.disconnectStripeFirst":
+    "Déconnectez Stripe avant de changer de pays — votre compte de paiement y est rattaché.",
+  "web.action.teacherAccount.invalidCountry": "Pays invalide.",
+  "web.action.teacherAccount.countrySaved": "Pays enregistré.",
+  "web.action.audit.bookedByTeacher": "Cours réservé par le professeur au nom de l'élève.",
+  "web.action.teacherPackages.remainingExceedsTotal":
+    "Le nombre de cours restants ne peut pas dépasser le total du forfait.",
+  "web.action.teacherPackages.expirationInFuture": "La date d'expiration doit être dans le futur.",
+  "web.action.audit.offPlatformPackage": "Forfait hors plateforme enregistré par le professeur.",
+  "web.action.teacherPackages.added": "Forfait ajouté — {remaining} cours restants sur {total}.",
+  "web.action.teacherPackages.onlyActiveOrPausedEdit":
+    "Seul un forfait actif ou en pause peut être modifié.",
+  "web.action.audit.packageCorrected": "Détails du forfait corrigés par le professeur.",
+  "web.action.teacherPackages.updated":
+    "Forfait mis à jour — {remaining} cours restants sur {total}.",
+  "web.action.invalidRequest": "Requête invalide.",
+  "web.action.teacherPackages.hasBookings":
+    "Ce forfait comporte des cours réservés ou suivis : il ne peut donc pas être supprimé. Mettez-le plutôt en pause, ou annulez d'abord ses cours.",
+  "web.action.teacherPackages.hasPayment":
+    "Ce forfait est associé à un paiement enregistré : il ne peut donc pas être supprimé. Remboursez plutôt le paiement.",
+  "web.action.audit.accidentalPackageDeleted":
+    "Forfait créé par erreur, supprimé par le professeur.",
+  "web.action.teacherStudents.teacherEmail":
+    "Cette adresse e-mail appartient à un compte enseignant et ne peut pas être ajoutée comme élève.",
+  "web.action.audit.studentAddedSilently": "Élève ajouté à la liste (ajout silencieux).",
+  "web.action.teacherStudents.alreadyLive": "Cet élève reçoit déjà les notifications.",
+  "web.action.audit.studentWentLive": "Élève activé — les notifications sont désormais envoyées.",
+  "web.action.teacherStudents.nowLive":
+    "L'élève est activé. Il recevra désormais les notifications.",
+  "web.action.audit.wiseNotReceived": "Wise : paiement non reçu",
+  "web.action.invitations.sent": "{count} invitations envoyées.",
+  "web.action.invitations.sent_one": "{count} invitation envoyée.",
+  "web.action.invitations.sentSomeFailed":
+    "{count} invitations envoyées. ({failed} n'ont pas pu être remises)",
+  "web.action.invitations.sentSomeFailed_one":
+    "{count} invitation envoyée. ({failed} n'ont pas pu être remises)",
+  "web.action.teacherPackages.committedExceeds":
+    "Ce forfait compte déjà {count} cours réservés ou suivis : il ne peut donc pas afficher plus de {max} cours restants.",
+  "web.action.teacherPackages.committedExceeds_one":
+    "Ce forfait compte déjà {count} cours réservé ou suivi : il ne peut donc pas afficher plus de {max} cours restants.",
+  "web.action.overrides.customPricesRemoved": "Tarifs personnalisés supprimés.",
+  "web.action.overrides.customPricesUpdated":
+    "Tarifs personnalisés mis à jour pour les prochains achats.",
+  "web.action.reasonTooShort": "Indiquez brièvement la raison.",
+  "web.action.overrides.invalidDate": "Date invalide (AAAA-MM-JJ)",
+  "web.action.studentNotes.empty": "La note ne peut pas être vide.",
+  "web.action.studentNotInList": "Cet élève ne figure pas dans votre liste.",
 } as const;
