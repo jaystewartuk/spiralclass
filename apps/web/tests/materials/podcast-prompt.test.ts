@@ -25,9 +25,14 @@ describe("buildPodcastScriptPrompt", () => {
     expect(user).toContain("Present simple");
   });
 
-  it("defaults narration language to Spanish for es and English for en", () => {
+  it("defaults narration language to the reader's own language", () => {
     expect(buildPodcastScriptPrompt({ ...base, locale: "es" }).system).toMatch(/Spanish/);
     expect(buildPodcastScriptPrompt({ ...base, locale: "en" }).system).toMatch(/English/);
+    // It was "English unless Spanish", so a French reader's episode was English.
+    const fr = buildPodcastScriptPrompt({ ...base, locale: "fr" });
+    expect(fr.system).toMatch(/French/);
+    expect(fr.system).not.toMatch(/English/);
+    expect(fr.user).toContain("Write the spoken podcast script now.");
   });
 
   it("splits output vs target language for a language teacher", () => {

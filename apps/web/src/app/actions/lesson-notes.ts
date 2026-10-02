@@ -11,7 +11,7 @@ import { createBookmark } from "@/lib/lesson-notes/bookmarks";
 import { formatZonedDateTime } from "@/lib/date-display";
 import { logger } from "@/lib/logger";
 import { revalidateAfterAction } from "@/lib/revalidate";
-import { createT, usesEnglishCopy } from "@spiralclass/shared";
+import { createT, localeEnglishName } from "@spiralclass/shared";
 import { DAY_PLAN_PATH } from "@/lib/lesson-notes/day-plan";
 
 const log = logger({ surface: "lesson-notes" });
@@ -332,7 +332,7 @@ export async function generateLessonSummary(
       when: formatZonedDateTime(booking.scheduledStart, teacher.timezone, locale),
       teacherCues,
       studentNotes,
-      en: usesEnglishCopy(locale),
+      language: localeEnglishName(locale),
     });
   } catch (err) {
     if (err instanceof SummaryUnavailableError) {

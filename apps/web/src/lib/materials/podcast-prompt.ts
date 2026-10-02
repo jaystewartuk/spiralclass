@@ -16,7 +16,7 @@ import type { LessonFormat } from "@spiralclass/shared";
 import type { AppLocale } from "@/lib/i18n";
 import { lessonFormatDirective, type MaterialPrompt } from "@/lib/materials/prompt";
 import { PODCAST_WORDS_PER_MINUTE } from "@/lib/materials/config";
-import { usesEnglishCopy } from "@spiralclass/shared";
+import { localeEnglishName } from "@spiralclass/shared";
 
 export type PodcastPromptInput = {
   // The material's Markdown body — the source the podcast narrates. Required:
@@ -49,8 +49,8 @@ export type PodcastPromptInput = {
 // plain spoken prose (NOT Markdown) — the model is told to return narration
 // only, no preamble, no formatting, no code fence.
 export function buildPodcastScriptPrompt(input: PodcastPromptInput): MaterialPrompt {
-  const en = usesEnglishCopy(input.locale);
-  const language = input.language?.trim() || (en ? "English" : "Spanish");
+  // Same fallback as buildMaterialPrompt: the reader's own language, by name.
+  const language = input.language?.trim() || localeEnglishName(input.locale);
   const target = input.targetLanguage?.trim();
   const teachesOtherLanguage = Boolean(target && target !== language);
   const wordBudget = Math.max(120, Math.round(input.targetDurationMin * PODCAST_WORDS_PER_MINUTE));
@@ -90,7 +90,7 @@ export function buildPodcastScriptPrompt(input: PodcastPromptInput): MaterialPro
     "",
     input.body.trim(),
     "",
-    en ? `Write the spoken podcast script now.` : `Escribe ahora el guion hablado del podcast.`,
+    `Write the spoken podcast script now.`,
   );
 
   return { system, user: lines.join("\n") };

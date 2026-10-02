@@ -1,7 +1,7 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { z } from "zod";
 import type { InsightCategory } from "@prisma/client";
-import { languageName, usesEnglishCopy } from "@spiralclass/shared";
+import { languageName } from "@spiralclass/shared";
 import { anthropicApiKey } from "@/lib/env";
 
 // AI lesson insights — Phase C (the Phase C design,
@@ -50,10 +50,10 @@ export type InsightsInput = {
   // corrections; these carry intent — together they're the "teacher signals".
   teacherCues: { body: string; done: boolean }[];
   studentNotes: { body: string }[];
-  // Whether the summary/suggestion text is written in English. Derive it with
-  // `writesEnglishInsights()` rather than by hand — see that function for why
-  // the predicate is "is she Spanish-reading", not "is she English-reading".
-  en: boolean;
+  // The language the summary/evidence/suggestion text is written in — the
+  // teacher's reading language, as an English name ("French"); see
+  // localeEnglishName(). Independent of targetLanguage (D-72/D-73).
+  outputLanguage: string;
   // Phase D: audio-grounded
   // pronunciation scores, present only when scoring ran. When present, the
   // pronunciation rule flips from "teacher-signal-only" to "use these scores as
@@ -81,118 +81,71 @@ export type Insight = {
 export class InsightsUnavailableError extends Error {}
 
 // ---------------------------------------------------------------------------
-// Prompt (pure — unit-tested without a network call). Localized to the teacher's
-// reading language. Evidence stays in the student's own words regardless.
-/**
- * Whether findings for this reader should be written in English.
- *
- * The prompt below exists in exactly two languages, English and Spanish, and
- * that is a property of THIS FILE, not of the app — the catalog ships `fr` and
- * will ship more. So the question this answers is "is she a Spanish reader",
- * and everyone else falls back to English, which is `DEFAULT_LOCALE`.
- *
- * Kept as a named export because the prompt reads better for it, but the rule
- * itself is `usesEnglishCopy` in @spiralclass/shared — see that function for
- * why the predicate has to be written this way round.
- */
-export function writesEnglishInsights(locale: string): boolean {
-  return usesEnglishCopy(locale);
-}
-
+// Prompt (pure — unit-tested without a network call). One English prompt that
+// names the language to write in. There were an English and a Spanish copy
+// chosen by a boolean, so every teacher who read neither got English findings,
+// and the two copies had to be kept saying the same thing by hand. Evidence
+// stays in the student's own words regardless.
 // ---------------------------------------------------------------------------
 export function buildInsightsPrompt(input: InsightsInput): { system: string; user: string } {
-  const { en } = input;
   const weakWords = input.pronunciation?.weakWords ?? [];
   const hasPron = weakWords.length > 0;
   const targetLanguageName = languageName(input.targetLanguage);
 
-  // The class is taught IN the target language, which is independent of `en`
-  // (the teacher's own reading language for the summary/suggestion text —
+  // The class is taught IN the target language, which is independent of the
+  // language the findings are written in (the teacher's own reading language —
   // D-72/D-73's four-language-fields lesson applies here too). Without this
   // rule the model has judged a student's TARGET-language grammar by some
   // other language's rules (e.g. flagging correct Spanish as wrong), because
   // the target language was passed as inert context rather than as the
   // standard to grade against.
-  const languageRule = en
-    ? `- The lesson is taught in ${targetLanguageName} (this is the language the student is being evaluated in — judge every finding against ITS grammar/vocabulary rules, never the reading language below). Write your summary/evidence/suggestion text in English, but keep the student's cited words in ${targetLanguageName} exactly as spoken.`
-    : `- La clase se imparte en ${targetLanguageName} (es el idioma en el que se evalúa al alumno — juzga cada observación según SUS reglas de gramática/vocabulario, nunca según el idioma de lectura de abajo). Escribe el resumen/evidencia/sugerencia en español, pero conserva las palabras citadas del alumno tal como las dijo, en ${targetLanguageName}.`;
+  const languageRule = `- The lesson is taught in ${targetLanguageName} (this is the language the student is being evaluated in — judge every finding against ITS grammar/vocabulary rules, never the reading language below). Write your summary/evidence/suggestion text in ${input.outputLanguage}, but keep the student's cited words in ${targetLanguageName} exactly as spoken.`;
 
   // The pronunciation rule flips when audio scores are available (Phase D): from
   // "teacher-signal-only, never guess from spelling" to "use the scores below".
-  const pronRule = en
-    ? hasPron
-      ? "- PRONUNCIATION: audio pronunciation scores are provided below. Base any pronunciation finding ONLY on those scored weak words and their phoneme scores (this is the recording, not spelling). Cite the weak word as evidence, name the target sound in the suggestion, and use that word's atMs."
-      : "- PRONUNCIATION: the transcript is text and cannot hear sound. Only emit a pronunciation finding when the TEACHER'S notes or spoken corrections raise one. Never guess pronunciation from spelling."
-    : hasPron
-      ? "- PRONUNCIATION: abajo se incluyen puntajes de pronunciación del audio. Basa cualquier observación de pronunciación SOLO en esas palabras débiles puntuadas y sus puntajes de fonemas (es la grabación, no la ortografía). Cita la palabra débil como evidencia, nombra el sonido objetivo en la sugerencia y usa el atMs de esa palabra."
-      : "- PRONUNCIATION: la transcripción es texto y no puede oír el sonido. Emite una observación de pronunciación solo cuando las notas o correcciones de la profe la señalen. Nunca adivines la pronunciación a partir de la ortografía.";
+  const pronRule = hasPron
+    ? "- PRONUNCIATION: audio pronunciation scores are provided below. Base any pronunciation finding ONLY on those scored weak words and their phoneme scores (this is the recording, not spelling). Cite the weak word as evidence, name the target sound in the suggestion, and use that word's atMs."
+    : "- PRONUNCIATION: the transcript is text and cannot hear sound. Only emit a pronunciation finding when the TEACHER'S notes or spoken corrections raise one. Never guess pronunciation from spelling.";
 
-  const system = (
-    en
-      ? [
-          "You are a language-teaching assistant analysing the transcript of a one-to-one lesson for a single student.",
-          "Identify the student's key focus areas — the few things most worth working on next — across these categories only: pronunciation, grammar, vocabulary, fluency, comprehension.",
-          "Hard rules you must follow:",
-          "- Use ONLY the provided transcript and teacher notes. Never invent errors, never infer beyond the evidence. If the lesson shows little, return few or no findings.",
-          "- Every finding must cite the student's exact words as evidence, and include the atMs timestamp of that utterance (copy it from the [Nms] tag on the line).",
-          "- Give one concrete suggestion (the correct form, a drill, or a target) per finding.",
-          "- Be conservative and high-signal. At most three findings per category; prefer fewer. A short, sharp list the teacher trusts beats an exhaustive one.",
-          languageRule,
-          pronRule,
-          "Return your findings only through the emit_insights tool.",
-        ]
-      : [
-          "Eres un asistente de enseñanza de idiomas que analiza la transcripción de una clase individual de un solo alumno.",
-          "Identifica las áreas de enfoque clave del alumno —lo poco que más conviene trabajar a continuación— únicamente en estas categorías: pronunciation, grammar, vocabulary, fluency, comprehension.",
-          "Reglas estrictas que debes cumplir:",
-          "- Usa SOLO la transcripción y las notas de la profe. Nunca inventes errores ni infieras más allá de la evidencia. Si la clase muestra poco, devuelve pocas o ninguna observación.",
-          "- Cada observación debe citar las palabras exactas del alumno como evidencia e incluir el atMs de esa intervención (cópialo de la etiqueta [Nms] de la línea).",
-          "- Da una sugerencia concreta (la forma correcta, un ejercicio o un objetivo) por observación.",
-          "- Sé conservador y de alta señal. Como máximo tres observaciones por categoría; mejor menos. Una lista corta y precisa en la que la profe confíe vale más que una exhaustiva.",
-          languageRule,
-          pronRule,
-          "Devuelve tus observaciones únicamente mediante la herramienta emit_insights.",
-        ]
-  ).join("\n");
+  const system = [
+    "You are a language-teaching assistant analysing the transcript of a one-to-one lesson for a single student.",
+    "Identify the student's key focus areas — the few things most worth working on next — across these categories only: pronunciation, grammar, vocabulary, fluency, comprehension.",
+    "Hard rules you must follow:",
+    "- Use ONLY the provided transcript and teacher notes. Never invent errors, never infer beyond the evidence. If the lesson shows little, return few or no findings.",
+    "- Every finding must cite the student's exact words as evidence, and include the atMs timestamp of that utterance (copy it from the [Nms] tag on the line).",
+    "- Give one concrete suggestion (the correct form, a drill, or a target) per finding.",
+    "- Be conservative and high-signal. At most three findings per category; prefer fewer. A short, sharp list the teacher trusts beats an exhaustive one.",
+    languageRule,
+    pronRule,
+    "Return your findings only through the emit_insights tool.",
+  ].join("\n");
 
   const transcriptLines = input.utterances.length
     ? input.utterances.map((u) => `[${u.atMs}ms] ${u.speaker}: ${u.text}`).join("\n")
-    : en
-      ? "(empty transcript)"
-      : "(transcripción vacía)";
+    : "(empty transcript)";
 
   const cueLines = input.teacherCues.length
-    ? input.teacherCues
-        .map((c) => `- ${c.body}${c.done ? (en ? " (covered)" : " (visto)") : ""}`)
-        .join("\n")
-    : en
-      ? "(none)"
-      : "(ninguna)";
+    ? input.teacherCues.map((c) => `- ${c.body}${c.done ? " (covered)" : ""}`).join("\n")
+    : "(none)";
   const noteLines = input.studentNotes.length
     ? input.studentNotes.map((n) => `- ${n.body}`).join("\n")
-    : en
-      ? "(none)"
-      : "(ninguna)";
+    : "(none)";
 
   // Phase D: the audio-scored weak words, lowest accuracy first, with their
   // moment and any weak phonemes — the evidence for pronunciation findings.
   const pronLines = weakWords
     .map((w) => {
       const sounds = w.phonemes?.length
-        ? `${en ? " — weak sounds: " : " — sonidos débiles: "}${w.phonemes.map((p) => p.phoneme).join(", ")}`
+        ? ` — weak sounds: ${w.phonemes.map((p) => p.phoneme).join(", ")}`
         : "";
       return `- "${w.word}" (${Math.round(w.accuracy)}/100) [${w.atMs}ms]${sounds}`;
     })
     .join("\n");
   const pronSection = hasPron
-    ? en
-      ? `\n\nPronunciation scores from the audio (lower = worse — use these for any pronunciation finding):\n${pronLines}`
-      : `\n\nPuntajes de pronunciación del audio (menor = peor — úsalos para cualquier observación de pronunciación):\n${pronLines}`
+    ? `\n\nPronunciation scores from the audio (lower = worse — use these for any pronunciation finding):\n${pronLines}`
     : "";
 
-  const user = en
-    ? `Student: ${input.studentName}. Target language (the class is taught in this — grade correctness against it): ${targetLanguageName}.\n\nTranscript (each line tagged with its moment in the lesson):\n${transcriptLines}\n\nMy private cues (what I planned to cover; "(covered)" = checked off):\n${cueLines}\n\nInstructions I gave the student during class:\n${noteLines}${pronSection}\n\nAnalyse the lesson and emit the focus areas.`
-    : `Alumno: ${input.studentName}. Idioma meta (la clase se imparte en este idioma — evalúa la corrección según sus reglas): ${targetLanguageName}.\n\nTranscripción (cada línea con su momento en la clase):\n${transcriptLines}\n\nMis apuntes privados (lo que planeé cubrir; "(visto)" = marcado):\n${cueLines}\n\nIndicaciones que le di al alumno durante la clase:\n${noteLines}${pronSection}\n\nAnaliza la clase y emite las áreas de enfoque.`;
+  const user = `Student: ${input.studentName}. Target language (the class is taught in this — grade correctness against it): ${targetLanguageName}.\n\nTranscript (each line tagged with its moment in the lesson):\n${transcriptLines}\n\nMy private cues (what I planned to cover; "(covered)" = checked off):\n${cueLines}\n\nInstructions I gave the student during class:\n${noteLines}${pronSection}\n\nAnalyse the lesson and emit the focus areas, written in ${input.outputLanguage}.`;
 
   return { system, user };
 }

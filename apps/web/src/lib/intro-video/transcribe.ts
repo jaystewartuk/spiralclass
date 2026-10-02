@@ -1,5 +1,5 @@
 import type { PrismaClient } from "@prisma/client";
-import type { IntroCoachFeedback } from "@spiralclass/shared";
+import { localeEnglishName, type IntroCoachFeedback } from "@spiralclass/shared";
 
 import { logger } from "@/lib/logger";
 import { teacherVideoPublicUrl } from "@/lib/storage/teacher-video";
@@ -42,15 +42,19 @@ const DEFAULT_LANGUAGE = "es";
 // moment they diverge, which is the whole point of a language-first platform:
 // a teacher OF English who teaches IN Spanish has targetLanguage "en", so her
 // Spanish intro went to ASR tagged as English (garbage transcript) and the
-// coach then wrote her feedback in English, against the house rule that
-// teacher-facing copy is Spanish.
+// coach then wrote her feedback in English rather than the language she reads.
+//
+// The feedback language was then a boolean — "does her locale start with en?"
+// — and the prompt behind it had an English arm and a Spanish one, so a
+// teacher reading French was coached in Spanish. It is her locale's own
+// language now, by name.
 export function introVideoLanguages(teacher: {
   teachingLanguage?: string | null;
   locale?: string | null;
-}): { asr: string; feedbackInEnglish: boolean } {
+}): { asr: string; feedbackLanguage: string } {
   return {
     asr: teacher.teachingLanguage?.trim() || DEFAULT_LANGUAGE,
-    feedbackInEnglish: (teacher.locale?.trim() || "en").toLowerCase().startsWith("en"),
+    feedbackLanguage: localeEnglishName(teacher.locale),
   };
 }
 
@@ -74,7 +78,7 @@ export type IntroVideoTranscribeDeps = {
   generateFeedback?: (input: {
     transcript: string;
     durationSec: number | null;
-    en: boolean;
+    language: string;
   }) => Promise<IntroCoachFeedback | null>;
   // Terminal-outcome analytics. Injected (and optional) so the pipeline stays a
   // pure unit test; the handler passes the real PostHog emitters. Every exit
@@ -174,7 +178,7 @@ export async function processIntroVideoReady(
     return { ok: false, reason: "no-public-url" };
   }
 
-  const { asr: language, feedbackInEnglish } = introVideoLanguages(teacher);
+  const { asr: language, feedbackLanguage } = introVideoLanguages(teacher);
 
   await prisma.introVideoAnalysis.upsert({
     where: { teacherId: teacher.id },
@@ -237,7 +241,7 @@ export async function processIntroVideoReady(
         // Her UI language, NOT the language she spoke in — see
         // introVideoLanguages above. A Spanish-speaking teacher of English gets
         // Spanish feedback about her (possibly English) intro.
-        en: feedbackInEnglish,
+        language: feedbackLanguage,
       });
       if (feedback) {
         coachGenerated = true;

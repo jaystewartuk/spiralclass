@@ -1,11 +1,11 @@
 import type { PrismaClient } from "@prisma/client";
+import { localeEnglishName } from "@spiralclass/shared";
 
 import { logger } from "@/lib/logger";
 import { inngest as defaultInngest } from "@/lib/inngest/client";
 import {
   generateInsights as defaultGenerate,
   InsightsUnavailableError,
-  writesEnglishInsights,
   type Insight,
   type InsightUtterance,
   type PronunciationWeakWord,
@@ -142,7 +142,7 @@ export async function generateAndStoreInsights(
       utterances,
       teacherCues,
       studentNotes,
-      en: writesEnglishInsights(booking.teacher.locale),
+      outputLanguage: localeEnglishName(booking.teacher.locale),
       pronunciation: weakWords.length ? { weakWords } : undefined,
     });
   } catch (err) {

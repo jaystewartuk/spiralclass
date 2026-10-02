@@ -66,7 +66,7 @@ export function buildInvitationEmail(input: BuildInvitationEmailInput): BuiltEma
   const intro = t("email.invitation.intro", { teacherName: input.teacherName });
   const closing = t("email.invitation.closing");
 
-  const bullets = benefitEmailLines(input.messagingEnabled, input.languageCode);
+  const bullets = benefitEmailLines(input.messagingEnabled, t);
 
   const cta = {
     label: t("invitation.accept.acceptCta"),

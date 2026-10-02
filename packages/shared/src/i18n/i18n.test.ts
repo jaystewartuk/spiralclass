@@ -15,6 +15,7 @@ import {
   intlLocale,
   ogLocale,
   localeDirection,
+  localeEnglishName,
 } from "./locales";
 import { createT, interpolate, translate } from "./translate";
 
@@ -116,6 +117,19 @@ describe("locale registry", () => {
       const expected = cldr.getTextInfo?.().direction ?? cldr.textInfo?.direction ?? "ltr";
       expect(localeDirection(locale.tag), locale.tag).toBe(expected);
     }
+  });
+
+  // The name a prompt gives a model as the language to write in. A teacher's
+  // stored locale can be regional; an exact lookup sent "es-MX" to English.
+  it("names a locale's language in English, matching regional tags by language", () => {
+    expect(localeEnglishName("es")).toBe("Spanish");
+    expect(localeEnglishName("es-MX")).toBe("Spanish");
+    expect(localeEnglishName("fr")).toBe("French");
+    expect(localeEnglishName("fr-CA")).toBe("French");
+    expect(localeEnglishName("en-GB")).toBe("English");
+    expect(localeEnglishName("de")).toBe(localeEnglishName(DEFAULT_LOCALE));
+    expect(localeEnglishName(null)).toBe(localeEnglishName(DEFAULT_LOCALE));
+    expect(localeEnglishName("")).toBe(localeEnglishName(DEFAULT_LOCALE));
   });
 
   it("languageCodeToLocale bridges the languageCode back to a tag", () => {

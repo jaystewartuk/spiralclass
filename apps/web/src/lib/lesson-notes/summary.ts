@@ -21,7 +21,9 @@ export type SummaryInput = {
   when: string; // already-formatted class date/time
   teacherCues: { body: string; done: boolean }[];
   studentNotes: { body: string }[];
-  en: boolean;
+  // The language the recap is written in — the teacher's reading language, as
+  // an English name ("French"); see localeEnglishName().
+  language: string;
 };
 
 // Raised when the platform has no Anthropic key configured, so the action can
@@ -29,30 +31,30 @@ export type SummaryInput = {
 export class SummaryUnavailableError extends Error {}
 
 // The prompt is built here (pure) so it can be unit-tested without a network
-// call. Both halves are localized to the teacher's language.
+// call.
+//
+// The instructions are in English, and the language of the recap is a rule in
+// them. There used to be an English prompt and a Spanish one, picked by a
+// boolean: every teacher who read neither got an English recap, and keeping two
+// prompts saying the same thing in step was the kind of work that drifts. The
+// model takes English instructions most reliably and writes the recap — section
+// titles included — in whatever language it is told.
 export function buildSummaryPrompt(input: SummaryInput): { system: string; user: string } {
-  const { en } = input;
-
-  const system = en
-    ? "You are an assistant to a private teacher. You write a short, plain post-class recap from the teacher's own in-class notes, for her records. Be concise and concrete. Use only the notes provided — never invent details. Write in English. Use three short labelled sections: Covered, Follow up, Homework. If a section has nothing, omit it. No preamble, no closing remarks."
-    : "Eres asistente de una profe particular. Escribes un resumen breve y claro de la clase a partir de las notas que la profe tomó durante la clase, para su registro. Sé concisa y concreta. Usa solo las notas proporcionadas; nunca inventes detalles. Escribe en español. Usa tres secciones cortas con título: Lo que se vio, Seguimiento, Tarea. Si una sección no aplica, omítela. Sin preámbulo ni despedida.";
+  const system = [
+    "You are an assistant to a private teacher. You write a short, plain post-class recap from the teacher's own in-class notes, for her records. Be concise and concrete. Use only the notes provided — never invent details.",
+    `Write the whole recap in ${input.language}, including the section titles.`,
+    "Use three short titled sections: what was covered, what to follow up, and homework. If a section has nothing, omit it. No preamble, no closing remarks.",
+    "The notes are quoted as the teacher wrote them and may be in another language; keep their content, but write the recap itself in the language above.",
+  ].join(" ");
 
   const cueLines = input.teacherCues.length
-    ? input.teacherCues
-        .map((c) => `- ${c.body}${c.done ? (en ? " (covered)" : " (visto)") : ""}`)
-        .join("\n")
-    : en
-      ? "(none)"
-      : "(ninguna)";
+    ? input.teacherCues.map((c) => `- ${c.body}${c.done ? " (covered)" : ""}`).join("\n")
+    : "(none)";
   const noteLines = input.studentNotes.length
     ? input.studentNotes.map((n) => `- ${n.body}`).join("\n")
-    : en
-      ? "(none)"
-      : "(ninguna)";
+    : "(none)";
 
-  const user = en
-    ? `Class with ${input.studentName} on ${input.when}.\n\nMy private cues (what I planned to cover; "(covered)" means I checked it off):\n${cueLines}\n\nInstructions I gave the student during class:\n${noteLines}\n\nWrite the recap.`
-    : `Clase con ${input.studentName} el ${input.when}.\n\nMis apuntes privados (lo que planeé cubrir; "(visto)" significa que lo marqué como hecho):\n${cueLines}\n\nIndicaciones que le di al alumno durante la clase:\n${noteLines}\n\nEscribe el resumen.`;
+  const user = `Class with ${input.studentName} on ${input.when}.\n\nMy private cues (what I planned to cover; "(covered)" means I checked it off):\n${cueLines}\n\nInstructions I gave the student during class:\n${noteLines}\n\nWrite the recap in ${input.language}.`;
 
   return { system, user };
 }

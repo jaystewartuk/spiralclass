@@ -6,11 +6,9 @@ vi.mock("@/lib/inngest/client", () => ({ inngest: { send: vi.fn() } }));
 import { generateAndStoreInsights } from "@/lib/lesson-notes/insights-pipeline";
 import {
   InsightsUnavailableError,
-  writesEnglishInsights,
   type Insight,
   type InsightsInput,
 } from "@/lib/lesson-notes/insights";
-import { strings } from "@spiralclass/shared";
 
 const BOOKING = "booking-1";
 const TEACHER = "teacher-1";
@@ -108,12 +106,12 @@ describe("generateAndStoreInsights", () => {
     });
   });
 
-  it("passes the teacher's locale through (en/es) and the transcript utterances", async () => {
+  it("passes the teacher's reading language and the transcript utterances", async () => {
     const { db } = makeDb();
     const generate = vi.fn(async (_input: InsightsInput) => oneInsight);
     await generateAndStoreInsights(deps(db, generate), BOOKING);
     const arg = generate.mock.calls[0][0];
-    expect(arg.en).toBe(true);
+    expect(arg.outputLanguage).toBe("English");
     expect(arg.studentName).toBe("Mira");
     expect(arg.utterances).toEqual([{ speaker: "student", text: "Yo es feliz", atMs: 1000 }]);
     expect(arg.teacherCues).toEqual([{ body: "ser vs estar", done: true }]);
@@ -222,36 +220,26 @@ describe("the language the model is told to grade against", () => {
     const generate = vi.fn(async () => oneInsight);
     await generateAndStoreInsights(deps(db, generate), BOOKING);
     expect(generate).toHaveBeenCalledWith(
-      expect.objectContaining({ targetLanguage: "en", en: false }),
+      expect.objectContaining({ targetLanguage: "en", outputLanguage: "Spanish" }),
     );
   });
 });
 
 describe("which language the findings are written in", () => {
-  // The prompt exists in English and Spanish only, so the rule has to be "is
-  // she a Spanish reader", not "is she an English reader". Those agree while
-  // there are two locales and diverge the moment a third appears — and the
-  // catalog already ships fr.
+  // The language was a boolean — English or the one translated (Spanish)
+  // prompt — so a teacher reading French got English findings. It is her
+  // locale's own language now, by name, and a regional tag counts as its
+  // language.
   it.each([
-    ["en", true],
-    ["es", false],
-    ["fr", true],
-  ])("locale %s -> English findings: %s", async (locale, english) => {
-    const { db } = makeDb({ teacher: { locale: locale as string, targetLanguage: "es" } });
+    ["en", "English"],
+    ["es", "Spanish"],
+    ["es-MX", "Spanish"],
+    ["fr", "French"],
+    ["pt-BR", "English"],
+  ])("locale %s -> findings in %s", async (locale, outputLanguage) => {
+    const { db } = makeDb({ teacher: { locale, targetLanguage: "es" } });
     const generate = vi.fn(async () => oneInsight);
     await generateAndStoreInsights(deps(db, generate), BOOKING);
-    expect(generate).toHaveBeenCalledWith(expect.objectContaining({ en: english }));
-  });
-
-  it("never routes an unrecognised locale into the Spanish prompt", () => {
-    // The regression, stated as the invariant: only the one locale that has a
-    // translated prompt may take the non-default branch. Everything else —
-    // including a locale added to the catalog years from now, by someone not
-    // reading this file — falls back to DEFAULT_LOCALE's language.
-    for (const locale of Object.keys(strings)) {
-      if (locale === "es") continue;
-      expect(writesEnglishInsights(locale)).toBe(true);
-    }
-    expect(writesEnglishInsights("pt-BR")).toBe(true);
+    expect(generate).toHaveBeenCalledWith(expect.objectContaining({ outputLanguage }));
   });
 });

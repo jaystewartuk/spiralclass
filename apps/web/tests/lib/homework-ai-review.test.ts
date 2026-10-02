@@ -169,7 +169,7 @@ describe("requestHomeworkAiReview", () => {
         attemptText: "My answer text",
         materialExcerpt: null,
         teacherInstructions: "focus on tenses",
-        en: true,
+        outputLanguage: "English",
       }),
     );
   });
