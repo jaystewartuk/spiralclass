@@ -5,25 +5,28 @@ import { SUPPORT_EMAIL } from "@/lib/support";
 import { Logo } from "@/components/brand/logo";
 import { hasStripeCreds } from "@/lib/env";
 import { createT } from "@/lib/i18n-translate";
+import { getPreferredLocale } from "@/lib/i18n";
+import { localizedAlternates, pageLanguages } from "@/lib/seo/localized-alternates";
+import { localizedHref, localizedPath, type AppLocale } from "@spiralclass/shared";
 import { CANCELLATION_POLICY_ANCHOR, LEGACY_CANCELLATION_ANCHOR } from "@/lib/terms-anchors";
 
 const CONTACT_EMAIL = SUPPORT_EMAIL;
 
 /**
- * Which of the two authored variants the bare URL serves.
+ * Which of the two authored documents a URL serves (D-193, D-196).
  *
- * The bare URL is English, matching `DEFAULT_LOCALE` — the reader arriving at
- * /terms cold, from the footer or from Stripe's billing portal, is the one
- * with no stated language, and this is the document they get. `?lang=es`
- * selects Spanish; `?lang=en` also resolves to English, since links carrying
- * it are out in sent email and cannot be edited.
+ * The URL decides: `/terms` is English, matching `DEFAULT_LOCALE`, and
+ * `/es/terms` is Spanish. Every other language's URL serves the English
+ * document, with a line in the reader's language saying so — there is no
+ * other translation, and legal copy is never machine-translated (D-81,
+ * D-196). The old `?lang=es` links in sent email are redirected to
+ * `/es/terms` by the middleware.
  *
- * Both documents are human-authored and stay so: legal copy is never
- * machine-translated (D-81). This picks which is offered first, not what
- * either says.
+ * Both documents are human-authored and stay so. This picks which is shown,
+ * not what either says.
  */
-function isSpanishRequested(lang: string | undefined): boolean {
-  return lang === "es" || lang === "es";
+function servesSpanish(locale: AppLocale): boolean {
+  return locale === "es";
 }
 
 /**
@@ -39,50 +42,54 @@ function isSpanishRequested(lang: string | undefined): boolean {
  * Both ids appear in both language variants, so a link works whichever
  * document the reader lands on.
  */
+type TermsDocumentProps = {
+  stripeAvailable: boolean;
+  /** Links to other public pages, in the language the page is rendered in. */
+  href: (path: string) => string;
+};
+
 function LegacyCancellationAnchor() {
   return <span id={LEGACY_CANCELLATION_ANCHOR} aria-hidden="true" />;
 }
 
-// Metadata follows the ?lang param (which picks the rendered variant), not the
-// locale cookie. The canonical points both variants at the bare URL so neither
-// competes with /terms in the index.
-export async function generateMetadata({
-  searchParams,
-}: {
-  searchParams: Promise<{ lang?: string }>;
-}): Promise<Metadata> {
-  const { lang } = await searchParams;
-  const t = createT(isSpanishRequested(lang) ? "es" : "en");
+// Metadata follows the URL's language. The two documents are each other's
+// alternates; every other language's URL canonicalises to `/terms`, because
+// the document it serves is the English one (localizedAlternates).
+export async function generateMetadata(): Promise<Metadata> {
+  const locale = await getPreferredLocale();
+  const t = createT(locale);
   return {
     title: t("web.terms.meta.title"),
     description: t("web.terms.meta.description"),
-    alternates: { canonical: "/terms" },
+    alternates: localizedAlternates("/terms", locale),
   };
 }
 
-export default async function TermsPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ lang?: string }>;
-}) {
-  const { lang } = await searchParams;
-  const isEnglish = !isSpanishRequested(lang);
+export default async function TermsPage() {
+  const locale = await getPreferredLocale();
+  const t = createT(locale);
+  const href = (path: string) => localizedHref(path, locale);
   const stripeAvailable = hasStripeCreds();
   return (
     <main className="container space-y-6 py-10 text-sm leading-relaxed lg:max-w-2xl">
-      <Link href="/" aria-label="SpiralClass" className="inline-block">
+      <Link href={href("/")} aria-label="SpiralClass" className="inline-block">
         <Logo size="sm" />
       </Link>
-      {isEnglish ? (
-        <EnglishTerms stripeAvailable={stripeAvailable} />
+      {!pageLanguages("/terms").includes(locale) && (
+        <p className="rounded-md border bg-muted/40 p-3 text-xs text-muted-foreground">
+          {t("web.legal.englishOnly")}
+        </p>
+      )}
+      {servesSpanish(locale) ? (
+        <SpanishTerms stripeAvailable={stripeAvailable} href={href} />
       ) : (
-        <SpanishTerms stripeAvailable={stripeAvailable} />
+        <EnglishTerms stripeAvailable={stripeAvailable} href={href} />
       )}
     </main>
   );
 }
 
-function SpanishTerms({ stripeAvailable }: { stripeAvailable: boolean }) {
+function SpanishTerms({ stripeAvailable, href }: TermsDocumentProps) {
   return (
     <article lang="es" className="space-y-4">
       <header>
@@ -91,9 +98,9 @@ function SpanishTerms({ stripeAvailable }: { stripeAvailable: boolean }) {
         </Heading>
         <p className="text-xs text-muted-foreground">
           Última actualización: 10 de julio de 2026 ·{" "}
-          <Link className="underline" href="/terms">
+          <a className="underline" href="/terms" hrefLang="en">
             English
-          </Link>
+          </a>
         </p>
       </header>
 
@@ -267,7 +274,7 @@ function SpanishTerms({ stripeAvailable }: { stripeAvailable: boolean }) {
           para ningún otro fin. Subtitular tu propia voz requiere tu consentimiento explícito,
           otorgable o revocable en cualquier momento desde la configuración de tu cuenta — consulta
           nuestro{" "}
-          <Link className="underline" href="/privacy-notice">
+          <Link className="underline" href={href("/privacy-notice")}>
             aviso de privacidad
           </Link>{" "}
           para más detalle.
@@ -284,7 +291,7 @@ function SpanishTerms({ stripeAvailable }: { stripeAvailable: boolean }) {
             {CONTACT_EMAIL}
           </a>
           . Consulta también nuestro{" "}
-          <Link className="underline" href="/privacy-notice">
+          <Link className="underline" href={href("/privacy-notice")}>
             aviso de privacidad
           </Link>
           .
@@ -294,7 +301,7 @@ function SpanishTerms({ stripeAvailable }: { stripeAvailable: boolean }) {
   );
 }
 
-function EnglishTerms({ stripeAvailable }: { stripeAvailable: boolean }) {
+function EnglishTerms({ stripeAvailable, href }: TermsDocumentProps) {
   return (
     <article lang="en" className="space-y-4">
       <header>
@@ -303,9 +310,9 @@ function EnglishTerms({ stripeAvailable }: { stripeAvailable: boolean }) {
         </Heading>
         <p className="text-xs text-muted-foreground">
           Last updated: July 10, 2026 ·{" "}
-          <Link className="underline" href="/terms?lang=es">
+          <a className="underline" href={localizedPath("/terms", "es")} hrefLang="es">
             Español
-          </Link>
+          </a>
         </p>
       </header>
 
@@ -474,7 +481,7 @@ function EnglishTerms({ stripeAvailable }: { stripeAvailable: boolean }) {
           screen; that audio is not stored or used for any other purpose. Captioning your own voice
           requires your explicit consent, which you can give or withdraw at any time from your
           account settings — see our{" "}
-          <Link className="underline" href="/privacy-notice">
+          <Link className="underline" href={href("/privacy-notice")}>
             privacy notice
           </Link>{" "}
           for more detail.
@@ -491,7 +498,7 @@ function EnglishTerms({ stripeAvailable }: { stripeAvailable: boolean }) {
             {CONTACT_EMAIL}
           </a>
           . See also our{" "}
-          <Link className="underline" href="/privacy-notice">
+          <Link className="underline" href={href("/privacy-notice")}>
             privacy notice
           </Link>
           .

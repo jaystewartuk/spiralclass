@@ -6,6 +6,7 @@ import {
   isLocalePreference,
   matchAcceptLanguage,
   resolveLocale,
+  type AppLocale,
 } from "@spiralclass/shared";
 import { LOCALE_COOKIE } from "@/lib/i18n";
 import { getAuthUser } from "@/lib/auth";
@@ -24,8 +25,25 @@ import { revalidateAfterAction } from "@/lib/revalidate";
 // no request there to resolve it against), so we collapse it to a real locale at
 // set time using this request's Accept-Language.
 export async function setLocaleAction(formData: FormData): Promise<void> {
-  const next = formData.get("locale");
-  if (!isLocalePreference(next)) return;
+  const resolved = await persistLocalePreference(formData.get("locale"));
+  if (resolved) revalidateAfterAction("/", "layout");
+}
+
+// The switcher on a public page whose URL names its language (D-193). The
+// cookie alone cannot change that page — `/es/pricing` is Spanish whatever the
+// cookie says — so the client needs the locale the choice resolved to, and
+// loads that locale's URL itself. That load is a full one on purpose: the
+// root layout carries the language too, and a client-side navigation keeps
+// the layout it already has.
+export async function chooseLocaleAction(
+  formData: FormData,
+): Promise<{ locale: AppLocale } | null> {
+  const resolved = await persistLocalePreference(formData.get("locale"));
+  return resolved ? { locale: resolved } : null;
+}
+
+async function persistLocalePreference(next: FormDataEntryValue | null): Promise<AppLocale | null> {
+  if (!isLocalePreference(next)) return null;
 
   const store = await cookies();
   store.set(LOCALE_COOKIE, next, {
@@ -56,5 +74,5 @@ export async function setLocaleAction(formData: FormData): Promise<void> {
     }
   }
 
-  revalidateAfterAction("/", "layout");
+  return resolved;
 }

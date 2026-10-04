@@ -44,6 +44,44 @@ describe("sitemap", () => {
     for (const path of ["/pricing", "/features", "/about", "/help", "/terms", "/privacy-notice"]) {
       expect(urls).toContain(`https://spiralclass.com${path}`);
     }
+    // A marketing route missing from the localized-path allowlist (D-193)
+    // would be listed once per language at one and the same URL.
+    expect(new Set(urls).size).toBe(urls.length);
+  });
+
+  // D-193: each page is listed at every URL its content exists in, and each
+  // entry carries the page's whole hreflang set — the same set its metadata
+  // emits, so the two cannot tell a search engine different things.
+  it("lists each page in every language it exists in, with a reciprocal hreflang set", async () => {
+    delete process.env.APP_URL;
+    const { default: sitemap } = await loadSitemap();
+    const entries = await sitemap();
+    const byUrl = new Map(entries.map((e) => [e.url, e]));
+    const origin = "https://spiralclass.com";
+
+    const pricing = {
+      en: `${origin}/pricing`,
+      es: `${origin}/es/pricing`,
+      fr: `${origin}/fr/pricing`,
+      "x-default": `${origin}/pricing`,
+    };
+    for (const url of [pricing.en, pricing.es, pricing.fr]) {
+      expect(byUrl.get(url)?.alternates?.languages, url).toEqual(pricing);
+    }
+    expect(byUrl.get(`${origin}/fr`)?.alternates?.languages).toMatchObject({
+      en: origin,
+      "x-default": origin,
+    });
+
+    // The terms exist in English and Spanish; the privacy policy in English.
+    expect(byUrl.has(`${origin}/es/terms`)).toBe(true);
+    expect(byUrl.has(`${origin}/fr/terms`)).toBe(false);
+    expect(byUrl.has(`${origin}/es/privacy-notice`)).toBe(false);
+    expect(byUrl.get(`${origin}/terms`)?.alternates?.languages).toEqual({
+      en: `${origin}/terms`,
+      es: `${origin}/es/terms`,
+      "x-default": `${origin}/terms`,
+    });
   });
 
   it("prioritizes the commercial pages over the legal ones", async () => {

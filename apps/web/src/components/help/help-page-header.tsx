@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Logo } from "@/components/brand/logo";
-import { getT } from "@/lib/i18n";
+import { getLocalizedHref, getT } from "@/lib/i18n";
 
 /**
  * The top bar of a signed-in help page: the wordmark home, and the way back to
@@ -17,13 +17,14 @@ export async function HelpPageHeader({
   backLabel: string;
 }) {
   const t = await getT();
+  const href = await getLocalizedHref();
   return (
     <div className="flex items-center justify-between gap-4">
-      <Link href="/" aria-label={t("common.brandName")} className="inline-block rounded-sm">
+      <Link href={href("/")} aria-label={t("common.brandName")} className="inline-block rounded-sm">
         <Logo size="sm" />
       </Link>
       <Link
-        href={backHref}
+        href={href(backHref)}
         className="rounded-sm text-xs text-muted-foreground hover:text-foreground hover:underline"
       >
         {backLabel}

@@ -1,3 +1,4 @@
+import { localizedAlternates } from "@/lib/seo/localized-alternates";
 // Public, unauthenticated help centre. No DB access, no auth. Sourced from the
 // content registry (@spiralclass/shared) instead of hand-duplicated copy, so
 // this page and the gated /help/[audience]/[slug] deep links can never drift
@@ -47,7 +48,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     title,
     description,
-    alternates: { canonical: "/help" },
+    alternates: localizedAlternates("/help", await getPreferredLocale()),
     // Next inherits `openGraph` from the root layout but does NOT fill its
     // title/description from a page's own — without these the card for a
     // shared help link carries the site defaults and says nothing about help.

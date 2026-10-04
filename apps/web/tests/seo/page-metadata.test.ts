@@ -4,10 +4,32 @@ import type { Metadata } from "next";
 // Pins the SEO metadata contract of the public pages: localized titles /
 // descriptions, self-referencing canonicals on the indexable marketing
 // surface, and `robots: { index: false }` on every utility page that must
-// stay out of the index (checkout funnel, auth, email-token pages). The
-// global tests/setup.ts next/headers
-// mock pins the locale cookie to es, so catalog-driven strings assert
-// their Spanish values.
+// stay out of the index (checkout funnel, auth, email-token pages).
+//
+// The locale cookie is pinned to es, as in the global tests/setup.ts mock.
+// A public page's language comes from its URL (D-193), which the middleware
+// hands on as the `x-locale` request header; each case below says which URL
+// it renders by setting that header.
+
+const requestHeaders = vi.hoisted(() => new Map<string, string>());
+vi.mock("next/headers", () => ({
+  cookies: async () => ({
+    get: (name: string) => (name === "locale" ? { value: "es" } : undefined),
+  }),
+  headers: async () => ({ get: (name: string) => requestHeaders.get(name) ?? null }),
+}));
+
+/** Render as the middleware would for a URL in `locale` (`/es/pricing`). */
+function atUrlIn(locale: "en" | "es" | "fr") {
+  requestHeaders.set("x-locale", locale);
+}
+
+const EVERY_LANGUAGE = (path: string) => ({
+  en: path,
+  es: path === "/" ? "/es" : `/es${path}`,
+  fr: path === "/" ? "/fr" : `/fr${path}`,
+  "x-default": path,
+});
 
 const teacherFindUnique = vi.fn();
 const studentFindFirst = vi.fn();
@@ -67,17 +89,21 @@ vi.mock("@/app/actions/transfer-mark-sent", () => ({ markTransferPaymentSentActi
 
 beforeEach(() => {
   vi.clearAllMocks();
+  requestHeaders.clear();
 });
 
 describe("marketing pages — localized metadata + canonicals", () => {
-  it("landing: absolute tagline title, trial-days description, canonical /", async () => {
+  beforeEach(() => atUrlIn("es"));
+
+  it("landing: absolute tagline title, trial-days description, canonical /es", async () => {
     const { generateMetadata } = await import("@/app/page");
     const meta = await generateMetadata();
     expect(meta.title).toEqual({
       absolute: "SpiralClass — Agenda, cobros y recordatorios para profes",
     });
     expect(meta.description).toContain("30 días de Pro gratis");
-    expect(meta.alternates?.canonical).toBe("/");
+    expect(meta.alternates?.canonical).toBe("/es");
+    expect(meta.alternates?.languages).toEqual(EVERY_LANGUAGE("/"));
   });
 
   it("precios: catalog title (no double brand), live price in description, canonical", async () => {
@@ -91,7 +117,8 @@ describe("marketing pages — localized metadata + canonicals", () => {
     // keeps the doubling out of the search-result snippet too.
     expect(meta.description).toContain("£7.99 GBP");
     expect(meta.description).toContain("30 días");
-    expect(meta.alternates?.canonical).toBe("/pricing");
+    expect(meta.alternates?.canonical).toBe("/es/pricing");
+    expect(meta.alternates?.languages).toEqual(EVERY_LANGUAGE("/pricing"));
   });
 
   it("help: catalog title + canonical", async () => {
@@ -99,56 +126,72 @@ describe("marketing pages — localized metadata + canonicals", () => {
     const meta = await generateMetadata();
     expect(meta.title).toBe("Centro de ayuda");
     expect(meta.description).toBeTruthy();
-    expect(meta.alternates?.canonical).toBe("/help");
+    expect(meta.alternates?.canonical).toBe("/es/help");
+    expect(meta.alternates?.languages).toEqual(EVERY_LANGUAGE("/help"));
   });
 
   it("about + features: canonicals present", async () => {
     const about = await (await import("@/app/about/page")).generateMetadata();
-    expect(about.alternates?.canonical).toBe("/about");
+    expect(about.alternates?.canonical).toBe("/es/about");
     const features = await (await import("@/app/features/page")).generateMetadata();
-    expect(features.alternates?.canonical).toBe("/features");
+    expect(features.alternates?.canonical).toBe("/es/features");
+  });
+
+  // The bare URL is English for everyone, the cookie here included: a crawler
+  // sends no cookie, and the page it indexes at /pricing must be the English
+  // one. The hreflang set is the same on every URL of the page.
+  it("the bare URL: English, canonical to itself, the same hreflang set", async () => {
+    atUrlIn("en");
+    const meta = await (await import("@/app/pricing/page")).generateMetadata();
+    expect(meta.title).toBe("Pricing");
+    expect(meta.alternates?.canonical).toBe("/pricing");
+    expect(meta.alternates?.languages).toEqual(EVERY_LANGUAGE("/pricing"));
   });
 });
 
-describe("legal pages — metadata and canonical on the bare URL", () => {
-  it("terms: English by default, Spanish under ?lang=es, same canonical", async () => {
+describe("legal pages — advertised only in the languages they exist in", () => {
+  // Two authored documents exist (D-196): /terms is the English one and
+  // /es/terms the Spanish one, and each lists the other. Every other
+  // language's URL serves the English document, so it canonicalises to
+  // /terms and is not offered to search engines as a French contract.
+  it("terms: English at /terms, Spanish at /es/terms, French canonicalising to /terms", async () => {
     const { generateMetadata } = await import("@/app/terms/page");
-    // The bare URL is the English document, matching DEFAULT_LOCALE: the
-    // reader arriving cold from the footer or from Stripe's billing portal is
-    // the one who has stated no language.
-    const bare = await generateMetadata({ searchParams: Promise.resolve({}) });
+    const termsLanguages = { en: "/terms", es: "/es/terms", "x-default": "/terms" };
+
+    atUrlIn("en");
+    const bare = await generateMetadata();
     expect(bare.title).toBe("Terms of Service");
     expect(bare.alternates?.canonical).toBe("/terms");
+    expect(bare.alternates?.languages).toEqual(termsLanguages);
 
-    const es = await generateMetadata({
-      searchParams: Promise.resolve({ lang: "es" }),
-    });
+    atUrlIn("es");
+    const es = await generateMetadata();
     expect(es.title).toBe("Términos y condiciones");
-    // Both variants canonicalize to the bare URL so neither competes with
-    // /terms in the index.
-    expect(es.alternates?.canonical).toBe("/terms");
+    expect(es.alternates?.canonical).toBe("/es/terms");
+    expect(es.alternates?.languages).toEqual(termsLanguages);
 
-    // `?lang=en` is in sent email and on pages already crawled, so it keeps
-    // resolving to English rather than 404ing or silently flipping to Spanish.
-    const en = await generateMetadata({
-      searchParams: Promise.resolve({ lang: "en" }),
-    });
-    expect(en.title).toBe("Terms of Service");
-    expect(en.alternates?.canonical).toBe("/terms");
+    atUrlIn("fr");
+    const fr = await generateMetadata();
+    expect(fr.alternates?.canonical).toBe("/terms");
+    expect(fr.alternates?.languages).toEqual(termsLanguages);
   });
 
-  // privacy-notice deliberately does NOT follow the ?lang pattern any more.
   // The policy is one English document rendered from @spiralclass/shared
-  // (legal copy is never machine-translated — D-81), so there is no second
-  // variant to canonicalize and no `lang` param to read. Only its metadata —
-  // the browser tab and the search-result snippet, which are chrome rather
-  // than legal text — still follows the viewer's locale.
-  it("privacy-notice: one document, locale-following metadata, bare canonical", async () => {
+  // (legal copy is never machine-translated — D-81, D-128). Its metadata — the
+  // browser tab and the search snippet, which are chrome rather than legal
+  // text — follows the URL's language, but every URL canonicalises to the
+  // English one.
+  it("privacy-notice: one document, metadata in the URL's language, one canonical", async () => {
+    atUrlIn("es");
     const { generateMetadata } = await import("@/app/privacy-notice/page");
     const meta = await generateMetadata();
     expect(meta.title).toBe("Política de privacidad");
     expect(meta.description).toBeTruthy();
     expect(meta.alternates?.canonical).toBe("/privacy-notice");
+    expect(meta.alternates?.languages).toEqual({
+      en: "/privacy-notice",
+      "x-default": "/privacy-notice",
+    });
   });
 });
 

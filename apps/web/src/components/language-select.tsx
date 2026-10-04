@@ -1,8 +1,15 @@
 "use client";
 
 import { useId, useRef } from "react";
-import { localeOptions, type LocalePreference } from "@spiralclass/shared";
-import { setLocaleAction } from "@/app/actions/locale";
+import {
+  localeOptions,
+  localizedPath,
+  publicUrlLocale,
+  unlocalizedPath,
+  type LocalePreference,
+} from "@spiralclass/shared";
+import { chooseLocaleAction, setLocaleAction } from "@/app/actions/locale";
+import { hardNavigate } from "@/lib/hard-navigate";
 import { useT } from "@/components/locale-provider";
 import { cn } from "@/lib/utils";
 
@@ -35,6 +42,25 @@ export function LanguageSelect({
 }) {
   const formRef = useRef<HTMLFormElement>(null);
   const t = useT();
+
+  // On a public page whose URL names its language (D-193), the cookie cannot
+  // change the page: `/es/pricing` is Spanish whatever it says. So the choice
+  // is saved, and then the chosen language's URL for this page is loaded —
+  // fully, because the root layout carries the language too and a client-side
+  // navigation would keep the old one. Everywhere else the form submits as it
+  // always has, and the action's revalidation re-renders the tree.
+  async function onChange() {
+    const form = formRef.current;
+    if (!form) return;
+    const { pathname, search, hash } = window.location;
+    if (publicUrlLocale(pathname) === null) {
+      form.requestSubmit();
+      return;
+    }
+    const result = await chooseLocaleAction(new FormData(form));
+    if (!result) return;
+    hardNavigate(`${localizedPath(unlocalizedPath(pathname), result.locale)}${search}${hash}`);
+  }
   const selectId = useId();
   const options = localeOptions(t("settings.language.system"));
   const field = variant === "field";
@@ -56,7 +82,7 @@ export function LanguageSelect({
         name="locale"
         defaultValue={current}
         aria-label={t("settings.language")}
-        onChange={() => formRef.current?.requestSubmit()}
+        onChange={() => void onChange()}
         className={cn(
           "cursor-pointer rounded-md border border-input bg-background focus-visible:ring-3 focus-visible:ring-ring focus-visible:outline-hidden",
           field

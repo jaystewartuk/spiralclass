@@ -28,7 +28,7 @@ export default async function ConfirmacionPage({
   const locale = await getPreferredLocale();
   const en = usesEnglishCopy(locale);
   const t = await getT();
-  const termsHref = cancellationPolicyPath(!en);
+  const termsHref = cancellationPolicyPath(locale);
   const { bookingId } = await searchParams;
   if (!bookingId) notFound();
 

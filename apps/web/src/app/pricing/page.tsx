@@ -1,8 +1,8 @@
+import { localizedAlternates } from "@/lib/seo/localized-alternates";
 import { Heading } from "@/components/ui/heading";
 import { PageShell } from "@/components/ui/page-shell";
 import type { Metadata } from "next";
 import { Badge } from "@/components/ui/badge";
-import Link from "next/link";
 import { getPreferredLocale, getT } from "@/lib/i18n";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -27,7 +27,7 @@ export async function generateMetadata(): Promise<Metadata> {
       monthly: formatMinorUnits(PLAN_PRICE_MINOR_UNITS.monthly, PLATFORM_MONEY_CURRENCY),
       days: TRIAL_DAYS,
     }),
-    alternates: { canonical: "/pricing" },
+    alternates: localizedAlternates("/pricing", await getPreferredLocale()),
   };
 }
 
@@ -218,7 +218,7 @@ export default async function PricingPage() {
 
       <div className="text-center">
         <Button asChild>
-          <Link href="/sign-up">{t("web.pricing.startTrial")}</Link>
+          <a href="/sign-up">{t("web.pricing.startTrial")}</a>
         </Button>
       </div>
     </PageShell>

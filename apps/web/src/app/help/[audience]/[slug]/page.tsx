@@ -10,7 +10,7 @@ import {
 } from "@spiralclass/shared";
 import { requireOnboardedTeacher, requireStudent } from "@/lib/auth";
 import { requireAdmin } from "@/lib/admin";
-import { getT, getPreferredLocale } from "@/lib/i18n";
+import { getLocalizedHref, getPreferredLocale, getT } from "@/lib/i18n";
 import type { StringKey } from "@/lib/i18n-translate";
 import { Heading } from "@/components/ui/heading";
 import { PageShell } from "@/components/ui/page-shell";
@@ -77,6 +77,7 @@ export default async function HelpDocPage({ params }: { params: Promise<PagePara
   if (!doc) notFound();
 
   const t = await getT();
+  const href = await getLocalizedHref();
   const locale = await getPreferredLocale();
 
   // One article, prepared the same way the public help centre prepares four:
@@ -98,7 +99,7 @@ export default async function HelpDocPage({ params }: { params: Promise<PagePara
         aria-label={t("web.help.title")}
         className="flex items-center gap-1 text-xs text-muted-foreground"
       >
-        <Link href={`/help/${typedAudience}`} className="rounded-sm hover:text-foreground">
+        <Link href={href(`/help/${typedAudience}`)} className="rounded-sm hover:text-foreground">
           {t(AUDIENCE_LABEL_KEY[typedAudience])}
         </Link>
         <ChevronRight className="h-3.5 w-3.5" aria-hidden />

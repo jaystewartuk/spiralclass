@@ -50,14 +50,18 @@ describe("/terms cancellation anchor", () => {
     expect(TERMS_SOURCE).not.toContain(`id="${LEGACY_CANCELLATION_ANCHOR}"`);
   });
 
-  it("builds a path whose fragment the page actually carries", () => {
-    expect(cancellationPolicyPath(false)).toBe(`/terms#${CANCELLATION_POLICY_ANCHOR}`);
-    // Spanish asks for its variant; the bare URL is the English document.
-    expect(cancellationPolicyPath(true)).toBe(`/terms?lang=es#${CANCELLATION_POLICY_ANCHOR}`);
+  // Each reader's own language's URL (D-193). The bare URL is the English
+  // document; French has no translated terms, and its URL says so in French
+  // around the English text (D-196).
+  it("builds a path, at the reader's language's URL, whose fragment the page carries", () => {
+    expect(cancellationPolicyPath("en")).toBe(`/terms#${CANCELLATION_POLICY_ANCHOR}`);
+    expect(cancellationPolicyPath("es")).toBe(`/es/terms#${CANCELLATION_POLICY_ANCHOR}`);
+    expect(cancellationPolicyPath("fr")).toBe(`/fr/terms#${CANCELLATION_POLICY_ANCHOR}`);
   });
 
   it("points every link at the current id, not the one kept for old email", () => {
-    expect(cancellationPolicyPath(false)).not.toContain(LEGACY_CANCELLATION_ANCHOR);
-    expect(cancellationPolicyPath(true)).not.toContain(LEGACY_CANCELLATION_ANCHOR);
+    for (const locale of ["en", "es", "fr"] as const) {
+      expect(cancellationPolicyPath(locale)).not.toContain(LEGACY_CANCELLATION_ANCHOR);
+    }
   });
 });

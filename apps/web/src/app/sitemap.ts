@@ -2,6 +2,8 @@ import type { MetadataRoute } from "next";
 import { prisma } from "@/lib/prisma";
 import { HAS_PAYOUT_RAIL_WHERE } from "@/lib/payments/payout-rail-where";
 import { EXCLUDE_TEST_ACCOUNTS_WHERE } from "@/lib/marketing/test-accounts";
+import { pageLanguages } from "@/lib/seo/localized-alternates";
+import { DEFAULT_LOCALE, localizedPath, type AppLocale } from "@spiralclass/shared";
 
 const APP_URL = (process.env.APP_URL ?? "https://spiralclass.com").replace(/\/$/, "");
 
@@ -28,6 +30,36 @@ const MARKETING_ROUTES = [
 // (lib/marketplace-ready.ts), which the page/buy-page 404 logic uses directly;
 // a plain JS predicate can't run inside a Prisma `where`, so this must be kept
 // in sync with that function by hand.
+// One entry per URL a public page has (D-193), each carrying the page's whole
+// hreflang set — the same set its metadata emits (localizedAlternates), so the
+// sitemap and the page cannot tell a search engine two different things. A
+// page is listed only in the languages its content exists in.
+function localizedEntries(
+  path: string,
+  changeFrequency: "weekly" | "monthly",
+  priority: number,
+): MetadataRoute.Sitemap {
+  const languages = pageLanguages(path);
+  // The bare root is listed as APP_URL itself, with no trailing slash, as it
+  // always has been.
+  const absolute = (locale: AppLocale) => {
+    const localized = localizedPath(path, locale);
+    return localized === "/" ? APP_URL : `${APP_URL}${localized}`;
+  };
+  const alternates = {
+    languages: {
+      ...Object.fromEntries(languages.map((l) => [l, absolute(l)])),
+      "x-default": absolute(DEFAULT_LOCALE),
+    },
+  };
+  return languages.map((locale) => ({
+    url: absolute(locale),
+    changeFrequency,
+    priority,
+    alternates,
+  }));
+}
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const teachers = await prisma.teacher.findMany({
     where: {
@@ -46,12 +78,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   });
 
   return [
-    { url: APP_URL, changeFrequency: "weekly", priority: 1 },
-    ...MARKETING_ROUTES.map((route) => ({
-      url: `${APP_URL}${route.path}`,
-      changeFrequency: "monthly" as const,
-      priority: route.priority,
-    })),
+    ...localizedEntries("/", "weekly", 1),
+    ...MARKETING_ROUTES.flatMap((route) => localizedEntries(route.path, "monthly", route.priority)),
     ...teachers.map((t) => ({
       url: `${APP_URL}/b/${t.bookingSlug}`,
       lastModified: t.updatedAt,

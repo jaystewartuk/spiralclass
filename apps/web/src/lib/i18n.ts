@@ -4,6 +4,7 @@ import {
   SYSTEM_LOCALE,
   isAppLocale,
   isLocalePreference,
+  localizedHref,
   matchAcceptLanguage,
   PUBLIC_FUNNEL_LOCALE,
   publicFunnelLocaleFor,
@@ -11,17 +12,18 @@ import {
   type LocalePreference,
 } from "@spiralclass/shared";
 import { createT } from "@/lib/i18n-translate";
+import { LOCALE_COOKIE, URL_LOCALE_HEADER } from "@/lib/i18n-constants";
 
-// English (en) is the default; Spanish (es) is auto-selected when the
-// browser's Accept-Language starts with `es`. A `locale` cookie set by the
-// toggle wins over the header so the manual choice persists. Which locales
+// English (en) is the default. On a public page whose URL names a language
+// (D-193) that language wins. Otherwise a `locale` cookie set by the switcher
+// wins over the browser's Accept-Language, so the manual choice persists. Which locales
 // exist, how they match Accept-Language, and the default all come from the
 // shared registry (@spiralclass/shared, packages/shared/src/i18n/locales.ts) —
 // adding a language is a single edit there, not a change at every call site.
 
 export type { AppLocale };
 
-export const LOCALE_COOKIE = "locale";
+export { LOCALE_COOKIE, URL_LOCALE_HEADER };
 
 // translate()/createT()/AppLocale are re-exported from i18n-translate.ts, which
 // has no "next/headers" import — Client Components must import them from there
@@ -36,6 +38,14 @@ export { translate } from "@/lib/i18n-translate";
 // the reader's behalf, which is the thing DEFAULT_LOCALE exists to prevent.
 export async function getPreferredLocale(fallback: AppLocale = DEFAULT_LOCALE): Promise<AppLocale> {
   try {
+    // A public page's URL names its language (D-193), and that wins over the
+    // reader's preference: `/es/pricing` is Spanish for everyone, which is
+    // what lets a search engine index it. Only the middleware sets this.
+    const hdrs = await headers();
+    const fromUrl = hdrs.get(URL_LOCALE_HEADER);
+    if (isAppLocale(fromUrl)) {
+      return fromUrl;
+    }
     const cookieStore = await cookies();
     const fromCookie = cookieStore.get(LOCALE_COOKIE)?.value;
     // A concrete locale in the cookie is the user's explicit choice and wins.
@@ -52,7 +62,6 @@ export async function getPreferredLocale(fallback: AppLocale = DEFAULT_LOCALE): 
     if (fromRegionalCookie) {
       return fromRegionalCookie;
     }
-    const hdrs = await headers();
     const accept = hdrs.get("accept-language");
     return matchAcceptLanguage(accept) ?? fallback;
   } catch {
@@ -74,6 +83,36 @@ export async function getLocalePreference(): Promise<LocalePreference> {
   } catch {
     return SYSTEM_LOCALE;
   }
+}
+
+/**
+ * What the language picker shows as selected. Usually the stored preference,
+ * but on a public page whose URL names a different language (D-193) — a
+ * reader who prefers English, arriving at `/es/pricing` from a search — it
+ * shows the language the page is actually in. Otherwise the picker would
+ * already show English, and choosing English would not fire a change at all.
+ */
+export async function getLanguagePickerValue(): Promise<LocalePreference> {
+  const preference = await getLocalePreference();
+  try {
+    const hdrs = await headers();
+    const fromUrl = hdrs.get(URL_LOCALE_HEADER);
+    if (!isAppLocale(fromUrl)) return preference;
+    const followed =
+      preference === SYSTEM_LOCALE
+        ? (matchAcceptLanguage(hdrs.get("accept-language")) ?? DEFAULT_LOCALE)
+        : preference;
+    return followed === fromUrl ? preference : fromUrl;
+  } catch {
+    return preference;
+  }
+}
+
+/** Server-side counterpart of `useLocalizedHref()`: hrefs to public pages in
+ * the request's locale (D-193). */
+export async function getLocalizedHref(): Promise<(href: string) => string> {
+  const locale = await getPreferredLocale();
+  return (href: string) => localizedHref(href, locale);
 }
 
 /** Server-side `t(key, vars)` bound to the request's preferred locale. Use in

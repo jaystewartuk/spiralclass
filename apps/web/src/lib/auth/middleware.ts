@@ -1,7 +1,9 @@
 import { getSessionCookie } from "better-auth/cookies";
 import { NextResponse, type NextRequest } from "next/server";
+import { resolvePublicLocaleRoute } from "@spiralclass/shared/localized-paths";
 import { buildCsp, cspHeaderName, generateNonce } from "@/lib/csp";
-import { toPublicOrigin } from "@/lib/public-url";
+import { LOCALE_COOKIE, URL_LOCALE_HEADER } from "@/lib/i18n-constants";
+import { publicUrl, toPublicOrigin } from "@/lib/public-url";
 import {
   newVisitorId,
   VISITOR_COOKIE,
@@ -30,6 +32,19 @@ import {
   normalizeReferralCode,
 } from "@/lib/subscriptions/referral";
 
+// Whether a Referer is a page of this site. Compared against APP_URL rather
+// than the request's own origin: self-hosted, nextUrl.origin is the container's
+// bind address (see lib/public-url.ts). A same-origin navigation carries its
+// full URL as Referer under the browser's default policy.
+function isFromThisSite(referer: string | null): boolean {
+  if (!referer) return false;
+  try {
+    return new URL(referer).origin === publicUrl("/").origin;
+  } catch {
+    return false;
+  }
+}
+
 // Called from the root middleware on every request. Optimistic, edge-safe
 // auth gate on better-auth's session cookie (D-40 migration plan): presence-
 // only, no DB round trip. The authoritative check is always
@@ -55,7 +70,33 @@ export async function updateSession(request: NextRequest) {
   requestHeaders.set("x-pathname", request.nextUrl.pathname);
   requestHeaders.set("Content-Security-Policy", buildCsp(nonce));
 
-  const response = NextResponse.next({ request: { headers: requestHeaders } });
+  // One URL per language for the public pages (D-193). `x-locale` is how the
+  // URL's language reaches getPreferredLocale, which reads it before the
+  // cookie — so it is deleted from every incoming request first. A client
+  // sending its own would otherwise choose the language of any page.
+  requestHeaders.delete(URL_LOCALE_HEADER);
+  const localeRoute = resolvePublicLocaleRoute({
+    pathname: request.nextUrl.pathname,
+    search: request.nextUrl.search,
+    method: request.method,
+    localeCookie: request.cookies.get(LOCALE_COOKIE)?.value,
+    acceptLanguage: request.headers.get("accept-language"),
+    fromThisSite: isFromThisSite(request.headers.get("referer")),
+  });
+  if (localeRoute.kind === "render") {
+    requestHeaders.set(URL_LOCALE_HEADER, localeRoute.locale);
+  }
+
+  // A prefixed page is served by the unprefixed route: nothing lives under a
+  // locale segment in app/, so the rewrite is the whole of the routing.
+  let response: NextResponse;
+  if (localeRoute.kind === "render" && localeRoute.rewrite) {
+    const target = request.nextUrl.clone();
+    target.pathname = localeRoute.path;
+    response = NextResponse.rewrite(target, { request: { headers: requestHeaders } });
+  } else {
+    response = NextResponse.next({ request: { headers: requestHeaders } });
+  }
 
   const path = request.nextUrl.pathname;
 
@@ -111,6 +152,23 @@ export async function updateSession(request: NextRequest) {
       wall.headers.set(cspHeaderName(), buildCsp(nonce));
       return wall;
     }
+  }
+
+  // After maintenance, which wins over everything. The query is carried, so a
+  // `?ref=` or UTM on the bare URL is stamped by the request this redirect
+  // produces. A 302 is per reader: it depends on their cookie and their
+  // browser, so it must never be cached as one answer for everyone.
+  if (localeRoute.kind === "redirect") {
+    const url = request.nextUrl.clone();
+    const [pathname, query = ""] = localeRoute.location.split("?");
+    url.pathname = pathname;
+    url.search = query ? `?${query}` : "";
+    const redirect = NextResponse.redirect(toPublicOrigin(url), localeRoute.status);
+    if (localeRoute.status === 302) {
+      redirect.headers.set("Vary", "Cookie, Accept-Language");
+      redirect.headers.set("Cache-Control", "private, no-store");
+    }
+    return redirect;
   }
 
   // The (app) route group — every segment behind requireTeacher() in its

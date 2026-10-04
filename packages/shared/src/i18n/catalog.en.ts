@@ -5489,6 +5489,8 @@ export const en = {
   "web.help.meta.description": "How payments, plans, and bookings work on SpiralClass.",
   "web.terms.meta.title": "Terms of Service",
   "web.terms.meta.description": "The terms and conditions for using SpiralClass.",
+  "web.legal.englishOnly":
+    "This document is only available in English for now. The English text is the one that applies.",
   "web.privacyNotice.meta.title": "Privacy policy",
   "web.privacyNotice.meta.description":
     "How SpiralClass collects, uses and protects your personal data, under UK GDPR.",

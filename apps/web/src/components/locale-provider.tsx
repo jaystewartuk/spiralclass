@@ -1,7 +1,7 @@
 "use client";
 
-import { createContext, useContext, useMemo, type ReactNode } from "react";
-import { DEFAULT_LOCALE } from "@spiralclass/shared";
+import { createContext, useCallback, useContext, useMemo, type ReactNode } from "react";
+import { DEFAULT_LOCALE, localizedHref } from "@spiralclass/shared";
 import { createT, type AppLocale, type TFunction } from "@/lib/i18n-translate";
 
 // The context default only applies to a tree with no LocaleProvider above it,
@@ -23,4 +23,14 @@ export function useLocale(): AppLocale {
 export function useT(): TFunction {
   const locale = useLocale();
   return useMemo(() => createT(locale), [locale]);
+}
+
+/** An href to a public page in the active locale's URL (D-193): `/pricing`
+ * becomes `/es/pricing` in a Spanish tree. A link that stays in the language
+ * it was rendered in is what keeps a client-side navigation safe, because the
+ * root layout, which carries the language too, is not re-rendered by one.
+ * Paths that are not public pages come back unchanged. */
+export function useLocalizedHref(): (href: string) => string {
+  const locale = useLocale();
+  return useCallback((href: string) => localizedHref(href, locale), [locale]);
 }

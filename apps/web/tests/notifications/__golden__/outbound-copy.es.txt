@@ -194,7 +194,7 @@ body: Clase con  el
 subject: Cancelación con menos de 24h — ⟦teacherName⟧
 text: Hola, soy ⟦teacherName⟧. Cancelaste la clase del ⟦originalDateTime⟧ con menos de 24h, así que se descuenta del paquete según la política de cancelaciones.
 
-Consulta la política: https://app.test/terms?lang=es#cancellation-policy
+Consulta la política: https://app.test/es/terms#cancellation-policy
 
 —
 Configurar notificaciones: https://app.test/r/notif-settings/token
@@ -209,7 +209,7 @@ body: Tu clase del ⟦originalDateTime⟧ con ⟦teacherName⟧ fue cancelada (m
 subject: Cancelación con menos de 24h — 
 text: Hola, soy . Cancelaste la clase del  con menos de 24h, así que se descuenta del paquete según la política de cancelaciones.
 
-Consulta la política: https://app.test/terms?lang=es#cancellation-policy
+Consulta la política: https://app.test/es/terms#cancellation-policy
 html: Cancelación con menos de 24h Cancelación tardía · SpiralClass Cancelación con menos de 24h Hola, soy . Cancelaste la clase del con menos de 24h, así que se descuenta del paquete según la política de cancelaciones. Ver política de cancelaciones Clases, cobros y recordatorios sin la carga mental. Enviado por SpiralClass · spiralclass.com
 
 === cancel_lt24h · push · with no variables
@@ -670,7 +670,7 @@ text: Hola ⟦teacherName⟧, ⟦studentName⟧ canceló la clase del ⟦origina
 
 Nota: ⟦studentName⟧ no recibió ningún aviso de esta cancelación porque está dado de baja en tu listado. Reactívalo desde su ficha si quieres que vuelva a recibir avisos.
 
-Consulta la política: https://app.test/terms?lang=es#cancellation-policy
+Consulta la política: https://app.test/es/terms#cancellation-policy
 
 —
 Configurar notificaciones: https://app.test/r/notif-settings/token
@@ -685,7 +685,7 @@ body: ⟦studentName⟧ canceló el ⟦originalDateTime⟧ (<24h).
 subject:  canceló con menos de 24h
 text: Hola ,  canceló la clase del  con menos de 24h. La clase se descontó del paquete según la política de cancelaciones.
 
-Consulta la política: https://app.test/terms?lang=es#cancellation-policy
+Consulta la política: https://app.test/es/terms#cancellation-policy
 html: Cancelación tardía undefined · undefined SpiralClass Cancelación tardía Hola , canceló la clase del con menos de 24h. La clase se descontó del paquete según la política de cancelaciones. Ver política de cancelaciones Clases, cobros y recordatorios sin la carga mental. Enviado por SpiralClass · spiralclass.com
 
 === cancel_lt24h_teacher · push · with no variables
@@ -744,7 +744,7 @@ text: Hola, soy ⟦teacherName⟧. Marqué la clase del ⟦originalDateTime⟧ c
 
 Si crees que fue un error, escríbeme por WhatsApp.
 
-Consulta la política: https://app.test/terms?lang=es#cancellation-policy
+Consulta la política: https://app.test/es/terms#cancellation-policy
 
 —
 Configurar notificaciones: https://app.test/r/notif-settings/token
@@ -761,7 +761,7 @@ text: Hola, soy . Marqué la clase del  como no asistencia, así que se descont�
 
 Si crees que fue un error, escríbeme por WhatsApp.
 
-Consulta la política: https://app.test/terms?lang=es#cancellation-policy
+Consulta la política: https://app.test/es/terms#cancellation-policy
 html: Clase no atendida Clase marcada como no asistencia SpiralClass Clase no atendida Hola, soy . Marqué la clase del como no asistencia, así que se descontó del paquete según la política de cancelaciones. Si crees que fue un error, escríbeme por WhatsApp. Ver política de cancelaciones Clases, cobros y recordatorios sin la carga mental. Enviado por SpiralClass · spiralclass.com
 
 === no_show_student · push · with no variables
