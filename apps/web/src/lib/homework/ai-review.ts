@@ -6,7 +6,7 @@ import {
   parseMaterialDoc,
   type HomeworkAiReviewDraft,
   createT,
-  usesEnglishCopy,
+  localeEnglishName,
 } from "@spiralclass/shared";
 import { prisma } from "@/lib/prisma";
 import { gateProFeature, upgradeNudge } from "@/lib/subscriptions/enforce";
@@ -144,7 +144,7 @@ export async function requestHomeworkAiReview(
     attemptText: attempt.textResponse,
     attachmentTexts,
     teacherInstructions,
-    en: usesEnglishCopy(locale),
+    outputLanguage: localeEnglishName(locale),
   });
 
   if (!result.ok) {

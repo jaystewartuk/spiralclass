@@ -28,7 +28,10 @@ export type BriefInput = {
   studentName: string;
   language: string; // BCP-47 target language
   profile: StudentProfile;
-  en: boolean; // teacher's reading language
+  // The language the brief is written in — the teacher's reading language, as
+  // an English name ("French"); see localeEnglishName(). Not `language`, which
+  // is the subject the student is learning.
+  outputLanguage: string;
 };
 
 export type BriefFocus = {
@@ -77,10 +80,11 @@ export function profileHasSignal(profile: StudentProfile): boolean {
 }
 
 // ---------------------------------------------------------------------------
-// Prompt (pure — unit-tested). Localized to the teacher's reading language.
+// Prompt (pure — unit-tested). One English prompt that names the language to
+// write in: there were an English and a Spanish copy chosen by a boolean, so a
+// teacher reading French was briefed in Spanish.
 // ---------------------------------------------------------------------------
 export function buildBriefPrompt(input: BriefInput): { system: string; user: string } {
-  const { en } = input;
   const flat = flatten(input.profile);
   // focus + new are actionable; improving is encouragement only (never nag).
   const trendRank = { focus: 0, new: 1, improving: 2 } as const;
@@ -91,29 +95,17 @@ export function buildBriefPrompt(input: BriefInput): { system: string; user: str
     );
   const improving = flat.filter((r) => r.trend === "improving");
 
-  const system = (
-    en
-      ? [
-          "You are a language-teaching assistant preparing a one-to-one teacher for her NEXT lesson with a single student.",
-          "From the student's learning profile below, write a brief, practical prep: a one-line summary, the few things most worth focusing on, and at most three concrete cues the teacher can use in class.",
-          "Hard rules you must follow:",
-          "- Use ONLY the profile provided. Never invent a weakness that isn't there. If the profile is thin, return little.",
-          "- Lead with 'focus' skills (recurring and recent). 'new' skills may follow. NEVER nag about 'improving' skills — at most mention them as encouragement in the summary.",
-          '- At most three suggested cues. Each cue is a short teacher-voice imperative ready to paste into class notes, e.g. "Drill ser vs estar with a photo prompt".',
-          "- Each focus item names the skill, says briefly WHY (recurrence/recency from the profile), and gives one cue.",
-          "Return your brief only through the emit_brief tool.",
-        ]
-      : [
-          "Eres un asistente de enseñanza de idiomas que prepara a una profe particular para su PRÓXIMA clase con un solo alumno.",
-          "A partir del perfil de aprendizaje del alumno, escribe una preparación breve y práctica: un resumen de una línea, lo poco que más conviene enfocar y como máximo tres sugerencias concretas que la profe pueda usar en clase.",
-          "Reglas estrictas que debes cumplir:",
-          "- Usa SOLO el perfil proporcionado. Nunca inventes una debilidad que no esté. Si el perfil es escaso, devuelve poco.",
-          "- Encabeza con las habilidades 'focus' (recurrentes y recientes). Las 'new' pueden seguir. NUNCA insistas en las 'improving' — como mucho menciónalas como ánimo en el resumen.",
-          '- Como máximo tres sugerencias. Cada una es una orden breve, en voz de la profe, lista para pegar en las notas de clase, p. ej. "Practica ser vs estar con una foto".',
-          "- Cada elemento de enfoque nombra la habilidad, dice brevemente POR QUÉ (recurrencia/recencia del perfil) y da una sugerencia.",
-          "Devuelve tu preparación únicamente mediante la herramienta emit_brief.",
-        ]
-  ).join("\n");
+  const system = [
+    "You are a language-teaching assistant preparing a one-to-one teacher for her NEXT lesson with a single student.",
+    "From the student's learning profile below, write a brief, practical prep: a one-line summary, the few things most worth focusing on, and at most three concrete cues the teacher can use in class.",
+    `Write every string in ${input.outputLanguage}. Skill names, example words and phrases in the language being learned stay as they are.`,
+    "Hard rules you must follow:",
+    "- Use ONLY the profile provided. Never invent a weakness that isn't there. If the profile is thin, return little.",
+    "- Lead with 'focus' skills (recurring and recent). 'new' skills may follow. NEVER nag about 'improving' skills — at most mention them as encouragement in the summary.",
+    '- At most three suggested cues. Each cue is a short teacher-voice imperative ready to paste into class notes, e.g. "Drill ser vs estar with a photo prompt".',
+    "- Each focus item names the skill, says briefly WHY (recurrence/recency from the profile), and gives one cue.",
+    "Return your brief only through the emit_brief tool.",
+  ].join("\n");
 
   const focusLines = actionable.length
     ? actionable
@@ -122,23 +114,13 @@ export function buildBriefPrompt(input: BriefInput): { system: string; user: str
             `- ${r.skill} (${r.category}, ${r.trend}, seen ${r.recurrenceCount}×)${r.lastEvidence ? `: "${r.lastEvidence}"` : ""}`,
         )
         .join("\n")
-    : en
-      ? "(none)"
-      : "(ninguna)";
-  const improvingLine = improving.length
-    ? improving.map((r) => r.skill).join(", ")
-    : en
-      ? "(none)"
-      : "(ninguna)";
+    : "(none)";
+  const improvingLine = improving.length ? improving.map((r) => r.skill).join(", ") : "(none)";
   const vocabLine = input.profile.vocabulary.length
     ? input.profile.vocabulary.map((v) => v.term).join(", ")
-    : en
-      ? "(none)"
-      : "(ninguno)";
+    : "(none)";
 
-  const user = en
-    ? `Student: ${input.studentName}. Target language: ${input.language}.\n\nFocus areas (recurring/recent — base your cues on these):\n${focusLines}\n\nImproving (mention only as encouragement, do NOT cue):\n${improvingLine}\n\nVocabulary to revisit:\n${vocabLine}\n\nWrite the prep brief.`
-    : `Alumno: ${input.studentName}. Idioma meta: ${input.language}.\n\nÁreas de enfoque (recurrentes/recientes — basa tus sugerencias en estas):\n${focusLines}\n\nMejorando (menciónalas solo como ánimo, NO sugieras):\n${improvingLine}\n\nVocabulario por repasar:\n${vocabLine}\n\nEscribe la preparación.`;
+  const user = `Student: ${input.studentName}. Target language: ${input.language}.\n\nFocus areas (recurring/recent — base your cues on these):\n${focusLines}\n\nImproving (mention only as encouragement, do NOT cue):\n${improvingLine}\n\nVocabulary to revisit:\n${vocabLine}\n\nWrite the prep brief in ${input.outputLanguage}.`;
 
   return { system, user };
 }

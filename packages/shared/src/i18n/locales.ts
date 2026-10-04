@@ -153,10 +153,12 @@ export function localeDirection(locale: AppLocale): "ltr" | "rtl" {
  * `usesEnglishCopy(locale) ? "English" : "Spanish"`, which told the model to
  * write English for every teacher who was not Spanish-speaking.
  */
-export function localeEnglishName(locale: string): string {
-  // Takes a string because its callers hold a locale read off a database row;
-  // definitionFor answers an unrecognised one with DEFAULT_LOCALE's.
-  return definitionFor(locale as AppLocale).englishName;
+export function localeEnglishName(locale: string | null | undefined): string {
+  // Takes whatever a database row holds, which may be a regional tag ("es-MX",
+  // "fr-CA") or nothing. Each is matched to the locale whose language it names,
+  // so a Mexican teacher's prompt says Spanish. An exact lookup said English to
+  // her. Anything else gets DEFAULT_LOCALE's name.
+  return definitionFor(matchAcceptLanguage(locale) ?? DEFAULT_LOCALE).englishName;
 }
 
 /**

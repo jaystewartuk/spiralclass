@@ -303,6 +303,23 @@ describe("buildMaterialPrompt — forClass: false (standalone library material)"
     expect(en.system).toContain("English");
   });
 
+  // The fallback was "English unless Spanish", so a French reader who left the
+  // output language unset got an English material. The user prompt is English
+  // for everyone: it is instructions to the model, not copy anyone reads.
+  it("writes in French for a French reader, and asks for it in English", () => {
+    const { system, user } = buildMaterialPrompt({ topic: "x", forClass: false, locale: "fr" });
+    expect(system).toContain("Write the material in French");
+    expect(user).toContain("Write the material now.");
+    const refine = buildMaterialRefinePrompt({
+      currentBody: "# x",
+      instruction: "shorter",
+      locale: "fr",
+    });
+    expect(refine.system).toContain("French");
+    expect(refine.system).not.toContain("English");
+    expect(refine.user).toContain("Return the full revised material now.");
+  });
+
   it("instructs the model to actually produce the chosen format, not describe it", () => {
     const { system } = buildMaterialPrompt({
       topic: "Comida",

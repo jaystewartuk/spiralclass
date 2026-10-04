@@ -8,23 +8,36 @@ import { buildIntroCoachPrompt, parseIntroCoachFeedback } from "@/lib/intro-vide
 // IntroCoachUnavailableError degrade path in the pipeline tests.
 
 describe("buildIntroCoachPrompt", () => {
-  it("writes a Spanish prompt embedding the transcript and duration when en=false", () => {
+  it("embeds the transcript and duration, and asks for the feedback in the named language", () => {
     const { system, user } = buildIntroCoachPrompt({
       transcript: "Hola, soy Mira y doy clases de inglés.",
       durationSec: 42,
-      en: false,
+      language: "Spanish",
     });
-    expect(system).toContain("JSON estricto");
-    expect(system).toContain("para quién son las clases");
+    expect(system).toContain("STRICT JSON");
+    expect(system).toContain("who the classes are for");
+    expect(system).toContain("Write every string in Spanish");
     expect(user).toContain("Hola, soy Mira y doy clases de inglés.");
-    expect(user).toContain("42 segundos");
+    expect(user).toContain("about 42 seconds");
+    expect(user).toContain("written in Spanish");
+  });
+
+  // One prompt for every language: a French teacher is coached in French,
+  // not in whichever of two hard-coded prompts a boolean picked.
+  it("is the same prompt in every language apart from the language", () => {
+    const input = { transcript: "Bonjour.", durationSec: 30 };
+    const fr = buildIntroCoachPrompt({ ...input, language: "French" });
+    const de = buildIntroCoachPrompt({ ...input, language: "German" });
+    expect(fr.system).toContain("Write every string in French");
+    expect(fr.system.replaceAll("French", "X")).toBe(de.system.replaceAll("German", "X"));
+    expect(fr.user.replaceAll("French", "X")).toBe(de.user.replaceAll("German", "X"));
   });
 
   it("writes an English prompt and states unknown length when duration is null", () => {
     const { system, user } = buildIntroCoachPrompt({
       transcript: "Hi, I'm Mira.",
       durationSec: null,
-      en: true,
+      language: "English",
     });
     expect(system).toContain("STRICT JSON");
     expect(system).toContain("who the classes are for");
@@ -33,7 +46,11 @@ describe("buildIntroCoachPrompt", () => {
   });
 
   it("substitutes a placeholder for an empty transcript rather than leaving it blank", () => {
-    const { user } = buildIntroCoachPrompt({ transcript: "   ", durationSec: 10, en: true });
+    const { user } = buildIntroCoachPrompt({
+      transcript: "   ",
+      durationSec: 10,
+      language: "English",
+    });
     expect(user).toContain("(no speech detected)");
   });
 });

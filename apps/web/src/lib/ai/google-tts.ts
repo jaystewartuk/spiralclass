@@ -8,7 +8,7 @@ import {
 import { logger } from "@/lib/logger";
 import { PODCAST_SCRIPT_MAX_CHARS } from "@/lib/materials/config";
 import type { SynthesizeOpts, SynthesizePodcastResult } from "./tts";
-import { usesEnglishCopy } from "@spiralclass/shared";
+import { localeEnglishName } from "@spiralclass/shared";
 
 const log = logger({ surface: "ai" });
 
@@ -47,14 +47,14 @@ const LANGUAGE_VOICES: Record<string, { languageCode: string; voice: string }> =
 
 // Resolve the languageCode + voice for this synthesis. Explicit env overrides
 // win; otherwise map the narration language (or the locale default) to a voice.
-// Mirrors buildPodcastScriptPrompt's own output-language default (locale → es/en).
+// Mirrors buildPodcastScriptPrompt's own output-language default — the
+// reader's language, by name — so the voice reads the language the script was
+// written in. Both used to say "English unless Spanish"; the script now follows
+// a French reader into French, and a voice left behind would read it in Spanish.
 function resolveVoice(opts?: SynthesizeOpts): { languageCode: string; voice: string } {
-  const name = (
-    opts?.language?.trim() || (usesEnglishCopy(opts?.locale) ? "English" : "Spanish")
-  ).toLowerCase();
-  const localeDefault = usesEnglishCopy(opts?.locale)
-    ? LANGUAGE_VOICES.english
-    : LANGUAGE_VOICES.spanish;
+  const localeLanguage = localeEnglishName(opts?.locale).toLowerCase();
+  const name = (opts?.language?.trim() || localeLanguage).toLowerCase();
+  const localeDefault = LANGUAGE_VOICES[localeLanguage] ?? LANGUAGE_VOICES.english;
   const base = LANGUAGE_VOICES[name] ?? localeDefault;
   return {
     languageCode: googleTtsLanguageCode() ?? base.languageCode,

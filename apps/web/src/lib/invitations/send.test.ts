@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { createT } from "@spiralclass/shared";
 import { buildInvitationEmail, invitationAcceptUrl, invitationEmailLocale } from "./send";
 
 describe("invitationEmailLocale", () => {
@@ -83,5 +84,16 @@ describe("buildInvitationEmail", () => {
     const { html } = buildInvitationEmail({ ...base, languageCode: "en" });
     expect(html).toContain("Book and reschedule");
     expect(html).toContain("AI-generated study materials");
+  });
+
+  // The benefit lines had their own es/en copy beside the catalog, so a French
+  // student's invitation was French with an English list in the middle.
+  it("lists the benefits in the student's language, from the catalog", () => {
+    const fr = buildInvitationEmail({ ...base, languageCode: "fr", messagingEnabled: true });
+    expect(fr.body).toContain(`• ${createT("fr")("invitation.benefit.scheduling")}`);
+    expect(fr.body).toContain(`• ${createT("fr")("invitation.benefit.messaging")}`);
+    expect(fr.body).not.toContain("Book and reschedule");
+    const es = buildInvitationEmail({ ...base, languageCode: "es" });
+    expect(es.body).toContain("• Agenda y reagenda tus clases en segundos.");
   });
 });

@@ -23,75 +23,50 @@ export type AiReviewPromptInput = {
   attachmentTexts: { fileName: string; text: string }[];
   // Optional teacher steer for this specific review request.
   teacherInstructions: string | null;
-  en: boolean;
+  // The language the review is written in — the teacher's reading language, as
+  // an English name ("French"); see localeEnglishName().
+  outputLanguage: string;
 };
 
+// One English prompt that names the language to write in. There were an English
+// and a Spanish copy chosen by a boolean, so a teacher reading French was sent
+// an English review to edit and pass on to her student.
 export function buildAiReviewPrompt(input: AiReviewPromptInput): {
   system: string;
   user: string;
 } {
-  const { en } = input;
-
-  const system = (
-    en
-      ? [
-          "You are a language-teaching assistant helping a teacher review one student's homework submission for a one-to-one lesson.",
-          "Analyse the student's answer against the assignment and (if provided) the source material's homework/exercise questions and answer key.",
-          "Hard rules you must follow:",
-          "- Base every correction/strength/weakness on the student's actual submitted text or attachments. Never invent content the student didn't write.",
-          "- Corrections should name the specific error and the fix, quoting the student's words where useful.",
-          "- Keep strengths and weaknesses short and concrete — a few bullet points each, not paragraphs.",
-          "- suggestedFeedback is a short, encouraging paragraph the teacher can edit and send to the student as-is; write it in the teacher's language, addressed to the student.",
-          "- suggestedScore (0-10, or omit if you cannot fairly judge) is only a starting point for the teacher, never a final grade.",
-          "- If the assignment includes an answer key, use it to judge correctness; if not, judge on effort, accuracy, and completeness given the instructions.",
-          "- Only emit grammarNotes when the material/assignment is clearly language-focused (grammar/vocabulary practice); otherwise omit it.",
-          "Return your review only through the emit_homework_review tool.",
-        ]
-      : [
-          "Eres un asistente de enseñanza de idiomas que ayuda a una profe a revisar la tarea de un alumno de una clase individual.",
-          "Analiza la respuesta del alumno frente a la tarea asignada y (si se proporciona) las preguntas del material de origen y su clave de respuestas.",
-          "Reglas estrictas que debes cumplir:",
-          "- Basa cada corrección/fortaleza/debilidad en el texto o los archivos que el alumno realmente envió. Nunca inventes contenido que el alumno no escribió.",
-          "- Las correcciones deben nombrar el error específico y la solución, citando las palabras del alumno cuando sea útil.",
-          "- Mantén las fortalezas y debilidades breves y concretas — unos pocos puntos cada una, no párrafos.",
-          "- suggestedFeedback es un párrafo breve y alentador que la profe puede editar y enviar al alumno tal cual; escríbelo en el idioma de la profe, dirigido al alumno.",
-          "- suggestedScore (0-10, u omítelo si no puedes juzgarlo con justicia) es solo un punto de partida para la profe, nunca una calificación final.",
-          "- Si la tarea incluye una clave de respuestas, úsala para juzgar la corrección; si no, evalúa el esfuerzo, la precisión y qué tan completa está la respuesta según las instrucciones.",
-          "- Solo incluye grammarNotes cuando el material/tarea esté claramente enfocado en el idioma (práctica de gramática/vocabulario); si no, omítelo.",
-          "Devuelve tu revisión únicamente mediante la herramienta emit_homework_review.",
-        ]
-  ).join("\n");
+  const language = input.outputLanguage;
+  const system = [
+    "You are a language-teaching assistant helping a teacher review one student's homework submission for a one-to-one lesson.",
+    "Analyse the student's answer against the assignment and (if provided) the source material's homework/exercise questions and answer key.",
+    `Write every string in ${language}. When you quote the student, quote their words as they wrote them.`,
+    "Hard rules you must follow:",
+    "- Base every correction/strength/weakness on the student's actual submitted text or attachments. Never invent content the student didn't write.",
+    "- Corrections should name the specific error and the fix, quoting the student's words where useful.",
+    "- Keep strengths and weaknesses short and concrete — a few bullet points each, not paragraphs.",
+    `- suggestedFeedback is a short, encouraging paragraph the teacher can edit and send to the student as-is; write it in ${language}, addressed to the student.`,
+    "- suggestedScore (0-10, or omit if you cannot fairly judge) is only a starting point for the teacher, never a final grade.",
+    "- If the assignment includes an answer key, use it to judge correctness; if not, judge on effort, accuracy, and completeness given the instructions.",
+    "- Only emit grammarNotes when the material/assignment is clearly language-focused (grammar/vocabulary practice); otherwise omit it.",
+    "Return your review only through the emit_homework_review tool.",
+  ].join("\n");
 
   const sections: string[] = [];
-  sections.push(en ? `Assignment: ${input.assignmentTitle}` : `Tarea: ${input.assignmentTitle}`);
+  sections.push(`Assignment: ${input.assignmentTitle}`);
   if (input.assignmentInstructions) {
-    sections.push((en ? "Instructions:\n" : "Instrucciones:\n") + input.assignmentInstructions);
+    sections.push(`Instructions:\n${input.assignmentInstructions}`);
   }
   if (input.materialExcerpt) {
-    sections.push(
-      (en
-        ? "Source material (questions/answer key):\n"
-        : "Material de origen (preguntas/clave de respuestas):\n") + input.materialExcerpt,
-    );
+    sections.push(`Source material (questions/answer key):\n${input.materialExcerpt}`);
   }
-  sections.push(
-    (en ? "Student's submitted text:\n" : "Texto enviado por el alumno:\n") +
-      (input.attemptText?.trim() || (en ? "(no text answer)" : "(sin respuesta escrita)")),
-  );
+  sections.push(`Student's submitted text:\n${input.attemptText?.trim() || "(no text answer)"}`);
   for (const att of input.attachmentTexts) {
-    sections.push(`${en ? "Attachment" : "Archivo adjunto"} "${att.fileName}":\n${att.text}`);
+    sections.push(`Attachment "${att.fileName}":\n${att.text}`);
   }
   if (input.teacherInstructions) {
-    sections.push(
-      (en ? "Teacher's steer for this review:\n" : "Indicación de la profe para esta revisión:\n") +
-        input.teacherInstructions,
-    );
+    sections.push(`Teacher's steer for this review:\n${input.teacherInstructions}`);
   }
-  sections.push(
-    en
-      ? "Review the submission and emit your findings."
-      : "Revisa la entrega y emite tus hallazgos.",
-  );
+  sections.push(`Review the submission and emit your findings, written in ${language}.`);
 
   return { system, user: sections.join("\n\n") };
 }

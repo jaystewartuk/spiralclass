@@ -9,7 +9,7 @@ import {
   BriefUnavailableError,
   type Brief,
 } from "./brief";
-import { usesEnglishCopy } from "@spiralclass/shared";
+import { localeEnglishName } from "@spiralclass/shared";
 
 // Phase F brief orchestration. On
 // demand — when the teacher opens an upcoming class — get the cached brief or
@@ -68,7 +68,7 @@ export async function getOrGenerateBrief(deps: BriefDeps, bookingId: string): Pr
       studentName: booking.student.name,
       language: DEFAULT_LESSON_LANGUAGE,
       profile: parsedProfile.data,
-      en: usesEnglishCopy(booking.teacher.locale),
+      outputLanguage: localeEnglishName(booking.teacher.locale),
     });
   } catch (err) {
     if (err instanceof BriefUnavailableError) return null; // degrade-gracefully

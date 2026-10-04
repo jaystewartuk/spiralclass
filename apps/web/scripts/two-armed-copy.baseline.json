@@ -1,16 +1,8 @@
 {
   "apps/web/src/app/(student)/my-classes/book/confirmation/page.tsx": 1,
-  "apps/web/src/app/actions/lesson-notes.ts": 1,
   "apps/web/src/app/terms/page.tsx": 2,
-  "apps/web/src/lib/ai/google-tts.ts": 2,
   "apps/web/src/lib/captions/deepgram-live.ts": 1,
   "apps/web/src/lib/email/templates.ts": 1,
-  "apps/web/src/lib/homework/ai-review.ts": 1,
-  "apps/web/src/lib/invitations/benefits.ts": 1,
-  "apps/web/src/lib/lesson-notes/brief-service.ts": 1,
-  "apps/web/src/lib/lesson-notes/insights.ts": 1,
-  "apps/web/src/lib/materials/podcast-prompt.ts": 1,
-  "apps/web/src/lib/materials/prompt.ts": 2,
   "apps/web/src/lib/pronunciation/config.ts": 1,
   "packages/shared/src/content/types.ts": 1,
   "packages/shared/src/money.ts": 1

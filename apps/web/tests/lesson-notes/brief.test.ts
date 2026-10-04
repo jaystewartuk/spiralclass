@@ -41,7 +41,12 @@ const PROFILE: StudentProfile = {
   speakingBalance: null,
 };
 
-const BASE: BriefInput = { studentName: "Mira", language: "es", profile: PROFILE, en: true };
+const BASE: BriefInput = {
+  studentName: "Mira",
+  language: "es",
+  profile: PROFILE,
+  outputLanguage: "English",
+};
 
 describe("buildBriefPrompt", () => {
   it("lists actionable focus areas with why-signal, leading with focus", () => {
@@ -70,10 +75,21 @@ describe("buildBriefPrompt", () => {
     expect(system).toContain("emit_brief");
   });
 
-  it("localizes to Spanish", () => {
-    const { system, user } = buildBriefPrompt({ ...BASE, en: false });
-    expect(system).toMatch(/Nunca inventes una debilidad/);
-    expect(user).toContain("Idioma meta: es");
+  // There were an English and a Spanish prompt chosen by a boolean, so a teacher
+  // reading French was briefed in Spanish. One prompt names the language now.
+  it.each(["Spanish", "French", "English"])("asks for the brief in %s", (outputLanguage) => {
+    const { system, user } = buildBriefPrompt({ ...BASE, outputLanguage });
+    expect(system).toContain(`Write every string in ${outputLanguage}.`);
+    expect(user).toContain(`Write the prep brief in ${outputLanguage}.`);
+    // the subject being learned is a separate thing from the reader's language
+    expect(user).toContain("Target language: es");
+  });
+
+  it("is the same prompt in every language apart from the language", () => {
+    const fr = buildBriefPrompt({ ...BASE, outputLanguage: "French" });
+    const es = buildBriefPrompt({ ...BASE, outputLanguage: "Spanish" });
+    expect(fr.system.replaceAll("French", "X")).toBe(es.system.replaceAll("Spanish", "X"));
+    expect(fr.user.replaceAll("French", "X")).toBe(es.user.replaceAll("Spanish", "X"));
   });
 
   it("handles an empty profile", () => {

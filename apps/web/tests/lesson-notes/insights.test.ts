@@ -23,7 +23,7 @@ const BASE: InsightsInput = {
     { body: "past tense", done: false },
   ],
   studentNotes: [{ body: "Practica el subjuntivo en casa" }],
-  en: true,
+  outputLanguage: "English",
 };
 
 describe("buildInsightsPrompt", () => {
@@ -48,15 +48,22 @@ describe("buildInsightsPrompt", () => {
     expect(system).toContain("emit_insights");
   });
 
-  it("localizes to Spanish for an es teacher", () => {
-    const { system, user } = buildInsightsPrompt({ ...BASE, en: false });
-    expect(system).toMatch(/Nunca inventes/);
-    expect(system).toMatch(/Nunca adivines la pronunciación/);
-    expect(user).toContain("Idioma meta");
-    expect(user).toContain("Spanish");
+  // There were an English and a Spanish prompt chosen by a boolean, so a teacher
+  // reading French got English findings. One prompt names the language now.
+  it.each(["Spanish", "French", "English"])("asks for the findings in %s", (outputLanguage) => {
+    const { system, user } = buildInsightsPrompt({ ...BASE, outputLanguage });
+    expect(system).toContain(`Write your summary/evidence/suggestion text in ${outputLanguage}`);
+    expect(user).toContain(`emit the focus areas, written in ${outputLanguage}.`);
   });
 
-  // Regression: the reading language (`en`, the TEACHER's own language) and the
+  it("is the same prompt in every language apart from the language", () => {
+    const fr = buildInsightsPrompt({ ...BASE, outputLanguage: "French" });
+    const de = buildInsightsPrompt({ ...BASE, outputLanguage: "German" });
+    expect(fr.system.replaceAll("French", "X")).toBe(de.system.replaceAll("German", "X"));
+    expect(fr.user.replaceAll("French", "X")).toBe(de.user.replaceAll("German", "X"));
+  });
+
+  // Regression: the reading language (the TEACHER's own language) and the
   // target language (what the class is taught IN) are independent facts — same
   // four-language-fields lesson as D-72/D-73, applied to this prompt. Passing
   // the target language as inert context let the model grade a student's
@@ -66,28 +73,27 @@ describe("buildInsightsPrompt", () => {
   // message must name the target language explicitly as the standard to grade
   // against, independent of which language the summary itself is written in.
   it("names the target language as the correctness standard, independent of the reading language", () => {
-    const es = buildInsightsPrompt({ ...BASE, en: false, targetLanguage: "es" });
-    expect(es.system).toContain("La clase se imparte en Spanish");
-    expect(es.system).toMatch(/juzga cada observación según SUS reglas/);
+    const es = buildInsightsPrompt({ ...BASE, outputLanguage: "Spanish", targetLanguage: "es" });
+    expect(es.system).toContain("The lesson is taught in Spanish");
+    expect(es.system).toMatch(/judge every finding against ITS grammar/);
 
-    const en = buildInsightsPrompt({ ...BASE, en: true, targetLanguage: "fr" });
+    const en = buildInsightsPrompt({ ...BASE, outputLanguage: "English", targetLanguage: "fr" });
     expect(en.system).toContain("The lesson is taught in French");
-    expect(en.system).toMatch(/judge every finding against ITS grammar/);
+    expect(en.user).toContain("grade correctness against it): French.");
 
     // Reading language Spanish, class taught in English: both facts hold at
     // once, independently.
-    const mixed = buildInsightsPrompt({ ...BASE, en: false, targetLanguage: "en" });
-    expect(mixed.system).toMatch(/Eres un asistente/);
-    expect(mixed.system).toContain("La clase se imparte en English");
+    const mixed = buildInsightsPrompt({ ...BASE, outputLanguage: "Spanish", targetLanguage: "en" });
+    expect(mixed.system).toContain("The lesson is taught in English");
+    expect(mixed.system).toContain("suggestion text in Spanish");
   });
 
   it("falls back to the raw code for a target language outside the registry", () => {
     const { system } = buildInsightsPrompt({
       ...BASE,
-      en: false,
       targetLanguage: "zz-not-a-language",
     });
-    expect(system).toContain("La clase se imparte en zz-not-a-language");
+    expect(system).toContain("The lesson is taught in zz-not-a-language");
   });
 
   it("handles an empty transcript without crashing", () => {

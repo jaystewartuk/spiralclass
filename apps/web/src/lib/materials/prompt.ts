@@ -16,7 +16,7 @@ import {
   CALLOUT_VARIANTS,
   DEFAULT_LESSON_FORMAT,
   DEFAULT_MATERIAL_VOCABULARY,
-  usesEnglishCopy,
+  localeEnglishName,
 } from "@spiralclass/shared";
 import type {
   LessonFormat,
@@ -215,13 +215,13 @@ export type MaterialPrompt = { system: string; user: string };
 // Markdown (the canonical material format); the model is told to return
 // content only, no preamble, no surrounding code fence.
 export function buildMaterialPrompt(input: MaterialPromptInput): MaterialPrompt {
-  const en = usesEnglishCopy(input.locale);
-  // An explicit output language wins; otherwise fall back to the UI locale. The
-  // fallback must be a plain registry name ("Spanish", not "Castilian Spanish
-  // (es-ES)") because it is compared against targetLanguage below — a regional
-  // qualifier here would read as a different language and wrongly split the
-  // output.
-  const language = input.language?.trim() || (en ? "English" : "Spanish");
+  // An explicit output language wins; otherwise fall back to the UI locale's
+  // language. The fallback must be a plain registry name ("Spanish", not
+  // "Castilian Spanish (es-ES)") because it is compared against targetLanguage
+  // below — a regional qualifier here would read as a different language and
+  // wrongly split the output. It was "English unless Spanish", which wrote a
+  // French reader's material in English.
+  const language = input.language?.trim() || localeEnglishName(input.locale);
   const templateBody = input.templateBody?.trim();
   const format = input.formatLabel?.trim();
   const target = input.targetLanguage?.trim();
@@ -363,11 +363,7 @@ export function buildMaterialPrompt(input: MaterialPromptInput): MaterialPrompt 
       `Required lesson structure — reproduce these section headings, in this order, and fill each one for this student:\n${templateBody}`,
     );
   }
-  lines.push(
-    en
-      ? `Write the ${input.forClass ? "class content" : "material"} now.`
-      : `Escribe ahora ${input.forClass ? "el contenido de la clase" : "el material"}.`,
-  );
+  lines.push(`Write the ${input.forClass ? "class content" : "material"} now.`);
 
   return { system, user: lines.join("\n") };
 }
@@ -412,11 +408,10 @@ export type MaterialRefinePromptInput = {
 };
 
 export function buildMaterialRefinePrompt(input: MaterialRefinePromptInput): MaterialPrompt {
-  const en = usesEnglishCopy(input.locale);
   // Mirror buildMaterialPrompt's resolution so a refine keeps the material in
   // the same language it was written in — and, for a language teacher, keeps
   // instructions and target-language content on their respective axes.
-  const language = input.language?.trim() || (en ? "English" : "Spanish");
+  const language = input.language?.trim() || localeEnglishName(input.locale);
   const target = input.targetLanguage?.trim();
   const teachesOtherLanguage = Boolean(target && target !== language);
 
@@ -460,7 +455,7 @@ export function buildMaterialRefinePrompt(input: MaterialRefinePromptInput): Mat
     ``,
     `Change to make: ${input.instruction.trim()}`,
     ``,
-    en ? `Return the full revised material now.` : `Devuelve ahora el material completo revisado.`,
+    `Return the full revised material now.`,
   ].join("\n");
 
   return { system, user };

@@ -196,11 +196,11 @@ describe("processIntroVideoReady", () => {
     });
 
     // Fed the joined utterance text, duration in whole seconds, and her
-    // es locale → en:false.
+    // es locale → Spanish.
     expect(generateFeedback).toHaveBeenCalledWith({
       transcript: "Hola, soy Mira.",
       durationSec: 45,
-      en: false,
+      language: "Spanish",
     });
     // …then the feedback is persisted on the analysis row.
     expect(update).toHaveBeenCalledWith(
@@ -212,7 +212,7 @@ describe("processIntroVideoReady", () => {
     expect(res).toEqual({ ok: true, utterances: 1 });
   });
 
-  it("passes en:true for an English-locale teacher and null duration when unknown", async () => {
+  it("asks for English for an English-locale teacher and null duration when unknown", async () => {
     const { deps, generateFeedback } = makeDeps({
       teacher: {
         introVideoPath: VIDEO_PATH,
@@ -224,7 +224,7 @@ describe("processIntroVideoReady", () => {
     });
     await processIntroVideoReady(deps, { teacherId: TEACHER_ID, videoPath: VIDEO_PATH });
     expect(generateFeedback).toHaveBeenCalledWith(
-      expect.objectContaining({ en: true, durationSec: null }),
+      expect.objectContaining({ language: "English", durationSec: null }),
     );
   });
 
@@ -323,7 +323,7 @@ describe("language resolution", () => {
       generateFeedback: async () => ({ overall: "ok", strengths: [], improvements: [] }),
     });
     await processIntroVideoReady(deps, { teacherId: TEACHER_ID, videoPath: VIDEO_PATH });
-    expect(generateFeedback).toHaveBeenCalledWith(expect.objectContaining({ en: false }));
+    expect(generateFeedback).toHaveBeenCalledWith(expect.objectContaining({ language: "Spanish" }));
   });
 
   it("writes feedback in her UI locale, not the language of the audio", async () => {
@@ -341,7 +341,7 @@ describe("language resolution", () => {
       generateFeedback: async () => ({ overall: "ok", strengths: [], improvements: [] }),
     });
     await processIntroVideoReady(deps, { teacherId: TEACHER_ID, videoPath: VIDEO_PATH });
-    expect(generateFeedback).toHaveBeenCalledWith(expect.objectContaining({ en: false }));
+    expect(generateFeedback).toHaveBeenCalledWith(expect.objectContaining({ language: "Spanish" }));
   });
 
   it("writes English feedback about a Spanish-spoken clip for an English-locale teacher", async () => {
@@ -358,7 +358,30 @@ describe("language resolution", () => {
     });
     await processIntroVideoReady(deps, { teacherId: TEACHER_ID, videoPath: VIDEO_PATH });
     expect(transcribe).toHaveBeenCalledWith(expect.objectContaining({ language: "es" }));
-    expect(generateFeedback).toHaveBeenCalledWith(expect.objectContaining({ en: true }));
+    expect(generateFeedback).toHaveBeenCalledWith(expect.objectContaining({ language: "English" }));
+  });
+
+  // The language was a boolean — "does her locale start with en?" — and the
+  // prompt had an English arm and a Spanish one, so a French reader was coached
+  // in Spanish. A locale the app does not know falls back to the default.
+  it.each([
+    ["fr", "French"],
+    ["fr-CA", "French"],
+    ["es-MX", "Spanish"],
+    ["de", "English"],
+    [null, "English"],
+  ])("coaches a teacher whose locale is %s in %s", async (locale, language) => {
+    const { deps, generateFeedback } = makeDeps({
+      teacher: {
+        introVideoPath: VIDEO_PATH,
+        teachingLanguage: "es",
+        locale,
+        introVideoDurationMs: 40000,
+      },
+      generateFeedback: async () => ({ overall: "ok", strengths: [], improvements: [] }),
+    });
+    await processIntroVideoReady(deps, { teacherId: TEACHER_ID, videoPath: VIDEO_PATH });
+    expect(generateFeedback).toHaveBeenCalledWith(expect.objectContaining({ language }));
   });
 });
 
