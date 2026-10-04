@@ -26,6 +26,7 @@ export const en = {
   "common.pagination.page": "Page",
   "common.pagination.prev": "Prev",
   "common.pagination.next": "Next",
+  "common.pagination.navigation": "Pagination",
   "common.loading": "Loading…",
   "common.image": "Image",
   "common.error": "Something went wrong",

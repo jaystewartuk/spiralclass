@@ -29,6 +29,8 @@ export type PaginationLabels = {
   page?: string;
   prev?: string;
   next?: string;
+  /** The control's accessible name. */
+  navigation?: string;
 };
 
 export function Pagination({
@@ -52,6 +54,7 @@ export function Pagination({
     page: "Page",
     prev: "Prev",
     next: "Next",
+    navigation: "Pagination",
     ...labels,
   };
 
@@ -61,7 +64,7 @@ export function Pagination({
         "flex flex-wrap items-center justify-between gap-3 text-sm text-muted-foreground",
         className,
       )}
-      aria-label="Pagination"
+      aria-label={L.navigation}
     >
       <p>
         {total === 0 ? (

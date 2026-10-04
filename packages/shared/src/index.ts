@@ -61,4 +61,6 @@ export * from "./class-offering";
 export * from "./two-person";
 export * from "./referrals";
 export * from "./brand/mark";
+export * from "./brand/name";
+export * from "./duration";
 export * from "./source-code";

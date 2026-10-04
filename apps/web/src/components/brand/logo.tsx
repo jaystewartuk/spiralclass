@@ -1,5 +1,6 @@
 import { MARK, MARK_SIMPLIFY_BELOW, MARK_SMALL } from "@spiralclass/shared";
 import { cn } from "@/lib/utils";
+import { BRAND_NAME } from "@spiralclass/shared";
 
 /**
  * The mark, drawn from the shared geometry rather than from a copy of it.
@@ -58,7 +59,7 @@ export function LogoMark({
       xmlns="http://www.w3.org/2000/svg"
       className={cn("shrink-0", className)}
       role="img"
-      aria-label="SpiralClass"
+      aria-label={BRAND_NAME}
       fill="none"
     >
       {small || variant === "mono" ? (
@@ -89,7 +90,7 @@ export function LogoMark({
 function Wordmark({ className }: { className?: string }) {
   return (
     <span className={cn("font-bold tracking-wordmark text-foreground", className)}>
-      SpiralClass
+      {BRAND_NAME}
     </span>
   );
 }

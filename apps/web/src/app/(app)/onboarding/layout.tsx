@@ -5,6 +5,7 @@ import { AccountBadge } from "@/components/account-badge";
 import { SignOutButton } from "@/components/sign-out-button";
 import { getT } from "@/lib/i18n";
 import { OnboardingStepper, OnboardingBack } from "./stepper";
+import { BRAND_NAME } from "@spiralclass/shared";
 
 export default async function OnboardingLayout({ children }: { children: React.ReactNode }) {
   const teacher = await requireTeacher();
@@ -19,7 +20,7 @@ export default async function OnboardingLayout({ children }: { children: React.R
         <SignOutButton label={t("common.signOut")} />
       </div>
       <div className="mb-8 flex justify-center">
-        <Link href="/dashboard" aria-label="SpiralClass">
+        <Link href="/dashboard" aria-label={BRAND_NAME}>
           <Logo size="md" />
         </Link>
       </div>

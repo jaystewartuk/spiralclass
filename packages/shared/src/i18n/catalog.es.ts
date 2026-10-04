@@ -29,6 +29,7 @@ export const esMX = {
   "common.pagination.page": "Página",
   "common.pagination.prev": "Anterior",
   "common.pagination.next": "Siguiente",
+  "common.pagination.navigation": "Paginación",
   "common.loading": "Cargando…",
   "common.image": "Imagen",
   "common.error": "Algo salió mal",

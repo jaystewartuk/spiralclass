@@ -656,7 +656,7 @@ export function UatRunbook({
                     <Input
                       id="uat-g-payment"
                       name="paymentId"
-                      placeholder="uuid"
+                      placeholder="00000000-0000-0000-0000-000000000000"
                       className="h-12 text-base"
                     />
                     <Button type="submit" size="lg" className="w-full" disabled={stripeGPending}>
