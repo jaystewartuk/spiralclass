@@ -5479,6 +5479,8 @@ export const fr = {
   "web.terms.meta.description": "Les conditions générales d'utilisation de SpiralClass.",
   "web.legal.englishOnly":
     "Pour l'instant, ce document n'existe qu'en anglais. C'est le texte anglais qui fait foi.",
+  "web.legal.translationOutdated":
+    "La traduction de ce document est en cours de mise à jour. En attendant, voici le texte anglais en vigueur, qui est celui qui s'applique.",
   "web.privacyNotice.meta.title": "Politique de confidentialité",
   "web.privacyNotice.meta.description":
     "Comment SpiralClass collecte, utilise et protège vos données personnelles, conformément au RGPD du Royaume-Uni.",

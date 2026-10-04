@@ -5502,6 +5502,8 @@ export const esMX = {
   "web.terms.meta.description": "Los términos y condiciones de uso de SpiralClass.",
   "web.legal.englishOnly":
     "Por ahora, este documento solo está disponible en inglés. El texto en inglés es el que se aplica.",
+  "web.legal.translationOutdated":
+    "La traducción de este documento se está actualizando. Mientras tanto, este es el texto vigente en inglés, que es el que se aplica.",
   "web.privacyNotice.meta.title": "Política de privacidad",
   "web.privacyNotice.meta.description":
     "Cómo SpiralClass recopila, usa y protege tus datos personales, conforme al RGPD del Reino Unido.",
