@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
+import { renderToStaticMarkup } from "react-dom/server";
 import {
   CANCELLATION_POLICY_ANCHOR,
   LEGACY_CANCELLATION_ANCHOR,
@@ -8,7 +9,7 @@ import {
 } from "@/lib/terms-anchors";
 
 /**
- * The cancellation-policy deep links land on the clause, in both languages.
+ * The cancellation-policy deep links land on the clause, in every language.
  *
  * A URL fragment never reaches the server, so a link pointing at an id the
  * page does not carry fails in the only way that cannot be detected from
@@ -16,32 +17,47 @@ import {
  * document, and the reader is left to find the clause. Nothing that checks
  * status codes — the link checker, the E2E suite, an uptime probe — sees it.
  *
- * So both ends are pinned here against the rendered source: the ids the page
- * carries, and the ids the links point at.
+ * So both ends are pinned here: the ids the rendered page carries, and the ids
+ * the links point at. The page renders every document through one function
+ * (the documents are data, D-196), so it is checked rendered, per language.
  */
+
+const urlLocale = vi.hoisted(() => ({ value: "en" }));
+vi.mock("next/headers", () => ({
+  cookies: async () => ({ get: () => undefined }),
+  headers: async () => ({ get: (n: string) => (n === "x-locale" ? urlLocale.value : null) }),
+}));
+vi.mock("@/lib/env", () => ({ hasStripeCreds: () => true }));
 
 const TERMS_SOURCE = readFileSync(resolve(__dirname, "../../src/app/terms/page.tsx"), "utf8");
 
-/** How many times the page renders a given anchor constant. */
-function anchorRenders(constantName: string): number {
-  return TERMS_SOURCE.split(`id={${constantName}}`).length - 1;
+async function renderedTerms(locale: "en" | "es" | "fr"): Promise<string> {
+  urlLocale.value = locale;
+  const { default: TermsPage } = await import("@/app/terms/page");
+  return renderToStaticMarkup(await TermsPage());
 }
 
-describe("/terms cancellation anchor", () => {
-  it("is carried by both language variants", () => {
-    // Two: the Spanish document and the English one. A reader following a link
-    // must reach the clause whichever variant answers.
-    expect(anchorRenders("CANCELLATION_POLICY_ANCHOR")).toBe(2);
-  });
+const count = (html: string, id: string) => html.split(`id="${id}"`).length - 1;
 
-  it("keeps the earlier id reachable in both variants", () => {
-    // Cancellation and deduction emails carry it and are already delivered, so
-    // this is not a link anybody can go and fix. Rendered through a component
-    // — one `id={…}`, placed twice — so this counts the placements.
-    expect(TERMS_SOURCE.split("<LegacyCancellationAnchor />").length - 1).toBe(2);
-    expect(anchorRenders("LEGACY_CANCELLATION_ANCHOR")).toBe(1);
-    expect(LEGACY_CANCELLATION_ANCHOR).toBe("cancelaciones");
-  });
+describe("/terms cancellation anchor", () => {
+  it.each(["en", "es", "fr"] as const)(
+    "is carried exactly once by the document a %s reader gets",
+    async (locale) => {
+      const html = await renderedTerms(locale);
+      expect(count(html, CANCELLATION_POLICY_ANCHOR)).toBe(1);
+    },
+  );
+
+  // Cancellation and deduction emails carry the earlier id and are already
+  // delivered, so it is not a link anybody can go and fix.
+  it.each(["en", "es"] as const)(
+    "keeps the earlier id reachable for a %s reader",
+    async (locale) => {
+      const html = await renderedTerms(locale);
+      expect(count(html, LEGACY_CANCELLATION_ANCHOR)).toBe(1);
+      expect(LEGACY_CANCELLATION_ANCHOR).toBe("cancelaciones");
+    },
+  );
 
   it("renders the ids as constants, not as repeated string literals", () => {
     // The failure this guards is drift between the page and the links, which

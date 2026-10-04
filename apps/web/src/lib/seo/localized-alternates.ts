@@ -1,5 +1,11 @@
 import type { Metadata } from "next";
-import { DEFAULT_LOCALE, LOCALES, localizedPath, type AppLocale } from "@spiralclass/shared";
+import {
+  DEFAULT_LOCALE,
+  LOCALES,
+  localizedPath,
+  termsLanguages,
+  type AppLocale,
+} from "@spiralclass/shared";
 
 // The canonical URL and the hreflang set for a localized public page (D-193).
 //
@@ -10,9 +16,9 @@ import { DEFAULT_LOCALE, LOCALES, localizedPath, type AppLocale } from "@spiralc
 // says so here, and its other URLs canonicalise to the default one.
 
 const DOCUMENT_LANGUAGES: Readonly<Record<string, readonly AppLocale[]>> = {
-  // Two authored documents. Legal text is translated by a person or not at
-  // all (D-196), and only these two exist.
-  "/terms": ["en", "es"],
+  // English, plus each translation that is current (D-196): a translation
+  // behind the English is not advertised as the terms.
+  "/terms": termsLanguages(),
   // English only (D-128).
   "/privacy-notice": ["en"],
 };

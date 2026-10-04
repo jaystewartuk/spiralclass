@@ -562,7 +562,7 @@ records removed before publication — see [What is not here](#what-is-not-here)
 | [D-193](./D-193.md) | One URL per language on public pages; bare URL is English             | Active                               |
 | [D-194](./D-194.md) | The booking page's language is the teacher's; no visitor switch       | Active (records existing behaviour)  |
 | [D-195](./D-195.md) | One locale per language; a regional locale is a delta over its base   | Decided, not built                   |
-| [D-196](./D-196.md) | Legal text: a person translates, English controls, launch needs it    | Decided, not built                   |
+| [D-196](./D-196.md) | Legal text: a person translates, English controls, launch needs it    | Partly built                         |
 | [D-197](./D-197.md) | Prices follow the reader's number format; currency always named       | Decided, not built                   |
 
 ---
