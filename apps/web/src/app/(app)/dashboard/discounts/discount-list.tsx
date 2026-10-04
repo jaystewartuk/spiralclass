@@ -56,10 +56,10 @@ export type ListContext = {
 };
 
 /** What the code takes off: "15%" or "£20". */
-function valueLabel(row: DiscountRow): string {
+function valueLabel(row: DiscountRow, locale: AppLocale): string {
   return row.kind === "percent"
     ? `${(row.percentBps ?? 0) / 100}%`
-    : formatMinorUnits(row.amountMinorUnits ?? 0, row.currency);
+    : formatMinorUnits(row.amountMinorUnits ?? 0, row.currency, locale);
 }
 
 /**
@@ -163,11 +163,11 @@ function DiscountRowView({ row, ctx }: { row: DiscountRow; ctx: ListContext }) {
     row.totals.givenMinorUnits > 0 || row.totals.salesMinorUnits > 0
       ? row.totals.salesMinorUnits > 0
         ? t("web.dashboard.discounts.gaveAwayOnSales", {
-            amount: formatMinorUnits(row.totals.givenMinorUnits, row.currency),
-            sales: formatMinorUnits(row.totals.salesMinorUnits, row.currency),
+            amount: formatMinorUnits(row.totals.givenMinorUnits, row.currency, locale),
+            sales: formatMinorUnits(row.totals.salesMinorUnits, row.currency, locale),
           })
         : t("web.dashboard.discounts.gaveAway", {
-            amount: formatMinorUnits(row.totals.givenMinorUnits, row.currency),
+            amount: formatMinorUnits(row.totals.givenMinorUnits, row.currency, locale),
           })
       : null;
 
@@ -183,7 +183,7 @@ function DiscountRowView({ row, ctx }: { row: DiscountRow; ctx: ListContext }) {
             {row.code}
           </span>
           <span className="text-sm font-medium">
-            {t("web.dashboard.discounts.valueOff", { value: valueLabel(row) })}
+            {t("web.dashboard.discounts.valueOff", { value: valueLabel(row, locale) })}
           </span>
           <Badge variant={badge.variant}>{t(badge.key)}</Badge>
           {/* One warning at most, and only while it can still be acted on. */}

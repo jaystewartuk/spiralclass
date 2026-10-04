@@ -3,6 +3,7 @@ import {
   DEFAULT_LOCALE,
   SYSTEM_LOCALE,
   isAppLocale,
+  formatMinorUnits,
   isLocalePreference,
   localizedHref,
   matchAcceptLanguage,
@@ -106,6 +107,13 @@ export async function getLanguagePickerValue(): Promise<LocalePreference> {
   } catch {
     return preference;
   }
+}
+
+/** Server-side counterpart of `useFormatMoney()`: prices in the request's
+ * locale's number format (D-197). */
+export async function getFormatMoney(): Promise<(minorUnits: number, currency?: string) => string> {
+  const locale = await getPreferredLocale();
+  return (minorUnits: number, currency?: string) => formatMinorUnits(minorUnits, currency, locale);
 }
 
 /** Server-side counterpart of `useLocalizedHref()`: hrefs to public pages in

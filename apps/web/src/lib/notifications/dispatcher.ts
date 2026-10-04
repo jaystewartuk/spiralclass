@@ -1571,7 +1571,7 @@ export async function buildVariables(
           teacherName,
           packageName:
             payment.package.template?.name ?? packagePlaceholder(ctx.recipientLocale, "yours"),
-          amount: formatMinorUnits(payment.amountMinorUnits, payment.currency),
+          amount: formatMinorUnits(payment.amountMinorUnits, payment.currency, ctx.recipientLocale),
           portalPathSuffix: `r/p/${md.packageId ?? payment.package.id}`,
         },
       };
@@ -1625,7 +1625,7 @@ export async function buildVariables(
           studentName: payment.package.student.name.trim(),
           packageName:
             payment.package.template?.name ?? packagePlaceholder(ctx.recipientLocale, "indefinite"),
-          amount: formatMinorUnits(payment.amountMinorUnits, payment.currency),
+          amount: formatMinorUnits(payment.amountMinorUnits, payment.currency, ctx.recipientLocale),
           wiseReference: payment.paymentReference ?? "(sin referencia)",
           paymentPathSuffix: `payments/${payment.id}`,
         },
@@ -1673,7 +1673,7 @@ export async function buildVariables(
           studentName: payment.package.student.name.trim(),
           packageName:
             payment.package.template?.name ?? packagePlaceholder(ctx.recipientLocale, "indefinite"),
-          amount: formatMinorUnits(payment.amountMinorUnits, payment.currency),
+          amount: formatMinorUnits(payment.amountMinorUnits, payment.currency, ctx.recipientLocale),
           paymentPathSuffix: `payments/${payment.id}`,
         },
       };
@@ -1718,7 +1718,7 @@ export async function buildVariables(
           teacherName,
           packageName:
             payment.package.template?.name ?? packagePlaceholder(ctx.recipientLocale, "yours"),
-          amount: formatMinorUnits(payment.amountMinorUnits, payment.currency),
+          amount: formatMinorUnits(payment.amountMinorUnits, payment.currency, ctx.recipientLocale),
           portalPathSuffix: "my-classes",
         },
       };
@@ -1742,7 +1742,7 @@ export async function buildVariables(
           studentName: payment.package.student.name.trim(),
           packageName:
             payment.package.template?.name ?? packagePlaceholder(ctx.recipientLocale, "indefinite"),
-          amount: formatMinorUnits(payment.amountMinorUnits, payment.currency),
+          amount: formatMinorUnits(payment.amountMinorUnits, payment.currency, ctx.recipientLocale),
           paymentPathSuffix: `payments/${payment.id}`,
         },
       };
@@ -1768,7 +1768,7 @@ export async function buildVariables(
           teacherName,
           packageName:
             payment.package.template?.name ?? packagePlaceholder(ctx.recipientLocale, "yours"),
-          amount: formatMinorUnits(payment.amountMinorUnits, payment.currency),
+          amount: formatMinorUnits(payment.amountMinorUnits, payment.currency, ctx.recipientLocale),
           portalPathSuffix: "my-classes",
         },
       };
@@ -1792,7 +1792,7 @@ export async function buildVariables(
           studentName: payment.package.student.name.trim(),
           packageName:
             payment.package.template?.name ?? packagePlaceholder(ctx.recipientLocale, "indefinite"),
-          amount: formatMinorUnits(payment.amountMinorUnits, payment.currency),
+          amount: formatMinorUnits(payment.amountMinorUnits, payment.currency, ctx.recipientLocale),
           paymentPathSuffix: `payments/${payment.id}`,
         },
       };
@@ -2255,6 +2255,7 @@ export async function buildVariables(
           amount: formatMinorUnits(
             md.amountMinorUnits ?? 0,
             md.currency ?? PLATFORM_FALLBACK_CURRENCY,
+            ctx.recipientLocale,
           ),
           nextChargeDate: md.nextChargeAt
             ? formatDateTimeInZone(
@@ -2293,6 +2294,7 @@ export async function buildVariables(
           amount: formatMinorUnits(
             md.amountMinorUnits ?? 0,
             md.currency ?? PLATFORM_FALLBACK_CURRENCY,
+            ctx.recipientLocale,
           ),
           billingPathSuffix: "settings/billing",
         },

@@ -100,7 +100,7 @@ export function planOptions({
       : t("web.settings.billing.interval.monthly");
 
   const priceLabel = (plan: Exclude<SubscriptionPlan, "free">) =>
-    formatMinorUnits(PLAN_PRICE_MINOR_UNITS[plan], PLATFORM_MONEY_CURRENCY);
+    formatMinorUnits(PLAN_PRICE_MINOR_UNITS[plan], PLATFORM_MONEY_CURRENCY, locale);
 
   const options: PlanOption[] = [
     {
@@ -122,13 +122,17 @@ export function planOptions({
       equivalentLabel:
         perMonthMinorUnits("annual") < PLAN_PRICE_MINOR_UNITS.monthly
           ? t("web.settings.billing.perMonth", {
-              amount: formatMinorUnits(perMonthMinorUnits("annual"), PLATFORM_MONEY_CURRENCY),
+              amount: formatMinorUnits(
+                perMonthMinorUnits("annual"),
+                PLATFORM_MONEY_CURRENCY,
+                locale,
+              ),
             })
           : undefined,
       highlight:
         annualSaving > 0
           ? t("web.settings.billing.annualSaving", {
-              amount: formatMinorUnits(annualSaving, PLATFORM_MONEY_CURRENCY),
+              amount: formatMinorUnits(annualSaving, PLATFORM_MONEY_CURRENCY, locale),
             })
           : undefined,
     },

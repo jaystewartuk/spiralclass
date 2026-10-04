@@ -105,7 +105,7 @@ export function BillingHistory({
                     })}
                   </TableCell>
                   <TableCell className="text-right tabular-nums">
-                    {formatMinorUnits(entry.amountMinorUnits, entry.currency)}
+                    {formatMinorUnits(entry.amountMinorUnits, entry.currency, locale)}
                   </TableCell>
                   <TableCell className="text-right">
                     <Badge variant={STATUS_VARIANT[entry.status]}>

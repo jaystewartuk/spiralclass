@@ -12,7 +12,7 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { Badge, type BadgeProps } from "@/components/ui/badge";
-import { useLocale, useT } from "@/components/locale-provider";
+import { useFormatMoney, useLocale, useT } from "@/components/locale-provider";
 import { formatMinorUnits } from "@/lib/money";
 import { cn } from "@/lib/utils";
 import type { StringKey } from "@/lib/i18n-translate";
@@ -66,6 +66,7 @@ export function PackageDetailsSheet({
   className?: string;
 }) {
   const t = useT();
+  const formatMoney = useFormatMoney();
   const locale = useLocale();
   const [open, setOpen] = useState(false);
   const [data, setData] = useState<PackageDetails | null>(null);
@@ -182,7 +183,7 @@ export function PackageDetailsSheet({
               <div className="flex items-center justify-between border-t pt-4 text-sm">
                 <span className="text-muted-foreground">{t("web.packageDetails.price")}</span>
                 <span className="font-medium">
-                  {formatMinorUnits(data.price.amountMinorUnits, data.price.currency)}
+                  {formatMoney(data.price.amountMinorUnits, data.price.currency)}
                 </span>
               </div>
             )}

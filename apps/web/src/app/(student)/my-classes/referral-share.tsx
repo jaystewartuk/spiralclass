@@ -5,7 +5,7 @@ import { formatMinorUnits } from "@/lib/money";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { CopyLinkButton } from "@/components/copy-link-button";
-import { getT } from "@/lib/i18n";
+import { getPreferredLocale, getT } from "@/lib/i18n";
 
 // Student-facing "refer a friend" surface in the portal (slice 2b). For each
 // teacher the student is actively rostered with whose referral program is on,
@@ -13,6 +13,7 @@ import { getT } from "@/lib/i18n";
 // lazily here on first view — same pattern as the iCal feed token.
 export async function ReferralShare({ studentIds }: { studentIds: string[] }) {
   const t = await getT();
+  const locale = await getPreferredLocale();
   const appUrl = serverEnv().APP_URL.replace(/\/$/, "");
 
   const links = await prisma.teacherStudent.findMany({
@@ -68,7 +69,7 @@ export async function ReferralShare({ studentIds }: { studentIds: string[] }) {
       const label =
         program.referredKind === "percent"
           ? `${(program.referredPercentBps ?? 0) / 100}%`
-          : formatMinorUnits(program.referredAmountMinorUnits ?? 0, program.currency);
+          : formatMinorUnits(program.referredAmountMinorUnits ?? 0, program.currency, locale);
       const url = `${appUrl}/b/${l.teacher.bookingSlug}?ref=${code}`;
       const waText = t("web.studentHome.referral.waText", {
         teacherName: l.teacher.name,

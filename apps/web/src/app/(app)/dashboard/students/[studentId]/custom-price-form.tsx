@@ -9,7 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { FieldError } from "@/components/ui/field-error";
 import { useFieldErrors } from "@/hooks/use-field-errors";
 import { setStudentCustomPrice, type OverrideState } from "@/app/actions/overrides";
-import { useT } from "@/components/locale-provider";
+import { useFormatMoney, useT } from "@/components/locale-provider";
 import { usePricingCurrency } from "@/components/pricing-currency-context";
 
 // Grandfathering UI, PER PACKAGE. One row per sellable package; an empty
@@ -41,6 +41,7 @@ export function CustomPriceForm({
   current: Record<string, number>;
 }) {
   const t = useT();
+  const formatMoney = useFormatMoney();
   const currency = usePricingCurrency();
   const [pesos, setPesos] = useState<Record<string, string>>(() =>
     Object.fromEntries(
@@ -141,7 +142,7 @@ export function CustomPriceForm({
             <FieldError id={`price-${tpl.id}-error`} message={errors[tpl.id]} />
             <p className="text-xs text-muted-foreground">
               {t("web.dashboard.students.price.catalogPrice", {
-                price: formatMinorUnits(tpl.priceMinorUnits, currency),
+                price: formatMoney(tpl.priceMinorUnits, currency),
               })}
             </p>
           </div>

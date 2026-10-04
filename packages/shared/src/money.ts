@@ -1,4 +1,4 @@
-import { intlLocale, usesEnglishCopy } from "./i18n/locales";
+import { DEFAULT_LOCALE, intlLocale, matchAcceptLanguage, usesEnglishCopy } from "./i18n/locales";
 // Shared money formatting. Amounts are integer minor units (centavos for MXN);
 // each amount also carries a currency code recording what it's denominated in.
 //
@@ -88,14 +88,27 @@ export function currencyExponent(currency: string): number {
 // distinct currencies onto a shared glyph (MXN and USD are both "$" here), so
 // the glyph alone would be ambiguous — the appended code is the disambiguator.
 // The two have to stay together; don't drop the suffix from `formatMinorUnits`.
+//
+// The NUMBER follows the reader (D-197): separators, grouping and where the
+// symbol sits are the reader's locale's, through the registry's `intl` tag.
+// It was `en-US` for everyone, and in French or German the comma is the
+// DECIMAL separator, so "$25,000 CLP" read as twenty-five pesos and
+// "¥1,500 JPY" as one and a half yen. The currency never follows the reader:
+// it is the price's own, and the code suffix names it exactly once in every
+// locale. Measured when D-197 was decided: Spanish (`es-419`) and English
+// output is byte-identical to the old `en-US` rendering; only other languages
+// change.
 const formatters = new Map<string, Intl.NumberFormat>();
 
-function formatterFor(currency: string): Intl.NumberFormat {
+function formatterFor(currency: string, locale?: string | null): Intl.NumberFormat {
   const code = currency.toUpperCase();
-  let formatter = formatters.get(code);
+  // A stored tag ("es-MX") reads as its language; anything unknown, or none, as DEFAULT_LOCALE.
+  const tag = intlLocale(matchAcceptLanguage(locale) ?? DEFAULT_LOCALE);
+  const key = `${tag}|${code}`;
+  let formatter = formatters.get(key);
   if (!formatter) {
     try {
-      formatter = new Intl.NumberFormat("en-US", {
+      formatter = new Intl.NumberFormat(tag, {
         style: "currency",
         currency: code,
         currencyDisplay: "narrowSymbol",
@@ -107,9 +120,9 @@ function formatterFor(currency: string): Intl.NumberFormat {
       // Android's ICU has to degrade to the previous rendering rather than
       // throw inside a price label. The amount and the code suffix are correct
       // in both branches; only the glyph is lost.
-      formatter = new Intl.NumberFormat("en-US", { style: "currency", currency: code });
+      formatter = new Intl.NumberFormat(tag, { style: "currency", currency: code });
     }
-    formatters.set(code, formatter);
+    formatters.set(key, formatter);
   }
   return formatter;
 }
@@ -145,9 +158,19 @@ function toMajorUnits(minorUnits: number, code: string): number {
   return minorUnits / 10 ** currencyExponent(code);
 }
 
-export function formatMinorUnits(minorUnits: number, currency: string = "MXN"): string {
+/**
+ * A price in its own currency, written the way `locale`'s reader writes
+ * numbers (D-197). Omitting `locale` means DEFAULT_LOCALE, which is right only
+ * where every reader is: the admin console. Everywhere else pass the reader's
+ * locale, or use `useFormatMoney()` / `getFormatMoney()`, which do.
+ */
+export function formatMinorUnits(
+  minorUnits: number,
+  currency: string = "MXN",
+  locale?: string | null,
+): string {
   const code = currency.toUpperCase();
-  const formatted = formatterFor(code).format(toMajorUnits(minorUnits, code));
+  const formatted = formatterFor(code, locale).format(toMajorUnits(minorUnits, code));
   return formatted.includes(code) ? formatted : `${formatted} ${code}`;
 }
 

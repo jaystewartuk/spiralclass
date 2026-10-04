@@ -80,7 +80,7 @@ function bookedLine(summary: CashFlowSummary, locale: string, t: TFunction): str
       ? "web.cashflow.bookedRestOne"
       : "web.cashflow.bookedRest",
     {
-      amount: formatMinorUnits(summary.bookedRestOfMonthCents, summary.currency),
+      amount: formatMinorUnits(summary.bookedRestOfMonthCents, summary.currency, locale),
       count: summary.bookedRestOfMonthLessons,
       month: monthName(summary.currentMonth, locale),
     },
@@ -123,7 +123,7 @@ export async function EarningsTile({ cashFlow }: { cashFlow: CashFlow }) {
         </CardTitle>
         <p className="text-sm font-medium">{soFarLabel(summary, locale, t)}</p>
         <p className="text-h1 font-semibold tabular-nums">
-          {formatMinorUnits(summary.currentMonthEarnedCents, summary.currency)}
+          {formatMinorUnits(summary.currentMonthEarnedCents, summary.currency, locale)}
         </p>
         <CardDescription>
           {classesTaught(summary.currentMonthLessons, t)}
@@ -136,13 +136,13 @@ export async function EarningsTile({ cashFlow }: { cashFlow: CashFlow }) {
             <Row
               term={label(monthName(previous.month, locale), locale)}
               detail={classesTaught(previous.lessons, t)}
-              value={formatMinorUnits(previous.earnedCents, summary.currency)}
+              value={formatMinorUnits(previous.earnedCents, summary.currency, locale)}
             />
           )}
           <Row
             term={t("web.cashflow.paidInAdvance")}
             detail={summary.heldLessons > 0 ? classesToTeach(summary, t) : undefined}
-            value={formatMinorUnits(summary.heldCents, summary.currency)}
+            value={formatMinorUnits(summary.heldCents, summary.currency, locale)}
           />
         </dl>
         {others.length > 0 && (
@@ -155,7 +155,7 @@ export async function EarningsTile({ cashFlow }: { cashFlow: CashFlow }) {
                     {t("web.cashflow.inCurrency", { currency: other.currency })}
                   </dt>
                   <dd className="font-medium tabular-nums">
-                    {formatMinorUnits(other.currentMonthEarnedCents, other.currency)}
+                    {formatMinorUnits(other.currentMonthEarnedCents, other.currency, locale)}
                   </dd>
                 </div>
               ))}
@@ -243,7 +243,7 @@ function SummaryStats({
     <div className="grid gap-4 sm:grid-cols-3">
       <Stat
         label={soFarLabel(summary, locale, t)}
-        value={formatMinorUnits(summary.currentMonthEarnedCents, summary.currency)}
+        value={formatMinorUnits(summary.currentMonthEarnedCents, summary.currency, locale)}
         sub={classesTaught(summary.currentMonthLessons, t)}
         extra={bookedLine(summary, locale, t)}
         hero
@@ -251,13 +251,13 @@ function SummaryStats({
       {previous && (
         <Stat
           label={label(monthName(previous.month, locale), locale)}
-          value={formatMinorUnits(previous.earnedCents, summary.currency)}
+          value={formatMinorUnits(previous.earnedCents, summary.currency, locale)}
           sub={classesTaught(previous.lessons, t)}
         />
       )}
       <Stat
         label={t("web.cashflow.paidInAdvance")}
-        value={formatMinorUnits(summary.heldCents, summary.currency)}
+        value={formatMinorUnits(summary.heldCents, summary.currency, locale)}
         sub={summary.heldLessons > 0 ? classesToTeach(summary, t) : undefined}
       />
     </div>
@@ -326,19 +326,24 @@ export async function EarningsByMonth({ cashFlow }: { cashFlow: CashFlow }) {
             <p className="text-sm font-medium tabular-nums">
               {t("web.cashflow.byMonth.yearTotal", {
                 year: summary.months[0].month.slice(0, 4),
-                amount: formatMinorUnits(summary.yearToDateCents, summary.currency),
+                amount: formatMinorUnits(summary.yearToDateCents, summary.currency, locale),
               })}
             </p>
             <MonthList summary={summary} locale={locale} t={t} />
             {summary.typicalMonth && (
               <p className="border-t pt-3 text-sm text-muted-foreground">
                 {t("web.cashflow.byMonth.typical", {
-                  average: formatMinorUnits(summary.typicalMonth.averageCents, summary.currency),
+                  average: formatMinorUnits(
+                    summary.typicalMonth.averageCents,
+                    summary.currency,
+                    locale,
+                  ),
                   count: summary.typicalMonth.months,
                   month: monthName(summary.typicalMonth.lowest.month, locale),
                   lowest: formatMinorUnits(
                     summary.typicalMonth.lowest.earnedCents,
                     summary.currency,
+                    locale,
                   ),
                 })}
               </p>
@@ -374,6 +379,7 @@ function MonthList({
             best={best}
             currency={currency}
             name={label(monthName(m.month, locale, spansYears), locale)}
+            locale={locale}
             t={t}
           />
         </li>
@@ -388,6 +394,7 @@ function MonthRow({
   best,
   currency,
   name,
+  locale,
   t,
 }: {
   month: MonthEarnings;
@@ -395,6 +402,7 @@ function MonthRow({
   best: number;
   currency: string;
   name: string;
+  locale: string;
   t: TFunction;
 }) {
   return (
@@ -413,7 +421,7 @@ function MonthRow({
           </div>
           <div className="flex items-center gap-2">
             <span className="font-semibold whitespace-nowrap tabular-nums">
-              {formatMinorUnits(month.earnedCents, currency)}
+              {formatMinorUnits(month.earnedCents, currency, locale)}
             </span>
             <ChevronDown
               className="size-4 text-muted-foreground transition-transform group-open:rotate-180"
@@ -444,7 +452,7 @@ function MonthRow({
                 </span>
               </span>
               <span className="shrink-0 whitespace-nowrap tabular-nums">
-                {formatMinorUnits(s.earnedCents, currency)}
+                {formatMinorUnits(s.earnedCents, currency, locale)}
               </span>
             </li>
           ))}

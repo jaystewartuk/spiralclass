@@ -184,9 +184,9 @@ export default async function TeacherStudentDetailPage({
 
   const paidLabel =
     paidByCurrency.length === 0
-      ? formatMinorUnits(0, currencyForTeacher(teacher))
+      ? formatMinorUnits(0, currencyForTeacher(teacher), locale)
       : paidByCurrency
-          .map((row) => formatMinorUnits(row._sum.amountMinorUnits ?? 0, row.currency))
+          .map((row) => formatMinorUnits(row._sum.amountMinorUnits ?? 0, row.currency, locale))
           .join(" · ");
   const paidCount = paidByCurrency.reduce((sum, row) => sum + row._count._all, 0);
 

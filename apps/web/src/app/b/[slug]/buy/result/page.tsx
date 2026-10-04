@@ -403,7 +403,7 @@ function PurchaseSummary({
               {paid ? t("web.buyResult.summaryPaid") : t("web.buyResult.summaryAmount")}
             </dt>
             <dd className="text-base font-semibold">
-              {formatMinorUnits(amountMinorUnits, currency)}
+              {formatMinorUnits(amountMinorUnits, currency, locale)}
             </dd>
           </div>
         </dl>

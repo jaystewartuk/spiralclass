@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext, useCallback, useContext, useMemo, type ReactNode } from "react";
-import { DEFAULT_LOCALE, localizedHref } from "@spiralclass/shared";
+import { DEFAULT_LOCALE, formatMinorUnits, localizedHref } from "@spiralclass/shared";
 import { createT, type AppLocale, type TFunction } from "@/lib/i18n-translate";
 
 // The context default only applies to a tree with no LocaleProvider above it,
@@ -23,6 +23,16 @@ export function useLocale(): AppLocale {
 export function useT(): TFunction {
   const locale = useLocale();
   return useMemo(() => createT(locale), [locale]);
+}
+
+/** `formatMinorUnits` bound to the active locale (D-197): the price's own
+ * currency, written the way this reader writes numbers. */
+export function useFormatMoney(): (minorUnits: number, currency?: string) => string {
+  const locale = useLocale();
+  return useCallback(
+    (minorUnits: number, currency?: string) => formatMinorUnits(minorUnits, currency, locale),
+    [locale],
+  );
 }
 
 /** An href to a public page in the active locale's URL (D-193): `/pricing`

@@ -23,7 +23,13 @@ import * as React from "react";
   disconnect() {}
 };
 
+const { formatMinorUnits: formatMinorUnitsForMock } = await vi.hoisted(
+  async () => await import("@spiralclass/shared"),
+);
 vi.mock("@/components/locale-provider", () => ({
+  // D-197: the real formatter, in English, as the tests expect.
+  useFormatMoney: () => (minorUnits: number, currency?: string) =>
+    formatMinorUnitsForMock(minorUnits, currency, "en"),
   useT: () => (key: string) => key,
 }));
 vi.mock("@/app/actions/onboarding", () => ({ saveTemplatesAction: vi.fn() }));

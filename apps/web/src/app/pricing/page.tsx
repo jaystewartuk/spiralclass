@@ -21,13 +21,14 @@ import { pricingJsonLd, seoBaseUrl } from "@/lib/seo/jsonld";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getT();
+  const locale = await getPreferredLocale();
   return {
     title: t("web.pricing.meta.title"),
     description: t("web.pricing.meta.description", {
-      monthly: formatMinorUnits(PLAN_PRICE_MINOR_UNITS.monthly, PLATFORM_MONEY_CURRENCY),
+      monthly: formatMinorUnits(PLAN_PRICE_MINOR_UNITS.monthly, PLATFORM_MONEY_CURRENCY, locale),
       days: TRIAL_DAYS,
     }),
-    alternates: localizedAlternates("/pricing", await getPreferredLocale()),
+    alternates: localizedAlternates("/pricing", locale),
   };
 }
 

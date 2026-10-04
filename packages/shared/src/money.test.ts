@@ -193,6 +193,54 @@ describe("formatMinorUnits", () => {
   });
 });
 
+// D-197: the number follows the reader, the currency never does.
+describe("formatMinorUnits in the reader's number format", () => {
+  // The measurement D-197 was decided on: Spanish and English readers see
+  // exactly what everyone saw under the old en-US formatter.
+  it.each([
+    [150_000, "MXN"],
+    [25_000, "CLP"],
+    [1_500, "JPY"],
+    [123_450, "EUR"],
+    [799, "GBP"],
+  ])("leaves %s %s byte-identical for Spanish and English readers", (minor, code) => {
+    const before = formatMinorUnits(minor, code);
+    expect(formatMinorUnits(minor, code, "es")).toBe(before);
+    expect(formatMinorUnits(minor, code, "en")).toBe(before);
+  });
+
+  // In French the comma is the decimal separator, so "$25,000 CLP" read as
+  // twenty-five pesos. Compared against Intl's own output, real spaces and all
+  // (French groups with a narrow no-break space).
+  it("writes a French reader's prices the French way", () => {
+    const fr = (n: number, code: string) =>
+      new Intl.NumberFormat("fr", {
+        style: "currency",
+        currency: code,
+        currencyDisplay: "narrowSymbol",
+      }).format(n);
+    expect(formatMinorUnits(25_000, "CLP", "fr")).toBe(`${fr(25_000, "CLP")} CLP`);
+    expect(formatMinorUnits(150_000, "MXN", "fr")).toBe(`${fr(1_500, "MXN")} MXN`);
+    expect(formatMinorUnits(25_000, "CLP", "fr")).not.toContain("25,000");
+  });
+
+  it("names the currency exactly once, in every locale", () => {
+    for (const locale of ["en", "es", "fr"]) {
+      for (const code of ["MXN", "CLP", "JPY", "EUR", "GBP", "USD", "XTS"]) {
+        const text = formatMinorUnits(150_000, code, locale);
+        expect(text.split(code).length - 1, `${code} in ${locale}: ${text}`).toBe(1);
+      }
+    }
+  });
+
+  it("reads a stored regional tag as its language, and anything else as the default", () => {
+    expect(formatMinorUnits(25_000, "CLP", "fr-CA")).toBe(formatMinorUnits(25_000, "CLP", "fr"));
+    expect(formatMinorUnits(25_000, "CLP", "es-MX")).toBe(formatMinorUnits(25_000, "CLP", "es"));
+    expect(formatMinorUnits(25_000, "CLP", "de")).toBe(formatMinorUnits(25_000, "CLP"));
+    expect(formatMinorUnits(25_000, "CLP", null)).toBe(formatMinorUnits(25_000, "CLP"));
+  });
+});
+
 describe("formatGbp", () => {
   it("renders a £ glyph with no disambiguating code suffix", () => {
     expect(formatGbp(123_456)).toBe("£1,234.56");

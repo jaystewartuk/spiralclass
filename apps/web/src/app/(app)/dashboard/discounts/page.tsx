@@ -111,7 +111,7 @@ export default async function DiscountsPage() {
   // is a use spent, not a sale made.
   const sales = money
     .filter((m) => m.salesMinorUnits > 0)
-    .map((m) => formatMinorUnits(m.salesMinorUnits, m.currency));
+    .map((m) => formatMinorUnits(m.salesMinorUnits, m.currency, locale));
 
   const ctx: ListContext = {
     t,
@@ -223,7 +223,7 @@ export default async function DiscountsPage() {
                 // making up her money. In practice her pricing currency is chosen
                 // once at onboarding, so this is one line.
                 value={money
-                  .map((m) => formatMinorUnits(m.givenMinorUnits, m.currency))
+                  .map((m) => formatMinorUnits(m.givenMinorUnits, m.currency, locale))
                   .join(" · ")}
                 hint={
                   sales.length > 0
