@@ -282,6 +282,7 @@ export default async function PaymentsListPage({
           moreHref={paymentsHref("pending")}
           now={now}
           day={day}
+          locale={locale}
           t={t}
         />
       )}

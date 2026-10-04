@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { formatMinorUnits } from "@spiralclass/shared";
 
 // Slice 2b reward minting. The claim → mint → bind sequence must be atomic:
 // as separate writes, a crash between mint and bind stranded a live orphaned
@@ -60,6 +61,9 @@ const PROGRAM = {
   rewardExpiryDays: null,
 };
 
+let programOverride: Record<string, unknown> = {};
+let ownerLocale = "es";
+
 const OWNER = {
   ownerStudentId: "owner1",
   owner: { email: "owner@x.com", name: "Mira", locale: "es", emailOptIn: true },
@@ -91,8 +95,10 @@ const fakePrisma: any = {
       return state.referral;
     },
   },
-  referralProgram: { findUnique: async () => PROGRAM },
-  referralCode: { findUnique: async () => OWNER },
+  referralProgram: { findUnique: async () => ({ ...PROGRAM, ...programOverride }) },
+  referralCode: {
+    findUnique: async () => ({ ...OWNER, owner: { ...OWNER.owner, locale: ownerLocale } }),
+  },
   discountCode: {
     create: async ({ data }: any) => {
       const row = { id: `dc${state.rewardCodes.length + 1}`, code: data.code, active: true };
@@ -133,6 +139,8 @@ beforeEach(() => {
   state.referral = freshReferral();
   state.rewardCodes = [];
   state.bindThrowsOnce = false;
+  programOverride = {};
+  ownerLocale = "es";
 });
 
 describe("grantReferralRewardHandler", () => {
@@ -142,6 +150,21 @@ describe("grantReferralRewardHandler", () => {
     expect(state.referral).toMatchObject({ status: "rewarded", referrerRewardCodeId: "dc1" });
     expect(state.rewardCodes).toHaveLength(1);
     expect(notifyReferrerReward).toHaveBeenCalledTimes(1);
+  });
+
+  // The label was formatted with no currency, so it fell back to MXN: a
+  // teacher whose program is in euros told the student their reward was in
+  // pesos. It is the program's currency now, in the student's number format.
+  it("labels the reward in the program's currency, written for the student", async () => {
+    programOverride = { currency: "EUR" };
+    ownerLocale = "fr";
+    await runHandler();
+    const { rewardLabel } = (notifyReferrerReward.mock.calls[0] as unknown[])[0] as {
+      rewardLabel: string;
+    };
+    expect(rewardLabel).toBe(formatMinorUnits(15_000, "EUR", "fr"));
+    expect(rewardLabel).toContain("EUR");
+    expect(rewardLabel).not.toContain("MXN");
   });
 
   it("skips a referral that was already rewarded (redelivered event)", async () => {

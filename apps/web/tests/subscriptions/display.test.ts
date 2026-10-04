@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { formatMinorUnits } from "@spiralclass/shared";
 import { planLabel, planPriceLabel, statusLabel } from "@/lib/subscriptions/display";
 
 // Localized plan/status display strings shared across billing, pricing,
@@ -90,9 +91,12 @@ describe("French, the locale the ternaries forgot", () => {
     expect(statusLabel("canceled", "fr")).toBe("Résiliée");
   });
 
-  it("renders a French cadence suffix", () => {
-    expect(planPriceLabel("monthly", "fr")).toBe("£7.99 GBP/mois");
-    expect(planPriceLabel("annual", "fr")).toBe("£79.90 GBP/an");
+  // The price is written the French way too (D-197): the decimal comma and
+  // the symbol after the number, the currency still named once.
+  it("renders a French cadence suffix, with the price written the French way", () => {
+    expect(planPriceLabel("monthly", "fr")).toBe(`${formatMinorUnits(799, "GBP", "fr")}/mois`);
+    expect(planPriceLabel("monthly", "fr")).toMatch(/^7,99\s£ GBP\/mois$/);
+    expect(planPriceLabel("annual", "fr")).toMatch(/^79,90\s£ GBP\/an$/);
     expect(planPriceLabel("free", "fr")).toBe("Gratuit");
   });
 });

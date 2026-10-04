@@ -58,7 +58,7 @@ import {
   formatMinorUnits,
   majorToMinorUnits,
 } from "@/lib/money";
-import { useT } from "@/components/locale-provider";
+import { useFormatMoney, useT } from "@/components/locale-provider";
 import { usePricingCurrency } from "@/components/pricing-currency-context";
 import { cn } from "@/lib/utils";
 
@@ -1008,6 +1008,7 @@ function PackageCard({
   toggleRef: (el: HTMLButtonElement | null) => void;
   fieldRef: (localKey: string, field: string) => (el: HTMLInputElement | null) => void;
 }) {
+  const formatMoney = useFormatMoney();
   const key = row.localKey;
   const panelId = `pkg-panel-${key}`;
   const errorId = `pkg-error-${key}`;
@@ -1095,11 +1096,11 @@ function PackageCard({
             </span>
             <span className="shrink-0 text-right">
               <span className="block text-sm font-semibold tabular-nums">
-                {formatMinorUnits(row.priceMinorUnits, currency)}
+                {formatMoney(row.priceMinorUnits, currency)}
               </span>
               {perClass !== null && (
                 <span className="block text-xs text-muted-foreground tabular-nums">
-                  {t("web.packages.perClass", { amount: formatMinorUnits(perClass, currency) })}
+                  {t("web.packages.perClass", { amount: formatMoney(perClass, currency) })}
                 </span>
               )}
               {/* One person's price leads, the price for two sits under it and
@@ -1108,7 +1109,7 @@ function PackageCard({
               {forTwo && (
                 <span className="mt-1 block text-xs text-muted-foreground tabular-nums">
                   {t("web.packages.twoPerson.summary", {
-                    amount: formatMinorUnits(row.twoPersonPriceMinorUnits!, currency),
+                    amount: formatMoney(row.twoPersonPriceMinorUnits!, currency),
                   })}
                 </span>
               )}
@@ -1297,7 +1298,7 @@ function PackageCard({
                     {t("onboarding.templates.priceHint", { currency })}
                     {perClass !== null &&
                       ` ${t("web.packages.perClass", {
-                        amount: formatMinorUnits(perClass, currency),
+                        amount: formatMoney(perClass, currency),
                       })}`}
                   </p>
                 )}
@@ -1348,7 +1349,7 @@ function PackageCard({
                         {wiseSavings > 0 && (
                           <span className="text-xs text-success tabular-nums">
                             {t("onboarding.templates.wiseSavings", {
-                              amount: formatMinorUnits(wiseSavings, currency),
+                              amount: formatMoney(wiseSavings, currency),
                             })}
                           </span>
                         )}
@@ -1427,7 +1428,7 @@ function PackageCard({
                         : t("web.packages.twoPerson.custom")}
                       {twoPerPerson !== null &&
                         ` ${t("web.packages.twoPerson.perPersonPerClass", {
-                          amount: formatMinorUnits(twoPerPerson, currency),
+                          amount: formatMoney(twoPerPerson, currency),
                         })}`}
                     </p>
                     {twoBelowOne && (

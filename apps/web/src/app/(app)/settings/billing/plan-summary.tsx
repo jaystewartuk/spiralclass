@@ -94,7 +94,7 @@ export function PlanSummary({
   // plan table would quietly misquote what she actually pays.
   const price =
     subscription.lockedPriceMinorUnits != null
-      ? formatMinorUnits(subscription.lockedPriceMinorUnits, subscription.currency)
+      ? formatMinorUnits(subscription.lockedPriceMinorUnits, subscription.currency, locale)
       : null;
   const interval = PLAN_INTERVAL[entitlements.plan];
 

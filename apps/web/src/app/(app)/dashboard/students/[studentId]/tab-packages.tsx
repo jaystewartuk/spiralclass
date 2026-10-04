@@ -115,7 +115,7 @@ function PackageRow({
               </span>
             </span>
             <span className="mt-1 block text-sm text-muted-foreground">
-              {formatMinorUnits(pkg.pricePaidMinorUnits, pkg.currency)}
+              {formatMinorUnits(pkg.pricePaidMinorUnits, pkg.currency, locale)}
               {" · "}
               {pkg.expiresAt
                 ? t("web.dashboard.students.package.expiresOn", {

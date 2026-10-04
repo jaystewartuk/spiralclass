@@ -109,7 +109,7 @@ export default async function PaymentDetailPage({
           <Row label={t("web.payments.detail.rail")} value={payment.rail} />
           <Row
             label={t("web.payments.detail.amount")}
-            value={formatMinorUnits(payment.amountMinorUnits, payment.currency)}
+            value={formatMinorUnits(payment.amountMinorUnits, payment.currency, locale)}
           />
           {payment.providerPaymentId && (
             <Row

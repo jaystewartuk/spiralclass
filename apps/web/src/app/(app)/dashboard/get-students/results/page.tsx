@@ -218,6 +218,7 @@ export default async function ResultsPage({
           {`${t("web.getStudents.revenue")}: ${formatMinorUnits(
             report.overall.revenueMinorUnits,
             teacher.pricingCurrency,
+            locale,
           )}`}
         </p>
       )}

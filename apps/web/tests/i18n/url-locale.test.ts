@@ -15,7 +15,8 @@ vi.mock("next/headers", () => ({
   headers: async () => ({ get: (name: string) => request.headers.get(name) ?? null }),
 }));
 
-const { getPreferredLocale, getLanguagePickerValue, getLocalizedHref } = await import("@/lib/i18n");
+const { getFormatMoney, getPreferredLocale, getLanguagePickerValue, getLocalizedHref } =
+  await import("@/lib/i18n");
 
 beforeEach(() => {
   request.headers.clear();
@@ -79,5 +80,15 @@ describe("getLocalizedHref", () => {
     const href = await getLocalizedHref();
     expect(href("/pricing")).toBe("/es/pricing");
     expect(href("/dashboard")).toBe("/dashboard");
+  });
+});
+
+describe("getFormatMoney", () => {
+  // D-197: the reader's number format, the price's own currency.
+  it("writes prices the way the request's reader writes numbers", async () => {
+    request.headers.set("x-locale", "fr");
+    expect((await getFormatMoney())(25_000, "CLP")).toMatch(/^25\s000\s\$ CLP$/);
+    request.headers.set("x-locale", "en");
+    expect((await getFormatMoney())(25_000, "CLP")).toBe("$25,000 CLP");
   });
 });

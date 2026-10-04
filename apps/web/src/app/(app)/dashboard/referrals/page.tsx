@@ -157,7 +157,7 @@ export default async function ReferralsPage() {
                 {
                   key: "revenue",
                   label: t("web.dashboard.referrals.results.revenue"),
-                  value: formatMinorUnits(stats.revenueMinorUnits, dashboard.currency),
+                  value: formatMinorUnits(stats.revenueMinorUnits, dashboard.currency, locale),
                 },
               ].map((tile) => (
                 <div key={tile.key} className="space-y-1">
@@ -169,7 +169,7 @@ export default async function ReferralsPage() {
                   for her to work out from her own price list. */}
               <p className="col-span-2 text-left text-sm text-muted-foreground lg:col-span-4">
                 {t("web.dashboard.referrals.results.cost", {
-                  amount: formatMinorUnits(stats.discountMinorUnits, dashboard.currency),
+                  amount: formatMinorUnits(stats.discountMinorUnits, dashboard.currency, locale),
                 })}
               </p>
             </CardContent>
@@ -225,7 +225,7 @@ export default async function ReferralsPage() {
                     <div className="flex shrink-0 items-center gap-2">
                       <span className="text-sm text-muted-foreground tabular-nums">
                         {t("web.dashboard.referrals.activity.discountGiven", {
-                          amount: formatMinorUnits(row.discountMinorUnits, row.currency),
+                          amount: formatMinorUnits(row.discountMinorUnits, row.currency, locale),
                         })}
                       </span>
                       <Badge variant={STATUS_VARIANT[row.status]}>

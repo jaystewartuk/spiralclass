@@ -18,7 +18,7 @@ import {
   type Seats,
 } from "@spiralclass/shared";
 import { currentSessionId } from "@/lib/analytics/posthog-browser";
-import { useT } from "@/components/locale-provider";
+import { useFormatMoney, useT } from "@/components/locale-provider";
 import type { TFunction } from "@/lib/i18n-translate";
 import { HelpTip } from "@/components/help-tip";
 
@@ -84,7 +84,8 @@ export function PortalPurchaseFlow({
   instruments: PayoutInstrument[];
 }) {
   const t = useT();
-  const money = (minorUnits: number) => formatMinorUnits(minorUnits, currency);
+  const formatMoney = useFormatMoney();
+  const money = (minorUnits: number) => formatMoney(minorUnits, currency);
 
   // One person or two (D-188) — asked only when something is sold for two.
   const forTwoAvailable = templates.some(offersTwoPerson);

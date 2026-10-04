@@ -13,7 +13,7 @@ import { FieldError } from "@/components/ui/field-error";
 import { FormStatus } from "@/components/ui/form-status";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useT } from "@/components/locale-provider";
+import { useFormatMoney, useT } from "@/components/locale-provider";
 import { usePricingCurrency } from "@/components/pricing-currency-context";
 import { saveReferralProgram, type ReferralProgramState } from "@/app/actions/referrals";
 import { cn } from "@/lib/utils";
@@ -203,6 +203,7 @@ function PreviewRow({ label, value, strong }: { label: string; value: string; st
 
 export function ReferralProgramForm({ initial }: { initial: ProgramInitial }) {
   const t = useT();
+  const formatMoney = useFormatMoney();
   const currency = usePricingCurrency();
   const enabledId = useId();
   const referredId = useId();
@@ -340,26 +341,26 @@ export function ReferralProgramForm({ initial }: { initial: ProgramInitial }) {
               <p className="text-sm text-muted-foreground">
                 {t("web.dashboard.referrals.preview.onPackage", {
                   package: sample.name,
-                  price: formatMinorUnits(base, previewCurrency),
+                  price: formatMoney(base, previewCurrency),
                 })}
               </p>
               <dl>
                 <PreviewRow
                   label={t("web.dashboard.referrals.preview.friendPays")}
-                  value={formatMinorUnits(base - friendOff, previewCurrency)}
+                  value={formatMoney(base - friendOff, previewCurrency)}
                 />
                 <PreviewRow
                   label={t("web.dashboard.referrals.preview.friendDiscount")}
-                  value={formatMinorUnits(friendOff, previewCurrency)}
+                  value={formatMoney(friendOff, previewCurrency)}
                 />
                 <PreviewRow
                   label={t("web.dashboard.referrals.preview.referrerReward")}
-                  value={formatMinorUnits(studentOff, previewCurrency)}
+                  value={formatMoney(studentOff, previewCurrency)}
                 />
                 <PreviewRow
                   strong
                   label={t("web.dashboard.referrals.preview.total")}
-                  value={formatMinorUnits(friendOff + studentOff, previewCurrency)}
+                  value={formatMoney(friendOff + studentOff, previewCurrency)}
                 />
               </dl>
               <p className="text-sm text-muted-foreground">

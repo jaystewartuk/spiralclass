@@ -1,6 +1,7 @@
 import { Heading } from "@/components/ui/heading";
 import type { Metadata } from "next";
 import Link from "next/link";
+import { publicFunnelLocaleFor } from "@spiralclass/shared";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -42,7 +43,10 @@ export default async function TransferInstructionsPage({
   params: Promise<{ slug: string; ref: string }>;
 }) {
   const { slug, ref } = await params;
-  const t = getPublicFunnelT(await funnelLocaleForSlug(slug));
+  // The funnel's language is the teacher's choice for her buyers, and so is
+  // the number format of the amount (D-194, D-197).
+  const locale = publicFunnelLocaleFor(await funnelLocaleForSlug(slug));
+  const t = getPublicFunnelT(locale);
 
   // Security audit M-8. This page renders the teacher's payee details — an
   // account-holder name and email, or a CLABE — real PII sitting behind a
@@ -115,7 +119,7 @@ export default async function TransferInstructionsPage({
           <CardContent className="space-y-3 text-sm">
             <p>
               {t(confirmedBodyKey, {
-                amount: formatMinorUnits(payment.amountMinorUnits, payment.currency),
+                amount: formatMinorUnits(payment.amountMinorUnits, payment.currency, locale),
               })}
             </p>
             <p>
@@ -132,7 +136,7 @@ export default async function TransferInstructionsPage({
   const teacher = payment.package.teacher;
   // Falls back to the teacher's own name: `accountHolder` is optional, but the
   // student still needs a human to recognize as the payee.
-  const amountStr = formatMinorUnits(payment.amountMinorUnits, payment.currency);
+  const amountStr = formatMinorUnits(payment.amountMinorUnits, payment.currency, locale);
 
   // The payee block, built by one shared function — so a student always sees
   // the same set of fields, in the same order, formatted the same way. A bank

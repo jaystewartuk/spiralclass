@@ -91,11 +91,14 @@ function methodLabel(provider: string, t: TFunction): string {
 export function PaymentRow({
   payment,
   day,
+  locale,
   t,
 }: {
   payment: PaymentRowData;
   /** Formats a date in the teacher's zone and locale — built once by the ledger. */
   day: Intl.DateTimeFormat;
+  /** The reader's locale, for the amount's number format (D-197). */
+  locale: string;
   t: TFunction;
 }) {
   // A refund left again; a failed charge never arrived. Neither is income, and
@@ -146,7 +149,7 @@ export function PaymentRow({
             refunded && "line-through",
           )}
         >
-          {formatMinorUnits(payment.amountMinorUnits, payment.currency)}
+          {formatMinorUnits(payment.amountMinorUnits, payment.currency, locale)}
         </span>
       </Link>
     </li>
@@ -226,7 +229,7 @@ export function PaymentLedger({
                   {totals
                     .map((total) =>
                       t("web.payments.ledger.received", {
-                        amount: formatMinorUnits(total.cents, total.currency),
+                        amount: formatMinorUnits(total.cents, total.currency, locale),
                       }),
                     )
                     .join(" · ")}
@@ -235,7 +238,7 @@ export function PaymentLedger({
             </div>
             <ul className="divide-y divide-border">
               {month.entries.map((payment) => (
-                <PaymentRow key={payment.id} payment={payment} day={day} t={t} />
+                <PaymentRow key={payment.id} payment={payment} day={day} locale={locale} t={t} />
               ))}
             </ul>
           </section>
@@ -271,6 +274,7 @@ export function ConfirmQueue({
   moreHref,
   now,
   day,
+  locale,
   t,
 }: {
   payments: PaymentRowData[];
@@ -279,6 +283,8 @@ export function ConfirmQueue({
   moreHref: string;
   now: Date;
   day: Intl.DateTimeFormat;
+  /** The reader's locale, for the amounts' number format (D-197). */
+  locale: string;
   t: TFunction;
 }) {
   return (
@@ -330,7 +336,7 @@ export function ConfirmQueue({
                   </span>
 
                   <span className="col-start-2 row-start-1 justify-self-end font-semibold tabular-nums">
-                    {formatMinorUnits(payment.amountMinorUnits, payment.currency)}
+                    {formatMinorUnits(payment.amountMinorUnits, payment.currency, locale)}
                   </span>
 
                   <span className="col-start-2 row-start-2 justify-self-end text-xs text-muted-foreground">

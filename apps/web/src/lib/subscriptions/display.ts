@@ -38,7 +38,7 @@ export function statusLabel(status: SubscriptionStatus, locale: AppLocale): stri
 // settings/billing, where "/mo" at display size reads as part of the number.
 export function planPriceLabel(plan: SubscriptionPlan, locale: AppLocale): string {
   const t = createT(locale);
-  const amount = formatMinorUnits(PLAN_PRICE_MINOR_UNITS[plan], PLATFORM_MONEY_CURRENCY);
+  const amount = formatMinorUnits(PLAN_PRICE_MINOR_UNITS[plan], PLATFORM_MONEY_CURRENCY, locale);
   switch (plan) {
     case "free":
       return t("subscriptions.plan.free");

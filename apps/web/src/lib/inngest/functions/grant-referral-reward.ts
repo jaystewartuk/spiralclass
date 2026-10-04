@@ -111,7 +111,14 @@ export async function grantReferralRewardHandler({
     const rewardLabel =
       program.referrerKind === "percent"
         ? `${(program.referrerPercentBps ?? 0) / 100}%`
-        : formatMinorUnits(program.referrerAmountMinorUnits ?? 0);
+        : // In the program's own currency, written for the student the email
+          // goes to. It was called with no currency, so it fell back to MXN:
+          // a teacher pricing in euros sent "€" rewards labelled in pesos.
+          formatMinorUnits(
+            program.referrerAmountMinorUnits ?? 0,
+            program.currency,
+            owner.owner.locale,
+          );
 
     trackServerEvent({
       name: "referral_qualified",
