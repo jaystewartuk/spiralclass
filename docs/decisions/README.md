@@ -311,6 +311,11 @@ has broken production.
 | [D-81](./D-81.md)   | A third UI language, on a registry where adding one is two steps                           |
 | [D-112](./D-112.md) | Ask for the teaching language at onboarding — an unset value silently seeds the wrong pack |
 | [D-173](./D-173.md) | Teachers of **any subject** — the copy widened, the language-shaped schema did not         |
+| [D-193](./D-193.md) | **One URL per language** on public pages: `/es/…`, `/fr/…`, and the bare URL is English    |
+| [D-194](./D-194.md) | A visitor cannot switch a booking page's language until the teacher can write in several   |
+| [D-195](./D-195.md) | One locale per language until a region earns one; a regional locale is a delta, not a copy |
+| [D-196](./D-196.md) | Legal text is translated by a person, English controls, no launch without it               |
+| [D-197](./D-197.md) | A price is written in its reader's number format; the currency charged is always named     |
 
 ### Design and layout
 
@@ -554,6 +559,11 @@ records removed before publication — see [What is not here](#what-is-not-here)
 | [D-190](./D-190.md) | A liveness probe restarts a wedged Cloud Run instance                 | Active                               |
 | [D-191](./D-191.md) | Money screens lead with this month earned; "safe to spend" retired    | Active                               |
 | [D-192](./D-192.md) | Test accounts are a recorded flag, left out of every figure           | Active                               |
+| [D-193](./D-193.md) | One URL per language on public pages; bare URL is English             | Decided, not built                   |
+| [D-194](./D-194.md) | The booking page's language is the teacher's; no visitor switch       | Active (records existing behaviour)  |
+| [D-195](./D-195.md) | One locale per language; a regional locale is a delta over its base   | Decided, not built                   |
+| [D-196](./D-196.md) | Legal text: a person translates, English controls, launch needs it    | Decided, not built                   |
+| [D-197](./D-197.md) | Prices follow the reader's number format; currency always named       | Decided, not built                   |
 
 ---
 
