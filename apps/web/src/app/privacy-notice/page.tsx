@@ -1,5 +1,3 @@
-import { localizedAlternates, pageLanguages } from "@/lib/seo/localized-alternates";
-import { localizedHref } from "@spiralclass/shared";
 // The privacy policy. Static — no DB access, no auth.
 //
 // The document itself lives in @spiralclass/shared (`legal/privacy-policy.ts`)
@@ -17,6 +15,8 @@ import { localizedHref } from "@spiralclass/shared";
 // and the Terms are already governed by the laws of England and Wales, so the
 // document is UK GDPR / DPA 2018 shaped.
 
+import { localizedAlternates, pageLanguages } from "@/lib/seo/localized-alternates";
+import { localizedHref } from "@spiralclass/shared";
 import { Heading } from "@/components/ui/heading";
 import type { Metadata } from "next";
 import { PageHeader } from "@/components/ui/page-header";

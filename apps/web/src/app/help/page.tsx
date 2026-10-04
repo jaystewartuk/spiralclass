@@ -1,4 +1,3 @@
-import { localizedAlternates } from "@/lib/seo/localized-alternates";
 // Public, unauthenticated help centre. No DB access, no auth. Sourced from the
 // content registry (@spiralclass/shared) instead of hand-duplicated copy, so
 // this page and the gated /help/[audience]/[slug] deep links can never drift
@@ -18,11 +17,12 @@ import { localizedAlternates } from "@/lib/seo/localized-alternates";
 // SAME prepared guides the article renders, so a link and its target cannot
 // come from two different computations of an anchor id.
 
+import { localizedAlternates } from "@/lib/seo/localized-alternates";
 import { Heading } from "@/components/ui/heading";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { GraduationCap, LifeBuoy, Users } from "lucide-react";
-import { listPublicFaqDocs } from "@spiralclass/shared";
+import { listPublicFaqDocs, localizedPath } from "@spiralclass/shared";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -39,20 +39,30 @@ import { collectHelpFaq } from "@/lib/help/faq";
 import { buildHelpSearchEntries } from "@/lib/help/search";
 import { getT, getPreferredLocale } from "@/lib/i18n";
 import { faqPageJsonLd } from "@/lib/seo/jsonld";
+import { socialCardImages } from "@/lib/seo/social-card";
 import { SUPPORT_EMAIL } from "@/lib/support";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getT();
+  const locale = await getPreferredLocale();
   const title = t("web.help.meta.title");
   const description = t("web.help.meta.description");
   return {
     title,
     description,
-    alternates: localizedAlternates("/help", await getPreferredLocale()),
+    alternates: localizedAlternates("/help", locale),
     // Next inherits `openGraph` from the root layout but does NOT fill its
     // title/description from a page's own — without these the card for a
     // shared help link carries the site defaults and says nothing about help.
-    openGraph: { title, description, url: "/help", type: "website" },
+    // Setting it replaces the layout's whole object, so the card image and
+    // the URL in the page's own language are set here too.
+    openGraph: {
+      title,
+      description,
+      url: localizedPath("/help", locale),
+      type: "website",
+      images: socialCardImages(locale),
+    },
   };
 }
 

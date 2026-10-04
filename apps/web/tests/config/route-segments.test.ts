@@ -164,6 +164,7 @@ const ALLOWED_SEGMENTS: readonly string[] = [
   "share-groups",
   "sign-in",
   "sign-up",
+  "social-card",
   "social-preview",
   "staff",
   "start",

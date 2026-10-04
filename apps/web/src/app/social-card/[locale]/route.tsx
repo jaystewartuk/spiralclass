@@ -1,23 +1,31 @@
 import { ImageResponse } from "next/og";
-import { MARK_SMALL, palette } from "@spiralclass/shared";
+import { MARK_SMALL, createT, isAppLocale, palette } from "@spiralclass/shared";
 import { hasStripeCreds } from "@/lib/env";
-import { getT } from "@/lib/i18n";
 import { ogFonts } from "@/lib/og-font";
+import { SOCIAL_CARD_SIZE } from "@/lib/seo/social-card";
 
-// The card a link preview shows. Its copy was hardcoded Spanish for a product
-// whose UI is Spanish, English and French — so every share into an English or
-// French context carried a Spanish sentence. The headline stayed Spanish after
-// the subline moved to the catalog; it is the landing page's own headline now.
+// The card a link preview shows for every page outside the booking funnel
+// (which has its own, in the teacher's buyers' language). Its copy was
+// hardcoded Spanish for a product whose UI is Spanish, English and French — so
+// every share into an English or French context carried a Spanish sentence.
 //
-// ⚠️ One URL for every language: a crawler fetches it with no cookie and no
-// Accept-Language, so it renders in DEFAULT_LOCALE even for `/es/…` pages. A
-// card per language needs a route that takes the language in its URL (D-193).
-export const alt = "SpiralClass";
-export const size = { width: 1200, height: 630 };
-export const contentType = "image/png";
+// The language is in the URL, `/social-card/es`, because a crawler fetching a
+// card sends no cookie and no Accept-Language. It was the file convention
+// `app/opengraph-image.tsx`, which has one URL, so every page's card was
+// English — `/es/pricing` previewed as an English card under a Spanish title
+// (D-193). The page names its card through `socialCardImages()`.
+//
+// Cached for a day, not a year. Next's `ImageResponse` defaults to
+// `immutable`, which is safe only for a URL carrying a content hash, and this
+// one has none to carry: the design is code and the copy is the catalog. A
+// year-long pin on an unhashed URL is the failure
+// tests/config/cache-unstable-asset-paths.test.ts records three times over.
+const CARD_CACHE_CONTROL = "public, max-age=86400, stale-while-revalidate=604800";
 
-export default async function OpengraphImage() {
-  const t = await getT();
+export async function GET(_req: Request, ctx: { params: Promise<{ locale: string }> }) {
+  const { locale } = await ctx.params;
+  if (!isAppLocale(locale)) return new Response("Not found", { status: 404 });
+  const t = createT(locale);
   const fonts = ogFonts();
   const stripeAvailable = hasStripeCreds();
   const subText = stripeAvailable ? t("web.og.subWithStripe") : t("web.og.sub");
@@ -99,6 +107,6 @@ export default async function OpengraphImage() {
       </div>
     </div>,
     // Without `fonts` Satori rasterises in its default serif — see lib/og-font.ts.
-    { ...size, fonts },
+    { ...SOCIAL_CARD_SIZE, fonts, headers: { "Cache-Control": CARD_CACHE_CONTROL } },
   );
 }
