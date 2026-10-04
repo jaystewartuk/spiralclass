@@ -17,6 +17,7 @@ import { getPreferredLocale, getT } from "@/lib/i18n";
 import { LOCALES, localeDirection, ogLocale } from "@spiralclass/shared";
 import { readingStyle } from "@/lib/reading";
 import { getReadingPreferences } from "@/lib/reading-server";
+import { socialCardImages } from "@/lib/seo/social-card";
 import "./globals.css";
 
 // Atkinson Hyperlegible carries everything (D-140). It was drawn by the Braille
@@ -70,8 +71,11 @@ export async function generateMetadata(): Promise<Metadata> {
       // it cannot be derived from the locale tag.
       locale: ogLocale(locale),
       alternateLocale: LOCALES.filter((l) => l.tag !== locale).map((l) => l.og),
+      // The card in the page's own language, by URL (D-193). The booking
+      // funnel's file-convention card overrides this under /b/**.
+      images: socialCardImages(locale),
     },
-    twitter: { card: "summary_large_image" },
+    twitter: { card: "summary_large_image", images: socialCardImages(locale) },
   };
 }
 

@@ -98,7 +98,7 @@ export const ALLOWLIST = {
   // Tailwind at all, so utilities are unavailable and inline style objects
   // are the only way to express anything. They consume palette.* directly,
   // which is the correct source; the literals they still hold are counted.
-  "app/opengraph-image.tsx": { inlineStyle: true },
+  "app/social-card/[locale]/route.tsx": { inlineStyle: true },
   "app/apple-icon.tsx": { inlineStyle: true },
   "app/b/[slug]/opengraph-image.tsx": { inlineStyle: true },
   "app/api/og/social-preview/[id]/route.tsx": { inlineStyle: true },

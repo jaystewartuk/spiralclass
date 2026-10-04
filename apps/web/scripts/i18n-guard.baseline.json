@@ -15,7 +15,7 @@
   "app/design/page.tsx": 37,
   "app/global-error.tsx": 1,
   "app/not-found.tsx": 1,
-  "app/opengraph-image.tsx": 3,
+  "app/social-card/[locale]/route.tsx": 3,
   "app/terms/page.tsx": 79,
   "components/brand/logo.tsx": 2,
   "components/site-footer.tsx": 3,

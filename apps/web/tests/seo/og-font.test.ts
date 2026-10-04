@@ -41,7 +41,7 @@ describe("OG image typography", () => {
     // The half the plan did not record. Belt and braces: a future edit that
     // reinstates a serif family would pass every other assertion here.
     for (const file of [
-      "src/app/opengraph-image.tsx",
+      "src/app/social-card/[locale]/route.tsx",
       "src/app/api/og/social-preview/[id]/route.tsx",
     ]) {
       const source = readFileSync(join(__dirname, "..", "..", file), "utf8");

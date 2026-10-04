@@ -51,7 +51,6 @@ const ROOTS = ["src", "public"].map((d) => join(__dirname, "..", "..", d));
  */
 const ALLOWED = [
   "app/apple-icon.tsx", // defines the route
-  "app/opengraph-image.tsx", // defines the route
   "b/[slug]/opengraph-image.tsx", // defines the per-teacher route
 ];
 
