@@ -194,7 +194,7 @@ body: Cours avec  le
 subject: Annulation tardive — ⟦teacherName⟧
 text: Bonjour, ici ⟦teacherName⟧. Vous avez annulé le cours du ⟦originalDateTime⟧ moins de 24 h à l'avance : il est donc déduit de votre forfait, conformément à la politique d'annulation.
 
-Politique d'annulation : https://app.test/terms#cancellation-policy
+Politique d'annulation : https://app.test/fr/terms#cancellation-policy
 
 —
 Gérer les notifications : https://app.test/r/notif-settings/token
@@ -209,7 +209,7 @@ body: Votre cours du ⟦originalDateTime⟧ avec ⟦teacherName⟧ a été annul
 subject: Annulation tardive — 
 text: Bonjour, ici . Vous avez annulé le cours du  moins de 24 h à l'avance : il est donc déduit de votre forfait, conformément à la politique d'annulation.
 
-Politique d'annulation : https://app.test/terms#cancellation-policy
+Politique d'annulation : https://app.test/fr/terms#cancellation-policy
 html: Annulation tardive (moins de 24 h) Annulation tardive · SpiralClass Annulation tardive (moins de 24 h) Bonjour, ici . Vous avez annulé le cours du moins de 24 h à l&#39;avance : il est donc déduit de votre forfait, conformément à la politique d&#39;annulation. Voir la politique d&#39;annulation Cours, paiements et rappels, sans charge mentale. Envoyé par SpiralClass · spiralclass.com
 
 === cancel_lt24h · push · with no variables
@@ -670,7 +670,7 @@ text: Bonjour ⟦teacherName⟧, ⟦studentName⟧ a annulé le cours du ⟦orig
 
 Remarque : ⟦studentName⟧ n'a reçu aucun avis de cette annulation, car cet élève est archivé dans votre liste. Réactivez-le depuis sa fiche si vous voulez qu'il reçoive à nouveau les avis.
 
-Politique d'annulation : https://app.test/terms#cancellation-policy
+Politique d'annulation : https://app.test/fr/terms#cancellation-policy
 
 —
 Gérer les notifications : https://app.test/r/notif-settings/token
@@ -685,7 +685,7 @@ body: ⟦studentName⟧ a annulé le ⟦originalDateTime⟧ (moins de 24 h).
 subject:  a annulé tardivement (moins de 24 h)
 text: Bonjour ,  a annulé le cours du  moins de 24 h à l'avance. Le cours a été déduit de son forfait, conformément à la politique d'annulation.
 
-Politique d'annulation : https://app.test/terms#cancellation-policy
+Politique d'annulation : https://app.test/fr/terms#cancellation-policy
 html: Annulation tardive undefined · undefined SpiralClass Annulation tardive Bonjour , a annulé le cours du moins de 24 h à l&#39;avance. Le cours a été déduit de son forfait, conformément à la politique d&#39;annulation. Voir la politique d&#39;annulation Cours, paiements et rappels, sans charge mentale. Envoyé par SpiralClass · spiralclass.com
 
 === cancel_lt24h_teacher · push · with no variables
@@ -744,7 +744,7 @@ text: Bonjour, ici ⟦teacherName⟧. J'ai signalé une absence pour le cours du
 
 Si vous pensez qu'il s'agit d'une erreur, écrivez-moi sur WhatsApp.
 
-Politique d'annulation : https://app.test/terms#cancellation-policy
+Politique d'annulation : https://app.test/fr/terms#cancellation-policy
 
 —
 Gérer les notifications : https://app.test/r/notif-settings/token
@@ -761,7 +761,7 @@ text: Bonjour, ici . J'ai signalé une absence pour le cours du  : il a donc ét
 
 Si vous pensez qu'il s'agit d'une erreur, écrivez-moi sur WhatsApp.
 
-Politique d'annulation : https://app.test/terms#cancellation-policy
+Politique d'annulation : https://app.test/fr/terms#cancellation-policy
 html: Absence enregistrée Absence signalée pour le cours SpiralClass Absence enregistrée Bonjour, ici . J&#39;ai signalé une absence pour le cours du : il a donc été déduit de votre forfait, conformément à la politique d&#39;annulation. Si vous pensez qu&#39;il s&#39;agit d&#39;une erreur, écrivez-moi sur WhatsApp. Voir la politique d&#39;annulation Cours, paiements et rappels, sans charge mentale. Envoyé par SpiralClass · spiralclass.com
 
 === no_show_student · push · with no variables

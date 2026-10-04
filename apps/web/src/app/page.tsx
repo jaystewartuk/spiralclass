@@ -1,3 +1,4 @@
+import { localizedAlternates } from "@/lib/seo/localized-alternates";
 import { Heading } from "@/components/ui/heading";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -23,7 +24,7 @@ import { Section } from "@/components/marketing/section";
 import { FeatureCard } from "@/components/marketing/feature-card";
 import { CtaBand } from "@/components/marketing/cta-band";
 import { CaptionsDemo } from "@/components/marketing/captions-demo";
-import { getT } from "@/lib/i18n";
+import { getLocalizedHref, getPreferredLocale, getT } from "@/lib/i18n";
 import { isSuperuser } from "@/lib/env";
 import { getAuthUser, getCurrentTeacher } from "@/lib/auth";
 import { hasClaimableStudentRow } from "@/lib/auth/student-link";
@@ -42,7 +43,7 @@ export async function generateMetadata(): Promise<Metadata> {
     // bare brand default from the layout template.
     title: { absolute: t("web.landing.meta.title") },
     description: t("web.landing.meta.description", { days: TRIAL_DAYS }),
-    alternates: { canonical: "/" },
+    alternates: localizedAlternates("/", await getPreferredLocale()),
   };
 }
 
@@ -66,6 +67,7 @@ export default async function LandingPage({
   searchParams?: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const t = await getT();
+  const href = await getLocalizedHref();
 
   const params = searchParams ? await searchParams : {};
   const errorParam = typeof params.error === "string" ? params.error : null;
@@ -255,10 +257,10 @@ export default async function LandingPage({
             ) : (
               <>
                 <Button asChild size="lg" className="w-full lg:w-auto">
-                  <Link href="/sign-up">{t("web.landing.cta")}</Link>
+                  <a href="/sign-up">{t("web.landing.cta")}</a>
                 </Button>
                 <Button asChild size="lg" variant="outline" className="w-full lg:w-auto">
-                  <Link href="/sign-in">{t("web.signIn.title")}</Link>
+                  <a href="/sign-in">{t("web.signIn.title")}</a>
                 </Button>
               </>
             )}
@@ -276,12 +278,12 @@ export default async function LandingPage({
           {!loggedInCta && (
             <p className="text-sm text-muted-foreground">
               {t("landing.studentPrompt")}{" "}
-              <Link
+              <a
                 href="/sign-in"
                 className="font-medium text-foreground underline-offset-4 hover:underline"
               >
                 {t("landing.studentCta")}
-              </Link>
+              </a>
             </p>
           )}
         </div>
@@ -355,7 +357,7 @@ export default async function LandingPage({
         </div>
         <div className="mt-8 text-center">
           <Link
-            href="/features"
+            href={href("/features")}
             className="text-sm font-medium text-primary underline-offset-4 hover:underline"
           >
             {t("web.landing.seeAllFeatures")}

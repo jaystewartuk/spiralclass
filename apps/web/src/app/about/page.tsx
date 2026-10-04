@@ -1,3 +1,4 @@
+import { localizedAlternates } from "@/lib/seo/localized-alternates";
 import { Heading } from "@/components/ui/heading";
 import { PageShell } from "@/components/ui/page-shell";
 import { PersonAvatar } from "@/components/teacher-identity";
@@ -6,7 +7,7 @@ import type { Metadata } from "next";
 import { Code2, GraduationCap, Globe, Heart, ShieldCheck, Sparkles, Wallet } from "lucide-react";
 import { SOURCE_CODE_LICENCE, SOURCE_CODE_URL } from "@spiralclass/shared";
 import { Button } from "@/components/ui/button";
-import { getT } from "@/lib/i18n";
+import { getLocalizedHref, getPreferredLocale, getT } from "@/lib/i18n";
 import type { StringKey } from "@/lib/i18n-translate";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -14,7 +15,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     title: t("web.about.meta.title"),
     description: t("web.about.meta.description"),
-    alternates: { canonical: "/about" },
+    alternates: localizedAlternates("/about", await getPreferredLocale()),
   };
 }
 
@@ -37,6 +38,7 @@ const FOUNDERS: Array<{
 
 export default async function AboutPage() {
   const t = await getT();
+  const href = await getLocalizedHref();
 
   const TRUST_POINTS = [
     {
@@ -170,10 +172,10 @@ export default async function AboutPage() {
         <p className="mt-3 text-primary-foreground">{t("web.trialBand.noCard")}</p>
         <div className="mt-7 flex flex-col items-center gap-3 lg:flex-row lg:justify-center">
           <Button asChild size="lg" variant="secondary">
-            <Link href="/sign-up">{t("web.trialBand.createAccount")}</Link>
+            <a href="/sign-up">{t("web.trialBand.createAccount")}</a>
           </Button>
           <Button asChild size="lg" variant="outlineOnPrimary">
-            <Link href="/features">{t("web.about.seeFeatures")}</Link>
+            <Link href={href("/features")}>{t("web.about.seeFeatures")}</Link>
           </Button>
         </div>
       </div>

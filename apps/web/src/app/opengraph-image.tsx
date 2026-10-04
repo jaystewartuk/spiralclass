@@ -6,7 +6,12 @@ import { ogFonts } from "@/lib/og-font";
 
 // The card a link preview shows. Its copy was hardcoded Spanish for a product
 // whose UI is Spanish, English and French — so every share into an English or
-// French context carried a Spanish sentence.
+// French context carried a Spanish sentence. The headline stayed Spanish after
+// the subline moved to the catalog; it is the landing page's own headline now.
+//
+// ⚠️ One URL for every language: a crawler fetches it with no cookie and no
+// Accept-Language, so it renders in DEFAULT_LOCALE even for `/es/…` pages. A
+// card per language needs a route that takes the language in its URL (D-193).
 export const alt = "SpiralClass";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
@@ -69,7 +74,7 @@ export default async function OpengraphImage() {
             maxWidth: 980,
           }}
         >
-          Da clases. Nosotros nos encargamos del resto.
+          {t("web.landing.headline")}
         </h1>
         <p
           style={{

@@ -4,13 +4,14 @@ import type { ReactNode } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ThemeToggle } from "@/components/theme-toggle";
-import { useT } from "@/components/locale-provider";
+import { useLocalizedHref, useT } from "@/components/locale-provider";
 import { cn } from "@/lib/utils";
 import { SOURCE_CODE_URL } from "@spiralclass/shared";
 
 export function SiteFooter({ localeToggle }: { localeToggle?: ReactNode }) {
   const pathname = usePathname();
   const t = useT();
+  const href = useLocalizedHref();
 
   const hidden =
     pathname.startsWith("/admin") ||
@@ -45,22 +46,22 @@ export function SiteFooter({ localeToggle }: { localeToggle?: ReactNode }) {
 
         {/* Page links — generous spacing so they breathe when they wrap on mobile */}
         <nav className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-xs text-muted-foreground">
-          <a href="/about" className="transition-colors hover:text-foreground">
+          <a href={href("/about")} className="transition-colors hover:text-foreground">
             {t("web.siteFooter.about")}
           </a>
-          <a href="/features" className="transition-colors hover:text-foreground">
+          <a href={href("/features")} className="transition-colors hover:text-foreground">
             {t("web.siteFooter.features")}
           </a>
-          <a href="/pricing" className="transition-colors hover:text-foreground">
+          <a href={href("/pricing")} className="transition-colors hover:text-foreground">
             {t("web.siteFooter.pricing")}
           </a>
-          <Link href="/help" className="transition-colors hover:text-foreground">
+          <Link href={href("/help")} className="transition-colors hover:text-foreground">
             {t("web.siteFooter.help")}
           </Link>
-          <a href="/terms" className="transition-colors hover:text-foreground">
+          <a href={href("/terms")} className="transition-colors hover:text-foreground">
             {t("web.siteFooter.terms")}
           </a>
-          <a href="/privacy-notice" className="transition-colors hover:text-foreground">
+          <a href={href("/privacy-notice")} className="transition-colors hover:text-foreground">
             {t("web.siteFooter.privacy")}
           </a>
           {/* The repository is public (AGPL-3.0-only) and the site says so —

@@ -1,3 +1,4 @@
+import { localizedAlternates } from "@/lib/seo/localized-alternates";
 import { Heading } from "@/components/ui/heading";
 import { PageShell } from "@/components/ui/page-shell";
 import Link from "next/link";
@@ -22,19 +23,20 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { FeatureCard } from "@/components/marketing/feature-card";
-import { getT } from "@/lib/i18n";
+import { getLocalizedHref, getPreferredLocale, getT } from "@/lib/i18n";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getT();
   return {
     title: t("web.features.meta.title"),
     description: t("web.features.meta.description"),
-    alternates: { canonical: "/features" },
+    alternates: localizedAlternates("/features", await getPreferredLocale()),
   };
 }
 
 export default async function FeaturesPage() {
   const t = await getT();
+  const href = await getLocalizedHref();
 
   const FEATURE_ITEMS = [
     {
@@ -156,10 +158,10 @@ export default async function FeaturesPage() {
         <p className="mt-3 text-primary-foreground">{t("web.trialBand.noCard")}</p>
         <div className="mt-7 flex flex-col items-center gap-3 lg:flex-row lg:justify-center">
           <Button asChild size="lg" variant="secondary">
-            <Link href="/sign-up">{t("web.trialBand.createAccount")}</Link>
+            <a href="/sign-up">{t("web.trialBand.createAccount")}</a>
           </Button>
           <Button asChild size="lg" variant="outlineOnPrimary">
-            <Link href="/pricing">{t("web.features.seePricing")}</Link>
+            <Link href={href("/pricing")}>{t("web.features.seePricing")}</Link>
           </Button>
         </div>
       </div>

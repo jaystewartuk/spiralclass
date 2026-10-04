@@ -32,7 +32,7 @@ vi.mock("@/lib/prisma", () => ({
   },
 }));
 
-const { setLocaleAction } = await import("@/app/actions/locale");
+const { chooseLocaleAction, setLocaleAction } = await import("@/app/actions/locale");
 
 function fd(locale?: string): FormData {
   const f = new FormData();
@@ -125,5 +125,33 @@ describe("setLocaleAction", () => {
         data: expect.objectContaining({ localeChosenAt: expect.any(Date) }),
       }),
     );
+  });
+});
+
+// The switcher on a public page whose URL names its language (D-193): the
+// cookie cannot change that page, so the client loads the chosen language's
+// URL itself, and needs to know which language the choice resolved to.
+describe("chooseLocaleAction", () => {
+  it("saves the choice and returns the locale it resolved to", async () => {
+    await expect(chooseLocaleAction(fd("fr"))).resolves.toEqual({ locale: "fr" });
+    expect(cookieStore.set).toHaveBeenCalledWith("locale", "fr", expect.anything());
+  });
+
+  it("resolves System Default against the browser", async () => {
+    // The request's Accept-Language is en-US.
+    await expect(chooseLocaleAction(fd("system"))).resolves.toEqual({ locale: "en" });
+    expect(cookieStore.set).toHaveBeenCalledWith("locale", "system", expect.anything());
+  });
+
+  it("returns nothing and saves nothing for a value that is not a preference", async () => {
+    await expect(chooseLocaleAction(fd("klingon"))).resolves.toBeNull();
+    expect(cookieStore.set).not.toHaveBeenCalled();
+  });
+
+  // The client navigates away straight after; re-rendering the old page first
+  // would flash it in the new language under the old URL.
+  it("does not revalidate the page it is about to leave", async () => {
+    await chooseLocaleAction(fd("es"));
+    expect(revalidatePath).not.toHaveBeenCalled();
   });
 });

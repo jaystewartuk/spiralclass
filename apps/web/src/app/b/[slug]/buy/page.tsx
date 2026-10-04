@@ -4,7 +4,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
-import { currencyForTeacher, parseSeats } from "@spiralclass/shared";
+import { currencyForTeacher, parseSeats, publicFunnelLocaleFor } from "@spiralclass/shared";
 import { prisma } from "@/lib/prisma";
 import { teacherPhotoPublicUrl } from "@/lib/storage/teacher-photo";
 import { approxUsdAssumptions, approxUsdFrom } from "@/lib/pricing/approx-usd";
@@ -98,8 +98,9 @@ export default async function PurchasePage({
   const t = getPublicFunnelT(funnelLocale);
   // Terms link follows the funnel's own language, not the browser's — sending
   // an English checkout's cancellation-policy link to the Spanish terms is
-  // exactly the split this pinning exists to remove.
-  const termsHref = cancellationPolicyPath(false);
+  // exactly the split this pinning exists to remove. It was hard-coded to the
+  // English terms, so a Spanish funnel linked out of its own language.
+  const termsHref = cancellationPolicyPath(publicFunnelLocaleFor(funnelLocale));
   const teacherName = teacher.name.trim();
 
   const stripeReady = Boolean(teacher.stripeAccountId && teacher.stripeChargesEnabled);

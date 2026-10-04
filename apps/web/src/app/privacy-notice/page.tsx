@@ -1,3 +1,5 @@
+import { localizedAlternates, pageLanguages } from "@/lib/seo/localized-alternates";
+import { localizedHref } from "@spiralclass/shared";
 // The privacy policy. Static — no DB access, no auth.
 //
 // The document itself lives in @spiralclass/shared (`legal/privacy-policy.ts`)
@@ -35,24 +37,37 @@ import {
   type Subprocessor,
 } from "@spiralclass/shared";
 import { Logo } from "@/components/brand/logo";
-import { getT } from "@/lib/i18n";
+import { getPreferredLocale, getT } from "@/lib/i18n";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getT();
   return {
     title: t("web.privacyNotice.meta.title"),
     description: t("web.privacyNotice.meta.description"),
-    alternates: { canonical: "/privacy-notice" },
+    alternates: localizedAlternates("/privacy-notice", await getPreferredLocale()),
   };
 }
 
 export default async function PrivacyNoticePage() {
   const t = await getT();
+  const locale = await getPreferredLocale();
   return (
     <main className="container space-y-8 py-10 text-sm leading-relaxed lg:max-w-3xl">
-      <Link href="/" aria-label={t("common.brandName")} className="inline-block">
+      <Link
+        href={localizedHref("/", locale)}
+        aria-label={t("common.brandName")}
+        className="inline-block"
+      >
         <Logo size="sm" />
       </Link>
+
+      {/* Said in the reader's own language, at every URL but the English one:
+          the policy exists only in English until a person translates it (D-196). */}
+      {!pageLanguages("/privacy-notice").includes(locale) && (
+        <p className="rounded-md border bg-muted/40 p-3 text-xs text-muted-foreground">
+          {t("web.legal.englishOnly")}
+        </p>
+      )}
 
       {/* `lang` is pinned to English: the document is authored in English and is
           not translated, so a screen reader must not announce it in the page

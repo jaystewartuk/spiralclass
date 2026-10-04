@@ -1,4 +1,4 @@
-import { createT, languageCodeToLocale, type TFunction } from "@spiralclass/shared";
+import { createT, languageCodeToLocale, type AppLocale, type TFunction } from "@spiralclass/shared";
 import type { LanguageCode, TemplateName, TemplateVariables } from "@/lib/notifications/templates";
 import { renderBrandedEmailHtml, type EmailHtmlContent } from "./html-shell";
 import { cancellationPolicyPath } from "@/lib/terms-anchors";
@@ -83,9 +83,9 @@ function notificationSettingsLine(t: TFunction, notificationSettingsUrl: string)
 // judgement is why no citation survives anywhere a reader can see. Falls back
 // to the production
 // origin when the dispatcher hasn't wired appUrl (tests).
-function cancellationPolicyUrl(appUrl: string | undefined, es: boolean): string {
+function cancellationPolicyUrl(appUrl: string | undefined, locale: AppLocale): string {
   const origin = (appUrl ?? "https://spiralclass.com").replace(/\/$/, "");
-  return `${origin}${cancellationPolicyPath(es)}`;
+  return `${origin}${cancellationPolicyPath(locale)}`;
 }
 
 // Teacher-mirror note when the student's own notice was suppressed by the
@@ -119,11 +119,8 @@ function meetingMedium(
 }
 
 function buildTemplate<T extends TemplateName>(input: RenderInput<T>): TemplateRender {
-  const t = createT(languageCodeToLocale(input.languageCode));
-  // The terms exist in English and in Spanish only, translated by a person
-  // (D-81, D-128), so this is the one choice here that stays two-armed: which
-  // of the two documents a policy link opens.
-  const spanishTerms = input.languageCode === "es";
+  const recipientLocale = languageCodeToLocale(input.languageCode);
+  const t = createT(recipientLocale);
   // The action link in a plain-text body, or a marker where the dispatcher had
   // none to give. One value, so every template says the same thing when it is
   // missing; it used to be "(pending)" in some and "(link pending)" in others.
@@ -331,7 +328,7 @@ function buildTemplate<T extends TemplateName>(input: RenderInput<T>): TemplateR
     }
     case "cancel_lt24h": {
       const v = input.variables as TemplateVariables["cancel_lt24h"];
-      const policyUrl = cancellationPolicyUrl(input.appUrl, spanishTerms);
+      const policyUrl = cancellationPolicyUrl(input.appUrl, recipientLocale);
       return {
         subject: t("email.cancelLt24h.subject", { teacherName: v.teacherName }),
         textBody: t("email.cancelLt24h.textBody", {
@@ -992,7 +989,7 @@ function buildTemplate<T extends TemplateName>(input: RenderInput<T>): TemplateR
     }
     case "cancel_lt24h_teacher": {
       const v = input.variables as TemplateVariables["cancel_lt24h_teacher"];
-      const policyUrl = cancellationPolicyUrl(input.appUrl, spanishTerms);
+      const policyUrl = cancellationPolicyUrl(input.appUrl, recipientLocale);
       const archivedNote = v.studentArchived ? archivedSuppressionNote(v.studentName, t) : null;
       return {
         subject: t("email.cancelLt24hTeacher.subject", { studentName: v.studentName }),
@@ -1169,7 +1166,7 @@ function buildTemplate<T extends TemplateName>(input: RenderInput<T>): TemplateR
     }
     case "no_show_student": {
       const v = input.variables as TemplateVariables["no_show_student"];
-      const policyUrl = cancellationPolicyUrl(input.appUrl, spanishTerms);
+      const policyUrl = cancellationPolicyUrl(input.appUrl, recipientLocale);
       return {
         subject: t("email.noShowStudent.subject", { originalDateTime: v.originalDateTime }),
         textBody: t("email.noShowStudent.textBody", {

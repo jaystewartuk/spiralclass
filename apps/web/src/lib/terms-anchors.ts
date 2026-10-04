@@ -1,3 +1,5 @@
+import { localizedPath, type AppLocale } from "@spiralclass/shared";
+
 /**
  * Fragments on /terms that other surfaces deep-link to.
  *
@@ -24,9 +26,13 @@ export const CANCELLATION_POLICY_ANCHOR = "cancellation-policy";
  */
 export const LEGACY_CANCELLATION_ANCHOR = "cancelaciones";
 
-/** `/terms` with the cancellation clause addressed, in the reader's language. */
-export function cancellationPolicyPath(spanish: boolean): string {
-  return spanish
-    ? `/terms?lang=es#${CANCELLATION_POLICY_ANCHOR}`
-    : `/terms#${CANCELLATION_POLICY_ANCHOR}`;
+/**
+ * The terms' cancellation clause, at the reader's language's URL (D-193):
+ * `/es/terms#…` for a Spanish reader. A language with no translated terms
+ * gets its own URL too, which serves the English document with a line in
+ * that language saying so (D-196) — so the page around the clause is still
+ * one the reader can navigate.
+ */
+export function cancellationPolicyPath(locale: AppLocale): string {
+  return `${localizedPath("/terms", locale)}#${CANCELLATION_POLICY_ANCHOR}`;
 }

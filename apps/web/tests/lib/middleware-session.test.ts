@@ -307,6 +307,15 @@ describe("updateSession — maintenance mode", () => {
     expect(res.status).toBe(503);
   });
 
+  it("puts maintenance before the language redirect", async () => {
+    vi.stubEnv("MAINTENANCE_MODE", "1");
+    const req = reqFor("/pricing");
+    req.headers.set("accept-language", "es");
+    const res = await updateSession(req);
+    expect(res.status).toBe(503);
+    expect(res.headers.get("location")).toBeNull();
+  });
+
   it("cannot bypass when no MAINTENANCE_BYPASS_TOKEN is configured", async () => {
     vi.stubEnv("MAINTENANCE_MODE", "1");
     // No token set — a stray bypass cookie must not open the wall.

@@ -559,7 +559,7 @@ records removed before publication — see [What is not here](#what-is-not-here)
 | [D-190](./D-190.md) | A liveness probe restarts a wedged Cloud Run instance                 | Active                               |
 | [D-191](./D-191.md) | Money screens lead with this month earned; "safe to spend" retired    | Active                               |
 | [D-192](./D-192.md) | Test accounts are a recorded flag, left out of every figure           | Active                               |
-| [D-193](./D-193.md) | One URL per language on public pages; bare URL is English             | Decided, not built                   |
+| [D-193](./D-193.md) | One URL per language on public pages; bare URL is English             | Active                               |
 | [D-194](./D-194.md) | The booking page's language is the teacher's; no visitor switch       | Active (records existing behaviour)  |
 | [D-195](./D-195.md) | One locale per language; a regional locale is a delta over its base   | Decided, not built                   |
 | [D-196](./D-196.md) | Legal text: a person translates, English controls, launch needs it    | Decided, not built                   |

@@ -5476,7 +5476,9 @@ export const fr = {
   "web.help.meta.description":
     "Comment fonctionnent les paiements, les formules et les réservations sur SpiralClass.",
   "web.terms.meta.title": "Conditions d'utilisation",
-  "web.terms.meta.description": "Les conditions générales d'utilisation d'SpiralClass.",
+  "web.terms.meta.description": "Les conditions générales d'utilisation de SpiralClass.",
+  "web.legal.englishOnly":
+    "Pour l'instant, ce document n'existe qu'en anglais. C'est le texte anglais qui fait foi.",
   "web.privacyNotice.meta.title": "Politique de confidentialité",
   "web.privacyNotice.meta.description":
     "Comment SpiralClass collecte, utilise et protège vos données personnelles, conformément au RGPD du Royaume-Uni.",

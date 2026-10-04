@@ -5,7 +5,7 @@ import { ArrowRight } from "lucide-react";
 import { listContentDocs, localize, type ContentAudience } from "@spiralclass/shared";
 import { requireOnboardedTeacher, requireStudent } from "@/lib/auth";
 import { requireAdmin } from "@/lib/admin";
-import { getT, getPreferredLocale } from "@/lib/i18n";
+import { getLocalizedHref, getPreferredLocale, getT } from "@/lib/i18n";
 import type { StringKey } from "@/lib/i18n-translate";
 import { Heading } from "@/components/ui/heading";
 import { PageShell } from "@/components/ui/page-shell";
@@ -61,6 +61,7 @@ export default async function HelpAudienceIndexPage({ params }: { params: Promis
 
   const docs = listContentDocs(typedAudience);
   const t = await getT();
+  const href = await getLocalizedHref();
   const locale = await getPreferredLocale();
 
   return (
@@ -81,7 +82,7 @@ export default async function HelpAudienceIndexPage({ params }: { params: Promis
         {docs.map((doc) => (
           <li key={doc.slug}>
             <Link
-              href={`/help/${typedAudience}/${doc.slug}`}
+              href={href(`/help/${typedAudience}/${doc.slug}`)}
               className="group flex items-start gap-4 rounded-xl border border-border bg-card p-4 transition-[border-color,box-shadow] hover:border-primary/40 hover:shadow-brand-sm"
             >
               <span className="min-w-0 flex-1">

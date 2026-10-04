@@ -5500,6 +5500,8 @@ export const esMX = {
     "Cómo funcionan los pagos, los planes y las reservas en SpiralClass.",
   "web.terms.meta.title": "Términos y condiciones",
   "web.terms.meta.description": "Los términos y condiciones de uso de SpiralClass.",
+  "web.legal.englishOnly":
+    "Por ahora, este documento solo está disponible en inglés. El texto en inglés es el que se aplica.",
   "web.privacyNotice.meta.title": "Política de privacidad",
   "web.privacyNotice.meta.description":
     "Cómo SpiralClass recopila, usa y protege tus datos personales, conforme al RGPD del Reino Unido.",
