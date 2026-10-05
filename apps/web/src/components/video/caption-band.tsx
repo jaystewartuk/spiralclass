@@ -61,6 +61,19 @@ export type CaptionBandProps = {
   // subtitles in the middle of the screen. Subtitles keep the bottom edge; a
   // corner obstruction gets a corner-shaped answer.
   tileParked: boolean;
+  // A material or a screen share owns the stage, so the band is a STRIP OF ITS
+  // OWN below it rather than an overlay on it. The band used to be removed
+  // outright in that state, on the grounds that subtitles must not sit on the
+  // worksheet being read — true, and it left a teacher with no subtitles for
+  // exactly the part of the lesson spent on a worksheet (reported from a real
+  // class, 2026-10-02). It also took the transcript button away with it,
+  // which was the one stated way to still read the lines.
+  //
+  // Docked, the strip HOLDS ITS HEIGHT between sentences. Over a video the
+  // band can come and go freely; here its height is taken from the material,
+  // and a worksheet that reflowed every time someone finished a sentence
+  // would be worse than no subtitles at all.
+  docked?: boolean;
   // True once the room is captioning but before the first line lands. ASR
   // plus translation is a second or two, and silence in that gap reads as
   // "it didn't work" — this is the difference between a feature that feels
@@ -85,12 +98,40 @@ export type CaptionBandProps = {
 // default right for a phone held at arm's length and too small for a monitor
 // across a desk — a student on a computer reported the subtitles as too small
 // to read, at the default, never having found the size control.
-const SIZE_CLASSES: Record<CaptionSize, { primary: string; secondary: string; maxLines: number }> =
-  {
-    m: { primary: "text-lg md:text-2xl", secondary: "text-sm md:text-base", maxLines: 3 },
-    l: { primary: "text-2xl md:text-3xl", secondary: "text-base md:text-xl", maxLines: 2 },
-    xl: { primary: "text-3xl md:text-4xl", secondary: "text-xl md:text-2xl", maxLines: 2 },
-  };
+//
+// `dockedHeight` is the height the docked strip reserves at that size: room
+// for one ordinary subtitle, and never less than the column of three controls
+// beside it. A longer line grows the strip; a pause does not shrink it.
+const SIZE_CLASSES: Record<
+  CaptionSize,
+  { primary: string; secondary: string; maxLines: number; dockedHeight: string }
+> = {
+  m: {
+    primary: "text-lg md:text-2xl",
+    secondary: "text-sm md:text-base",
+    maxLines: 3,
+    dockedHeight: "min-h-24 lg:min-h-28",
+  },
+  l: {
+    primary: "text-2xl md:text-3xl",
+    secondary: "text-base md:text-xl",
+    maxLines: 2,
+    dockedHeight: "min-h-28 lg:min-h-32",
+  },
+  xl: {
+    primary: "text-3xl md:text-4xl",
+    secondary: "text-xl md:text-2xl",
+    maxLines: 2,
+    dockedHeight: "min-h-32 lg:min-h-36",
+  },
+};
+
+// Docked, the strip's height comes out of the material above it, so it shows
+// the current exchange at the default size and only the current line at the
+// larger ones. Two extra-large bilingual lines measured ~200px in a browser,
+// on a laptop window that left the worksheet 110px — the subtitles had become
+// the stage. The transcript is where the rest lives.
+const DOCKED_MAX_LINES: Record<CaptionSize, number> = { m: 2, l: 1, xl: 1 };
 
 export function CaptionBand({
   entries,
@@ -98,6 +139,7 @@ export function CaptionBand({
   onPrefsChange,
   speakerName,
   tileParked,
+  docked = false,
   awaitingFirstLine,
   onOpenTranscript,
   hasTranscript,
@@ -109,14 +151,18 @@ export function CaptionBand({
   const sizes = SIZE_CLASSES[prefs.size];
   // The feed hands over everything still inside its lifetime; the band
   // decides how much of that fits at the reader's chosen type size.
-  const shown = entries.slice(-sizes.maxLines);
+  const shown = entries.slice(-(docked ? DOCKED_MAX_LINES[prefs.size] : sizes.maxLines));
 
   // Nothing to show and nothing to say: render no element at all, so the
   // stage is genuinely clear rather than holding an invisible box over the
   // video (the same mistake the notes-overlay wrapper made — see the
   // overlay comment in class-call.tsx).
+  //
+  // Docked is the exception, and deliberately: the strip is a row in the
+  // layout rather than a box over the video, so an idle one covers nothing,
+  // and removing it between sentences is what would make the material jump.
   const idle = shown.length === 0 && !awaitingFirstLine;
-  if (!prefs.visible || idle) return null;
+  if (!prefs.visible || (idle && !docked)) return null;
 
   return (
     <div
@@ -130,10 +176,23 @@ export function CaptionBand({
       // centred max-w-3xl band cannot reach the corner anyway — the arithmetic
       // is (stageWidth - 768) / 2 > 126, which is true from about 1020px — so
       // reserving the column there would narrow the subtitles for nothing.
-      className={cn(
-        "pointer-events-none absolute inset-x-0 bottom-3 z-20 mx-auto flex max-w-3xl flex-col items-center gap-1 pl-3 lg:bottom-4 lg:gap-1.5 lg:pl-4",
-        tileParked ? "pr-32 lg:pr-4" : "pr-3 lg:pr-4",
-      )}
+      //
+      // DOCKED is a different box with the same contents: a row in the call's
+      // own column, under the stage, with the controls in a column beside the
+      // subtitles rather than in a row above them — beside costs the material
+      // no height, above would cost it a line. `flex-row-reverse` keeps the
+      // controls first in the DOM (and so in the tab order) in both layouts.
+      // No tile clearance: the camera tiles are parked in the stage's corners,
+      // and the stage ends where this strip begins.
+      data-docked={docked || undefined}
+      className={
+        docked
+          ? "relative z-20 mx-auto flex w-full max-w-3xl flex-row-reverse items-stretch gap-2 px-3 pt-2 pb-1 lg:px-4"
+          : cn(
+              "pointer-events-none absolute inset-x-0 bottom-3 z-20 mx-auto flex max-w-3xl flex-col items-center gap-1 pl-3 lg:bottom-4 lg:gap-1.5 lg:pl-4",
+              tileParked ? "pr-32 lg:pr-4" : "pr-3 lg:pr-4",
+            )
+      }
     >
       {/* The band's own controls, anchored to the band rather than buried in
       the control row below the stage. Subtitle settings are read WHILE
@@ -149,7 +208,10 @@ export function CaptionBand({
       look dead. */}
       <div
         ref={controlsRef}
-        className="pointer-events-auto relative flex items-center gap-1 self-end"
+        className={cn(
+          "pointer-events-auto relative flex items-center gap-1",
+          docked ? "flex-col justify-start" : "self-end",
+        )}
       >
         {settingsOpen && (
           <CaptionSettings
@@ -158,6 +220,7 @@ export function CaptionBand({
             onChange={onPrefsChange}
             onClose={() => setSettingsOpen(false)}
             outsideOf={controlsRef}
+            opensUpward={docked}
           />
         )}
         {hasTranscript && (
@@ -207,7 +270,15 @@ export function CaptionBand({
           // "Listening…" state is two words, and stretching a full-width
           // black bar across the video to hold them reads as something being
           // wrong rather than as a quiet standby.
-          shown.length > 0 ? "w-full" : "w-auto",
+          //
+          // Docked, it is always the full strip, lines resting on its bottom
+          // edge — the standby state is a reserved row there, not a bar across
+          // somebody's face.
+          docked
+            ? cn("flex-1 justify-end", sizes.dockedHeight)
+            : shown.length > 0
+              ? "w-full"
+              : "w-auto",
           // ROOM FOR THE POPOVER, and the reason it is bought HERE rather
           // than by moving the popover.
           //
@@ -226,7 +297,10 @@ export function CaptionBand({
           // are open this panel holds at least the popover's height, the band
           // grows upward from its bottom anchor as it always does, and the
           // popover has the room it was promised in every caption state.
-          settingsOpen && "min-h-40",
+          //
+          // Not when docked: the popover opens upward there (see
+          // CaptionSettings), so there is nothing to make room for.
+          settingsOpen && !docked && "min-h-40",
         )}
       >
         {awaitingFirstLine && shown.length === 0 && (
@@ -410,12 +484,14 @@ function CaptionSettings({
   // the whole controls cluster, not this popover — see the comment at its
   // ref in CaptionBand.
   outsideOf,
+  opensUpward,
 }: {
   id: string;
   prefs: CaptionPreferences;
   onChange: (patch: Partial<CaptionPreferences>) => void;
   onClose: () => void;
   outsideOf: React.RefObject<HTMLElement | null>;
+  opensUpward: boolean;
 }) {
   const t = useT();
 
@@ -498,7 +574,16 @@ function CaptionSettings({
       // visible as you make it. Both rows are segmented (three across, not
       // three stacked) to keep it to ~150px; the cap is the backstop for a
       // locale whose labels wrap.
-      className="absolute top-10 right-0 z-30 max-h-over-controls w-64 overflow-y-auto rounded-2xl bg-scrim-3 p-3 text-left shadow-lg backdrop-blur-md"
+      //
+      // UPWARD when the band is docked, which is the same reasoning arriving
+      // at the other answer. The docked strip sits outside the stage, so
+      // nothing clips what rises above it, and it has the whole material for
+      // headroom; downward from there is the call's control row and then the
+      // bottom of the window.
+      className={cn(
+        "absolute right-0 z-30 max-h-over-controls w-64 overflow-y-auto rounded-2xl bg-scrim-3 p-3 text-left shadow-lg backdrop-blur-md",
+        opensUpward ? "bottom-full mb-2" : "top-10",
+      )}
     >
       <fieldset>
         <legend className="mb-1.5 text-sm font-semibold text-on-dark-faint">

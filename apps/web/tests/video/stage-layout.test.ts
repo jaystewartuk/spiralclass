@@ -3,8 +3,42 @@ import {
   computeStageTileStyle,
   initialFloatingTilePosition,
   isFloatingRole,
+  resolveCaptionPlacement,
   resolveTileRole,
 } from "@/lib/video/stage-layout";
+
+describe("resolveCaptionPlacement", () => {
+  const base = { minimized: false, contentOwnsStage: false, roomCaptionsOn: true };
+
+  it("overlays the subtitles on a camera", () => {
+    expect(resolveCaptionPlacement(base)).toBe("over-stage");
+    // Captions off changes nothing here: the overlay renders no element with
+    // no lines to show, so it needs no gate of its own.
+    expect(resolveCaptionPlacement({ ...base, roomCaptionsOn: false })).toBe("over-stage");
+  });
+
+  it("docks them under a material or a screen share instead of dropping them", () => {
+    // The regression, from a real class on 2026-10-02: content on the stage
+    // answered "none", so a teacher lost her subtitles — and the only button
+    // that opens the transcript — for as long as a worksheet was open.
+    expect(resolveCaptionPlacement({ ...base, contentOwnsStage: true })).toBe("docked");
+  });
+
+  it("reserves no strip under a material when the room is not captioning", () => {
+    // The dock holds its height between sentences, so a class that never
+    // turned captions on must not pay a row of every worksheet for it.
+    expect(
+      resolveCaptionPlacement({ ...base, contentOwnsStage: true, roomCaptionsOn: false }),
+    ).toBe("none");
+  });
+
+  it("shows nothing in the minimized bubble", () => {
+    expect(resolveCaptionPlacement({ ...base, minimized: true })).toBe("none");
+    expect(resolveCaptionPlacement({ ...base, minimized: true, contentOwnsStage: true })).toBe(
+      "none",
+    );
+  });
+});
 
 describe("isFloatingRole", () => {
   it("covers both corners and neither of the non-floating roles", () => {

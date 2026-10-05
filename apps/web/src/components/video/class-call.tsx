@@ -88,6 +88,7 @@ import { CallMaterialsPanel, CallMaterialViewer } from "./call-materials-panel";
 import {
   computeStageTileStyle,
   resolveTileRole,
+  resolveCaptionPlacement,
   isFloatingRole,
   initialFloatingTilePosition,
   type StageTileRole,
@@ -1592,6 +1593,7 @@ export function ClassCall({
   // A material or a screen share fills the stage; the status stack then takes
   // a row of its own instead of floating over that content.
   const contentOwnsStage = Boolean(activeMaterial) || screenShareActive;
+  const captionPlacement = resolveCaptionPlacement({ minimized, contentOwnsStage, roomCaptionsOn });
   const localIsBig = stage.main === "local";
   // Minimized mode shows exactly one tile (the current primary) and nothing
   // else — see canMinimize above for why material/screen-share are excluded
@@ -2202,12 +2204,12 @@ export function ClassCall({
             clear of a parked camera tile sideways rather than by climbing the
             screen — see the note on tileParkedAtBottom above, and
             caption-band.tsx for the rest.
-            Suppressed while a material or screen share
-            owns the stage: the subtitles would sit over the worksheet the
-            teacher just put up, and that content is the thing being looked
-            at. The transcript stays reachable throughout, which is where the
-            lines go instead of being lost. */}
-            {!minimized && !activeMaterial && !screenShareActive && (
+            Not here while a material or screen share owns the stage: the
+            subtitles would sit over the worksheet the teacher just put up,
+            and that content is the thing being looked at. They move to a
+            strip under the stage instead — see the docked band in the
+            controls block below, and resolveCaptionPlacement. */}
+            {captionPlacement === "over-stage" && (
               <CaptionBand
                 entries={captions.visible}
                 prefs={captionPrefs}
@@ -2294,6 +2296,25 @@ export function ClassCall({
             // down behind the control row and become unreachable, which is
             // precisely the bound clampSelfViewPosition exists to enforce.
             <div ref={controlsRef}>
+              {/* The subtitles, docked: a strip between the stage and the
+              controls while a material or a screen share fills the stage, so
+              they are readable WITH the worksheet rather than instead of it.
+              Inside controlsRef on purpose — the stage is the flex-1 above, so
+              it shrinks by exactly this strip, and the measured controls height
+              that bounds a dragged camera tile grows by it. */}
+              {captionPlacement === "docked" && (
+                <CaptionBand
+                  docked
+                  entries={captions.visible}
+                  prefs={captionPrefs}
+                  onPrefsChange={setCaptionPrefs}
+                  speakerName={speakerName}
+                  tileParked={false}
+                  awaitingFirstLine={captions.transcript.length === 0}
+                  hasTranscript={captions.transcript.length > 0}
+                  onOpenTranscript={() => setTranscriptOpen(true)}
+                />
+              )}
               {/* Record/Stop error, surfaced so a rejected toggle isn't a silent no-op. */}
               {recordError && (
                 <p className="px-3 pb-1 text-center text-sm text-destructive">{recordError}</p>

@@ -309,3 +309,66 @@ describe("the reader's preferences", () => {
     expect(clear.className).not.toContain("pr-32");
   });
 });
+
+// The band while a material or a screen share fills the stage. It used not to
+// exist there at all: a teacher reading a worksheet with her student had no
+// subtitles and no way to open the transcript (a real class, 2026-10-02).
+describe("docked under a material", () => {
+  it("is a row in the layout, not an overlay on the material", () => {
+    const band = render({ docked: true }).firstElementChild as HTMLElement;
+    expect(band.dataset.docked).toBe("true");
+    // In flow: this is what makes the stage above give up the height, rather
+    // than the subtitles covering the last lines of the worksheet.
+    expect(band.className).not.toMatch(/\babsolute\b/);
+    expect(band.className).not.toContain("bottom-3");
+    expect(band.className).not.toContain("pointer-events-none");
+  });
+
+  it("keeps its strip between sentences, so the material does not jump", () => {
+    const html = render({ docked: true, entries: [], awaitingFirstLine: false });
+    const log = html.querySelector('[role="log"]') as HTMLElement;
+    expect(log).not.toBeNull();
+    expect(log.className).toContain("min-h-24");
+    // The overlay's answer to the same state, for contrast, is no element.
+    expect(render({ entries: [], awaitingFirstLine: false }).innerHTML).toBe("");
+  });
+
+  it("keeps the transcript reachable with a material open", () => {
+    const html = render({ docked: true, entries: [] });
+    expect(html.querySelector('[aria-label="call.captionsTranscript"]')).not.toBeNull();
+  });
+
+  it("still goes away when the reader hides subtitles", () => {
+    const html = render({
+      docked: true,
+      prefs: { ...BOTH_LANGUAGES, visible: false },
+    });
+    expect(html.innerHTML).toBe("");
+  });
+
+  it("shows the current exchange only, whatever the size step allows", () => {
+    const entries = [1, 2, 3].map((n) => ({ ...bilingual, id: String(n), text: `line ${n}` }));
+    const html = render({ docked: true, entries });
+    expect(html.textContent).not.toContain("line 1");
+    expect(html.textContent).toContain("line 2");
+    expect(html.textContent).toContain("line 3");
+
+    // And only the current line once the text is large: two extra-large
+    // bilingual lines took more of a laptop window than the worksheet kept.
+    const large = render({ docked: true, entries, prefs: { ...BOTH_LANGUAGES, size: "xl" } });
+    expect(large.textContent).not.toContain("line 2");
+    expect(large.textContent).toContain("line 3");
+  });
+
+  it("opens its settings upward, over the material, not down into the controls", () => {
+    const html = render({ docked: true });
+    const settings = html.querySelector('[aria-label="call.captionsSettings"]') as HTMLElement;
+    act(() => settings.click());
+    const popover = html.querySelector('[role="group"]') as HTMLElement;
+    expect(popover.className).toContain("bottom-full");
+    expect(popover.className).not.toContain("top-10");
+    // And the panel is not stretched to make room for a popover that no
+    // longer opens over it.
+    expect((html.querySelector('[role="log"]') as HTMLElement).className).not.toContain("min-h-40");
+  });
+});

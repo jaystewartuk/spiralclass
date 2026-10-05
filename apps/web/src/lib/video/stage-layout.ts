@@ -112,3 +112,31 @@ export function resolveTileRole(input: {
   if (!input.isFloating) return "hidden";
   return input.corner === "left" ? "floating-left" : "floating-right";
 }
+
+// Where the live subtitles go, given what is on the stage.
+//
+// Over a camera they are an overlay along its bottom edge, like any video
+// player's. Over a material or a screen share they cannot be: that content is
+// the thing being read, and a band across the last lines of a worksheet hides
+// what the teacher is teaching from. So they dock in a strip below the stage
+// instead, and the content gives up that much height.
+//
+// The third answer used to be the second one: content on the stage meant no
+// subtitles at all, for anyone, for as long as it stayed open — and no
+// transcript either, because the only button that opens it lives in the band.
+// Reported from a real class on 2026-10-02.
+//
+// The dock is reserved only while the room is captioning. It holds its height
+// between sentences (see CaptionBand), so reserving it for a class that never
+// turned captions on would take a row from every worksheet for nothing.
+export type CaptionPlacement = "over-stage" | "docked" | "none";
+
+export function resolveCaptionPlacement(input: {
+  minimized: boolean;
+  contentOwnsStage: boolean;
+  roomCaptionsOn: boolean;
+}): CaptionPlacement {
+  if (input.minimized) return "none";
+  if (!input.contentOwnsStage) return "over-stage";
+  return input.roomCaptionsOn ? "docked" : "none";
+}

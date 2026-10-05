@@ -223,6 +223,13 @@ That lasts until preview has a LiveKit server of its own.
     transcript artifact separate from the post-call transcription pipeline
     below. The translation route logs a character count per call, never text;
     the token route logs each grant, never audio or the token.
+    - **Captions are readable whatever is on the stage.** Over a camera they
+      are a band along the bottom of the video. While a material or a screen
+      share fills the stage they are a strip of their own beneath it — the
+      content gives up that height rather than being covered — and the strip
+      holds its height between sentences so a worksheet does not reflow as
+      people speak. The transcript opens from either. (`resolveCaptionPlacement`
+      in `apps/web/src/lib/video/stage-layout.ts`.)
 19. The teacher's caption toggle is hidden entirely if the flag is on but
     `GOOGLE_TRANSLATE_API_KEY` is missing — no error state, matching the
     "flag-on-but-dark" failure mode the product has hit before (the
