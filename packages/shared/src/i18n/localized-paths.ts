@@ -1,8 +1,9 @@
 import {
   DEFAULT_LOCALE,
-  LOCALES,
+  LAUNCHED_LOCALES,
   SYSTEM_LOCALE,
   isAppLocale,
+  isLaunchedLocale,
   matchAcceptLanguage,
   type AppLocale,
 } from "./locales";
@@ -60,11 +61,13 @@ export function localePathPrefix(locale: AppLocale): string | null {
  * Null when the path has no locale segment.
  */
 export function splitLocalePrefix(pathname: string): { locale: AppLocale; path: string } | null {
-  for (const { tag } of LOCALES) {
+  // Launched locales only: an unlaunched one has no URL, so `/de/pricing`
+  // passes through to a 404 rather than publishing a half-reviewed page.
+  for (const { tag } of LAUNCHED_LOCALES) {
+    const locale = tag as AppLocale;
     const prefix = `/${tag.toLowerCase()}`;
-    if (pathname === prefix) return { locale: tag, path: "/" };
-    if (pathname.startsWith(`${prefix}/`))
-      return { locale: tag, path: pathname.slice(prefix.length) };
+    if (pathname === prefix) return { locale, path: "/" };
+    if (pathname.startsWith(`${prefix}/`)) return { locale, path: pathname.slice(prefix.length) };
   }
   return null;
 }
@@ -113,7 +116,9 @@ export function unlocalizedPath(pathname: string): string {
  */
 export function explicitLocaleChoice(cookieValue: string | null | undefined): AppLocale | null {
   if (!cookieValue || cookieValue === SYSTEM_LOCALE) return null;
-  if (isAppLocale(cookieValue)) return cookieValue;
+  // A reviewer's cookie may name an unlaunched locale; it reads the app in it,
+  // but it never sends the public pages anywhere, since that locale has no URL.
+  if (isAppLocale(cookieValue)) return isLaunchedLocale(cookieValue) ? cookieValue : null;
   return matchAcceptLanguage(cookieValue);
 }
 

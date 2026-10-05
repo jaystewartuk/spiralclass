@@ -14,7 +14,7 @@ import { InstallPromptCapture } from "@/components/pwa/install-prompt-capture";
 import { CallSessionProvider } from "@/lib/video/call-session-context";
 import { CallSessionOverlay } from "@/components/video/call-session-overlay";
 import { getPreferredLocale, getT } from "@/lib/i18n";
-import { LOCALES, localeDirection, ogLocale } from "@spiralclass/shared";
+import { LAUNCHED_LOCALES, localeDirection, ogLocale } from "@spiralclass/shared";
 import { readingStyle } from "@/lib/reading";
 import { getReadingPreferences } from "@/lib/reading-server";
 import { socialCardImages } from "@/lib/seo/social-card";
@@ -70,7 +70,7 @@ export async function generateMetadata(): Promise<Metadata> {
       // The Open Graph tag is the registry row's `og`: region-qualified, so
       // it cannot be derived from the locale tag.
       locale: ogLocale(locale),
-      alternateLocale: LOCALES.filter((l) => l.tag !== locale).map((l) => l.og),
+      alternateLocale: LAUNCHED_LOCALES.filter((l) => l.tag !== locale).map((l) => l.og),
       // The card in the page's own language, by URL (D-193). The booking
       // funnel's file-convention card overrides this under /b/**.
       images: socialCardImages(locale),
