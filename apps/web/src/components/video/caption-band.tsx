@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useId, useMemo, useRef, useState } from "react";
-import { ScrollText, Settings2, Type, X } from "lucide-react";
+import { Captions, ScrollText, Settings2, Type, X } from "lucide-react";
 import { useT } from "@/components/locale-provider";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import type { CaptionEntry } from "@/lib/captions/caption-feed";
 import type { CaptionDisplay, CaptionPreferences, CaptionSize } from "@/lib/captions/preferences";
@@ -164,6 +165,47 @@ export function CaptionBand({
   const idle = shown.length === 0 && !awaitingFirstLine;
   if (!prefs.visible || (idle && !docked)) return null;
 
+  // PUT AWAY, with a worksheet up. The reader has said she wants the material
+  // alone, so the strip gives its height back — but it leaves a chip where its
+  // controls were, because a switch with no visible way back is how a feature
+  // gets reported as broken. The chip sits at the strip's right edge, under
+  // the ✕ that put the subtitles away, so hiding and showing are the same
+  // spot on the screen rather than a hunt.
+  //
+  // The transcript button stays beside it: wanting the worksheet clear is not
+  // the same as not wanting to know what was just said, and this is the state
+  // in which the transcript is the only place the lines are going.
+  if (docked && !prefs.visibleWithContent) {
+    return (
+      <div
+        data-docked="collapsed"
+        className="relative z-20 mx-auto flex w-full max-w-3xl items-center justify-end gap-1.5 px-3 pt-1.5 lg:px-4"
+      >
+        {hasTranscript && (
+          <BandButton
+            onClick={onOpenTranscript}
+            label={t("call.captionsTranscript")}
+            icon={<ScrollText className="h-4 w-4" aria-hidden />}
+          />
+        )}
+        {/* The ui/ primitive, at its own sizes: a full touch target on a phone,
+        where this is tapped mid-lesson, and the app's focus ring on a black
+        strip where a keyboard user has nothing else to go on. The colours are
+        the call's, since ghost's hover is meant for a page background. */}
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          onClick={() => onPrefsChange({ visibleWithContent: true })}
+          className="gap-1.5 rounded-full bg-overlay-1 text-white hover:bg-overlay-2 hover:text-white"
+        >
+          <Captions className="h-4 w-4" aria-hidden />
+          {t("call.captionsShowMine")}
+        </Button>
+      </div>
+    );
+  }
+
   return (
     <div
       // ANCHORED TO THE BOTTOM, always. The column is capped at the same
@@ -238,8 +280,15 @@ export function CaptionBand({
           icon={<Settings2 className="h-4 w-4" aria-hidden />}
         />
         <BandButton
-          onClick={() => onPrefsChange({ visible: false })}
-          label={t("call.captionsHideMine")}
+          // Docked, the ✕ answers the narrower question — "not over this
+          // worksheet" — and leaves the subtitles over the camera alone. The
+          // label says so, because the same glyph doing two different things
+          // is only acceptable when the name tells them apart.
+          onClick={() => {
+            setSettingsOpen(false);
+            onPrefsChange(docked ? { visibleWithContent: false } : { visible: false });
+          }}
+          label={docked ? t("call.captionsHideWithContent") : t("call.captionsHideMine")}
           icon={<X className="h-4 w-4" aria-hidden />}
         />
       </div>

@@ -230,6 +230,14 @@ That lasts until preview has a LiveKit server of its own.
       holds its height between sentences so a worksheet does not reflow as
       people speak. The transcript opens from either. (`resolveCaptionPlacement`
       in `apps/web/src/lib/video/stage-layout.ts`.)
+    - **Each reader can put them away, on her own screen only, in two
+      scopes.** Hiding them over a camera hides them everywhere. Hiding them
+      under a material hides them only while a material or screen share is
+      up: they return over the camera, a chip where the strip was brings them
+      back, and the choice is remembered in that browser. Neither touches the
+      room's switch, the other person's screen or the transcript. Whenever a
+      reader has hidden them, the way back is on screen
+      (`toggleCaptionsHerePatch` in `apps/web/src/lib/captions/preferences.ts`).
 19. The teacher's caption toggle is hidden entirely if the flag is on but
     `GOOGLE_TRANSLATE_API_KEY` is missing — no error state, matching the
     "flag-on-but-dark" failure mode the product has hit before (the

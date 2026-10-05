@@ -748,8 +748,9 @@ export const fr = {
   // captionsOff, ci-dessus) — voir caption-band.tsx.
   "call.captionsHideMine": "Masquer les sous-titres",
   "call.captionsShowMine": "Afficher les sous-titres",
+  "call.captionsHideWithContent": "Masquer les sous-titres quand un support est ouvert",
   "call.captionsHiddenHint":
-    "Les sous-titres sont actifs — touchez Afficher les sous-titres pour les voir.",
+    "Les sous-titres sont actifs mais masqués sur votre écran — touchez ici pour les afficher.",
   "call.captionsSettings": "Réglages des sous-titres",
   "call.captionsRegionLabel": "Sous-titres en direct",
   "call.captionsListening": "Écoute en cours…",

@@ -762,7 +762,9 @@ export const esMX = {
   // caption-band.tsx para saber por qué esa distinción importa.
   "call.captionsHideMine": "Ocultar subtítulos",
   "call.captionsShowMine": "Mostrar subtítulos",
-  "call.captionsHiddenHint": "Los subtítulos están activos — toca Mostrar subtítulos para verlos.",
+  "call.captionsHideWithContent": "Ocultar subtítulos mientras haya material abierto",
+  "call.captionsHiddenHint":
+    "Los subtítulos están activos pero ocultos en tu pantalla — toca aquí para verlos.",
   "call.captionsSettings": "Ajustes de subtítulos",
   "call.captionsRegionLabel": "Subtítulos en vivo",
   "call.captionsListening": "Escuchando…",

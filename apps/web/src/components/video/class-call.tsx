@@ -49,6 +49,7 @@ import { useBrowserCaptions } from "@/lib/captions/use-browser-captions";
 import { captionsConsentPrompt } from "@/lib/captions/consent-prompt";
 import { useRemoteParticipant } from "@/lib/video/use-remote-participant";
 import { useCaptionPreferences } from "@/lib/captions/use-caption-preferences";
+import { captionsShownHere, toggleCaptionsHerePatch } from "@/lib/captions/preferences";
 import {
   CAPTIONS_NOTICE_STORAGE_KEY,
   LEGACY_CAPTIONS_NOTICE_STORAGE_KEY,
@@ -954,6 +955,19 @@ export function ClassCall({
   // camera-off placeholder and the top bar's name.
   const remote = useRemoteParticipant(room);
   const { prefs: captionPrefs, setPrefs: setCaptionPrefs } = useCaptionPreferences();
+  // A material or a screen share fills the stage; the status stack then takes
+  // a row of its own instead of floating over that content, and the subtitles
+  // dock beneath it.
+  const contentOwnsStage = Boolean(activeMaterial) || screenShareActive;
+  // Whether this reader's subtitles are showing right now, and the one way
+  // every control flips that — the student's button, her keyboard shortcut and
+  // the "subtitles are hidden" pill all go through here, so they cannot
+  // disagree about what "hide" means with a worksheet up.
+  const captionsShown = captionsShownHere(captionPrefs, contentOwnsStage);
+  const toggleCaptionsHere = useCallback(
+    () => setCaptionPrefs(toggleCaptionsHerePatch(captionPrefs, contentOwnsStage)),
+    [captionPrefs, contentOwnsStage, setCaptionPrefs],
+  );
   const [transcriptOpen, setTranscriptOpen] = useState(false);
   // Resolve a caption's speaker identity to the name the room knows them by.
   // Deliberately not memoized on the participant map: LiveKit mutates it in
@@ -1554,7 +1568,7 @@ export function ClassCall({
           // The student cannot turn the room's captions on, so for her the
           // same key does the thing she CAN do: show or hide the band on her
           // own screen — and only while there are captions to hide.
-          else if (roomCaptionsOn) setCaptionPrefs({ visible: !captionPrefs.visible });
+          else if (roomCaptionsOn) toggleCaptionsHere();
           return;
       }
     };
@@ -1567,8 +1581,7 @@ export function ClassCall({
     toggleCaptions,
     canCaption,
     roomCaptionsOn,
-    captionPrefs.visible,
-    setCaptionPrefs,
+    toggleCaptionsHere,
   ]);
 
   // Connected but neither camera nor mic is on — the "I just see a blank screen"
@@ -1590,9 +1603,6 @@ export function ClassCall({
     swapped,
   });
   const remoteIsBig = stage.main === "remote";
-  // A material or a screen share fills the stage; the status stack then takes
-  // a row of its own instead of floating over that content.
-  const contentOwnsStage = Boolean(activeMaterial) || screenShareActive;
   const captionPlacement = resolveCaptionPlacement({ minimized, contentOwnsStage, roomCaptionsOn });
   const localIsBig = stage.main === "local";
   // Minimized mode shows exactly one tile (the current primary) and nothing
@@ -1942,9 +1952,21 @@ export function ClassCall({
               )}
               {/* Subtitles are on but the reader has hidden the band on her
                 own screen. Without this the Subtitles control looks off and
-                the feature looks broken; with it, the way back is one tap. */}
+                the feature looks broken; with it, the way back is one tap —
+                on the pill itself. It used to point at a "Show subtitles"
+                button that only the student has: the teacher's button is the
+                room's switch, so she could hide her own subtitles and then
+                had no way to bring them back short of turning the whole
+                room's captions off and on.
+
+                Not shown for the with-materials switch: that state has its
+                own way back, the chip sitting where the strip was. */}
               {roomCaptionsOn && !captionPrefs.visible && (
-                <StatusPill tone="info" label={t("call.captionsHiddenHint")} />
+                <StatusPill
+                  tone="info"
+                  label={t("call.captionsHiddenHint")}
+                  onActivate={toggleCaptionsHere}
+                />
               )}
               {/* The on-device translation model is downloading — once, on
                 the teacher's first captioned class on this computer. Lines
@@ -2402,13 +2424,11 @@ export function ClassCall({
                   running, so it is never a dead control. */}
                   {!canCaption && roomCaptionsOn && (
                     <CallButton
-                      onClick={() => setCaptionPrefs({ visible: !captionPrefs.visible })}
-                      active={captionPrefs.visible}
+                      onClick={toggleCaptionsHere}
+                      active={captionsShown}
                       icon={Captions}
                       label={
-                        captionPrefs.visible
-                          ? t("call.captionsHideMine")
-                          : t("call.captionsShowMine")
+                        captionsShown ? t("call.captionsHideMine") : t("call.captionsShowMine")
                       }
                       shortcut="c"
                     />
