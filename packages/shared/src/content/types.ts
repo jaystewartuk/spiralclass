@@ -1,3 +1,5 @@
+import type { AppLocale } from "../i18n/locales";
+
 // The in-app help-docs content model — shared by web and mobile so both
 // platforms render the exact same audience-segmented documentation. Content
 // is generated from docs/help/{teacher,student}/*.md (see
@@ -17,10 +19,9 @@
 export const CONTENT_AUDIENCES = ["teacher", "student", "admin"] as const;
 export type ContentAudience = (typeof CONTENT_AUDIENCES)[number];
 
-export interface LocalizedText {
-  en: string;
-  es?: string;
-}
+/** A help text in English, which every doc has, and in any language it has
+ * been written in by a person (docs/help/<slug>.<locale>.md). */
+export type LocalizedText = { en: string } & Partial<Record<Exclude<AppLocale, "en">, string>>;
 
 export interface ContentDoc {
   /** Unique within its audience; used as the URL segment on both platforms. */
@@ -38,9 +39,7 @@ export interface ContentDoc {
 }
 
 /** Resolve a LocalizedText for the given app locale, falling back to `en`
- *  when the locale has no translation (e.g. `fr`, or `es` before it's
- *  written for a given doc). */
+ *  when the locale has no translation written for this doc. */
 export function localize(text: LocalizedText, locale: string): string {
-  if (locale === "es" && text["es"]) return text["es"];
-  return text.en;
+  return (text as Partial<Record<string, string>>)[locale] || text.en;
 }

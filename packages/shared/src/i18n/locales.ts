@@ -52,6 +52,15 @@ export type LocaleDefinition = {
   intl: string;
   og: string;
   dir: "ltr" | "rtl";
+  /**
+   * How a booking funnel in this language shows the price in the SELLER'S own
+   * currency (formatPriceForBuyer). "narrow" is the bare glyph — "$1,500.00" —
+   * for a language whose funnel readers are the seller's own market, where
+   * the alternative is a code ("MXN 1,500.00" under es-419). "symbol" keeps
+   * the disambiguated form — "MX$", "$MX" — for a language whose readers are
+   * cross-border. Every language must choose; nothing infers it.
+   */
+  ownCurrencySymbol: "narrow" | "symbol";
 };
 
 export const LOCALES = [
@@ -66,6 +75,9 @@ export const LOCALES = [
     intl: "es-419",
     og: "es_LA",
     dir: "ltr",
+    // A Spanish funnel's readers are the teacher's own market, and es-419's
+    // non-narrow form is a bare code.
+    ownCurrencySymbol: "narrow",
   },
   {
     tag: "en",
@@ -76,6 +88,8 @@ export const LOCALES = [
     intl: "en",
     og: "en_US",
     dir: "ltr",
+    // English is the cross-border audience: "$6,400.00" reads as US dollars.
+    ownCurrencySymbol: "symbol",
   },
   {
     tag: "fr",
@@ -86,6 +100,9 @@ export const LOCALES = [
     intl: "fr",
     og: "fr_FR",
     dir: "ltr",
+    // French already has a symbol of its own for each dollar ("$MX", "$CO").
+    // It was given the bare "$", which a French reader takes for any dollar.
+    ownCurrencySymbol: "symbol",
   },
 ] as const satisfies readonly LocaleDefinition[];
 
@@ -161,32 +178,9 @@ export function localeEnglishName(locale: string | null | undefined): string {
   return definitionFor(matchAcceptLanguage(locale) ?? DEFAULT_LOCALE).englishName;
 }
 
-/**
- * Whether a string that exists in only English and Spanish renders its ENGLISH
- * half for this reader.
- *
- * Plenty of copy is still written as a two-armed conditional at the call site
- * rather than as a catalog key, and the question such a conditional has to ask
- * is **"is this a Spanish reader?"** — never "is this an English reader?".
- *
- * The two look equivalent and are not. With two locales they agree. With three
- * they diverge in the worst direction: `"fr" === "en"` is false, so a French
- * reader falls into the SPANISH arm and is handed a language she neither reads
- * nor chose — while the arm she should get, English, is `DEFAULT_LOCALE` and
- * the fallback every other part of the system would have given her. Adding a
- * locale is what triggers it, which is exactly when nobody is reading these
- * call sites.
- *
- * So the predicate is written once, here, and the call sites ask it rather than
- * comparing tags themselves. `apps/web/tests/i18n/english-branch.test.ts` fails
- * on a new `=== "en"` used this way.
- *
- * This is about which of two authored strings to show. It is not a locale for
- * `Intl` — pass the locale itself there, so a French reader gets French dates
- * rather than either of these two.
- */
-export function usesEnglishCopy(locale: string | null | undefined): boolean {
-  return locale !== "es";
+/** How a funnel in `locale` shows the seller's own currency; see the field. */
+export function ownCurrencySymbol(locale: string): "narrow" | "symbol" {
+  return definitionFor(matchAcceptLanguage(locale) ?? DEFAULT_LOCALE).ownCurrencySymbol;
 }
 
 /** Resolve an Accept-Language header (or a device's BCP-47 languageTag) to a
