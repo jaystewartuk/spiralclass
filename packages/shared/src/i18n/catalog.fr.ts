@@ -1302,7 +1302,7 @@ export const fr = {
   "homework.teacher.review.ai.regenerate": "Régénérer",
   "homework.teacher.review.ai.loading": "Révision en cours…",
   "homework.teacher.review.ai.instructionsLabel": "Orienter cette révision (optionnel)",
-  "homework.teacher.review.ai.instructionsPlaceholder": "ex. concentre-toi sur le subjonctif",
+  "homework.teacher.review.ai.instructionsPlaceholder": "ex. concentrez-vous sur le subjonctif",
   "homework.teacher.review.ai.draftTitle": "Brouillon de l'IA",
   "homework.teacher.review.ai.discarded": "Ignoré",
   "homework.teacher.review.ai.corrections": "Corrections",
@@ -1522,7 +1522,7 @@ export const fr = {
   "admin.mod.extendPackage": "Prolonger l'échéance",
   "admin.mod.extendMonth": "Prolonger d'1 mois",
   "admin.mod.extendReason": "Motif de la prolongation.",
-  "admin.stat.teachers": "Profes",
+  "admin.stat.teachers": "Professeurs",
   "admin.stat.students": "Élèves",
   "admin.stat.activePackages": "Forfaits actifs",
   "admin.stat.overrides": "Overrides",
@@ -1531,7 +1531,7 @@ export const fr = {
   "admin.stat.notificationsQueued": "Notif. en file",
   "admin.stat.notificationsFailed": "Notif. échouées",
   "admin.stat.openDisputes": "Litiges ouverts",
-  "admin.chart.signups": "Nouvelles profes (6 mois)",
+  "admin.chart.signups": "Nouveaux professeurs (6 mois)",
   "admin.chart.onboardingMix": "Intégration",
   "admin.chart.notificationHealth": "État des notifications",
   "admin.chart.connectionMix": "Connexion de paiement",
@@ -1544,9 +1544,9 @@ export const fr = {
   "admin.chart.failed": "Échouées",
   "admin.chart.active": "Actif",
   "admin.search.title": "Rechercher",
-  "admin.search.placeholder": "Rechercher une profe ou un élève",
+  "admin.search.placeholder": "Rechercher un professeur ou un élève",
   "admin.search.empty": "Aucun résultat.",
-  "admin.search.teachers": "Profes",
+  "admin.search.teachers": "Professeurs",
   "admin.search.students": "Élèves",
   "admin.sortBy.name": "Nom",
   "admin.sortBy.email": "E-mail",
@@ -1567,8 +1567,8 @@ export const fr = {
   "admin.sortBy.channel": "Canal",
   "admin.sortBy.role": "Rôle",
   "admin.sortBy.wise": "Wise",
-  "admin.mod.disableTeacher": "Désactiver la profe",
-  "admin.mod.enableTeacher": "Activer la profe",
+  "admin.mod.disableTeacher": "Désactiver le professeur",
+  "admin.mod.enableTeacher": "Activer le professeur",
   "admin.mod.resendMagicLink": "Renvoyer le lien",
   "admin.mod.resendDone": "Lien envoyé.",
   "admin.mod.refundPayment": "Rembourser le paiement",
@@ -1606,13 +1606,13 @@ export const fr = {
   "buy.wise.payNow": "Ouvrir Wise",
   "buy.wise.sent": "J'ai envoyé le paiement",
   "buy.sellerDisclaimer.stripe":
-    "SpiralClass traite le paiement au nom de la profe. Elle est la vendeuse du service.",
+    "SpiralClass traite le paiement au nom du professeur, qui est le vendeur du service.",
   "buy.sellerDisclaimer.wise":
-    "Le virement va directement à la profe — SpiralClass ne touche jamais ce paiement. Elle est la vendeuse du service.",
+    "Le virement va directement au professeur — SpiralClass ne touche jamais ce paiement. C'est lui le vendeur du service.",
   "publicProfile.subtitle": "Réserver et acheter des cours",
   "publicProfile.requestLink": "Vous avez déjà des cours ? Connectez-vous avec un code",
   "publicProfile.packagesTitle": "Forfaits disponibles",
-  "publicProfile.noPackages": "Cette profe n'a encore publié aucun forfait.",
+  "publicProfile.noPackages": "Ce professeur n'a encore publié aucun forfait.",
   "publicProfile.noAccount":
     "Nous n'avons trouvé aucun cours associé à cet e-mail. Achetez un forfait ci-dessus pour commencer, ou vérifiez l'e-mail utilisé.",
   "a11y.status": "Statut",
@@ -1650,15 +1650,15 @@ export const fr = {
   "push.prime.dismiss": "Plus tard",
   "push.prime.student.title": "Voulez-vous que l'on vous prévienne ?",
   "push.prime.student.body":
-    "Activez les notifications pour recevoir instantanément vos rappels de cours, les changements de réservation et les messages de votre profe.",
+    "Activez les notifications pour recevoir instantanément vos rappels de cours, les changements de réservation et les messages de votre professeur.",
   "studentOnboarding.notifications.title": "Ne manquez aucun cours",
   "studentOnboarding.notifications.body":
-    "Activez les notifications pour ne jamais manquer un changement de réservation, un message de votre profe ou un rappel de cours.",
+    "Activez les notifications pour ne jamais manquer un changement de réservation, un message de votre professeur ou un rappel de cours.",
   "studentOnboarding.booking.title": "Voici comment réserver",
   "studentOnboarding.booking.subtitle": "Trois étapes, c'est tout.",
   "studentOnboarding.booking.step1.title": "Choisissez un horaire",
   "studentOnboarding.booking.step1.body":
-    "Choisissez parmi les créneaux disponibles de votre profe.",
+    "Choisissez parmi les créneaux disponibles de votre professeur.",
   "studentOnboarding.booking.step2.title": "Confirmation instantanée",
   "studentOnboarding.booking.step2.body":
     "Votre cours est réservé aussitôt — pas besoin d'attendre une réponse.",
@@ -1701,10 +1701,10 @@ export const fr = {
   "studentNotifications.when.booking_updates":
     "Dès que vous réservez, annulez (24 h ou plus avant le cours) ou reportez un cours.",
   "studentNotifications.when.class_materials":
-    "Quand votre profe les envoie — à la main, ou automatiquement 5 jours, 24 h ou 1 h avant le cours.",
+    "Quand votre professeur les envoie — à la main, ou automatiquement 5 jours, 24 h ou 1 h avant le cours.",
   "studentNotifications.when.expiry_reminders":
     "7 jours avant l'expiration de votre forfait, ou juste après avoir terminé tous ses cours (rappel de renouvellement).",
-  "studentNotifications.when.messages": "Dès que votre profe vous envoie un message de chat.",
+  "studentNotifications.when.messages": "Dès que votre professeur vous envoie un message de chat.",
   "studentNotifications.globalChannelNote":
     "Ce sont des interrupteurs principaux. Désactiver un canal ici annule vos réglages par catégorie ci-dessus.",
   "studentNotifications.alwaysSent.title": "Toujours envoyés",
@@ -1713,7 +1713,7 @@ export const fr = {
   "studentNotifications.alwaysSent.signIn":
     "Liens de connexion, pour ne jamais rester bloqué·e dehors.",
   "studentNotifications.alwaysSent.lateCancelNoShow":
-    "Un avis si vous annulez moins de 24 heures avant le cours, ou si votre profe marque un cours comme non-présentation.",
+    "Un avis si vous annulez moins de 24 heures avant le cours, ou si votre professeur marque un cours comme non-présentation.",
   "teacherNotifications.title": "Notifications",
   "teacherNotifications.subtitle":
     "Choisissez les notifications que vous recevez et par quel moyen.",
@@ -1845,20 +1845,20 @@ export const fr = {
   "buyAnother.cta": "Acheter un forfait",
   "buyAnother.title": "Acheter un forfait",
   "buyAnother.with": "avec {name}",
-  "buyAnother.none": "Vous n'avez pas encore de profe active",
+  "buyAnother.none": "Vous n'avez pas encore de professeur actif",
   "buyAnother.noneHint":
-    "Utilisez le lien de réservation que votre profe vous a partagé pour acheter votre premier forfait.",
-  "buyAnother.teacher": "Profe",
+    "Utilisez le lien de réservation que votre professeur vous a partagé pour acheter votre premier forfait.",
+  "buyAnother.teacher": "Professeur",
   "buyAnother.noMethods":
-    "Votre profe n'accepte pas encore les paiements en ligne. Écrivez-lui sur WhatsApp pour vous organiser.",
+    "Votre professeur n'accepte pas encore les paiements en ligne. Écrivez-lui sur WhatsApp pour vous organiser.",
   "buyAnother.noPackages": "Aucun forfait publié pour le moment.",
   "buyAnother.choosePackage": "Choisissez le forfait",
   "buyAnother.pickRequired": "Choisissez un forfait pour continuer.",
   "buyAnother.pay": "Continuer vers le paiement",
   "buyAnother.disclaimer.stripe":
-    "SpiralClass traite le paiement au nom de la profe, qui est responsable du service.",
+    "SpiralClass traite le paiement au nom du professeur, qui est responsable du service.",
   "buyAnother.disclaimer.wise":
-    "Le virement va directement à la profe — SpiralClass ne touche jamais ce paiement. Elle est responsable du service.",
+    "Le virement va directement au professeur — SpiralClass ne touche jamais ce paiement. C'est lui qui est responsable du service.",
   "calendarSync.title": "Synchronisation du calendrier",
   "calendarSync.help":
     "Abonnez-vous à vos classes depuis n'importe quelle application de calendrier — elles restent à jour automatiquement.",
@@ -2249,7 +2249,7 @@ export const fr = {
   "chat.placeholder": "Écrivez un message…",
   "chat.send": "Envoyer",
   "chat.you": "Vous",
-  "chat.messageTeacher": "Envoyer un message à votre profe",
+  "chat.messageTeacher": "Envoyer un message à votre professeur",
   "chat.openChat": "Messages",
   "chat.voice.record": "Enregistrer un message vocal",
   "chat.voice.recording": "Enregistrement…",
@@ -2275,12 +2275,12 @@ export const fr = {
   "chat.deleted.byThem": "Ce message a été supprimé",
   "chat.newMessage": "Nouveau message",
   "chat.pickStudent": "Choisissez un élève à qui écrire.",
-  "chat.pickTeacher": "Choisissez un profe à qui écrire.",
+  "chat.pickTeacher": "Choisissez un professeur à qui écrire.",
   "chat.searchStudents": "Rechercher des élèves…",
-  "chat.searchTeachers": "Rechercher des profes…",
+  "chat.searchTeachers": "Rechercher des professeurs…",
   "chat.noStudents": "Aucun élève pour le moment. Ajoutez des élèves pour commencer à échanger.",
   "chat.noTeachers":
-    "Aucun profe pour le moment. Ils apparaîtront ici une fois que vous serez inscrit.",
+    "Aucun professeur pour le moment. Ils apparaîtront ici une fois que vous serez inscrit.",
   "chat.noMatch": "Personne ne correspond à votre recherche.",
   "chat.select": "Sélectionner",
   "chat.selection.count": "{count} sélectionnés",

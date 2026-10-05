@@ -3,5 +3,6 @@
 // for how to add a language.
 export * from "./locales";
 export * from "./localized-paths";
+export * from "./glossary";
 export * from "./catalog";
 export * from "./translate";
