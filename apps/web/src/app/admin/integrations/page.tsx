@@ -119,10 +119,10 @@ export default async function AdminIntegrationsPage() {
           {t("web.admin.integrations.environment")}
         </Heading>
         <p>
-          NODE_ENV: <code>{env.NODE_ENV}</code>
+          <code>NODE_ENV</code>: <code>{env.NODE_ENV}</code>
         </p>
         <p>
-          APP_URL: <code>{env.APP_URL}</code>
+          <code>APP_URL</code>: <code>{env.APP_URL}</code>
         </p>
       </section>
     </div>

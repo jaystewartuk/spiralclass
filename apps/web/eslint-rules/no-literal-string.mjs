@@ -1,8 +1,6 @@
-// Local ESLint rule: forbid hardcoded user-facing strings in JSX. Applied only
-// to files already migrated onto the shared catalog (see eslint.config.mjs),
-// where it's an edit-time backstop so a converted surface can't silently
-// regress to inline copy between the periodic ratchet-test runs
-// (tests/i18n-guard.test.ts guards everything else).
+// Local ESLint rule: forbid hardcoded user-facing strings in JSX. An
+// edit-time backstop on the files listed in eslint.config.mjs; the repo-wide
+// guarantee is the ban in tests/i18n-guard.test.ts.
 //
 // Flags: raw JSX text containing a letter, and string-literal values on the
 // user-facing attributes below. Use t("key") from the catalog instead.

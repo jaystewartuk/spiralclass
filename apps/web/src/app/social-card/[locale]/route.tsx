@@ -3,6 +3,7 @@ import { MARK_SMALL, createT, isAppLocale, palette } from "@spiralclass/shared";
 import { hasStripeCreds } from "@/lib/env";
 import { ogFonts } from "@/lib/og-font";
 import { SOCIAL_CARD_SIZE } from "@/lib/seo/social-card";
+import { BRAND_DOMAIN, BRAND_WORDMARK } from "@spiralclass/shared";
 
 // The card a link preview shows for every page outside the booking funnel
 // (which has its own, in the teacher's buyers' language). Its copy was
@@ -66,7 +67,7 @@ export async function GET(_req: Request, ctx: { params: Promise<{ locale: string
             letterSpacing: -1.5,
           }}
         >
-          spiralclass
+          {BRAND_WORDMARK}
         </span>
       </div>
 
@@ -103,7 +104,7 @@ export async function GET(_req: Request, ctx: { params: Promise<{ locale: string
           justifyContent: "space-between",
         }}
       >
-        <span style={{ fontSize: 24, color: palette.textMuted }}>spiralclass.com</span>
+        <span style={{ fontSize: 24, color: palette.textMuted }}>{BRAND_DOMAIN}</span>
       </div>
     </div>,
     // Without `fonts` Satori rasterises in its default serif — see lib/og-font.ts.

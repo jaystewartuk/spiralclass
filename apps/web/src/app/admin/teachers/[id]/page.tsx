@@ -15,6 +15,7 @@ import { TestAccountForm } from "../../test-account-form";
 import { SubscriptionForm } from "./subscription-form";
 import { BackLink } from "@/components/back-link";
 import { getT } from "@/lib/i18n";
+import { formatMinutes } from "@spiralclass/shared";
 
 export default async function AdminTeacherDetailPage({
   params,
@@ -303,7 +304,7 @@ export default async function AdminTeacherDetailPage({
                 <div>
                   <div className="font-medium">{tpl.name}</div>
                   <div className="text-xs text-muted-foreground">
-                    {tpl.classCount}× {tpl.classDurationMin}m
+                    {tpl.classCount}× {formatMinutes(tpl.classDurationMin, "en")}
                     {tpl.expirationMonths
                       ? ` · ${t("web.admin.teachers.expirationMonths", { months: tpl.expirationMonths })}`
                       : ""}

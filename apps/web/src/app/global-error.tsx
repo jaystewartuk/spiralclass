@@ -8,6 +8,7 @@ import { useSkewRecoveryOrReport } from "@/components/use-server-action-recovery
 // global-error renders outside the root layout, so it must pull in the
 // global stylesheet itself for the Tailwind design tokens below to apply.
 import "./globals.css";
+import { BRAND_NAME } from "@spiralclass/shared";
 
 // Catches errors thrown in the root layout itself (i.e., before any
 // route-level error.tsx is reachable). Must render its own <html>/<body>
@@ -66,7 +67,7 @@ export default function GlobalError({ error }: { error: Error & { digest?: strin
     <html lang={locale} dir={localeDirection(locale)}>
       <body className="m-0 flex min-h-dvh items-center justify-center bg-background p-8 text-center font-sans text-foreground">
         <div className="max-w-md space-y-4">
-          <Heading level={1}>SpiralClass</Heading>
+          <Heading level={1}>{BRAND_NAME}</Heading>
           <p className="text-muted-foreground">{copy.body}</p>
           {error.digest && (
             <p className="text-xs text-muted-foreground">

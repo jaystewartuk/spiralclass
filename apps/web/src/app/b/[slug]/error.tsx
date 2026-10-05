@@ -6,6 +6,7 @@ import { Logo } from "@/components/brand/logo";
 import { Button } from "@/components/ui/button";
 import { useT } from "@/components/locale-provider";
 import { useSkewRecoveryOrReport } from "@/components/use-server-action-recovery";
+import { BRAND_NAME } from "@spiralclass/shared";
 
 // Group-level error boundary for the public booking page (b/[slug]). Keeps
 // the throw from bubbling to the root boundary.
@@ -26,7 +27,7 @@ export default function PublicBookingError({
 
   return (
     <main className="container flex min-h-dvh flex-col items-center justify-center gap-6 py-12 text-center">
-      <Link href="/" aria-label="SpiralClass">
+      <Link href="/" aria-label={BRAND_NAME}>
         <Logo size="md" />
       </Link>
       <div className="max-w-md space-y-3">

@@ -1,7 +1,7 @@
 "use client";
 
 import { useActionState, useRef, useState, type FormEvent } from "react";
-import { hasFieldErrors, validateManualPackageFields } from "@spiralclass/shared";
+import { hasFieldErrors, validateManualPackageFields, formatMinutes } from "@spiralclass/shared";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -10,7 +10,7 @@ import { useFieldErrors } from "@/hooks/use-field-errors";
 import { packageFieldMessage } from "./package-field-message";
 import { createManualPackageAction, type ManualPackageState } from "@/app/actions/teacher-packages";
 import { FormStatus } from "@/components/ui/form-status";
-import { useT } from "@/components/locale-provider";
+import { useLocale, useT } from "@/components/locale-provider";
 import { usePricingCurrency } from "@/components/pricing-currency-context";
 import { ForTwoField } from "./for-two-field";
 
@@ -35,6 +35,7 @@ export function AddPackageForm({
   templates: PackageTemplateOption[];
 }) {
   const t = useT();
+  const locale = useLocale();
   const currency = usePricingCurrency();
   const [open, setOpen] = useState(false);
   const [total, setTotal] = useState("");
@@ -112,7 +113,7 @@ export function AddPackageForm({
             <option value="">{t("web.dashboard.students.package.custom")}</option>
             {templates.map((tpl) => (
               <option key={tpl.id} value={tpl.id}>
-                {tpl.name} · {tpl.classCount} × {tpl.classDurationMin} min
+                {tpl.name} · {tpl.classCount} × {formatMinutes(tpl.classDurationMin, locale)}
               </option>
             ))}
           </select>

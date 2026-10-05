@@ -15,7 +15,7 @@ import {
   TableRow,
   TableShell,
 } from "@/components/ui/table";
-import { toBarSeries } from "@spiralclass/shared";
+import { toBarSeries, formatSecondsNarrow } from "@spiralclass/shared";
 
 // The capture→brief pipeline stages, in sequence — one series (not distinct
 // per-stage colors), since the chart's job is magnitude-across-stages, not
@@ -301,7 +301,9 @@ export default async function AdminLessonInsightsPage() {
                         <Badge variant={statusVariant(r.status)}>{r.status}</Badge>
                       </TableCell>
                       <TableCell className="text-right text-xs text-muted-foreground">
-                        {r.durationMs != null ? `${Math.round(r.durationMs / 1000)}s` : "—"}
+                        {r.durationMs != null
+                          ? formatSecondsNarrow(Math.round(r.durationMs / 1000), "en")
+                          : "—"}
                       </TableCell>
                       <TableCell className="text-right text-xs text-muted-foreground">
                         {r.createdAt.toLocaleString()}

@@ -22,6 +22,7 @@ import {
 import { BookingMonthCalendar } from "@/components/calendar/booking-month-calendar";
 import { HardLink } from "@/components/calendar/hard-link";
 import { SlotSubmitButton } from "./slot-submit-button";
+import { formatMinutes } from "@spiralclass/shared";
 
 // Default to today's local date in the teacher's timezone.
 function todayInZone(tz: string): string {
@@ -254,7 +255,7 @@ export default async function ReservarPage({
                         active ? "border-primary bg-primary/10" : ""
                       }`}
                     >
-                      {pl.classDurationMin} min
+                      {formatMinutes(pl.classDurationMin, locale)}
                       {pl.seats === 2 && ` · ${t("web.buyFlow.package.forTwo")}`} ·{" "}
                       {poolTeacher.name} · {pl.classesLeft}
                     </HardLink>

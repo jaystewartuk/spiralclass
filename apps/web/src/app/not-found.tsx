@@ -3,6 +3,7 @@ import Link from "next/link";
 import { getPreferredLocale } from "@/lib/i18n";
 import { Logo } from "@/components/brand/logo";
 import { Button } from "@/components/ui/button";
+import { BRAND_NAME } from "@spiralclass/shared";
 
 const COPY = {
   es: {
@@ -27,7 +28,7 @@ export default async function NotFound() {
   const copy = COPY[locale];
   return (
     <main className="container flex min-h-dvh flex-col items-center justify-center gap-6 py-12 text-center">
-      <Link href="/" aria-label="SpiralClass">
+      <Link href="/" aria-label={BRAND_NAME}>
         <Logo size="md" />
       </Link>
       <div className="max-w-md space-y-3">

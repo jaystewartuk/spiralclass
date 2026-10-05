@@ -16,11 +16,9 @@ export default [
     ignores: ["node_modules", ".next", "dist", "prisma/generated"],
   },
   {
-    // Edit-time i18n backstop on surfaces already migrated to the shared
-    // catalog: no hardcoded user-facing strings may reappear here. As each new
-    // surface is converted, add its files to this glob (and regenerate the
-    // ratchet baseline). Everything not yet listed is held by the repo-wide
-    // ratchet test (tests/i18n-guard.test.ts) instead.
+    // Edit-time i18n backstop on these surfaces: a hardcoded user-facing
+    // string shows in the editor. The repo-wide guarantee is the ban in
+    // tests/i18n-guard.test.ts, which covers every file.
     files: [
       "src/app/(auth)/sign-in/sign-in-form.tsx",
       "src/app/(auth)/sign-up/sign-up-form.tsx",

@@ -11,6 +11,7 @@ import { formatPriceForBuyer, publicFunnelLocaleFor } from "@spiralclass/shared"
 import { teacherPhotoPublicUrl } from "@/lib/storage/teacher-photo";
 import { INSTRUMENT_READINESS_SELECT, isPubliclyListed } from "@/lib/marketplace-ready";
 import { getPublicFunnelT, PUBLIC_FUNNEL_LOCALE } from "@/lib/i18n";
+import { BRAND_DOMAIN, BRAND_WORDMARK } from "@spiralclass/shared";
 
 // Per-teacher social card (WhatsApp / search / link previews). Mirrors the
 // brand styling of the site-wide app/opengraph-image.tsx but leads with the
@@ -62,7 +63,7 @@ function Brand() {
         <circle cx="32.5" cy="32" r="2" fill={palette.gold} />
       </svg>
       <span style={{ fontSize: 40, fontWeight: 600, color: INK, letterSpacing: -1 }}>
-        spiralclass
+        {BRAND_WORDMARK}
       </span>
     </div>
   );
@@ -181,7 +182,7 @@ export default async function Image({ params }: { params: Promise<{ slug: string
       </div>
 
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-        <span style={{ fontSize: 24, color: MUTED }}>spiralclass.com</span>
+        <span style={{ fontSize: 24, color: MUTED }}>{BRAND_DOMAIN}</span>
         {from != null && (
           <span
             style={{

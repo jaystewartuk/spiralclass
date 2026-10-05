@@ -6,7 +6,7 @@ import { usePathname } from "next/navigation";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { useLocalizedHref, useT } from "@/components/locale-provider";
 import { cn } from "@/lib/utils";
-import { SOURCE_CODE_URL } from "@spiralclass/shared";
+import { BRAND_NAME, CONTROLLER, SOURCE_CODE_URL } from "@spiralclass/shared";
 
 export function SiteFooter({ localeToggle }: { localeToggle?: ReactNode }) {
   const pathname = usePathname();
@@ -42,7 +42,7 @@ export function SiteFooter({ localeToggle }: { localeToggle?: ReactNode }) {
     <footer className={cn("mt-12 border-t", mobileOnly && "lg:hidden")}>
       <div className="container flex flex-col items-center gap-5 py-8 text-center">
         {/* Wordmark — gives the footer a little brand presence */}
-        <span className="font-display text-sm font-semibold text-foreground/70">SpiralClass</span>
+        <span className="font-display text-sm font-semibold text-foreground/70">{BRAND_NAME}</span>
 
         {/* Page links — generous spacing so they breathe when they wrap on mobile */}
         <nav className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-xs text-muted-foreground">
@@ -85,7 +85,9 @@ export function SiteFooter({ localeToggle }: { localeToggle?: ReactNode }) {
           <ThemeToggle />
         </div>
 
-        <p className="text-sm text-subtle">© {year} SpiralClass</p>
+        <p className="text-sm text-subtle">
+          © {year} {BRAND_NAME}
+        </p>
 
         <p className="text-sm text-subtle">
           {t("web.siteFooter.madeBy")}{" "}
@@ -95,7 +97,7 @@ export function SiteFooter({ localeToggle }: { localeToggle?: ReactNode }) {
             rel="noopener noreferrer"
             className="transition-colors hover:text-foreground"
           >
-            Jay Stewart
+            {CONTROLLER.name}
           </a>
         </p>
       </div>

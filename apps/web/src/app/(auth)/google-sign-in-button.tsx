@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { authClient } from "@/lib/auth/client";
 import { safeNextPath } from "@/lib/auth/safe-next";
+import { useT } from "@/components/locale-provider";
 
 // Google Sign-In button shared by /sign-in and /sign-up. Social sign-in is a
 // full-page browser redirect (not a server action): better-auth bounces to
@@ -25,6 +26,7 @@ export function GoogleSignInButton({
   next?: string;
   intent?: "sign-in" | "sign-up";
 }) {
+  const t = useT();
   const [pending, setPending] = useState(false);
 
   async function signInWithGoogle() {
@@ -53,7 +55,8 @@ export function GoogleSignInButton({
     <div className="flex w-full flex-col gap-3">
       <div className="flex items-center gap-3" aria-hidden="true">
         <span className="h-px flex-1 bg-border" />
-        <span className="text-xs text-muted-foreground">o</span>
+        {/* It said "o", Spanish, to every reader. */}
+        <span className="text-xs text-muted-foreground">{t("common.or")}</span>
         <span className="h-px flex-1 bg-border" />
       </div>
       <Button
@@ -64,7 +67,7 @@ export function GoogleSignInButton({
         disabled={pending}
       >
         <GoogleG className="size-4" aria-hidden="true" />
-        {pending ? "Conectando…" : "Continuar con Google"}
+        {pending ? t("email.googleConnecting") : t("auth.continueWithGoogle")}
       </Button>
     </div>
   );

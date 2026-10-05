@@ -26,6 +26,7 @@ export const fr = {
   "common.pagination.page": "Page",
   "common.pagination.prev": "Précédent",
   "common.pagination.next": "Suivant",
+  "common.pagination.navigation": "Pagination",
   "common.loading": "Chargement…",
   "common.image": "Image",
   "common.error": "Une erreur est survenue",

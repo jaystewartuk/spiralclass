@@ -422,6 +422,7 @@ export default async function LibraryPage({
               page: t("common.pagination.page"),
               prev: t("common.pagination.prev"),
               next: t("common.pagination.next"),
+              navigation: t("common.pagination.navigation"),
             }}
           />
         </>

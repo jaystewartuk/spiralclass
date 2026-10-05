@@ -7,11 +7,12 @@ import {
   INTRO_VIDEO_IDEAL_MAX_SEC,
   INTRO_VIDEO_IDEAL_MIN_SEC,
   introVideoLengthVerdict,
+  formatSecondsNarrow,
 } from "@spiralclass/shared";
 import { Button } from "@/components/ui/button";
 import { FormStatus } from "@/components/ui/form-status";
 import { Label } from "@/components/ui/label";
-import { useT } from "@/components/locale-provider";
+import { useLocale, useT } from "@/components/locale-provider";
 import {
   finalizeIntroVideoAction,
   presignIntroVideoUploadAction,
@@ -78,6 +79,7 @@ export function IntroVideoForm({
   analysis: IntroVideoAnalysisPanelState;
 }) {
   const t = useT();
+  const locale = useLocale();
   const router = useRouter();
   const posthog = usePostHog();
 
@@ -433,7 +435,7 @@ export function IntroVideoForm({
             ) : null}
             {recording && (
               <span className="absolute top-2 left-2 rounded bg-destructive px-2 py-0.5 text-xs font-medium text-destructive-foreground">
-                {`● ${secs}s`}
+                {`● ${formatSecondsNarrow(secs, locale)}`}
               </span>
             )}
           </div>

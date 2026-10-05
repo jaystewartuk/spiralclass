@@ -297,10 +297,11 @@ one type-checks, lints and builds.
 
 User-facing copy goes through the shared catalog via `getT()` (Server
 Components) or `useT()` (Client Components). Two enforcement layers: the
-`i18n/no-literal-string` ESLint rule on fully-migrated files, and the ratchet in
-`apps/web/tests/i18n-guard.test.ts` elsewhere. If the guard flags a file you
-touched, move the string into the catalog — never hand-edit the baseline upward
-to dodge it. The help centre (`docs/help/`) is the deliberate carve-out: it is
+`i18n/no-literal-string` ESLint rule, and the ban in
+`apps/web/tests/i18n-guard.test.ts`, which fails on any literal. If the guard
+flags a string you wrote, move it into the catalog. A name that never
+translates is a constant (`BRAND_NAME`), an identifier goes in `<code>`, and
+only a reasoned entry in the scanner's `EXEMPT` excuses a file. The help centre (`docs/help/`) is the deliberate carve-out: it is
 authored per language, `<slug>.es.md` beside `<slug>.md`.
 
 ---
