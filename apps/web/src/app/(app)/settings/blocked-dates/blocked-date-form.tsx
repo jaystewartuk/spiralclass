@@ -2,7 +2,7 @@
 
 import { useActionState, useEffect, useRef, useState, type FormEvent } from "react";
 import { AlertTriangle, CalendarOff } from "lucide-react";
-import { blockedDateSchema, zodFieldErrors } from "@spiralclass/shared";
+import { blockedDateSchemaWith, zodFieldErrors } from "@spiralclass/shared";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { FormStatus } from "@/components/ui/form-status";
@@ -70,7 +70,7 @@ export function BlockedDateForm({
 
   function handleSubmit(e: FormEvent<HTMLFormElement>) {
     const fd = new FormData(e.currentTarget);
-    const parsed = blockedDateSchema(locale).safeParse({
+    const parsed = blockedDateSchemaWith(t).safeParse({
       startDate: fd.get("startDate"),
       endDate: fd.get("endDate"),
       reason: fd.get("reason"),

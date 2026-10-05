@@ -35,7 +35,7 @@ const { ResultsSummaryCard } =
   await import("@/app/(app)/dashboard/get-students/results-summary-card");
 const { SectionNav } = await import("@/app/(app)/dashboard/get-students/section-nav");
 const { WeekProgress } = await import("@/app/(app)/dashboard/get-students/week-progress");
-const { LocaleProvider } = await import("@/components/locale-provider");
+const { LocaleProvider } = await import("@/components/locale-catalog");
 
 type Item = React.ComponentProps<typeof NextActionCard>["item"];
 

@@ -30,7 +30,7 @@ vi.mock("@/app/actions/marketing", () => ({
 
 const { AddCommunityPanel, ArchivedCommunityRow, CommunityCard } =
   await import("@/app/(app)/dashboard/get-students/communities/community-forms");
-const { LocaleProvider } = await import("@/components/locale-provider");
+const { LocaleProvider } = await import("@/components/locale-catalog");
 
 const NO_RULES: PromotionRules = {
   weekdays: [],

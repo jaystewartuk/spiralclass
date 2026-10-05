@@ -63,7 +63,7 @@ export default async function ActivityPage({
         {activity.reason && (
           <div className="space-y-1 pt-2">
             <div className="text-sm font-medium">{t("web.getStudents.whyThis")}</div>
-            <p className="text-sm">{planReasonText(activity.reason, locale)}</p>
+            <p className="text-sm">{planReasonText(activity.reason, t)}</p>
           </div>
         )}
       </div>

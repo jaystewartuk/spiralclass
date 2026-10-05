@@ -21,7 +21,7 @@ vi.mock("@/app/actions/focus-tags", () => ({
 vi.mock("sonner", () => ({ toast: { error: vi.fn(), success: vi.fn() } }));
 
 const { TagsManager } = await import("@/app/(app)/settings/focus-tags/tags-manager");
-const { LocaleProvider } = await import("@/components/locale-provider");
+const { LocaleProvider } = await import("@/components/locale-catalog");
 
 const CATEGORIES = [
   { id: "c1", label: "Grammar" },

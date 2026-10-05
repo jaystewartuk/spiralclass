@@ -6,7 +6,7 @@ import {
   defaultPricingCurrencyForCountry,
   languageOptions,
   pricingCurrenciesForCountry,
-  timezoneSchema,
+  timezoneSchemaWith,
   zodFieldErrors,
 } from "@spiralclass/shared";
 import { Button } from "@/components/ui/button";
@@ -147,7 +147,7 @@ export function TimezoneForm({
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     // Same schema the action enforces — an empty/invalid timezone or a missing
     // phone lands next to its own field instead of only as a form-level error.
-    const parsed = timezoneSchema(locale).safeParse({
+    const parsed = timezoneSchemaWith(t).safeParse({
       timezone: value,
       phoneE164: phone,
       country,

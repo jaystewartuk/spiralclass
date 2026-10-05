@@ -2,7 +2,7 @@
 
 import { useActionState, useEffect, type FormEvent } from "react";
 import { toast } from "sonner";
-import { signInSchema, zodFieldErrors } from "@spiralclass/shared";
+import { signInSchemaWith, zodFieldErrors } from "@spiralclass/shared";
 import {
   adminChangeStudentEmailAction,
   type AdminStudentActionState,
@@ -40,7 +40,7 @@ export function StudentEmailForm({
   const { errors, setErrors, clearError } = useFieldErrors<"newEmail">();
   function handleSubmit(e: FormEvent<HTMLFormElement>) {
     const email = String(new FormData(e.currentTarget).get("newEmail") ?? "");
-    const parsed = signInSchema().safeParse({ email });
+    const parsed = signInSchemaWith(t).safeParse({ email });
     if (!parsed.success) {
       e.preventDefault();
       setErrors({ newEmail: zodFieldErrors(parsed.error).email });

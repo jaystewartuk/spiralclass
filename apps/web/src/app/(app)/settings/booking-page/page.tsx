@@ -18,6 +18,7 @@ import { TeachingLanguageForm } from "./teaching-language-form";
 import { BookingPageLocaleForm } from "./booking-page-locale-form";
 import { BookingPageStatus } from "./booking-page-status";
 import { BookingPagePreview } from "./page-preview";
+import { previewVisitorCopy } from "./page-preview-copy";
 import { BookingPageDraftProvider } from "./preview-context";
 import { SectionNav, type SectionNavItem } from "./section-nav";
 import { INSTRUMENT_READINESS_SELECT } from "@/lib/marketplace-ready";
@@ -172,10 +173,13 @@ export default async function BookingPageSettings() {
                     initialHeadline={teacher.headline}
                     initialBio={teacher.bio}
                     timezone={teacher.timezone}
-                    offering={cheapestPackage}
+                    visitor={previewVisitorCopy(
+                      teacher.name,
+                      cheapestPackage,
+                      publicFunnelLocaleFor(teacher.bookingPageLocale),
+                    )}
                     hasVideo={Boolean(teacher.introVideoPath)}
                     hasWhatsapp={Boolean(teacher.publicWhatsappE164)}
-                    funnelLocale={publicFunnelLocaleFor(teacher.bookingPageLocale)}
                     displayUrl={displayUrl}
                   />
                 </div>

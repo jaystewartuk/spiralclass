@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { localeDirection } from "@spiralclass/shared";
-import { LocaleProvider } from "@/components/locale-provider";
+import { LocaleProvider } from "@/components/locale-catalog";
 import { funnelLocaleForSlug } from "@/lib/booking/funnel-locale";
 
 // Pins every Client Component under /b/** to the public funnel's locale,

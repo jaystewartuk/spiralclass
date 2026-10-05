@@ -2,7 +2,7 @@
 
 import { useState, type FormEvent } from "react";
 import { useActionState } from "react";
-import { teacherCreateStudentSchema, zodFieldErrors } from "@spiralclass/shared";
+import { teacherCreateStudentSchemaWith, zodFieldErrors } from "@spiralclass/shared";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -33,7 +33,7 @@ export function AddStudentForm({ defaultPhoneCountry }: { defaultPhoneCountry: s
   // guard. Optional email/phone stay with the server action's form-level error.
   function handleSubmit(e: FormEvent<HTMLFormElement>) {
     const fd = new FormData(e.currentTarget);
-    const parsed = teacherCreateStudentSchema(locale).safeParse({
+    const parsed = teacherCreateStudentSchemaWith(t).safeParse({
       name: fd.get("name"),
       email: fd.get("email") ?? undefined,
       phone: fd.get("phone"),

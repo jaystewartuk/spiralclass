@@ -6,7 +6,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { ThemeProvider } from "@/components/theme-provider";
 import { SiteFooter } from "@/components/site-footer";
 import { LanguagePicker } from "@/components/language-picker";
-import { LocaleProvider } from "@/components/locale-provider";
+import { LocaleProvider } from "@/components/locale-catalog";
 import { ReportProblemProvider } from "@/components/report-problem-provider";
 import { PostHogProvider } from "@/components/posthog-provider";
 import { ServerActionRecoveryListener } from "@/components/server-action-recovery-listener";

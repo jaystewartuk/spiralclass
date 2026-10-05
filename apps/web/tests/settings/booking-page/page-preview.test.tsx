@@ -1,11 +1,12 @@
 import { describe, expect, it } from "vitest";
 import { renderToStaticMarkup } from "react-dom/server";
 import * as React from "react";
-import { LocaleProvider } from "@/components/locale-provider";
+import { LocaleProvider } from "@/components/locale-catalog";
 import {
   BookingPagePreview,
   type PreviewOffering,
 } from "@/app/(app)/settings/booking-page/page-preview";
+import { previewVisitorCopy } from "@/app/(app)/settings/booking-page/page-preview-copy";
 import { BookingPageDraftProvider } from "@/app/(app)/settings/booking-page/preview-context";
 
 (globalThis as Record<string, unknown>).React = React;
@@ -24,8 +25,13 @@ const OFFERING: PreviewOffering = {
   singleClass: false,
 };
 
+type RenderProps = Partial<React.ComponentProps<typeof BookingPagePreview>> & {
+  offering?: PreviewOffering | null;
+  funnelLocale?: "en" | "es" | "fr";
+};
+
 function render(
-  props: Partial<React.ComponentProps<typeof BookingPagePreview>> = {},
+  { offering = OFFERING, funnelLocale = "en", ...props }: RenderProps = {},
   teacherLocale: "en" | "es" | "fr" = "es",
 ) {
   return renderToStaticMarkup(
@@ -40,10 +46,10 @@ function render(
         initialHeadline: null,
         initialBio: null,
         timezone: "America/Costa_Rica",
-        offering: OFFERING,
+        // Worded the way the settings page words it, on the server.
+        visitor: previewVisitorCopy("Alicia Moreno", offering, funnelLocale),
         hasVideo: false,
         hasWhatsapp: false,
-        funnelLocale: "en",
         displayUrl: "spiralclass.com/b/mira",
         ...props,
       }),
@@ -115,10 +121,9 @@ describe("BookingPagePreview — unsaved text", () => {
             initialHeadline: "Old headline",
             initialBio: "Old bio",
             timezone: "America/Costa_Rica",
-            offering: null,
+            visitor: previewVisitorCopy("Alicia Moreno", null, "en"),
             hasVideo: false,
             hasWhatsapp: false,
-            funnelLocale: "en" as const,
             displayUrl: "spiralclass.com/b/mira",
           }),
         ),

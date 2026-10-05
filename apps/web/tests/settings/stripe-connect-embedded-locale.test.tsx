@@ -34,7 +34,7 @@ vi.mock("next/navigation", () => ({
 
 const { StripeConnectEmbeddedOnboarding } =
   await import("@/app/(app)/settings/payments/stripe-connect-embedded");
-const { LocaleProvider } = await import("@/components/locale-provider");
+const { LocaleProvider } = await import("@/components/locale-catalog");
 
 let container: HTMLDivElement;
 let root: Root;
