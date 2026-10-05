@@ -33,7 +33,7 @@ Los alumnos siempre pueden ver el contenido de clase guardado. Solo ven las nota
 1. Abre una clase y elige **Tareas → Agregar**.
 2. Agrega un título, instrucciones, fecha límite y opciones de entrega; guarda.
 3. Cuando un alumno entrega su trabajo, abre **Revisar**.
-4. Agrega comentarios y una calificación opcional, y luego elige **Aprobar**, **Solicitar reenvío** o **Rechazar**.
+4. Agrega comentarios y una calificación opcional, y luego elige **Aprobar**, **Pedir reenvío** o **Rechazar**.
 
 [Captura de pantalla: detalle de clase con Materiales, Notas y Tareas]
 

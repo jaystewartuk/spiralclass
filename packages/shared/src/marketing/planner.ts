@@ -18,8 +18,7 @@
 // explore-everything; with data it concentrates on what works while still
 // spending one slot on something untried.
 
-import type { AppLocale } from "../i18n/locales";
-import { createT } from "../i18n/translate";
+import type { TFunction } from "../i18n/translate-core";
 import type { StringKey } from "../i18n/catalog";
 import { allowsDirectPromotion, type MarketingPlatform, type PromoPolicy } from "./channels";
 import {
@@ -395,9 +394,12 @@ export function planProgress(
  * endings — "alumno" + "s", "enquir" + "ies" — which only ever works for the
  * languages it was written in, and the referral sentence glued a phrase from
  * one table onto a sentence from another.
+ *
+ * It takes the reader's `t`, not a locale: the get-students card renders this
+ * in the browser, which holds one language's table, and a locale here meant
+ * importing every language's strings into it (#178).
  */
-export function planReasonText(reason: PlanReason, locale: AppLocale): string {
-  const t = createT(locale);
+export function planReasonText(reason: PlanReason, t: TFunction): string {
   switch (reason.code) {
     case "best_community":
       return t("marketing.reason.bestCommunity", {

@@ -13,7 +13,7 @@ Choose when students can book you, block time off, and manage booked classes.
 
 ### Change working hours
 
-1. Open **Settings** and then **Availability**.
+1. Open **Settings** and then **Working hours**.
 2. Add, edit, or remove your weekly time ranges.
 3. Adjust buffer time, minimum notice, or booking window if needed.
 4. Save.
@@ -57,7 +57,7 @@ Removing a block later gives those days back and lets students book them again. 
 
 ## Questions
 
-**Can I connect Google Calendar?** Yes. In **Settings → Calendar**, connect your Google account. Busy events help prevent conflicting bookings.
+**Can I connect Google Calendar?** Yes. In **Settings → Calendar sync**, connect your Google account. Busy events help prevent conflicting bookings.
 
 **Can I cancel a completed or no-show class?** Yes. Choose Cancel and provide the required reason; the class credit is returned.
 

@@ -13,6 +13,7 @@ import { logger } from "@/lib/logger";
 import { posthogRegionHosts } from "@/lib/analytics/posthog-region";
 import { sentryEnvironment } from "@/lib/sentry-environment";
 import type { AttributionProperties } from "@/lib/analytics/attribution";
+import type { AppLocale } from "@spiralclass/shared";
 
 const log = logger({ surface: "analytics" });
 
@@ -327,6 +328,11 @@ export type ServerEvent = WithSessionId<
         // look entirely non-human when about a tenth of it is real. Filter on
         // this property instead; the ledger already excludes these.
         isBot: boolean;
+        // The language the page was rendered in — the teacher's
+        // booking_page_locale, not the visitor's browser (#178). Lets a
+        // funnel be read per language: whether a page in a buyer's own
+        // language converts, and where a translation is losing people.
+        locale: AppLocale;
       } & AttributionProperties;
     }
   | {
@@ -358,6 +364,9 @@ export type ServerEvent = WithSessionId<
         // Splitting the funnel by source shows whether renewals actually
         // flow through the portal.
         source: "public" | "portal";
+        // The language the purchase was made in: the funnel's for a public
+        // checkout, the student's own for the portal (#178).
+        locale: AppLocale;
         // Carried through from booking_page_viewed so conversion can be
         // broken down by channel without joining across events on session id
         // — which fails precisely when it matters most (a visitor who took
@@ -1028,6 +1037,8 @@ export type ServerEvent = WithSessionId<
         teacherId: string;
         leadId: string;
         hasPhone: boolean;
+        // The language of the page the enquiry was written on (#178).
+        locale: AppLocale;
         hasMessage: boolean;
         // A lead is the OTHER conversion this page produces — the visitor who
         // wasn't ready to buy. Attributing it matters as much as attributing a

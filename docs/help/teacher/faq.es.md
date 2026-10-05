@@ -33,7 +33,7 @@ Encuentra respuestas rápidas a preguntas comunes sobre cómo usar SpiralClass c
 
 **¿SpiralClass se queda con una parte de lo que me pagan mis alumnos?** No. Tus alumnos te pagan directamente a ti y no cobramos comisión en ningún plan. Tu plan es lo único que te cobramos.
 
-**¿Entonces por qué un pago llega un poco por debajo del precio que puse?** Porque Stripe cobra su propia comisión por procesarlo, en tu propia cuenta de Stripe. Esa comisión es de Stripe — SpiralClass no recibe ninguna parte — y Stripe fija la tarifa según tu país y el método que usó tu alumno. Consulta [los precios de Stripe](https://stripe.com/pricing), o [Crea paquetes y administra pagos](packages-and-payments.md) para el panorama completo.
+**¿Entonces por qué un pago llega un poco por debajo del precio que puse?** Porque Stripe cobra su propia comisión por procesarlo, en tu propia cuenta de Stripe. Esa comisión es de Stripe — SpiralClass no recibe ninguna parte — y Stripe fija la tarifa según tu país y el método que usó tu alumno. Consulta [los precios de Stripe](https://stripe.com/pricing), o [Crea paquetes y administra pagos](packages-and-payments.es.md) para el panorama completo.
 
 **¿Hay forma de evitar la comisión de Stripe?** Cobra por Wise — tu alumno transfiere directo a tu cuenta de Wise, así que el dinero nunca pasa por Stripe y no lleva comisión de Stripe. Tu banco o Wise sí podrían cobrarte por recibir el dinero. Ojo: una transferencia ofrecida _dentro_ del checkout de Stripe sigue siendo un pago por Stripe y sigue llevando la comisión.
 

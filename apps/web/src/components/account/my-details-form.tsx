@@ -1,7 +1,7 @@
 "use client";
 
 import { useActionState, useEffect, useMemo, useState, type FormEvent } from "react";
-import { splitE164, teacherContactSchema, zodFieldErrors } from "@spiralclass/shared";
+import { splitE164, teacherContactSchemaWith, zodFieldErrors } from "@spiralclass/shared";
 import { Button } from "@/components/ui/button";
 import { FormStatus } from "@/components/ui/form-status";
 import { FieldError } from "@/components/ui/field-error";
@@ -89,7 +89,7 @@ export function MyDetailsForm({
   // invalid form never dispatches. Only `name` is a hard client-side rule (the
   // shared contact schema's required check); phone/timezone stay server-side.
   function handleSubmit(e: FormEvent<HTMLFormElement>) {
-    const result = teacherContactSchema(locale).safeParse({
+    const result = teacherContactSchemaWith(t).safeParse({
       name: new FormData(e.currentTarget).get("name"),
     });
     if (!result.success) {

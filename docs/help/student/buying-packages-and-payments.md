@@ -31,7 +31,7 @@ and so on).
 3. Use the payment reference exactly as shown. It is how your teacher
    identifies your payment.
 4. Send the transfer.
-5. Select **I already sent it** if shown.
+5. Select **I've sent the payment** if shown.
 6. Wait for your teacher to confirm receipt. The package then becomes ready.
 
 [Screenshot: Package selection and payment method]

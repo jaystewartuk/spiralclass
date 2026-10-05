@@ -43,3 +43,10 @@ export interface ContentDoc {
 export function localize(text: LocalizedText, locale: string): string {
   return (text as Partial<Record<string, string>>)[locale] || text.en;
 }
+
+/** The language `localize(text, locale)` returns: `locale` when the text has
+ *  been written in it, English otherwise. For `lang` on the element, and for
+ *  saying so to a reader whose language it is not (#178 step A7). */
+export function localizedLanguage(text: LocalizedText, locale: string): string {
+  return (text as Partial<Record<string, string>>)[locale] ? locale : "en";
+}

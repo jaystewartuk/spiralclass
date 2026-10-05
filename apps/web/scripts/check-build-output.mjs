@@ -23,6 +23,9 @@
  *      Scanning the emitted chunks for the literal values in the build env is
  *      the only way to know.
  *
+ *   3. Each language's strings are in a chunk of their own (#178), so a reader
+ *      downloads her language and not every language. See catalog-chunks.mjs.
+ *
  * Runs after `next build` in scripts/ci/integration.sh (was integration.yml
  * until D-129 deleted every workflow in this repo).
  *
@@ -31,6 +34,7 @@
 
 import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
 import { join, relative, resolve } from "node:path";
+import { catalogChunkFailures } from "./catalog-chunks.mjs";
 
 const webRoot = resolve(import.meta.dirname, "..");
 const distDir = resolve(webRoot, process.argv[2] ?? ".next");
@@ -191,6 +195,19 @@ function checkNoSecretsInClientBundle() {
   }
 }
 
+/* ------------------------------------------------------------------ *
+ * 3. One language per client chunk
+ * ------------------------------------------------------------------ */
+
+function checkOneLanguagePerChunk() {
+  const catalogDir = resolve(webRoot, "..", "..", "packages", "shared", "src", "i18n");
+  const languageFailures = catalogChunkFailures(join(distDir, "static"), catalogDir);
+  for (const failure of languageFailures) fail(failure);
+  if (languageFailures.length === 0) {
+    console.log("client bundle: every language's strings are in a chunk of their own.");
+  }
+}
+
 /* ------------------------------------------------------------------ */
 
 if (!existsSync(distDir)) {
@@ -203,6 +220,7 @@ if (!existsSync(distDir)) {
 
 checkMiddlewareCompiled();
 checkNoSecretsInClientBundle();
+checkOneLanguagePerChunk();
 
 if (failures.length > 0) {
   console.error("\nBuild-output assertions failed:\n");

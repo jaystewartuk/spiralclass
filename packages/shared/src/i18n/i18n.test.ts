@@ -18,6 +18,17 @@ import {
   localeEnglishName,
 } from "./locales";
 import { createT, interpolate, translate } from "./translate";
+import type { AppLocale } from "./locales";
+
+/**
+ * A copy guard's patterns, one list per language (#178 step D2). Typed by
+ * AppLocale, so registering a language without its own patterns fails
+ * typecheck — rather than its catalog passing a guard written in English,
+ * Spanish and French, unread. Every catalog is still checked against every
+ * language's patterns: an English phrase in the French catalog is caught too.
+ */
+type PerLanguage = Record<AppLocale, RegExp[]>;
+const everyLanguage = (patterns: PerLanguage): RegExp[] => Object.values(patterns).flat();
 
 describe("locale registry", () => {
   it("exposes every registered locale as a catalog block", () => {
@@ -213,11 +224,11 @@ describe("public marketing copy makes no unverifiable scale claim", () => {
   // credibility signal the page should keep. Our customers are teachers, so a
   // quantifier next to a teacher noun is the shape that can only be a claim
   // about us.
-  const SCALE_CLAIMS = [
-    /\b(hundreds|thousands|millions)\s+of\s+(\w+\s+){0,2}teachers\b/i,
-    /\b(cientos|miles|millones)\s+de\s+(\w+\s+){0,2}(maestr|profesor)/i,
-    /\b(centaines|milliers|millions)\s+d[e']\s*(\w+\s+){0,2}(enseignant|professeur)/i,
-  ];
+  const SCALE_CLAIMS = everyLanguage({
+    en: [/\b(hundreds|thousands|millions)\s+of\s+(\w+\s+){0,2}teachers\b/i],
+    es: [/\b(cientos|miles|millones)\s+de\s+(\w+\s+){0,2}(maestr|profesor)/i],
+    fr: [/\b(centaines|milliers|millions)\s+d[e']\s*(\w+\s+){0,2}(enseignant|professeur)/i],
+  });
 
   // Every public marketing surface, not just the bio the claim was found in.
   const PUBLIC_PREFIXES = ["web.about.", "web.home.", "web.features.", "web.pricing."];
@@ -254,16 +265,22 @@ describe("the marketing copy sells to teachers of any subject", () => {
   // /language/ also flags "feedback in your language" (the UI language of the
   // AI's reply) and "a plain-language privacy notice" — neither is a claim
   // about who may sign up.
-  const AUDIENCE_SCOPED_TO_LANGUAGES = [
-    /\b(any|every|all)\s+languages?\b/i,
-    /\blanguages?\s+(teacher|teachers|teaching)\b/i,
-    /\b(teacher|teachers|profs?)\s+of\s+(any|every|all)?\s*languages?\b/i,
-    /\b(maestr|profesor|profes)\w*\s+de\s+(cualquier\s+)?idiomas?\b/i,
-    /\bcualquier\s+idioma\b/i,
-    /\b(el\s+)?idioma\s+que\s+ense/i,
-    /\b(enseignant|professeur|prof)\w*\s+de\s+(toute\s+|n'importe\s+quelle\s+)?langues?\b/i,
-    /\b(toute|n'importe quelle)\s+langue\b/i,
-  ];
+  const AUDIENCE_SCOPED_TO_LANGUAGES = everyLanguage({
+    en: [
+      /\b(any|every|all)\s+languages?\b/i,
+      /\blanguages?\s+(teacher|teachers|teaching)\b/i,
+      /\b(teacher|teachers|profs?)\s+of\s+(any|every|all)?\s*languages?\b/i,
+    ],
+    es: [
+      /\b(maestr|profesor|profes)\w*\s+de\s+(cualquier\s+)?idiomas?\b/i,
+      /\bcualquier\s+idioma\b/i,
+      /\b(el\s+)?idioma\s+que\s+ense/i,
+    ],
+    fr: [
+      /\b(enseignant|professeur|prof)\w*\s+de\s+(toute\s+|n'importe\s+quelle\s+)?langues?\b/i,
+      /\b(toute|n'importe quelle)\s+langue\b/i,
+    ],
+  });
 
   // Every public marketing surface — the pages a teacher reads before she has
   // an account, plus the metadata a link preview renders from.
@@ -368,11 +385,11 @@ describe("the card fee is disclosed, and attributed to Stripe (D-152)", () => {
   // "Platform commission" / "marketplace commission" in any locale. The
   // AMBASSADOR commission is real and still paid, so the pattern requires the
   // platform/marketplace qualifier rather than the bare word.
-  const RETIRED_COMMISSION = [
-    /\b(platform|marketplace)\s+commission\b/i,
-    /\bcomisi[óo]n\s+de\s+(la\s+)?(plataforma|marketplace|mercado)\b/i,
-    /\bcommission\s+de\s+(la\s+)?(plateforme|marketplace)\b/i,
-  ];
+  const RETIRED_COMMISSION = everyLanguage({
+    en: [/\b(platform|marketplace)\s+commission\b/i],
+    es: [/\bcomisi[óo]n\s+de\s+(la\s+)?(plataforma|marketplace|mercado)\b/i],
+    fr: [/\bcommission\s+de\s+(la\s+)?(plateforme|marketplace)\b/i],
+  });
 
   // A sentence may still SAY we take no marketplace commission — that is the
   // disclosure, not a violation of it.
@@ -467,12 +484,11 @@ describe("the card fee is disclosed, and attributed to Stripe (D-152)", () => {
   //
   // Saying a PLAN is free is fine. Saying GETTING PAID is free is not, because
   // Stripe's fee makes it untrue.
-  const FREE_TO_GET_PAID = [
-    /\bgetting paid\b[^.]*\bfree\b/i,
-    /\bpaid by\s+(your\s+)?students\b[^.]*\bfree\b/i,
-    /\bcobrar(?:les)?\b[^.]*\bgratis\b/i,
-    /\b[êe]tre pay[ée]+\b[^.]*\bgratuit/i,
-  ];
+  const FREE_TO_GET_PAID = everyLanguage({
+    en: [/\bgetting paid\b[^.]*\bfree\b/i, /\bpaid by\s+(your\s+)?students\b[^.]*\bfree\b/i],
+    es: [/\bcobrar(?:les)?\b[^.]*\bgratis\b/i],
+    fr: [/\b[êe]tre pay[ée]+\b[^.]*\bgratuit/i],
+  });
 
   for (const [locale, catalog] of CATALOGS) {
     it(`never claims getting paid is free in ${locale}`, () => {

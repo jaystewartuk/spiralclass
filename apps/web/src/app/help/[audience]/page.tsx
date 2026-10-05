@@ -2,7 +2,12 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
-import { listContentDocs, localize, type ContentAudience } from "@spiralclass/shared";
+import {
+  listContentDocs,
+  localize,
+  localizedLanguage,
+  type ContentAudience,
+} from "@spiralclass/shared";
 import { requireOnboardedTeacher, requireStudent } from "@/lib/auth";
 import { requireAdmin } from "@/lib/admin";
 import { getLocalizedHref, getPreferredLocale, getT } from "@/lib/i18n";
@@ -85,7 +90,7 @@ export default async function HelpAudienceIndexPage({ params }: { params: Promis
               href={href(`/help/${typedAudience}/${doc.slug}`)}
               className="group flex items-start gap-4 rounded-xl border border-border bg-card p-4 transition-[border-color,box-shadow] hover:border-primary/40 hover:shadow-brand-sm"
             >
-              <span className="min-w-0 flex-1">
+              <span className="min-w-0 flex-1" lang={localizedLanguage(doc.title, locale)}>
                 <span className="block font-semibold text-foreground">
                   {localize(doc.title, locale)}
                 </span>

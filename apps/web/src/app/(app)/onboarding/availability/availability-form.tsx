@@ -2,7 +2,7 @@
 
 import { useActionState, useState } from "react";
 import { PlusCircle, Trash2 } from "lucide-react";
-import { availabilitySchema, zodFieldErrors } from "@spiralclass/shared";
+import { availabilitySchemaWith, zodFieldErrors } from "@spiralclass/shared";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -78,7 +78,7 @@ export function AvailabilityForm({
   // "ranges" key (see zodFieldErrors), matching the days-section error slot.
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     const data = new FormData(event.currentTarget);
-    const parsed = availabilitySchema(locale).safeParse({
+    const parsed = availabilitySchemaWith(t).safeParse({
       bufferMin: data.get("bufferMin"),
       minAdvanceH: data.get("minAdvanceH"),
       maxAdvanceDays: data.get("maxAdvanceDays"),

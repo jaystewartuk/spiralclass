@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { createT } from "../i18n/translate";
 import {
   actionsForBudget,
   buildWeeklyPlan,
@@ -237,7 +238,7 @@ describe("planReasonText", () => {
     ] as const;
     for (const locale of ["es", "en", "fr"] as const) {
       for (const reason of reasons) {
-        const text = planReasonText(reason, locale);
+        const text = planReasonText(reason, createT(locale));
         expect(text.length).toBeGreaterThan(5);
         expect(text).not.toContain("{");
         expect(text).not.toContain("undefined");
@@ -246,9 +247,9 @@ describe("planReasonText", () => {
   });
 
   it("uses the singular for one student", () => {
-    expect(planReasonText({ code: "best_community", community: "X", students: 1 }, "en")).toContain(
-      "1 student.",
-    );
+    expect(
+      planReasonText({ code: "best_community", community: "X", students: 1 }, createT("en")),
+    ).toContain("1 student.");
   });
 
   // The plurals were endings pasted onto a word, which gave English
@@ -259,17 +260,17 @@ describe("planReasonText", () => {
     ["es", 1, "X generó 1 mensaje de interesados."],
     ["fr", 2, "X a généré 2 demandes."],
   ] as const)("counts enquiries in %s (%i)", (locale, enquiries, copy) => {
-    expect(planReasonText({ code: "promising_community", community: "X", enquiries }, locale)).toBe(
-      copy,
-    );
+    expect(
+      planReasonText({ code: "promising_community", community: "X", enquiries }, createT(locale)),
+    ).toBe(copy);
   });
 
   it("says a referral moment as one sentence in each language", () => {
     const reason = { code: "referral_moment", student: "Mira", trigger: "renewal" } as const;
-    expect(planReasonText(reason, "en")).toBe(
+    expect(planReasonText(reason, createT("en"))).toBe(
       "Mira renewed their package — the best moment to ask for a referral.",
     );
-    expect(planReasonText(reason, "fr")).toBe(
+    expect(planReasonText(reason, createT("fr"))).toBe(
       "Mira a renouvelé son forfait. C'est le meilleur moment pour demander une recommandation.",
     );
   });

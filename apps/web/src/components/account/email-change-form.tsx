@@ -2,7 +2,7 @@
 
 import { useActionState, useEffect, useRef, useState, type FormEvent } from "react";
 import { Alert } from "@/components/ui/alert";
-import { signInSchema, zodFieldErrors } from "@spiralclass/shared";
+import { signInSchemaWith, zodFieldErrors } from "@spiralclass/shared";
 import { Button } from "@/components/ui/button";
 import { FieldError } from "@/components/ui/field-error";
 import { Input } from "@/components/ui/input";
@@ -60,7 +60,7 @@ export function EmailChangeForm({
   // only on the server action's single form-level error. React 19 honours
   // preventDefault in onSubmit, so an invalid address never dispatches.
   function handleSendSubmit(e: FormEvent<HTMLFormElement>) {
-    const result = signInSchema(locale).safeParse({
+    const result = signInSchemaWith(t).safeParse({
       email: new FormData(e.currentTarget).get("newEmail"),
     });
     if (!result.success) {

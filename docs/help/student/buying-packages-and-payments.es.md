@@ -31,7 +31,7 @@ en Brasil, etc.).
 3. Usa la referencia de pago exactamente como se muestra. Así identifica tu
    profesor tu pago.
 4. Envía la transferencia.
-5. Selecciona **Ya lo envié** si aparece la opción.
+5. Selecciona **Ya envié el pago** si aparece la opción.
 6. Espera a que tu profesor confirme la recepción. El paquete queda listo
    entonces.
 

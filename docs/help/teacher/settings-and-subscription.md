@@ -21,7 +21,7 @@ To change your email, enter the new address and complete the verification code s
 
 ### Connect or disconnect Google Calendar
 
-1. Open **Settings → Calendar**.
+1. Open **Settings → Calendar sync**.
 2. Choose **Connect Google Calendar** and approve access.
 3. Return to SpiralClass and check that the connection is active.
 4. Toggle sync off or disconnect whenever needed.

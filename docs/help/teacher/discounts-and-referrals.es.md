@@ -13,8 +13,8 @@ Crea un código de descuento para posibles alumnos u opera un programa de referi
 
 ### Crear un código de descuento
 
-1. Abre **Descuentos**.
-2. Elige **Crear código de descuento**.
+1. Abre **Códigos de descuento**.
+2. Elige **Crear código**.
 3. Define el código, el porcentaje o monto fijo de descuento, y cualquier límite de vigencia o de usos.
 4. Guarda y comparte el código tú mismo.
 

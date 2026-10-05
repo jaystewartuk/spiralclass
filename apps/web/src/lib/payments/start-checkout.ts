@@ -558,6 +558,7 @@ export async function startCheckout(args: StartCheckoutArgs): Promise<StartCheck
       priceMinorUnits,
       seats: args.seats,
       source: args.source,
+      locale: args.locale,
       // Carried from the first-touch cookie so the purchase can be attributed
       // to the channel that produced it without a cross-event join. Empty on
       // the portal path (a signed-in repurchase has no acquisition channel)

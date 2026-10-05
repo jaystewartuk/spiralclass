@@ -16,7 +16,7 @@ Access your lessons, materials, packages, and messages.
 3. Enter the six-digit code sent to your email.
 4. Open **My classes** to see your lessons, or use the student tabs.
 
-You can also choose **Sign in with Google** where it is offered.
+You can also choose **Continue with Google** where it is offered.
 
 [Screenshot: Student sign-in screen]
 

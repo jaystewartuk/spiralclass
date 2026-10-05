@@ -1,7 +1,7 @@
 "use client";
 
 import { useActionState, type FormEvent } from "react";
-import { signInSchema, zodFieldErrors } from "@spiralclass/shared";
+import { signInSchemaWith, zodFieldErrors } from "@spiralclass/shared";
 import {
   inviteAdminAction,
   toggleAdminDisabledAction,
@@ -32,7 +32,7 @@ export function InviteForm() {
   const { errors, setErrors, clearError } = useFieldErrors<"email">();
   function handleSubmit(e: FormEvent<HTMLFormElement>) {
     const email = String(new FormData(e.currentTarget).get("email") ?? "");
-    const parsed = signInSchema().safeParse({ email });
+    const parsed = signInSchemaWith(t).safeParse({ email });
     if (!parsed.success) {
       e.preventDefault();
       setErrors({ email: zodFieldErrors(parsed.error).email });

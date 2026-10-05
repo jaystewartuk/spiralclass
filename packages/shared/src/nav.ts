@@ -286,7 +286,7 @@ export const NAV_ITEMS: NavItem[] = [
   {
     key: "availability",
     group: "config",
-    label: { es: "Horario de trabajo", en: "Working hours", fr: "Heures de travail" },
+    label: { es: "Horario de trabajo", en: "Working hours", fr: "Horaires de travail" },
     description: {
       es: "Ajusta tu agenda semanal.",
       en: "Adjust your weekly schedule.",

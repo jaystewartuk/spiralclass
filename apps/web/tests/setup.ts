@@ -35,3 +35,20 @@ if (typeof window !== "undefined") {
       }) as unknown as MediaQueryList,
   });
 }
+
+// The app loads each language's catalog behind its own `import()`
+// (src/components/locale-catalog/loader.tsx), so a browser fetches one
+// language. In a test that is a component that renders nothing on its first,
+// synchronous pass. Replace only that indirection: the per-language modules
+// and the provider they render are the real ones. Whether the split holds is
+// asserted on the built chunks (scripts/catalog-chunks.mjs), not here.
+vi.mock("@/components/locale-catalog/loader", async () => {
+  const { default: en } = await import("@/components/locale-catalog/en");
+  const { default: es } = await import("@/components/locale-catalog/es");
+  const { default: fr } = await import("@/components/locale-catalog/fr");
+  const catalogs = { en, es, fr } as const;
+  return {
+    CatalogLoader: ({ locale, children }: { locale: keyof typeof catalogs; children: never }) =>
+      catalogs[locale]({ children }),
+  };
+});

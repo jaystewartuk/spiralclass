@@ -16,7 +16,7 @@ Accede a tus lecciones, materiales, paquetes y mensajes.
 3. Ingresa el código de seis dígitos que recibiste por correo.
 4. Abre **Mis clases** para ver tus lecciones, o usa las pestañas de alumno.
 
-También puedes elegir **Iniciar sesión con Google** donde esté disponible.
+También puedes elegir **Continuar con Google** donde esté disponible.
 
 [Captura de pantalla: pantalla de inicio de sesión del alumno]
 

@@ -23,7 +23,8 @@ describe("content registry", () => {
   it("localize() falls back to en for a locale with no translation", () => {
     const doc = getContentDoc("teacher", "getting-started");
     expect(doc).toBeTruthy();
-    expect(localize(doc!.title, "fr")).toBe(doc!.title.en);
+    // Every launched language has its guides now; a language still to come does not.
+    expect(localize(doc!.title, "de")).toBe(doc!.title.en);
   });
 
   it("localize() prefers es when present", () => {

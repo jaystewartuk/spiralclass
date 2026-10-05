@@ -148,6 +148,7 @@ export default async function HelpPage() {
           <div className="mt-8 space-y-16 lg:mt-0">
             {guides.map((guide) => (
               <article
+                lang={guide.lang}
                 key={guide.slug}
                 id={guide.id}
                 // A rule between guides rather than only space: four articles

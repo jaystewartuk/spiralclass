@@ -2,19 +2,13 @@
 
 import Image from "next/image";
 import { CalendarClock, Clock3, Globe, MessageCircle, Play } from "lucide-react";
-import { formatPriceForBuyer, initialsFrom, isOneClassOffering } from "@spiralclass/shared";
-import { createT, type AppLocale } from "@/lib/i18n-translate";
+import { initialsFrom } from "@spiralclass/shared";
 import { Badge } from "@/components/ui/badge";
 import { useT } from "@/components/locale-provider";
 import { useBookingPageDraft } from "./preview-context";
+import type { PreviewVisitorCopy } from "./page-preview-copy";
 
-export type PreviewOffering = {
-  priceMinorUnits: number;
-  currency: string;
-  classCount: number;
-  classDurationMin: number;
-  singleClass: boolean;
-};
+export type { PreviewOffering } from "./page-preview-copy";
 
 /**
  * What the teacher's public page looks like, beside the controls that change it.
@@ -48,7 +42,9 @@ export type PreviewOffering = {
  * Rendered with `bookingPageLocale`, never the teacher's own — that is the
  * whole point of the field (see the i18n section of CLAUDE.md). A preview in
  * her language of a page in her buyers' language would show her something no
- * visitor will ever see.
+ * visitor will ever see. Those words arrive finished, as `visitor`
+ * (previewVisitorCopy, worded on the server); only the editor's own hints use
+ * `useT()`.
  */
 export function BookingPagePreview({
   name,
@@ -56,10 +52,9 @@ export function BookingPagePreview({
   initialHeadline,
   initialBio,
   timezone,
-  offering,
+  visitor,
   hasVideo,
   hasWhatsapp,
-  funnelLocale,
   displayUrl,
 }: {
   name: string;
@@ -67,17 +62,14 @@ export function BookingPagePreview({
   initialHeadline: string | null;
   initialBio: string | null;
   timezone: string;
-  /** Cheapest live package — the one the hero's price/duration badges quote. */
-  offering: PreviewOffering | null;
+  /** What a visitor reads, in her booking page's language. */
+  visitor: PreviewVisitorCopy;
   hasVideo: boolean;
   hasWhatsapp: boolean;
-  funnelLocale: AppLocale;
   /** Host + path, without the scheme — the address-bar line. */
   displayUrl: string;
 }) {
   const t = useT();
-  // The visitor's copy. Bound to HER page's locale, not the dashboard's.
-  const pt = createT(funnelLocale);
 
   const draft = useBookingPageDraft();
   const headline = (draft?.headline ?? initialHeadline ?? "").trim();
@@ -96,10 +88,8 @@ export function BookingPagePreview({
 
       <div className="space-y-4 bg-background p-5 text-center">
         <div className="space-y-1.5">
-          <p className="text-lg font-semibold text-balance">
-            {headline || pt("web.bookingLanding.classesWith", { name })}
-          </p>
-          <p className="text-xs text-muted-foreground">{pt("web.bookingLanding.tagline")}</p>
+          <p className="text-lg font-semibold text-balance">{headline || visitor.classesWith}</p>
+          <p className="text-xs text-muted-foreground">{visitor.tagline}</p>
         </div>
 
         {photoUrl ? (
@@ -125,29 +115,17 @@ export function BookingPagePreview({
           <Badge variant="outline" className="gap-1">
             <Globe className="h-3 w-3" aria-hidden /> {tzLabel}
           </Badge>
-          {offering && (
-            <>
-              <Badge variant="outline" className="gap-1">
-                <CalendarClock className="h-3 w-3" aria-hidden />
-                {pt("web.bookingLanding.fromPrice", {
-                  price: formatPriceForBuyer(
-                    offering.priceMinorUnits,
-                    offering.currency,
-                    funnelLocale,
-                    offering.currency,
-                  ),
-                })}
-              </Badge>
-              <Badge variant="outline" className="gap-1">
-                <Clock3 className="h-3 w-3" aria-hidden />
-                {isOneClassOffering(offering)
-                  ? pt("web.bookingLanding.singleClassDuration", { min: offering.classDurationMin })
-                  : pt("web.bookingLanding.classCountDuration", {
-                      count: offering.classCount,
-                      min: offering.classDurationMin,
-                    })}
-              </Badge>
-            </>
+          {visitor.fromPrice && (
+            <Badge variant="outline" className="gap-1">
+              <CalendarClock className="h-3 w-3" aria-hidden />
+              {visitor.fromPrice}
+            </Badge>
+          )}
+          {visitor.duration && (
+            <Badge variant="outline" className="gap-1">
+              <Clock3 className="h-3 w-3" aria-hidden />
+              {visitor.duration}
+            </Badge>
           )}
         </div>
 
@@ -175,12 +153,12 @@ export function BookingPagePreview({
             show where the action sits, without pretending to be it. */}
         <div className="space-y-2 pt-1">
           <span className="flex h-10 w-full items-center justify-center rounded-md bg-primary text-sm font-semibold text-primary-foreground">
-            {pt("web.bookingLanding.packagesHeading")}
+            {visitor.packagesHeading}
           </span>
           {hasWhatsapp && (
             <span className="flex h-10 w-full items-center justify-center gap-2 rounded-md border border-border text-sm font-medium text-foreground">
               <MessageCircle className="h-4 w-4" aria-hidden />
-              {pt("common.chatOnWhatsApp")}
+              {visitor.chatOnWhatsApp}
             </span>
           )}
         </div>

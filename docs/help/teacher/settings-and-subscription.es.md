@@ -21,7 +21,7 @@ Para cambiar tu correo, ingresa la nueva dirección y completa el código de ver
 
 ### Conectar o desconectar Google Calendar
 
-1. Abre **Configuración → Calendario**.
+1. Abre **Configuración → Sincronizar calendario**.
 2. Elige **Conectar Google Calendar** y aprueba el acceso.
 3. Regresa a SpiralClass y verifica que la conexión esté activa.
 4. Desactiva la sincronización o desconéctala cuando lo necesites.
@@ -37,7 +37,7 @@ Para cambiar tu correo, ingresa la nueva dirección y completa el código de ver
 - Tu plan es lo que le pagas a SpiralClass por el software. No es lo que te
   cuesta cobrar: un pago hecho por Stripe lleva su comisión de procesamiento,
   que se cobra en tu propia cuenta de Stripe. Consulta
-  [Crea paquetes y administra pagos](packages-and-payments.md).
+  [Crea paquetes y administra pagos](packages-and-payments.es.md).
 - Tu acceso a Pro continúa hasta el final de un periodo pagado si cancelas.
 - Cuando termina una prueba gratuita, tu cuenta pasa a Free en vez de bloquearse.
 - Un cobro fallido te da siete días para actualizar tus datos de pago antes de que tu cuenta pase a Free.

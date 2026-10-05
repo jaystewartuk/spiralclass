@@ -7,7 +7,7 @@
 // they are all derived from this, once, and the ids exist exactly here.
 
 import type { ContentDoc } from "@spiralclass/shared";
-import { localize } from "@spiralclass/shared";
+import { localize, localizedLanguage } from "@spiralclass/shared";
 import { helpGuideId, helpSectionId } from "./anchors";
 import { rewriteHelpDocLinks, type HelpLinkResolver } from "./links";
 import { splitHelpSections, stripMarkdown } from "./markdown";
@@ -27,6 +27,9 @@ export interface HelpGuide {
   title: string;
   summary: string;
   sections: HelpGuideSection[];
+  /** The language the guide is written in: the reader's when it has been
+   *  translated into it, English otherwise. */
+  lang: string;
 }
 
 /**
@@ -52,6 +55,7 @@ export function prepareHelpGuides(
       id: helpGuideId(doc.slug),
       title: localize(doc.title, locale),
       summary,
+      lang: localizedLanguage(doc.body, locale),
       sections: dropSummaryEcho(
         splitHelpSections(body)
           // Content before the first `##` has no heading to link to and no doc

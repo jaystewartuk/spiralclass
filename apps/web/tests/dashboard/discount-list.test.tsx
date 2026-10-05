@@ -22,7 +22,7 @@ vi.mock("@/app/actions/discounts", () => ({
 
 const { DiscountGroup } = await import("@/app/(app)/dashboard/discounts/discount-list");
 const { CreateDiscountForm } = await import("@/app/(app)/dashboard/discounts/discount-forms");
-const { LocaleProvider } = await import("@/components/locale-provider");
+const { LocaleProvider } = await import("@/components/locale-catalog");
 const { PricingCurrencyProvider } = await import("@/components/pricing-currency-context");
 type Row = Parameters<typeof DiscountGroup>[0]["rows"][number];
 

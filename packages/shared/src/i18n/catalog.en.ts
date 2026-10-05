@@ -5590,6 +5590,8 @@ export const en = {
   "web.help.backToPortal": "← Back to my classes",
   "web.help.backToAdmin": "← Back to admin panel",
   "web.help.title": "Help center",
+  "web.help.notTranslated":
+    "This guide hasn't been translated into your language yet, so here it is in English.",
   "web.help.audience.teacher": "For teachers",
   "web.help.audience.student": "For students",
   "web.help.audience.admin": "For admins",

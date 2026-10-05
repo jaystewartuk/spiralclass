@@ -105,7 +105,7 @@ export function NextActionCard({ item }: { item: ActionCardItem }) {
     useActivityActions();
 
   const task = contentKindLabel(item.kind, locale);
-  const reason = item.reason ? planReasonText(item.reason, locale) : null;
+  const reason = item.reason ? planReasonText(item.reason, t) : null;
   const where = whereFor(item, locale);
 
   return (
@@ -179,7 +179,7 @@ export function ActionRow({ item }: { item: ActionCardItem }) {
   const { doneState, doneAction, donePending } = useActivityActions();
 
   const task = contentKindLabel(item.kind, locale);
-  const reason = item.reason ? planReasonText(item.reason, locale) : null;
+  const reason = item.reason ? planReasonText(item.reason, t) : null;
 
   return (
     <li>

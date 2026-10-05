@@ -27,7 +27,7 @@ Actualiza tus datos, cambia tu correo de inicio de sesión, controla tus notific
 ### Solicitar tus datos o la eliminación de tu cuenta
 
 1. Abre la sección de datos o de cuenta en configuración.
-2. Elige **Exportar mis datos** para descargar tu información.
+2. Elige **Descargar mis datos** para descargar tu información.
 3. Elige **Eliminar cuenta** y confirma si quieres solicitar la eliminación.
 4. Regresa a esta pantalla para cancelar una solicitud de eliminación pendiente durante el periodo de gracia.
 

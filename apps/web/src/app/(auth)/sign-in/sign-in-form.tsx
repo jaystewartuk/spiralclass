@@ -10,7 +10,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { signInSchema, zodFieldErrors } from "@spiralclass/shared";
+import { signInSchemaWith, zodFieldErrors } from "@spiralclass/shared";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { FieldError } from "@/components/ui/field-error";
@@ -131,7 +131,7 @@ export function SignInForm({
           submittedEmail.current = email;
           // Same schema the server enforces — a malformed/empty email lands
           // inline instead of only after the round-trip.
-          const parsed = signInSchema(locale).safeParse({ email });
+          const parsed = signInSchemaWith(t).safeParse({ email });
           if (!parsed.success) {
             event.preventDefault();
             setErrors(zodFieldErrors(parsed.error));

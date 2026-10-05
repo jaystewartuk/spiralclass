@@ -20,7 +20,7 @@ Add students to your roster, invite them to use SpiralClass, keep private notes,
 ### Invite a student
 
 1. Open the student’s profile.
-2. Choose **Invite** or **Resend invitation**.
+2. Choose **Invite** or **Resend**.
 3. Ask the student to open the email and sign in with that same email address.
 
 Invitation links are valid for 30 days.

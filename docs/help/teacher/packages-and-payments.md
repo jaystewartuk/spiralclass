@@ -13,7 +13,7 @@ Create lesson offers, record an existing package, and manage payments and refund
 
 ### Create or edit an offer
 
-1. Open **Settings → Templates**.
+1. Open **Settings → Packages**.
 2. Add or edit an offer with a name, class count or single-class option, duration, price, and expiry period.
 3. Save all changes.
 

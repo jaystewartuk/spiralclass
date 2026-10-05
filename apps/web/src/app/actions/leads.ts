@@ -145,6 +145,7 @@ export async function captureLead(
       leadId: lead.id,
       hasPhone: Boolean(phoneE164),
       hasMessage: Boolean(input.message),
+      locale,
       // The other conversion this page produces. A channel that sends people
       // who enquire rather than buy looks dead on purchase data alone.
       ...attributionProperties(await currentAttribution()),

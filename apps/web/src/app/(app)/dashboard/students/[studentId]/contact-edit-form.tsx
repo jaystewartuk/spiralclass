@@ -1,7 +1,11 @@
 "use client";
 
 import { useActionState, useState, type FormEvent } from "react";
-import { splitE164, teacherEditStudentContactSchema, zodFieldErrors } from "@spiralclass/shared";
+import {
+  splitE164,
+  teacherEditStudentContactSchemaWith,
+  zodFieldErrors,
+} from "@spiralclass/shared";
 import { Button } from "@/components/ui/button";
 import { FormStatus } from "@/components/ui/form-status";
 import { Input } from "@/components/ui/input";
@@ -57,7 +61,7 @@ export function ContactEditForm({
   // guard. Email/phone stay with the server action's form-level error.
   function handleSubmit(e: FormEvent<HTMLFormElement>) {
     const fd = new FormData(e.currentTarget);
-    const parsed = teacherEditStudentContactSchema(locale).safeParse({
+    const parsed = teacherEditStudentContactSchemaWith(t).safeParse({
       studentId: fd.get("studentId"),
       name: fd.get("name"),
       email: fd.get("email") ?? undefined,

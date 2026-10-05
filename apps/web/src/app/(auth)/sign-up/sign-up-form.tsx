@@ -11,7 +11,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { signUpSchema, zodFieldErrors } from "@spiralclass/shared";
+import { signUpSchemaWith, zodFieldErrors } from "@spiralclass/shared";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { FieldError } from "@/components/ui/field-error";
@@ -86,7 +86,7 @@ export function SignUpForm({ googleEnabled = false }: { googleEnabled?: boolean 
           // Validate on submit against the same schema the server enforces, so
           // an empty name or a malformed email lands inline next to its field
           // instead of only after the server round-trip.
-          const parsed = signUpSchema(locale).safeParse({ name, email });
+          const parsed = signUpSchemaWith(t).safeParse({ name, email });
           if (!parsed.success) {
             event.preventDefault();
             setErrors(zodFieldErrors(parsed.error));

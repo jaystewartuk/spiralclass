@@ -8,10 +8,15 @@ export const GENERATED_HELP_DOCS: readonly ContentDoc[] = [
   {
     slug: "getting-started",
     audience: "teacher",
-    title: { en: `Set up your teaching account`, es: `Configura tu cuenta de profesor` },
+    title: {
+      en: `Set up your teaching account`,
+      es: `Configura tu cuenta de profesor`,
+      fr: `Configurer votre compte de professeur`,
+    },
     summary: {
       en: `Set up your profile, availability, and first class packages so students can book you.`,
       es: `Configura tu perfil, tu disponibilidad y tus primeros paquetes de clases para que los alumnos puedan reservar contigo.`,
+      fr: `Configurez votre profil, vos disponibilités et vos premiers forfaits de cours pour que les élèves puissent réserver avec vous.`,
     },
     body: {
       en: `## Purpose
@@ -98,16 +103,63 @@ Video sugerido: **"Configura tu cuenta de profesor (3 minutos)"**
 
 **¿Necesito un plan de pago para empezar?** No. Los nuevos profesores comienzan con una prueba gratuita de Pro de 30 días y no se requiere tarjeta.
 `,
+      fr: `## Objectif
+
+Configurez votre profil, vos disponibilités et vos premiers forfaits de cours pour que les élèves puissent réserver avec vous.
+
+## Avant de commencer
+
+- Il vous faut une adresse e-mail que vous pouvez consulter dès maintenant.
+- Préparez vos horaires d'enseignement, la durée de vos cours et vos tarifs.
+
+## Étapes
+
+1. Choisissez **Créer un compte**, puis saisissez votre nom et votre adresse e-mail.
+2. Saisissez le code à six chiffres envoyé à votre adresse e-mail.
+3. Confirmez votre fuseau horaire et vos coordonnées.
+4. Ajoutez les jours et les heures où vous enseignez. Réglez votre temps de pause entre deux cours, votre délai minimum de réservation et jusqu'à quand à l'avance les élèves peuvent réserver.
+5. Créez au moins un forfait ou une option de cours à l'unité, avec sa durée, son prix et sa période de validité.
+6. Vérifiez votre page de réservation publique et terminez la configuration.
+
+
+
+## Conseils
+
+- Utilisez le fuseau horaire où vous enseignez habituellement.
+- Laissez une pause entre les cours pour que les élèves ne puissent pas réserver des cours qui s'enchaînent sans interruption.
+- Votre page de réservation devient accessible une fois la configuration terminée.
+
+Vidéo suggérée : **« Configurer votre compte de professeur (3 minutes) »**
+
+## Dépannage
+
+**Je n'ai pas reçu de code.** Vérifiez vos spams ou vos courriers indésirables, puis demandez un nouveau code. Les codes expirent au bout de cinq minutes.
+
+**Je n'arrive pas à terminer mes disponibilités.** Ajoutez au moins une plage d'heures de travail et vérifiez que vos plages ne se chevauchent pas.
+
+## Questions
+
+**Puis-je modifier tout cela plus tard ?** Oui. Ouvrez les Paramètres pour modifier votre profil, vos disponibilités et vos forfaits.
+
+**Comment trouver rapidement une page, un élève ou un cours ?** Utilisez le bouton de recherche (la loupe) en haut de n'importe quelle page, ou appuyez sur ⌘K sur un Mac, ou sur Ctrl+K ailleurs. Décrivez ce que vous cherchez avec vos propres mots, par exemple le nom d'un élève, « forfaits », « organiser ma journée » ou une question, puis appuyez sur Entrée.
+
+**Ai-je besoin d'une formule payante pour commencer ?** Non. Les nouveaux professeurs commencent avec un essai Pro de 30 jours, sans carte bancaire.
+`,
     },
     publicFaq: true,
   },
   {
     slug: "settings-and-subscription",
     audience: "teacher",
-    title: { en: `Manage settings and your plan`, es: `Administra tu configuración y tu plan` },
+    title: {
+      en: `Manage settings and your plan`,
+      es: `Administra tu configuración y tu plan`,
+      fr: `Gérer les paramètres et votre formule`,
+    },
     summary: {
       en: `Update your profile and calendar connection, control notifications, and manage your SpiralClass Free or Pro plan.`,
       es: `Actualiza tu perfil y tu conexión de calendario, controla tus notificaciones y administra tu plan Free o Pro de SpiralClass.`,
+      fr: `Mettez à jour votre profil et la connexion à votre calendrier, réglez vos notifications et gérez votre formule SpiralClass Gratuite ou Pro.`,
     },
     body: {
       en: `## Purpose
@@ -131,7 +183,7 @@ To change your email, enter the new address and complete the verification code s
 
 ### Connect or disconnect Google Calendar
 
-1. Open **Settings → Calendar**.
+1. Open **Settings → Calendar sync**.
 2. Choose **Connect Google Calendar** and approve access.
 3. Return to SpiralClass and check that the connection is active.
 4. Toggle sync off or disconnect whenever needed.
@@ -185,7 +237,7 @@ Para cambiar tu correo, ingresa la nueva dirección y completa el código de ver
 
 ### Conectar o desconectar Google Calendar
 
-1. Abre **Configuración → Calendario**.
+1. Abre **Configuración → Sincronizar calendario**.
 2. Elige **Conectar Google Calendar** y aprueba el acceso.
 3. Regresa a SpiralClass y verifica que la conexión esté activa.
 4. Desactiva la sincronización o desconéctala cuando lo necesites.
@@ -201,7 +253,7 @@ Para cambiar tu correo, ingresa la nueva dirección y completa el código de ver
 - Tu plan es lo que le pagas a SpiralClass por el software. No es lo que te
   cuesta cobrar: un pago hecho por Stripe lleva su comisión de procesamiento,
   que se cobra en tu propia cuenta de Stripe. Consulta
-  [Crea paquetes y administra pagos](packages-and-payments.md).
+  [Crea paquetes y administra pagos](packages-and-payments.es.md).
 - Tu acceso a Pro continúa hasta el final de un periodo pagado si cancelas.
 - Cuando termina una prueba gratuita, tu cuenta pasa a Free en vez de bloquearse.
 - Un cobro fallido te da siete días para actualizar tus datos de pago antes de que tu cuenta pase a Free.
@@ -218,16 +270,72 @@ Para cambiar tu correo, ingresa la nueva dirección y completa el código de ver
 
 **¿Puedo cancelar una solicitud de eliminación de cuenta?** Sí, durante el periodo de gracia de 30 días.
 `,
+      fr: `## Objectif
+
+Mettez à jour votre profil et la connexion à votre calendrier, réglez vos notifications et gérez votre formule SpiralClass Gratuite ou Pro.
+
+## Avant de commencer
+
+- Vous devez être connecté en tant que professeur.
+- Gardez l'accès à votre messagerie si vous comptez changer votre adresse de connexion.
+
+## Étapes
+
+### Mettre à jour les paramètres du compte
+
+1. Ouvrez **Paramètres**.
+2. Modifiez votre nom, votre numéro de téléphone, votre fuseau horaire ou les autres informations de profil disponibles.
+3. Enregistrez.
+
+Pour changer d'adresse e-mail, saisissez la nouvelle adresse et entrez le code de vérification qui y est envoyé.
+
+### Connecter ou déconnecter Google Calendar
+
+1. Ouvrez **Paramètres → Synchronisation du calendrier**.
+2. Choisissez **Connecter Google Calendar** et autorisez l'accès.
+3. Revenez sur SpiralClass et vérifiez que la connexion est active.
+4. Désactivez la synchronisation ou déconnectez le calendrier quand vous le souhaitez.
+
+### Passer à Pro ou gérer Pro
+
+1. Ouvrez l'écran de facturation ou de passage à Pro.
+2. Choisissez la formule proposée et effectuez le paiement.
+3. Utilisez le portail client pour mettre à jour votre moyen de paiement ou résilier.
+
+## Conseils
+
+- Votre formule, c'est ce que vous payez à SpiralClass pour le logiciel. Ce n'est
+  pas ce que vous coûte le fait d'être payé : un paiement effectué via Stripe
+  supporte les frais de traitement propres à Stripe, prélevés sur votre propre
+  compte Stripe. Consultez
+  [Créer des forfaits et gérer les paiements](packages-and-payments.fr.md).
+- Si vous résiliez, vous gardez l'accès à Pro jusqu'à la fin de la période déjà payée.
+- À la fin d'un essai, votre compte passe à la formule Gratuite au lieu d'être bloqué.
+- Si un renouvellement échoue, vous avez sept jours pour mettre à jour vos informations de paiement avant que votre compte passe à la formule Gratuite.
+
+## Dépannage
+
+**Pourquoi certains outils sont-ils verrouillés ?** Ils peuvent nécessiter Pro, ou être limités par votre formule actuelle.
+
+**Pourquoi ne puis-je pas supprimer mon compte ?** La suppression du compte est bloquée tant qu'il reste des cours payés non utilisés.
+
+## Questions
+
+**Puis-je exporter mes données ?** Oui. Demandez un export depuis les paramètres du compte.
+
+**Puis-je annuler une demande de suppression de compte ?** Oui, pendant le délai de grâce de 30 jours.
+`,
     },
     publicFaq: true,
   },
   {
     slug: "students",
     audience: "teacher",
-    title: { en: `Manage students`, es: `Administra alumnos` },
+    title: { en: `Manage students`, es: `Administra alumnos`, fr: `Gérer les élèves` },
     summary: {
       en: `Add students to your roster, invite them to use SpiralClass, keep private notes, and archive a student when lessons pause.`,
       es: `Agrega alumnos a tu lista, invítalos a usar SpiralClass, guarda notas privadas y archiva a un alumno cuando se pausen las clases.`,
+      fr: `Ajoutez des élèves à votre liste, invitez-les à utiliser SpiralClass, prenez des notes privées et archivez un élève quand les cours sont en pause.`,
     },
     body: {
       en: `## Purpose
@@ -250,7 +358,7 @@ Add students to your roster, invite them to use SpiralClass, keep private notes,
 ### Invite a student
 
 1. Open the student’s profile.
-2. Choose **Invite** or **Resend invitation**.
+2. Choose **Invite** or **Resend**.
 3. Ask the student to open the email and sign in with that same email address.
 
 Invitation links are valid for 30 days.
@@ -308,7 +416,7 @@ Agrega alumnos a tu lista, invítalos a usar SpiralClass, guarda notas privadas 
 ### Invitar a un alumno
 
 1. Abre el perfil del alumno.
-2. Elige **Invitar** o **Reenviar invitación**.
+2. Elige **Invitar** o **Reenviar**.
 3. Pide al alumno que abra el correo e inicie sesión con ese mismo correo.
 
 Los enlaces de invitación son válidos por 30 días.
@@ -346,6 +454,64 @@ Los enlaces de invitación son válidos por 30 días.
 
 **¿Archivar cancela las clases futuras?** No. Revisa las clases próximas por separado antes de archivar.
 `,
+      fr: `## Objectif
+
+Ajoutez des élèves à votre liste, invitez-les à utiliser SpiralClass, prenez des notes privées et archivez un élève quand les cours sont en pause.
+
+## Avant de commencer
+
+- Vous devez être connecté en tant que professeur.
+- Pour une invitation, utilisez l’adresse e-mail actuelle de l’élève.
+
+## Étapes
+
+### Ajouter un élève
+
+1. Ouvrez **Élèves**.
+2. Sélectionnez **Ajouter un élève**.
+3. Saisissez les informations demandées et enregistrez.
+
+### Inviter un élève
+
+1. Ouvrez le profil de l’élève.
+2. Choisissez **Inviter** ou **Renvoyer**.
+3. Demandez à l’élève d’ouvrir l’e-mail et de se connecter avec cette même adresse e-mail.
+
+Les liens d’invitation sont valables 30 jours.
+
+### Ajouter plusieurs élèves (web)
+
+1. Ouvrez l’écran d’invitation groupée.
+2. Collez les noms et les adresses e-mail, un élève par ligne.
+3. Vérifiez les entrées non valides ou en double.
+4. Envoyez les invitations pour les entrées valides.
+
+### Ajouter une note privée ou archiver un élève
+
+1. Ouvrez le profil de l’élève.
+2. Utilisez **Notes** pour enregistrer une note privée, ou choisissez **Archiver** pour mettre sa fiche en pause dans votre liste.
+3. Ajoutez un motif si c’est utile, puis confirmez.
+
+
+
+## Conseils
+
+- Les notes privées ne sont visibles que par vous.
+- L’archivage ne supprime ni l’élève, ni ses forfaits, ni ses cours passés, ni son accès à son compte. Vous pourrez le réactiver plus tard.
+- Les élèves ajoutés en masse ne reçoivent aucune notification tant que vous ne les activez pas.
+
+## Dépannage
+
+**L’invitation ne fonctionne pas.** L’élève doit se connecter avec l’adresse e-mail exacte à laquelle vous l’avez invité. Renvoyez l’invitation si elle a expiré.
+
+**Pourquoi ne puis-je pas ajouter d’élève ?** Votre offre a peut-être atteint sa limite d’élèves. Vérifiez votre offre ou passez à une offre supérieure.
+
+## Questions
+
+**Puis-je modifier les coordonnées d’un élève ?** Oui. Ouvrez son profil et enregistrez la modification. Un élève peut aussi mettre à jour ses propres coordonnées.
+
+**L’archivage annule-t-il les cours à venir ?** Non. Vérifiez les cours à venir séparément avant d’archiver.
+`,
     },
   },
   {
@@ -354,10 +520,12 @@ Los enlaces de invitación son válidos por 30 días.
     title: {
       en: `Set availability and manage classes`,
       es: `Configura tu disponibilidad y administra tus clases`,
+      fr: `Définir vos disponibilités et gérer vos cours`,
     },
     summary: {
       en: `Choose when students can book you, block time off, and manage booked classes.`,
       es: `Elige cuándo pueden reservarte los alumnos, bloquea tiempo libre y administra las clases ya reservadas.`,
+      fr: `Choisissez quand les élèves peuvent réserver avec vous, bloquez des jours de repos et gérez les cours réservés.`,
     },
     body: {
       en: `## Purpose
@@ -373,7 +541,7 @@ Choose when students can book you, block time off, and manage booked classes.
 
 ### Change working hours
 
-1. Open **Settings** and then **Availability**.
+1. Open **Settings** and then **Working hours**.
 2. Add, edit, or remove your weekly time ranges.
 3. Adjust buffer time, minimum notice, or booking window if needed.
 4. Save.
@@ -417,7 +585,7 @@ Removing a block later gives those days back and lets students book them again. 
 
 ## Questions
 
-**Can I connect Google Calendar?** Yes. In **Settings → Calendar**, connect your Google account. Busy events help prevent conflicting bookings.
+**Can I connect Google Calendar?** Yes. In **Settings → Calendar sync**, connect your Google account. Busy events help prevent conflicting bookings.
 
 **Can I cancel a completed or no-show class?** Yes. Choose Cancel and provide the required reason; the class credit is returned.
 
@@ -438,7 +606,7 @@ Elige cuándo pueden reservarte los alumnos, bloquea tiempo libre y administra l
 
 ### Cambiar tus horarios de trabajo
 
-1. Abre **Configuración** y luego **Disponibilidad**.
+1. Abre **Configuración** y luego **Horario de trabajo**.
 2. Agrega, edita o elimina tus rangos de horario semanales.
 3. Ajusta el tiempo de descanso, el aviso mínimo o la ventana de reservación si lo necesitas.
 4. Guarda.
@@ -482,7 +650,7 @@ Quitar un bloqueo después devuelve esos días y los alumnos pueden reservarlos 
 
 ## Preguntas
 
-**¿Puedo conectar Google Calendar?** Sí. En **Configuración → Calendario**, conecta tu cuenta de Google. Los eventos marcados como ocupado ayudan a evitar reservas en conflicto.
+**¿Puedo conectar Google Calendar?** Sí. En **Configuración → Sincronizar calendario**, conecta tu cuenta de Google. Los eventos marcados como ocupado ayudan a evitar reservas en conflicto.
 
 **¿Puedo cancelar una clase completada o una ausencia?** Sí. Elige Cancelar e indica el motivo requerido; el crédito de la clase se devuelve.
 
@@ -490,16 +658,86 @@ Quitar un bloqueo después devuelve esos días y los alumnos pueden reservarlos 
 
 **¿Puedo mover una clase que ya ocurrió?** No. Una clase completada, cancelada o con ausencia no se puede mover. Cancélala, o restitúyela primero y luego reserva el horario nuevo.
 `,
+      fr: `## Objectif
+
+Choisissez quand les élèves peuvent réserver avec vous, bloquez des jours de repos et gérez les cours réservés.
+
+## Avant de commencer
+
+- Vous devez avoir terminé la configuration de votre compte de professeur.
+- Définissez votre fuseau horaire avant d'ajouter vos heures de travail.
+
+## Étapes
+
+### Modifier vos heures de travail
+
+1. Ouvrez **Paramètres**, puis **Horaires de travail**.
+2. Ajoutez, modifiez ou supprimez vos plages horaires hebdomadaires.
+3. Ajustez si besoin le temps de pause entre deux cours, le délai minimum de réservation ou la période de réservation.
+4. Enregistrez.
+
+### Bloquer des jours de repos
+
+1. Ouvrez **Paramètres**, puis **Dates bloquées**.
+2. Touchez un jour dans le calendrier. Touchez un second jour pour bloquer toute la période entre les deux, ou bloquez seulement ce jour-là. Vous pouvez aussi saisir les dates dans les champs **Du** et **Au**.
+3. Ajoutez un motif si vous le souhaitez. Il sera affiché à l'élève dont le cours est annulé par ce blocage.
+4. Appuyez sur **Bloquer**.
+
+Avant que vous appuyiez, l'écran vous indique combien de cours sont réservés sur les jours choisis, et un point sous une date signale qu'un cours est réservé ce jour-là. Si un blocage chevauche des cours prévus, ces cours sont annulés, le crédit de cours revient à l'élève et l'élève est prévenu.
+
+Supprimer un blocage plus tard libère de nouveau ces jours et permet aux élèves de les réserver. Cela ne rétablit pas les cours que le blocage a déjà annulés.
+
+### Réserver ou annuler pour un élève
+
+1. Ouvrez l'élève ou le calendrier des cours.
+2. Sélectionnez un créneau disponible pour réserver au nom de l'élève, ou ouvrez un cours et choisissez **Annuler le cours**.
+3. Indiquez un motif d'annulation et confirmez.
+
+### Changer la date ou l'heure d'un cours
+
+1. Ouvrez le cours et choisissez **Gérer le cours → Changer la date et l'heure**.
+2. Choisissez un nouveau jour et une nouvelle heure. Seuls les horaires compatibles avec vos heures de travail, vos blocages, votre temps de pause et vos cours existants sont proposés, et l'horaire actuel du cours n'en fait pas partie.
+3. Confirmez. Le cours est déplacé, votre élève est informé du nouvel horaire et la modification est enregistrée dans l'historique du cours.
+
+
+
+## Conseils
+
+- Les jours bloqués apparaissent barrés dans le calendrier : vous voyez ce qui est déjà bloqué avant de choisir.
+- Les élèves ne voient que les créneaux compatibles avec vos heures de travail, vos blocages, vos temps de pause et votre délai de réservation.
+- Vous pouvez réserver vous-même un cours pour un élève, même quand votre délai minimum habituel l'empêcherait de le faire.
+
+## Dépannage
+
+**Je n'arrive pas à enregistrer mes horaires.** Vérifiez que les plages horaires ne se chevauchent pas et qu'il en reste au moins une.
+
+**Un créneau a disparu.** Il a peut-être été réservé ou bloqué, ou il ne respecte plus les règles de délai de réservation.
+
+## Questions
+
+**Puis-je connecter Google Calendar ?** Oui. Dans **Paramètres → Synchronisation du calendrier**, connectez votre compte Google. Les événements marqués comme occupés aident à éviter les réservations en conflit.
+
+**Puis-je annuler un cours terminé ou marqué comme absence ?** Oui. Choisissez Annuler et indiquez le motif demandé ; le crédit de cours est restitué.
+
+**Puis-je déplacer un cours qui commence dans moins de 24 heures ?** Oui. La règle des 24 heures s'applique à votre élève, pas à vous — et déplacer un cours n'entame aucune des modifications de planning incluses dans le forfait.
+
+**Puis-je déplacer un cours qui a déjà eu lieu ?** Non. Un cours terminé, annulé ou marqué comme absence ne peut pas être déplacé. Annulez-le, ou rétablissez-le d'abord, puis réservez le nouvel horaire.
+`,
     },
     publicFaq: true,
   },
   {
     slug: "packages-and-payments",
     audience: "teacher",
-    title: { en: `Create packages and manage payments`, es: `Crea paquetes y administra pagos` },
+    title: {
+      en: `Create packages and manage payments`,
+      es: `Crea paquetes y administra pagos`,
+      fr: `Créer des forfaits et gérer les paiements`,
+    },
     summary: {
       en: `Create lesson offers, record an existing package, and manage payments and refunds.`,
       es: `Crea ofertas de clases, registra un paquete ya existente y administra pagos y reembolsos.`,
+      fr: `Créez vos offres de cours, enregistrez un forfait existant et gérez les paiements et les remboursements.`,
     },
     body: {
       en: `## Purpose
@@ -515,7 +753,7 @@ Create lesson offers, record an existing package, and manage payments and refund
 
 ### Create or edit an offer
 
-1. Open **Settings → Templates**.
+1. Open **Settings → Packages**.
 2. Add or edit an offer with a name, class count or single-class option, duration, price, and expiry period.
 3. Save all changes.
 
@@ -596,7 +834,7 @@ Crea ofertas de clases, registra un paquete ya existente y administra pagos y re
 
 ### Crear o editar una oferta
 
-1. Abre **Configuración → Plantillas**.
+1. Abre **Configuración → Paquetes**.
 2. Agrega o edita una oferta con un nombre, número de clases u opción de clase individual, duración, precio y periodo de vigencia.
 3. Guarda todos los cambios.
 
@@ -666,16 +904,106 @@ nuestra.
 
 **¿Qué pasa después de un reembolso?** Se elimina el crédito restante del alumno de ese pago y se les notifica a ambos.
 `,
+      fr: `## Objectif
+
+Créez vos offres de cours, enregistrez un forfait existant et gérez les paiements et les remboursements.
+
+## Avant de commencer
+
+- Vous devez être connecté en tant que professeur.
+- Préparez le nombre de cours, la durée d'un cours, le prix et la période de validité.
+
+## Étapes
+
+### Créer ou modifier une offre
+
+1. Ouvrez **Paramètres → Forfaits**.
+2. Ajoutez ou modifiez une offre avec un nom, un nombre de cours ou l'option de cours à l'unité, une durée, un prix et une période de validité.
+3. Enregistrez toutes les modifications.
+
+Supprimer une offre existante l'archive. Les forfaits déjà achetés par vos élèves ne sont pas supprimés.
+
+### Enregistrer un forfait vendu ailleurs
+
+1. Ouvrez le profil de l'élève.
+2. Choisissez **Ajouter un forfait**.
+3. Saisissez le nombre total de cours et le nombre de cours restants. Ajoutez le prix ou la date d'expiration si besoin.
+4. Enregistrez.
+
+### Confirmer un virement ou rembourser un paiement par carte
+
+1. Ouvrez le détail du paiement ou du forfait.
+2. Pour un virement bancaire ou Wise, ne confirmez la réception qu'une fois l'argent
+   réellement arrivé sur votre compte.
+3. Pour un paiement par carte éligible, choisissez **Rembourser**, indiquez le motif et confirmez.
+
+
+
+## Ce que vous coûte le fait d'être payé
+
+Deux coûts différents, facturés par deux entreprises différentes. Seul le premier vient de nous.
+
+- **Votre formule SpiralClass** — ce que vous nous payez pour le logiciel. C'est
+  le seul argent que SpiralClass vous prend. Nous ne prélevons aucune commission
+  sur les revenus de vos cours, quelle que soit la formule, y compris la formule
+  gratuite.
+- **Les frais de traitement de Stripe** — ce que Stripe vous facture pour traiter
+  un paiement effectué via Stripe. Votre élève vous paie directement : l'argent
+  arrive sur votre propre compte Stripe, et Stripe y prélève ses frais avant de
+  verser le reste sur votre compte bancaire. SpiralClass ne détient jamais cet
+  argent et ne touche aucune part de ces frais. Stripe fixe le tarif selon votre
+  pays et le moyen de paiement utilisé par votre élève : consultez
+  [la grille tarifaire de Stripe](https://stripe.com/pricing) pour savoir ce qui
+  s'applique à vous. Cela concerne **tous** les moyens de paiement que Stripe
+  propose au moment du paiement : les cartes, mais aussi les options locales de
+  virement bancaire ou de paiement en espèces qu'il peut proposer à votre élève.
+  Un virement bancaire effectué dans le paiement Stripe reste un paiement Stripe
+  et entraîne les mêmes frais.
+- **Wise** — votre élève vous envoie l'argent directement sur votre compte Wise.
+  Il ne passe jamais par Stripe, il n'y a donc aucun frais Stripe. Wise ou votre
+  propre banque peuvent toutefois vous facturer la réception de l'argent.
+
+C'est pourquoi un forfait peut avoir un prix Wise inférieur à son prix Stripe :
+vous gardez davantage sur un virement Wise, vous pouvez donc en répercuter une
+partie. Les deux prix sont à votre choix, et aucun n'est obligatoire.
+
+Les remboursements et les litiges sont eux aussi gérés sur votre compte Stripe.
+La politique de frais de Stripe sur un paiement remboursé relève de Stripe, pas
+de nous.
+
+## Conseils
+
+- Fixez une période de validité claire. Les cours non utilisés ne peuvent plus être réservés une fois le forfait expiré.
+- Les élèves voient un seul solde disponible, regroupé, lorsque plusieurs forfaits éligibles s'appliquent.
+- Un forfait payé par carte s'active dès que le paiement est confirmé. Un forfait payé par virement s'active lorsque vous confirmez la réception.
+
+## Dépannage
+
+**Un élève ne peut pas réserver.** Vérifiez qu'il a un forfait actif, non expiré, avec une durée de cours correspondante.
+
+**Pourquoi ne puis-je pas ajouter une autre offre ?** Les formules gratuites limitent le nombre de modèles actifs. Passez à une formule supérieure ou archivez une offre que vous n'utilisez plus.
+
+## Questions
+
+**Puis-je modifier un forfait après son achat par un élève ?** Les forfaits déjà achetés conservent leurs propres conditions. Modifiez le modèle pour les achats à venir.
+
+**Que se passe-t-il après un remboursement ?** Le crédit restant de l'élève issu de ce paiement est retiré, et vous êtes tous les deux prévenus.
+`,
     },
     publicFaq: true,
   },
   {
     slug: "discounts-and-referrals",
     audience: "teacher",
-    title: { en: `Offer discounts and referrals`, es: `Ofrece descuentos y referidos` },
+    title: {
+      en: `Offer discounts and referrals`,
+      es: `Ofrece descuentos y referidos`,
+      fr: `Proposer des réductions et le parrainage`,
+    },
     summary: {
       en: `Create a discount code for prospective students or run a referral programme that rewards current students for successful introductions.`,
       es: `Crea un código de descuento para posibles alumnos u opera un programa de referidos que premie a tus alumnos actuales por recomendaciones exitosas.`,
+      fr: `Créez un code de réduction pour de futurs élèves, ou lancez un programme de parrainage qui récompense vos élèves actuels quand ils vous recommandent quelqu'un.`,
     },
     body: {
       en: `## Purpose
@@ -691,8 +1019,8 @@ Create a discount code for prospective students or run a referral programme that
 
 ### Create a discount code
 
-1. Open **Discounts**.
-2. Choose **Create discount code**.
+1. Open **Discount codes**.
+2. Choose **Create code**.
 3. Set the code, percentage or fixed discount, and any expiry or redemption limits.
 4. Save and share the code yourself.
 
@@ -740,8 +1068,8 @@ Crea un código de descuento para posibles alumnos u opera un programa de referi
 
 ### Crear un código de descuento
 
-1. Abre **Descuentos**.
-2. Elige **Crear código de descuento**.
+1. Abre **Códigos de descuento**.
+2. Elige **Crear código**.
 3. Define el código, el porcentaje o monto fijo de descuento, y cualquier límite de vigencia o de usos.
 4. Guarda y comparte el código tú mismo.
 
@@ -776,6 +1104,55 @@ Los alumnos elegibles pueden entonces compartir su enlace o código personal de 
 
 **¿Puedo usar un descuento y una recompensa de referido juntos?** La pantalla de pago aplica la oferta elegible según las reglas que se muestran ahí.
 `,
+      fr: `## Objectif
+
+Créez un code de réduction pour de futurs élèves, ou lancez un programme de parrainage qui récompense vos élèves actuels quand ils vous recommandent quelqu'un.
+
+## Avant de commencer
+
+- Vous devez être connecté en tant que professeur.
+- Décidez de la réduction ou de la récompense que vous pouvez vous permettre avant de la publier.
+
+## Étapes
+
+### Créer un code de réduction
+
+1. Ouvrez **Codes de réduction**.
+2. Choisissez **Créer le code**.
+3. Définissez le code, la réduction en pourcentage ou en montant fixe, et une éventuelle date d'expiration ou limite d'utilisation.
+4. Enregistrez, puis partagez le code vous-même.
+
+Les élèves saisissent un code valide au moment de payer un forfait.
+
+### Activer le parrainage
+
+1. Ouvrez **Parrainages**.
+2. Activez le programme.
+3. Définissez la réduction accordée à l'ami, la récompense du parrain et la durée de validité de la récompense.
+4. Enregistrez.
+
+Les élèves éligibles peuvent alors partager leur lien ou leur code de parrainage personnel. Une récompense n'est créée qu'une fois le premier paiement de l'élève parrainé confirmé.
+
+
+
+## Conseils
+
+- Ajoutez une date d'expiration ou une limite d'utilisation aux offres limitées dans le temps.
+- Partagez vos codes sur les canaux que vous utilisez déjà ; SpiralClass n'envoie aucune promotion à votre place.
+- Une récompense de parrainage est retirée si le paiement qui y donne droit est remboursé avant qu'elle soit utilisée.
+
+## Dépannage
+
+**Une réduction ne s'applique pas.** Vérifiez sa date d'expiration, ses limites, et qu'elle est bien valable pour cet élève et ce forfait.
+
+**Pourquoi un élève n'a-t-il pas reçu de récompense de parrainage ?** Le paiement de l'élève parrainé doit être un premier achat valide, et il doit d'abord être confirmé.
+
+## Questions
+
+**Un élève peut-il se parrainer lui-même ?** Non.
+
+**Puis-je cumuler une réduction et une récompense de parrainage ?** L'écran de paiement applique l'offre éligible selon les règles qui y sont indiquées.
+`,
     },
   },
   {
@@ -784,10 +1161,12 @@ Los alumnos elegibles pueden entonces compartir su enlace o código personal de 
     title: {
       en: `Prepare classes, materials, and homework`,
       es: `Prepara clases, materiales y tareas`,
+      fr: `Préparer les cours, les supports et les devoirs`,
     },
     summary: {
       en: `Use class notes and learning materials to prepare a lesson, then assign and review homework.`,
       es: `Usa notas de clase y materiales de aprendizaje para preparar una lección, y luego asigna y revisa tareas.`,
+      fr: `Utilisez les notes de cours et les supports pédagogiques pour préparer un cours, puis donnez des devoirs et corrigez-les.`,
     },
     body: {
       en: `## Purpose
@@ -878,7 +1257,7 @@ Los alumnos siempre pueden ver el contenido de clase guardado. Solo ven las nota
 1. Abre una clase y elige **Tareas → Agregar**.
 2. Agrega un título, instrucciones, fecha límite y opciones de entrega; guarda.
 3. Cuando un alumno entrega su trabajo, abre **Revisar**.
-4. Agrega comentarios y una calificación opcional, y luego elige **Aprobar**, **Solicitar reenvío** o **Rechazar**.
+4. Agrega comentarios y una calificación opcional, y luego elige **Aprobar**, **Pedir reenvío** o **Rechazar**.
 
 
 
@@ -900,15 +1279,75 @@ Los alumnos siempre pueden ver el contenido de clase guardado. Solo ven las nota
 
 **¿Puedo adjuntar más de un elemento de la biblioteca?** Sí, puedes elegir varios elementos existentes para una clase.
 `,
+      fr: `## Objectif
+
+Utilisez les notes de cours et les supports pédagogiques pour préparer un cours, puis donnez des devoirs et corrigez-les.
+
+## Avant de commencer
+
+- Ouvrez un cours réservé par un élève.
+- Certains outils d’IA nécessitent l’offre Pro et peuvent être soumis à une limite mensuelle.
+
+## Étapes
+
+### Ajouter des notes et le contenu du cours
+
+1. Ouvrez la page de détail du cours.
+2. Ajoutez des repères pédagogiques privés et, si besoin, des notes destinées à l’élève.
+3. Ouvrez le panneau du contenu du cours ou des supports.
+4. Rédigez du contenu, choisissez un support existant, importez un fichier ou un lien, ou générez un brouillon si cette option est disponible.
+5. Relisez, modifiez et enregistrez.
+
+Les élèves peuvent toujours consulter le contenu du cours enregistré. Ils ne voient les notes qui leur sont destinées que peu avant et peu après le cours.
+
+### Constituer votre bibliothèque de supports
+
+1. Ouvrez **Supports**.
+2. Choisissez **Ajouter un support**.
+3. Rédigez, générez, importez ou ajoutez un lien ; choisissez un niveau et enregistrez.
+4. Joignez un élément de la bibliothèque à un cours ou attribuez-le depuis le profil d’un élève.
+
+### Donner et corriger des devoirs
+
+1. Ouvrez un cours et choisissez **Devoirs → Ajouter un devoir**.
+2. Ajoutez un titre, des consignes, une date limite et les options de remise ; enregistrez.
+3. Quand un élève rend son travail, ouvrez **Réviser**.
+4. Ajoutez un commentaire et une note facultative, puis choisissez **Approuver**, **Demander une nouvelle remise** ou **Rejeter**.
+
+
+
+## Conseils
+
+- Séparez vos repères privés des consignes destinées à l’élève.
+- Enregistrer un support qui contient un bloc de devoirs ou d’exercices peut créer un brouillon de devoir ; supprimez-le si vous ne voulez pas le donner.
+- Une décision de correction ne peut plus être modifiée ensuite : relisez d’abord votre commentaire.
+
+## Dépannage
+
+**L’élève ne voit pas le devoir.** Vérifiez que le devoir a bien été enregistré sur le bon cours.
+
+**La génération par IA n’est pas disponible.** Vérifiez votre accès Pro et votre quota mensuel, puis réessayez plus tard si vous avez atteint la limite.
+
+## Questions
+
+**Un élève peut-il rendre ses devoirs sur le web ?** Oui. Il ouvre le devoir depuis la page de son cours et le rend depuis cette page.
+
+**Puis-je joindre plusieurs éléments de la bibliothèque ?** Oui, vous pouvez choisir plusieurs éléments existants pour un même cours.
+`,
     },
   },
   {
     slug: "live-calls",
     audience: "teacher",
-    title: { en: `Join live calls`, es: `Únete a videollamadas en vivo` },
+    title: {
+      en: `Join live calls`,
+      es: `Únete a videollamadas en vivo`,
+      fr: `Rejoindre les appels en direct`,
+    },
     summary: {
       en: `Join a scheduled lesson, control your camera and microphone, share your screen, and use supported teaching tools during a call.`,
       es: `Únete a una lección programada, controla tu cámara y micrófono, comparte tu pantalla y usa las herramientas de enseñanza disponibles durante una llamada.`,
+      fr: `Rejoignez un cours programmé, contrôlez votre caméra et votre micro, partagez votre écran et utilisez les outils pédagogiques disponibles pendant un appel.`,
     },
     body: {
       en: `## Purpose
@@ -965,7 +1404,7 @@ Suggested video: **“Join and Run a Live Lesson (2 minutes)”**
 ## Pasos
 
 1. Abre la clase próxima desde tu panel o tu lista de clases.
-2. Selecciona **Unirse a la llamada** cuando aparezca.
+2. Selecciona **Entrar a la llamada** cuando aparezca.
 3. Revisa tu cámara y micrófono.
 4. Usa los controles de llamada para silenciarte, activar o desactivar tu cámara, compartir pantalla o avisar al alumno.
 5. Minimiza la llamada si necesitas ver otra parte de SpiralClass; la llamada sigue activa.
@@ -993,15 +1432,61 @@ Video sugerido: **"Únete y da una lección en vivo (2 minutos)"**
 
 **¿Puedo mantener la llamada abierta mientras reviso mensajes?** Sí. Minimízala en vez de salir.
 `,
+      fr: `## Objectif
+
+Rejoignez un cours programmé, contrôlez votre caméra et votre micro, partagez votre écran et utilisez les outils pédagogiques disponibles pendant un appel.
+
+## Avant de commencer
+
+- Ouvrez un cours programmé à venir peu avant l’heure de début.
+- Autorisez l’accès à la caméra et au micro quand votre appareil le demande.
+- Utilisez une connexion internet fiable et, si possible, un casque ou des écouteurs.
+
+## Étapes
+
+1. Ouvrez le cours à venir depuis votre tableau de bord ou votre liste de cours.
+2. Sélectionnez **Rejoindre l'appel** quand le bouton apparaît.
+3. Vérifiez votre caméra et votre micro.
+4. Utilisez les commandes de l’appel pour couper le micro, activer ou désactiver la caméra, partager votre écran ou relancer l’élève.
+5. Réduisez l’appel si vous devez consulter une autre partie de SpiralClass ; l’appel reste actif.
+6. Quittez l’appel à la fin du cours.
+
+
+
+## Conseils
+
+- Une seule personne à la fois peut partager son écran.
+- Sur mobile, le partage d’écran est disponible sur Android ; il ne l’est pas sur iPhone ni sur iPad.
+- L’enregistrement et les sous-titres en direct n’apparaissent que s’ils sont activés pour votre compte et pour le cours.
+
+Vidéo suggérée : **« Rejoindre et animer un cours en direct (2 minutes) »**
+
+## Dépannage
+
+**Je n’arrive pas à rejoindre l’appel.** Actualisez la page du cours, vérifiez votre connexion et autorisez l’accès à la caméra et au micro.
+
+**L’élève n’a pas rejoint l’appel.** Utilisez la commande de relance si elle est disponible, puis attendez qu’il se connecte.
+
+## Questions
+
+**Puis-je enregistrer un cours ?** Si l’enregistrement vous est proposé, lancez-le et arrêtez-le depuis les commandes de l’appel. Un indicateur d’enregistrement s’affiche tant qu’il est en cours.
+
+**Puis-je garder l’appel ouvert pendant que je consulte mes messages ?** Oui. Réduisez-le au lieu de le quitter.
+`,
     },
   },
   {
     slug: "messages-and-notifications",
     audience: "teacher",
-    title: { en: `Messages and notifications`, es: `Mensajes y notificaciones` },
+    title: {
+      en: `Messages and notifications`,
+      es: `Mensajes y notificaciones`,
+      fr: `Messages et notifications`,
+    },
     summary: {
       en: `Talk with your students and choose how SpiralClass keeps you informed.`,
       es: `Habla con tus alumnos y elige cómo te mantiene informado SpiralClass.`,
+      fr: `Échangez avec vos élèves et choisissez comment SpiralClass vous tient informé.`,
     },
     body: {
       en: `## Purpose
@@ -1098,15 +1583,67 @@ Para editar un mensaje de solo texto, elige Editar dentro de los primeros 15 min
 
 **¿El alumno sabrá que leí un mensaje?** Abrir la conversación actualiza el estado de leído.
 `,
+      fr: `## Objectif
+
+Échangez avec vos élèves et choisissez comment SpiralClass vous tient informé.
+
+## Avant de commencer
+
+- Vous devez être connecté en tant que professeur.
+- Vous pouvez écrire aux élèves éligibles de votre liste.
+
+## Étapes
+
+### Envoyer un message
+
+1. Ouvrez **Messages**.
+2. Ouvrez une conversation existante ou sélectionnez un élève éligible.
+3. Écrivez un message ou joignez une note vocale, une vidéo, une image ou un fichier.
+4. Envoyez.
+
+Pour modifier un message qui ne contient que du texte, choisissez Modifier dans les 15 minutes. Pour supprimer un message pour tout le monde, choisissez Supprimer dans un délai d'environ deux jours et demi.
+
+### Modifier les notifications
+
+1. Ouvrez **Paramètres → Notifications**.
+2. Activez ou désactivez des catégories, ou l'envoi par e-mail ou par notification push.
+3. Enregistrez vos modifications.
+4. Pour couper les notifications générales d'un seul élève, ouvrez son profil et ajustez son réglage de notifications.
+
+
+
+## Conseils
+
+- Ouvrez une conversation pour marquer ses messages comme lus.
+- Les messages importants liés aux paiements, à la facturation et à la connexion ne peuvent pas être désactivés.
+- Si les notifications push ne sont pas disponibles, SpiralClass peut vous envoyer un e-mail à la place.
+
+## Dépannage
+
+**Je ne peux pas modifier un message.** Seuls les messages qui ne contiennent que du texte peuvent être modifiés, et uniquement pendant les 15 minutes prévues pour cela.
+
+**Je ne reçois pas de notifications.** Vérifiez vos réglages de notifications, ainsi que l'autorisation donnée à SpiralClass sur votre téléphone pour vous envoyer des notifications.
+
+## Questions
+
+**Puis-je annuler une suppression ?** Non. Un message supprimé ne peut pas être restauré.
+
+**L'élève saura-t-il que j'ai lu son message ?** Ouvrir la conversation met à jour son état de lecture.
+`,
     },
   },
   {
     slug: "student-progress-reports",
     audience: "teacher",
-    title: { en: `Student progress reports`, es: `Informes de progreso del alumno` },
+    title: {
+      en: `Student progress reports`,
+      es: `Informes de progreso del alumno`,
+      fr: `Rapports de progression des élèves`,
+    },
     summary: {
       en: `Review learning insights from lessons, prepare for the next class, and choose whether a student can see a simplified progress view.`,
       es: `Revisa hallazgos de aprendizaje de las lecciones, prepárate para la siguiente clase y elige si un alumno puede ver una vista simplificada de su progreso.`,
+      fr: `Consultez les analyses pédagogiques issues des cours, préparez le cours suivant et choisissez si un élève peut voir une version simplifiée de sa progression.`,
     },
     body: {
       en: `## Purpose
@@ -1181,15 +1718,56 @@ Revisa hallazgos de aprendizaje de las lecciones, prepárate para la siguiente c
 
 **¿Qué ve el alumno?** Ve agrupaciones de progreso alentadoras y, cuando esté disponible, tarjetas de repaso de vocabulario.
 `,
+      fr: `## Objectif
+
+Consultez les analyses pédagogiques issues des cours, préparez le cours suivant et choisissez si un élève peut voir une version simplifiée de sa progression.
+
+## Avant de commencer
+
+- Ouvrez le profil d’un élève ou un cours terminé.
+- Les analyses de progression dépendent de la disponibilité des fonctionnalités d’apprentissage concernées et, lorsqu’il est demandé, du consentement de l’élève.
+
+## Étapes
+
+1. Ouvrez le profil d’un élève pour voir ses points à travailler et sa progression en vocabulaire.
+2. Utilisez les options de consentement avant d’activer les analyses pédagogiques éligibles. Pour un élève mineur, effectuez l’étape de consentement supplémentaire.
+3. Choisissez si vous voulez **Partager la progression avec l'élève**.
+4. Avant un cours, ouvrez la fiche de préparation et ajoutez des repères utiles à vos notes de cours.
+5. Après un cours analysé, examinez chaque constat. Choisissez **Confirmer**, **Modifier** ou **Écarter**, ou ajoutez votre propre constat.
+
+
+
+## Conseils
+
+- La progression visible par l’élève est simplifiée ; il ne voit ni vos éléments détaillés ni les constats internes du cours.
+- Considérez les suggestions comme une aide pédagogique. Vérifiez-les avant de vous appuyer dessus pendant un cours.
+
+## Dépannage
+
+**Je ne vois pas les analyses.** Le cours n’est peut-être pas encore prêt, la fonctionnalité n’est peut-être pas disponible, ou le consentement requis manque peut-être.
+
+**L’élève ne voit pas sa progression.** Activez **Partager la progression avec l'élève** depuis son profil.
+
+## Questions
+
+**Puis-je modifier un constat ?** Vous pouvez modifier ou écarter un constat suggéré avant de le confirmer.
+
+**Que voit l’élève ?** Il voit des regroupements encourageants de sa progression et, lorsqu’elles sont disponibles, des fiches de révision du vocabulaire.
+`,
     },
   },
   {
     slug: "faq",
     audience: "teacher",
-    title: { en: `Teacher frequently asked questions`, es: `Preguntas frecuentes para profesores` },
+    title: {
+      en: `Teacher frequently asked questions`,
+      es: `Preguntas frecuentes para profesores`,
+      fr: `Questions fréquentes des professeurs`,
+    },
     summary: {
       en: `Find quick answers to common questions about using SpiralClass as a teacher.`,
       es: `Encuentra respuestas rápidas a preguntas comunes sobre cómo usar SpiralClass como profesor.`,
+      fr: `Trouvez des réponses rapides aux questions courantes sur l'utilisation de SpiralClass en tant que professeur.`,
     },
     body: {
       en: `## Purpose
@@ -1281,7 +1859,7 @@ Encuentra respuestas rápidas a preguntas comunes sobre cómo usar SpiralClass c
 
 **¿SpiralClass se queda con una parte de lo que me pagan mis alumnos?** No. Tus alumnos te pagan directamente a ti y no cobramos comisión en ningún plan. Tu plan es lo único que te cobramos.
 
-**¿Entonces por qué un pago llega un poco por debajo del precio que puse?** Porque Stripe cobra su propia comisión por procesarlo, en tu propia cuenta de Stripe. Esa comisión es de Stripe — SpiralClass no recibe ninguna parte — y Stripe fija la tarifa según tu país y el método que usó tu alumno. Consulta [los precios de Stripe](https://stripe.com/pricing), o [Crea paquetes y administra pagos](packages-and-payments.md) para el panorama completo.
+**¿Entonces por qué un pago llega un poco por debajo del precio que puse?** Porque Stripe cobra su propia comisión por procesarlo, en tu propia cuenta de Stripe. Esa comisión es de Stripe — SpiralClass no recibe ninguna parte — y Stripe fija la tarifa según tu país y el método que usó tu alumno. Consulta [los precios de Stripe](https://stripe.com/pricing), o [Crea paquetes y administra pagos](packages-and-payments.es.md) para el panorama completo.
 
 **¿Hay forma de evitar la comisión de Stripe?** Cobra por Wise — tu alumno transfiere directo a tu cuenta de Wise, así que el dinero nunca pasa por Stripe y no lleva comisión de Stripe. Tu banco o Wise sí podrían cobrarte por recibir el dinero. Ojo: una transferencia ofrecida _dentro_ del checkout de Stripe sigue siendo un pago por Stripe y sigue llevando la comisión.
 
@@ -1304,15 +1882,76 @@ Consulta la guía correspondiente en el [Centro de ayuda para profesores](index.
 
 Si algo en pantalla difiere de estas respuestas, no repitas un pago o una reserva. Toma una captura de pantalla y contacta a soporte.
 `,
+      fr: `## Objectif
+
+Trouvez des réponses rapides aux questions courantes sur l'utilisation de SpiralClass en tant que professeur.
+
+## Avant de commencer
+
+- Connectez-vous à votre compte de professeur.
+- Ouvrez le guide indiqué quand une réponse demande plus de détails.
+
+## Questions
+
+### Pour commencer
+
+**Comment les élèves me trouvent-ils ?** Partagez votre page de réservation publique une fois votre configuration terminée.
+
+**Puis-je utiliser SpiralClass avant de payer Pro ?** Oui. Les nouveaux professeurs commencent par un essai Pro de 30 jours, puis passent à la formule Gratuite, sauf s'ils s'abonnent.
+
+### Élèves et cours
+
+**Archiver un élève le supprime-t-il ?** Non. Cela met cette entrée de votre liste en pause, et vous pouvez revenir en arrière.
+
+**Que se passe-t-il si je bloque des dates où des cours sont déjà prévus ?** Les cours concernés sont annulés et l'élève récupère son crédit de cours.
+
+**Puis-je réserver un cours pour un élève ?** Oui, depuis votre tableau de bord ou votre calendrier.
+
+### Forfaits et paiements
+
+**Quand un forfait expire-t-il ?** À la date d'expiration définie pour ce forfait. Les cours restants ne peuvent plus être réservés ensuite.
+
+**Puis-je enregistrer un paiement reçu en dehors de SpiralClass ?** Oui. Ajoutez un forfait actif depuis le profil de l'élève.
+
+**SpiralClass prend-il une part de ce que mes élèves me paient ?** Non. Vos élèves vous paient directement, et nous ne prenons aucune commission, quelle que soit la formule. Votre formule est le seul argent que nous vous facturons.
+
+**Alors pourquoi un paiement est-il un peu inférieur au prix que j'ai fixé ?** Parce que Stripe facture ses propres frais de traitement pour le gérer, sur votre propre compte Stripe. Ces frais sont ceux de Stripe — SpiralClass n'en touche aucune part — et Stripe fixe le taux selon votre pays et le moyen de paiement utilisé par votre élève. Consultez [les tarifs de Stripe](https://stripe.com/pricing), ou [Créer des forfaits et gérer les paiements](packages-and-payments.fr.md) pour une vue d'ensemble.
+
+**Existe-t-il un moyen d'éviter les frais Stripe ?** Faites-vous payer par Wise : votre élève vire l'argent directement sur votre compte Wise, il ne passe donc jamais par Stripe et ne supporte aucuns frais Stripe. Votre banque ou Wise peuvent tout de même vous facturer la réception de l'argent. Attention : un virement bancaire proposé _dans_ le paiement Stripe reste un paiement Stripe, et il supporte toujours les frais.
+
+### Outils d'enseignement
+
+**Qui peut voir mes notes de cours ?** Les élèves ne voient que les notes qui leur sont destinées, pendant le créneau du cours. Vos repères privés restent privés.
+
+**Les élèves peuvent-ils rendre leurs devoirs sur le web ?** Oui. Ils ouvrent le devoir depuis la page du cours, écrivent leur réponse, joignent d'éventuels fichiers et l'envoient.
+
+## Besoin d'aide supplémentaire ?
+
+Consultez le guide correspondant dans le [Centre d'aide pour les professeurs](index.fr.md), puis contactez votre canal d'assistance SpiralClass habituel si le problème persiste.
+
+## Conseils
+
+- Vérifiez votre fuseau horaire, le solde du forfait et l'heure du cours avant de modifier une réservation.
+- Tenez à jour les coordonnées de vos élèves pour que les invitations et les avis arrivent correctement.
+
+## Dépannage
+
+Si ce que vous voyez à l'écran ne correspond pas à ces réponses, ne refaites pas un paiement ou une réservation. Faites une capture d'écran et contactez l'assistance.
+`,
     },
   },
   {
     slug: "getting-started",
     audience: "student",
-    title: { en: `Sign in and get started`, es: `Inicia sesión y comienza` },
+    title: {
+      en: `Sign in and get started`,
+      es: `Inicia sesión y comienza`,
+      fr: `Se connecter et bien démarrer`,
+    },
     summary: {
       en: `Access your lessons, materials, packages, and messages.`,
       es: `Accede a tus lecciones, materiales, paquetes y mensajes.`,
+      fr: `Accédez à vos cours, à vos supports, à vos forfaits et à vos messages.`,
     },
     body: {
       en: `## Purpose
@@ -1331,7 +1970,7 @@ Access your lessons, materials, packages, and messages.
 3. Enter the six-digit code sent to your email.
 4. Open **My classes** to see your lessons, or use the student tabs.
 
-You can also choose **Sign in with Google** where it is offered.
+You can also choose **Continue with Google** where it is offered.
 
 
 
@@ -1371,7 +2010,7 @@ Accede a tus lecciones, materiales, paquetes y mensajes.
 3. Ingresa el código de seis dígitos que recibiste por correo.
 4. Abre **Mis clases** para ver tus lecciones, o usa las pestañas de alumno.
 
-También puedes elegir **Iniciar sesión con Google** donde esté disponible.
+También puedes elegir **Continuar con Google** donde esté disponible.
 
 
 
@@ -1395,15 +2034,56 @@ Video sugerido: **"Tus primeros pasos como alumno (1 minuto)"**
 
 **¿Cómo encuentro rápido una clase, un profesor o una página?** Usa el botón de búsqueda (la lupa) en la parte superior de cualquier página, o presiona ⌘K en una Mac o Ctrl+K en otros equipos. Escribe lo que buscas, como el nombre de tu profesor, "agendar" o una pregunta, y presiona Enter.
 `,
+      fr: `## Objectif
+
+Accédez à vos cours, à vos supports, à vos forfaits et à vos messages.
+
+## Avant de commencer
+
+- Utilisez l'adresse e-mail à laquelle votre professeur vous a invité, ou celle utilisée lors de l'achat d'un forfait.
+- Assurez-vous d'avoir accès à cette boîte de réception.
+
+## Étapes
+
+1. Ouvrez **Se connecter**.
+2. Saisissez votre adresse e-mail.
+3. Saisissez le code à six chiffres envoyé à votre adresse e-mail.
+4. Ouvrez **Mes cours** pour voir vos cours, ou utilisez les onglets élève.
+
+Vous pouvez aussi choisir **Continuer avec Google** lorsque cette option est proposée.
+
+
+
+## Conseils
+
+- Les codes expirent au bout de cinq minutes : saisissez-les rapidement.
+- Si votre professeur vous a invité, connectez-vous avec l'adresse e-mail utilisée pour l'invitation.
+- Après avoir acheté un forfait sur la page de réservation d'un professeur, connectez-vous plus tard avec l'adresse e-mail saisie lors du paiement.
+
+Vidéo suggérée : **« Vos premiers pas en tant qu'élève (1 minute) »**
+
+## Dépannage
+
+**Je n'ai pas reçu de code.** Vérifiez vos courriers indésirables ou spams, puis demandez un nouveau code.
+
+**Mon invitation ne me relie pas à mes cours.** Vérifiez que vous vous êtes connecté avec exactement l'adresse e-mail invitée.
+
+## Questions
+
+**Ai-je besoin d'un mot de passe ?** Non. SpiralClass vous connecte avec un code envoyé par e-mail ou, lorsque c'est possible, avec Google.
+
+**Comment trouver rapidement un cours, un professeur ou une page ?** Utilisez le bouton de recherche (la loupe) en haut de chaque page, ou appuyez sur ⌘K sur un Mac ou Ctrl+K ailleurs. Saisissez ce que vous cherchez, par exemple le nom de votre professeur, « réserver » ou une question, puis appuyez sur Entrée.
+`,
     },
   },
   {
     slug: "account-settings",
     audience: "student",
-    title: { en: `Manage your account`, es: `Administra tu cuenta` },
+    title: { en: `Manage your account`, es: `Administra tu cuenta`, fr: `Gérer votre compte` },
     summary: {
       en: `Update your details, change your sign-in email, control notifications, request your data, or request account deletion.`,
       es: `Actualiza tus datos, cambia tu correo de inicio de sesión, controla tus notificaciones, solicita tus datos o solicita la eliminación de tu cuenta.`,
+      fr: `Modifiez vos informations, changez votre adresse e-mail de connexion, gérez vos notifications, demandez vos données ou demandez la suppression de votre compte.`,
     },
     body: {
       en: `## Purpose
@@ -1433,7 +2113,7 @@ Update your details, change your sign-in email, control notifications, request y
 ### Request data or account deletion
 
 1. Open the data or account section of settings.
-2. Choose **Export my data** to download your information.
+2. Choose **Download my data** to download your information.
 3. Choose **Delete account** and confirm if you want to request deletion.
 4. Return to this screen to cancel a pending deletion request during the grace period.
 
@@ -1484,7 +2164,7 @@ Actualiza tus datos, cambia tu correo de inicio de sesión, controla tus notific
 ### Solicitar tus datos o la eliminación de tu cuenta
 
 1. Abre la sección de datos o de cuenta en configuración.
-2. Elige **Exportar mis datos** para descargar tu información.
+2. Elige **Descargar mis datos** para descargar tu información.
 3. Elige **Eliminar cuenta** y confirma si quieres solicitar la eliminación.
 4. Regresa a esta pantalla para cancelar una solicitud de eliminación pendiente durante el periodo de gracia.
 
@@ -1508,15 +2188,71 @@ Actualiza tus datos, cambia tu correo de inicio de sesión, controla tus notific
 
 **¿Puedo cambiar mis preferencias de notificación?** Sí. Abre **Notificaciones** en la configuración de tu cuenta.
 `,
+      fr: `## Objectif
+
+Modifiez vos informations, changez votre adresse e-mail de connexion, gérez vos notifications, demandez vos données ou demandez la suppression de votre compte.
+
+## Avant de commencer
+
+- Vous devez être connecté.
+- Gardez l'accès à votre boîte e-mail si vous prévoyez de changer votre adresse de connexion.
+
+## Étapes
+
+### Modifier vos informations
+
+1. Ouvrez **Compte** ou **Paramètres**.
+2. Modifiez votre nom, votre numéro de téléphone, votre fuseau horaire ou les autres informations de profil disponibles.
+3. Enregistrez.
+
+### Changer votre adresse e-mail de connexion
+
+1. Ouvrez l'option de changement d'adresse e-mail.
+2. Saisissez votre nouvelle adresse e-mail.
+3. Saisissez le code de vérification envoyé à cette nouvelle adresse.
+4. Confirmez le changement.
+
+### Demander vos données ou la suppression du compte
+
+1. Ouvrez la section des données ou du compte dans les paramètres.
+2. Choisissez **Télécharger mes données** pour télécharger vos informations.
+3. Choisissez **Supprimer le compte** et confirmez si vous souhaitez demander la suppression.
+4. Revenez sur cet écran pour annuler une demande de suppression en attente pendant le délai de grâce.
+
+
+
+## Conseils
+
+- Mettez à jour votre fuseau horaire avant de réserver des cours pendant un voyage.
+- Gardez votre adresse e-mail à jour pour recevoir les codes de connexion et les avis concernant vos cours.
+- La suppression du compte comporte un délai de grâce de 30 jours.
+
+## Dépannage
+
+**Je ne peux pas changer mon adresse e-mail.** Vérifiez que vous avez saisi le code envoyé à la nouvelle adresse avant son expiration.
+
+**Je ne peux pas demander la suppression.** La suppression est bloquée tant qu'il vous reste des cours payés non utilisés. Réservez-les, utilisez-les ou réglez la situation d'abord.
+
+## Questions
+
+**La suppression de mon compte est-elle immédiate ?** Non. Vous avez 30 jours pour annuler la demande.
+
+**Puis-je modifier mes préférences de notification ?** Oui. Ouvrez **Notifications** dans les paramètres du compte.
+`,
     },
   },
   {
     slug: "buying-packages-and-payments",
     audience: "student",
-    title: { en: `Buy packages and pay`, es: `Compra paquetes y paga` },
+    title: {
+      en: `Buy packages and pay`,
+      es: `Compra paquetes y paga`,
+      fr: `Acheter des forfaits et payer`,
+    },
     summary: {
       en: `Buy lesson packages from your teacher and understand when they are ready to use.`,
       es: `Compra paquetes de lecciones con tu profesor y entiende cuándo quedan listos para usarse.`,
+      fr: `Achetez des forfaits de cours auprès de votre professeur et sachez quand ils sont prêts à être utilisés.`,
     },
     body: {
       en: `## Purpose
@@ -1550,7 +2286,7 @@ and so on).
 3. Use the payment reference exactly as shown. It is how your teacher
    identifies your payment.
 4. Send the transfer.
-5. Select **I already sent it** if shown.
+5. Select **I've sent the payment** if shown.
 6. Wait for your teacher to confirm receipt. The package then becomes ready.
 
 
@@ -1605,7 +2341,7 @@ en Brasil, etc.).
 3. Usa la referencia de pago exactamente como se muestra. Así identifica tu
    profesor tu pago.
 4. Envía la transferencia.
-5. Selecciona **Ya lo envié** si aparece la opción.
+5. Selecciona **Ya envié el pago** si aparece la opción.
 6. Espera a que tu profesor confirme la recepción. El paquete queda listo
    entonces.
 
@@ -1630,15 +2366,75 @@ en Brasil, etc.).
 
 **¿Qué pasa después de un reembolso?** El pago se reembolsa y se eliminan las clases restantes de ese paquete. Te avisamos por correo cuando se emite, y el dinero regresa al mismo método de pago que usaste, normalmente en 5 a 10 días hábiles según tu banco.
 `,
+      fr: `## Objectif
+
+Achetez des forfaits de cours auprès de votre professeur et sachez quand ils sont prêts à être utilisés.
+
+## Avant de commencer
+
+- Ouvrez la page de réservation de votre professeur, ou connectez-vous pour acheter à nouveau.
+- Choisissez le forfait qui correspond à la durée de cours souhaitée.
+
+## Étapes
+
+### Payer par carte
+
+1. Choisissez un forfait.
+2. Ajoutez un code de réduction valide si vous en avez un.
+3. Sélectionnez le paiement par carte et remplissez l'écran de paiement.
+4. Attendez la confirmation. Votre forfait est prêt dès que le paiement est confirmé.
+
+### Payer par virement bancaire
+
+Votre professeur peut proposer un virement à la place du paiement par carte, ou
+en plus — via Wise, ou sur un compte bancaire dans son propre pays (SPEI, PIX au Brésil,
+etc.).
+
+1. Choisissez l'option de virement proposée lors du paiement.
+2. Wise vous donne un lien de paiement. Un compte bancaire vous donne les
+   coordonnées à saisir dans votre propre application bancaire — vérifiez que le nom de la banque
+   affiché correspond à celui que montre votre application avant d'envoyer.
+3. Utilisez la référence de paiement exactement telle qu'elle est affichée. C'est ainsi que votre professeur
+   identifie votre paiement.
+4. Envoyez le virement.
+5. Sélectionnez **J'ai envoyé le paiement** si l'option s'affiche.
+6. Attendez que votre professeur confirme la réception. Le forfait est alors prêt.
+
+
+
+## Conseils
+
+- Pour un virement, reprenez la référence de paiement exactement telle qu'elle est affichée. C'est la seule
+  chose qui relie votre paiement à votre forfait.
+- Un code de réduction doit être valide avant le paiement pour réduire le prix.
+- Vérifiez la date d'expiration du forfait. Les cours non utilisés ne peuvent plus être réservés après son expiration.
+
+## Dépannage
+
+**Mon forfait n'est pas encore actif.** Les paiements par carte doivent être confirmés. Pour un virement, votre professeur doit confirmer la réception, ce qui peut prendre plus de temps.
+
+**Mon code de réduction ne fonctionne pas.** Il est peut-être expiré, épuisé, non disponible pour ce forfait ou non valable pour votre compte.
+
+## Questions
+
+**Puis-je acheter sans compte ?** Oui. Vous pouvez acheter sur la page de réservation publique d'un professeur, puis vous connecter plus tard avec l'adresse e-mail saisie lors du paiement.
+
+**Que se passe-t-il après un remboursement ?** Le paiement est remboursé et les cours restants de ce forfait sont retirés. Nous vous envoyons un e-mail lorsque le remboursement est effectué, et l'argent revient sur le moyen de paiement que vous avez utilisé — généralement sous 5 à 10 jours ouvrés, selon votre banque.
+`,
     },
   },
   {
     slug: "booking-and-managing-lessons",
     audience: "student",
-    title: { en: `Book, cancel, or move a lesson`, es: `Reserva, cancela o cambia una lección` },
+    title: {
+      en: `Book, cancel, or move a lesson`,
+      es: `Reserva, cancela o cambia una lección`,
+      fr: `Réserver, annuler ou déplacer un cours`,
+    },
     summary: {
       en: `Choose a lesson time and manage changes to booked lessons.`,
       es: `Elige un horario de lección y administra los cambios a las lecciones ya reservadas.`,
+      fr: `Choisissez un horaire de cours et gérez les modifications de vos cours réservés.`,
     },
     body: {
       en: `## Purpose
@@ -1717,7 +2513,7 @@ Elige un horario de lección y administra los cambios a las lecciones ya reserva
 
 ### Cambiar una lección
 
-1. Abre la lección y elige **Reprogramar**.
+1. Abre la lección y elige **Reagendar**.
 2. Elige un nuevo horario disponible.
 3. Confirma el cambio.
 
@@ -1741,15 +2537,70 @@ Elige un horario de lección y administra los cambios a las lecciones ya reserva
 
 **¿Por qué desapareció un horario disponible?** Otra reserva, un cambio de calendario o una regla de disponibilidad actualizada pueden haberlo dejado no disponible.
 `,
+      fr: `## Objectif
+
+Choisissez un horaire de cours et gérez les modifications de vos cours réservés.
+
+## Avant de commencer
+
+- Vous devez être connecté.
+- Il vous faut un forfait actif, non expiré, avec un cours disponible pour la durée souhaitée.
+
+## Étapes
+
+### Réserver un cours
+
+1. Ouvrez **Réserver** ou **Mes cours**.
+2. Choisissez un jour et un horaire disponibles.
+3. Confirmez le cours.
+4. Vérifiez l'écran de confirmation et vos prochains cours.
+
+### Annuler un cours
+
+1. Ouvrez le cours dans **Mes cours**.
+2. Choisissez **Annuler** et confirmez.
+3. Lisez le résultat affiché à l'écran.
+
+### Déplacer un cours
+
+1. Ouvrez le cours et choisissez **Reprogrammer**.
+2. Choisissez un nouvel horaire disponible.
+3. Confirmez le changement.
+
+
+
+## Conseils
+
+- Vérifiez la date, l'heure et le fuseau horaire avant de confirmer.
+- Le calendrier de votre professeur tient déjà compte de ses heures de travail et de ses absences.
+- Utilisez l'option du prochain créneau disponible lorsque vous voulez l'horaire libre le plus proche.
+
+## Dépannage
+
+**Je ne peux pas réserver.** Votre forfait est peut-être épuisé ou expiré, le créneau n'est peut-être plus disponible, ou il est trop proche selon les règles de réservation de votre professeur.
+
+**Je ne peux pas reprogrammer.** Les changements dépendent de l'horaire du cours et du nombre de modifications qu'il vous reste pour votre forfait. Choisissez Annuler si l'application le propose, ou contactez votre professeur.
+
+## Questions
+
+**Que se passe-t-il si j'annule moins de 24 heures avant un cours ?** L'application vous indique le résultat avant de finaliser l'annulation. Les règles de modification des cours de votre professeur s'appliquent.
+
+**Pourquoi un créneau disponible a-t-il disparu ?** Une autre réservation, une modification du calendrier ou une règle de disponibilités mise à jour l'a peut-être rendu indisponible.
+`,
     },
   },
   {
     slug: "live-lessons",
     audience: "student",
-    title: { en: `Join a live lesson`, es: `Únete a una lección en vivo` },
+    title: {
+      en: `Join a live lesson`,
+      es: `Únete a una lección en vivo`,
+      fr: `Rejoindre un cours en direct`,
+    },
     summary: {
       en: `Join your scheduled lesson and use the camera, microphone, and other call controls.`,
       es: `Únete a tu lección programada y usa la cámara, el micrófono y otros controles de llamada.`,
+      fr: `Rejoignez votre cours prévu et utilisez la caméra, le micro et les autres commandes de l'appel.`,
     },
     body: {
       en: `## Purpose
@@ -1804,7 +2655,7 @@ Suggested video: **“Join Your First Live Lesson (1 minute)”**
 ## Pasos
 
 1. Abre la clase próxima en **Mis clases**.
-2. Selecciona **Unirse a la llamada** cuando aparezca.
+2. Selecciona **Entrar a la llamada** cuando aparezca.
 3. Revisa tu cámara y micrófono.
 4. Usa los controles para silenciarte, activar o desactivar tu cámara, compartir pantalla o avisar a tu profesor si lo necesitas.
 5. Minimiza la llamada si necesitas abrir otra parte de SpiralClass; sigue activa.
@@ -1830,15 +2681,55 @@ Video sugerido: **"Únete a tu primera lección en vivo (1 minuto)"**
 
 **¿Puedo dejar la llamada abierta mientras reviso un mensaje?** Sí. Minimiza la llamada en vez de salir.
 `,
+      fr: `## Objectif
+
+Rejoignez votre cours prévu et utilisez la caméra, le micro et les autres commandes de l'appel.
+
+## Avant de commencer
+
+- Ouvrez un cours à venir peu avant l'heure de début.
+- Autorisez l'accès à la caméra et au micro quand on vous le demande.
+- Utilisez une connexion internet fiable et, si possible, un casque ou des écouteurs.
+
+## Étapes
+
+1. Ouvrez le cours à venir dans **Mes cours**.
+2. Sélectionnez **Rejoindre l'appel** quand le bouton apparaît.
+3. Vérifiez votre caméra et votre micro.
+4. Utilisez les commandes pour couper le micro, activer ou désactiver la caméra, partager votre écran ou envoyer un rappel à votre professeur si besoin.
+5. Réduisez l'appel si vous devez ouvrir une autre partie de SpiralClass : il reste actif.
+6. Quittez l'appel à la fin du cours.
+
+
+
+## Conseils
+
+- Une seule personne à la fois peut partager son écran.
+- Sur mobile, le partage d'écran est disponible sur Android. Il ne l'est pas sur iPhone ni sur iPad.
+- Votre professeur peut mettre des supports de cours à disposition depuis l'appel ou la page du cours.
+
+Vidéo suggérée : **« Rejoindre votre premier cours en direct (1 minute) »**
+
+## Dépannage
+
+**Je n'arrive pas à rejoindre l'appel.** Vérifiez votre connexion, actualisez la page du cours et autorisez l'accès à la caméra et au micro.
+
+**Je n'entends personne.** Vérifiez le volume de votre appareil, votre casque et le bouton du micro.
+
+## Questions
+
+**Puis-je laisser l'appel ouvert pendant que je consulte un message ?** Oui. Réduisez l'appel au lieu de le quitter.
+`,
     },
   },
   {
     slug: "materials-and-homework",
     audience: "student",
-    title: { en: `Materials and homework`, es: `Materiales y tareas` },
+    title: { en: `Materials and homework`, es: `Materiales y tareas`, fr: `Supports et devoirs` },
     summary: {
       en: `Find learning materials for your level and complete homework assigned to a class.`,
       es: `Encuentra materiales de aprendizaje para tu nivel y completa las tareas asignadas a una clase.`,
+      fr: `Trouvez les supports adaptés à votre niveau et faites les devoirs liés à un cours.`,
     },
     body: {
       en: `## Purpose
@@ -1937,15 +2828,64 @@ Puedes ver materiales seleccionados para tu nivel, materiales asignados directam
 
 **¿Puedo ver el contenido de clase después de la lección?** Sí. El contenido de clase guardado sigue disponible desde la página de la clase.
 `,
+      fr: `## Objectif
+
+Trouvez les supports adaptés à votre niveau et faites les devoirs liés à un cours.
+
+## Avant de commencer
+
+- Connectez-vous à votre compte élève.
+- Les devoirs se rédigent et se remettent dans votre navigateur, sur la page du devoir.
+
+## Étapes
+
+### Consulter les supports
+
+1. Ouvrez **Supports** ou la page de détail d'un cours.
+2. Choisissez un support à lire, ouvrir, télécharger ou écouter, selon ce qui est disponible.
+3. Ouvrez le contenu d'un cours depuis la séance concernée, quand vous en avez besoin.
+
+Vous pouvez voir des supports choisis pour votre niveau, des supports qui vous sont attribués directement et des supports joints à un cours.
+
+### Remettre un devoir
+
+1. Ouvrez le cours qui affiche la carte du devoir.
+2. Ouvrez le devoir.
+3. Rédigez votre réponse. Elle est enregistrée comme brouillon pendant que vous travaillez.
+4. Ajoutez des fichiers si besoin. Chaque fichier peut faire jusqu'à 25 Mo.
+5. Sélectionnez **Remettre**.
+6. Revenez plus tard sur le devoir pour lire le retour de votre professeur.
+
+
+
+## Conseils
+
+- Votre brouillon est enregistré automatiquement, même si votre connexion est coupée.
+- Remettez votre devoir avant la date limite quand c'est possible.
+- Ne le remettez que lorsque vous êtes prêt : votre travail passe ensuite en lecture seule, sauf si votre professeur le rouvre.
+
+## Dépannage
+
+**Je n'arrive pas à remettre mon devoir.** La date limite est peut-être passée sans que les remises tardives soient autorisées, ou le devoir est peut-être déjà définitif.
+
+**Je ne vois pas le retour sur mon devoir.** Votre professeur n'a peut-être pas encore corrigé votre travail.
+
+## Questions
+
+**Puis-je remettre mon devoir une nouvelle fois ?** Oui, quand votre professeur demande une nouvelle remise ou refuse la tentative précédente.
+
+**Puis-je consulter le contenu du cours après la séance ?** Oui. Le contenu enregistré reste disponible depuis la page du cours.
+`,
     },
   },
   {
     slug: "progress",
     audience: "student",
-    title: { en: `View your progress`, es: `Consulta tu progreso` },
+    title: { en: `View your progress`, es: `Consulta tu progreso`, fr: `Consulter vos progrès` },
     summary: {
       en: `See the progress your teacher has chosen to share and review vocabulary when it is available.`,
       es: `Consulta el progreso que tu profesor ha decidido compartir y repasa vocabulario cuando esté disponible.`,
+      fr: `Voyez les progrès que votre professeur a choisi de partager et révisez le vocabulaire quand il est disponible.`,
     },
     body: {
       en: `## Purpose
@@ -1997,7 +2937,7 @@ Consulta el progreso que tu profesor ha decidido compartir y repasa vocabulario 
 1. Abre **Tu progreso** para el profesor correspondiente.
 2. Revisa las áreas marcadas como en mejora y las áreas que vale la pena practicar.
 3. Si hay tarjetas de vocabulario disponibles, abre una tarjeta a la vez.
-4. Voltea la tarjeta para ver su contexto y luego elige **De nuevo**, **Difícil**, **Bien** o **Fácil** para continuar.
+4. Voltea la tarjeta para ver su contexto y luego elige **Otra vez**, **Difícil**, **Bien** o **Fácil** para continuar.
 
 
 
@@ -2018,15 +2958,55 @@ Consulta el progreso que tu profesor ha decidido compartir y repasa vocabulario 
 
 **¿Puedo cambiar los hallazgos de progreso?** No. Pregúntale a tu profesor si tienes dudas sobre ellos.
 `,
+      fr: `## Objectif
+
+Voyez les progrès que votre professeur a choisi de partager et révisez le vocabulaire quand il est disponible.
+
+## Avant de commencer
+
+- Vous devez être connecté en tant qu'élève.
+- Votre professeur doit activer le partage des progrès pour vous.
+
+## Étapes
+
+1. Ouvrez **Vos progrès** pour le professeur concerné.
+2. Passez en revue les points qui progressent et ceux qui méritent d'être travaillés.
+3. Si des cartes de vocabulaire sont disponibles, ouvrez-les une par une.
+4. Retournez la carte pour voir son contexte, puis choisissez **Encore**, **Difficile**, **Bien** ou **Facile** pour continuer.
+
+
+
+## Conseils
+
+- Les progrès sont affichés séparément pour chaque professeur.
+- Révisez le vocabulaire régulièrement. Choisissez la réponse qui reflète le mieux à quel point vous vous en êtes souvenu.
+
+## Dépannage
+
+**Je ne vois pas Vos progrès.** Votre professeur n'a peut-être pas encore activé le partage, ou aucun progrès n'est encore prêt à être affiché.
+
+**Je ne vois pas de cartes de vocabulaire.** La révision du vocabulaire n'apparaît que lorsqu'il y a du vocabulaire pertinent.
+
+## Questions
+
+**Puis-je voir les notes de cours détaillées de mon professeur ?** Non. Votre vue des progrès est un résumé pensé pour les élèves.
+
+**Puis-je modifier les observations sur mes progrès ?** Non. Si vous avez une question à leur sujet, demandez à votre professeur.
+`,
     },
   },
   {
     slug: "messages-and-notifications",
     audience: "student",
-    title: { en: `Messages and notifications`, es: `Mensajes y notificaciones` },
+    title: {
+      en: `Messages and notifications`,
+      es: `Mensajes y notificaciones`,
+      fr: `Messages et notifications`,
+    },
     summary: {
       en: `Message your teacher and control how SpiralClass notifies you about lessons and learning.`,
       es: `Envía mensajes a tu profesor y controla cómo te notifica SpiralClass sobre lecciones y aprendizaje.`,
+      fr: `Écrivez à votre professeur et choisissez comment SpiralClass vous informe de vos cours et de votre apprentissage.`,
     },
     body: {
       en: `## Purpose
@@ -2121,15 +3101,66 @@ Puedes editar un mensaje de solo texto dentro de los primeros 15 minutos. Puedes
 
 **¿Por qué recibí un correo además de una notificación?** Los avisos importantes pueden usar todos los medios de contacto disponibles. Los mensajes no leídos también pueden seguirse por correo.
 `,
+      fr: `## Objectif
+
+Écrivez à votre professeur et choisissez comment SpiralClass vous informe de vos cours et de votre apprentissage.
+
+## Avant de commencer
+
+- Connectez-vous à votre compte élève.
+- Votre professeur doit être une relation active dans SpiralClass.
+
+## Étapes
+
+### Envoyer un message
+
+1. Ouvrez **Messages**.
+2. Ouvrez votre conversation avec votre professeur.
+3. Écrivez un message ou joignez une note vocale, une vidéo, une image ou un fichier.
+4. Envoyez.
+
+Vous pouvez modifier un message texte uniquement dans les 15 minutes. Vous pouvez supprimer un message pour tout le monde pendant environ deux jours et demi.
+
+### Modifier les paramètres de notification
+
+1. Ouvrez **Compte → Notifications**.
+2. Activez ou désactivez des catégories, ou l'envoi par e-mail ou par notification push.
+3. Enregistrez vos modifications.
+
+
+
+## Conseils
+
+- Ouvrez une conversation pour marquer ses messages comme lus.
+- Si les notifications push ne sont pas disponibles, vous pouvez recevoir un e-mail à la place.
+- Les avis concernant les paiements, la connexion et certains cours importants ne peuvent pas être désactivés.
+
+## Dépannage
+
+**Je ne reçois pas de notifications.** Vérifiez les interrupteurs de notification dans SpiralClass et l'autorisation des notifications sur votre téléphone.
+
+**Je n'arrive pas à modifier un message.** Seuls les messages texte peuvent être modifiés, et uniquement pendant les 15 minutes prévues.
+
+## Questions
+
+**Puis-je récupérer un message supprimé ?** Non. La suppression d'un message est définitive.
+
+**Pourquoi ai-je reçu un e-mail en plus d'une notification ?** Les avis importants peuvent passer par tous les moyens de contact disponibles. Les messages non lus peuvent aussi être suivis d'un e-mail.
+`,
     },
   },
   {
     slug: "faq",
     audience: "student",
-    title: { en: `Student frequently asked questions`, es: `Preguntas frecuentes para alumnos` },
+    title: {
+      en: `Student frequently asked questions`,
+      es: `Preguntas frecuentes para alumnos`,
+      fr: `Questions fréquentes des élèves`,
+    },
     summary: {
       en: `Find quick answers to common questions about using SpiralClass as a student.`,
       es: `Encuentra respuestas rápidas a preguntas comunes sobre cómo usar SpiralClass como alumno.`,
+      fr: `Trouvez des réponses rapides aux questions courantes sur l'utilisation de SpiralClass en tant qu'élève.`,
     },
     body: {
       en: `## Purpose
@@ -2235,6 +3266,58 @@ Consulta la guía correspondiente en el [Centro de ayuda para alumnos](index.es.
 ## Solución de problemas
 
 Si algo en pantalla difiere de estas respuestas, no repitas un pago o una reserva. Toma una captura de pantalla y contacta a tu profesor o a soporte.
+`,
+      fr: `## Objectif
+
+Trouvez des réponses rapides aux questions courantes sur l'utilisation de SpiralClass en tant qu'élève.
+
+## Avant de commencer
+
+- Connectez-vous avec l'adresse e-mail liée à votre professeur ou à votre achat.
+- Ouvrez le guide indiqué quand une réponse demande plus de détails.
+
+## Questions
+
+### Connexion et compte
+
+**Ai-je besoin d'un mot de passe ?** Non. Connectez-vous avec un code reçu par e-mail ou, quand c'est possible, avec Google.
+
+**Pourquoi mon invitation ne fonctionne-t-elle pas ?** Connectez-vous avec l'adresse e-mail exacte à laquelle votre professeur vous a invité.
+
+### Forfaits et réservations
+
+**Pourquoi ne puis-je pas réserver de cours ?** Il vous faut peut-être un forfait actif, un créneau libre ou un horaire qui respecte le délai de réservation de votre professeur.
+
+**Que se passe-t-il quand un forfait expire ?** Les cours non utilisés de ce forfait ne peuvent plus être réservés.
+
+**Puis-je annuler ou déplacer un cours ?** Oui, depuis la page du cours, si le cours et les modifications qu'il reste à votre forfait le permettent.
+
+### Apprentissage
+
+**Où sont mes supports ?** Ouvrez **Supports** ou la page du cours concerné.
+
+**Puis-je remettre mes devoirs dans un navigateur ?** Oui. Ouvrez le cours, ouvrez le devoir, rédigez votre réponse et sélectionnez **Remettre**.
+
+**Pourquoi ne vois-je pas de bilans de progrès ?** C'est votre professeur qui décide de partager ou non sa vue des progrès avec vous.
+
+### Cours en direct et messages
+
+**Que faire si je n'arrive pas à rejoindre un appel ?** Vérifiez votre connexion et les autorisations de votre appareil, puis actualisez la page du cours.
+
+**Puis-je modifier ou supprimer un message ?** Les messages texte peuvent être modifiés dans les 15 minutes ; les messages peuvent être supprimés pour tout le monde pendant environ deux jours et demi.
+
+## Besoin d'aide supplémentaire ?
+
+Consultez le guide concerné dans le [Centre d'aide pour les élèves](index.fr.md), puis contactez votre professeur ou votre canal d'assistance SpiralClass habituel si le problème persiste.
+
+## Conseils
+
+- Vérifiez la date, l'heure et le fuseau horaire du cours avant de confirmer une réservation.
+- Gardez à jour l'adresse e-mail de votre compte pour recevoir vos codes de connexion.
+
+## Dépannage
+
+Si ce que vous voyez à l'écran diffère de ces réponses, ne refaites pas un paiement ni une réservation. Faites une capture d'écran et contactez votre professeur ou l'assistance.
 `,
     },
   },

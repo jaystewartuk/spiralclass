@@ -14,7 +14,7 @@ import { createT } from "@spiralclass/shared";
 vi.mock("@/app/actions/leads", () => ({ setLeadStatus: vi.fn() }));
 vi.mock("sonner", () => ({ toast: { success: vi.fn() } }));
 
-const { LocaleProvider } = await import("@/components/locale-provider");
+const { LocaleProvider } = await import("@/components/locale-catalog");
 const { LeadGroup, LeadRow } = await import("@/app/(app)/dashboard/leads/lead-list");
 type LeadListModule = typeof import("@/app/(app)/dashboard/leads/lead-list");
 type LeadItem = Parameters<LeadListModule["LeadRow"]>[0]["lead"];

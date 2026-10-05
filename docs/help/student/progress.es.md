@@ -14,7 +14,7 @@ Consulta el progreso que tu profesor ha decidido compartir y repasa vocabulario 
 1. Abre **Tu progreso** para el profesor correspondiente.
 2. Revisa las áreas marcadas como en mejora y las áreas que vale la pena practicar.
 3. Si hay tarjetas de vocabulario disponibles, abre una tarjeta a la vez.
-4. Voltea la tarjeta para ver su contexto y luego elige **De nuevo**, **Difícil**, **Bien** o **Fácil** para continuar.
+4. Voltea la tarjeta para ver su contexto y luego elige **Otra vez**, **Difícil**, **Bien** o **Fácil** para continuar.
 
 [Captura de pantalla: vista de progreso del alumno y tarjeta de vocabulario]
 
