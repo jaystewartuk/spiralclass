@@ -27,7 +27,7 @@ Update your details, change your sign-in email, control notifications, request y
 ### Request data or account deletion
 
 1. Open the data or account section of settings.
-2. Choose **Export my data** to download your information.
+2. Choose **Download my data** to download your information.
 3. Choose **Delete account** and confirm if you want to request deletion.
 4. Return to this screen to cancel a pending deletion request during the grace period.
 

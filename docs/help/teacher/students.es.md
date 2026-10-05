@@ -20,7 +20,7 @@ Agrega alumnos a tu lista, invítalos a usar SpiralClass, guarda notas privadas 
 ### Invitar a un alumno
 
 1. Abre el perfil del alumno.
-2. Elige **Invitar** o **Reenviar invitación**.
+2. Elige **Invitar** o **Reenviar**.
 3. Pide al alumno que abra el correo e inicie sesión con ese mismo correo.
 
 Los enlaces de invitación son válidos por 30 días.

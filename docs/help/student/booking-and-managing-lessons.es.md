@@ -26,7 +26,7 @@ Elige un horario de lección y administra los cambios a las lecciones ya reserva
 
 ### Cambiar una lección
 
-1. Abre la lección y elige **Reprogramar**.
+1. Abre la lección y elige **Reagendar**.
 2. Elige un nuevo horario disponible.
 3. Confirma el cambio.
 

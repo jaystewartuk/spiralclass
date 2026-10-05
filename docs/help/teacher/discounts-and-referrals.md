@@ -13,8 +13,8 @@ Create a discount code for prospective students or run a referral programme that
 
 ### Create a discount code
 
-1. Open **Discounts**.
-2. Choose **Create discount code**.
+1. Open **Discount codes**.
+2. Choose **Create code**.
 3. Set the code, percentage or fixed discount, and any expiry or redemption limits.
 4. Save and share the code yourself.
 

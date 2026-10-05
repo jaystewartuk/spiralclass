@@ -13,7 +13,7 @@
 ## Pasos
 
 1. Abre la clase próxima desde tu panel o tu lista de clases.
-2. Selecciona **Unirse a la llamada** cuando aparezca.
+2. Selecciona **Entrar a la llamada** cuando aparezca.
 3. Revisa tu cámara y micrófono.
 4. Usa los controles de llamada para silenciarte, activar o desactivar tu cámara, compartir pantalla o avisar al alumno.
 5. Minimiza la llamada si necesitas ver otra parte de SpiralClass; la llamada sigue activa.

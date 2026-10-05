@@ -13,7 +13,7 @@ Crea ofertas de clases, registra un paquete ya existente y administra pagos y re
 
 ### Crear o editar una oferta
 
-1. Abre **Configuración → Plantillas**.
+1. Abre **Configuración → Paquetes**.
 2. Agrega o edita una oferta con un nombre, número de clases u opción de clase individual, duración, precio y periodo de vigencia.
 3. Guarda todos los cambios.
 
