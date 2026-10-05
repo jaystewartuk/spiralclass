@@ -1,7 +1,7 @@
 "use client";
 
 import { useActionState, useState, startTransition } from "react";
-import { LOCALES } from "@spiralclass/shared";
+import { LAUNCHED_LOCALES } from "@spiralclass/shared";
 import { FormStatus } from "@/components/ui/form-status";
 import { Label } from "@/components/ui/label";
 import {
@@ -51,7 +51,7 @@ export function BookingPageLocaleForm({ initialLocale }: { initialLocale: string
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            {LOCALES.map((l) => (
+            {LAUNCHED_LOCALES.map((l) => (
               // Each option in its OWN language: she is picking a language for
               // people who are not her, so an endonym is the one label that
               // reads correctly whatever her own UI is set to.

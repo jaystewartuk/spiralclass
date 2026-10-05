@@ -5,7 +5,7 @@
 // testimonials are teacher-curated quotes without ratings, and emitting
 // fabricated review markup violates Google's review-snippet policy.
 
-import { LOCALES, languageName } from "@spiralclass/shared";
+import { LAUNCHED_LOCALES, languageName } from "@spiralclass/shared";
 
 // Absolute base URL for structured data. JSON-LD can't lean on Next's
 // metadataBase the way <head> metadata does, so URLs are built explicitly.
@@ -45,7 +45,7 @@ export function webSiteJsonLd(baseUrl: string) {
     "@type": "WebSite",
     name: "SpiralClass",
     url: baseUrl,
-    inLanguage: LOCALES.map((l) => l.tag),
+    inLanguage: LAUNCHED_LOCALES.map((l) => l.tag),
   };
 }
 

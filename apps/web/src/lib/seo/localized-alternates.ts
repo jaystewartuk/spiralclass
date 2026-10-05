@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import {
   DEFAULT_LOCALE,
-  LOCALES,
+  LAUNCHED_LOCALES,
   localizedPath,
   termsLanguages,
   type AppLocale,
@@ -25,7 +25,7 @@ const DOCUMENT_LANGUAGES: Readonly<Record<string, readonly AppLocale[]>> = {
 
 /** The languages a public page's content exists in. */
 export function pageLanguages(path: string): readonly AppLocale[] {
-  return DOCUMENT_LANGUAGES[path] ?? LOCALES.map((l) => l.tag);
+  return DOCUMENT_LANGUAGES[path] ?? LAUNCHED_LOCALES.map((l) => l.tag as AppLocale);
 }
 
 /**
