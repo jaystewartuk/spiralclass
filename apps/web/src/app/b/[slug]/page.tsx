@@ -509,6 +509,7 @@ export default async function BookingLandingPage({
       transferReady,
       isOwner,
       isBot,
+      locale: funnelLocale,
       ...attributionProperties(attribution),
     },
   });

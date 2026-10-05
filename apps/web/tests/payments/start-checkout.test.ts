@@ -682,4 +682,14 @@ describe("startCheckout — Stripe is told the checkout's language", () => {
     expect(ensureCheckoutCustomer).toHaveBeenCalledTimes(1);
     expect(ensureCheckoutCustomer.mock.calls[0][0]).toMatchObject({ preferredLocale: "fr" });
   });
+
+  it("records the language the purchase was made in on checkout_started", async () => {
+    await startCheckout(args({ locale: "fr" }));
+    expect(trackServerEvent).toHaveBeenCalledWith(
+      expect.objectContaining({
+        name: "checkout_started",
+        properties: expect.objectContaining({ locale: "fr" }),
+      }),
+    );
+  });
 });

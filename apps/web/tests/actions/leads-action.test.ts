@@ -291,6 +291,16 @@ describe("captureLead", () => {
     );
   });
 
+  it("records the language of the page the enquiry was written on", async () => {
+    await captureLead(undefined, leadForm({ ...validLead, pageLocale: "fr" }));
+    expect(trackServerEvent).toHaveBeenCalledWith(
+      expect.objectContaining({
+        name: "lead_captured",
+        properties: expect.objectContaining({ locale: "fr" }),
+      }),
+    );
+  });
+
   it("resolves the phone with the picked country instead of the +52 default", async () => {
     const res = await captureLead(
       undefined,
