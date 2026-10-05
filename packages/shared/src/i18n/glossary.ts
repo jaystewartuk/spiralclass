@@ -9,7 +9,16 @@ import type { AppLocale } from "./locales";
 // one. Its terms are the catalog's own: a word here that the catalog does not
 // use is a glossary describing some other product.
 
-export type Concept = "teacher" | "student" | "class" | "package" | "booking" | "availability";
+export type Concept =
+  | "teacher"
+  | "student"
+  | "class"
+  | "package"
+  | "booking"
+  | "availability"
+  | "materials"
+  | "settings"
+  | "plan";
 
 export type Glossary = {
   /** How the reader is addressed, and why. */
@@ -30,6 +39,9 @@ export const GLOSSARY: Record<AppLocale, Glossary> = {
       package: "package",
       booking: "booking",
       availability: "availability",
+      materials: "materials",
+      settings: "Settings",
+      plan: "plan",
     },
     forbidden: [],
   },
@@ -44,6 +56,9 @@ export const GLOSSARY: Record<AppLocale, Glossary> = {
       package: "paquete",
       booking: "reserva",
       availability: "disponibilidad",
+      materials: "materiales",
+      settings: "Configuración",
+      plan: "plan",
     },
     forbidden: [
       {
@@ -61,11 +76,25 @@ export const GLOSSARY: Record<AppLocale, Glossary> = {
       package: "forfait",
       booking: "réservation",
       availability: "disponibilités",
+      materials: "supports",
+      settings: "Paramètres",
+      // Not "forfait", which is a class package.
+      plan: "formule",
     },
     forbidden: [
       {
         pattern: /\bprofes?\b/i,
         why: "Spanish. It reached the French catalog 25 times before this guard.",
+      },
+      {
+        pattern: /(?<!\p{L})matériels?(?!\p{L})/iu,
+        why:
+          "Equipment, in French. Teaching materials are “supports”; the catalog " +
+          "used both, plus “Ressources”, for one thing.",
+      },
+      {
+        pattern: /forfaits? (Gratuit|Pro|SpiralClass|mensuel|annuel)/,
+        why: "A subscription plan is a “formule”; a “forfait” is a class package.",
       },
       {
         pattern: /(?<!\p{L})(tu|toi|tes)(?!\p{L})/u,
