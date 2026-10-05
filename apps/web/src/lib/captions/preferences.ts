@@ -22,6 +22,16 @@ export type CaptionPreferences = {
   // switch: a student who wants to just listen for a while can put the
   // subtitles away without asking her teacher to turn the feature off.
   visible: boolean;
+  // Whether the subtitles show while a material or a screen share fills the
+  // stage. A second switch rather than a reuse of `visible`, because the two
+  // answers differ for the same person in the same lesson: a teacher asked
+  // for subtitles over the worksheet, and then said she sometimes wants the
+  // worksheet alone. Putting them away there must not also take them off the
+  // student's face when the worksheet closes, and must not need the room's
+  // switch — which would stop her student's subtitles and the transcript too.
+  //
+  // `visible` still wins: hidden everywhere is hidden here.
+  visibleWithContent: boolean;
   // "translation" is the default because the reader who has never seen this
   // product before has to be able to read the subtitles without first being
   // taught how to read them. Two languages stacked is the richer view for a
@@ -47,9 +57,38 @@ export type CaptionPreferences = {
 
 export const DEFAULT_CAPTION_PREFERENCES: CaptionPreferences = {
   visible: true,
+  visibleWithContent: true,
   display: "translation",
   size: "m",
 };
+
+// Are the subtitles showing on this screen right now, given what is on the
+// stage? The one answer the band, the control-row button and the keyboard
+// shortcut all read, so the button can never say "Hide" while there is
+// nothing showing to hide.
+export function captionsShownHere(prefs: CaptionPreferences, contentOwnsStage: boolean): boolean {
+  return prefs.visible && (!contentOwnsStage || prefs.visibleWithContent);
+}
+
+// What "hide" and "show" mean from where the reader is standing.
+//
+// HIDE is scoped to what she is looking at: over a worksheet it puts the
+// subtitles away for worksheets and leaves them alone over the camera; over
+// the camera it is the everywhere switch it always was.
+//
+// SHOW is not scoped. Someone who asks to see subtitles wants to see them
+// now, so it clears whichever of the two switches is in the way — including
+// the everywhere one, which is otherwise a state a teacher could get into
+// and not out of, since her control-row button is the room's switch.
+export function toggleCaptionsHerePatch(
+  prefs: CaptionPreferences,
+  contentOwnsStage: boolean,
+): Partial<CaptionPreferences> {
+  if (captionsShownHere(prefs, contentOwnsStage)) {
+    return contentOwnsStage ? { visibleWithContent: false } : { visible: false };
+  }
+  return contentOwnsStage ? { visible: true, visibleWithContent: true } : { visible: true };
+}
 
 // The localStorage key. Exported because the React wiring in
 // use-caption-preferences.ts is the only writer and lives in another file —
@@ -77,6 +116,10 @@ export function parseCaptionPreferences(raw: string | null): CaptionPreferences 
   const obj = parsed as Record<string, unknown>;
   return {
     visible: typeof obj.visible === "boolean" ? obj.visible : DEFAULT_CAPTION_PREFERENCES.visible,
+    visibleWithContent:
+      typeof obj.visibleWithContent === "boolean"
+        ? obj.visibleWithContent
+        : DEFAULT_CAPTION_PREFERENCES.visibleWithContent,
     display: DISPLAYS.includes(obj.display as CaptionDisplay)
       ? (obj.display as CaptionDisplay)
       : DEFAULT_CAPTION_PREFERENCES.display,

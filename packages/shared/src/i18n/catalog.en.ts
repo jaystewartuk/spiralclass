@@ -751,7 +751,8 @@ export const en = {
   // switch above — see caption-band.tsx for why that distinction is load-bearing.
   "call.captionsHideMine": "Hide subtitles",
   "call.captionsShowMine": "Show subtitles",
-  "call.captionsHiddenHint": "Subtitles are on — tap Show subtitles to see them.",
+  "call.captionsHideWithContent": "Hide subtitles while materials are open",
+  "call.captionsHiddenHint": "Subtitles are on but hidden on your screen — tap here to show them.",
   "call.captionsSettings": "Subtitle settings",
   "call.captionsRegionLabel": "Live subtitles",
   "call.captionsListening": "Listening…",

@@ -360,6 +360,56 @@ describe("docked under a material", () => {
     expect(large.textContent).toContain("line 3");
   });
 
+  it("puts the subtitles away for materials only, from the strip's own ✕", () => {
+    // The teacher's follow-up: sometimes the worksheet alone. The ✕ here must
+    // not be the everywhere switch — that would take the subtitles off the
+    // student's face too once the worksheet closes.
+    const onPrefsChange = vi.fn();
+    const html = render({ docked: true, onPrefsChange });
+    const hide = html.querySelector('[aria-label="call.captionsHideWithContent"]') as HTMLElement;
+    expect(hide).not.toBeNull();
+    expect(html.querySelector('[aria-label="call.captionsHideMine"]')).toBeNull();
+    act(() => hide.click());
+    expect(onPrefsChange).toHaveBeenCalledWith({ visibleWithContent: false });
+
+    // Over the camera the same ✕ is still the everywhere switch.
+    const overCamera = vi.fn();
+    const band = render({ onPrefsChange: overCamera });
+    act(() => (band.querySelector('[aria-label="call.captionsHideMine"]') as HTMLElement).click());
+    expect(overCamera).toHaveBeenCalledWith({ visible: false });
+  });
+
+  it("leaves a way back, and the transcript, where the strip was", () => {
+    const onPrefsChange = vi.fn();
+    const onOpenTranscript = vi.fn();
+    const html = render({
+      docked: true,
+      prefs: { ...BOTH_LANGUAGES, visibleWithContent: false },
+      onPrefsChange,
+      onOpenTranscript,
+    });
+    // No subtitles and no reserved strip: the material has its height back.
+    expect(html.querySelector('[role="log"]')).toBeNull();
+    expect(html.textContent).not.toContain(bilingual.text);
+    expect((html.firstElementChild as HTMLElement).dataset.docked).toBe("collapsed");
+
+    const show = [...html.querySelectorAll("button")].find((b) =>
+      b.textContent?.includes("call.captionsShowMine"),
+    ) as HTMLElement;
+    act(() => show.click());
+    expect(onPrefsChange).toHaveBeenCalledWith({ visibleWithContent: true });
+
+    act(() =>
+      (html.querySelector('[aria-label="call.captionsTranscript"]') as HTMLElement).click(),
+    );
+    expect(onOpenTranscript).toHaveBeenCalled();
+  });
+
+  it("does not put them away over the camera because of the materials switch", () => {
+    const html = render({ prefs: { ...BOTH_LANGUAGES, visibleWithContent: false } });
+    expect(html.querySelector('[role="log"]')).not.toBeNull();
+  });
+
   it("opens its settings upward, over the material, not down into the controls", () => {
     const html = render({ docked: true });
     const settings = html.querySelector('[aria-label="call.captionsSettings"]') as HTMLElement;
