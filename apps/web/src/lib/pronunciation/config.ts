@@ -47,8 +47,12 @@ function primarySubtag(language: string): string {
 // ("es"). Pass a locale through untouched; map a bare subtag to a default.
 export function toAzureLocale(language: string): string {
   if (language.includes("-")) return language;
-  const primary = primarySubtag(language);
-  if (primary === "es") return "es-ES";
-  if (primary === "en") return "en-US";
-  return language;
+  return AZURE_DEFAULT_LOCALE[primarySubtag(language)] ?? language;
 }
+
+// The region Azure scores a bare subtag against. Data, so a language is an
+// entry rather than another branch.
+const AZURE_DEFAULT_LOCALE: Readonly<Record<string, string>> = {
+  es: "es-ES",
+  en: "en-US",
+};

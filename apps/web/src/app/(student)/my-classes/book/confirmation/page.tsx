@@ -17,7 +17,6 @@ import { getPreferredLocale, getT } from "@/lib/i18n";
 import { studentIdentityIds } from "@/lib/students/identity";
 import { buildBookingCalendarLinks } from "@/lib/calendar/add-to-calendar";
 import { AddToCalendar } from "@/components/calendar/add-to-calendar";
-import { usesEnglishCopy } from "@spiralclass/shared";
 
 export default async function ConfirmacionPage({
   searchParams,
@@ -26,7 +25,6 @@ export default async function ConfirmacionPage({
 }) {
   const student = await requireStudent();
   const locale = await getPreferredLocale();
-  const en = usesEnglishCopy(locale);
   const t = await getT();
   const termsHref = cancellationPolicyPath(locale);
   const { bookingId } = await searchParams;

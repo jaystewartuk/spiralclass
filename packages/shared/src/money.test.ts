@@ -79,6 +79,18 @@ describe("formatPriceForBuyer", () => {
     expect(formatPriceForBuyer(150_000, "MXN", "en", "MXN")).toBe("MX$1,500.00");
   });
 
+  // The choice was "every language but English gets the bare glyph", so a
+  // French funnel for a Mexican teacher printed "1 500,00 $" — any dollar, to a
+  // French reader — while French has a symbol of its own for the peso. Each
+  // language now chooses on its registry row.
+  it("keeps French's own disambiguated symbol for the seller's own currency", () => {
+    const fr = formatPriceForBuyer(150_000, "MXN", "fr", "MXN");
+    expect(fr).toContain("$MX");
+    expect(fr).toBe(
+      new Intl.NumberFormat("fr", { style: "currency", currency: "MXN" }).format(1_500),
+    );
+  });
+
   it("falls back to the in-product rendering rather than throwing on a bad locale", () => {
     // A price label must never be the thing that breaks the page, and the
     // LOCALE is the argument that can arrive malformed. "en_US" is the

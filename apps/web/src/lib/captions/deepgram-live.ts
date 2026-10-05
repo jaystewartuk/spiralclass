@@ -121,6 +121,13 @@ const LANGUAGES = new Set([
   "zh",
 ]);
 
+// A language Deepgram streams under one tag for a group of regions: every
+// Spanish but Spain's is Latin American ("es-419"). Data, not a branch on one
+// language, so the next one is an entry here.
+const REGIONAL_UMBRELLA: Readonly<Record<string, { tag: string; except: string }>> = {
+  es: { tag: "es-419", except: "ES" },
+};
+
 // The Deepgram `language` for a speaker's recognition locale (the same
 // recognitionLocale a browser recogniser would use), or null when Nova-3
 // cannot stream it.
@@ -131,7 +138,8 @@ export function deepgramLiveLanguage(locale: string): string | null {
   if (region) {
     const tag = `${lang}-${region}`;
     if (REGIONAL.has(tag)) return tag;
-    if (lang === "es" && region !== "ES") return "es-419";
+    const umbrella = REGIONAL_UMBRELLA[lang];
+    if (umbrella && region !== umbrella.except) return umbrella.tag;
   }
   return LANGUAGES.has(lang) ? lang : null;
 }

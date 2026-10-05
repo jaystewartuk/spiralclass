@@ -1,4 +1,4 @@
-import { DEFAULT_LOCALE, intlLocale, matchAcceptLanguage, usesEnglishCopy } from "./i18n/locales";
+import { DEFAULT_LOCALE, intlLocale, matchAcceptLanguage, ownCurrencySymbol } from "./i18n/locales";
 // Shared money formatting. Amounts are integer minor units (centavos for MXN);
 // each amount also carries a currency code recording what it's denominated in.
 //
@@ -218,16 +218,17 @@ export function formatPriceForBuyer(
   try {
     const code = currency.toUpperCase();
     const major = toMajorUnits(minorUnits, code);
-    // The seller's own currency reads by its plain symbol to a reader of her
-    // funnel language: a Spanish reader buying pesos from a peso-priced
-    // teacher cannot misread "$". English is the cross-border audience, so it
-    // keeps the disambiguated symbol ("MX$"), and any currency other than the
-    // seller's own shows its code to everyone.
+    // The seller's own currency reads by its plain glyph where the funnel's
+    // language says its readers are her own market — a Spanish reader buying
+    // pesos from a peso-priced teacher cannot misread "$" — and keeps the
+    // disambiguated symbol ("MX$", "$MX") where they are cross-border. Each
+    // language chooses on its registry row. Any currency other than the
+    // seller's own shows its symbol or code to everyone.
     const own = sellerCurrency != null && sellerCurrency.toUpperCase() === code;
     return new Intl.NumberFormat(intlLocale(locale), {
       style: "currency",
       currency: code,
-      currencyDisplay: own && !usesEnglishCopy(locale) ? "narrowSymbol" : "symbol",
+      currencyDisplay: own && ownCurrencySymbol(locale) === "narrow" ? "narrowSymbol" : "symbol",
     }).format(major);
   } catch {
     // Falls back to the in-product rendering: ambiguous, but correct, and it

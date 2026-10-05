@@ -32,6 +32,14 @@ describe("content registry", () => {
     expect(localize(doc!.title, "es")).toBe(doc!.title["es"]);
   });
 
+  // It asked "is this Spanish?", so a French guide, once written, would never
+  // have been shown (#178 step A7 writes them).
+  it("localize() serves any language a text has been written in", () => {
+    expect(localize({ en: "Hello", fr: "Bonjour" }, "fr")).toBe("Bonjour");
+    expect(localize({ en: "Hello", fr: "" }, "fr")).toBe("Hello");
+    expect(localize({ en: "Hello" }, "de")).toBe("Hello");
+  });
+
   it("has no duplicate (audience, slug) pairs", () => {
     const keys = CONTENT_DOCS.map((doc) => `${doc.audience}/${doc.slug}`);
     expect(new Set(keys).size).toBe(keys.length);

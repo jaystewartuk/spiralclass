@@ -1,8 +1,7 @@
 // Types for the two-armed copy scanner (scripts/two-armed-copy.mjs). A sibling
 // declaration for the same reason i18n-guard has one: the scanner stays a plain
-// runnable .mjs, and the ratchet test imports it with full types.
+// runnable .mjs, and the test imports it with full types.
 export const REPO_ROOT: string;
-export const BASELINE_PATH: string;
 export const SCAN_ROOTS: string[];
 
 /** Count two-armed call sites in one source, ignoring comment lines. */
@@ -12,5 +11,5 @@ export function scanSource(source: string): number;
  * least one. */
 export function collectCounts(repoRoot?: string): Record<string, number>;
 
-/** Load the checked-in ratchet baseline. */
-export function loadBaseline(): Record<string, number>;
+/** Every call site, as "path: count". */
+export function collectViolations(repoRoot?: string): string[];
