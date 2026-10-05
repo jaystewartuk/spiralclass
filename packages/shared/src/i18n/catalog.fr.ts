@@ -5577,6 +5577,8 @@ export const fr = {
   "web.help.backToPortal": "← Retour à mes cours",
   "web.help.backToAdmin": "← Retour au panneau d'administration",
   "web.help.title": "Centre d'aide",
+  "web.help.notTranslated":
+    "Ce guide n'est pas encore traduit dans votre langue : le voici en anglais.",
   "web.help.audience.teacher": "Pour les enseignants",
   "web.help.audience.student": "Pour les élèves",
   "web.help.audience.admin": "Pour les administrateurs",

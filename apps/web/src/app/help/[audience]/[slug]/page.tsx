@@ -106,7 +106,13 @@ export default async function HelpDocPage({ params }: { params: Promise<PagePara
         <span className="text-foreground">{guide.title}</span>
       </nav>
 
-      <article>
+      {guide.lang !== locale && (
+        <p className="rounded-md border bg-muted/40 p-3 text-xs text-muted-foreground">
+          {t("web.help.notTranslated")}
+        </p>
+      )}
+
+      <article lang={guide.lang}>
         <Heading level={1} as="h1" className="text-balance">
           {guide.title}
         </Heading>

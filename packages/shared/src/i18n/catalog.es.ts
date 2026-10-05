@@ -5601,6 +5601,8 @@ export const esMX = {
   "web.help.backToPortal": "← Volver a mis clases",
   "web.help.backToAdmin": "← Volver al panel de administración",
   "web.help.title": "Centro de ayuda",
+  "web.help.notTranslated":
+    "Esta guía aún no está traducida a tu idioma, así que aquí la tienes en inglés.",
   "web.help.audience.teacher": "Para profesores",
   "web.help.audience.student": "Para alumnos",
   "web.help.audience.admin": "Para administradores",

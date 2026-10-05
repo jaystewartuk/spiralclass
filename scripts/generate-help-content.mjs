@@ -16,12 +16,14 @@
 // audience index page renders in. index.md itself is navigation, not a doc,
 // and is skipped.
 //
-// A doc's Spanish translation, when it exists, lives as a sibling
-// `<slug>.es.md` next to `<slug>.md` — same structure, translated
-// headings included. There's no `fr` variant yet; ContentDoc.localize()
-// falls back to `en` for any locale without its own file.
+// A doc's translation into a language lives as a sibling `<slug>.<locale>.md`
+// next to `<slug>.md` — `getting-started.es.md`, `getting-started.fr.md` —
+// same structure, translated headings included, written by a person. Every
+// such file found is read; localize() falls back to `en` for a locale a doc
+// has none for, and the page says so (#178 step A7).
 
 import { readFileSync, readdirSync, writeFileSync } from "node:fs";
+import * as prettier from "prettier";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
 
@@ -85,6 +87,18 @@ function escapeTemplateLiteral(s) {
   return s.replace(/\\/g, "\\\\").replace(/`/g, "\\`").replace(/\$\{/g, "\\${");
 }
 
+// `<slug>.<locale>.md`: a translation, not a doc of its own.
+const TRANSLATION_FILE = /^[a-z0-9-]+\.[a-z]{2}(?:-[A-Z]{2})?\.md$/;
+
+/** The locales a doc has a translation for, sorted. */
+function translationLocales(dir, slug) {
+  const prefix = `${slug}.`;
+  return readdirSync(dir)
+    .filter((f) => f.startsWith(prefix) && TRANSLATION_FILE.test(f))
+    .map((f) => f.slice(prefix.length, -".md".length))
+    .sort();
+}
+
 function readDocFile(dir, slug, locale) {
   const suffix = locale === "en" ? "" : `.${locale}`;
   const file = path.join(dir, `${slug}${suffix}.md`);
@@ -105,7 +119,7 @@ function collectDocs() {
     const allSlugs = [
       ...new Set(
         readdirSync(dir)
-          .filter((f) => f.endsWith(".md") && f !== "index.md" && !f.endsWith(".es.md"))
+          .filter((f) => f.endsWith(".md") && !TRANSLATION_FILE.test(f) && f !== "index.md")
           .map((f) => f.replace(/\.md$/, "")),
       ),
     ];
@@ -122,15 +136,22 @@ function collectDocs() {
       if (enRaw == null) throw new Error(`${audience}/${slug}: missing ${slug}.md`);
       const en = parseDoc(audience, slug, "en", enRaw);
 
-      const esRaw = readDocFile(dir, slug, "es");
-      const es = esRaw != null ? parseDoc(audience, slug, "es", esRaw) : null;
+      // Every translation that exists, in a stable order.
+      const translations = translationLocales(dir, slug).map((locale) => [
+        locale,
+        parseDoc(audience, slug, locale, readDocFile(dir, slug, locale)),
+      ]);
+      const field = (name) => ({
+        en: en[name],
+        ...Object.fromEntries(translations.map(([locale, doc]) => [locale, doc[name]])),
+      });
 
       docs.push({
         audience,
         slug,
-        title: { en: en.title, ...(es ? { es: es.title } : {}) },
-        summary: { en: en.summary, ...(es ? { es: es.summary } : {}) },
-        body: { en: en.body, ...(es ? { es: es.body } : {}) },
+        title: field("title"),
+        summary: field("summary"),
+        body: field("body"),
         publicFaq: PUBLIC_FAQ.has(`${audience}/${slug}`),
       });
     }
@@ -172,9 +193,17 @@ ${entries}
 `;
 }
 
-function main() {
+// The checked-in file is Prettier-formatted, like the rest of the tree, so the
+// output is formatted the same way before it is written or compared. Without
+// this, --check reported the file stale on every clean tree.
+async function formatted(source) {
+  const config = (await prettier.resolveConfig(OUT)) ?? {};
+  return prettier.format(source, { ...config, filepath: OUT });
+}
+
+async function main() {
   const docs = collectDocs();
-  const output = render(docs);
+  const output = await formatted(render(docs));
   const checkOnly = process.argv.includes("--check");
 
   if (checkOnly) {
@@ -195,10 +224,14 @@ function main() {
   }
 
   writeFileSync(OUT, output);
-  const withEs = docs.filter((d) => d.title["es"]).length;
-  console.log(
-    `Wrote ${docs.length} help docs (${withEs} with es) to ${path.relative(repoRoot, OUT)}`,
-  );
+  const perLocale = {};
+  for (const doc of docs) {
+    for (const locale of Object.keys(doc.title)) perLocale[locale] = (perLocale[locale] ?? 0) + 1;
+  }
+  const counts = Object.entries(perLocale)
+    .map(([locale, n]) => `${n} ${locale}`)
+    .join(", ");
+  console.log(`Wrote ${docs.length} help docs (${counts}) to ${path.relative(repoRoot, OUT)}`);
 }
 
-main();
+await main();
