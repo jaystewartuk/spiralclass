@@ -99,33 +99,24 @@ export type CaptionBandProps = {
 // default right for a phone held at arm's length and too small for a monitor
 // across a desk — a student on a computer reported the subtitles as too small
 // to read, at the default, never having found the size control.
-//
-// `dockedHeight` is the height the docked strip reserves at that size: room
-// for one ordinary subtitle, and never less than the column of three controls
-// beside it. A longer line grows the strip; a pause does not shrink it.
-const SIZE_CLASSES: Record<
-  CaptionSize,
-  { primary: string; secondary: string; maxLines: number; dockedHeight: string }
-> = {
-  m: {
-    primary: "text-lg md:text-2xl",
-    secondary: "text-sm md:text-base",
-    maxLines: 3,
-    dockedHeight: "min-h-24 lg:min-h-28",
-  },
-  l: {
-    primary: "text-2xl md:text-3xl",
-    secondary: "text-base md:text-xl",
-    maxLines: 2,
-    dockedHeight: "min-h-28 lg:min-h-32",
-  },
-  xl: {
-    primary: "text-3xl md:text-4xl",
-    secondary: "text-xl md:text-2xl",
-    maxLines: 2,
-    dockedHeight: "min-h-32 lg:min-h-36",
-  },
-};
+const SIZE_CLASSES: Record<CaptionSize, { primary: string; secondary: string; maxLines: number }> =
+  {
+    m: {
+      primary: "text-lg md:text-2xl",
+      secondary: "text-sm md:text-base",
+      maxLines: 3,
+    },
+    l: {
+      primary: "text-2xl md:text-3xl",
+      secondary: "text-base md:text-xl",
+      maxLines: 2,
+    },
+    xl: {
+      primary: "text-3xl md:text-4xl",
+      secondary: "text-xl md:text-2xl",
+      maxLines: 2,
+    },
+  };
 
 // Docked, the strip's height comes out of the material above it, so it shows
 // the current exchange at the default size and only the current line at the
@@ -220,16 +211,19 @@ export function CaptionBand({
       // reserving the column there would narrow the subtitles for nothing.
       //
       // DOCKED is a different box with the same contents: a row in the call's
-      // own column, under the stage, with the controls in a column beside the
-      // subtitles rather than in a row above them — beside costs the material
-      // no height, above would cost it a line. `flex-row-reverse` keeps the
-      // controls first in the DOM (and so in the tab order) in both layouts.
-      // No tile clearance: the camera tiles are parked in the stage's corners,
-      // and the stage ends where this strip begins.
+      // own column, under the stage, with the controls in a ROW beside the
+      // subtitles, level with the newest line. Every pixel of this strip's
+      // height is taken off the worksheet, so nothing in it may be taller
+      // than one subtitle. The controls were a column of three once, and that
+      // column — not the text — set the strip's floor at ~100px, against a
+      // ~30px line. `flex-row-reverse` keeps the controls first in the DOM
+      // (and so in the tab order) in both layouts. No tile clearance: the
+      // camera tiles are parked in the stage's corners, and the stage ends
+      // where this strip begins.
       data-docked={docked || undefined}
       className={
         docked
-          ? "relative z-20 mx-auto flex w-full max-w-3xl flex-row-reverse items-stretch gap-2 px-3 pt-2 pb-1 lg:px-4"
+          ? "relative z-20 mx-auto flex w-full max-w-3xl flex-row-reverse items-end gap-2 px-3 pt-1 lg:px-4"
           : cn(
               "pointer-events-none absolute inset-x-0 bottom-3 z-20 mx-auto flex max-w-3xl flex-col items-center gap-1 pl-3 lg:bottom-4 lg:gap-1.5 lg:pl-4",
               tileParked ? "pr-32 lg:pr-4" : "pr-3 lg:pr-4",
@@ -252,7 +246,7 @@ export function CaptionBand({
         ref={controlsRef}
         className={cn(
           "pointer-events-auto relative flex items-center gap-1",
-          docked ? "flex-col justify-start" : "self-end",
+          docked ? "shrink-0" : "self-end",
         )}
       >
         {settingsOpen && (
@@ -310,24 +304,26 @@ export function CaptionBand({
         aria-relevant="additions"
         aria-label={t("call.captionsRegionLabel")}
         className={cn(
-          // Tighter on a phone. Every one of these steps is vertical space
-          // taken off the video on the screen that has least of it.
-          "flex flex-col items-center gap-1.5 rounded-xl bg-scrim-3 px-3 py-2 shadow-lg backdrop-blur-xs",
-          "lg:gap-2.5 lg:rounded-2xl lg:px-5 lg:py-3",
-          // Full width once there is text, so successive lines do not make
-          // the panel jump about as sentences change length. But the
-          // "Listening…" state is two words, and stretching a full-width
-          // black bar across the video to hold them reads as something being
-          // wrong rather than as a quiet standby.
-          //
-          // Docked, it is always the full strip, lines resting on its bottom
-          // edge — the standby state is a reserved row there, not a bar across
-          // somebody's face.
+          "flex flex-col items-center",
+          // DOCKED, NO PANEL. The scrim exists to lift text off a moving
+          // picture; the strip sits on the call's own black, under the stage,
+          // where a dark box with its own padding is just a second border of
+          // black taken from the worksheet. The lines rest on the strip's
+          // bottom edge.
           docked
-            ? cn("flex-1 justify-end", sizes.dockedHeight)
-            : shown.length > 0
-              ? "w-full"
-              : "w-auto",
+            ? "min-w-0 flex-1 justify-end gap-1 lg:gap-1.5"
+            : cn(
+                // Tighter on a phone. Every one of these steps is vertical
+                // space taken off the video on the screen that has least of it.
+                "gap-1.5 rounded-xl bg-scrim-3 px-3 py-2 shadow-lg backdrop-blur-xs",
+                "lg:gap-2.5 lg:rounded-2xl lg:px-5 lg:py-3",
+                // Full width once there is text, so successive lines do not
+                // make the panel jump about as sentences change length. But
+                // the "Listening…" state is two words, and stretching a
+                // full-width black bar across the video to hold them reads as
+                // something being wrong rather than as a quiet standby.
+                shown.length > 0 ? "w-full" : "w-auto",
+              ),
           // ROOM FOR THE POPOVER, and the reason it is bought HERE rather
           // than by moving the popover.
           //
@@ -352,8 +348,15 @@ export function CaptionBand({
           settingsOpen && !docked && "min-h-40",
         )}
       >
-        {awaitingFirstLine && shown.length === 0 && (
-          <ListeningLine label={t("call.captionsListening")} />
+        {docked && shown.length === 0 ? (
+          <DockedStandby
+            display={prefs.display}
+            sizes={sizes}
+            listening={awaitingFirstLine ? t("call.captionsListening") : null}
+          />
+        ) : (
+          awaitingFirstLine &&
+          shown.length === 0 && <ListeningLine label={t("call.captionsListening")} />
         )}
         {shown.map((entry, index) => (
           <CaptionLineView
@@ -368,6 +371,7 @@ export function CaptionBand({
             // A run of lines from one speaker is a single turn; repeating the
             // name on each is noise that pushes the words themselves down.
             showSpeaker={entry.from !== shown[index - 1]?.from}
+            inlineSpeaker={docked}
             display={prefs.display}
             sizes={sizes}
             speakerName={speakerName}
@@ -387,6 +391,7 @@ function CaptionLineView({
   latest,
   hiddenOnSmall,
   showSpeaker,
+  inlineSpeaker,
   display,
   sizes,
   speakerName,
@@ -396,6 +401,10 @@ function CaptionLineView({
   latest: boolean;
   hiddenOnSmall: boolean;
   showSpeaker: boolean;
+  // The name at the start of the line's first row rather than on a row above
+  // it. Docked, where a row of height is a row of worksheet, a name of its own
+  // made a new turn's subtitle a third taller than the line it introduced.
+  inlineSpeaker: boolean;
   display: CaptionDisplay;
   sizes: { primary: string; secondary: string };
   speakerName: (identity: string) => string | null;
@@ -416,6 +425,10 @@ function CaptionLineView({
 
   const name = entry.from ? speakerName(entry.from) : null;
   const label = entry.from ? (name ?? unknownSpeakerLabel) : null;
+  const inlineLabel =
+    label && showSpeaker && inlineSpeaker ? (
+      <span className="mr-2 align-middle text-sm font-semibold text-on-dark-faint">{label}</span>
+    ) : null;
 
   return (
     <div
@@ -434,7 +447,7 @@ function CaptionLineView({
         latest ? "text-on-dark" : "text-on-dark-faint",
       )}
     >
-      {label && showSpeaker && (
+      {label && showSpeaker && !inlineSpeaker && (
         <p className="mb-0.5 text-center text-sm font-semibold text-on-dark-faint">{label}</p>
       )}
       {showOriginal && (
@@ -446,6 +459,7 @@ function CaptionLineView({
           lang={entry.srcLang}
           className={cn(sizes.primary, "leading-snug font-medium")}
         >
+          {inlineLabel}
           {original}
         </p>
       )}
@@ -463,6 +477,7 @@ function CaptionLineView({
               : cn(sizes.primary, "leading-snug font-medium"),
           )}
         >
+          {!showOriginal && inlineLabel}
           {entry.text}
         </p>
       )}
@@ -472,7 +487,7 @@ function CaptionLineView({
 
 // The gap between "captions are on" and the first line. Three dots that
 // breathe. No scrim or shadow of its own — it sits INSIDE the band's panel,
-// which already has both.
+// which already has both, or on the call's own black when docked.
 function ListeningLine({ label }: { label: string }) {
   return (
     <div className="flex items-center gap-2">
@@ -486,6 +501,37 @@ function ListeningLine({ label }: { label: string }) {
         ))}
       </span>
       <span className="text-sm text-on-dark-muted">{label}</span>
+    </div>
+  );
+}
+
+// The docked strip between sentences: one subtitle's worth of nothing, at the
+// reader's own size and in her own display mode, so the strip already holds the
+// height its next line will take and the worksheet does not reflow when it
+// arrives. The browser measures it from the same classes a line uses, rather
+// than this file keeping a pixel floor per size that a font or a locale would
+// drift away from: `h-lh` is one line at that element's own font size and
+// line height. "Listening…" sits inside it, not on top of it.
+function DockedStandby({
+  display,
+  sizes,
+  listening,
+}: {
+  display: CaptionDisplay;
+  sizes: { primary: string; secondary: string };
+  listening: string | null;
+}) {
+  return (
+    <div data-caption-standby className="relative w-full">
+      <div aria-hidden className="invisible">
+        <div className={cn(sizes.primary, "h-lh leading-snug")} />
+        {display === "both" && <div className={cn(sizes.secondary, "mt-1 h-lh leading-snug")} />}
+      </div>
+      {listening && (
+        <div className="absolute inset-0 flex items-center justify-center">
+          <ListeningLine label={listening} />
+        </div>
+      )}
     </div>
   );
 }

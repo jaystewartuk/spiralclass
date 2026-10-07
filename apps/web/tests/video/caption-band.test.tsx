@@ -328,9 +328,69 @@ describe("docked under a material", () => {
     const html = render({ docked: true, entries: [], awaitingFirstLine: false });
     const log = html.querySelector('[role="log"]') as HTMLElement;
     expect(log).not.toBeNull();
-    expect(log.className).toContain("min-h-24");
+    // Held open by one invisible subtitle at the reader's size, not by a
+    // fixed pixel floor.
+    const standby = log.querySelector("[data-caption-standby]") as HTMLElement;
+    expect(standby).not.toBeNull();
+    expect(standby.querySelector(".invisible")?.getAttribute("aria-hidden")).toBe("true");
+    expect(standby.innerHTML).toContain("text-lg");
     // The overlay's answer to the same state, for contrast, is no element.
     expect(render({ entries: [], awaitingFirstLine: false }).innerHTML).toBe("");
+  });
+
+  it("holds one subtitle's height between sentences, not the controls' column", () => {
+    // The floor used to be min-h-24 to min-h-36 — sized to three buttons
+    // stacked beside the text, about three times one subtitle line, all of it
+    // taken from the worksheet above.
+    const rows = (prefs: typeof BOTH_LANGUAGES | typeof DEFAULT_CAPTION_PREFERENCES) =>
+      render({ docked: true, entries: [], prefs })
+        .querySelector("[data-caption-standby] .invisible")
+        ?.querySelectorAll(".h-lh").length;
+    // The shipped default shows the translation alone: one line of reserve.
+    expect(rows(DEFAULT_CAPTION_PREFERENCES)).toBe(1);
+    // Both languages is two lines per subtitle, so two lines of reserve.
+    expect(rows(BOTH_LANGUAGES)).toBe(2);
+
+    const html = render({ docked: true, entries: [] });
+    expect((html.querySelector('[role="log"]') as HTMLElement).className).not.toMatch(/\bmin-h-/);
+    // The controls lie in a row beside the text, so they never set the height.
+    const controls = html.querySelector('[aria-label="call.captionsSettings"]')
+      ?.parentElement as HTMLElement;
+    expect(controls.className).not.toContain("flex-col");
+  });
+
+  it("says it is listening inside the reserved line, not on a row of its own", () => {
+    const html = render({ docked: true, entries: [], awaitingFirstLine: true });
+    const standby = html.querySelector("[data-caption-standby]") as HTMLElement;
+    expect(standby.textContent).toContain("call.captionsListening");
+  });
+
+  it("draws no panel of its own on the call's black", () => {
+    const log = render({ docked: true }).querySelector('[role="log"]') as HTMLElement;
+    expect(log.className).not.toContain("bg-scrim");
+    expect(log.className).not.toMatch(/\bp[xy]-/);
+    // Over the camera the scrim is what makes the text readable, and stays.
+    const overCamera = render().querySelector('[role="log"]') as HTMLElement;
+    expect(overCamera.className).toContain("bg-scrim-3");
+  });
+
+  it("names the speaker on the line itself rather than a row above it", () => {
+    const html = render({ docked: true, prefs: DEFAULT_CAPTION_PREFERENCES });
+    const line = [...html.querySelectorAll("p")].find((p) =>
+      p.textContent?.includes(bilingual.text),
+    ) as HTMLElement;
+    expect(line.querySelector("span")?.textContent).toBe("Mira");
+    expect([...html.querySelectorAll("p")].some((p) => p.textContent === "Mira")).toBe(false);
+
+    // In both languages the name leads the prominent (original) line, once.
+    const both = render({ docked: true });
+    const original = both.querySelector('p[lang="es"]') as HTMLElement;
+    expect(original.querySelector("span")?.textContent).toBe("Mira");
+    expect((both.querySelector('p[lang="en"]') as HTMLElement).querySelector("span")).toBeNull();
+
+    // Over the camera the name keeps its own row.
+    const overCamera = render();
+    expect([...overCamera.querySelectorAll("p")].some((p) => p.textContent === "Mira")).toBe(true);
   });
 
   it("keeps the transcript reachable with a material open", () => {

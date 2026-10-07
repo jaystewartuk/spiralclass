@@ -37,7 +37,10 @@ overrides:
   "@eslint/eslintrc>js-yaml": "5.2.2" # GHSA-pm4m-ph32-ghv5
   "js-yaml@5.2.1": "5.2.2" # GHSA-pm4m-ph32-ghv5
   "js-yaml@5.2.0": "5.2.2" # GHSA-pm4m-ph32-ghv5
-  shell-quote@<1.8.5: ">=1.8.5" # GHSA-395f-4hp3-45gv
+  # Widened 2026-10-07, <1.8.5 -> <1.11.0, and made exact: GHSA-pqg4-j6r4-53mv
+  # (critical) reaches the 1.10.0 the open ">=1.8.5" had resolved to. Reached
+  # only through livekit-activity-cli > ink > react-devtools-core.
+  shell-quote@<1.11.0: "1.11.0" # GHSA-395f-4hp3-45gv, GHSA-pqg4-j6r4-53mv
   # 2026-07-20 high-severity audit sweep: these previously sat in ignoreGhsas
   # as "no available fix path" — that had gone stale, patched lines now exist.
   # Exact-version pins (not open-ended ranges) — an unbounded ">=" replacement
@@ -70,7 +73,10 @@ overrides:
   # per package and no chance of a narrower stale pin winning. apps/web already
   # depends on 0.35.4 directly; this only drags next's own optional copy up to
   # meet it (`pnpm why sharp` showed 0.35.3 and 0.35.4 side by side).
-  sharp@<0.35.4: "0.35.4" # GHSA-rgj7-g3m4-5g8c, GHSA-f88m-g3jw-g9cj
+  #
+  # 2026-10-07: and again — GHSA-wq5f-xc86-pv6w (librsvg, high) reaches
+  # `<0.35.5`. The pin and apps/web's direct dependency both move to 0.35.5.
+  sharp@<0.35.5: "0.35.5" # GHSA-rgj7-g3m4-5g8c, GHSA-f88m-g3jw-g9cj, GHSA-wq5f-xc86-pv6w
   # 2026-08-03 high-severity audit sweep (GHSA-rgw5-rvv9-x895 bypasses the
   # CVE-2026-14257 mitigation, so it re-breaks lines the earlier
   # brace-expansion override had already patched — hence the <5.0.7 -> <5.0.9
@@ -177,6 +183,13 @@ overrides:
   # CI. Lighthouse CI was retired on 2026-09-14 and took every js-yaml 3.x with
   # it, so that override was removed with it.)
   qs@<6.16.0: "6.16.0" # GHSA-4mjr-xmp4-gh2g, GHSA-x5fp-wj9c-mxmx
+  # 2026-10-07: new advisories against an unchanged lockfile, red on origin/main
+  # (the shell-quote and sharp pins above moved the same day). proxy-addr is
+  # in the production tree through inngest > express; source-map-js through
+  # next > postcss and the Prisma CLI chain. Patch releases inside the ranges
+  # their dependents already ask for. Exact pins, per the 2026-07-20 note.
+  proxy-addr@<2.0.8: "2.0.8" # GHSA-jqcg-44mw-7w3h
+  source-map-js@<1.2.2: "1.2.2" # GHSA-68fv-2mgg-jv7q
 
 # auditConfig.ignoreGhsas emptied 2026-07-20: the prior 45-entry high+
 # baseline (docs/security.md) is now fully resolved via the
