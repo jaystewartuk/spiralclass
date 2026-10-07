@@ -107,7 +107,7 @@
     "remark-gfm": "^4.0.1",
     "remark-parse": "^11.0.0",
     "resend": "^6.30.0",
-    "sharp": "^0.35.4",
+    "sharp": "^0.35.5",
     "sonner": "^1.7.4",
     "stripe": "^22.6.2",
     "tailwind-merge": "^3.7.0",
