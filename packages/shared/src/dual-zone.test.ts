@@ -1,5 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { getDualZoneTime, formatDualZoneText, type TimeZoneParty } from "./dual-zone";
+import {
+  getDualZoneTime,
+  formatDualZoneText,
+  zoneCityName,
+  zoneOffsetMinutes,
+  zonesShowDifferentClocks,
+  type TimeZoneParty,
+} from "./dual-zone";
 
 const teacher = (tz: string): TimeZoneParty => ({ tz, label: "Teacher" });
 const student = (tz: string): TimeZoneParty => ({ tz, label: "Student" });
@@ -178,5 +185,57 @@ describe("formatDualZoneText", () => {
     );
     expect(text).toContain("Votre heure");
     expect(text).toContain("Heure de Teacher");
+  });
+});
+
+describe("zoneOffsetMinutes", () => {
+  it("follows each zone's summer time", () => {
+    const winter = new Date("2026-01-15T12:00:00Z");
+    const summer = new Date("2026-07-15T12:00:00Z");
+    expect(zoneOffsetMinutes("Europe/Vienna", winter)).toBe(60);
+    expect(zoneOffsetMinutes("Europe/Vienna", summer)).toBe(120);
+    expect(zoneOffsetMinutes("America/Toronto", winter)).toBe(-300);
+    expect(zoneOffsetMinutes("America/Toronto", summer)).toBe(-240);
+    expect(zoneOffsetMinutes("Asia/Kolkata", winter)).toBe(330);
+    expect(zoneOffsetMinutes("UTC", summer)).toBe(0);
+  });
+});
+
+describe("zonesShowDifferentClocks", () => {
+  const at = new Date("2026-10-12T15:00:00Z");
+
+  it("a student who moved from Vienna to Toronto sees a different clock", () => {
+    expect(zonesShowDifferentClocks("Europe/Vienna", "America/Toronto", at)).toBe(true);
+  });
+
+  it("the same id is never a difference", () => {
+    expect(zonesShowDifferentClocks("Europe/Vienna", "Europe/Vienna", at)).toBe(false);
+  });
+
+  it("two ids for the same clock are not a difference", () => {
+    expect(zonesShowDifferentClocks("Europe/Vienna", "Europe/Berlin", at)).toBe(false);
+    expect(zonesShowDifferentClocks("America/Toronto", "America/New_York", at)).toBe(false);
+  });
+
+  it("zones that agree today but split for summer time are a difference", () => {
+    // Mexico City dropped summer time in 2022; Chicago keeps it. In January
+    // both are UTC-6, in July Chicago is UTC-5.
+    const january = new Date("2026-01-20T12:00:00Z");
+    expect(zoneOffsetMinutes("America/Mexico_City", january)).toBe(
+      zoneOffsetMinutes("America/Chicago", january),
+    );
+    expect(zonesShowDifferentClocks("America/Mexico_City", "America/Chicago", january)).toBe(true);
+  });
+
+  it("an id the engine cannot resolve is no basis for an offer", () => {
+    expect(zonesShowDifferentClocks("Not/AZone", "America/Toronto", at)).toBe(false);
+  });
+});
+
+describe("zoneCityName", () => {
+  it("names the place in the id", () => {
+    expect(zoneCityName("Europe/Vienna")).toBe("Vienna");
+    expect(zoneCityName("America/Argentina/Buenos_Aires")).toBe("Buenos Aires");
+    expect(zoneCityName("UTC")).toBe("UTC");
   });
 });

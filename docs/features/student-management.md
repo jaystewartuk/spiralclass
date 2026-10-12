@@ -149,8 +149,33 @@ same individual across teachers.
   notice is sent to the _old_ address (a heads-up, not a confirmation step
   — the old address cannot block or approve the change).
 - Name, phone number, and timezone changes are not email-gated and can be
-  made directly by either the student or the teacher, each recorded in the
-  audit trail.
+  made directly by either the student (her account page) or the teacher (the
+  contact card on the student's page), each recorded in the audit trail.
+
+### The student's time zone
+
+- A student's time zone decides the clock her portal and her emails show
+  class times in; with none saved they fall back to the teacher's. It never
+  decides _when_ a class is: bookings are fixed moments, and changing the zone
+  moves no class — a class at 18:00 Vienna time is simply shown as 12:00
+  Toronto time afterwards. Slots are still generated from the teacher's
+  working hours, in the zone those were written in
+  ([D-53](../decisions/D-53.md)).
+- It is filled from her device the first time she opens her portal, and that
+  automatic capture never overwrites a saved zone (D-53) — so a student who
+  moves would otherwise keep her old city's clock indefinitely.
+- Three ways it follows her instead, none of them automatic:
+  - **The portal offers it.** When her device is on a different clock from
+    the saved zone (compared by the clock each shows, not by name — Vienna and
+    Berlin are the same clock), every portal page shows a notice naming both
+    cities with "Use <device city> time" and "Keep <saved city> time". Using
+    it saves the device's zone through the same audited path as her account
+    form. Keeping it is remembered in that browser for that pair of zones, so
+    a traveller who wants home time is asked once, and again only from a third
+    place.
+  - **She changes it** on her account page.
+  - **Her teacher changes it** from the contact card on the student's page —
+    the field says that booked classes stay at the same moment.
 
 ### Teacher share groups (student acquisition, not roster sharing)
 

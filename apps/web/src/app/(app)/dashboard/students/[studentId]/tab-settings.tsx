@@ -3,6 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { HelpTip } from "@/components/help-tip";
 import { isNotificationsFullyDisabled } from "@/lib/notifications/preferences";
 import type { TFunction } from "@/lib/i18n-translate";
+import { COMMON_TIMEZONES } from "@/app/(app)/onboarding/timezone/timezones";
 import { ContactEditForm } from "./contact-edit-form";
 import { NotificationsToggle } from "./notifications-toggle";
 import { StudentArchiveButton } from "./student-archive-button";
@@ -34,6 +35,7 @@ export function SettingsTab({
       phoneE164: string | null;
       authUserId: string | null;
       notificationPrefs: unknown;
+      timezone: string | null;
     };
   };
 }) {
@@ -58,6 +60,8 @@ export function SettingsTab({
             initialPhone={link.student.phoneE164}
             emailLocked={link.student.authUserId != null}
             defaultPhoneCountry={teacher.country}
+            initialTimezone={link.student.timezone}
+            timezoneOptions={COMMON_TIMEZONES}
           />
           <NotificationsToggle
             studentId={studentId}

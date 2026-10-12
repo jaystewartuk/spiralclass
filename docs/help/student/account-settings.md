@@ -35,7 +35,7 @@ Update your details, change your sign-in email, control notifications, request y
 
 ## Tips
 
-- Update your timezone before booking lessons while travelling.
+- Moved, or travelling? If your device is on a different clock from your saved timezone, your portal offers to switch with one tap. Booked lessons never move: they stay at the same moment and are just shown in the new local time. Your teacher can also set your timezone for you.
 - Keep your email current so you can receive sign-in codes and lesson notices.
 - Account deletion has a 30-day grace period.
 

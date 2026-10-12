@@ -3090,7 +3090,11 @@ export const esMX = {
   "web.dashboard.students.contact.cardTitle": "Datos de contacto",
   "web.dashboard.students.contact.helpLabel": "Ayuda sobre datos de contacto",
   "web.dashboard.students.contact.helpText":
-    "Corrige errores en el nombre, correo o teléfono de este alumno (p. ej. de la compra). Su correo es su acceso, así que una vez que inicia sesión por primera vez solo él puede cambiarlo.",
+    "Corrige errores en el nombre, correo o teléfono de este alumno (p. ej. de la compra), o pon la zona horaria donde vive ahora. Su correo es su acceso, así que una vez que inicia sesión por primera vez solo él puede cambiarlo.",
+  "web.dashboard.students.contact.timezone": "Zona horaria",
+  "web.dashboard.students.contact.timezonePlaceholder": "Sin definir: se usa tu zona horaria",
+  "web.dashboard.students.contact.timezoneHint":
+    "Dónde vive ahora. Su portal y sus correos le muestran los horarios en esta zona. Las clases ya reservadas no se mueven: siguen en el mismo momento, solo se muestran con su nueva hora local.",
   "web.dashboard.students.notLiveYet": "Sin activar",
   "web.dashboard.students.archivedBadge": "Dado de baja",
   "web.dashboard.students.notLiveCard.title": "Sin activar todavía",
@@ -5203,6 +5207,16 @@ export const esMX = {
   "web.myDetailsForm.timezonePlaceholder": "Elige una zona horaria",
   "web.myDetailsForm.timezoneHint": "Los horarios de tus clases se muestran en esta zona horaria.",
   "web.myDetailsForm.saving": "Guardando…",
+  // Aviso del portal cuando el dispositivo está en otra zona horaria que la
+  // guardada (TimezoneMismatchNotice). {saved}/{device} son ciudades: "Viena".
+  "web.myClasses.timezoneNotice.body":
+    "Tus horarios de clase se muestran en hora de {saved}, pero este dispositivo está en hora de {device}.",
+  "web.myClasses.timezoneNotice.hint":
+    "Tus clases reservadas no se mueven; solo cambia la hora en la que se muestran.",
+  "web.myClasses.timezoneNotice.switch": "Usar hora de {device}",
+  "web.myClasses.timezoneNotice.keep": "Mantener hora de {saved}",
+  "web.myClasses.timezoneNotice.switched":
+    "Listo: tus horarios ahora se muestran en hora de {device}.",
   // Preferencias de avisos (NotificationPrefsForm), compartidas por las
   // pantallas de profe y alumno. De arriba abajo son las tres capas por las que
   // pasa un aviso: el dispositivo, el canal de la cuenta y la elección por
