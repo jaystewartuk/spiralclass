@@ -12,6 +12,7 @@ import {
   checkoutIntentSchemaWith,
   leadCaptureSchemaWith,
   studentContactSchemaWith,
+  studentTimezoneSwitchSchemaWith,
   teacherContactSchemaWith,
   teacherPublicWhatsappSchemaWith,
   materialStyleSchemaWith,
@@ -49,6 +50,8 @@ export const leadCaptureSchema = (locale: AppLocale = "en") =>
   leadCaptureSchemaWith(createT(locale));
 export const studentContactSchema = (locale: AppLocale = "en") =>
   studentContactSchemaWith(createT(locale));
+export const studentTimezoneSwitchSchema = (locale: AppLocale = "en") =>
+  studentTimezoneSwitchSchemaWith(createT(locale));
 export const teacherContactSchema = (locale: AppLocale = "en") =>
   teacherContactSchemaWith(createT(locale));
 export const teacherPublicWhatsappSchema = (locale: AppLocale = "en") =>

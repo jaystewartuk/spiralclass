@@ -38,6 +38,8 @@ describe("ContactEditForm — inline name validation", () => {
       initialPhone: null,
       emailLocked: false,
       defaultPhoneCountry: "MX",
+      initialTimezone: null,
+      timezoneOptions: [],
     }),
   );
 
@@ -69,6 +71,8 @@ describe("ContactEditForm — phone field re-population", () => {
         initialPhone: "+525512345678",
         emailLocked: false,
         defaultPhoneCountry: "MX",
+        initialTimezone: null,
+        timezoneOptions: [],
       }),
     );
     expect(html).toContain('value="5512345678"');
@@ -85,9 +89,44 @@ describe("ContactEditForm — phone field re-population", () => {
         initialPhone: "+447911123456",
         emailLocked: false,
         defaultPhoneCountry: "MX",
+        initialTimezone: null,
+        timezoneOptions: [],
       }),
     );
     expect(html).toContain('value="7911123456"');
+  });
+});
+
+describe("ContactEditForm — the student's time zone", () => {
+  // A teacher whose student moved had no zone field to change. The saved zone
+  // must show as selected even when the quick-pick list lacks it (Vienna is
+  // not on it), or the form would read as "not set" and post nothing.
+  const render = (initialTimezone: string | null) =>
+    renderToStaticMarkup(
+      React.createElement(ContactEditForm, {
+        studentId: "s1",
+        initialName: "Catarina",
+        initialEmail: null,
+        initialPhone: null,
+        emailLocked: true,
+        defaultPhoneCountry: "MX",
+        initialTimezone,
+        timezoneOptions: ["America/Toronto", "America/Mexico_City"],
+      }),
+    );
+
+  it("posts the saved zone, even one missing from the quick-pick list", () => {
+    const html = render("Europe/Vienna");
+    expect(html).toContain('id="student-contact-timezone"');
+    expect(html).toMatch(/<input type="hidden" name="timezone" value="Europe\/Vienna"\/>/);
+  });
+
+  it("says plainly that booked classes do not move", () => {
+    expect(render(null)).toContain("web.dashboard.students.contact.timezoneHint");
+  });
+
+  it("posts nothing for a student with no zone, so saving other fields leaves it unset", () => {
+    expect(render(null)).toMatch(/<input type="hidden" name="timezone" value=""\/>/);
   });
 });
 

@@ -37,8 +37,12 @@ const state = {
   rl: { ok: true } as { ok: boolean },
 };
 
-const { updateMyContactInfoAction, updateStudentContactAsTeacherAction, requestEmailChangeAction } =
-  await import("@/app/actions/student-contact");
+const {
+  updateMyContactInfoAction,
+  updateStudentContactAsTeacherAction,
+  requestEmailChangeAction,
+  switchMyTimezoneAction,
+} = await import("@/app/actions/student-contact");
 
 function form(entries: Record<string, string>): FormData {
   const f = new FormData();
@@ -104,6 +108,84 @@ describe("updateMyContactInfoAction", () => {
     expect(applyStudentContactUpdate).toHaveBeenCalledWith(
       expect.objectContaining({ patch: expect.objectContaining({ phoneCountry: "MX" }) }),
     );
+  });
+
+  // A teacher whose student moved from Vienna to Toronto had no way to say so:
+  // the form had no zone and the action dropped one.
+  it("passes the time zone the teacher picked through to the update", async () => {
+    await updateStudentContactAsTeacherAction(
+      undefined,
+      form({
+        studentId: "22222222-2222-4222-8222-222222222222",
+        name: "Catarina",
+        email: "",
+        phone: "",
+        timezone: "America/Toronto",
+      }),
+    );
+    expect(applyStudentContactUpdate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        actor: { type: "teacher", teacherId: "t1" },
+        patch: expect.objectContaining({ timezone: "America/Toronto" }),
+      }),
+    );
+  });
+
+  it("leaves the zone alone when the teacher's form sends none", async () => {
+    await updateStudentContactAsTeacherAction(
+      undefined,
+      form({
+        studentId: "22222222-2222-4222-8222-222222222222",
+        name: "Catarina",
+        email: "",
+        phone: "",
+        timezone: "",
+      }),
+    );
+    const [[call]] = applyStudentContactUpdate.mock.calls as unknown as [
+      [{ patch: Record<string, unknown> }],
+    ];
+    expect(call.patch).not.toHaveProperty("timezone");
+  });
+
+  it("refuses a zone that is not a real IANA id", async () => {
+    const res = await updateStudentContactAsTeacherAction(
+      undefined,
+      form({
+        studentId: "22222222-2222-4222-8222-222222222222",
+        name: "Catarina",
+        email: "",
+        phone: "",
+        timezone: "Mars/Olympus_Mons",
+      }),
+    );
+    expect(res).toHaveProperty("error");
+    expect(applyStudentContactUpdate).not.toHaveBeenCalled();
+  });
+});
+
+describe("switchMyTimezoneAction", () => {
+  it("saves the device's zone for the signed-in student, as her own change", async () => {
+    const res = await switchMyTimezoneAction("America/Toronto");
+    expect(res?.ok).toBeTruthy();
+    expect(applyStudentContactUpdate).toHaveBeenCalledWith({
+      studentId: "s1",
+      actor: { type: "student" },
+      patch: { timezone: "America/Toronto" },
+    });
+  });
+
+  it("refuses an empty or unknown zone without touching the row", async () => {
+    expect(await switchMyTimezoneAction("")).toHaveProperty("error");
+    expect(await switchMyTimezoneAction("Not/AZone")).toHaveProperty("error");
+    expect(applyStudentContactUpdate).not.toHaveBeenCalled();
+  });
+
+  it("reports a failed update rather than claiming success", async () => {
+    state.contactResult = { ok: false, error: "not-found" };
+    const res = await switchMyTimezoneAction("America/Toronto");
+    expect(res).toHaveProperty("error");
+    expect(res).not.toHaveProperty("ok");
   });
 });
 

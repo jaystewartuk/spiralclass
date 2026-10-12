@@ -56,6 +56,8 @@ Les liens d’invitation sont valables 30 jours.
 
 **Puis-je modifier les coordonnées d’un élève ?** Oui. Ouvrez son profil et enregistrez la modification. Un élève peut aussi mettre à jour ses propres coordonnées.
 
+**Mon élève a déménagé dans une autre ville. Comment changer son fuseau horaire ?** Ouvrez son profil, allez dans **Paramètres**, choisissez le nouveau fuseau sous **Fuseau horaire** dans les coordonnées et enregistrez. Son portail et ses e-mails affichent alors les horaires à la nouvelle heure. Les cours déjà réservés ne bougent pas : ils restent au même moment et sont simplement affichés à la nouvelle heure locale. Pour un cours à un autre horaire, reprogrammez-le.
+
 **L’archivage annule-t-il les cours à venir ?** Non. Vérifiez les cours à venir séparément avant d’archiver.
 
 ## Articles associés

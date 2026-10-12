@@ -35,7 +35,7 @@ Actualiza tus datos, cambia tu correo de inicio de sesión, controla tus notific
 
 ## Consejos
 
-- Actualiza tu zona horaria antes de reservar lecciones mientras viajas.
+- ¿Te mudaste o estás de viaje? Si tu dispositivo está en otra hora que tu zona horaria guardada, tu portal te ofrece cambiarla con un toque. Las lecciones reservadas no se mueven: siguen en el mismo momento y solo se muestran con la nueva hora local. Tu profesor también puede cambiar tu zona horaria.
 - Mantén tu correo actualizado para recibir códigos de inicio de sesión y avisos de lecciones.
 - La eliminación de cuenta tiene un periodo de gracia de 30 días.
 

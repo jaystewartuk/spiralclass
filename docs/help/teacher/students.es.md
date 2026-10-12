@@ -56,6 +56,8 @@ Los enlaces de invitación son válidos por 30 días.
 
 **¿Puedo cambiar los datos de contacto de un alumno?** Sí. Abre su perfil y guarda el cambio. El alumno también puede actualizar sus propios datos.
 
+**Mi alumno se mudó a otra ciudad. ¿Cómo cambio su zona horaria?** Abre su perfil, ve a **Ajustes**, elige la nueva zona en **Zona horaria** dentro de los datos de contacto y guarda. Su portal y sus correos le mostrarán los horarios con la nueva hora. Las clases ya reservadas no se mueven: siguen en el mismo momento y solo se muestran con su nueva hora local. Si quieres una clase a otra hora, reprográmala.
+
 **¿Archivar cancela las clases futuras?** No. Revisa las clases próximas por separado antes de archivar.
 
 ## Artículos relacionados

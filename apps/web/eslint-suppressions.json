@@ -235,11 +235,6 @@
       "count": 1
     }
   },
-  "src/components/account/my-details-form.tsx": {
-    "react-hooks/set-state-in-effect": {
-      "count": 1
-    }
-  },
   "src/components/account/notification-prefs-form.tsx": {
     "react-hooks/refs": {
       "count": 1

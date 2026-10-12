@@ -9,10 +9,33 @@ import {
   materialStyleSchema,
   resolveVocabulary,
   timezoneSchema,
+  teacherEditStudentContactSchema,
+  studentTimezoneSwitchSchema,
   DEFAULT_MATERIAL_VOCABULARY,
   MATERIAL_CUSTOM_INSTRUCTIONS_MAX,
   MATERIAL_LANGUAGE_VARIETY_MAX,
 } from "./validators";
+
+describe("a student's time zone, as the teacher and the portal send it", () => {
+  const base = { studentId: "22222222-2222-4222-8222-222222222222", name: "Catarina", phone: "" };
+  const teacherEdit = (timezone: string) =>
+    teacherEditStudentContactSchema("en").safeParse({ ...base, timezone });
+  const portalSwitch = (timezone: string) =>
+    studentTimezoneSwitchSchema("en").safeParse({ timezone });
+
+  it("the teacher's roster edit carries a real zone, and an empty one means leave it", () => {
+    expect(teacherEdit("America/Toronto").data?.timezone).toBe("America/Toronto");
+    expect(teacherEdit("").success).toBe(true);
+    expect(teacherEdit("").data?.timezone).toBeUndefined();
+    expect(teacherEdit("Nope/Nope").success).toBe(false);
+  });
+
+  it("the portal's one-tap switch needs exactly one real zone", () => {
+    expect(portalSwitch("America/Toronto").success).toBe(true);
+    expect(portalSwitch("").success).toBe(false);
+    expect(portalSwitch("Nope/Nope").success).toBe(false);
+  });
+});
 
 // The comprehensive per-field coverage lives in apps/web/tests/lib/validators
 // (which now exercises this shared module via the re-export). These cases just

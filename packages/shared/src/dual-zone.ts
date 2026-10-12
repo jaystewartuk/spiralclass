@@ -188,3 +188,58 @@ export function formatDualZoneText(
   const secondary = `${otherLabel}: ${dz.other.dateLabel}, ${dz.other.timeLabel} (${dz.other.tzDisplay})`;
   return `${primary}\n${secondary}`;
 }
+
+/**
+ * Minutes east of UTC that `tz` is at the instant `at` (e.g. -300 for New York
+ * in winter), read from the engine's own `longOffset` name ("GMT-05:00"), so
+ * summer time comes from the same ICU data every other formatter here uses.
+ * Throws for an id the engine cannot resolve, as Intl itself does.
+ */
+export function zoneOffsetMinutes(tz: string, at: Date): number {
+  const name =
+    new Intl.DateTimeFormat("en-US", { timeZone: tz, timeZoneName: "longOffset" })
+      .formatToParts(at)
+      .find((p) => p.type === "timeZoneName")?.value ?? "";
+  // "GMT" alone is UTC itself; some engines write the minus as U+2212.
+  const match = /^GMT(?:([+\-−])(\d{1,2}):?(\d{2})?)?$/.exec(name);
+  if (!match) throw new RangeError(`Unreadable UTC offset "${name}" for ${tz}`);
+  if (!match[1]) return 0;
+  const minutes = Number(match[2]) * 60 + Number(match[3] ?? 0);
+  return match[1] === "+" ? minutes : -minutes;
+}
+
+/**
+ * Whether two IANA zones would show a person a different clock — the test for
+ * "this device is somewhere other than the zone your classes are shown in".
+ *
+ * Compared by what they render, not by name: `Europe/Berlin` and
+ * `Europe/Vienna`, or `America/Toronto` and `America/New_York`, are different
+ * ids for the same clock and must not nag anyone. Checked now and in
+ * mid-January and mid-July of the same year, so two zones that agree today but
+ * split when one of them changes for summer time (Mexico City and Chicago)
+ * still count as different. An id the engine cannot resolve counts as "no
+ * difference" — this only ever drives an offer, and a broken id is no basis
+ * for one.
+ */
+export function zonesShowDifferentClocks(a: string, b: string, at: Date = new Date()): boolean {
+  if (a === b) return false;
+  const year = at.getUTCFullYear();
+  const probes = [at, new Date(Date.UTC(year, 0, 15, 12)), new Date(Date.UTC(year, 6, 15, 12))];
+  try {
+    return probes.some((p) => zoneOffsetMinutes(a, p) !== zoneOffsetMinutes(b, p));
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * The place an IANA id names, for a sentence like "Vienna time":
+ * `Europe/Vienna` → "Vienna", `America/Argentina/Buenos_Aires` →
+ * "Buenos Aires". The id's own city, untranslated — the same token the zone
+ * pickers list — rather than an ICU long name ("Central European Time"), which
+ * would not tell a student which of her two cities is meant.
+ */
+export function zoneCityName(tz: string): string {
+  const last = tz.split("/").pop() ?? tz;
+  return last.replace(/_/g, " ");
+}

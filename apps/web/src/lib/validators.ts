@@ -31,6 +31,7 @@ export {
   type LeadCaptureInput,
   studentContactSchema,
   type StudentContactInput,
+  studentTimezoneSwitchSchema,
   teacherContactSchema,
   type TeacherContactInput,
   teacherPublicWhatsappSchema,
