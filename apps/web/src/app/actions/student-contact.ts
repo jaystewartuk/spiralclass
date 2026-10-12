@@ -7,7 +7,11 @@ import { requireOnboardedTeacher, requireStudent } from "@/lib/auth";
 import { getPreferredLocale } from "@/lib/i18n";
 import { prisma } from "@/lib/prisma";
 import { rateLimit } from "@/lib/rate-limit";
-import { studentContactSchema, teacherEditStudentContactSchema } from "@/lib/validators";
+import {
+  studentContactSchema,
+  studentTimezoneSwitchSchema,
+  teacherEditStudentContactSchema,
+} from "@/lib/validators";
 import { applyStudentContactUpdate, type ContactUpdateError } from "@/lib/students/contact";
 import { requestStudentEmailChange, verifyStudentEmailChange } from "@/lib/students/email-change";
 import { flushAnalytics } from "@/lib/analytics/posthog";
@@ -71,7 +75,7 @@ export async function updateMyContactInfoAction(
 }
 
 // Teacher roster fix: name, email (only while the student has never signed
-// in) and phone number from /dashboard/students/[studentId].
+// in), phone number and time zone from /dashboard/students/[studentId].
 export async function updateStudentContactAsTeacherAction(
   _prev: ContactFormState,
   formData: FormData,
@@ -86,6 +90,7 @@ export async function updateStudentContactAsTeacherAction(
     email: formData.get("email") ?? undefined,
     phone: formData.get("phone"),
     phoneCountry: formData.get("phoneCountry") ?? undefined,
+    timezone: formData.get("timezone") ?? undefined,
   });
   if (!parsed.success) {
     return {
@@ -105,6 +110,8 @@ export async function updateStudentContactAsTeacherAction(
       // Falls back to the teacher's own country when the form didn't send
       // one (older client) — a same-market default, always overridable.
       phoneCountry: parsed.data.phoneCountry ?? teacher.country,
+      // Empty means "leave as is" — the same rule as the student's own form.
+      ...(parsed.data.timezone ? { timezone: parsed.data.timezone } : {}),
     },
   });
   if (!result.ok) return { error: contactErrorMessage(result.error, t) };
@@ -112,6 +119,32 @@ export async function updateStudentContactAsTeacherAction(
 
   revalidateAfterAction(`/dashboard/students/${parsed.data.studentId}`);
   return { ok: t("web.action.contact.teacherSaved") };
+}
+
+// The portal's one tap: this device is in a different zone from the saved one
+// (TimezoneMismatchNotice), and the student chose the device's. Same funnel
+// and audit trail as the account form. Only ever runs on her tap — the
+// automatic capture still never overwrites a saved zone (D-53).
+export async function switchMyTimezoneAction(timezone: string): Promise<ContactFormState> {
+  const student = await requireStudent();
+  const locale = await getPreferredLocale();
+  const t = createT(locale);
+
+  const parsed = studentTimezoneSwitchSchema(locale).safeParse({ timezone });
+  if (!parsed.success) {
+    return { error: issueMessage(parsed.error, t, "web.action.invalidData") };
+  }
+
+  const result = await applyStudentContactUpdate({
+    studentId: student.id,
+    actor: { type: "student" },
+    patch: { timezone: parsed.data.timezone },
+  });
+  if (!result.ok) return { error: contactErrorMessage(result.error, t) };
+  await flushAnalytics();
+
+  revalidateAfterAction("/my-classes", "layout");
+  return { ok: t("web.action.contact.saved") };
 }
 
 // Step 1 of the verified email change: the signed-in student names a new

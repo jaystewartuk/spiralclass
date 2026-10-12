@@ -3058,7 +3058,11 @@ export const en = {
   "web.dashboard.students.contact.cardTitle": "Contact details",
   "web.dashboard.students.contact.helpLabel": "Help on contact details",
   "web.dashboard.students.contact.helpText":
-    "Fix a typo in this student's name, email or phone (e.g. from checkout). Their email is how they sign in, so once they've signed in for the first time only they can change it.",
+    "Fix a typo in this student's name, email or phone (e.g. from checkout), or set the time zone they live in now. Their email is how they sign in, so once they've signed in for the first time only they can change it.",
+  "web.dashboard.students.contact.timezone": "Time zone",
+  "web.dashboard.students.contact.timezonePlaceholder": "Not set — your time zone is used",
+  "web.dashboard.students.contact.timezoneHint":
+    "Where they live now. Their portal and emails show class times in this zone. Classes already booked don't move: they stay at the same moment, just shown in their new local time.",
   "web.dashboard.students.notLiveYet": "Not live yet",
   "web.dashboard.students.archivedBadge": "Archived",
   "web.dashboard.students.notLiveCard.title": "Not live yet",
@@ -5188,6 +5192,15 @@ export const en = {
   "web.myDetailsForm.timezonePlaceholder": "Choose a time zone",
   "web.myDetailsForm.timezoneHint": "Your class times are shown in this time zone.",
   "web.myDetailsForm.saving": "Saving…",
+  // The portal's notice when this device is in a different time zone from the
+  // saved one (TimezoneMismatchNotice). {saved}/{device} are cities: "Vienna".
+  "web.myClasses.timezoneNotice.body":
+    "Your class times are shown in {saved} time, but this device is set to {device} time.",
+  "web.myClasses.timezoneNotice.hint":
+    "Booked classes don't move — only the clock their times are shown in changes.",
+  "web.myClasses.timezoneNotice.switch": "Use {device} time",
+  "web.myClasses.timezoneNotice.keep": "Keep {saved} time",
+  "web.myClasses.timezoneNotice.switched": "Done — your class times now show in {device} time.",
   // Notification preferences (NotificationPrefsForm), shared by the teacher and
   // student screens. Read top to bottom these are the three layers a
   // notification passes through: the device, the account-level channel, and the

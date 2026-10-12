@@ -3043,7 +3043,11 @@ export const fr = {
   "web.dashboard.students.contact.cardTitle": "Coordonnées",
   "web.dashboard.students.contact.helpLabel": "Aide sur les coordonnées",
   "web.dashboard.students.contact.helpText":
-    "Corrigez une faute de frappe dans le nom, l'e-mail ou le téléphone de cet élève (ex. issue du paiement). Son e-mail lui sert à se connecter, donc une fois qu'il s'est connecté pour la première fois, lui seul peut le modifier.",
+    "Corrigez une faute de frappe dans le nom, l'e-mail ou le téléphone de cet élève (ex. issue du paiement), ou indiquez le fuseau horaire où il vit maintenant. Son e-mail lui sert à se connecter, donc une fois qu'il s'est connecté pour la première fois, lui seul peut le modifier.",
+  "web.dashboard.students.contact.timezone": "Fuseau horaire",
+  "web.dashboard.students.contact.timezonePlaceholder": "Non défini : votre fuseau est utilisé",
+  "web.dashboard.students.contact.timezoneHint":
+    "Où il vit maintenant. Son portail et ses e-mails affichent les horaires dans ce fuseau. Les cours déjà réservés ne bougent pas : ils restent au même moment, simplement affichés à sa nouvelle heure locale.",
   "web.dashboard.students.notLiveYet": "Pas encore activé",
   "web.dashboard.students.archivedBadge": "Archivé",
   "web.dashboard.students.notLiveCard.title": "Pas encore activé",
@@ -5172,6 +5176,16 @@ export const fr = {
   "web.myDetailsForm.timezoneHint":
     "Les horaires de vos cours sont affichés dans ce fuseau horaire.",
   "web.myDetailsForm.saving": "Enregistrement…",
+  // Avis du portail quand cet appareil est dans un autre fuseau que celui
+  // enregistré (TimezoneMismatchNotice). {saved}/{device} sont des villes.
+  "web.myClasses.timezoneNotice.body":
+    "Vos horaires de cours sont affichés à l'heure de {saved}, mais cet appareil est réglé sur l'heure de {device}.",
+  "web.myClasses.timezoneNotice.hint":
+    "Vos cours réservés ne bougent pas ; seule l'heure à laquelle ils sont affichés change.",
+  "web.myClasses.timezoneNotice.switch": "Passer à l'heure de {device}",
+  "web.myClasses.timezoneNotice.keep": "Garder l'heure de {saved}",
+  "web.myClasses.timezoneNotice.switched":
+    "C'est fait : vos horaires s'affichent maintenant à l'heure de {device}.",
   // Préférences de notification (NotificationPrefsForm), partagées par les
   // écrans enseignant et élève. De haut en bas, ce sont les trois couches que
   // traverse une notification : l'appareil, le canal du compte et le choix par

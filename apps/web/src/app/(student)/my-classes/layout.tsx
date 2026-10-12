@@ -1,5 +1,6 @@
 import { StudentNav } from "./student-nav";
 import { CaptureTimezone } from "./capture-timezone";
+import { TimezoneMismatchNotice } from "./timezone-mismatch-notice";
 import { LanguagePicker } from "@/components/language-picker";
 import { getCurrentStudent } from "@/lib/auth";
 import { studentPhotoUrl } from "@/lib/storage/student-photo";
@@ -22,7 +23,11 @@ export default async function MisClasesLayout({ children }: { children: React.Re
             : undefined
         }
       />
+      {/* Exactly one of the two: no saved zone → fill it silently from the
+          device; a saved one → offer the device's when it is a different
+          clock, never overwrite it (D-53). */}
       {student && !student.timezone ? <CaptureTimezone /> : null}
+      {student?.timezone ? <TimezoneMismatchNotice savedTimezone={student.timezone} /> : null}
       {children}
     </>
   );

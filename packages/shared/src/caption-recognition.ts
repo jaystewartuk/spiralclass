@@ -337,11 +337,14 @@ export function buildCaptionLine(args: {
   // Monotonic within the publisher; see captionLineId.
   seq: number;
   now: number;
+  // The id the utterance's partials were shown under, so the finished line
+  // replaces them in place (D-198). Omitted when there were none.
+  id?: string;
 }): CaptionLine {
   const line: CaptionLine = {
     t: "line",
     for: args.listenerIdentity,
-    id: captionLineId(args.speakerIdentity, args.now, args.seq),
+    id: args.id ?? captionLineId(args.speakerIdentity, args.now, args.seq),
     text: args.translated,
     from: args.speakerIdentity,
     lang: args.targetLanguage,
@@ -355,6 +358,45 @@ export function buildCaptionLine(args: {
   // is often capitalisation, and that is not two languages.
   if (src && src.toLowerCase() !== args.translated.trim().toLowerCase()) line.src = src;
   return line;
+}
+
+// The longest stretch of a still-spoken utterance a partial carries. A
+// listener reads the words arriving now, not the start of a sentence that
+// began half a minute ago, so a long partial keeps only its tail — cut at a
+// word, marked with an ellipsis — which also keeps the packet small however
+// long the speaker goes without a pause.
+export const PARTIAL_TAIL_CHARS = 140;
+
+// The partial for an utterance still being spoken: what has been heard so
+// far, in the speaker's language, untranslated (D-198). Null when nothing
+// has been heard yet.
+export function buildPartialCaptionLine(args: {
+  heard: string;
+  sourceLanguage: string;
+  speakerIdentity: string;
+  listenerIdentity: string;
+  id: string;
+}): CaptionLine | null {
+  const heard = args.heard.replace(/\s+/g, " ").trim();
+  if (!heard) return null;
+  return {
+    t: "line",
+    for: args.listenerIdentity,
+    id: args.id,
+    text: partialTail(heard),
+    from: args.speakerIdentity,
+    lang: args.sourceLanguage,
+    partial: true,
+  };
+}
+
+export function partialTail(text: string, max = PARTIAL_TAIL_CHARS): string {
+  if (text.length <= max) return text;
+  const tail = text.slice(-max);
+  const space = tail.indexOf(" ");
+  // Drop the cut word unless that would leave nothing.
+  const start = space > 0 && space < tail.length - 1 ? space + 1 : 0;
+  return `…${tail.slice(start)}`;
 }
 
 // Unique per receiver's feed, which keys lines by id so a redelivery replaces

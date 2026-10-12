@@ -459,6 +459,30 @@ export const leadCaptureSchemaWith = (loc: Loc) => {
 };
 export type LeadCaptureInput = z.infer<ReturnType<typeof leadCaptureSchemaWith>>;
 
+// A student's IANA zone as either contact form sends it. An empty field means
+// "leave as is", never "clear": a cleared zone would silently drop the student
+// back onto the teacher's clock (every display path reads
+// `student.timezone ?? teacher.timezone`).
+const optionalStudentTimezone = (loc: Loc) =>
+  z
+    .string()
+    .max(64)
+    .refine(isValidTimezone, { message: loc("validation.invalidTimezone") })
+    .optional()
+    .or(z.literal("").transform(() => undefined));
+
+// The portal's one-tap "use this device's time zone" (the device-zone notice
+// on /my-classes). Required here: the tap names exactly one zone.
+export const studentTimezoneSwitchSchemaWith = (loc: Loc) => {
+  return z.object({
+    timezone: z
+      .string()
+      .min(1)
+      .max(64)
+      .refine(isValidTimezone, { message: loc("validation.invalidTimezone") }),
+  });
+};
+
 // Student self-service contact edit on /mis-clases/cuenta and the mobile
 // equivalent. Email is deliberately absent — changing the sign-in email
 // needs the verified email-change flow, not a plain form field.
@@ -474,12 +498,7 @@ export const studentContactSchemaWith = (loc: Loc) => {
       .trim()
       .optional()
       .transform((v) => (v ? v : undefined)),
-    timezone: z
-      .string()
-      .max(64)
-      .refine(isValidTimezone, { message: loc("validation.invalidTimezone") })
-      .optional()
-      .or(z.literal("").transform(() => undefined)),
+    timezone: optionalStudentTimezone(loc),
   });
 };
 export type StudentContactInput = z.infer<ReturnType<typeof studentContactSchemaWith>>;
@@ -676,6 +695,9 @@ export const teacherEditStudentContactSchemaWith = (loc: Loc) => {
       .trim()
       .optional()
       .transform((v) => (v ? v : undefined)),
+    // Where the student's portal and emails render her class times — for the
+    // student who moved and never opened her own account page.
+    timezone: optionalStudentTimezone(loc),
   });
 };
 export type TeacherEditStudentContactInput = z.infer<

@@ -13,6 +13,7 @@ import { Label } from "@/components/ui/label";
 import { FieldError } from "@/components/ui/field-error";
 import { useFieldErrors } from "@/hooks/use-field-errors";
 import { PhoneNumberField } from "@/components/phone-number-field";
+import { TimezoneSelect } from "@/components/account/timezone-select";
 import {
   updateStudentContactAsTeacherAction,
   type ContactFormState,
@@ -20,7 +21,9 @@ import {
 import { useLocale, useT } from "@/components/locale-provider";
 
 // Roster contact fix: checkout typos in name/email/phone are common and
-// were previously unfixable without support. Email is editable only while
+// were previously unfixable without support. The time zone is here for the
+// student who moved: the one-shot portal capture never overwrites a saved
+// zone (D-53), so without this a teacher had no way to follow her. Email is editable only while
 // the student has never signed in — once their magic-link account exists,
 // the row's email must move together with the auth identity, so the field
 // locks (the student changes it from their own account instead).
@@ -32,6 +35,8 @@ export function ContactEditForm({
   initialPhone,
   emailLocked,
   defaultPhoneCountry,
+  initialTimezone,
+  timezoneOptions,
 }: {
   studentId: string;
   initialName: string;
@@ -41,6 +46,10 @@ export function ContactEditForm({
   // The acting teacher's own country — a same-market default for a bare
   // national-format number, always overridable in the picker below.
   defaultPhoneCountry: string;
+  // The student's saved zone; null renders the "your time zone is used"
+  // placeholder, which is what every display path falls back to.
+  initialTimezone: string | null;
+  timezoneOptions: readonly string[];
 }) {
   const t = useT();
   const locale = useLocale();
@@ -67,6 +76,7 @@ export function ContactEditForm({
       email: fd.get("email") ?? undefined,
       phone: fd.get("phone"),
       phoneCountry: fd.get("phoneCountry") ?? undefined,
+      timezone: fd.get("timezone") ?? undefined,
     });
     if (!parsed.success) {
       const fieldErrors = zodFieldErrors(parsed.error);
@@ -127,6 +137,15 @@ export function ContactEditForm({
         countryPlaceholder={t("web.phoneCountrySelect.placeholder")}
         countrySearchPlaceholder={t("web.phoneCountrySelect.searchPlaceholder")}
         countryEmptyText={t("web.phoneCountrySelect.noResults")}
+      />
+
+      <TimezoneSelect
+        id="student-contact-timezone"
+        label={t("web.dashboard.students.contact.timezone")}
+        placeholder={t("web.dashboard.students.contact.timezonePlaceholder")}
+        hint={t("web.dashboard.students.contact.timezoneHint")}
+        initialTimezone={initialTimezone}
+        options={timezoneOptions}
       />
 
       <div className="flex items-center gap-3">

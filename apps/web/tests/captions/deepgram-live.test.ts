@@ -58,7 +58,7 @@ describe("deepgramListenUrl", () => {
       model: "nova-3",
       language: "es-419",
       smart_format: "true",
-      interim_results: "false",
+      interim_results: "true",
       mip_opt_out: "true",
     });
   });

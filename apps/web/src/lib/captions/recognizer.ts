@@ -108,6 +108,10 @@ export type RecognizerOptions = {
   // SpeechRecognition.lang: regional when that is meaningful (recognitionLocale).
   lang: string;
   onFinal: (text: string) => void;
+  // What has been heard of the utterance still being spoken, each time the
+  // browser hears more (D-198). Optional: a caller that only wants finals
+  // passes nothing.
+  onPartial?: (heard: string) => void;
   // Called once, when the recogniser gives up for good.
   onStopped: (reason: RecognizerStopReason) => void;
   setTimeout?: (fn: () => void, ms: number) => unknown;
@@ -132,6 +136,7 @@ export class TrackRecognizer {
     this.opts = {
       setTimeout: (fn, ms) => globalThis.setTimeout(fn, ms),
       clearTimeout: (h) => globalThis.clearTimeout(h as ReturnType<typeof setTimeout>),
+      onPartial: () => {},
       ...options,
     };
     this.lang = options.lang;
@@ -184,22 +189,30 @@ export class TrackRecognizer {
     const recognition = new this.opts.Ctor();
     recognition.lang = this.lang;
     recognition.continuous = true;
-    // Only finished utterances are ever translated and shown; partials would
-    // be work thrown away.
-    recognition.interimResults = false;
+    // Partials are shown as they are heard, untranslated, so a listener is
+    // never left watching someone talk with no subtitle while a phrase runs
+    // on (D-198). Only finals are translated and kept.
+    recognition.interimResults = true;
     const local = this.local;
     if (local) recognition.processLocally = true;
     this.lastError = null;
 
     recognition.onresult = (event) => {
+      // Chrome reports the finished results first and then the ones still
+      // changing; together, the unfinished ones are the utterance in flight.
+      let heard = "";
       for (let i = event.resultIndex; i < event.results.length; i++) {
         const result = event.results[i];
-        if (!result.isFinal) continue;
         const text = result[0].transcript.trim();
         if (!text) continue;
+        if (!result.isFinal) {
+          heard = heard ? `${heard} ${text}` : text;
+          continue;
+        }
         this.failures = 0;
         this.opts.onFinal(text);
       }
+      if (heard) this.opts.onPartial(heard);
     };
     recognition.onerror = (event) => {
       this.lastError = event.error;

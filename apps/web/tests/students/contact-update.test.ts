@@ -296,6 +296,33 @@ describe("teacher roster edit", () => {
     expect(studentRow().phoneE164).toBe("+525599999999");
   });
 
+  it("moves a student who has moved onto her new time zone, audited as the teacher's change", async () => {
+    Object.assign(studentRow(), { authUserId: AUTH_USER_ID, timezone: "Europe/Vienna" });
+    const result = await applyStudentContactUpdate({
+      studentId: STUDENT_ID,
+      actor: { type: "teacher", teacherId: TEACHER_ID },
+      patch: { timezone: "America/Toronto" },
+    });
+    expect(result.ok).toBe(true);
+    expect(studentRow().timezone).toBe("America/Toronto");
+    expect(state.contactChanges[0]).toMatchObject({
+      actorType: "teacher",
+      actorTeacherId: TEACHER_ID,
+      beforeJson: { timezone: "Europe/Vienna" },
+      afterJson: { timezone: "America/Toronto" },
+    });
+  });
+
+  it("cannot set the time zone of a student off the teacher's roster", async () => {
+    const result = await applyStudentContactUpdate({
+      studentId: STUDENT_ID,
+      actor: { type: "teacher", teacherId: OTHER_TEACHER_ID },
+      patch: { timezone: "America/Toronto" },
+    });
+    expect(result).toEqual({ ok: false, error: "not-found" });
+    expect(studentRow().timezone).toBeNull();
+  });
+
   it("resolves a bare national number using the teacher's picked country", async () => {
     const result = await applyStudentContactUpdate({
       studentId: STUDENT_ID,

@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import {
   CaptionTranslator,
+  TRANSLATE_TIMEOUT_MS,
   type CaptionTranslatorOptions,
 } from "@/lib/captions/caption-translator";
 
@@ -130,6 +131,41 @@ describe("CaptionTranslator", () => {
       fetch: serverReplies({ status: 502, body: { reason: "translate-failed" } }),
     });
     expect(await t.translate("hola")).toBeNull();
+  });
+
+  // One speaker's lines are shown in spoken order, so a request left to hang
+  // would hold back every line after it.
+  it("gives up on, and aborts, a server translation that takes too long", async () => {
+    vi.useFakeTimers();
+    try {
+      let signal: AbortSignal | undefined;
+      const fetch = vi.fn(
+        (_u: string | URL | Request, init?: RequestInit) =>
+          new Promise<Response>(() => {
+            signal = init?.signal ?? undefined;
+          }),
+      );
+      const { t } = make({ fetch });
+      const pending = t.translate("hola");
+      await vi.advanceTimersByTimeAsync(TRANSLATE_TIMEOUT_MS);
+      expect(await pending).toBeNull();
+      expect(signal?.aborted).toBe(true);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("hands a device translation that never settles to the server", async () => {
+    vi.useFakeTimers();
+    try {
+      const { api } = deviceTranslator("available", () => new Promise<string>(() => {}));
+      const { t } = make({ Translator: api });
+      const pending = t.translate("hola");
+      await vi.advanceTimersByTimeAsync(TRANSLATE_TIMEOUT_MS);
+      expect(await pending).toBe("server");
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   it("drops a line when the network fails", async () => {

@@ -35,7 +35,7 @@ Modifiez vos informations, changez votre adresse e-mail de connexion, gérez vos
 
 ## Conseils
 
-- Mettez à jour votre fuseau horaire avant de réserver des cours pendant un voyage.
+- Vous avez déménagé ou vous voyagez ? Si votre appareil est sur une autre heure que votre fuseau enregistré, votre portail vous propose de changer en un geste. Les cours réservés ne bougent pas : ils restent au même moment et sont simplement affichés à la nouvelle heure locale. Votre enseignant peut aussi modifier votre fuseau horaire.
 - Gardez votre adresse e-mail à jour pour recevoir les codes de connexion et les avis concernant vos cours.
 - La suppression du compte comporte un délai de grâce de 30 jours.
 

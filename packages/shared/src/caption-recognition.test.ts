@@ -4,6 +4,9 @@ import {
   assignRecognizers,
   baseLanguage,
   buildCaptionLine,
+  buildPartialCaptionLine,
+  partialTail,
+  PARTIAL_TAIL_CHARS,
   canRecognizeDuringCall,
   captionLineId,
   chooseTranslationRoute,
@@ -282,6 +285,66 @@ describe("buildCaptionLine", () => {
 
   it("omits src when nothing was recognised verbatim", () => {
     expect(buildCaptionLine({ ...base, source: "  " }).src).toBeUndefined();
+  });
+});
+
+describe("buildPartialCaptionLine", () => {
+  const base = {
+    sourceLanguage: "es",
+    speakerIdentity: "t1",
+    listenerIdentity: "s1",
+    id: "t1:1-0",
+  };
+
+  it("carries the words heard so far, untranslated, in the speaker's language", () => {
+    expect(buildPartialCaptionLine({ ...base, heard: "  hola   a todos " })).toEqual({
+      t: "line",
+      for: "s1",
+      id: "t1:1-0",
+      text: "hola a todos",
+      from: "t1",
+      lang: "es",
+      partial: true,
+    });
+  });
+
+  it("is null when nothing has been heard", () => {
+    expect(buildPartialCaptionLine({ ...base, heard: "   " })).toBeNull();
+  });
+});
+
+describe("partialTail", () => {
+  it("leaves a short run of speech alone", () => {
+    expect(partialTail("hola a todos")).toBe("hola a todos");
+  });
+
+  it("keeps the newest words of a long one, cut at a word and marked", () => {
+    const text = `${"uno ".repeat(60)}dos tres`;
+    const tail = partialTail(text);
+    expect(tail.startsWith("…uno ")).toBe(true);
+    expect(tail.endsWith("dos tres")).toBe(true);
+    expect(tail.length).toBeLessThanOrEqual(PARTIAL_TAIL_CHARS + 1);
+  });
+
+  it("cuts mid-word only when the tail has no space at all", () => {
+    expect(partialTail("x".repeat(200), 10)).toBe(`…${"x".repeat(10)}`);
+  });
+});
+
+describe("buildCaptionLine — taking over a partial's id", () => {
+  it("uses the id it is given", () => {
+    const line = buildCaptionLine({
+      translated: "hello",
+      source: "hola",
+      sourceLanguage: "es",
+      targetLanguage: "en",
+      speakerIdentity: "t1",
+      listenerIdentity: "s1",
+      seq: 7,
+      now: 5,
+      id: "t1:1-0",
+    });
+    expect(line.id).toBe("t1:1-0");
   });
 });
 

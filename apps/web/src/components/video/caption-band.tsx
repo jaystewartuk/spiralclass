@@ -360,7 +360,10 @@ export function CaptionBand({
         )}
         {shown.map((entry, index) => (
           <CaptionLineView
-            key={entry.id}
+            // The finished line mounts afresh over the partial it replaces
+            // (D-198), so the log announces it as an addition, translation
+            // and all, rather than as a silent edit of words already there.
+            key={entry.partial ? `${entry.id}:partial` : entry.id}
             entry={entry}
             latest={index === shown.length - 1}
             // A phone shows at most the last TWO, whatever the size step
@@ -432,6 +435,9 @@ function CaptionLineView({
 
   return (
     <div
+      // Words still being spoken change several times a second; a screen
+      // reader is given the finished line instead (see the key above).
+      aria-hidden={entry.partial ? true : undefined}
       className={cn(
         // motion-safe: the slide-up is a nicety; for a reader with reduced
         // motion set, text sliding under their eye as they start reading it

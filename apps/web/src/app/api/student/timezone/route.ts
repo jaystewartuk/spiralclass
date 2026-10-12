@@ -51,9 +51,11 @@ export async function POST(req: NextRequest): Promise<Response> {
     return NextResponse.json({ ok: false, reason: "no-student" }, { status: 403 });
   }
 
-  // Only set if missing — capture is a one-shot at first sign-in. A
-  // student who later moves can update via a future settings UI; we
-  // don't want every login to clobber a manually-set value.
+  // Only set if missing — capture is a one-shot at first sign-in; we
+  // don't want every login to clobber a manually-set value. A student who
+  // later moves is OFFERED her device's zone instead (TimezoneMismatchNotice
+  // in the my-classes layout), or changes it on /my-classes/account, or her
+  // teacher sets it from the student's page.
   if (student.timezone) {
     return NextResponse.json({ ok: true, updated: false });
   }

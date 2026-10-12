@@ -56,6 +56,8 @@ Invitation links are valid for 30 days.
 
 **Can I change a student’s contact details?** Yes. Open their profile and save the change. A student can also update their own details.
 
+**My student moved to another city. How do I change their time zone?** Open their profile, go to **Settings**, pick the new zone under **Time zone** in the contact details and save. Their portal and emails then show class times on the new clock. Lessons already booked do not move: they stay at the same moment and are just shown in the new local time. If you want a lesson at a different time, reschedule it.
+
 **Does archiving cancel future lessons?** No. Review upcoming lessons separately before archiving.
 
 ## Related articles

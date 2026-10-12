@@ -237,6 +237,7 @@ on it.
 | [D-185](./D-185.md) | **Captions move into the browsers**, and a computer in the call covers a phone that cannot; two phones stream to Deepgram |
 | [D-187](./D-187.md) | **Production video moves to a free `e2-micro`** — measured to carry a class, not its recording, so recording goes off     |
 | [D-189](./D-189.md) | **The lesson transcript is the caption text the browsers already recognise**, kept with consent — no audio, no egress     |
+| [D-198](./D-198.md) | **A caption shows the words as they are spoken**; the translation replaces them when the phrase ends                      |
 
 ### The lesson-AI pipeline, and the consent that gates it
 
@@ -564,6 +565,7 @@ records removed before publication — see [What is not here](#what-is-not-here)
 | [D-195](./D-195.md) | One locale per language; a regional locale is a delta over its base   | Decided, not built                   |
 | [D-196](./D-196.md) | Legal text: a person translates, English controls, launch needs it    | Partly built                         |
 | [D-197](./D-197.md) | Prices follow the reader's number format; currency always named       | Decided, not built                   |
+| [D-198](./D-198.md) | Captions show words as spoken; the translation replaces them          | Active (narrows D-27, D-185)         |
 
 ---
 

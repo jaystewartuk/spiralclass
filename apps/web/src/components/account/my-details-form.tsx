@@ -1,20 +1,14 @@
 "use client";
 
-import { useActionState, useEffect, useMemo, useState, type FormEvent } from "react";
+import { useActionState, useState, type FormEvent } from "react";
 import { splitE164, teacherContactSchemaWith, zodFieldErrors } from "@spiralclass/shared";
 import { Button } from "@/components/ui/button";
 import { FormStatus } from "@/components/ui/form-status";
 import { FieldError } from "@/components/ui/field-error";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { PhoneNumberField } from "@/components/phone-number-field";
+import { TimezoneSelect } from "@/components/account/timezone-select";
 import { useFieldErrors } from "@/hooks/use-field-errors";
 import { useLocale, useT } from "@/components/locale-provider";
 
@@ -64,23 +58,6 @@ export function MyDetailsForm({
     initialSplitPhone?.country ?? initialPhoneCountry ?? "MX",
   );
 
-  const [detected, setDetected] = useState<string | null>(null);
-  useEffect(() => {
-    try {
-      setDetected(Intl.DateTimeFormat().resolvedOptions().timeZone);
-    } catch {
-      setDetected(null);
-    }
-  }, []);
-
-  const zones = useMemo(() => {
-    const set = new Set(timezoneOptions);
-    if (detected) set.add(detected);
-    if (initialTimezone) set.add(initialTimezone);
-    return Array.from(set).sort();
-  }, [timezoneOptions, detected, initialTimezone]);
-
-  const [timezone, setTimezone] = useState<string>(initialTimezone ?? "");
   const [phone, setPhone] = useState<string>(initialSplitPhone?.localNumber ?? "");
 
   // Inline per-field validation (canonical form pattern): keep the submit button
@@ -136,23 +113,15 @@ export function MyDetailsForm({
         countryEmptyText={t("web.phoneCountrySelect.noResults")}
       />
 
-      <div className="space-y-1">
-        <Label htmlFor="contact-timezone">{t("web.myDetailsForm.timezone")}</Label>
-        <Select value={timezone || undefined} onValueChange={setTimezone}>
-          <SelectTrigger id="contact-timezone">
-            <SelectValue placeholder={t("web.myDetailsForm.timezonePlaceholder")} />
-          </SelectTrigger>
-          <SelectContent>
-            {zones.map((z) => (
-              <SelectItem key={z} value={z}>
-                {z}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        <input type="hidden" name="timezone" value={timezone} />
-        <p className="text-xs text-muted-foreground">{t("web.myDetailsForm.timezoneHint")}</p>
-      </div>
+      <TimezoneSelect
+        id="contact-timezone"
+        label={t("web.myDetailsForm.timezone")}
+        placeholder={t("web.myDetailsForm.timezonePlaceholder")}
+        hint={t("web.myDetailsForm.timezoneHint")}
+        initialTimezone={initialTimezone}
+        options={timezoneOptions}
+        includeDeviceZone
+      />
 
       <div className="flex items-center gap-3">
         <Button type="submit" disabled={pending}>

@@ -251,6 +251,43 @@ describe("accessibility", () => {
   });
 });
 
+// D-198: the words of a phrase are on screen while it is being said.
+describe("words still being spoken", () => {
+  const partial: CaptionEntry = {
+    id: "1",
+    text: "¿Cómo estás",
+    from: "teacher-1",
+    lang: "es",
+    partial: true,
+    at: 1_000,
+  };
+
+  it.each(["translation", "original", "both"] as const)(
+    'shows them, in the speaker\'s language, in "%s" mode',
+    (display) => {
+      const el = render({ entries: [partial], prefs: { ...DEFAULT_CAPTION_PREFERENCES, display } });
+      const p = [...el.querySelectorAll("p")].find((n) => n.textContent === "¿Cómo estás");
+      expect(p?.getAttribute("lang")).toBe("es");
+    },
+  );
+
+  it("keeps them from a screen reader, which hears the finished line", () => {
+    const el = render({ entries: [partial] });
+    const line = [...el.querySelectorAll("p")].find((n) => n.textContent === "¿Cómo estás");
+    expect(line?.closest('[aria-hidden="true"]')).not.toBeNull();
+  });
+
+  it("puts the finished line in as a new line, so the log announces it", () => {
+    const el = render({ entries: [partial] });
+    const before = [...el.querySelectorAll("p")].find((n) => n.textContent === "¿Cómo estás");
+    render({ entries: [bilingual] });
+    const after = [...el.querySelectorAll("p")].find((n) => n.textContent === "¿Cómo estás hoy?");
+    expect(after).toBeDefined();
+    expect(before?.isConnected).toBe(false);
+    expect(after?.closest('[aria-hidden="true"]')).toBeNull();
+  });
+});
+
 describe("the reader's preferences", () => {
   it("renders nothing when the reader has hidden subtitles", () => {
     // The control a student never had: the room switch is her teacher's, but
