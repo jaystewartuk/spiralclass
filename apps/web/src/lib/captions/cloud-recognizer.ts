@@ -6,7 +6,8 @@ import type { RecognizerStopReason } from "@/lib/captions/recognizer";
 // nothing while the call holds the microphone, measured — the speaker's own
 // browser records the call's OWN microphone track with MediaRecorder and
 // streams it to Deepgram over a WebSocket, turning each final transcript into
-// the same onFinal a browser recogniser produces. The controller then
+// the same onFinal a browser recogniser produces, and each interim one into
+// its onPartial (D-198). The controller then
 // translates and publishes it exactly as it does any other line.
 //
 // It records the LiveKit track, never a second getUserMedia capture, so the
@@ -50,6 +51,8 @@ export type CloudRecognizerOptions = {
   WebSocket: WebSocketCtorLike | null;
   MediaRecorder: MediaRecorderCtorLike | null;
   onFinal: (text: string) => void;
+  // The words of the segment still being spoken, as Deepgram revises them.
+  onPartial?: (heard: string) => void;
   // Called once, when the recogniser gives up for good.
   onStopped: (reason: RecognizerStopReason) => void;
   // The server refused for a reason retrying cannot fix (consent revoked,
@@ -95,10 +98,10 @@ export function pickCloudMimeType(Recorder: MediaRecorderCtorLike | null): strin
   return CLOUD_MIME_TYPES.find((t) => Recorder.isTypeSupported?.(t)) ?? null;
 }
 
-// One Deepgram message → the final transcript it carries, or null. Only
-// "Results" messages marked final count; metadata, speech-started and
-// utterance-end messages, interim results and empty finals are all ignored.
-export function finalTranscriptOf(data: unknown): string | null {
+// One Deepgram message → the transcript it carries and whether it is final,
+// or null. Only "Results" messages count; metadata, speech-started and
+// utterance-end messages and empty transcripts are all ignored.
+export function transcriptOf(data: unknown): { text: string; final: boolean } | null {
   if (typeof data !== "string") return null;
   let msg: {
     type?: unknown;
@@ -110,11 +113,11 @@ export function finalTranscriptOf(data: unknown): string | null {
   } catch {
     return null;
   }
-  if (msg?.type !== "Results" || msg.is_final !== true) return null;
+  if (msg?.type !== "Results") return null;
   const transcript = msg.channel?.alternatives?.[0]?.transcript;
   if (typeof transcript !== "string") return null;
   const text = transcript.trim();
-  return text || null;
+  return text ? { text, final: msg.is_final === true } : null;
 }
 
 export class CloudRecognizer {
@@ -132,6 +135,7 @@ export class CloudRecognizer {
       setTimeout: (fn, ms) => globalThis.setTimeout(fn, ms),
       clearTimeout: (h) => globalThis.clearTimeout(h as ReturnType<typeof setTimeout>),
       now: Date.now,
+      onPartial: () => {},
       ...options,
     };
   }
@@ -188,8 +192,10 @@ export class CloudRecognizer {
     };
     ws.onmessage = (event) => {
       if (this.ws !== ws) return;
-      const text = finalTranscriptOf(event.data);
-      if (text) this.opts.onFinal(text);
+      const result = transcriptOf(event.data);
+      if (!result) return;
+      if (result.final) this.opts.onFinal(result.text);
+      else this.opts.onPartial(result.text);
     };
     ws.onerror = () => {
       // Always followed by onclose, which decides what happens next.

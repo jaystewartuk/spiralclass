@@ -48,12 +48,14 @@ let timers: { fn: () => void; ms: number }[];
 
 function make(opts: { Ctor?: SpeechRecognitionCtorLike; lang?: string } = {}) {
   const onFinal = vi.fn();
+  const onPartial = vi.fn();
   const onStopped = vi.fn();
   const r = new TrackRecognizer({
     Ctor: opts.Ctor ?? (FakeRecognition as unknown as SpeechRecognitionCtorLike),
     track,
     lang: opts.lang ?? "es-MX",
     onFinal,
+    onPartial,
     onStopped,
     setTimeout: (fn, ms) => {
       timers.push({ fn, ms });
@@ -63,7 +65,7 @@ function make(opts: { Ctor?: SpeechRecognitionCtorLike; lang?: string } = {}) {
       timers = [];
     },
   });
-  return { r, onFinal, onStopped };
+  return { r, onFinal, onPartial, onStopped };
 }
 
 const latest = () => FakeRecognition.instances[FakeRecognition.instances.length - 1];
@@ -80,10 +82,10 @@ beforeEach(() => {
 });
 
 describe("TrackRecognizer", () => {
-  it("recognises the given track, continuously, finals only, in the given language", () => {
+  it("recognises the given track, continuously, with partials, in the given language", () => {
     const { r } = make();
     r.start();
-    expect(latest()).toMatchObject({ lang: "es-MX", continuous: true, interimResults: false });
+    expect(latest()).toMatchObject({ lang: "es-MX", continuous: true, interimResults: true });
     expect(latest().startedWith).toBe(track);
   });
 
@@ -96,11 +98,40 @@ describe("TrackRecognizer", () => {
     expect(onFinal).toHaveBeenCalledWith("hola");
   });
 
-  it("ignores interim results", () => {
-    const { r, onFinal } = make();
+  // D-198: a listener sees the words of a phrase as it is spoken, not only
+  // once it ends — measured 2026-10-12, a teacher's phrases ran to ~500
+  // characters before a single subtitle appeared.
+  it("hands the utterance in flight to onPartial, never to onFinal", () => {
+    const { r, onFinal, onPartial } = make();
     r.start();
     latest().onresult?.({ resultIndex: 0, results: [{ isFinal: false, 0: { transcript: "ho" } }] });
     expect(onFinal).not.toHaveBeenCalled();
+    expect(onPartial).toHaveBeenLastCalledWith("ho");
+  });
+
+  it("finishes a final before reporting the next utterance's words, joined", () => {
+    const { r, onFinal, onPartial } = make();
+    r.start();
+    const calls: string[] = [];
+    onFinal.mockImplementation((t: string) => calls.push(`final:${t}`));
+    onPartial.mockImplementation((t: string) => calls.push(`partial:${t}`));
+    latest().onresult?.({
+      resultIndex: 0,
+      results: [
+        { isFinal: true, 0: { transcript: "hola a todos" } },
+        { isFinal: false, 0: { transcript: " hoy vamos" } },
+        { isFinal: false, 0: { transcript: "a hablar " } },
+        { isFinal: false, 0: { transcript: "  " } },
+      ],
+    });
+    expect(calls).toEqual(["final:hola a todos", "partial:hoy vamos a hablar"]);
+  });
+
+  it("reports no partial when only finals arrived", () => {
+    const { r, onPartial } = make();
+    r.start();
+    latest().final("hola");
+    expect(onPartial).not.toHaveBeenCalled();
   });
 
   it("starts a FRESH instance when a session ends on its own", () => {

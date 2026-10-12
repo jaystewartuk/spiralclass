@@ -101,6 +101,42 @@ describe("reduceCaptionFeed", () => {
   });
 });
 
+// D-198: the words of a phrase are shown while it is being said, then the
+// finished, translated line takes their place.
+describe("reduceCaptionFeed — partials", () => {
+  const step = (state: CaptionFeedState, l: CaptionLine, at: number) =>
+    reduceCaptionFeed(state, { kind: "line", line: l, at });
+  const partial = (text: string) => line("u1", { text, lang: "es", partial: true });
+
+  it("grows a partial in place, its lifetime running from the latest words", () => {
+    let state = step(INITIAL_FEED_STATE, partial("hola"), 1_000);
+    state = step(state, partial("hola a todos"), 8_000);
+    expect(state.entries).toEqual([
+      expect.objectContaining({ id: "u1", text: "hola a todos", partial: true, at: 8_000 }),
+    ]);
+    expect(visibleCaptions(state, 1_000 + LINE_TTL_MS + 1)).toHaveLength(1);
+  });
+
+  it("replaces the partial with the finished line, which gets a full lifetime of its own", () => {
+    let state = step(INITIAL_FEED_STATE, partial("hola a todos"), 1_000);
+    state = step(state, line("u1", { text: "hello everyone", src: "hola a todos" }), 4_000);
+    expect(state.entries).toHaveLength(1);
+    expect(state.entries[0]).toMatchObject({
+      text: "hello everyone",
+      src: "hola a todos",
+      at: 4_000,
+    });
+    expect(state.entries[0].partial).toBeUndefined();
+  });
+
+  it("ignores a partial that arrives after its finished line", () => {
+    let state = step(INITIAL_FEED_STATE, line("u1", { text: "hello everyone" }), 4_000);
+    const before = state;
+    state = step(state, partial("hola a"), 5_000);
+    expect(state).toBe(before);
+  });
+});
+
 describe("visibleCaptions", () => {
   it("shows nothing while the feed is inactive, even holding a transcript", () => {
     const state = reduceCaptionFeed(feed([["a", 1_000]]), { kind: "active", on: false });

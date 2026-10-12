@@ -1,6 +1,8 @@
 import {
   assignRecognizers,
   buildCaptionLine,
+  buildPartialCaptionLine,
+  captionLineId,
   splitUtterance,
   type CallRole,
   type CaptionLine,
@@ -32,6 +34,12 @@ import {
 // "cloud": their OWN browser streams their microphone to the paid
 // speech-to-text fallback (cloud-recognizer.ts) and publishes the result like
 // any line of its own speaker's. The other browser runs nothing for them.
+//
+// While an utterance is being spoken its words so far go out (or are shown)
+// as they are heard, untranslated, as a `partial` line under one id; the
+// finished, translated line then takes that same id and replaces it, so the
+// listener is never left with nothing on screen while a phrase runs on
+// (D-198). Partials are never kept and never translated.
 //
 // Each finished utterance is split to the route's size, translated, built
 // into a CaptionLine, and then either PUBLISHED to the other participant —
@@ -126,6 +134,9 @@ type Running = {
   // When this speaker's previous line finished (or the recogniser started):
   // the base for the next line's duration estimate.
   lastFinalAt: number;
+  // The id the utterance being spoken is shown under, from its first partial
+  // until its final takes it over; null between utterances.
+  partialId: string | null;
 };
 
 const SPEAKERS: readonly CallRole[] = ["teacher", "student"];
@@ -268,13 +279,32 @@ export class BrowserCaptions {
       chain: Promise.resolve(),
       recognizer: { start() {}, stop() {} },
       lastFinalAt: this.now(),
+      partialId: null,
     };
     const onFinal = (text: string) => {
       const at = this.now();
       const durationMs = Math.min(Math.max(0, at - run.lastFinalAt), MAX_KEPT_LINE_MS);
       run.lastFinalAt = at;
+      const id = run.partialId ?? undefined;
+      run.partialId = null;
       if (args.session.transcriptCapture) this.keep(text, durationMs, args);
-      run.chain = run.chain.then(() => this.deliver(text, translator, args)).catch(() => {});
+      run.chain = run.chain.then(() => this.deliver(text, id, translator, args)).catch(() => {});
+    };
+    // Not through the chain: a partial is shown the moment it is heard, even
+    // while the previous utterance is still waiting on its translation.
+    const onPartial = (heard: string) => {
+      if (this.disposed) return;
+      run.partialId ??= captionLineId(args.speakerIdentity, this.now(), this.seq++);
+      const line = buildPartialCaptionLine({
+        heard,
+        sourceLanguage: args.direction.source,
+        speakerIdentity: args.speakerIdentity,
+        listenerIdentity: args.listenerIdentity,
+        id: run.partialId,
+      });
+      if (!line) return;
+      if (args.publish) void this.deps.publish(line).catch(() => {});
+      else this.deps.showLocal(line);
     };
     const onStopped = (reason: RecognizerStopReason) => {
       this.givenUp.add(args.key);
@@ -292,6 +322,7 @@ export class BrowserCaptions {
         WebSocket: this.deps.WebSocket,
         MediaRecorder: this.deps.MediaRecorder,
         onFinal,
+        onPartial,
         onStopped,
         onRefused: (reason) => this.deps.onRefused(reason),
       });
@@ -303,6 +334,7 @@ export class BrowserCaptions {
         track: args.track,
         lang: args.lang,
         onFinal,
+        onPartial,
         onStopped,
       });
     }
@@ -329,8 +361,11 @@ export class BrowserCaptions {
     }
   }
 
+  // The first piece takes the id the utterance's partials were shown under,
+  // so it replaces them; any further pieces are new lines after it.
   private async deliver(
     text: string,
+    partialId: string | undefined,
     translator: CaptionTranslator,
     args: {
       direction: { source: string; target: string };
@@ -339,10 +374,14 @@ export class BrowserCaptions {
       publish: boolean;
     },
   ): Promise<void> {
+    let id = partialId;
     for (const piece of splitUtterance(text)) {
+      const pieceId = id;
+      id = undefined;
       const translated = await translator.translate(piece);
       if (translated === null || this.disposed) continue;
       const line = buildCaptionLine({
+        id: pieceId,
         translated,
         source: piece,
         sourceLanguage: args.direction.source,

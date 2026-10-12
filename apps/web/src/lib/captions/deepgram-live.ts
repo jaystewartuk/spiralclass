@@ -144,10 +144,12 @@ export function deepgramLiveLanguage(locale: string): string | null {
   return LANGUAGES.has(lang) ? lang : null;
 }
 
-// The socket URL the browser opens. Finals only (interim_results=false): a
-// caption is translated and shown once per finished phrase, exactly like the
-// browser recogniser's output, and partials would be translated work thrown
-// away. smart_format adds punctuation and casing a reader expects.
+// The socket URL the browser opens. interim_results so the words of a phrase
+// still being spoken are shown as they are heard, like the browser
+// recogniser's partials (D-198). Deepgram bills streaming by audio duration
+// (its pricing page, 2026-10-12), and only finals are translated, so the
+// interims add messages, not cost.
+// smart_format adds punctuation and casing a reader expects.
 //
 // mip_opt_out keeps this audio out of Deepgram's Model Improvement Program:
 // without it Deepgram may store part of the request to train its models,
@@ -160,7 +162,7 @@ export function deepgramListenUrl(language: string): string {
     model: DEEPGRAM_LIVE_MODEL,
     language,
     smart_format: "true",
-    interim_results: "false",
+    interim_results: "true",
     mip_opt_out: "true",
   });
   return `${LISTEN_URL}?${params.toString()}`;

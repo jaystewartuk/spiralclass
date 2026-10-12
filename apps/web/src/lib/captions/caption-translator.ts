@@ -11,7 +11,12 @@ import type { TranslatorApiLike, TranslatorLike } from "@/lib/captions/recognize
 //
 // A line that cannot be translated is dropped (null), never shown
 // untranslated: the listener reads the captions BECAUSE she does not speak
-// the source language.
+// the source language. (She will already have seen its words as they were
+// spoken — D-198's partials — which is all an untranslated line could add.)
+//
+// A translation that takes longer than TRANSLATE_TIMEOUT_MS is a failure.
+// One speaker's lines are shown in the order spoken, so a request left to
+// hang would hold every later line of theirs back behind it.
 
 export type TranslationRefusal = "captions-off" | "no-consent" | "not-entitled" | "not-found";
 
@@ -33,6 +38,37 @@ export type CaptionTranslatorOptions = {
 type Route = "none" | "device" | "server";
 
 const REFUSALS: readonly string[] = ["captions-off", "no-consent", "not-entitled", "not-found"];
+
+type ServerAnswer = {
+  ok?: boolean;
+  text?: unknown;
+  reason?: string;
+  retryAfterMs?: number;
+} | null;
+
+// The server's own call to Google gives up after 5 s (google-translate.ts);
+// this covers that plus the trip to our route, and bounds an on-device
+// translation that never settles.
+export const TRANSLATE_TIMEOUT_MS = 6_000;
+
+function withTimeout<T>(work: Promise<T>, ms: number, onTimeout?: () => void): Promise<T | null> {
+  return new Promise((resolve) => {
+    const timer = setTimeout(() => {
+      onTimeout?.();
+      resolve(null);
+    }, ms);
+    work.then(
+      (value) => {
+        clearTimeout(timer);
+        resolve(value);
+      },
+      () => {
+        clearTimeout(timer);
+        resolve(null);
+      },
+    );
+  });
+}
 
 export class CaptionTranslator {
   private route: Promise<Route> | null = null;
@@ -91,32 +127,31 @@ export class CaptionTranslator {
     }).catch(() => null);
     const translator = await this.device;
     if (!translator) return null;
-    try {
-      const out = (await translator.translate(text)).trim();
-      return out || null;
-    } catch {
-      return null;
-    }
+    const out = await withTimeout(translator.translate(text), TRANSLATE_TIMEOUT_MS);
+    return out?.trim() || null;
   }
 
   private async translateOnServer(text: string): Promise<string | null> {
     if (this.now() < this.pausedUntil) return null;
-    let res: Response;
-    try {
-      res = await this.opts.fetch("/api/captions/translate", {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({ bookingId: this.opts.bookingId, speaker: this.opts.speaker, text }),
-      });
-    } catch {
-      return null;
-    }
-    const body = (await res.json().catch(() => null)) as {
-      ok?: boolean;
-      text?: unknown;
-      reason?: string;
-      retryAfterMs?: number;
-    } | null;
+    const abort = new AbortController();
+    const answer = await withTimeout(
+      this.opts
+        .fetch("/api/captions/translate", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({
+            bookingId: this.opts.bookingId,
+            speaker: this.opts.speaker,
+            text,
+          }),
+          signal: abort.signal,
+        })
+        .then(async (res) => ({ res, body: (await res.json().catch(() => null)) as ServerAnswer })),
+      TRANSLATE_TIMEOUT_MS,
+      () => abort.abort(),
+    );
+    if (!answer) return null;
+    const { res, body } = answer;
     if (res.ok && body?.ok && typeof body.text === "string") return body.text;
     if (res.status === 429) {
       this.pausedUntil = this.now() + Math.max(1_000, body?.retryAfterMs ?? 30_000);

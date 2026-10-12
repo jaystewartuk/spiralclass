@@ -35,6 +35,9 @@ export type CaptionEntry = {
   from?: string;
   lang?: string;
   srcLang?: string;
+  // The words of an utterance still being spoken, untranslated, in `lang`
+  // (CaptionLine.partial, D-198). Its finished line replaces it.
+  partial?: true;
   // Client receipt time (epoch ms).
   at: number;
 };
@@ -92,15 +95,23 @@ export function reduceCaptionFeed(
     srcLang: line.srcLang,
     at,
   };
+  if (line.partial) entry.partial = true;
   // A redelivery of a line we already hold must replace, never stack —
   // LiveKit's reliable channel can deliver twice, and the id exists for
   // exactly this.
   const existing = state.entries.findIndex((e) => e.id === line.id);
   if (existing !== -1) {
+    const held = state.entries[existing];
+    // A partial never overwrites the finished line it led to: one that
+    // arrives late would put untranslated words back over the translation.
+    if (entry.partial && !held.partial) return state;
     const entries = state.entries.slice();
-    // Keep the ORIGINAL receipt time: a redelivery is not a new utterance,
-    // and re-arming the lifetime would strand a stale line on screen.
-    entries[existing] = { ...entry, at: state.entries[existing].at };
+    // A partial growing, or its finished line arriving, is the utterance
+    // still in progress, so its lifetime runs from now — a long phrase must
+    // not age off screen while it is being said, and its translation gets a
+    // full read. A redelivery of a finished line is not new: re-arming its
+    // lifetime would strand a stale line on screen.
+    entries[existing] = { ...entry, at: held.partial ? at : held.at };
     return { ...state, entries, active: true };
   }
   const entries = [...state.entries, entry];

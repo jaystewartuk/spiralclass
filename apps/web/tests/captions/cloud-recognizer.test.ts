@@ -4,7 +4,7 @@ import {
   CLOUD_MAX_FAILURES,
   CLOUD_TIMESLICE_MS,
   CloudRecognizer,
-  finalTranscriptOf,
+  transcriptOf,
   pickCloudMimeType,
   type CloudRecognizerOptions,
   type MediaRecorderCtorLike,
@@ -105,6 +105,7 @@ const refuse =
 
 function setup(over: Partial<CloudRecognizerOptions> = {}) {
   const finals: string[] = [];
+  const partials: string[] = [];
   const stopped: string[] = [];
   const onRefused = vi.fn();
   const r = new CloudRecognizer({
@@ -114,6 +115,7 @@ function setup(over: Partial<CloudRecognizerOptions> = {}) {
     WebSocket: FakeSocket as unknown as WebSocketCtorLike,
     MediaRecorder: FakeRecorder as unknown as MediaRecorderCtorLike,
     onFinal: (t) => finals.push(t),
+    onPartial: (t) => partials.push(t),
     onStopped: (reason) => stopped.push(reason),
     onRefused,
     createStream: (t) => ({ tracks: [t] }) as unknown as MediaStream,
@@ -128,7 +130,7 @@ function setup(over: Partial<CloudRecognizerOptions> = {}) {
     now: () => clock,
     ...over,
   });
-  return { r, finals, stopped, onRefused };
+  return { r, finals, partials, stopped, onRefused };
 }
 
 // Real ticks: Response.json() in Node crosses a macrotask.
@@ -187,8 +189,8 @@ describe("CloudRecognizer — connecting and streaming", () => {
     expect(socket().sent).toHaveLength(1);
   });
 
-  it("passes on finals only", async () => {
-    const { r, finals } = setup();
+  it("passes finals to onFinal and interims to onPartial, ignoring the rest", async () => {
+    const { r, finals, partials } = setup();
     r.start();
     await flush();
     socket().open();
@@ -198,6 +200,7 @@ describe("CloudRecognizer — connecting and streaming", () => {
     socket().message(JSON.stringify({ type: "Metadata" }));
     socket().message("not json");
     expect(finals).toEqual(["hola a todos"]);
+    expect(partials).toEqual(["parcial"]);
   });
 });
 
@@ -386,7 +389,7 @@ describe("CloudRecognizer — stopping", () => {
   });
 });
 
-describe("pickCloudMimeType / finalTranscriptOf", () => {
+describe("pickCloudMimeType / transcriptOf", () => {
   it("prefers WebM/Opus, falls back to Ogg/Opus, and answers null otherwise", () => {
     expect(pickCloudMimeType(FakeRecorder as unknown as MediaRecorderCtorLike)).toBe(
       "audio/webm;codecs=opus",
@@ -399,10 +402,11 @@ describe("pickCloudMimeType / finalTranscriptOf", () => {
     expect(pickCloudMimeType(function R() {} as unknown as MediaRecorderCtorLike)).toBeNull();
   });
 
-  it("reads only a final Results message's first alternative", () => {
-    expect(finalTranscriptOf(result(" hola "))).toBe("hola");
-    expect(finalTranscriptOf(result("hola", false))).toBeNull();
-    expect(finalTranscriptOf(JSON.stringify({ type: "Results", is_final: true }))).toBeNull();
-    expect(finalTranscriptOf(new ArrayBuffer(2))).toBeNull();
+  it("reads a Results message's first alternative and whether it is final", () => {
+    expect(transcriptOf(result(" hola "))).toEqual({ text: "hola", final: true });
+    expect(transcriptOf(result("hola", false))).toEqual({ text: "hola", final: false });
+    expect(transcriptOf(JSON.stringify({ type: "Results", is_final: true }))).toBeNull();
+    expect(transcriptOf(JSON.stringify({ type: "UtteranceEnd" }))).toBeNull();
+    expect(transcriptOf(new ArrayBuffer(2))).toBeNull();
   });
 });
