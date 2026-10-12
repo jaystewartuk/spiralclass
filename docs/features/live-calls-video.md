@@ -153,9 +153,13 @@ That lasts until preview has a LiveKit server of its own.
     language, otherwise by the browser's speech service (Google, for Chrome) —
     and each finished utterance is translated on the device when the browser
     has a translator for the pair (desktop Chrome), otherwise by
-    `POST /api/captions/translate` through Google Cloud Translation. Only
-    finished utterances are translated; interim results never leave the
-    browser. There is no server-side captions process: the one paid path
+    `POST /api/captions/translate` through Google Cloud Translation.
+    **The words are on screen while they are being said**
+    ([D-198](../decisions/D-198.md)): what the recogniser has heard of the
+    phrase in progress goes to the listener at once, untranslated, and the
+    finished, translated line replaces it when the phrase ends. Only finished
+    utterances are translated or kept for the transcript, and a translation
+    that takes longer than 6 seconds is dropped. There is no server-side captions process: the one paid path
     (below) streams from a participant's own browser to Deepgram.
     - **Who recognises whom.** Each person's speech is recognised by their
       own browser when it can recognise during a call — today that means
@@ -166,7 +170,8 @@ That lasts until preview has a LiveKit server of its own.
       it can, as a participant attribute), so they agree without talking.
     - **When neither browser can — two phones.** Each person's own browser
       records their call microphone track and streams it to Deepgram
-      (Nova-3, finals only, opted out of Deepgram's model training), and the
+      (Nova-3, with interim results for the words in progress, opted out of
+      Deepgram's model training), and the
       transcript goes through the same translate-and-publish path. This is
       the only case that uses it: never for a speaker a browser in the room
       can recognise, never for the student without her consent. Each

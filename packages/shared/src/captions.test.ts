@@ -75,6 +75,29 @@ describe("decodeCaption defensive parsing", () => {
 // They are OPTIONAL on the wire because any client running an older build
 // predates them, and every one of those must keep rendering subtitles
 // unchanged.
+describe("decodeCaption partial lines (D-198)", () => {
+  const bytes = (o: unknown) => new TextEncoder().encode(JSON.stringify(o));
+
+  it("round-trips a partial", () => {
+    const msg: CaptionMessage = {
+      t: "line",
+      for: "s1",
+      id: "a",
+      text: "hola",
+      lang: "es",
+      partial: true,
+    };
+    expect(decodeCaption(encodeCaption(msg))).toEqual(msg);
+  });
+
+  it("treats anything but `true` as a finished line", () => {
+    const line = decodeCaption(
+      bytes({ t: "line", for: "s1", id: "a", text: "hola", partial: "yes" }),
+    );
+    expect(line).toEqual({ t: "line", for: "s1", id: "a", text: "hola" });
+  });
+});
+
 describe("decodeCaption enrichment fields", () => {
   const bytes = (s: string) => new TextEncoder().encode(s);
 

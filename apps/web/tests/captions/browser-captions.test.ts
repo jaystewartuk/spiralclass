@@ -545,3 +545,139 @@ describe("BrowserCaptions — where lines go", () => {
     expect(published).toHaveLength(0);
   });
 });
+
+// D-198. Measured 2026-10-12: a teacher's phrases ran to ~500 characters, and
+// a listener reading the translation saw nothing until each one ended and
+// its translation came back. The words now go out as they are heard.
+describe("BrowserCaptions — words as they are spoken (D-198)", () => {
+  it("publishes the words so far, untranslated, under one id that the translated line then takes", async () => {
+    const { c, published, fetch } = setup();
+    c.sync(input());
+    recognizers[0].onPartial?.("¿Cómo");
+    recognizers[0].onPartial?.("¿Cómo estás");
+    expect(fetch).not.toHaveBeenCalled();
+    expect(published).toEqual([
+      {
+        t: "line",
+        for: "s1",
+        id: "t1:1000-0",
+        text: "¿Cómo",
+        from: "t1",
+        lang: "es",
+        partial: true,
+      },
+      {
+        t: "line",
+        for: "s1",
+        id: "t1:1000-0",
+        text: "¿Cómo estás",
+        from: "t1",
+        lang: "es",
+        partial: true,
+      },
+    ]);
+    recognizers[0].onFinal("¿Cómo estás?");
+    await flush();
+    expect(published[2]).toEqual({
+      t: "line",
+      for: "s1",
+      id: "t1:1000-0",
+      text: "EN(¿Cómo estás?)",
+      src: "¿Cómo estás?",
+      from: "t1",
+      lang: "en",
+      srcLang: "es",
+    });
+  });
+
+  it("starts a new id for the next utterance", async () => {
+    const { c, published } = setup();
+    c.sync(input());
+    recognizers[0].onPartial?.("uno");
+    recognizers[0].onFinal("uno");
+    recognizers[0].onPartial?.("dos");
+    await flush();
+    const ids = published.map((l) => `${l.partial ? "p" : "f"}:${l.id}`);
+    expect(ids).toEqual(["p:t1:1000-0", "p:t1:1000-1", "f:t1:1000-0"]);
+  });
+
+  it("shows the next utterance's words while the previous one is still being translated", async () => {
+    let release: () => void = () => {};
+    const slow = new Promise<void>((r) => (release = r));
+    const fetch = vi.fn(async (_u: string | URL | Request, init?: RequestInit) => {
+      const { text } = JSON.parse(String(init?.body)) as { text: string };
+      await slow;
+      return new Response(JSON.stringify({ ok: true, text: `EN(${text})` }), { status: 200 });
+    });
+    const { c, published } = setup({ fetch });
+    c.sync(input());
+    recognizers[0].onFinal("una frase larga");
+    recognizers[0].onPartial?.("y la siguiente");
+    await flush();
+    expect(published).toEqual([expect.objectContaining({ text: "y la siguiente", partial: true })]);
+    release();
+    await flush();
+    expect(published[1]).toMatchObject({ text: "EN(una frase larga)" });
+  });
+
+  it("shows, never publishes, the words of the other participant it is recognising", () => {
+    const { c, published, shown } = setup();
+    c.sync(
+      input({
+        room: { ...input().room, remote: { identity: "s1", micTrack: remoteMic, capable: false } },
+      }),
+    );
+    recognizers[1].onPartial?.("How are");
+    expect(published).toHaveLength(0);
+    expect(shown).toEqual([
+      expect.objectContaining({
+        for: "t1",
+        from: "s1",
+        lang: "en",
+        text: "How are",
+        partial: true,
+      }),
+    ]);
+  });
+
+  it("never keeps a partial in the transcript", () => {
+    const { c, kept } = setup();
+    c.sync(input({ session: SESSION({ transcriptCapture: true }) }));
+    recognizers[0].onPartial?.("hola");
+    expect(kept).toHaveLength(0);
+  });
+
+  it("carries only the tail of a long run of speech, cut at a word", () => {
+    const { c, published } = setup();
+    c.sync(input());
+    recognizers[0].onPartial?.(`${"palabra ".repeat(40)}final`);
+    const text = published[0].text;
+    expect(text.startsWith("…palabra")).toBe(true);
+    expect(text.endsWith("final")).toBe(true);
+    expect(text.length).toBeLessThanOrEqual(141);
+  });
+
+  it("gives a long utterance's first piece the partial's id and the rest new ones", async () => {
+    const { c, published } = setup();
+    c.sync(input());
+    recognizers[0].onPartial?.("aaa");
+    recognizers[0].onFinal(`${"a".repeat(300)}. ${"b".repeat(300)}.`);
+    await flush();
+    const [partial, first, second] = published.map((l) => l.id);
+    expect(first).toBe(partial);
+    expect(second).not.toBe(partial);
+  });
+
+  it("publishes a cloud recogniser's partials the same way", () => {
+    const { c, published } = setup({ SpeechRecognition: null });
+    c.sync(
+      input({
+        session: SESSION({ cloudRecognition: true }),
+        selfCapable: false,
+        room: { ...input().room, remote: { identity: "s1", micTrack: remoteMic, capable: false } },
+      }),
+    );
+    clouds[0].onPartial?.("hola");
+    expect(published).toEqual([expect.objectContaining({ text: "hola", partial: true })]);
+  });
+});

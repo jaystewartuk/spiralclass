@@ -4,7 +4,8 @@
 // dedicated topic.
 //
 // Two message kinds travel the channel:
-//   * "line"  — one finished, translated caption to show.
+//   * "line"  — one caption to show: a finished, translated utterance, or
+//               (`partial`) the words of one still being spoken.
 //   * "state" — captions just turned on/off for this participant; tells the
 //               receiver to show or hide the caption band (so turning
 //               captions off clears the screen immediately rather than
@@ -60,6 +61,19 @@ export type CaptionLine = {
   // both get it wrong otherwise when the two languages sit in one card.
   lang?: string;
   srcLang?: string;
+  // THE WORDS OF AN UTTERANCE STILL BEING SPOKEN (D-198). `text` is what the
+  // recogniser has heard so far, in the SPEAKER's language and untranslated
+  // (`lang` names it; there is no `src`), and the line is sent again, under
+  // the same `id`, every time the recogniser hears more. The finished,
+  // translated line then arrives under that same id and replaces it.
+  //
+  // Without it a listener saw nothing until a phrase ended and its
+  // translation came back — measured 2026-10-12 at up to ~500 characters,
+  // half a minute of speech, of a teacher talking with no subtitle at all.
+  //
+  // Optional so an older client still renders a partial as an ordinary line,
+  // replaced by the finished one exactly as a redelivery is.
+  partial?: true;
 };
 
 export type CaptionState = {
@@ -104,6 +118,7 @@ export function decodeCaption(bytes: Uint8Array): CaptionMessage | null {
     if (typeof obj.from === "string" && obj.from.length > 0) line.from = obj.from;
     if (typeof obj.lang === "string" && obj.lang.length > 0) line.lang = obj.lang;
     if (typeof obj.srcLang === "string" && obj.srcLang.length > 0) line.srcLang = obj.srcLang;
+    if (obj.partial === true) line.partial = true;
     return line;
   }
   if (obj.t === "state") {
