@@ -134,10 +134,6 @@
   "components/materials/method-picker.tsx": {
     "rawButton": 3
   },
-  "components/mobile-nav-panel.tsx": {
-    "arbitraryValue": 1,
-    "rawButton": 2
-  },
   "components/packages/package-details-sheet.tsx": {
     "rawButton": 1
   },

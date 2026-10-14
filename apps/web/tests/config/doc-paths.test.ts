@@ -89,20 +89,6 @@ const DELETED_DOCS = new Set([
   "docs/product/SUBSCRIPTIONS.md",
 ]);
 
-/**
- * Paths a SCRIPT writes rather than a person. Absent from a fresh checkout
- * until someone runs the generator, so "it does not exist" is not evidence of
- * anything wrong — unlike every entry above, which names something gone.
- *
- * `docs/development/tested-behaviour.md` is `pnpm test:spec`'s output. Its path
- * has been wrong twice — it named `docs/engineering/` until 2026-09-06 and
- * `docs/testing/` until that directory folded into `docs/development/` — both
- * times because nothing in the gate calls the generator, so the broken output
- * path went unnoticed for weeks. An entry here is exempt from the
- * existence check, which is exactly why it cannot catch that.
- */
-const GENERATED_DOCS = new Set(["docs/development/tested-behaviour.md"]);
-
 function isTextFile(name: string): boolean {
   return TEXT_FILE.test(name) || BARE_TEXT_FILES.has(name);
 }
@@ -158,7 +144,7 @@ describe("docs paths written in the repo", () => {
 
   it("names no docs file that does not exist", () => {
     const offenders = [...dangling]
-      .filter(([path]) => !DELETED_DOCS.has(path) && !GENERATED_DOCS.has(path))
+      .filter(([path]) => !DELETED_DOCS.has(path))
       .map(([path, files]) => `${path}\n    written by: ${files.join(", ")}`);
 
     expect(

@@ -96,7 +96,7 @@ config/env/*.env, and the *.example files under infra/."
 fi
 
 # A command that only READS is never blocked for what it happens to CONTAIN.
-# This is what keeps `grep -rn "fly deploy" docs/` working — a session asking a
+# This is what keeps `grep -rn "pnpm promote" docs/` working — a session asking a
 # question about the deploy path is not deploying, and a guard that cannot tell
 # the difference is one people learn to work around.
 if [[ "$command_line" =~ ^[[:space:]]*(grep|rg|ag|cat|head|tail|less|wc|find|ls|file|git[[:space:]]+grep)[[:space:]] ]]; then
@@ -148,7 +148,7 @@ fi
 
 # The database half of every deploy, on its own since the production targets
 # were split ([D-177]'s addendum). Matched on the name anywhere in the COMMAND,
-# like the Fly script: `bash -c` or a path prefix is a likelier way a session
+# like the Cloud Run scripts: `bash -c` or a path prefix is a likelier way a session
 # would reach it than a bare invocation.
 #
 # ⚠️ The original reason given for matching anywhere was that "nothing ordinary

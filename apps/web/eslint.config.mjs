@@ -35,7 +35,6 @@ export default [
       "src/app/(app)/dashboard/students/[studentId]/insights-consent-control.tsx",
       // Full i18n sweep (dashboard/settings/student-portal/booking/components/admin/legal).
       "src/app/(app)/app-nav.tsx",
-      "src/components/mobile-nav-panel.tsx",
       "src/components/report-problem-dialog.tsx",
       "src/components/report-problem-provider.tsx",
       "src/app/(app)/dashboard/calendar/page.tsx",
@@ -48,8 +47,6 @@ export default [
       "src/app/(app)/dashboard/classes/[bookingId]/override-action.tsx",
       "src/app/(app)/dashboard/classes/[bookingId]/page.tsx",
       "src/app/(app)/dashboard/classes/[bookingId]/prepare-card.tsx",
-      "src/app/(app)/dashboard/classes/[bookingId]/present/page.tsx",
-      "src/app/(app)/dashboard/classes/[bookingId]/present/present-mode.tsx",
       "src/app/(app)/dashboard/classes/book/page.tsx",
       "src/app/(app)/dashboard/classes/book/student-picker.tsx",
       "src/app/(app)/dashboard/classes/book/teacher-slot-button.tsx",
@@ -57,8 +54,6 @@ export default [
       "src/app/(app)/dashboard/classes/class-list.tsx",
       "src/app/(app)/dashboard/classes/classes-toolbar.tsx",
       "src/app/(app)/dashboard/customize/page.tsx",
-      "src/app/(app)/dashboard/discounts/discount-forms.tsx",
-      "src/app/(app)/dashboard/discounts/page.tsx",
       "src/app/(app)/dashboard/leads/lead-actions.tsx",
       "src/app/(app)/dashboard/leads/lead-list.tsx",
       "src/app/(app)/dashboard/leads/lead-message.tsx",
@@ -117,13 +112,10 @@ export default [
       "src/app/(app)/payments/payments-view.tsx",
       "src/app/(app)/settings/account/account-deletion-form.tsx",
       "src/app/(app)/settings/account/country-form.tsx",
-      "src/app/(app)/settings/account/discipline-form.tsx",
       "src/app/(app)/settings/account/page.tsx",
       "src/app/(app)/settings/availability/page.tsx",
       "src/app/(app)/settings/billing/page.tsx",
       "src/app/(app)/settings/billing/plan-buttons.tsx",
-      "src/app/(app)/settings/blocked-dates/blocked-date-form.tsx",
-      "src/app/(app)/settings/blocked-dates/page.tsx",
       "src/app/(app)/settings/booking-page/bio-form.tsx",
       "src/app/(app)/settings/booking-page/booking-page-status.tsx",
       "src/app/(app)/settings/booking-page/booking-slug-form.tsx",
@@ -156,7 +148,6 @@ export default [
       "src/app/(student)/my-classes/buy/page.tsx",
       "src/app/(student)/my-classes/buy/portal-purchase-flow.tsx",
       "src/app/(student)/my-classes/calendar/page.tsx",
-      "src/app/(student)/my-classes/materials/page.tsx",
       "src/app/(student)/my-classes/messages/[teacherId]/page.tsx",
       "src/app/(student)/my-classes/messages/new/page.tsx",
       "src/app/(student)/my-classes/messages/page.tsx",
@@ -166,7 +157,6 @@ export default [
       "src/app/(student)/my-classes/referral-share.tsx",
       "src/app/(student)/my-classes/student-nav.tsx",
       "src/app/about/page.tsx",
-      "src/app/admin/admin-nav.tsx",
       "src/app/admin/audit/page.tsx",
       "src/app/admin/error.tsx",
       "src/app/admin/layout.tsx",
@@ -195,7 +185,6 @@ export default [
       "src/app/admin/uat/page.tsx",
       "src/app/b/[slug]/buy/purchase-flow.tsx",
       "src/app/b/[slug]/buy/result/page.tsx",
-      "src/app/b/[slug]/buy/single-class-slot-picker.tsx",
       "src/app/b/[slug]/buy/wise/[ref]/page.tsx",
       "src/app/b/[slug]/lead-form.tsx",
       "src/app/b/[slug]/page.tsx",
@@ -207,7 +196,6 @@ export default [
       "src/app/layout.tsx",
       "src/app/m/login/page.tsx",
       "src/app/page.tsx",
-      "src/app/precios/page.tsx",
       "src/app/privacy-notice/page.tsx",
       "src/components/account-badge.tsx",
       "src/components/account-menu.tsx",
@@ -309,17 +297,17 @@ export default [
       "src/app/(app)/dashboard/students/**/*.tsx",
       "src/app/(student)/my-classes/**/*.tsx",
       "src/app/page.tsx",
-      "src/app/precios/page.tsx",
     ],
     plugins: { design: { rules: { tokens: designTokens } } },
     rules: { "design/tokens": "warn" },
   },
   {
     // react-hooks/exhaustive-deps crashes ("a.getSource is not a function")
-    // analyzing this hook's large async-IIFE effect body — an inline
+    // analyzing a large async-IIFE effect body — an inline
     // eslint-disable-next-line doesn't help since the crash happens during
     // the rule's own analysis, before directive suppression applies. Disable
-    // the rule for this file at the config level so it's never invoked here.
+    // the rule for these files at the config level so it's never invoked here.
+    // (The hook it was first disabled for, use-live-captions.ts, is deleted.)
     // class-call.tsx's own connect effect hit the identical crash once its
     // async IIFE grew with the call-analytics instrumentation (docs/architecture/
     // VIDEO_CALL_POSTHOG_AUDIT.md) — same root cause, same fix.
@@ -334,7 +322,6 @@ export default [
     // the crash happens inside the rule's own analysis, before directive
     // suppression applies.
     files: [
-      "src/lib/captions/use-live-captions.ts",
       "src/lib/captions/use-caption-feed.ts",
       "src/components/video/class-call.tsx",
       "src/components/materials/material-form.tsx",
