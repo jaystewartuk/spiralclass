@@ -16,8 +16,9 @@ truth — not a longer version of this one.
 ## The four rules that override everything else
 
 1. **A session opens a pull request. It does not merge, deploy or promote.**
-   `pnpm pr` is the end of the road. Merging and `pnpm promote` are the
-   operator's call, taken per change, on timing that is theirs. Every change —
+   `pnpm pr` is the end of the road. Merging, and approving the production
+   deploy a merge starts (D-199), are the operator's call, taken per change, on
+   timing that is theirs. Every change —
    documentation included — lands through a PR; there is no direct-push
    exception.
 2. **Never bypass the gate.** No `SKIP_GATE=1`, no `--no-verify`. A push that

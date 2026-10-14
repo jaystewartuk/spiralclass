@@ -388,6 +388,7 @@ a hook — is a caller.
 | [D-171](./D-171.md) | One visual baseline set, owned by the machine that gates the merge — the macOS half is deleted |
 | [D-179](./D-179.md) | **CodeQL gates on new alerts through a ruleset**, not a workflow and not a required check      |
 | [D-180](./D-180.md) | The two counts every PR moves are stated as floors, so open branches stop conflicting on them  |
+| [D-199](./D-199.md) | **A merge starts its own production deploy**; the owner's approval is the release decision     |
 
 ### Privacy, governance and publication
 
@@ -566,6 +567,7 @@ records removed before publication — see [What is not here](#what-is-not-here)
 | [D-196](./D-196.md) | Legal text: a person translates, English controls, launch needs it    | Partly built                         |
 | [D-197](./D-197.md) | Prices follow the reader's number format; currency always named       | Decided, not built                   |
 | [D-198](./D-198.md) | Captions show words as spoken; the translation replaces them          | Active (narrows D-27, D-185)         |
+| [D-199](./D-199.md) | A merge starts its own production deploy, behind the approval         | Active (narrows D-119, D-157)        |
 
 ---
 

@@ -181,6 +181,32 @@ if [ "${EXISTING_POLICIES}" != "production" ]; then
 fi
 echo "  ✓ every production deploy waits for ${REPO%%/*}, and only the production branch can deploy."
 
+# ── promote: the environment PROMOTE_TOKEN lives in (D-199) ──────────────────
+# promote-on-green.yml fast-forwards `production` with a token acting as the
+# owner. Only `main` may reach this environment, so a workflow on any other
+# branch cannot read the token. No reviewer here: the approval that matters is
+# on `production`, and a second one would be a click that guards nothing.
+# The token itself is made by hand — docs/deployment/BRANCH_PROTECTION.md.
+echo "Applying the promote environment on ${REPO}…"
+gh api -X PUT "repos/${REPO}/environments/promote" --input - >/dev/null <<JSON
+{
+  "wait_timer": 0,
+  "deployment_branch_policy": { "protected_branches": false, "custom_branch_policies": true }
+}
+JSON
+PROMOTE_POLICIES="$(gh api "repos/${REPO}/environments/promote/deployment-branch-policies" --jq '[.branch_policies[].name] | join(",")')"
+if [ -z "${PROMOTE_POLICIES}" ]; then
+  gh api -X POST "repos/${REPO}/environments/promote/deployment-branch-policies" \
+    -f name=main -f type=branch >/dev/null
+  PROMOTE_POLICIES="main"
+fi
+if [ "${PROMOTE_POLICIES}" != "main" ]; then
+  echo "  ✗ the promote environment's branch policies are '${PROMOTE_POLICIES}', not just 'main'." >&2
+  echo "    Fix them in Settings → Environments → promote → Deployment branches." >&2
+  exit 1
+fi
+echo "  ✓ only main can reach PROMOTE_TOKEN."
+
 # ── Security tab: reporting, code scanning, and merge protection (D-179) ─────
 # SECURITY.md and the issue-template contact link both send a reporter to the
 # private "Report a vulnerability" flow. With the setting off that link is a

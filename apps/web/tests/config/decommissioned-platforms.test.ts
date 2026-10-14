@@ -62,12 +62,7 @@ const PACKAGE_JSONS = ["package.json", "apps/web/package.json", "packages/shared
  * the hole open, which is the whole lesson of D-164.
 
  */
-const DEPLOY_CONFIGS = [
-  "Dockerfile",
-  "config/cloudrun/production.env",
-  "docker-compose.yml",
-  "turbo.json",
-];
+const DEPLOY_CONFIGS = ["Dockerfile", "config/cloudrun/production.env", "turbo.json"];
 
 /**
  * Files with no comment syntax, where a BARE name is unambiguous.
@@ -188,6 +183,17 @@ function isCommentLine(line: string): boolean {
   return trimmed.startsWith("//") || trimmed.startsWith("*") || trimmed.startsWith("/*");
 }
 
+/**
+ * A row naming a file that is not there checks nothing and still passes. Both
+ * lists below once returned early on an absent file, and `DEPLOY_CONFIGS`
+ * carried a repo-root `docker-compose.yml` that did not exist — a green row
+ * guarding nothing. A missing file now fails, so a deleted or moved config
+ * forces the list to be repointed rather than quietly going blind.
+ */
+const MISSING_ROW = (relPath: string) =>
+  `${relPath} is listed here but does not exist — remove the row or repoint it at where ` +
+  `the file lives now; an absent file is checked for nothing.`;
+
 describe("decommissioned platforms stay decommissioned", () => {
   const violations: string[] = [];
 
@@ -221,7 +227,7 @@ describe("decommissioned platforms stay decommissioned", () => {
 
   it.each(PACKAGE_JSONS)("%s declares no decommissioned-platform dependency", (relPath) => {
     const absolute = resolve(REPO_ROOT, relPath);
-    if (!existsSync(absolute)) return;
+    expect(existsSync(absolute), MISSING_ROW(relPath)).toBe(true);
 
     const pkg = JSON.parse(readFileSync(absolute, "utf8")) as {
       dependencies?: Record<string, string>;
@@ -243,7 +249,7 @@ describe("decommissioned platforms stay decommissioned", () => {
 
   it.each(DEPLOY_CONFIGS)("%s sets no decommissioned-platform variable", (relPath) => {
     const absolute = resolve(REPO_ROOT, relPath);
-    if (!existsSync(absolute)) return;
+    expect(existsSync(absolute), MISSING_ROW(relPath)).toBe(true);
 
     const patterns = NO_COMMENT_CONFIGS.has(relPath)
       ? [...DEPLOY_CONFIG_PATTERNS, ...BARE_NAME_PATTERNS]

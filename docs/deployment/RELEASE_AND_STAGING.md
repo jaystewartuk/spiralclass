@@ -17,8 +17,10 @@ that trigger off the workflow file and refuses before the fast-forward if it is
 ever missing. Preview moved to the Oracle A1 box
 ([D-150](../decisions/D-150.md)), which was destroyed on 2026-09-19
 ([D-182](../decisions/D-182.md)); preview has no deploy target until it is
-rebuilt, and `scripts/oracle-deploy.sh` is the way back. Merging to `main`
-deploys nothing. Production's recovery path from the laptop is
+rebuilt, and `scripts/oracle-deploy.sh` is the way back. Since
+[D-199](../decisions/D-199.md) a merge to `main` starts a production deploy once
+Gate and Heavy are green, and it waits for the owner's approval on the
+`production` environment. Production's recovery path from the laptop is
 [below](#recovering-a-release-by-hand).
 
 This file is the operator runbook — the one-time setup, the everyday release
