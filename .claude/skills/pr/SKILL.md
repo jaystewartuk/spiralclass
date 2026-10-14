@@ -13,8 +13,9 @@ body.
 
 ## Why this stops at the PR
 
-The back half is `gh pr merge --squash --delete-branch`, and then
-`pnpm promote` when production is actually wanted.
+The back half is `gh pr merge --squash --delete-branch`. Since
+[D-199](../../../docs/decisions/D-199.md) the merge starts its own production
+deploy once the runners are green, and it waits for the operator's approval.
 
 There used to be a `/ship-pr` skill that batched all of that, because the heavy
 suites could only run on the operator's laptop and needed to run once rather
@@ -107,5 +108,5 @@ commit: the push updates it and the script reports the existing number.
 
 - The work isn't finished or isn't tested. Opening a PR doesn't make it so.
 - The user wants it in production **now** — that's `/pr`, then `gh pr merge`,
-  then `pnpm promote`, and the timing call (CLAUDE.md: no risky-path merges
-  during lesson hours) is theirs, not yours.
+  then approving the deploy it starts, and the timing call (CLAUDE.md: no
+  risky-path merges during lesson hours) is theirs, not yours.

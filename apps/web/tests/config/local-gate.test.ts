@@ -182,6 +182,9 @@ describe("GitHub Actions is back, on stated terms (D-157)", () => {
       // deliberately laptop-only, on a blocker (darwin-only visual baselines)
       // that D-161 removed rather than worked around.
       "heavy.yml",
+      // D-199. Runs promote when both runners certify a push to `main`; holds
+      // nothing of its own and is guarded in promote-on-green.test.ts.
+      "promote-on-green.yml",
     ]);
   });
 

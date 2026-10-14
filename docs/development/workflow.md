@@ -11,7 +11,8 @@ document disagree, the decision record wins and one of them is a bug.
 ```
 branch → implement + tests → push (the fast gate runs here)
   → PR into main → local-gate green → squash-merge
-  → verify → pnpm promote → production
+  → Gate + Heavy green on main → production fast-forwards itself
+  → approve the deploy → production
 ```
 
 ## The branching model
@@ -30,7 +31,9 @@ Short-lived branches off `main`, deleted after merge, prefixed by intent.
 - **`main` is the trunk.** Every change lands through a pull request — docs
   included. There is no direct-push exception.
 - **`production` is a release pointer, not a place you work.** It is
-  fast-forwarded by `pnpm promote` and by nothing else. Never protect it;
+  fast-forwarded by `scripts/ci/promote.mjs` and by nothing else — run by
+  `promote-on-green.yml` after a merge, or by hand as `pnpm promote`
+  ([D-199](../decisions/D-199.md)). Never protect it;
   protection blocks the fast-forward.
 - **One branch = one PR = one logical change.** Large features split into
   vertical slices, each independently shippable and independently reversible.
@@ -127,7 +130,9 @@ What the tier still decides is **judgement**:
   payments change would be expensive to find after a force-push.
 - Whether to have two risky changes in flight at once, which is two ways to
   break production and a merge order to reason about.
-- Whether to ship it now at all. **No risky-path promote during lesson hours.**
+- Whether to ship it now at all. **No risky-path deploy during lesson hours.**
+  Since [D-199](../decisions/D-199.md) nothing in code holds a deploy back:
+  the judgement is made when you merge, and again when you approve.
 
 ## The sequence
 
@@ -146,16 +151,15 @@ flowchart TD
     HV --> SP["gh pr merge --squash --delete-branch"]
     SP --> SP2["gate.yml + heavy.yml re-run<br/>on the merged commit"]
     SP2 -->|red| M["fix forward on main"]
-    SP2 -->|green| K["Verify<br/>(no preview host today)"]
-    K --> L{"Good?"}
-    L -->|no| M
     M --> SP
-    L -->|"yes, outside lesson hours"| N["pnpm promote"]
+    SP2 -->|"both green"| N["promote-on-green.yml<br/>runs promote --when-certified"]
     N --> O["reads the runners' verdict<br/>for this exact SHA"]
-    O -->|"red, pending or unreadable"| P["stop; fix on main first"]
+    O -->|"pending, red or cancelled"| P["hold; nothing moves"]
     O -->|green| R["fast-forward production<br/>+ tag + GitHub Release"]
-    R --> S["the push triggers deploy-production.yml<br/>required reviewer · native amd64 build"]
-    S --> T["production probes"]
+    R --> S["the push triggers deploy-production.yml<br/>native amd64 build"]
+    S --> L{"Approve?<br/>outside lesson hours"}
+    L -->|"not now"| Q["the run waits in the Actions tab"]
+    L -->|yes| T["migrate · deploy · production probes"]
     T --> U{"Healthy?"}
     U -->|no| V["send traffic back to the previous<br/>Cloud Run revision + git revert on main"]
     U -->|yes| W["Done"]
@@ -226,18 +230,29 @@ Until then the manual pass runs against your own checkout.
 
 Then verify: the relevant `/admin/uat` section, and your own eyes on the change.
 
-### 6. Promote
+### 6. Promote — it happens by itself, and you approve it
 
-Outside lesson hours, on an up-to-date `main`:
+**A merge promotes itself** ([D-199](../decisions/D-199.md)).
+`promote-on-green.yml` runs `scripts/ci/promote.mjs --when-certified` each time
+Gate or Heavy finishes on a push to `main`. It reads the **runners' verdict** for
+that exact commit: the Gate and Heavy workflows' push runs, both green
+([D-162](../decisions/D-162.md)). It does not re-run the suites. Once both are
+green it fast-forwards `production` and stamps a `vYYYY.MM.DD.N` tag and a
+GitHub Release. The first of the two runs to finish finds the other still
+going, and holds. A red or cancelled run holds too: that commit ships with the
+next one that goes green.
+
+The token it pushes with, and how to make one, is in
+[`BRANCH_PROTECTION.md`](../deployment/BRANCH_PROTECTION.md#the-runners-token--promote_token).
+
+**Typed by hand,** on an up-to-date `main`, it is the same script:
 
 ```bash
 pnpm promote
 ```
 
-It reads the **runners' verdict** for this exact commit — the Gate and Heavy
-workflows' push runs, both green ([D-162](../decisions/D-162.md)) — rather than
-re-running the suites. Then it confirms, fast-forwards `production`, and stamps a
-`vYYYY.MM.DD.N` tag and a GitHub Release.
+Use it to ship an older commit, to certify with `--force-gate` when the
+verdict cannot be read, or when the runner is broken.
 
 **That push is the trigger.** `deploy-production.yml` runs two jobs, each
 behind the `production` environment's required reviewer. First, `database`
@@ -245,8 +260,10 @@ behind the `production` environment's required reviewer. First, `database`
 `cloudrun` (`scripts/cloudrun-deploy.sh`: a **native amd64** image, the Cloud
 Run deploy, the Inngest sync; then the production probes). Each job holds only
 its own credentials. GitHub asks for approval per job, so a promote asks twice.
-`pnpm promote` watches the run and exits non-zero unless both jobs are green, so
-a green promote means production is serving. ([D-177](../decisions/D-177.md)'s
+**The approval is the release decision**: approve outside lesson hours, or
+leave the run waiting until then. Approving ships everything merged before it.
+A hand-typed `pnpm promote` watches the run and exits non-zero unless both jobs
+are green, so a green promote means production is serving. ([D-177](../decisions/D-177.md)'s
 addendum split the jobs; [D-186](../decisions/D-186.md) retired the Vercel
 failover that ran beside them.)
 
@@ -299,8 +316,9 @@ deploy.
 - **Blocks the merge:** the `local-gate` status, bound to the exact commit the PR
   wants to merge.
 - **Blocks production:** the Gate and Heavy workflows, both green on the _push_
-  run for the exact commit being promoted. `pnpm promote` fails closed — a
-  pending run, a missing one, or an answer it cannot read all stop it.
+  run for the exact commit being promoted, and then the owner's approval on
+  the `production` environment. Promote fails closed — a pending run, a
+  missing one, or an answer it cannot read all stop it.
 - **Blocks nothing, by design:** the heavy run on a pull request, and the
   maintenance staleness nag.
 

@@ -1,7 +1,9 @@
 name: Deploy production
 
-# Production deploys when `pnpm promote` fast-forwards the `production` branch
-# ([D-157]), after a required reviewer approves the run.
+# Production deploys when promote fast-forwards the `production` branch
+# ([D-157]), after a required reviewer approves the run. Promote usually runs by
+# itself after a merge (promote-on-green.yml, [D-199]), so the approval below is
+# the release decision.
 #
 # ⚠️ This workflow does not deploy anything, and it does not gate anything
 # either. `scripts/database-deploy.sh` and `scripts/cloudrun-deploy.sh` deploy;
@@ -37,12 +39,13 @@ name: Deploy production
 # ⚠️ Approvals are PER JOB on GitHub, not per run. A push asks twice: once for
 # the database job, then once for the target.
 #
-# THE GATE STILL RUNS ON THE LAPTOP, AND STILL RUNS FIRST. `production` is a
-# fast-forward-only branch that only `pnpm promote` moves, and promote runs the
-# FULL tier (mutation · integration · E2E) against the exact commit before it
-# pushes. So by the time this workflow starts, the commit it is deploying has
-# been certified. That ordering is why `--gate-already-passed` is honest here:
-# it is a handoff, not a bypass.
+# THE GATE STILL RUNS FIRST. `production` is a fast-forward-only branch that
+# only scripts/ci/promote.mjs moves, by hand or from promote-on-green.yml, and
+# promote refuses unless the full tier is green for the exact commit: the
+# runners' push runs ([D-162]), or `--force-gate` run locally. So by the time
+# this workflow starts, the commit it is deploying has been certified. That
+# ordering is why `--gate-already-passed` is honest here: it is a handoff, not
+# a bypass.
 #
 # ⚠️ The full tier still runs LOCALLY before this fires, and after [D-161] that
 # is no longer because it has to. The blocker D-157 named — darwin-only visual
