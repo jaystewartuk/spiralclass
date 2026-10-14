@@ -129,9 +129,9 @@ ARG NEXT_DEPLOYMENT_ID
 ENV NEXT_DEPLOYMENT_ID=${NEXT_DEPLOYMENT_ID}
 # Build with Turbopack (Next's Rust bundler) — NOT the default webpack build.
 # Measured: ~3.45GB peak, compile ~70-80s, vs webpack's ~5-6GB and
-# single-threaded ~12min. This image builds with Turbopack via its own
-# `build:standalone` script (apps/web/package.json); `pnpm build` keeps the
-# webpack path for the gate's local/CI build check.
+# single-threaded ~12min. This image runs `next build --turbopack` itself (the
+# RUN below); `pnpm build` keeps the webpack path for the gate's local/CI build
+# check.
 #
 # WHERE THIS BUILDS: on a GitHub-hosted `ubuntu-latest` runner (16GB, genuine
 # amd64), via scripts/cloudrun-deploy.sh — D-157, D-184. It used to build on Fly's free
@@ -167,13 +167,12 @@ ENV NEXT_DEPLOYMENT_ID=${NEXT_DEPLOYMENT_ID}
 # `experimental.cpus` in next.config.ts instead.
 #
 # `prisma generate` already ran in the install layer's postinstall, so the
-# client is present without `build:standalone` re-running it.
+# client is present without this layer re-running it.
 ENV NODE_OPTIONS=--max-old-space-size=6144
-# Invoke Next directly instead of `pnpm --filter spiralclass-web
-# build:standalone`. Identical work — build:standalone IS `next build
-# --turbopack` (apps/web/package.json) — but it skips the `pnpm run` wrapper,
-# and that wrapper is not free here. pnpm 11 defaults verify-deps-before-run to
-# `install`: once `COPY . .` above brings in the workspace manifests the
+# Invoke Next directly rather than through a `pnpm --filter spiralclass-web`
+# script. apps/web once had one for exactly this, `build:standalone`, and it was
+# deleted because nothing ran it: the `pnpm run` wrapper is not free here.
+# pnpm 11 defaults verify-deps-before-run to `install`: once `COPY . .` above brings in the workspace manifests the
 # filtered install layer deliberately never installed (the CLI packages),
 # pnpm judges node_modules out of sync with the full workspace and
 # silently runs a FULL install inside THIS layer — `Scope: all 6 workspace

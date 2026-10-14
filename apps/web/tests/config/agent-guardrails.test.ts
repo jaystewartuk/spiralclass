@@ -26,7 +26,7 @@ import { describe, expect, it } from "vitest";
  * prove the file exists and mentions the right words. This proves it behaves.
  *
  * THE ORDERING BUG THIS CAUGHT, on the first run. The hook exempts read-only
- * commands so that `grep -rn "fly deploy" docs/` is not blocked — a session
+ * commands so that `grep -rn "pnpm promote" docs/` is not blocked — a session
  * asking a question about the deploy path is not deploying, and a guard that
  * cannot tell the difference is one people learn to route around. That
  * exemption was written before the rule about credential-bearing files, and
