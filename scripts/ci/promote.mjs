@@ -42,6 +42,7 @@
  *   pnpm promote --yes      # no confirmation prompt
  *   pnpm promote --force-gate # run the full tier HERE instead of reading the runners
  *   pnpm promote --no-wait    # stop once production is fast-forwarded
+ *   pnpm promote --when-certified # "not certified yet" exits 0, having moved nothing
  *
  * `--no-deploy` is still ACCEPTED and now means `--no-wait`. It cannot suppress
  * the deploy any more — the push IS the trigger — and saying so out loud beats
@@ -55,9 +56,28 @@
  * workflow runs, and a run that no longer exists is not a green one. That is a
  * refusal, and `--force-gate` is the answer — certify it here.
  *
- * No PROMOTE_TOKEN is involved. That PAT existed because a push made with
- * GITHUB_TOKEN never triggers other workflows; a push from your own
- * credentials does, which is exactly what the fast-forward below is.
+ * WHO RUNS THIS ([D-199]). Usually a runner, not a person:
+ * .github/workflows/promote-on-green.yml runs it with `--when-certified` each
+ * time Gate or Heavy finishes green on a push to `main`, so a merge starts its
+ * own deploy and `production` cannot fall behind `main` unnoticed (D-120). The
+ * deploy still waits for the owner's approval on the `production` environment.
+ * That click, not this command, is when production changes, and it is where
+ * the lesson-hours judgement now lives. Typed by hand this is unchanged: it
+ * ships an older commit, runs `--force-gate`, or recovers a held promote.
+ *
+ * `--when-certified` changes one thing. An answer of "not certified YET" exits
+ * 0 having moved nothing: the other workflow still running, a run cancelled by
+ * a newer push, a red one, or `production` already carrying this commit. The
+ * runner fires once per finishing workflow and only the later of the two can
+ * succeed, so the earlier one holding is the normal case, not a failure. Every
+ * other refusal still fails the run: unprotected settings, a commit not on
+ * `main`, an unreadable verdict, a branch moved out of band.
+ *
+ * The runner pushes with PROMOTE_TOKEN, a fine-grained token acting as the
+ * owner. A push made with GITHUB_TOKEN never triggers other workflows, and the
+ * `production` ruleset lets only an admin move the branch. The token lives in
+ * the `promote` environment, which only `main` can reach. Typed by hand, the
+ * push uses your own credentials, as it always has.
  */
 
 import { readFileSync } from "node:fs";
@@ -79,12 +99,26 @@ const forceGate = args.includes("--force-gate");
 // --no-deploy is the old spelling and is kept working; see the header for why
 // it can no longer mean "do not deploy".
 const noWait = args.includes("--no-wait") || args.includes("--no-deploy");
+// See the header. Never a pass: every path it adds returns before the push.
+const whenCertified = args.includes("--when-certified");
 
 function die(message, ...rest) {
   console.error(`\n  ${message}`);
   for (const line of rest) console.error(`  ${line}`);
   console.error("");
   process.exit(1);
+}
+
+/** Nothing shipped and nothing is wrong: the next finishing run tries again. */
+function hold(message, ...rest) {
+  console.log(`\n  Holding: ${message}`);
+  for (const line of rest) console.log(`  ${line}`);
+  console.log("  Nothing moved. Production is still serving whatever shipped last.\n");
+  process.exit(0);
+}
+
+if (whenCertified && forceGate) {
+  die("--when-certified reads the runners' verdict; --force-gate replaces it. Pick one.");
 }
 
 // ── Preflight ────────────────────────────────────────────────────────────────
@@ -184,6 +218,12 @@ if (!check("git", ["merge-base", "--is-ancestor", sha, "origin/main"])) {
 }
 
 const productionSha = capture("git", ["rev-parse", "origin/production"]);
+// Gate and Heavy each start the runner, and both can finish green moments apart:
+// the second run finds the first already shipped. That, or a newer commit
+// already promoted past this one, is the expected way to have nothing to do.
+if (whenCertified && check("git", ["merge-base", "--is-ancestor", sha, productionSha])) {
+  hold(`origin/production already carries ${short}.`);
+}
 if (productionSha === sha) {
   die(`origin/production is already at ${short} — nothing to promote.`);
 }
@@ -297,6 +337,15 @@ if (forceGate) {
     } else {
       problems.push(`${name}: ${verdict}`);
     }
+  }
+
+  if (problems.length && whenCertified) {
+    hold(
+      `${short} is not certified by the runners yet:`,
+      ...problems.map((p) => `  · ${p}`),
+      "",
+      "Whichever run finishes last tries again. A red one needs a fix on `main`.",
+    );
   }
 
   if (problems.length) {

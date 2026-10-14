@@ -1,0 +1,114 @@
+name: Promote on green
+
+# A merge to `main` starts its own production deploy ([D-199]).
+#
+# ⚠️ This workflow decides nothing. `scripts/ci/promote.mjs` reads the runners'
+# verdict ([D-162]), checks that production is still the owner's alone
+# (scripts/ci/deploy-protection.mjs), and fast-forwards `production`. That push
+# triggers deploy-production.yml, which waits for the owner's approval on the
+# `production` environment before the database job, and again before Cloud
+# Run. This file runs promote with `--when-certified` and restates none of it.
+#
+# WHY. D-120's binding lesson was that a step nobody is forced to take gets
+# forgotten: `production` once sat 96 commits behind `main`. `pnpm promote` was
+# that step, typed by hand. The approval is now the one human step left, and it
+# cannot be forgotten silently: it is a queued run with a notification. That
+# click is also where the lesson-hours judgement lives, since nothing in code
+# encodes the window (D-199 says why).
+#
+# WHY IT FIRES TWICE. Gate and Heavy each trigger this when they finish, so it
+# runs twice per merge. The first to finish finds the other still running, and
+# promote holds: it exits 0 having moved nothing. The second finds both green
+# and ships. If they finish together, the queued second run finds `production`
+# already carrying the commit, and holds too. A red or cancelled run (heavy.yml
+# cancels the previous push's run) never certifies anything. Its commit ships
+# as part of the next one that goes green.
+#
+# NOT A SCHEDULE. `workflow_run` fires when a run finishes, which is the moment
+# somebody merged. local-gate.test.ts still bans `schedule:` everywhere (D-129).
+#
+# ⚠️ THE TOKEN. PROMOTE_TOKEN is a fine-grained token for this repository only,
+# acting as the owner. It has to be the owner: the `production` ruleset lets
+# only an admin move the branch, and a push made with GITHUB_TOKEN would never
+# trigger the deploy. It lives in the `promote` environment, whose only
+# deployment branch is `main`, so a workflow on any other branch cannot read
+# it. `workflow_run` always runs this file as it is on `main`, never a branch's
+# copy. And nothing in this job runs third-party code: no install, and no
+# dependency at all, since promote.mjs imports only node builtins and its own
+# scripts. scripts/setup-branch-protection.sh creates the environment. The
+# token itself is made by hand (docs/deployment/BRANCH_PROTECTION.md says how).
+#
+# `apps/web/tests/config/promote-on-green.test.ts` holds all of this.
+
+on:
+  workflow_run:
+    workflows: [Gate, Heavy]
+    types: [completed]
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: promote-on-green
+  # ⚠️ Never true. Promote is fast-forward only and idempotent, so a queued run
+  # just finds the work done. A cancelled run mid-push can do nothing useful.
+  cancel-in-progress: false
+
+jobs:
+  promote:
+    name: Fast-forward production to a commit the runners certified
+    # Only a push to `main`, in this repository. The branch filter alone matches
+    # on the NAME `main`, which a fork's pull request can also carry.
+    if: >-
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.event == 'push' &&
+      github.event.workflow_run.head_branch == 'main' &&
+      github.event.workflow_run.head_repository.full_name == github.repository
+    runs-on: ubuntu-latest # ⚠️ Never a larger runner — those are billed even on a public repo.
+    timeout-minutes: 10
+    environment:
+      name: promote
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          # promote.mjs walks the ancestry between `production` and the commit.
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Refuse a commit that is not on main
+        # The checkout is `main` as it is now. The certified commit is checked
+        # out only after this proves it landed there, so promote.mjs only ever
+        # runs from code that was merged.
+        env:
+          HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
+        run: |
+          set -euo pipefail
+          git fetch --quiet origin main
+          if ! git merge-base --is-ancestor "$HEAD_SHA" origin/main; then
+            echo "$HEAD_SHA is not on origin/main. Nothing moved." >&2
+            exit 1
+          fi
+          git checkout --quiet --detach "$HEAD_SHA"
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: .nvmrc
+
+      - name: Promote, if both runners certified this commit
+        env:
+          # gh reads it for the verdict, the protection settings and the
+          # release. git reads it through gh, set here as the credential
+          # helper for this one step. It never reaches .git/config or the disk.
+          GH_TOKEN: ${{ secrets.PROMOTE_TOKEN }}
+          GIT_CONFIG_COUNT: "1"
+          GIT_CONFIG_KEY_0: credential.https://github.com.helper
+          GIT_CONFIG_VALUE_0: "!gh auth git-credential"
+        run: |
+          set -euo pipefail
+          if [ -z "${GH_TOKEN:-}" ]; then
+            echo "The \`promote\` environment has no PROMOTE_TOKEN. Nothing moved." >&2
+            echo "docs/deployment/BRANCH_PROTECTION.md says how to make one." >&2
+            exit 1
+          fi
+          node scripts/ci/promote.mjs --when-certified --yes --no-wait

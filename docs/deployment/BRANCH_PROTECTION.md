@@ -79,11 +79,11 @@ at `high` or `critical`.
 
 ## `production` — do NOT put a blocking rule on it
 
-`production` is written only by a promote fast-forward — `pnpm promote` from the
-operator's machine (D-119). That is now the only writer: the `promote.yml`
-fallback, which pushed with a `PROMOTE_TOKEN` PAT, was deleted along with every
-other workflow in D-129. A "require a pull request" or "require status
-checks" rule on `production` would **reject that push and break deploys**.
+`production` is written only by a promote fast-forward — `scripts/ci/promote.mjs`,
+run by `promote-on-green.yml` when both runners certify a push to `main`
+([D-199](../decisions/D-199.md)), or typed by the operator as `pnpm promote`. A
+"require a pull request" or "require status checks" rule on `production` would
+**reject that push and break deploys**.
 Production is already gated upstream — promote refuses to fast-forward unless
 the Gate and Heavy workflows are both green for the exact commit
 ([D-162](../decisions/D-162.md)), and `--force-gate` runs the full tier locally
@@ -128,11 +128,35 @@ nobody approving it. The promote check is what keeps that from recurring
 unnoticed, and `apps/web/tests/config/production-access.test.ts` holds that
 what the script applies is exactly what the check accepts.
 
+### The runner's token — `PROMOTE_TOKEN`
+
+`promote-on-green.yml` has to push as the admin (the ruleset above), and a push
+made with `GITHUB_TOKEN` never triggers the deploy. So it uses a token acting
+as the owner, made by hand once:
+
+1. GitHub → Settings → Developer settings → **Fine-grained tokens** → new.
+   Resource owner: the repository's owner. Repository access: **only this
+   repository**.
+2. Repository permissions: **Contents: read and write** (the fast-forward and
+   the release), **Actions: read** (the runners' verdict), **Administration:
+   read** (the rulesets and environment that the protection check reads).
+   Nothing else.
+3. Store it as `PROMOTE_TOKEN` on the **`promote` environment**, never
+   repository-wide. The script creates the environment and limits it to
+   `main`; a repository-wide secret would reach every branch's workflows.
+
+It can move `production`, and nothing it can do skips the approval: the deploy
+it triggers waits on the `production` environment either way. Rotate it like
+`GCP_DEPLOY_KEY` (`infra/gcp/README.md`) — before it expires, which a
+fine-grained token does. An expired token makes the runner fail red rather than
+drift silently, and `pnpm promote` from the laptop still works meanwhile.
+
 ## Paired repo settings (Settings → General → Pull Requests)
 
 - **Allow squash merging** ✅, and turn **merge commits** and **rebase** off —
   makes squash automatic and pairs with "require linear history."
 - **Allow auto-merge** ✅ — enable per finished PR; it merges the moment the
-  required check goes green (blast radius is preview only; prod stays behind
-  promote).
+  required check goes green. ⚠️ Since [D-199](../decisions/D-199.md) a merge
+  starts a production deploy, so auto-merge does too; production still waits
+  for the owner's approval on the `production` environment.
 - **Automatically delete head branches** ✅ — cleanup after merge.
