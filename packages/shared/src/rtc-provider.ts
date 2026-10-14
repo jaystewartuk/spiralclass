@@ -1,8 +1,8 @@
 // The provider-agnostic seam for the in-class video call (D-16, extended per
 // docs/features/live-calls-video.md). Promoted to
 // packages/shared — rather than living only in apps/web as VideoProvider did
-// before this — so a future second implementation (and, eventually, mobile)
-// can reference the same types. Today only
+// before this — so a future second implementation can reference the same
+// types. Today only
 // apps/web/src/lib/video/providers/livekit-provider.ts implements
 // `VideoProvider`.
 //

@@ -1,6 +1,6 @@
-// OTP "resend code" cooldown policy — shared by web (sign-in/sign-up
-// check-email step, checkout-result resend link) and mobile (OtpCodeStep) so
-// both surfaces throttle a tap on "resend" the same way.
+// OTP "resend code" cooldown policy — shared by the sign-in/sign-up
+// check-email step and the checkout-result resend link so both throttle a tap
+// on "resend" the same way.
 //
 // The client-side cooldown is a UX nicety only (discourages accidental
 // double-taps and mailbox spam); the real cap is server-side per-IP/per-email

@@ -12,9 +12,8 @@ import { createT } from "@spiralclass/shared";
 type Db = PrismaClient | Prisma.TransactionClient;
 
 // Reusable lesson skeletons (task 3) — "start a new material from a template"
-// instead of retyping the same structure every time. Teacher-scoped, so the web
-// server actions and the mobile JSON API share this exact logic (web/mobile
-// parity). Independent of the ClassContent/ClassMaterial merge (D-69) — a
+// instead of retyping the same structure every time. Teacher-scoped.
+// Independent of the ClassContent/ClassMaterial merge (D-69) — a
 // template is a Markdown skeleton, not a material itself.
 
 export type ClassContentTemplateRow = { id: string; label: string; body: string };

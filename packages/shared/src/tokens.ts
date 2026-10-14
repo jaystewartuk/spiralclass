@@ -1,22 +1,17 @@
 // Canonical brand design tokens, kept in one place so no surface can drift.
 // This is the single source of
 // truth for the *brand* values: the warm terracotta-on-cream palette, the
-// spacing/radius rhythm, the type scale, motion, tap targets and elevation.
+// spacing/radius rhythm, the type scale, motion and elevation.
 //
-// What lives here is platform-agnostic. What does NOT live here:
-//    (`PlusJakartaSans_400Regular`) vs CSS variables on web (`var(--font-sans)`).
-//    Each platform owns those and composes them with the shared `typeScale`.
-//  - Theme switching mechanics — web layers `palette`/`paletteDark` via a CSS
-//    `.dark` class, mobile via `ThemeProvider`/`useTheme()`. `paletteDark`
-//    below is mirrored by web's `.dark` HSL block in
-//    `apps/web/src/app/globals.css`; a machine parity test
-//    (`apps/web/src/lib/theme-parity.test.ts`) converts that HSL back to hex and
-//    fails if it drifts from these values, so the two can't silently diverge.
+// What does NOT live here: font families (CSS variables, `var(--font-sans)`,
+// composed with the shared `typeScale`) and theme switching. The app layers
+// `palette`/`paletteDark` via a CSS `.dark` class; `paletteDark` below is
+// mirrored by the `.dark` HSL block in `apps/web/src/app/globals.css`, and a
+// machine parity test (`apps/web/src/lib/theme-parity.test.ts`) converts that
+// HSL back to hex and fails if it drifts from these values, so the two can't
+// silently diverge.
 //
-// Each app keeps a thin adapter that consumes these tokens: mobile's
-// `src/theme/index.ts` re-exports them (adding RN-specific elevation + fonts),
-// and web's `tailwind.config.ts` exposes them as `brand.*` utilities via
-// `src/lib/brand-tokens.ts`.
+// `apps/web/tailwind.config.ts` exposes these as `brand.*` utilities.
 //
 // SURFACE MODEL (both themes): a deliberate tier ladder rather than a flat
 // sheet — `background` (page, lowest) < `muted`/`secondary` (mid fills) <
@@ -165,7 +160,7 @@ export const paletteDark = {
   sageBg: "#233319",
 } as const satisfies Record<PaletteToken, string>;
 
-/** Spacing rhythm (px / dp). The same 4-based ladder both platforms step on. */
+/** Spacing rhythm (px). A 4-based ladder. */
 export const spacing = {
   xs: 4,
   sm: 8,
@@ -184,48 +179,26 @@ export const radius = {
   xl: 20,
 } as const;
 
-/** Minimum touch-target sizes (dp). `md` (48) is the Android/Material floor. */
-export const tap = {
-  sm: 40,
-  md: 48,
-  lg: 56,
-} as const;
-
-/** Motion durations (ms). Callers feed these to CSS transitions (web) or
- * Animated/Reanimated timings (mobile). */
+/** Motion durations (ms), for CSS transitions. */
 export const motion = {
   duration: { short: 150, medium: 250, long: 400 },
 } as const;
 
-/** Elevation ladder — one platform-neutral geometry, two renderers. Each rung
- * is a vertical offset (`y`, dp/px), blur radius, shadow `opacity`, and an
- * Android `elevation` value. Web composes these into `box-shadow` strings in
- * `tailwind.config.ts` (tinted via the `--shadow-color` CSS var); mobile feeds
- * them to RN shadow props in `ThemeProvider.buildElevation`. Keeping the numbers
- * here is what stops the two platforms' shadows from drifting. */
+/** Elevation ladder. Each rung is a vertical offset (`y`, px), blur radius and
+ * shadow `opacity`, composed into `box-shadow` strings in `tailwind.config.ts`
+ * and tinted there via the theme-swapping `--shadow-color` CSS var
+ * (globals.css). */
 export const elevation = {
-  none: { y: 0, blur: 0, opacity: 0, android: 0 },
-  sm: { y: 1, blur: 2, opacity: 0.06, android: 1 },
-  md: { y: 2, blur: 6, opacity: 0.1, android: 3 },
-  lg: { y: 6, blur: 16, opacity: 0.14, android: 6 },
+  none: { y: 0, blur: 0, opacity: 0 },
+  sm: { y: 1, blur: 2, opacity: 0.06 },
+  md: { y: 2, blur: 6, opacity: 0.1 },
+  lg: { y: 6, blur: 16, opacity: 0.14 },
 } as const;
 
 export type ElevationLevel = keyof typeof elevation;
 
-/** Shadow tint per theme. Light shadows are a warm brown (not neutral black, so
- * they sit in the terracotta temperature on the cream ground); dark shadows are
- * plain black — a warm-brown blur all but vanishes on a dark surface, so dark
- * mode leans on black at a higher opacity plus the 1px border most surfaces
- * already draw. Web wires these into `--shadow-color`; mobile reads
- * `shadowTint[scheme]`. */
-export const shadowTint = {
-  light: "#3A2A20",
-  dark: "#000000",
-} as const;
-
-/** The type scale — sizes only (px / dp). Font *families* are platform-specific
- * and applied by each platform's adapter; the metrics here keep both apps on the
- * same rhythm. */
+/** The type scale — sizes only (px). Font *families* are CSS variables, applied
+ * where the scale is wired into Tailwind. */
 /**
  * The type scale (D-140).
  *
@@ -273,37 +246,18 @@ export const typeScale = {
   small: { fontSize: 15, lineHeight: 23 },
 } as const;
 
-/** Everything in one object, for adapters that prefer a single import. */
-export const tokens = {
-  palette,
-  paletteDark,
-  spacing,
-  radius,
-  tap,
-  motion,
-  elevation,
-  shadowTint,
-  typeScale,
-} as const;
-
 // ---------------------------------------------------------------------------
 // D-140 / D-141 palette — ink and gold
 // ---------------------------------------------------------------------------
 //
-// Added alongside the palette above rather than replacing it. The migration of
-// 111 routes onto these values is its own change; this export exists so the
-// brand assets, which are generated rather than drawn, have their single source
-// of colour today.
+// Added alongside the palette above rather than replacing it. This export
+// exists so the brand assets, which are generated rather than drawn, have their
+// single source of colour.
 //
-// Every value is the smallest OKLCH lightness step that clears the contrast its
-// role requires, solved against the HARDEST surface in its own theme — computed
-// by luminance, not assumed. 84 pairings verify across both themes with zero
-// failures. Body text lands at 13:1: past AAA's 7:1, and deliberately short of
-// black-on-white's 21:1, the pairing most often reported as causing glare.
-//
-// The one value NOT solved this way is `gold`. A gold has to look like gold, so
-// its lightness is chosen and its contrast is then verified; solving it the
-// usual way returns the darkest gold that clears, which is a brown.
+// `gold` is chosen rather than solved: a gold has to look like gold, so its
+// lightness is picked and its contrast is then verified; solving it for the
+// smallest step that clears returns the darkest gold that does, which is a
+// brown.
 
 /** Brand constants, theme-independent. Used by the asset generator. */
 export const brandPalette = {
@@ -316,56 +270,3 @@ export const brandPalette = {
   /** The mark's opening pass, and the accent everywhere else. */
   gold: "#e0be4d",
 } as const;
-
-export const paletteInk = {
-  background: "#f3f4f8",
-  surface: "#fafcff",
-  raised: "#feffff",
-  subtle: "#e8eaf0",
-  text: "#2d2f36",
-  textMuted: "#535761",
-  textFaint: "#656872",
-  /** A faint rule. Never a control boundary — that is `borderControl`. */
-  divider: "#bdc1c9",
-  /** A control boundary, solved to clear 3:1 (WCAG 1.4.11). */
-  borderControl: "#81848d",
-  /** The depth ramp: the spiral curriculum, as three passes. */
-  ink1: "#2a3583",
-  ink2: "#42519b",
-  ink3: "#57669d",
-  primary: "#384696",
-  primaryFill: "#5569c2",
-  onPrimary: "#f4f5f9",
-  goldFill: "#e0be4d",
-  goldText: "#7d6612",
-  onGold: "#13161d",
-  success: "#3c744a",
-  warning: "#99581f",
-  danger: "#ab4947",
-  info: "#1d708f",
-} as const;
-
-export const paletteInkDark = {
-  background: "#101318",
-  surface: "#1a1d24",
-  raised: "#23272f",
-  subtle: "#292c34",
-  text: "#e1e5ed",
-  textMuted: "#a6aab4",
-  textFaint: "#90949f",
-  divider: "#44474e",
-  borderControl: "#73777f",
-  ink1: "#b8d1ff",
-  ink2: "#91a7f8",
-  ink3: "#8192cd",
-  primary: "#9eb6ff",
-  primaryFill: "#687cd0",
-  onPrimary: "#13161d",
-  goldFill: "#dab746",
-  goldText: "#ab9246",
-  onGold: "#13161d",
-  success: "#67a173",
-  warning: "#c9854e",
-  danger: "#de7671",
-  info: "#509ebe",
-} as const satisfies Record<keyof typeof paletteInk, string>;

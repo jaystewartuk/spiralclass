@@ -3,9 +3,9 @@ import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
 import type { PageResult } from "@/lib/pagination";
 
-// Server-rendered pagination controls. Like `SortableHead`, links preserve the
-// page's other params (filters + sort) and carry only `page`, so paging never
-// drops the current view. Renders the "showing X–Y of N" summary always; the
+// Server-rendered pagination controls. Links preserve the page's other params
+// (filters + sort) and carry only `page`, so paging never drops the current
+// view. Renders the "showing X–Y of N" summary always; the
 // Prev/Next nav only when there's more than one page.
 
 function pageHref(params: Record<string, string | undefined>, page: number): string {

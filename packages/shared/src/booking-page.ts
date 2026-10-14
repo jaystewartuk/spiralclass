@@ -1,17 +1,13 @@
 // What the public booking page (`/b/<slug>`) promises a prospective student,
 // beyond the teacher's own photo/video/packages.
 //
-// Why this lives in shared rather than in either client: the "what's included"
-// band renders on BOTH web (`app/b/[slug]/whats-included.tsx`) and mobile
-// (`app/b/[slug]/index.tsx`), and every line of it is a public promise about
-// what the buyer gets. Two hand-maintained lists would drift, and the failure
-// mode of drift here is a claim on one platform that the other doesn't back —
-// the same class of problem `tests/config/ai-marketing-claims.test.ts` exists
-// to catch. One ordered list, one gate per capability, both clients render it.
+// The "what's included" band (`app/b/[slug]/whats-included.tsx`) is a public
+// promise about what the buyer gets, so it is one ordered list with one gate
+// per capability — a claim the product doesn't back is the class of problem
+// `tests/config/ai-marketing-claims.test.ts` exists to catch.
 //
-// Pure data: the caller resolves the capability flags (server-side env gates on
-// web, the `/api/mobile/public/teacher/[slug]` payload on mobile) and this
-// decides only WHICH items are true for that teacher, in what order.
+// Pure data: the caller resolves the capability flags (server-side env gates)
+// and this decides only WHICH items are true for that teacher, in what order.
 
 /**
  * One reassurance item. Each maps to a `web.bookingLanding.included.<item>`
@@ -61,8 +57,8 @@ export type BookingPageCapabilities = {
 // The differentiating items lead: each class continuing the last (the spiral
 // the product is named after — see brand/mark.ts), then subtitles, then
 // materials prepared for this student, then the work that goes between classes.
-// The always-true items stay in a fixed order so the band reads identically on
-// both platforms regardless of which gated items happen to be on.
+// The always-true items stay in a fixed order so the band reads identically
+// regardless of which gated items happen to be on.
 const ALWAYS_INCLUDED: readonly IncludedItem[] = [
   "continuity",
   "materials",

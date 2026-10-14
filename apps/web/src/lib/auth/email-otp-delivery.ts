@@ -11,7 +11,7 @@ const log = logger({ surface: "better-auth-email-otp" });
 // D-40: deliver a better-auth email-OTP code via the existing Resend rail.
 // **Code-only** — magic-link delivery is dropped (email-OTP only), so unlike the
 // retired sendAuthMagicCode this carries no tappable link, just the code the
-// user types into the requesting session (web or mobile). Wired into the
+// user types into the requesting session. Wired into the
 // better-auth instance's emailOTP.sendVerificationOTP.
 export async function sendBetterAuthEmailOtp(input: {
   email: string;

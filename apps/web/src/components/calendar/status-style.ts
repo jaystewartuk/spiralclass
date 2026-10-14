@@ -87,10 +87,3 @@ const UNKNOWN: StatusStyle = {
 export function styleFor(status: string): StatusStyle {
   return STYLES[status as CalendarStatus] ?? UNKNOWN;
 }
-
-/** A cancelled class is still on the calendar — the teacher needs to see that
- * the slot was given up — but it should not compete with the ones she is
- * actually teaching. */
-export function isMuted(status: string): boolean {
-  return status === "canceled_by_student" || status === "canceled_by_teacher";
-}

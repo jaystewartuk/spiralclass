@@ -1,6 +1,6 @@
 // The "open this material for the other participant" data-channel protocol
 // (teacher-materials-flexibility redesign). Mirrors captions.ts's shape
-// exactly — one shared, dependency-free wire definition so web and mobile
+// exactly — one shared, dependency-free wire definition so sender and receiver
 // can't drift, encoded as JSON over LiveKit's reliable data channel under a
 // dedicated topic.
 //
@@ -23,16 +23,13 @@
 // receiver see this material at all" — it does NOT cover "may the receiver see
 // the SOLUTIONS in it", and the answer is no: the addressee is always the
 // student. The teacher drives what the student looks at, and the student has
-// no send affordance on either client (web gates the panel on
-// `role !== "student"`, mobile on `isTeacher`), so every packet on this topic
-// is teacher -> student. So the message carries the STUDENT COPY by
-// construction: `encodeCallMaterialOpen` strips the answer key before the
-// bytes leave the sender, and `decodeCallMaterialOpen` strips again on
-// arrival. The second strip is not belt-and-braces theatre — web and mobile
-// shipped independently (mobile builds and OTA updates were a
-// separate manual step), so a teacher still running an older mobile build
-// keeps publishing unstripped bodies for as long as that build lives, and the
-// receiver is the only party that can guarantee what its own user sees.
+// no send affordance (the panel is gated on `role !== "student"`), so every
+// packet on this topic is teacher -> student. So the message carries the
+// STUDENT COPY by construction: `encodeCallMaterialOpen` strips the answer key
+// before the bytes leave the sender, and `decodeCallMaterialOpen` strips again
+// on arrival. The second strip is not belt-and-braces theatre: the receiver is
+// the only party that can guarantee what its own user sees, whatever build the
+// sender happens to be running.
 //
 // If a future change ever lets the STUDENT open a material on the TEACHER's
 // screen, this premise is what breaks (she would receive a stripped copy of

@@ -1,8 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
-  FOUNDING_MAX_TEACHERS,
   PLAN_PRICE_MINOR_UNITS,
-  isFoundingCohortOpen,
   isPaidPlan,
   monthlyEquivalentMinorUnits,
   planForStripePriceId,
@@ -45,37 +43,10 @@ describe("planForStripePriceId", () => {
   });
 });
 
-describe("founding cohort gate (cap AND cutoff)", () => {
-  const launch = new Date("2026-05-27T00:00:00Z");
-  const cutoff = foundingCutoffDate(launch); // launch + 90 days
-
-  it("open while under cap AND before cutoff", () => {
-    expect(
-      isFoundingCohortOpen({
-        foundingHeadcount: 10,
-        now: new Date("2026-06-12T00:00:00Z"),
-        launch,
-      }),
-    ).toBe(true);
-  });
-
-  it("closed once the headcount cap is reached", () => {
-    expect(
-      isFoundingCohortOpen({
-        foundingHeadcount: FOUNDING_MAX_TEACHERS,
-        now: new Date("2026-06-12T00:00:00Z"),
-        launch,
-      }),
-    ).toBe(false);
-  });
-
-  it("closed once the cutoff date passes (even under cap)", () => {
-    expect(
-      isFoundingCohortOpen({
-        foundingHeadcount: 1,
-        now: new Date(cutoff.getTime() + 1000),
-        launch,
-      }),
-    ).toBe(false);
+describe("foundingCutoffDate", () => {
+  it("closes the founding window 90 days after launch", () => {
+    expect(foundingCutoffDate(new Date("2026-05-27T00:00:00Z")).toISOString()).toBe(
+      "2026-08-25T00:00:00.000Z",
+    );
   });
 });

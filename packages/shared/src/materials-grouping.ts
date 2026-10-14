@@ -1,5 +1,5 @@
-// Category-based organization of materials, shared by every material list on
-// both platforms (teacher library, student library, and the per-class lists).
+// Category-based organization of materials, shared by every material list
+// (teacher library, student library, and the per-class lists).
 //
 // A material can carry tags across MANY categories (grammar + format + theme…).
 // Showing the same item once under each of its categories makes a list noisy
@@ -11,7 +11,7 @@
 // Materials with no tags (or whose tags reference no known category) fall into
 // a trailing "uncategorized" bucket.
 //
-// Pure and dependency-free (no DB, no React) so web and mobile share one
+// Pure and dependency-free (no DB, no React) so every list shares one
 // organization and it unit-tests in isolation.
 
 export type MaterialTag = { id: string; label: string; categoryId: string };

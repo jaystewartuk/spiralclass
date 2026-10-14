@@ -5,42 +5,12 @@ import {
   SELFVIEW_W,
   clampSelfViewPosition,
   initialFloatingTilePosition,
-  initialRemotePipPosition,
-  initialSelfViewPosition,
   isTapGesture,
   TAP_MAX_DURATION_MS,
   TAP_MOVE_THRESHOLD_PX,
 } from "./call-drag";
 
 const bounds = { screenW: 400, screenH: 800, controlsBlockH: 120 };
-
-describe("initialSelfViewPosition", () => {
-  it("starts bottom-right, clear of the controls bar", () => {
-    const pos = initialSelfViewPosition(bounds);
-    expect(pos.x).toBe(bounds.screenW - SELFVIEW_W - SELFVIEW_MARGIN);
-    expect(pos.y).toBe(bounds.screenH - SELFVIEW_H - bounds.controlsBlockH - SELFVIEW_MARGIN);
-  });
-
-  it("never starts above the top margin on a very short screen", () => {
-    const pos = initialSelfViewPosition({ screenW: 400, screenH: 200, controlsBlockH: 150 });
-    expect(pos.y).toBe(SELFVIEW_MARGIN);
-  });
-});
-
-describe("initialRemotePipPosition", () => {
-  it("starts top-right, below the given top offset", () => {
-    const pos = initialRemotePipPosition(bounds, 50);
-    expect(pos.x).toBe(bounds.screenW - SELFVIEW_W - SELFVIEW_MARGIN);
-    expect(pos.y).toBe(50);
-  });
-
-  it("clamps to stay above the controls bar even with a large top offset", () => {
-    const pos = initialRemotePipPosition(bounds, 900);
-    expect(pos.y).toBeLessThanOrEqual(
-      bounds.screenH - SELFVIEW_H - bounds.controlsBlockH - SELFVIEW_MARGIN,
-    );
-  });
-});
 
 describe("initialFloatingTilePosition", () => {
   it("anchors right for the right corner", () => {

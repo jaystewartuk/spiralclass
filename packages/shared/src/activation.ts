@@ -3,7 +3,7 @@
 // 4/5-step wizard" — it says nothing about whether a teacher has a real
 // photo/bio, a customized offer, a reviewed schedule, or a way to actually get
 // paid. This module is the single, platform-agnostic resolver for the richer
-// activation states derived from those signals, so web, mobile, and admin
+// activation states derived from those signals, so the teacher UI and admin
 // can never disagree about what "ready for the marketplace" means — the same
 // pattern `growthSteps()` already established for the "Crecer" checklist.
 //
@@ -27,11 +27,8 @@ export type MarketplaceReadinessSignals = {
 };
 
 // The full signal set needed to resolve every named activation state
-// (superset of MarketplaceReadinessSignals). Each app maps its own data
-// source onto this shape:
-//   - web: reads the Teacher row directly (Prisma).
-//   - mobile: reads the same fields off the /api/mobile/teacher/dashboard
-//     response, which the server populates from the same Teacher row.
+// (superset of MarketplaceReadinessSignals), read off the Teacher row
+// (Prisma).
 export type ActivationSignals = MarketplaceReadinessSignals & {
   bookingCount: number;
   hasReceivedPayment: boolean;

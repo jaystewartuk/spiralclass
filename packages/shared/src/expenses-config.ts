@@ -2,8 +2,8 @@
 //
 // KNOWN_EXPENSE_VENDORS is a curated, extensible list (NOT a DB enum) so a
 // new vendor can be added here without a migration — see PlatformExpense in
-// apps/web/prisma/schema.prisma. Shared so web and mobile resolve the same
-// vendor set / default categories. ExpenseCategory mirrors the Prisma
+// apps/web/prisma/schema.prisma. Shared so the admin form and the server
+// resolve the same vendor set / default categories. ExpenseCategory mirrors the Prisma
 // ExpenseCategory enum of the same name; keep the two in sync by hand
 // (Prisma enums can't import from here).
 

@@ -1,12 +1,10 @@
 // The sub-processor register — the single source of truth for "who else
 // touches personal data, what for, and where."
 //
-// It lives in @spiralclass/shared because BOTH clients render the privacy
-// policy from it (web `/privacy-notice`, mobile `app/privacy-notice.tsx`).
-// Before this existed the two pages were separately hand-written documents
-// that had already drifted: web ran a bilingual hand-written notice and mobile ran
-// a five-card summary asserting a different controller. A privacy policy that
-// disagrees with itself across platforms is worse than a short one.
+// The privacy policy (`/privacy-notice`) renders from it. Before this existed
+// the policy was hand-written in more than one place and had already drifted
+// to asserting different controllers; a privacy policy that disagrees with
+// itself is worse than a short one.
 //
 // WHY A CODE REGISTER RATHER THAN PROSE. A privacy policy's sub-processor list
 // is the part that rots first: a vendor is added in a pull request, the policy

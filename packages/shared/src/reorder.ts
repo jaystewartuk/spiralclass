@@ -2,11 +2,11 @@
 // grouped list — the model behind focus-tag categories and the tags nested
 // inside each one (a category is a "group", scoped by `categoryId`). Kept
 // generic over row shape (only `id`, and a group-id accessor) rather than
-// importing the FocusTag types directly, since the web settings page and the
-// mobile FocusTagsManager each keep their own local row shape.
+// importing the FocusTag types directly, so the settings page keeps its own
+// local row shape.
 //
 // The convention these support is the same "replace-set" one used everywhere
-// else in this codebase (see saveFocusTagsForTeacher, dashboard-layout.ts):
+// else in this codebase (see saveFocusTagsForTeacher):
 // the caller holds the whole current array in memory, calls one of these to
 // produce the next array, and persists the whole thing — the array's index at
 // save time becomes the row's new `position`.

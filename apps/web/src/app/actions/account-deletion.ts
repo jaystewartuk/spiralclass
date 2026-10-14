@@ -4,10 +4,7 @@
  * called via useActionState must accept (prev, formData); these
  * actions are confirm-only (no fields) so neither parameter is used. */
 
-import { redirect } from "next/navigation";
-import { headers } from "next/headers";
 import { requireTeacher, requireStudent } from "@/lib/auth";
-import { auth } from "@/lib/auth/server";
 import { getPreferredLocale } from "@/lib/i18n";
 import { studentComplianceIds } from "@/lib/students/identity";
 import {
@@ -131,15 +128,4 @@ export async function cancelStudentDeletionAction(
   await cancelStudentDeletionRequests(await studentComplianceIds(student));
   revalidateAfterAction("/my-classes");
   return { ok: true };
-}
-
-// ----- Sign out after request -----
-//
-// Optional: callers can chain this after the request action to drop
-// the session immediately. Keeps the post-request UI from being a
-// teacher-still-signed-in surface; they re-sign-in to cancel.
-
-export async function signOutAfterDeletionRequest() {
-  await auth.api.signOut({ headers: await headers() });
-  redirect("/?deleted=pending");
 }

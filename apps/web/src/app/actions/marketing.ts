@@ -14,7 +14,6 @@ import {
 import { requireOnboardedTeacher } from "@/lib/auth";
 import { getPreferredLocale } from "@/lib/i18n";
 import {
-  createActivity,
   getOrCreateCommunityDraft,
   markActivityDone,
   prepareActivity,
@@ -25,7 +24,6 @@ import {
   addCommunity,
   archiveCommunity,
   communityInputSchema,
-  deleteCommunity,
   restoreCommunity,
   updateCommunity,
 } from "@/lib/marketing/communities";
@@ -175,20 +173,6 @@ export async function restoreCommunityAction(
   return { ok: true };
 }
 
-export async function deleteCommunityAction(
-  _prev: MarketingState,
-  formData: FormData,
-): Promise<MarketingState> {
-  const t = createT(await getPreferredLocale());
-  const id = z.string().uuid().safeParse(formData.get("id"));
-  if (!id.success) return failed(t);
-  const teacher = await requireOnboardedTeacher();
-  const ok = await deleteCommunity(teacher.id, id.data);
-  if (!ok) return failed(t);
-  revalidateAfterAction(`${GET_STUDENTS_PATH}/communities`);
-  return { ok: true };
-}
-
 // ── Marketing profile ──────────────────────────────────────────────────────
 
 /** Comma-separated free text into a bounded list. */
@@ -298,28 +282,6 @@ export async function regeneratePlanAction(
 ): Promise<MarketingState> {
   const teacher = await requireOnboardedTeacher();
   await regenerateWeeklyPlan({ teacherId: teacher.id });
-  revalidateAfterAction(GET_STUDENTS_PATH);
-  return { ok: true };
-}
-
-/** Ad-hoc extra action, outside the week's plan. */
-export async function addActivityAction(
-  _prev: MarketingState,
-  formData: FormData,
-): Promise<MarketingState> {
-  const t = createT(await getPreferredLocale());
-  const kind = formData.get("kind");
-  const platform = formData.get("platform");
-  const communityId = formData.get("communityId");
-  if (!isMarketingContentKind(kind) || !isMarketingPlatform(platform)) return failed(t);
-  const teacher = await requireOnboardedTeacher();
-  const parsedCommunity = z.string().uuid().safeParse(communityId);
-  await createActivity({
-    teacherId: teacher.id,
-    kind,
-    platform,
-    communityId: parsedCommunity.success ? parsedCommunity.data : null,
-  });
   revalidateAfterAction(GET_STUDENTS_PATH);
   return { ok: true };
 }

@@ -3,8 +3,8 @@
 // The manual rail renders payee instructions plus a unique reference, lets the
 // student self-attest, and lets the teacher confirm. Since D-145 there is
 // exactly ONE kind of instrument — a Wisetag — and this module is the shared
-// vocabulary for it, so web and mobile agree on readiness and display without
-// either re-implementing it.
+// vocabulary for it, so the server and the UI agree on readiness and display
+// without either re-implementing it.
 //
 // ── Why one kind, when the union was the point ────────────────────────────
 //

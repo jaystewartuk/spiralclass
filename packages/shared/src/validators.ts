@@ -3,8 +3,6 @@ import type { LocaleCode as AppLocale } from "./api";
 import {
   signUpSchemaWith,
   signInSchemaWith,
-  phoneSignInSchemaWith,
-  phoneCodeSchemaWith,
   timezoneSchemaWith,
   availabilityRangeSchemaWith,
   availabilitySchemaWith,
@@ -34,9 +32,6 @@ export * from "./validators-core";
 // `signInSchemaWith(useT())`.
 export const signUpSchema = (locale: AppLocale = "en") => signUpSchemaWith(createT(locale));
 export const signInSchema = (locale: AppLocale = "en") => signInSchemaWith(createT(locale));
-export const phoneSignInSchema = (locale: AppLocale = "en") =>
-  phoneSignInSchemaWith(createT(locale));
-export const phoneCodeSchema = (locale: AppLocale = "en") => phoneCodeSchemaWith(createT(locale));
 export const timezoneSchema = (locale: AppLocale = "en") => timezoneSchemaWith(createT(locale));
 export const availabilityRangeSchema = (locale: AppLocale = "en") =>
   availabilityRangeSchemaWith(createT(locale));

@@ -15,7 +15,6 @@ export * from "./social-preview";
 export * from "./activation";
 export * from "./intro-video";
 export * from "./nav";
-export * from "./dashboard-layout";
 export * from "./money";
 export * from "./phone";
 export * from "./initials";

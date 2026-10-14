@@ -212,9 +212,8 @@ describe("noindex surfaces", () => {
     }
   });
 
-  it("email-token pages (/m/login, /r/notif-settings): noindex, nofollow", async () => {
+  it("email-token pages (/r/notif-settings): noindex, nofollow", async () => {
     const pages: Array<{ metadata: Metadata }> = [
-      await import("@/app/m/login/page"),
       await import("@/app/r/notif-settings/[token]/page"),
     ];
     for (const page of pages) {

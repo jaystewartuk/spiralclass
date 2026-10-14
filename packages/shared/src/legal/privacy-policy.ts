@@ -1,9 +1,9 @@
 // The privacy policy, as structured data rather than markup.
 //
 // WHY DATA AND NOT JSX. Three reasons, in order of how much they matter.
-//   1. Web and mobile render the SAME document. They previously rendered two
-//      different ones, and the mobile copy named a different controller under a
-//      different country's law. One source removes that class of bug outright.
+//   1. There is ONE document. Two hand-written copies once existed and named
+//      different controllers under different countries' law; one source
+//      removes that class of bug outright.
 //   2. Legal copy is authored in English and is NOT machine-translated —
 //      the standing rule from D-81. Keeping the text out of the i18n catalog is
 //      how that rule is enforced structurally instead of remembered. (The page

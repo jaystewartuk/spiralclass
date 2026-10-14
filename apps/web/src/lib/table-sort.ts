@@ -7,9 +7,7 @@
 // fragment it produces. Unknown or missing keys collapse to the page default,
 // which keeps the URL space tidy and the query safe.
 
-export type SortDir = "asc" | "desc";
-
-export type SortState = { key: string; dir: SortDir };
+import type { SortDir, SortState } from "@spiralclass/shared";
 
 /**
  * A whitelist of sortable columns. Each entry returns the Prisma `orderBy`

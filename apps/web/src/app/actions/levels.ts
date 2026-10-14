@@ -5,7 +5,6 @@ import { prisma } from "@/lib/prisma";
 import { requireOnboardedTeacher } from "@/lib/auth";
 import { getPreferredLocale } from "@/lib/i18n";
 import { flushAnalytics, trackServerEvent } from "@/lib/analytics/posthog";
-import { ensureTeacherLevels } from "@/lib/levels";
 import { revalidateAfterAction } from "@/lib/revalidate";
 import { createT } from "@spiralclass/shared";
 
@@ -74,16 +73,4 @@ export async function setStudentLevel(
 
   revalidateAfterAction(`/dashboard/students/${studentId}`);
   return { ok: t("web.action.levels.saved") };
-}
-
-// Convenience used by the student detail page to render the selector. Seeds
-// CEFR on first use (self-healing).
-export async function getMyLevels() {
-  const teacher = await requireOnboardedTeacher();
-  await ensureTeacherLevels(teacher.id);
-  return prisma.level.findMany({
-    where: { teacherId: teacher.id, archived: false },
-    select: { id: true, code: true, label: true, position: true },
-    orderBy: { position: "asc" },
-  });
 }

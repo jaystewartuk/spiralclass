@@ -1,8 +1,7 @@
-// Static, offline emoji catalog for the chat composer's emoji picker (web +
-// mobile). Deliberately a plain unicode list rather than an npm package or a
-// GIF-style remote catalog: no images to fetch, no network dependency, and it
-// renders identically via each platform's native emoji font (browser on web,
-// system font on mobile). GIF search is out of scope — it needs a keyed
+// Static, offline emoji catalog for the chat composer's emoji picker.
+// Deliberately a plain unicode list rather than an npm package or a GIF-style
+// remote catalog: no images to fetch, no network dependency, and it renders via
+// the browser's native emoji font. GIF search is out of scope — it needs a keyed
 // third-party API (Giphy/Tenor) that hasn't been set up.
 
 export type EmojiCategory = {

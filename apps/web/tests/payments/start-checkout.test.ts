@@ -36,24 +36,12 @@ const state = {
   // revoked key, a dead connected account or an outage.
   stripeThrows: null as string | null,
   sessionUrl: "https://checkout.stripe.com/c/pay/cs_test_1" as string | null,
-  paymentIntentClientSecret: "pi_test_1_secret_abc" as string | null,
   created: {} as { pkg?: unknown; payment?: unknown; sessionUpdate?: unknown },
 };
 
 const createCheckoutSession = vi.fn(async (_args: Record<string, unknown>) => {
   if (state.stripeThrows) throw new Error(state.stripeThrows);
   return { id: "cs_test_1", url: state.sessionUrl };
-});
-
-const createPaymentIntent = vi.fn(async (_args: Record<string, unknown>) => {
-  if (state.stripeThrows) throw new Error(state.stripeThrows);
-  return {
-    id: "pi_test_1",
-    status: "requires_payment_method" as const,
-    amount: 150_000,
-    currency: "mxn",
-    client_secret: state.paymentIntentClientSecret,
-  };
 });
 
 vi.mock("@/lib/prisma", () => ({
@@ -112,7 +100,7 @@ const ensureCheckoutCustomer = vi.fn(async (_args: Record<string, unknown>): Pro
 });
 
 vi.mock("@/lib/stripe", () => ({
-  getStripeClient: () => ({ createCheckoutSession, createPaymentIntent, ensureCheckoutCustomer }),
+  getStripeClient: () => ({ createCheckoutSession, ensureCheckoutCustomer }),
 }));
 
 vi.mock("@/lib/payments/reference", () => ({
@@ -212,7 +200,6 @@ beforeEach(() => {
   state.stripeTaxEnabled = undefined;
   state.stripeThrows = null;
   state.sessionUrl = "https://checkout.stripe.com/c/pay/cs_test_1";
-  state.paymentIntentClientSecret = "pi_test_1_secret_abc";
   state.created = {};
 });
 
@@ -423,7 +410,6 @@ describe("startCheckout — Stripe rail, default ui mode", () => {
   it("defaults to hosted mode when stripeUiMode is omitted", async () => {
     await startCheckout(args());
     expect(createCheckoutSession).toHaveBeenCalledTimes(1);
-    expect(createPaymentIntent).not.toHaveBeenCalled();
   });
 });
 

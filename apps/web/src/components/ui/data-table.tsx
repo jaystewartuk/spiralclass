@@ -20,7 +20,7 @@ import {
 } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
 
-export type { ColumnDef, SortDir, SortState };
+export type { SortState };
 
 export type AdminColumnMeta = {
   /**

@@ -6,8 +6,7 @@
 // any non-alphanumeric run so "maria.jose", "maria_jose" and "María José" all
 // yield "MJ". Returns "?" when there's nothing to work with.
 //
-// Shared so web avatars and mobile avatars derive the SAME initials for a given
-// person (mobile previously had a divergent whitespace-only implementation).
+// Shared so every avatar derives the SAME initials for a given person.
 export function initialsFrom(name: string | null | undefined, email?: string | null): string {
   const source = name?.trim() || email?.split("@")[0] || "";
   const tokens = source.split(/[^\p{L}\p{N}]+/u).filter(Boolean);

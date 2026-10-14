@@ -1,16 +1,5 @@
 import { describe, expect, it } from "vitest";
-import {
-  elevation,
-  motion,
-  palette,
-  paletteDark,
-  radius,
-  shadowTint,
-  spacing,
-  tap,
-  tokens,
-  typeScale,
-} from "./tokens";
+import { elevation, motion, palette, paletteDark, radius, spacing, typeScale } from "./tokens";
 
 /** Perceptual lightness (0–1) of a #rrggbb hex, for tier-ordering assertions. */
 function luminance(hex: string): number {
@@ -99,26 +88,18 @@ describe("brand tokens", () => {
     expect(radius).toEqual({ sm: 4, md: 10, lg: 14, xl: 20 });
   });
 
-  it("carries tap targets and motion durations", () => {
-    expect(tap.md).toBe(48);
+  it("carries motion durations", () => {
     expect(motion.duration).toEqual({ short: 150, medium: 250, long: 400 });
   });
 
   it("defines an elevation ladder with monotonically deeper rungs", () => {
-    // One geometry, two renderers (web box-shadow / mobile RN shadow props).
     expect(elevation.none.opacity).toBe(0);
     const levels = [elevation.sm, elevation.md, elevation.lg];
     for (let i = 1; i < levels.length; i++) {
       expect(levels[i].y).toBeGreaterThan(levels[i - 1].y);
       expect(levels[i].blur).toBeGreaterThan(levels[i - 1].blur);
       expect(levels[i].opacity).toBeGreaterThan(levels[i - 1].opacity);
-      expect(levels[i].android).toBeGreaterThan(levels[i - 1].android);
     }
-  });
-
-  it("provides a warm light / black dark shadow tint", () => {
-    expect(shadowTint.light).toMatch(/^#[0-9A-Fa-f]{6}$/);
-    expect(shadowTint.dark).toBe("#000000");
   });
 
   it("provides a size-only type scale (no font families)", () => {
@@ -153,14 +134,5 @@ describe("brand tokens", () => {
       expect(step.fontSize).toBeGreaterThan(0);
       expect(step.lineHeight).toBeGreaterThan(0);
     }
-  });
-
-  it("bundles every group under the `tokens` aggregate", () => {
-    expect(tokens.palette).toBe(palette);
-    expect(tokens.spacing).toBe(spacing);
-    expect(tokens.radius).toBe(radius);
-    expect(tokens.elevation).toBe(elevation);
-    expect(tokens.shadowTint).toBe(shadowTint);
-    expect(tokens.typeScale).toBe(typeScale);
   });
 });

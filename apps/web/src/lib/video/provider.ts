@@ -1,4 +1,4 @@
-import type { CallGrant, MintOptions, VideoProvider } from "@spiralclass/shared";
+import type { CallGrant, VideoProvider } from "@spiralclass/shared";
 import { getVideoProvider as resolveVideoProvider } from "@/lib/video/providers";
 
 // Owning the in-class video call (live-notes-panel.md step 3, D-16). The media
@@ -7,14 +7,13 @@ import { getVideoProvider as resolveVideoProvider } from "@/lib/video/providers"
 //
 // As of docs/features/live-calls-video.md, the
 // VideoProvider TYPE lives in @spiralclass/shared and the concrete
-// implementations live under lib/video/providers/ — this file re-exports
-// getVideoProvider() and the types for every existing call site (so none of
-// them had to change), plus the room-naming helpers below, which stay
-// provider-agnostic. A different provider (or peer-to-peer) is a sibling
+// implementations live under lib/video/providers/ — this file is the call
+// sites' entry point: getVideoProvider(), the CallGrant type, and the
+// room-naming helpers below, which stay provider-agnostic. A different provider (or peer-to-peer) is a sibling
 // implementation under providers/, selected via the RTC_PROVIDER env var — see
 // providers/index.ts.
 
-export type { CallGrant, MintOptions, VideoProvider };
+export type { CallGrant };
 
 // One room per booking. Prefixed so a room name can never collide with another
 // kind of id and is obvious in provider dashboards/logs.

@@ -189,21 +189,6 @@ export type EnsureCheckoutCustomerInput = {
   preferredLocale?: StripeCheckoutLocale;
 };
 
-// Raw PaymentIntent (no Checkout Session) — the mobile native flow.
-// Stripe's mobile SDKs (PaymentSheet) confirm a PaymentIntent directly; they
-// have no concept of a Checkout Session (hosted or embedded), which is a
-// web-only construct. Same plain-platform-charge shape as the one-off
-// Checkout Session (separate charges & transfers, card-only): no
-// transfer_data, the teacher is paid via a separate Transfer once the charge
-// settles.
-export type CreatePaymentIntentInput = {
-  amountMinorUnits: number;
-  currency: string;
-  customerEmail?: string;
-  metadata?: Record<string, string>;
-  idempotencyKey?: string;
-};
-
 export type CreateRefundInput = {
   // Either pass payment_intent (preferred for one-time charges) or a
   // specific charge id (legacy). We always have the PI.
@@ -311,7 +296,6 @@ export interface StripeClient {
     sessionId: string,
     connectedAccountId?: string,
   ): Promise<StripeCheckoutSession>;
-  createPaymentIntent(input: CreatePaymentIntentInput): Promise<StripePaymentIntent>;
   getPaymentIntent(
     paymentIntentId: string,
     connectedAccountId?: string,
@@ -736,24 +720,6 @@ export function fetchStripeClient(deps: {
         "/v1/checkout/sessions",
         () => stripe.checkout.sessions.expire(sessionId, undefined, onAccount(connectedAccountId)),
         stripeCheckoutSessionSchema,
-      );
-    },
-
-    async createPaymentIntent(input) {
-      return call(
-        "/v1/payment_intents",
-        () =>
-          stripe.paymentIntents.create(
-            {
-              amount: input.amountMinorUnits,
-              currency: input.currency,
-              payment_method_types: ["card"],
-              ...(input.customerEmail ? { receipt_email: input.customerEmail } : {}),
-              ...(input.metadata ? { metadata: input.metadata } : {}),
-            },
-            idem(input.idempotencyKey),
-          ),
-        stripePaymentIntentSchema,
       );
     },
 

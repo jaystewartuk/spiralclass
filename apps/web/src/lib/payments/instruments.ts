@@ -1,8 +1,6 @@
 import type { Prisma, PrismaClient } from "@prisma/client";
 import {
   type PayoutInstrument,
-  type PayoutInstrumentKind,
-  type StudentBuyInstrument,
   railForKind,
   isInstrumentOfferable,
   priceForSeats,
@@ -89,44 +87,6 @@ export async function resolveOfferableInstrument(
   });
   if (!row) return null;
   return isInstrumentOfferable(row, args.currency) ? row : null;
-}
-
-// The instrument as the checkout picker needs it: enough to label the option
-// and to name it back to the server, and nothing more. Payee details are NOT
-// here — they belong to the instructions page, which a student only reaches
-// once a payment row (and therefore a reference) exists. Shipping an account
-// number to everyone who loads a public booking page would hand it out with no
-// reference gate at all.
-export function toWireInstrument(instrument: {
-  id: string;
-  kind: PayoutInstrumentKind;
-}): StudentBuyInstrument {
-  return { id: instrument.id, kind: instrument.kind };
-}
-
-// The i18n key for an instrument's display name. Names are proper nouns, so
-// they are the same in every locale — but they still go through the catalog so
-// a surface never hardcodes one.
-export function instrumentNameKey(kind: PayoutInstrumentKind): string {
-  return `payments.instrument.${kind}`;
-}
-
-// The payee detail a student is actually asked to pay against, reduced to the
-// one string that identifies the destination. Used for compact surfaces
-// (payment detail, admin, notifications) — the full instructions page renders
-// the whole instrument, not this.
-export function instrumentPayeeSummary(instrument: PayoutInstrument): string | null {
-  return instrument.wiseHandle;
-}
-
-// The label a picker shows for an option.
-//
-// Still a function rather than the literal "Wise": D-145 left one kind, and the
-// reason a picker labels an option at all is that a student has to recognize
-// the payee before sending — which is this rail's main defence against
-// "student says sent, teacher can't find it".
-export function instrumentDisplayName(instrument: { kind: PayoutInstrumentKind }): string | null {
-  return instrument.kind === "wise" ? "Wise" : null;
 }
 
 // The price a student is quoted for a template on a given rail.

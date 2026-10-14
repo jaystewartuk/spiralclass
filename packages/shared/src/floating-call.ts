@@ -1,18 +1,15 @@
 // Pure geometry for the minimized/floating call window (WhatsApp-style
-// "collapse the call to a small draggable bubble") — shared by the web
-// ClassCall and the mobile NativeCall so corner-snap math can't drift the way
-// the self-view tile size once did (see call-tile.ts). The component owns the
-// drag gesture wiring (PanResponder on mobile, pointer events on web); this
-// owns "given where a drag released, which corner does the bubble snap to and
-// where does that corner sit" — unit-testable without either platform's
-// runtime.
+// "collapse the call to a small draggable bubble"), used by ClassCall. The
+// component owns the pointer-event wiring; this owns "given where a drag
+// released, which corner does the bubble snap to and where does that corner
+// sit" — unit-testable without the browser runtime.
 
 export type FloatingCorner = "top-left" | "top-right" | "bottom-left" | "bottom-right";
 
 export type FloatingPosition = { x: number; y: number };
 
 export type FloatingBounds = {
-  // The container the bubble drags within (viewport on web, screen on mobile).
+  // The container the bubble drags within (the viewport).
   width: number;
   height: number;
   // The bubble's own size.

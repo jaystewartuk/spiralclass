@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 // Teacher overrides — covers the five one-tap actions other than
 // teacher_cancel (which lives in cancel-handler.*.test.ts). Each action
@@ -371,7 +371,6 @@ const {
   markBookingNoShow,
   restoreClass,
   waiveCancellation,
-  extendPackageExpiration,
   setStudentCustomPrice,
   toggleStudentArchive,
   updateBookingLanguageOverrideAction,
@@ -808,100 +807,6 @@ describe("waiveCancellation", () => {
     expect(result?.error).toMatch(/ya fue modificada/i);
     // The winner's single refund stands — no second decrement, no audit row.
     expect(state.packages.get(PACKAGE_ID)?.classesUsed).toBe(3);
-    expect(state.overrides).toHaveLength(0);
-  });
-});
-
-describe("extendPackageExpiration", () => {
-  // The two boundary checks (future-date first, then posterior-to-current) are
-  // wall-clock sensitive, and the fixture expiry is a fixed 2026-08-01. Pin
-  // "now" to an instant before both the fixture expiry and the 2026-07-01 case
-  // below, so the "posterior a la actual" branch is what's exercised — not the
-  // "must be in the future" guard — no matter when the suite runs. (Only Date
-  // is faked; real timers are left alone so awaits behave normally.)
-  beforeEach(() => {
-    vi.useFakeTimers({ toFake: ["Date"] });
-    vi.setSystemTime(new Date("2026-06-15T00:00:00.000Z"));
-  });
-  afterEach(() => {
-    vi.useRealTimers();
-  });
-
-  it("resolves the new date as end-of-day in the teacher's IANA tz, not UTC", async () => {
-    const result = await extendPackageExpiration(
-      undefined,
-      form({
-        packageId: PACKAGE_ID,
-        newExpiresAt: "2026-09-30",
-        reason: "Vacaciones del alumno",
-      }),
-    );
-    expect(result?.ok).toBeTruthy();
-    const pkg = state.packages.get(PACKAGE_ID)!;
-    // Sept 30 23:59:59 in America/Costa_Rica (CST = -06:00) =
-    // Oct 1 05:59:59 UTC.
-    expect(pkg.expiresAt?.toISOString()).toBe("2026-10-01T05:59:59.000Z");
-    expect(state.overrides[0]).toMatchObject({
-      action: "extend_expiration",
-      targetType: "package",
-      afterJson: { expiresAt: "2026-10-01T05:59:59.000Z" },
-    });
-    expect(trackServerEventMock).toHaveBeenCalledWith(
-      expect.objectContaining({
-        name: "override_applied",
-        properties: expect.objectContaining({
-          action: "extend_expiration",
-          previousValue: "2026-08-01T05:59:59.000Z",
-          newValue: "2026-10-01T05:59:59.000Z",
-        }),
-      }),
-    );
-  });
-
-  it("rejects a date earlier than the current expiration", async () => {
-    const result = await extendPackageExpiration(
-      undefined,
-      form({
-        packageId: PACKAGE_ID,
-        // In the future (so it clears the "must be in the future" guard) but
-        // before the current 2026-08-01 expiry, to exercise the "must be after
-        // the current one" branch specifically.
-        newExpiresAt: "2026-07-15",
-        reason: "Atrás del actual",
-      }),
-    );
-    expect(result?.error).toMatch(/posterior/i);
-    // Existing expiresAt unchanged.
-    expect(state.packages.get(PACKAGE_ID)?.expiresAt?.toISOString()).toBe(
-      "2026-08-01T05:59:59.000Z",
-    );
-    expect(state.overrides).toHaveLength(0);
-  });
-
-  it("rejects malformed dates from the form", async () => {
-    const result = await extendPackageExpiration(
-      undefined,
-      form({
-        packageId: PACKAGE_ID,
-        newExpiresAt: "next month",
-        reason: "Bad input",
-      }),
-    );
-    expect(result?.error).toBeTruthy();
-    expect(state.overrides).toHaveLength(0);
-  });
-
-  it(": refuses cross-tenant package lookup", async () => {
-    state.packages.get(PACKAGE_ID)!.teacherId = OTHER_TEACHER_ID;
-    const result = await extendPackageExpiration(
-      undefined,
-      form({
-        packageId: PACKAGE_ID,
-        newExpiresAt: "2026-09-30",
-        reason: "Tenant bypass",
-      }),
-    );
-    expect(result?.error).toMatch(/no encontrado/i);
     expect(state.overrides).toHaveLength(0);
   });
 });

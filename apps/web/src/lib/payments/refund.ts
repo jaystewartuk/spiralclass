@@ -58,8 +58,8 @@ export async function applyRefund(args: {
   const notificationIds: string[] = [];
 
   const applied = await prisma.$transaction(async (tx) => {
-    // Guarded on `status: "paid"` so a concurrent second refund (web + mobile,
-    // a double submit, or a webhook that beat us here) is a no-op rather than
+    // Guarded on `status: "paid"` so a concurrent second refund (two tabs, a
+    // double submit, or a webhook that beat us here) is a no-op rather than
     // a duplicate audit row and a duplicate pair of notifications. Stripe's
     // own idempotency key already collapses the money movement.
     const flipped = await tx.payment.updateMany({

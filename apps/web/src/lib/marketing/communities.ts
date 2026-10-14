@@ -20,10 +20,6 @@ import { prisma } from "@/lib/prisma";
 // teacher posts her link in" (D-125). Same table (`teacher_share_groups`), same
 // ids, same already-posted utm_content slugs; a platform, a promotion policy
 // and an audience note on top.
-//
-// This module supersedes lib/share-groups/store.ts, which now re-exports from
-// here so every existing caller (the social-preview panel, the growth
-// checklist) keeps working unchanged.
 
 export const COMMUNITY_NAME_MAX = 80;
 export const COMMUNITY_URL_MAX = 300;
@@ -173,7 +169,7 @@ function linkOverride(value: "default" | "yes" | "no" | undefined): boolean | nu
 }
 
 /** Only the promotion fields the form actually rendered. Written as a partial
- * so a narrower client (an older mobile build, the quick-add form) can never
+ * so a narrower form (the quick-add form) can never
  * blank a rule it did not know about. */
 function promotionData(input: CommunityInput) {
   const links = linkOverride(input.promoLinksAllowed);
@@ -286,10 +282,4 @@ export async function restoreCommunity(teacherId: string, id: string): Promise<b
     data: { archivedAt: null },
   });
   return updated.count > 0;
-}
-
-/** Hard delete, kept for the teacher who genuinely added a wrong row. */
-export async function deleteCommunity(teacherId: string, id: string): Promise<boolean> {
-  const deleted = await prisma.teacherShareGroup.deleteMany({ where: { id, teacherId } });
-  return deleted.count > 0;
 }

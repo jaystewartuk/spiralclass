@@ -53,15 +53,6 @@ export type StripeOutcomeInput =
       paymentIntentId: string | null;
     };
 
-// The platform's default settlement currency (lowercase ISO-4217), used where a
-// caller synthesizes an outcome with no per-row currency to hand (kept for
-// back-compat). The paid-path guard below compares against the PAYMENT's own
-// expected currency (`snapshot.currency`), not this const — a settlement in a
-// currency other than what the row was priced in makes the amount comparison
-// meaningless (50000 JPY ≠ 50000 centavos MXN), so we refuse to flip-paid on a
-// mismatch.
-export const EXPECTED_CURRENCY = "mxn";
-
 export type AdvanceOutcome =
   | {
       action: "flip-paid";

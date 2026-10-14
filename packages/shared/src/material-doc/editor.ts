@@ -5,8 +5,8 @@ import { serializeMaterialDoc } from "./serialize";
 import type { InlineNode, MaterialDoc } from "./types";
 
 // The state core of the section editor (Layer 2/3 of
-// the material-editing design), shared by the web and mobile
-// components so "what a structural edit does" has exactly one implementation.
+// the material-editing design), so "what a structural edit does" has exactly
+// one implementation.
 // Everything here is pure Markdown-in / Markdown-out: the component owns no
 // document logic, so the reorder / delete / undo / AI-splice behaviour is
 // unit-testable in node without a DOM, and the shared section ops stay the

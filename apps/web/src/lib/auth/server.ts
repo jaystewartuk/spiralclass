@@ -23,19 +23,6 @@ import { trackTeacherSignIn } from "@/lib/auth/sign-in-analytics";
 // module-eval time would make importing the seam require the full server env
 // even when nothing here is ever actually invoked.
 
-// The accepted audiences for a Google ID token, in better-auth's own shape.
-//
-// better-auth's google provider takes `clientId: string | string[]`, where the
-// array form means "any of these is an acceptable `aud`" and the FIRST entry is
-// the client the browser redirect flow uses (its getPrimaryClientId). One
-// provider therefore covers three token sources: the web redirect and the
-// Android native SDK both use the web client id, while the iOS native SDK mints
-// its token for the iOS client.
-//
-// Order is load-bearing — the web client id must stay first, or the browser
-// flow would start using a native client id that has no secret and no
-// registered redirect URI. Returns the bare string when there's nothing extra
-// to accept, so the common case produces exactly the config it always had.
 function createAuth() {
   const env = serverEnv();
   const configuredSecret = env.BETTER_AUTH_SECRET;

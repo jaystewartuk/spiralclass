@@ -1,3 +1,3 @@
-// Initials derivation now lives in @spiralclass/shared so web and mobile
-// avatars agree. Re-exported here for existing `@/lib/initials` imports.
+// Initials derivation lives in @spiralclass/shared. Re-exported here as the
+// import surface the avatars use.
 export { initialsFrom } from "@spiralclass/shared";

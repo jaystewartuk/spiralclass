@@ -36,7 +36,6 @@ export const stripeV2AccountSchema = z.object({
   object: z.literal("v2.core.account").optional(),
   applied_configurations: z.array(z.string()).optional(),
 });
-export type StripeV2Account = z.infer<typeof stripeV2AccountSchema>;
 
 export const stripeAccountLinkSchema = z.object({
   url: z.string().url(),
@@ -72,10 +71,8 @@ export type StripeAddress = z.infer<typeof stripeAddressSchema>;
 // ---------------- Checkout Session ----------------
 
 export const stripeCheckoutSessionStatusSchema = z.enum(["open", "complete", "expired"]);
-export type StripeCheckoutSessionStatus = z.infer<typeof stripeCheckoutSessionStatusSchema>;
 
 export const stripePaymentStatusSchema = z.enum(["paid", "unpaid", "no_payment_required"]);
-export type StripePaymentStatus = z.infer<typeof stripePaymentStatusSchema>;
 
 export const stripeCheckoutSessionSchema = z.object({
   id: z.string(), // cs_xxx
@@ -128,7 +125,6 @@ export const stripePaymentIntentStatusSchema = z.enum([
   "canceled",
   "succeeded",
 ]);
-export type StripePaymentIntentStatus = z.infer<typeof stripePaymentIntentStatusSchema>;
 
 export const stripePaymentIntentSchema = z.object({
   id: z.string(), // pi_xxx
@@ -199,7 +195,6 @@ export const stripeSettledPaymentIntentSchema = z.object({
     .nullable()
     .optional(),
 });
-export type StripeSettledPaymentIntent = z.infer<typeof stripeSettledPaymentIntentSchema>;
 
 // Resolved exact net for a settled charge, or null if not yet available.
 // `feeMinorUnits` is the platform's Stripe processing cost on the charge (read
@@ -244,7 +239,6 @@ export const stripeSubscriptionStatusSchema = z.enum([
   "incomplete_expired",
   "paused",
 ]);
-export type StripeSubscriptionStatus = z.infer<typeof stripeSubscriptionStatusSchema>;
 
 export const stripeSubscriptionSchema = z.object({
   id: z.string(), // sub_xxx
@@ -280,7 +274,6 @@ export const stripeSubscriptionSchema = z.object({
 export type StripeSubscription = z.infer<typeof stripeSubscriptionSchema>;
 
 export const stripeInvoiceStatusSchema = z.enum(["draft", "open", "paid", "void", "uncollectible"]);
-export type StripeInvoiceStatus = z.infer<typeof stripeInvoiceStatusSchema>;
 
 export const stripeInvoiceSchema = z.object({
   id: z.string(), // in_xxx
@@ -331,7 +324,6 @@ export const stripeDisputeStatusSchema = z.enum([
   "won",
   "lost",
 ]);
-export type StripeDisputeStatus = z.infer<typeof stripeDisputeStatusSchema>;
 
 export const stripeDisputeSchema = z.object({
   id: z.string(), // dp_xxx

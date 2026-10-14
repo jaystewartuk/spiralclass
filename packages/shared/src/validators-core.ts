@@ -66,36 +66,6 @@ export const signInSchemaWith = (loc: Loc) => {
 };
 export type SignInInput = z.infer<ReturnType<typeof signInSchemaWith>>;
 
-// Optional phone-OTP sign-in rail, student-facing and flag-gated. It never
-// reached production — the rail was dropped in the better-auth cutover (D-40)
-// and this schema is residue.
-//
-// A phone number is the more universal identity for students in this market; the
-// schema mirrors the phone-number rule used elsewhere (E.164-ish digits,
-// optional leading +). Normalization to canonical E.164 happens in the action
-// via normalizeE164.
-const phoneField = (loc: Loc) =>
-  z
-    .string()
-    .trim()
-    .regex(/^\+?\d{8,15}$/u, loc("myDetails.whatsappInvalid"));
-
-export const phoneSignInSchemaWith = (loc: Loc) => {
-  return z.object({ phone: phoneField(loc) });
-};
-export type PhoneSignInInput = z.infer<ReturnType<typeof phoneSignInSchemaWith>>;
-
-export const phoneCodeSchemaWith = (loc: Loc) => {
-  return z.object({
-    phone: phoneField(loc),
-    code: z
-      .string()
-      .trim()
-      .regex(/^\d{4,10}$/u, loc("validation.invalidCode")),
-  });
-};
-export type PhoneCodeInput = z.infer<ReturnType<typeof phoneCodeSchemaWith>>;
-
 export const timezoneSchemaWith = (loc: Loc) => {
   return z.object({
     timezone: z
@@ -151,13 +121,10 @@ export const timezoneSchemaWith = (loc: Loc) => {
     // additive, so a language set later stacks its pack on top of the wrong
     // one instead of replacing it (D-112).
     //
-    // **Required in both onboarding forms, optional at this schema layer** —
-    // deliberately, and for exactly the reason `country`/`pricingCurrency`
-    // above are: an already-shipped mobile build predating the field omits it,
-    // and a hard requirement here would 422 that client's whole step 1 rather
-    // than just leaving the language unset. The web action enforces it
-    // server-side (web is never a stale client); mobile enforces it in the
-    // screen and picks the rest up on the next OTA.
+    // **Required in the onboarding form, optional at this schema layer.** The
+    // onboarding action enforces it server-side. The schema-level optionality
+    // (like `pricingCurrency` above) served a client that predated the field;
+    // nothing still sends without it.
     targetLanguage: z
       .string()
       .trim()
@@ -483,8 +450,7 @@ export const studentTimezoneSwitchSchemaWith = (loc: Loc) => {
   });
 };
 
-// Student self-service contact edit on /mis-clases/cuenta and the mobile
-// equivalent. Email is deliberately absent — changing the sign-in email
+// Student self-service contact edit on /mis-clases/cuenta. Email is deliberately absent — changing the sign-in email
 // needs the verified email-change flow, not a plain form field.
 export const studentContactSchemaWith = (loc: Loc) => {
   return z.object({
@@ -503,7 +469,7 @@ export const studentContactSchemaWith = (loc: Loc) => {
 };
 export type StudentContactInput = z.infer<ReturnType<typeof studentContactSchemaWith>>;
 
-// Teacher self-service contact edit on the teacher account page (web + mobile).
+// Teacher self-service contact edit on the teacher account page.
 // The teacher number is the platform → teacher contact line. Email is absent
 // for the same reason as students — it's the sign-in identity and
 // changes through the verified email-change flow, never a plain field.
@@ -532,8 +498,8 @@ export const teacherContactSchemaWith = (loc: Loc) => {
 export type TeacherContactInput = z.infer<ReturnType<typeof teacherContactSchemaWith>>;
 
 // Teacher opt-in edit of the PUBLIC-facing WhatsApp number shown on the
-// booking page (/b/<slug>), settings/booking-page (web) and BookingPageCard
-// (mobile). Deliberately its own schema, not a reuse of teacherContactSchema
+// booking page (/b/<slug>) and edited in settings/booking-page. Deliberately
+// its own schema, not a reuse of teacherContactSchema
 // above — that one edits the private account `phone` field, this one edits
 // `publicWhatsappE164`, a separate opt-in with a separate consent scope (see
 // the schema.prisma comment on Teacher.publicWhatsappE164).
@@ -554,7 +520,7 @@ export type TeacherPublicWhatsappInput = z.infer<
 >;
 
 // AI material style — teacher-configurable tone/register for AI-generated
-// materials (web + mobile). All fields optional; an unset field means "no
+// materials. All fields optional; an unset field means "no
 // directive", i.e. today's default behavior. The register presets are the
 // headline fix for "the AI writes too academically"; `customInstructions` is
 // the free-text escape hatch appended to every material's prompt — the
@@ -623,8 +589,8 @@ export const DEFAULT_LESSON_FORMAT: LessonFormat = "one_to_one";
 export const MATERIAL_LANGUAGE_VARIETY_MAX = 60;
 export const MATERIAL_CUSTOM_INSTRUCTIONS_MAX = 600;
 
-// Coerce a form/JSON value to null when empty so "unset" is uniform across
-// web FormData (which posts "") and the mobile JSON body (which may send null).
+// Coerce a form/JSON value to null when empty so "unset" is uniform whether a
+// FormData field posts "" or a JSON body sends null.
 const blankToNull = (v: unknown) => {
   if (v == null) return null;
   if (typeof v === "string") {
@@ -639,9 +605,8 @@ export const materialStyleSchemaWith = (loc: Loc) => {
     tone: z.preprocess(blankToNull, z.enum(MATERIAL_TONES).nullable()).default(null),
     learnerAge: z.preprocess(blankToNull, z.enum(MATERIAL_LEARNER_AGES).nullable()).default(null),
     // Teacher default vocabulary difficulty (D-80). Nullable → the effective
-    // default (everyday). Written by the mobile material-style route AND, since
-    // the settings-page redesign, by the web save action — the web form posts
-    // the stored value back unchanged unless the teacher moves the dial.
+    // default (everyday). Written by the settings-page save action — the form
+    // posts the stored value back unchanged unless the teacher moves the dial.
     vocabulary: z.preprocess(blankToNull, z.enum(MATERIAL_VOCABULARIES).nullable()).default(null),
     languageVariety: z
       .preprocess(

@@ -15,8 +15,6 @@ import { VISITOR_COOKIE } from "./visitor-cookie";
 // handles that) and from the ap_src attribution cookie (first-touch marketing
 // source, absent on a direct visit).
 
-export { VISITOR_COOKIE, VISITOR_COOKIE_MAX_AGE_SECONDS, newVisitorId } from "./visitor-cookie";
-
 /** Storage form of a raw visitor id. Never store the raw value. */
 export function hashVisitorId(raw: string | null | undefined): string | null {
   if (!raw) return null;

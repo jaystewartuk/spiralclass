@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { compareValues, sortRows, type SortColumn } from "./table-sort";
+import { sortRows } from "./table-sort";
 
 type Row = { id: string; name: string; count: number | null };
 
@@ -9,9 +9,9 @@ const rows: Row[] = [
   { id: "c", name: "Carlos", count: 5 },
 ];
 
-const columns: SortColumn<Row>[] = [
-  { key: "name", label: "Name", get: (r) => r.name },
-  { key: "count", label: "Count", get: (r) => r.count },
+const columns = [
+  { key: "name", label: "Name", get: (r: Row) => r.name },
+  { key: "count", label: "Count", get: (r: Row) => r.count },
 ];
 
 describe("sortRows", () => {
@@ -45,14 +45,14 @@ describe("sortRows", () => {
   });
 });
 
-describe("compareValues", () => {
-  it("treats two nulls as equal", () => {
-    expect(compareValues(null, undefined, "asc")).toBe(0);
-  });
-
-  it("sorts a null value after a defined one in both directions", () => {
-    expect(compareValues(null, 1, "asc")).toBeGreaterThan(0);
-    expect(compareValues(null, 1, "desc")).toBeGreaterThan(0);
-    expect(compareValues(1, null, "asc")).toBeLessThan(0);
+describe("null ordering", () => {
+  it("treats two nulls as equal, keeping their original order", () => {
+    const nulls: Row[] = [
+      { id: "x", name: "X", count: null },
+      { id: "y", name: "Y", count: null },
+    ];
+    for (const dir of ["asc", "desc"] as const) {
+      expect(sortRows(nulls, columns, { key: "count", dir }).map((r) => r.id)).toEqual(["x", "y"]);
+    }
   });
 });

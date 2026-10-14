@@ -5,7 +5,7 @@ import { trackServerEvent } from "@/lib/analytics/posthog";
 
 // Shared mutation path for editing a student's contact card (name, email,
 // WhatsApp number, timezone). All surfaces — the student's own account page
-// (web + mobile) and the teacher's roster fix — funnel through here so the
+// and the teacher's roster fix — funnel through here so the
 // consent stamping, the email guard and the audit trail can't drift apart.
 //
 // Email rules:

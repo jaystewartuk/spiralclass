@@ -7,8 +7,8 @@ import { stripAnswerKeyMarkdown } from "./material-doc/index";
 // generation prompt deliberately puts every solution in a `> [!answer]` callout
 // so it can be held back, and the on-screen renderers collapse those behind a
 // "Show answer" toggle. That toggle is TYPOGRAPHY, NOT A BOUNDARY — a student
-// whose device holds the body can tap it open, read it out of the RSC payload
-// or the /api/mobile JSON, or pull it off the LiveKit data channel. The only
+// whose device holds the body can tap it open, read it out of the RSC payload,
+// or pull it off the LiveKit data channel. The only
 // way answers are actually withheld is for the answer bytes never to reach the
 // student's device at all, which is exactly the cut the PDF export already
 // makes for the student copy (see material-doc/answer-key.ts).

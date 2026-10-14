@@ -24,7 +24,7 @@ import { TESTIMONIAL_AUTHOR_MAX, TESTIMONIAL_BODY_MAX, TESTIMONIAL_NOTE_MAX } fr
 
 // Re-exported, not re-declared. These used to be three literals here that
 // ./limits believed it owned; see the warning in that file.
-export { TESTIMONIAL_AUTHOR_MAX, TESTIMONIAL_NOTE_MAX, TESTIMONIAL_BODY_MAX } from "./limits";
+export { TESTIMONIAL_BODY_MAX } from "./limits";
 
 // `authorNote` is optional; an empty string collapses to undefined so a blank
 // field clears the note rather than storing "".

@@ -2,8 +2,8 @@ import type { LocaleCode } from "./api";
 import { countryLabel } from "./countries";
 import { intlLocale } from "./i18n/locales";
 
-// Canonical E.164 normalization, shared by web and mobile so a WhatsApp number
-// is stored/displayed identically no matter which client submitted it.
+// Canonical E.164 normalization, so a WhatsApp number is stored/displayed
+// identically no matter which form submitted it.
 //
 // Teachers and students are anywhere in the world, so the ONLY reliable input
 // is the caller's `countryHint` (an ISO-3166-1 alpha-2 code — a teacher's own
@@ -425,9 +425,8 @@ export function phoneCountryOptions(
  * Builds a `wa.me` deep-link that opens a chat with `e164` pre-filled with
  * `message` — the plain, no-Meta-integration WhatsApp link D-42 kept (see
  * `docs/decisions/D-42.md`) after the automated Cloud API send rail was
- * removed. Shared by web (booking-page "Chat on WhatsApp" button) and mobile
- * (same button, opened via `Linking.openURL`) so both build the exact same
- * URL from the exact same stored number. `wa.me` wants bare digits — no `+`,
+ * removed. Used by the booking page's "Chat on WhatsApp" button, so the link
+ * is built from the exact same stored number everywhere. `wa.me` wants bare digits — no `+`,
  * no separators — so this strips everything but `[0-9]` regardless of how
  * `e164` is formatted. Returns null for an empty/unparseable number so
  * callers can hide the button rather than link to a broken chat.

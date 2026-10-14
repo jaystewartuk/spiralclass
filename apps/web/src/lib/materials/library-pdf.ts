@@ -76,8 +76,8 @@ export function materialPdfFilename(
 }
 
 // The opt-in that flips a PDF download from the student copy to the teacher's.
-// Shared by both routes so web and mobile can never disagree about what counts
-// as "yes" — and deliberately allow-listed rather than truthiness-checked, so a
+// Shared by both routes so they can never disagree about what counts as "yes"
+// — and deliberately allow-listed rather than truthiness-checked, so a
 // stray `?answers=0` or `?answers=` reads as the safe default rather than as a
 // request for the answers.
 export function answerKeyRequested(url: string): boolean {

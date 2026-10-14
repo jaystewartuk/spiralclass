@@ -2,12 +2,12 @@ import { DEFAULT_LOCALE, intlLocale, matchAcceptLanguage, ownCurrencySymbol } fr
 // Shared money formatting. Amounts are integer minor units (centavos for MXN);
 // each amount also carries a currency code recording what it's denominated in.
 //
-// One source of truth so web and mobile render identical strings. A narrow
-// symbol is a bare `$` for USD and most other dollar/peso currencies, so every
-// formatted amount carries an explicit code suffix (`$1,500.00 MXN`). Number
-// formatting is deliberately locale-independent (always en-US grouping) so the
-// two platforms never drift on separators; the currency, not the UI language,
-// drives the symbol and decimals.
+// One source of truth so the server and the browser render identical strings.
+// A narrow symbol is a bare `$` for USD and most other dollar/peso currencies,
+// so every formatted amount carries an explicit code suffix (`$1,500.00 MXN`).
+// Number formatting is deliberately locale-independent (always en-US grouping)
+// so separators never drift; the currency, not the UI language, drives the
+// symbol and decimals.
 //
 // The app is genuinely multi-currency: a teacher picks one currency for her
 // whole business at onboarding from a curated per-rail list (D-64/D-124,
@@ -26,9 +26,9 @@ import { DEFAULT_LOCALE, intlLocale, matchAcceptLanguage, ownCurrencySymbol } fr
 // BOTH SIDES ARE CURRENCY-AWARE, AND THEY MUST STAY THAT WAY TOGETHER.
 // `majorToMinorUnits` still defaults its `currency` to MXN for the handful of
 // legacy readers that pass none, but every PRICE-ENTRY path now passes the
-// teacher's own `pricingCurrency` explicitly — web via the
-// `PricingCurrencyProvider` context, the server actions and mobile routes via
-// `currencyForTeacher(teacher)`, mobile via the row's own `currency`.
+// teacher's own `pricingCurrency` explicitly — the client via the
+// `PricingCurrencyProvider` context, the server actions via
+// `currencyForTeacher(teacher)`.
 //
 // That matters because the two halves used to disagree: entry always
 // multiplied by 100 while `formatMinorUnits` divided by the REAL exponent, so a
@@ -70,9 +70,7 @@ export function currencyExponent(currency: string): number {
 }
 
 // One Intl.NumberFormat per currency, built lazily. Intl formatters are
-// relatively expensive to construct, and RN Hermes supports Intl.NumberFormat
-// (currency style) reliably, so caching keeps the hot path cheap on both
-// platforms.
+// relatively expensive to construct, so caching keeps the hot path cheap.
 //
 // `currencyDisplay: "narrowSymbol"` is load-bearing, not cosmetic. An ICU
 // locale renders only its OWN currency by symbol — every other one falls back
@@ -114,12 +112,10 @@ function formatterFor(currency: string, locale?: string | null): Intl.NumberForm
         currencyDisplay: "narrowSymbol",
       });
     } catch {
-      // "narrowSymbol" needs ICU 62+. Every engine this ships on today has it
-      // (Node, every current browser, Hermes on Android 11+), but the mobile
-      // app is FROZEN and still installed on real phones, so an older
-      // Android's ICU has to degrade to the previous rendering rather than
-      // throw inside a price label. The amount and the code suffix are correct
-      // in both branches; only the glyph is lost.
+      // "narrowSymbol" needs ICU 62+. Node and every current browser have it;
+      // an engine without it degrades to the previous rendering rather than
+      // throwing inside a price label. The amount and the code suffix are
+      // correct in both branches; only the glyph is lost.
       formatter = new Intl.NumberFormat(tag, { style: "currency", currency: code });
     }
     formatters.set(key, formatter);

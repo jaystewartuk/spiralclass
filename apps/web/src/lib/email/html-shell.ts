@@ -5,7 +5,7 @@
 // Verdana and Tahoma, the same legible fallbacks the app's own stack uses.
 //
 // Color tokens are pulled from the shared brand palette (`@spiralclass/shared`)
-// — the same source web and mobile read from — so the brand voice stays
+// — the same source the app reads from — so the brand voice stays
 // consistent across surfaces (web app, emails, unsubscribe page).
 import {
   MARK,

@@ -112,20 +112,6 @@ export function currentSessionId(): string | null {
   }
 }
 
-// Returns the PostHog session replay URL for the current session, or null
-// when replay isn't running / posthog-js isn't initialized. Used to embed
-// the replay link in the WhatsApp support pre-fill so the developer can
-// immediately watch what the user was doing when they asked for help.
-export function getSessionReplayUrl(): string | null {
-  try {
-    if (typeof window === "undefined") return null;
-    if (!initialized) return null;
-    return posthog.get_session_replay_url?.() || null;
-  } catch {
-    return null;
-  }
-}
-
 // Bundles the two pieces of context needed to pre-fill a WhatsApp support
 // message: who the user is and a link to watch their session.
 export function getSupportContext(): {

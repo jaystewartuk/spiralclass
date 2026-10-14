@@ -1,7 +1,7 @@
 import type { AppLocale } from "../i18n/locales";
 
-// The in-app help-docs content model — shared by web and mobile so both
-// platforms render the exact same audience-segmented documentation. Content
+// The in-app help-docs content model — the audience-segmented documentation
+// the help centre renders. Content
 // is generated from docs/help/{teacher,student}/*.md (see
 // scripts/generate-help-content.mjs) — docs/help is the single source of
 // truth; do not hand-edit generated.ts.
@@ -24,16 +24,15 @@ export type ContentAudience = (typeof CONTENT_AUDIENCES)[number];
 export type LocalizedText = { en: string } & Partial<Record<Exclude<AppLocale, "en">, string>>;
 
 export interface ContentDoc {
-  /** Unique within its audience; used as the URL segment on both platforms. */
+  /** Unique within its audience; used as the URL segment. */
   slug: string;
   audience: ContentAudience;
   title: LocalizedText;
   /** One-line summary — used in doc-list rows and as the FAQPage JSON-LD answer. */
   summary: LocalizedText;
-  /** Markdown body, rendered by MarkdownArticle (web) / ClassContentMarkdown (mobile). */
+  /** Markdown body, rendered by MarkdownArticle. */
   body: LocalizedText;
-  /** Also surfaced on the public, unauthenticated /help FAQ (web) and the
-   * signed-out mobile help list. Reserved for content that's useful before
+  /** Also surfaced on the public, unauthenticated /help FAQ. Reserved for content that's useful before
    * signup — never true for the admin audience (no admin docs exist yet). */
   publicFaq?: boolean;
 }

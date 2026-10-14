@@ -27,8 +27,8 @@ export const LANGUAGE_CODES = LOCALES.map((l) => l.languageCode) as LanguageCode
 
 // Platform default / fallback. Matches the web default and the DB column
 // default (Teacher.locale / Student.locale default to "en"); another locale is
-// chosen when the request/device signals it (see matchAcceptLanguage / mobile
-// detect) or when the user picks one explicitly.
+// chosen when the request signals it (see matchAcceptLanguage) or when the
+// user picks one explicitly.
 export const DEFAULT_LOCALE: AppLocale = "en";
 
 const LOCALE_TAGS = LOCALES.map((l) => l.tag) as AppLocale[];

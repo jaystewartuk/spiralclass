@@ -23,7 +23,7 @@ export function studentPhotoStorageKey(studentId: string): string {
 
 // Short-lived signed URL for a stored photo, or null when there's no photo or
 // signing fails. Unlike teacherPhotoPublicUrl this is ASYNC — every caller
-// (page render, mobile /auth/me, mobile photo route) must await it.
+// must await it.
 export async function studentPhotoUrl(
   photoPath: string | null | undefined,
 ): Promise<string | null> {

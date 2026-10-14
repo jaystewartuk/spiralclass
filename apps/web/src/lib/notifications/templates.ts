@@ -202,7 +202,7 @@ export function isTeacherRecipientTemplate(t: TemplateName): boolean {
 // so registering a language extends outbound copy in lockstep with the in-app
 // catalog. Re-exported here to keep existing `@/lib/notifications/templates`
 // imports stable.
-export { LANGUAGE_CODES, localeToLanguageCode, type LanguageCode } from "@spiralclass/shared";
+export { localeToLanguageCode, type LanguageCode } from "@spiralclass/shared";
 
 // -----------------------------
 // Template variable contracts

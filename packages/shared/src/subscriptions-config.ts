@@ -14,9 +14,9 @@
 // reinterpreting any pre-existing MXN subscriber's already-stored
 // `lockedPriceMinorUnits`/`currency` (see billing-webhook-handler.ts — a live
 // subscriber's actual billing currency always comes from their own Stripe
-// object, never re-derived from this table after activation). Shared so web
-// and mobile resolve plan prices/caps/windows and entitlements from the same
-// source. See docs/features/subscriptions.md for the product rationale.
+// object, never re-derived from this table after activation). Shared so the
+// handlers and the UI resolve plan prices/caps/windows and entitlements from
+// the same source. See docs/features/subscriptions.md for the product rationale.
 
 // --- Plans -----------------------------------------------------------------
 
@@ -142,19 +142,6 @@ export const LAUNCH_DATE = new Date("2026-05-27T00:00:00.000Z");
 
 export function foundingCutoffDate(launch: Date = LAUNCH_DATE): Date {
   return new Date(launch.getTime() + FOUNDING_WINDOW_DAYS * 24 * 60 * 60 * 1000);
-}
-
-// True while the founding cohort is still open given the current headcount and
-// clock. Headcount is the count of teachers already on a founding subscription
-// (the founding_cohort source-of-truth row tracks this; callers pass it in).
-export function isFoundingCohortOpen(input: {
-  foundingHeadcount: number;
-  now?: Date;
-  launch?: Date;
-}): boolean {
-  const now = input.now ?? new Date();
-  const cutoff = foundingCutoffDate(input.launch ?? LAUNCH_DATE);
-  return input.foundingHeadcount < FOUNDING_MAX_TEACHERS && now < cutoff;
 }
 
 // --- Ambassador commission (referral attribution) --------------------------

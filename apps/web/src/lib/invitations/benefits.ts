@@ -1,7 +1,6 @@
 // The value proposition shown to an invited student. The benefit key list and
-// its catalog-key helper are shared cross-platform (@spiralclass/shared) so the
-// email and the web accept page can't drift; re-exported here so existing
-// `@/lib/invitations/benefits` imports keep working.
+// its catalog-key helper live in @spiralclass/shared so the email and the
+// accept page can't drift; re-exported here as the import surface both use.
 import {
   CORE_BENEFIT_KEYS,
   benefitCatalogKey,
@@ -9,7 +8,7 @@ import {
   type TFunction,
 } from "@spiralclass/shared";
 
-export { CORE_BENEFIT_KEYS, benefitCatalogKey, type InvitationBenefitKey };
+export { CORE_BENEFIT_KEYS, benefitCatalogKey };
 
 // The benefit lines for the EMAIL body, from the same catalog keys the accept
 // page renders. This used to hold its own Spanish and English copy, so a French

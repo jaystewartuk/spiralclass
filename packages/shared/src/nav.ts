@@ -11,7 +11,7 @@ export type NavLocale = AppLocale;
 export type NavLabel = Record<AppLocale, string>;
 
 // Top-level sections of the teacher experience.
-//  - main:    the day-to-day task nav (the web header bar / mobile tab bar).
+//  - main:    the day-to-day task nav (the header bar).
 //  - page:    "Tu página" — the booking-page-facing tools (leads, social
 //             proof, the public page itself). Their natural home, rather than
 //             scattered into settings or the dashboard grid.
@@ -68,13 +68,13 @@ export type NavItem = {
   key: NavKey;
   group: NavGroupKey;
   label: NavLabel;
-  // Short blurb used by card-grid presentations (the web dashboard "Tu día a
-  // día" tiles and the mobile "Tu página" cards). Omitted for items that only
+  // Short blurb used by card-grid presentations (the dashboard "Tu día a
+  // día" tiles). Omitted for items that only
   // ever appear as a bare row/link.
   description?: NavLabel;
   // True when the destination lives outside the app shell (legal pages, the
   // public booking page) and should open as a plain link rather than an
-  // in-app route. Each platform decides how to honour it.
+  // in-app route.
   external?: boolean;
 };
 
@@ -223,8 +223,8 @@ export const NAV_ITEMS: NavItem[] = [
     },
   },
   {
-    // Key unchanged on purpose: it is persisted in every teacher's saved
-    // dashboard layout and addressed by the mobile router. D-125 generalised
+    // Key unchanged on purpose: it is persisted in teachers' saved dashboard
+    // tile orders. D-125 generalised
     // what it POINTS AT (Facebook groups became marketing communities), not
     // what it is called internally.
     key: "shareGroups",
@@ -382,10 +382,8 @@ export const TEACHER_PRIMARY_TAB_KEYS: NavKey[] = ["dashboard", "classes", "paym
 // Dashboard tile order (customizable "Day to day" grid)
 // ---------------------------------------------------------------------------
 
-// The keys shown in the web dashboard's "Day to day" card / the mobile
-// equivalent, in the historical default order. Both platforms render this
-// same set so a teacher's saved order/visibility applies identically on
-// either app.
+// The keys shown in the dashboard's "Day to day" card, in the historical
+// default order.
 export const DEFAULT_DASHBOARD_TILE_KEYS: NavKey[] = [
   "getStudents",
   "classes",

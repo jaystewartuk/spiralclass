@@ -1,15 +1,13 @@
-// Client-side sort for admin list screens/grids, shared by web and mobile.
-// Both platforms load a bounded set of rows into memory and sort them
-// in-browser/in-app rather than re-querying — web additionally has a
-// Prisma-`orderBy`-driven server sort for the columns that need to stay
-// correct across pages (see apps/web/src/lib/table-sort.ts), but the actual
-// comparator used for the instant, in-memory reorder is this one, so mobile
-// and web agree on tie-breaking/null semantics instead of hand-copying it.
+// Client-side sort for the admin data tables. A table loads a bounded set of
+// rows into memory and sorts them in-browser rather than re-querying; the
+// columns that must stay correct across pages also have a Prisma-`orderBy`
+// server sort (apps/web/src/lib/table-sort.ts), which shares these
+// `SortDir`/`SortState` types so the two agree on what a sort is.
 
 export type SortDir = "asc" | "desc";
 export type SortState = { key: string; dir: SortDir };
 
-export type SortColumn<T> = {
+type SortColumn<T> = {
   key: string;
   label: string;
   get: (row: T) => string | number | null | undefined;
@@ -21,7 +19,7 @@ export type SortColumn<T> = {
  * flip nulls to the front, which reads as broken to whoever's looking at the
  * grid.
  */
-export function compareValues(
+function compareValues(
   a: string | number | null | undefined,
   b: string | number | null | undefined,
   dir: SortDir,

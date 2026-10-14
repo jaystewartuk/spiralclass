@@ -1,12 +1,12 @@
 import { Inngest } from "inngest";
-import { hasInngestCreds, serverEnv } from "@/lib/env";
+import { serverEnv } from "@/lib/env";
 import { INNGEST_APP_ID } from "./app-id";
 
 // Single app-wide Inngest client. When creds are missing (dev / tests),
 // events still go through this instance — Inngest's SDK runs in a local
 // mode and will connect to `npx inngest-cli dev` on localhost:8288 if
 // present, or discard events otherwise. Production requires both keys
-// via hasInngestCreds().
+// (lib/env.ts hasInngestCreds).
 //
 // Event schemas are defined inline here so function handlers stay typed.
 
@@ -112,7 +112,3 @@ export const inngest = new Inngest({
   // Omitting signingKey here; it's read by inngest/next serve() handler
   // from the env directly.
 });
-
-export function getInngestKind(): "real" | "stub" {
-  return hasInngestCreds() ? "real" : "stub";
-}

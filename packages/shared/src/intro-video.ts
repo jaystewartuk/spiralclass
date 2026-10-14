@@ -104,7 +104,7 @@ export function foldIntroVideoTick(
 }
 
 // The properties the summary event carries. Rounded here (not at each call
-// site) so web and mobile report identically-shaped numbers.
+// site) so every reporter sends identically-shaped numbers.
 export function introVideoWatchSummary(state: IntroVideoWatchState): {
   watched_ms: number;
   max_percent: number;

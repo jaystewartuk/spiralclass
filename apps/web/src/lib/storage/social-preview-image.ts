@@ -1,4 +1,3 @@
-import { SOCIAL_PREVIEW_MAX_UPLOAD_BYTES, SOCIAL_PREVIEW_UPLOAD_TYPES } from "@spiralclass/shared";
 import { getStorageProvider, PUBLIC_VERSIONED_ASSET_CACHE_CONTROL } from "./provider";
 import { r2PublicUrl } from "./r2-public-url";
 import { TEACHER_PHOTO_BUCKET } from "./teacher-photo";
@@ -27,8 +26,6 @@ import { TEACHER_PHOTO_BUCKET } from "./teacher-photo";
 // these URLs carry no `?v=` cache-buster of their own.
 
 export const SOCIAL_PREVIEW_BUCKET = TEACHER_PHOTO_BUCKET;
-
-export { SOCIAL_PREVIEW_MAX_UPLOAD_BYTES, SOCIAL_PREVIEW_UPLOAD_TYPES };
 
 export function socialPreviewStorageKey(
   teacherId: string,

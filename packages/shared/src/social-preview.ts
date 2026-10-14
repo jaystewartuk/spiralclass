@@ -1,7 +1,7 @@
 // Social previews (D-123) — the per-share-link OG/social image a teacher
 // uploads or generates for her booking link.
 //
-// This module owns the parts BOTH clients must agree on: the configuration
+// This module owns the parts the editor and the server must agree on: the configuration
 // vocabulary (angle), the field bounds, the canonical card dimensions, and the
 // wire shapes. The provider prompt, the storage lifecycle and the Satori
 // composition all stay server-side (apps/web/src/lib/social-preview,
@@ -75,7 +75,7 @@ export const SOCIAL_PREVIEW_TOPIC_MAX_CHARS = 160;
  *
  * Two lines of large type at 1200x630 is roughly this many characters; past it
  * the text either shrinks below thumbnail legibility or overflows the safe
- * band. Bounded here so web and mobile refuse the same input.
+ * band. Bounded here so the form and the server refuse the same input.
  */
 export const SOCIAL_PREVIEW_CAPTION_MAX_CHARS = 120;
 
@@ -120,7 +120,7 @@ export function socialPreviewMonthlyCap(isPro: boolean): number {
 
 // --- Wire shapes -------------------------------------------------------------
 
-/** One stored asset, as both clients see it. */
+/** One stored asset, as the editor sees it. */
 export type SocialPreviewImageView = {
   id: string;
   source: SocialPreviewSource;
@@ -131,7 +131,7 @@ export type SocialPreviewImageView = {
   createdAt: string;
 };
 
-/** One placement, as both clients see it. */
+/** One placement, as the editor sees it. */
 export type SocialPreviewView = {
   id: string;
   /** null = the teacher's default preview for untagged shares. */
@@ -140,16 +140,6 @@ export type SocialPreviewView = {
   image: SocialPreviewImageView;
   /** Absolute URL of the COMPOSED card, cache-busted — what og:image points at. */
   cardUrl: string;
-};
-
-/** Everything the mobile editor needs in one round trip: what is configured,
- * what images exist to choose from, and how much allowance is left. Bundled
- * because rendering the screen needs all three and three separate requests
- * would each pay the same auth + cold-start cost. */
-export type SocialPreviewBundle = {
-  previews: SocialPreviewView[];
-  images: SocialPreviewImageView[];
-  quota: { used: number; cap: number; remaining: number };
 };
 
 /** What the teacher fills in to generate. The provider prompt is built from

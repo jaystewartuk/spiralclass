@@ -3,8 +3,8 @@
 // The estimate layer's cost categories and usage meters. Both are curated,
 // extensible `as const` lists (NOT Prisma enums) so a new category, metric, or
 // integration is a data change that needs no migration — the same migration-free
-// posture `KNOWN_EXPENSE_VENDORS` takes in expenses-config.ts. Shared so web
-// (and, later, a mobile mirror) resolve the same sets.
+// posture `KNOWN_EXPENSE_VENDORS` takes in expenses-config.ts. Shared so the
+// admin forms and the server resolve the same sets.
 //
 // This is deliberately SEPARATE from expenses-config.ts's `EXPENSE_CATEGORIES`
 // (7 values, the ACTUALS taxonomy that's load-bearing across money-metrics.ts

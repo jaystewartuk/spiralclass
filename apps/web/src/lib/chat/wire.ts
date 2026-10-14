@@ -1,5 +1,5 @@
-// Message row → ChatMessage wire mapping, shared by every chat surface (web +
-// mobile routes, and the two chat pages' initial server render) so a new wire
+// Message row → ChatMessage wire mapping, shared by every chat surface (the
+// chat routes and the two chat pages' initial server render) so a new wire
 // field lands everywhere at once instead of in a dozen per-route copies.
 
 import type {

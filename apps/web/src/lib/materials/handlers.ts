@@ -82,12 +82,11 @@ async function resolveSubject(
   };
 }
 
-// Platform-agnostic material-authoring logic (D-17, generalized by the
-// ClassContent/ClassMaterial → LibraryMaterial merge, D-69), factored out of
-// the web server actions so the mobile JSON API can reuse the exact same
-// gating, validation, Pro-cap, and AI pipeline (web/mobile parity per
-// CLAUDE.md). Returns localized messages so each caller just passes the
-// result through. No `revalidatePath` here — that's web-only.
+// Material-authoring logic (D-17, generalized by the ClassContent/ClassMaterial
+// → LibraryMaterial merge, D-69), factored out of the server actions so the
+// gating, validation, Pro-cap, and AI pipeline have one implementation.
+// Returns localized messages so each caller just passes the result through.
+// No `revalidatePath` here — that is the action's job.
 //
 // This module covers the booking-scoped "content" material — a body-bearing
 // LibraryMaterial with `bookingId` set and `sendTiming` null (the merged
@@ -96,8 +95,8 @@ async function resolveSubject(
 // monthly AI cap, and (via materials/revisions.ts) one version-history log.
 // File/link attachments — scheduled `sendTiming`, either fresh-uploaded or
 // attached from the library — are simple CRUD on the same LibraryMaterial
-// table and live directly in the callers (app/actions/library.ts and the
-// mobile routes); they don't need the AI/versioning machinery here.
+// table and live directly in the callers (app/actions/library.ts); they don't
+// need the AI/versioning machinery here.
 
 // @/lib/ai/anthropic pulls in `server-only`; it's imported dynamically inside
 // the generate paths (after auth) so the GET/PUT/DELETE routes — and the
@@ -239,9 +238,8 @@ export async function saveClassContentForBooking(input: {
     },
   });
 
-  // Homework auto-draft (docs/features/homework.md) — one
-  // shared handler for both web and mobile, so this needs no per-platform
-  // wiring. Best-effort internally; never fails the content save.
+  // Homework auto-draft (docs/features/homework.md). Best-effort internally;
+  // never fails the content save.
   await maybeAutoDraftAssignmentFromMaterial({
     teacherId: input.teacherId,
     materialId: row.id,
@@ -252,24 +250,6 @@ export async function saveClassContentForBooking(input: {
   });
 
   return { ok: true, materialId: row.id };
-}
-
-export async function deleteClassContentForBooking(input: {
-  teacherId: string;
-  bookingId: string;
-}): Promise<{ ok: true }> {
-  const booking = await findOwnedBooking(input.teacherId, input.bookingId);
-  if (!booking) return { ok: true };
-  // deleteMany (not delete) so a missing row is a no-op, never a throw.
-  await prisma.libraryMaterial.deleteMany({
-    where: {
-      teacherId: input.teacherId,
-      bookingId: booking.id,
-      sendTiming: null,
-      body: { not: null },
-    },
-  });
-  return { ok: true };
 }
 
 // ---------- lesson continuity ("continue from a previous class") ----------
