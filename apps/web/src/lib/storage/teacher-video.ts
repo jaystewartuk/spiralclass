@@ -101,11 +101,11 @@ export async function removeTeacherVideo(videoPath: string): Promise<void> {
 }
 
 // --- Direct (presigned) upload path -----------------------------------------
-// A gallery/library video easily exceeds the serverless request-body limit, so
-// the buffered `putTeacherVideo` (multipart through the function) 500s on large
-// files. Mirroring the chat-video flow, the client instead GETs a presigned PUT
-// URL, uploads the bytes STRAIGHT to R2, then finalizes by path — the bytes
-// never pass through the function. One object per teacher (the id key), so a
+// A gallery/library video is too large to buffer through the app server — the
+// buffered `putTeacherVideo` (multipart through the request) 500'd on large
+// files on the former serverless host. Mirroring the chat-video flow, the client
+// instead GETs a presigned PUT URL, uploads the bytes STRAIGHT to R2, then
+// finalizes by path — the bytes never pass through the app server. One object per teacher (the id key), so a
 // re-upload replaces in place, same as the buffered path.
 
 const PUT_TTL_SECONDS = 300;

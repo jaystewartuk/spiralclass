@@ -73,11 +73,11 @@ ENV BUILD_STANDALONE=1
 # Next's build-time "Collecting page data" step statically imports every
 # route module, and something in that import chain calls serverEnv() (Zod-
 # validated) at module load — even though nothing at build time actually
-# connects to the DB. `fly secrets set` only
-# reaches the RUNNING container, not this build step, so these are
-# placeholder SHAPES only, satisfying Zod's format checks — real values
-# from `fly secrets` override them at runtime (container env always wins
-# over an image's baked-in ENV default).
+# connects to the DB. Runtime secrets only
+# reach the RUNNING container, not this build step, so these are
+# placeholder SHAPES only, satisfying Zod's format checks — the real values
+# override them at runtime (container env always wins over an image's
+# baked-in ENV default).
 ENV DATABASE_URL="postgresql://build:build@localhost:5432/build" \
     DIRECT_URL="postgresql://build:build@localhost:5432/build" \
     SESSION_SECRET="build-time-placeholder-not-a-real-secret"

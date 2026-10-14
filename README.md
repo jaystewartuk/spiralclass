@@ -360,22 +360,23 @@ authorisation server-side rather than trusting the client.
 
 ### Video
 
-LiveKit, **self-hosted** on a single ARM box rather than LiveKit Cloud, fronted
-by Caddy with a Let's Encrypt certificate. The application talks to it through a
+LiveKit, **self-hosted** on a single free Compute Engine VM rather than LiveKit
+Cloud, fronted by Caddy ([D-187](docs/decisions/D-187.md)). The application talks to it through a
 `VideoProvider` interface selected by `RTC_PROVIDER`, so the Cloud→self-hosted
 cutover changed two configuration values and zero lines of application code.
 
 Recording is room-composite Egress writing straight to R2 with per-request
-credentials. Live captions run **in the participants' browsers**: speech is
+credentials, and it is switched off in production: the VM carries a class but
+not egress (D-187). Live captions run **in the participants' browsers**: speech is
 recognised by the browser (by the other person's, when a phone cannot recognise
 during a call), translated on the device or through the app, and published into
 the room as a data message. Nothing about captions is stored.
 
-The honest part: both environments share one physical box, which is a documented
+The honest part: video runs on one free VM with no SLA, which is a documented
 risk acceptance with a written graduation trigger, not an oversight.
 
 → [`docs/features/live-calls-video.md`](docs/features/live-calls-video.md),
-[`docs/deployment/ORACLE_LIVEKIT_PRODUCTION.md`](docs/deployment/ORACLE_LIVEKIT_PRODUCTION.md)
+[`infra/gcp-livekit/README.md`](infra/gcp-livekit/README.md)
 
 ### Background processing
 
@@ -611,7 +612,7 @@ Running an equivalent yourself needs: a Postgres (Neon's free tier is fine), any
 container host that can run the `Dockerfile`, and — for the paid features — a
 Stripe account, an S3-compatible bucket, and a LiveKit server. LiveKit is
 Apache-2.0 and self-hostable; the provisioning this project uses is written up
-in [`docs/deployment/ORACLE_LIVEKIT_PRODUCTION.md`](docs/deployment/ORACLE_LIVEKIT_PRODUCTION.md).
+in [`infra/gcp-livekit/README.md`](infra/gcp-livekit/README.md).
 
 → [`docs/deployment/RELEASE_AND_STAGING.md`](docs/deployment/RELEASE_AND_STAGING.md)
 

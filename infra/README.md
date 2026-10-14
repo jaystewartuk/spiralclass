@@ -79,12 +79,18 @@ runbook (`infra/database/RUNBOOK.md`) is Neon's now — see
 `infra/database/neon/README.md`, which is a manual/console runbook, not a
 Tofu module.
 
-`oracle-runner` and `cloudflare` were both deleted in
+The `oracle-runner` and `cloudflare` Tofu modules were both deleted in
 [D-139](../docs/decisions/D-139.md): neither had ever been applied, neither
 had a state file, and both asserted a configuration that had really been
-built and changed by hand. The Oracle box is now described by
+built and changed by hand. The Cloudflare Access gate is described in
+[`docs/deployment/DOCS_SITE.md`](../docs/deployment/DOCS_SITE.md).
+`infra/cloudflare/` exists again, but not as a module: it holds the R2 bucket
+CORS runbook ([`R2_CORS.md`](./cloudflare/R2_CORS.md)) and its JSON.
+
+The Oracle box was described by
 [`docs/deployment/ORACLE_BOX_REBUILD.md`](../docs/deployment/ORACLE_BOX_REBUILD.md),
-transcribed from the running machine; the Cloudflare Access gate is described
-in [`docs/deployment/DOCS_SITE.md`](../docs/deployment/DOCS_SITE.md). Both are
-prose runbooks over hand-managed infrastructure, which is what they were in
-reality all along.
+transcribed from the running machine, until it was destroyed on 2026-09-19
+([D-182](../docs/decisions/D-182.md)); `oracle-box/` is the unapplied module
+for rebuilding it. Production video now runs on the hand-built Compute Engine
+box in [`gcp-livekit/`](./gcp-livekit/README.md), and the Cloud Run target's
+one-time setup is in [`gcp/`](./gcp/README.md). Neither is a Tofu module.

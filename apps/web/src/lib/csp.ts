@@ -8,7 +8,7 @@
 // `'unsafe-inline'` on scripts — an injected inline <script> without the nonce
 // won't execute under enforcement.
 //
-// Enforcement: ON by default in production (and on Vercel preview/preview, which
+// Enforcement: ON by default in production (and on preview, which
 // build with NODE_ENV=production — deliberately, so preview catches a missing
 // directive before prod). Report-only everywhere else (dev/test) so HMR + dev
 // tooling inline scripts aren't blocked. `CSP_ENFORCE` is an explicit override in
@@ -108,9 +108,9 @@ export function buildCsp(nonce: string): string {
       // (WebRTC media itself is ICE/STUN/TURN, not governed by connect-src.)
       "https://*.livekit.cloud",
       "wss://*.livekit.cloud",
-      // Self-hosted LiveKit (docs/deployment/ORACLE_LIVEKIT_PRODUCTION.md,
-      // 2026-07-21): preview points here now; production still uses Cloud
-      // above, so both stay listed rather than making this env-conditional.
+      // Self-hosted LiveKit: production's video server since D-187
+      // (infra/gcp-livekit/). LiveKit Cloud above is the rollback (D-182), so
+      // both stay listed rather than making this env-conditional.
       "https://livekit.spiralclass.com",
       "wss://livekit.spiralclass.com",
       // Deepgram streaming speech-to-text, for live captions' phone-to-phone

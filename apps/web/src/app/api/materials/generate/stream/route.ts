@@ -22,13 +22,14 @@ const log = logger({ surface: "materials-generate-stream" });
 // its ABSENCE tells the client the generation failed mid-stream.
 //
 // Wire format is Server-Sent Events (`text/event-stream`), NOT raw text. This
-// is load-bearing after the D-70 move off Vercel to self-hosted Docker behind
-// Cloudflare + Fly: a plain `text/plain` body gets buffered/compressed by the
-// edge (Cloudflare ignores `X-Accel-Buffering` and compresses ordinary text),
-// so every delta arrived in one burst and the "watch it write" UI collapsed
-// back into a plain spinner. `text/event-stream` is the one content type the
-// whole chain (Cloudflare, Fly, Next) passes through unbuffered and never
-// compresses. Each delta is one `data:` frame carrying the JSON-encoded chunk
+// became load-bearing after the D-70 move off Vercel to self-hosted Docker
+// behind Cloudflare's proxy + Fly: a plain `text/plain` body got
+// buffered/compressed by the edge (Cloudflare ignores `X-Accel-Buffering` and
+// compresses ordinary text), so every delta arrived in one burst and the
+// "watch it write" UI collapsed back into a plain spinner. `text/event-stream`
+// was the one content type that whole chain (Cloudflare, Fly, Next) passed
+// through unbuffered and uncompressed. Production has since moved to Cloud Run
+// with the apex DNS-only (D-184); the wire format stays SSE. Each delta is one `data:` frame carrying the JSON-encoded chunk
 // (JSON keeps it single-line so the blank line stays a clean frame delimiter);
 // success is a final `data:` frame carrying the DONE sentinel.
 

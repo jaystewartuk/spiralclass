@@ -40,8 +40,8 @@ function r2Config() {
 }
 
 // --- Direct (presigned) upload path -----------------------------------------
-// Videos and long voice notes exceed Vercel's ~4.5 MB function request-body
-// limit, so they can't be proxied through the API route. Instead the client
+// Videos and long voice notes are not proxied through the API route, so their
+// bytes never pass through the app server. Instead the client
 // asks for a presigned PUT URL, uploads straight to R2, then finalizes the
 // message with just the storage path. These helpers mint that URL, validate a
 // path the client hands back, and confirm the object actually landed.

@@ -1,11 +1,22 @@
 # Rebuilding the Oracle A1 box
 
+> [!IMPORTANT]
+> **The box this file was observed from was destroyed on 2026-09-19**
+> ([D-182](../decisions/D-182.md)), and no Oracle box has served since.
+> Production video runs on a Compute Engine `e2-micro`
+> ([D-187](../decisions/D-187.md),
+> [`infra/gcp-livekit/README.md`](../../infra/gcp-livekit/README.md)). What
+> follows is the record of that machine and the hand procedure for the Oracle
+> way back ([D-184](../decisions/D-184.md)); where it and
+> [`infra/oracle-box/`](../../infra/oracle-box/README.md) disagree, the module
+> and its `CUTOVER.md` are the newer attempt. Read "the running box" below as
+> the box as it was on 2026-08-29.
+
 > [!NOTE]
 > **[D-150](../decisions/D-150.md) (2026-09-03) decided this box gets an
 > OpenTofu definition again, and that the Next.js app moves onto Oracle
-> alongside it.** Nothing has been applied — there are no OCI credentials on
-> the dev machine — so **everything below is still the only description of the
-> box and is still the procedure to follow.** D-150 also carries the
+> alongside it.** Nothing was applied before the box was destroyed, so **this
+> file was the only description of the box for as long as it existed.** D-150 also carries the
 > measurement that shaped it: this box is in `mx-queretaro-1`, 58 ms from
 > Neon's `aws-us-east-2` against the Fly machine's 12 ms (production has since
 > moved to `aws-us-east-1`, which is ~55 ms from there). When the module
@@ -27,13 +38,15 @@ apply`/rebuild today reproduces the box as-is". It was never applied, had no
 
 ## What this box is
 
-One Oracle Cloud Always Free ARM instance running the self-hosted LiveKit
-stack that carries every live class. It is **not** a CI runner — that role was
+One Oracle Cloud Always Free ARM instance that ran the self-hosted LiveKit
+stack carrying every live class until 2026-09-19. It was **not** a CI runner — that role was
 retired in 2026-07 after three reversals in as many days, and CI now runs on
 GitHub-hosted runners ([D-157](../decisions/D-157.md)).
 
-Losing it stops classes. Rebuilding it is a hand operation measured in hours,
-which is the cost [D-139](../decisions/D-139.md) knowingly accepted.
+Losing it stopped classes — which is what happened when it could not be
+relaunched ([D-182](../decisions/D-182.md)). Rebuilding it is a hand operation
+measured in hours, which is the cost [D-139](../decisions/D-139.md) knowingly
+accepted.
 
 ## Observed state, 2026-08-29
 
@@ -124,7 +137,7 @@ the rotation runbook, which is kept privately (see
 ⚠️ **Read this before the migration, not during it. The failure mode is
 silence.**
 
-Today the box runs LiveKit, Egress, Caddy and Redis.
+As observed, the box ran LiveKit, Egress, Caddy and Redis.
 [D-150](../decisions/D-150.md) moves the Next.js app here too, and the app gets
 its non-secret configuration a different way from everything above.
 

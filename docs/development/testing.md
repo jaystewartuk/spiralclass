@@ -19,8 +19,8 @@ Single files, per workspace (Turborepo's tasks do not take file arguments, so
 target a workspace and forward args after `--`):
 
 ```bash
-pnpm --filter spiralclass-web test -- src/lib/money.test.ts
-pnpm --filter spiralclass-web test:watch -- src/lib/money.test.ts
+pnpm --filter spiralclass-web test -- tests/lib/money.test.ts
+pnpm --filter spiralclass-web test:watch -- tests/lib/money.test.ts
 pnpm --filter @spiralclass/shared test -- src/money.test.ts
 ```
 

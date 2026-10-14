@@ -9,7 +9,7 @@ import { Badge, Spinner, StatusMessage } from "@inkjs/ui";
 import { RoomServiceClient, type ParticipantInfo, type Room } from "livekit-server-sdk";
 
 // Prototype: an Ink live dashboard for the self-hosted LiveKit box's room
-// activity (see docs/deployment/ORACLE_LIVEKIT_PRODUCTION.md). Talks to
+// activity (see infra/gcp-livekit/README.md). Talks to
 // livekit-server-sdk's RoomServiceClient directly — no `lk` CLI, no `watch`
 // shell-out — so every render is a real React state update, not a redrawn
 // terminal frame from an external process.

@@ -7,7 +7,7 @@ const log = logger({ surface: "csp-report" });
 // ({ "csp-report": {...} }) or the Reporting-API `application/reports+json`
 // ([{ type, body }]). This route is exempt from the middleware matcher, does no
 // auth, and NEVER trusts or acts on the body — it only logs (structured, so the
-// report-only→enforce rollout is observable in Vercel logs) and returns 204.
+// report-only→enforce rollout is observable in the production logs) and returns 204.
 //
 // Hardened against abuse: oversized bodies are dropped without parsing.
 const MAX_REPORT_BYTES = 16_384;

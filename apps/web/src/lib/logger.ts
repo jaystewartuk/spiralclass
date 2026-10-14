@@ -1,7 +1,7 @@
 import * as Sentry from "@sentry/nextjs";
 
 // Minimal structured JSON logger. Replaces ad-hoc `console.log("[tag] msg", obj)`
-// calls so log lines are queryable in Vercel's log drain (level + event + fields
+// calls so log lines are queryable in the platform's logs (level + event + fields
 // as JSON) and can be correlated across a single request via `correlationId`.
 //
 // Usage:
@@ -28,7 +28,7 @@ function emit(level: Level, base: Fields, message: string, fields?: Fields) {
   // entirely rather than just discarding the output at the console layer.
   if (level === "debug" && process.env.NODE_ENV === "production") return;
   const line = { level, msg: message, ...base, ...(fields ?? {}) };
-  // One JSON object per line — Vercel/most drains parse these into fields.
+  // One JSON object per line — most log pipelines parse these into fields.
   const serialized = JSON.stringify(line);
   if (level === "error") console.error(serialized);
   else if (level === "warn") console.warn(serialized);

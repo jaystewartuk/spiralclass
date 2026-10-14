@@ -6,8 +6,11 @@ under the reversal [D-150](../../docs/decisions/D-150.md) allowed.
 > [!CAUTION]
 > ⚠️ **THIS MODULE HAS NOT BEEN APPLIED. NO STATE FILE EXISTS. NO BOX MATCHES
 > IT.** Read every file here as a proposal, never as a description of a
-> machine — and in particular, **do not run `tofu apply` to "fix" a problem
-> with the live box.** There is a live box; this does not describe it.
+> machine. The hand-built box it was written beside was destroyed on 2026-09-19
+> ([D-182](../../docs/decisions/D-182.md)); no Oracle box exists now, and
+> production video runs on Compute Engine
+> ([`infra/gcp-livekit/`](../gcp-livekit/README.md),
+> [D-187](../../docs/decisions/D-187.md)).
 >
 > That is D-139's exact fault, committed knowingly. [D-150](../../docs/decisions/D-150.md)
 > forbade committing this before an apply precisely to avoid it, and its third
@@ -31,17 +34,19 @@ security list, one public subnet, one `VM.Standard.A1.Flex` instance, and one
 
 **Does not:** deploy anything. Docker, Tailscale, the firewall and swap come
 from `cloud-init.yaml.tftpl`; the LiveKit stack, the preview web app and
-preview's Postgres come from `scripts/oracle-deploy.sh`, which is re-runnable
-and is what CI invokes. A box that must be rebuilt to change what it runs is
+preview's Postgres come from `scripts/oracle-deploy.sh`, which is re-runnable.
+No workflow invokes it today: preview has no deploy target
+([D-184](../../docs/decisions/D-184.md)). A box that must be rebuilt to change what it runs is
 the box this replaced.
 
 **Does not:** carry production. The production web app is on Cloud Run
 ([D-184](../../docs/decisions/D-184.md)) and production's database is on Neon
 — the 2026-09-04 topology decision, in
 [D-150](../../docs/decisions/D-150.md)'s second addendum, kept production off
-this box. This box holds
-LiveKit, preview and preview's data, and losing it stops classes rather than
-stopping the site.
+this box. This box would hold
+LiveKit, preview and preview's data. Production video has been on Compute
+Engine since [D-187](../../docs/decisions/D-187.md), so it carries no class until
+a change moves `LIVEKIT_URL` back under D-182's three conditions.
 
 **Does not:** touch Cloudflare. D-139 deleted `infra/cloudflare` because its
 Access application was made by hand, so a first apply would create a second

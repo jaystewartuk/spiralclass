@@ -503,8 +503,8 @@ model Teacher {
   // teacher can finish onboarding without ever touching either. These two
   // timestamps distinguish "the wizard step was genuinely (re-)submitted by
   // the teacher" from "the seed is still sitting untouched" — set on every
-  // real call to saveTemplatesAction/saveAvailabilityAction (web) or the
-  // equivalent mobile PUT routes, including from onboarding itself. Null means
+  // real call to saveTemplatesAction/saveAvailabilityAction, including from
+  // onboarding itself. Null means
   // never submitted past the initial seed. Feed isMarketplaceReady() in
   // @spiralclass/shared; not a hard gate on their own.
   templatesTouchedAt               DateTime? @map("templates_touched_at") @db.Timestamptz
@@ -539,7 +539,8 @@ model Teacher {
   // order with nothing hidden; see resolveDashboardTiles().
   dashboardTileOrder               Json?     @map("dashboard_tile_order")
   // Per-teacher fully-customizable dashboard *layout* — the superset of
-  // dashboardTileOrder driving the mobile Home drag-and-drop customizer: an
+  // dashboardTileOrder, written by the Home drag-and-drop customizer of the
+  // deleted native client; nothing in apps/web writes it today: an
   // ordered list of sections (fixed widget cards + reorderable tile groups),
   // each with its own hidden flag and, for tile groups, an ordered {key,hidden}
   // tile list (NavKey from packages/shared/src/nav.ts). NULL (the default for
@@ -588,8 +589,8 @@ model Teacher {
   // intro video, shown on the public booking page under the hero. One object
   // per teacher (replace in place); null = no video. The public URL is derived
   // in lib/storage/teacher-video.ts. A recorded or uploaded MP4/WebM plays
-  // natively on web <video> and mobile expo-video (deliberately no third-party
-  // embed / WebView — see D-73). Layer 2/3 (D-73) transcribes this object for
+  // natively in a <video> element (deliberately no third-party embed — see
+  // D-73). Layer 2/3 (D-73) transcribes this object for
   // the AI intro-coach, captions, and draft-bio; this key is its source of truth.
   introVideoPath                   String?   @map("intro_video_path")
   // Duration of the intro video in milliseconds, as reported by the recorder at
@@ -867,10 +868,10 @@ model Student {
   // effectively un-reachable and the teacher must follow up manually.
   emailOptIn           Boolean   @default(true) @map("email_opt_in")
   emailOptInAt         DateTime? @map("email_opt_in_at") @db.Timestamptz
-  // Push channel opt-out. Defaults to true (push delivered when a
-  // device_token is registered). Flipped to false from the notification
+  // Push channel opt-out. Defaults to true (push delivered when an active
+  // Web Push subscription exists). Flipped to false from the notification
   // settings page; the dispatcher then skips push and falls through to
-  // email even when the student has active device tokens.
+  // email even when the student has active subscriptions.
   pushOptIn            Boolean   @default(true) @map("push_opt_in")
   // Per-student lifecycle notification preferences (category → on/off as
   // JSON, e.g. {"class_reminders":false}); null = product defaults (all on).
@@ -1420,7 +1421,7 @@ model TeacherShareGroup {
   // teacher can reach learners", which is the same thing for every existing
   // row (the backfill defaults `platform` to facebook_group) and a superset
   // going forward. The table keeps its name deliberately: renaming it would
-  // churn the mobile API surface, the `SocialPreview.shareGroupId` relation
+  // churn the `SocialPreview.shareGroupId` relation
   // and the already-posted `utm_content` slugs derived from these ids, for
   // nothing a comment cannot buy. See D-125.
   //
@@ -1783,7 +1784,7 @@ model Booking {
   lessonPronunciation LessonPronunciation?
   lessonBrief         LessonBrief?
   // Homework assignments the teacher attached to this class. A student submits
-  // against these from the mobile class-detail screen (HomeworkSubmission).
+  // against these from the student portal's class page (HomeworkSubmission).
   assignments         Assignment[]
 
   @@index([teacherId, scheduledStart])
@@ -1838,7 +1839,7 @@ model LessonNote {
 }
 
 // A homework assignment attached to one class (Booking). The teacher authors it;
-// the student sees it on the mobile class-detail screen and submits a
+// the student sees it on the student portal's class page and submits a
 // HomeworkSubmission. Booking-scoped like LessonNote/LibraryMaterial and
 // tenant-scoped by teacherId, so a class's homework cascades away with
 // the class. Only draft/submitted are user-reachable today; `allowResubmission`
@@ -1859,7 +1860,7 @@ model Assignment {
   // hand-in is flagged, not blocked). Enforced server-side on submit.
   allowLateSubmission      Boolean   @default(true) @map("allow_late_submission")
   // Whether a student may re-open and re-submit after a first submission. When
-  // false, a `submitted` submission is final (the mobile UI locks editing).
+  // false, a `submitted` submission is final (the student's form locks editing).
   allowResubmission        Boolean   @default(false) @map("allow_resubmission")
   // Optional provenance: set when this assignment was drafted from a class's
   // AI/teacher-authored material rather than authored from scratch — lets the
@@ -2490,7 +2491,7 @@ model FocusTag {
 //     the level-gated browse shelf or any other class.
 // This merge (docs/features/library-materials.md, D-69) intentionally keeps
 // the Prisma/table name `LibraryMaterial` — renaming it would ripple through
-// every consumer (mobile wire types, storage paths, the focus-tag join table
+// every consumer (wire types, storage paths, the focus-tag join table
 // name) for no functional gain; `bookingId` is the only thing that changes
 // what a row *means*.
 model LibraryMaterial {
@@ -2540,7 +2541,7 @@ model LibraryMaterial {
 
   @@index([teacherId, levelId, position])
   @@index([teacherId, bookingId])
-  // Paginated library list (web offset + mobile cursor): the equality prefix
+  // Paginated library list (offset pages + the in-call library's cursor): the equality prefix
   // (teacherId, bookingId, archived) seeks, then createdAt/id range-scans in
   // the default "recently added" order and backs the keyset cursor. Name pinned
   // (the default would exceed Postgres's 63-char identifier limit).
@@ -3005,8 +3006,8 @@ model Notification {
   paymentId         String?                   @map("payment_id") @db.Uuid
   // The actual channel used at dispatch time. Producers leave this as
   // 'push' (the top of the cascade). At dispatch the resolver picks the
-  // preferred channel — push when the recipient has a registered
-  // device_token; email otherwise. The dispatcher rewrites the column to
+  // preferred channel — push when the recipient has an active Web Push
+  // subscription; email otherwise. The dispatcher rewrites the column to
   // whichever channel actually delivered the message.
   channel           NotificationChannel
   templateName      String                    @map("template_name")
@@ -3019,9 +3020,9 @@ model Notification {
   languageCode      String?                   @map("language_code")
   status            NotificationStatus        @default(queued)
   error             String?
-  // Channel-dependent: Resend message id (email) or Expo push ticket id
-  // (push). Set on successful send. Push delivery walks Expo's receipts
-  // endpoint via the poll-push-receipts Inngest cron.
+  // Channel-dependent: the email provider's message id (email) or
+  // `webpush:<notification id>` (push). Set on successful send. Web Push is
+  // accepted synchronously, so a push send sets deliveredAt at the same time.
   providerMessageId String?                   @unique @map("provider_message_id")
   sentAt            DateTime?                 @map("sent_at") @db.Timestamptz
   deliveredAt       DateTime?                 @map("delivered_at") @db.Timestamptz
@@ -3053,10 +3054,6 @@ model Notification {
   @@map("notifications")
 }
 
-// Expo push tokens — one row per (recipient, device). Soft-revoked via
-// `revoked_at` so we keep history when a token goes stale. Fan-out
-// dispatch reads all rows where `revoked_at IS NULL`. Not tenant-scoped:
-// teachers and students each own their own rows keyed by recipient_type.
 // Browser Web Push subscriptions — the `push` notification CHANNEL's only
 // transport. It had a sibling, `device_tokens`, holding the Expo tokens of the
 // client that has been deleted; that transport was removed and this dropped
@@ -3064,7 +3061,7 @@ model Notification {
 //
 // Identity is the endpoint URL the browser's push service mints — unique, and
 // what the recipient re-sends on every subscribe, so it doubles as the upsert
-// key exactly like expo_push_token does. `p256dh`/`auth` are the client's
+// key. `p256dh`/`auth` are the client's
 // public encryption keys; payloads are encrypted to them and the push service
 // never sees plaintext.
 //

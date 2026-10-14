@@ -1,35 +1,42 @@
-# Oracle A1 self-hosted LiveKit — production deployment
+# Oracle A1 self-hosted LiveKit — the former production box
 
 > [!IMPORTANT]
-> **2026-08-29 — the Tofu module this document repeatedly points at is gone.**
-> `infra/oracle-runner` was deleted in [D-139](../decisions/D-139.md): it had
-> never been applied and had no state, so every `tofu apply` instruction below
-> would have edited a template rather than the box. **The rebuild procedure is
-> now [`ORACLE_BOX_REBUILD.md`](./ORACLE_BOX_REBUILD.md)**, transcribed from
-> the running machine. The manual-step sections here remain the best record of
-> what was learned building the box by hand; the "the plan" column and the
-> Tofu apply steps are historical and must not be followed.
+> **This machine no longer exists.** `infra/oracle-box/CUTOVER.md` step 3
+> terminated it on 2026-09-19 to free the tenancy for a rebuild, and every
+> relaunch was refused for lack of host capacity ([D-182](../decisions/D-182.md)).
+> Production video moved to LiveKit Cloud that night, and since 2026-09-24 runs
+> on an Always Free `e2-micro` on Compute Engine
+> ([D-187](../decisions/D-187.md)) — its build record is
+> [`infra/gcp-livekit/README.md`](../../infra/gcp-livekit/README.md), and that
+> is the document for the box that serves today.
+>
+> This file is kept because the Oracle path is the way back
+> ([D-184](../decisions/D-184.md) keeps `scripts/oracle-deploy.sh` for it), and
+> its manual-step sections are the record of what building this box by hand
+> taught — the two firewall layers in particular. Read every "today",
+> "currently" and "live" below as **as of 2026-09-19**. The rebuild procedure is
+> [`ORACLE_BOX_REBUILD.md`](./ORACLE_BOX_REBUILD.md) and
+> [`infra/oracle-box/`](../../infra/oracle-box/README.md); the
+> `infra/oracle-runner` module this document repeatedly points at was deleted
+> in [D-139](../decisions/D-139.md), so the "the plan" column and the Tofu apply
+> steps below must not be followed.
 
-**Status: LIVE and reachable (2026-07-21).** Fully deployed and verified
-end-to-end from the public internet — DNS resolves, both firewall layers
-(OCI security list + host iptables, see "Manual step 1") allow the right
-ports, and Caddy holds a real Let's Encrypt cert
-(`https://livekit.spiralclass.com/` returns `HTTP 200`). Wired to preview
-since 2026-07-21 (`config/env/preview.runtime.env`); **as of D-94
-(2026-07-21) also wired to production** (`config/env/production.runtime.env`)
-— both environments then shared this ONE box. **Since D-94's 2026-09-16
-addendum, only production holds a key pair for it.** Preview keeps the URL but
-has no pair, so it has no video. Read this alongside
-`ORACLE_LIVEKIT_SPIKE.md` (the capacity numbers
-this deployment operates under) and
-`../architecture/VIDEO_ARCHITECTURE_AUDIT.md`
-(the cost/architecture reasoning behind self-hosting at all).
+**Status: destroyed (2026-09-19).** It went live on 2026-07-21, verified
+end-to-end from the public internet — DNS resolved, both firewall layers (OCI
+security list + host iptables, see "Manual step 1") allowed the right ports, and
+Caddy held a real Let's Encrypt cert. It served preview from 2026-07-21 and, as
+of D-94 (2026-07-21), production too — both environments shared this ONE box —
+until D-94's 2026-09-16 addendum left only production holding a key pair for it.
+The capacity numbers it operated under came from the LiveKit spike, whose
+runbook [D-110](../decisions/D-110.md) deleted (the video architecture audit the
+old header also cited is not in the tree either); the ~15-20-room ceiling quoted
+below is the part worth keeping.
 
 ## How this box is delivered — today vs. the plan
 
 Read this before assuming any part of the box comes from the repo.
 
-| Layer                                   | How it works **today**                                                                                                                                                                                    | The plan                                                 |
+| Layer                                   | How it worked (to 2026-09-19)                                                                                                                                                                             | The plan                                                 |
 | --------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------- |
 | Compute, network, firewall, DNS         | Provisioned **by hand** on 2026-07-21. An OpenTofu module was written for it and never applied, then deleted ([D-139](../decisions/D-139.md)); `infra/oracle-box` is the current, also-unapplied attempt. | Apply it; the box becomes rebuildable from `tofu apply`. |
 | LiveKit / Egress / Caddy / Redis config | Rendered onto the box **by hand** in `~/oracle-livekit-production/`. It has since drifted from `services/*.tftpl` (secrets moved into a box-local `.env`).                                                | Rendered by Tofu at apply time.                          |
@@ -50,7 +57,7 @@ The spike doc, §32/§33 of the audit, and this doc's own earlier drafts all
 said **don't put production video on this specific box** —
 [D-49](../decisions/D-49.md) already ruled it out for anything prod-critical (documented capacity/suspension
 risk, no failover), and the measured capacity ceiling (~15-20 concurrent
-rooms, see `ORACLE_LIVEKIT_SPIKE.md`) is real, not hypothetical.
+rooms, measured in the LiveKit spike) is real, not hypothetical.
 
 **This was a deliberate, informed operator decision, not an oversight.**
 Given the choice between provisioning new paid infrastructure (a fresh
@@ -75,7 +82,7 @@ margin before the ceiling matters is smaller than when only preview used it.
 
 - If a second or third teacher starts generating real concurrent load, or if
   this box becomes unavailable, treat that as the trigger to actually
-  provision the Hetzner box `ORACLE_LIVEKIT_SPIKE.md` describes — not a
+  provision the Hetzner box the LiveKit spike described — not a
   reason to scale this one up further. This box was never meant to be the
   permanent answer past very small scale, and that's now true for BOTH
   environments' traffic, not just preview's.
@@ -227,8 +234,8 @@ against the public IP failed with "No route to host", not a plain
 connection-refused/timeout). **This finding is why `infra/oracle-runner`'s
 `cloud-init.yaml.tftpl` also inserts the same 5 iptables rules in its
 `runcmd`** — a fresh box gets both layers opened automatically on first
-boot; a box created before that change (i.e. the currently-live one) still
-has these applied from the original manual pass below, and only needs this
+boot; a box created before that change (i.e. the one destroyed on 2026-09-19)
+had these applied from the original manual pass below, and only needs this
 repeated by hand if it's ever rebuilt from an image predating the Tofu
 change. Originally fixed by inserting matching ACCEPT rules into the box's
 own `INPUT` chain, before the reject, then persisting (`iptables-persistent`

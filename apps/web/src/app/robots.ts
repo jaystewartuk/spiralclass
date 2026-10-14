@@ -14,8 +14,8 @@ const APP_URL = (process.env.APP_URL ?? "https://spiralclass.com").replace(/\/$/
 // `robots: { index: false }` metadata instead of a disallow here; this list is
 // crawl-budget hygiene for auth-gated and email-token surfaces only.
 export default function robots(): MetadataRoute.Robots {
-  // Preview (preview.spiralclass.com is a custom domain, so Vercel's automatic
-  // *.vercel.app noindex does NOT cover it) must never enter the index as a
+  // Preview (preview.spiralclass.com, a custom domain no host-level noindex
+  // covers) must never enter the index as a
   // duplicate of production. It stays CRAWLABLE on purpose: preview shipped
   // with no indexing protection at all (D-26 onward), so pages may already be
   // indexed, and Google's only clean removal path is fetching them and seeing

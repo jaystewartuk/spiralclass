@@ -4,7 +4,7 @@ import { withSentryConfig } from "@sentry/nextjs";
 import { buildSecurityHeaders } from "./src/lib/security-headers";
 
 // Repo root, two levels up from apps/web/. Set as outputFileTracingRoot
-// so Vercel's standalone bundling follows symlinks to workspace packages
+// so standalone output tracing follows symlinks to workspace packages
 // (e.g. @spiralclass/shared in packages/shared/) rather than treating
 // them as missing modules. Without this, Next traces only from
 // apps/web/ and can mis-handle the pnpm symlink layout.
@@ -17,7 +17,7 @@ const monorepoRoot = path.join(__dirname, "..", "..");
 //
 // This is the FREE half of skew handling and is NOT full Skew Protection: it
 // can't route a server-action POST back to the deployment that served the page
-// (that needs Vercel Pro's deployment routing), so it does not by itself stop
+// (that needs the host to route requests by deployment), so it does not by itself stop
 // "Failed to find Server Action". The client reload fallback in
 // src/lib/server-action-recovery.ts covers that residual case.
 //
@@ -57,10 +57,10 @@ const config: NextConfig = {
   agentRules: false,
   deploymentId,
   outputFileTracingRoot: monorepoRoot,
-  // Self-hosted Docker builds (Fly.io spike, docs/decisions/D-70.md) need a
-  // self-contained server bundle. Vercel's own build system has its own
-  // output format and doesn't need this, so it's opt-in via an explicit
-  // build-time flag rather than always-on — zero effect on Vercel builds.
+  // The production image (the root Dockerfile sets BUILD_STANDALONE=1) needs a
+  // self-contained server bundle. Opt-in via an explicit build-time flag, so
+  // `pnpm build` — the gate's local/CI build check — keeps Next's default
+  // output.
   ...(process.env.BUILD_STANDALONE === "1" ? { output: "standalone" as const } : {}),
   // Teacher / testimonial profile photos are served from the public R2 bucket
   // (pub-*.r2.dev). Both entries below must be here or next/image rejects the
@@ -134,48 +134,51 @@ const config: NextConfig = {
       // Class-materials upload accepts up to 25 MB. Next.js
       // defaults server action bodies to 1 MB, which surfaces as a
       // generic "client-side exception" on uploads above that.
-      // NOTE: Vercel Hobby caps function payloads at 4.5 MB regardless
-      // of this setting; Pro caps at 50 MB. The hard 25 MB limit is
-      // also enforced in the upload action itself.
+      // The hard 25 MB limit is also enforced in the upload action itself.
       bodySizeLimit: "25mb",
     },
     // Trades some build wall-clock for materially lower peak memory during
-    // webpack compilation. Added after a Vercel build OOM (SIGKILL, no
-    // routes-manifest.json produced) — the app's route count has grown to
-    // where a default-machine build sits close to the container's RAM
-    // ceiling. Still applies to Vercel/production (webpack); the Fly build
-    // now uses Turbopack (see Dockerfile), which ignores this flag.
+    // webpack compilation. Added after a webpack build on a former host ran
+    // out of memory (SIGKILL, no routes-manifest.json produced) — the app's
+    // route count has grown to where a default-machine build sits close to
+    // the container's RAM ceiling. Applies to the webpack build (`pnpm
+    // build`, the gate's build check); the production image builds with
+    // Turbopack (see Dockerfile), which ignores this flag.
     webpackMemoryOptimizations: true,
-    // Fly/Depot only: cap the static-generation worker pool at 1.
+    // Standalone (production image) only: cap the static-generation worker
+    // pool at 1.
     //
     // `experimental.cpus` is NOT a webpack-only knob and Turbopack does NOT
-    // ignore it (#517 removed this cap on that premise, and the Fly build has
-    // OOM'd on its first Depot attempt on every deploy since — surviving only
-    // because flyctl silently retries the build). Only the *compile* is
+    // ignore it (#517 removed this cap on that premise, and the image build,
+    // then on Fly's Depot builder, OOM'd on its first attempt on every deploy
+    // after — surviving only because flyctl silently retried). Only the *compile* is
     // Turbopack/Rust; `getNumberOfWorkers()` in next/dist/build/index.js is
     // bundler-agnostic and drives the Node worker pool that "Collecting page
     // data" / "Generating static pages" fork.
     //
-    // Two container-unaware defaults collide on Depot's fixed ~4GB builder:
+    // Two container-unaware defaults collided on Depot's fixed ~4GB builder:
     // the pool defaults to `os.cpus().length - 1` — the BUILD HOST's core
     // count, not the container's share — and `createStaticWorker` passes
     // `isolatedMemory: true`, which strips the Dockerfile's
     // --max-old-space-size out of each child's NODE_OPTIONS, so every worker
     // sizes its V8 heap off the host's RAM too. N host-sized heaps plus
-    // Turbopack's resident compile memory exceed the 4GB cgroup -> SIGKILL.
+    // Turbopack's resident compile memory exceeded the 4GB cgroup -> SIGKILL.
     // One worker is deterministic regardless of the host, and costs only a few
-    // seconds (190 static pages).
+    // seconds (190 static pages). The image no longer builds on Depot — see
+    // the Dockerfile's "WHERE THIS BUILDS" — and the cap is unchanged.
     //
-    // Vercel/production is unaffected: it builds via `pnpm build` with
-    // BUILD_STANDALONE unset, keeping Next's default worker count.
+    // `pnpm build` is unaffected: BUILD_STANDALONE is unset there, keeping
+    // Next's default worker count.
     ...(process.env.BUILD_STANDALONE === "1" ? { cpus: 1 } : {}),
   },
-  // Fly.io spike only: main-checks.yml already gates every PR merge on
-  // `pnpm typecheck` + lint, so redoing both inside the Docker build is pure
-  // duplicated work — this build showed ~106s just for "Linting and checking
-  // validity of types". Trade-off: this build path loses that safety net if
-  // a type/lint error somehow reached here despite the CI gate. Vercel's
-  // build is unaffected (BUILD_STANDALONE unset there).
+  // Standalone (production image) only: the gate already runs `pnpm
+  // typecheck` + lint on every pull request — `scripts/ci/steps.mjs` is the
+  // registry, run by `.githooks/pre-push` and `.github/workflows/gate.yml` —
+  // so redoing both inside the Docker build is pure duplicated work; this
+  // build showed ~106s just for "Linting and checking validity of types".
+  // Trade-off: this build path loses that safety net if a type/lint error
+  // somehow reached here despite the gate. `pnpm build` is unaffected
+  // (BUILD_STANDALONE unset there).
   ...(process.env.BUILD_STANDALONE === "1"
     ? {
         typescript: { ignoreBuildErrors: true },
@@ -235,11 +238,11 @@ const config: NextConfig = {
 // (requires SENTRY_AUTH_TOKEN at build time) — without it the plugin
 // just skips the upload step.
 //
-// Turbopack note (2026-07-14): the Fly/standalone build uses `next build
-// --turbopack`. Sentry SDK v10 supports Turbopack — there's no webpack plugin
-// pass, so the large build-time memory cost the webpack plugin used to add is
-// gone, which is what lets the Fly build fit Fly's free ~4GB Depot builder.
-// Kept unconditional (Vercel + Fly) so runtime Sentry stays wired on both.
+// Turbopack note (2026-07-14): the standalone (production image) build uses
+// `next build --turbopack`. Sentry SDK v10 supports Turbopack — there's no
+// webpack plugin pass, so the large build-time memory cost the webpack plugin
+// used to add is gone. Kept unconditional so runtime Sentry stays wired on both
+// the Turbopack image build and the webpack `pnpm build`.
 export default withSentryConfig(config, {
   silent: !process.env.CI,
   disableLogger: true,

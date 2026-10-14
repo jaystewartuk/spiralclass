@@ -131,8 +131,8 @@ const serverSchema = z.object({
   EMAIL_PROVIDER: blankAsAbsent(z.enum(["ses", "resend"]).optional()),
   // Anthropic API (AI post-class lesson summary + class-content compose, D-17).
   // Optional — missing key means the AI actions return a friendly error instead
-  // of calling out, so dev + tests run without a key. Production sets it via
-  // Vercel env. ANTHROPIC_MODEL optionally overrides the model (defaults to
+  // of calling out, so dev + tests run without a key. Production sets it as a
+  // runtime secret. ANTHROPIC_MODEL optionally overrides the model (defaults to
   // claude-sonnet-5 as of D-87); routed through the PLATFORM key only, never
   // per-teacher. NOTE: this override reaches anthropicModel() ONLY — the four
   // hardcoded lesson-notes/intro-coach constants ignore it entirely.
@@ -277,8 +277,8 @@ const serverSchema = z.object({
   AZURE_SPEECH_REGION: blankAsAbsent(z.string().min(1).optional()),
   LESSON_INSIGHTS_PRONUNCIATION_ENABLED: blankAsAbsent(z.string().min(1).optional()),
   // Observability (Slice 7a). Both optional — missing → no-op clients so
-  // dev + tests run without creds. Production deploys set both via Vercel
-  // env. SENTRY_DSN drives server-side Sentry; NEXT_PUBLIC_SENTRY_DSN is
+  // dev + tests run without creds. Production deploys set both. SENTRY_DSN
+  // drives server-side Sentry; NEXT_PUBLIC_SENTRY_DSN is
   // exposed to the browser bundle. POSTHOG_KEY drives the server-side
   // event pipeline (server-side analytics capture — ad-blocker-resistant). Session replay needs
   // posthog-js in the browser, which uses the NEXT_PUBLIC_POSTHOG_* keys
@@ -406,7 +406,7 @@ type ClientEnv = z.infer<typeof clientSchema>;
 // Every env var this module recognizes, derived from the schemas so the
 // lists never drift. Tests use these to scrub ambient values before
 // patching process.env — without it, real credentials present in a CI/
-// build environment (e.g. Vercel) leak into cases that assert a var is
+// build environment leak into cases that assert a var is
 // absent. Not read by app code.
 export const SERVER_ENV_KEYS = Object.keys(serverSchema.shape) as (keyof ServerEnv)[];
 export const CLIENT_ENV_KEYS = Object.keys(clientSchema.shape) as (keyof ClientEnv)[];

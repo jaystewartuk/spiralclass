@@ -9,9 +9,10 @@ import type { PoolConfig } from "pg";
 // need a DIFFERENT database (the seed's DIRECT_URL, the integration suite's
 // TEST_DATABASE_URL) would have opened the app's connection just by importing.
 
-// Production runs on Fly (D-70/D-89): one long-lived Node process per machine
-// serves many concurrent requests through a single shared Prisma client,
-// unlike a Vercel function (one connection per invocation). A pool of 1 there
+// Production runs as a long-lived Node container (Cloud Run since D-184, Fly
+// before it): one process per instance serves many concurrent requests through
+// a single shared Prisma client, unlike a per-invocation serverless function
+// (one connection per invocation). A pool of 1 there
 // would serialize every concurrent query in the process — including
 // /api/health's own SELECT 1 — behind whichever request already holds the lone
 // connection, which is what caused "DB health check timed out after 5000ms" in
