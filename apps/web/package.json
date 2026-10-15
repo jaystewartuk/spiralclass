@@ -51,7 +51,9 @@
     "design:drift": "node scripts/design-drift.mjs --report",
     "test:visual": "playwright test --config playwright.visual.config.ts",
     "visual:gallery": "node scripts/visual-gallery.mjs",
-    "test:visual:regression": "playwright test --config playwright.visual.config.ts tests/visual/regression.spec.ts --project=1440-light"
+    "test:visual:regression": "playwright test --config playwright.visual.config.ts tests/visual/regression.spec.ts --project=1440-light",
+    "demo:fixtures": "dotenv -e ../../config/env/local.runtime.env -- tsx scripts/marketing/demo-fixtures.ts",
+    "demo:record": "node scripts/marketing/record.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.128.0",

@@ -4,15 +4,13 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import {
   BellRing,
+  BookOpen,
   CalendarClock,
   Check,
   Clapperboard,
   Globe,
   Languages,
-  Link2,
-  Repeat,
   Sparkles,
-  Video,
   Wallet,
 } from "lucide-react";
 import { Logo } from "@/components/brand/logo";
@@ -22,12 +20,13 @@ import { JsonLd } from "@/components/json-ld";
 import { MarketingHeader } from "@/components/marketing/marketing-header";
 import { Section } from "@/components/marketing/section";
 import { FeatureCard } from "@/components/marketing/feature-card";
+import { FeatureClip } from "@/components/marketing/feature-clip";
 import { CtaBand } from "@/components/marketing/cta-band";
-import { CaptionsDemo } from "@/components/marketing/captions-demo";
 import { getLocalizedHref, getPreferredLocale, getT } from "@/lib/i18n";
 import { isSuperuser } from "@/lib/env";
 import { getAuthUser, getCurrentTeacher } from "@/lib/auth";
 import { hasClaimableStudentRow } from "@/lib/auth/student-link";
+import { TEACHER_TESTIMONIAL } from "@/lib/marketing/testimonial";
 import { TRIAL_DAYS } from "@/lib/subscriptions/config";
 import {
   organizationJsonLd,
@@ -35,6 +34,7 @@ import {
   softwareApplicationJsonLd,
   webSiteJsonLd,
 } from "@/lib/seo/jsonld";
+import { cn } from "@/lib/utils";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getT();
@@ -61,6 +61,8 @@ const AUTH_NOTICES = {
   "teacher-disabled": "web.landing.authNotice.teacherDisabled",
 } as const;
 
+const TOUR_ID = "tour";
+
 export default async function LandingPage({
   searchParams,
 }: {
@@ -76,27 +78,88 @@ export default async function LandingPage({
       ? AUTH_NOTICES[errorParam as keyof typeof AUTH_NOTICES]
       : null;
 
-  // Core value props — the everyday "runs your business" capabilities.
-  const valueProps = [
+  // The tour: one job per section, each shown by a clip recorded from the
+  // running app (scripts/marketing/record.mjs). The order is the order of a
+  // class — before it, during it, after it — then the business around it.
+  //
+  // Every title here is a promise on a public page, so each key is classified
+  // in tests/config/ai-marketing-claims.test.ts: the `web.landing.ai.*` ones
+  // name the production flag that makes them true, the `web.landing.feature.*`
+  // ones are declared flag-free. A capability that is off in production
+  // (pronunciation scoring, study podcasts, class recording) has no clip and no
+  // card; re-adding one means turning its flag on in the same change.
+  const tour = [
     {
-      icon: Link2,
-      title: t("web.landing.feature.book.title"),
-      body: t("web.landing.feature.book.body"),
+      clip: "call",
+      title: t("web.landing.ai.captions.title"),
+      body: t("web.landing.ai.captions.body"),
+      label: t("web.landing.clip.call"),
     },
     {
-      icon: Wallet,
-      title: t("web.landing.feature.pay.title"),
-      body: t("web.landing.feature.pay.body"),
+      clip: "materials",
+      title: t("web.landing.ai.lessonPlans.title"),
+      body: t("web.landing.ai.lessonPlans.body"),
+      label: t("web.landing.clip.materials"),
     },
+    {
+      clip: "learning",
+      title: t("web.landing.ai.learningNotes.title"),
+      body: t("web.landing.ai.learningNotes.body"),
+      label: t("web.landing.clip.learning"),
+    },
+    {
+      clip: "vocabulary",
+      portrait: true,
+      title: t("web.landing.ai.srs.title"),
+      body: t("web.landing.ai.srs.body"),
+      label: t("web.landing.clip.vocabulary"),
+    },
+    {
+      clip: "homework",
+      title: t("web.landing.ai.homework.title"),
+      body: t("web.landing.ai.homework.body"),
+      label: t("web.landing.clip.homework"),
+    },
+    {
+      clip: "dashboard",
+      title: t("web.landing.feature.dashboard.title"),
+      body: t("web.landing.feature.dashboard.body"),
+      label: t("web.landing.clip.dashboard"),
+    },
+    {
+      clip: "messages",
+      title: t("web.landing.feature.messages.title"),
+      body: t("web.landing.feature.messages.body"),
+      label: t("web.landing.clip.messages"),
+    },
+    {
+      clip: "payments",
+      title: t("web.landing.feature.payments.title"),
+      body: t("web.landing.feature.payments.body"),
+      label: t("web.landing.clip.payments"),
+    },
+    {
+      clip: "students",
+      title: t("web.landing.feature.students.title"),
+      body: t("web.landing.feature.students.body"),
+      label: t("web.landing.clip.students"),
+    },
+  ];
+
+  // The rest of the job: true on every deploy, no clip needed. The intro-video
+  // coach is the one AI card here (INTRO_VIDEO_COACH_ENABLED is on in
+  // production; Pro-gated at the pipeline, and every new teacher starts on the
+  // Pro trial, so a visitor signing up today can reach it).
+  const more = [
     {
       icon: BellRing,
       title: t("web.landing.feature.reminders.title"),
       body: t("web.landing.feature.reminders.body"),
     },
     {
-      icon: Video,
-      title: t("web.landing.feature.video.title"),
-      body: t("web.landing.feature.video.body"),
+      icon: Globe,
+      title: t("web.landing.feature.globalPay.title"),
+      body: t("web.landing.feature.globalPay.body"),
     },
     {
       icon: CalendarClock,
@@ -104,45 +167,50 @@ export default async function LandingPage({
       body: t("web.landing.feature.calendar.body"),
     },
     {
-      icon: Globe,
-      title: t("web.landing.feature.globalPay.title"),
-      body: t("web.landing.feature.globalPay.body"),
-    },
-  ];
-
-  // The live-lesson AI stack — the differentiators a marketplace can't match.
-  //
-  // Every card here must name something a visitor who signs up today can
-  // actually reach; `tests/config/ai-marketing-claims.test.ts` holds each claim
-  // against the enablement flag that governs it in
-  // `config/env/production.runtime.env`, and fails if a card outruns its flag.
-  //
-  // Three cards were removed rather than reworded, each because its capability
-  // is off in production. Re-add one in the SAME change that turns its flag on,
-  // not before:
-  //   Pronunciation scoring — LESSON_INSIGHTS_PRONUNCIATION_ENABLED, never on
-  //     in any environment, so no student has ever seen a phoneme score.
-  //   AI lesson insights — LESSON_INSIGHTS_TRANSCRIPTION_ENABLED, turned off
-  //     again by D-114 ahead of first promotion.
-  //   Study podcasts — MATERIAL_PODCASTS_ENABLED, the flag D-114 added so the
-  //     feature has an off switch that isn't "pull a secret".
-  const aiFeatures = [
-    {
       icon: Languages,
-      title: t("web.landing.ai.captions.title"),
-      body: t("web.landing.ai.captions.body"),
+      title: t("web.landing.feature.languages.title"),
+      body: t("web.landing.feature.languages.body"),
     },
-    { icon: Repeat, title: t("web.landing.ai.srs.title"), body: t("web.landing.ai.srs.body") },
     {
-      // Intro-video AI coach (D-73): INTRO_VIDEO_COACH_ENABLED is on in
-      // production. Pro-gated at the pipeline, but every new teacher starts on
-      // the 30-day Pro trial, so a visitor signing up today can reach it. The
-      // flag alone doesn't prove DEEPGRAM_API_KEY is set (Infisical, not this
-      // repo — the guard test's scope note): verify with `fly secrets list
-      // --app agendaprofe`, don't assume.
       icon: Clapperboard,
       title: t("web.landing.ai.videoCoach.title"),
       body: t("web.landing.ai.videoCoach.body"),
+    },
+  ];
+
+  const wedgeRows = [
+    {
+      label: t("web.landing.wedge.row.commission.label"),
+      marketplace: t("web.landing.wedge.row.commission.marketplace"),
+      us: t("web.landing.wedge.row.commission.us"),
+    },
+    {
+      label: t("web.landing.wedge.row.money.label"),
+      marketplace: t("web.landing.wedge.row.money.marketplace"),
+      us: t("web.landing.wedge.row.money.us"),
+    },
+    {
+      label: t("web.landing.wedge.row.students.label"),
+      marketplace: t("web.landing.wedge.row.students.marketplace"),
+      us: t("web.landing.wedge.row.students.us"),
+    },
+  ];
+
+  const fit = [
+    {
+      icon: Languages,
+      title: t("web.landing.fit.language.title"),
+      body: t("web.landing.fit.language.body"),
+    },
+    {
+      icon: BookOpen,
+      title: t("web.landing.fit.subject.title"),
+      body: t("web.landing.fit.subject.body"),
+    },
+    {
+      icon: Wallet,
+      title: t("web.landing.fit.abroad.title"),
+      body: t("web.landing.fit.abroad.body"),
     },
   ];
 
@@ -152,18 +220,10 @@ export default async function LandingPage({
     t("web.landing.steps.teach"),
   ];
 
-  // The founding-cohort claim is gone. The strategy was discarded, so the page
-  // was advertising a programme nobody could join — the worst kind of stale
-  // marketing, because it reads as current. Two true pills beat three with one
-  // that is not.
-  const trustPills = [t("web.landing.trust.keepAll"), t("web.landing.trust.aiLessons")];
-
-  const socialStats = [
-    {
-      value: t("web.landing.social.stat.rails.value"),
-      label: t("web.landing.social.stat.rails.label"),
-    },
-    { value: t("web.landing.social.stat.ai.value"), label: t("web.landing.social.stat.ai.label") },
+  const trustPills = [
+    t("web.landing.trust.keepAll"),
+    t("web.landing.trust.freePlan"),
+    t("web.landing.trust.openSource"),
   ];
 
   // Auth-aware hero CTA: a logged-in visitor landing here should be offered a
@@ -205,7 +265,7 @@ export default async function LandingPage({
   }
 
   const baseUrl = seoBaseUrl();
-  const featureList = [...valueProps, ...aiFeatures].map((f) => f.title);
+  const featureList = [...tour, ...more].map((f) => f.title);
 
   return (
     <main className="flex flex-col">
@@ -223,130 +283,188 @@ export default async function LandingPage({
         </div>
       )}
 
-      {/* Hero — warm atmosphere behind a serif headline */}
+      {/* Hero — the promise on the left, a student booking on a phone on the
+          right. The clip is the product's front door seen the way a student
+          sees it, which is the thing a teacher is deciding whether to share. */}
       <section className="relative overflow-hidden">
         <div aria-hidden className="pointer-events-none absolute inset-0 -z-10">
-          {/* One ink wash behind the mark, and a small gold one offset from it.
-              The gold was at 20% and read as a stain on a cool ground — the
-              accent is a highlight, not a wash. */}
-          <div className="absolute top-[-12%] left-1/2 h-[34rem] w-[34rem] -translate-x-1/2 rounded-full bg-primary/10 blur-3xl" />
+          <div className="absolute top-[-12%] left-1/3 h-[34rem] w-[34rem] -translate-x-1/2 rounded-full bg-primary/10 blur-3xl" />
           <div className="absolute top-[26%] right-[6%] h-56 w-56 rounded-full bg-accent/10 blur-3xl" />
         </div>
 
-        <div className="container flex flex-col items-center gap-6 py-20 text-center lg:py-28">
-          <Logo size="xl" />
+        <div className="container grid items-center gap-12 py-16 lg:grid-cols-2 lg:py-24">
+          <div className="flex flex-col items-center gap-6 text-center lg:items-start lg:text-left">
+            <Logo size="xl" />
 
-          <span className="inline-flex items-center gap-2 rounded-full border border-border/70 bg-card/60 px-4 py-1.5 text-xs font-medium text-muted-foreground backdrop-blur">
-            <Sparkles className="h-3.5 w-3.5 text-accent" aria-hidden />
-            {t("web.landing.eyebrow")}
-          </span>
+            <span className="inline-flex items-center gap-2 rounded-full border border-border/70 bg-card/60 px-4 py-1.5 text-xs font-medium text-muted-foreground backdrop-blur">
+              <Sparkles className="h-3.5 w-3.5 text-accent" aria-hidden />
+              {t("web.landing.eyebrow")}
+            </span>
 
-          <Heading level={1} className="max-w-reading text-balance lg:text-display">
-            {t("web.landing.headline")}
-          </Heading>
+            <Heading level={1} className="max-w-reading text-balance lg:text-display">
+              {t("web.landing.headline")}
+            </Heading>
 
-          <p className="max-w-reading text-lg text-pretty text-muted-foreground">
-            {t("web.landing.sub")}
-          </p>
+            <p className="max-w-reading text-lg text-pretty text-muted-foreground">
+              {t("web.landing.sub")}
+            </p>
 
-          <div className="mt-2 flex w-full flex-col items-center gap-3 lg:w-auto lg:flex-row">
-            {loggedInCta ? (
-              <Button asChild size="lg" className="w-full lg:w-auto">
-                <Link href={loggedInCta.href}>{loggedInCta.label}</Link>
-              </Button>
-            ) : (
-              <>
+            <div className="mt-2 flex w-full flex-col items-center gap-3 lg:w-auto lg:flex-row">
+              {loggedInCta ? (
+                <Button asChild size="lg" className="w-full lg:w-auto">
+                  <Link href={loggedInCta.href}>{loggedInCta.label}</Link>
+                </Button>
+              ) : (
                 <Button asChild size="lg" className="w-full lg:w-auto">
                   <a href="/sign-up">{t("web.landing.cta")}</a>
                 </Button>
-                <Button asChild size="lg" variant="outline" className="w-full lg:w-auto">
-                  <a href="/sign-in">{t("web.signIn.title")}</a>
-                </Button>
-              </>
+              )}
+              <Button asChild size="lg" variant="outline" className="w-full lg:w-auto">
+                <a href={`#${TOUR_ID}`}>{t("web.landing.ctaTour")}</a>
+              </Button>
+            </div>
+
+            <ul className="mt-2 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-xs text-muted-foreground lg:justify-start">
+              {trustPills.map((pill) => (
+                <li key={pill} className="inline-flex items-center gap-1.5">
+                  <Check className="h-3.5 w-3.5 text-primary" aria-hidden />
+                  {pill}
+                </li>
+              ))}
+            </ul>
+
+            {!loggedInCta && (
+              <p className="text-sm text-muted-foreground">
+                {t("landing.studentPrompt")}{" "}
+                <a
+                  href="/sign-in"
+                  className="font-medium text-foreground underline-offset-4 hover:underline"
+                >
+                  {t("landing.studentCta")}
+                </a>
+              </p>
             )}
           </div>
 
-          <ul className="mt-2 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-xs text-muted-foreground">
-            {trustPills.map((pill) => (
-              <li key={pill} className="inline-flex items-center gap-1.5">
-                <Check className="h-3.5 w-3.5 text-primary" aria-hidden />
-                {pill}
-              </li>
-            ))}
-          </ul>
-
-          {!loggedInCta && (
-            <p className="text-sm text-muted-foreground">
-              {t("landing.studentPrompt")}{" "}
-              <a
-                href="/sign-in"
-                className="font-medium text-foreground underline-offset-4 hover:underline"
-              >
-                {t("landing.studentCta")}
-              </a>
+          <div className="flex flex-col items-center gap-3">
+            <FeatureClip
+              name="booking"
+              label={t("web.landing.clip.booking")}
+              orientation="portrait"
+            />
+            <p className="max-w-xs text-center text-sm text-muted-foreground">
+              <span className="font-medium text-foreground">
+                {t("web.landing.feature.book.title")}
+              </span>{" "}
+              {t("web.landing.feature.book.body")}
             </p>
-          )}
+          </div>
         </div>
       </section>
 
-      {/* The wedge — teachers keep ~100%, and we're a tool, not a marketplace */}
+      {/* The wedge — a tool, not a marketplace. Three rows a teacher who has
+          paid a commission will recognise, without a competitor's number in
+          them: a figure quoted here would be a claim nothing in this repository
+          can verify next month. */}
       <Section
         variant="band"
         eyebrow={t("web.landing.wedge.eyebrow")}
         title={t("web.landing.wedge.title")}
         description={t("web.landing.wedge.sub")}
       >
-        <div className="grid gap-4 lg:grid-cols-2">
-          <div className="rounded-2xl border bg-card/50 p-6 text-center">
-            <p className="text-sm font-medium text-muted-foreground">
-              {t("web.landing.wedge.marketplace.label")}
-            </p>
-            <p className="mt-2 font-display text-2xl font-semibold text-muted-foreground">
-              {t("web.landing.wedge.marketplace.value")}
-            </p>
-          </div>
-          <div className="rounded-2xl border-2 border-primary bg-card p-6 text-center shadow-xs">
-            <p className="text-sm font-medium text-primary">{t("web.landing.wedge.us.label")}</p>
-            <p className="mt-2 font-display text-2xl font-semibold">
-              {t("web.landing.wedge.us.value")}
-            </p>
-            <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-              {t("web.landing.wedge.us.note")}
-            </p>
-          </div>
+        {/* Three columns from md up; on a phone each row becomes a card with
+            the two answers stacked, because three columns of sentences do not
+            fit in 390px without a horizontal scroll. */}
+        <div className="hidden overflow-hidden rounded-2xl border bg-card shadow-xs md:block">
+          <table className="w-full text-left text-sm">
+            <thead>
+              <tr className="border-b bg-secondary/40">
+                <th scope="col" className="sr-only">
+                  {t("web.landing.wedge.eyebrow")}
+                </th>
+                <th scope="col" className="px-4 py-3 font-medium text-muted-foreground">
+                  {t("web.landing.wedge.marketplace.label")}
+                </th>
+                <th scope="col" className="px-4 py-3 font-semibold text-primary">
+                  {t("web.landing.wedge.us.label")}
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {wedgeRows.map((row) => (
+                <tr key={row.label} className="border-b align-top last:border-b-0">
+                  <th scope="row" className="px-4 py-4 font-medium whitespace-nowrap">
+                    {row.label}
+                  </th>
+                  <td className="px-4 py-4 text-muted-foreground">{row.marketplace}</td>
+                  <td className="px-4 py-4 font-medium">{row.us}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
-      </Section>
-
-      {/* Live-lesson AI showcase — the demo is the centerpiece */}
-      <Section
-        width="wide"
-        eyebrow={t("web.landing.ai.eyebrow")}
-        title={t("web.landing.ai.title")}
-        description={t("web.landing.ai.sub")}
-      >
-        <CaptionsDemo
-          badge={t("web.landing.demo.badge")}
-          speakerLabel={t("web.landing.demo.speakerLabel")}
-          translationLabel={t("web.landing.demo.translationLabel")}
-          replayLabel={t("web.landing.demo.replay")}
-          a11yLabel={t("web.landing.demo.a11yLabel")}
-        />
-        <div className="mt-12 grid gap-5 lg:grid-cols-2 xl:grid-cols-3">
-          {aiFeatures.map((feature) => (
-            <FeatureCard
-              key={feature.title}
-              icon={feature.icon}
-              title={feature.title}
-              body={feature.body}
-            />
+        <ul className="flex flex-col gap-3 md:hidden">
+          {wedgeRows.map((row) => (
+            <li key={row.label} className="rounded-2xl border bg-card p-4 text-sm shadow-xs">
+              <p className="font-display font-semibold">{row.label}</p>
+              <p className="mt-2 text-muted-foreground">
+                <span className="font-medium">{t("web.landing.wedge.marketplace.label")}:</span>{" "}
+                {row.marketplace}
+              </p>
+              <p className="mt-1">
+                <span className="font-medium text-primary">{t("web.landing.wedge.us.label")}:</span>{" "}
+                {row.us}
+              </p>
+            </li>
           ))}
-        </div>
+        </ul>
+        <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
+          {t("web.landing.wedge.us.note")}
+        </p>
       </Section>
 
-      {/* Everyday value props */}
-      <Section width="wide" title={t("web.landing.featuresTitle")}>
+      {/* The tour — one job per section, the real screen beside the words. */}
+      <section id={TOUR_ID} className="scroll-mt-8">
+        <Section
+          width="wide"
+          eyebrow={t("web.landing.tour.eyebrow")}
+          title={t("web.landing.tour.title")}
+          description={t("web.landing.tour.sub")}
+        >
+          <ol className="flex flex-col gap-16 lg:gap-24">
+            {tour.map((job, i) => {
+              const flip = i % 2 === 1;
+              return (
+                <li key={job.clip} className="grid items-center gap-8 lg:grid-cols-2 lg:gap-14">
+                  <div className={cn("max-w-reading", flip && "lg:order-2")}>
+                    <Heading level={2} as="h3" className="text-balance">
+                      {job.title}
+                    </Heading>
+                    <p className="mt-4 leading-relaxed text-pretty text-muted-foreground">
+                      {job.body}
+                    </p>
+                  </div>
+                  <div className={cn("flex flex-col gap-2", flip && "lg:order-1")}>
+                    <FeatureClip
+                      name={job.clip}
+                      label={job.label}
+                      orientation={job.portrait ? "portrait" : "landscape"}
+                    />
+                    <p className="text-center text-xs text-muted-foreground">
+                      {t("web.landing.clipNote")}
+                    </p>
+                  </div>
+                </li>
+              );
+            })}
+          </ol>
+        </Section>
+      </section>
+
+      {/* The rest of the job */}
+      <Section variant="band" width="wide" title={t("web.landing.featuresTitle")}>
         <div className="grid gap-5 lg:grid-cols-2 xl:grid-cols-3">
-          {valueProps.map((feature) => (
+          {more.map((feature) => (
             <FeatureCard
               key={feature.title}
               icon={feature.icon}
@@ -365,8 +483,42 @@ export default async function LandingPage({
         </div>
       </Section>
 
-      {/* How it works — quiet warm band */}
-      <Section variant="band" title={t("web.landing.stepsTitle")}>
+      {/* Built for how you teach */}
+      <Section
+        width="wide"
+        title={t("web.landing.fit.title")}
+        description={t("web.landing.fit.sub")}
+      >
+        <div className="grid gap-5 lg:grid-cols-3">
+          {fit.map((item) => (
+            <FeatureCard key={item.title} icon={item.icon} title={item.title} body={item.body} />
+          ))}
+        </div>
+      </Section>
+
+      {/* The teacher it was built with. One quotation, whole sentences, in her
+          own words and her own language. */}
+      <Section
+        variant="band"
+        title={t("web.landing.social.title")}
+        description={t("web.landing.social.body")}
+      >
+        <figure className="rounded-2xl border bg-card p-6 shadow-xs lg:p-8">
+          <blockquote className="font-display text-lg leading-relaxed text-pretty lg:text-xl">
+            “{TEACHER_TESTIMONIAL}”
+          </blockquote>
+          <figcaption className="mt-4 text-sm text-muted-foreground">
+            <span className="font-medium text-foreground">
+              {t("web.landing.quote.attribution")}
+            </span>
+            {" · "}
+            {t("web.landing.quote.context")}
+          </figcaption>
+        </figure>
+      </Section>
+
+      {/* How it works */}
+      <Section title={t("web.landing.stepsTitle")}>
         <ol className="grid gap-8 lg:grid-cols-3">
           {steps.map((step, i) => (
             <li key={step} className="text-center lg:text-left">
@@ -379,17 +531,18 @@ export default async function LandingPage({
         </ol>
       </Section>
 
-      {/* Honest social proof — capability stats only, no fake reviews and no
-          offer nobody can take up */}
-      <Section title={t("web.landing.social.title")} description={t("web.landing.social.body")}>
-        <dl className="grid gap-6 lg:grid-cols-3">
-          {socialStats.map((stat) => (
-            <div key={stat.value} className="rounded-2xl border bg-card p-6 text-center shadow-xs">
-              <dt className="font-display text-2xl font-semibold text-primary">{stat.value}</dt>
-              <dd className="mt-1 text-sm text-muted-foreground">{stat.label}</dd>
-            </div>
-          ))}
-        </dl>
+      {/* Pricing, in one line each. The figures live on /pricing, where they are
+          interpolated from the live config rather than typed here. */}
+      <Section
+        variant="band"
+        title={t("web.landing.pricing.title")}
+        description={t("web.landing.pricing.body", { days: TRIAL_DAYS })}
+      >
+        <div className="text-center">
+          <Button asChild variant="outline">
+            <Link href={href("/pricing")}>{t("web.landing.seePricing")}</Link>
+          </Button>
+        </div>
       </Section>
 
       {/* Closing CTA — prospect-conversion band; hidden for superadmins, for

@@ -99,7 +99,7 @@ describe("marketing pages — localized metadata + canonicals", () => {
     const { generateMetadata } = await import("@/app/page");
     const meta = await generateMetadata();
     expect(meta.title).toEqual({
-      absolute: "SpiralClass — Agenda, cobros y recordatorios para profes",
+      absolute: "SpiralClass — Reservas, cobros y clases en video para profes independientes",
     });
     expect(meta.description).toContain("30 días de Pro gratis");
     expect(meta.alternates?.canonical).toBe("/es");

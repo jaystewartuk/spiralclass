@@ -4,7 +4,16 @@ import { PageShell } from "@/components/ui/page-shell";
 import { PersonAvatar } from "@/components/teacher-identity";
 import Link from "next/link";
 import type { Metadata } from "next";
-import { Code2, GraduationCap, Globe, Heart, ShieldCheck, Sparkles, Wallet } from "lucide-react";
+import {
+  Bot,
+  Code2,
+  GraduationCap,
+  Globe,
+  Heart,
+  ShieldCheck,
+  Sparkles,
+  Wallet,
+} from "lucide-react";
 import { SOURCE_CODE_LICENCE, SOURCE_CODE_URL } from "@spiralclass/shared";
 import { Button } from "@/components/ui/button";
 import { getLocalizedHref, getPreferredLocale, getT } from "@/lib/i18n";
@@ -60,6 +69,15 @@ export default async function AboutPage() {
       icon: Globe,
       title: t("web.about.trust.globalPay.title"),
       body: t("web.about.trust.globalPay.body"),
+    },
+    // How the code is made, said plainly: written with coding agents, and
+    // reviewed, tested and released by the one engineer who runs the service.
+    // It sits beside the open-source card because that is what makes it
+    // checkable — the gate and the history are public.
+    {
+      icon: Bot,
+      title: t("web.about.trust.agents.title"),
+      body: t("web.about.trust.agents.body"),
     },
     // The only card that leaves the site, and the one that lets a reader check
     // every other card for herself: the repository is public under
@@ -139,8 +157,7 @@ export default async function AboutPage() {
         <Heading level={2} className="text-center">
           {t("web.about.whyTrust")}
         </Heading>
-        {/* Three across rather than four: the fifth card would otherwise sit
-            alone on its own row at xl. */}
+        {/* Three across: six cards make two full rows at xl. */}
         <div className="mt-8 grid gap-6 lg:grid-cols-2 xl:grid-cols-3">
           {TRUST_POINTS.map((p) => {
             const Icon = p.icon;
