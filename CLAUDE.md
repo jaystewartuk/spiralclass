@@ -15,12 +15,13 @@ truth — not a longer version of this one.
 
 ## The four rules that override everything else
 
-1. **A session opens a pull request. It does not merge, deploy or promote.**
-   `pnpm pr` is the end of the road. Merging, and approving the production
-   deploy a merge starts (D-199), are the operator's call, taken per change, on
-   timing that is theirs. Every change —
-   documentation included — lands through a PR; there is no direct-push
-   exception.
+1. **A session opens a pull request. It does not deploy or promote, and merges
+   only when the operator says so.** `pnpm pr` is the end of the road unless
+   they ask for the merge; `gh pr merge` is then a prompt they answer (a
+   user-level rule, the same in every repository). Approving the production
+   deploy a merge starts (D-199) is theirs alone, on timing that is theirs.
+   Every change — documentation included — lands through a PR; there is no
+   direct-push exception.
 2. **Never bypass the gate.** No `SKIP_GATE=1`, no `--no-verify`. A push that
    looks stuck is queuing on the machine lock and says so — wait for it.
 3. **A change is not done until it ships with tests** covering the new
@@ -120,7 +121,7 @@ pnpm --filter spiralclass-web test -- src/lib/money.test.ts
 pnpm --filter @spiralclass/shared test -- src/money.test.ts
 ```
 
-**Operator-only, never run from a session:** `pnpm promote`, `gh pr merge`,
+**Operator-only, never run from a session:** `pnpm promote`,
 `scripts/cloudrun-deploy.sh`
 and the two operator scripts in `infra/gcp/`, `scripts/database-deploy.sh`,
 anything matching `migrate:prod`, and `infisical`. These are denied in `.claude/settings.json` and

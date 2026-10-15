@@ -73,9 +73,17 @@ describe("the Bash guard blocks what a permission prefix cannot", () => {
   });
 });
 
+describe("merging is the operator's prompt, not this repository's block", () => {
+  it("leaves the merge command to the user-level ask rule", () => {
+    // `gh pr merge` is an `ask` at user level, the same in every repository:
+    // each merge is a prompt the operator answers. A block here would turn that
+    // ask into a refusal in this repository alone.
+    expect(blocks("gh pr merge 1234 --squash").blocked).toBe(false);
+  });
+});
+
 describe("the operator's decisions cannot be taken by a session", () => {
   it.each([
-    ["gh pr merge 1234 --squash", "merging"],
     ["pnpm promote", "promoting"],
     ["bash scripts/cloudrun-deploy.sh production --gate-already-passed", "deploying"],
     // The database job's script, which checkpoints and migrates production on

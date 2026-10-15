@@ -101,7 +101,10 @@ any check (`pnpm gate --allow-dirty`, `typecheck`, `lint`, `test`, a single test
 file), formatting, and read-only `git` and `gh`. These are the operations a
 session performs dozens of times an hour and none of them can lose work.
 
-**Denied outright** — `pnpm promote`, `gh pr merge`, both deploy scripts,
+**Asked every time** — `gh pr merge`, by a user-level rule that is the same in
+every repository, so a merge happens only when the operator answers the prompt.
+
+**Denied outright** — `pnpm promote`, both deploy scripts,
 anything matching `migrate:prod`, `infisical`, force-pushes, hard resets, and
 reads of the credential-bearing files. Every one of these either moves real
 money, touches production data, or hands out live credentials, and none has an
