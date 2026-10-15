@@ -208,7 +208,6 @@ describe("the operator-only rule is enforced, not merely stated", () => {
   /** The command, and the substring the deny rules must contain for it. */
   const OPERATOR_ONLY = [
     "pnpm promote",
-    "gh pr merge",
     // What serves spiralclass.com since the 2026-09-23 cutover ([D-184]'s
     // addendum). It replaced the Fly script on this list when it replaced Fly.
     "scripts/cloudrun-deploy.sh",
@@ -231,6 +230,12 @@ describe("the operator-only rule is enforced, not merely stated", () => {
     for (const cmd of OPERATOR_ONLY) {
       expect(deny, `${cmd} is called operator-only but nothing denies it`).toContain(cmd);
     }
+  });
+
+  it("leaves merging to the user-level ask, the same in every repository", () => {
+    // A project deny outranks a user-level ask, so a merge rule here would make
+    // this repository refuse what every other one prompts for.
+    expect(deny).not.toContain("gh pr merge");
   });
 
   // The third copy of the rule — the PreToolUse hook — is not asserted here by

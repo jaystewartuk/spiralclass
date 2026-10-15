@@ -2,9 +2,8 @@
 # PreToolUse(Bash) — the rules that must not depend on a model remembering them.
 #
 # WHY THIS EXISTS, GIVEN .claude/settings.json ALREADY HAS A DENY LIST.
-# A permission rule matches a command PREFIX. That covers `pnpm promote` and
-# `gh pr merge` well, and covers the two shapes that actually matter here not at
-# all:
+# A permission rule matches a command PREFIX. That covers `pnpm promote` well,
+# and covers the two shapes that actually matter here not at all:
 #
 #   SKIP_GATE=1 git push        an environment assignment in front of the command
 #   git push --no-verify        a flag in the middle of one
@@ -124,11 +123,14 @@ push normally."
 fi
 
 # ── The operator's decisions, not a session's ────────────────────────────────
-if [[ "$command_line" =~ (^|[[:space:]&|;])(pnpm[[:space:]]+promote|gh[[:space:]]+pr[[:space:]]+merge) ]]; then
-  block "Merging and promoting are the operator's call, taken per change." \
-    "A session's job ends at an open, green pull request ('pnpm pr'). Timing matters here:
-CLAUDE.md forbids risky-path merges during lesson hours, and a promote fast-forwards
-'production' and triggers a real deploy."
+# Merging is deliberately NOT here. `gh pr merge` is an `ask` rule at user
+# level, the same in every repository the operator works in, so each merge is a
+# prompt they answer. A deny or a block here would override that ask in this one
+# repository — which is exactly the inconsistency it was removed to fix.
+if [[ "$command_line" =~ (^|[[:space:]&|;])pnpm[[:space:]]+promote ]]; then
+  block "Promoting is the operator's call, taken per change." \
+    "A promote fast-forwards 'production' and starts a real deploy. Since D-199 a
+merge does that by itself, behind the operator's approval on the deploy."
 fi
 
 # The third production target ([D-184]). `gcloud run deploy` and the two
