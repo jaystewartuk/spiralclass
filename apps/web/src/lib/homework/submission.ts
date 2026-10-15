@@ -53,19 +53,6 @@ export async function ensureSubmission(
   });
 }
 
-// The teacher's feedback on a submission's most recent attempt, or null when
-// there is none yet (no attempts, or the latest attempt hasn't been reviewed).
-// Used to surface "your latest feedback" on the student assignment-detail
-// screen without the student needing the full attempt history.
-export function latestFeedbackForSubmission(
-  submissionId: string,
-): Promise<HomeworkFeedback | null> {
-  return prisma.homeworkFeedback.findFirst({
-    where: { attempt: { submissionId } },
-    orderBy: { attempt: { attemptNumber: "desc" } },
-  });
-}
-
 // All attempts (the append-only submit history) for a TEACHER-owned
 // assignment, newest first — the review screen's data source on both
 // platforms. SpiralClass is strictly 1-on-1 tutoring (D-88), so an assignment

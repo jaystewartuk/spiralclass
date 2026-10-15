@@ -763,45 +763,6 @@ export async function deleteLibraryMaterialAction(formData: FormData): Promise<v
   );
 }
 
-// ---------- reorder within a level ----------
-
-export async function moveLibraryMaterialAction(formData: FormData): Promise<void> {
-  const teacher = await requireOnboardedTeacher();
-  const id = String(formData.get("materialId") ?? "");
-  const direction = String(formData.get("direction") ?? "");
-  if (!id || (direction !== "up" && direction !== "down")) return;
-
-  const item = await prisma.libraryMaterial.findFirst({
-    where: { id, teacherId: teacher.id },
-    select: { id: true, levelId: true, position: true },
-  });
-  if (!item) return;
-
-  // Find the adjacent item in the same level to swap positions with.
-  const neighbor = await prisma.libraryMaterial.findFirst({
-    where: {
-      teacherId: teacher.id,
-      levelId: item.levelId,
-      position: direction === "up" ? { lt: item.position } : { gt: item.position },
-    },
-    orderBy: { position: direction === "up" ? "desc" : "asc" },
-    select: { id: true, position: true },
-  });
-  if (!neighbor) return; // already at the edge
-
-  await prisma.$transaction([
-    prisma.libraryMaterial.update({
-      where: { id: item.id },
-      data: { position: neighbor.position },
-    }),
-    prisma.libraryMaterial.update({
-      where: { id: neighbor.id },
-      data: { position: item.position },
-    }),
-  ]);
-  revalidateAfterAction("/dashboard/materials");
-}
-
 // ---------- per-student assignment + completion (the notebook) ----------
 
 // Verifies the student is linked to the teacher and the material is theirs,

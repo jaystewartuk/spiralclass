@@ -8,7 +8,6 @@ import type {
   EnsureCheckoutCustomerInput,
   CreateConnectedAccountInput,
   CreateCustomerAccountInput,
-  CreatePaymentIntentInput,
   CreateRefundInput,
   StripeClient,
 } from "./client";
@@ -79,7 +78,6 @@ export function createStubStripeClient(): StubStripeClient {
 
   let acctSeq = 1;
   let csSeq = 1;
-  let piSeq = 1;
   let reSeq = 1;
   let cusSeq = 1;
   let bpsSeq = 1;
@@ -174,20 +172,6 @@ export function createStubStripeClient(): StubStripeClient {
       };
       sessions.set(sessionId, expired);
       return expired;
-    },
-
-    async createPaymentIntent(input: CreatePaymentIntentInput): Promise<StripePaymentIntent> {
-      const id = `pi_STUB${piSeq++}`;
-      const intent: StripePaymentIntent = {
-        id,
-        status: "requires_payment_method",
-        amount: input.amountMinorUnits,
-        currency: input.currency,
-        client_secret: `${id}_secret_STUB`,
-        metadata: input.metadata ?? null,
-      };
-      intents.set(id, intent);
-      return intent;
     },
 
     async getPaymentIntent(paymentIntentId: string): Promise<StripePaymentIntent> {
@@ -352,7 +336,6 @@ export function createStubStripeClient(): StubStripeClient {
       portalSessions.length = 0;
       acctSeq = 1;
       csSeq = 1;
-      piSeq = 1;
       reSeq = 1;
       cusSeq = 1;
       bpsSeq = 1;

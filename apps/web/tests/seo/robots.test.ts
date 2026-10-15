@@ -49,7 +49,6 @@ describe("robots (production)", () => {
         "/payments",
         "/notifications",
         "/auth/",
-        "/m/",
         "/r/",
       ],
     });

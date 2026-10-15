@@ -141,10 +141,6 @@ export const PUBLIC_ROUTES: Route[] = [
   // structure rather than pixels and do not care what day it is.
   { path: `/b/${TEACHER_SLUG}/buy`, name: "booking-buy", tier: "public" },
 
-  // The mobile magic-link fallback. A real page with its own (entirely inline)
-  // styling, which is exactly why it belongs in the baseline.
-  { path: "/m/login", name: "mobile-login", tier: "public" },
-
   // Renders only when the app is deliberately taken down; capturing it would
   // mean inducing that state.
   { path: "/maintenance", name: "maintenance", tier: "public", excluded: "failure-state" },

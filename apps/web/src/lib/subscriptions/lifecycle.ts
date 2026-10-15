@@ -11,7 +11,7 @@ import {
 } from "@/lib/notifications/enqueue";
 import { trackServerEvent } from "@/lib/analytics/posthog";
 import { currencyForRegion } from "@spiralclass/shared";
-import { PAST_DUE_GRACE_DAYS, isPaidPlan, type SubscriptionPlan } from "./config";
+import { PAST_DUE_GRACE_DAYS, type SubscriptionPlan } from "./config";
 import { logger } from "@/lib/logger";
 
 const log = logger({ surface: "subscriptions" });
@@ -442,5 +442,3 @@ export async function notifyPaymentSucceeded(
   });
   await fireNotification(deps, notifId, input.teacherId);
 }
-
-export { isPaidPlan };

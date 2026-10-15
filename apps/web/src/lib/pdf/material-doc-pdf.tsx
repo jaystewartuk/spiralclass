@@ -457,11 +457,11 @@ function renderImage(
   );
 }
 
-/** A tense timeline, drawn from the SHARED geometry — the same numbers the web
- * and mobile renderers use, so a downloaded handout matches the on-screen
+/** A tense timeline, drawn from the SHARED geometry — the same numbers the
+ * on-screen renderer uses, so a downloaded handout matches the on-screen
  * material rather than being a second drawing of the same data.
  *
- * Two constraints this renderer has that the other two don't, both from the
+ * Two constraints this renderer has that the on-screen one doesn't, both from the
  * doc's own "what each renderer can draw" table:
  *  - NO EMOJI. There is no `Font.register` here (built-in standard PDF fonts
  *    only), so every mark is a vector primitive — a Line, a Polygon arrow head,

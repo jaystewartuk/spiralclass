@@ -2,12 +2,12 @@
 //
 // WHY THIS EXISTS (the material-rendering redesign): materials used to be a
 // flat Markdown string that FIVE renderers each re-parsed and re-styled
-// independently (web on-screen, web PDF, mobile, plus the docs/help copies) —
+// independently (on-screen, PDF, plus the docs/help copies) —
 // they drifted, and none could tell a "vocabulary" box from a "warning" from a
 // plain paragraph, so every material rendered as undifferentiated prose. This
 // module is the single intermediate representation those renderers now share: a
 // material `body` (still Markdown on the wire — see parse.ts for why) is parsed
-// ONCE, here, into a typed block tree, and each platform renderer walks that
+// ONCE, here, into a typed block tree, and each renderer walks that
 // tree mapping block types to its own styled primitives. One parser + one token
 // set (packages/shared/src/tokens.ts) = the renderers cannot semantically drift.
 //
@@ -117,7 +117,7 @@ export type TimelineSpan = { from: number; to: number; label: string };
  * teach a tense, and the first block type that is DRAWN rather than typeset.
  *
  * It is pure data by construction: positions and plain-text labels, from which
- * each platform's own components produce the drawing. No markup a renderer
+ * each renderer's own components produce the drawing. No markup a renderer
  * evaluates ever crosses this boundary — see
  * docs/architecture/material-visuals.md, "no markup sink" (D-17), and
  * ./timeline.ts for the Markdown spelling and the shared geometry every

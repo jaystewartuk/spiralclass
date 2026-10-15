@@ -8,10 +8,9 @@ import type { MaterialBlock, MaterialDoc } from "./types";
 // a private object in the class-materials bucket, reachable only through a
 // short-lived signed URL — a URL that would be stale days before the body that
 // embeds it is next read. The body therefore stores the STORAGE KEY behind the
-// `material-image:` scheme, and each platform turns that into a URL it can
-// actually fetch at render time (web: a same-origin route on the session
-// cookie; mobile: the same route under /api/mobile on the bearer token). The
-// stored body stays valid forever, and no signed URL is ever persisted.
+// `material-image:` scheme, and the renderer turns that into a URL it can
+// actually fetch at render time (a same-origin route on the session cookie).
+// The stored body stays valid forever, and no signed URL is ever persisted.
 //
 // EXTERNAL IMAGES are allowed but restricted to https. An http image would be
 // blocked as mixed content anyway, and every other scheme (data:, blob:,
@@ -30,7 +29,7 @@ import type { MaterialBlock, MaterialDoc } from "./types";
 export const MATERIAL_IMAGE_SCHEME = "material-image:";
 
 /** Image content types accepted on upload, mapped to the extension the stored
- * object gets. Kept in step with the web upload route + the mobile picker;
+ * object gets. Kept in step with the upload route;
  * anything outside this table is rejected before a byte is written. */
 export const MATERIAL_IMAGE_CONTENT_TYPES: Record<string, string> = {
   "image/jpeg": "jpg",
@@ -97,9 +96,6 @@ export function materialImageSrc(key: string): string {
 }
 
 /** The route an embedded image is served from.
- *
- * It took a `surface: "web" | "mobile"` while a bearer-authed sibling route
- * existed under /api/mobile; D-163 deleted that route, so there is one path.
  *
  * Each key segment is encoded individually: `encodeURI` would leave a `?` or
  * `#` inside a key intact and truncate the path at it. */

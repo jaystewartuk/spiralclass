@@ -123,8 +123,6 @@ const ALLOWED_SEGMENTS: readonly string[] = [
   "live",
   "live-calls",
   "livekit",
-  "login",
-  "m",
   "maintenance",
   "materials",
   "messages",

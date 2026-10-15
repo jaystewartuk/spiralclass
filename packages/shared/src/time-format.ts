@@ -2,7 +2,7 @@ import { intlLocale } from "./i18n/locales";
 // How an hour is written, per locale — the one place that decides it.
 //
 // WHY THIS EXISTS. "Should the hour carry a leading zero?" was being answered
-// independently at sixteen call sites across web, mobile and this package, and
+// independently at sixteen call sites across the app and this package, and
 // they did not agree: eleven said `hour: "2-digit"` and four said `numeric`.
 // The product shipped both answers at once — the public checkout rendered
 // "5:00 PM" while the teacher's own calendar rendered "05:00 PM" for the same
@@ -42,10 +42,9 @@ const PROBE = new Date("2026-01-06T13:00:00.000Z");
  * Detected by asking Intl for a `dayPeriod` part rather than by reading
  * `resolvedOptions().hourCycle`.
  *
- * Both would work in Node and in every current browser. `formatToParts` also
- * works under Hermes, whose `Intl` is a partial implementation and does not
- * reliably report `hourCycle` — and this module is in `packages/shared`, which
- * both clients consume, so the detection has to hold on the narrower runtime.
+ * Both would work in Node and in every current browser, but `formatToParts`
+ * also holds on a partial `Intl` implementation that does not reliably report
+ * `hourCycle`, so it is the detection that asks less of the runtime.
  * A locale that prints "PM" is a locale that counts to twelve; nothing else
  * needs to be known.
  */

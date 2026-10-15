@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/prisma";
 
-// Read-only lookup used by the settings UI (web card + mobile screens) to
+// Read-only lookup used by the settings UI to
 // decide whether to show "Connect Google" or "Reconnect Google", and by the
 // email-change flow's warning copy. A user has at most one `google` Account
 // row (unique on [providerId, accountId], and better-auth upserts on that

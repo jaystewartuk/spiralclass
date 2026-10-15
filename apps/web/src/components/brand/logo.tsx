@@ -17,11 +17,11 @@ import { BRAND_NAME } from "@spiralclass/shared";
 
 type LogoSize = "sm" | "md" | "lg" | "xl";
 
-const SIZES: Record<LogoSize, { mark: number; text: string; gap: string; stackedText: string }> = {
-  sm: { mark: 24, text: "text-base", gap: "gap-2", stackedText: "text-base" },
-  md: { mark: 32, text: "text-lg", gap: "gap-2.5", stackedText: "text-xl" },
-  lg: { mark: 44, text: "text-2xl", gap: "gap-3", stackedText: "text-2xl" },
-  xl: { mark: 60, text: "text-3xl", gap: "gap-4", stackedText: "text-4xl" },
+const SIZES: Record<LogoSize, { mark: number; text: string; gap: string }> = {
+  sm: { mark: 24, text: "text-base", gap: "gap-2" },
+  md: { mark: 32, text: "text-lg", gap: "gap-2.5" },
+  lg: { mark: 44, text: "text-2xl", gap: "gap-3" },
+  xl: { mark: 60, text: "text-3xl", gap: "gap-4" },
 };
 
 /**
@@ -111,24 +111,6 @@ export function Logo({
     <span className={cn("inline-flex items-center", s.gap, className)}>
       <LogoMark size={s.mark} variant={variant} />
       {withWordmark && <Wordmark className={s.text} />}
-    </span>
-  );
-}
-
-export function LogoStacked({
-  size = "lg",
-  variant = "default",
-  className,
-}: {
-  size?: LogoSize;
-  variant?: MarkVariant;
-  className?: string;
-}) {
-  const s = SIZES[size];
-  return (
-    <span className={cn("inline-flex flex-col items-center gap-2 text-center", className)}>
-      <LogoMark size={s.mark + 8} variant={variant} />
-      <Wordmark className={s.stackedText} />
     </span>
   );
 }

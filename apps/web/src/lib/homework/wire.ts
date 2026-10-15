@@ -11,14 +11,11 @@ import type {
 import type {
   HomeworkAiReviewContent,
   HomeworkAiReviewDraft,
-  HomeworkAssignmentDetail,
   HomeworkAssignmentSummary,
   HomeworkAttempt,
   HomeworkFeedback,
-  HomeworkSubmission,
   HomeworkSubmissionFile,
   HomeworkSubmissionStatus,
-  TeacherAssignment,
 } from "@spiralclass/shared";
 import { mintSubmissionSignedUrl } from "@/lib/storage/homework-file";
 
@@ -89,24 +86,6 @@ async function toWireFile(f: PrismaSubmissionFile): Promise<HomeworkSubmissionFi
   };
 }
 
-export async function toWireSubmission(
-  submission: PrismaSubmission & { files: PrismaSubmissionFile[] },
-): Promise<HomeworkSubmission> {
-  const files = await Promise.all(
-    [...submission.files]
-      .sort((a, b) => a.uploadedAt.getTime() - b.uploadedAt.getTime())
-      .map(toWireFile),
-  );
-  return {
-    id: submission.id,
-    status: submission.status as HomeworkSubmission["status"],
-    textResponse: submission.textResponse,
-    submittedAt: submission.submittedAt?.toISOString() ?? null,
-    updatedAt: submission.updatedAt.toISOString(),
-    files,
-  };
-}
-
 export function toWireAssignmentSummary(
   a: Pick<Assignment, "id" | "title" | "dueAt">,
   submission: (Pick<PrismaSubmission, "status" | "submittedAt"> & { fileCount: number }) | null,
@@ -165,44 +144,5 @@ export async function toWireAttempt(
     files,
     feedback: attempt.feedback ? toWireFeedback(attempt.feedback) : null,
     aiReviewDrafts: (attempt.aiReviewDrafts ?? []).map(toWireAiReviewDraft),
-  };
-}
-
-export async function toWireAssignmentDetail(
-  a: Assignment,
-  submission: (PrismaSubmission & { files: PrismaSubmissionFile[] }) | null,
-  now: Date,
-  latestFeedback: PrismaFeedback | null = null,
-): Promise<HomeworkAssignmentDetail> {
-  const status = displayStatus(submission, a.dueAt);
-  return {
-    id: a.id,
-    bookingId: a.bookingId,
-    title: a.title,
-    instructions: a.instructions,
-    dueAt: a.dueAt?.toISOString() ?? null,
-    allowLateSubmission: a.allowLateSubmission,
-    allowResubmission: a.allowResubmission,
-    status,
-    late: status === "late",
-    pastDue: a.dueAt != null && a.dueAt.getTime() < now.getTime(),
-    canSubmit: canSubmit(submission, a, now),
-    canEdit: canEditSubmission(submission, a.allowResubmission),
-    submission: submission ? await toWireSubmission(submission) : null,
-    feedback: latestFeedback ? toWireFeedback(latestFeedback) : null,
-  };
-}
-
-export function toWireTeacherAssignment(a: Assignment, submissionCount: number): TeacherAssignment {
-  return {
-    id: a.id,
-    bookingId: a.bookingId,
-    title: a.title,
-    instructions: a.instructions,
-    dueAt: a.dueAt?.toISOString() ?? null,
-    allowLateSubmission: a.allowLateSubmission,
-    allowResubmission: a.allowResubmission,
-    createdAt: a.createdAt.toISOString(),
-    submissionCount,
   };
 }

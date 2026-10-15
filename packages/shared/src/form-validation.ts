@@ -1,14 +1,12 @@
-// Client-side "validate on submit" helpers, shared by web and mobile so a
-// form's required-field rules live in exactly one place instead of being
-// hand-rolled per screen. Pair with a per-app field-errors hook: keep the
-// submit button always enabled (except while in flight), call the validator
-// on submit, and render the returned messages next to each field instead of
-// disabling the button until everything happens to already be valid.
+// Client-side "validate on submit" helpers, so a form's required-field rules
+// live in exactly one place instead of being hand-rolled per screen. Pair with
+// a field-errors hook: keep the submit button always enabled (except while in
+// flight), call the validator on submit, and render the returned messages next
+// to each field instead of disabling the button until everything happens to
+// already be valid.
 //
-// Validators return error CODES, not localized strings — web and mobile each
-// have their own i18n mechanism (inline es/en ternaries vs. a t() key table),
-// so each app maps a code to its own copy rather than duplicating translated
-// text in this package.
+// Validators return error CODES, not localized strings; the form maps a code to
+// its copy.
 
 export function hasFieldErrors(errors: Record<string, string | undefined>): boolean {
   return Object.values(errors).some(Boolean);
@@ -42,7 +40,7 @@ export type ManualPackageFieldErrors = {
   classesRemaining?: ManualPackageFieldErrorCode;
 };
 
-// The "record an off-platform package" form (add + edit) on both apps: the
+// The "record an off-platform package" form (add + edit): the
 // teacher types the total and how many classes are LEFT. `maxRemaining`, when
 // given, is the edit form's extra ceiling (total minus classes already
 // booked/taken against the package).
@@ -76,8 +74,7 @@ export function validateManualPackageFields(input: {
   return errors;
 }
 
-// The unified "add material" form (web `material-form.tsx` + mobile
-// `AddMaterialModal`). A material is one row that can carry any combination of
+// The unified "add material" form (`material-form.tsx`). A material is one row that can carry any combination of
 // a written body, an uploaded file, and a link — so the only hard rules are:
 // a level must be chosen (library scope), at least one of the three pieces is
 // present, and a link, if typed, is a real URL. These mirror the server rules
@@ -127,9 +124,9 @@ export function validateMaterialFields(input: {
   return errors;
 }
 
-// One draft-vs-saved comparator for the unified material form, shared by web
-// (`use-unsaved-changes-guard.ts`) and mobile (`MaterialForm.tsx`) so the two
-// platforms can't disagree about what counts as an unsaved edit. Optional
+// One draft-vs-saved comparator for the unified material form
+// (`use-unsaved-changes-guard.ts`), so there is one definition of what counts
+// as an unsaved edit. Optional
 // fields exist because booking scope has no label/level/visibility/tags of its
 // own — a context that never renders a field simply omits it from BOTH
 // snapshots. `undefined` and `""` compare equal so a context that seeds a
@@ -162,8 +159,8 @@ export function isMaterialDraftDirty(
   ) {
     return true;
   }
-  // Tag SELECTION is what saves — order is a UI artifact (web holds a Set,
-  // mobile iterates groups), so reordering alone must not read as dirty.
+  // Tag SELECTION is what saves — order is a UI artifact (the form holds a
+  // Set), so reordering alone must not read as dirty.
   const a = new Set(current.focusTagIds ?? []);
   const b = new Set(lastSaved.focusTagIds ?? []);
   if (a.size !== b.size) return true;
@@ -187,11 +184,10 @@ export function materialSaveStatus(input: {
   return "idle";
 }
 
-// Codes → localized copy for the material form. Lives here (not per-app like
-// `packageFieldMessage`) because web and mobile now draw from ONE i18n catalog,
-// so the wording can't drift. Each app passes its own `t`; the key union keeps
-// this decoupled from the full StringKey type while staying assignable from
-// either app's `t`.
+// Codes → localized copy for the material form, drawn from the one i18n
+// catalog so the wording can't drift. The caller passes its `t`; the key union
+// keeps this decoupled from the full StringKey type while staying assignable
+// from it.
 type MaterialMessageKey =
   "libManage.chooseLevel" | "libManage.needAttachment" | "libManage.linkInvalid";
 

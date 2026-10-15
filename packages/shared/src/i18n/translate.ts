@@ -45,10 +45,3 @@ export function issueMessage(
   if (!message) return t(fallback);
   return isStringKey(message) ? t(message) : message;
 }
-
-/** Legacy inline-dictionary accessor: `translate({ en, "es" }, locale)`.
- * Retained for the handful of call sites that predate the key-based catalog;
- * prefer createT()/t(key) for new copy so the string lives in the catalog. */
-export function translate<T extends string>(dict: Record<AppLocale, T>, locale: AppLocale): T {
-  return dict[locale];
-}

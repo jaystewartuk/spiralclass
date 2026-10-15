@@ -11,12 +11,11 @@ const findMany = vi.fn();
 const findFirst = vi.fn();
 const create = vi.fn();
 const updateMany = vi.fn();
-const deleteMany = vi.fn();
 const count = vi.fn();
 
 vi.mock("@/lib/prisma", () => ({
   prisma: {
-    teacherShareGroup: { findMany, findFirst, create, updateMany, deleteMany, count },
+    teacherShareGroup: { findMany, findFirst, create, updateMany, count },
   },
 }));
 
@@ -25,7 +24,6 @@ const {
   archiveCommunity,
   communityInputSchema,
   countCommunities,
-  deleteCommunity,
   listCommunities,
   restoreCommunity,
   toCommunityView,
@@ -56,7 +54,6 @@ beforeEach(() => {
   findFirst.mockResolvedValue({ sortOrder: 3 });
   create.mockImplementation(async (a: { data: Record<string, unknown> }) => row(a.data));
   updateMany.mockResolvedValue({ count: 1 });
-  deleteMany.mockResolvedValue({ count: 1 });
   count.mockResolvedValue(2);
 });
 
@@ -136,9 +133,6 @@ describe("mutations are teacher-scoped", () => {
 
     await restoreCommunity("t1", "c1");
     expect(updateMany.mock.calls[2][0].data).toEqual({ archivedAt: null });
-
-    await deleteCommunity("t1", "c1");
-    expect(deleteMany.mock.calls[0][0]).toEqual({ where: { id: "c1", teacherId: "t1" } });
   });
 
   it("leaves the platform and policy untouched when the form omits them", async () => {
@@ -149,11 +143,9 @@ describe("mutations are teacher-scoped", () => {
 
   it("reports false when nothing matched", async () => {
     updateMany.mockResolvedValue({ count: 0 });
-    deleteMany.mockResolvedValue({ count: 0 });
     expect(await updateCommunity("t1", "x", { name: "y" })).toBe(false);
     expect(await archiveCommunity("t1", "x")).toBe(false);
     expect(await restoreCommunity("t1", "x")).toBe(false);
-    expect(await deleteCommunity("t1", "x")).toBe(false);
   });
 });
 

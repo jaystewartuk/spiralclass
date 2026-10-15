@@ -1,5 +1,5 @@
 // Shared reply-to validation for every chat send route (text/voice/video/
-// image/file, web + mobile, teacher + student): a client-supplied
+// image/file, teacher + student): a client-supplied
 // `replyToId` must point at a real message inside the SAME (teacherId,
 // studentId) thread — otherwise a client could stitch a reply onto a
 // message from an unrelated conversation it has no access to.

@@ -48,7 +48,6 @@
   "lib/homework/ai-review.ts": 1,
   "lib/homework/auto-draft.ts": 1,
   "lib/homework/feedback.ts": 2,
-  "lib/homework/submission.ts": 1,
   "lib/inngest/functions/anomaly-alerts.ts": 3,
   "lib/inngest/functions/auto-complete-sweep.ts": 1,
   "lib/inngest/functions/grant-referral-reward.ts": 4,

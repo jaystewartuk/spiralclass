@@ -151,7 +151,7 @@ export function listLibraryMaterialsRows(
   });
 }
 
-// Cursor page (mobile / infinite scroll). `cursor` is the id of the last row
+// Cursor page (infinite scroll, /api/teacher/library/materials). `cursor` is the id of the last row
 // of the previous page; ordering is a stable `(createdAt, id)` keyset so the
 // seek is a `cursor` + `skip:1` query. Fetch one extra row to know whether an
 // older page exists.

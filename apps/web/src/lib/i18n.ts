@@ -26,11 +26,9 @@ export type { AppLocale };
 
 export { LOCALE_COOKIE, URL_LOCALE_HEADER };
 
-// translate()/createT()/AppLocale are re-exported from i18n-translate.ts, which
-// has no "next/headers" import — Client Components must import them from there
-// directly (not from this file) or the build fails bundling next/headers into
-// client code.
-export { translate } from "@/lib/i18n-translate";
+// createT()/AppLocale live in i18n-translate.ts, which has no "next/headers"
+// import — Client Components must import them from there directly (not from
+// this file) or the build fails bundling next/headers into client code.
 
 // `fallback` is what we return when neither the cookie nor Accept-Language
 // resolve to a known locale. It is DEFAULT_LOCALE for every caller — the

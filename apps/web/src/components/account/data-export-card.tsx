@@ -1,11 +1,10 @@
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { getT } from "@/lib/i18n";
 
-// Shared "Download my data" card for both account pages. The /api/account/export
-// endpoint resolves the caller (student or teacher) from the session, so a
-// single card serves both — the only difference is the parenthetical list of
-// what's included, which is role-aware.
+// The "Download my data" pieces for the account pages. The /api/account/export
+// endpoint resolves the caller (student or teacher) from the session, so one
+// button serves both — the only difference is the parenthetical list of what's
+// included, which is role-aware.
 
 /** The role-aware "what's in the file" sentence, for a caller that renders its
  * own heading. */
@@ -31,20 +30,5 @@ export async function DataExportButton() {
         {t("web.dataExportCard.downloadButton")}
       </a>
     </Button>
-  );
-}
-
-export async function DataExportCard({ role }: { role: "student" | "teacher" }) {
-  const t = await getT();
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle>{t("web.dataExportCard.title")}</CardTitle>
-        <CardDescription>{await dataExportDescription(role)}</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <DataExportButton />
-      </CardContent>
-    </Card>
   );
 }

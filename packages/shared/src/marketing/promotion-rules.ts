@@ -19,8 +19,8 @@
 //     is CONTEXT for generation, never an enforced constraint. Treating a
 //     sentence as a guarantee is how a safety gate becomes a liability.
 //
-// Shared between web and mobile so neither client can enforce a different
-// reading of the same row.
+// Shared so the UI and the server can never enforce different readings of the
+// same row.
 
 import type { Weekday } from "../api";
 import type { AppLocale } from "../i18n/locales";
@@ -237,7 +237,7 @@ export function describePromotionRules(rules: PromotionRules, locale: AppLocale)
 }
 
 // Four fragments, kept here rather than in the string catalog because they are
-// produced by this pure function and consumed by both clients, and a catalog
+// produced by this pure function, and a catalog
 // lookup would make `describePromotionRules` need a `t` it otherwise doesn't.
 const EVERY_DAY_LABEL: Record<AppLocale, string> = {
   es: "Una vez al día",

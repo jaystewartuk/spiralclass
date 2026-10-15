@@ -10,8 +10,7 @@ import { isMaterialDraftDirty, type MaterialDraftSnapshot } from "@spiralclass/s
 // beforeunload covers the case that actually loses work.
 //
 // The comparison itself lives in @spiralclass/shared (isMaterialDraftDirty),
-// shared with mobile's MaterialForm so the two platforms can't disagree about
-// what counts as an unsaved edit.
+// so there is one definition of what counts as an unsaved edit.
 
 // Kept under its historical name so existing tests/imports stay valid — the
 // shared comparator's {body, source} subset is exactly the old signature.

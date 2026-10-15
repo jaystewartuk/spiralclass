@@ -8,14 +8,10 @@
 import type { CSSProperties } from "react";
 import { CALL_TILE_HEIGHT, CALL_TILE_WIDTH, type SelfViewPosition } from "@spiralclass/shared";
 
-// Web's floating tiles anchor at the bottom in either corner (left for the
+// The floating tiles anchor at the bottom in either corner (left for the
 // material-mode remote PiP, right for the self-view) — the starting
-// position before the user ever drags one. Shared with mobile's
-// initialSelfViewPosition/initialRemotePipPosition (which anchor
-// bottom-right/top-right instead, since mobile's two floating tiles play
-// different roles rather than sharing one corner-by-mode convention).
+// position before the user ever drags one.
 export { initialFloatingTilePosition } from "@spiralclass/shared";
-export type { SelfViewBounds, SelfViewPosition } from "@spiralclass/shared";
 
 export type StageTileRole = "big" | "floating-left" | "floating-right" | "hidden";
 
@@ -36,8 +32,8 @@ export function computeStageTileStyle(
   drag?: { position: SelfViewPosition | null; dragging?: boolean },
 ): CSSProperties {
   // A floating tile the user has actually dragged gets an absolute left/top
-  // position instead of its default corner anchor — free-drag (item 1 of the
-  // web/mobile call-UX parity work), clamped by the caller via
+  // position instead of its default corner anchor — free-drag, clamped by the
+  // caller via
   // clampSelfViewPosition so it can never end up off-screen. No transition
   // while the pointer is still moving it (1:1 tracking, matching the
   // minimized bubble's own drag behavior); a short one on release so letting

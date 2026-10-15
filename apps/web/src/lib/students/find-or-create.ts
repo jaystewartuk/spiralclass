@@ -33,7 +33,7 @@ async function sharesProgressByDefault(
   return teacher?.shareProgressByDefault ?? false;
 }
 
-// Shared by the web and mobile public checkouts: resolve the (teacher, email)
+// Shared by the public checkouts: resolve the (teacher, email)
 // pair to exactly one roster Student, creating it on first purchase.
 //
 // `students.email` is deliberately non-unique (multi-teacher tenancy — see

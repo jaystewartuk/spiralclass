@@ -1,6 +1,5 @@
-// WhatsApp-style edit & delete windows for chat messages, shared by the web
-// and mobile UIs (to decide whether to offer the actions) and by the API
-// routes (which enforce them server-side in lib/chat/message-actions.ts).
+// WhatsApp-style edit & delete windows for chat messages, shared by the UI
+// (to decide whether to offer the actions) and by the API routes (which enforce them server-side in lib/chat/message-actions.ts).
 //
 // Semantics mirror WhatsApp: only the sender may edit or delete; editing is
 // text-only (voice notes and videos are delete-and-re-record, as in WhatsApp)

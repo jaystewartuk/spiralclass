@@ -6,7 +6,7 @@ import { acceptInvitation } from "@/lib/invitations/accept";
 import { getPreferredLocale } from "@/lib/i18n";
 import { prisma } from "@/lib/prisma";
 import { flushAnalytics, trackServerEvent } from "@/lib/analytics/posthog";
-import { bulkInviteSchema, invitationActionSchema, singleInviteSchema } from "@/lib/validators";
+import { bulkInviteSchema, invitationActionSchema } from "@/lib/validators";
 import { classifyForTeacher, collectInvitees, sendInvitations } from "@/lib/invitations/service";
 import {
   cancelInvitation,
@@ -167,32 +167,6 @@ export async function sendInvitesAction(
   };
 }
 
-// Single invite convenience — same pipeline, one email. Kept separate so the
-// single-add form can post {email,name} directly.
-export async function inviteSingleAction(
-  _prev: InviteFormState,
-  formData: FormData,
-): Promise<InviteFormState> {
-  const locale = await getPreferredLocale();
-  const t = createT(locale);
-  const parsed = singleInviteSchema(locale).safeParse({
-    email: formData.get("email"),
-    name: formData.get("name") ?? undefined,
-  });
-  if (!parsed.success) {
-    return {
-      error: issueMessage(parsed.error, t, "web.action.invalidData"),
-    };
-  }
-  const forwarded = new FormData();
-  forwarded.set(
-    "list",
-    parsed.data.name ? `${parsed.data.name}, ${parsed.data.email}` : parsed.data.email,
-  );
-  forwarded.set("source", "single");
-  return sendInvitesAction(undefined, forwarded);
-}
-
 export type RosterActionState = { error?: string; ok?: string; url?: string } | undefined;
 
 export async function resendInvitationAction(
@@ -289,19 +263,6 @@ export async function copyInvitationLinkAction(
     return { error: t("web.action.invitations.notFound") };
   }
   return { url: invitationAcceptUrl(rotated.rawToken), ok: t("web.action.invitations.linkReady") };
-}
-
-// The multi-select-existing-students entry: invite every rostered student with
-// no login and no live invitation, in one go.
-export async function inviteRosterStudentsAction(
-  _prev: InviteFormState,
-  formData: FormData,
-): Promise<InviteFormState> {
-  const ids = parseStudentIds(formData.get("studentIds"));
-  const forwarded = new FormData();
-  forwarded.set("studentIds", JSON.stringify(ids));
-  forwarded.set("source", "bulk");
-  return sendInvitesAction(undefined, forwarded);
 }
 
 // --- Student-side acceptance -------------------------------------------------

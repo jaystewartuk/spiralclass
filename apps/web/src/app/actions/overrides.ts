@@ -2,7 +2,6 @@
 
 import { issueMessage } from "@spiralclass/shared";
 import { z } from "zod";
-import { fromZonedTime } from "date-fns-tz";
 import { createT, currencyForTeacher, isCaptionLanguage } from "@spiralclass/shared";
 import { prisma } from "@/lib/prisma";
 import { requireOnboardedTeacher } from "@/lib/auth";
@@ -31,7 +30,6 @@ const log = logger({ surface: "overrides" });
 //                                 the class was already committed at booking)
 //   * restore_class             — canceled_by_student | no_show → scheduled
 //   * waive_cancellation        — canceled_by_student → canceled_by_teacher
-//   * extend_expiration         — package.expires_at shift
 //   * set_custom_price          — teacher_students.custom_price_minor_units
 //
 // All actions filter by teacher_id (tenant isolation). Auth resolves teacher via
@@ -44,7 +42,6 @@ export type OverrideState = { error?: string; ok?: string } | undefined;
 // the reader's language. These two were Spanish literals shown to everyone.
 const reasonField = z.string().trim().min(3, "web.action.reasonTooShort").max(500);
 const bookingIdField = z.string().uuid();
-const packageIdField = z.string().uuid();
 const studentIdField = z.string().uuid();
 
 // ---------- mark_complete ----------
@@ -539,89 +536,6 @@ export async function waiveCancellation(
   return {
     ok: t("web.action.overrides.waived"),
   };
-}
-
-// ---------- extend_expiration ----------
-
-const extendSchema = z.object({
-  packageId: packageIdField,
-  // ISO date (YYYY-MM-DD). Resolved to end-of-day in the teacher's IANA
-  // tz (server-authoritative) — using UTC end-of-day shifted expirations by ±1 day for
-  // tz-distant teachers near midnight.
-  newExpiresAt: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "web.action.overrides.invalidDate"),
-  reason: reasonField,
-});
-
-export async function extendPackageExpiration(
-  _prev: OverrideState,
-  formData: FormData,
-): Promise<OverrideState> {
-  const locale = await getPreferredLocale();
-  const t = createT(locale);
-  const parsed = extendSchema.safeParse({
-    packageId: formData.get("packageId"),
-    newExpiresAt: formData.get("newExpiresAt"),
-    reason: formData.get("reason"),
-  });
-  if (!parsed.success) {
-    return {
-      error: issueMessage(parsed.error, t, "web.action.invalidData"),
-    };
-  }
-
-  const teacher = await requireOnboardedTeacher();
-  const pkg = await prisma.package.findFirst({
-    where: { id: parsed.data.packageId, teacherId: teacher.id },
-    select: { id: true, expiresAt: true, status: true },
-  });
-  if (!pkg) return { error: t("web.action.packageNotFound") };
-
-  const newExpiresAt = fromZonedTime(`${parsed.data.newExpiresAt}T23:59:59`, teacher.timezone);
-  if (newExpiresAt <= new Date()) {
-    return {
-      error: t("web.action.overrides.dateInFuture"),
-    };
-  }
-  if (pkg.expiresAt && newExpiresAt <= pkg.expiresAt) {
-    return {
-      error: t("web.action.overrides.dateAfterCurrent"),
-    };
-  }
-
-  await prisma.$transaction(async (tx) => {
-    await tx.package.update({
-      where: { id: pkg.id },
-      data: { expiresAt: newExpiresAt },
-    });
-    await tx.override.create({
-      data: {
-        teacherId: teacher.id,
-        targetType: "package",
-        targetId: pkg.id,
-        action: "extend_expiration",
-        reason: parsed.data.reason,
-        beforeJson: { expiresAt: pkg.expiresAt?.toISOString() ?? null },
-        afterJson: { expiresAt: newExpiresAt.toISOString() },
-      },
-    });
-  });
-
-  trackServerEvent({
-    name: "override_applied",
-    distinctId: teacher.id,
-    properties: {
-      teacherId: teacher.id,
-      action: "extend_expiration",
-      targetType: "package",
-      targetId: pkg.id,
-      previousValue: pkg.expiresAt?.toISOString() ?? "",
-      newValue: newExpiresAt.toISOString(),
-    },
-  });
-  await flushAnalytics();
-
-  revalidateAfterAction(`/dashboard/students`);
-  return { ok: t("web.action.overrides.expirationUpdated") };
 }
 
 // ---------- set_custom_price ----------

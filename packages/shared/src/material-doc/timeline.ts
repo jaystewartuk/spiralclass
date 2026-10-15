@@ -14,8 +14,8 @@ import type { MaterialBlock, TimelineBlock, TimelinePoint, TimelineSpan } from "
 //    it, so a timeline can never be swallowed by an adjacent paragraph — the
 //    failure mode a brand-new line syntax would have had to defend against.
 //  - It degrades to something honest. A renderer that predates this block
-//    (an older mobile build on an OTA-lagged device, a third-party Markdown
-//    viewer, a teacher's own copy-paste into a note app) shows the payload as a
+//    (a third-party Markdown viewer, a teacher's own copy-paste into a note
+//    app) shows the payload as a
 //    code block. The content is visible and recoverable, not lost.
 //  - It stays DATA. The payload below is a fixed set of directives with numeric
 //    positions and plain-text labels — never markup a renderer evaluates. That
@@ -232,14 +232,12 @@ export function isTimelineBlock(block: MaterialBlock): block is TimelineBlock {
 
 // --- geometry ----------------------------------------------------------------
 //
-// ONE layout, three drawing routines. Web draws it as inline SVG, mobile with
-// the PDF with @react-pdf/renderer's Svg primitives — but
-// none of them decides where anything goes, or the same document would look
-// like three different diagrams.
+// ONE layout, two drawing routines. The page draws it as inline SVG, the PDF
+// with @react-pdf/renderer's Svg primitives — but neither decides where
+// anything goes, or the same document would look like two different diagrams.
 //
 // NO TEXT INSIDE THE GRAPHIC. Marker labels are real platform text below it,
-// not `<text>` in the SVG, for the reason TrendLineChart.tsx already documents
-// on mobile: none of the three surfaces can measure a string, so on-axis labels
+// not `<text>` in the SVG: neither surface can measure a string, so on-axis labels
 // either collide with their neighbours or overflow the viewBox, and there is no
 // safe way to find out which. Below the graphic they wrap, translate, get
 // selected and get read aloud. The legend lists markers left-to-right in axis

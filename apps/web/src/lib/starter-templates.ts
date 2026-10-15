@@ -45,8 +45,8 @@ const STARTER_TEMPLATE_DEFS: Array<{
 // was the launch market's language — which stopped being true of the product:
 // teachers are anywhere and speak anything, so a signup whose Accept-Language
 // says `pl` was being handed Spanish package names it could not read. Callers
-// that know the teacher's locale (getPreferredLocale on web, the
-// Accept-Language header on mobile) still pass it explicitly; this is only the
+// that know the teacher's locale (getPreferredLocale) still pass it
+// explicitly; this is only the
 // answer when the request resolves nothing at all.
 
 export type StarterTemplate = {

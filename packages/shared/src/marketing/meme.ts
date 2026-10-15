@@ -1,5 +1,5 @@
-// The teacher's image-generation preferences, as a vocabulary both clients
-// share.
+// The teacher's image-generation preferences, as a vocabulary the form and
+// the server share.
 //
 // The problem this fixes is concrete. Image generation used to take exactly two
 // inputs — one of four angles and a 160-character topic — and everything else
@@ -131,7 +131,8 @@ export function memeStyleLabel(style: MemeStyle, locale: AppLocale): string {
  * Long enough for a real paragraph about her niche, her humour and her
  * red lines; short enough that it stays a preference rather than becoming a
  * prompt she has to maintain. It is bounded here because it is teacher text
- * that reaches an image provider, and both clients must refuse the same input.
+ * that reaches an image provider, and the form and the server must refuse the
+ * same input.
  */
 export const TEACHER_MEME_BRIEF_MAX_CHARS = 700;
 

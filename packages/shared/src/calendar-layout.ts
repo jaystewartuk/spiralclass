@@ -1,5 +1,5 @@
 // Pure layout math for Google-Calendar-style time-grid views (week + day),
-// shared by the web and mobile apps so both position events identically.
+// kept out of the components so it unit-tests in isolation.
 //
 // The grid is a vertical hour axis: an event's vertical position is its start
 // time-of-day (minutes from local midnight) and its height is its duration.

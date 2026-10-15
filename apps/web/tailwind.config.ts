@@ -1,7 +1,7 @@
 import type { Config } from "tailwindcss";
 // Pull the brand palette + radius + elevation from the shared token source so the
-// web's `brand.*` / `rounded-brand-*` / `shadow-brand-*` utilities can't drift
-// from mobile. Imported via the source path (not the package barrel) to keep zod
+// `brand.*` / `rounded-brand-*` / `shadow-brand-*` utilities have one definition.
+// Imported via the source path (not the package barrel) to keep zod
 // & friends out of the PostCSS build graph.
 import { elevation, palette, radius, typeScale } from "../../packages/shared/src/tokens";
 // The responsive screen scale lives in src/lib/breakpoints.ts because
@@ -13,9 +13,7 @@ import { CONTAINER_MAX_WIDTH, SCREENS } from "./src/lib/breakpoints";
 
 // Compose the shared elevation geometry into CSS box-shadow strings. The tint is
 // the theme-swapping `--shadow-color` var (warm brown in light, black in dark —
-// see globals.css) so a single scale renders correctly in both themes. Mobile's
-// ThemeProvider.buildElevation reads the same `elevation` numbers, so the two
-// platforms' shadows stay in lockstep.
+// see globals.css) so a single scale renders correctly in both themes.
 const brandBoxShadow = Object.fromEntries(
   (["sm", "md", "lg"] as const).map((level) => {
     const e = elevation[level];

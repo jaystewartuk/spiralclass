@@ -60,7 +60,6 @@ export default function robots(): MetadataRoute.Robots {
         "/payments",
         "/notifications",
         "/auth/",
-        "/m/",
         "/r/",
       ],
     },

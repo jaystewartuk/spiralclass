@@ -1,6 +1,6 @@
-// Notification category definitions shared between web and mobile.
-// The web preferences lib and the mobile notifications screen both import
-// from here so adding a category in one place covers both platforms.
+// Notification category definitions. The preferences lib, the dispatcher and
+// the settings UI all import from here, so adding a category in one place
+// covers every reader.
 
 export const NOTIFICATION_CATEGORIES = [
   "class_reminders",
@@ -25,8 +25,8 @@ export const TEACHER_NOTIFICATION_CATEGORIES = [
 
 export type TeacherNotificationCategory = (typeof TEACHER_NOTIFICATION_CATEGORIES)[number];
 
-// Delivery channels available across the system. Shared so both the web
-// dispatcher and the mobile settings screen use the same literal set.
+// Delivery channels available across the system. Shared so the dispatcher and
+// the settings UI use the same literal set.
 export const NOTIFICATION_CHANNELS = ["push", "email"] as const;
 export type NotificationChannel = (typeof NOTIFICATION_CHANNELS)[number];
 

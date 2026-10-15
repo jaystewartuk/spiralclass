@@ -9,7 +9,7 @@
 // placement, length, whether a direct offer is even allowed), rather than
 // advice in a help article nobody reads.
 //
-// Shared between web and mobile so the two clients can never disagree about
+// Shared so the planner, the generator and the UI can never disagree about
 // what is acceptable in a given community.
 
 import type { AppLocale } from "../i18n/locales";

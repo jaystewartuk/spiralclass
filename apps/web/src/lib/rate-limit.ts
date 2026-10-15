@@ -265,16 +265,6 @@ export async function clientIp(): Promise<string> {
   });
 }
 
-// Same extraction for plain `Request` handlers, which have the request in hand
-// rather than the ambient next/headers ctx.
-export function clientIpFromRequest(req: Request): string {
-  return pickClientIp({
-    flyClientIp: req.headers.get("fly-client-ip"),
-    realIp: req.headers.get("x-real-ip"),
-    xff: req.headers.get("x-forwarded-for"),
-  });
-}
-
 // SECURITY (audit M-1): prefer platform-set, single-value headers that a client
 // cannot forge — `fly-client-ip` (Fly's edge-observed peer) and `x-real-ip`
 // (Vercel sets it to the real client). The left-most `x-forwarded-for` entry is

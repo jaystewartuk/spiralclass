@@ -179,9 +179,8 @@ export const requireTeacher = cache(async () => {
   }
 
   attachActorToObservability(teacher, "teacher");
-  // Trial provisioning + signup/starter-template analytics: shared with
-  // mobile's lazy-create so a mobile signup can never silently skip
-  // trial_started again.
+  // Trial provisioning + signup/starter-template analytics, in one shared
+  // helper so no signup path can silently skip trial_started again.
   await provisionNewTeacher(teacher);
 
   return teacher;

@@ -49,18 +49,18 @@
 //   International card:   3.25% + 20p
 //   Currency conversion:  +2% when the card's currency differs from the charge's
 //
-// Shared so the web and mobile pricing UIs compute identical suggestions
-// instead of re-deriving the formula per platform.
+// In the shared package because the suggestion is a pricing rule the server
+// and the pricing UI must agree on, not a per-surface formula.
 import { currencyExponent } from "./money";
 
-export const STRIPE_INTERNATIONAL_RATE = 0.0325;
-export const STRIPE_CURRENCY_CONVERSION_RATE = 0.02;
+const STRIPE_INTERNATIONAL_RATE = 0.0325;
+const STRIPE_CURRENCY_CONVERSION_RATE = 0.02;
 // 30 minor units: 20p for a GBP charge, and comfortably above the local
 // equivalent for a EUR or USD one. One number rather than a per-currency table
 // because all three are the same order of magnitude and the estimate is
 // deliberately generous.
-export const STRIPE_FIXED_FEE_MINOR_UNITS = 30;
-export const STRIPE_WORST_CASE_RATE = STRIPE_INTERNATIONAL_RATE + STRIPE_CURRENCY_CONVERSION_RATE;
+const STRIPE_FIXED_FEE_MINOR_UNITS = 30;
+const STRIPE_WORST_CASE_RATE = STRIPE_INTERNATIONAL_RATE + STRIPE_CURRENCY_CONVERSION_RATE;
 
 /**
  * Stripe's own pricing page, the ONLY figure the platform points a teacher at

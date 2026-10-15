@@ -19,8 +19,7 @@ export const FEEDBACK_TOPICS = [
 export type FeedbackTopic = (typeof FEEDBACK_TOPICS)[number]["id"];
 
 /** Short enough that a one-line "it's broken" still asks for detail, long
- * enough not to nag someone who wrote a real sentence. Matches the mobile
- * FeedbackModal's threshold so both clients reject the same reports. */
+ * enough not to nag someone who wrote a real sentence. */
 export const FEEDBACK_MESSAGE_MIN = 10;
 export const FEEDBACK_MESSAGE_MAX = 2000;
 

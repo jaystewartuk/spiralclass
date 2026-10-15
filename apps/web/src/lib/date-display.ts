@@ -8,16 +8,12 @@ import {
   formatTimeInZone,
   timeOptionsFor,
   getDualZoneTime,
-  formatDualZoneText,
-  type TimeZoneParty,
-  type DualZoneTime,
   type TFunction,
   createT,
   type AppLocale,
 } from "@spiralclass/shared";
 
-export type { TimeZoneParty, DualZoneTime };
-export { getDualZoneTime, formatDualZoneText };
+export { getDualZoneTime };
 
 /**
  * Dual-timezone display standard for booking list rows (BookingCard's

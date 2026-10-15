@@ -23,16 +23,6 @@ import { type StringKey } from "@spiralclass/shared";
 
 export type FocusTagCategory = "grammar" | "vocabulary" | "skill" | "activity" | "theme" | "format";
 
-// Order categories are shown in the picker.
-export const FOCUS_TAG_CATEGORY_ORDER: FocusTagCategory[] = [
-  "grammar",
-  "vocabulary",
-  "skill",
-  "activity",
-  "theme",
-  "format",
-];
-
 // The 5 categories every teacher's `focus_tag_categories` starts with
 // (ensureTeacherFocusCategories seeds these, idempotently, the same way
 // ensureTeacherFocusTags seeds the language pack). Unlike tag labels —
@@ -41,8 +31,7 @@ export const FOCUS_TAG_CATEGORY_ORDER: FocusTagCategory[] = [
 // FocusTagCategory is a real, teacher-owned row she's free to rename
 // afterward (this is the one place "category" behaves like ordinary data
 // instead of pack content). This is the single source of truth for those
-// labels — the old per-file `CATEGORY_LABELS` duplicates (web ×3, mobile ×1)
-// are gone; a category's `label` column IS the display string now.
+// labels — the old per-file `CATEGORY_LABELS` duplicates are gone; a category's `label` column IS the display string now.
 export const FOCUS_TAG_BUILTIN_CATEGORIES: {
   code: FocusTagCategory;
   labelKey: StringKey;

@@ -14,7 +14,6 @@ import {
   nextExpiryAt,
   visibleCaptions,
   type CaptionEntry,
-  type CaptionFeedState,
 } from "./caption-feed";
 
 // React wiring for the caption feed. Subscribes to the room's caption topic,
@@ -158,5 +157,3 @@ export function useRoomCaptionsEnabled(room: Room | null): boolean {
 
   return on;
 }
-
-export type { CaptionEntry, CaptionFeedState };

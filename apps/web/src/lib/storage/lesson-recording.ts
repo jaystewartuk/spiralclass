@@ -6,7 +6,7 @@ import { getStorageProvider } from "./provider";
 // LIVEKIT_EGRESS_S3_*) and lib/video/recording.ts's startRoomRecording, which
 // is what first creates the object at CallRecording.storageKey. Kept as its
 // own module (mirrors student-photo.ts) rather than inlined at each replay
-// call site, so web + mobile share exactly one TTL/bucket decision.
+// call site, so every replay shares exactly one TTL/bucket decision.
 
 export const RECORDINGS_BUCKET = "recordings";
 // A replay session can run long (a teacher scrubbing through a full class) —

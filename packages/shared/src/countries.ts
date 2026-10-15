@@ -27,43 +27,6 @@ import type { LocaleCode } from "./api";
 import { COUNTRY_NAMES } from "./country-names";
 import { intlLocale } from "./i18n/locales";
 
-// Stripe Connect's cross-border payout circle (docs.stripe.com/connect/cross-border-payouts,
-// confirmed while preparing D-58): a platform in any of these countries can
-// Transfer to a connected account in any other of these countries. EEA = the
-// 27 EU states plus Iceland, Liechtenstein, Norway.
-const EEA_COUNTRIES = [
-  "AT",
-  "BE",
-  "BG",
-  "CY",
-  "CZ",
-  "DE",
-  "DK",
-  "EE",
-  "ES",
-  "FI",
-  "FR",
-  "GR",
-  "HR",
-  "HU",
-  "IE",
-  "IS",
-  "IT",
-  "LI",
-  "LT",
-  "LU",
-  "LV",
-  "MT",
-  "NL",
-  "NO",
-  "PL",
-  "PT",
-  "RO",
-  "SE",
-  "SI",
-  "SK",
-] as const;
-
 // Countries where a UK platform can create a v2 `Account` carrying the
 // `merchant` configuration — i.e. where a teacher can take card payments as
 // merchant of record.
@@ -177,7 +140,7 @@ export function countryLabel(code: string, locale: LocaleCode = "en"): string {
 
 /**
  * All countries as `{ code, label }`, localized and sorted by label in the
- * caller's locale. Drives the onboarding country picker on web and mobile.
+ * caller's locale. Drives the onboarding country picker.
  */
 export function countryOptions(locale: LocaleCode = "en"): Array<{ code: string; label: string }> {
   const collator = new Intl.Collator(intlLocale(locale));
@@ -188,7 +151,7 @@ export function countryOptions(locale: LocaleCode = "en"): Array<{ code: string;
 
 /**
  * Case-insensitive filter over country options by label OR code, used by the
- * searchable pickers on both platforms. An empty query returns everything so a
+ * searchable pickers. An empty query returns everything so a
  * freshly-opened picker shows the full list.
  */
 export function filterCountryOptions(

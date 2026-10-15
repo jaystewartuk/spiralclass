@@ -1,7 +1,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
-import type { SortDir, SortParams, SortState } from "@/lib/table-sort";
+import type { SortDir } from "@spiralclass/shared";
 
 const Table = React.forwardRef<HTMLTableElement, React.HTMLAttributes<HTMLTableElement>>(
   ({ className, ...props }, ref) => (
@@ -27,14 +27,6 @@ const TableBody = React.forwardRef<
   <tbody ref={ref} className={cn("[&_tr:last-child]:border-0", className)} {...props} />
 ));
 TableBody.displayName = "TableBody";
-
-const TableFooter = React.forwardRef<
-  HTMLTableSectionElement,
-  React.HTMLAttributes<HTMLTableSectionElement>
->(({ className, ...props }, ref) => (
-  <tfoot ref={ref} className={cn("border-t bg-muted/50 font-medium", className)} {...props} />
-));
-TableFooter.displayName = "TableFooter";
 
 const TableRow = React.forwardRef<HTMLTableRowElement, React.HTMLAttributes<HTMLTableRowElement>>(
   ({ className, ...props }, ref) => (
@@ -80,14 +72,6 @@ const TableCell = React.forwardRef<
 ));
 TableCell.displayName = "TableCell";
 
-const TableCaption = React.forwardRef<
-  HTMLTableCaptionElement,
-  React.HTMLAttributes<HTMLTableCaptionElement>
->(({ className, ...props }, ref) => (
-  <caption ref={ref} className={cn("mt-4 text-sm text-muted-foreground", className)} {...props} />
-));
-TableCaption.displayName = "TableCaption";
-
 /**
  * Framed container for a `Table`. Replaces the ad-hoc
  * `<div className="rounded-md border">` that used to wrap every admin table.
@@ -127,63 +111,6 @@ function SortArrow({ active, dir }: { active: boolean; dir: SortDir }) {
 }
 
 /**
- * Build a `?sort=&dir=` href that preserves the page's filters. `page` is
- * dropped so re-sorting returns to the first page (page 5 of one ordering is
- * meaningless under another).
- */
-function sortHref(
-  params: Record<string, string | undefined>,
-  column: string,
-  nextDir: SortDir,
-): string {
-  const next = new URLSearchParams();
-  for (const [key, value] of Object.entries(params)) {
-    if (value && key !== "sort" && key !== "dir" && key !== "page") next.set(key, value);
-  }
-  next.set("sort", column);
-  next.set("dir", nextDir);
-  return `?${next.toString()}`;
-}
-
-/**
- * A `TableHead` whose label is a link that toggles URL-driven sorting while
- * preserving any active filters. First click sorts ascending; clicking the
- * active column flips direction. Works in Server Components (no client JS).
- */
-function SortableHead({
-  label,
-  column,
-  sort,
-  params,
-  className,
-}: {
-  label: string;
-  column: string;
-  sort: SortState;
-  /** The page's current `searchParams` (filters are preserved in the link). */
-  params: SortParams & Record<string, string | undefined>;
-  className?: string;
-}) {
-  const active = sort.key === column;
-  const nextDir: SortDir = active && sort.dir === "asc" ? "desc" : "asc";
-  return (
-    <TableHead
-      className={className}
-      aria-sort={active ? (sort.dir === "asc" ? "ascending" : "descending") : "none"}
-    >
-      <Link
-        href={sortHref(params, column, nextDir)}
-        scroll={false}
-        className="group inline-flex items-center gap-1 rounded transition-colors hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring focus-visible:outline-hidden"
-      >
-        {label}
-        <SortArrow active={active} dir={sort.dir} />
-      </Link>
-    </TableHead>
-  );
-}
-
-/**
  * The primary link of a clickable table row. Renders a normal anchor (so
  * keyboard focus, right-click "open in new tab" and cmd/ctrl-click all work)
  * but stretches an invisible `::after` overlay across the whole row, so that
@@ -208,13 +135,10 @@ export {
   Table,
   TableHeader,
   TableBody,
-  TableFooter,
   TableHead,
   TableRow,
   TableCell,
-  TableCaption,
   TableShell,
-  SortableHead,
   SortArrow,
   RowLink,
 };

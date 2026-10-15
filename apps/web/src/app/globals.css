@@ -102,8 +102,8 @@
     --border: 225 9% 75%;
     --input: 225 9% 75%;
     --ring: 229 47% 55%;
-    /* Shadow tint: a warm brown (mirrors shared `shadowTint.light` #3A2A20) so
-       elevation sits in the terracotta temperature instead of a cold grey.
+    /* Shadow tint: a warm brown (#3A2A20) so elevation sits in the terracotta
+       temperature instead of a cold grey.
        Consumed by the `shadow-brand-*` box-shadow scale in tailwind.config.ts. */
     --shadow-color: 24 29% 18%;
     --radius: 0.625rem;
@@ -201,7 +201,7 @@
        user navigates by. */
     --ring: 228 53% 70%;
     /* Dark shadows are plain black at higher opacity — a warm-brown blur all
-       but vanishes on a dark surface (mirrors shared `shadowTint.dark`). */
+       but vanishes on a dark surface. */
     --shadow-color: 0 0% 0%;
     /* Same four chart slots, restepped for the dark surface (OKLCH-ish L band,
        kept ≥3:1 against --background). */

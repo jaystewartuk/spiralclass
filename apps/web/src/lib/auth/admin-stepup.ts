@@ -90,12 +90,3 @@ export async function hasValidAdminStepUp(userId: string): Promise<boolean> {
     return false;
   }
 }
-
-export async function clearAdminStepUp(): Promise<void> {
-  try {
-    const store = await cookies();
-    store.delete(ADMIN_STEPUP_COOKIE);
-  } catch {
-    // No cookie context — nothing to clear.
-  }
-}

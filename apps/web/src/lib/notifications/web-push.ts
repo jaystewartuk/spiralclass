@@ -97,11 +97,6 @@ export function getWebPushClient(): WebPushClient {
   return cachedClient;
 }
 
-// Test seam: lets a test reset the module-level cache between cases.
-export function resetWebPushClientCache(): void {
-  cachedClient = null;
-}
-
 export function createRealWebPushClient(config?: VapidConfig): WebPushClient {
   return {
     async send(input) {

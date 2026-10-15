@@ -1,5 +1,4 @@
 import type { PrismaClient } from "@prisma/client";
-import { prisma as defaultPrisma } from "@/lib/prisma";
 import { decideStudentCancel, scheduleChangeBudget } from "@/lib/cancellation/classify";
 import {
   enqueueCancelGte24hTeacher,
@@ -124,7 +123,7 @@ export async function handleStudentCancel(
       //          one pooled schedule-change unit (the same budget reschedule uses).
       //
       // Race-safe flip: decideStudentCancel ran against a read taken *outside*
-      // this transaction, so a double-submit (web + mobile, or a retried action)
+      // this transaction, so a double-submit (two tabs, or a retried action)
       // could reach here twice. Guard the status transition with updateMany so the
       // second pass is a no-op — otherwise classes_used would be decremented and a
       // schedule-change unit spent twice (over-refund / budget over-spend).
@@ -269,8 +268,8 @@ export async function handleTeacherCancel(
       scheduledStart: booking.scheduledStart.toISOString(),
       scheduledEnd: booking.scheduledEnd.toISOString(),
     };
-    // Race-safe flip guarded on the current status — a double-submit (web +
-    // mobile, or a retried action) must not decrement classes_used twice.
+    // Race-safe flip guarded on the current status — a double-submit (two
+    // tabs, or a retried action) must not decrement classes_used twice.
     // `completed_at` is cleared so a forgiven past class doesn't keep its
     // auto-complete stamp.
     const flipped = await tx.booking.updateMany({
@@ -365,9 +364,3 @@ async function emitCancelEvents(
     log.error("booking.canceled emission failed", err);
   }
 }
-
-// Convenience default for production callers — production uses the singleton
-// Prisma client. Tests always pass their own deps.
-export const defaultCancelDeps = {
-  prisma: defaultPrisma as unknown as CancelDeps["prisma"],
-};

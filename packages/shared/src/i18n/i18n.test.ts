@@ -17,7 +17,7 @@ import {
   localeDirection,
   localeEnglishName,
 } from "./locales";
-import { createT, interpolate, translate } from "./translate";
+import { createT, interpolate } from "./translate";
 import type { AppLocale } from "./locales";
 
 /**
@@ -195,12 +195,6 @@ describe("createT / interpolate", () => {
     expect(createT("en")("home.greeting", { name: "Mira" })).toBe("Hi, Mira");
     expect(interpolate("Paso {n} de 4", { n: 2 })).toBe("Paso 2 de 4");
     expect(interpolate("no vars")).toBe("no vars");
-  });
-
-  it("legacy translate() returns the entry for the locale", () => {
-    expect(translate({ en: "Hello", es: "Hola", fr: "Bonjour" }, "en")).toBe("Hello");
-    expect(translate({ en: "Hello", es: "Hola", fr: "Bonjour" }, "es")).toBe("Hola");
-    expect(translate({ en: "Hello", es: "Hola", fr: "Bonjour" }, "fr")).toBe("Bonjour");
   });
 });
 

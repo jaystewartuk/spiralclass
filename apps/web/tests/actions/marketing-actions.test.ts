@@ -14,7 +14,6 @@ const updateCommunity = vi.fn(
 );
 const archiveCommunity = vi.fn(async () => true);
 const restoreCommunity = vi.fn(async () => true);
-const deleteCommunity = vi.fn(async () => true);
 vi.mock("@/lib/marketing/communities", async () => {
   const actual = await vi.importActual<typeof import("@/lib/marketing/communities")>(
     "@/lib/marketing/communities",
@@ -25,11 +24,9 @@ vi.mock("@/lib/marketing/communities", async () => {
     updateCommunity,
     archiveCommunity,
     restoreCommunity,
-    deleteCommunity,
   };
 });
 
-const createActivity = vi.fn(async (_input: Record<string, unknown>) => "a1");
 const markActivityDone = vi.fn(async () => true);
 const skipActivity = vi.fn(async () => true);
 const updateActivityBody = vi.fn(async () => true);
@@ -44,7 +41,6 @@ const getOrCreateCommunityDraft = vi.fn(
   }),
 );
 vi.mock("@/lib/marketing/activities", () => ({
-  createActivity,
   getOrCreateCommunityDraft,
   markActivityDone,
   prepareActivity,
@@ -97,7 +93,6 @@ beforeEach(() => {
   updateCommunity.mockResolvedValue(true);
   archiveCommunity.mockResolvedValue(true);
   restoreCommunity.mockResolvedValue(true);
-  deleteCommunity.mockResolvedValue(true);
 });
 
 describe("community actions", () => {
@@ -152,7 +147,6 @@ describe("community actions", () => {
       actions.updateCommunityAction,
       actions.archiveCommunityAction,
       actions.restoreCommunityAction,
-      actions.deleteCommunityAction,
     ]) {
       const state = await action(undefined, form({ id: "not-a-uuid", name: "X", url: "" }));
       expect(state?.error).toBeTruthy();
@@ -177,11 +171,9 @@ describe("community actions", () => {
     expect(revalidatePath).toHaveBeenCalledWith("/dashboard/get-students/communities");
   });
 
-  it("restores and hard-deletes when explicitly asked", async () => {
+  it("restores when explicitly asked", async () => {
     expect((await actions.restoreCommunityAction(undefined, form({ id: ID })))?.ok).toBe(true);
-    expect((await actions.deleteCommunityAction(undefined, form({ id: ID })))?.ok).toBe(true);
     expect(restoreCommunity).toHaveBeenCalledWith("t1", ID);
-    expect(deleteCommunity).toHaveBeenCalledWith("t1", ID);
   });
 });
 
@@ -295,29 +287,6 @@ describe("activity actions", () => {
   it("regenerates the week for the signed-in teacher only", async () => {
     expect((await actions.regeneratePlanAction(undefined, new FormData()))?.ok).toBe(true);
     expect(regenerateWeeklyPlan).toHaveBeenCalledWith({ teacherId: "t1" });
-  });
-
-  it("refuses an ad-hoc activity with an unknown kind or platform", async () => {
-    const state = await actions.addActivityAction(
-      undefined,
-      form({ kind: "growth_hack", platform: "facebook_group" }),
-    );
-    expect(state?.error).toBeTruthy();
-    expect(createActivity).not.toHaveBeenCalled();
-  });
-
-  it("creates an ad-hoc activity, dropping a malformed community id", async () => {
-    const state = await actions.addActivityAction(
-      undefined,
-      form({ kind: "tip", platform: "facebook_group", communityId: "nope" }),
-    );
-    expect(state?.ok).toBe(true);
-    expect(createActivity).toHaveBeenCalledWith({
-      teacherId: "t1",
-      kind: "tip",
-      platform: "facebook_group",
-      communityId: null,
-    });
   });
 });
 

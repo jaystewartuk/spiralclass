@@ -410,7 +410,7 @@ export async function saveFocusTagsForTeacher(
     }
   }
 
-  // No inner $transaction here (unlike the web/mobile packages batch save) —
+  // No inner $transaction here (unlike the packages batch save) —
   // this function takes an injectable `db` for unit testing (mirrors every
   // other function in this file), and a Prisma.TransactionClient doesn't expose
   // $transaction itself. Callers that want atomicity pass a tx client in, e.g.

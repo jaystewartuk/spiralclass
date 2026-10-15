@@ -3,15 +3,7 @@ import type { PayoutInstrumentKind } from "./payout-instruments";
 // Serialisable shapes that cross a boundary — a route handler's JSON body, a
 // Server Component's props into a Client Component, a data-channel payload.
 //
-// ⚠️ THIS FILE WAS THE MOBILE-WEB WIRE CONTRACT, and most of it was. It defined
-// the JSON for the 220 routes under `/api/mobile/*` that
-// a workspace deletion orphaned and a later one removed; that change left the
-// types in
-// place deliberately, inert and typed, to be swept in their own change rather
-// than hidden inside a 33,000-line deletion. This is that change: 75 types with
-// no reachable reference are gone, 1,898 lines down to 1,098.
-//
-// What is left is what something still reads. A type here has to earn its place
+// What is here is what something still reads. A type here has to earn its place
 // by being referenced from outside this file (directly, or through another type
 // that is) — the same test that produced the deletion. If you add one for a
 // consumer you have not written yet, it is dead code with a plan attached.
@@ -29,8 +21,6 @@ import type { PayoutInstrumentKind } from "./payout-instruments";
 
 import type { MaterialLearnerAge, MaterialTone, MaterialVocabulary } from "./validators";
 
-export type UserRole = "teacher" | "student" | "admin" | "superuser" | "guest";
-
 // The wire-level locale identifier. Aliased to the shared locale registry's
 // AppLocale so there is ONE source of truth for the supported set — adding a
 // language to ./i18n/locales.ts widens this automatically, rather than needing
@@ -38,49 +28,6 @@ export type UserRole = "teacher" | "student" | "admin" | "superuser" | "guest";
 import type { AppLocale } from "./i18n/locales";
 import type { MaterialTag } from "./materials-grouping";
 export type LocaleCode = AppLocale;
-
-export type SessionUser = {
-  id: string;
-  // Canonical id for analytics (PostHog distinct_id): Teacher.id for teachers,
-  // Student.id for students, else the auth user id. Matches the key the web app
-  // and the server-event pipeline use, so a person resolves to ONE PostHog
-  // Person across the client and the server. Optional for forward-compat with
-  // older backends that predate it (clients fall back to `id`).
-  analyticsId?: string;
-  email: string;
-  name: string | null;
-  role: UserRole;
-  locale: LocaleCode;
-  timezone: string | null;
-  onboardingComplete: boolean;
-  bookingSlug: string | null;
-  // True when this identity is on the SUPERUSER_EMAILS env allowlist
-  // specifically (lib/env.ts isSuperuser()) — kept distinct from `isAdmin`
-  // below because it's also the env-bootstrap path admin.ts's loadAdminActor
-  // falls back to on a fresh DB with no admin_users rows yet.
-  isSuperuser: boolean;
-  // True when this identity has ANY admin_users row (any AdminRole, not
-  // disabled) — mirrors web's loadAdminActor()/resolveAdminActor() DB-backed
-  // gate, so a support/finance admin (not necessarily env-allowlisted) also
-  // reaches the admin surface. This — not `isSuperuser` — is the field
-  // clients should branch on for "does this identity belong in the admin
-  // interface." True whenever `isSuperuser` is true too (the env allowlist is
-  // one path into admin, not a separate privilege tier).
-  isAdmin: boolean;
-  // Public profile photo URL (version-stamped for cache-busting), or null when
-  // the person hasn't uploaded one — the client renders an initials monogram
-  // instead. Populated for teachers by buildMobileSessionUser. Optional for
-  // forward-compat with older backends that predate it (clients fall back to
-  // the monogram).
-  photoUrl?: string | null;
-  // Whether a Google account is currently linked for sign-in (better-auth
-  // Account row, providerId "google"). Drives the connect/reconnect Google
-  // affordance on the account settings screens — see
-  // lib/auth/identity-change.ts on the server for why this can flip to false
-  // right after an email change. Optional for forward-compat with older
-  // backends that predate it.
-  googleLinked?: boolean;
-};
 
 // ---------------------------------------------------------------------------
 // Teacher
@@ -333,19 +280,6 @@ export type HomeworkSubmissionFile = {
   uploadedAt: string;
 };
 
-// The student's own submission for an assignment (draft or submitted). Absent
-// (null on the detail payload) until the student first saves a draft or attaches
-// a file. `status` here is the raw DB state (never the derived "not_submitted"/
-// "late"); the assignment-level `status`/`late` fields carry the display state.
-export type HomeworkSubmission = {
-  id: string;
-  status: "draft" | "submitted" | "returned" | "graded";
-  textResponse: string | null;
-  submittedAt: string | null;
-  updatedAt: string;
-  files: HomeworkSubmissionFile[];
-};
-
 // One assignment as shown in the class-detail "Homework" list — enough to
 // render a row with its status without opening it. `status` is the derived
 // display state (see HomeworkSubmissionStatus); `late` is broken out so a
@@ -358,49 +292,6 @@ export type HomeworkAssignmentSummary = {
   late: boolean;
   // Whether the student currently has any files attached (draft or submitted).
   fileCount: number;
-};
-
-// Full assignment detail for the submission screen: the assignment itself plus
-// the student's own submission (or null). `canSubmit`/`canEdit` are resolved
-// server-side from the assignment's late/resubmission rules and the current
-// submission status, so the client never re-derives the policy.
-export type HomeworkAssignmentDetail = {
-  id: string;
-  bookingId: string;
-  title: string;
-  instructions: string | null;
-  dueAt: string | null;
-  allowLateSubmission: boolean;
-  allowResubmission: boolean;
-  // Derived display state + late flag (same as the summary), for the header.
-  status: HomeworkSubmissionStatus;
-  late: boolean;
-  // Whether the due date has already passed (for the "past due" hint).
-  pastDue: boolean;
-  // Whether a final submit is currently allowed (not already submitted without
-  // resubmission, and not past due when late submission is disallowed).
-  canSubmit: boolean;
-  // Whether the student may still edit text / add / remove files.
-  canEdit: boolean;
-  submission: HomeworkSubmission | null;
-  // The teacher's feedback on the most recent attempt, once given — null until
-  // then. Never a draft/undecided AI review, only an explicit teacher decision.
-  feedback: HomeworkFeedback | null;
-};
-
-// Teacher-facing assignment row (create/list/delete on the teacher class
-// screen). `submissionCount` is how many students have a non-draft submission —
-// a lightweight signal for the future review surface.
-export type TeacherAssignment = {
-  id: string;
-  bookingId: string;
-  title: string;
-  instructions: string | null;
-  dueAt: string | null;
-  allowLateSubmission: boolean;
-  allowResubmission: boolean;
-  createdAt: string;
-  submissionCount: number;
 };
 
 // An immutable snapshot of one submit action (HomeworkAttempt). `files` mirrors
@@ -694,28 +585,6 @@ export type Payment = {
 // Students
 // ---------------------------------------------------------------------------
 
-export type StudentSummary = {
-  id: string;
-  name: string;
-  email: string;
-  customPriceCents: number | null;
-  // Currency of `customPriceCents` (ISO-4217) — the teacher's own pricing
-  // currency (D-64/D-124). Carried explicitly so the amount's denomination is
-  // never implicit.
-  currency: string;
-  // true when the teacher created the student manually and hasn't gone live yet
-  // (onboardingHoldAt is set); notifications are suppressed until go-live.
-  notLive: boolean;
-  archivedAt: string | null;
-  level: { id: string; label: string } | null;
-  activePackage: {
-    name: string;
-    remaining: number;
-    total: number;
-    expiresAt: string | null;
-  } | null;
-};
-
 // The signed-in student's own contact card. Email is read-only on this
 // surface — it's
 // the magic-link sign-in identity, so changing it needs a verified flow.
@@ -727,20 +596,6 @@ export type StudentProfile = {
   // Live-caption default (D-27): the student's own language. See
   // caption-languages.ts. Overridable per class by the teacher.
   nativeLanguage: string;
-};
-
-export type UpdateStudentProfileBody = {
-  name: string;
-  // null clears the number.
-  phoneE164: string | null;
-  // ISO-3166-1 alpha-2, picked next to the phone field — resolves a bare
-  // national-format phoneE164 to the right calling code. Ignored when
-  // phoneE164 is null.
-  phoneCountry?: string;
-  // Omitted = leave unchanged.
-  timezone?: string;
-  // Omitted = leave unchanged.
-  nativeLanguage?: string;
 };
 
 // Teacher notification preferences.
@@ -757,12 +612,6 @@ export type TeacherNotificationPrefs = {
 // ---------------------------------------------------------------------------
 
 export type Weekday = 0 | 1 | 2 | 3 | 4 | 5 | 6;
-
-export type WeeklyAvailability = {
-  weekday: Weekday;
-  startMinutes: number;
-  endMinutes: number;
-};
 
 export type BlockedDate = {
   id: string;
@@ -814,12 +663,6 @@ export type TestimonialInput = {
   authorName: string;
   authorNote?: string;
   body: string;
-};
-
-// Body for creating/editing a share group.
-export type ShareGroupInput = {
-  name: string;
-  url?: string;
 };
 
 // ---------------------------------------------------------------------------
@@ -927,31 +770,9 @@ export type BookingSlugAvailability =
 // In-portal repurchase (signed-in "buy another package")
 // ---------------------------------------------------------------------------
 
-// The instrument as the checkout picker needs it: enough to label the option
-// and to name it back to the server. Payee details themselves are NOT here —
-// they belong to the instructions screen, which the student only reaches after
-// a payment row exists.
-export type StudentBuyInstrument = {
-  id: string;
-  kind: PayoutInstrumentKind;
-};
-
 // ---------------------------------------------------------------------------
 // Admin
 // ---------------------------------------------------------------------------
-
-export type AdminStats = {
-  teachers: number;
-  teachersOnboarded: number;
-  students: number;
-  activePackages: number;
-  overrides: number;
-  openDisputes: number;
-  grossPaidCents: number;
-  refundsCents: number;
-  notificationsQueued: number;
-  notificationsFailed: number;
-};
 
 // --- Admin: staff (admin_users management) ---
 export type AdminRole = "superadmin" | "finance" | "support";

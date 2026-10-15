@@ -19,7 +19,6 @@
  * container booted.
  */
 
-import { execSync } from "node:child_process";
 import { describe } from "vitest";
 import { PrismaClient } from "@prisma/client";
 
@@ -33,8 +32,8 @@ export function hasTestDb(): boolean {
 
 /**
  * Singleton Prisma client pointed at TEST_DATABASE_URL. Reused across
- * the whole test process so migrations + truncations + seeds share a
- * single connection pool.
+ * the whole test process so truncations + seeds share a single
+ * connection pool.
  *
  * Throws if TEST_DATABASE_URL is missing — wrap callers in
  * `describeIntegration` so they self-skip rather than throw.
@@ -51,30 +50,6 @@ export function getTestPrisma(): PrismaClient {
     log: ["warn", "error"],
   });
   return cachedPrisma;
-}
-
-/**
- * Apply all pending Prisma migrations against TEST_DATABASE_URL.
- * Idempotent thanks to the `_prisma_migrations` table — re-runs are
- * a no-op once the schema is current. Called once per test process
- * by global-setup.ts.
- */
-export function applyMigrations(): void {
-  if (!hasTestDb()) return;
-  // Use the prisma CLI directly; same code path the main project uses
-  // for `prisma migrate deploy`. Pass DATABASE_URL inline so we never
-  // touch the production env in this process.
-  execSync("pnpm prisma migrate deploy", {
-    // Override both DATABASE_URL and DIRECT_URL — Prisma uses
-    // directUrl for migrate, and a process-level DIRECT_URL stub
-    // (from CI) would short-circuit the connect.
-    env: {
-      ...process.env,
-      DATABASE_URL: process.env.TEST_DATABASE_URL,
-      DIRECT_URL: process.env.TEST_DATABASE_URL,
-    },
-    stdio: "inherit",
-  });
 }
 
 /**
@@ -97,28 +72,6 @@ export async function truncateAll(): Promise<void> {
   const list = rows.map((r) => `"public"."${r.tablename}"`).join(", ");
   await prisma.$executeRawUnsafe(`TRUNCATE TABLE ${list} RESTART IDENTITY CASCADE`);
 }
-
-/**
- * Wraps a test body in a transaction that always rolls back. Handy
- * when a single test wants to verify a write path without cleaning up
- * after itself + when no other test depends on the row staying.
- */
-export async function withTransaction<T>(fn: (tx: PrismaClient) => Promise<T>): Promise<T> {
-  const prisma = getTestPrisma();
-  let result!: T;
-  try {
-    await prisma.$transaction(async (tx) => {
-      result = await fn(tx as unknown as PrismaClient);
-      // Force rollback by throwing a sentinel.
-      throw new RollbackSentinel();
-    });
-  } catch (err) {
-    if (!(err instanceof RollbackSentinel)) throw err;
-  }
-  return result;
-}
-
-class RollbackSentinel extends Error {}
 
 /**
  * Vitest `describe` wrapper that skips when TEST_DATABASE_URL is

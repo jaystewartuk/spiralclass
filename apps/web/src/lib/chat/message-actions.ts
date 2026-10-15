@@ -1,5 +1,5 @@
-// Server-side edit & delete for chat messages, shared by all four route
-// families (web/mobile × teacher/student). Routes do auth + tenancy and pass
+// Server-side edit & delete for chat messages, shared by the teacher and
+// student route families. Routes do auth + tenancy and pass
 // the resolved (teacherId, studentId) pair here; this module owns the
 // WhatsApp-parity rules so they can't drift between surfaces:
 //

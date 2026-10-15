@@ -10,8 +10,8 @@ import { flushAnalytics, trackServerEvent } from "@/lib/analytics/posthog";
 // singleton import here would silently bypass that test double and hit a
 // real, unconfigured Prisma client instead. That exact bug already happened
 // once with maybeEmitFirstPayment (see lib/analytics/first-events.ts) — every
-// call site (including the ~15 web actions/mobile routes that just pass their
-// own already-imported `prisma`) is required to be explicit so it can't
+// call site (including the server actions that just pass their own
+// already-imported `prisma`) is required to be explicit so it can't
 // happen again here.
 type MarketplaceReadyPrisma = Pick<PrismaClient, "teacher">;
 
@@ -105,8 +105,8 @@ export async function maybeEmitMarketplaceReady(
  * maybeEmitMarketplaceReady above, kept separate since profile completion can
  * happen well before or after the other Marketplace Ready sub-signals.
  *
- * Call this after a photo or bio save (web's saveTeacherPhotoAction/
- * saveBioAction, mobile's profile PATCH/photo POST routes) — the only two
+ * Call this after a photo or bio save (saveTeacherPhotoAction/saveBioAction)
+ * — the only two
  * fields this state depends on. Takes the Prisma client explicitly, same
  * reasoning as maybeEmitMarketplaceReady above (not currently called from a
  * DI'd context, but kept consistent so it can't become a landmine if it ever

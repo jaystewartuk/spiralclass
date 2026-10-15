@@ -1,6 +1,5 @@
 // Pure layout logic for the in-class "stage" (the main video
-// region), shared by the web ClassCall and the mobile NativeCall so the two
-// platforms can't drift. The component owns the LiveKit wiring and the actual
+// region), used by ClassCall. The component owns the LiveKit wiring and the actual
 // rendering; this owns the single decision "given whether a material is open
 // and whether the other participant is present, what fills the stage and does
 // the other participant show as a small picture-in-picture tile".

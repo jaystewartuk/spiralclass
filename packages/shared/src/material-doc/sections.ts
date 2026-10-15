@@ -1,9 +1,9 @@
 import type { InlineNode, MaterialBlock, MaterialDoc } from "./types";
 
 // Section-level structural operations over a MaterialDoc — the pure core the
-// web and mobile section editors both drive (Layer 1 of
-// the material-editing design). No UI, no I/O, no dependencies:
-// same Node/browser/Hermes/react-pdf guarantee the parser and serializer make.
+// section editor drives (Layer 1 of the material-editing design). No UI, no
+// I/O, no dependencies: same Node/browser/react-pdf guarantee the parser and
+// serializer make.
 //
 // The block tree is deliberately FLAT — headings are blocks, not containers, so
 // a truncated stream always yields a valid doc (see types.ts). "Sections" are

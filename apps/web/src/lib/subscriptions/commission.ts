@@ -1,3 +1,4 @@
+import { addMonths } from "@/lib/dates";
 import { COMMISSION_WINDOW_MONTHS } from "./config";
 
 // Ambassador commission computation (pure). An ambassador referral is
@@ -61,29 +62,6 @@ export type AmbassadorCommission = {
   totalNetMinorUnits: number;
   totalPayableMinorUnits: number;
 };
-
-// Add `months` calendar months to a date (clamps day-of-month overflow, e.g.
-// Jan 31 + 1mo → Feb 28/29). Used for the 12-month window edge.
-export function addMonths(date: Date, months: number): Date {
-  const d = new Date(date.getTime());
-  const targetMonth = d.getUTCMonth() + months;
-  const result = new Date(
-    Date.UTC(
-      d.getUTCFullYear(),
-      targetMonth,
-      d.getUTCDate(),
-      d.getUTCHours(),
-      d.getUTCMinutes(),
-      d.getUTCSeconds(),
-      d.getUTCMilliseconds(),
-    ),
-  );
-  // Handle overflow (e.g. day 31 rolling into the next month).
-  if (result.getUTCDate() !== d.getUTCDate()) {
-    result.setUTCDate(0);
-  }
-  return result;
-}
 
 // The payable for a single net amount, rounded to the minor unit.
 export function payableForNet(netMinorUnits: number, rate: number = commissionRate()): number {

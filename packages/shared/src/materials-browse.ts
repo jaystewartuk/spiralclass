@@ -1,6 +1,6 @@
 // Level-first navigation for the teacher's reusable material library — the
-// single rule deciding WHICH of three things the Materials surface shows, so
-// web (?level= in the URL) and mobile (screen state) can never drift apart.
+// single rule deciding WHICH of three things the Materials surface shows
+// (driven by ?level= in the URL).
 //
 // Why level is the hierarchy and everything else stays a filter: `levelId` is
 // the only axis on a library material that is mandatory, single-valued, AND
@@ -18,8 +18,8 @@
 // folder left behind, and it keeps all of its cross-cutting tags — none of
 // which a real folder tree can do.
 //
-// Pure and dependency-free (no DB, no React, no URL parsing) so both platforms
-// share one behaviour and it unit-tests in isolation.
+// Pure and dependency-free (no DB, no React, no URL parsing) so every surface
+// shares one behaviour and it unit-tests in isolation.
 
 // Sentinel for the "Todos los materiales" escape hatch — the flat, all-levels
 // list the library has always been. A real level id never collides with it
@@ -78,8 +78,8 @@ export function browseLevelFilter(mode: MaterialsBrowseMode): string | null {
   return mode.kind === "level" ? mode.levelId : null;
 }
 
-// The value to write back into the surface's own state (web: the `level` query
-// param; mobile: the screen's selection), so navigating around inside the list
+// The value to write back into the surface's own state (the `level` query
+// param), so navigating around inside the list
 // doesn't bounce back to the hub. Null means "omit it" — i.e. the hub.
 export function browseLevelParam(mode: MaterialsBrowseMode): string | null {
   if (mode.kind === "level") return mode.levelId;
@@ -118,13 +118,12 @@ export type MaterialLevelGroup<T> = {
 // Groups picker options by level, in FIRST-ENCOUNTER order.
 //
 // Encounter order IS ladder order because every caller's query sorts by
-// `level: { position: "asc" }` — see the `libraryMaterial.findMany` in both
-// apps/web/src/app/(app)/dashboard/classes/[bookingId]/page.tsx and
-// apps/web/src/app/api/mobile/teacher/bookings/[bookingId]/route.ts. That's why
-// this takes no level ladder: threading the teacher's full `Level[]` into the
-// mobile booking payload just to re-derive an order the query already applied
-// would be redundant. If you ever change one of those `orderBy` clauses, this
-// grouping silently loses its ladder order — change it here too.
+// `level: { position: "asc" }` — see the `libraryMaterial.findMany` in
+// apps/web/src/app/(app)/dashboard/classes/[bookingId]/page.tsx. That's why
+// this takes no level ladder: threading the teacher's full `Level[]` through
+// just to re-derive an order the query already applied would be redundant. If
+// you ever change that `orderBy` clause, this grouping silently loses its
+// ladder order — change it here too.
 export function groupMaterialsByLevel<T extends LevelledMaterial>(
   items: readonly T[],
   noLevelLabel: string,

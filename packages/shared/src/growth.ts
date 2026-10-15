@@ -12,19 +12,18 @@
 // live here — referral / taster-offer steps stay out until those features exist,
 // so the guide can never point at something that isn't built.
 //
-// Like nav.ts this owns *structure + bilingual copy* and is platform-agnostic:
-// each app feeds it the booleans it computes from its own data source and renders
-// the resolved steps with native components.
+// Like nav.ts this owns *structure + bilingual copy* and is framework-free: the
+// caller feeds it the booleans it computes from its data source and renders the
+// resolved steps.
 
 import { type NavKey, type NavLocale } from "./nav";
 
 export type GrowthStepKey = "payment" | "profile" | "testimonials" | "share" | "leads";
 
-// The real-world signals each step's done-state is derived from. Both web and
-// mobile compute these from the same underlying columns (teacher.photoPath /
-// teacher.bio, published testimonial count, linked-student count, new-lead count,
-// stripeChargesEnabled/isWiseReady()) so the two platforms can't disagree about
-// what "done" means.
+// The real-world signals each step's done-state is derived from: the
+// underlying columns (teacher.photoPath / teacher.bio, published testimonial
+// count, linked-student count, new-lead count, stripeChargesEnabled/
+// isWiseReady()), so every surface agrees about what "done" means.
 export type GrowthSignals = {
   hasPhoto: boolean;
   hasBio: boolean;
@@ -45,8 +44,8 @@ export type GrowthSignals = {
   // payment step's "todo" copy to a Wise-only variant so a teacher outside
   // the Stripe Connect circle (D-58) isn't told to "Connect Stripe" only to
   // hit the country-unsupported wall on the settings page. Optional so a
-  // stale cached mobile payload (or a fixture that predates this field)
-  // degrades to the pre-existing Stripe+Wise copy rather than guessing wrong.
+  // fixture that predates this field degrades to the pre-existing Stripe+Wise
+  // copy rather than guessing wrong.
   stripeAvailable?: boolean;
 };
 
@@ -60,7 +59,7 @@ export type ShareChannel = "whatsapp" | "facebook";
 
 // What a step's CTA does. Most steps navigate to the feature that executes them;
 // "share" is the one inherent *action* — it hands the teacher a prefilled post
-// for each channel, which each platform wires to its own share affordance.
+// for each channel, which the card wires to its share affordance.
 export type GrowthAction =
   { kind: "nav"; nav: NavKey } | { kind: "share"; channels: ShareChannel[] };
 
@@ -179,7 +178,7 @@ const STEPS: Record<
     // Photo/bio are edited on the booking-page settings screen, not the
     // account screen (account is name/email/phone/timezone — see the comment
     // on apps/web/src/app/(app)/settings/account/page.tsx). Was "account"
-    // before this fix, a real dead-end on both platforms.
+    // before this fix, a real dead-end.
     action: { kind: "nav", nav: "bookingPage" },
   },
   testimonials: {
@@ -268,8 +267,7 @@ function isDone(key: GrowthStepKey, s: GrowthSignals): boolean {
 
 /**
  * Resolve the ordered, ROI-sorted growth checklist for a teacher in `locale`.
- * Pure: feed it the signals, render the result. The same call drives the web
- * dashboard card and the mobile "Crecer" card.
+ * Pure: feed it the signals, render the result. Drives the dashboard card.
  */
 export function growthSteps(signals: GrowthSignals, locale: NavLocale): GrowthChecklist {
   const steps: ResolvedGrowthStep[] = ORDER.map((key) => {
@@ -350,9 +348,9 @@ export function growthAllDoneLabel(locale: NavLocale): string {
 }
 
 // ── Share channels ─────────────────────────────────────────────────────────
-// The "share" step's per-channel copy + attribution, owned here so web and
-// mobile build identical posts and tag links the same way. A platform renders
-// one CTA per `action.channels` entry and feeds the share affordance the text
+// The "share" step's per-channel copy + attribution, owned here so every post
+// is built and tagged the same way. The card renders one CTA per
+// `action.channels` entry and feeds the share affordance the text
 // from `shareText()` (which already embeds the tagged URL).
 
 // Per-channel CTA labels.

@@ -3,7 +3,7 @@ import type { StringKey } from "../i18n/index";
 import type { CalloutVariant } from "./types";
 
 // The shared semantics of each callout variant — the ONE table every renderer
-// (web, mobile, PDF) reads so a "tip" is the same green lightbulb everywhere and
+// (on-screen and PDF) reads so a "tip" is the same green lightbulb everywhere and
 // a "warning" the same amber triangle. Renderers do NOT hardcode per-variant
 // colours; they look them up here and derive their own tinted background /
 // border from the role colour (a subtle alpha wash — see each renderer), so the
@@ -18,7 +18,7 @@ import type { CalloutVariant } from "./types";
 // the PDF renderer, which has no icon runtime,
 // falls back to the coloured label alone.
 //
-// `labelKey` is a shared-catalog i18n key (both platforms draw from it), used
+// `labelKey` is a shared-catalog i18n key, used
 // when the author didn't supply an inline title after the `[!variant]` marker.
 
 export type CalloutMeta = {

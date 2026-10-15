@@ -48,9 +48,4 @@ export function getEmailClientKind(): "stub" | "resend" | "ses" | null {
   return cachedKind;
 }
 
-export function __resetEmailClient() {
-  cached = null;
-  cachedKind = null;
-}
-
 export type { EmailClient } from "./resend";

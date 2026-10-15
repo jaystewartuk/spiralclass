@@ -254,7 +254,7 @@ export function buildMaterialPrompt(input: MaterialPromptInput): MaterialPrompt 
     `Return well-structured Markdown only: headings, short paragraphs, bullet or numbered lists, and simple tables where useful.`,
     // Semantic callouts (the material-rendering redesign). The renderer turns a
     // blockquote whose first line is a `[!variant]` marker into a distinct,
-    // colour-coded box (icon + label) on every surface — PDF, web, mobile, the
+    // colour-coded box (icon + label) on every surface — PDF, the page, the
     // in-call viewer — so a vocabulary list, a grammar note, a worked example,
     // and the answer key are each instantly recognisable instead of undifferentiated
     // prose. Use them where they FIT NATURALLY; keep the main teaching flow as

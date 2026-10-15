@@ -1,13 +1,7 @@
 import "server-only";
 import Anthropic from "@anthropic-ai/sdk";
 import { z } from "zod";
-import {
-  contentKindSpec,
-  platformSpec,
-  type MarketingContentKind,
-  type MarketingPlatform,
-  type PromoPolicy,
-} from "@spiralclass/shared";
+import { contentKindSpec, platformSpec } from "@spiralclass/shared";
 import { anthropicApiKey, anthropicModel, hasAnthropicCreds } from "@/lib/env";
 import { logger } from "@/lib/logger";
 import { rateLimit } from "@/lib/rate-limit";
@@ -152,10 +146,3 @@ export async function generateMarketingContent(
     return { ok: false, reason: "error" };
   }
 }
-
-export type ContentRequest = {
-  teacherId: string;
-  kind: MarketingContentKind;
-  platform: MarketingPlatform;
-  promoPolicy: PromoPolicy;
-};

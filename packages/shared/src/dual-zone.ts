@@ -1,8 +1,8 @@
 // Dual-timezone display: every class-related date/time must show the
 // viewer's own local time (primary) and the other participant's local
 // time (secondary) — see docs/features (class scheduling) and D-NN dual
-// timezone display. This is the single formatter web, mobile, and the
-// notification dispatcher all build on, so "viewer primary / other
+// timezone display. This is the single formatter the UI and the
+// notification dispatcher both build on, so "viewer primary / other
 // secondary" is decided once here instead of per call site.
 //
 // Pure Intl.DateTimeFormat, no date-fns-tz dependency — IANA tz database
@@ -20,8 +20,8 @@ import { intlLocale } from "./i18n/locales";
 // most of them AND wrong invisibly — it renders a plausible wall-clock time
 // that is simply not theirs. UTC is wrong for everyone, which is the point: it
 // is the only value that cannot be mistaken for a resolved answer. Every
-// display path should exhaust the viewer's own zone first (see
-// `resolveDisplayZone` on mobile) and reach this only as a last resort.
+// display path should exhaust the viewer's own zone first and reach this only
+// as a last resort.
 export const FALLBACK_TIMEZONE = "UTC";
 
 export interface TimeZoneParty {

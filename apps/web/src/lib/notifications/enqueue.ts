@@ -319,26 +319,6 @@ export async function enqueueWiseConfirmReminderTeacher(
   });
 }
 
-// Remind a teacher to post her booking link in her saved Facebook groups
-// again. Email-only (teacher recipient); push when she has a device token.
-// Dedup (one nudge per cadence window) is enforced by the cron via the
-// notifications.created_at of prior facebook_groups_nudge_teacher rows.
-export async function enqueueFacebookGroupsNudgeTeacher(
-  tx: Tx,
-  input: { teacherId: string; groupCount: number },
-): Promise<string> {
-  return insert(tx, {
-    teacherId: input.teacherId,
-    recipientType: "teacher",
-    recipientId: input.teacherId,
-    channel: "email",
-    templateName: "facebook_groups_nudge_teacher",
-    status: "queued",
-    metadata: { groupCount: input.groupCount } satisfies FacebookGroupsNudgeMetadata,
-  });
-}
-export type FacebookGroupsNudgeMetadata = { groupCount: number };
-
 /**
  * The weekly student-acquisition plan nudge (D-125) — the replacement for the
  * Facebook-groups nudge above. The difference that matters is in the metadata:

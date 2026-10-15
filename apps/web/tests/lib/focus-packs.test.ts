@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { focusTagSeedFor, FOCUS_TAG_CATEGORY_ORDER, type FocusTagSeed } from "@/lib/focus-packs";
+import {
+  focusTagSeedFor,
+  FOCUS_TAG_BUILTIN_CATEGORIES,
+  type FocusTagSeed,
+} from "@/lib/focus-packs";
 
 // Focus-tag seed packs — D-19 Layers 2/3, narrowed to language-first by D-72
 // (the music/math/generic packs and the `discipline` concept are gone; a pack is
@@ -100,7 +104,7 @@ describe("focus-tag seed packs", () => {
   it("uses only known categories so the picker can group them", () => {
     for (const code of ["es", "en", "fr"]) {
       for (const s of focusTagSeedFor(code).seeds) {
-        expect(FOCUS_TAG_CATEGORY_ORDER).toContain(s.category);
+        expect(FOCUS_TAG_BUILTIN_CATEGORIES.map((c) => c.code)).toContain(s.category);
       }
     }
   });

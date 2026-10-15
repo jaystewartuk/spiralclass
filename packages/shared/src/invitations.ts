@@ -15,7 +15,7 @@ export const CORE_BENEFIT_KEYS: readonly InvitationBenefitKey[] = [
 ] as const;
 
 // The i18n catalog key for a benefit line — typed as the exact literal so it
-// feeds straight into `t()` on both platforms.
+// feeds straight into `t()`.
 export function benefitCatalogKey(
   key: InvitationBenefitKey,
 ): `invitation.benefit.${InvitationBenefitKey}` {

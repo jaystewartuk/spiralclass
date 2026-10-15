@@ -1,6 +1,5 @@
-// Money formatting now lives in @spiralclass/shared so web and mobile render
-// identical MXN strings. Re-exported here so existing `@/lib/money` imports
-// keep working.
+// Money formatting lives in @spiralclass/shared, beside the currency exponents
+// it reads. Re-exported here as the import surface the app uses.
 export {
   mxnFormatter,
   formatMinorUnits,

@@ -85,11 +85,3 @@ export async function startJobsWorker(): Promise<void> {
     log.error("pg-boss worker failed to start", err);
   }
 }
-
-// Graceful shutdown — used by tests and available for a future process
-// SIGTERM hook. No-ops if the worker was never started.
-export async function stopJobsWorker(): Promise<void> {
-  if (!singleton || !started) return;
-  await singleton.stop();
-  started = false;
-}

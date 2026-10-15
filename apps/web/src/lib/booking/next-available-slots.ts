@@ -21,10 +21,10 @@ export type NextAvailableSlotsResult = { date: string; slots: Slot[] } | null;
 export function findNextAvailableSlots(
   inputs: SlotInputsWire,
   params: {
-    // The day search starts AFTER, not the first day checked — matches the
-    // mobile screens' prior loop (`for i = 1..horizon: shiftDay(today, i)`),
-    // which always searches strictly forward of "today" regardless of
-    // whichever day is currently on screen.
+    // The day search starts AFTER, not the first day checked
+    // (`for i = 1..horizon: shiftDay(today, i)`), so it always searches
+    // strictly forward of "today" regardless of whichever day is currently on
+    // screen.
     anchorYmd: string;
     horizonDays: number;
     classDurationMin: number;
