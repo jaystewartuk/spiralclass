@@ -222,22 +222,32 @@ run lint`, so setting `TURBO_TOKEN`/`TURBO_TEAM` in the shell environment still
   pricing, so there's no cheaper tier to defer to — this is the
   end-state storage.
 
-### Video — self-hosted LiveKit (Oracle A1, D-94)
+### Video — self-hosted LiveKit (Compute Engine `e2-micro`, D-187)
+
+- **Today:** production video runs on one Always Free `e2-micro` on Compute
+  Engine ([D-187](../decisions/D-187.md),
+  [`infra/gcp-livekit/`](../../infra/gcp-livekit/README.md)). The only line on
+  its bill is the static IPv4 address, about $3.65/mo. It carries a class but
+  not egress, so class recording is off. D-187's graduation trigger is two
+  overlapping classes, which means an `e2-medium`.
+- **The rollback is LiveKit Cloud's free Build tier**
+  ([D-182](../decisions/D-182.md)), kept as a commented line in the runtime env
+  file. That tier is a hard cap, not a meter: 5,000 WebRTC participant-minutes
+  a month, no overage, service stops. A 2-person class-hour spends 120 of them,
+  so it is roughly 41 class-hours, and the next rung is Ship at $50/mo — an
+  order of magnitude above any box on this page.
 
 > [!IMPORTANT]
-> ⚠️ **Not true today, and the bill is the reason to say so here.** The box was
-> destroyed on 2026-09-19 and Oracle had no capacity to rebuild it, so
-> production video runs on **LiveKit Cloud's free Build tier** until it does
-> ([D-182](../decisions/D-182.md)). That tier is a hard cap, not a meter: 5,000
-> WebRTC participant-minutes a month, no overage, service stops. A 2-person
-> class-hour spends 120 of them, so it is roughly 41 class-hours, and the next
-> rung is Ship at $50/mo — an order of magnitude above any box on this page.
-> The rest of this section describes the arrangement being returned to, and
-> [D-183](../decisions/D-183.md) is what was done to get back to it.
+> **The Oracle A1 box the rest of this section describes no longer exists.** It
+> was destroyed on 2026-09-19 and Oracle had no capacity to rebuild it
+> ([D-182](../decisions/D-182.md)). The bullets below are the arrangement
+> [D-183](../decisions/D-183.md) tried to get back to and
+> [D-184](../decisions/D-184.md) keeps as the way back; they are not a
+> description of anything running.
 
 - Previously the largest variable-cost vendor was never listed here at all
-  (a real gap — see `docs/features/live-calls-video.md`). As
-  of D-94, both preview and production run on a self-hosted LiveKit stack
+  (a real gap — see `docs/features/live-calls-video.md`). From
+  D-94 until 2026-09-19, both preview and production ran on a self-hosted LiveKit stack
   (`livekit-server` + `livekit-egress` + Redis + Caddy) on a free-tier Oracle
   Cloud "A1" ARM box (2 OCPU/12GB) — **$0/mo direct cost**, replacing
   LiveKit Cloud's participant-minute billing entirely.
@@ -248,7 +258,7 @@ run lint`, so setting `TURBO_TOKEN`/`TURBO_TEAM` in the shell environment still
   measured
   capacity ceiling is ~15-20 concurrent 2-participant rooms before packet
   loss (measured in the LiveKit spike; its runbook was deleted by
-  [D-110](../decisions/D-110.md), the number is the part worth keeping) — now shared across both
+  [D-110](../decisions/D-110.md), the number is the part worth keeping) — then shared across both
   environments (D-94). The deferred cost is a purpose-built box once real
   concurrent load from a second/third teacher approaches that ceiling — see
   `ORACLE_LIVEKIT_PRODUCTION.md`'s "What this means going forward" for the
@@ -262,8 +272,9 @@ run lint`, so setting `TURBO_TOKEN`/`TURBO_TEAM` in the shell environment still
   a media relay there sits ~160-190 ms from two people who are both in the Americas,
   and `scripts/oracle-push-images.sh` fails closed on a non-arm64 image, so an
   x86 box brings the QEMU cross-build back with it.
-- Recording storage rides the existing R2 line above (Egress uploads
-  directly, no separate line item).
+- Recording storage rides the existing R2 line above (Egress uploaded
+  directly, no separate line item). Recording has been off in production
+  since D-187; recordings already in R2 are untouched.
 - Live captions cost nothing to run in the browser; their translation
   fallback is Google Cloud Translation, free for the first 500,000 characters
   a month and $20 per million after that (checked 2026-09-23 —
@@ -443,12 +454,12 @@ Two independent sources:
    ```
 
    (The cap counts a **UTC** calendar month — `monthStartUtc()` in
-   `src/lib/class-content/config.ts`.)
+   `src/lib/materials/config.ts`.)
 
 ### Tuning the monthly cap
 
 The cap is the named constant `CLASS_CONTENT_AI_MONTHLY_CAP` (currently **100**)
-in `src/lib/class-content/config.ts` — change it there; the action, the panel,
+in `src/lib/materials/config.ts` — change it there; the action, the panel,
 and the tests all read from it. Guidance:
 
 - **It's a spend ceiling, not a UX limit.** A teacher who hits it can still

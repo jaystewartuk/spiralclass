@@ -6,9 +6,10 @@
 // flag check never depends on the whole env schema validating.
 //
 // Convention: name the env var FLAG_<SCREAMING_SNAKE>. Set it per environment in
-// Vercel — leave it unset (off) in Production while it's on in the main/preview
-// scope, so a feature can be merged to main and exercised on preview without
-// being exposed to production students. Promote, then flip it on in Production.
+// that environment's runtime env (`config/env/<env>.runtime.env`) — leave it
+// unset (off) in production while it's on in preview, so a feature can be
+// merged to main and exercised on preview without being exposed to production
+// students. Promote, then flip it on in production.
 //
 // Usage:
 //   import { flagEnabled } from "@/lib/flags";

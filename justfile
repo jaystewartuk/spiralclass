@@ -112,7 +112,7 @@ lint:
 test:
     pnpm test
 
-# Unit tests for one file, e.g. `just test-file src/lib/money.test.ts`
+# Unit tests for one file, e.g. `just test-file tests/lib/money.test.ts`
 [group('checks')]
 test-file FILE:
     pnpm --filter spiralclass-web test -- {{FILE}}

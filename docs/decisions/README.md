@@ -296,7 +296,7 @@ community and nothing that constitutes participating in one.
 | [D-73](./D-73.md)   | A self-hosted intro video, because owning the file is what makes the AI coach possible                |
 | [D-123](./D-123.md) | Social previews attach to the share **link**; the model draws no text, we render every character      |
 | [D-125](./D-125.md) | **A planner that is a pure function** — Claude writes the words, it never decides what a number means |
-| [D-142](./D-142.md) | The public demo is a rendered fixture: a read-only account would need 68 enforcement points           |
+| [D-142](./D-142.md) | The public demo is a rendered fixture: a demo account needs a sign-in that proves nothing             |
 | [D-151](./D-151.md) | A testimonial the teacher cannot write — a CHECK constraint ties the badge to a real student          |
 | [D-155](./D-155.md) | The generated memes were all a shocked face because our own prompt asked for one                      |
 
@@ -516,7 +516,7 @@ records removed before publication — see [What is not here](#what-is-not-here)
 | [D-139](./D-139.md) | Delete the OpenTofu modules that were never applied                   | Active (one part → D-150)            |
 | [D-140](./D-140.md) | Legibility is the governing constraint                                | Active                               |
 | [D-141](./D-141.md) | The standard breakpoint scale is restored                             | Active                               |
-| [D-142](./D-142.md) | The public demo is a rendered fixture                                 | Active                               |
+| [D-142](./D-142.md) | The public demo is a rendered fixture                                 | Active (premise revised 2026-10-14)  |
 | [D-143](./D-143.md) | The teacher becomes merchant of record                                | Active                               |
 | [D-144](./D-144.md) | Checkout stops collecting an unused address; reordered                | Active                               |
 | [D-145](./D-145.md) | The manual bank-account rail is removed; Wise stays                   | Active                               |

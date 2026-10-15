@@ -9,7 +9,7 @@ import { validateReplyToId } from "@/lib/chat/reply";
 import { trackMessageSent } from "@/lib/chat/analytics";
 import { flushAnalytics } from "@/lib/analytics/posthog";
 
-// Video uploads direct-to-R2 (it exceeds Vercel's ~4.5 MB function body limit):
+// Video uploads direct-to-R2 (the bytes never pass through the app server):
 // GET presigns a PUT ticket, the browser uploads straight to R2, then POST
 // finalizes with the storage path. See lib/storage/chat-media.ts.
 export async function GET(

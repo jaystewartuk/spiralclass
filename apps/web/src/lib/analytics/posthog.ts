@@ -1223,9 +1223,9 @@ export type ServerEvent = WithSessionId<
         bookingId: string;
       };
     }
-  // --- Video call analytics audit follow-up (docs/architecture/
-  // VIDEO_CALL_POSTHOG_AUDIT.md) — everything below closes a gap that report
-  // found. `call_started`/`call_participant_left`/`call_recording_started`
+  // --- Video call analytics audit follow-up — everything below closes a gap a
+  // pre-launch video-call analytics review found (that review was deleted with
+  // the other planning documents under D-110; these events are the record). `call_started`/`call_participant_left`/`call_recording_started`
   // above predate the audit and are unchanged. ---
   | {
       // The webhook counterpart `call_started`/`call_participant_left` were
@@ -1324,10 +1324,10 @@ function getClient(): PostHog | null {
 export function trackServerEvent(event: ServerEvent): void {
   if (process.env.NODE_ENV === "test") return;
   // Stamp the deployment environment on every server event so preview traffic
-  // (the APK + preview.spiralclass.com both point at the preview backend, whose
-  // posthog-node fires these) is separable from production in insights. These
+  // (preview.spiralclass.com's backend fires these through posthog-node too)
+  // is separable from production in insights. These
   // events are the ones the launch dashboard is built on, and posthog-node has
-  // no super-property mechanism, so it's added per event. Hostname/Vercel-based
+  // no super-property mechanism, so it's added per event. APP_URL-based
   // via sentryEnvironment — NOT NODE_ENV (a preview build is NODE_ENV=production).
   //
   // Also stamps `platform: "web"` — every ServerEvent here is emitted by this

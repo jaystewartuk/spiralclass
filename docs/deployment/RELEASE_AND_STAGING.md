@@ -17,8 +17,10 @@ that trigger off the workflow file and refuses before the fast-forward if it is
 ever missing. Preview moved to the Oracle A1 box
 ([D-150](../decisions/D-150.md)), which was destroyed on 2026-09-19
 ([D-182](../decisions/D-182.md)); preview has no deploy target until it is
-rebuilt, and `scripts/oracle-deploy.sh` is the way back. Merging to `main`
-deploys nothing. Production's recovery path from the laptop is
+rebuilt, and `scripts/oracle-deploy.sh` is the way back. Since
+[D-199](../decisions/D-199.md) a merge to `main` starts a production deploy once
+Gate and Heavy are green, and it waits for the owner's approval on the
+`production` environment. Production's recovery path from the laptop is
 [below](#recovering-a-release-by-hand).
 
 This file is the operator runbook — the one-time setup, the everyday release
@@ -205,26 +207,27 @@ is live and `/api/health` is green. Remove `MAINTENANCE_MESSAGE`/
 
 - Create a disposable **Neon preview project** (separate from prod).
 - Apply schema + seed: put the preview `DATABASE_URL` / `DIRECT_URL` in
-  `apps/web/.env.preview.local` (`DIRECT_URL` over the **direct**
+  Infisical's `preview` environment (`DIRECT_URL` over the **direct**
   connection, not the pooler — the pooler breaks the seed's prepared statements;
   there is no `SUPABASE_*` env anymore, D-89), then run
-  `pnpm --filter spiralclass-web migrate:preview` then
-  `pnpm --filter spiralclass-web seed:preview`. (The seed hard-refuses if pointed
-  at the production ref, so a mis-set env can't touch prod.)
+  `pnpm --filter spiralclass-web migrate:preview` then `pnpm seed:preview`. Both
+  read the values from Infisical at run time and write no env file
+  (`infra/infisical/seed-preview.sh`). (The seed hard-refuses if pointed at the
+  production ref, so a mis-set env can't touch prod.)
 - The seed has two layers (`apps/web/scripts/seed.ts`): a **deterministic core**
   — Alicia Moreno (the E2E teacher) plus "hero" teachers covering the full
   subscription matrix (Free at-cap, Pro monthly/annual, Founding, trial,
   past-due, canceled) and both payment rails (Stripe-ready + Wise-only) — and
   **optional bulk volume**. For a realistic preview dataset run
-  `SEED_BULK_TEACHERS=40 pnpm --filter spiralclass-web seed:preview` (tune the count;
+  `SEED_BULK_TEACHERS=40 pnpm seed:preview` (tune the count;
   `SEED_BULK_STUDENTS_PER_TEACHER` defaults to 6). CI seeds the core only.
 - **Logging in to preview** (seed accounts can't receive real email): the
   loginable hero teachers use real `profe.*@spiralclass.com` addresses
   (request a magic link at `/sign-in`), and Alicia Moreno + her students use
   `*.test` addresses reachable only via superadmin **impersonation** at
   `/admin` (which reveals the link/code in the UI instead of emailing it).
-  Reaching `/admin` requires your own email in `SUPERUSER_EMAILS` (main/preview
-  scope) plus MFA.
+  Reaching `/admin` requires your own email in preview's `SUPERUSER_EMAILS`
+  plus MFA.
 
 ### 2. Cloud Run production service
 
@@ -270,7 +273,7 @@ is live and `/api/health` is green. Remove `MAINTENANCE_MESSAGE`/
 ### 4. Feature flags
 
 - Dark-launch with `flagEnabled("FLAG_<NAME>")` (`apps/web/src/lib/flags.ts`). Set
-  `FLAG_<NAME>=on` in the **main/preview** scope and leave it unset in **Production**;
+  `FLAG_<NAME>=on` in **preview**'s runtime environment and leave it unset in **production**;
   flip it on in Production after promotion when you're ready to expose the feature.
 
 ## Migrations (live data)

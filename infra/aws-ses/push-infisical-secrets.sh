@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # Push the SES-sender IAM credential from this module's OpenTofu state to
-# Infisical's "preview" environment (→ synced to the Fly preview app — see
-# infra/infisical/README.md and D-66). Production goes to the production Fly
-# app by hand for now — see README.md.
+# Infisical's "preview" environment (see infra/infisical/README.md and D-66).
+# Preview has no host today (D-184). Production is set by hand in Infisical's
+# "production" environment — see README.md.
 #
 # Run AFTER `tofu apply` has created aws_iam_access_key.ses_sender (this
 # reads Tofu's own state via `tofu output`, not the AWS API directly).
@@ -52,9 +52,9 @@ echo >&2
 echo "Done. Confirm with: infisical secrets --env=preview (values redacted in listing)." >&2
 echo >&2
 echo "Non-secret SES_REGION/SES_FROM still need uncommenting by hand in" >&2
-echo "fly.toml's [env] block (see fly.toml's Amazon SES comment) — this" >&2
+echo "config/env/<env>.runtime.env (preview's lists them, commented) — this" >&2
 echo "script only handles the two genuinely-secret vars." >&2
 echo >&2
-echo "Production is NOT covered by this script — set the same two values on" >&2
-echo "the production Fly app (fly secrets / Infisical 'production' env) by" >&2
-echo "hand; see infra/aws-ses/README.md Part D." >&2
+echo "Production is NOT covered by this script — set the same two values in" >&2
+echo "Infisical's 'production' env by hand; they reach Cloud Run through" >&2
+echo "infra/gcp/push-cloudrun-env.sh. See infra/aws-ses/README.md Part D." >&2

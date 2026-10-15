@@ -447,13 +447,15 @@ That lasts until preview has a LiveKit server of its own.
   legal-gate override (PR #670, 2026-07-21) is filed under **D-94**. A
   short-lived numbering collision meant some contemporaneous notes filed the
   same change under a different number; D-94 is authoritative.
-- **Production LiveKit connectivity cannot be confirmed from the repo.**
-  `docs/deployment/ORACLE_LIVEKIT_PRODUCTION.md` documents an outstanding manual
-  step (production's `LIVEKIT_API_SECRET` possibly not yet matching the
-  self-hosted box) as of D-94's writing, with no later decision doc found
-  confirming it was resolved. If unresolved, production calls would fail to
-  connect outright rather than merely degrade. Verify live before treating
-  video calls as fully operational in production.
+- **Production LiveKit connectivity cannot be confirmed from the repo.** The
+  Oracle-era version of this question — whether production's
+  `LIVEKIT_API_SECRET` matched the self-hosted box — ended with that box, which
+  was destroyed on 2026-09-19 ([D-182](../decisions/D-182.md)). Production now
+  uses the Compute Engine box, and [D-187](../decisions/D-187.md) names the
+  first class booked and joined through the app after its deploy as the check;
+  no record in the tree says that class has run. If the pair in production's
+  secrets is not the box's own, calls fail to connect outright rather than
+  merely degrade.
 - **Vendor keys for captions/transcription (`GOOGLE_TRANSLATE_API_KEY`,
   `DEEPGRAM_API_KEY`, `ANTHROPIC_API_KEY`, or `ASSEMBLYAI_API_KEY`) cannot be
   confirmed present in production from this repo** — verify against Infisical

@@ -1,10 +1,10 @@
 // Shared server helpers for the presigned (direct-to-R2) chat-media upload,
-// used by every mobile + web voice/video route so the presign + finalize
+// used by every voice/video route so the presign + finalize
 // validation lives in one place. Message creation and notification enqueue
 // stay per-route (they differ by direction and media kind).
 //
-// Flow: client GETs a presigned PUT ticket → uploads straight to R2 (bypassing
-// Vercel's ~4.5 MB function body limit) → POSTs the storage path back to
+// Flow: client GETs a presigned PUT ticket → uploads straight to R2 (the bytes
+// never pass through the app server) → POSTs the storage path back to
 // finalize. Finalize re-derives trust from the authenticated (teacher, student)
 // pair — never from the client — so a caller can only attach an object it
 // uploaded, under its own thread's prefix, within the size cap.

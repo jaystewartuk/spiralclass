@@ -133,8 +133,8 @@ export default defineConfig({
     ],
 
     // Global coverage config (read by `vitest run --coverage` regardless of
-    // which workspace project runs). See vitest.workspace.ts for the
-    // unit/integration split.
+    // which project runs). The unit/integration split is the `projects` list
+    // above.
     coverage: {
       provider: "v8",
       // Measure the testable LOGIC layer: lib modules, server actions, and

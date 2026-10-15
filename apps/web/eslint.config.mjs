@@ -309,8 +309,9 @@ export default [
     // the rule for these files at the config level so it's never invoked here.
     // (The hook it was first disabled for, use-live-captions.ts, is deleted.)
     // class-call.tsx's own connect effect hit the identical crash once its
-    // async IIFE grew with the call-analytics instrumentation (docs/architecture/
-    // VIDEO_CALL_POSTHOG_AUDIT.md) — same root cause, same fix.
+    // async IIFE grew with the call-analytics instrumentation (the video-call
+    // analytics audit follow-up in lib/analytics/posthog.ts) — same root cause,
+    // same fix.
     // material-form.tsx's refine-result effect hit it the same way once the
     // AI-editing UX follow-up added the pre-refine snapshot/banner state to
     // its body — tried factoring the body into a named helper function first,

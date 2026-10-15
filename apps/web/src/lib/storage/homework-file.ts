@@ -6,9 +6,9 @@ import { r2BucketConfig, r2ObjectPath, type R2BucketConfig } from "@/lib/storage
 // Homework submission files — private objects in the shared `class-materials`
 // R2 bucket (already provisioned; the admin browser allowlists it), under a
 // `homework/` key prefix so they never collide with teacher-authored class
-// materials. Modelled on chat-file.ts's presigned direct-to-R2 flow: the mobile
-// client PUTs the bytes straight to R2 (bypassing Vercel's ~4.5 MB function
-// body limit), then the finalize route re-validates the server-chosen path and
+// materials. Modelled on chat-file.ts's presigned direct-to-R2 flow: the
+// browser PUTs the bytes straight to R2 (they never pass through the app
+// server), then the finalize route re-validates the server-chosen path and
 // HEADs the object for its real size before writing the DB row.
 //
 // Files are downloaded only through a short-lived signed GET URL minted for the

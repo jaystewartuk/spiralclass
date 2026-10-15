@@ -116,7 +116,7 @@ Single file, single workspace — turbo tasks take no file arguments, so target 
 workspace and forward after `--`:
 
 ```bash
-pnpm --filter spiralclass-web test -- src/lib/money.test.ts
+pnpm --filter spiralclass-web test -- tests/lib/money.test.ts
 pnpm --filter @spiralclass/shared test -- src/money.test.ts
 ```
 

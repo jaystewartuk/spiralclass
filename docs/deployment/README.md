@@ -26,10 +26,15 @@ For how a change gets _to_ a release, see
 
 ## Platform
 
-- **[Oracle LiveKit production](ORACLE_LIVEKIT_PRODUCTION.md)** — the
-  self-hosted video box: LiveKit and Egress.
-- **[Oracle box rebuild](ORACLE_BOX_REBUILD.md)** — standing that box back up
-  from nothing.
+- **[The LiveKit box on Compute Engine](../../infra/gcp-livekit/README.md)** —
+  the self-hosted video server production uses today
+  ([D-187](../decisions/D-187.md)).
+- **[Cloud Run](../../infra/gcp/README.md)** — the production web target's
+  one-time setup ([D-184](../decisions/D-184.md)).
+- **[Oracle LiveKit production](ORACLE_LIVEKIT_PRODUCTION.md)** and
+  **[Oracle box rebuild](ORACLE_BOX_REBUILD.md)** — the former video box,
+  destroyed on 2026-09-19 ([D-182](../decisions/D-182.md)). Kept as the record
+  of the Oracle way back, not a description of anything running.
 - **[Cost playbook](COST_PLAYBOOK.md)** — what each hosted dependency costs at
   this scale, and the levers already pulled.
 - **[Docs site](DOCS_SITE.md)** — the MkDocs build behind `pnpm docs:serve`.

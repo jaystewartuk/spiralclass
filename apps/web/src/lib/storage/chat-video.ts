@@ -10,9 +10,9 @@ import { r2BucketConfig, r2ObjectPath } from "@/lib/storage/provider";
 // phone-quality selfie video at typical camera bitrates (~6–8 Mbps).
 
 // 100 MB — comfortably fits a full 60s selfie clip at phone camera bitrates.
-// Uploads go direct-to-R2 (presigned), so this is no longer bounded by
-// Vercel's ~4.5 MB function body limit; it's just an abuse guard checked
-// against the object's Content-Length at finalize.
+// Uploads go direct-to-R2 (presigned), so this is not bounded by any app-server
+// request-body limit; it's just an abuse guard checked against the object's
+// Content-Length at finalize.
 export const MAX_VIDEO_BYTES = 100 * 1024 * 1024;
 const SIGNED_URL_TTL_SECONDS = 60 * 60 * 24; // 24 hours
 const PUT_TTL_SECONDS = 300;
@@ -31,8 +31,8 @@ function r2Config() {
 }
 
 // --- Direct (presigned) upload path -----------------------------------------
-// Video always exceeds Vercel's ~4.5 MB function request-body limit, so it is
-// uploaded straight to R2 via a presigned PUT and then finalized by path.
+// Video is never proxied through the app server: it is uploaded straight to R2
+// via a presigned PUT and then finalized by path.
 // Mirrors the chat-audio helpers; videos live under the `video/` key prefix.
 
 /** Mint a presigned PUT URL + server-chosen storage path for a new video. */
