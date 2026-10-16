@@ -295,6 +295,11 @@ signal, a quoted span in a homework correction appears in the submission.
 Whether a finding is _insightful_ is the teacher's call, and her confirm/dismiss
 verdicts are read back on the admin overview rather than guessed at here.
 
+A live run takes `ANTHROPIC_API_KEY` from the process environment — exported in
+your shell, or `ANTHROPIC_API_KEY=… pnpm evals`. The committed local env holds
+no vendor key on purpose, and a package script may not read a private env file
+(`tests/config/no-private-env-files.test.ts`). Replay needs no key.
+
 **Committed cases are synthetic.** A real lesson is personal data; keep those
 outside the repository and point `EVAL_CASES_DIR` at them. The guard rejects
 an email address or a phone number in a committed case.

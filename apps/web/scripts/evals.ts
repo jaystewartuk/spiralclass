@@ -8,8 +8,11 @@
 //                                           candidate model, report saved, delta printed
 //   pnpm evals -- --surface homework-review one surface only
 //
-// A live run needs ANTHROPIC_API_KEY (the pnpm script loads the local runtime
-// env). It is never part of the gate: it spends money, needs the network and
+// A live run needs ANTHROPIC_API_KEY in the process environment — exported in
+// the shell, or on the command line. The committed local runtime env holds no
+// vendor key on purpose, and a package script may not read a private env file
+// (tests/config/no-private-env-files.test.ts); the environment is the first
+// source by design (config/env/README.md). It is never part of the gate: it spends money, needs the network and
 // scores rather than passes. Exit code is 0 unless a case could not be loaded
 // or no case ran — a low score is a finding for the PR, not a build failure.
 
@@ -201,7 +204,7 @@ async function main() {
   if (cases.length === 0) throw new Error("no cases matched");
   if (!args.replay && !process.env.ANTHROPIC_API_KEY) {
     throw new Error(
-      "ANTHROPIC_API_KEY is not set (the local runtime env has none; the platform key is in the secret store); use --replay to score recorded outputs",
+      "ANTHROPIC_API_KEY is not set: export it in your shell (ANTHROPIC_API_KEY=… pnpm evals), or use --replay to score recorded outputs",
     );
   }
 
