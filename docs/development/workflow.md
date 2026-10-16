@@ -343,7 +343,7 @@ fails the gate.
 point-in-time recovery plus the pre-migration checkpoint;
 `scripts/local/backup-prod-db.sh` is an unregistered on-demand tool, left
 unregistered so nothing nags about a decision already made. See
-[`LOCAL_AUTOMATION.md`](../deployment/LOCAL_AUTOMATION.md).
+[Maintenance jobs](../deployment/RELEASE_AND_STAGING.md#maintenance-jobs).
 
 ## Releases and versioning
 
