@@ -58,6 +58,16 @@ export async function createHomeworkFeedback(
   const isLatestAttempt = attempt.attemptNumber === attemptCount;
 
   const created = await prisma.$transaction(async (tx) => {
+    // The draft on screen when she sent this, if any: the review card shows
+    // the latest draft that has not been regenerated past, so that is the one
+    // this feedback started from. Informational — the content may be a
+    // rewrite — and the only "a draft was used" signal the AI-quality figure
+    // on the admin overview has (lib/ai/quality-metrics.ts, D-201).
+    const draft = await tx.homeworkAiReviewDraft.findFirst({
+      where: { attemptId: attempt.id, teacherId: teacher.id, discardedAt: null },
+      orderBy: { createdAt: "desc" },
+      select: { id: true },
+    });
     const feedback = await tx.homeworkFeedback.create({
       data: {
         attemptId: attempt.id,
@@ -65,6 +75,7 @@ export async function createHomeworkFeedback(
         decision: input.decision,
         content: input.content,
         score: input.score ?? null,
+        aiDraftId: draft?.id ?? null,
       },
     });
     if (isLatestAttempt) {

@@ -228,7 +228,13 @@ export function capPerCategory(insights: Insight[], max = MAX_INSIGHTS_PER_CATEG
 
 // Generate insights via Claude with a forced tool call. Throws
 // InsightsUnavailableError when no key is configured; lets SDK errors propagate.
-export async function generateInsights(input: InsightsInput): Promise<Insight[]> {
+// `options.model` exists for the offline evals (scripts/evals.ts), which run
+// the same prompt against a candidate model before INSIGHTS_MODEL is changed
+// (D-201); the pipeline never passes it.
+export async function generateInsights(
+  input: InsightsInput,
+  options: { model?: string } = {},
+): Promise<Insight[]> {
   const apiKey = anthropicApiKey();
   if (!apiKey) throw new InsightsUnavailableError("ANTHROPIC_API_KEY not configured");
 
@@ -236,7 +242,7 @@ export async function generateInsights(input: InsightsInput): Promise<Insight[]>
   const { system, user } = buildInsightsPrompt(input);
 
   const response = await client.messages.create({
-    model: INSIGHTS_MODEL,
+    model: options.model ?? INSIGHTS_MODEL,
     max_tokens: 2048,
     system,
     messages: [{ role: "user", content: user }],

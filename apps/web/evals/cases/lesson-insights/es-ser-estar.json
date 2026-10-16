@@ -1,0 +1,46 @@
+{
+  "surface": "lesson-insights",
+  "name": "es-ser-estar",
+  "about": "A Spanish lesson with two clear ser/estar slips and a teacher cue naming them; findings must quote the student and stay in grammar/vocabulary.",
+  "input": {
+    "studentName": "Sam",
+    "targetLanguage": "es",
+    "outputLanguage": "English",
+    "utterances": [
+      { "speaker": "teacher", "text": "Hola Sam, ¿qué tal el fin de semana?", "atMs": 0 },
+      { "speaker": "student", "text": "Bien, pero yo soy muy cansado hoy.", "atMs": 4200 },
+      {
+        "speaker": "teacher",
+        "text": "Estoy cansado — con estar, porque es cómo te sientes ahora.",
+        "atMs": 9100
+      },
+      {
+        "speaker": "student",
+        "text": "Ah sí, estoy cansado. Mi hermana es en Madrid esta semana.",
+        "atMs": 15300
+      },
+      { "speaker": "teacher", "text": "Está en Madrid. ¿Y qué hace allí?", "atMs": 21000 },
+      {
+        "speaker": "student",
+        "text": "Ella trabaja en una oficina y le gusta mucho la ciudad.",
+        "atMs": 26800
+      },
+      { "speaker": "teacher", "text": "Muy bien. ¿Y tú, qué hiciste el sábado?", "atMs": 33500 },
+      {
+        "speaker": "student",
+        "text": "El sábado fui al mercado con mi amigo y compramos frutas.",
+        "atMs": 39000
+      }
+    ],
+    "teacherCues": [
+      { "body": "ser vs estar — states and location", "done": true },
+      { "body": "preterite of ir", "done": false }
+    ],
+    "studentNotes": []
+  },
+  "expect": {
+    "categories": ["grammar", "vocabulary", "fluency"],
+    "mustMention": ["estar"],
+    "maxFindings": 4
+  }
+}

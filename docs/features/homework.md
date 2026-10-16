@@ -166,6 +166,13 @@ prose.
   changes what the student sees as their live status.
 - Giving feedback fires a best-effort student notification; a notification
   failure never blocks the feedback from being saved.
+- **A draft leaves a verdict** ([D-201](../decisions/D-201.md)). Feedback sent
+  while an AI review draft is on screen is linked to that draft — the latest
+  one for the attempt that has not been regenerated past — as the draft it
+  started from; the content may be a rewrite. Regenerating marks the attempt's
+  earlier drafts discarded, never deleted. Used-over-decided is the figure the
+  admin overview shows; it is a ceiling, since a teacher who read a draft and
+  wrote her own still counts as having started from it.
 
 ## User Flow (step by step)
 

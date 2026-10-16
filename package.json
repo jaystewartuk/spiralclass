@@ -44,6 +44,7 @@
     "check:links": "node apps/web/scripts/check-links.mjs",
     "check:counts": "node scripts/readme-counts.mjs",
     "issue:check": "node scripts/issue-check.mjs",
+    "evals": "pnpm --filter spiralclass-web evals",
     "prepare": "git config core.hooksPath .githooks || true",
     "reset:preview": "bash infra/infisical/reset-preview.sh",
     "gate:lock": "node scripts/ci/lock.mjs status"

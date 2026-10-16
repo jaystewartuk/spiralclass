@@ -257,6 +257,7 @@ which is a separate control from the flag that turns the capability on.
 | [D-114](./D-114.md) | Turn transcription and recording off — and the capture bug that flag flip exposed            |
 | [D-131](./D-131.md) | Turn them back on, and correct the four sentences of the privacy policy that said otherwise  |
 | [D-136](./D-136.md) | Closing an account destroys its recordings — making a published promise true                 |
+| [D-201](./D-201.md) | A model call site ships with an eval set; the teacher's verdict on its output is a figure    |
 
 ### Teaching content and materials
 
@@ -570,6 +571,7 @@ records removed before publication — see [What is not here](#what-is-not-here)
 | [D-198](./D-198.md) | Captions show words as spoken; the translation replaces them          | Active (narrows D-27, D-185)         |
 | [D-199](./D-199.md) | A merge starts its own production deploy, behind the approval         | Active (narrows D-119, D-157)        |
 | [D-200](./D-200.md) | Preview returns on Cloud Run, deployed by every merge                 | Decided, not built (reverses D-184)  |
+| [D-201](./D-201.md) | A model call site ships with an eval set; verdicts become a figure    | Active (narrows D-87)                |
 
 ---
 

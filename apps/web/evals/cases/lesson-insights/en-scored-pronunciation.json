@@ -1,0 +1,53 @@
+{
+  "surface": "lesson-insights",
+  "name": "en-scored-pronunciation",
+  "about": "An English lesson with audio pronunciation scores; a pronunciation finding must name a scored weak word and sit on its timestamp, never on spelling.",
+  "input": {
+    "studentName": "Mateo",
+    "targetLanguage": "en",
+    "outputLanguage": "Spanish",
+    "utterances": [
+      { "speaker": "teacher", "text": "Tell me about your week, Mateo.", "atMs": 0 },
+      {
+        "speaker": "student",
+        "text": "This week I worked a lot and I thought about the project every day.",
+        "atMs": 3800
+      },
+      { "speaker": "teacher", "text": "Good. What was the hardest part?", "atMs": 10200 },
+      {
+        "speaker": "student",
+        "text": "The hardest part was the schedule, because three people were sick.",
+        "atMs": 14500
+      },
+      { "speaker": "teacher", "text": "Say that word again for me — schedule.", "atMs": 21000 },
+      {
+        "speaker": "student",
+        "text": "Schedule. It is difficult with the th sound too, like thought.",
+        "atMs": 24300
+      }
+    ],
+    "teacherCues": [{ "body": "th sound, word stress", "done": true }],
+    "studentNotes": [],
+    "pronunciation": {
+      "weakWords": [
+        {
+          "word": "thought",
+          "accuracy": 41,
+          "atMs": 3800,
+          "phonemes": [{ "phoneme": "θ", "accuracy": 22 }]
+        },
+        { "word": "schedule", "accuracy": 55, "atMs": 14500 },
+        {
+          "word": "three",
+          "accuracy": 48,
+          "atMs": 14500,
+          "phonemes": [{ "phoneme": "θ", "accuracy": 30 }]
+        }
+      ]
+    }
+  },
+  "expect": {
+    "mustMention": ["thought"],
+    "maxFindings": 4
+  }
+}

@@ -5558,6 +5558,10 @@ export const esMX = {
   "web.admin.overview.auditOverrides": "Anulaciones de auditoría",
   "web.admin.overview.grossPaid": "Total pagado",
   "web.admin.overview.paymentsHint": "{count} pagos",
+  "web.admin.overview.aiInsightsKept": "Hallazgos de IA conservados",
+  "web.admin.overview.aiDraftsUsed": "Borradores de IA usados en tareas",
+  "web.admin.overview.aiVerdictsHint":
+    "{kept} conservados · {rejected} descartados · {pending} sin revisar",
   "web.admin.overview.refundedPayments": "Pagos reembolsados",
   "web.admin.overview.queuedNotifications": "Notificaciones en cola",
   "web.admin.overview.failedNotifications": "Notificaciones fallidas",

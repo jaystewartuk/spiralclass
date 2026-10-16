@@ -96,14 +96,17 @@ const aiReviewCreate = vi.fn(
       createdAt: new Date("2026-07-25T00:00:00Z"),
     }) as unknown,
 );
+const aiReviewDiscard = vi.fn(async (..._: unknown[]) => ({ count: 0 }) as unknown);
 const materialFindUnique = vi.fn(async (..._: unknown[]) => null as unknown);
 
 const prismaMock = {
   homeworkAiReviewDraft: {
     count: (...a: unknown[]) => aiReviewCount(...a),
     create: (...a: unknown[]) => aiReviewCreate(...a),
+    updateMany: (...a: unknown[]) => aiReviewDiscard(...a),
   },
   libraryMaterial: { findUnique: (...a: unknown[]) => materialFindUnique(...a) },
+  $transaction: async (fn: (tx: unknown) => Promise<unknown>) => fn(prismaMock),
 };
 vi.mock("@/lib/prisma", () => ({ prisma: prismaMock }));
 
@@ -153,6 +156,27 @@ describe("requestHomeworkAiReview", () => {
         model: "claude-sonnet-5",
       },
     });
+  });
+
+  // A regenerate is the teacher's verdict on the draft she had: it is marked
+  // discarded (never deleted) so the AI-quality figure can count it
+  // (lib/ai/quality-metrics.ts), and only this attempt's live drafts are touched.
+  it("marks the attempt's earlier live drafts discarded when a new one is generated", async () => {
+    await requestHomeworkAiReview(TEACHER as never, "at1", {}, "en");
+    expect(aiReviewDiscard).toHaveBeenCalledWith({
+      where: { attemptId: "at1", teacherId: "t1", discardedAt: null },
+      data: { discardedAt: expect.any(Date) },
+    });
+    expect(aiReviewDiscard.mock.invocationCallOrder[0]).toBeLessThan(
+      aiReviewCreate.mock.invocationCallOrder[0]!,
+    );
+  });
+
+  it("leaves every draft in place when the model call fails", async () => {
+    generateHomeworkAiReview.mockResolvedValue({ ok: false, reason: "error" });
+    await requestHomeworkAiReview(TEACHER as never, "at1", {}, "en");
+    expect(aiReviewDiscard).not.toHaveBeenCalled();
+    expect(aiReviewCreate).not.toHaveBeenCalled();
   });
 
   it("passes the attempt text and assignment context into the prompt inputs", async () => {
