@@ -28,10 +28,10 @@ Four conventions are worth knowing before reading any of them.
   decision did _not_ fix, what was accepted, and what would reopen it. A record
   that names an open gap is a record doing its job — the alternative is a log
   that only says what went well, which is worth nothing to the next person.
-- **A superseded decision stays and is marked, never deleted.** Where a later
-  decision reverses an earlier one, both are here and the header says which is
-  live. The reasoning trail is the point, so a reversal is recorded rather than
-  resolved by removing what it reversed.
+- **One record per live decision, amended in place** ([D-202](./D-202.md)).
+  A record that a later one absorbed is deleted and its number is listed under
+  [Retired numbers](#retired-numbers) with where its reasoning went. The
+  original records are in git history.
 - **Read alongside the code, not instead of it.** Several records describe
   software that has since changed; the status line at the top of a record is
   the only claim about what is live today.
@@ -406,6 +406,7 @@ a hook — is a caller.
 | [D-158](./D-158.md) | Publish the shape, never the account — a third gate on the credential scanner                                        |
 | [D-159](./D-159.md) | What was built is published; what the operator personally owes is not                                                |
 | [D-181](./D-181.md) | **A security fix lands as a public PR with a neutral title**, pushed only when it can ship                           |
+| [D-202](./D-202.md) | **One record per live decision, edited in place**; absorbed numbers retired, never reused                            |
 
 ### Naming and positioning
 
@@ -572,14 +573,33 @@ records removed before publication — see [What is not here](#what-is-not-here)
 | [D-199](./D-199.md) | A merge starts its own production deploy, behind the approval         | Active (narrows D-119, D-157)        |
 | [D-200](./D-200.md) | Preview returns on Cloud Run, deployed by every merge                 | Decided, not built (reverses D-184)  |
 | [D-201](./D-201.md) | A model call site ships with an eval set; verdicts become a figure    | Active (narrows D-87)                |
+| [D-202](./D-202.md) | One record per live decision, edited in place                         | Active                               |
+
+---
+
+## Retired numbers
+
+A number whose record was absorbed into a live one, or dropped because what it
+held was behaviour or a rule, is listed here with where its reasoning went
+([D-202](./D-202.md)). A retired number is never reused, and a row is never
+removed: applied migrations cite some of these and cannot be edited. Outside
+migrations, cite the live record instead.
+
+| #   | Where its reasoning went |
+| --- | ------------------------ |
 
 ---
 
 ## Adding one
 
-A change significant enough to set or reverse policy gets a record. Copy
-[`_template.md`](./_template.md) to the next unused number, fill it in, and add
-a row to both the theme table and the numeric index above.
+**Most changes do not need a record.** One is warranted only when there were at
+least two real options, a wrong choice is expensive or hard to undo, and someone
+could plausibly undo it without knowing why. Otherwise the reasoning goes in the
+PR body, behaviour in [`docs/features/`](../features/), and the constraint in a
+guard test.
 
-Read the record you are about to reverse first, and say in the new one what
-changed about its premise — that is the part the log exists for.
+**If a record for the topic exists, amend it** — rewrite what is now true and
+add the change to its How we got here section, saying what changed about the
+premise. Only a new topic gets a new number: copy
+[`_template.md`](./_template.md) to the next unused number (never a retired
+one), and add a row to both the theme table and the numeric index above.

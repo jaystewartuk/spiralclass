@@ -357,9 +357,9 @@ build` does not fail on type errors by itself.
   _"fix: class list dedupe"_. The body says why; the diff says what. **A
   security fix is the exception** — neutral title, pushed only when it can ship
   ([SECURITY.md](SECURITY.md#how-a-security-fix-lands)).
-- **A change that sets or reverses policy gets a decision record** — copy
-  `docs/decisions/_template.md` to the next unused number and add a row to both
-  tables in its README.
+- **A decision record only when** there were two real options, a wrong choice
+  is costly to undo, and someone could undo it unknowingly (D-202). Amend the
+  topic's record; else PR body, `docs/features/`, a guard. `docs/decisions/_template.md`.
 
 ---
 
