@@ -114,7 +114,7 @@ export default async function PurchasePage({
   );
 
   // Preload the availability window so the slot picker can render client-side
-  // (the student picks a time before paying). Since D-111 this is needed for
+  // (the student picks a time before paying). This is needed for
   // every offering, not just individual classes — a package offers its FIRST
   // class here — so it's loaded whenever the teacher has anything to sell, and
   // skipped only when she has nothing (the empty state below renders no flow).
@@ -149,7 +149,7 @@ export default async function PurchasePage({
   const templatesWithApprox = teacher.packageTemplates.map((tpl) => ({
     ...tpl,
     approxUsdCents: approxUsdCents(tpl.priceMinorUnits, tpl.currency),
-    // The same approximation for the price for two (D-188), so switching to
+    // The same approximation for the price for two (D-149), so switching to
     // "Two of us" never drops the dollar figure the buyer was reading.
     twoPersonApproxUsdCents: approxUsdCents(tpl.twoPersonPriceMinorUnits, tpl.currency),
   }));

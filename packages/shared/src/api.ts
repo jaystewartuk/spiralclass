@@ -146,7 +146,7 @@ export type Material = {
   // client show the picture inline instead of a bare "open this" link, which
   // is the whole point for a visual learner. Absent/false = render the link.
   isImage?: boolean;
-  // Null = "always visible, no notification" (D-69's exposed always-visible
+  // Null = "always visible, no notification" (the exposed always-visible
   // state) — the attachment isn't on a push schedule at all.
   sendTiming: MaterialSendTiming | null;
   createdAt: string;
@@ -244,7 +244,7 @@ export type ContinuationCandidate = {
   preview: string;
 };
 
-// In-class live notes (live-notes-panel.md, D-15). A per-booking cue list with
+// In-class live notes (docs/features/classes-lesson-content.md). A per-booking cue list with
 // two audiences from one author. The teacher endpoint returns both; the student
 // endpoint returns only `audience: "student"` rows, gated server-side to the
 // class window. `done` is meaningful only for teacher-audience cues.

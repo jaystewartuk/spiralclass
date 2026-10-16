@@ -154,7 +154,7 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  # ── The database: checkpoint, then migrate. Once per commit ([D-95]) ──────
+  # ── The database: checkpoint, then migrate. Once per commit ([D-178]) ──────
   #
   # The target does not own this, and neither did any of the three that have
   # served this Neon branch. It holds the database and Neon credentials and
@@ -178,7 +178,7 @@ jobs:
     env:
       DATABASE_URL: ${{ secrets.DATABASE_URL }}
       DIRECT_URL: ${{ secrets.DIRECT_URL }}
-      # The pre-migration Neon checkpoint (D-95). It is FAIL-CLOSED — no
+      # The pre-migration Neon checkpoint (D-178). It is FAIL-CLOSED — no
       # credential, no checkpoint, no migration — and that must stay true. A
       # migration is the one thing redeploying the previous image cannot undo.
       NEON_API_KEY: ${{ secrets.NEON_API_KEY }}
@@ -262,7 +262,7 @@ jobs:
             echo "| Commit | \`${GITHUB_SHA}\` |"
             echo "| Branch | Neon \`production\` |"
             echo
-            echo "Checkpointed before migrations ran (D-95), by \`scripts/database-deploy.sh\`."
+            echo "Checkpointed before migrations ran (D-178), by \`scripts/database-deploy.sh\`."
             echo "The Cloud Run job needs this one, and holds no database credential."
           } >> "$GITHUB_STEP_SUMMARY"
 

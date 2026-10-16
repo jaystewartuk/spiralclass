@@ -144,10 +144,10 @@ enum MaterialSendTiming {
   t_1h
 }
 
-// In-class "live notes" co-pilot (docs/features/classes-lesson-content.md, D-15).
+// In-class "live notes" co-pilot (docs/features/classes-lesson-content.md).
 // `teacher` cues are private to the teacher; `student` instructions surface on
 // the student's booking detail inside the class window (visibility derived from
-// the booking schedule, not a stored flag — see D-15).
+// the booking schedule, not a stored flag).
 enum NoteAudience {
   teacher
   student
@@ -425,7 +425,7 @@ model Teacher {
   // values, mirroring teachers_country_iso_format.
   pricingCurrency String    @default("MXN") @map("pricing_currency")
   // What a package bought for two costs, as a percent of the one-person price
-  // (D-188). Only ever a SUGGESTION: the package editor fills a new two-person
+  // (D-149). Only ever a SUGGESTION: the package editor fills a new two-person
   // price from it, and every price is then stored explicitly on the template.
   // 150 = the second person pays half. `teachers_two_person_price_percent_range`
   // (migration 20260927120000_packages_for_two) keeps it within 100..300.
@@ -1593,7 +1593,7 @@ model PackageTemplate {
   // manual-transfer instrument, not just Wise.
   transferPriceMinorUnits Int?     @map("transfer_price_minor_units")
   // The price of this package bought for TWO people who take every class
-  // together — a couple, two siblings — paid once by one buyer (D-188). Null =
+  // together — a couple, two siblings — paid once by one buyer (D-149). Null =
   // not offered for two. Stored explicitly rather than derived from
   // `Teacher.twoPersonPricePercent` at checkout: the percent only suggests a
   // price in the editor, and a charge is always a number someone saw.
@@ -1642,13 +1642,13 @@ model Package {
   scheduleChangesUsed Int           @default(0) @map("schedule_changes_used")
   classDurationMin    Int           @default(50) @map("class_duration_min")
   // How many people take each class on this package: 1, or 2 for a package
-  // bought for two (D-188). Snapshotted at purchase like the price. Credits
+  // bought for two (D-149). Snapshotted at purchase like the price. Credits
   // are fungible only within one (teacher, class length, seats) pool — see
   // lib/booking/credit-ledger.ts. `packages_seats_one_or_two` (migration
   // 20260927120000_packages_for_two) keeps it to those two values.
   seats               Int           @default(1)
   // When the buyer confirmed the second person agrees to the lesson-insights
-  // terms the buyer chooses (D-188). Null on every one-person package, and on
+  // terms the buyer chooses (D-149). Null on every one-person package, and on
   // a two-person package recorded by the teacher rather than bought — for
   // which insights capture stays off (lib/video/call-recording.ts).
   partnerConsentAt    DateTime?     @map("partner_consent_at") @db.Timestamptz
@@ -1764,7 +1764,7 @@ model Booking {
   student             Student                  @relation(fields: [studentId], references: [id], onDelete: Restrict)
   rescheduleOf        Booking?                 @relation("Reschedule", fields: [rescheduleOfBookingId], references: [id], onDelete: SetNull)
   reschedules         Booking[]                @relation("Reschedule")
-  // Private, booking-scoped materials (D-69) — a file/link sent on a schedule,
+  // Private, booking-scoped materials — a file/link sent on a schedule,
   // or the class's AI/typed lesson content (bookingId set, sendTiming null).
   materials           LibraryMaterial[]
   // Reusable library items attached to this class (gap G3) — distinct from
@@ -1815,7 +1815,7 @@ enum NoteKind {
 // In-class live note — a per-booking cue (teacher) or instruction (student).
 // Sibling of ClassMaterial: materials are files sent ahead of time; notes are
 // short text shown at class time. Tenant-scoped by teacherId like every
-// other per-class row. See docs/features/classes-lesson-content.md + D-15.
+// other per-class row. See docs/features/classes-lesson-content.md.
 model LessonNote {
   id        String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   bookingId String       @map("booking_id") @db.Uuid
@@ -2098,7 +2098,7 @@ model ClassContentTemplate {
 }
 
 // AI post-class summary — one teacher-private recap per booking, generated from
-// the class's live notes after it ends (live-notes-panel.md "step 2", D-15).
+// the class's live notes after it ends (docs/features/classes-lesson-content.md).
 // Teacher-only: never shown to a student, so there is no student RLS policy.
 model LessonSummary {
   id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
@@ -2488,7 +2488,7 @@ model FocusTag {
 //     schedule) and ClassContent (AI/typed lesson content, always visible,
 //     one per booking in practice though not DB-enforced). Never appears in
 //     the level-gated browse shelf or any other class.
-// This merge (docs/features/library-materials.md, D-69) intentionally keeps
+// This merge (docs/features/library-materials.md) intentionally keeps
 // the Prisma/table name `LibraryMaterial` — renaming it would ripple through
 // every consumer (wire types, storage paths, the focus-tag join table
 // name) for no functional gain; `bookingId` is the only thing that changes
@@ -2508,7 +2508,7 @@ model LibraryMaterial {
   storagePath   String?             @map("storage_path") // reuses class-materials bucket
   linkUrl       String?             @map("link_url")
   // Reusable native content (docs/features/classes-lesson-content.md,
-  // D-20, Layer 4; generalized from ClassContent by D-69). A material is one
+  // D-20, Layer 4; generalized from ClassContent). A material is one
   // of three kinds: a file (storagePath), an external link (linkUrl), or
   // native Markdown content (`body`) — rendered natively, never as raw HTML.
   // `contentSource` records provenance (manual vs ai).
@@ -2551,7 +2551,7 @@ model LibraryMaterial {
 }
 
 // Version history for a material's `body` (generalized from the old
-// ClassContentRevision by D-69 — see docs/features/library-materials.md). A
+// ClassContentRevision — see docs/features/library-materials.md). A
 // row is written for the PREVIOUS body just before it's overwritten by a save
 // (including a "restore," which is itself a save, so what it replaces is
 // snapshotted too — restores stay reversible in both directions). Applies to

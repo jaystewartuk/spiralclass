@@ -5,7 +5,7 @@ import { describe, expect, it } from "vitest";
 import { REPO_ROOT } from "../../../../scripts/env-config.mjs";
 
 // Locks the checkpoint-retention contract for the pre-migration Neon safety net
-// (D-95): `scripts/database-deploy.sh`'s production path creates a `pre-deploy-*`
+// (D-178): `scripts/database-deploy.sh`'s production path creates a `pre-deploy-*`
 // branch before any migration touches production, and that step fails closed.
 // Since the production targets were split ([D-177]'s addendum) that script is
 // the deploy workflow's `database` job, and the first step of a hand-run
@@ -186,7 +186,7 @@ describe("neon checkpoint retention", () => {
 //   1. The key is no longer REQUIRED, or the deploy is coupled to a secret
 //      again.
 //   2. The refusal is unchanged. Losing the key was never the danger; a
-//      migration with no restore point is. "No checkpoint, no deploy" (D-95)
+//      migration with no restore point is. "No checkpoint, no deploy" (D-178)
 //      has to survive a change whose whole subject is the credential.
 describe("neon auth (D-146 follow-up)", () => {
   const checkpoint = () => readFileSync(SCRIPT_SH, "utf8");
@@ -251,7 +251,7 @@ describe("neon auth (D-146 follow-up)", () => {
   });
 
   it("...but production still refuses to migrate without a checkpoint", () => {
-    // The load-bearing half. This is D-95's rule, and the credential change
+    // The load-bearing half. This is D-178's rule, and the credential change
     // must not have relaxed it: database-deploy.sh (the Fly script's steps 1–2
     // until the targets were split) still calls the checkpoint on the
     // production path, and the script still exits non-zero when the create

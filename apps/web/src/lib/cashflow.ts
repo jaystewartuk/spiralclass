@@ -444,7 +444,7 @@ export function apportion(total: number, weights: number[]): number[] {
   return parts;
 }
 
-// A no-show is forfeited time the teacher earned (D-12): it is delivered for
+// A no-show is forfeited time the teacher earned: it is delivered for
 // the earned/held split, so it is earned in the month it was booked for too.
 // One list, so the monthly figures and the all-time split cannot disagree
 // about what counts.

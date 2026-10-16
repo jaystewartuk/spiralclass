@@ -84,7 +84,7 @@ describe("gateProFeature (materials + custom price + lesson_notes)", () => {
     expect(await gateProFeature("t2", "custom_price", pro.db)).toEqual({ ok: true });
   });
 
-  it("gates live-notes present mode the same way (D-15: authoring free, live Pro)", async () => {
+  it("gates live-notes present mode the same way (authoring free, live Pro)", async () => {
     const free = makeFakePrisma({ subs: [freeSub("t1")] });
     const pro = makeFakePrisma({ subs: [proSub("t2")] });
     expect(await gateProFeature("t1", "lesson_notes", free.db)).toMatchObject({
@@ -140,7 +140,7 @@ describe("upgradeNudge", () => {
   });
 });
 
-// Packages for two (D-188) are Pro, gated like the template cap: only
+// Packages for two (D-149) are Pro, gated like the template cap: only
 // switching a NEW one on is refused, so a downgrade never takes a price for two
 // off a booking page.
 describe("gateTwoPersonSet (replace-set, grandfathered)", () => {

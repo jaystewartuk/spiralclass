@@ -84,7 +84,7 @@ export default async function StudentPortalPage({
     include: {
       teacher: { select: { name: true, timezone: true } },
       package: { select: { classDurationMin: true, template: { select: { name: true } } } },
-      // Every class-scoped/private material (D-69 merge) — a file/link
+      // Every class-scoped/private material (merged into LibraryMaterial) — a file/link
       // attachment OR native written content (body set) alike; both count
       // toward "has materials". A scheduled or always-visible attachment
       // qualifies once its send time has elapsed; materialSendTimeElapsed

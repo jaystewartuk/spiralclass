@@ -1,7 +1,7 @@
 # Release & preview runbook
 
 Policy: **D-26**, superseded in part by **D-70** (production moved from
-Vercel+Supabase to Fly+Neon), **D-95** (database rollback moved from an R2
+Vercel+Supabase to Fly+Neon), **D-178** (database rollback moved from an R2
 pg_dump to Neon PITR + checkpoint branches), **D-119** (the test gates run on
 the operator's machine), **D-129** (which deleted every GitHub Actions
 workflow), **D-157** (which brought the workflows back once the
@@ -78,7 +78,7 @@ instead. Only the five newest images are kept, so that is the rollback depth.
 
 **This only rolls back code, never the database.** A code rollback does not
 undo a migration or bad data change. `scripts/database-deploy.sh` checkpoints
-the Neon `production` branch before every production migration (D-95) —
+the Neon `production` branch before every production migration (D-178) —
 restore it in seconds with `infra/database/scripts/neon-rollback.sh`, Neon's
 own point-in-time restore. See [`DB_BACKUP_RESTORE.md`](./DB_BACKUP_RESTORE.md) for the full
 restore procedure and the fastest safe recovery path for a failed migration.

@@ -21,7 +21,7 @@ import { InstructionsOverlay } from "./instructions-overlay";
 // their purchase) and by LiveKit being configured. Call *access* is no longer
 // time-windowed — a student can join whenever the teacher can (e.g. a few minutes
 // early), matching the teacher surface. The student's written instructions are
-// still only revealed inside the class window (D-15), so joining early shows the
+// still only revealed inside the class window, so joining early shows the
 // call without leaking notes the teacher prepped ahead.
 export default async function StudentCallPage({
   params,
@@ -69,7 +69,7 @@ export default async function StudentCallPage({
     name: student.name,
   });
 
-  // Instructions are revealed only inside the class window (D-15), even though
+  // Instructions are revealed only inside the class window, even though
   // the call itself can be joined earlier.
   const notesVisible = lessonNoteStudentVisible(
     booking.scheduledStart,

@@ -63,7 +63,7 @@ let usedRows: unknown[] = [];
 
 vi.mock("@/lib/prisma", () => ({
   prisma: {
-    // Two distinct queries share this model (D-69): the plain reusable library
+    // Two distinct queries share this model: the plain reusable library
     // list (bookingId absent from the where clause) and the cross-booking
     // scheduled-materials rollup (bookingId: { not: null }).
     libraryMaterial: {

@@ -263,7 +263,7 @@ That lasts until preview has a LiveKit server of its own.
     student's recorded insights consent** exists. For a **minor student**, the
     student's own consent is explicitly **not sufficient by itself** — a
     guardian's consent must be on file. A class for two also needs the buyer's
-    confirmation for the second person (D-188). The route re-checks this per
+    confirmation for the second person (D-149). The route re-checks this per
     line; without it, nothing of either speaker is kept.
 22. A missing teacher-student pairing record blocks keeping outright.
 23. Lines are appended atomically to one per-booking `LessonTranscript`

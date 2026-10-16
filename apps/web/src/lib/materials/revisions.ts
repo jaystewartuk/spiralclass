@@ -2,7 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { CLASS_CONTENT_MAX_REVISIONS, type ClassContentSource } from "@/lib/materials/config";
 
 // Version history (task 5), generalized by the ClassContent/LibraryMaterial
-// merge (D-69) from a per-booking log to a per-material one — a separate
+// merge from a per-booking log to a per-material one — a separate
 // append-only log, not a version of the material row itself. Today this is
 // only ever exercised by the booking-scoped "class content" material (the one
 // whose body is edited in place), but any material with a body could grow

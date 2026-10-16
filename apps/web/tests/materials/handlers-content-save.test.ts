@@ -46,7 +46,7 @@ const refineMaterial = vi.fn(async () => state.refine);
 vi.mock("@/lib/ai/anthropic", () => ({ generateMaterial, refineMaterial }));
 
 // The booking-scoped "content" material — a LibraryMaterial row with
-// bookingId set, sendTiming null, body set (D-69). Tests mutate
+// bookingId set, sendTiming null, body set. Tests mutate
 // `contentStored` to model the row that "exists" before a given save.
 let contentStored: { id: string; body: string; contentSource: string } | null = null;
 let libraryMaterialStored: { id: string; body: string; contentSource: string } | null = null;

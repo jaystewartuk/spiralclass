@@ -96,7 +96,7 @@ function PackageRow({
               <span className="font-medium">
                 {pkg.template?.name ?? t("web.dashboard.students.package.packageLabel")}
               </span>
-              {/* Bought for two (D-188): the one fact about this package that
+              {/* Bought for two (D-149): the one fact about this package that
                   changes who is in the room, and that the name alone does not
                   have to say. */}
               {pkg.seats === 2 && <Badge variant="info">{t("web.packages.twoPerson.badge")}</Badge>}

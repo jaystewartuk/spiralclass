@@ -91,7 +91,7 @@ export async function gateTemplateSet(
   return { ok: false, limit: "templates", cap: ent.templateLimit };
 }
 
-// Replace-set gate for packages sold for two (D-188), in the same shape as
+// Replace-set gate for packages sold for two (D-149), in the same shape as
 // gateTemplateSet: it only blocks ADDING. A Free teacher keeps — and may
 // reprice — every two-person offer she already had, so a downgrade never
 // takes a price off her booking page; she cannot switch a new one on.
@@ -113,9 +113,9 @@ export async function gateTwoPersonSet(
 
 // Pro-only feature gate (class-materials scheduling, class-content authoring +
 // AI compose, per-student custom price, live-notes present mode + realtime
-// student panel — D-15/D-17). class_content rides the same Pro entitlement as
+// student panel — D-17). class_content rides the same Pro entitlement as
 // materials — both are content-authoring tools, free to view and Pro to author.
-// sell_for_two covers a package for two recorded by hand (D-188); the package
+// sell_for_two covers a package for two recorded by hand (D-149); the package
 // editor's replace-set uses gateTwoPersonSet above instead.
 export async function gateProFeature(
   teacherId: string,

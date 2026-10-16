@@ -7,7 +7,7 @@
 //
 //   2. "Does paying RESERVE the slot?"  A fact about how it is SOLD. It decides
 //      whether checkout refuses to take money until a time is chosen
-//      (pay-at-reservation, D-111) and whether the first-class picker sits
+//      (pay-at-reservation) and whether the first-class picker sits
 //      above the pay button or below it.
 //
 // Those coincide for every template a teacher sets up deliberately, which is

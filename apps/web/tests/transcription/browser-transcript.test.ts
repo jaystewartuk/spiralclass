@@ -61,7 +61,7 @@ describe("lessonTranscriptCaptureOk", () => {
     ).toBe(false);
   });
 
-  it("needs the buyer's confirmation for the second person of a class for two (D-188)", async () => {
+  it("needs the buyer's confirmation for the second person of a class for two (D-149)", async () => {
     const forTwo = { ...booking, package: { seats: 2, partnerConsentAt: null } };
     expect(await lessonTranscriptCaptureOk(db(consented) as never, forTwo)).toBe(false);
     const confirmed = { ...booking, package: { seats: 2, partnerConsentAt: new Date() } };

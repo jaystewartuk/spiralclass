@@ -2,7 +2,7 @@ import type { PrismaClient } from "@prisma/client";
 import { stripAnswerKeyMarkdown } from "@spiralclass/shared";
 import { prisma } from "@/lib/prisma";
 
-// The STUDENT's copy of a class's native written content (D-17/D-69: the
+// The STUDENT's copy of a class's native written content (D-17: the
 // booking-scoped, body-bearing LibraryMaterial with `sendTiming` null, always
 // visible once present — no send-time gate, unlike an attached material).
 //

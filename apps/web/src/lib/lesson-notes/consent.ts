@@ -19,7 +19,7 @@ export type InsightsConsent = {
   guardianConsentAt: Date | null;
   // The package the class is paid from, when the caller is deciding about one
   // class. A class for two has a second person in the room who has no account
-  // and so no consent row (D-188); what stands in for it is the buyer's
+  // and so no consent row (D-149); what stands in for it is the buyer's
   // confirmation at purchase, `Package.partnerConsentAt`. Omitted when the
   // question is about the pair rather than a class (the student profile).
   classPackage?: { seats: number; partnerConsentAt: Date | null };

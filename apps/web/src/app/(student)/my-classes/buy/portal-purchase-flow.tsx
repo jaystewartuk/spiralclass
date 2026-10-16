@@ -43,7 +43,7 @@ type Template = {
   classDurationMin: number;
   priceMinorUnits: number;
   transferPriceMinorUnits: number | null;
-  // The prices for two people (D-188); null when not sold for two.
+  // The prices for two people (D-149); null when not sold for two.
   twoPersonPriceMinorUnits: number | null;
   twoPersonTransferPriceMinorUnits: number | null;
   expirationMonths: number | null;
@@ -87,7 +87,7 @@ export function PortalPurchaseFlow({
   const formatMoney = useFormatMoney();
   const money = (minorUnits: number) => formatMoney(minorUnits, currency);
 
-  // One person or two (D-188) — asked only when something is sold for two.
+  // One person or two (D-149) — asked only when something is sold for two.
   const forTwoAvailable = templates.some(offersTwoPerson);
   const [seats, setSeats] = useState<Seats>(1);
   const visibleTemplates = seats === 2 ? templates.filter(offersTwoPerson) : templates;

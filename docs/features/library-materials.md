@@ -12,6 +12,15 @@ booking-scoped, private class content and scheduled attachments (see
 `docs/features/classes-lesson-content.md`); this document covers the
 **reusable library** side (`bookingId` null).
 
+Two nullable columns tell the rows apart: `bookingId` null is a reusable
+library item and set is private to that one class; `sendTiming` null is
+always visible with no push and set is pushed on that schedule. A
+booking-scoped row has no `levelId`. Version history (`MaterialRevision`) is
+keyed by material, and both AI entry points share one prompt builder
+(`lib/materials/prompt.ts`). Class content and per-class attachments were once
+separate tables, which meant every materials feature was built twice; keep
+them one.
+
 From the library, a teacher can attach an item to a specific reserved class
 (`BookingLibraryMaterial`) or assign it directly to a student's personal
 notebook (`StudentLibraryItem`), which is visible to that student regardless

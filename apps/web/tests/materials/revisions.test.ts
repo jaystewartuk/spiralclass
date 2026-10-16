@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-// Version-history storage (task 5, generalized to any material at D-69):
+// Version-history storage (task 5, generalized to any material):
 // snapshot + prune + list. Exercised directly against a hand-rolled fake db
 // (mirrors the focus-tags.test.ts style) rather than through the save
 // action, so the cap/prune behavior is pinned independent of the save-path

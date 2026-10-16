@@ -22,7 +22,7 @@ import { TemplatesForm } from "@/app/(app)/onboarding/templates/templates-form";
 //     `gateTemplateSet` AFTER filling the whole card in. The cap comes from
 //     the same entitlements resolver the gate uses, so the editor can say so
 //     before she types.
-//   * PACKAGES FOR TWO (D-188): the teacher's percent, which suggests each
+//   * PACKAGES FOR TWO (D-149): the teacher's percent, which suggests each
 //     price for two, and whether her plan lets her switch a new one on.
 //   * SALES PER TEMPLATE. Removing a package archives the template; it does
 //     not touch the packages already bought from it. That is the one fact a

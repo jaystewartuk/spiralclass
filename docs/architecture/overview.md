@@ -119,7 +119,7 @@ unique index and two `EXCLUDE` constraints, all of which mean "that slot is
 taken". A pre-flight availability check is a courtesy; the constraint is the
 guarantee. Applied migrations are never edited — Prisma checksums each file —
 and production migrations run behind a Neon checkpoint branch
-([D-95](../decisions/D-95.md)), because a code rollback never undoes a schema
+([D-178](../decisions/D-178.md)), because a code rollback never undoes a schema
 change.
 
 The `/admin/database` console generates a live ERD from the running schema

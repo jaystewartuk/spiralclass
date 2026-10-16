@@ -1050,7 +1050,7 @@ describe("the deploy is triggered, never dispatched by hand", () => {
   });
 
   it("the local production deploy still checkpoints Neon before it migrates", () => {
-    // D-95 made a named pre-migration restore point production's primary safety
+    // D-178 made a named pre-migration restore point production's primary safety
     // net, and it was a step in fly-deploy.yml's `production` job. D-120 moved
     // the deploy into scripts/fly-deploy.sh and left the checkpoint behind — so
     // a promote applied migrations to production with no restore point while

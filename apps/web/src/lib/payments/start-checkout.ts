@@ -90,7 +90,7 @@ export type StartCheckoutArgs = {
   teacher: CheckoutTeacher;
   student: { id: string; email: string | null; name: string };
   template: CheckoutTemplate;
-  // How many people the package is for (D-188). Two is refused unless the
+  // How many people the package is for (D-149). Two is refused unless the
   // template is sold for two, and unless `partnerConsent` is set.
   seats: Seats;
   // The buyer confirmed the second person agrees to the lesson-insights
@@ -113,7 +113,7 @@ export type StartCheckoutArgs = {
   source: "public" | "portal";
   // Pay-at-reservation: the UTC slot the student chose. It's stored on the
   // pending Package and turned into a booking by the auto-book-on-paid Inngest
-  // job once payment lands. Meaningful for ANY offering since D-111 — the
+  // job once payment lands. Meaningful for ANY offering — the
   // reservation for a single class, the first class for a package — and
   // omitted when nothing was picked. It can only ever consume that package's
   // own credit, so carrying it for a multi-class buy books one of the classes
@@ -255,7 +255,7 @@ export async function startCheckout(args: StartCheckoutArgs): Promise<StartCheck
   }
   // A package for two is bought by one person on behalf of two. The second
   // person has no account and so no consent row of her own; the buyer's
-  // confirmation is what stands in for it (D-188), and it is recorded on the
+  // confirmation is what stands in for it (D-149), and it is recorded on the
   // package so the insights capture can check it.
   if (args.seats === 2 && !args.partnerConsent) {
     return {
@@ -267,7 +267,7 @@ export async function startCheckout(args: StartCheckoutArgs): Promise<StartCheck
   // Payment, the Stripe line item, and the funnel event — stays in sync.
   let priceMinorUnits = basePriceMinorUnits;
 
-  // The chosen slot rides through checkout for ANY offering (D-111). For a
+  // The chosen slot rides through checkout for ANY offering. For a
   // single class it IS the reservation and the UI requires it; for a package
   // it's an optional "pick your first class", and the remaining credits are
   // booked from the portal later. Null either way when nothing was picked —

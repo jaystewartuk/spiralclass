@@ -31,7 +31,7 @@ can save and reapply.
 
 The two prior specs this page absorbed (deleted with the rest of the backlog
 by [D-110](../decisions/D-110.md)) predate two architectural shifts (the
-D-69 merge of the old standalone `ClassContent`/`ClassMaterial` models into
+the merge of the old standalone `ClassContent`/`ClassMaterial` models into
 `LibraryMaterial`, and the D-72 narrowing to language teaching) — treat them
 as historical rationale, not current schema truth.
 
@@ -144,11 +144,21 @@ as historical rationale, not current schema truth.
   **resets done-state** on copy ("a fresh class hasn't covered them yet"). If
   there's no earlier booking with notes, this is an explicit error, not a
   silent no-op.
-- **Student visibility is a time window, not a stored flag** (D-15):
+- **Student visibility is a time window, not a stored flag**:
   student-facing notes become visible starting **15 minutes before**
   `scheduledStart` and remain visible until **30 minutes after**
   `scheduledEnd`. Teacher-audience notes are never visible to the student at
   any time — enforced at the query layer, not just the UI.
+- There is **no "go live" switch** and no stored published flag on
+  `LessonNote` — do not add one. Every student read path applies the window
+  server-side through `lessonNoteStudentVisible`
+  (`lib/lesson-notes/visibility.ts`), never in the client, so a teacher can
+  write cues days ahead without leaking them. The after-class tail is its own
+  constant (`NOTE_VISIBLE_AFTER_MIN`), not the teacher's inter-class buffer.
+- Writing notes is free; the **live surfaces are Pro** (`canUseLiveNotes`,
+  `gateProFeature(…, "lesson_notes")`) — the call, where both sides' notes
+  overlay the stage, and the lesson summary. The booking page's student notes
+  card is gated by the window only.
 - **In the call**, each side's notes (the teacher's cues, the student's
   instructions) show in a card over the top-left of the stage. The card
   collapses to its title and note count, so it never has to cover a shared

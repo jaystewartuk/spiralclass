@@ -166,7 +166,7 @@ The baseline is **regenerated, never edited** — `prisma migrate diff
 property worth protecting, and it is exactly the property a single combined file
 destroys: the hand-written SQL mixed into it would be silently dropped the first
 time anyone regenerated. So the partial indexes, the CHECK constraints, the two
-GiST exclusion constraints and the two triggers live in their own file, and
+GiST exclusion constraints and the three triggers live in their own file, and
 "regenerate the first, hand-review the second" is a procedure rather than a
 thing to remember.
 
@@ -179,16 +179,17 @@ each file and any drift breaks `migrate deploy` on the next environment.
 Correcting a mistake means a new migration.
 
 Production migrations run behind a **Neon checkpoint branch**
-([D-95](../decisions/D-95.md)), created by `scripts/database-deploy.sh` before
+([D-178](../decisions/D-178.md)), created by `scripts/database-deploy.sh` before
 anything is applied, because a code rollback never undoes a schema change. The
 restore path is a script — `infra/database/scripts/neon-rollback.sh` — not a
 plan. See [`DB_BACKUP_RESTORE.md`](../deployment/DB_BACKUP_RESTORE.md).
 
-The **expand/contract discipline** (add a column, backfill, switch reads, drop
-in a later release) no longer has a client that can lag a deploy — the mobile
-app it protected is gone. Keep it anyway for anything a **third party** calls:
-today that is the Stripe and LiveKit webhooks, where the caller is not ours to
-update.
+Every migration **expands** — add a column, backfill, switch reads — and a
+drop, rename or narrowing ships a release **after** the code that stopped
+using it, marked `CONTRACT` ([D-178](../decisions/D-178.md),
+`apps/web/tests/migrations/contract-migrations.test.ts`). The mobile app this
+once protected is gone; the reason now is the deploy itself, which migrates
+before its new code serves, so old code always meets the new schema.
 
 Only one migration-bearing branch should be in flight at a time. Two branches
 each adding a migration collide on ordering and checksums.

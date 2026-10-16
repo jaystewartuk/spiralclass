@@ -198,7 +198,7 @@ describe("summarizeCreditPools", () => {
     expect(new Set(pools.map((p) => p.classDurationMin))).toEqual(new Set([25, 50]));
   });
 
-  // D-188: a class for two costs more per class than a class for one, so a
+  // D-149: a class for two costs more per class than a class for one, so a
   // one-person credit spent on a class for two would underpay the teacher.
   it("keeps a package for two as its own balance, apart from the one-person one", () => {
     const pools = summarizeCreditPools([
@@ -213,7 +213,7 @@ describe("summarizeCreditPools", () => {
   });
 });
 
-describe("the seat axis (D-188)", () => {
+describe("the seat axis (D-149)", () => {
   it("never spends a one-person credit on a class for two", async () => {
     const rows = [row({ id: "solo", expiresAt: new Date("2026-06-20T00:00:00Z") })];
     const claimed = await claimNextCredit(fakeClient(rows), { ...pool, seats: 2 }, NOW, null);

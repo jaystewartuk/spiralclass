@@ -129,7 +129,7 @@ vi.mock("@/lib/prisma", () => {
   };
 });
 
-// D-69 + the materials UI unification: this action now serves both scopes,
+// The ClassContent/ClassMaterial merge + the materials UI unification: this action now serves both scopes,
 // dispatching on whether a bookingId is posted. These tests cover the
 // booking-scoped (per-class attachment) path specifically.
 const { saveMaterialAttachmentAction: uploadMaterialAction } =

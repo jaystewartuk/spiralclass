@@ -126,7 +126,16 @@ same individual across teachers.
 - A note cannot be empty and is capped at 5,000 characters.
 - Deleting or editing a note is restricted to the teacher who created it.
 - Notes are deliberately kept out of the student-visible class-history audit
-  trail, specifically so their contents can never leak to the student.
+  trail, specifically so their contents can never leak to the student. Note
+  edits are never written to `overrides`; the rows' own timestamps are the
+  only trail, and analytics events carry ids, never the body.
+- Notes are a dated journal (`StudentNote`, many rows per teacher–student
+  pair, newest first), not one text field on the roster entry, and are free on
+  every plan.
+- Notes are the teacher's own content: they are in the teacher's data export
+  and never in the student's (the same treatment as `custom_price_note`).
+  Erasing a student deletes them; merging duplicate students moves them to the
+  kept record.
 
 ### Student contact-change handling
 

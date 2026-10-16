@@ -354,7 +354,7 @@ export async function saveTemplatesAction(
   // back to the Stripe price at checkout. We never store 0 to mean
   // "fallback" — that would make a free Wise checkout impossible to express.
   const wisePrices = formData.getAll("tpl_wise_price") as string[];
-  // The price for two people and its non-card price (D-188), major units like
+  // The price for two people and its non-card price (D-149), major units like
   // the rest. Empty = not sold for two / same price on every rail.
   const twoPrices = formData.getAll("tpl_two_price") as string[];
   const twoWisePrices = formData.getAll("tpl_two_wise_price") as string[];
@@ -413,7 +413,7 @@ export async function saveTemplatesAction(
     return describeTemplateError(parsed.error, locale);
   }
 
-  // The teacher-wide suggestion for what two people pay (D-188). Only the
+  // The teacher-wide suggestion for what two people pay (D-149). Only the
   // settings screen renders the field; a submit without it (onboarding) leaves
   // the saved value alone rather than resetting it to the default.
   const rawPercent = formData.get("two_person_percent");
@@ -428,7 +428,7 @@ export async function saveTemplatesAction(
     };
   }
 
-  // Selling for two is Pro (D-149, D-188), gated like the template cap: only
+  // Selling for two is Pro (D-149), gated like the template cap: only
   // switching a NEW one on is refused, so a downgraded teacher keeps every
   // two-person price already on her booking page.
   const alreadyForTwo = await prisma.packageTemplate.findMany({

@@ -6,7 +6,7 @@ import { lessonNoteStudentVisible } from "@/lib/lesson-notes/visibility";
 // can't reach: the actual `NoteAudience` enum + FK cascade, cross-teacher
 // isolation through the booking relation, and the exact query the student page
 // runs (audience = "student", ordered by position) combined with the class
-// window gate (D-15). Seeds two teachers so "scoped to my own bookings" is
+// window gate. Seeds two teachers so "scoped to my own bookings" is
 // proven against a populated table, not an empty one.
 
 const TEACHER_A = "11111111-1111-4111-8111-111111111111";
@@ -141,7 +141,7 @@ describeIntegration("lesson notes (real DB)", () => {
     expect(bNotes.map((n) => n.body)).toEqual(["B note"]);
   });
 
-  it("the class-window gate hides student notes outside the window and shows them inside (D-15)", async () => {
+  it("the class-window gate hides student notes outside the window and shows them inside", async () => {
     const prisma = getTestPrisma();
     const bookingId = await seedTeacherWithBooking({ teacherId: TEACHER_A, slug: "alpha" });
     await prisma.lessonNote.create({

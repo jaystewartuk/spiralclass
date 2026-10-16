@@ -54,7 +54,7 @@ const manualPackageSchema = z
       .max(1_000_000)
       .optional()
       .or(z.literal("").transform(() => undefined)),
-    // A package for two people (D-188). Its own credit balance; insights stay
+    // A package for two people (D-149). Its own credit balance; insights stay
     // off for its classes, because no buyer confirmed for the second person.
     forTwo: z.unknown().transform((v) => v === "1" || v === "on"),
   })
@@ -95,7 +95,7 @@ export async function createManualPackageAction(
   const teacher = await requireOnboardedTeacher();
   const data = parsed.data;
 
-  // Selling for two is Pro (D-149, D-188), and recording one is how a package
+  // Selling for two is Pro (D-149), and recording one is how a package
   // for two is sold off-platform.
   if (data.forTwo) {
     const gate = await gateProFeature(teacher.id, "sell_for_two");
@@ -291,7 +291,7 @@ export async function editManualPackageAction(
   if (!pkg) {
     return { error: t("web.action.packageNotFound") };
   }
-  // Turning a package INTO one for two is selling for two (Pro, D-188);
+  // Turning a package INTO one for two is selling for two (Pro, D-149);
   // keeping or undoing it never is, so a downgrade never locks a correction.
   const seats = data.forTwo ? 2 : 1;
   if (seats === 2 && pkg.seats !== 2) {

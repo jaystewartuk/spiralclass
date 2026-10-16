@@ -38,7 +38,7 @@ const notifyLibraryMaterialAssigned = vi.fn(async () => {});
 vi.mock("@/lib/notifications/materials", () => ({
   notifyLibraryMaterialAssigned,
 }));
-// Pulled in by uploadBookingMaterialAction (D-69's merged materials.ts logic,
+// Pulled in by uploadBookingMaterialAction (the merged materials.ts logic,
 // now living in this action file) — not exercised by these tests, stubbed so
 // the module graph doesn't reach the real Inngest client (which needs env).
 vi.mock("@/lib/notifications/enqueue", () => ({

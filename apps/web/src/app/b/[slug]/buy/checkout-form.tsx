@@ -72,7 +72,7 @@ export function CheckoutForm({
 }: {
   slug: string;
   templateId: string;
-  // How many people the package is for (D-188). The prices above are already
+  // How many people the package is for (D-149). The prices above are already
   // the ones for this many people; this only posts the count and asks the
   // buyer to confirm for the second person.
   seats?: 1 | 2;

@@ -1,5 +1,5 @@
 // Material domain constants + validation (docs/features/library-materials.md,
-// D-69 merge of ClassContent/ClassMaterial into LibraryMaterial).
+// the merge of ClassContent/ClassMaterial into LibraryMaterial).
 //
 // A material's body is Markdown text rendered natively (react-markdown, raw
 // HTML disabled). Keep these as named constants — the panels, the server

@@ -291,7 +291,7 @@ export default async function BookingLandingPage({
 }: {
   params: Promise<{ slug: string }>;
   // `?seats=2` opens the package list on "Two of us", so a teacher can send a
-  // couple a link that starts where they are (D-188).
+  // couple a link that starts where they are (D-149).
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const { slug } = await params;
@@ -355,7 +355,7 @@ export default async function BookingLandingPage({
    * every row for exactly that reason: the claim is verifiable in place.
    */
   //
-  // Packages for two (D-188) are a second list with its own best value: a
+  // Packages for two (D-149) are a second list with its own best value: a
   // package for two is dearer per class than one for one, so ranking the two
   // together would crown a one-person package over every package for two, and
   // measure a couple's options against a price they cannot buy.

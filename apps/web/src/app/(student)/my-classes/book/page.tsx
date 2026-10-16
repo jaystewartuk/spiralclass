@@ -96,7 +96,7 @@ export default async function ReservarPage({
   }
 
   // Collapse the packages into one spendable balance per (teacher, class
-  // length, seats) — a package for two is its own balance (D-188). The student no longer picks an individual package — the server
+  // length, seats) — a package for two is its own balance (D-149). The student no longer picks an individual package — the server
   // always spends the soonest-to-expire credit in the chosen pool — so the UI
   // shows combined balances and the form submits a pool pointer.
   const pools = summarizeCreditPools(bookablePackages);

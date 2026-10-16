@@ -166,7 +166,7 @@ fi
 
 if [[ "$command_line" == *migrate:prod* ]] || [[ "$command_line" == *migrate:preview* ]]; then
   block "This runs migrations against a shared database." \
-    "Production migrations run inside the deploy, behind a Neon checkpoint (D-95).
+    "Production migrations run inside the deploy, behind a Neon checkpoint (D-178).
 Locally, use 'pnpm --filter spiralclass-web prisma:migrate'."
 fi
 
