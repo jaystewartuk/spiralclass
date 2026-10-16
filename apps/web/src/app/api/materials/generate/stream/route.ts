@@ -95,6 +95,8 @@ export async function POST(req: Request): Promise<Response> {
       // start streaming immediately rather than waiting for the first frame.
       controller.enqueue(encoder.encode(":ok\n\n"));
       let total = 0;
+      // What the teacher received, kept for the generation's record (D-202).
+      const received: string[] = [];
       try {
         for await (const delta of generateMaterialStream(prep.promptInput)) {
           // Bound the streamed body to the same ceiling the non-streaming path
@@ -104,10 +106,11 @@ export async function POST(req: Request): Promise<Response> {
           if (remaining <= 0) break;
           const chunk = delta.length > remaining ? delta.slice(0, remaining) : delta;
           total += chunk.length;
+          received.push(chunk);
           controller.enqueue(frame(chunk));
         }
         // Success — burn one quota row, then mark the stream complete.
-        await recordLibraryMaterialGeneration(teacherId, prep.meta);
+        await recordLibraryMaterialGeneration(teacherId, prep.meta, received.join(""));
         controller.enqueue(frame(DONE));
         controller.close();
       } catch (err) {

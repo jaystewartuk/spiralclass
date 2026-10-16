@@ -204,6 +204,16 @@
       ]
     },
     {
+      "name": "MaterialGenerationKind",
+      "schema": "public",
+      "values": [
+        "class_content",
+        "library_material",
+        "refine",
+        "podcast_script"
+      ]
+    },
+    {
       "name": "MaterialSendTiming",
       "schema": "public",
       "values": [
@@ -2303,6 +2313,66 @@
           "isEnum": false,
           "enumName": null,
           "default": "now()()"
+        },
+        {
+          "name": "kind",
+          "type": "MaterialGenerationKind",
+          "note": null,
+          "isPrimaryKey": false,
+          "isForeignKey": false,
+          "isUnique": false,
+          "isNotNull": false,
+          "isEnum": true,
+          "enumName": "MaterialGenerationKind",
+          "default": null
+        },
+        {
+          "name": "body",
+          "type": "String",
+          "note": null,
+          "isPrimaryKey": false,
+          "isForeignKey": false,
+          "isUnique": false,
+          "isNotNull": false,
+          "isEnum": false,
+          "enumName": null,
+          "default": null
+        },
+        {
+          "name": "instruction",
+          "type": "String",
+          "note": null,
+          "isPrimaryKey": false,
+          "isForeignKey": false,
+          "isUnique": false,
+          "isNotNull": false,
+          "isEnum": false,
+          "enumName": null,
+          "default": null
+        },
+        {
+          "name": "materialId",
+          "type": "String",
+          "note": null,
+          "isPrimaryKey": false,
+          "isForeignKey": false,
+          "isUnique": false,
+          "isNotNull": false,
+          "isEnum": false,
+          "enumName": null,
+          "default": null
+        },
+        {
+          "name": "keptAt",
+          "type": "DateTime",
+          "note": null,
+          "isPrimaryKey": false,
+          "isForeignKey": false,
+          "isUnique": false,
+          "isNotNull": false,
+          "isEnum": false,
+          "enumName": null,
+          "default": null
         }
       ],
       "indexes": [],

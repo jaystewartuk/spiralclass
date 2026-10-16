@@ -264,18 +264,19 @@ which is a separate control from the flag that turns the capability on.
 The recurring line: the platform owns the machinery, the teacher owns the
 method. No platform curriculum, ever.
 
-| #                   | Decision                                                                                     |
-| ------------------- | -------------------------------------------------------------------------------------------- |
-| [D-14](./D-14.md)   | Teacher-private notes get their own table and never enter the audit trail                    |
-| [D-15](./D-15.md)   | Note visibility is a time window derived from the booking, not a toggle someone can forget   |
-| [D-17](./D-17.md)   | Native structured content, not distributed PDFs; AI authoring in-house and Pro-gated         |
-| [D-20](./D-20.md)   | **Inputs are teacher-owned seeded rows, not a platform curriculum library**                  |
-| [D-46](./D-46.md)   | A teacher's own lesson template drives AI compose — wire the primitive, don't bake a method  |
-| [D-69](./D-69.md)   | `ClassContent` + `ClassMaterial` collapse into `LibraryMaterial` behind two nullable columns |
-| [D-78](./D-78.md)   | Account-level AI style as presets plus a bounded note — never a raw editable system prompt   |
-| [D-80](./D-80.md)   | Vocabulary difficulty is its own axis; CEFR level was doing double duty as a rarity dial     |
-| [D-93](./D-93.md)   | Homework review and AI-assist architecture — designed first, then built in slices            |
-| [D-107](./D-107.md) | Materials opens on a level picker: level is the only mandatory, single-valued, ordered axis  |
+| #                   | Decision                                                                                       |
+| ------------------- | ---------------------------------------------------------------------------------------------- |
+| [D-14](./D-14.md)   | Teacher-private notes get their own table and never enter the audit trail                      |
+| [D-15](./D-15.md)   | Note visibility is a time window derived from the booking, not a toggle someone can forget     |
+| [D-17](./D-17.md)   | Native structured content, not distributed PDFs; AI authoring in-house and Pro-gated           |
+| [D-20](./D-20.md)   | **Inputs are teacher-owned seeded rows, not a platform curriculum library**                    |
+| [D-46](./D-46.md)   | A teacher's own lesson template drives AI compose — wire the primitive, don't bake a method    |
+| [D-69](./D-69.md)   | `ClassContent` + `ClassMaterial` collapse into `LibraryMaterial` behind two nullable columns   |
+| [D-78](./D-78.md)   | Account-level AI style as presets plus a bounded note — never a raw editable system prompt     |
+| [D-80](./D-80.md)   | Vocabulary difficulty is its own axis; CEFR level was doing double duty as a rarity dial       |
+| [D-93](./D-93.md)   | Homework review and AI-assist architecture — designed first, then built in slices              |
+| [D-107](./D-107.md) | Materials opens on a level picker: level is the only mandatory, single-valued, ordered axis    |
+| [D-202](./D-202.md) | An AI materials call records what it returned and whether she kept it; text cleared at 30 days |
 
 ### Notifications and messaging
 
@@ -572,6 +573,7 @@ records removed before publication — see [What is not here](#what-is-not-here)
 | [D-199](./D-199.md) | A merge starts its own production deploy, behind the approval         | Active (narrows D-119, D-157)        |
 | [D-200](./D-200.md) | Preview returns on Cloud Run, deployed by every merge                 | Decided, not built (reverses D-184)  |
 | [D-201](./D-201.md) | A model call site ships with an eval set; verdicts become a figure    | Active (narrows D-87)                |
+| [D-202](./D-202.md) | AI materials calls record output and keep; text cleared at 30 days    | Active                               |
 
 ---
 
