@@ -53,16 +53,21 @@ no Stripe account. See [below](#end-to-end-in-detail).
 **Visual regression** captures every route in `apps/web/tests/visual/routes.ts`
 at six viewports in both themes. Playwright names a snapshot after the platform
 that took it, and there is one set — `-linux.png`, asserted on `ubuntu-latest`
-and nowhere else ([D-157](../decisions/D-157.md)). The suite **skips** on a Mac
-and says so, `scripts/ci/e2e.sh` refuses to regenerate there, and a page whose
-look changes is re-baselined by dispatch:
+and nowhere else ([D-157](../decisions/D-157.md)). The suite **skips** anywhere
+but Linux and says so, and `scripts/ci/e2e.sh` refuses to regenerate there. A
+page whose look changes is re-baselined on a runner, by dispatch:
 
 ```bash
-gh workflow run heavy.yml -f update_visual_baselines=<route> --ref <branch>
+gh workflow run heavy.yml -f update_visual_baselines=<all | -g route pattern> --ref <branch>
 ```
 
+The run uploads the new images as the `visual-baselines-linux` artifact; the
+header of `.github/workflows/heavy.yml` has the download step. Review them and
+commit them.
+
 To see how a page renders on your own machine, run `capture.spec.ts` — it writes
-a gallery instead of asserting against one, so it needs no committed image.
+a gallery instead of asserting against one, so it needs no committed image
+([design/](../design/README.md) covers the gallery).
 
 **Mutation** is a spot-check, not a full run: it perturbs code and asserts the
 suite notices, so the unit tests are measured on whether they would actually
@@ -72,10 +77,8 @@ catch a defect rather than on how many lines they touch.
 `linux/amd64`, final stage, the same build args — with a stub for every
 `__LOCAL__` key in `config/env/production.build.env`, and discards the result:
 no push, no tag, no registry credential. Every other layer runs `next build` on
-the runner's own Node, so before this step a broken base image or pnpm bootstrap
-was first found by the production deploy, after it had migrated
-(#100). On an arm64
-laptop, `IMAGE_BUILD_PLATFORM=linux/arm64 bash scripts/ci/image-build.sh` is the
+the runner's own Node, so this is the only check before a deploy that can see a
+broken base image or pnpm bootstrap. On an arm64 laptop, `IMAGE_BUILD_PLATFORM=linux/arm64 bash scripts/ci/image-build.sh` is the
 fast, weaker local answer; the amd64 verdict comes from the runner.
 
 ## Coverage
@@ -117,14 +120,12 @@ _mechanism_ is dismantled, rather than if a function returns the wrong number.
 - `packages/shared/src/i18n/i18n.test.ts` fails if a public marketing string
   narrows the audience back to language teaching, and if the fee-disclosure keys
   go missing from a locale.
-- `scripts/readme-counts.mjs` recounts every number stated in the README and the
-  architecture docs from the tree, and fails if a sentence has drifted.
+- `scripts/readme-counts.mjs` recounts every number stated in the front-door
+  documents from the tree, and fails if a sentence has drifted.
 
 **Guard tests have a failure mode of their own**: a guard outlives the premise
 it was written for, keeps passing, and quietly protects something nobody needs
-any more. One here held 220 unreachable routes in place for a month after the
-client that called them was deleted. When you retire a thing, retire its guard in the same
-change.
+any more. When you retire a thing, retire its guard in the same change.
 
 ## End-to-end, in detail
 
@@ -153,9 +154,8 @@ no secrets and no environment:
    better-auth's own tables work. Fixture material uploads go through the app's
    real storage provider and fail gracefully with no R2 credentials; the rows
    still get created and nothing asserts on the uploaded bytes.
-4. A **production** build (`next build` + `next start`, never `next dev`) — the
-   durable fix for a long tail of flakiness that `next dev`'s on-demand route
-   compilation caused on a loaded runner. The Stripe stub is opted into that
+4. A **production** build (`next build` + `next start`, never `next dev`, whose
+   on-demand route compilation is flaky on a loaded runner). The Stripe stub is opted into that
    build with `E2E_STRIPE_STUB=1`, which is never set in a real deploy and fails
    closed there.
 5. Playwright against the prebuilt server.
@@ -163,24 +163,10 @@ no secrets and no environment:
 Every run gets a fresh deterministic stack: no shared-state drift,
 parallel-safe, and nothing to keep secret.
 
-### Fixtures
+### Writing a spec
 
-Seeded accounts live in `apps/web/scripts/seed.ts` and come in two kinds.
-
-- **Shared and read-only** — the E2E-critical teacher and the hero matrix. Read
-  them, assert on them, never mutate them. Their emails, slugs, Stripe flags,
-  template names and availability are pinned by the seed file's own header.
-- **Dedicated and spec-owned** — one per journey that needs to mutate a teacher
-  (the Wise checkout journeys, the rail-connect journey). A spec that mutates a
-  teacher must own a fixture outright and restore it in `afterAll`. Mutating a
-  shared hero leaks across spec files and makes the suite order-dependent.
-
-Specs that create students collect their addresses and delete them in
-`afterAll`.
-
-Helpers are imported from the `_helpers` barrel, never from a file directly, and
-**must never import `@/lib/*`** — Playwright's CJS loader cannot load the app's
-ESM wrappers.
+The helpers, and the rules for which seeded fixtures a spec may mutate, are in
+[`apps/web/tests/e2e/README.md`](../../apps/web/tests/e2e/README.md).
 
 ### What it deliberately does not cover
 
@@ -232,7 +218,7 @@ Every setting in it is there because the obvious thing failed:
 | the enforced CSP                             | `connect-src` has no `ws://localhost:7880`; the LiveKit socket is refused and the call says "Couldn't connect"                                       | sets `CSP_ENFORCE=0` (report-only)                                        |
 | `livekit-server --dev` in Docker             | on a Mac it advertises the container's address for media: signalling works, ICE never does, the page sits on "Connecting…"                           | passes `--node-ip 127.0.0.1`                                              |
 | reading the sign-in code from the server log | only `next dev` prints the stub email; `next start` logs that it sent nothing                                                                        | plants a known code over the real send (`code`), as the E2E helper does   |
-| the captions toggle with no Translate key    | hidden (live-calls-video.md rule 19)                                                                                                                 | sets a placeholder key — desktop Chrome translates on the device          |
+| the captions toggle with no Translate key    | hidden ([live-calls-video.md](../features/live-calls-video.md), rule 19)                                                                             | sets a placeholder key — desktop Chrome translates on the device          |
 
 Two database traps for anyone editing fixture rows by hand: `psql -c "a; b"`
 runs as **one transaction**, so a failure in `b` silently undoes `a`; and a
@@ -249,7 +235,7 @@ consent prompts, the "Listening…" band.
 
 The home page shows the product through short recordings of the real app
 (`apps/web/public/marketing/*.mp4`, played by
-`components/marketing/feature-clip.tsx`). They are recorded, not drawn, and
+`apps/web/src/components/marketing/feature-clip.tsx`). They are recorded, not drawn, and
 the recording is a script so a clip can be redone when the screen it shows
 changes:
 
@@ -259,13 +245,13 @@ pnpm --filter spiralclass-web demo:fixtures  # findings, a brief, homework, mess
 pnpm --filter spiralclass-web demo:record    # every clip, or `demo:record call messages`
 ```
 
-`scripts/marketing/demo-fixtures.ts` writes the rows a teacher only has after
-real classes, for the seed's Alicia and Carlos; `scripts/marketing/record.mjs`
+`apps/web/scripts/marketing/demo-fixtures.ts` writes the rows a teacher only has after
+real classes, for the seed's Alicia and Carlos; `apps/web/scripts/marketing/record.mjs`
 signs both in, drives each screen with a visible cursor, and encodes the clip
 and its poster with ffmpeg. The call clip is recorded from the student's side
 with the teacher's microphone fed a voice file (`DEMO_MIC_WAV`), because
 headless Chrome recognises English on the device; the script's header says
-which two columns to set for that. `tests/marketing/landing-clips.test.ts`
+which two columns to set for that. `apps/web/tests/marketing/landing-clips.test.ts`
 holds the page's clip names to the files and to a size.
 
 ## The rule
