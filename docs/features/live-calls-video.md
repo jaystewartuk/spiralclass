@@ -1,18 +1,15 @@
 # Live Calls & Video
 
-## Overview
-
 Every scheduled class has a corresponding live video call, joined by the
 teacher and student from a per-booking room. Calls run on **self-hosted
 LiveKit** at `livekit.spiralclass.com`: one free Compute Engine `e2-micro`
 running `livekit-server` and Caddy, with no egress —
 [D-16](../decisions/D-16.md), [`infra/gcp-livekit/`](../../infra/gcp-livekit/README.md).
 It carries one class at a time comfortably; a second overlapping class is the
-trigger for a bigger machine. **Preview has no video** (see "Joining /
-connection" below). On top of the core call (mute/camera/screen-share/leave),
+trigger for a bigger machine. **Preview has no video** (see
+[Joining and connection](#joining-and-connection)). On top of the core call (mute/camera/screen-share/leave),
 the product layers three Pro-gated, legal/consent-sensitive capabilities:
-**recording** (teacher-controlled capture of the whole class, audio-only since
-D-16), **live captions** (real-time speech-to-text + translation of both
+**recording** (teacher-controlled capture of the whole class, audio-only), **live captions** (real-time speech-to-text + translation of both
 people, run in their browsers — [D-185](../decisions/D-185.md)), and the
 **lesson transcript** (the caption lines, kept with the student's insights
 consent as the class's transcript for the lesson-insights pipeline —
@@ -20,33 +17,12 @@ consent as the class's transcript for the lesson-insights pipeline —
 production; recording is off**: it needs egress, which the box cannot carry,
 so D-16 switched it off. The behaviour below is what each does when on.
 
-Source: `apps/web/src/lib/video/*`, `apps/web/src/lib/captions/*`,
-`apps/web/src/lib/transcription/*`, `docs/decisions/D-16.md`,
-`infra/gcp-livekit/README.md`.
+Code: `apps/web/src/lib/video/`, `apps/web/src/lib/captions/`,
+`apps/web/src/lib/transcription/`, `apps/web/src/components/video/`.
 
-## User Stories
+## Business rules
 
-- As a **teacher or student**, I want to join my scheduled class's video call
-  with one tap, reliably, without worrying about connection drops when I
-  navigate elsewhere in the app.
-- As a **teacher**, I want to record a class (Pro feature) so I have a
-  reference of what was taught.
-- As a **teacher**, I want live captions of what I'm saying translated for
-  my student in real time, and of what she says translated for me, without
-  either of us needing to set anything up mid-call.
-- As a **teacher**, I want a transcript and pronunciation insight generated
-  automatically after class, without having to remember to start anything —
-  as long as my student has actually consented to being analyzed this way.
-- As a **teacher or student**, I want to share my screen during a class
-  (e.g. to show a document), and know only one side can share at a time.
-- As a **teacher or student**, I want to nudge my counterpart if they haven't
-  joined yet, without it feeling like a cold automated call.
-- As a **student**, I want to be told plainly that a class may be recorded,
-  and to have my voice specifically analyzed only when I've said yes.
-
-## Business Rules (exhaustive)
-
-### Joining / connection
+### Joining and connection
 
 1. One LiveKit room per class booking, named `class-<bookingId>`. A room name
    without that prefix resolves to no booking, so the recording/transcription
@@ -55,9 +31,8 @@ Source: `apps/web/src/lib/video/*`, `apps/web/src/lib/captions/*`,
    (2-hour TTL) — this is deliberate, not wasteful: the client is built to
    **not** reconnect merely because the token value changed (only the media
    server URL and an explicit retry counter are watched for reconnect
-   purposes). This was a real fix for a regression where tapping Record
-   (which triggers a page re-render via `revalidatePath`) would otherwise
-   tear down and reconnect the whole call.
+   purposes), so a re-render — tapping Record revalidates the page — never
+   tears down the call.
    - **Nothing connects before a Join tap.** Opening the call shows a check
      first: a camera preview, a live microphone bar, a camera and microphone
      picker where there is more than one, and on/off toggles. A blocked
@@ -77,12 +52,11 @@ Source: `apps/web/src/lib/video/*`, `apps/web/src/lib/captions/*`,
    session with a new token.
 
 **Preview has no video.** Preview holds no LiveKit key pair
-since 2026-09-16 ([D-16](../decisions/D-16.md)), so `getVideoProvider()`
-returns null there. Both call pages on preview show "Video calling isn't
+([D-16](../decisions/D-16.md), `config/env/preview.runtime.env`), so
+`getVideoProvider()` returns null there. Both call pages on preview show "Video calling isn't
 switched on yet", the student's class page shows no join button, and recording,
 live captions and post-call transcription cannot run there, whatever
 `config/env/preview.runtime.env`'s flags say. Only production runs a real call.
-That lasts until preview has a LiveKit server of its own.
 
 ### Call controls
 
@@ -92,15 +66,12 @@ That lasts until preview has a LiveKit server of its own.
    the other is (a 1:1 product, not a multi-presenter one). No system audio
    is captured during screen share.
 7. **Nudge**: either party can send a one-click push notification to the other
-   if they haven't joined a scheduled class yet. This is NOT an automatic ring
-   at class start time — pushing that decision to a manual click was deliberate,
-   because an automated ring on top of the existing reminder ladder would feel
-   jarring. Rules: one nudge per (booking, recipient) per 45 seconds; refused
-   with `already-present` if the counterparty (or anyone else) is already in the
-   room when the nudge is attempted.
-   ⚠️ It rode a transport that had been retired, which means it delivered
-   **nothing** — while reporting "Sent" — for a month. It reads
-   `web_push_subscriptions` now.
+   if they haven't joined a scheduled class yet. It is **not** an automatic ring
+   at class start: on top of the reminder ladder an automated ring would feel
+   jarring. One nudge per (booking, recipient) per 45 seconds
+   (`NUDGE_COOLDOWN_MS`, `lib/video/nudge.ts`); refused with `already-present`
+   if anyone is already in the room. It is delivered by Web Push
+   (`web_push_subscriptions`).
 8. **Bookmark** (teacher-only): a one-tap marker of "this moment" during the
    call, for later review via a replay view. A bookmark is a `LessonNote` with
    `kind: "bookmark"`, excluded from every ordinary notes surface (the notes
@@ -139,24 +110,21 @@ That lasts until preview has a LiveKit server of its own.
     navigated away), the next Record attempt stops that dangling egress and
     marks it `completed` before starting a fresh one — a class is never
     silently blocked from recording by a leftover in-progress row.
-12. **The A/V room-composite recording itself requires no per-student
-    consent** — it proceeds unconditionally once the teacher (Pro-gated)
-    taps Record. Consent only governs a **separate, additional** capability:
-    per-participant "lesson-audio" capture that feeds the transcription/
-    insights pipeline (see below). This is a load-bearing distinction: a
-    student is recorded on video/audio as part of ordinary class recording
-    whenever the teacher enables it, with no separate opt-in required for
-    that specific layer.
+12. **The room-composite recording requires no per-student consent** — it
+    starts once the teacher (Pro) taps Record. Insights consent governs only
+    what is kept for lesson insights: the caption transcript, and on the
+    dormant legacy path the per-speaker `LessonAudio` capture. A student is
+    recorded whenever the teacher records, with no separate opt-in for that.
 13. Recording finalization is webhook-driven (`recording_ended`,
     `room_finished`), not client-driven, so a crashed app or an
     abruptly-closed tab never leaves a recording stuck in an unresolved
     state — a room-finished event sweeps any still-"recording" row
     automatically.
-14. Storage: recordings land in R2 at `recordings/<bookingId>/<timestamp>.m4a`.
-    The room composite is **audio-only** (MP4/AAC) since 2026-08-27
-    ([D-16](../decisions/D-16.md)); older `.mp4` rows are video and still play,
-    because the key's extension is what the replay page reads to choose its
-    player.
+14. Storage: recordings land in R2 at `recordings/<bookingId>/<timestamp>.m4a`
+    (`callRecordingKey`, `lib/video/recording.ts`). The room composite is
+    **audio-only** (MP4/AAC, [D-16](../decisions/D-16.md)); older `.mp4` rows
+    are video and still play, because the key's extension is what the replay
+    page reads to choose its player.
     - **Auto-record** (`Teacher.autoRecordClasses`, Settings → Account,
       default off; the card is hidden unless recording is enabled): the server
       starts the recording on `participant_joined` once **both** the teacher
@@ -229,10 +197,7 @@ That lasts until preview has a LiveKit server of its own.
       that she is being asked; for a minor, it says the guardian's consent is
       the one to record, and the student is never asked to consent for
       herself. The teacher's student page shows each consent under its own
-      heading, including whether an adult has turned captions on. (This rule
-      previously read "one-way only, the teacher's mic"; the retired agent
-      already captioned both sides under the same switch and consent, and the
-      browser design keeps that.)
+      heading, including whether an adult has turned captions on.
 17. **Per-class language override**: `Booking.teacherLanguageOverride` /
     `studentLanguageOverride` — if the teacher has set a class-specific
     override, it wins over the teacher's/student's own profile default
@@ -264,15 +229,13 @@ That lasts until preview has a LiveKit server of its own.
       room's switch, the other person's screen or the transcript. Whenever a
       reader has hidden them, the way back is on screen
       (`toggleCaptionsHerePatch` in `apps/web/src/lib/captions/preferences.ts`).
-19. The teacher's caption toggle is hidden entirely if the flag is on but
-    `GOOGLE_TRANSLATE_API_KEY` is missing — no error state, matching the
-    "flag-on-but-dark" failure mode the product has hit before (the
-    diagnostic logging that exists specifically for this was added _because_
-    it happened silently once, at the Vercel→Fly cutover). Both caption
-    routes re-check the flag, the key, the class's participants and the
+19. The teacher's caption toggle is hidden entirely if `LIVE_CAPTIONS_ENABLED`
+    is on but `GOOGLE_TRANSLATE_API_KEY` is missing — no error state, only a
+    one-time diagnostic log, because a flag that is on can still be dark. Both
+    caption routes re-check the flag, the key, the class's participants and the
     teacher's Pro plan on every call.
 
-### The lesson transcript & lesson insights
+### The lesson transcript
 
 20. The transcript is the **caption text** (D-185): while captions are on,
     the browser that recognised a finished utterance also posts its source
@@ -301,7 +264,8 @@ That lasts until preview has a LiveKit server of its own.
 25. Not every call gets a transcript — only when captions are on, the flag is
     on, and the consent above is on file. The legacy egress-audio path
     (`lib/transcription/pipeline.ts`) additionally requires recording to be
-    enabled, so it is dormant.
+    enabled, so it is dormant. What happens to the transcript next is
+    [lesson insights](lesson-insights-reports.md).
 
 ### Materials on the call
 
@@ -346,7 +310,7 @@ That lasts until preview has a LiveKit server of its own.
     above. Both follow from one `audience` parameter server-side, so a
     surface cannot get one and forget the other.
 
-## User Flow
+## User flow
 
 1. Teacher or student opens their upcoming class from their dashboard/class
    list; a "join call" affordance appears once the class window is near.
@@ -362,15 +326,15 @@ That lasts until preview has a LiveKit server of its own.
    student sees a translated scrolling caption of what the teacher says, and
    the teacher sees one of what the student says if she has consented.
 7. After the call ends (either party leaves, or the room otherwise
-   finishes), any in-progress recording/audio-capture is finalized via
-   webhook; consenting students' audio proceeds into the transcription
-   pipeline; the teacher can later view class content/insights that surface
-   from that pipeline.
+   finishes), any in-progress recording is finalized via webhook and a kept
+   transcript is finalized for lesson insights. The teacher reviews the
+   recording and transcript on the class's replay page
+   (`/dashboard/classes/[bookingId]/replay`).
 8. Navigating away from the call screen to another part of the app (e.g.
    chat) keeps the call alive in the background (minimize), rather than
    hanging up.
 
-## Data Used
+## Data used
 
 - **CallRecording** — one row per A/V recording attempt: `bookingId`,
   `teacherId`, `egressId` (LiveKit egress handle), `storageKey` (R2 object
@@ -380,20 +344,19 @@ That lasts until preview has a LiveKit server of its own.
   `CallRecording`): `speaker` (teacher/student), `egressId`, `storageKey`,
   `status` (`recording` → `ready` → `transcribed` → `deleted`), `durationMs`.
 - **LessonTranscript** — one row per booking: merged, speaker-labelled,
-  word-timestamped utterances, target language, ASR provider used
-  (`deepgram` or `assemblyai`).
+  timestamped utterances, language, and provider — `browser-live` while lines
+  are arriving, `browser` once finalized; `deepgram` or `assemblyai` on the
+  legacy audio path.
 - **Booking.teacherLanguageOverride** / **studentLanguageOverride** —
   per-class caption-language overrides, live-read (not snapshotted).
 - **Teacher.lessonAudioRetentionOptIn** — governs whether raw per-speaker
   audio is retained after transcription or discarded.
 - Per-student insights consent (adult self-consent, or guardian consent for
-  a minor) — gates whether that student's `LessonAudio` capture happens at
-  all.
+  a minor) — gates whether the transcript is kept at all.
 
-## Edge Cases
+## Edge cases
 
-- Tapping Record mid-call does not cause a reconnect/black-screen — this was
-  a real bug the token/connection-key design explicitly guards against.
+- Tapping Record mid-call does not reconnect the call (rule 2).
 - A prior recording session's egress never got stopped (app crash,
   navigate-away): the next Record tap self-heals it before starting fresh,
   rather than refusing to record or leaving two egresses running.
@@ -404,8 +367,7 @@ That lasts until preview has a LiveKit server of its own.
   button (with its cooldown/already-present guard), not any automatic
   fallback behavior or recording/consent rule.
 - A student without insights consent is in a class the teacher records: the
-  A/V recording proceeds normally; that student's voice is simply never
-  captured into the separate lesson-audio/transcription pipeline.
+  recording proceeds normally; nothing of hers is kept as transcript.
 - Mid-class language override change: takes effect within a minute, at the
   next caption-config read; the recogniser restarts in the new language.
 - Both people on phones: nothing can be captioned in the browser, and both
@@ -424,7 +386,7 @@ That lasts until preview has a LiveKit server of its own.
   never optimistically, so it cannot dismiss itself over a call that is still
   silent.
 
-## Error States
+## Error states
 
 - Missing/misconfigured video provider credentials: `getVideoProvider()`
   returns null and every caller degrades gracefully (feature hidden) rather
@@ -445,8 +407,7 @@ That lasts until preview has a LiveKit server of its own.
 - A browser's refusal to play audio is not an application error and is never
   reported as one: it is room state (LiveKit's own playback status) driving a
   visible, tappable row, not an exception. The library's internal retries of
-  that unblock are prevented from escaping as unhandled rejections, which is
-  the only form this failure used to take.
+  that unblock are kept from escaping as unhandled rejections.
 
 ## Permissions
 
@@ -460,34 +421,16 @@ That lasts until preview has a LiveKit server of its own.
 | Set per-class language override | Yes                          | No                                    | No         |
 | Send a nudge                    | Yes                          | Yes                                   | No         |
 | Bookmark a moment               | Yes                          | No                                    | No         |
-| View transcript/lesson insights | Yes (own class)              | Not confirmed — see Open Questions    | No         |
+| View transcript/lesson insights | Yes (own class)              | No                                    | No         |
 
-## Open Questions
+## Open questions
 
-- **Production LiveKit connectivity cannot be confirmed from the repo.** The
-  Oracle-era version of this question — whether production's
-  `LIVEKIT_API_SECRET` matched the self-hosted box — ended with that box, which
-  was destroyed on 2026-09-19 ([D-16](../decisions/D-16.md)). Production now
-  uses the Compute Engine box, and [D-16](../decisions/D-16.md) names the
-  first class booked and joined through the app after its deploy as the check;
-  no record in the tree says that class has run. If the pair in production's
-  secrets is not the box's own, calls fail to connect outright rather than
-  merely degrade.
-- **Vendor keys for captions/transcription (`GOOGLE_TRANSLATE_API_KEY`,
-  `DEEPGRAM_API_KEY`, `ANTHROPIC_API_KEY`, or `ASSEMBLYAI_API_KEY`) cannot be
-  confirmed present in production from this repo** — verify against Infisical
-  `production` (which `infra/gcp/push-cloudrun-env.sh` writes into the running
-  service's secret) rather than assuming.
-  In production `LIVE_CAPTIONS_ENABLED` and
-  `LESSON_INSIGHTS_TRANSCRIPTION_ENABLED` are on and `CLASS_RECORDING_ENABLED`
-  is off (`config/env/production.runtime.env`), but "flag on" has already once
-  meant "silently dark" in this product's history (a deploy-host cutover) — do
-  not treat flag state alone as proof the feature works end-to-end for real
-  users.
-- **The teacher-facing surface that displays `LessonTranscript` /
-  transcription output to a teacher** (presumably a "lesson insights" or
-  "lesson notes" screen) was not directly located/verified in this research
-  pass — confirm the actual UI before writing QA cases against "teacher can
-  view the transcript."
-- Whether a **student** can ever view their own class transcript/insights
-  (as opposed to only the teacher) was not confirmed either way.
+- **Production LiveKit connectivity cannot be confirmed from the repo.**
+  [D-16](../decisions/D-16.md) names the first class booked and joined through
+  the app after the Compute Engine box's deploy as the check; nothing in the
+  tree records that class. If the key pair in production's secrets is not the
+  box's own, calls fail to connect outright.
+- **Vendor keys** (`GOOGLE_TRANSLATE_API_KEY`, `DEEPGRAM_API_KEY`,
+  `ANTHROPIC_API_KEY`) cannot be confirmed present in production from the repo
+  — check Infisical `production`, which `infra/gcp/push-cloudrun-env.sh` writes
+  into the running service. A flag that is on is not proof the feature works.

@@ -1,7 +1,5 @@
 # Library of learning materials
 
-## Overview
-
 Every teacher has a reusable library of teaching materials — files, external
 links, or native AI-drafted/typed Markdown content — organized by **Level**
 (a teacher's own ordered ladder, auto-seeded with CEFR A1–C2) and tagged with
@@ -18,8 +16,8 @@ always visible with no push and set is pushed on that schedule. A
 booking-scoped row has no `levelId`. Version history (`MaterialRevision`) is
 keyed by material, and both AI entry points share one prompt builder
 (`lib/materials/prompt.ts`). Class content and per-class attachments were once
-separate tables, which meant every materials feature was built twice; keep
-them one.
+separate tables, so every materials feature was built twice; keep them one
+table.
 
 From the library, a teacher can attach an item to a specific reserved class
 (`BookingLibraryMaterial`) or assign it directly to a student's personal
@@ -33,53 +31,30 @@ Native content can embed **images** inline, and a material whose file
 attachment is itself a picture previews inline rather than hiding behind a
 download link — see "Images" below.
 
-This page absorbed the two specs it was written from — the taxonomy spec
-(tagging, AI-generate, attach, auto-surface) and the original
-level-gated library design. Both were deleted with the rest of the backlog
-by [D-164](../decisions/D-164.md); what was current in them is here, and
-what was stale went with them.
-
-## User Stories
-
-- As a teacher, I want to build a library of materials once, tagged by level
-  and topic, so I don't recreate the same worksheet for every student at
-  that level.
-- As a teacher, I want AI to draft a new library material from a topic, level,
-  and tags, so I can build my library faster.
-- As a teacher, I want to attach a library item to a specific upcoming class,
-  scheduled to send at a chosen moment.
-- As a teacher, I want to assign specific material directly to a student —
-  even above their normal level — as an explicit act of accompaniment, and
-  track what they've covered.
-- As a student, I want to browse materials appropriate to my level, see what
-  my teacher has assigned to me, and get a PDF or audio version to study
-  with.
-
-## Business Rules (exhaustive)
+## Business rules
 
 ### Taxonomy: Level and FocusTag/FocusTagCategory
 
 - `Level` is a **teacher-scoped, ordered table**, not a fixed enum — every
   teacher is auto-seeded with six CEFR rows (`a1`…`c2`, labels "A1"…"C2",
   positions 1–6) via `ensureTeacherLevels`, self-healing on first read if
-  somehow empty. This lets a non-language tutor (math grades, music skill
-  tiers) use the same mechanism without a schema change, though in practice
-  the seed **is** the UI today — no settings screen exists yet to rename,
-  add, reorder, or archive levels on either platform.
+  empty. A non-language tutor could use the same mechanism without a schema
+  change, but the seed **is** the ladder today: there is no screen to rename,
+  add, reorder or archive levels.
 - `FocusTagCategory`/`FocusTag` are likewise teacher-owned tables, seeded
-  from packs: a **Format** pack (10 tags — Actividad breve, Presentación,
-  Lecturas, Ponte al día, Unidad didáctica, Test, Canción, Pódcast, Escape
-  Room, Kahoot) layered onto **every** teacher regardless of language, plus a
-  language-specific pack (Spanish ~45 tags, English ~40, or a neutral
-  ~10-tag pack) chosen by the teacher's `targetLanguage`. Six categories
+  from packs (`lib/focus-packs.ts`): a **Format** pack (`FORMAT_TAG_SEEDS`, 10
+  tags — Actividad breve, Presentación, Lecturas, Ponte al día, Unidad
+  didáctica, Test, Canción, Pódcast, Escape Room, Kahoot) seeded for **every**
+  teacher, plus a pack chosen by her `targetLanguage` — Spanish, English, or a
+  neutral language pack for anything else (`focusTagSeedFor`). Six categories
   exist by default: Grammar, Vocabulary, Skill, Activity, Theme, Format.
 - A category can only be archived once it has **zero active tags** — enforced
   both at the application layer (an explicit "still has focus tags" error)
   and at the database layer (`onDelete: Restrict`) as a backstop. There is no
   cascade-archive-the-tags-too path; removing a category from use is always a
   conscious, visible decision.
-- Limits: focus-tag label ≤ 60 characters, category label ≤ 40 characters,
-  up to 300 focus tags and 60 categories per teacher.
+- Limits (`lib/focus-tag-editing.ts`): focus-tag label ≤ 60 characters,
+  category label ≤ 40, up to 300 focus tags and 60 categories per teacher.
 - A library material may carry any number of the teacher's own focus tags via
   the `LibraryMaterialFocusTag` join table; posted tag ids are **always
   re-resolved against the teacher's own active tags** before writing — a
@@ -94,9 +69,8 @@ what was stale went with them.
   search, active/archived) is unchanged.
 - A shelf contains materials **filed at exactly that level** — it is not the
   student-facing `at_or_below` view. An A2 shelf shows A2 materials only, not
-  A1+A2. (Chosen deliberately with the teacher this was designed with: she
-  organises by where a material _lives_, not by who can see it. The
-  student-facing ceiling is a separate, unchanged concept — see below.)
+  A1+A2: a teacher organises by where a material _lives_, not by who can see
+  it. The student-facing ceiling is a separate rule (below).
 - **No folders, and no stored hierarchy.** A shelf is a view over
   `LibraryMaterial.levelId`, which every library material already carries.
   Re-tagging a material to a different level re-homes it with no move
@@ -106,9 +80,8 @@ what was stale went with them.
   simultaneously mandatory, single-valued, and totally ordered
   (`Level.position`); focus tags are optional and many-per-item, so they can
   only narrow a set, never partition it.
-- **No per-level counts** on the picker (explicit teacher preference), which
-  is also why the picker costs no material query at all. Nor is a shelf
-  sub-grouped by `unit`; the existing filters were judged enough.
+- **No per-level counts** on the picker, so it costs no material query. A shelf
+  is not sub-grouped by `unit`.
 - Browse state is encoded in `?level=`: absent = the picker, `?level=<id>` = a
   shelf, `?level=all` = the flat all-levels list. The rule lives in
   `packages/shared/src/materials-browse.ts` rather than in the page, so the
@@ -122,10 +95,9 @@ what was stale went with them.
 - Inside a shelf, the level chip row is a **switcher**, not a filter: it moves
   sideways between shelves. Its "All" option selects the all-levels list
   explicitly rather than clearing the level (which would mean "picker").
-- The in-call "My library" browser (`CallMaterialsPanel`) deliberately keeps
-  the **flat** list — mid-lesson, a two-tap drill-down is a cost, not a
-  feature. It shares the fetch state machine (`use-library-browser.ts`) but
-  not the picker.
+- The in-call "My library" browser (`CallLibraryBrowser`, inside
+  `CallMaterialsPanel`) deliberately keeps the **flat** list — mid-lesson, a
+  two-tap drill-down is a cost, not a feature.
 - The class-detail page's **attach-from-library** control gets level-first as
   _structure_ rather than as a drill-down: it is a multi-select inside a
   larger form, and replacing its list with a hub would either lose a
@@ -134,7 +106,7 @@ what was stale went with them.
   (`groupMaterialsByLevel`), with an optional single-level narrowing. The
   checked set lives outside the list, so **a selection survives narrowing and
   still submits** — the submit button's count is what surfaces off-screen
-  picks. Level headings replaced the old per-row `· A2` suffix.
+  picks.
 - That picker is **not** defaulted to the class student's own level: the class
   page already has a separate opt-in "at their level" shelf
   (`teachers.auto_surface_level_materials`) doing exactly that, and hiding the
@@ -157,9 +129,9 @@ what was stale went with them.
   e.g. a placement test), and `all` (visible regardless of level, including
   students with no level set at all — a syllabus/intro item).
 - **The browse ceiling is a hard, non-overridable rule**: an A2 student
-  browsing the library sees A1 + A2 materials, never B1 or above — this is
-  described as pedagogical, not a nicety (a teacher does not want a student
-  reaching material above their level without her guidance). The **only**
+  browsing the library sees A1 + A2 materials, never B1 or above — a teacher
+  does not want a student reaching material above her level without her
+  guidance. The **only**
   sanctioned path above the ceiling is an explicit teacher action: assigning
   the item to that student's notebook, or attaching it to one of their
   classes.
@@ -167,9 +139,9 @@ what was stale went with them.
   even `visibility: "all"` ones. The only materials that reach a
   level-less student are ones a teacher explicitly puts in front of them
   (an assignment or a class attachment).
-- Library items **never expire** — the 60-day/1-year per-class purge job that
-  cleans up old booking-scoped attachments explicitly skips the
-  `${teacherId}/library/...` storage prefix.
+- Library items **never expire** — the daily purge of booking-scoped uploads
+  older than one year (`materials-purge-cron`, `lib/storage/materials-purge.ts`)
+  skips the `${teacherId}/library/...` storage prefix.
 - Archiving hides an item (reversible); a separate **hard delete** frees its
   storage object and cascades its assignments — archive alone never frees
   storage.
@@ -185,7 +157,7 @@ what was stale went with them.
   booking) sends immediately — same rule as a brand-new upload.
 - This send/push behavior only applies to file/link materials — a
   native-content item (Markdown body, no file/link) attaches for on-page
-  visibility only, since there is nothing to push over WhatsApp/email.
+  visibility only, since there is no file or link to send.
 - An opt-in, per-teacher **auto-surface shelf** (`teachers.auto_surface_level_materials`,
   default off) shows a read-only "at their level" row on a class page using
   the exact same browse-ceiling query as the student's own browse surface,
@@ -208,7 +180,7 @@ we use with this student last time?" needs all three:
 `ClassMaterialUse` is a **teacher-private** record and is never shown to the
 student, never carries a send timing, and never sends anything. That is why it
 is a separate table rather than a flag on `BookingLibraryMaterial`: attaching
-is a promise to the student (it schedules a WhatsApp or email delivery),
+is a promise to the student (it schedules a push or email delivery),
 whereas opening is a fact about the lesson. Recording an open through the
 attach path would push a material to the student every time the teacher merely
 previewed one for herself.
@@ -235,9 +207,7 @@ collapses them to one row per (class, material). Two surfaces consume it:
   date or type, filterable to "used in class" or "sent".
 - **The class-content composer's "continue from a previous class" picker** —
   which offers the body-bearing subset, since a file or a link has no text to
-  feed the prompt. Before this it saw only the class's own content, so a
-  teacher who had taught off a library worksheet was offered nothing to
-  continue from.
+  feed the prompt — including a library worksheet she taught from.
 
 ### Assignment + completion (the "notebook," `StudentLibraryItem`)
 
@@ -254,17 +224,15 @@ collapses them to one row per (class, material). Two surfaces consume it:
   (re-assigning/toggling doesn't re-notify).
 - **Completion is teacher-driven by default** — the teacher marks an item
   covered/uncovered; the `completedBy` column records who flipped it
-  ("teacher" today) and exists specifically to allow student self-marking
-  later without a schema migration. No code path ever
-  sets `completedBy: "student"` — self-marking is designed for, not shipped.
+  (`"teacher"`) so student self-marking could be added without a migration.
+  No code path sets `completedBy: "student"`; self-marking is not built.
 - Unassigning removes the notebook entry outright (not a soft-archive).
 
 ### AI generation, refine, and templates
 
-- AI generation is **Pro-gated** and shares the exact same monthly cap (100
-  generations/teacher/month) as class-content generation, refine, and
-  podcast script generation — "one AI plumbing, several outputs, one quota."
-  Only a successful generation burns quota.
+- AI generation is **Pro-gated** (`class_content`) and shares one monthly cap
+  (`CLASS_CONTENT_AI_MONTHLY_CAP`, 100 per teacher) with class-content
+  generation, refine and podcast scripts. Only a success uses quota.
 - Generation never auto-saves: it is always "generate → review → explicit
   save." Saving a library item is a distinct action
   (`saveContentToLibraryAction` / `saveLibraryContentMaterial`) from
@@ -281,8 +249,7 @@ collapses them to one row per (class, material). Two surfaces consume it:
 - Every generation — material, class content, refine and podcast script — is
   told the lesson is **one-to-one**: one teacher, one student, no pair or group
   work, and a naturally group activity rewritten for two people
-  (`lessonFormatDirective()` in `lib/materials/prompt.ts`). It is always on;
-  there is no setting, because there is no other lesson format.
+  (`lessonFormatDirective()` in `lib/materials/prompt.ts`). There is no setting.
 - A teacher shapes the AI's writing through **presets and a note**, not by
   editing the prompt: tone, learner age, language variety, vocabulary
   difficulty and a free-text note (`/settings/materials`). They are placed after
@@ -366,8 +333,8 @@ answers from students" but "never send them":
 - **A generated podcast narrates the stripped body**, so the answers can't be
   listened to instead of read. The cut is made on the script prompt, so the
   model is never told the solutions and cannot allude to them either. A
-  podcast synthesized before this rule existed still contains whatever it was
-  generated from — regenerate to refresh it.
+  podcast generated before this rule still contains the answers — regenerate
+  it.
 - **A material that is nothing but an answer key** strips to an empty body,
   not to null: it is still a content material with nothing left to show. The
   podcast job treats that as terminally invalid rather than narrating silence.
@@ -381,10 +348,8 @@ disagree about what counts as an answer.
 
 ### Images
 
-Two independent things, both added for visual learners (dual coding — pairing
-a word with a picture is one of the best-supported techniques in language
-teaching, and the reason a vocabulary or "describe this scene" activity wants
-a picture at all):
+Two independent features, for activities that need a picture (vocabulary,
+"describe this scene"):
 
 - **Inline preview of an image file attachment.** A material whose file is a
   raster image (`jpg`, `jpeg`, `png`, `webp`, `gif`, `avif`, `heic`, `heif`)
@@ -461,7 +426,7 @@ Rules:
 
 ### Storage & uploads
 
-- File uploads are capped at 25 MB.
+- File uploads are capped at 25 MB, one file or link per upload.
 - Library files live under a distinct `${teacherId}/library/...` storage
   prefix specifically so the time-based per-class purge job never touches
   them.
@@ -486,7 +451,7 @@ Rules:
   and slug-safe, capped at 60 characters, falling back to `"material.pdf"` if
   empty.
 
-## User Flow
+## User flow
 
 **Teacher — building the library:**
 
@@ -538,7 +503,7 @@ Rules:
    inline, download a PDF of a content item, or listen to its generated
    podcast if one exists.
 
-## Data Used
+## Data used
 
 Level ladder (per teacher), focus-tag taxonomy (categories + tags, per
 teacher), library materials (file/link/body, level, visibility, unit,
@@ -547,7 +512,7 @@ records (what was opened during a lesson, and for whom), per-student
 assignment + completion state, revision history, and generated podcast
 audio + script.
 
-## Edge Cases
+## Edge cases
 
 - A student with no level assigned browses the library: sees nothing on the
   browse surface, only explicit assignments/class attachments.
@@ -570,7 +535,7 @@ audio + script.
 - Regenerating a podcast on a material whose body changed since the last
   generation: reuses the same podcast row, discarding the prior audio/script.
 
-## Error States
+## Error states
 
 - Category archive attempted while active tags remain →
   explicit "still has focus tags" error, category not archived.
@@ -592,40 +557,31 @@ audio + script.
 
 ## Permissions
 
-| Action                                  | Teacher (owner)         | Other teacher | Student                                                      |
-| --------------------------------------- | ----------------------- | ------------- | ------------------------------------------------------------ |
-| Browse library (level-capped)           | Yes (all own)           | No            | Yes, capped at their level                                   |
-| Create/upload material                  | Yes                     | No            | No                                                           |
-| Generate with AI / refine / podcast     | Yes (Pro + monthly cap) | No            | No                                                           |
-| Edit body / view + restore revisions    | Yes                     | No            | No                                                           |
-| Archive / hard-delete                   | Yes                     | No            | No                                                           |
-| Reorder within a level                  | Yes                     | No            | No                                                           |
-| Manage focus tags/categories            | Yes (Pro to save)       | No            | No                                                           |
-| Attach material to a booking            | Yes (Pro)               | No            | No                                                           |
-| Assign material to a student (notebook) | Yes                     | No            | No (read-only)                                               |
-| Mark assignment completed               | Yes (default)           | No            | No (not yet shipped)                                         |
-| Set a student's level                   | Yes                     | No            | No                                                           |
-| View assigned/class materials           | Yes                     | No            | Yes (own only)                                               |
-| Export material PDF                     | Yes                     | No            | Presumably yes for own materials, via the same route pattern |
-| See a material's answer key             | Yes                     | No            | **Never** — cut server-side from every student surface       |
+| Action                                  | Teacher (owner)         | Other teacher | Student                                                |
+| --------------------------------------- | ----------------------- | ------------- | ------------------------------------------------------ |
+| Browse library (level-capped)           | Yes (all own)           | No            | Yes, capped at their level                             |
+| Create/upload material                  | Yes                     | No            | No                                                     |
+| Generate with AI / refine / podcast     | Yes (Pro + monthly cap) | No            | No                                                     |
+| Edit body / view + restore revisions    | Yes                     | No            | No                                                     |
+| Archive / hard-delete                   | Yes                     | No            | No                                                     |
+| Reorder within a level                  | Yes                     | No            | No                                                     |
+| Manage focus tags/categories            | Yes (Pro to save)       | No            | No                                                     |
+| Attach material to a booking            | Yes (Pro)               | No            | No                                                     |
+| Assign material to a student (notebook) | Yes                     | No            | No (read-only)                                         |
+| Mark assignment completed               | Yes                     | No            | No                                                     |
+| Set a student's level                   | Yes                     | No            | No                                                     |
+| View assigned/class materials           | Yes                     | No            | Yes (own only)                                         |
+| Export material PDF                     | Yes                     | No            | Only one attached to her class and already released    |
+| See a material's answer key             | Yes                     | No            | **Never** — cut server-side from every student surface |
 
 No moderation or approval workflow exists — every material is teacher-owned
 and strictly tenant-scoped; there is no platform admin review step.
 
-## Open Questions
+## Open questions
 
-- Whether a student will ever be allowed to self-mark a notebook item
-  "done" (`completedBy: "student"`) is an explicitly open, deferred
-  sub-decision carried over from the deleted level-materials spec — the
-  column exists to support
-  it but no code path sets it today.
-- No level-ladder management UI (rename/add/reorder/archive a level) exists,
-  despite being called out as a "purely additive, cheap"
-  follow-up — still roadmap only.
-- Bulk/multi-file upload is still listed as a roadmap item — today's upload
-  flow is one file or link at a time.
-- The exact precedence when a material appears in more than one of the
-  student's three surfaces at once (browsable + assigned + class-attached)
-  wasn't independently confirmed to a single, tested ordering in this pass —
-  worth a targeted test read (`student-view.ts` / its test suite) before
-  writing QA cases that depend on display order.
+- Whether a student may self-mark a notebook item covered
+  (`completedBy: "student"`). The column allows it; nothing sets it.
+- There is no level-ladder management UI (rename, add, reorder, archive).
+- When one material reaches a student by more than one route (browsable,
+  assigned, class-attached), the display order is not pinned by a test
+  (`lib/library/student-view.ts`).
