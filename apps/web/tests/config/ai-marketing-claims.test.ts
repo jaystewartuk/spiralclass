@@ -48,9 +48,25 @@ const BOOKING_INCLUDED = resolve(REPO_ROOT, "apps/web/src/app/b/[slug]/whats-inc
 // all (credential-gated only, and it degrades to a hidden control rather than a
 // broken promise) — still listed here, so rule (1) stays exhaustive.
 const CLAIM_GATES: Record<string, string[]> = {
-  // Live captions (D-27): teacher speaks Spanish, student reads English.
+  // Live captions (D-27, D-185): each side reads the other's words in their
+  // own language, recognised and translated in the browsers.
   "web.landing.ai.captions": ["LIVE_CAPTIONS_ENABLED"],
   "web.features.item.liveCaptions": ["LIVE_CAPTIONS_ENABLED"],
+
+  // AI-drafted class content (D-17, D-69). No flag: it is Pro-entitlement and
+  // quota gated, and every new teacher starts on the Pro trial. Credential-
+  // gated only (ANTHROPIC_API_KEY, in Infisical), and it degrades to a hidden
+  // control rather than a broken promise — hence the empty array.
+  "web.landing.ai.lessonPlans": [],
+
+  // Learning notes after class (D-19, D-22, D-189): the caption transcript,
+  // kept with the pairing's insights consent, becomes findings the teacher
+  // confirms. The flag is the one D-189 turned back on.
+  "web.landing.ai.learningNotes": ["LESSON_INSIGHTS_TRANSCRIPTION_ENABLED"],
+
+  // "Review with AI" on a homework submission (lib/homework/ai-review.ts).
+  // Pro-gated and quota-capped, no flag; credential-gated like compose.
+  "web.landing.ai.homework": [],
 
   // SM-2 vocabulary review. No flag: VocabularyReview rows seed from CONFIRMED
   // vocabulary-category insights, and a teacher can author those by hand
@@ -95,13 +111,19 @@ const NON_AI_CLAIMS = new Set([
   "web.features.item.reminders",
   "web.features.item.videoLessons",
   // The landing page's everyday value props (web.landing.feature.*), scanned
-  // because a flag-gated claim can land in that namespace too.
+  // because a flag-gated claim can land in that namespace too. The student
+  // acquisition planner is here deliberately: the plan is a pure function
+  // (packages/shared/src/marketing/planner.ts), and the card promises the
+  // plan, not generated content.
   "web.landing.feature.book",
   "web.landing.feature.calendar",
+  "web.landing.feature.dashboard",
   "web.landing.feature.globalPay",
-  "web.landing.feature.pay",
+  "web.landing.feature.languages",
+  "web.landing.feature.messages",
+  "web.landing.feature.payments",
   "web.landing.feature.reminders",
-  "web.landing.feature.video",
+  "web.landing.feature.students",
   // The booking page's ungated promises (web.bookingLanding.included.*). Each
   // is true for every teacher on every tier: none is behind an entitlement, and
   // "never paywall getting paid" keeps the purchase path itself free too.

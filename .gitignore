@@ -166,3 +166,6 @@ skills-lock.json
 # out of the tree rather than deleted at the end, so a pass can be picked up
 # where it stopped without its scratch reaching a reader.
 .polish/
+
+# Sign-in state and raw recordings the landing-page recorder keeps between runs
+apps/web/scripts/marketing/.tmp/

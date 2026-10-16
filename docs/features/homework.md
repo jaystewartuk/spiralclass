@@ -17,11 +17,17 @@ submission surface with autosave and file attachments; and **teacher review and
 feedback** — reading attempts, writing feedback, and a three-way decision
 (approve / request resubmission / reject) with a notification back.
 
+Also live: **"Review with AI"** on a submitted attempt. The teacher can give
+a one-line steer ("focus on the subjunctive"), and Claude returns a draft
+review she reads before writing her own feedback; drafts are stored in
+`HomeworkAiReviewDraft` and counted against `HOMEWORK_AI_REVIEW_MONTHLY_CAP`
+(`lib/homework/config.ts`, `lib/homework/ai-review.ts`). Grading never
+requires it — a teacher who hits the cap, or whose deploy has no Anthropic
+key, still reviews and grades by hand.
+
 **What is designed but not built**, and is called out again under
-[Open Questions](#open-questions) so this document does not overclaim: AI-assisted
-review drafts (the `HomeworkAiReviewDraft` table exists but nothing reads or
-writes it — there is no "Review with AI" button anywhere), due-soon and overdue
-reminders, and audio submissions.
+[Open Questions](#open-questions) so this document does not overclaim:
+due-soon and overdue reminders, and audio submissions.
 
 There is also an unrelated, purely cosmetic feature that reuses the word
 "homework": a `[!homework]` **Markdown callout style** a teacher can use
@@ -291,12 +297,6 @@ gating anywhere in this feature today.
 
 ## Open Questions
 
-- **AI-assisted review is not built.** The `HomeworkAiReviewDraft`
-  database table exists (reserved by the original schema work) but nothing in
-  the product reads or writes it — there is no "Review with AI" button, no
-  AI-generated draft feedback, and no Pro-gating decision made yet for this
-  feature. Any mention of AI-assisted homework review describes a planned,
-  not shipped, capability.
 - **Due-soon and overdue reminder notifications are not built** — a student is
   never proactively reminded that homework is due soon or overdue.
 - **Audio submissions are not built** — despite the product having

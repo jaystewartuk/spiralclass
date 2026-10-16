@@ -25,10 +25,12 @@ import { capturable, type ResolveKey, type Route, type Tier } from "./routes";
  * DETERMINISM is the whole difficulty with screenshot tests, and three things
  * cause nearly all of the noise here:
  *
- *   Animation. The landing page's CaptionsDemo replays on a timer, and
- *   tailwindcss-animate transitions run on mount. Playwright's
- *   `animations: "disabled"` freezes CSS animations and transitions at their
- *   end state; the JS-driven demo needs the extra settle below.
+ *   Animation. tailwindcss-animate transitions run on mount, and the landing
+ *   page's clips (components/marketing/feature-clip.tsx) play once they are
+ *   in view. Playwright's `animations: "disabled"` freezes CSS animations and
+ *   transitions at their end state; a clip is a <video> with a poster, so a
+ *   capture photographs the poster unless the clip has started, which the
+ *   extra settle below gives it no reason to have.
  *
  *   Fonts. Fraunces and Plus Jakarta Sans are self-hosted by next/font, but a
  *   capture that starts before they swap photographs the fallback stack, and

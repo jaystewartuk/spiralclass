@@ -245,6 +245,29 @@ tests (`tests/captions/`, `tests/video/caption-band.test.tsx`), and the
 rendered check covers everything around them — the toggle, the notice, the
 consent prompts, the "Listening…" band.
 
+## The landing-page clips
+
+The home page shows the product through short recordings of the real app
+(`apps/web/public/marketing/*.mp4`, played by
+`components/marketing/feature-clip.tsx`). They are recorded, not drawn, and
+the recording is a script so a clip can be redone when the screen it shows
+changes:
+
+```bash
+pnpm call:local                              # the stack above: db, seed, LiveKit, build
+pnpm --filter spiralclass-web demo:fixtures  # findings, a brief, homework, messages, materials
+pnpm --filter spiralclass-web demo:record    # every clip, or `demo:record call messages`
+```
+
+`scripts/marketing/demo-fixtures.ts` writes the rows a teacher only has after
+real classes, for the seed's Alicia and Carlos; `scripts/marketing/record.mjs`
+signs both in, drives each screen with a visible cursor, and encodes the clip
+and its poster with ffmpeg. The call clip is recorded from the student's side
+with the teacher's microphone fed a voice file (`DEMO_MIC_WAV`), because
+headless Chrome recognises English on the device; the script's header says
+which two columns to set for that. `tests/marketing/landing-clips.test.ts`
+holds the page's clip names to the files and to a size.
+
 ## The rule
 
 **A change is not done until it ships with tests** covering the new behaviour,

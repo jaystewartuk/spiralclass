@@ -5161,14 +5161,15 @@ export const en = {
     "Your camera and microphone are off. Tap Mic or Camera below to turn them on (allow access if your browser asks).",
   "web.about.meta.title": "About",
   "web.about.meta.description":
-    "Why SpiralClass exists, and who built it — a teacher and a developer solving the problem they lived.",
+    "Why SpiralClass exists and who built it: one software engineer and a working teacher solving the problems she lived.",
   "web.manifest.description": "Scheduling, payments and reminders for teachers of any subject.",
   "web.og.sub": "Scheduling, payments and automatic reminders for teachers of any subject.",
   "web.og.subWithStripe":
     "Scheduling, Stripe payments and automatic reminders for teachers of any subject.",
-  "web.landing.meta.title": "SpiralClass — Scheduling, payments, and reminders for teachers",
+  "web.landing.meta.title":
+    "SpiralClass — Booking, payments and video classes for independent teachers",
   "web.landing.meta.description":
-    "Share your booking link, get paid via Stripe or Wise, and send automatic reminders to your students. Start with {days} days of Pro free, no card needed.",
+    "One link your students book and pay through, a video classroom with live translated subtitles, and AI notes after every class. 0% commission. Start with {days} days of Pro free, no card needed.",
   "web.layout.meta.description":
     "SpiralClass organizes your classes, payments, and reminders so you can teach any subject without the mental load.",
   "web.pricing.meta.title": "Pricing",
@@ -5185,14 +5186,14 @@ export const en = {
   "web.privacyNotice.meta.title": "Privacy policy",
   "web.privacyNotice.meta.description":
     "How SpiralClass collects, uses and protects your personal data, under UK GDPR.",
-  "web.about.eyebrow": "Founded by a teacher and a developer",
+  "web.about.eyebrow": "Built by one engineer, with a working teacher",
   "web.about.headline": "Why SpiralClass exists",
   "web.about.sub":
     "Not a feature list built for a pitch deck — a set of problems one teacher actually lived, solved one at a time.",
   "web.about.whoBuiltIt": "Who built it",
-  "web.about.founders.jay.role": "Founder — the developer",
+  "web.about.founders.jay.role": "Founder and software engineer",
   "web.about.founders.jay.bio":
-    "Software developer. He built SpiralClass for a working teacher's real problem, not an abstract idea — which is why every feature exists for a reason: someone needed it first.",
+    "Software engineer: backend, payments and AI. After eight years building e-commerce and payment systems, he built SpiralClass for a working teacher's real problems and runs it in production, writing the code with coding agents and reviewing, testing and shipping every change himself. Each feature exists because someone needed it first.",
   "web.about.ourWhy.title": "Our why",
   "web.about.ourWhy.body":
     "Independent teachers do the hardest part — teaching well — and then lose hours to scheduling, chasing payments, and repeating themselves over WhatsApp. SpiralClass exists so that admin work never costs a teacher a class, or a student a lesson.",
@@ -5215,6 +5216,9 @@ export const en = {
   "web.about.trust.openSource.body":
     "The whole platform is public on GitHub under the {licence} licence — anyone can read exactly how classes, student data and payments are handled here.",
   "web.about.trust.openSource.link": "Read the code on GitHub",
+  "web.about.trust.agents.title": "Built with coding agents, checked by a person",
+  "web.about.trust.agents.body":
+    "The code is written with coding agents and reviewed, tested and released by the engineer who runs the service. Every change passes the same automated gate before it can reach you, and the history is public.",
   "web.about.seeFeatures": "See features",
   "web.trialBand.title": "Start your 30-day free trial.",
   "web.trialBand.noCard": "No credit card required.",
@@ -5336,29 +5340,105 @@ export const en = {
     "This teacher account isn't active. Please get in touch with support.",
   "web.landing.nav.features": "Features",
   "web.landing.nav.pricing": "Pricing",
-  "web.landing.eyebrow": "For teachers of any subject",
-  "web.landing.headline": "Teach. We handle the rest.",
+  "web.landing.ctaTour": "Watch it in a real class",
+  "web.landing.trust.freePlan": "Free plan, no card needed",
+  "web.landing.trust.openSource": "Open source",
+  "web.landing.clipNote": "Recorded in SpiralClass with demo data.",
+  "web.landing.clip.booking":
+    "A student opening a teacher's booking link on a phone, choosing a package and paying.",
+  "web.landing.clip.call":
+    "A class in the video classroom: the teacher opens a material for both of them, then turns on captions and her words appear in the student's language.",
+  "web.landing.clip.materials":
+    "The teacher's materials library by level, and the lesson plan prepared for the next class.",
+  "web.landing.clip.learning":
+    "After a class: the AI findings the teacher confirms, and the student profile they build.",
+  "web.landing.clip.vocabulary": "The student reviewing vocabulary from their classes on a phone.",
+  "web.landing.clip.homework":
+    "The teacher reading a homework submission, writing feedback and approving it.",
+  "web.landing.clip.dashboard":
+    "The teacher's dashboard, her calendar for the week and her list of classes.",
+  "web.landing.clip.messages": "A student's message arriving and the teacher answering it.",
+  "web.landing.clip.payments":
+    "The payments screen: what she earned this month and what students paid in advance.",
+  "web.landing.clip.students":
+    "The weekly plan for getting students, and the results of the last thirty days.",
+  "web.landing.wedge.row.commission.label": "Commission",
+  "web.landing.wedge.row.commission.marketplace":
+    "A cut of every class, including with students you brought yourself",
+  "web.landing.wedge.row.commission.us": "0%. Your plan is the only thing you pay us.",
+  "web.landing.wedge.row.money.label": "Where the money goes",
+  "web.landing.wedge.row.money.marketplace": "Held by the platform and paid out on its schedule",
+  "web.landing.wedge.row.money.us":
+    "Straight to your own Stripe or Wise account. We never hold it.",
+  "web.landing.wedge.row.students.label": "Your students",
+  "web.landing.wedge.row.students.marketplace":
+    "Theirs, with rules against teaching them anywhere else",
+  "web.landing.wedge.row.students.us": "Yours. So is the booking link, and your data if you leave.",
+  "web.landing.tour.eyebrow": "See it work",
+  "web.landing.tour.title": "One app for before, during and after the class.",
+  "web.landing.tour.sub":
+    "Every clip below is the real app, recorded with demo data. Nothing is a mock-up.",
+  "web.landing.ai.lessonPlans.title": "A lesson plan drafted for this student, in your structure",
+  "web.landing.ai.lessonPlans.body":
+    "Save the way you build a class once. For each class, AI fills your template around the student's level, goals and what you covered last time; you edit, then it reaches them on their class page. Your library keeps everything by level, so a worksheet is made once.",
+  "web.landing.ai.learningNotes.title": "Notes after every class, that you confirm",
+  "web.landing.ai.learningNotes.body":
+    "With the student's consent, the captions are kept as the transcript. After class, AI lists what it noticed, each finding tied to the words that showed it: a grammar slip, a word they reached for in English, a sound. You confirm or dismiss each one. Only confirmed findings build the student's profile and the short brief you read before the next class.",
+  "web.landing.ai.homework.title": "Homework with feedback in minutes",
+  "web.landing.ai.homework.body":
+    "Write a homework block into the class plan and the assignment appears for the student, with a reminder. They hand it in from their phone. You read it, ask AI for a first review if you want one, write your feedback and approve, or ask for another go.",
+  "web.landing.feature.dashboard.title": "Your week at a glance",
+  "web.landing.feature.dashboard.body":
+    "Every class, package and payment in one calendar, synced both ways with Google Calendar. A day plan shows every student and what you'll cover with each.",
+  "web.landing.feature.messages.title": "Messages in the same place as the classes",
+  "web.landing.feature.messages.body":
+    "Text, voice notes, photos and files, in a thread per student. A push notification first, an email only if they haven't read it.",
+  "web.landing.feature.payments.title": "Know what you've earned",
+  "web.landing.feature.payments.body":
+    "What this month brought in, what students paid in advance and how many classes it covers, and every payment with its reference, ready to export.",
+  "web.landing.feature.students.title": "A plan for getting your next student",
+  "web.landing.feature.students.body":
+    "Tell it where learners find you and how much time you have. It plans the week: a referral ask when a student just renewed, a useful post for the group that brought you someone. Only real visits and enquiries are counted.",
+  "web.landing.feature.languages.title": "In your language, and theirs",
+  "web.landing.feature.languages.body":
+    "SpiralClass is in English, Spanish and French. Your booking page shows in the language your students read, and each person sees class times in their own time zone.",
+  "web.landing.fit.title": "Built for how you teach",
+  "web.landing.fit.sub": "Teachers of any subject, teaching anyone, anywhere.",
+  "web.landing.fit.language.title": "You teach a language",
+  "web.landing.fit.language.body":
+    "Subtitles bridge the first classes with a beginner, the transcript becomes the student's own notes, and the vocabulary you confirm comes back to them until it sticks.",
+  "web.landing.fit.subject.title": "You teach something else",
+  "web.landing.fit.subject.body":
+    "Maths, music, exam prep: the booking link, the packages, the classroom, the materials and the homework work the same. Levels are yours to name.",
+  "web.landing.fit.abroad.title": "Your students are somewhere else",
+  "web.landing.fit.abroad.body":
+    "Stripe pays you in your country at your country's rates, Wise reaches you where Stripe doesn't, and every class time is shown to each person in their own zone.",
+  "web.landing.quote.attribution": "A Spanish teacher on SpiralClass, its first",
+  "web.landing.quote.context": "Her classes shaped every feature on this page.",
+  "web.landing.pricing.title": "Free to start. Free to get paid, on every plan.",
+  "web.landing.pricing.body":
+    "A free plan for as long as you want it, and Pro for the AI and the extras, with {days} days to try it and no card. Both payment rails are free whatever you choose.",
+  "web.landing.eyebrow": "For independent teachers of any subject",
+  "web.landing.headline": "Your students book, pay and learn in one place.",
   // One line, not a Stripe-conditional pair. It used to name the rails
   // ("Stripe or Wise payments") and the delivery channels ("push/email
   // reminders"), which forced a second string for a deploy where Stripe is not
   // configured, and spent the hero on plumbing rather than on what she gets.
   // Naming the five things she gets needs no branch — it is true on every
   // deploy, so `web.landing.subNoStripe` is gone rather than reworded.
-  "web.landing.sub": "Scheduling, payments, materials, video and notifications — all in one place.",
-  "web.landing.cta": "Create account",
-  "web.landing.featuresTitle": "Your whole teaching business, in one place.",
-  "web.landing.feature.book.title": "One link to book",
+  "web.landing.sub":
+    "A booking link they pay through, a video classroom with live translated subtitles, and AI that turns every class into notes you check. You keep what you earn.",
+  "web.landing.cta": "Start free",
+  "web.landing.featuresTitle": "And the rest of the job",
+  "web.landing.feature.book.title": "One link to book and pay",
   "web.landing.feature.book.body":
-    "Students book and pay from the single link you share on WhatsApp — whatever subject you teach.",
-  "web.landing.feature.pay.title": "Get paid without chasing",
-  "web.landing.feature.pay.body":
-    "Prepaid packages and secure payments. The money just arrives — no awkward reminders.",
+    "Share it on WhatsApp. Students pick a package, choose a time and pay; a reminder goes out before every class.",
   "web.landing.feature.reminders.title": "Fewer no-shows",
   "web.landing.feature.reminders.body":
     "Automatic push and email reminders at 24 hours, 1 hour and 15 minutes before every class.",
-  "web.landing.feature.globalPay.title": "Get paid, wherever you teach",
+  "web.landing.feature.globalPay.title": "Paid in your country, in your currency",
   "web.landing.feature.globalPay.body":
-    "Stripe not available where you live? Use Wise and get paid straight to your account, no platform in between. There's always a way to get paid.",
+    "Card payments through Stripe, on your own Stripe account, with the methods your country uses. Where Stripe isn't available, a Wise transfer with a reference the app reconciles for you. Both are free on every plan.",
   "web.landing.seeAllFeatures": "See all features →",
   "web.landing.stepsTitle": "How it works",
   "web.landing.steps.createAccount": "Create your account and your booking link.",
@@ -5366,50 +5446,34 @@ export const en = {
   "web.landing.steps.teach": "Get paid and teach. We send the reminders.",
   "web.landing.ctaBandTitle": "Start teaching with everything under control.",
   "web.landing.seePricing": "See pricing",
-  "web.landing.trust.keepAll": "0% commission on your lessons",
-  "web.landing.trust.aiLessons": "AI-powered live lessons",
+  "web.landing.trust.keepAll": "0% commission, paid straight to you",
   "web.landing.wedge.eyebrow": "Not a marketplace",
   "web.landing.wedge.title": "Your students. Your money. No middleman.",
   "web.landing.wedge.sub":
-    "Tutor marketplaces rent you your own students and take a cut of every class. SpiralClass is the tool that runs your business — not the middleman charging to introduce you.",
+    "Marketplaces introduce you to students and then charge you for every class, for as long as you teach them. SpiralClass is the tool that runs the teaching business you already have.",
   "web.landing.wedge.marketplace.label": "Tutor marketplaces",
-  "web.landing.wedge.marketplace.value": "Take a cut of every class",
   "web.landing.wedge.us.label": "SpiralClass",
-  "web.landing.wedge.us.value": "0% commission",
   "web.landing.wedge.us.note":
     "Your students pay you directly, and we take no share of it. Anything paid through Stripe carries Stripe's own processing fee — charged by Stripe, at the rate Stripe sets for your country, and we receive none of it. A Wise transfer skips Stripe entirely. Your SpiralClass plan is separate, and it is the only thing you pay us.",
   "web.landing.ai.eyebrow": "AI in every lesson",
   "web.landing.ai.title": "The lesson doesn't end when the call does.",
   "web.landing.ai.sub":
     "SpiralClass hosts the live lesson and layers on AI no marketplace gives you.",
-  "web.landing.ai.captions.title": "Live captions",
+  "web.landing.ai.captions.title": "A video classroom with subtitles in their language",
   "web.landing.ai.captions.body":
-    "You speak Spanish; your student reads English subtitles in real time. No extra apps, nothing stored.",
-  "web.landing.ai.srs.title": "Vocabulary that sticks",
+    "The class happens inside SpiralClass, no Zoom link, no second app. Turn on captions and your words appear on your student's screen as you speak, then translated when the sentence ends. Theirs come back to you the same way. It runs in the browser and nothing is stored.",
+  "web.landing.ai.srs.title": "Vocabulary that comes back before it's forgotten",
   "web.landing.ai.srs.body":
-    "Vocabulary from your classes feeds a spaced-repetition schedule (SM-2) that brings it back right before it's forgotten.",
+    "The words you confirm go into the student's own review queue, spaced so each one returns just before it would slip. They see what they're improving at, in their own app.",
   "web.landing.ai.videoCoach.title": "AI coach for your intro video",
   "web.landing.ai.videoCoach.body":
     "Record a short pitch for your booking page and the AI tells you what lands and what to tighten — warm, concrete feedback in your language.",
-  "web.landing.demo.badge": "Live · demo",
-  "web.landing.demo.speakerLabel": "Teacher says (Spanish)",
-  "web.landing.demo.translationLabel": "Student reads (English)",
-  "web.landing.demo.replay": "Replay",
-  "web.landing.demo.a11yLabel":
-    "Demonstration of live captions translating the teacher's Spanish speech into English subtitles.",
-  "web.landing.feature.video.title": "Teach right here",
-  "web.landing.feature.video.body":
-    "Built-in video classroom — no Zoom links, no separate app. The class happens inside SpiralClass.",
   "web.landing.feature.calendar.title": "Synced to your calendar",
   "web.landing.feature.calendar.body":
     "Two-way Google Calendar and a subscribable iCal feed — your classes live alongside everything else in your day.",
-  "web.landing.social.title": "Built with a real teacher, for real teachers.",
+  "web.landing.social.title": "Built with a working teacher",
   "web.landing.social.body":
-    "Every feature was proven in real classes before it reached anyone else. No smoke, no empty promises.",
-  "web.landing.social.stat.rails.value": "2 ways to get paid",
-  "web.landing.social.stat.rails.label": "Card via Stripe or direct Wise transfer",
-  "web.landing.social.stat.ai.value": "AI in every lesson",
-  "web.landing.social.stat.ai.label": "Live captions and vocabulary that sticks",
+    "Every feature on this page was used in real classes before it reached anyone else. The code is public, so you can check how your students' data and your money are handled.",
   "web.pricing.perk.remindersPushEmail": "Push and email reminders",
   "web.pricing.perk.unlimitedStudents": "Unlimited students",
   "web.pricing.perk.unlimitedTemplates": "Unlimited package templates",
