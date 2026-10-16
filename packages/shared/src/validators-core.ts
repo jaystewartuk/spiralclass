@@ -94,7 +94,7 @@ export const timezoneSchemaWith = (loc: Loc) => {
     // @spiralclass/shared pricing-currency.ts) the picker offers. Optional at
     // the schema layer so a pre-existing client that predates this field
     // keeps working — it omits it and the teacher stays on the column
-    // default. Locked after onboarding — see D-64.
+    // default. Locked after onboarding — see D-153.
     pricingCurrency: z
       .string()
       .trim()
@@ -351,7 +351,7 @@ export const checkoutIntentSchemaWith = (loc: Loc) => {
     studentPhone: optionalPhoneInput(loc),
     paymentMethod: z.enum(["stripe", "manual_transfer"]).default("stripe"),
     // Which payout instrument the student picked, for `manual_transfer`
-    // (D-113). Absent for Stripe. The server re-checks ownership and
+    // (D-145). Absent for Stripe. The server re-checks ownership and
     // offerability — this only bounds the shape.
     //
     // Absent arrives as null (FormData.get) or "" (the always-present hidden
@@ -730,7 +730,7 @@ export type PortalCheckoutIntentInput = z.infer<typeof portalCheckoutIntentSchem
 // Settings form for /settings/payments — Wise card. The DB CHECK
 // constraints mirror these for defense-in-depth.
 
-// --- Payout instruments (D-113) --------------------------------------------
+// --- Payout instruments (D-145) --------------------------------------------
 //
 // One schema per instrument kind rather than one schema with a `kind`
 // discriminator and every field optional: each kind's required field is

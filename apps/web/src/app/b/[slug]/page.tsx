@@ -390,7 +390,7 @@ export default async function BookingLandingPage({
       : null;
   };
   const stripeReady = Boolean(teacher.stripeAccountId && teacher.stripeChargesEnabled);
-  // Any offerable instrument, not Wise specifically (D-113).
+  // Any offerable instrument, not Wise specifically (D-145).
   const transferReady = hasOfferableInstrument(
     teacher.payoutInstruments,
     currencyForTeacher(teacher),

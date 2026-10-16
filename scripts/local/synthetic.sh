@@ -206,7 +206,7 @@ fi
 # buy page.
 #
 # This said until 2026-08-31 that an early teacher was "Wise-only, because
-# her country is outside the Stripe Connect circle" (D-58), so a single rail was a
+# her country is outside the Stripe Connect circle", so a single rail was a
 # single point of failure. D-143 reversed exactly that: the teacher is now
 # merchant of record on her own connected account, her country is one of the 44
 # measured Connect countries, and that account is live and charge-enabled. Both
@@ -222,7 +222,7 @@ fi
 # happens at session creation, after the buyer clicks Pay. Proving that needs a
 # real Checkout Session, which writes rows; it is deliberately not done here.
 #
-# D-113 (2026-08-23) replaced the web buy page's `wiseReady` boolean with a
+# D-145 (2026-08-23) replaced the web buy page's `wiseReady` boolean with a
 # full `instruments` array (a teacher can offer Wise AND a bank_account/SPEI
 # instrument side by side) — `wiseReady` survives only on the mobile JSON API,
 # kept there for the installed app. Readiness here mirrors purchase-flow.tsx's

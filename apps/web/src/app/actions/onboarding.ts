@@ -141,7 +141,7 @@ export async function saveTimezoneAction(
       // Only overwrite the currency when sent, and only before
       // onboarding completes in practice (the stepper never revisits this
       // page afterward) — a self-service change post-onboarding is out of
-      // scope (D-64), same as country.
+      // scope (D-153), same as country.
       ...(parsed.data.pricingCurrency ? { pricingCurrency: parsed.data.pricingCurrency } : {}),
       // What she teaches (D-72). Same only-when-sent posture as the two above.
       ...(parsed.data.targetLanguage ? { targetLanguage: parsed.data.targetLanguage } : {}),
@@ -362,7 +362,7 @@ export async function saveTemplatesAction(
   const keeps = formData.getAll("tpl_keep") as string[]; // "1" if the keep checkbox was checked
 
   // A teacher outside the Stripe Connect payout circle has no card rail at all
-  // (D-58), so there is no "Stripe price" for a Wise price to be a discount
+  // (D-143), so there is no "Stripe price" for a Wise price to be a discount
   // OFF. TemplatesForm already hides the whole split for her and shows a single
   // plain "Price" — but hiding a control is not the same as clearing its value,
   // and the hidden input kept resubmitting whatever `transferPriceMinorUnits` was

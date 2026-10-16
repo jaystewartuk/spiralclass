@@ -24,7 +24,7 @@ import { Quote, ShieldCheck } from "lucide-react";
 type Method = "stripe" | "manual_transfer";
 
 // The picker's value: "stripe", or the id of the chosen payout instrument.
-// The id (not just the kind) is what the server needs — see D-113.
+// The id (not just the kind) is what the server needs — see D-145.
 const STRIPE_SELECTION = "stripe";
 
 type Template = {
@@ -147,7 +147,7 @@ export function PurchaseFlow({
   // `?seats=2` from the booking page's "Two of us" list (D-188).
   initialSeats?: Seats;
   stripeReady: boolean;
-  // Already filtered to the offerable ones by the page (D-113). One option is
+  // Already filtered to the offerable ones by the page (D-145). One option is
   // rendered per instrument, so a teacher with Wise and SPEI shows both.
   instruments: PayoutInstrument[];
   prefill?: CheckoutPrefill;

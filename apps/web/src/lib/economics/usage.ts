@@ -1,8 +1,8 @@
-// Financial Intelligence estimate layer (D-86, S3) — the UsageInput read
+// Financial Intelligence estimate layer (slice S3) — the UsageInput read
 // side, feeding the pricing engine's `UsageValues` (a single month's
 // snapshot) and `UsagePoint[]` (a metric's history, for exhaustion
 // projection). Reuses `monthKey`/`monthWindowStart` from money-metrics.ts per
-// the D-86 doc, so month bucketing can't drift between the actuals and
+// design, so month bucketing can't drift between the actuals and
 // estimate surfaces.
 
 import type { Prisma, PrismaClient } from "@prisma/client";

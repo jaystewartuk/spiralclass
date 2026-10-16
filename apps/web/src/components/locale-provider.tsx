@@ -50,7 +50,7 @@ export function useT(): TFunction {
   return useContext(LocaleContext).t;
 }
 
-/** `formatMinorUnits` bound to the active locale (D-197): the price's own
+/** `formatMinorUnits` bound to the active locale (D-153): the price's own
  * currency, written the way this reader writes numbers. */
 export function useFormatMoney(): (minorUnits: number, currency?: string) => string {
   const locale = useLocale();

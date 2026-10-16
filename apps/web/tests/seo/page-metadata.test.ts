@@ -110,7 +110,7 @@ describe("marketing pages — localized metadata + canonicals", () => {
     const { generateMetadata } = await import("@/app/pricing/page");
     const meta = await generateMetadata();
     expect(meta.title).toBe("Precios");
-    // Price is interpolated from PLAN_PRICE_MINOR_UNITS (canonical GBP, D-99) so
+    // Price is interpolated from PLAN_PRICE_MINOR_UNITS (canonical GBP, D-153) so
     // it can never drift. This was two loose `toContain`s while formatMinorUnits
     // rendered GBP as a bare code and then doubled it; now that it renders a
     // symbol plus one code, the literal is assertable — and pinning it here

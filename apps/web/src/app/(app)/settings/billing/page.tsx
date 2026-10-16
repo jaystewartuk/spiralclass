@@ -190,7 +190,7 @@ export default async function BillingSettingsPage({
         t={t}
       />
 
-      {/* D-152. Every other line on this page is money that flows to US. Since
+      {/* D-143. Every other line on this page is money that flows to US. Since
           D-143 made her the merchant of record, the cost she actually meets per
           payment is Stripe's, billed to her own account, and it appears nowhere
           in the history above — so a teacher reading this page could reasonably

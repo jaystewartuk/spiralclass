@@ -70,9 +70,8 @@ another way" about anything that still exists.
   successor tells the whole story better (phone-OTP sign-in and device trust,
   both reversed by [D-40](./D-40.md)).
 
-**Numbering is never reused and never renumbered**, so `D-01` is still the
-first decision and `D-192` the most recent. A gap means a record was removed,
-not that one is missing.
+**Numbering is never reused and never renumbered.** A gap means a record was
+removed or retired, not that one is missing.
 
 **Everything kept is unedited**, except where a record named an account
 identifier ([D-158](./D-158.md)) or the maintainer's personal legal position
@@ -139,7 +138,7 @@ constraint, which is the one thing a log can show that a codebase cannot.
 
 ### Where the money goes, and where it deliberately does not
 
-- **[D-137](./D-137.md)** — "the platform never touches the funds" is promoted
+- **[D-143](./D-143.md)** — "the platform never touches the funds" is promoted
   from an incidental property to a constraint that governs every future
   payments decision, and every vendor that looks like the answer is named and
   rejected on the same point.
@@ -160,28 +159,12 @@ of record to the teacher being one; the manual rail generalised from a single
 vendor to a per-country scheme registry, then contracted again when Stripe
 closed the gap from the other side.
 
-| #                   | Decision                                                                                         |
-| ------------------- | ------------------------------------------------------------------------------------------------ |
-| [D-01](./D-01.md)   | Payment processor: Mercado Pago → Stripe                                                         |
-| [D-02](./D-02.md)   | Cash-voucher (OXXO) rail removed — asynchronous settlement broke booking confirmation            |
-| [D-03](./D-03.md)   | Recurring subscriptions removed; one-off packages only                                           |
-| [D-30](./D-30.md)   | Individual classes sold and paid for at reservation, on the existing package machinery           |
-| [D-37](./D-37.md)   | Discount codes are the single reward primitive for referrals — teacher-funded, no ledger         |
-| [D-50](./D-50.md)   | Capture the billing address now, enable tax later — it cannot be added retroactively             |
-| [D-58](./D-58.md)   | Platform entity moves to the UK; the Connect country gate becomes the cross-border payout circle |
-| [D-64](./D-64.md)   | Teacher-selectable pricing currency, split by payout rail                                        |
-| [D-79](./D-79.md)   | Webhook durability: a claim recorded before the handler ran swallowed Stripe's retries           |
-| [D-99](./D-99.md)   | Platform billing MXN → GBP, and the currency-blending bugs the audit found on the way            |
-| [D-113](./D-113.md) | Generalise the manual rail rather than adding a per-country sibling                              |
-| [D-124](./D-124.md) | Any country, via a 15-scheme payee registry with real checksums — no free-form payee field       |
-| [D-137](./D-137.md) | The platform stays out of the money flow; a card rail outside the circle is the teacher's        |
-| [D-143](./D-143.md) | **The teacher becomes merchant of record — Connect direct charges on Accounts v2**               |
-| [D-144](./D-144.md) | Checkout stops collecting an address it has no use for, and is reordered around the decision     |
-| [D-145](./D-145.md) | The manual bank-account rail is removed once Stripe began presenting SPEI itself                 |
-| [D-152](./D-152.md) | Tell the teacher what Stripe charges her, and that the platform receives none of it              |
-| [D-153](./D-153.md) | Money columns say `minor_units` — eight supported currencies have no minor unit                  |
-| [D-191](./D-191.md) | **The money screens lead with what she earned this month**, not a "safe to spend" average        |
-| [D-192](./D-192.md) | **An operator's test accounts are marked**, and left out of every figure — never tested unmarked |
+| #                   | Decision                                                                               |
+| ------------------- | -------------------------------------------------------------------------------------- |
+| [D-79](./D-79.md)   | Webhook durability: a claim recorded before the handler ran swallowed Stripe's retries |
+| [D-143](./D-143.md) | **The teacher becomes merchant of record — Connect direct charges on Accounts v2**     |
+| [D-145](./D-145.md) | The manual bank-account rail is removed once Stripe began presenting SPEI itself       |
+| [D-153](./D-153.md) | Money columns say `minor_units` — eight supported currencies have no minor unit        |
 
 ### Scheduling, packages and credits
 
@@ -316,7 +299,6 @@ has broken production.
 | [D-194](./D-194.md) | A visitor cannot switch a booking page's language until the teacher can write in several   |
 | [D-195](./D-195.md) | One locale per language until a region earns one; a regional locale is a delta, not a copy |
 | [D-196](./D-196.md) | Legal text is translated by a person, English controls, no launch without it               |
-| [D-197](./D-197.md) | A price is written in its reader's number format; the currency charged is always named     |
 
 ### Design and layout
 
@@ -328,10 +310,8 @@ has broken production.
 
 ### Subscriptions, entitlements and unit economics
 
-| #                 | Decision                                                                                |
-| ----------------- | --------------------------------------------------------------------------------------- |
-| [D-86](./D-86.md) | Pricing is data, not code — a generic engine with no per-provider branches              |
-| [D-96](./D-96.md) | The entitlements audit changes no architecture: the gaps were in applying it, not in it |
+| #   | Decision |
+| --- | -------- |
 
 ### Database, hosting and configuration
 
@@ -423,9 +403,6 @@ records removed before publication — see [What is not here](#what-is-not-here)
 
 | #                   | Decision                                                              | Status                               |
 | ------------------- | --------------------------------------------------------------------- | ------------------------------------ |
-| [D-01](./D-01.md)   | Payment processor: Mercado Pago → Stripe                              | Active                               |
-| [D-02](./D-02.md)   | Cash-voucher (OXXO) rail removed                                      | Active                               |
-| [D-03](./D-03.md)   | Recurring subscriptions removed; one-off packages only                | Active                               |
 | [D-05](./D-05.md)   | Early privacy framing                                                 | Superseded by D-128; content removed |
 | [D-08](./D-08.md)   | Reschedule cap → per-package schedule-change budget                   | Active                               |
 | [D-09](./D-09.md)   | Credit consumption is FIFO-by-expiry, server-decided                  | Active                               |
@@ -445,8 +422,6 @@ records removed before publication — see [What is not here](#what-is-not-here)
 | [D-25](./D-25.md)   | Superadmin hardened: MFA, append-only audit, impersonation rules      | Active                               |
 | [D-26](./D-26.md)   | Staging tier + gated promote-to-production                            | Principle active; mechanism replaced |
 | [D-27](./D-27.md)   | Live captions, client-streamed and ephemeral                          | Superseded in part by D-106          |
-| [D-30](./D-30.md)   | Individual classes, paid at reservation                               | Active                               |
-| [D-37](./D-37.md)   | Discount codes as the single reward primitive                         | Active                               |
 | [D-38](./D-38.md)   | Teacher and Student mutually exclusive per identity                   | Active                               |
 | [D-40](./D-40.md)   | Supabase Auth → better-auth on owned tables                           | Active                               |
 | [D-42](./D-42.md)   | Remove the WhatsApp Cloud API integration                             | Active                               |
@@ -455,14 +430,11 @@ records removed before publication — see [What is not here](#what-is-not-here)
 | [D-46](./D-46.md)   | The teacher's own template drives AI compose                          | Active                               |
 | [D-48](./D-48.md)   | Analytics region becomes real configuration                           | Active                               |
 | [D-49](./D-49.md)   | Provider-neutral provision · schema · data                            | Executed by D-70 / D-89              |
-| [D-50](./D-50.md)   | Capture billing address now; tax behind a flag                        | Active (capture-only)                |
 | [D-51](./D-51.md)   | The multi-region serving plane — design only, deliberately unbuilt    | Design only; not built               |
 | [D-52](./D-52.md)   | Shared key-based i18n catalog with a ratchet and a lint rule          | Active                               |
 | [D-53](./D-53.md)   | Availability rules frozen in the zone they were written in            | Active                               |
 | [D-55](./D-55.md)   | Admin capability layer + an interactive `/admin/uat` runbook          | Active                               |
 | [D-56](./D-56.md)   | `/sign-in` never auto-provisions a Teacher                            | Active                               |
-| [D-58](./D-58.md)   | Platform entity moves to the UK; Connect gate widens to the circle    | Active (circle retired by D-143)     |
-| [D-64](./D-64.md)   | Teacher-selectable pricing currency                                   | Active                               |
 | [D-65](./D-65.md)   | R2 buckets split preview/production; env reads consolidated           | Active                               |
 | [D-66](./D-66.md)   | Infisical replaces a plaintext secrets file                           | Active                               |
 | [D-69](./D-69.md)   | `ClassContent`/`ClassMaterial` merge into `LibraryMaterial`           | Active                               |
@@ -477,16 +449,13 @@ records removed before publication — see [What is not here](#what-is-not-here)
 | [D-81](./D-81.md)   | A third UI language on a registry-driven architecture                 | Active                               |
 | [D-83](./D-83.md)   | Teacher → student invitation and onboarding flow                      | Active                               |
 | [D-85](./D-85.md)   | Non-secret config moves to platform-neutral `config/env/`             | Active                               |
-| [D-86](./D-86.md)   | Unit-economics estimates: pricing as data, never per-provider code    | Active                               |
 | [D-87](./D-87.md)   | Model defaults split by call shape; `effort` and Haiku never coexist  | Active                               |
 | [D-88](./D-88.md)   | One-to-one is an always-on prompt directive                           | Active                               |
 | [D-89](./D-89.md)   | Production cutover executed; Vercel and Supabase decommissioned       | Active (D-177 → D-186)               |
 | [D-93](./D-93.md)   | Homework review / feedback / AI-assist architecture                   | Designed; shipping in slices         |
 | [D-94](./D-94.md)   | Production onto the self-hosted LiveKit box                           | First half reversed → D-182          |
 | [D-95](./D-95.md)   | Neon PITR + pre-migration checkpoint branches                         | Active                               |
-| [D-96](./D-96.md)   | Entitlements audit: no architecture change; close the gaps            | Active                               |
 | [D-97](./D-97.md)   | Flashcards, speaking-time analytics, derived-offset bookmarks         | Active                               |
-| [D-99](./D-99.md)   | Platform billing currency MXN → GBP                                   | Active                               |
 | [D-104](./D-104.md) | Public listing gates on Marketplace Ready                             | Active                               |
 | [D-106](./D-106.md) | Captions move to a server-side LiveKit agent                          | Superseded by D-185                  |
 | [D-107](./D-107.md) | Materials opens on a level picker                                     | Active                               |
@@ -494,7 +463,6 @@ records removed before publication — see [What is not here](#what-is-not-here)
 | [D-110](./D-110.md) | One board in `hq`; this repository carries no backlog                 | Active (location → D-172)            |
 | [D-111](./D-111.md) | Package guest booking is "pick your first class"                      | Decided; not built                   |
 | [D-112](./D-112.md) | Teaching language asked at onboarding                                 | Active                               |
-| [D-113](./D-113.md) | Generalise the manual rail rather than adding a sibling               | Built; extended by D-124             |
 | [D-114](./D-114.md) | Recording and transcription off; the capture bug it exposed           | Reversed by D-131                    |
 | [D-115](./D-115.md) | Hourly cron grid + a delayed-event wake chain                         | Active                               |
 | [D-116](./D-116.md) | Retire the no-local-tests policy                                      | Active                               |
@@ -502,7 +470,6 @@ records removed before publication — see [What is not here](#what-is-not-here)
 | [D-120](./D-120.md) | The web deploy leaves Actions, on measured cost                       | Superseded in part by D-157          |
 | [D-122](./D-122.md) | Responsive scale moves above every tablet width                       | Superseded by D-141                  |
 | [D-123](./D-123.md) | Social previews on the share link; we render every character          | Active (billing path → D-127)        |
-| [D-124](./D-124.md) | Any country, via a per-country bank-scheme registry                   | Active (`bank_account` → D-145)      |
 | [D-125](./D-125.md) | A student-acquisition assistant with a pure planner                   | Active                               |
 | [D-127](./D-127.md) | Image generation moves to Vertex AI                                   | Active (key → runtime identity)      |
 | [D-128](./D-128.md) | UK GDPR privacy layer; the supplier register becomes code             | Active                               |
@@ -513,21 +480,18 @@ records removed before publication — see [What is not here](#what-is-not-here)
 | [D-134](./D-134.md) | The media host goes behind Cloudflare's proxy                         | Active (partly → D-139)              |
 | [D-135](./D-135.md) | The class recording is audio-only                                     | Active                               |
 | [D-136](./D-136.md) | Closing an account destroys its recordings                            | Active                               |
-| [D-137](./D-137.md) | The platform stays out of the money flow                              | Active                               |
 | [D-138](./D-138.md) | Renamed to SpiralClass; 45 identifiers deliberately not renamed       | Active                               |
 | [D-139](./D-139.md) | Delete the OpenTofu modules that were never applied                   | Active (one part → D-150)            |
 | [D-140](./D-140.md) | Legibility is the governing constraint                                | Active                               |
 | [D-141](./D-141.md) | The standard breakpoint scale is restored                             | Active                               |
 | [D-142](./D-142.md) | The public demo is a rendered fixture                                 | Active (premise revised 2026-10-14)  |
 | [D-143](./D-143.md) | The teacher becomes merchant of record                                | Active                               |
-| [D-144](./D-144.md) | Checkout stops collecting an unused address; reordered                | Active                               |
 | [D-145](./D-145.md) | The manual bank-account rail is removed; Wise stays                   | Active                               |
 | [D-146](./D-146.md) | One heavy job at a time; the laptop becomes a queue                   | Active (in part → D-157/D-161)       |
 | [D-147](./D-147.md) | Regulatory position                                                   | Content removed; finding kept        |
 | [D-149](./D-149.md) | Group classes: one booking, many attendees                            | Scoped; narrowed by D-188 for two    |
 | [D-150](./D-150.md) | Hosting measured; the app stays where the database is                 | Decided; partly executed             |
 | [D-151](./D-151.md) | Verified student testimonials the teacher cannot write                | Active                               |
-| [D-152](./D-152.md) | Disclose Stripe's fee, and that we receive none of it                 | Active                               |
 | [D-153](./D-153.md) | Money columns say `minor_units`                                       | Active                               |
 | [D-155](./D-155.md) | A community has rules, a post and a picture                           | Active                               |
 | [D-157](./D-157.md) | Actions comes back; the registry stays the single definition          | Active (heavy tier → D-161)          |
@@ -561,13 +525,10 @@ records removed before publication — see [What is not here](#what-is-not-here)
 | [D-188](./D-188.md) | Packages for two: one buyer, one account, a separate credit balance   | Active (narrows D-149)               |
 | [D-189](./D-189.md) | The transcript is the browsers' caption text; no audio is captured    | Active (partly reverses D-187)       |
 | [D-190](./D-190.md) | A liveness probe restarts a wedged Cloud Run instance                 | Active                               |
-| [D-191](./D-191.md) | Money screens lead with this month earned; "safe to spend" retired    | Active                               |
-| [D-192](./D-192.md) | Test accounts are a recorded flag, left out of every figure           | Active                               |
 | [D-193](./D-193.md) | One URL per language on public pages; bare URL is English             | Active                               |
 | [D-194](./D-194.md) | The booking page's language is the teacher's; no visitor switch       | Active (records existing behaviour)  |
 | [D-195](./D-195.md) | One locale per language; a regional locale is a delta over its base   | Decided, not built                   |
 | [D-196](./D-196.md) | Legal text: a person translates, English controls, launch needs it    | Partly built                         |
-| [D-197](./D-197.md) | Prices follow the reader's number format; currency always named       | Decided, not built                   |
 | [D-198](./D-198.md) | Captions show words as spoken; the translation replaces them          | Active (narrows D-27, D-185)         |
 | [D-199](./D-199.md) | A merge starts its own production deploy, behind the approval         | Active (narrows D-119, D-157)        |
 | [D-200](./D-200.md) | Preview returns on Cloud Run, deployed by every merge                 | Decided, not built (reverses D-184)  |
@@ -583,8 +544,27 @@ held was behaviour or a rule, is listed here with where its reasoning went
 removed: applied migrations cite some of these and cannot be edited. Outside
 migrations, cite the live record instead.
 
-| #   | Where its reasoning went |
-| --- | ------------------------ |
+| #     | Where its reasoning went                                                                                                                                            |
+| ----- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| D-01  | [D-143](./D-143.md) — Payment processor moved from Mercado Pago to Stripe Connect, each teacher paid into her own Stripe account                                    |
+| D-02  | retired: OXXO cash vouchers were removed for slow settlement; OXXO now appears through the teacher's own Stripe account                                             |
+| D-03  | [packages](../features/packages.md) — Removed recurring monthly student subscriptions in favour of one-off packages                                                 |
+| D-30  | [packages](../features/packages.md) — A single class is sold as a one-class package, paid at reservation and auto-booked on payment                                 |
+| D-37  | [referrals and discounts](../features/referrals-discounts.md) — Discount codes are the single, teacher-funded reward primitive for referrals, with no credit ledger |
+| D-50  | [D-143](./D-143.md) — Capture the billing address at checkout; Stripe Tax stays behind an off-by-default flag                                                       |
+| D-58  | [D-143](./D-143.md) — Platform Stripe entity moved to the UK; the Connect gate widened to the cross-border payout circle                                            |
+| D-64  | [D-153](./D-153.md) — Teacher-chosen pricing currency, captured once at onboarding from a curated list                                                              |
+| D-86  | [admin portal](../features/admin-portal.md) — Admin unit-economics estimate layer: pricing as data, a GBP view, estimates never mixed with actuals                  |
+| D-96  | [subscriptions](../features/subscriptions.md) — Kept code-defined plans and one entitlements resolver; closed the enforcement gaps                                  |
+| D-99  | [D-153](./D-153.md) — Platform subscription billing currency moved from MXN to GBP                                                                                  |
+| D-113 | [D-145](./D-145.md) — Manual rail made generic: the payee instrument is data, not a payment provider                                                                |
+| D-124 | [D-145](./D-145.md) — Bank-account instrument backed by a 15-scheme per-country registry                                                                            |
+| D-137 | [D-143](./D-143.md) — The platform never collects and forwards student money; teacher-held card links were in scope                                                 |
+| D-144 | [D-143](./D-143.md) — Student checkout stopped requiring a full address; buy page reordered around the buyer                                                        |
+| D-152 | [D-143](./D-143.md) — The teacher is told Stripe's fee is Stripe's; public copy quotes no percentage                                                                |
+| D-191 | [payments](../features/payments.md) — Money screens lead with what was earned this month, not a "safe to spend" average                                             |
+| D-192 | [admin portal](../features/admin-portal.md) — Operator test accounts are flagged and left out of every figure                                                       |
+| D-197 | [D-153](./D-153.md) — Prices are written in the reader's number format; the currency never changes                                                                  |
 
 ---
 

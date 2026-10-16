@@ -10,7 +10,7 @@ import { EconomicsTabs } from "./economics-tabs";
 import type { UsageEntry } from "./usage-panel";
 import type { IntegrationRow } from "./integrations-panel";
 
-// Financial Intelligence estimate layer (D-86, S4) — the /admin/economics
+// Financial Intelligence estimate layer (slice S4) — the /admin/economics
 // entry point. One Server Component fetch (Promise.all), one requireAdmin,
 // then a client tab shell for Overview / Integrations / Usage. This surface
 // is deliberately STANDALONE from /admin/costs (actuals) — see the doc's

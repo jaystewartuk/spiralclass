@@ -5,7 +5,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 // the page in a Suspense boundary, streams this first, and swaps in the real
 // content with its inline `$RS` reveal.
 //
-// It did not mirror it. D-144 rewrote the page into one narrow column
+// It did not mirror it. The 2026-08-30 rewrite put the page into one narrow column
 // (`mx-auto max-w-lg`, summary card then form card), and this skeleton was left
 // on the old two-column container (`lg:max-w-4xl`) with a list of package rows
 // that no longer exists — so every load painted the previous design for a beat

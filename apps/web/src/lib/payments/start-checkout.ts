@@ -100,7 +100,7 @@ export type StartCheckoutArgs = {
   // Which payee instructions the student picked. Required for
   // `manual_transfer` and ignored for Stripe. Verified against this teacher
   // here — it arrives from an untrusted client, so ownership and offerability
-  // are re-checked rather than assumed (D-113).
+  // are re-checked rather than assumed (D-145).
   instrumentId?: string;
   // Optional discount code typed at checkout (slice 2a). Validated + applied
   // here, after the grandfathered/rail price is resolved, so it always composes
@@ -359,7 +359,7 @@ export async function startCheckout(args: StartCheckoutArgs): Promise<StartCheck
   // Stripe's minimum charge. Passing that into createCheckoutSession throws
   // AFTER the pending rows are written, orphaning them and 500-ing the student.
   // Validate the final amount here, BEFORE any rows are created, and fail with a
-  // clear message. The minimum is per-currency (D-64): a Connect teacher priced
+  // clear message. The minimum is per-currency (D-153): a Connect teacher priced
   // in GBP/USD/EUR must not be blocked by MXN's 10.00 gate.
   if (priceMinorUnits === 0) {
     return {
@@ -743,7 +743,7 @@ export async function startCheckout(args: StartCheckoutArgs): Promise<StartCheck
       // highest-abandonment screen in the product: `required` puts country, line
       // 1, city, state and postcode in front of someone who is trying to buy a
       // Spanish class, for a capability with no registration behind it yet. On
-      // the STUDENT rail that trade is not worth it — see D-144.
+      // the STUDENT rail that trade is not worth it — see D-143.
       //
       // `auto` does not mean "nothing": Stripe still collects whatever the chosen
       // payment method needs (typically postcode/country on a card), and

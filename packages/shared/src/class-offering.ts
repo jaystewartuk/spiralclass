@@ -1,4 +1,4 @@
-// A package template gets asked two different questions, and until D-144's
+// A package template gets asked two different questions, and until the buy-page rewrite's
 // follow-up one boolean — `singleClass` — was answering both of them.
 //
 //   1. "Is this ONE class?"  A fact about the offering's SHAPE. It decides the

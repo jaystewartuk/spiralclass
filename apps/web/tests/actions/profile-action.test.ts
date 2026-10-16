@@ -22,7 +22,7 @@ const state = {
     bio: null as string | null,
     profileCompletedAt: null as Date | null,
     // maybeEmitMarketplaceReady reads the payout rail off the relation
-    // (D-113); an empty list is "no transfer instrument configured".
+    // (D-145); an empty list is "no transfer instrument configured".
     pricingCurrency: "MXN",
     payoutInstruments: [] as { kind: string; enabled: boolean }[],
   },
@@ -56,7 +56,7 @@ const introVideoAnalysisFindUnique = vi.fn(
 const introVideoAnalysisUpsert = vi.fn(async () => ({}));
 vi.mock("@/lib/prisma", () => ({
   prisma: {
-    // D-113: the payout-instrument delegate. Empty by default — a test that
+    // D-145: the payout-instrument delegate. Empty by default — a test that
     // cares about a specific instrument overrides it.
     teacherPayoutInstrument: {
       findMany: async () => [],

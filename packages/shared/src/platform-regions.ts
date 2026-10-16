@@ -1,7 +1,7 @@
 // SpiralClass — platform Stripe region registry.
 //
-// There is exactly ONE platform Stripe entity today, and it is UK-established (D-58).
-// The launch entity moved to the UK entity per D-58, and per D-99 the registry
+// There is exactly ONE platform Stripe entity today, and it is UK-established (D-143).
+// The launch entity moved to the UK entity per D-143, and per D-153 the registry
 // below now matches that — key `GB`, currency `GBP` — instead of carrying the
 // original launch naming forward as "historical residue." Env var
 // names and behavior stay entity-agnostic either way, so a future entity swap
@@ -11,10 +11,10 @@
 // `currency` here is the settlement currency of the platform's OWN SaaS
 // billing (SpiralClass Free/Pro subscriptions — see currencyForRegion's
 // callers), which is a platform-wide charge and is the SAME for every teacher
-// (single canonical currency — see D-99 for why multi-currency presentment
+// (single canonical currency — see D-153 for why multi-currency presentment
 // was evaluated and deliberately not built). It is NOT what a teacher charges
 // her own students — that's `pricing-currency.ts`'s `currencyForTeacher`, a
-// teacher-chosen value (D-64).
+// teacher-chosen value (D-153).
 //
 // A live Stripe subscription/invoice's OWN `currency` field is the
 // authoritative source for what a specific existing subscriber is actually

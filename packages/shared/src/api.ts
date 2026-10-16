@@ -547,7 +547,7 @@ export type MaterialPodcastStatus = {
 
 export type PaymentStatus = "pending" | "paid" | "failed" | "refunded" | "partially_refunded";
 
-// The payout rail a payment ran on (D-113). `manual_transfer` is "the student
+// The payout rail a payment ran on (D-145). `manual_transfer` is "the student
 // followed payee instructions and the teacher confirmed"; WHICH instructions
 // is `instrumentKind`/`instrumentId`, because the instrument is data and not
 // a provider.
@@ -564,7 +564,7 @@ export type Payment = {
   status: PaymentStatus;
   amountCents: number;
   // ISO-4217 code recording what `amountCents` is denominated in — the
-  // teacher's own pricing currency (D-64/D-124), which is any of ~40 curated
+  // teacher's own pricing currency (D-153/D-145), which is any of ~40 curated
   // codes, not necessarily MXN. Typed as string rather than a literal union so
   // it carries the row's real stored currency for provenance.
   currency: string;
@@ -683,7 +683,7 @@ export type DiscountCode = {
   percentBps: number | null;
   amountMinorUnits: number | null;
   // Currency of the fixed `amountMinorUnits` — the teacher's own pricing
-  // currency (D-64/D-124), carried explicitly.
+  // currency (D-153/D-145), carried explicitly.
   currency: string;
   active: boolean;
   maxRedemptions: number | null;

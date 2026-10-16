@@ -1078,7 +1078,7 @@ export const esMX = {
   "onboarding.templates.priceStripe": "Precio Stripe",
   "onboarding.templates.priceWise": "Precio por transferencia (opcional)",
   // Shown instead of priceStripe when the teacher's country has no Stripe
-  // Connect rail at all (Wise-only, D-58) — there's no Stripe price to split
+  // Connect rail at all (Wise-only, D-143) — there's no Stripe price to split
   // from, so it's just "Price".
   "onboarding.templates.price": "Precio",
   "onboarding.templates.expirationMonths": "Vencimiento (meses)",
@@ -6324,7 +6324,7 @@ export const esMX = {
   "web.admin.teachers.entitlements.canScheduleMaterials": "Puede programar materiales",
   "web.admin.teachers.entitlements.canCustomPrice": "Puede fijar precio personalizado",
   "web.admin.teachers.entitlements.canUseLiveNotes": "Puede usar notas en vivo",
-  // Merged from the D-99 (PR #680) GBP-billing-currency conflict resolution
+  // Merged from the D-153 (PR #680) GBP-billing-currency conflict resolution
   // — see catalog.en.ts's identical comment.
   "web.admin.subscriptions.otherCurrencyMrrNote":
     "No incluido arriba (suscriptores en otra moneda, sin conversión de divisas):",

@@ -33,7 +33,7 @@ Do not read records in numeric order and do not read them all.
    name the three or four candidates outright.
 2. **Grep the log for the concrete nouns in the change** — a column name, a
    Stripe object, a script, a route, an env var, a package. Bare `D-NN`
-   citations in the source are also a signal: `git grep -n "D-1" -- apps packages scripts`
+   citations in the source are also a signal: `git grep -n "D-143" -- apps packages scripts`
    near the code being changed shows which records the code itself thinks it is
    bound by.
 3. **Read the candidates in full**, not just their first paragraph. The

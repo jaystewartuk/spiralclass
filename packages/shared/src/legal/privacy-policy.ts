@@ -18,7 +18,7 @@
 // SCOPE OF THIS DOCUMENT. UK GDPR and the Data Protection Act 2018 are the
 // governing regime, matching the Terms, which are already governed by the laws
 // of England and Wales, and matching the platform Stripe entity, which is
-// UK-established (D-58). It replaced a hand-written bilingual notice whose controller and
+// UK-established (D-143). It replaced a hand-written bilingual notice whose controller and
 // rights regime did not match a UK-established controller.
 
 import { SUBPROCESSORS_REVIEWED } from "./subprocessors";

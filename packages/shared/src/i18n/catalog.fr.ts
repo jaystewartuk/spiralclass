@@ -1061,7 +1061,7 @@ export const fr = {
   "onboarding.templates.priceStripe": "Prix Stripe",
   "onboarding.templates.priceWise": "Prix par virement (facultatif)",
   // Shown instead of priceStripe when the teacher's country has no Stripe
-  // Connect rail at all (Wise-only, D-58) — there's no Stripe price to split
+  // Connect rail at all (Wise-only, D-143) — there's no Stripe price to split
   // from, so it's just "Price".
   "onboarding.templates.price": "Prix",
   "onboarding.templates.expirationMonths": "Expiration (mois)",
@@ -6346,7 +6346,7 @@ export const fr = {
   "web.admin.teachers.entitlements.canScheduleMaterials": "Peut programmer des supports",
   "web.admin.teachers.entitlements.canCustomPrice": "Peut fixer un prix personnalisé",
   "web.admin.teachers.entitlements.canUseLiveNotes": "Peut utiliser les notes en direct",
-  // Merged from the D-99 (PR #680) GBP-billing-currency conflict resolution
+  // Merged from the D-153 (PR #680) GBP-billing-currency conflict resolution
   // — see catalog.en.ts's identical comment.
   "web.admin.subscriptions.otherCurrencyMrrNote":
     "Non inclus ci-dessus (abonnés facturés dans une autre devise, sans conversion) :",

@@ -1,7 +1,7 @@
 import { Card, CardContent } from "@/components/ui/card";
 
 // Shared KPI tile, extracted from the triplicated local `Stat` in
-// admin/page.tsx, admin/money/page.tsx, and admin/costs/page.tsx (D-86 S3) so
+// admin/page.tsx, admin/money/page.tsx, and admin/costs/page.tsx (economics slice S3) so
 // the Financial Intelligence overview panel reuses it instead of a 4th copy.
 export function StatCard({
   label,

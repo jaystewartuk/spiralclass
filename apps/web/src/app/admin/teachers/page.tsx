@@ -136,7 +136,7 @@ export default async function AdminTeachersPage({
       bio: true,
       templatesTouchedAt: true,
       availabilityTouchedAt: true,
-      // D-113: the payout rail is a relation, and `wiseApiProfileId` (the
+      // D-145: the payout rail is a relation, and `wiseApiProfileId` (the
       // auto-reconcile credential) moved onto the Wise instrument with it.
       payoutInstruments: { select: ADMIN_INSTRUMENT_SELECT },
       _count: {

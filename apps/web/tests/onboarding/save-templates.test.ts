@@ -40,7 +40,7 @@ class TestRedirect extends Error {
 
 // The teacher's country decides whether a Wise price is even meaningful — a
 // teacher outside the Connect circle has no card rail for it to discount
-// against (D-58) — so it has to be part of this stub rather than absent.
+// against (D-143) — so it has to be part of this stub rather than absent.
 // Mutable, so a test can put her outside the circle.
 const teacherStub = { id: TEACHER_ID, country: "GB" };
 

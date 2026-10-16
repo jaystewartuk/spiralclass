@@ -43,7 +43,7 @@ describe("statusLabel", () => {
 });
 
 describe("planPriceLabel", () => {
-  // The canonical currency (D-99) is GBP. These used to assert
+  // The canonical currency (D-153) is GBP. These used to assert
   // contains-not-exact-string because formatMinorUnits rendered GBP as a bare
   // code and then appended the code again, so the public pricing page really
   // said "GBP 7.99 GBP/mo" — the loose assertions were what let it ship. Pinned
@@ -91,7 +91,7 @@ describe("French, the locale the ternaries forgot", () => {
     expect(statusLabel("canceled", "fr")).toBe("Résiliée");
   });
 
-  // The price is written the French way too (D-197): the decimal comma and
+  // The price is written the French way too (D-153): the decimal comma and
   // the symbol after the number, the currency still named once.
   it("renders a French cadence suffix, with the price written the French way", () => {
     expect(planPriceLabel("monthly", "fr")).toBe(`${formatMinorUnits(799, "GBP", "fr")}/mois`);

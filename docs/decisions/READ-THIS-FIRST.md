@@ -35,7 +35,7 @@ and a `Transfer` forwarded the settled net to the teacher's connected account.
 
 That funds flow has a hard external constraint attached to it. A Transfer must
 cross a border Stripe is willing to cross, and Stripe's cross-border payout
-circle excluded the country where the first teachers were. [D-58](./D-58.md) had
+circle excluded the country where the first teachers were. [D-143](./D-143.md) had
 correctly concluded that a UK entity cannot Transfer to a connected account
 outside the circle, and had excluded that country from the card rail on that basis.
 
@@ -61,7 +61,7 @@ needed one.**
 
 - **Work around the circle with teacher-held third-party payment links** — a
   Wise link, a Mercado Pago _link de pago_, PayPal. This was the previous
-  decision, [D-137](./D-137.md), which explicitly left Connect alone. It is
+  decision, [D-143](./D-143.md), which explicitly left Connect alone. It is
   rejected here because a direct charge makes the teacher merchant of record on
   Stripe itself: no second processor, no second dispute model, and no per-teacher
   link for someone to verify by hand.
@@ -177,7 +177,7 @@ records**:
 ## What the two have in common
 
 Each one is a decision that reverses an earlier decision **without the earlier
-decision having been wrong**. D-58 was right that a UK entity cannot Transfer to
+decision having been wrong**. D-143 was right that a UK entity cannot Transfer to
 an account outside its circle. D-120's minute arithmetic was right. In both cases what
 expired was the premise, not the reasoning — and the expensive part was the gap
 between when the premise died and when anyone noticed.

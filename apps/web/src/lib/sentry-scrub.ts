@@ -22,7 +22,7 @@ const PII_KEYS = new Set([
   "publicWhatsappE164",
   "public_whatsapp_e164",
   // Bank account identifiers. `details` is the whole payee blob on a
-  // `teacher_payout_instruments` row (D-124) — since the fields inside it are
+  // `teacher_payout_instruments` row (the bank-account kind, removed by D-145) — since the fields inside it are
   // per-country and open-ended, the only safe rule is to redact the container
   // rather than enumerate what might be in it. The named keys below stay
   // because they also appear on their own, outside a `details` object.
@@ -63,7 +63,7 @@ const EMAIL_RE = /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b/g;
 // and bare 10-digit numbers in log lines.
 const PHONE_RE = /\+?\d{10,15}/g;
 // Bank account numbers concatenated into a free-text log line. Two shapes,
-// because D-124 opened the payout rail past one country:
+// because the August 2026 bank-account kind opened the payout rail past one country:
 //   * a bare run of 15-22 digits — a CLABE (18), a CBU (22), a CCI (20), and
 //     the long domestic account numbers either side of them. The lower bound
 //     is 15 rather than 18 so a Peruvian or Nigerian account in a log line is

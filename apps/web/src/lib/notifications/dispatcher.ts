@@ -2533,7 +2533,7 @@ function packagePlaceholder(locale: string, form: "yours" | "indefinite"): strin
 }
 
 // Last resort for a SUBSCRIPTION notification queued before its metadata
-// carried a currency. The platform's own billing currency (GBP since D-99),
+// carried a currency. The platform's own billing currency (GBP since D-153),
 // resolved through the same registry the rest of the platform uses — not
 // `formatMinorUnits`'s MXN default, which is a TEACHER-pricing default and has
 // never been what the platform charges in.

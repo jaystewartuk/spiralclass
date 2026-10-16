@@ -37,7 +37,7 @@ export default async function AdminOverviewPage() {
     recentTeachers,
     recentPayments,
   ] = await Promise.all([
-    // Platform totals leave out operators' test accounts (D-192).
+    // Platform totals leave out operators' test accounts.
     prisma.teacher.count({ where: NOT_TEST_ACCOUNT }),
     prisma.teacher.count({ where: { onboardingCompleteAt: { not: null }, ...NOT_TEST_ACCOUNT } }),
     prisma.student.count({ where: NOT_TEST_ACCOUNT }),

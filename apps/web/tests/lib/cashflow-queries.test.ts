@@ -149,7 +149,7 @@ describe("computeTeacherCashFlow — what is paid in advance", () => {
   });
 });
 
-describe("computeTeacherCashFlow — operators' test students (D-192)", () => {
+describe("computeTeacherCashFlow — operators' test students", () => {
   const whereOf = (mock: typeof packageFindManyMock) =>
     (mock.mock.calls[0] as [{ where: Record<string, unknown> }])[0].where;
 

@@ -1,6 +1,6 @@
 // The reference a student is asked to quote on a manual transfer.
 //
-// Instrument-agnostic by construction (D-113): Wise puts it in the transfer's
+// Instrument-agnostic by construction (D-145): Wise puts it in the transfer's
 // reference field, SPEI puts it in the concepto. It used to live in
 // `lib/wise/` because Wise was the only manual rail; nothing about it was ever
 // Wise-specific.

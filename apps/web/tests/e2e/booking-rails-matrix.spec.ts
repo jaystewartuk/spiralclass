@@ -32,7 +32,7 @@ test.describe("every rail at once", () => {
     // Card is the default, so the CTA is a priced Pay button.
     await expect(page.getByRole("button", { name: /^Pay\b/i })).toBeVisible();
 
-    // Since D-144 the rail switcher is a disclosure rather than the first
+    // Since 2026-08-30 the rail switcher is a disclosure rather than the first
     // control on the page: closed by default, and after the pay button.
     const disclosure = page.locator("details");
     await expect(disclosure).toHaveCount(1);
@@ -67,7 +67,7 @@ test.describe("every rail at once", () => {
     await page.goto("/b/paula-pagos/buy");
 
     // Her primary template is singleClass, so D-111's rule applies: the pay
-    // button stays disabled until a slot is chosen, and (since D-144) the
+    // button stays disabled until a slot is chosen, and (since 2026-08-30) the
     // picker sits ABOVE it so the blocking copy's "above" is true.
     await expect(page.getByText(/Pick a class time above to continue/i)).toBeVisible();
     await expect(page.getByRole("button", { name: /^Pay\b/i })).toBeDisabled();

@@ -352,7 +352,7 @@ const serverSchema = z.object({
   FIELD_ENCRYPTION_REQUIRED: blankAsAbsent(z.string().min(1).optional()),
   // Wise automated reconciliation (poll-wise-statements cron). The API
   // credentials are PER-TEACHER (stored encrypted on the Teacher row), and so
-  // is the balance currency to reconcile (Teacher.pricingCurrency, D-64) — this
+  // is the balance currency to reconcile (Teacher.pricingCurrency, D-153) — this
   // is the only platform-wide knob left, optional:
   //   * WISE_API_BASE: override for sandbox
   //     (https://api.sandbox.transferwise.tech). Defaults to production.

@@ -281,7 +281,7 @@ E2E_STATUS=$?
 # is a filter rather than a flag.
 #
 # Both halves of that are load-bearing, and each was learned the hard way while
-# regenerating for D-144:
+# regenerating for the 2026-08-30 buy-page rewrite:
 #
 #   `=all` rather than a bare `--update-snapshots` (which means "changed"),
 #   because the suite tolerates maxDiffPixelRatio 0.01 for font rasterisation

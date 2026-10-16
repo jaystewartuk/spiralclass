@@ -5,12 +5,11 @@ import { DEFAULT_LOCALE, intlLocale, matchAcceptLanguage, ownCurrencySymbol } fr
 // One source of truth so the server and the browser render identical strings.
 // A narrow symbol is a bare `$` for USD and most other dollar/peso currencies,
 // so every formatted amount carries an explicit code suffix (`$1,500.00 MXN`).
-// Number formatting is deliberately locale-independent (always en-US grouping)
-// so separators never drift; the currency, not the UI language, drives the
-// symbol and decimals.
+// The currency, never the UI language, decides the symbol and the decimals;
+// the reader's locale decides separators and grouping (see formatterFor).
 //
 // The app is genuinely multi-currency: a teacher picks one currency for her
-// whole business at onboarding from a curated per-rail list (D-64/D-124,
+// whole business at onboarding from a curated list (D-153,
 // pricing-currency.ts), and MXN is only that list's default, not its content.
 // Every stored amount records its own currency explicitly, and formatting is
 // currency-aware — the divisor comes from the currency's minor-unit exponent
@@ -77,7 +76,7 @@ export function currencyExponent(currency: string): number {
 // to the bare alphabetic code. `formatMinorUnits` then appends the code for
 // provenance, so the default `currencyDisplay` DOUBLED it for every other
 // currency: "GBP 7.99 GBP", "EUR 1,500.00 EUR". Only the first teachers'
-// currency rendered correctly, which is why this survived until D-64 opened
+// currency rendered correctly, which is why this survived until D-153 opened
 // pricing to ~40 currencies without the rendering following. "narrowSymbol" asks for the
 // symbol regardless of locale, so the suffix disambiguates instead of repeating:
 // "£7.99 GBP", "$1,500.00 USD", "€1,500.00 EUR".
@@ -87,13 +86,13 @@ export function currencyExponent(currency: string): number {
 // the glyph alone would be ambiguous — the appended code is the disambiguator.
 // The two have to stay together; don't drop the suffix from `formatMinorUnits`.
 //
-// The NUMBER follows the reader (D-197): separators, grouping and where the
+// The NUMBER follows the reader (D-153): separators, grouping and where the
 // symbol sits are the reader's locale's, through the registry's `intl` tag.
 // It was `en-US` for everyone, and in French or German the comma is the
 // DECIMAL separator, so "$25,000 CLP" read as twenty-five pesos and
 // "¥1,500 JPY" as one and a half yen. The currency never follows the reader:
 // it is the price's own, and the code suffix names it exactly once in every
-// locale. Measured when D-197 was decided: Spanish (`es-419`) and English
+// locale. Measured when D-153 was decided: Spanish (`es-419`) and English
 // output is byte-identical to the old `en-US` rendering; only other languages
 // change.
 const formatters = new Map<string, Intl.NumberFormat>();
@@ -156,7 +155,7 @@ function toMajorUnits(minorUnits: number, code: string): number {
 
 /**
  * A price in its own currency, written the way `locale`'s reader writes
- * numbers (D-197). Omitting `locale` means DEFAULT_LOCALE, which is right only
+ * numbers (D-153). Omitting `locale` means DEFAULT_LOCALE, which is right only
  * where every reader is: the admin console. Everywhere else pass the reader's
  * locale, or use `useFormatMoney()` / `getFormatMoney()`, which do.
  */
@@ -250,7 +249,7 @@ export function majorToMinorUnits(pesos: number, currency: string = "MXN"): numb
   return Math.round(pesos * 10 ** currencyExponent(currency));
 }
 
-// GBP-specific formatter (Financial Intelligence dashboard, D-86). The one
+// GBP-specific formatter (Financial Intelligence dashboard). The one
 // thing it still does differently from formatMinorUnits is omit the code suffix:
 // the whole /admin/economics view is already GBP-only, so " GBP" on every
 // figure would be noise (contrast formatMinorUnits, which is multi-currency by

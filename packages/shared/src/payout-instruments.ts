@@ -1,4 +1,4 @@
-// Payee instruments for the manual-transfer payout rail (D-113, D-124, D-145).
+// Payee instruments for the manual-transfer payout rail (D-145).
 //
 // The manual rail renders payee instructions plus a unique reference, lets the
 // student self-attest, and lets the teacher confirm. Since D-145 there is
@@ -8,7 +8,7 @@
 //
 // ── Why one kind, when the union was the point ────────────────────────────
 //
-// D-113 shipped three kinds (`wise`, `spei`, `bank_account`); D-124 folded SPEI
+// The generic rail of 2026-08-23 shipped `wise` and `bank_account`, with SPEI folded
 // into `bank_account` behind a 15-scheme per-country registry, so that adding a
 // country was a registry row rather than a migration. That was good design for
 // the problem as it stood, and D-145 removes it because the problem changed:

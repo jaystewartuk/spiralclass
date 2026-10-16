@@ -39,7 +39,7 @@ export default async function DashboardPage() {
   const appUrl = serverEnv().APP_URL.replace(/\/$/, "");
   const bookingUrl = `${appUrl}/b/${teacher.bookingSlug}`;
   const stripeConnected = Boolean(teacher.stripeAccountId && teacher.stripeChargesEnabled);
-  // Any offerable payout instrument counts, not Wise specifically (D-113) —
+  // Any offerable payout instrument counts, not Wise specifically (D-145) —
   // a teacher whose only rail is SPEI is just as payable.
   const transferConnected = hasOfferableInstrument(
     await prisma.teacherPayoutInstrument.findMany({

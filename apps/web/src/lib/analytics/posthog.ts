@@ -312,7 +312,7 @@ export type ServerEvent = WithSessionId<
         // Wise-only teacher means something different from one that dies
         // with a card option present.
         stripeReady: boolean;
-        // Renamed from `wiseReady` by D-113: the signal was always "can a
+        // Renamed from `wiseReady` by D-145: the signal was always "can a
         // student pay by transfer", and it is now true for SPEI too.
         transferReady: boolean;
         // True when the viewer is the teacher herself — she checks her own
@@ -399,7 +399,7 @@ export type ServerEvent = WithSessionId<
         // payment). The `post` value is reserved for a future flow
         // where teachers settle outside the system and import the receipt.
         // The manual-transfer values are the INSTRUMENT kind, not the
-        // provider: `wise` keeps the exact meaning it had before D-113, so
+        // provider: `wise` keeps the exact meaning it had before D-145, so
         // every existing PostHog funnel and saved insight survives the
         // generalization, and `bank_transfer` arrives as a new value rather than a
         // re-labelling of an old one. Same model as `prepaid` for funnel
@@ -875,7 +875,7 @@ export type ServerEvent = WithSessionId<
       distinctId: string;
       properties: {
         teacherId: string;
-        // Instrument kind for the manual rail (D-113/D-124) — `wise` keeps the
+        // Instrument kind for the manual rail (D-145) — `wise` keeps the
         // value it emitted before the generalization, so the existing
         // activation funnel is continuous across the cutover.
         rail: "stripe" | "wise" | "bank_transfer";
@@ -1423,7 +1423,7 @@ export function identifyServerUser(
   properties: {
     email?: string | null;
     role: "teacher" | "student" | "admin";
-    // An operator's test account (D-192). Sent as `is_test_account` so
+    // An operator's test account. Sent as `is_test_account` so
     // PostHog's "filter out test accounts" switch can be keyed on it.
     testAccount?: boolean;
   },

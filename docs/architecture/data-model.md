@@ -132,8 +132,7 @@ where that is load-bearing:
   column say nothing. What must never come back is a free-form payee blob: every
   value a student pays against has to be machine-checkable, since an unvalidated
   one is the single place this rail loses real money with no way back. That rule
-  outlived the 15-scheme registry it was written for
-  ([D-124](../decisions/D-124.md), removed by
+  outlived the 15-scheme registry it was written for (removed by
   [D-145](../decisions/D-145.md)).
 - **Testimonials.** `testimonials.source` is `teacher_curated` or
   `student_submitted`, and a `CHECK` constraint ties `source`, `student_id` and
@@ -146,7 +145,7 @@ where that is load-bearing:
 
 By contrast, scheme and currency identifiers are validated in the application
 layer rather than enumerated as Postgres types
-([D-64](../decisions/D-64.md)), deliberately: adding a currency should be a
+([D-153](../decisions/D-153.md)), deliberately: adding a currency should be a
 constant, not a migration.
 
 ## Migrations

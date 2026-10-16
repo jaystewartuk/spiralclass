@@ -34,7 +34,7 @@ const log = logger({ surface: "stripe" });
 //
 // `region` selects which platform Stripe entity to talk to (PLATFORM_REGIONS
 // in @spiralclass/shared). There is only one entry today (GB, the UK platform
-// entity — D-58/D-99), so every caller resolves to the same client
+// entity — D-143/D-153), so every caller resolves to the same client
 // either way — the parameter exists so a future second region is additive
 // instead of a rewrite.
 
