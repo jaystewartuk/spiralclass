@@ -80,7 +80,7 @@ let teacherRow: { targetLanguage: string | null; materialVocabulary?: string | n
   targetLanguage: "es",
 };
 const teacherFindUnique = vi.fn(async () => teacherRow);
-// D-80: the booking-scoped generator reads the class's vocabulary override and
+// D-17: the booking-scoped generator reads the class's vocabulary override and
 // (when the caller supplies one) writes it back. Model both.
 let bookingVocabularyOverride: string | null = null;
 const bookingUpdate = vi.fn(async (_args: any) => ({ id: "b1" }) as any);
@@ -325,7 +325,7 @@ describe("generateClassContentForBooking", () => {
     expect(genCreate).toHaveBeenCalledTimes(1);
   });
 
-  it("resolves the class vocabulary override over the teacher default and persists it (D-80)", async () => {
+  it("resolves the class vocabulary override over the teacher default and persists it (D-17)", async () => {
     teacherRow = { targetLanguage: "es", materialVocabulary: "everyday" };
     const r = await generateClassContentForBooking({
       teacherId: "t1",
@@ -345,7 +345,7 @@ describe("generateClassContentForBooking", () => {
     );
   });
 
-  it("uses the stored class override when the caller passes none, and doesn't rewrite it (D-80)", async () => {
+  it("uses the stored class override when the caller passes none, and doesn't rewrite it (D-17)", async () => {
     bookingVocabularyOverride = "advanced";
     teacherRow = { targetLanguage: "es", materialVocabulary: "basic" };
     await generateClassContentForBooking({
@@ -361,7 +361,7 @@ describe("generateClassContentForBooking", () => {
     expect(bookingUpdate).not.toHaveBeenCalled();
   });
 
-  it("falls back to the teacher default when neither the class nor the call sets vocabulary (D-80)", async () => {
+  it("falls back to the teacher default when neither the class nor the call sets vocabulary (D-17)", async () => {
     teacherRow = { targetLanguage: "es", materialVocabulary: "native" };
     await generateClassContentForBooking({
       teacherId: "t1",
@@ -374,7 +374,7 @@ describe("generateClassContentForBooking", () => {
     expect(seed.vocabulary).toBe("native");
   });
 
-  it("threads the chosen template's structure into the generation seed (D-46)", async () => {
+  it("threads the chosen template's structure into the generation seed (D-17)", async () => {
     templateFindFirst.mockResolvedValue({ body: "## Bienvenida\n## Proyecto" });
     const r = await generateClassContentForBooking({
       teacherId: "t1",

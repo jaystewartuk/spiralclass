@@ -4,7 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { TESTIMONIAL_AUTHOR_MAX, TESTIMONIAL_BODY_MAX, TESTIMONIAL_NOTE_MAX } from "./limits";
 
 // Testimonials shown as social proof on the public booking page
-// (docs/features/student-acquisition.md, D-24). This module
+// (docs/features/student-acquisition.md, D-125). This module
 // owns the CRUD rules — field limits, teacher scoping, default sort. Callers
 // handle their own cache revalidation and response shaping.
 //

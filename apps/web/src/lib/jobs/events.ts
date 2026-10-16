@@ -25,7 +25,7 @@ import type { JobDefinition } from "./register";
 //
 // SCOPE: notifications + podcast + admin-reseed. The four dormant AI handlers
 // (lesson-audio/transcript/insights/intro-video) are intentionally NOT ported
-// yet — they're flag-gated OFF (legal/consent-blocked, D-19/D-21/D-22; intro
+// yet — they're flag-gated OFF (legal/consent-blocked, D-185/D-22; intro
 // coach dormant), their producers still emit to Inngest, and Inngest still
 // serves them until a later phase. Mixed routing per event-type is safe: every
 // handler is idempotent and the flag only decides which backend each converted

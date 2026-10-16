@@ -30,7 +30,7 @@ export async function listClassContentTemplates(
   });
 }
 
-// Resolve a chosen template's body for AI compose (D-46), tenant-scoped: only
+// Resolve a chosen template's body for AI compose (D-17), tenant-scoped: only
 // the teacher's OWN template resolves, so a posted id from another teacher (or a
 // stale/deleted one) yields null and the generator falls back to its default
 // shape — never an error, never another teacher's structure. Mirrors the

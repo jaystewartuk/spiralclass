@@ -25,7 +25,7 @@ safe to run from CI:
   role, `roles/aiplatform.user`**, because the one Google API the app calls is
   Vertex AI ("Generate with AI"): the metadata server mints that token for
   this identity, so the app needs no stored service account key
-  ([D-127](../../docs/decisions/D-127.md)'s 2026-09-24 addendum). Everything
+  ([D-125](../../docs/decisions/D-125.md), 2026-09-24). Everything
   else — Neon, Stripe, LiveKit, R2 — it reaches over the network with its own
   credentials. Its only other grant is `secretAccessor` on a single secret.
   Not the default Compute Engine service account, which usually carries
@@ -33,7 +33,7 @@ safe to run from CI:
 - **`github-deploy`** — what Actions impersonates. It can push an image and
   deploy a revision, and it is **never granted `secretAccessor`**. So the job
   that deploys production genuinely cannot read production's Stripe keys — the
-  same boundary [D-163](../../docs/decisions/D-163.md)'s addendum drew when it
+  same boundary [D-163](../../docs/decisions/D-163.md) drew when it
   removed the runner's machine identity for Infisical.
 - **The operator** — the only identity that can write the secret, under their
   own `infisical login`.
@@ -49,7 +49,7 @@ that job — and this job builds the Docker image, which means `pnpm install`
 running the lifecycle scripts of the whole dependency tree. Anything in there
 could mint its own token and trade it for whatever the identity behind it
 reaches, however narrow the workflow's own request was.
-[D-163](../../docs/decisions/D-163.md)'s addendum reversed exactly that shape
+[D-163](../../docs/decisions/D-163.md) reversed exactly that shape
 once already, for Infisical, and `apps/web/tests/config/local-gate.test.ts` now
 bans `id-token: write` in every workflow in this repository. **A job that runs
 third-party install scripts is the worst candidate for an exception, not the

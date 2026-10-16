@@ -300,7 +300,7 @@ vendor's dashboard):
 - `INNGEST_EVENT_KEY` — Manage → Event Keys.
 - `INNGEST_SIGNING_KEY` — Manage → Signing Key.
 
-**Vertex AI (Gemini image generation, D-127)** — **no secret in
+**Vertex AI (Gemini image generation, D-125)** — **no secret in
 production.** Vertex has no bare-API-key auth surface, so every call carries
 an OAuth2 token, and on Cloud Run `lib/ai/google-vertex-auth.ts` gets that
 token from the metadata server for the service's own runtime identity
@@ -317,8 +317,8 @@ live in `config/env/*.runtime.env`, not here.
   runtime identity, which is what made the switch safe to deploy before the
   key was removed — so a copy left in Infisical `production` keeps a
   long-lived key live in the running service for no benefit. If you find one
-  there, it is the pre-2026-09-24 key; D-127's addendum says how it is
-  retired. D-127 also says why Vertex rather than the simpler
+  there, it is the pre-2026-09-24 key; D-125 says how it is
+  retired, and why Vertex rather than the simpler
   `X-Goog-Api-Key` the public Gemini API offers (that surface gates every
   call on a separate Prepay balance a linked Cloud Billing account doesn't
   satisfy).
@@ -450,7 +450,7 @@ uses, which is the worst state for one to be in.
 
 - **`DEEPGRAM_API_KEY` was live on Fly preview** (confirmed 2026-07-17).
   Deepgram backs intro-video coaching, post-class transcription and, since
-  [D-185](../../docs/decisions/D-185.md)'s addendum, live captions'
+  [D-185](../../docs/decisions/D-185.md), live captions'
   phone-to-phone fallback: the server mints short-lived tokens from it with
   `/v1/auth/grant`, which needs a key with Deepgram's **Member** role or
   above. Live captions otherwise run in the browser and need

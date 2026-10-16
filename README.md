@@ -73,7 +73,7 @@ appears in it.</sub>
 It is published as an honest record of how one engineer builds and runs a
 payments-handling, video-carrying SaaS product alone: the architecture, the
 decisions, the things that went wrong, and the mechanisms built so they would
-not go wrong twice. More than 75 decision records in
+not go wrong twice. More than 50 decision records in
 [`docs/decisions/`](docs/decisions/README.md) are the most useful thing here —
 several of them reverse an earlier one and say why.
 
@@ -360,16 +360,18 @@ authorisation server-side rather than trusting the client.
 ### Video
 
 LiveKit, **self-hosted** on a single free Compute Engine VM rather than LiveKit
-Cloud, fronted by Caddy ([D-187](docs/decisions/D-187.md)). The application talks to it through a
+Cloud, fronted by Caddy ([D-16](docs/decisions/D-16.md)). The application talks to it through a
 `VideoProvider` interface selected by `RTC_PROVIDER`, so the Cloud→self-hosted
 cutover changed two configuration values and zero lines of application code.
 
 Recording is room-composite Egress writing straight to R2 with per-request
 credentials, and it is switched off in production: the VM carries a class but
-not egress (D-187). Live captions run **in the participants' browsers**: speech is
+not egress (D-16). Live captions run **in the participants' browsers**: speech is
 recognised by the browser (by the other person's, when a phone cannot recognise
 during a call), translated on the device or through the app, and published into
-the room as a data message. Nothing about captions is stored.
+the room as a data message. Captions are not stored as captions; with the
+pairing's insights consent the recognised text is kept as the class transcript
+([D-185](docs/decisions/D-185.md)).
 
 The honest part: video runs on one free VM with no SLA, which is a documented
 risk acceptance with a written graduation trigger, not an oversight.
@@ -616,16 +618,16 @@ in [`infra/gcp-livekit/README.md`](infra/gcp-livekit/README.md).
 
 ## Documentation map
 
-| Where                                      | What                                                                                             |
-| ------------------------------------------ | ------------------------------------------------------------------------------------------------ |
-| [`docs/architecture/`](docs/architecture/) | System design, the data model, how a purchase and a booking flow                                 |
-| [`docs/decisions/`](docs/decisions/)       | **More than 75 decision records.** Current policy, not history — several reverse an earlier one |
-| [`docs/features/`](docs/features/)         | Canonical product behaviour, one document per feature                                            |
-| [`docs/development/`](docs/development/)   | Setup, testing, the change workflow, i18n, analytics                                             |
-| [`docs/deployment/`](docs/deployment/)     | Release, incident response, backup and restore, infrastructure runbooks                          |
-| [`docs/help/`](docs/help/)                 | Customer-facing guides — the source for the in-app help centre                                   |
-| [`docs/security.md`](docs/security.md)     | What this public repository does and does not expose                                             |
-| [`CLAUDE.md`](CLAUDE.md)                   | The non-negotiable rules. Binds humans as much as agents                                         |
+| Where                                      | What                                                                                            |
+| ------------------------------------------ | ----------------------------------------------------------------------------------------------- |
+| [`docs/architecture/`](docs/architecture/) | System design, the data model, how a purchase and a booking flow                                |
+| [`docs/decisions/`](docs/decisions/)       | **More than 50 decision records.** Current policy, not history — several reverse an earlier one |
+| [`docs/features/`](docs/features/)         | Canonical product behaviour, one document per feature                                           |
+| [`docs/development/`](docs/development/)   | Setup, testing, the change workflow, i18n, analytics                                            |
+| [`docs/deployment/`](docs/deployment/)     | Release, incident response, backup and restore, infrastructure runbooks                         |
+| [`docs/help/`](docs/help/)                 | Customer-facing guides — the source for the in-app help centre                                  |
+| [`docs/security.md`](docs/security.md)     | What this public repository does and does not expose                                            |
+| [`CLAUDE.md`](CLAUDE.md)                   | The non-negotiable rules. Binds humans as much as agents                                        |
 
 If you read only one thing beyond this file, make it
 [**Three decisions, told in full**](docs/decisions/READ-THIS-FIRST.md) — the

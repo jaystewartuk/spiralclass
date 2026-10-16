@@ -9,7 +9,7 @@ import { INVITATION_NUDGE_AFTER_DAYS } from "./constants";
 
 const log = logger({ surface: "invitations" });
 
-// Pending-invite teacher reminder (D-83). A daily cron collects every teacher
+// Pending-invite teacher reminder. A daily cron collects every teacher
 // who has invitations that were sent ≥ N days ago, are still pending, still
 // unexpired, and haven't been nudged, then emails the teacher ONE digest per
 // run naming how many students haven't accepted — with a link back to the

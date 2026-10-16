@@ -213,7 +213,7 @@ describe("the language the model is told to grade against", () => {
   });
 
   // Her `locale` is what she READS; targetLanguage is what she TEACHES. Both
-  // feed the same prompt and they are allowed to diverge (D-72/D-73) — this is
+  // feed the same prompt and they are allowed to diverge (D-72) — this is
   // the teacher of Spanish who reads the dashboard in English.
   it("keeps the reading language independent of the subject", async () => {
     const { db } = makeDb({ teacher: { locale: "es", targetLanguage: "en" } });

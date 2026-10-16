@@ -3284,7 +3284,7 @@ export const esMX = {
   "web.dashboard.shareGroups.groupName": "Nombre del grupo",
   "web.dashboard.shareGroups.linkForThisGroup": "Enlace para publicar en este grupo",
 
-  // Vistas previas sociales (D-123).
+  // Vistas previas sociales (D-125).
   "socialPreview.title": "Vista previa social",
   "socialPreview.subtitle":
     "La imagen que ve la gente cuando compartes este enlace en Facebook, WhatsApp o donde sea.",

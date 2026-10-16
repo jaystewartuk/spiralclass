@@ -10,7 +10,7 @@
  * Neon checkpoint), then scripts/cloudrun-deploy.sh — the amd64 image, the
  * Cloud Run deploy, the Inngest sync — and the production probes. Promote
  * judges production by those two jobs (scripts/ci/deploy-verdict.mjs). Cloud Run has held the domain since the
- * 2026-09-23 cutover ([D-184]'s addendum); it was Fly before.
+ * 2026-09-23 cutover ([D-184]); it was Fly before.
  *
  * WHY THE DEPLOY MOVED, AND WHY THAT IS NOT THE 2026-07-19 DRIFT AGAIN.
  * In August 2026 the deploy was chained into this command because a HUMAN DISPATCH STEP had
@@ -146,7 +146,7 @@ try {
       "`production` would move the branch and deploy nothing.",
       "",
       "Production deploys to Cloud Run and that workflow's trigger is supposed",
-      "to be live (D-157's addendum 2, D-184's addendum). If it has been taken",
+      "to be live (D-157, D-184). If it has been taken",
       "off, put it back rather than working around this.",
       "",
       "Nothing is broken — production is still serving whatever shipped last.",

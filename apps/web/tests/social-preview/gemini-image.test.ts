@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("server-only", () => ({}));
 
-// The Gemini adapter, called through Vertex AI (D-127). What matters is that
+// The Gemini adapter, called through Vertex AI (D-125). What matters is that
 // every way the provider can say no maps onto a DISTINCT reason, because the
 // orchestrator turns those into different messages for the teacher:
 // "blocked" tells her to rephrase, while "timeout"/"error" tell her to

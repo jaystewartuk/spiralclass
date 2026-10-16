@@ -462,7 +462,7 @@ describe("scanAndScheduleNextWake", () => {
   });
 });
 
-// ── The creation-time scan (on-booking-created.ts, D-115 addendum) ─────────
+// ── The creation-time scan (on-booking-created.ts, D-115) ─────────
 //
 // A wake is only ever armed BY a scan. If scans ran only on the hourly tick or
 // on a wake, a booking created between ticks whose next leg fell before the

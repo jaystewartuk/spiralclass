@@ -3253,7 +3253,7 @@ export const fr = {
   "web.dashboard.shareGroups.groupName": "Nom du groupe",
   "web.dashboard.shareGroups.linkForThisGroup": "Lien à publier dans ce groupe",
 
-  // Aperçus sociaux (D-123).
+  // Aperçus sociaux (D-125).
   "socialPreview.title": "Aperçu social",
   "socialPreview.subtitle":
     "L'image que les gens voient quand ce lien est partagé sur Facebook, WhatsApp ou ailleurs.",

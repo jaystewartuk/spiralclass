@@ -57,6 +57,42 @@ where the features below interact with plan limits.
   templates (subject to the Free-tier template cap — see subscriptions doc)
   before the teacher is marked as fully onboarded.
 
+### Intro video (booking page)
+
+- A teacher can add one short intro video to her public booking page,
+  recorded in the browser or uploaded. It is a file SpiralClass stores and
+  serves into a `<video>` element — **never a YouTube/Vimeo/Loom embed** —
+  because the AI coach, the transcript in the page's structured data and any
+  future captions all need the media itself, which an embed on someone else's
+  platform does not give us.
+- It lives in its own **public** R2 bucket (`teacher-videos`,
+  `lib/storage/teacher-video.ts`), not the private, signed chat-video path: the
+  booking page is public and crawled, and a signed URL would expire inside the
+  page cache. One object per teacher, so a re-record replaces it; the URL
+  carries a `?v=` cache-buster from the teacher row's `updatedAt`.
+- Limits: 50 MB and about 5 minutes. Upload goes browser-to-R2 with a presigned
+  `PUT` (a gallery clip exceeds the 25 MB server-action body limit), which is
+  why the CSP allows R2 in `connect-src` and `blob:`/`https:` in `media-src`
+  (pinned in `apps/web/tests/lib/csp.test.ts`).
+- With `NEXT_PUBLIC_TEACHER_VIDEOS_R2_PUBLIC_URL` unset the editor card and the
+  public video are both hidden; nothing breaks.
+- **The AI coach** is layered on the file. Layer 1 is the video; Layer 2
+  transcribes it (an Inngest job on `intro-video.ready`, batch Deepgram) into
+  `IntroVideoAnalysis`; Layer 3 asks Claude for feedback
+  (`{overall, strengths[], improvements[]}`), shown **only to the teacher** in
+  the booking-page editor, never on `/b/<slug>`. Layers 2–3 need their own flag,
+  `INTRO_VIDEO_COACH_ENABLED`, plus an ASR key, and are Pro
+  (`canUseIntroVideoCoach`); the feedback step is best-effort and a failure
+  leaves the transcript in place. It is not behind the lesson-insights consent
+  gate because it analyses the teacher's own public clip — no student data.
+- The transcription language is her `teaching_language` (what she speaks in the
+  clip) and the feedback is written in her `locale` — never her
+  `target_language`, which is the subject she teaches and diverges from both for
+  a teacher of English who teaches in Spanish.
+- Not built: auto-captions and a drafted bio/headline from the transcript, and
+  moderation tooling for teacher-hosted video beyond the account holder being
+  accountable for it.
+
 ### Availability (working hours)
 
 - Availability is a set of weekly recurring rules: day of week (Sun–Sat),

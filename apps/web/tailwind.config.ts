@@ -56,7 +56,7 @@ const config: Config = {
     // still defines (see `maxWidth.content` below).
     extend: {
       /**
-       * The one canonical social-card shape, 1200x630 (D-123).
+       * The one canonical social-card shape, 1200x630 (D-125).
        *
        * Named because it is a DOMAIN constant, not a layout choice: the same
        * ratio is baked into SOCIAL_PREVIEW_WIDTH/HEIGHT, into what the Satori

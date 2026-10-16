@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-// The completion fallback for a browser-written transcript (D-189): waits until
+// The completion fallback for a browser-written transcript (D-185): waits until
 // the class is surely over, then finalises — so a transcript never sits "live"
 // for ever if the room_finished webhook goes missing (#108 again).
 

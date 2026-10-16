@@ -412,7 +412,7 @@ the whole point of doing it in this order.
 must be issued — and tls-alpn-01 cannot work through Cloudflare's proxy, so
 http-01 is the only path.
 
-That makes D-134's invariant govern both: **"Always Use HTTPS" must be OFF and
+That makes D-16's invariant govern both: **"Always Use HTTPS" must be OFF and
 SSL mode must be Full on the zone.** Turn it on and issuance fails silently
 until the certificate expires and every class stops.
 
@@ -447,7 +447,7 @@ spiralclass-preview`. It has to pass before anything else here means much:
 - **Rotate production's LiveKit API key pair, and take preview's away.** The
   pair was also exposed in that transcript, and rotating is cheapest now, while
   `livekit.yaml` is being rewritten anyway. Preview holds **no** LiveKit pair
-  from here on ([D-94](../../docs/decisions/D-94.md)'s 2026-09-16 addendum).
+  from here on (since 2026-09-16, [D-16](../../docs/decisions/D-16.md)).
   Do it outside lesson hours, because every class in progress drops when
   livekit-server restarts in step 3.
   1. **Generate a new pair** —
@@ -495,7 +495,7 @@ spiralclass-preview`. It has to pass before anything else here means much:
   operator session to borrow; and the **GHCR** build-and-push that replaces
   `oracle-push-images.sh`, on an `ubuntu-24.04-arm` runner. A preview deploy
   workflow with a `push` trigger against this box is the last step of that,
-  not the first — see D-157's addendum. (The old `deploy-preview.yml` was
+  not the first — see D-157. (The old `deploy-preview.yml` was
   deleted with Fly on 2026-09-23; git history has it.)
 - **Repoint Infisical's preview `DATABASE_URL` and `DIRECT_URL`** at the box's
   Postgres, or delete the orphaned Neon preview project. Until one of those

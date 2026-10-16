@@ -71,7 +71,7 @@ Reddit communities default to prohibited, because Reddit's own culture treats
 unsolicited self-promotion as spam and starting anywhere else would ship the ban
 as the default experience.
 
-### What "limited" actually means ([D-155](../decisions/D-155.md))
+### What "limited" actually means ([D-125](../decisions/D-125.md))
 
 `limited` was the honest answer for most real groups, and on its own it said
 nothing further — so the teacher recorded the coarse policy and kept the real
@@ -123,7 +123,7 @@ The image brief has three authors, and the UI names them in those terms:
    rather than replacing.
 
 Her caption is still drawn over the image by SpiralClass rather than by the
-image model ([D-123](../decisions/D-123.md)): a misspelt Spanish meme posted by
+image model ([D-125](../decisions/D-125.md)): a misspelt Spanish meme posted by
 a Spanish teacher discredits the exact expertise she is advertising, and accents
 are where image models fail.
 
@@ -150,6 +150,10 @@ Reddit treats unsolicited promotion as spam, so a product that automated the
 posting would be handing teachers a ban rather than a marketing department. The
 teacher keeps her own account and her own voice; she reviews, edits if she wants
 to, and posts.
+
+It is also not a marketplace: SpiralClass sends a teacher no students from a
+directory and lists no teacher beside another. Everything here amplifies the
+traffic and word of mouth she already has.
 
 ---
 
@@ -220,6 +224,6 @@ ranking noise.
   `promo_links_allowed`, `promo_notes`) and the community's own image
   instructions (`meme_brief`).
 - `social_preview_images` — the image library, generated or uploaded, shared
-  with the social-preview pipeline ([D-123](../decisions/D-123.md)). The
+  with the social-preview pipeline ([D-125](../decisions/D-125.md)). The
   teacher's general image instructions and her visual register live beside her
   acquisition profile, on `teacher_marketing_profiles`.

@@ -255,7 +255,7 @@ export class LiveKitProvider implements VideoProvider {
     return egressConfig() !== null;
   }
 
-  // AUDIO-ONLY since 2026-08-27 (D-135). This used to composite video too, at
+  // AUDIO-ONLY since 2026-08-27 (D-16). This used to composite video too, at
   // LiveKit's default H264_720P_30 preset, which produced 846 MB for a single
   // 51-minute class and dropped 2,586 video frames doing it — the 2-OCPU ARM box
   // also ran livekit-server, Redis, Caddy and (then) a captions worker, and video

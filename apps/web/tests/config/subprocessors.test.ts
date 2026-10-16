@@ -244,8 +244,8 @@ describe("sub-processor register", () => {
     expect(missing, `Evidence paths that do not exist:\n${missing.join("\n")}`).toEqual([]);
   });
 
-  // #104: production video moved to LiveKit Cloud (D-182) and back to our own
-  // box (D-187), and the register kept saying "self-hosted" through the first
+  // #104: production video moved to LiveKit Cloud on 2026-09-19 and back to
+  // our own box on 2026-09-24 (D-16), and the register kept saying "self-hosted" through the first
   // move. LiveKit Cloud is a separate company with its own location, so the
   // entry has to follow production's LIVEKIT_URL, in both directions.
   it("names the LiveKit that production's LIVEKIT_URL actually points at", () => {

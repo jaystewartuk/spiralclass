@@ -1,4 +1,4 @@
-// Social previews (D-123) — the per-share-link OG/social image a teacher
+// Social previews (D-125) — the per-share-link OG/social image a teacher
 // uploads or generates for her booking link.
 //
 // This module owns the parts the editor and the server must agree on: the configuration
@@ -42,7 +42,7 @@ export function isSocialPreviewAngle(value: unknown): value is SocialPreviewAngl
  * and it crops cleanly into X's `summary_large_image`. We deliberately generate
  * ONE asset rather than per-platform crops: platform-specific images only earn
  * their keep once there are platform-specific LINKS to hang them off, which
- * there aren't yet (see D-123 "future extensibility").
+ * there aren't yet (see D-125 "future extensibility").
  */
 export const SOCIAL_PREVIEW_WIDTH = 1200;
 export const SOCIAL_PREVIEW_HEIGHT = 630;

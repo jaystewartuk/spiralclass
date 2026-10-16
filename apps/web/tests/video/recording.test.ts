@@ -158,7 +158,7 @@ describe("callRecordingKey / isAudioOnlyRecordingKey", () => {
   });
 
   it("classifies a new .m4a key as audio and a legacy .mp4 key as video", () => {
-    // The extension is the ONLY signal separating a D-135 audio composite from
+    // The extension is the ONLY signal separating a D-16 audio composite from
     // a recording made before it, and both still live in the same bucket.
     expect(isAudioOnlyRecordingKey("recordings/b1/1.m4a")).toBe(true);
     expect(isAudioOnlyRecordingKey("recordings/b1/1.M4A")).toBe(true);
@@ -183,7 +183,7 @@ describe("startRoomRecording", () => {
     expect((opts.file as any).filepath).toBe("recordings/b1/123.m4a");
     expect((opts.file as any).fileType).toBe(1); // EncodedFileType.MP4 per the mock
     expect((opts.file as any).output).toEqual({ case: "s3", value: expect.any(S3Upload) });
-    // D-135. Without this the composite reverts to LiveKit's default
+    // D-16. Without this the composite reverts to LiveKit's default
     // H264_720P_30, which cost 846 MB and 2,586 dropped frames for one class.
     expect(compositeOpts).toEqual({ audioOnly: true });
   });

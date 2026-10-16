@@ -23,7 +23,7 @@ import type { StringKey } from "@/lib/i18n-translate";
 // SpiralClass to TEACHERS ("keep ~100% of what you charge", "no marketplace
 // commission"), none of which is a student benefit, and pasting it here would
 // make the teacher read as a listing on someone else's platform — the exact
-// marketplace shape D-24 rejected in favour of amplifying the teacher. What
+// marketplace shape D-125 rejected in favour of amplifying the teacher. What
 // belongs here is the same underlying capabilities re-framed as answers to the
 // questions a stranger asks before sending money up front: what if I can't make
 // it, how do we actually meet, will I forget, what do I get between classes.

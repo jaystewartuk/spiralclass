@@ -67,7 +67,7 @@ export async function GET(request: Request, ctx: { params: Promise<{ code: strin
   //
   // A crawler scraping the posted `/g/<code>` follows this redirect and reads
   // the tags of whatever it lands on, so a destination with no group tag
-  // resolves no group preview: the community's card (D-123) was unreachable
+  // resolves no group preview: the community's card (D-125) was unreachable
   // through a tracked link, which is the very link teachers are told to post.
   // Appending the tag when — and only when — that community actually has a
   // preview keeps the "nothing advertises that this was a tracked link"

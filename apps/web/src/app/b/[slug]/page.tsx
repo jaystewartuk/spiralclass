@@ -145,7 +145,7 @@ const getTeacherBySlug = cache((slug: string) =>
 // timezone placeholder — a small, early signal that the page is not for them.
 //
 // The funnel locale is the better guess because it is the one field where she
-// has already said who her buyers are (booking_page_locale, D-73's fourth
+// has already said who her buyers are (booking_page_locale, D-72's fourth
 // language field). `maximize()` resolves a bare "en" to US via CLDR's
 // likely-subtags data. Falls back to her country when the locale carries no
 // region, which is the old behaviour and still the right last resort.
@@ -172,7 +172,7 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
   // Read for `utm_content` ONLY — the tag shareTaggedUrl() already puts on every
   // per-group link, which is what lets one booking page preview differently in
-  // different places (D-123). This page is already dynamic (the body reads
+  // different places (D-125). This page is already dynamic (the body reads
   // cookies via getAuthUser), so consuming searchParams here costs no
   // staticness that wasn't already spent.
   searchParams: Promise<Record<string, string | string[] | undefined>>;
@@ -417,7 +417,7 @@ export default async function BookingLandingPage({
   // English speakers, many of them living in her country, so a local IP says
   // nothing about whether the reader thinks in pesos. Second,
   // `booking_page_locale` is a decision SHE made about who this page is for —
-  // it is the only field on the row that carries that, and D-73 exists because
+  // it is the only field on the row that carries that, and the column exists because
   // inferring it from anything else was wrong twice.
   //
   // So: a page she chose to sell in English gets the lingua franca of price
@@ -427,12 +427,12 @@ export default async function BookingLandingPage({
     approxAssumptions
       ? (approxUsdFrom(minorUnits, currency, approxAssumptions, new Date())?.centsUsd ?? null)
       : null;
-  // Live captions (D-27) are advertised in the reassurance band only when the
+  // Live captions (D-185) are advertised in the reassurance band only when the
   // flag AND the ASR/translation vendors are actually configured.
   const captionsAvailable = liveCaptionsEnabled();
   const tzLabel = teacher.timezone.split("/").pop()?.replace(/_/g, " ") ?? teacher.timezone;
   const photoUrl = teacherPhotoPublicUrl(teacher.photoPath, teacher.updatedAt.getTime());
-  // Intro video (D-73). A public R2-hosted file — plays inline via <video>,
+  // Intro video. A public R2-hosted file — plays inline via <video>,
   // rendered by IntroVideoCard with a branded play overlay (not the profile
   // photo — that previously duplicated the same headshot twice on the page).
   // Null when the teacher hasn't recorded one or the storage bucket isn't
@@ -1086,7 +1086,7 @@ export default async function BookingLandingPage({
           shared in a Facebook group is how the ambassador loop starts. It stays
           a footer line rather than a band because the moment SpiralClass
           competes for attention with the teacher, her page reads as a
-          marketplace listing (D-24). */}
+          marketplace listing (D-125). */}
       <footer className="mt-12 flex flex-wrap items-center justify-center gap-x-4 gap-y-1 border-t pt-6 text-xs text-muted-foreground">
         <Link href="/" className="underline-offset-4 hover:text-foreground hover:underline">
           {t("web.bookingLanding.poweredBy")}

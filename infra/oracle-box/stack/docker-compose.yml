@@ -88,7 +88,7 @@ services:
       - ./egress.yaml:/etc/egress.yaml:ro
       - egress_tmp:/tmp
     # Room-composite egress renders through a headless Chrome; it needs a real
-    # shm size and SYS_ADMIN for its sandbox, per LiveKit's own docs. D-135
+    # shm size and SYS_ADMIN for its sandbox, per LiveKit's own docs. D-16
     # made recordings audio-only, which is why a 2-OCPU box can carry this at
     # all — do not restore video compositing here without re-reading it.
     shm_size: "2gb"

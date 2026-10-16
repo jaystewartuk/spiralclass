@@ -163,7 +163,7 @@ describe("saveTimezoneAction", () => {
 
 // D-112: the teaching language is asked at step 1 rather than left to Settings,
 // and seeded there, because `getTeacherFocusTags` self-seeds on the first empty
-// read — a null language writes the generic pack permanently, and D-20 seeding
+// read — a null language writes the generic pack permanently, and D-17 seeding
 // is additive, so a language set afterwards stacks its pack on top instead of
 // replacing it.
 describe("saveTimezoneAction — teaching language (D-112)", () => {

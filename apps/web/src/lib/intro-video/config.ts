@@ -1,9 +1,9 @@
 import { transcriptionConfig } from "@/lib/transcription/config";
 
-// Intro-video AI coach enablement (D-73, Layer 2). Deliberately a SEPARATE gate
+// Intro-video AI coach enablement (Layer 2). Deliberately a SEPARATE gate
 // from the lesson-insights transcription flag (`LESSON_INSIGHTS_TRANSCRIPTION_ENABLED`):
 // the intro video is the teacher's OWN public clip — no student data, no minors —
-// so it is not blocked on the D-19 consent/retention sign-off. It still needs an
+// so it is not blocked on the D-185 consent/retention sign-off. It still needs an
 // explicit on-switch AND a configured ASR vendor before any bytes are sent, so a
 // misconfiguration can never quietly start spending vendor minutes.
 //

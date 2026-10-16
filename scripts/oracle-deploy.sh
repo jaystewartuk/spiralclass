@@ -3,7 +3,7 @@
 # preview's Postgres. Idempotent — run it as often as you like.
 #
 # ⚠️ PRODUCTION IS NOT DEPLOYED FROM HERE. The production web app is on Cloud
-# Run and its database is on Neon (D-184's addendum, 2026-09-23);
+# Run and its database is on Neon (D-184, 2026-09-23);
 # scripts/cloudrun-deploy.sh ships it and nothing in this file touches it.
 #
 # ⚠️ THIS IS THE ONLY THING THAT DEPLOYS THE BOX. `deploy-preview.yml` is
@@ -312,7 +312,7 @@ fi
 # that hostname's TLS survives the rebuild untouched.
 #
 # ⚠️ It does NOT cover preview.spiralclass.com — that name is new to Caddy and
-# must be issued, which needs "Always Use HTTPS" OFF on the zone (D-134).
+# must be issued, which needs "Always Use HTTPS" OFF on the zone (D-16).
 # `spiralclass.com` is not served here at all: it is on Fly, behind Cloudflare,
 # and Caddy on this box must never be given it.
 if [ "$RESTORE_CADDY" -eq 1 ]; then

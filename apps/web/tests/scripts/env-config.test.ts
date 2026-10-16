@@ -86,7 +86,7 @@ describe("config/env non-secret files", () => {
   });
 });
 
-describe("preview holds no LiveKit key pair (D-94's 2026-09-16 addendum)", () => {
+describe("preview holds no LiveKit key pair (D-16, since 2026-09-16)", () => {
   // The only LiveKit server is production's, and preview gets no credentials
   // for it. This sees the committed files. Infisical's preview environment is
   // the other place a pair could come from, and nothing in the tree can read

@@ -131,7 +131,7 @@ describe("timezoneSchema — targetLanguage (shared, D-112)", () => {
   });
 });
 
-describe("resolveVocabulary (shared, D-80)", () => {
+describe("resolveVocabulary (shared, D-17)", () => {
   it("the class override replaces the teacher default", () => {
     expect(resolveVocabulary("advanced", "basic")).toBe("advanced");
     expect(resolveVocabulary("basic", "native")).toBe("basic");
@@ -179,7 +179,7 @@ describe("materialStyleSchema (shared)", () => {
     }
   });
 
-  it("accepts a vocabulary difficulty and coerces blank to null (D-80)", () => {
+  it("accepts a vocabulary difficulty and coerces blank to null (D-17)", () => {
     const ok = materialStyleSchema().safeParse({ vocabulary: "basic" });
     expect(ok.success).toBe(true);
     if (ok.success) expect(ok.data.vocabulary).toBe("basic");

@@ -4,7 +4,7 @@
 # livekit-activity-ink.sh, beside it, are the two callers.
 #
 # ⚠️ PRODUCTION'S PAIR, BECAUSE IT IS THE ONLY ONE. Preview holds no LiveKit key
-# pair (D-94's 2026-09-16 addendum), so everything comes from production:
+# pair (since 2026-09-16, D-16), so everything comes from production:
 #
 #   * LIVEKIT_URL from config/env/production.runtime.env (D-70).
 #   * The key and the secret from Infisical's production environment, at the

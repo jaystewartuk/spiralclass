@@ -47,7 +47,7 @@ export function lessonAudioKey(bookingId: string, speaker: string, token: string
 }
 
 // Object key for a class's room-composite recording. `.m4a` — the composite is
-// AUDIO-ONLY as of D-135, and the extension is load-bearing: it is the only
+// AUDIO-ONLY as of D-16, and the extension is load-bearing: it is the only
 // thing that distinguishes a new audio recording from a legacy `.mp4` one
 // recorded before the change, both of which still sit in the same bucket and
 // still have to play. `token` is a start-time timestamp, so repeated Record
@@ -56,7 +56,7 @@ export function callRecordingKey(bookingId: string, token: string): string {
   return `recordings/${bookingId}/${token}.m4a`;
 }
 
-// Does this stored recording hold audio only? Legacy rows (before D-135) are
+// Does this stored recording hold audio only? Legacy rows (before D-16) are
 // `.mp4` room composites WITH video and must keep rendering in a video player;
 // everything written since is `.m4a`. Kept a pure string check so the replay
 // page can decide server-side without loading a provider.

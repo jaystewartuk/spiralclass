@@ -260,7 +260,7 @@ one type-checks, lints and builds.
 - **Four language columns, all allowed to diverge**: `target_language` (what
   she teaches) · `teaching_language` (what she teaches in) · `locale` (what
   **she** reads) · `booking_page_locale` (what her **buyers** read). Conflating
-  two of them has broken production twice; D-72, D-73 and D-133 are the record.
+  two of them has broken production twice; D-72 is the record.
 - **The public funnel (`/b/**`) renders in `booking_page_locale`**, resolved by
   `publicFunnelLocaleFor()`. The pages, the client layout and the social card
   all derive from that one value. **Never from the visitor's locale** — the

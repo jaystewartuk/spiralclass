@@ -45,6 +45,9 @@ const SKIP_PREFIXES = [
   "apps/web/tests/config/doc-paths.test.ts",
 ];
 
+const MIGRATIONS = "apps/web/prisma/migrations/";
+const RECORD_PATH = /^docs\/decisions\/D-\d{1,3}\.md$/;
+
 /** Only text we can plausibly read; skip images, fonts, archives, lockfiles. */
 const TEXT_FILE =
   /\.(ts|tsx|js|jsx|mjs|cjs|md|mdx|json|jsonc|ya?ml|toml|tf|tfvars|sh|env|sql|prisma|txt|example|hcl|Dockerfile)$/;
@@ -73,13 +76,8 @@ const DELETED_DOCS = new Set([
   "docs/deployment/SELF_HOSTED_RUNNER.md",
   "docs/engineering/TECH_DEBT.md",
   "docs/engineering/integrations/whatsapp.md",
-  "docs/engineering/lesson-insights.md",
-  "docs/engineering/live-notes-panel.md",
   "docs/launch/UAT_PRELAUNCH.md",
   "docs/ops/FLY_SPIKE.md",
-  "docs/orientation/04-levels-and-materials.md",
-  "docs/product/HOMEWORK_WORKFLOW.md",
-  "docs/product/MATERIALS_TAXONOMY.md",
 ]);
 
 function isTextFile(name: string): boolean {
@@ -118,6 +116,10 @@ function danglingReferences(): Map<string, string[]> {
       const path = match[0];
       // `present` is the walk's own view, so a path it contains exists.
       if (present.has(path)) continue;
+      // An applied migration cannot be edited, so a decision record it links
+      // may since have been retired (D-202). decision-records.test.ts holds
+      // that number to the README's Retired numbers table instead.
+      if (file.startsWith(MIGRATIONS) && RECORD_PATH.test(path)) continue;
       const seen = dangling.get(path) ?? [];
       if (!seen.includes(file)) seen.push(file);
       dangling.set(path, seen);

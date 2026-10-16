@@ -35,7 +35,7 @@ const teacherFindUnique = vi.fn();
 const studentFindFirst = vi.fn();
 // No configured social previews — the default for every teacher who has never
 // touched the feature, and the case that must leave og:image exactly as it was
-// (D-123). The "custom preview overrides og:image" case is covered in
+// (D-125). The "custom preview overrides og:image" case is covered in
 // tests/social-preview/og-metadata.test.ts.
 const socialPreviewFindMany = vi.fn(async () => []);
 vi.mock("@/lib/prisma", () => ({
@@ -224,7 +224,7 @@ describe("noindex surfaces", () => {
 
 describe("teacher booking page /b/[slug]", () => {
   const params = Promise.resolve({ slug: "mira" });
-  // generateMetadata reads searchParams for `utm_content` (D-123 social
+  // generateMetadata reads searchParams for `utm_content` (D-125 social
   // previews). Empty here: these cases assert the UNTAGGED link's metadata,
   // which is exactly the path that must stay unchanged.
   const searchParams = Promise.resolve({});

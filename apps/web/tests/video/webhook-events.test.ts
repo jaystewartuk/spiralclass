@@ -182,7 +182,7 @@ describe("handleNormalizedEvent — room_finished", () => {
     expect(outcome).toEqual({ code: "room-finished-swept", bookingId: "booking-9" });
     expect(stopLessonAudioCaptures).toHaveBeenCalledWith(prisma, "booking-9");
     expect(finalizeDanglingRecording).toHaveBeenCalledWith(prisma, "booking-9");
-    // The transcript the browsers wrote during the class (D-189).
+    // The transcript the browsers wrote during the class (D-185).
     expect(finalizeBrowserTranscript).toHaveBeenCalledWith(prisma, { tag: "inngest" }, "booking-9");
     expect(trackServerEvent).toHaveBeenCalledWith({
       name: "call_room_finished",
@@ -235,7 +235,7 @@ describe("handleNormalizedEvent — participant_joined", () => {
 
     expect(outcome).toEqual({ code: "lesson-audio-capture-checked", bookingId: "booking-9" });
     expect(maybeStartLessonAudioCapture).toHaveBeenCalledWith(prisma, "booking-9");
-    // D-132: the auto-record check rides the same event, independently — the
+    // D-16: the auto-record check rides the same event, independently — the
     // two answer different questions and neither implies the other.
     expect(maybeAutoStartRecording).toHaveBeenCalledWith(prisma, "booking-9");
     expect(trackServerEvent).toHaveBeenCalledWith({

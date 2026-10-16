@@ -527,7 +527,7 @@ describe("saveBookingPageLocaleAction", () => {
   });
 });
 
-// D-132 — the auto-record-classes opt-in. A checkbox action, so the whole
+// D-16 — the auto-record-classes opt-in. A checkbox action, so the whole
 // behaviour is "did an absent field mean off"; the interesting part is that it
 // writes ONLY this column, because conflating a teacher's preference about her
 // own classes with a consent decision about her students is the mistake this

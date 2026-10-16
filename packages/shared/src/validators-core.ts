@@ -117,7 +117,7 @@ export const timezoneSchemaWith = (loc: Loc) => {
     // platform is language-first (D-72). A BCP-47 code from the one registry
     // (`languages.ts`), asked here at onboarding step 1 rather than left to
     // Settings, because a null value is not inert: `ensureTeacherFocusTags`
-    // seeds the generic pack off it on first read and D-20 seeding is
+    // seeds the generic pack off it on first read and D-17 seeding is
     // additive, so a language set later stacks its pack on top of the wrong
     // one instead of replacing it (D-112).
     //
@@ -390,7 +390,7 @@ export const checkoutIntentSchemaWith = (loc: Loc) => {
 };
 export type CheckoutIntentInput = z.infer<ReturnType<typeof checkoutIntentSchemaWith>>;
 
-// Booking-page lead capture (docs/features/student-acquisition.md, D-24):
+// Booking-page lead capture (docs/features/student-acquisition.md, D-125):
 // a visitor who isn't ready to buy leaves their contact details and an optional
 // message so the teacher can follow up. The number here is a contact detail
 // the teacher uses to reply manually, not
@@ -531,7 +531,7 @@ export type MaterialTone = (typeof MATERIAL_TONES)[number];
 export const MATERIAL_LEARNER_AGES = ["kids", "teens", "adults"] as const;
 export type MaterialLearnerAge = (typeof MATERIAL_LEARNER_AGES)[number];
 
-// Vocabulary difficulty (D-80) — a SEPARATE axis from the CEFR language level.
+// Vocabulary difficulty (D-17) — a SEPARATE axis from the CEFR language level.
 // The CEFR level controls grammar complexity, sentence structures, discourse,
 // and abstractness of ideas; this controls how common/rare the WORDS are
 // (word frequency, idioms, uncommon synonyms, technical/literary terms). The
@@ -555,7 +555,7 @@ export const MATERIAL_VOCABULARIES = ["basic", "everyday", "advanced", "native"]
 export type MaterialVocabulary = (typeof MATERIAL_VOCABULARIES)[number];
 // The effective vocabulary when neither the class override nor the teacher
 // default is set. Deliberately conservative (common vocabulary) so a high CEFR
-// level does not silently pull in rare words — the D-80 product goal.
+// level does not silently pull in rare words — the D-17 product goal.
 export const DEFAULT_MATERIAL_VOCABULARY: MaterialVocabulary = "everyday";
 
 // Resolve the vocabulary difficulty that actually drives generation, applying
@@ -571,7 +571,7 @@ export function resolveVocabulary(
 }
 
 // Lesson format — the participant configuration AI-generated material is
-// written for (D-88). The platform supports ONE shape today: a `Booking` has
+// written for (D-17). The platform supports ONE shape today: a `Booking` has
 // exactly one `studentId` — there is no multi-student booking anywhere in the
 // schema — so `one_to_one` is the only value and every material-generation
 // prompt asserts it unconditionally (see `lessonFormatDirective` in
@@ -604,7 +604,7 @@ export const materialStyleSchemaWith = (loc: Loc) => {
   return z.object({
     tone: z.preprocess(blankToNull, z.enum(MATERIAL_TONES).nullable()).default(null),
     learnerAge: z.preprocess(blankToNull, z.enum(MATERIAL_LEARNER_AGES).nullable()).default(null),
-    // Teacher default vocabulary difficulty (D-80). Nullable → the effective
+    // Teacher default vocabulary difficulty (D-17). Nullable → the effective
     // default (everyday). Written by the settings-page save action — the form
     // posts the stored value back unchanged unless the teacher moves the dial.
     vocabulary: z.preprocess(blankToNull, z.enum(MATERIAL_VOCABULARIES).nullable()).default(null),
@@ -793,7 +793,7 @@ export const transferConfirmSchemaWith = (loc: Loc) => {
   });
 };
 
-// --- Teacher → Student invitations (D-83) ----------------------------------
+// --- Teacher → Student invitations (docs/features/student-management.md) ----
 
 // A single invitee (form or one parsed row). Email required (that's the
 // acceptance target); name optional (falls back to the email/roster name).

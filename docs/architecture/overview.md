@@ -329,10 +329,10 @@ The decision log is the real record; this is the shape of it.
   ([D-143](../decisions/D-143.md)), and platform billing moved to GBP
   ([D-153](../decisions/D-153.md)). Because every call site resolves credentials
   through one function, each swap was configuration rather than code.
-- **Video**: LiveKit Cloud → self-hosted ([D-94](../decisions/D-94.md)). Two
+- **Video**: LiveKit Cloud → self-hosted ([D-16](../decisions/D-16.md)). Two
   config values, no application code.
 - **Subject scope**: English-teaching → language-agnostic
-  ([D-72](../decisions/D-72.md), [D-73](../decisions/D-73.md)). A teacher's
+  ([D-72](../decisions/D-72.md)). A teacher's
   subject became a BCP-47 code from one registry.
 - **CI**: GitHub Actions → a free Oracle box → a paid Hetzner pool →
   GitHub-hosted again → the maintainer's laptop with no workflows at all

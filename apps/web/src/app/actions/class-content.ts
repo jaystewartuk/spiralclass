@@ -10,7 +10,7 @@ import {
   type ClassContentTemplateRow,
 } from "@/lib/materials/templates";
 
-// Lesson templates (D-46) — Markdown skeletons a teacher reuses across
+// Lesson templates (D-17) — Markdown skeletons a teacher reuses across
 // materials, independent of any single material. Booking-scoped and
 // library-scoped content authoring both live in app/actions/library.ts now
 // (the unified material form, docs/features/library-materials.md); this file

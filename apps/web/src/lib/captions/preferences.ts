@@ -1,6 +1,6 @@
 // How THIS viewer wants subtitles rendered on THEIR screen.
 //
-// Distinct from the teacher's room-wide captions switch (D-27), and the
+// Distinct from the teacher's room-wide captions switch (D-185), and the
 // distinction is the point. That switch decides whether anyone's speech is
 // transcribed at all — a privacy and cost decision, correctly hers alone.
 // What size the letters are, whether the original sits above the

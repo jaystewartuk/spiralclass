@@ -119,7 +119,7 @@ export async function saveBookingSlugAction(
 // subject in the AI material prompt. Storing it seeds that pack right away, so
 // the focus picker is populated the next time it renders. Empty clears it (the
 // picker then falls back to the neutral language pack). We never remove
-// already-seeded tags on change — adding a pack is additive (D-20).
+// already-seeded tags on change — adding a pack is additive (D-17).
 export async function saveTargetLanguageAction(
   _prev: ProfileState,
   formData: FormData,
@@ -161,7 +161,7 @@ export async function saveTargetLanguageAction(
   return { ok: true };
 }
 
-// Live-caption default language (D-27): the language this teacher teaches IN,
+// Live-caption default language (D-185): the language this teacher teaches IN,
 // used as the ASR/translation source unless a class has its own
 // teacherLanguageOverride. Distinct from `targetLanguage` above: this is the
 // language she SPEAKS while teaching, that is the language she teaches.
@@ -249,7 +249,7 @@ export async function saveAutoSurfaceLevelMaterialsAction(
   return { ok: true };
 }
 
-// Auto-record classes (D-132) — opt-in toggle for letting the server start a
+// Auto-record classes (D-16) — opt-in toggle for letting the server start a
 // class's recording once both parties are in the room, instead of waiting for
 // the teacher to tap Record mid-lesson.
 //
@@ -385,7 +385,7 @@ export async function saveBookingPageWhatsappAction(
   return { ok: true };
 }
 
-// Persists the teacher's AI material style (D-78) — the tone/register, learner
+// Persists the teacher's AI material style (D-17) — the tone/register, learner
 // age, target-language variety, and free-text note applied to every AI-generated
 // material via resolveSubject. Validated with the shared materialStyleSchema so
 // web and mobile enforce identical bounds; each field clears to null.
@@ -400,7 +400,7 @@ export async function saveMaterialStyleAction(
   const parsed = materialStyleSchema(locale).safeParse({
     tone: formData.get("tone"),
     learnerAge: formData.get("learnerAge"),
-    // Vocabulary difficulty (D-80) reached this form with the settings-page
+    // Vocabulary difficulty (D-17) reached this form with the settings-page
     // redesign. The form posts the stored value back unchanged unless the
     // teacher moves the dial, so a save can't silently wipe a stored setting.
     vocabulary: formData.get("vocabulary"),
@@ -505,7 +505,7 @@ export async function removeTeacherPhotoAction(): Promise<ProfileState> {
   return { ok: true };
 }
 
-// Reasonable ceiling on the recorded/stored intro video (D-73). ~5 minutes is
+// Reasonable ceiling on the recorded/stored intro video. ~5 minutes is
 // well beyond the ~45–60s intro we nudge for, but leaves room for an uploaded
 // clip; the AI coach (Layer 3) later flags anything much over ~60s as too long.
 const INTRO_VIDEO_MAX_DURATION_MS = 5 * 60 * 1000;
@@ -583,7 +583,7 @@ export async function finalizeIntroVideoAction(
     data: { introVideoPath: key, introVideoDurationMs: clamped },
   });
 
-  // Kick off the async intro-video coach pipeline (D-73). Best-effort: the
+  // Kick off the async intro-video coach pipeline. Best-effort: the
   // handler is Pro-gated + flag-gated and no-ops when dormant, so a send failure
   // must never block saving the video.
   await inngest
@@ -620,7 +620,7 @@ export async function removeIntroVideoAction(): Promise<ProfileState> {
     where: { id: teacher.id },
     data: { introVideoPath: null, introVideoDurationMs: null },
   });
-  // Drop any stale AI analysis (D-73, Layer 2) — the video it described is gone.
+  // Drop any stale AI analysis (Layer 2) — the video it described is gone.
   await prisma.introVideoAnalysis.deleteMany({ where: { teacherId: teacher.id } });
   trackIntroVideoRemoved({
     teacherId: teacher.id,
@@ -632,7 +632,7 @@ export async function removeIntroVideoAction(): Promise<ProfileState> {
   return { ok: true };
 }
 
-// Polling target for the AI Coach panel (D-73, Layer 3): lets the client see
+// Polling target for the AI Coach panel (Layer 3): lets the client see
 // the pipeline move through pending → transcribing → transcribed/failed
 // without a full page reload, and picks up the true current state whenever
 // the teacher navigates back to this page.

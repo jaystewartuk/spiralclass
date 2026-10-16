@@ -58,7 +58,7 @@ async function resolveSubject(
     where: { id: teacherId },
     select: {
       targetLanguage: true,
-      // AI material style (D-78) — read here so every generation path (class
+      // AI material style (D-17) — read here so every generation path (class
       // content, library, streamed, refine) inherits the teacher's preference.
       // Stored values were validated on write (materialStyleSchema); the prompt
       // builders also ignore any unknown value (switch default → no directive).
@@ -66,7 +66,7 @@ async function resolveSubject(
       materialLearnerAge: true,
       materialLanguageVariety: true,
       materialCustomInstructions: true,
-      // Vocabulary difficulty default (D-80). The booking-scoped generator
+      // Vocabulary difficulty default (D-17). The booking-scoped generator
       // overrides it per class; the library/refine paths use it as-is. Resolved
       // to a concrete value by the prompt builder (null → everyday).
       materialVocabulary: true,
@@ -445,7 +445,7 @@ export async function generateClassContentForBooking(input: {
   bookingId: string;
   topic: string;
   focusTagIds: string[];
-  // The teacher's chosen lesson template (D-46) — its structure shapes the
+  // The teacher's chosen lesson template (D-17) — its structure shapes the
   // output. Optional and tenant-scoped on resolve; a foreign/unknown/absent id
   // falls back to the default shape.
   templateId?: string | null;
@@ -455,7 +455,7 @@ export async function generateClassContentForBooking(input: {
   // drafts her library in French wants her classes in French too, so this is
   // not a library-only input.
   language?: string | null;
-  // Per-class vocabulary difficulty (D-80). `undefined` = leave this class's
+  // Per-class vocabulary difficulty (D-17). `undefined` = leave this class's
   // stored override untouched and generate with whatever it already is;
   // a value or explicit `null` = set the booking's override to it (null clears
   // the override, falling back to the teacher default) BEFORE generating, so
@@ -497,7 +497,7 @@ export async function generateClassContentForBooking(input: {
     // student.name is passed into the prompt so the model uses the ONE correct
     // name and never reproduces a stray name from the template/interests/goals
     // (the wrong-student-name bug). vocabularyOverride is this class's stored
-    // vocabulary-difficulty override (D-80).
+    // vocabulary-difficulty override (D-17).
     select: {
       id: true,
       studentId: true,
@@ -513,7 +513,7 @@ export async function generateClassContentForBooking(input: {
     };
   }
 
-  // Persist the class's vocabulary override when the caller supplied one (D-80),
+  // Persist the class's vocabulary override when the caller supplied one (D-17),
   // so the compose picker doubles as the class setting. `undefined` leaves the
   // stored value alone; a value/null writes it. Resolve the effective value the
   // generation will use: class override ?? teacher default ?? everyday.
@@ -545,7 +545,7 @@ export async function generateClassContentForBooking(input: {
   });
 
   // Resolve the teacher's chosen template (tenant-scoped) and bound the slice we
-  // inject as the lesson structure (D-46).
+  // inject as the lesson structure (D-17).
   const templateBody = (
     await resolveClassContentTemplateBody(input.teacherId, input.templateId)
   )?.slice(0, CLASS_CONTENT_TEMPLATE_PROMPT_MAX_CHARS);
@@ -584,7 +584,7 @@ export async function generateClassContentForBooking(input: {
     language: input.language ?? null,
     ...subject,
     // The class override beats the teacher default `subject.vocabulary`, so it
-    // must be applied AFTER the spread (D-80).
+    // must be applied AFTER the spread (D-17).
     vocabulary: resolveVocabulary(classVocabulary, subject.vocabulary),
   });
 
@@ -703,7 +703,7 @@ export async function generateLibraryMaterialForTeacher(input: {
   topic: string;
   levelId?: string | null;
   focusTagIds: string[];
-  // The teacher's chosen lesson template (D-46) — same structure-following as
+  // The teacher's chosen lesson template (D-17) — same structure-following as
   // the booking-scoped generator.
   templateId?: string | null;
   locale: AppLocale;
@@ -757,7 +757,7 @@ export async function generateLibraryMaterialForTeacher(input: {
     : null;
 
   // Resolve the teacher's chosen template (tenant-scoped) and bound the slice we
-  // inject as the material's structure (D-46), same as the class-content path.
+  // inject as the material's structure (D-17), same as the class-content path.
   const templateBody = (
     await resolveClassContentTemplateBody(input.teacherId, input.templateId)
   )?.slice(0, CLASS_CONTENT_TEMPLATE_PROMPT_MAX_CHARS);
@@ -919,7 +919,7 @@ export async function recordLibraryMaterialGeneration(
   });
 }
 
-// ---------- "Edit with AI" refine (D-73) ----------
+// ---------- "Edit with AI" refine ----------
 //
 // The change-in-place counterpart to the generate paths above: instead of
 // composing a fresh material, it applies a teacher's free-text instruction to an

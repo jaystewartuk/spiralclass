@@ -1,6 +1,6 @@
 // The "Crecer" / "Grow" checklist — the in-app teacher-amplification guide.
 //
-// D-24 / the student-acquisition design: SpiralClass does not run a
+// D-125 / the student-acquisition design: SpiralClass does not run a
 // marketplace; instead it makes the traffic and word-of-mouth a teacher already
 // drives convert and compound. This module is the ROI-ordered playbook that ties
 // the already-shipped acquisition features (profile, testimonials, the share
@@ -483,7 +483,7 @@ export function shareChannelLabel(channel: ShareChannel, locale: NavLocale): str
  * carrying the old slug are already posted in that group and will keep being
  * crawled for as long as the post lives. Matching on the id suffix means a
  * rename never orphans an already-shared link from the social preview attached
- * to it (D-123).
+ * to it (D-125).
  *
  * Returns null when the value isn't a slug we minted, so a hand-typed or
  * third-party `utm_content` resolves to "no group" rather than to an arbitrary

@@ -16,7 +16,7 @@ import { createSocialPreviewImage } from "./store";
 
 const log = logger({ surface: "social-preview" });
 
-// The upload half of the social-preview asset model (D-123).
+// The upload half of the social-preview asset model (D-125).
 //
 // A teacher who already makes images elsewhere — ChatGPT, Canva, her phone —
 // must not be pushed through generation to use them, and the two rails

@@ -9,7 +9,7 @@ import { REPO_ROOT } from "../../../../scripts/env-config.mjs";
 /**
  * The database is a job of its own, and the target holds none of its
  * credentials ([D-184], 2026-09-12). Cloud Run took the domain from
- * Fly on 2026-09-23 and Fly was destroyed ([D-184]'s addendum); the Vercel
+ * Fly on 2026-09-23 and Fly was destroyed ([D-184]); the Vercel
  * failover that ran beside it was retired the same week ([D-70]). So there is
  * one target, Cloud Run, and it serves.
  *
@@ -146,7 +146,7 @@ describe("each job holds its own credentials and no other job's", () => {
     // `id-token: write`, GitHub grants that per JOB rather than per step, and
     // this job builds the Docker image — so every lifecycle script in the
     // dependency tree would run with a token-minting endpoint in front of it.
-    // [D-163]'s addendum reversed that shape once; local-gate.test.ts bans it
+    // [D-163] reversed that shape once; local-gate.test.ts bans it
     // across every workflow, and this is the reminder at the one place most
     // likely to want an exception. infra/gcp/README.md carries the reasoning.
     expect(job("cloudrun"), "the Cloud Run job grants id-token: write").not.toMatch(

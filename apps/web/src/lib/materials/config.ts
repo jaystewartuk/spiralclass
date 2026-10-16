@@ -49,7 +49,7 @@ export const CLASS_CONTENT_TEMPLATE_LABEL_MAX_CHARS = 80;
 export const CLASS_CONTENT_TEMPLATE_MAX_PER_TEACHER = 100;
 
 // How much of a teacher's lesson template we inject into the AI compose prompt
-// as the section skeleton (D-46). A template body can be up to the full
+// as the section skeleton (D-17). A template body can be up to the full
 // CLASS_CONTENT_MAX_CHARS ceiling, but the useful *structure* (headings + short
 // hints) is small; bounding the injected slice keeps the prompt (and cost)
 // tight and stops a teacher from pasting an entire filled lesson into the

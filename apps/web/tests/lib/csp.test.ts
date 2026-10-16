@@ -74,7 +74,7 @@ describe("buildCsp third-party allowlists are complete and asserted", () => {
       "https://livekit.spiralclass.com", // Self-hosted LiveKit (preview, 2026-07-21)
       "wss://livekit.spiralclass.com", //   Self-hosted LiveKit signaling socket (preview)
       "wss://api.deepgram.com", //     live captions' phone-to-phone fallback stream (D-185)
-      "https://*.r2.cloudflarestorage.com", // intro-video presigned PUT (browser→R2, D-73)
+      "https://*.r2.cloudflarestorage.com", // intro-video presigned PUT (browser→R2)
     ]);
     expect(new Set(directiveTokens(buildCsp("n"), "connect-src"))).toEqual(EXPECTED_CONNECT_SRC);
   });
@@ -109,7 +109,7 @@ describe("buildCsp third-party allowlists are complete and asserted", () => {
   it("media-src matches the documented allowlist exactly (intro-video playback)", () => {
     // <video> sources: the public R2 host (broad https:, host varies per env,
     // mirroring img-src) plus blob: for the booking-page recorder's local
-    // preview before upload. See D-73.
+    // preview before upload.
     const EXPECTED_MEDIA_SRC = new Set([
       "'self'",
       "blob:", //   in-browser recording preview (URL.createObjectURL)

@@ -188,7 +188,7 @@ enum NotificationRecipientType {
   student
 }
 
-// Booking-page lead lifecycle (docs/features/student-acquisition.md, D-24).
+// Booking-page lead lifecycle (docs/features/student-acquisition.md, D-125).
 // `new` = just captured, `contacted` = teacher reached out, `converted` = became
 // a paying student, `archived` = dismissed. The teacher moves a lead through
 // these by hand from her dashboard.
@@ -443,7 +443,7 @@ model Teacher {
   /// It exists because `locale` was answering two questions at once, and the
   /// automatic writer kept winning: a client that mirrored the DEVICE language
   /// on every session check-in silently reset a teacher who had deliberately
-  /// picked Spanish back to English. Same lesson as D-72/D-73 — split the
+  /// picked Spanish back to English. Same lesson as D-72 — split the
   /// column rather than guess which writer meant it. Set by a language picker;
   /// never by a background mirror.
   localeChosenAt  DateTime? @map("locale_chosen_at")
@@ -484,7 +484,7 @@ model Teacher {
   bookingPageLocale                String?   @map("booking_page_locale")
   // The language the teacher teaches IN (BCP-47, e.g. "es") — the live-caption
   // ASR/translation source language by default. Distinct from `locale` (which
-  // is UI/email chrome only). Defaults to "es" matching the D-27 launch
+  // is UI/email chrome only). Defaults to "es" matching the D-185 launch
   // direction; overridable per booking via Booking.teacherLanguageOverride.
   teachingLanguage                 String    @default("es") @map("teaching_language")
   bufferMin                        Int       @default(10) @map("buffer_min")
@@ -590,7 +590,7 @@ model Teacher {
   // per teacher (replace in place); null = no video. The public URL is derived
   // in lib/storage/teacher-video.ts. A recorded or uploaded MP4/WebM plays
   // natively in a <video> element (deliberately no third-party embed — see
-  // D-73). Layer 2/3 (D-73) transcribes this object for
+  // docs/features/teacher-management.md). Layer 2/3 transcribes this object for
   // the AI intro-coach, captions, and draft-bio; this key is its source of truth.
   introVideoPath                   String?   @map("intro_video_path")
   // Duration of the intro video in milliseconds, as reported by the recorder at
@@ -651,7 +651,7 @@ model Teacher {
   // is language-first (D-72). A BCP-47 code from the one language registry
   // (@spiralclass/shared `LANGUAGES`): "es", "fr", "qu". Null = unset.
   //
-  // Replaces the old `discipline` column (D-20), which tried to be three things
+  // Replaces the old `discipline` column (D-17), which tried to be three things
   // at once — a subject name, a focus-tag seed-pack selector, and an
   // is-this-a-language flag. Under D-72 those collapse: what she teaches IS a
   // language, so one code answers all three (the pack comes from
@@ -668,14 +668,14 @@ model Teacher {
   // SESSION_SECRET. Null until the teacher first opens their calendar-sync
   // settings, where it is lazily minted. See lib/calendar/feed-token.ts.
   calendarFeedToken                String?   @unique @map("calendar_feed_token")
-  // Lesson-insights retention (D-19 item 6). Default is
+  // Lesson-insights retention (derive-then-discard, D-185). Default is
   // derive-then-discard: once a lesson's transcript exists the raw per-speaker
   // audio is deleted. When a teacher opts in here, that audio is KEPT for
   // playback instead of discarded ("keep on opt-in"). Default false = discard.
   // The consent/legal model that governs ENABLING this (data-protection law, minors,
   // cross-border) is still pending sign-off; this column is the mechanism only.
   lessonAudioRetentionOptIn        Boolean   @default(false) @map("lesson_audio_retention_opt_in")
-  // Auto-record classes (D-132). When on, the server starts the room-composite
+  // Auto-record classes (D-16). When on, the server starts the room-composite
   // recording itself once BOTH the teacher and the student are in the class
   // room, so the recording — and the insights pipeline that feeds off it — no
   // longer depends on the teacher remembering to tap Record. Defaults off;
@@ -697,7 +697,7 @@ model Teacher {
   // that does not exist yet. Off by default, so no teacher's page makes the
   // promise until she has deliberately turned it on.
   shareProgressByDefault           Boolean   @default(false) @map("share_progress_by_default")
-  // AI-crawler readability (D-73 follow-on, booking-page-ai-readability): whether
+  // AI-crawler readability (an intro-video follow-on, booking-page-ai-readability): whether
   // the intro-video TRANSCRIPT (IntroVideoAnalysis.transcript, not the video
   // itself — that's already public) may be published in the /b/<slug>
   // VideoObject JSON-LD. The video being public isn't the same decision as its
@@ -721,7 +721,7 @@ model Teacher {
   materialLearnerAge               String?   @map("material_learner_age")
   materialLanguageVariety          String?   @map("material_language_variety")
   materialCustomInstructions       String?   @map("material_custom_instructions")
-  // Default vocabulary difficulty for AI-generated materials (D-80) — a
+  // Default vocabulary difficulty for AI-generated materials (D-17) — a
   // separate axis from the CEFR level, which controls grammar/structure only.
   // ∈ basic|everyday|advanced|native. Null → the effective default (everyday);
   // a per-class override on bookings.vocabulary_override beats this. Read by
@@ -858,7 +858,7 @@ model Student {
   // The student's own language (BCP-47, e.g. "en") — the live-caption
   // ASR/translation source language for the student's own speech, and the
   // target when translating the teacher. Distinct from `locale` (UI/email
-  // chrome only). Defaults to "en" matching the D-27 launch direction;
+  // chrome only). Defaults to "en" matching the D-185 launch direction;
   // overridable per booking via Booking.studentLanguageOverride.
   nativeLanguage       String    @default("en") @map("native_language")
   // Email unsubscribe. Defaults to true (transactional) — students
@@ -942,7 +942,7 @@ model Student {
   @@map("students")
 }
 
-// --- Teacher → Student invitations (D-83) ------------------------------------
+// --- Teacher → Student invitations (docs/features/student-management.md) ------
 
 // The lifecycle status a teacher sees for each invitation. `expired` is a
 // DERIVED display state: a row stays `pending` in the DB past its expiresAt and
@@ -988,7 +988,7 @@ model StudentInvitation {
   resendCount      Int              @default(0) @map("resend_count")
   acceptedAt       DateTime?        @map("accepted_at") @db.Timestamptz
   cancelledAt      DateTime?        @map("cancelled_at") @db.Timestamptz
-  // One-time "these students haven't accepted yet" teacher nudge (D-83). Stamped
+  // One-time "these students haven't accepted yet" teacher nudge. Stamped
   // by the pending-invite cron so each invitation nudges the teacher at most
   // once; a resend clears it (via rotate) so a re-invited student can nudge again.
   reminderSentAt   DateTime?        @map("reminder_sent_at") @db.Timestamptz
@@ -1031,7 +1031,7 @@ model TeacherStudent {
   // items); only explicitly-assigned or class-attached materials reach them
   // (product rule, 2026-07). References the teacher's own Level row.
   levelId                   String?   @map("level_id") @db.Uuid
-  // Durable student profile (docs/features/classes-lesson-content.md, D-20).
+  // Durable student profile (docs/features/classes-lesson-content.md, D-17).
   // The "who" the teacher would otherwise re-type into ChatGPT every class:
   // `interests` (hobbies/themes to personalize examples — "cooking, football")
   // and `goals` (what they're working toward — "pass DELE B1", "business
@@ -1064,7 +1064,7 @@ model TeacherStudent {
   // framing, so progress is shared deliberately, not always-on.
   shareProgress             Boolean   @default(false) @map("share_progress")
   // Lesson-insights consent gate (D-22). Capturing a student's voice for the
-  // insights pipeline (D-19/D-21) requires an explicit, recorded consent for
+  // insights pipeline (D-185/D-21) requires an explicit, recorded consent for
   // THIS (teacher, student) pair — the visible recording indicator alone is not
   // treated as sufficient. The teacher records consent per student; `isMinor`
   // flags that a guardian's consent is the one that counts, so a minor is
@@ -1130,7 +1130,7 @@ model TeacherStudentTemplatePrice {
   @@map("teacher_student_template_prices")
 }
 
-// --- Student acquisition (docs/features/student-acquisition.md, D-24) ---
+// --- Student acquisition (docs/features/student-acquisition.md, D-125) ---
 
 // An inbound enquiry from a visitor to the public booking page (/b/<slug>) who
 // isn't ready to buy yet but wants the teacher to reach out — the demand the
@@ -1473,7 +1473,7 @@ model TeacherShareGroup {
   updatedAt    DateTime  @updatedAt @map("updated_at") @db.Timestamptz
 
   teacher           Teacher             @relation(fields: [teacherId], references: [id], onDelete: Cascade)
-  // The per-group social preview (D-123). Optional: a group with none keeps
+  // The per-group social preview (D-125). Optional: a group with none keeps
   // the teacher's default preview, or the built-in OG card.
   preview           SocialPreview?
   activities        MarketingActivity[]
@@ -1737,7 +1737,7 @@ model Booking {
   // its language at mint time — so a switch takes effect on rejoin.
   teacherLanguageOverride String?       @map("teacher_language_override")
   studentLanguageOverride String?       @map("student_language_override")
-  // Per-class vocabulary difficulty override (D-80) — beats the teacher's
+  // Per-class vocabulary difficulty override (D-17) — beats the teacher's
   // account-level `teachers.material_vocabulary` default for THIS class's AI
   // generation. ∈ basic|everyday|advanced|native. NULL = inherit the teacher
   // default (which itself falls back to the global default, everyday). Freely
@@ -1800,7 +1800,7 @@ model Booking {
 }
 
 // text: an ordinary authored cue/instruction. bookmark: a one-tap in-call
-// marker (D-97 in-call bookmarks) — no reused position sequence with text
+// marker (an in-call bookmark, docs/features/live-calls-video.md) — no reused position sequence with text
 // notes, excluded from the notes panel/teleprompter/AI summary/copy-forward,
 // and its replay-relative timestamp is DERIVED at read time from
 // createdAt vs. the booking's earliest LessonAudio.startedAt (the same
@@ -2142,7 +2142,7 @@ model CallRecording {
 
 // Per-participant, audio-only capture of an in-class call — the raw material the
 // lesson-insights pipeline consumes (docs/features/lesson-insights-reports.md,
-// D-19). A SEPARATE table from call_recordings because the retention lifecycle
+// D-185). A SEPARATE table from call_recordings because the retention lifecycle
 // differs: the A/V recording is kept on teacher opt-in, whereas this analysis
 // audio is derive-then-discard — transcribed, then the audio is deleted. Phase A
 // only lands the file and fires `lesson.audio.ready`; transcription/discard are
@@ -2178,7 +2178,7 @@ model LessonAudio {
 }
 
 // Speaker-labelled, word-timestamped transcript of a lesson — the output of
-// Phase B (docs/features/lesson-insights-reports.md, D-19) and the input to
+// Phase B (docs/features/lesson-insights-reports.md, D-185) and the input to
 // Phase C analysis. ONE row per booking: the two per-speaker LessonAudio files
 // are transcribed independently (so each speaker is KNOWN, no diarization) and
 // merged into a single timeline here. Teacher-only, owner RLS (tenant isolation), exactly
@@ -2204,14 +2204,14 @@ model LessonTranscript {
   @@map("lesson_transcripts")
 }
 
-// Async analysis of a teacher's public intro video (D-73, Layer 2). One row per
+// Async analysis of a teacher's public intro video (coach Layer 2). One row per
 // teacher (1:1). Layer 2 fills `transcript` via batch ASR (Deepgram) run on the
 // public video URL when the teacher records/uploads; Layer 3 will add the AI
 // coach feedback, captions (VTT) and draft bio/headline derived from it (their
 // own migration). Pro-gated (`canUseIntroVideoCoach`) and behind
 // `INTRO_VIDEO_COACH_ENABLED` — dormant until both hold. Unlike lesson
 // transcripts this is the teacher's OWN public video (no student data, no
-// minors), so D-19's consent/retention model doesn't apply.
+// minors), so D-185's consent/retention model doesn't apply.
 enum IntroVideoAnalysisStatus {
   pending
   transcribing
@@ -2231,12 +2231,12 @@ model IntroVideoAnalysis {
   // (D-72). The two coincide for a teacher of Spanish who teaches in Spanish,
   // which is what masked this for so long; they diverge for a teacher OF
   // English who teaches IN Spanish, whose audio then went to the vendor tagged
-  // "en". See docs/decisions/D-73.md's 2026-07-29 amendment.
+  // "en". See docs/features/teacher-management.md, "Intro video".
   language      String?
   provider      String? // "deepgram" | "assemblyai" — ASR provenance
   // Transcript utterances JSON: [{ text, startMs, endMs }] ordered by startMs.
   transcript    Json?
-  // AI coach feedback (D-73, Layer 3): { overall, strengths[], improvements[] }.
+  // AI coach feedback (Layer 3): { overall, strengths[], improvements[] }.
   // Generated from the transcript after ASR; null until analysed (or if it fails
   // — best-effort, never blocks the transcript). Teacher-only, never public.
   coachFeedback Json?                    @map("coach_feedback")
@@ -2250,7 +2250,7 @@ model IntroVideoAnalysis {
 }
 
 // Categorised, evidence-anchored focus areas derived from a lesson transcript —
-// the output of Phase C (docs/features/lesson-insights-reports.md, D-19) and
+// the output of Phase C (docs/features/lesson-insights-reports.md, D-185) and
 // the structured evolution of the free-text lesson_summaries. Teacher-only,
 // owner RLS (tenant isolation), like lesson_summaries — never shown to a student.
 //
@@ -2293,7 +2293,7 @@ model LessonInsight {
 }
 
 // Pronunciation scores from the student's audio — Phase D
-// (docs/features/lesson-insights-reports.md, D-19). The one dimension a
+// (docs/features/lesson-insights-reports.md, D-185). The one dimension a
 // transcript can't give: phoneme-level accuracy from the recording. Scored
 // inside the Phase B pipeline while the audio is still present (before the
 // derive-then-discard step), then read by Phase C so its pronunciation findings
@@ -2317,7 +2317,7 @@ model LessonPronunciation {
 }
 
 // Materialised per-student learning profile — Phase E
-// (docs/features/lesson-insights-reports.md, D-19). A rollup of the student's
+// (docs/features/lesson-insights-reports.md, D-185). A rollup of the student's
 // CONFIRMED insights (the teacher-validated ones; unconfirmed AI never feeds it),
 // grouped by category+skill with recurrence + trend, plus a vocabulary queue.
 // NOT a source of truth — recomputed from lesson_insights on every validation
@@ -2340,7 +2340,7 @@ model StudentLearningProfile {
 }
 
 // Pre-class teacher brief — Phase F (docs/features/lesson-insights-reports.md,
-// D-19). Closes the loop: built on-demand from the student's
+// D-185). Closes the loop: built on-demand from the student's
 // StudentLearningProfile when the teacher opens the UPCOMING class, it proposes
 // what to focus on and ≤3 suggested cues the teacher can stage into the live
 // notes with one tap. Cached one-per-booking; regenerated when the profile
@@ -2364,7 +2364,7 @@ model LessonBrief {
 }
 
 // Spaced-repetition state for a student's vocabulary — Phase F, Half 2
-// (docs/features/lesson-insights-reports.md, D-19). The profile's vocabulary
+// (docs/features/lesson-insights-reports.md, D-185). The profile's vocabulary
 // queue is a derived list with NO scheduling state and is clobbered on every E
 // recompute, so SRS state must live OUTSIDE the profile: here. Seeded/topped-up
 // from the queue (the @@unique makes re-seeding a no-op that preserves
@@ -2426,7 +2426,7 @@ model Level {
 // optional soft grouping ("grammar" / "vocabulary" / "skill" / "activity" /
 // "theme") used only to organize the picker. Editing/adding tags is additive
 // (a later settings screen); in v1 the seed IS the UI, like levels.
-// docs/features/classes-lesson-content.md, D-20, Layer 2.
+// docs/features/classes-lesson-content.md, D-17, Layer 2.
 // A teacher-scoped, teacher-manageable grouping for focus tags — "Grammar",
 // "Vocabulary", etc. Every teacher gets the 5 canonical categories seeded on
 // first use (mirrors FocusTag's own pack-seeding), but — unlike the pack tags
@@ -2508,7 +2508,7 @@ model LibraryMaterial {
   storagePath   String?             @map("storage_path") // reuses class-materials bucket
   linkUrl       String?             @map("link_url")
   // Reusable native content (docs/features/classes-lesson-content.md,
-  // D-20, Layer 4; generalized from ClassContent). A material is one
+  // D-17, Layer 4; generalized from ClassContent). A material is one
   // of three kinds: a file (storagePath), an external link (linkUrl), or
   // native Markdown content (`body`) — rendered natively, never as raw HTML.
   // `contentSource` records provenance (manual vs ai).
@@ -3642,7 +3642,7 @@ model TwoFactor {
   @@map("twoFactor")
 }
 
-// --- Social previews (D-123) -------------------------------------------------
+// --- Social previews (D-125) -------------------------------------------------
 
 // How the image behind a social preview came to exist. `upload` and `ai` are
 // the two MVP rails and deliberately share ONE asset model, so the surface that
@@ -3658,7 +3658,7 @@ enum SocialPreviewSource {
   @@map("social_preview_source")
 }
 
-// The single configuration dimension a teacher picks when generating (D-123).
+// The single configuration dimension a teacher picks when generating (D-125).
 // Deliberately ONE axis, not purpose x style: for this audience the two are
 // ~95% correlated, and a 24-cell matrix multiplies analytics cardinality before
 // there is a single data point to break down. Named `angle` (not `type`/`style`)
@@ -3681,7 +3681,7 @@ enum SocialPreviewAngle {
 // The stored bytes are the BACKGROUND ONLY — never the finished card. All text
 // (caption, teacher name, brand) is rendered over this by Satori at serve time
 // (/api/og/social-preview/[id]); the image model is explicitly instructed to
-// produce no letters at all. See D-123 for why: a misspelled Spanish meme
+// produce no letters at all. See D-125 for why: a misspelled Spanish meme
 // posted by a Spanish teacher inverts the whole value proposition, and keeping
 // text out of the asset makes a caption edit free, instant and provider-free.
 model SocialPreviewImage {
@@ -3725,7 +3725,7 @@ model SocialPreviewImage {
 // THIS caption". Attached to the share GROUP rather than to the teacher's
 // booking page, because the same booking page is promoted differently in
 // different places — a funny meme in one Facebook group, a clean promotional
-// card in another (D-123).
+// card in another (D-125).
 //
 // `shareGroupId = null` is the teacher's DEFAULT custom preview: what an
 // untagged /b/<slug> share (a WhatsApp broadcast, a bio link) uses. A teacher
@@ -3895,7 +3895,7 @@ model MarketingActivity {
   // planner). Stored, not recomputed, so the teacher always reads the reason
   // that was true when the plan was made.
   reason       Json?
-  // The generated background image reused from the D-123 social-preview
+  // The generated background image reused from the D-125 social-preview
   // pipeline. Restrict, not Cascade: an image a posted activity references
   // must not vanish underneath it.
   imageId      String?                 @map("image_id") @db.Uuid

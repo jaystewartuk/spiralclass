@@ -165,7 +165,7 @@ describe("the deploy can ship production and cannot read it", () => {
 
   it("gives the runtime identity exactly one project role, the Vertex AI caller", () => {
     // "Generate with AI" authenticates as web-runtime through the metadata
-    // server rather than with a stored key (D-127's 2026-09-24 addendum), so
+    // server rather than with a stored key (D-125, 2026-09-24), so
     // the grant that makes it work has to be one the setup script re-creates —
     // a grant made once by hand is the one a rebuilt project silently lacks,
     // and the feature then fails on the first click rather than at deploy.

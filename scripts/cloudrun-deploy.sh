@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # The production deploy. Cloud Run `web` has served spiralclass.com since the
-# 2026-09-23 cutover ([D-184]'s addendum); Fly `agendaprofe` was destroyed
+# 2026-09-23 cutover ([D-184]); Fly `agendaprofe` was destroyed
 # the same day. It is the only production target ([D-70]).
 #
 # ⚠️ WHAT THIS DELIBERATELY DOES NOT DO, and each omission is load bearing
@@ -56,7 +56,7 @@
 # account is never granted `secretAccessor`, so it can name the secret in a
 # --set-secrets flag and still not read its contents. Only the RUNTIME service
 # account can. This deploys production and cannot read it — the same boundary
-# [D-163]'s addendum drew for the runner, and for the same reason: a step that
+# [D-163] drew for the runner, and for the same reason: a step that
 # can reach the vault hands that capability to every other step in the job,
 # `pnpm install` included.
 #
@@ -76,7 +76,7 @@
 # of the usual advice and was reversed rather than chosen. WIF needs
 # `id-token: write`; GitHub grants that per JOB, not per step; and this job
 # builds a Docker image — so every lifecycle script in the dependency tree would
-# run with a token-minting endpoint in front of it. [D-163]'s addendum reversed
+# run with a token-minting endpoint in front of it. [D-163] reversed
 # that exact shape once, and apps/web/tests/config/local-gate.test.ts bans it in
 # every workflow here. This job is the worst candidate for an exception, not the
 # best: it runs more third-party code than any other.
@@ -98,7 +98,7 @@ case "$ENVIRONMENT" in
     echo "usage: scripts/cloudrun-deploy.sh production --gate-already-passed" >&2
     echo "" >&2
     echo "Only \`production\` exists as a Cloud Run target. Preview has no host until" >&2
-    echo "the Oracle box is rebuilt (D-184's addendum), and a second service would be" >&2
+    echo "the Oracle box is rebuilt (D-184), and a second service would be" >&2
     echo "a second thing to keep in sync for no stated reason." >&2
     exit 1
     ;;

@@ -2,7 +2,7 @@ import { inngest } from "../client";
 import { prisma } from "@/lib/prisma";
 import { finalizeBrowserTranscript } from "@/lib/transcription/browser-transcript";
 
-// The completion fallback for a browser-written lesson transcript (D-189).
+// The completion fallback for a browser-written lesson transcript (D-185).
 //
 // The transcript is normally finalised by the LiveKit `room_finished` webhook
 // (lib/video/webhook-events.ts). That webhook has gone missing before — #108,

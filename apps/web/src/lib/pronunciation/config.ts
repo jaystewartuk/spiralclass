@@ -1,5 +1,5 @@
 // Pronunciation config + the Phase D enablement gate (lesson-insights Phase D,
-// the Phase D design, D-19). Mirrors the transcription
+// the Phase D design, D-185). Mirrors the transcription
 // gate: scoring stays dormant unless a vendor is configured AND the explicit
 // flag is on. The flag matters because Phase D sends the student's voice to a
 // SECOND external vendor (Azure) — D-21 cleared sending voice to an ASR vendor;
@@ -30,7 +30,7 @@ export function pronunciationEnabled(): boolean {
 }
 
 // Azure pronunciation assessment supports a fixed language set; language coverage
-// is the binding constraint (D-19). Gate conservatively by primary subtag —
+// is the binding constraint (D-185). Gate conservatively by primary subtag —
 // Spanish-first, English alongside — and skip anything else rather than sending
 // an unsupported locale.
 const SUPPORTED_PRIMARY = new Set(["es", "en"]);

@@ -3262,7 +3262,7 @@ export const en = {
   "web.dashboard.shareGroups.groupName": "Group name",
   "web.dashboard.shareGroups.linkForThisGroup": "Link to post in this group",
 
-  // Social previews (D-123) — the image a shared booking link previews with.
+  // Social previews (D-125) — the image a shared booking link previews with.
   "socialPreview.title": "Social preview",
   "socialPreview.subtitle":
     "The image people see when this link is shared on Facebook, WhatsApp or anywhere else.",

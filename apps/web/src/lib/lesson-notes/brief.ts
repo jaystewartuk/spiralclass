@@ -5,7 +5,7 @@ import { anthropicApiKey } from "@/lib/env";
 import type { StudentProfile } from "./profile";
 
 // AI pre-class brief — Phase F (the Phase F design,
-// D-19). Closes the loop: turns the student's StudentLearningProfile (what E
+// D-185). Closes the loop: turns the student's StudentLearningProfile (what E
 // validated) into a short prep for the NEXT lesson — what to focus on and ≤3
 // suggested cues the teacher can stage into the live notes. Read-only over the
 // profile; mirrors insights.ts (pure prompt + forced-tool structured output +

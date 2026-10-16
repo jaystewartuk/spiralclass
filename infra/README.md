@@ -90,7 +90,7 @@ CORS runbook ([`R2_CORS.md`](./cloudflare/R2_CORS.md)) and its JSON.
 The Oracle box was described by
 [`docs/deployment/ORACLE_BOX_REBUILD.md`](../docs/deployment/ORACLE_BOX_REBUILD.md),
 transcribed from the running machine, until it was destroyed on 2026-09-19
-([D-182](../docs/decisions/D-182.md)); `oracle-box/` is the unapplied module
+([D-16](../docs/decisions/D-16.md)); `oracle-box/` is the unapplied module
 for rebuilding it. Production video now runs on the hand-built Compute Engine
 box in [`gcp-livekit/`](./gcp-livekit/README.md), and the Cloud Run target's
 one-time setup is in [`gcp/`](./gcp/README.md). Neither is a Tofu module.

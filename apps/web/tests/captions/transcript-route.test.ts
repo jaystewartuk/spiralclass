@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 // POST /api/captions/transcript — a browser keeping one recognised caption line
-// as part of the class's transcript (D-189). The access check is shared with
+// as part of the class's transcript (D-185). The access check is shared with
 // the other caption routes and tested in access.test.ts; what this pins is the
 // order of this route's own refusals — transcript capture must be on for the
 // class, a student's line needs her consent — the rate limits, the append, and
