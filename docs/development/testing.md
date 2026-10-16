@@ -281,10 +281,10 @@ and the surfaces with no eval set are a list that may only shrink.
 
 ```bash
 pnpm evals                                   # committed cases, production models
-pnpm evals -- --out before.json              # save the run
-pnpm evals -- --model <candidate> --out after.json --baseline before.json
-pnpm evals -- --record out/a                 # keep every output, for re-scoring
-pnpm evals -- --replay out/a                 # score recorded outputs: no key, no network
+pnpm evals -- --out evals/runs/before.json   # save the run (evals/runs/ is gitignored)
+pnpm evals -- --model <candidate> --out evals/runs/after.json --baseline evals/runs/before.json
+pnpm evals -- --record evals/runs/a          # keep every output, for re-scoring
+pnpm evals -- --replay evals/runs/a          # score recorded outputs: no key, no network
 ```
 
 A case is a JSON file under `apps/web/evals/cases/<surface>/`: the input the

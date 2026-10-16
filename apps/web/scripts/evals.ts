@@ -2,11 +2,14 @@
 //
 //   pnpm evals                              live run, committed cases, default models
 //   pnpm evals -- --cases ~/evals/private   add a private case directory (or EVAL_CASES_DIR)
-//   pnpm evals -- --record out/run-a        live run, saving every output for re-scoring
-//   pnpm evals -- --replay out/run-a        score saved outputs; no network, no key
-//   pnpm evals -- --model claude-x --out b.json --baseline a.json
+//   pnpm evals -- --record evals/runs/a     live run, saving every output for re-scoring
+//   pnpm evals -- --replay evals/runs/a     score saved outputs; no network, no key
+//   pnpm evals -- --model claude-x --out evals/runs/b.json --baseline evals/runs/a.json
 //                                           candidate model, report saved, delta printed
 //   pnpm evals -- --surface homework-review one surface only
+//
+// evals/runs/ is gitignored: a report is a measurement for a PR to quote, not
+// a file in the tree.
 //
 // A live run needs ANTHROPIC_API_KEY in the process environment — exported in
 // the shell, or on the command line. The committed local runtime env holds no

@@ -169,3 +169,7 @@ skills-lock.json
 
 # Sign-in state and raw recordings the landing-page recorder keeps between runs
 apps/web/scripts/marketing/.tmp/
+
+# Model eval reports and recorded outputs (pnpm evals --out / --record): a run is
+# a measurement for a PR to quote, never a file in the tree. D-201.
+apps/web/evals/runs/
