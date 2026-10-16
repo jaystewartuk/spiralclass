@@ -72,9 +72,3 @@ Everything else is lowercase-kebab and is read rather than executed.
 
 Full conventions, including where a new document goes:
 [development/documentation.md](development/documentation.md).
-
-## Reading the docs as a site
-
-The tree builds as a searchable [MkDocs Material](https://squidfunk.github.io/mkdocs-material/)
-site — `pnpm docs:serve` renders it locally at `http://localhost:8000`. The nav
-mirrors the folder tree, so moving a file moves its page.

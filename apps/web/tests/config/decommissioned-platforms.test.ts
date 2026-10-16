@@ -112,6 +112,15 @@ const BANNED_FILES: ReadonlyArray<readonly [string, string]> = [
     "infra/infisical/push-vercel-env.sh",
     "pushed production secrets into the retired Vercel project (D-70)",
   ],
+  [
+    "mkdocs.yml",
+    "built the retired MkDocs docs site; GitHub-rendered Markdown is the only docs surface",
+  ],
+  [
+    "wrangler.jsonc",
+    "deployed the retired docs site, and Cloudflare reads it AUTOMATICALLY on a connected build",
+  ],
+  ["requirements.txt", "pinned the retired docs site's Python, the only Python this repo had"],
 ];
 
 /** An assignment, not a mention: `#`-commented history must stay readable. */

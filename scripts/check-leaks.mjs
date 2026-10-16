@@ -66,7 +66,7 @@ export const BASELINE_PATH = join(REPO_ROOT, "scripts", "check-leaks.baseline.js
  * Trees worth scanning. Everything else is generated, vendored or huge.
  *
  * `.` is here so REPO-ROOT files are covered — `Dockerfile`, `justfile`,
- * `fly.*.toml`, `wrangler.jsonc`, `CLAUDE.md`, `README.md`. A 2026-09-06
+ * `turbo.json`, `CLAUDE.md`, `README.md`. A 2026-09-06
  * publication audit found 368 tracked files this scanner had never looked at,
  * and every one of them was either at the root, in a dotdir, under
  * `prisma/migrations/`, or carried an extension not in the list below. They
@@ -104,7 +104,7 @@ const SCAN_EXTENSIONS = [
   ".tf",
   // Added 2026-09-06 with the root-tree widening above. Each is a file type
   // that was tracked, was committed on purpose, and was invisible to this
-  // scanner: Fly/Prisma config (.toml), the docs-site Worker (.jsonc), the
+  // scanner: Fly/Prisma config (.toml), JSON-with-comments config (.jsonc), the
   // cloud-init template that provisions a box (.tftpl), the import templates a
   // teacher's real roster gets pasted into (.csv), the schema (.prisma), and
   // brand/docs assets that an export tool can stamp with an author or a path
@@ -142,8 +142,6 @@ const SKIP_DIRECTORIES = new Set([
   // anyway — this stops us reading 688 MB of screenshots to reach that
   // conclusion.
   ".gate",
-  ".venv-docs",
-  "site",
   "playwright-report",
   "test-results",
   "worktrees",
