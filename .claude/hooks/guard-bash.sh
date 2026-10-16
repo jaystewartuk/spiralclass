@@ -111,7 +111,7 @@ gate is red, fix it and report what failed."
 fi
 
 if [[ "$command_line" =~ (git[[:space:]]+push|git[[:space:]]+commit).*(--no-verify|[[:space:]]-n[[:space:]]|[[:space:]]-n$) ]]; then
-  block "--no-verify skips the hook that IS the gate (D-119)." \
+  block "--no-verify skips the hook that IS the gate (D-157)." \
     "The pre-push hook is what posts the 'local-gate' status branch protection requires.
 A push without it leaves a pull request that cannot merge."
 fi

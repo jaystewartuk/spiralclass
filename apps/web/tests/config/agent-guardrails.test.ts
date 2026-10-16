@@ -16,7 +16,7 @@ import { describe, expect, it } from "vitest";
  *
  * Both are the gate bypass CLAUDE.md forbids, both are what a model reaches for
  * when a push looks stuck, and on this machine a push that looks stuck is
- * usually queuing on the lock every worktree shares (D-146). So the rule lives
+ * usually queuing on the lock every worktree shares (D-157). So the rule lives
  * in `.claude/hooks/guard-bash.sh`, which sees the whole command line.
  *
  * A hook is the worst possible place for an untested regex. It runs outside the

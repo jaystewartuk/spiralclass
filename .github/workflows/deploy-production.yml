@@ -42,20 +42,18 @@ name: Deploy production
 # THE GATE STILL RUNS FIRST. `production` is a fast-forward-only branch that
 # only scripts/ci/promote.mjs moves, by hand or from promote-on-green.yml, and
 # promote refuses unless the full tier is green for the exact commit: the
-# runners' push runs ([D-162]), or `--force-gate` run locally. So by the time
+# runners' push runs ([D-157]), or `--force-gate` run locally. So by the time
 # this workflow starts, the commit it is deploying has been certified. That
 # ordering is why `--gate-already-passed` is honest here: it is a handoff, not
 # a bypass.
 #
-# ⚠️ The full tier still runs LOCALLY before this fires, and after [D-161] that
-# is no longer because it has to. The blocker D-157 named — darwin-only visual
-# baselines — is gone, and heavy.yml runs the same suites on a runner for every
-# PR. What keeps the promote gate local is the RECEIPT: `pnpm promote` reuses a
-# green full-tier receipt bound to this exact commit, and a runner's filesystem
-# is thrown away. Certifying a release from a runner is a separate decision.
+# The full tier no longer runs locally before this fires ([D-157]): heavy.yml
+# runs the heavy half on a runner for every PR and every push to `main`, and
+# promote reads that verdict rather than a local receipt. `pnpm promote
+# --force-gate` is the local exception.
 #
 # THE HUMAN CHECKPOINT, AND WHY IT IS NOT THE 2026-07-19 DRIFT AGAIN.
-# D-120's binding lesson was that a HUMAN DISPATCH STEP left `production` 96
+# D-199's binding lesson was that a HUMAN DISPATCH STEP left `production` 96
 # commits behind what was live, so the deploy was chained into `pnpm promote`
 # and a guard test asserted it stayed chained. This moves the checkpoint into
 # the platform instead — a required reviewer on the `production` environment —
@@ -361,7 +359,7 @@ jobs:
         run: bash scripts/cloudrun-deploy.sh production --gate-already-passed
 
       - name: Probe what is now live
-        # The probes D-129 chained into `pnpm promote`, moved to where the
+        # The probes D-157 chained into `pnpm promote`, moved to where the
         # deploy happens. They exist because the regressions they catch — a
         # route that renders an error, a booking page with nothing purchasable,
         # a checkout with no payment rail — all return 200, so `gcloud run
@@ -370,7 +368,7 @@ jobs:
         #
         # Called directly rather than through `pnpm local synthetic`: that
         # wrapper exists to give a hand-run task the run history and the
-        # failure notification that Actions provides for free (D-129).
+        # failure notification that Actions provides for free (D-157).
         run: bash scripts/local/synthetic.sh
 
       - name: Say what shipped

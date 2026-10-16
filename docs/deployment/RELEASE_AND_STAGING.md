@@ -1,13 +1,9 @@
 # Release & preview runbook
 
-Policy: **D-26**, superseded in part by **D-70** (production moved from
-Vercel+Supabase to Fly+Neon), **D-178** (database rollback moved from an R2
-pg_dump to Neon PITR + checkpoint branches), **D-119** (the test gates run on
-the operator's machine), **D-129** (which deleted every GitHub Actions
-workflow), **D-157** (which brought the workflows back once the
-repository went public and the minutes became free) and
-**D-161**/**D-162** (which moved the heavy suites onto runners and made their
-verdict what promote reads). The release/promote/rollback gate structure below
+Policy: **D-199** (how a merge reaches production), **D-157** (where the gate
+runs, and the workflows that call it), **D-70** (production left
+Vercel+Supabase) and **D-178** (database rollback is Neon PITR + checkpoint
+branches). The release/promote/rollback gate structure below
 is current.
 
 ⚠️ **There is no preview host today; production's deploy is live.**
@@ -29,7 +25,7 @@ flow, and rollback.
 ## Everyday release flow
 
 1. Branch, commit, `git push` — the pre-push hook runs the fast gate on your
-   machine and posts the `local-gate` status once the push lands (D-119). Open a
+   machine and posts the `local-gate` status once the push lands (D-157). Open a
    PR into `main`; when that status is green on the PR head, branch protection
    unlocks the merge button. (No laptop? **`gate.yml` posts the same context on
    the PR** — D-157 — so the PR is not stranded. Say plainly which run you saw,
@@ -41,13 +37,13 @@ flow, and rollback.
    validates the _commit_, so a green run means the version you're about to
    hand-test is the version that will clear promote. Usually unnecessary now —
    **`heavy.yml` runs that same half on every PR and every push to `main`**
-   ([D-161](../decisions/D-161.md)), and promote reads its verdict. Spend the
+   ([D-157](../decisions/D-157.md)), and promote reads its verdict. Spend the
    20-40 minute local hold only when you need the answer before the PR is open.
 3. When ready (and **outside lesson hours**), with `main` checked out and
    up to date, run **`pnpm promote`**. To ship an older reviewed commit, check
    it out first — the gate certifies the exact commit that ships.
 4. It **reads the runners' verdict** for that exact commit — Gate and Heavy
-   both green for the SHA ([D-162](../decisions/D-162.md)) — asks for
+   both green for the SHA ([D-157](../decisions/D-157.md)) — asks for
    confirmation, fast-forwards the `production` branch and stamps a
    `vYYYY.MM.DD.N` tag + GitHub Release. **That push triggers
    `deploy-production.yml`.**
@@ -251,7 +247,7 @@ is live and `/api/health` is green. Remove `MAINTENANCE_MESSAGE`/
     **sandbox** Stripe/Wise/Meta/Resend keys — never live keys.
   - Note: `NEXT_PUBLIC_*` are build-time; the preview build inlines preview's, the
     production build inlines production's. This is why prod is a rebuild, not an
-    artifact-promote (see D-26).
+    artifact-promote (see D-199).
 - **Server Action skew**: there is no Cloud Run equivalent of Vercel's Skew Protection.
   The client-side reload fallback (`src/lib/server-action-recovery.ts`) is the
   **sole** mechanism — when a browser running a previous deploy posts a stale

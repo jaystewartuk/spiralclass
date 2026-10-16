@@ -37,13 +37,14 @@ require_tools() {
 #   2. neonctl's own stored OAuth credential (~/.config/neon/credentials.json),
 #      written by `neonctl auth`.
 #
-# (2) is the normal path as of D-146's follow-up. The long-lived API key was
+# (2) is the normal path on the laptop since 2026-08-31. The long-lived API key was
 # fetched from Infisical's `infra` environment on every production deploy, and
 # when those keys were deleted the deploy fail-closed at the checkpoint — with
-# `production` already fast-forwarded and the app not deployed. Since this
-# laptop is the only thing that deploys (D-129), a machine-local credential
-# loses nothing that was actually in use, and removes a secret that has to
-# exist, be valid and be rotated.
+# `production` already fast-forwarded and the app not deployed. While this
+# laptop was the only thing that deployed, a machine-local credential lost
+# nothing that was actually in use and removed a secret that had to exist, be
+# valid and be rotated. A runner deploy ([D-157]) has no stored credential, so
+# it uses (1), with NEON_API_KEY from the `production` environment ([D-163]).
 #
 # The pre-check costs one cheap API call and buys a legible failure. Without it
 # the first symptom is whatever the real command says, in the middle of a

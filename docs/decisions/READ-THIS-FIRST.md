@@ -16,7 +16,7 @@ anyone noticed. That is what this log is for.
 ---
 
 The rest of this page is those two at length — context, decision, what else was
-considered, and what each one cost. There are more than 125 decision records
+considered, and what each one cost. There are more than 75 decision records
 in this directory and these are two of them; every number below is from the
 record it cites, and where a record states a cost it is repeated here rather than
 smoothed over.
@@ -108,12 +108,12 @@ needed one.**
 
 ## 2. Every CI workflow is deleted — and the condition on which they came back
 
-**[D-129](./D-129.md)** → **[D-157](./D-157.md)**
+**[D-157](./D-157.md)** → **[D-157](./D-157.md)**
 
 ### Context
 
 The repository was private, and GitHub Actions minutes are metered on a private
-repository. [D-120](./D-120.md) had measured it: ~1,500–1,700 billable
+repository. [D-199](./D-199.md) had measured it: ~1,500–1,700 billable
 minutes a month against a 2,000-minute allowance, the deploy alone ~744 of them.
 Its own change brought that to roughly 780, comfortably inside the allowance, and
 it concluded the scheduled work did not need to move.
@@ -142,12 +142,12 @@ records**:
 
 ### Alternatives considered
 
-- **Keep the crons and accept the metering.** This is what D-120 decided, and the
+- **Keep the crons and accept the metering.** This is what D-199 decided, and the
   arithmetic behind it was right. What changed was not the arithmetic: it was
   that a backup whose availability depends on how many minutes the month's merges
   consumed is not a backup anyone can reason about.
 - **Put the schedule on the laptop** — a launchd agent or a crontab. Rejected on
-  D-120's own argument that a laptop schedule is one nobody owns. There is no
+  D-199's own argument that a laptop schedule is one nobody owns. There is no
   scheduler; there are commands with a staleness nag attached, and the honest
   description of the cadence is "weekly, when prompted".
 - **Bring the workflows back as they were.** Part of what was deleted was a
@@ -178,7 +178,7 @@ records**:
 
 Each one is a decision that reverses an earlier decision **without the earlier
 decision having been wrong**. D-143 was right that a UK entity cannot Transfer to
-an account outside its circle. D-120's minute arithmetic was right. In both cases what
+an account outside its circle. D-199's minute arithmetic was right. In both cases what
 expired was the premise, not the reasoning — and the expensive part was the gap
 between when the premise died and when anyone noticed.
 

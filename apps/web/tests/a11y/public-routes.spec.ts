@@ -47,8 +47,8 @@ const PUBLIC_ROUTES = [
  * render depends on real teacher data.
  *
  * Slug matches the dedicated fixture the production synthetic monitor already
- * probes (scripts/local/synthetic.sh — was synthetic.yml until D-129 deleted
- * every workflow in this repo). Override for another environment.
+ * probes (scripts/local/synthetic.sh — was synthetic.yml until every workflow
+ * in this repo was deleted in August 2026). Override for another environment.
  */
 const TEACHER_SLUG = process.env.A11Y_TEACHER_SLUG ?? "alicia-moreno";
 const BOOKING_ROUTES = [`/b/${TEACHER_SLUG}`];

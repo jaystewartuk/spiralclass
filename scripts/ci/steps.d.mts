@@ -13,7 +13,7 @@ export interface Step {
   cmd: string[];
   /**
    * The GitHub Actions job this step took over from. PROVENANCE ONLY — every
-   * workflow in this repo was deleted by D-129, so nothing checks that the file
+   * workflow it names was deleted in August 2026, so nothing checks that the file
    * named here exists. It is what makes the shape of a check readable later.
    */
   replaces: string;

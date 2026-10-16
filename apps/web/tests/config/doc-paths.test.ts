@@ -77,7 +77,6 @@ const DELETED_DOCS = new Set([
   "docs/engineering/live-notes-panel.md",
   "docs/launch/UAT_PRELAUNCH.md",
   "docs/ops/FLY_SPIKE.md",
-  "docs/ops/PREVIEW_DEPLOYMENTS.md",
   "docs/orientation/04-levels-and-materials.md",
   "docs/product/HOMEWORK_WORKFLOW.md",
   "docs/product/MATERIALS_TAXONOMY.md",

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Read-only synthetic monitor against production. Run it: `pnpm local synthetic`.
 #
-# The local port of the deleted .github/workflows/synthetic.yml (D-129) — same
+# The local port of the deleted .github/workflows/synthetic.yml (D-157) — same
 # probes, same body markers, same reasoning per probe. What changed is when it
 # runs: there is no 12-hourly cron any more. `pnpm promote` runs this itself
 # once production is serving the new code, because a deploy is when these
@@ -367,7 +367,7 @@ else
     if [ -z "$expiry" ]; then
       fail "LiveKit origin served something that isn't a parseable certificate"
     # -checkend rather than date arithmetic: BSD date (macOS, where this runs —
-    # D-119) has no -d, and this needs no portability shim.
+    # D-157) has no -d, and this needs no portability shim.
     elif ! printf '%s' "$cert" |
       openssl x509 -noout -checkend $((LIVEKIT_CERT_MIN_DAYS * 86400)) >/dev/null 2>&1; then
       fail "LiveKit origin cert expires within ${LIVEKIT_CERT_MIN_DAYS}d (${expiry}) — Caddy's renewal has stalled"

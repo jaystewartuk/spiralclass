@@ -190,7 +190,7 @@ describe("updateSession — redirects resolve against the public origin (APP_URL
     expect(res.headers.get("location")).toBe(`${PUBLIC_ORIGIN}/sign-in?next=%2Fadmin`);
   });
 
-  // Production and preview are different origins (D-26); the redirect origin
+  // Production and preview are different origins (D-199); the redirect origin
   // must follow APP_URL rather than being pinned to either.
   it("follows APP_URL per environment", async () => {
     envState.appUrl = "https://spiralclass.com";

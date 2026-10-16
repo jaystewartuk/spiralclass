@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * The gate (D-119) — one program, two machines.
+ * The gate (D-157) — one program, two machines.
  *
  * Runs the tier defined in scripts/ci/steps.mjs, writes a receipt bound to the
  * exact HEAD commit, and (when green, clean and pushed) posts the `local-gate`
@@ -10,14 +10,14 @@
  * in both: this laptop, driven by .githooks/pre-push, and
  * .github/workflows/gate.yml on a GitHub-hosted runner. The workflow does not
  * restate the step list — it invokes this with `--tier fast` and lets
- * steps.mjs decide. That is the property D-119 bought by making the registry
+ * steps.mjs decide. That is the property D-157 bought by making the registry
  * the single definition of "green", and re-adding Actions is only safe while
  * it holds: a workflow with its own copy of the steps is two definitions that
  * agree until the day they do not.
  *
  *   pnpm gate               # fast tier (what the PR gate used to run)
  *   pnpm gate:full          # + mutation, integration, the browser suites, the image build
- *   pnpm gate --tier heavy  # ONLY that heavy half — what heavy.yml runs (D-161)
+ *   pnpm gate --tier heavy  # ONLY that heavy half — what heavy.yml runs (D-157)
  *   pnpm gate --only lint,typecheck
  *   pnpm gate --skip audit
  *   pnpm gate --list
@@ -25,7 +25,7 @@
  * Flags:
  *   --tier fast|heavy|full  which tier to run (default fast). `fast` and
  *                      `heavy` are the two halves; `full` is both, and is
- *                      the only one `pnpm promote` will accept a receipt for.
+ *                      what `pnpm promote --force-gate` runs.
  *   --only a,b         run just these step ids
  *   --skip a,b         run everything but these
  *   --no-post          run the checks, never touch the commit status
@@ -34,13 +34,13 @@
  *   --list             print the steps and exit
  *   --json             with --list, print them as JSON instead of a table.
  *                      This is what .github/workflows/heavy.yml builds its
- *                      matrix from (D-161), so the set of jobs on a runner is
+ *                      matrix from (D-157), so the set of jobs on a runner is
  *                      DERIVED from steps.mjs rather than typed into YAML —
  *                      a heavy step added to the registry gets a job in the
  *                      same commit, with no list anywhere to remember to widen.
  *   --quiet-header     skip the banner (used by the pre-push hook)
  *
- * Runs hold the MACHINE LOCK for their whole duration (D-146): several Claude
+ * Runs hold the MACHINE LOCK for their whole duration (D-157): several Claude
  * Code sessions work this repo at once, each in its own worktree, and the
  * suites here contend for one 16GB machine, one fixed-name Postgres container
  * and one port 3000. A contended run queues and says what it is waiting for
@@ -255,7 +255,7 @@ async function runGate(argv = []) {
     console.log(`\n  logs: ${color.dim(logDir)}`);
   }
 
-  // One heavy job on this machine at a time (D-146). Several Claude Code
+  // One heavy job on this machine at a time (D-157). Several Claude Code
   // sessions push at once, and the suites below contend for a 16GB machine, one
   // fixed-name Postgres container and one port 3000 — see lock.mjs for what
   // each of those does when two runs overlap. Taken here rather than in the
@@ -346,7 +346,7 @@ async function runGate(argv = []) {
     console.log("  (partial run — no status posted; run the whole tier to certify the commit)\n");
   }
 
-  // The maintenance nag (D-129). Nothing schedules the backup, the production
+  // The maintenance nag (D-157). Nothing schedules the backup, the production
   // probes or the time-bomb sweep any more — there is no Actions cron and no
   // laptop scheduler — so the only thing standing between "run by hand" and
   // "not run since July" is being told. This is the moment to tell: the

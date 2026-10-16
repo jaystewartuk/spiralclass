@@ -26,8 +26,8 @@ import { REPO_ROOT } from "../../../../scripts/env-config.mjs";
 // The number used to live in two files read at different times — the composite
 // action's input default (what CI passed) and the script's own KEEP (what a
 // human running it by hand got) — and they could disagree without anything
-// noticing. D-129 deleted every workflow and composite action in this repo, so
-// the script is now the only definition. What still has to hold is that the
+// noticing. the composite action was deleted with every workflow in August
+// 2026 and did not come back, so the script is now the only definition. What still has to hold is that the
 // only call site doesn't quietly override it.
 
 const SCRIPT_SH = resolve(REPO_ROOT, "infra/database/scripts/neon-checkpoint.sh");
@@ -171,7 +171,7 @@ describe("neon checkpoint retention", () => {
   });
 });
 
-// How neonctl authenticates, changed 2026-08-31 (the D-146 follow-up).
+// How neonctl authenticates, changed 2026-08-31.
 //
 // The Fly deploy script used to fetch a long-lived NEON_API_KEY from Infisical's
 // `infra` environment on every production deploy. The keys were deleted, the
@@ -179,8 +179,9 @@ describe("neon checkpoint retention", () => {
 // `production` already fast-forwarded and the app still on the previous
 // release — the branch moved and the running app did not. neonctl was always
 // the tool; only the credential changed, to the OAuth one `neonctl auth`
-// stores per machine, which is sufficient because this laptop is the only
-// thing that deploys (D-129).
+// stores per machine, which was sufficient while this laptop was the only
+// thing that deployed. A runner deploy ([D-157]) has no stored credential and
+// takes NEON_API_KEY from the `production` environment ([D-163]).
 //
 // Two things must hold, and they pull in opposite directions:
 //   1. The key is no longer REQUIRED, or the deploy is coupled to a secret
@@ -188,7 +189,7 @@ describe("neon checkpoint retention", () => {
 //   2. The refusal is unchanged. Losing the key was never the danger; a
 //      migration with no restore point is. "No checkpoint, no deploy" (D-178)
 //      has to survive a change whose whole subject is the credential.
-describe("neon auth (D-146 follow-up)", () => {
+describe("neon auth (2026-08-31 follow-up)", () => {
   const checkpoint = () => readFileSync(SCRIPT_SH, "utf8");
   const common = () =>
     readFileSync(resolve(REPO_ROOT, "infra/database/scripts/_common.sh"), "utf8");

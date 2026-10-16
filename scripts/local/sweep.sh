@@ -2,7 +2,7 @@
 # Time-bomb sweep — re-run the clock-sensitive checks against TODAY's date.
 # Run it: `pnpm local sweep`.
 #
-# The local port of the deleted .github/workflows/nightly-checks.yml (D-129).
+# The local port of the deleted .github/workflows/nightly-checks.yml (D-157).
 #
 # WHY THIS EXISTS AT ALL, given the same suites run on every push: a
 # time-dependent test — one whose assertion holds only while the wall clock sits
@@ -11,7 +11,7 @@
 # cannot catch that class. Only a clock that advanced can, which is why this is
 # a separate thing you run rather than a step in the gate.
 #
-# It runs the same three checks the nightly cron was slimmed to (D-119): the two
+# It runs the same three checks the nightly cron was slimmed to (D-157): the two
 # unit suites and the dependency audit. Typecheck, lint, formatting and the
 # mutation spot-check are pure functions of the committed tree — on an unchanged
 # `main` they can only reproduce the answer the gate already got.

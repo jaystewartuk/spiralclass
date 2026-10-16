@@ -75,7 +75,8 @@ LABEL=""
 # definition of that number — scripts/database-deploy.sh calls this script without
 # --keep precisely so it stays that way. (It used to be duplicated in
 # .github/actions/neon-checkpoint/action.yml, which passed it explicitly; that
-# action and every workflow in this repo were deleted by D-129.) Bounded from
+# action was deleted with every workflow in August 2026 and did not come
+# back.) Bounded from
 # both sides and both bounds fail silently — too high hits the Neon project's
 # branch ceiling mid-deploy, too low leaves no restore point for a bad migration
 # noticed days later. A guard test enforces the range and the no-override:

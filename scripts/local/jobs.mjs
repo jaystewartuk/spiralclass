@@ -1,8 +1,8 @@
 // The three maintenance tasks that used to run on a GitHub Actions cron, and
-// the staleness budget each one gets now that it is run BY HAND (D-129).
+// the staleness budget each one gets now that it is run BY HAND (D-157).
 //
-// Until 2026-08-25 these were `schedule:` crons in .github/workflows, and D-129
-// deleted them: the private-repo minutes allowance kept running out, and an
+// Until 2026-08-25 these were `schedule:` crons in .github/workflows, and they
+// were deleted that day: the private-repo minutes allowance kept running out, and an
 // allowance that empties mid-month takes the *backup* down with everything
 // else. Nothing replaced the clock, and D-157 did not bring one back — its
 // scope is deliberately the gate and the deploys, not `schedule:` triggers.
@@ -30,9 +30,9 @@
 // still clears on a deploy and the nag keeps meaning what it says.
 //
 // THERE IS NO `backup` JOB HERE, and that is deliberate as of 2026-08-25
-// (D-129 addendum). The operator's call: **Neon already backs production up**,
+// (D-157). The operator's call: **Neon already backs production up**,
 // so a hand-run pg_dump to R2 is not a practice worth keeping. What that gives
-// up is stated in the addendum rather than left to be discovered — the dump was
+// up is stated in D-157 rather than left to be discovered — the dump was
 // the copy that lived outside Neon entirely and the one that outlived the PITR
 // window. `scripts/local/backup-prod-db.sh` is KEPT as an on-demand tool for
 // the case that still wants one (before a migration risky enough to want a copy

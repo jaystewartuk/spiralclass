@@ -372,9 +372,8 @@ synthetic` asserts the challenge path is answered by Caddy (308) rather than
 >   warning.
 >
 > ⚠️ **Neither runs on a clock.** There is no cron and no systemd timer on the
-> box — verified, both crontabs are empty — and [D-129](../decisions/D-129.md)
-> deleted every scheduled
-> workflow, so these run by hand and on `pnpm promote`. `pnpm gate` nags when
+> box — verified, both crontabs are empty — and every scheduled workflow was
+> deleted on 2026-08-25 and none came back ([D-157](../decisions/D-157.md)), so these run by hand and on `pnpm promote`. `pnpm gate` nags when
 > the `synthetic` receipt goes stale after 7 days, which is the dead-man's
 > switch, but it only nags at a push. **A month without pushing is a month
 > without either probe**, and the first signal would again be a teacher

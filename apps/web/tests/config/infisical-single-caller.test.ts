@@ -5,7 +5,7 @@ import { join, relative } from "node:path";
 
 import { describe, expect, it } from "vitest";
 
-// [D-169] EXACTLY ONE FILE RUNS THE INFISICAL CLI.
+// [D-163] EXACTLY ONE FILE RUNS THE INFISICAL CLI.
 //
 // Before it, ten call sites in nine files implemented four operations five
 // different ways, and each learned the same lessons separately — so not all of
@@ -57,7 +57,7 @@ const callers = shellFiles.filter((file) =>
   readFileSync(join(REPO_ROOT, file), "utf8").split("\n").some(isExecutable),
 );
 
-describe("D-169: one wrapper owns every Infisical call", () => {
+describe("D-163: one wrapper owns every Infisical call", () => {
   // Guards the guard. A walk that returned nothing, or a regex that matched
   // nothing, would pass every assertion below having checked nothing at all —
   // which is the exact failure shape this whole area keeps producing.

@@ -27,7 +27,7 @@
 // not belong in a document whose whole claim is that nothing was staged for
 // presentation.
 //
-// ⚠️ Two claims are FLOORS, not exact counts (D-180): test files and decision
+// ⚠️ Two claims are FLOORS, not exact counts: test files and decision
 // records. Nearly every pull request adds a test file, so an exact count put the
 // same line of README.md and docs/development/testing.md in every open branch,
 // and any two of them conflicted — 19 of the commits that touched those files
@@ -37,7 +37,9 @@
 // asserts, and still rewritten by --fix; it just moves once per step instead of
 // once per file. Two branches that both cross a step write the identical line,
 // which git merges cleanly. Keep every other claim exact: none of them moved
-// more than three times in the same window.
+// more than three times in the same window. Floor another claim only after
+// measuring its churn, and never raise a step to turn the gate green — `--fix`
+// is the answer to drift.
 
 import { execFileSync } from "node:child_process";
 import { readFileSync, writeFileSync, readdirSync } from "node:fs";
@@ -195,7 +197,7 @@ const CLAIMS = [
   {
     // Distinct ROUTES under the visual baselines, not files: each route is
     // captured at six widths in two themes, so the 120 committed PNGs are 10
-    // surfaces. (240 until [D-171] deleted the second platform's set.) Counting
+    // surfaces. (240 until [D-157] deleted the second platform's set.) Counting
     // files would state a number twelve times larger than the thing the
     // sentence is about, and it would move when a breakpoint was added rather
     // than when a page was.
@@ -290,7 +292,7 @@ function main() {
   }
 
   if (unfloored.length > 0) {
-    console.error("An exact count of a floored claim — nothing checks that form (D-180):");
+    console.error("An exact count of a floored claim — nothing checks that form:");
     for (const line of unfloored) console.error(`  · ${line}`);
   }
 

@@ -109,17 +109,18 @@ always-free grant. That is a different route to the $0 that the
 
 ### CI/CD — GitHub Actions
 
-> **As of [D-129](../decisions/D-129.md) (2026-08-25) this line item is £0 and
-> there is nothing left to tune.** Every workflow and composite action in this
-> repo is deleted — the deploy, the dispatch-only gate fallbacks, and all three
-> crons. Everything runs on the operator's machine, by hand
-> ([`LOCAL_AUTOMATION.md`](./LOCAL_AUTOMATION.md)). The rest of this section is
-> kept as the reasoning trail, because the levers it describes are the ones that
-> would matter again if Actions ever came back — and because the "stay private"
-> argument below is unchanged and still binding.
+> **From 2026-08-25 to 2026-09-04 this line item was £0 because there was
+> nothing to bill.** Every workflow and composite action in this repo was
+> deleted — the deploy, the dispatch-only gate fallbacks, and all three crons —
+> and everything ran on the operator's machine, by hand
+> ([`LOCAL_AUTOMATION.md`](./LOCAL_AUTOMATION.md)). It is £0 now because the
+> repository is public ([D-157](../decisions/D-157.md)). The rest of this section
+> is kept as the reasoning trail, because the levers it describes are the ones
+> that would matter again if the repository went private. The "stay private"
+> bullets below predate publication and no longer describe this repository.
 >
-> **What tipped it was not the arithmetic.** D-120 had already measured the
-> month down to ~780 billable minutes, comfortably inside the allowance. What
+> **What tipped it was not the arithmetic.** The 2026-08-17 cut had already
+> measured the month down to ~780 billable minutes, comfortably inside the allowance. What
 > the arithmetic did not prevent was the allowance emptying anyway: every
 > private repo's workflows started failing at once, and production's Postgres
 > went **eleven days with no backup** while the public repos stayed green. A
@@ -134,7 +135,7 @@ always-free grant. That is a different route to the $0 that the
   product idea is already visible to anyone who signs up), hands attackers a map
   of a money-handling app, and muddies the IP/due-diligence story in any future
   sale. Keep it private.
-- **Largest structural cut to date — D-119 (2026-08-12): the test tiers moved
+- **Largest structural cut — 2026-08-12: the test tiers moved
   onto the dev machine.** The per-PR fan-out (`main-checks.yml` → five parallel
   `checks.yml` jobs, each with its own `pnpm install`, on every push to every
   PR) and the promote fan-out (integration + E2E + the browser suites)
@@ -143,15 +144,15 @@ always-free grant. That is a different route to the $0 that the
   this laptop is arm64), three crons, and any dispatched fallback run. Combined
   with taking mobile builds and OTA publishes out of CI, the two biggest recurring line items
   are gone; the trims below are now the second-order levers, not the first.
-- **Second structural cut — D-120 (2026-08-17): the web deploy followed**, into
+- **Second structural cut — 2026-08-17: the web deploy followed**, into
   `pnpm promote` itself (~744 billable min/month, the largest single line).
-- **Final cut — D-129 (2026-08-25): everything else, deleted.** The three crons
+- **Final cut — 2026-08-25: everything else, deleted.** The three crons
   became `pnpm local synthetic | sweep`, run by hand with a staleness
   nag in the gate; the dispatch-only fallbacks went with them, which saves no
   minutes and removes the only path that worked without this machine. That cost
-  is stated in D-129 rather than discovered later.
+  is stated in [D-157](../decisions/D-157.md) rather than discovered later.
 - **Biggest minute sinks while Actions was still in use, in order:** the deploy
-  workflow (image build dominates); the nightly sweep (slimmed at D-119 to the
+  workflow (image build dominates); the nightly sweep (slimmed on 2026-08-12 to the
   unit suites + audit — the only checks a clock can break — via
   `time_dependent_only`); a dispatched fallback gate; chatty Dependabot (each PR
   re-ran the full matrix). Dependabot itself stays: it is not Actions and spends
@@ -173,8 +174,8 @@ always-free grant. That is a different route to the $0 that the
   secret `TURBO_TOKEN`, and add the team slug as the repo **variable**
   `TURBO_TEAM` (both under Settings → Secrets and variables → Actions). The
   slug is not a secret, but it names an account, so it is a `vars` entry rather
-  than a literal in the workflow — this repository is public. **Post-D-129 this applies to the
-  local gate instead**: `pnpm gate` runs the same `turbo run typecheck` / `turbo
+  than a literal in the workflow — this repository is public. **It applies to the local gate
+  too**: `pnpm gate` runs the same `turbo run typecheck` / `turbo
 run lint`, so setting `TURBO_TOKEN`/`TURBO_TEAM` in the shell environment still
   buys the cache hits. Without them, turbo falls back to its local cache — never
   a hard failure.
@@ -188,8 +189,7 @@ run lint`, so setting `TURBO_TOKEN`/`TURBO_TEAM` in the shell environment still
   cloud runner, a paid Hetzner `self-hosted-x86` pool, a physical home mini-PC
   — are all reversed and their runbooks deleted
   ([D-164](../decisions/D-164.md)). The surviving arc is
-  [D-119](../decisions/D-119.md) → [D-129](../decisions/D-129.md) →
-  [D-157](../decisions/D-157.md) → [D-161](../decisions/D-161.md); the question
+  in [D-157](../decisions/D-157.md); the question
   is settled, so **do not re-derive it**.
 
 ### LLM — Anthropic API, pay-as-you-go
