@@ -53,7 +53,7 @@ import { capturable } from "./routes";
  *   - a genuine change under the threshold PASSES, which means Playwright's
  *     default "changed" update mode writes nothing and the baseline silently
  *     keeps showing a layout that no longer ships (three regeneration runs in a
- *     row did nothing during the D-144 work before this was spotted); and
+ *     row did nothing during the 2026-08-30 buy-page work before this was spotted); and
  *   - forcing `=all` to get around that rewrites every route, because the same
  *     sub-tolerance noise differs run to run — re-baselining ~130 images onto
  *     one machine's font rendering and burying the files you meant to change.

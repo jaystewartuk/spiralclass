@@ -14,7 +14,7 @@ const { formatMinorUnits: formatMinorUnitsForMock } = await vi.hoisted(
   async () => await import("@spiralclass/shared"),
 );
 vi.mock("@/components/locale-provider", () => ({
-  // D-197: the real formatter, in English, as the tests expect.
+  // D-153: the real formatter, in English, as the tests expect.
   useFormatMoney: () => (minorUnits: number, currency?: string) =>
     formatMinorUnitsForMock(minorUnits, currency, "en"),
   useT: () => (key: string) => key,
@@ -62,7 +62,7 @@ describe("PortalPurchaseFlow — seller disclaimer", () => {
     container.remove();
   });
 
-  // D-113: the flow takes the offerable instruments, not a `wiseReady` flag.
+  // D-145: the flow takes the offerable instruments, not a `wiseReady` flag.
   const WISE_INSTRUMENT = {
     id: "inst-wise-1",
     kind: "wise" as const,

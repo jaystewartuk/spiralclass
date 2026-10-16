@@ -353,7 +353,7 @@ type HeroSpec = {
   // the seed varied it, so the public funnel's locale resolution was only ever
   // exercised at its default.
   bookingPageLocale?: string;
-  // Social proof on the landing page and, since D-144, in the checkout itself.
+  // Social proof on the landing page and, since 2026-08-30, in the checkout itself.
   testimonials?: { authorName: string; authorNote?: string; body: string }[];
   // Give this hero a placeholder intro video, so the video card is reachable in
   // a seeded environment at all. Opt-in per hero — see seedTeacherIntroVideo.
@@ -862,7 +862,7 @@ export function heroSpecs(): HeroSpec[] {
     {
       // --- EVERY RAIL AT ONCE, plus the booking-page surface. ---------------
       // The multi-rail teacher: card AND a transfer, which is what renders the
-      // payment-method chooser at all — since D-144 a disclosure ("Prefer to
+      // payment-method chooser at all — since 2026-08-30 a disclosure ("Prefer to
       // pay by bank transfer?") rather than the first control on the page, so
       // without a hero like this neither the disclosure nor the picker inside
       // it is reachable in any seeded environment.
@@ -877,9 +877,9 @@ export function heroSpecs(): HeroSpec[] {
       //     a non-zero saving to show;
       //   * a singleClass template, so pay-at-reservation is reachable — the
       //     slot picker moves ABOVE the pay button and checkout refuses money
-      //     until a time is chosen (D-111, and the ordering rule from D-144);
+      //     until a time is chosen (D-111, and the buy page's ordering rule);
       //   * testimonials, which the landing page has always rendered and the
-      //     checkout has rendered since D-144, and which no seed teacher had.
+      //     checkout has rendered since 2026-08-30, and which no seed teacher had.
       key: "paulapagos",
       name: "Paula Pagos",
       email: "paula.pagos@spiralclass.test",
@@ -1044,7 +1044,7 @@ async function seedStudentWithUsage(
     tz: string;
     // The teacher's Wise instrument, when she has one. A manual-transfer
     // payment must carry it — `payments_instrument_required_for_manual_transfer`
-    // rejects the insert otherwise (D-113).
+    // rejects the insert otherwise (D-145).
     wiseInstrumentId?: string | null;
   },
 ) {
@@ -1215,7 +1215,7 @@ async function seedHero(
             stripePayoutsEnabled: true,
           }
         : {}),
-      // D-113: the manual rail is a payout-instrument row, not teacher columns.
+      // D-145: the manual rail is a payout-instrument row, not teacher columns.
       //
       // `wiseOnly` stays a distinct flag rather than folding into `instruments`
       // because the Maestro Wise flow depends on those heroes having EXACTLY
@@ -2287,7 +2287,7 @@ export async function main(opts?: {
     });
   }
 
-  // Financial Intelligence estimate layer (D-86, S2) — same rationale as the
+  // Financial Intelligence estimate layer (slice S2) — same rationale as the
   // admin_users loop above: a platform-wide registry, not a per-teacher/
   // student fixture, so it's create-if-absent here in main() rather than in
   // seedAll() (which the integration test harness also calls against a

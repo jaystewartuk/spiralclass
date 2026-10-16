@@ -8,7 +8,7 @@ import {
 } from "@/lib/subscriptions/config";
 
 describe("plan prices", () => {
-  it("matches the documented canonical GBP prices (pence, D-99)", () => {
+  it("matches the documented canonical GBP prices (pence, D-153)", () => {
     expect(PLAN_PRICE_MINOR_UNITS.free).toBe(0);
     expect(PLAN_PRICE_MINOR_UNITS.monthly).toBe(799); // £7.99
     expect(PLAN_PRICE_MINOR_UNITS.annual).toBe(7_990); // £79.90

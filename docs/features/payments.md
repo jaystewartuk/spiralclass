@@ -33,7 +33,7 @@ Two payment rails exist side by side, and a student picks one at checkout:
   runs, so activation, notification and analytics are identical either way.
 
   WHICH payee instructions is a separate axis, and the part that used to be
-  conflated with the rail ([D-113](../decisions/D-113.md)): a teacher
+  conflated with the rail ([D-145](../decisions/D-145.md)): a teacher
   publishes one or more **payout instruments**, and each pending payment
   records the one its student was actually shown.
 
@@ -49,7 +49,7 @@ Two payment rails exist side by side, and a student picks one at checkout:
 ### Wise is the only manual instrument, and why
 
 ⚠️ **There used to be a second kind.** `bank_account` held a per-country payee
-format drawn from a **15-scheme registry** ([D-124](../decisions/D-124.md)) —
+format drawn from a **15-scheme registry** —
 CLABE, PIX in Brazil, NUBAN in Nigeria, IFSC in India, IBAN across the
 roughly eighty registry countries and SWIFT/BIC as the universal fallback — so
 that supporting a new country was a registry row rather than a migration. It was
@@ -58,7 +58,7 @@ good design for the problem as it stood.
 [D-145](../decisions/D-145.md) removed it, with the kind, the registry
 (`packages/shared/src/bank-schemes.ts`), its checksum validators, both settings
 forms, three columns, four CHECK constraints and 120 i18n keys. **Do not
-reintroduce it, and do not read D-124 as live policy.**
+reintroduce it.**
 
 The reason it went is the interesting part. [D-143](../decisions/D-143.md) made
 the teacher merchant of record on her own Stripe account, and that account began
@@ -70,7 +70,7 @@ tell which one was "right". The worse copy goes.
 
 `bank_account` was never merely slower. It was **permanently**
 teacher-confirmed — no retail bank exposes a per-teacher statement API to
-reconcile against, which D-124 recorded as a property of the instrument rather
+reconcile against, which was recorded as a property of the instrument rather
 than a gap that would close. Stripe closed it from the other side.
 
 **Wise stays** because it is the one thing Stripe is not:
@@ -202,7 +202,7 @@ template)`.
   refused before any row is created, with a message pointing the student at
   Wise if that rail is available for this teacher.
 - Prices are always computed and stored in the **teacher's own chosen
-  pricing currency** (see D-64) — never a hardcoded currency.
+  pricing currency** (see D-153) — never a hardcoded currency.
 
 ### The language Stripe speaks
 
@@ -415,14 +415,21 @@ template)`.
 
 ### Tax capture (not yet enforced)
 
-- The student's billing country and full address are captured on Stripe's
-  hosted checkout page regardless of whether tax is actually calculated —
-  this is capture-only, preparing for VAT/GST support with no future
-  backfill needed. Turning on actual tax calculation is a separate
-  legal/business gate (the platform must be tax-registered first), not
-  something this capture alone enables.
+- `STRIPE_TAX_ENABLED` (default off) decides two things
+  (`apps/web/src/lib/stripe/tax.ts`): whether Stripe computes tax
+  (`automatic_tax`), and whether the **student** checkout requires a full
+  billing address. With it off, the student checkout uses
+  `billing_address_collection: "auto"`, so Stripe asks only for what the
+  payment method needs (often country and postcode), and the row keeps that
+  partial address. Turning the flag on later cannot complete those rows; tax
+  is computed from the address collected at the time of the charge.
+- The teacher's own **subscription** checkout always requires a full
+  address: that is the platform's own sale, where the address is a billing
+  record.
+- Turning tax on is a separate legal/business gate with prerequisites outside
+  the code that the flag does not enforce.
 
-### What the teacher sees she earned (`lib/cashflow.ts`, [D-191](../decisions/D-191.md))
+### What the teacher sees she earned (`lib/cashflow.ts`)
 
 **What counts as earned**
 
@@ -450,7 +457,7 @@ template)`.
   those classes are left out of it.
 - **Amounts are what students paid.** The screens say so, and say that card
   payments reach her a little lower after Stripe's own fee, which SpiralClass
-  does not receive ([D-152](../decisions/D-152.md)). No net-of-fee figure is
+  does not receive ([D-143](../decisions/D-143.md)). No net-of-fee figure is
   ever shown.
 
 **Which month a class belongs to**
@@ -480,8 +487,12 @@ template)`.
   the history. That leaves out the current month and her first month, which
   she started part-way through. It is stated as a fact and only once two such
   months exist. No figure is presented as what she can safely spend.
+- **No spending advice, "safe" figure or forecast.** The platform knows
+  neither her balance nor her bills, and the money is in her own account, so
+  these screens state only what happened and what is booked. A monthly figure
+  is never compared as a percentage against a closed month.
 
-**Test accounts** ([D-192](../decisions/D-192.md))
+**Test accounts** (see [admin portal](./admin-portal.md#test-accounts))
 
 - A real teacher's figures leave out students an operator has marked as test
   accounts. That covers earned, paid in advance, booked, the history and the
@@ -503,6 +514,25 @@ template)`.
   taught in September is received in August and earned in September.
 
 ## User Flow
+
+**The buy page (`/b/[slug]/buy`)** is one narrow column in the order a buyer
+decides:
+
+1. Who and what: the chosen package collapses to a summary line with a
+   Change link. A required class-time picker (a single class) sits **above**
+   the pay button; an optional one sits after it.
+2. Pay.
+3. Reassurance: the teacher's photo, one published testimonial and the
+   24-hour cancellation promise.
+4. Other rails: a closed disclosure after the pay button, never the first
+   control.
+
+Slot times render in the **visitor's** timezone with the teacher's named
+beside them, and the chosen day is written out in words. On a booking page
+whose `booking_page_locale` is `en`, an approximate USD figure appears beside
+the teacher's own price (`apps/web/src/lib/pricing/approx-usd.ts`, hidden once
+the rates are over 60 days old). It is presentation only: the charge is always
+in her own currency.
 
 **Student buys a package (card):**
 
@@ -616,11 +646,12 @@ template)`.
   payout.** It makes no difference: no commission is withheld at the charge
   under direct charges, so a tier change cannot retroactively alter what a
   student's payment paid her.
-- **A teacher outside the Stripe Connect circle (e.g. the launch market) somehow has a
+- **A teacher outside `SUPPORTED_CONNECT_COUNTRIES` somehow has a
   `stripeAccountId` from a prior era.** Country-based gating on the
-  teacher's current country is the live mechanism; a previously-connected
-  account for a non-circle country is a historical/migration edge case (see
-  D-58 in the decision log for the one teacher this applied to).
+  teacher's current country is the live mechanism; an account minted under
+  the platform's earlier Stripe entity stopped being payable when the
+  production key moved to the UK entity, and the fix is to disconnect it in
+  Settings → Payments, not a data migration.
 
 ## Error States
 

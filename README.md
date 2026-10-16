@@ -284,7 +284,7 @@ become a payments one again.
 The second rail is **Wise**, and the reason it is the only manual rail is worth
 more than the rail itself. There used to be a `bank_account` instrument behind a
 15-scheme per-country registry, so that supporting a new country was a registry
-row rather than a migration ([D-124](docs/decisions/D-124.md)) — good design for
+row rather than a migration — good design for
 the problem as it stood. Then direct charges made the teacher's own Stripe
 account present SPEI at checkout, and the same buyer was being offered the local
 bank transfer twice on one page: once reconciling in seconds, once waiting on

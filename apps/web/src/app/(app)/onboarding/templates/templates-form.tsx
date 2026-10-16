@@ -219,7 +219,7 @@ export function TemplatesForm({
   submitLabel?: string;
   // From `isConnectCountrySupported(teacher.country)` — a teacher outside the
   // Stripe Connect payout circle never gets a Stripe rail at all (Wise is her
-  // only rail, D-58), so the "Stripe price" / "charge less for Wise" split is
+  // only rail, D-143), so the "Stripe price" / "charge less for Wise" split is
   // meaningless: there's no Stripe price to discount against. Those teachers
   // see a single plain "Price" field instead.
   payoutCountrySupported: boolean;
@@ -1318,7 +1318,7 @@ function PackageCard({
                     <Label htmlFor={`wise-discount-${key}`} className="text-sm">
                       {t("onboarding.templates.wiseDiscountLabel")}
                     </Label>
-                    {/* D-152: the rate comes from the same constant that sizes
+                    {/* D-143: the rate comes from the same constant that sizes
                         the discount, so the number in the sentence can never
                         drift from the arithmetic — and the copy attributes it
                         to US as an estimate, not to Stripe as its rate. */}

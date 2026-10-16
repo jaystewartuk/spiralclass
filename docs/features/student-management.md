@@ -64,7 +64,7 @@ same individual across teachers.
   app exists.
 
 - A student an operator has marked as a **test account**
-  ([D-192](../decisions/D-192.md)) stays on the roster with a "Cuenta de
+  (see [admin portal](./admin-portal.md#test-accounts)) stays on the roster with a "Cuenta de
   prueba" badge, but counts in none of the roster's figures and never needs
   attention. In a test teacher's own roster everyone counts.
 

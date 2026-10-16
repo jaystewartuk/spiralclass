@@ -74,7 +74,7 @@ describe("defaultPricingCurrencyForCountry", () => {
     expect(defaultPricingCurrencyForCountry("NO")).toBeNull();
   });
 
-  // D-124 reversed this: these countries used to have no preselect because the
+  // The 2026-08-23 widening reversed this: these countries used to have no preselect because the
   // manual rail only offered six LatAm currencies. Now a teacher who banks in
   // Indonesia or India is offered her own money by default.
   it("preselects the home currency for a manual-rail country outside Latin America", () => {
@@ -124,16 +124,16 @@ describe("stripeMinChargeMinorUnits", () => {
   });
 });
 
-// D-124 widened the manual rail well past the original six LatAm currencies.
+// On 2026-08-23 the manual rail was widened well past the original six LatAm currencies.
 // These pin the properties that widening must not break.
-describe("manual-rail widening (D-124)", () => {
-  it("keeps every currency the original D-64 cut offered", () => {
+describe("manual-rail widening", () => {
+  it("keeps every currency the original pricing-currency cut offered", () => {
     for (const code of ["MXN", "COP", "ARS", "CLP", "PEN", "BRL"]) {
       expect(MANUAL_RAIL_PRICING_CURRENCIES).toContain(code);
     }
   });
 
-  // The gap D-124 set out to close: a teacher with a working local bank
+  // The gap that widening set out to close: a teacher with a working local bank
   // account who could not price in her own money.
   it("lets a teacher price in her own currency outside Latin America", () => {
     for (const code of ["NGN", "INR", "PHP", "IDR", "KES", "ZAR", "VND", "TRY"]) {

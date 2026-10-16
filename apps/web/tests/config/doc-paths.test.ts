@@ -72,7 +72,6 @@ const DELETED_DOCS = new Set([
   "docs/deployment/ORACLE_RUNNER.md",
   "docs/deployment/SELF_HOSTED_RUNNER.md",
   "docs/engineering/DEVELOPMENT_WORKFLOW.md",
-  "docs/engineering/ENTITLEMENTS_AUDIT.md",
   "docs/engineering/TECH_DEBT.md",
   "docs/engineering/integrations/whatsapp.md",
   "docs/engineering/lesson-insights.md",
@@ -83,10 +82,8 @@ const DELETED_DOCS = new Set([
   "docs/ops/PRODUCTION_CUTOVER.md",
   "docs/orientation/04-levels-and-materials.md",
   "docs/orientation/09-infrastructure-and-deployment.md",
-  "docs/product/FINANCIAL_INTELLIGENCE.md",
   "docs/product/HOMEWORK_WORKFLOW.md",
   "docs/product/MATERIALS_TAXONOMY.md",
-  "docs/product/SUBSCRIPTIONS.md",
 ]);
 
 function isTextFile(name: string): boolean {

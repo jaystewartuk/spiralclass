@@ -114,7 +114,7 @@ describe("saveTimezoneAction", () => {
     expect(teacherUpdate).not.toHaveBeenCalled();
   });
 
-  it("persists the submitted pricing currency (D-64)", async () => {
+  it("persists the submitted pricing currency (D-153)", async () => {
     const res = await run(
       fd({
         timezone: "Europe/London",

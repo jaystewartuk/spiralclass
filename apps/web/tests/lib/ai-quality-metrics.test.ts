@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 // The AI acceptance figures on the admin overview (D-201): confirmed-over-
 // decided for lesson insights, used-over-decided for homework drafts. Counts
-// only (D-23), test accounts out (D-192).
+// only (D-23), test accounts out.
 
 const insightCount = vi.fn(async (..._: unknown[]) => 0);
 const draftCount = vi.fn(async (..._: unknown[]) => 0);
@@ -73,7 +73,7 @@ describe("getAiQualityMetrics", () => {
     ]);
   });
 
-  it("leaves test teachers and test students out of every count (D-192)", async () => {
+  it("leaves test teachers and test students out of every count", async () => {
     await getAiQualityMetrics();
     const realBooking = { teacher: { testAccount: false }, student: { testAccount: false } };
     for (const call of insightCount.mock.calls) {

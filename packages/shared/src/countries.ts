@@ -6,7 +6,7 @@
 // mis-configures the teacher's payout account — it is a genuine one-way door.
 // The same field is the seed for tax-residency logic, and it already drives
 // which curated pricing currencies a teacher is offered
-// (`pricingCurrenciesForCountry`, D-64/D-124) — that is per-country, not
+// (`pricingCurrenciesForCountry`, D-153/D-145) — that is per-country, not
 // MXN-only.
 //
 // Two distinct sets live here:
@@ -50,7 +50,7 @@ import { intlLocale } from "./i18n/locales";
 // concern, not a membership one.
 //
 // A country missing from this list is not stranded: it falls back to the
-// country-agnostic manual transfer rail (D-124). Unlike the pre-D-143 failure
+// country-agnostic manual transfer rail (D-145). Unlike the pre-D-143 failure
 // mode, a wrong entry here surfaces at ONBOARDING as a failed account creation
 // rather than after money has been taken.
 export const SUPPORTED_CONNECT_COUNTRIES = [

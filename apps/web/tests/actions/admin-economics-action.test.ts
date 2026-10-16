@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { Prisma } from "@prisma/client";
 
-// Financial Intelligence estimate layer (D-86, S4) — the /admin/economics
+// Financial Intelligence estimate layer (slice S4) — the /admin/economics
 // write side. Pins: pricing-model JSON is validated in two stages (syntax,
 // then the shared discriminated-union schema) before ever reaching Prisma;
 // a duplicate `key` surfaces as a friendly error, not a 500; the usage-input

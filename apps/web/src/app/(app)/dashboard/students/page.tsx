@@ -257,7 +257,7 @@ export default async function TeacherStudentsPage({
   // The standing figures, over the whole roster rather than the current view —
   // see note 3 in the header comment.
   //
-  // An operator's test student (D-192) stays on the list, marked, but counts
+  // An operator's test student stays on the list, marked, but counts
   // in none of the figures and never "needs attention" — the operator booking
   // a real teacher's funnel to test it is not a student she is losing. A test
   // teacher's own sandbox counts everyone, test students included.

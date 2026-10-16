@@ -205,7 +205,7 @@ one type-checks, lints and builds.
   `saveTeacherInstrument` is the only write path.
 - **`pricing-fees.ts` is a deliberately generous estimate**, used only to size
   the Wise-rail discount suggestion. **Never present it as what Stripe
-  charges** (D-152): teacher-facing copy names who charges the fee and links to
+  charges** (D-143): teacher-facing copy names who charges the fee and links to
   Stripe's own page, and public marketing quotes no percentage at all. Guarded
   in `packages/shared/src/i18n/i18n.test.ts`.
 - **"Bank transfer" is not a synonym for fee-free** — a transfer made _inside_

@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 //
-// Product review the public booking page: a teacher outside the Stripe Connect payout circle (D-58) never
+// Product review the public booking page: a teacher outside SUPPORTED_CONNECT_COUNTRIES (D-143) never
 // gets a Stripe rail at all — Wise is her only rail — so the "Stripe price" /
 // "charge less for bank transfer (Wise)" split is meaningless: there's no
 // Stripe price to discount against. `payoutCountrySupported` (derived from
@@ -27,7 +27,7 @@ const { formatMinorUnits: formatMinorUnitsForMock } = await vi.hoisted(
   async () => await import("@spiralclass/shared"),
 );
 vi.mock("@/components/locale-provider", () => ({
-  // D-197: the real formatter, in English, as the tests expect.
+  // D-153: the real formatter, in English, as the tests expect.
   useFormatMoney: () => (minorUnits: number, currency?: string) =>
     formatMinorUnitsForMock(minorUnits, currency, "en"),
   useT: () => (key: string) => key,

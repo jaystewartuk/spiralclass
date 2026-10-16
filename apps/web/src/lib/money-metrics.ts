@@ -9,7 +9,7 @@
 //      rail. This is a scale metric and NOT revenue in any part: direct
 //      charges settle on the teacher's own Stripe account, so none of it ever
 //      reaches the platform's balance. The commission series that used to sit
-//      here (`getCommissionSeries`, D-58 pivot) is gone with the Transfer it
+//      here (`getCommissionSeries`) is gone with the Transfer it
 //      was withheld from — do not reintroduce a revenue reading of GMV.
 //   3. Platform-wide deferred-revenue liability — the aggregate of the same
 //      earned-vs-held split cashflow.ts computes per teacher, on the
@@ -20,7 +20,7 @@
 //
 // Money is centavos (integer). Both the subscription-revenue and
 // running-cost series are scoped to ONE currency at a time — the platform's
-// canonical PLATFORM_MONEY_CURRENCY (GBP as of D-99) by default — and any row
+// canonical PLATFORM_MONEY_CURRENCY (GBP as of D-153) by default — and any row
 // in a different currency (a not-yet-renewed pre-D-99 MXN subscription
 // invoice, a hand-entered USD/GBP expense) is EXCLUDED from the summed total
 // and surfaced separately instead (see `otherCurrency*Totals`). This app has
@@ -169,7 +169,7 @@ export async function getSubscriptionRevenueSeries(
     where: {
       status: "paid",
       paidAt: { not: null, gte: monthWindowStart(now, monthsBack) },
-      // An operator's test teacher's subscription is not revenue (D-192).
+      // An operator's test teacher's subscription is not revenue.
       teacher: NOT_TEST_ACCOUNT,
     },
     select: {
@@ -232,7 +232,7 @@ export function summarizeGmvSeries(payments: PaidPayment[], months: string[]): G
 
 // One currency's GMV series. Payments are summed only within a currency:
 // minor units of two currencies do not add up to anything, and this app has
-// no FX rate to convert them with (#27, and D-99 for the same bug in
+// no FX rate to convert them with (#27, and D-153 for the same bug in
 // subscription revenue).
 export type GmvCurrencySlice = {
   currency: string;
@@ -279,7 +279,7 @@ export async function getGmvSeries(
     where: {
       status: "paid",
       paidAt: { not: null, gte: monthWindowStart(now, monthsBack) },
-      // Neither side an operator's test account (D-192).
+      // Neither side an operator's test account.
       package: REAL_PACKAGE_WHERE,
     },
     select: { paidAt: true, amountMinorUnits: true, rail: true, currency: true },

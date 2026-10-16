@@ -129,7 +129,7 @@ D-89/Neon migration completed; the module was removed from the repo.)
 Most of the vars below are the _same value_ in preview and production today
 (Resend, Sentry, Inngest, Google OAuth client, etc.) — only a handful
 actually differ per environment (`DATABASE_URL`/`DIRECT_URL`, the Stripe
-keys once production gets its own Stripe account per D-58, `APP_URL`).
+keys once production gets its own Stripe account, `APP_URL`).
 
 Infisical doesn't have automatic environment inheritance, but it does support
 **secret references**: a secret's value can be `${preview.SOME_KEY}`,

@@ -53,7 +53,7 @@ describe("growthSteps", () => {
   });
 
   // Country-gated Stripe copy (reuses the settings/payments/page.tsx pattern,
-  // D-58): a teacher outside SUPPORTED_CONNECT_COUNTRIES shouldn't be told to
+  // D-143): a teacher outside SUPPORTED_CONNECT_COUNTRIES shouldn't be told to
   // "Connect Stripe" only to hit the country-unsupported wall on settings.
   it("mentions Stripe by default when stripeAvailable is omitted", () => {
     const step = growthSteps(EMPTY, "en").steps.find((s) => s.key === "payment")!;

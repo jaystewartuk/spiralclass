@@ -42,7 +42,7 @@ export type GrowthSignals = {
   // isConnectCountrySupported(teacher.country) || already linked, and only
   // once the platform itself has Stripe creds configured). false swaps the
   // payment step's "todo" copy to a Wise-only variant so a teacher outside
-  // the Stripe Connect circle (D-58) isn't told to "Connect Stripe" only to
+  // SUPPORTED_CONNECT_COUNTRIES (D-143) isn't told to "Connect Stripe" only to
   // hit the country-unsupported wall on the settings page. Optional so a
   // fixture that predates this field degrades to the pre-existing Stripe+Wise
   // copy rather than guessing wrong.

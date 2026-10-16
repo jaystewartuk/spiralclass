@@ -108,7 +108,7 @@ export async function getLanguagePickerValue(): Promise<LocalePreference> {
 }
 
 /** Server-side counterpart of `useFormatMoney()`: prices in the request's
- * locale's number format (D-197). */
+ * locale's number format (D-153). */
 export async function getFormatMoney(): Promise<(minorUnits: number, currency?: string) => string> {
   const locale = await getPreferredLocale();
   return (minorUnits: number, currency?: string) => formatMinorUnits(minorUnits, currency, locale);

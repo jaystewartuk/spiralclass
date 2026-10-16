@@ -9,7 +9,7 @@
 //
 // Money is in integer minor units; the CANONICAL billing currency is GBP
 // (PLATFORM_MONEY_CURRENCY, ./platform-regions.ts) — the platform's own UK
-// UK Stripe entity (D-58/D-99). It was MXN before D-99: a
+// UK Stripe entity (D-143/D-153). It was MXN before D-153: a
 // per-currency price table (below) is what lets that change without
 // reinterpreting any pre-existing MXN subscriber's already-stored
 // `lockedPriceMinorUnits`/`currency` (see billing-webhook-handler.ts — a live
@@ -43,7 +43,7 @@ export type SubscriptionStatus = (typeof SUBSCRIPTION_STATUSES)[number];
 // --- Prices (integer minor units, per currency) ----------------------------
 
 // Plan prices keyed by settlement currency. GBP is the canonical/new-checkout
-// currency as of D-99 (PLATFORM_MONEY_CURRENCY); MXN is kept as the pre-D-99
+// currency as of D-153 (PLATFORM_MONEY_CURRENCY); MXN is kept as the pre-D-99
 // launch pricing — still resolvable by currency so an existing MXN
 // subscriber's grandfathered/renewal price keeps computing correctly (see
 // foundingLockedPrice in billing-webhook-handler.ts) — but no new checkout
@@ -79,7 +79,7 @@ export const PLAN_PRICE_MINOR_UNITS_BY_CURRENCY: Record<
   },
 };
 
-// Back-compat default table (GBP, the canonical currency as of D-99). Prefer
+// Back-compat default table (GBP, the canonical currency as of D-153). Prefer
 // planPriceMinorUnits(plan, currency) so a specific-currency reader (e.g. an
 // existing MXN subscriber's own row) resolves correctly; this alias is for
 // callers that only ever want "the current canonical price" (the pricing
@@ -162,7 +162,7 @@ export const COMMISSION_WINDOW_MONTHS = 12; // first 12 months per referred acco
 
 // There is deliberately NO marketplace commission constant here (D-143).
 //
-// The D-58 pivot withheld 8%/3%/0% of the settled net before the teacher
+// Until 2026-08-30 the platform withheld 8%/3%/0% of the settled net before the teacher
 // payout, which only worked because the money passed through the platform
 // balance first. Under direct charges it does not: the charge settles on the
 // teacher's own connected account. Withholding a cut would mean a Stripe
@@ -187,7 +187,7 @@ export function isPaidPlan(plan: SubscriptionPlan): boolean {
 // halves to /12, month/none pass through unchanged. This does NOT look the
 // price up from the config table, so it's the correct helper for MRR: a
 // subscriber's locked price can (deliberately, for founding) differ from
-// today's config table, and after D-99 it can also be in an older currency
+// today's config table, and after D-153 it can also be in an older currency
 // (MXN) than a newer subscriber's (GBP) — re-deriving from the table instead
 // of the stored price would silently substitute the wrong figure, or blend
 // two currencies' raw numbers as if they were one unit. Callers still own

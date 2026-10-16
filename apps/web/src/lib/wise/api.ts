@@ -16,7 +16,7 @@ import { decryptField } from "@/lib/crypto/field-encryption";
 // the Teacher row). Money never funnels through a shared account — the
 // poller builds one client per teacher and only ever reads that teacher's
 // statement, in THAT teacher's own pricing currency (Teacher.pricingCurrency,
-// D-64) — a non-MXN-priced teacher's Wise balance is never in MXN, so
+// D-153) — a non-MXN-priced teacher's Wise balance is never in MXN, so
 // reconciliation must pull the balance matching their own currency, not a
 // platform-wide one. Only the base URL is a platform-wide env; everything
 // else (secrets + currency) is per-teacher.
@@ -63,7 +63,7 @@ type WiseApiConfig = {
 
 // The per-teacher credential columns the reconciler selects off the Teacher
 // row. The instrument's own `enabled` flag gates participation even when
-// creds are on file; the reconciler's query filters on it (D-113).
+// creds are on file; the reconciler's query filters on it (D-145).
 // `pricingCurrency` picks which of the teacher's Wise balances to read
 // statement lines from — a teacher priced in COP has no MXN balance to poll.
 export type TeacherWiseCreds = {

@@ -5,7 +5,7 @@ import type { Prisma } from "@prisma/client";
 // `where` rather than in JS — the sitemap and the admin "stalled" filter.
 //
 // Deliberately its OWN module rather than sitting beside the predicate it
-// mirrors, which is where it lived until D-124. `lib/admin-filters.ts` imports
+// mirrors, which is where it lived until August 2026. `lib/admin-filters.ts` imports
 // these, and `admin-filters` is reachable from the CLIENT (the admin teachers
 // table filters in the browser). `marketplace-ready.ts` imports the PostHog
 // *server* client, which reaches `node:async_hooks` and `node:fs` — fine on
@@ -51,10 +51,10 @@ export const NO_PAYOUT_RAIL_WHERE = {
 // admin `where` asks.
 //
 // Named here rather than written inline because the credential columns moved
-// from `Teacher` onto the INSTRUMENT at D-113, and a `where` written against
+// from `Teacher` onto the INSTRUMENT on 2026-08-23, and a `where` written against
 // the old shape is a RUNTIME-only failure: Prisma's `Subset` types accept an
 // unknown key inside a spread `where` literal without a compile error, so
-// `tsc` cannot see it — /admin/teachers 500'd on exactly that from D-113 until
+// `tsc` cannot see it — /admin/teachers 500'd on exactly that from 2026-08-23 until
 // 2026-09-06. `satisfies` on a named constant is what makes the typechecker
 // check it, so keep instrument `where` clauses in this file rather than at
 // their call sites.

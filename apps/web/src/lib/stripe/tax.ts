@@ -1,7 +1,7 @@
 import { serverEnv } from "@/lib/env";
 
 // VAT/GST switch (global-launch item 7). It governs two things, and since
-// D-144 they are no longer the same on both rails:
+// D-143 they are no longer the same on both rails:
 //
 //   * Whether Stripe *computes and collects* tax (`automatic_tax[enabled]`).
 //     Defaults OFF on both rails: it has prerequisites outside the codebase
@@ -9,7 +9,7 @@ import { serverEnv } from "@/lib/env";
 //   * On the STUDENT rail only, whether the buyer's billing address is
 //     `required` at checkout. This flag used to be irrelevant to that — the
 //     address was collected unconditionally, "capture-now, enable-later", so
-//     that flipping the flag needed no backfill. D-144 ended that on the
+//     that flipping the flag needed no backfill. D-143 ended that on the
 //     student rail: five address fields on the highest-abandonment screen in
 //     the product is a real, per-student conversion cost, and it was being paid
 //     for a registration that does not exist yet. With the flag off Stripe now

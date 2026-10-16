@@ -224,7 +224,7 @@ describe("the group itself", () => {
 describe("the create form", () => {
   const html = renderToStaticMarkup(
     <LocaleProvider locale="en">
-      {/* Her own pricing currency (D-64), which is what the fixed-amount half
+      {/* Her own pricing currency (D-153), which is what the fixed-amount half
           of the switch has to be denominated in. */}
       <PricingCurrencyProvider currency="GBP">
         <CreateDiscountForm />

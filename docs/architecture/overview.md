@@ -326,8 +326,8 @@ The decision log is the real record; this is the shape of it.
 - **Payments**: separate charges and transfers → direct charges on Accounts v2
   ([D-143](../decisions/D-143.md)). The platform stopped touching the money.
 - **Platform entity**: consolidated in the UK
-  ([D-58](../decisions/D-58.md)), and platform billing moved to GBP
-  ([D-99](../decisions/D-99.md)). Because every call site resolves credentials
+  ([D-143](../decisions/D-143.md)), and platform billing moved to GBP
+  ([D-153](../decisions/D-153.md)). Because every call site resolves credentials
   through one function, each swap was configuration rather than code.
 - **Video**: LiveKit Cloud → self-hosted ([D-94](../decisions/D-94.md)). Two
   config values, no application code.

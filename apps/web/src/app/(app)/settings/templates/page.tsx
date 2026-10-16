@@ -31,7 +31,7 @@ export default async function TemplatesSettingsPage() {
   const teacher = await requireOnboardedTeacher();
   const t = await getT();
   // A teacher outside the Stripe Connect payout circle never gets a Stripe
-  // rail — Wise is her only rail (D-58) — so the form drops the "Stripe
+  // rail — Wise is her only rail (D-143) — so the form drops the "Stripe
   // price" / Wise-discount split for a single plain price. Mirrors the gate
   // in the settings payments page.
   const payoutCountrySupported = isConnectCountrySupported(teacher.country);

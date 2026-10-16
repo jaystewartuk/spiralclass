@@ -82,7 +82,7 @@ export function CheckoutForm({
   method: Method;
   // The chosen instrument, for `manual_transfer`. Null for Stripe. Forwarded
   // as a hidden field so the server knows WHICH payee instructions this
-  // student was shown (D-113); `instrumentKind` is the analytics label, kept
+  // student was shown (D-145); `instrumentKind` is the analytics label, kept
   // in the same vocabulary as checkout_started/payment_received.
   instrumentId: string | null;
   instrumentKind: PayoutInstrumentKind | null;

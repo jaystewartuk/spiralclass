@@ -11,7 +11,7 @@
 // What this replaced: a bilingual hand-written notice whose two variants were keyed `…privacy.es.*` / `…privacy.en.*`
 // inside a per-locale catalog. `catalog.fr.ts` had therefore machine-translated
 // both variants into French, so a French reader was shown a link labelled
-// "Español" that rendered in French. The controller is UK-established (D-58)
+// "Español" that rendered in French. The controller is UK-established (D-143)
 // and the Terms are already governed by the laws of England and Wales, so the
 // document is UK GDPR / DPA 2018 shaped.
 

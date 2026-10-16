@@ -53,7 +53,7 @@ export function webSiteJsonLd(baseUrl: string) {
 // plan is cohort-gated and deliberately excluded; callers pass the evergreen
 // plans from @/lib/subscriptions/config so prices can never drift from the
 // source of truth. `currency` is the platform's own canonical billing
-// currency (PLATFORM_MONEY_CURRENCY, GBP as of D-99) — these are ALL priced
+// currency (PLATFORM_MONEY_CURRENCY, GBP as of D-153) — these are ALL priced
 // in the same currency (a single canonical platform subscription price), so
 // one currency for the whole Offers list is correct, unlike
 // teacherProfileJsonLd below where each package can carry its own.
@@ -168,7 +168,7 @@ export function teacherProfileJsonLd(input: {
   // ISO-3166-1 alpha-2 (Teacher.country); null until onboarding captures it.
   country?: string | null;
   // Each package carries ITS OWN currency (a teacher prices in her own chosen
-  // currency — D-64), unlike pricingJsonLd's single platform-wide currency —
+  // currency — D-153), unlike pricingJsonLd's single platform-wide currency —
   // never hardcode one here. classDurationMin drives each Offer's
   // itemOffered.hasCourseInstance duration.
   packages: Array<{

@@ -98,7 +98,7 @@ enum PaymentStatus {
   refunded
 }
 
-// The teacher-payout rail (D-113). `stripe` is a real card charge the
+// The teacher-payout rail (D-145). `stripe` is a real card charge the
 // platform processes and transfers on; `manual_transfer` is "the student
 // follows payee instructions and the teacher confirms" — the platform never
 // touches those funds. WHICH payee instructions is a separate axis
@@ -332,7 +332,7 @@ enum SubscriptionInvoiceStatus {
 }
 
 // How a teacher paid SpiralClass for one billing cycle. Split from
-// `PaymentProvider` by D-113: the two enums shared a name and a shape but
+// `PaymentProvider` by D-145: the two enums shared a name and a shape but
 // never a meaning. On the payout rail the platform never touches the money,
 // which is exactly what `manual_transfer` asserts; on the BILLING side the
 // platform does receive the funds, so "manual transfer" would be the wrong
@@ -411,7 +411,7 @@ model Teacher {
   // `country` is known (country decides which curated list applies) and
   // never changed afterward — same one-way-door posture as `country`:
   // existing packages/prices/payments are already denominated in it, so a
-  // self-service currency change would corrupt that history (see D-64).
+  // self-service currency change would corrupt that history (see D-153).
   // Curated by payout rail via @spiralclass/shared: Connect-circle teachers
   // (isConnectCountrySupported(country)) pick from
   // CONNECT_CIRCLE_PRICING_CURRENCIES, everyone else from
@@ -620,13 +620,13 @@ model Teacher {
   stripeRequirementsDisabledReason String?   @map("stripe_requirements_disabled_reason")
   // Which platform Stripe entity (PLATFORM_REGIONS in @spiralclass/shared)
   // this teacher's charges/transfers route through. Unused for routing
-  // today — there is only one region (GB, the UK entity — D-58) —
+  // today — there is only one region (GB, the UK entity — D-143) —
   // so it exists purely to avoid a backfill if/when a second regional entity
   // is added. Was "MX" pre-D-99; migration 20260722010000 backfilled every
   // existing row to "GB" alongside this default.
   platformRegion                   String?   @default("GB") @map("platform_region")
   // Payee instructions for the manual-transfer rail live in
-  // `TeacherPayoutInstrument` rows, not in columns here (D-113). Wise used to
+  // `TeacherPayoutInstrument` rows, not in columns here (D-145). Wise used to
   // own 7 columns on this model; modelling the instrument as the provider was
   // the original error, and it made a second instrument (SPEI) cost a
   // migration instead of a row.
@@ -636,7 +636,7 @@ model Teacher {
   // and student data are preserved.
   disabledAt                       DateTime? @map("disabled_at") @db.Timestamptz
   disabledReason                   String?   @map("disabled_reason")
-  // An operator's own test account (D-192), not a customer. Set ONLY by an
+  // An operator's own test account, not a customer. Set ONLY by an
   // admin action, with a reason, audited. Read-side only: it never gates
   // sign-in, booking, payment or entitlements. A test teacher's screens show
   // her everything, because that account is her sandbox; platform roll-ups
@@ -886,7 +886,7 @@ model Student {
   // so the teacher can finish out paid classes.
   disabledAt           DateTime? @map("disabled_at") @db.Timestamptz
   disabledReason       String?   @map("disabled_reason")
-  // An operator's own test account (D-192) — e.g. the operator booking a real
+  // An operator's own test account — e.g. the operator booking a real
   // teacher's live funnel as a student. Set ONLY by an admin action, with a
   // reason, audited. Read-side only. A real teacher's earnings, paid-in-advance
   // and roster counts leave this student out; the rows stay visible, marked,
@@ -1427,8 +1427,7 @@ model TeacherShareGroup {
   //
   // Which platform this community lives on — a MarketingPlatform value from
   // @spiralclass/shared. Validated in the app layer rather than as a Postgres
-  // enum, the same posture as `pricing_currency` (D-64) and scheme ids
-  // (D-124): adding a platform is a shared-package change, not a migration.
+  // enum, the same posture as `pricing_currency` (D-153): adding a platform is a shared-package change, not a migration.
   platform     String    @default("facebook_group")
   // What the community's own rules say about self-promotion, as the teacher
   // recorded them: open | limited | prohibited | unknown. THE load-bearing
@@ -1590,7 +1589,7 @@ model PackageTemplate {
   // The NON-CARD price. Teachers may want to discount bank transfer to pass
   // along the savings vs. Stripe processing fees, or charge the same. Null =
   // use `priceMinorUnits` for every rail. Named for the instrument until
-  // D-113 — it was always the non-card price, and it applies to every
+  // D-145 — it was always the non-card price, and it applies to every
   // manual-transfer instrument, not just Wise.
   transferPriceMinorUnits Int?     @map("transfer_price_minor_units")
   // The price of this package bought for TWO people who take every class
@@ -2745,7 +2744,7 @@ model StudentNote {
 // --- Payments ---
 
 // One set of payee instructions a teacher publishes for the manual-transfer
-// rail (D-113). Wise was a `PaymentProvider` value and 7 columns on
+// rail (D-145). Wise was a `PaymentProvider` value and 7 columns on
 // `teachers`; it is one row here, and SPEI is a second. What the rail
 // actually does — render payee instructions plus a unique reference, let the
 // student self-attest, let the teacher confirm, then run the SAME
@@ -2798,7 +2797,7 @@ model TeacherPayoutInstrument {
 
   // D-145 dropped `scheme_id`, `country` and `details` with the
   // `bank_account` kind. They held a per-country account format from a
-  // 15-scheme registry (D-124) — three columns instead of one per country,
+  // 15-scheme registry — three columns instead of one per country,
   // which is what made "a teacher anywhere" a registry row rather than a
   // migration. Good design for the problem as it stood; the problem changed
   // when D-143 made Stripe present her country's own bank transfer with
@@ -2849,7 +2848,7 @@ model Payment {
   // charges settle on her own connected account, so the platform never holds,
   // withholds or forwards any of it — `amountMinorUnits` is simply what the
   // student paid her.
-  // Manual-transfer fields (instrument-neutral as of D-113 — these were
+  // Manual-transfer fields (instrument-neutral as of D-145 — these were
   // `wise_*` when Wise was the provider rather than one instrument).
   //
   // `instrumentId` records WHICH payee instructions this student was
@@ -3254,7 +3253,7 @@ model TeacherSubscription {
   // `founding` this is FOUNDING price and never auto-increases to monthly.
   // Null for free.
   lockedPriceMinorUnits  Int?               @map("locked_price_minor_units")
-  // The platform's canonical billing currency is GBP as of D-99 (was MXN) —
+  // The platform's canonical billing currency is GBP as of D-153 (was MXN) —
   // this default only applies to a row created without an explicit currency;
   // every real activation path always passes one explicitly (see
   // billing-webhook-handler.ts). A pre-D-99 row's stored "MXN" is untouched by
@@ -3314,10 +3313,10 @@ model SubscriptionInvoice {
   netMinorUnits      Int                         @map("net_minor_units")
   // Currency of amount/fee/net, recorded for provenance so the subscription
   // rail's denomination is never implicit. Canonical currency is GBP as of
-  // D-99 (was MXN); a pre-D-99 invoice's stored "MXN" is untouched.
+  // D-153 (was MXN); a pre-D-99 invoice's stored "MXN" is untouched.
   currency         String                      @default("GBP")
   status           SubscriptionInvoiceStatus   @default(open)
-  // Own enum since D-113 — see SubscriptionPaymentProvider. Sharing
+  // Own enum since D-145 — see SubscriptionPaymentProvider. Sharing
   // `PaymentProvider` with the teacher-payout rail meant a rename on one
   // concern silently renamed the other.
   provider         SubscriptionPaymentProvider @default(stripe)
@@ -3369,7 +3368,7 @@ model PlatformExpense {
   @@map("platform_expenses")
 }
 
-// Financial Intelligence estimate layer (D-86) — a registry of third-party
+// Financial Intelligence estimate layer — a registry of third-party
 // integrations with a structured pricing model, kept deliberately SEPARATE
 // from PlatformExpense above (actuals, hand-entered invoice totals). `key` is
 // a stable slug (e.g. "vercel") used by seed-registry.ts for idempotent
@@ -3405,7 +3404,7 @@ model Integration {
   @@map("integrations")
 }
 
-// One manually-entered usage reading per meter per calendar month (D-86) —
+// One manually-entered usage reading per meter per calendar month —
 // the estimate layer's input to the pricing engine's `UsageValues`. `metric`
 // is TEXT validated against the shared `USAGE_METRICS` const (same
 // migration-free posture as Integration.category). `value` is a plain count/
@@ -3431,8 +3430,8 @@ model UsageInput {
 
 // Singleton (id="default") of the FX + allocation assumptions the estimate
 // layer's lib layer (assumptions.ts) uses to convert every integration's
-// native-currency cost into GBP pence (D-86 — GBP is the owner's
-// money-of-record for this view per D-58) and to allocate shared costs across
+// native-currency cost into GBP pence (GBP is the owner's
+// money-of-record for this view, the platform entity being UK-established) and to allocate shared costs across
 // the profitability breakdowns. Manually maintained — this app has no live FX
 // feed — so `fxAsOf` lets the UI show "FX as of {date}" rather than implying
 // a live rate. Mirrors FoundingCohort's single-row-by-fixed-id pattern above.

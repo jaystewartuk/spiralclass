@@ -19,7 +19,7 @@ function fakePrisma() {
   return {
     store,
     prisma: {
-      // D-113: credentials live on the Wise instrument, and the write is an
+      // D-145: credentials live on the Wise instrument, and the write is an
       // upsert (an operator can connect the API before the teacher has filled
       // in a Wisetag, so the row may not exist yet).
       teacherPayoutInstrument: {
@@ -84,7 +84,7 @@ describe("wiseClientForTeacher gating", () => {
     expect(wiseClientForTeacher(complete)).not.toBeNull();
   });
 
-  // "Wise is paused" is no longer a property of these creds: since D-113 the
+  // "Wise is paused" is no longer a property of these creds: since D-145 the
   // instrument's own `enabled` flag is the gate, and the reconciler's query
   // filters on it before ever building a client (see lib/payments/
   // wise-reconcile.ts). Asserting it here would test the fixture, not the

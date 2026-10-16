@@ -83,7 +83,7 @@ type FakePaymentRow = {
   currency: string;
   rail: "card" | "wise" | "unknown";
   provider: "stripe" | "manual_transfer";
-  // Which payout instrument the student was shown (D-113). The reconciler
+  // Which payout instrument the student was shown (D-145). The reconciler
   // scopes its scan to this, so a fixture that omitted it would let a dropped
   // filter pass unnoticed.
   instrumentId: string | null;
@@ -135,7 +135,7 @@ function freshPayment(): FakePaymentRow {
 
 const TEACHER_A = "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa";
 
-// The reconciler reads Wise INSTRUMENTS now, not teachers (D-113): auto-
+// The reconciler reads Wise INSTRUMENTS now, not teachers (D-145): auto-
 // reconcile is a capability of the instrument, which is what makes it
 // structural that SPEI has none.
 const INSTRUMENT_A = "11111111-1111-1111-1111-111111111111";
@@ -190,7 +190,7 @@ function makeFakePrisma(rows: FakePaymentRow[], teachers: FakeTeacher[]) {
       // Honors the per-teacher relation filter the reconciler passes.
       findMany: async (args: any) => {
         const teacherId = args?.where?.package?.is?.teacherId;
-        // D-113 scopes the scan to the instrument whose statement was just
+        // D-145 scopes the scan to the instrument whose statement was just
         // read, so a teacher's SPEI payments can never be matched against her
         // Wise statement. Honor it here or the test would pass a reconciler
         // that had dropped the filter.

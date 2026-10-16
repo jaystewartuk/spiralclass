@@ -30,7 +30,7 @@ export type PaymentRowData = {
   amountMinorUnits: number;
   currency: string;
   studentName: string;
-  // An operator's test student (D-192). The row stays — it is a real charge on
+  // An operator's test student. The row stays — it is a real charge on
   // her own Stripe account, and the ledger has to reconcile to it — but it is
   // marked, so she can tell the operator's test charge from a student's.
   testAccount: boolean;
@@ -97,7 +97,7 @@ export function PaymentRow({
   payment: PaymentRowData;
   /** Formats a date in the teacher's zone and locale — built once by the ledger. */
   day: Intl.DateTimeFormat;
-  /** The reader's locale, for the amount's number format (D-197). */
+  /** The reader's locale, for the amount's number format (D-153). */
   locale: string;
   t: TFunction;
 }) {
@@ -283,7 +283,7 @@ export function ConfirmQueue({
   moreHref: string;
   now: Date;
   day: Intl.DateTimeFormat;
-  /** The reader's locale, for the amounts' number format (D-197). */
+  /** The reader's locale, for the amounts' number format (D-153). */
   locale: string;
   t: TFunction;
 }) {

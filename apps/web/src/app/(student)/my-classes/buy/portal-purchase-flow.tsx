@@ -28,7 +28,7 @@ type Method = "stripe" | "manual_transfer";
 // student chose. A single string keeps the radio group trivial, and the two
 // wire fields are derived from it at submit — the instrument id is what the
 // server needs, because "which payee instructions did this student see" is
-// not recoverable from the kind alone (D-113).
+// not recoverable from the kind alone (D-145).
 const STRIPE_SELECTION = "stripe";
 
 // See checkout-form.tsx (public funnel) for the same pattern/rationale.

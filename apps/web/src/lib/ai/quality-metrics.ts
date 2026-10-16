@@ -14,7 +14,7 @@
 //
 // Counts only, never content — the admin sees pipeline status and figures, not
 // what was said in a lesson (D-23). Test accounts are left out of every figure
-// (D-192). `LessonInsight` does not record which model produced it, so this
+//. `LessonInsight` does not record which model produced it, so this
 // cannot split by model; the offline evals (lib/evals/) are the before/after
 // measure for a model change.
 

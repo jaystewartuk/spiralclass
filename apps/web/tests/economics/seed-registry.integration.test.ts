@@ -3,7 +3,7 @@ import { describeIntegration, getTestPrisma, truncateAll } from "../_setup/test-
 import { KNOWN_INTEGRATIONS } from "@spiralclass/shared";
 import { ensureIntegrationsSeeded } from "@/lib/economics/seed-registry";
 
-// D-86 S2 — the create-if-absent Integration registry seed against a real
+// Economics slice S2 — the create-if-absent Integration registry seed against a real
 // Postgres, verifying the unique `key` index + createMany/skipDuplicates
 // contract this file relies on to never clobber an admin's edited row
 // (tests/lib/economics-seed-registry.test.ts covers the same behaviour
