@@ -16,7 +16,7 @@ import { getVideoProvider } from "@/lib/video/providers";
 
 // Explicit enablement flag for class recording, OFF by default — mirrors
 // LIVE_CAPTIONS_ENABLED (captions/config.ts). Recording a live lesson carries
-// the same consent/privacy weight as captioning it (D-21/D-22), hence a flag
+// the same consent/privacy weight as captioning it (D-22), hence a flag
 // rather than "on because the provider happens to be configured for it".
 // Non-secret, so it lives in the committed runtime env files
 // (config/env/*.runtime.env), not Infisical. Accepts 1/true/on (any case).

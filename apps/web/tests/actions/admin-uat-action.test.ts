@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-// /admin/uat actions (D-55). All five require the superadmin rank OR the
+// /admin/uat actions (D-25). All five require the superadmin rank OR the
 // uat:run capability — requireAdmin is mocked wholesale here (that OR-logic
 // is covered directly in tests/lib/admin-nav-visibility.test.ts and
 // tests/lib/admin-capabilities.test.ts), so these tests focus on: each

@@ -2,7 +2,7 @@
 //
 // Capturing a student's voice for the insights pipeline requires an explicit,
 // recorded consent for the specific (teacher, student) pair. The visible
-// recording indicator (D-21 item 2) is necessary but is not treated as sufficient on
+// recording indicator is necessary but is not treated as sufficient on
 // its own — so capture is gated HERE, at the point of capture, on a
 // deliberately-recorded consent.
 //

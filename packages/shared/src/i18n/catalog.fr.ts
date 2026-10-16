@@ -5855,14 +5855,14 @@ export const fr = {
   "web.admin.lessonInsights.liveWarning.pre":
     "— la voix capturée est envoyée au fournisseur d'ASR et les transcriptions sont stockées,",
   "web.admin.lessonInsights.liveWarning.strong": "pour chaque paire consentante",
-  "web.admin.lessonInsights.liveWarning.mid": "(D-21/D-22). Seules les paires de",
+  "web.admin.lessonInsights.liveWarning.mid": "(D-22). Seules les paires de",
   "web.admin.lessonInsights.liveWarning.em": "test",
   "web.admin.lessonInsights.liveWarning.midEnd":
     "consenties doivent être enregistrées ; désactivez",
   "web.admin.lessonInsights.liveWarning.post": "entre les tests.",
   "web.admin.lessonInsights.title": "Insights de cours — état du pipeline",
   "web.admin.lessonInsights.subtitle":
-    "Statut opérationnel sur tous les tenants : capture → transcription → insights → profil → résumé. Statuts et compteurs uniquement — aucun contenu de transcription, de prononciation ou de profil n'est affiché ici (D-21/D-22).",
+    "Statut opérationnel sur tous les tenants : capture → transcription → insights → profil → résumé. Statuts et compteurs uniquement — aucun contenu de transcription, de prononciation ou de profil n'est affiché ici (D-22).",
   "web.admin.lessonInsights.awaitingTranscription": "Captures en attente de transcription",
   "web.admin.lessonInsights.awaitingTranscriptionHint": 'audio "ready" pas encore transcrit',
   "web.admin.lessonInsights.stuckCaptures": "Captures bloquées",

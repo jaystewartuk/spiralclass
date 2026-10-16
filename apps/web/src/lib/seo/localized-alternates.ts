@@ -19,7 +19,7 @@ const DOCUMENT_LANGUAGES: Readonly<Record<string, readonly AppLocale[]>> = {
   // English, plus each translation that is current (D-196): a translation
   // behind the English is not advertised as the terms.
   "/terms": termsLanguages(),
-  // English only (D-128).
+  // English only (D-22).
   "/privacy-notice": ["en"],
 };
 

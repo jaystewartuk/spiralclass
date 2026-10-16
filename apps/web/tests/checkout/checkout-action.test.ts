@@ -226,7 +226,7 @@ describe("createCheckoutIntent", () => {
     expect(res).toEqual({ clientSecret: "cs_1_secret_abc", externalReference: "ref-1" });
   });
 
-  it("rejects checkout when the email belongs to a Teacher account (D-38)", async () => {
+  it("rejects checkout when the email belongs to a Teacher account (D-40)", async () => {
     findOrCreateRosterStudent.mockRejectedValueOnce(new TeacherEmailConflictError("conflict"));
     const res = await run(formData());
     expect(res).toHaveProperty("error");

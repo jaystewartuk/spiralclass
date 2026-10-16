@@ -207,7 +207,7 @@ if [ "${PROMOTE_POLICIES}" != "main" ]; then
 fi
 echo "  ✓ only main can reach PROMOTE_TOKEN."
 
-# ── Security tab: reporting, code scanning, and merge protection (D-179) ─────
+# ── Security tab: reporting, code scanning, and merge protection (D-158) ─────
 # SECURITY.md and the issue-template contact link both send a reporter to the
 # private "Report a vulnerability" flow. With the setting off that link is a
 # dead end, and a reporter who hits one opens a public issue instead.

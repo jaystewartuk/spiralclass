@@ -25,7 +25,7 @@
 #                                    line (`SEED_BULK_TEACHERS=40 pnpm
 #                                    seed:preview`) and different every run. A
 #                                    stored value would be the wrong shape.
-#   SEED_BULK_STUDENTS_PER_TEACHER — that knob's companion, same reason (D-55).
+#   SEED_BULK_STUDENTS_PER_TEACHER — that knob's companion, same reason (D-25).
 #   PROD_DB_HOSTS                  — the production-database refusal guard
 #                                    (D-70). It travels with the environments
 #                                    that carry prod credentials; a preview seed

@@ -52,7 +52,8 @@ export async function writeOverride(input: WriteOverrideInput): Promise<string> 
   });
 
   // Out-of-band copy of the audit event. The `overrides` table is append-only
-  // at the DB level (migration 20260625000000), but a logger sink lives
+  // at the DB level (overrides_append_only() in the invariants migration,
+  // 20260906120100_database_invariants), but a logger sink lives
   // outside the DB entirely, so the trail survives even a DB-credential
   // holder. Cheap; admin write volume is low.
   log.info("override", {

@@ -305,6 +305,12 @@ template)`.
   so there is no Account-to-Customer mapping table to keep.
 - **Wise and bank transfers were always outside this** — that money settles
   directly to the teacher and never touched the platform either.
+- **Strong Customer Authentication follows the teacher's country.** Under
+  direct charges the charge is already on her account, so SCA is decided by
+  the connected account's country, not the platform's, and `on_behalf_of`
+  (which attributes a _destination_ charge) is not needed. One consequence
+  is UX, not a defect: the Customer and saved card live on her account, so a
+  student buying from two teachers saves a card twice.
 
 ### Refunds
 

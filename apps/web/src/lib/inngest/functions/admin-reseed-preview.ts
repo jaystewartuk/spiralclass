@@ -7,7 +7,7 @@ import { UAT_OVERRIDE_TARGET_IDS } from "@/lib/uat/env-targets";
 // see the comment on `main`'s export in scripts/seed.ts. Deliberately NOT a
 // new Supabase client of our own; this is the existing coupling (Auth Admin
 // API for account provisioning, pending the D-40 better-auth cutover), not a
-// new one introduced by /admin/uat (D-55).
+// new one introduced by /admin/uat (D-25).
 import { main as runPreviewSeed } from "../../../../scripts/seed";
 
 // Triggered by the /admin/uat "Reseed preview" button (apps/actions/admin-uat.ts).

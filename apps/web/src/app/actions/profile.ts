@@ -342,7 +342,8 @@ export async function saveBioAction(
 // account phone: publishing a number on the public page is its own opt-in,
 // not a republishing of the account field (see schema.prisma's
 // Teacher.publicWhatsappE164). An empty field clears the number and hides the
-// button. Uses the plain wa.me deep-link D-42 kept — no Meta integration.
+// button. Uses a plain wa.me deep-link — no Meta integration (the automated
+// WhatsApp Cloud API rail was removed; docs/features/notifications.md).
 export async function saveBookingPageWhatsappAction(
   _prev: ProfileState,
   formData: FormData,

@@ -93,6 +93,34 @@ where the features below interact with plan limits.
   moderation tooling for teacher-hosted video beyond the account holder being
   accountable for it.
 
+### Public listing (Marketplace Ready)
+
+- Finishing onboarding does **not** make a teacher public. Her booking page
+  (`/b/<slug>`), its buy page, social card, lead capture, the anonymous
+  checkout and the sitemap all gate on `isPubliclyListed()`
+  (`apps/web/src/lib/marketplace-ready.ts`): `isMarketplaceReady()`
+  (`packages/shared/src/activation.ts`) and not moderation-disabled.
+- Marketplace Ready is six signals, all required: onboarding complete, a
+  photo, a bio, package templates saved at least once (`templatesTouchedAt`),
+  availability saved at least once (`availabilityTouchedAt`), and a payout
+  rail — Stripe can charge, or a payout instrument is offerable at her
+  pricing currency. The untouched starter seed does not count as reviewed.
+- It is the **only** activation state that changes behaviour. Every other
+  state (`firstBookingReceived`, `activeTeacher`, …) is informational, and
+  `marketplaceReadyAt` is a one-time analytics cache, never read by a gate.
+- **Not gated on it:** the authenticated teacher app (she must reach
+  Settings to become ready) and every existing-relationship flow — a student
+  who already has this teacher keeps buying from the portal.
+- The gate applied to every teacher at once when it shipped (2026-07-25),
+  with no grace period: a teacher with no payout rail could not be paid
+  anyway, so the cost was visibility, not revenue.
+- The sitemap and the admin `stalled=yes` filter (onboarded
+  `STALLED_TEACHER_DAYS`+ days ago, still not ready) translate the predicate
+  into a Prisma `where` by hand; a change to `isMarketplaceReady()` must be
+  mirrored there.
+- Once a Stripe account exists, `country` cannot change: Stripe fixes a
+  connected account's country at creation.
+
 ### Availability (working hours)
 
 - Availability is a set of weekly recurring rules: day of week (Sun–Sat),
@@ -190,8 +218,9 @@ where the features below interact with plan limits.
    (capped on Free plan).
 5. **Preview step**: teacher reviews her public booking page before
    finishing.
-6. Onboarding is marked complete; the teacher's booking page becomes fully
-   live.
+6. Onboarding is marked complete. The booking page goes live only once the
+   teacher is also Marketplace Ready (see Public listing above); until then
+   `/b/<slug>` 404s and Settings → Booking page names what is missing.
 
 ### Editing working hours later
 

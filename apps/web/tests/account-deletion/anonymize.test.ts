@@ -139,7 +139,7 @@ function makeDeps(now: Date): {
         return { count: 1 };
       },
     },
-    // D-136: closing a teacher's account destroys her recordings. Empty here —
+    // D-22: closing a teacher's account destroys her recordings. Empty here —
     // the purge itself is covered in purge-recordings.test.ts; what this stub
     // buys is that anonymizeTeacher still completes (and still revokes sessions)
     // with the purge wired in.
@@ -274,7 +274,7 @@ describe("anonymizeMaturedDeletions", () => {
   });
 
   it("purges a deleted teacher's recordings, and a purge failure can't block the deletion", async () => {
-    // D-136. The privacy policy has promised since 2026-08-26 that a class recording
+    // D-22. The privacy policy has promised since 2026-08-26 that a class recording
     // lives only "while the teacher's account is open"; nothing enforced it.
     const now = new Date("2026-06-01T00:00:00Z");
     const env = makeDeps(now);

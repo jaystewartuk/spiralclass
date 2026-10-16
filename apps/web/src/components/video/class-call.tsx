@@ -1796,7 +1796,7 @@ export function ClassCall({
               endAt={scheduledEndAt}
               // The recognised lines are being kept as this class's
               // transcript for lesson insights (D-185). Shown to both
-              // people: a capture with no visible indicator is what D-21
+              // people: a capture with no visible indicator is what D-22
               // forbids.
               indicators={browserCaptions.transcriptKept && <LearningNotesIndicator />}
               controls={

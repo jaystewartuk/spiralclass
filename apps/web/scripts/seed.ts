@@ -216,7 +216,7 @@ export interface SeedOptions {
 // Generate + upload one seeded teacher's monogram, then hand back the
 // photo_path to store on her row. The path is returned unconditionally, even
 // when the upload failed: `hasPhoto` is one of isPubliclyListed()'s signals
-// (D-104) and several seeded teachers are meant to be listed, so the column
+// and several seeded teachers are meant to be listed, so the column
 // must not depend on whether this env happens to have R2 credentials. A failed
 // upload is announced rather than swallowed — on preview it is the whole bug
 // this function exists to fix.
@@ -1190,7 +1190,7 @@ async function seedHero(
       locale: "en",
       bookingSlug: hero.slug,
       headline: hero.headline,
-      // hasPhoto/hasBio signals for isPubliclyListed() (D-104). The photo is a
+      // hasPhoto/hasBio signals for isPubliclyListed(). The photo is a
       // monogram generated and uploaded under this hero's own id, so the
       // pointer is true in whichever bucket the seed ran against; bio is a
       // generic placeholder derived from the headline. Neither is asserted by
@@ -1366,7 +1366,7 @@ async function seedBulkTeacher(
       locale: "en",
       bookingSlug: `seed-teacher-${i}`,
       // hasPhoto/hasBio/templatesTouched/availabilityTouched signals for
-      // isPubliclyListed() (D-104) — see the identical comment on seedHero's
+      // isPubliclyListed() — see the identical comment on seedHero's
       // teacher.create above.
       photoPath: await seedTeacherPhoto(deps, teacherId, name, email),
       bio: `${name}'s bio.`,
@@ -1709,12 +1709,12 @@ export async function seedAll(
       // re-seed is the only place it comes back. Resolves to null (no image,
       // initials monogram instead) in envs without R2 configured (local).
       photoPath: await seedTeacherPhoto(deps, anaId, "Alicia Moreno", SEED_EMAIL),
-      // Real short bio text — isPubliclyListed()'s hasBio signal (D-104) needs
+      // Real short bio text — isPubliclyListed()'s hasBio signal needs
       // this non-null, same as templatesTouchedAt/availabilityTouchedAt below.
       bio: "Profesora de inglés con más de 10 años de experiencia enseñando a adultos.",
       onboardingCompleteAt: now,
       country: SEED_COUNTRY,
-      // Marketplace Ready's other two sub-signals (D-104, isMarketplaceReady()):
+      // Marketplace Ready's other two sub-signals (isMarketplaceReady()):
       // "reviewed the offer" / "reviewed the schedule". Every seed teacher is
       // meant to represent an already-active real teacher, not one mid-wizard,
       // so both stamp to `now` alongside the templates/availability they're
@@ -2157,7 +2157,7 @@ async function loadUserIdByEmailMap(prisma: PrismaClient): Promise<Map<string, s
   return new Map(rows.map((r) => [r.email, r.id]));
 }
 
-// Exported so the /admin/uat Reseed action's Inngest function (D-55) can call
+// Exported so the /admin/uat Reseed action's Inngest function (D-25) can call
 // the exact same seeding path as the CLI, rather than duplicating the
 // user-provisioning / storage upload wiring above. `opts` lets that caller
 // pass the same bulk-volume knobs the CLI reads from

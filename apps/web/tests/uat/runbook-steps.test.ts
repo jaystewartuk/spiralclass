@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { UAT_SECTIONS, CATEGORY_LABELS } from "@/lib/uat/runbook-steps";
 
-// Item ids are now hand-authored (D-55's structured runbook, not derived
+// Item ids are now hand-authored (D-25's structured runbook, not derived
 // from markdown document order), so a copy-paste duplicate is a real risk —
 // two items sharing an id would silently share checklist-checked state.
 

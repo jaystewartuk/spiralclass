@@ -75,8 +75,6 @@ const DELETED_DOCS = new Set([
   "docs/deployment/ORACLE_RUNNER.md",
   "docs/deployment/SELF_HOSTED_RUNNER.md",
   "docs/engineering/TECH_DEBT.md",
-  "docs/engineering/integrations/whatsapp.md",
-  "docs/launch/UAT_PRELAUNCH.md",
   "docs/ops/FLY_SPIKE.md",
 ]);
 

@@ -189,7 +189,7 @@ describe("PayoutStatusPanel", () => {
     const html = render({ card: "not-connected", wise: "not-connected", canBePaid: false });
     expect(html).toContain(c("web.settings.payments.status.blockedHeadline"));
     // The sentence the page never said: no rail means her booking page is
-    // unlisted (D-104's hasPayoutMethod signal), so nobody reaches a checkout.
+    // unlisted (isMarketplaceReady()'s hasPayoutMethod signal), so nobody reaches a checkout.
     expect(html).toContain(c("web.settings.payments.status.blockedBody"));
     // One call to action, anchored at the section that fixes it.
     expect(html).toContain(c("web.settings.payments.status.setUpCta"));

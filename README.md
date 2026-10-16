@@ -73,7 +73,7 @@ appears in it.</sub>
 It is published as an honest record of how one engineer builds and runs a
 payments-handling, video-carrying SaaS product alone: the architecture, the
 decisions, the things that went wrong, and the mechanisms built so they would
-not go wrong twice. More than 50 decision records in
+not go wrong twice. More than 25 decision records in
 [`docs/decisions/`](docs/decisions/README.md) are the most useful thing here —
 several of them reverse an earlier one and say why.
 
@@ -84,8 +84,8 @@ reading is what serves production.
 publication — UI iteration on a client that no longer exists,
 infrastructure churn whose lesson its successors carry, and implementation
 notes with no rejected alternative. The survivors are unedited except where a
-record named an account identifier ([D-158](docs/decisions/D-158.md)) or the
-maintainer's own legal position ([D-159](docs/decisions/D-159.md)). Numbering
+record named an account identifier or the maintainer's own legal position
+([D-158](docs/decisions/D-158.md)). Numbering
 was not renumbered, so the gaps are visible rather than tidied away —
 [the index says which groups went and why](docs/decisions/README.md#what-is-not-here).
 
@@ -621,7 +621,7 @@ in [`infra/gcp-livekit/README.md`](infra/gcp-livekit/README.md).
 | Where                                      | What                                                                                            |
 | ------------------------------------------ | ----------------------------------------------------------------------------------------------- |
 | [`docs/architecture/`](docs/architecture/) | System design, the data model, how a purchase and a booking flow                                |
-| [`docs/decisions/`](docs/decisions/)       | **More than 50 decision records.** Current policy, not history — several reverse an earlier one |
+| [`docs/decisions/`](docs/decisions/)       | **More than 25 decision records.** Current policy, not history — several reverse an earlier one |
 | [`docs/features/`](docs/features/)         | Canonical product behaviour, one document per feature                                           |
 | [`docs/development/`](docs/development/)   | Setup, testing, the change workflow, i18n, analytics                                            |
 | [`docs/deployment/`](docs/deployment/)     | Release, incident response, backup and restore, infrastructure runbooks                         |

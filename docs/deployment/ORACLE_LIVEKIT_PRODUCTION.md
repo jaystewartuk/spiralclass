@@ -134,7 +134,7 @@ infrastructure. Because of a pre-existing coupling
 unfixed during Phase 1) turning this on also starts per-participant
 lesson-audio capture to R2 for consenting students — not the downstream AI
 transcription/analysis (`LESSON_INSIGHTS_TRANSCRIPTION_ENABLED` stays off,
-separately gated, still legal-blocked per D-21). Consent (D-22) still gates
+separately gated, still legal-blocked). Consent (D-22) still gates
 who this applies to; nothing here changes the consent model, only that the
 capture side of the already-consented-to pipeline now actually runs instead
 of being silently prevented by the coupling bug.
