@@ -118,7 +118,7 @@ export async function copyNotesFromLastClass(
   return { ok: true };
 }
 
-// In-call bookmark (D-97) — a one-tap "mark this moment" during the live
+// In-call bookmark — a one-tap "mark this moment" during the live
 // call. Plain callable action (bookingId) => result, called from the
 // call-page button, not a <form> — mirrors app/actions/call-nudge.ts.
 export async function createLessonBookmark(

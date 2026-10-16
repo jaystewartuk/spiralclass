@@ -12,7 +12,7 @@ import type { TranslatorApiLike, TranslatorLike } from "@/lib/captions/recognize
 // A line that cannot be translated is dropped (null), never shown
 // untranslated: the listener reads the captions BECAUSE she does not speak
 // the source language. (She will already have seen its words as they were
-// spoken — D-198's partials — which is all an untranslated line could add.)
+// spoken — D-185's partials — which is all an untranslated line could add.)
 //
 // A translation that takes longer than TRANSLATE_TIMEOUT_MS is a failure.
 // One speaker's lines are shown in the order spoken, so a request left to

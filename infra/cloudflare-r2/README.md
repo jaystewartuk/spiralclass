@@ -57,7 +57,7 @@ own env-var family (irregular prefixes by history, not by design — see
 | ------------------- | ---------------------- | --------------------------------------------------------------------------------- |
 | `class-materials`   | `CLASS_MATERIALS_R2`   | `apps/web/src/lib/storage/provider.ts`                                            |
 | `teacher-photos`    | `TEACHER_PHOTOS_R2`    | `apps/web/src/lib/storage/provider.ts` (public)                                   |
-| `teacher-videos`    | `TEACHER_VIDEOS_R2`    | `provider.ts`'s `R2_ENV_PREFIX` (intro video, public — D-73)                      |
+| `teacher-videos`    | `TEACHER_VIDEOS_R2`    | `provider.ts`'s `R2_ENV_PREFIX` (intro video, public)                             |
 | `student-photos`    | `STUDENT_PHOTOS_R2`    | `lib/storage/student-photo.ts` (student profile photo, **private** — signed URLs) |
 | `chat-audio`        | `CHAT_AUDIO_R2`        | `provider.ts`'s `R2_ENV_PREFIX` (chat audio + video)                              |
 | `material-podcasts` | `MATERIAL_PODCASTS_R2` | `provider.ts`'s `R2_ENV_PREFIX` (generated material podcasts)                     |
@@ -247,7 +247,7 @@ existed. On the current scheme there is **nothing to adopt on the production
 side**: `apply` creates all six `agendaprofe-production-*` buckets and tokens
 from scratch (the old bare-named live buckets are out of scope — see the
 migration note up top). Two preview buckets are also brand-new:
-`agendaprofe-preview-teacher-videos` (D-73) and
+`agendaprofe-preview-teacher-videos` and
 `agendaprofe-preview-material-podcasts`.
 
 The **only** import risk is the four **older** `agendaprofe-preview-*`

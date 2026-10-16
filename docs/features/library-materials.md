@@ -107,7 +107,8 @@ what was stale went with them.
   (`Level.position`); focus tags are optional and many-per-item, so they can
   only narrow a set, never partition it.
 - **No per-level counts** on the picker (explicit teacher preference), which
-  is also why the picker costs no material query at all.
+  is also why the picker costs no material query at all. Nor is a shelf
+  sub-grouped by `unit`; the existing filters were judged enough.
 - Browse state is encoded in `?level=`: absent = the picker, `?level=<id>` = a
   shelf, `?level=all` = the flat all-levels list. The rule lives in
   `packages/shared/src/materials-browse.ts` rather than in the page, so the
@@ -277,6 +278,19 @@ collapses them to one row per (class, material). Two surfaces consume it:
   the same prompt builder and template picker.
 - "Edit with AI" (refine) applies a bounded free-text change instruction
   (≤1,000 characters) to an existing body; cannot run against an empty body.
+- Every generation — material, class content, refine and podcast script — is
+  told the lesson is **one-to-one**: one teacher, one student, no pair or group
+  work, and a naturally group activity rewritten for two people
+  (`lessonFormatDirective()` in `lib/materials/prompt.ts`). It is always on;
+  there is no setting, because there is no other lesson format.
+- A teacher shapes the AI's writing through **presets and a note**, not by
+  editing the prompt: tone, learner age, language variety, vocabulary
+  difficulty and a free-text note (`/settings/materials`). They are placed after
+  the rules about the taught language and the student's name, and worded to
+  defer to them, so a note cannot override either.
+- The platform ships no lesson templates or curriculum. A template is always one
+  the teacher wrote; focus-tag packs are the only seeded content, and she can
+  edit them.
 - Generated/typed body is capped at 20,000 characters
   (`CLASS_CONTENT_MAX_CHARS`), same ceiling as class content.
 - Every save that changes the body snapshots the outgoing body to

@@ -7,10 +7,10 @@ under the reversal [D-184](../../docs/decisions/D-184.md) allowed.
 > ⚠️ **THIS MODULE HAS NOT BEEN APPLIED. NO STATE FILE EXISTS. NO BOX MATCHES
 > IT.** Read every file here as a proposal, never as a description of a
 > machine. The hand-built box it was written beside was destroyed on 2026-09-19
-> ([D-182](../../docs/decisions/D-182.md)); no Oracle box exists now, and
+> ([D-16](../../docs/decisions/D-16.md)); no Oracle box exists now, and
 > production video runs on Compute Engine
 > ([`infra/gcp-livekit/`](../gcp-livekit/README.md),
-> [D-187](../../docs/decisions/D-187.md)).
+> [D-16](../../docs/decisions/D-16.md)).
 >
 > That is D-139's exact fault, committed knowingly. [D-184](../../docs/decisions/D-184.md)
 > forbade committing this before an apply precisely to avoid it, and its third
@@ -45,8 +45,8 @@ the box this replaced.
 [D-184](../../docs/decisions/D-184.md), kept production off
 this box. This box would hold
 LiveKit, preview and preview's data. Production video has been on Compute
-Engine since [D-187](../../docs/decisions/D-187.md), so it carries no class until
-a change moves `LIVEKIT_URL` back under D-182's three conditions.
+Engine since [D-16](../../docs/decisions/D-16.md), so it carries no class until
+a change moves `LIVEKIT_URL` back under D-16's three conditions.
 
 **Does not:** touch Cloudflare. D-139 deleted `infra/cloudflare` because its
 Access application was made by hand, so a first apply would create a second

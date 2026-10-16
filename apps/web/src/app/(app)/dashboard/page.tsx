@@ -125,7 +125,7 @@ export default async function DashboardPage() {
   // de-listed by exactly those two. See missingMarketplaceSignals().
   const missingSignals = missingMarketplaceSignals(marketplaceSignals);
 
-  // The in-app teacher-amplification guide (D-24): an ROI-ordered checklist of
+  // The in-app teacher-amplification guide (D-125): an ROI-ordered checklist of
   // the shipped acquisition features, with each step's done-state derived from
   // real data so it reads as live progress, not a stale help article. Leads
   // with the payment-rail step since nothing else here matters

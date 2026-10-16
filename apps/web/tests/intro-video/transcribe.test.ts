@@ -6,7 +6,7 @@ import {
 } from "@/lib/intro-video/transcribe";
 import type { Utterance } from "@/lib/transcription/types";
 
-// Layer 2 pipeline (D-73): teacher's public intro video → transcript, Pro-gated,
+// Layer 2 pipeline: teacher's public intro video → transcript, Pro-gated,
 // on the Inngest rail. All I/O is injected, so these drive the branch matrix
 // (no video / stale / not-Pro / success / failure) against stub deps.
 

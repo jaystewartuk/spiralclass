@@ -224,7 +224,7 @@ nothing reaches production without the heavy tier green on that commit.
 
 ⚠️ **There is no preview host today, so merging to `main` deploys nothing.**
 Preview moved to the Oracle box ([D-184](../decisions/D-184.md)), that box was
-destroyed on 2026-09-19 ([D-182](../decisions/D-182.md)), and preview has no
+destroyed on 2026-09-19 ([D-16](../decisions/D-16.md)), and preview has no
 deploy target until it is rebuilt. `scripts/oracle-deploy.sh` is the way back.
 Until then the manual pass runs against your own checkout.
 

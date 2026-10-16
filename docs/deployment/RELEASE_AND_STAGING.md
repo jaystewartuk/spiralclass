@@ -7,12 +7,12 @@ branches). The release/promote/rollback gate structure below
 is current.
 
 ⚠️ **There is no preview host today; production's deploy is live.**
-Production serves from Cloud Run ([D-184](../decisions/D-184.md)'s addendum)
+Production serves from Cloud Run ([D-184](../decisions/D-184.md))
 and `deploy-production.yml`'s `push` trigger is live — `pnpm promote` reads
 that trigger off the workflow file and refuses before the fast-forward if it is
 ever missing. Preview moved to the Oracle A1 box
 ([D-184](../decisions/D-184.md)), which was destroyed on 2026-09-19
-([D-182](../decisions/D-182.md)); preview has no deploy target until it is
+([D-16](../decisions/D-16.md)); preview has no deploy target until it is
 rebuilt, and `scripts/oracle-deploy.sh` is the way back. Since
 [D-199](../decisions/D-199.md) a merge to `main` starts a production deploy once
 Gate and Heavy are green, and it waits for the owner's approval on the

@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-// Lesson templates (D-46) — the only authoring surface still owned by
+// Lesson templates (D-17) — the only authoring surface still owned by
 // app/actions/class-content.ts after the materials UI unification. Saving and
 // generating class content itself moved to the unified actions in
 // app/actions/library.ts (docs/features/library-materials.md); their coverage

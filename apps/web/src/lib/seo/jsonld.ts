@@ -177,7 +177,7 @@ export function teacherProfileJsonLd(input: {
     currency: string;
     classDurationMin?: number;
   }>;
-  // The intro video (D-73), when recorded. `transcriptText` is ONLY passed
+  // The intro video, when recorded. `transcriptText` is ONLY passed
   // when the teacher has opted in (introVideoTranscriptPublicOptIn) AND a
   // transcript actually exists — the caller decides that, not this builder.
   video?: {
@@ -259,7 +259,7 @@ export function teacherProfileJsonLd(input: {
     });
   }
 
-  // The intro video (D-73) — richer content than the 280-char bio, and
+  // The intro video — richer content than the 280-char bio, and
   // otherwise invisible to a text crawler. `transcript` only appears when the
   // caller passed one (teacher opted in AND it exists); the video markup
   // itself doesn't depend on that opt-in, since the video is already public.

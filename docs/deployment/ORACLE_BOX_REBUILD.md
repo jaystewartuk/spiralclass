@@ -2,9 +2,9 @@
 
 > [!IMPORTANT]
 > **The box this file was observed from was destroyed on 2026-09-19**
-> ([D-182](../decisions/D-182.md)), and no Oracle box has served since.
+> ([D-16](../decisions/D-16.md)), and no Oracle box has served since.
 > Production video runs on a Compute Engine `e2-micro`
-> ([D-187](../decisions/D-187.md),
+> ([D-16](../decisions/D-16.md),
 > [`infra/gcp-livekit/README.md`](../../infra/gcp-livekit/README.md)). What
 > follows is the record of that machine and the hand procedure for the Oracle
 > way back ([D-184](../decisions/D-184.md)); where it and
@@ -44,7 +44,7 @@ retired in 2026-07 after three reversals in as many days, and CI now runs on
 GitHub-hosted runners ([D-157](../decisions/D-157.md)).
 
 Losing it stopped classes — which is what happened when it could not be
-relaunched ([D-182](../decisions/D-182.md)). Rebuilding it is a hand operation
+relaunched ([D-16](../decisions/D-16.md)). Rebuilding it is a hand operation
 measured in hours, which is the cost [D-139](../decisions/D-139.md) knowingly
 accepted.
 
@@ -345,7 +345,7 @@ The http-01 path was verified end-to-end on 2026-08-29 and it does work:
 > challenge with a redirect, http-01 fails, and — because tls-alpn-01 is
 > already impossible through the proxy — **renewal fails silently until the
 > certificate expires and every class stops.** This is
-> [D-134](../decisions/D-134.md)'s risk, and it is now the _only_ remaining
+> [D-16](../decisions/D-16.md)'s risk, and it is now the _only_ remaining
 > path rather than one of two.
 >
 > **This invariant is a probe, not just this paragraph.** `pnpm local

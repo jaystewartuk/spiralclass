@@ -10,7 +10,7 @@ import { flushAnalytics, trackServerEvent } from "@/lib/analytics/posthog";
 
 const log = logger({ surface: "intro-video-ready" });
 
-// Triggered when a teacher records/uploads their public intro video (D-73,
+// Triggered when a teacher records/uploads their public intro video (coach
 // Layer 2). Transcribes it into their IntroVideoAnalysis row so Layer 3 can
 // coach on it. Dormant until `introVideoCoachEnabled()` (an explicit flag AND a
 // configured ASR vendor) is true — until then this logs and returns, exactly

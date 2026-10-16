@@ -175,7 +175,7 @@ export function CheckoutForm({
         // abandons (left before submit, or JS never ran) from server-side
         // drop-offs. No PII in the payload; the email/name live only in the
         // server event's resolved student id.
-        // Stamped with the visitor's intro-video watch state (D-73) so the
+        // Stamped with the visitor's intro-video watch state so the
         // "does watching the intro convert better?" question is ONE insight
         // with a breakdown, rather than a hand-computed ratio between two
         // separate funnels that don't share a denominator. `watched: false` is

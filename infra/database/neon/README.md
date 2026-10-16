@@ -94,7 +94,7 @@ neonctl projects list --org-id "$NEON_ORG_ID" --output json
 
 The production project is `spiralclass-use1`, id from `neonctl projects list`.
 There is no preview project: preview has no host
-([D-184](../../../docs/decisions/D-184.md)'s addendum). The table that stood
+([D-184](../../../docs/decisions/D-184.md)). The table that stood
 here named two projects, `agendaprofe-preview` and `agendaprofe-production`,
 long after neither existed under those names.
 

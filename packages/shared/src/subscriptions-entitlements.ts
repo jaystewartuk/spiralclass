@@ -48,7 +48,7 @@ export type Entitlements = {
   // Live notes: authoring is free, but the live surfaces — present mode
   // and the realtime student panel — are Pro.
   canUseLiveNotes: boolean;
-  // Intro-video AI coach (D-73, Layer 2/3): transcribe the teacher's public
+  // Intro-video AI coach (Layer 2/3): transcribe the teacher's public
   // intro video and coach them on it (+ captions, draft bio). A Pro growth tool
   // — recording/showing the video is always free; only the AI analysis is gated.
   canUseIntroVideoCoach: boolean;

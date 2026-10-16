@@ -37,7 +37,7 @@ import { REPO_ROOT, walkTree } from "./_tree";
  *   - a section of a PUBLISHED standard (`RFC 5545 §3.3.11`), which a reader
  *     can look up;
  *   - a numbered item of a decision record that is in this tree, cited as
- *     "D-19 item 6" rather than "D-19 §6" — the record is here, so the pointer
+ *     "D-NN item 6" rather than "D-NN §6" — the record is here, so the pointer
  *     resolves;
  *   - `Slice N`, which is not a pointer at all. It names a delivery milestone
  *     the way "Phase 2" does, and a reader loses nothing by not finding a

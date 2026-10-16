@@ -83,7 +83,7 @@ export function IntroVideoForm({
   const router = useRouter();
   const posthog = usePostHog();
 
-  // Teacher-side funnel (D-73). The server only ever hears about attempts that
+  // Teacher-side funnel. The server only ever hears about attempts that
   // reached R2, so every step BEFORE that — opened the recorder, granted the
   // camera, finished a take, started the upload, failed the upload — has to be
   // captured here or it is simply unmeasurable. `surface: "web"` tags every
@@ -112,7 +112,7 @@ export function IntroVideoForm({
     null,
   );
   const [recorderError, setRecorderError] = useState<string | null>(null);
-  // Upload is a SECONDARY path, collapsed behind a disclosure (D-73's review).
+  // Upload is a SECONDARY path, collapsed behind a disclosure (the intro-video review).
   // Recording in-app is what the product actually wants — a warm phone selfie
   // converts better than a produced marketing clip, and it's the only path with
   // a known duration, orientation and length cap. But upload is NOT removed:
@@ -381,7 +381,7 @@ export function IntroVideoForm({
         />
       )}
 
-      {/* AI coach feedback (D-73, Layer 3) — teacher-only, shown when generated
+      {/* AI coach feedback (Layer 3) — teacher-only, shown when generated
           or while processing.
 
           It used to be hidden whenever `recording || recorded` was true, i.e.

@@ -115,7 +115,7 @@ export async function handleNormalizedEvent(
     // closed at this point, so any row still marked "recording" is definitely
     // orphaned (see finalizeDanglingRecording's own comment for why).
     await finalizeDanglingRecording(prisma, bookingId);
-    // The transcript the browsers wrote during the class (D-189) is complete
+    // The transcript the browsers wrote during the class (D-185) is complete
     // once the room is: rebase it and hand it to Phase C. Idempotent against
     // the Inngest fallback that does the same after the scheduled end.
     try {
@@ -156,7 +156,7 @@ export async function handleNormalizedEvent(
     // rather than behind the manual Record button.
     await maybeStartLessonAudioCapture(prisma, bookingId);
     // Auto-start the A/V recording when the teacher opted into it and both
-    // parties are now in the room (D-132). Deliberately AFTER the capture
+    // parties are now in the room (D-16). Deliberately AFTER the capture
     // above and independent of it: the two answer different questions (may we
     // analyse this student's voice, versus does this teacher want her classes
     // recorded) and neither implies the other.

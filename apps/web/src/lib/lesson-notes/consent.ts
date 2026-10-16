@@ -1,4 +1,4 @@
-// Lesson-insights consent gate (D-22, refines D-19 item 6 and D-21 item 2).
+// Lesson-insights consent gate (D-22).
 //
 // Capturing a student's voice for the insights pipeline requires an explicit,
 // recorded consent for the specific (teacher, student) pair. The visible

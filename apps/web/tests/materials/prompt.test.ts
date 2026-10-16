@@ -343,7 +343,7 @@ describe("buildMaterialPrompt — forClass: false (standalone library material)"
       forClass: false,
       locale: "es",
     });
-    // D-80: the level line now names the level and scopes it to grammar/concepts.
+    // D-17: the level line now names the level and scopes it to grammar/concepts.
     expect(withLevel.system).toContain('language level is "A2"');
     const withoutLevel = buildMaterialPrompt({ topic: "x", forClass: false, locale: "es" });
     expect(withoutLevel.system).toContain("introductory level");
@@ -416,7 +416,7 @@ describe("buildMaterialPrompt — the language taught", () => {
     expect(system).toMatch(/rather than assuming it is the same language you are writing in/i);
   });
 
-  // D-80: the CEFR level drives GRAMMAR/structure/concepts, NOT vocabulary —
+  // D-17: the CEFR level drives GRAMMAR/structure/concepts, NOT vocabulary —
   // the two axes are decoupled so a high level no longer implies rare words.
   it("pitches grammar/structure to the level and decouples vocabulary from it", () => {
     const { system } = buildMaterialPrompt({
@@ -435,7 +435,7 @@ describe("buildMaterialPrompt — the language taught", () => {
   });
 });
 
-describe("buildMaterialPrompt — vocabulary difficulty decoupled from level (D-80)", () => {
+describe("buildMaterialPrompt — vocabulary difficulty decoupled from level (D-17)", () => {
   it("C1 + Basic vocabulary keeps grammar at C1 but demands common words", () => {
     const { system } = buildMaterialPrompt({
       topic: "El subjuntivo",
@@ -535,7 +535,7 @@ describe("buildMaterialPrompt — language taught vs language written in", () =>
   });
 });
 
-// "Edit with AI" (D-73) — the refine builder takes an existing body + a free-text
+// "Edit with AI" — the refine builder takes an existing body + a free-text
 // instruction and asks for the FULL revised document with only that change. It
 // reuses buildMaterialPrompt's output-language / target-language framing so a
 // refine never drifts the material into another language.
@@ -601,7 +601,7 @@ describe("buildMaterialRefinePrompt", () => {
   });
 });
 
-// Teacher-configurable AI material style (D-78) — tone/register, learner age,
+// Teacher-configurable AI material style (D-17) — tone/register, learner age,
 // target-language variety, and a free-text note that apply to every generated
 // material. The core requirement: a teacher who finds the output too academic
 // can make it informal, and it sticks. Each field injects a directive only when
@@ -711,7 +711,7 @@ describe("buildMaterialPrompt — material style", () => {
   });
 });
 
-describe("buildMaterialPrompt — one-to-one lesson format (D-88)", () => {
+describe("buildMaterialPrompt — one-to-one lesson format (D-17)", () => {
   it("always asserts the one-to-one constraint, even when unset (forClass true and false)", () => {
     const forClass = buildMaterialPrompt({ topic: "x", forClass: true, locale: "en" });
     const forLibrary = buildMaterialPrompt({ topic: "x", forClass: false, locale: "en" });
@@ -771,7 +771,7 @@ describe("buildMaterialRefinePrompt — material style", () => {
     expect(system).not.toMatch(/additional style instructions/i);
   });
 
-  it("carries the vocabulary difficulty into a refine so an edit doesn't drift rarer (D-80)", () => {
+  it("carries the vocabulary difficulty into a refine so an edit doesn't drift rarer (D-17)", () => {
     const { system } = buildMaterialRefinePrompt({
       currentBody: "x",
       instruction: "shorten it",
@@ -782,7 +782,7 @@ describe("buildMaterialRefinePrompt — material style", () => {
     expect(system).toMatch(/Vocabulary difficulty: BASIC/);
   });
 
-  it("always asserts the one-to-one constraint on a refine, even when unset (D-88)", () => {
+  it("always asserts the one-to-one constraint on a refine, even when unset (D-17)", () => {
     const { system } = buildMaterialRefinePrompt({
       currentBody: "x",
       instruction: "shorten it",

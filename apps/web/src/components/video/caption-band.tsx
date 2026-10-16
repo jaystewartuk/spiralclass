@@ -361,7 +361,7 @@ export function CaptionBand({
         {shown.map((entry, index) => (
           <CaptionLineView
             // The finished line mounts afresh over the partial it replaces
-            // (D-198), so the log announces it as an addition, translation
+            // (D-185), so the log announces it as an addition, translation
             // and all, rather than as a silent edit of words already there.
             key={entry.partial ? `${entry.id}:partial` : entry.id}
             entry={entry}

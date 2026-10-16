@@ -111,7 +111,7 @@ describe("inngest registry — preview cron gate", () => {
 });
 
 // The reminder wake chain has an event-driven starter, on-booking-created.ts
-// (D-115 addendum, 2026-08-16): every `booking.created` re-runs the reminder
+// (D-115, 2026-08-16): every `booking.created` re-runs the reminder
 // scan so a class booked between two hourly ticks still gets its 1h/15m legs
 // on time. It is not a cron, so nothing above would catch it landing in
 // eventFunctions — but on preview it would start the chain from every Maestro

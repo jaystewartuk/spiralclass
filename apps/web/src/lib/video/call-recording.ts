@@ -94,7 +94,7 @@ export async function startBookingRecording(
     return { ok: false, reason: "start-failed" };
   }
 
-  // Per-participant analysis audio (Phase A, D-19) — a SUPPLEMENT to the A/V
+  // Per-participant analysis audio (Phase A, D-185) — a SUPPLEMENT to the A/V
   // recording, gated on the per-student insights consent (D-22). With no recorded
   // consent the A/V recording proceeds and only the insights capture is skipped.
   // Best-effort: a capture failure (or this skip) must not fail the A/V recording.
@@ -173,7 +173,7 @@ export async function stopBookingRecording(
 // consenting students get automatic capture whether or not the teacher ever
 // taps the (separately-gated) visible Record button.
 //
-// It DOES gate on transcriptionEnabled() (D-114). Without this check that flag
+// It DOES gate on transcriptionEnabled() (D-185). Without this check that flag
 // only stopped the audio at the ASR step: on-lesson-audio-ready.ts bails, but the
 // per-participant audio has already been captured and uploaded to R2, where it
 // then sits. So "transcription off" silently still meant "student voice
@@ -190,12 +190,12 @@ export async function stopBookingRecording(
 // idempotent per (bookingId, speaker), so a duplicate `participant_joined`
 // (e.g. a reconnect) is a safe no-op.
 //
-// Since D-189 the transcript lesson insights read is written by the browsers
+// Since D-185 the transcript lesson insights read is written by the browsers
 // (lib/transcription/browser-transcript.ts), and this egress capture is the
 // legacy path: it ALSO requires recordingEnabled() — a video box with an
 // egress service, which CLASS_RECORDING_ENABLED stands for — so turning the
 // transcription flag on for the browser path does not start an egress on a
-// box that has none (D-187). Its retirement is a separate change.
+// box that has none (D-16). Its retirement is a separate change.
 export async function maybeStartLessonAudioCapture(
   prisma: PrismaClient,
   bookingId: string,
@@ -246,9 +246,9 @@ export async function maybeStartLessonAudioCapture(
 }
 
 // Auto-start a booking's recording on `participant_joined` when the teacher has
-// turned on `autoRecordClasses` (D-132).
+// turned on `autoRecordClasses` (D-16).
 //
-// Why this exists: with recording enabled (D-131), a class is recorded only if
+// Why this exists: with recording enabled (D-16), a class is recorded only if
 // the teacher remembers to tap Record mid-lesson — and if she doesn't, there is
 // no recording, no per-speaker audio, no transcript and no focus areas for the
 // next class. The whole pipeline hung off one easily-forgotten tap. This makes

@@ -10,7 +10,7 @@ import {
   type FocusTagRow,
 } from "@/lib/focus-tags";
 
-// Teacher-editable focus tags + categories (D-20's deferred follow-up: "rename
+// Teacher-editable focus tags + categories (D-17's deferred follow-up: "rename
 // / add / reorder / archive"; category later moved from free text into
 // its own manageable taxonomy). These are the WEB entry points — FormData
 // parsing, then delegate the Pro gate + validation + writes to

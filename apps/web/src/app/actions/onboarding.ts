@@ -170,7 +170,7 @@ export async function saveTimezoneAction(
   // onboarding, which is the whole point of asking here (D-112). The seeder is
   // lazy — `getTeacherFocusTags` self-seeds on the first empty read — so
   // whichever value is stored when the focus picker first renders is the pack
-  // she gets, permanently: D-20 seeding is additive, so a language set after
+  // she gets, permanently: D-17 seeding is additive, so a language set after
   // that read stacks its pack on top of the generic one instead of replacing
   // it. Seeding here means the read never happens with a null language.
   // Best-effort and idempotent, exactly as in `saveTargetLanguageAction`.

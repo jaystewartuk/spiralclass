@@ -19,7 +19,7 @@
 // only against evidence.
 //
 // `asr`: Deepgram's streaming ASR must transcribe the language well AND it must
-// read naturally in the Claude translation prompt (D-27's original bar). A
+// read naturally in the Claude translation prompt (the bar captions launched with). A
 // code outside the flag still "works" for captions in the degraded sense
 // translate.ts describes, it just degrades UX.
 //

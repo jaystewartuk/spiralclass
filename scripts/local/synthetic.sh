@@ -37,7 +37,7 @@ TEACHER_SLUG="${TEACHER_SLUG:-ana-laura}"
 # `wss://livekit.spiralclass.com`. Probing the wrong one made a probe fail
 # after a good deploy once already (D-138), so check the env file rather than
 # the prose when moving it.
-# The box's own IP, needed because the hostname is Cloudflare-proxied (D-134) —
+# The box's own IP, needed because the hostname is Cloudflare-proxied (D-16) —
 # resolving it gives a Cloudflare edge address, whose certificate is Cloudflare's
 # and always valid. Checking that would prove nothing about Caddy.
 #
@@ -54,7 +54,7 @@ LIVEKIT_HOST="${LIVEKIT_HOST:-livekit.spiralclass.com}"
 
 # ── Is production's video actually on the self-hosted box? ───────────────────
 #
-# [D-182] moved production video to LiveKit Cloud on 2026-09-19, while Oracle
+# Production video moved to LiveKit Cloud on 2026-09-19 ([D-16]), while Oracle
 # had no capacity to rebuild the box. The origin-certificate check below is
 # about the BOX, so from that moment its subject was something production no
 # longer used — and it duly went red on every release, reading as "production
@@ -65,8 +65,8 @@ LIVEKIT_HOST="${LIVEKIT_HOST:-livekit.spiralclass.com}"
 # sentence here, for the reason the LIVEKIT_URL note above already gives: that
 # file is what production actually dials, and probing the wrong host made a
 # probe fail after a good deploy once already (D-138). Deriving it also means
-# the check comes back BY ITSELF the day D-182 is reversed and the URL points
-# at the box again — no second edit, and no guard left asserting a dead premise.
+# the check came back BY ITSELF on 2026-09-24, when the URL pointed at a box
+# again (D-16) — no second edit, and no guard left asserting a dead premise.
 # Anchored to this script's own location, not to the working directory. Every
 # other check here reaches the app over HTTP and never touched the tree, so the
 # script had no reason to know where it was until now — and a relative path
@@ -277,13 +277,13 @@ fi
 # by hand and on `pnpm promote`. A certificate stops renewing on a Tuesday
 # nobody deployed.
 #
-#   - self-hosted LiveKit box reachable (D-94) — covered by the
+#   - self-hosted LiveKit box reachable (D-16) — covered by the
 #     `livekit.spiralclass.com` HetrixTools monitor, 5-minute, four locations,
 #     200 + body "OK".
 #   - ACME HTTP-01 challenge path — a new HetrixTools monitor, 10-minute, four
 #     locations, expecting exactly 308 with redirects not followed. A 301 means
 #     a Cloudflare edge redirect is intercepting :80 and renewal has no working
-#     path left; see D-134 and docs/deployment/ORACLE_BOX_REBUILD.md.
+#     path left; see D-16 and docs/deployment/ORACLE_BOX_REBUILD.md.
 #
 # Added 2026-08-30, same reasoning, after the D-138 rename broke both of them:
 #
@@ -319,7 +319,7 @@ fi
 # nothing and costs the alert fatigue scripts/local/jobs.mjs warns about.
 
 # ── the LiveKit box's ORIGIN certificate is not about to expire ──────────────
-# Caddy auto-renews, and until D-134 it had two independent ways to prove
+# Caddy auto-renews, and until the hostname was proxied (2026-08-27, D-16) it had two independent ways to prove
 # control of the hostname: TLS-ALPN-01 and HTTP-01. Proxying the record through
 # Cloudflare terminates TLS at the edge, so TLS-ALPN-01 can no longer work at
 # all. HTTP-01 is now the only path left — one link deep instead of two.
@@ -352,9 +352,9 @@ if [ -z "$LIVEKIT_URL_IN_CONFIG" ]; then
   # thing this check cannot do without, and its absence is a real fault.
   fail "config/env/production.runtime.env names no LIVEKIT_URL — cannot tell which host production dials"
 elif [ "$LIVEKIT_IS_SELF_HOSTED" != "1" ]; then
-  # Production dials something other than the box — LiveKit Cloud, under
-  # [D-182]. The box's certificate is not production's problem today.
-  skip "LiveKit origin cert — production dials ${LIVEKIT_URL_IN_CONFIG}, not ${LIVEKIT_HOST} (D-182)"
+  # Production dials something other than the box — the LiveKit Cloud
+  # rollback ([D-16]). The box's certificate is not production's problem then.
+  skip "LiveKit origin cert — production dials ${LIVEKIT_URL_IN_CONFIG}, not ${LIVEKIT_HOST} (D-16)"
 elif ! command -v openssl >/dev/null 2>&1; then
   fail "openssl not found — cannot check the LiveKit origin certificate"
 else

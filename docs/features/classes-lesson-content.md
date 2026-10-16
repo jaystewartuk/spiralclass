@@ -91,10 +91,10 @@ as historical rationale, not current schema truth.
 - **AI seed inputs**: the student's level, the `TeacherStudent` interests/goals,
   what the student's notebook already marks as covered (up to 25 recent
   titles), the teacher's account-level AI style preferences (tone/register,
-  learner-age, target-language variety, free-text note — D-78), the language
+  learner-age, target-language variety, free-text note — D-17), the language
   the teacher teaches (D-72), and a per-class vocabulary-difficulty override
   if set.
-- **Vocabulary override precedence** (D-80): a class-level override beats the
+- **Vocabulary override precedence** (D-17): a class-level override beats the
   teacher's account default, which beats "everyday" as the fallback. Omitting
   the field on a generate request leaves any stored override untouched;
   passing a value (or explicit clear) persists it before generating.

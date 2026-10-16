@@ -11,17 +11,18 @@ const log = logger({ surface: "purge-recordings" });
 //
 // The privacy policy already promised this and the code did not do it. The
 // retention table in packages/shared/src/legal/privacy-policy.ts has said, since
-// D-131, that "a class recording a teacher started, and its transcript" is kept
+// 2026-08-26, that "a class recording a teacher started, and its transcript" is kept
 // "while the teacher's account is open" — but anonymizeTeacher only ever touched
 // the teacher row, device tokens and notifications, so the R2 objects and their
-// rows survived the account forever. D-131 named that gap in its own unresolved
+// rows survived the account forever. The decision that turned recording back
+// on (2026-08-26) named that gap in its own unresolved
 // risks ("nothing purges recordings from R2 on account closure") and shipped
 // anyway. This closes it.
 //
 // Four things go, all keyed off the denormalized `teacherId` every one of these
 // models already carries:
 //
-//   - CallRecording — the room-composite recording (audio-only since D-135) and
+//   - CallRecording — the room-composite recording (audio-only since D-16) and
 //     its R2 object.
 //   - LessonAudio — per-speaker insights audio. Normally already discarded right
 //     after transcription (transcription/pipeline.ts's derive-then-discard), so

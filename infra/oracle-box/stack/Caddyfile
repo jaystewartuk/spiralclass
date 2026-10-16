@@ -23,7 +23,7 @@ livekit.spiralclass.com {
 # through Cloudflare's proxy (the challenge handshake terminates at the edge),
 # so http-01 is the only path.
 #
-# ⚠️ That makes D-134's invariant govern this hostname too: **"Always Use
+# ⚠️ That makes D-16's invariant govern this hostname too: **"Always Use
 # HTTPS" must be OFF and SSL mode must be Full**, or the edge answers the ACME
 # challenge with a redirect, issuance fails, and the name has no certificate at
 # all. Issue while grey-clouded, verify on the box, then re-proxy.

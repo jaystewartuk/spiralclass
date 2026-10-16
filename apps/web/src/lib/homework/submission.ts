@@ -55,7 +55,7 @@ export async function ensureSubmission(
 
 // All attempts (the append-only submit history) for a TEACHER-owned
 // assignment, newest first — the review screen's data source on both
-// platforms. SpiralClass is strictly 1-on-1 tutoring (D-88), so an assignment
+// platforms. SpiralClass is strictly 1-on-1 tutoring (D-17), so an assignment
 // has at most one HomeworkSubmission; this is that submission's full attempt
 // history, not a per-student list.
 export function attemptsForAssignment(

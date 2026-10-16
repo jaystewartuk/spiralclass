@@ -14,7 +14,7 @@ name: Deploy production
 #   database ───> cloudrun    serves spiralclass.com, then the production probes
 #
 # Cloud Run took the domain from Fly on 2026-09-23 and Fly was destroyed the
-# same day ([D-184]'s addendum). The Vercel failover that ran beside it was
+# same day ([D-184]). The Vercel failover that ran beside it was
 # retired the same week ([D-70]). The shape did not change: the job that serves
 # the domain is the one that probes it and decides whether production shipped.
 #
@@ -92,7 +92,7 @@ name: Deploy production
 # ⚠️ Preview's workflow is still suspended, and for a reason that does not
 # apply here: its target genuinely is moving, and the box is not serving yet.
 #
-# WHERE THE VALUES COME FROM ([D-163], and read its addendum before changing
+# WHERE THE VALUES COME FROM ([D-163], and read it before changing
 # this). Infisical is the source of truth, and it PUSHES a copy into this
 # environment's secrets — the same direction `infra/gcp/push-cloudrun-env.sh`
 # pushes the app's runtime secrets into Secret Manager. One vault, two push
@@ -278,7 +278,7 @@ jobs:
   # grants per JOB rather than per step — so ACTIONS_ID_TOKEN_REQUEST_URL sits
   # in front of EVERY step in this job, `pnpm install` and the Docker build
   # included, and anything in that dependency tree could mint its own token and
-  # trade it for whatever the identity behind it may reach. [D-163]'s addendum
+  # trade it for whatever the identity behind it may reach. [D-163]
   # reversed exactly that shape once already, and
   # apps/web/tests/config/local-gate.test.ts bans it in every workflow here.
   # This job is not the exception: it runs more third-party code than any other
@@ -314,7 +314,7 @@ jobs:
       # The Cloudflare origin address behind livekit.spiralclass.com, read by
       # the probe step's LiveKit certificate check when production video is on
       # the self-hosted box. Never committed: hiding the origin behind
-      # Cloudflare IS the protection (D-134). It moved here with the probe.
+      # Cloudflare IS the protection (D-16). It moved here with the probe.
       LIVEKIT_ORIGIN_IP: ${{ secrets.LIVEKIT_ORIGIN_IP }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1

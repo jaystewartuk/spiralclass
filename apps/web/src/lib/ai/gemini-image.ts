@@ -10,8 +10,8 @@ import {
 
 const log = logger({ surface: "ai" });
 
-// Gemini image generation — the default social-preview rail (D-123), called
-// through VERTEX AI rather than the public Generative Language API (D-127).
+// Gemini image generation — the default social-preview rail (D-125), called
+// through VERTEX AI rather than the public Generative Language API (D-125).
 //
 // `generateContent`'s request/response shape is IDENTICAL between the two
 // surfaces for this model (confirmed against a live call) — only the
@@ -25,7 +25,7 @@ const log = logger({ surface: "ai" });
 // image part and ignore the rest.
 
 // Global (not regional) — the only location gemini-3.1-flash-image is
-// actually published to as of D-127; see geminiVertexLocation()'s comment.
+// actually published to as of D-125; see geminiVertexLocation()'s comment.
 function endpointFor(projectId: string, location: string, model: string): string {
   const host =
     location === "global" ? "aiplatform.googleapis.com" : `${location}-aiplatform.googleapis.com`;

@@ -116,6 +116,14 @@ same individual across teachers.
   rejected; the same account re-accepting is treated as a harmless no-op.
 - If sending the invitation email fails outright, the never-sent invitation
   is discarded rather than left behind as a broken "ghost" invite.
+- The emailed link carries a random 256-bit token; only its SHA-256 hash is
+  stored (`lib/invitations/token.ts`). Copying a link from the dashboard
+  rotates the token, so any link emailed earlier for that invitation stops
+  working — the copied link is always the current one.
+- The invitation email is sent one-off, not through the notification
+  dispatcher, because the recipient is not a platform user yet. Acceptance
+  reuses the existing sign-in and `resolveLinkedStudent`; there is no separate
+  invitation auth path.
 
 ### Per-student notes
 

@@ -24,7 +24,7 @@ import { prisma } from "@/lib/prisma";
 import { revalidateAfterAction } from "@/lib/revalidate";
 
 // Teacher-authored testimonials shown as social proof on the public booking
-// page (docs/features/student-acquisition.md, D-24). The CRUD rules live
+// page (docs/features/student-acquisition.md, D-125). The CRUD rules live
 // in lib/testimonials/store; these actions parse
 // the form, scope to the signed-in teacher, and revalidate both the dashboard
 // editor and the public page so a published change shows immediately.

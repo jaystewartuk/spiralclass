@@ -3,7 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { generateInsights } from "@/lib/lesson-notes/insights";
 import { generateAndStoreInsights } from "@/lib/lesson-notes/insights-pipeline";
 
-// Lesson insights Phase C (the Phase C design, D-19).
+// Lesson insights Phase C (the Phase C design, D-185).
 // Triggered once per booking when its transcript is ready (Phase B). Turns the
 // transcript + the teacher's live-notes into categorised, evidence-anchored
 // focus areas and stores them as read-only AI-suggested rows.

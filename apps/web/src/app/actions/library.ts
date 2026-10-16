@@ -374,7 +374,7 @@ export async function generateMaterialDraftAction(
   return { body: result.body };
 }
 
-// ---------- "Edit with AI" refine (D-73), unified across both scopes ----------
+// ---------- "Edit with AI" refine, unified across both scopes ----------
 
 export type RefineMaterialState = { error?: string; body?: string } | undefined;
 
@@ -562,7 +562,7 @@ export async function restoreMaterialRevisionAction(
   };
 }
 
-// ---------- save native content to the library (D-20, Layer 4) ----------
+// ---------- save native content to the library (D-17, Layer 4) ----------
 
 // Saves authored/AI-drafted class content into the library as a reusable native
 // item at a level — the "author once, assign to many" path. Distinct from

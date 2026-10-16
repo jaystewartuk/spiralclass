@@ -165,7 +165,7 @@ export type ServerEvent = WithSessionId<
       };
     }
   | {
-      // Teacher recorded/uploaded their public-page intro video (D-73). The
+      // Teacher recorded/uploaded their public-page intro video. The
       // conversion event of the whole teacher-side funnel — everything before
       // it (recorder opened, recording started/completed, upload started) is a
       // CLIENT event, because the server only ever hears about the attempts
@@ -213,7 +213,7 @@ export type ServerEvent = WithSessionId<
       };
     }
   | {
-      // The async AI analysis pipeline finished (D-73, Layers 2–3). Fired from
+      // The async AI analysis pipeline finished (intro-video Layers 2–3). Fired from
       // the Inngest handler for EVERY terminal outcome, including the skips —
       // "how often is analysis generated" is unanswerable without knowing how
       // often it was skipped and why.
@@ -275,7 +275,7 @@ export type ServerEvent = WithSessionId<
         // topic (e.g. "Conversación") — null when the package has no
         // template (legacy/manual packages).
         className?: string | null;
-        // The platform is 1:1-only today (no group classes — see D-16/D-88),
+        // The platform is 1:1-only today (no group classes — see D-16/D-17),
         // so this reflects the real product distinction instead: a one-off
         // single_class purchase vs a multi-class package.
         classType?: "single_class" | "package";
@@ -599,7 +599,7 @@ export type ServerEvent = WithSessionId<
       };
     }
   | {
-      // Durable student profile (interests/goals) — D-20, Layer 1.
+      // Durable student profile (interests/goals) — D-17, Layer 1.
       name: "student_profile_set";
       distinctId: string;
       properties: {
@@ -611,7 +611,7 @@ export type ServerEvent = WithSessionId<
     }
   | {
       // The language a teacher teaches — the subject, and the focus-tag seed
-      // pack selector (D-20 Layer 3, narrowed to language-first by D-72).
+      // pack selector (D-17 Layer 3, narrowed to language-first by D-72).
       name: "teacher_target_language_set";
       distinctId: string;
       properties: {
@@ -659,7 +659,7 @@ export type ServerEvent = WithSessionId<
         levelId: string;
         visibility: "at_or_below" | "exact" | "all";
         attachmentKind: "file" | "link" | "content";
-        // Provenance for native-content items (D-20, Layer 4); absent for file/link.
+        // Provenance for native-content items (D-17, Layer 4); absent for file/link.
         source?: "manual" | "ai";
         // Gap G1 (docs/features/library-materials.md) — how many focus tags
         // (category/format/theme) this item was tagged with on save.
@@ -683,7 +683,7 @@ export type ServerEvent = WithSessionId<
       };
     }
   | {
-      // "Edit with AI" (D-73) — a teacher applied a free-text change to an
+      // "Edit with AI" — a teacher applied a free-text change to an
       // existing material's body. Burns one shared class_content AI-cap row,
       // same pool as class_content_generated / library_material_generated.
       name: "material_refined";
@@ -735,7 +735,7 @@ export type ServerEvent = WithSessionId<
       };
     }
   | {
-      // D-132 — the auto-record-classes setting flipped (Settings → Account).
+      // D-16 — the auto-record-classes setting flipped (Settings → Account).
       // Worth a signal of its own: it is the switch that decides whether the
       // insights pipeline runs on a teacher's whole timetable or only on the
       // classes she remembered to record, so adoption of it explains the
@@ -758,8 +758,8 @@ export type ServerEvent = WithSessionId<
       };
     }
   | {
-      // D-78 — teacher saved their AI material style (tone/age/variety/notes),
-      // plus D-80's vocabulary dial.
+      // D-17 — teacher saved their AI material style (tone/age/variety/notes),
+      // plus the vocabulary dial.
       name: "material_style_saved";
       distinctId: string;
       properties: {
@@ -1014,17 +1014,17 @@ export type ServerEvent = WithSessionId<
         // Lesson continuity: how many previous-class materials were picked as
         // "continue from" context (0 = the generic continuity nudge only).
         continuationCount: number;
-        // D-20 structured inputs: how many focus tags, and whether the durable
+        // D-17 structured inputs: how many focus tags, and whether the durable
         // profile / a free-text topic contributed.
         focusCount?: number;
         hasInterests?: boolean;
         hasGoals?: boolean;
         hasTopic?: boolean;
-        // Whether the teacher's lesson template shaped the structure (D-46).
+        // Whether the teacher's lesson template shaped the structure (D-17).
         usedTemplate?: boolean;
       };
     }
-  // --- Student acquisition (docs/features/student-acquisition.md, D-24) ---
+  // --- Student acquisition (docs/features/student-acquisition.md, D-125) ---
   // Booking-page conversion funnel. `lead_captured` fires on the public route, so
   // its distinctId is the visitor's PostHog session id (anonymous) rather than a
   // teacher/student id; teacherId in properties still attaches the `teacher`
@@ -1054,7 +1054,7 @@ export type ServerEvent = WithSessionId<
         leadId: string;
       };
     }
-  // Social previews (D-123). Two events, and deliberately only two.
+  // Social previews (D-125). Two events, and deliberately only two.
   //
   // The acquisition loop these feed is ALREADY closed by the attribution
   // pipeline: shareTaggedUrl() stamps utm_content with the group's slug, the
@@ -1138,7 +1138,7 @@ export type ServerEvent = WithSessionId<
         rewardMinorUnits?: number;
       };
     }
-  // Teacher → Student invitation funnel (D-83). Teacher-side events use
+  // Teacher → Student invitation funnel. Teacher-side events use
   // distinctId = teacher.id; student-side acceptance/onboarding events use
   // distinctId = student.id so time-to-acceptance stitches across the same
   // Person. `channel` distinguishes web from the mobile deep-link accept.

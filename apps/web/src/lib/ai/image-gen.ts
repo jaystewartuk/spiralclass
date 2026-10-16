@@ -1,7 +1,7 @@
 import "server-only";
 import { hasGeminiImageCreds } from "@/lib/env";
 
-// Vendor-neutral image-generation seam for social previews (D-123).
+// Vendor-neutral image-generation seam for social previews (D-125).
 //
 // Deliberately the SAME shape as lib/ai/tts.ts, which already proves the
 // pattern in production: one exported function, a result union both rails

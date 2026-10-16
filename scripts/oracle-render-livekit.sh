@@ -132,8 +132,8 @@ cpu_cost:
   #
   # It means egress reserves 2 of this box's 2 OCPUs for one composite. That
   # is egress refusing to run two at once, which on this machine is correct:
-  # D-131 records it wanting 4 OCPUs, and one 51-minute class produced an
-  # 846 MB file and dropped 2,586 frames before D-135 made recordings
+  # LiveKit's egress guidance wants 4 OCPUs, and one 51-minute class produced an
+  # 846 MB file and dropped 2,586 frames before D-16 made recordings
   # audio-only.
   room_composite_cpu_cost: 2
 EOF

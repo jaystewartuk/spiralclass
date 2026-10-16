@@ -173,7 +173,7 @@ describe("GitHub Actions is back, on stated terms (D-157)", () => {
   // the invariants worth holding are now about what the workflows may DO.
 
   it("the workflows exist", () => {
-    // deploy-preview.yml went with Fly on 2026-09-23 ([D-184]'s addendum):
+    // deploy-preview.yml went with Fly on 2026-09-23 ([D-184]):
     // preview has no host until the Oracle box is rebuilt.
     expect(WORKFLOW_FILES.sort()).toEqual([
       "deploy-production.yml",
@@ -426,7 +426,7 @@ describe("the workflows call the registry, and never restate it (D-157)", () => 
     // script a laptop can also run, and states none of the steps itself.
     // scripts/database-deploy.sh joined when the checkpoint and migrations moved
     // into a job of their own ([D-184]); the Cloud Run script
-    // replaced Fly's when the domain moved ([D-184]'s addendum). The Vercel
+    // replaced Fly's when the domain moved ([D-184]). The Vercel
     // script left with the failover ([D-70]).
     const DEPLOY_SCRIPTS = ["scripts/cloudrun-deploy.sh", "scripts/database-deploy.sh"];
 
@@ -494,7 +494,7 @@ describe("the workflows call the registry, and never restate it (D-157)", () => 
   it("only the production branch can reach the production deploy", () => {
     // workflow_dispatch is kept as a recovery path, so this ref guard is what
     // stops it being pointed at an arbitrary branch and shipping it. The push
-    // trigger is live (D-157's addendum 2), so this guards the recovery path
+    // trigger is live (D-157), so this guards the recovery path
     // rather than the only path.
     expect(byName("deploy-production.yml")).toContain("github.ref == 'refs/heads/production'");
   });
@@ -503,7 +503,7 @@ describe("the workflows call the registry, and never restate it (D-157)", () => 
     // Promote's anti-drift property is that the push to `production` IS the
     // trigger — with no trigger, promoting moves the branch and deploys
     // nothing, which is the 2026-07-19 incident reached from the other
-    // direction. Production's trigger is live today (D-157's addendum 2);
+    // direction. Production's trigger is live today (D-157);
     // this check is what makes taking it off again a loud failure rather than
     // a quiet one.
     //
@@ -978,7 +978,7 @@ describe("the maintenance the crons used to do still exists (D-157)", () => {
     // The subtle way this probe could go quietly useless: check
     // https://livekit.spiralclass.com and you read CLOUDFLARE's certificate,
     // which is always valid and says nothing about whether Caddy renewed. Since
-    // D-134 proxied the record, the probe has to dial the box's own IP with SNI.
+    // D-16 proxied the record, the probe has to dial the box's own IP with SNI.
     const probes = read("scripts", "local", "synthetic.sh");
     expect(probes).toContain("LIVEKIT_ORIGIN_IP");
     expect(probes).toMatch(/openssl s_client -connect "\$\{LIVEKIT_ORIGIN_IP\}:443"/);

@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 // on-booking-created.ts is the reminder wake chain's creation-time entry
-// (D-115 addendum, 2026-08-16): every `booking.created` re-runs the reminder
+// (D-115, 2026-08-16): every `booking.created` re-runs the reminder
 // scan so a class booked between two hourly ticks still gets its 1h/15m legs on
 // time. The scan itself is covered in tests/notifications/reminder-scan.test.ts
 // ("run at booking creation"); this pins the wiring — the trigger event, the id,

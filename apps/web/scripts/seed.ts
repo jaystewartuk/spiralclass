@@ -349,7 +349,7 @@ type HeroSpec = {
   // The teacher's own country — decides which bank schemes and Connect
   // behaviour apply. Defaults to SEED_COUNTRY.
   country?: string;
-  // Which language HER BUYERS read (D-73's fourth language field). Nothing in
+  // Which language HER BUYERS read (D-72's fourth language field). Nothing in
   // the seed varied it, so the public funnel's locale resolution was only ever
   // exercised at its default.
   bookingPageLocale?: string;
@@ -888,7 +888,7 @@ export function heroSpecs(): HeroSpec[] {
       stripeReady: true,
       instruments: [{ kind: "wise" }],
       // She sells to English speakers, like the first live teacher — the
-      // exact case D-73 exists for, and the one that makes the approximate-USD
+      // exact case `booking_page_locale` exists for, and the one that makes the approximate-USD
       // price render. Every other hero leaves this at its default.
       bookingPageLocale: "en",
       introVideo: true,

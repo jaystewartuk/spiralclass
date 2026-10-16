@@ -98,7 +98,7 @@ describe("TrackRecognizer", () => {
     expect(onFinal).toHaveBeenCalledWith("hola");
   });
 
-  // D-198: a listener sees the words of a phrase as it is spoken, not only
+  // D-185: a listener sees the words of a phrase as it is spoken, not only
   // once it ends — measured 2026-10-12, a teacher's phrases ran to ~500
   // characters before a single subtitle appeared.
   it("hands the utterance in flight to onPartial, never to onFinal", () => {

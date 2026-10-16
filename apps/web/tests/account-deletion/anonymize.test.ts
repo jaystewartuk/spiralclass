@@ -274,7 +274,7 @@ describe("anonymizeMaturedDeletions", () => {
   });
 
   it("purges a deleted teacher's recordings, and a purge failure can't block the deletion", async () => {
-    // D-136. The privacy policy has promised since D-131 that a class recording
+    // D-136. The privacy policy has promised since 2026-08-26 that a class recording
     // lives only "while the teacher's account is open"; nothing enforced it.
     const now = new Date("2026-06-01T00:00:00Z");
     const env = makeDeps(now);

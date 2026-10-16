@@ -15,7 +15,7 @@
 #
 # ⚠️ It pushes ONLY those. Do NOT "simplify" this into an `infisical export |
 # gh secret set` of everything: the deploy environment holding forty secrets
-# instead of eleven is the blast radius D-163's addendum exists to bound.
+# instead of eleven is the blast radius D-163 exists to bound.
 #
 # WHY A SCRIPT RATHER THAN INFISICAL'S NATIVE GITHUB SYNC. Both were on the
 # table and the script won on two things the sync cannot offer:

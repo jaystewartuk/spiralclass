@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 //
-// Interactive coverage for the AI material style form (D-78 + D-80).
+// Interactive coverage for the AI material style form (D-17).
 //
 // Three things here are easy to break and invisible when they are:
 //
@@ -101,7 +101,7 @@ afterEach(() => {
   container.remove();
 });
 
-describe("MaterialStyleForm — vocabulary (D-80) on web", () => {
+describe("MaterialStyleForm — vocabulary (D-17) on web", () => {
   it("shows everyday for a null column but posts nothing, so an untouched row stays null", () => {
     render();
     expect(checked("vocabulary").textContent).toBe("web.settings.materialStyle.vocab.everyday");

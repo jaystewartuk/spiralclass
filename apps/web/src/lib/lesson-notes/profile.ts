@@ -38,7 +38,7 @@ const skillEntrySchema = z.object({
 });
 const vocabEntrySchema = z.object({ term: z.string(), lastSeenAt: z.string() });
 
-// Speaking-time rollup (D-97) — averaged across every lesson that had both a
+// Speaking-time rollup — averaged across every lesson that had both a
 // recording and a transcript. Optional/nullable/defaulted so profiles
 // persisted before this field existed still parse.
 const speakingBalanceSchema = z.object({
@@ -76,7 +76,7 @@ function groupKey(i: ProfileInsight): string {
 
 // Pure: roll a student's confirmed insights into the profile. `lessonsByDate` is
 // the student's lessons ordered ascending; its tail defines "recent" for trend.
-// `speakingBalance` (D-97) is computed independently of confirmed insights —
+// `speakingBalance` is computed independently of confirmed insights —
 // it just passes through.
 export function computeProfile(
   insights: ProfileInsight[],
@@ -147,7 +147,7 @@ type Db = Pick<
 >;
 
 // Recompute and upsert a student's profile from all their CONFIRMED insights,
-// plus (D-97) a speaking-balance rollup averaged across every lesson that has
+// plus a speaking-balance rollup averaged across every lesson that has
 // both a completed recording and a transcript — independent of insights, so a
 // lesson contributes to it even before/without a teacher validation pass.
 // Called after every validation mutation. The set is bounded by lesson count, so
@@ -182,7 +182,7 @@ export async function recomputeStudentProfile(
     }),
     prisma.booking.findMany({
       // A finalised transcript only: one the browsers are still writing
-      // (D-189) is not on the lesson timeline yet.
+      // (D-185) is not on the lesson timeline yet.
       where: {
         teacherId,
         studentId,

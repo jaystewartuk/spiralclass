@@ -24,7 +24,7 @@ import { uploadSocialPreviewImage } from "@/lib/social-preview/upload";
 import { loadEntitlements } from "@/lib/subscriptions/service";
 import { revalidateAfterAction } from "@/lib/revalidate";
 
-// Social-preview server actions (D-123). The rules live in
+// Social-preview server actions (D-125). The rules live in
 // lib/social-preview/*; these parse the
 // form, scope everything to the signed-in teacher, translate the domain's
 // failure vocabulary into her language, and revalidate the editor.
