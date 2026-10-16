@@ -256,6 +256,13 @@ async function anonymizeTeacher(deps: AnonymizeDeps, teacherId: string): Promise
     await tx.notification.deleteMany({
       where: { recipientType: "teacher", recipientId: teacherId },
     });
+    // The text of her AI materials generations and the refine instructions she
+    // typed (D-202). The rows stay — counts only, like every other figure that
+    // outlives an account.
+    await tx.classContentGeneration.updateMany({
+      where: { teacherId },
+      data: { body: null, instruction: null },
+    });
   });
 
   // Destroy her recordings and everything derived from them (D-136). Outside

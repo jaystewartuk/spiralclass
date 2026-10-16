@@ -12,6 +12,7 @@ import { reconcileStrandedPaidPayments } from "@/lib/payments/reconcile-paid";
 import { cleanupAbandonedPendingPackages } from "@/lib/payments/cleanup-pending";
 import { sendTransferConfirmReminders } from "@/lib/payments/transfer-confirm-reminder";
 import { purgeExpiredMaterials } from "@/lib/storage/materials-purge";
+import { purgeExpiredGenerationBodies } from "@/lib/materials/generations";
 import { syncAllConnectedTeachers } from "@/lib/calendar/google/sync";
 import { runSubscriptionSweep } from "@/lib/subscriptions/sweep";
 import { sendPackageExpiryNudges } from "@/lib/notifications/package-expiry-nudge";
@@ -134,6 +135,8 @@ export const cronJobs: JobDefinition[] = [
     cron: { pattern: "0 2 * * *" },
     handler: async () => {
       await purgeExpiredMaterials({ prisma, storage: getStorageProvider() });
+      // Same tick as the Inngest twin (D-202).
+      await purgeExpiredGenerationBodies(prisma);
     },
   },
   {
