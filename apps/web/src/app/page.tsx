@@ -13,7 +13,6 @@ import {
   Sparkles,
   Wallet,
 } from "lucide-react";
-import { Logo } from "@/components/brand/logo";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { JsonLd } from "@/components/json-ld";
@@ -292,10 +291,8 @@ export default async function LandingPage({
           <div className="absolute top-[26%] right-[6%] h-56 w-56 rounded-full bg-accent/10 blur-3xl" />
         </div>
 
-        <div className="container grid items-center gap-12 py-16 lg:grid-cols-2 lg:py-24">
+        <div className="container grid items-center gap-12 py-14 lg:grid-cols-2 lg:py-20">
           <div className="flex flex-col items-center gap-6 text-center lg:items-start lg:text-left">
-            <Logo size="xl" />
-
             <span className="inline-flex items-center gap-2 rounded-full border border-border/70 bg-card/60 px-4 py-1.5 text-xs font-medium text-muted-foreground backdrop-blur">
               <Sparkles className="h-3.5 w-3.5 text-accent" aria-hidden />
               {t("web.landing.eyebrow")}
@@ -351,6 +348,7 @@ export default async function LandingPage({
               name="booking"
               label={t("web.landing.clip.booking")}
               orientation="portrait"
+              className="w-full max-w-64"
             />
             <p className="max-w-xs text-center text-sm text-muted-foreground">
               <span className="font-medium text-foreground">
@@ -431,7 +429,7 @@ export default async function LandingPage({
           title={t("web.landing.tour.title")}
           description={t("web.landing.tour.sub")}
         >
-          <ol className="flex flex-col gap-16 lg:gap-24">
+          <ol className="flex flex-col gap-16 lg:gap-20">
             {tour.map((job, i) => {
               const flip = i % 2 === 1;
               return (
@@ -463,7 +461,7 @@ export default async function LandingPage({
 
       {/* The rest of the job */}
       <Section variant="band" width="wide" title={t("web.landing.featuresTitle")}>
-        <div className="grid gap-5 lg:grid-cols-2 xl:grid-cols-3">
+        <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
           {more.map((feature) => (
             <FeatureCard
               key={feature.title}
@@ -489,7 +487,7 @@ export default async function LandingPage({
         title={t("web.landing.fit.title")}
         description={t("web.landing.fit.sub")}
       >
-        <div className="grid gap-5 lg:grid-cols-3">
+        <div className="grid gap-5 md:grid-cols-3">
           {fit.map((item) => (
             <FeatureCard key={item.title} icon={item.icon} title={item.title} body={item.body} />
           ))}
