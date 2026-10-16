@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { existsSync, readFileSync } from "node:fs";
 
 import { REPO_ROOT, walkTree } from "./_tree";
-import { dirname, join, relative, resolve } from "node:path";
+import { dirname, relative, resolve } from "node:path";
 
 /**
  * Every relative Markdown link resolves to a file that exists.
@@ -26,10 +26,11 @@ import { dirname, join, relative, resolve } from "node:path";
  * a piece of Markdown SYNTAX without the checker reading `src` as a file, and
  * three of them do.
  *
- * An anchor is checkable in principle and is not checked here: heading slugs
- * are renderer-specific (MkDocs Material, GitHub and Prettier's TOC all differ
- * on punctuation), so asserting them would encode one renderer's rules as the
- * truth and fail on a heading nobody broke.
+ * GitHub is the only renderer these documents have. An anchor is checkable in
+ * principle and is not checked here: GitHub's heading slugs are its own
+ * (Prettier's TOC already disagrees with them on punctuation), so asserting
+ * them would re-implement an unpublished rule and fail on a heading nobody
+ * broke.
  *
  * THERE IS NO EXCEPTION LIST, on purpose. A broken relative link has exactly
  * one honest fix — repoint it or remove it — so an allowlist would only ever
@@ -59,17 +60,12 @@ const LOOKS_LIKE_A_PATH = /[/.]/;
 const markdownFiles = (dir: string = REPO_ROOT) => walkTree(dir, (name) => name.endsWith(".md"));
 
 /**
- * MkDocs serves a directory through its `README.md`/`index.md`, and GitHub
- * renders a `.md` extension omitted from a link. Accept both so a link that
- * works in either reader counts as resolving.
+ * GitHub resolves a link to exactly the path written: a file, or a directory,
+ * whose listing renders its `README.md`. An omitted `.md` extension is a 404
+ * there, so it does not count as resolving here.
  */
 function resolves(target: string): boolean {
-  return (
-    existsSync(target) ||
-    existsSync(`${target}.md`) ||
-    existsSync(join(target, "README.md")) ||
-    existsSync(join(target, "index.md"))
-  );
+  return existsSync(target);
 }
 
 function brokenLinks(): string[] {
@@ -92,6 +88,21 @@ function brokenLinks(): string[] {
   return broken.sort();
 }
 
+/**
+ * MkDocs-only syntax: an admonition (`!!! note`) or a collapsible (`??? note`).
+ * GitHub prints either as a literal line of text, so a document written for
+ * the retired docs site reads as broken here. GitHub's own form is an alert,
+ * `> [!NOTE]`.
+ */
+const MKDOCS_ADMONITION = /^\s*(?:!!!|\?\?\?\+?) +[a-z]/m;
+
+function mkdocsOnlySyntax(): string[] {
+  return markdownFiles(REPO_ROOT)
+    .filter((file) => MKDOCS_ADMONITION.test(readFileSync(file, "utf8")))
+    .map((file) => relative(REPO_ROOT, file))
+    .sort();
+}
+
 describe("relative links between Markdown files", () => {
   it("reads enough Markdown to be checking anything", () => {
     // Guards the guard: an empty walk would pass the assertion below having
@@ -107,6 +118,18 @@ describe("relative links between Markdown files", () => {
       `These Markdown links point at nothing. Repoint each at where the file lives now, ` +
         `or remove the link if its target is gone — there is no exception list:\n` +
         broken.join("\n"),
+    ).toEqual([]);
+  });
+});
+
+describe("Markdown written for GitHub, the only renderer", () => {
+  it("uses no MkDocs-only admonition syntax", () => {
+    const offenders = mkdocsOnlySyntax();
+    expect(
+      offenders,
+      `These files use \`!!!\`/\`???\` admonitions, which GitHub renders as plain text. ` +
+        `Rewrite each as a GitHub alert (\`> [!NOTE]\`, \`> [!WARNING]\`):\n` +
+        offenders.join("\n"),
     ).toEqual([]);
   });
 });

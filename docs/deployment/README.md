@@ -37,7 +37,6 @@ For how a change gets _to_ a release, see
   of the Oracle way back, not a description of anything running.
 - **[Cost playbook](COST_PLAYBOOK.md)** — what each hosted dependency costs at
   this scale, and the levers already pulled.
-- **[Docs site](DOCS_SITE.md)** — the MkDocs build behind `pnpm docs:serve`.
 
 > **The secrets-rotation runbook is not in this repository.** It named every
 > credential, where it lives and what each one reaches — no values, but a map

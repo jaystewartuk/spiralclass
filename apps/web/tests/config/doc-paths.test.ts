@@ -51,7 +51,7 @@ const RECORD_PATH = /^docs\/decisions\/D-\d{1,3}\.md$/;
 /** Only text we can plausibly read; skip images, fonts, archives, lockfiles. */
 const TEXT_FILE =
   /\.(ts|tsx|js|jsx|mjs|cjs|md|mdx|json|jsonc|ya?ml|toml|tf|tfvars|sh|env|sql|prisma|txt|example|hcl|Dockerfile)$/;
-const BARE_TEXT_FILES = new Set([".gitignore", "Dockerfile", "requirements.txt", "Caddyfile"]);
+const BARE_TEXT_FILES = new Set([".gitignore", "Dockerfile", "Caddyfile"]);
 
 /**
  * An absolute-from-root docs path. Stops at the extension so a possessive
