@@ -26,6 +26,7 @@ vi.mock("@/lib/storage/provider", async (orig) => {
   };
 });
 
+import { INTRO_VIDEO_UPLOAD_TYPES } from "@spiralclass/shared";
 import {
   TEACHER_VIDEO_BUCKET,
   MAX_VIDEO_BYTES,
@@ -63,6 +64,12 @@ describe("constants", () => {
       "video/quicktime": "mov",
       "video/webm;codecs=vp9,opus": "webm",
     });
+  });
+
+  // The editor's picker and its pre-upload duration read take this list; a
+  // type the picker offers but the presign refuses would fail every upload of it.
+  it.each(INTRO_VIDEO_UPLOAD_TYPES)("accepts %s, which the intro-video picker offers", (type) => {
+    expect(ALLOWED_VIDEO_TYPES[type]).toBeDefined();
   });
 });
 

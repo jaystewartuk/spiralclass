@@ -72,7 +72,7 @@ export const esMX = {
   "feedback.attachHint": "Opcional. Imágenes de hasta {max} MB.",
   "feedback.attachRemove": "Quitar {filename}",
   "feedback.attachTooLarge": "Esa imagen pesa más de {max} MB. Prueba con una más pequeña.",
-  "feedback.attachInvalidType": "Ese archivo no es una imagen.",
+  "feedback.attachInvalidType": "Ese archivo no es una captura ni una foto.",
   "feedback.attachReadFailed": "No pudimos leer esa imagen. Prueba con otra.",
   "feedback.diagnosticsNote":
     "Adjuntamos esta página y datos de tu navegador. No incluyas contraseñas ni números de tarjeta.",
