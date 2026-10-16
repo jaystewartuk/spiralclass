@@ -5,8 +5,8 @@
 # Postgres.
 #
 # ⚠️ PRODUCTION IS NOT HERE, and that is the 2026-09-04 decision, not an
-# omission. The production web app stays on Fly and production's database
-# stays on Neon; Oracle carries everything else. See D-150's second addendum.
+# omission. The production web app is on Cloud Run and production's database
+# stays on Neon; Oracle carries everything else. See D-184.
 # Two consequences follow and both are load-bearing: this box runs ONE web
 # app, and livekit-server's webhook to production leaves the box — which is
 # why scripts/oracle-render-livekit.sh renders that URL and
@@ -193,7 +193,7 @@ volumes:
   egress_tmp:
   # ⚠️ Deliberately NOT backed up. Preview's data is seeded and disposable —
   # `infra/infisical/seed-preview.sh` regenerates it — and that disposability
-  # is the entire reason D-150's objection to colocating Postgres does not
+  # is the entire reason D-184's objection to colocating Postgres does not
   # apply here. If this volume ever holds something a person would miss, that
   # reasoning has broken and the decision needs re-opening.
   preview_db:

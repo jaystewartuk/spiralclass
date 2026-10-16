@@ -3,9 +3,9 @@
 # repository that checkpoints and migrates a shared database.
 #
 # It was steps 1 and 2 of the Fly deploy script until 2026-09-12, when the
-# production targets became independently deployable ([D-177]'s addendum). The
+# production targets became independently deployable ([D-184]). The
 # steps did not change; who owns them did. While they lived inside the Fly
-# deploy, the Vercel failover (since retired, [D-186]) could only be deployed
+# deploy, the Vercel failover (since retired, [D-70]) could only be deployed
 # after a Fly deploy had succeeded. The database is not any target's, and this
 # is where that stops being a comment and becomes the structure.
 #

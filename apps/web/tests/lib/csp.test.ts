@@ -55,7 +55,7 @@ describe("buildCsp", () => {
 // set below, in the same change.
 describe("buildCsp third-party allowlists are complete and asserted", () => {
   // buildCsp is environment-invariant (the old Vercel Live off-production block
-  // was removed with the D-89 decommission), so these directive sets are the
+  // was removed with the D-70 decommission), so these directive sets are the
   // whole allowlist on every deployment.
   it("connect-src matches the documented host allowlist exactly", () => {
     // Browser-initiated network destinations (fetch / XHR / WebSocket). Inline
@@ -143,7 +143,7 @@ describe("buildCsp third-party allowlists are complete and asserted", () => {
 });
 
 // The Vercel Live toolbar hosts (vercel.live / *.pusher.com / assets.vercel.com)
-// were removed from the CSP with the D-89 Vercel decommission — the toolbar only
+// were removed from the CSP with the D-70 Vercel decommission — the toolbar only
 // existed on Vercel preview deploys. Lock in that no Vercel host survives.
 describe("no Vercel host in the CSP (post-D-89)", () => {
   it("never emits vercel.live / pusher.com / assets.vercel.com", () => {

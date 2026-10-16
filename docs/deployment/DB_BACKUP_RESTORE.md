@@ -3,7 +3,7 @@
 This is the operator runbook for production database safety: what protects
 production today, how to check on it, and the fastest safe recovery procedure
 if a migration or bad data change needs undoing. Rewritten 2026-07-20 (D-178)
-after the D-70 Fly + Neon cutover was confirmed executed (D-89) — production
+after the D-70 Fly + Neon cutover was confirmed executed — production
 is now confirmed on Neon (see "How do I know production is actually on Neon?"
 below), which changes the right primary mechanism from a pg_dump snapshot to
 Neon's own point-in-time restore (PITR) and branching.
@@ -92,9 +92,9 @@ failed dump, or a dump that does not verify is an error, never a skip. It needs
 `libpq` (`brew install libpq`) and `awscli` on the machine.
 
 **Which database does the backup actually back up?** The Neon
-cutover **has been executed** (D-89; `docs/decisions/D-89.md`).
+cutover **has been executed** (D-70; `docs/decisions/D-70.md`).
 Production runs on Cloud Run (Fly until 2026-09-23, D-184) + a **Neon
-production project**; Supabase is decommissioned (D-89 Phase 5). `PROD_BACKUP_DB_URL`
+production project**; Supabase is decommissioned (D-70 Phase 5). `PROD_BACKUP_DB_URL`
 was repointed to the Neon production project's direct connection string at
 cutover, in the same step that `PROD_DATABASE_URL`/`PROD_DIRECT_URL` were set
 (`PRODUCTION_CUTOVER.md` Phase 3) — otherwise the job would keep "succeeding"
@@ -156,7 +156,7 @@ drift from reality.
 
 ## Rollback procedure — a production migration fails or ships bad data
 
-**Production is on Neon (D-89), so Neon branching + PITR via
+**Production is on Neon (D-70), so Neon branching + PITR via
 `neon-rollback.sh` is THE fast path.** The R2 dump restore below is the
 fallback for when the incident falls outside Neon's PITR retention window
 (and no checkpoint branch covers it either), or you need a target off Neon
@@ -190,7 +190,7 @@ entirely.
    necessarily need a restore at all.
 6. Exit maintenance mode once verified.
 
-**This is a major payoff of the Neon cutover** (`PRODUCTION_CUTOVER.md`, D-89)
+**This is a major payoff of the Neon cutover** (`PRODUCTION_CUTOVER.md`, D-70)
 from a disaster-recovery standpoint, independent of any other cutover
 motivation: PITR + branching turns "restore prod" from an hours-scale manual
 operation into a minutes-scale, low-risk one.

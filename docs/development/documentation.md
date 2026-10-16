@@ -32,7 +32,7 @@ a `docs/development/plans/` roadmap, and a 72-file archive. They were deleted
 outright, not migrated. A second copy of a commitment rots while the queue
 moves on — the post-launch backlog was last refreshed 2026-06-07 and by August
 cited 11 documentation paths that had not existed since the 2026-07-24 reorg,
-plus a Supabase upgrade item that D-89 had made meaningless.
+plus a Supabase upgrade item that D-70 had made meaningless.
 
 So:
 

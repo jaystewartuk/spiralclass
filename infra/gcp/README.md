@@ -97,7 +97,7 @@ Three reasons, in the order they decided it:
 2. **The credential boundary.** A mounted secret is named, not valued, in the
    deploy command — so the deploy identity needs no read access to it.
    `--set-env-vars` would have required CI to hold every value.
-3. **[D-66](../../docs/decisions/D-66.md).** `gcloud`'s env-var flags take
+3. **[D-70](../../docs/decisions/D-70.md).** `gcloud`'s env-var flags take
    values as **process arguments**, where `ps` can read them. The secret's
    content goes in over stdin and never appears in argv.
 

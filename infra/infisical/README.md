@@ -2,11 +2,11 @@
 
 Secrets manager for everything the production app (Cloud Run `web`) needs at
 runtime, **except** the R2 credentials, which stay
-Tofu-owned (`infra/cloudflare-r2/`, D-65) — don't move those here.
+Tofu-owned (`infra/cloudflare-r2/`, D-70) — don't move those here.
 
 It replaced a plaintext `.env.fly.local` that was being pasted into `fly
 secrets set` by hand, back when production ran on Fly. See
-`docs/decisions/D-66.md` for why.
+`docs/decisions/D-70.md` for why.
 
 ## Adding a new script that needs a secret
 
@@ -50,7 +50,7 @@ push lives with the rest of its setup, as `infra/gcp/push-cloudrun-env.sh`.
 ## Account setup (cloud free tier)
 
 1. Sign up at [infisical.com](https://infisical.com) (free tier — unlimited
-   secrets/environments, fine for a solo project; see D-66 for why not
+   secrets/environments, fine for a solo project; see D-70 for why not
    self-hosted).
 2. Create one project: **SpiralClass**.
 3. Repurpose the default `dev`/`staging`/`prod` trio Infisical creates into
@@ -108,7 +108,7 @@ Shared across the `infra/` modules: `CLOUDFLARE_API_TOKEN` by `cloudflare` +
 per-command with `infisical run --env=infra -- tofu <cmd>` — off argv, out of
 shell history. (`infra/database/supabase`, the one module that used raw
 `SUPABASE_ACCESS_TOKEN` exports instead of this pattern, is retired —
-D-89/Neon migration completed; the module was removed from the repo.)
+D-70/Neon migration completed; the module was removed from the repo.)
 
 - **The `AWS_*` names are load-bearing, not a mislabel.** OpenTofu's
   `backend "s3"` reaches R2 over the S3 API and reads credentials via the AWS
@@ -192,7 +192,7 @@ somewhere `env.ts`'s `serverSchema` doesn't cover (e.g. read directly off
 Cross-referenced against `apps/web/src/lib/env.ts`'s `serverSchema` — a
 starting point, not the ground truth. R2 vars
 (`*_R2_*`, `CHAT_AUDIO_R2_*`, `LIVEKIT_EGRESS_S3_*`) are deliberately
-excluded — Tofu-owned, D-65.
+excluded — Tofu-owned, D-70.
 
 ```
 DATABASE_URL
@@ -224,7 +224,7 @@ VAPID_SUBJECT
 
 ### Where to get each value
 
-**Neon** (console.neon.tech — Supabase was decommissioned D-89; see
+**Neon** (console.neon.tech — Supabase was decommissioned D-70; see
 `infra/database/neon/README.md`):
 
 - `DATABASE_URL` — project's Connection Details panel → **Pooled** connection
@@ -350,7 +350,7 @@ server's configured key pair):
 
 **Reclassified out of this list (2026-07-12), same secret-vs-not test as the
 Supabase/Sentry/PostHog move above** — moved to committed config (now
-`config/env/`, D-85): `BETTER_AUTH_URL`,
+`config/env/`, D-70): `BETTER_AUTH_URL`,
 `APP_URL`, `RESEND_FROM` (all just URLs/an email address, no credential
 value), `STRIPE_PRICE_MONTHLY`/`ANNUAL`/`FOUNDING` (Stripe Price IDs — public
 identifiers, not secrets), `WISE_API_BASE` (an API base URL),
@@ -372,12 +372,12 @@ hard cutover switch paired 1:1 with `FIELD_ENCRYPTION_KEY`
 see `docs/security.md` §11.3), so setting it without the matching
 key already live in Infisical hard-fails boot.
 
-> **Where the non-secret values live (D-85).** They sit in
+> **Where the non-secret values live (D-70).** They sit in
 > `config/env/<env>.runtime.env` (runtime) and `config/env/<env>.build.env`
 > (`NEXT_PUBLIC_*` build-args), which every host and local dev load alike. They
 > started out in the Fly configs' `[env]`/`[build.args]` tables, which are
 > gone; the secret-vs-non-secret split this section documents is unchanged.
-> See `config/env/README.md` and `docs/decisions/D-85.md`.
+> See `config/env/README.md` and `docs/decisions/D-70.md`.
 
 **`SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SENTRY_DSN`, `POSTHOG_KEY`,
 `POSTHOG_HOST` deliberately removed from this list — moved to committed
@@ -406,7 +406,7 @@ are real `env.ts` secrets read by `apps/web`.
 > those were ever imported — there is no such cleanup to do. (That same stale
 > note also called Stripe and LiveKit "not set"; their secrets — `STRIPE_*`,
 > `LIVEKIT_API_SECRET` — are in fact present.) The non-secret values now live
-> in `config/env/` (D-85), never in `fly secrets`.
+> in `config/env/` (D-70), never in `fly secrets`.
 >
 > ⚠️ **That correction checked the wrong app, and the conclusion does not
 > hold for production (2026-09-05).** It ran against
@@ -414,7 +414,7 @@ are real `env.ts` secrets read by `apps/web`.
 > both. A live `fly secrets list --app agendaprofe` shows
 > **`SUPABASE_PROD_DIRECT_URL` is set on production** — a direct Postgres
 > connection string for a platform decommissioned by
-> [D-89](../../docs/decisions/D-89.md), sitting on the live app for roughly
+> [D-70](../../docs/decisions/D-70.md), sitting on the live app for roughly
 > seven weeks after the note that said there was nothing to clean up.
 >
 > Nothing reads it and nothing can start reading it:
@@ -488,7 +488,7 @@ Don't pre-populate speculative future config that's neither read by the code
 nor plausibly needed soon — but do add anything `production` holds that this
 list is missing.
 
-**`NEXT_PUBLIC_*` build-time vars — now handled (D-85, was a gap).**
+**`NEXT_PUBLIC_*` build-time vars — now handled (D-70, was a gap).**
 `NEXT_PUBLIC_*` vars are inlined into the client bundle at **Docker build
 time**, not read from the runtime secret — see the comment block in the root
 `Dockerfile`. They all live in `config/env/<env>.build.env` now, and

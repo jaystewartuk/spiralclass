@@ -8,9 +8,9 @@ import { REPO_ROOT } from "../../../../scripts/env-config.mjs";
 
 /**
  * The database is a job of its own, and the target holds none of its
- * credentials ([D-177]'s addendum, 2026-09-12). Cloud Run took the domain from
+ * credentials ([D-184], 2026-09-12). Cloud Run took the domain from
  * Fly on 2026-09-23 and Fly was destroyed ([D-184]'s addendum); the Vercel
- * failover that ran beside it was retired the same week ([D-186]). So there is
+ * failover that ran beside it was retired the same week ([D-70]). So there is
  * one target, Cloud Run, and it serves.
  *
  * The split was made so two targets could deploy independently. It outlived
@@ -94,7 +94,7 @@ const sorted = (set: Iterable<string>) => [...set].sort();
 describe("the database is a job of its own, and the target waits only on it", () => {
   it("has exactly the two jobs, and the build values are real", () => {
     // A third job is a third target, and that is a decision record, not an
-    // edit here (D-186 retired the last one).
+    // edit here (D-70 retired the last one).
     expect(Object.keys(JOBS).sort()).toEqual(["cloudrun", "database"]);
     // An empty BUILD would make every subset assertion below vacuous.
     expect(BUILD.size).toBeGreaterThan(0);
@@ -158,7 +158,7 @@ describe("each job holds its own credentials and no other job's", () => {
   it("no key is written where a process list or a later step could read it", () => {
     // The key reaches gcloud through a file created under umask 077 and removed
     // on exit. `--key-file` takes a path, so the value never becomes an
-    // argument (D-66), and no step writes it into the workspace.
+    // argument (D-70), and no step writes it into the workspace.
     const script = read("scripts", "cloudrun-deploy.sh");
     expect(script).toContain("--key-file=");
     expect(script).toContain("umask 077");

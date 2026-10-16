@@ -167,7 +167,7 @@ jobs:
 
       - name: Let the browser resolve preview.localhost
         # scripts/ci/e2e.sh drives Chromium at http://preview.localhost:3000
-        # because prod-vs-preview is decided by APP_URL (D-89 Phase 5), so the
+        # because prod-vs-preview is decided by APP_URL (D-70 Phase 5), so the
         # app must see a preview-shaped origin. macOS resolves *.localhost
         # through mDNSResponder and needs nothing; glibc does not resolve it at
         # all. The script's own probe fails with this exact instruction, so

@@ -117,7 +117,7 @@ constraint, which is the one thing a log can show that a codebase cannot.
   decomposed into 72% idle scale-to-zero timer. One 15-minute reminder leg was
   costing roughly half the free compute allowance. It keeps the reminder and
   gets the hourly grid, by arming a delayed event at the exact due moment.
-- **[D-150](./D-150.md)** — round-trip latency measured from the actual
+- **[D-184](./D-184.md)** — round-trip latency measured from the actual
   machines, then multiplied by a documented query pattern: moving the app to a
   free box would cost ~1.3 seconds on a database-heavy page. The free option
   loses, and the record says so.
@@ -253,10 +253,8 @@ method. No platform curriculum, ever.
 
 ### Notifications and messaging
 
-| #                 | Decision                                                                                 |
-| ----------------- | ---------------------------------------------------------------------------------------- |
-| [D-44](./D-44.md) | Drop Realtime for portable polling; push-first with a delayed email only if still unread |
-| [D-75](./D-75.md) | A waiting-room nudge on demand, rather than auto-ringing a scheduled appointment         |
+| #   | Decision |
+| --- | -------- |
 
 ### Acquisition and the public funnel
 
@@ -314,26 +312,14 @@ and exercised for real when the provider actually changed.
 | ------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | [D-26](./D-26.md)   | A staging tier and a gated promote — `main` stops deploying to production                                                                                 |
 | [D-43](./D-43.md)   | Rename staging → preview, and the two silent outages the rename actually caused                                                                           |
-| [D-49](./D-49.md)   | **Provision · schema · data as three independently reproducible layers**                                                                                  |
-| [D-51](./D-51.md)   | The serving plane is designed and deliberately **not** built — these layers change the hot path                                                           |
-| [D-65](./D-65.md)   | IaC written without live API access got the bucket list wrong; preview and production split                                                               |
-| [D-66](./D-66.md)   | A managed secrets store replaces a plaintext file nobody rotates                                                                                          |
 | [D-70](./D-70.md)   | **Full exit from Supabase and Vercel**; 125 migrations squashed to one portable baseline                                                                  |
-| [D-76](./D-76.md)   | Maintenance mode is an env var, because a flag you cannot read while the database is down is useless                                                      |
-| [D-85](./D-85.md)   | Non-secret config leaves the host's own format — split on one question: is this a credential?                                                             |
-| [D-89](./D-89.md)   | The cutover, executed — and the decommission that removed the code coupling                                                                               |
 | [D-115](./D-115.md) | Collapse the cron wake grid; serve the tight leg with a delayed-event chain                                                                               |
 | [D-127](./D-127.md) | Image generation moves to Vertex AI — the consumer API gates on a prepay balance                                                                          |
 | [D-139](./D-139.md) | **Delete the OpenTofu modules that were never applied** — they assert a state nobody reconciled                                                           |
-| [D-150](./D-150.md) | Measure the latency before taking the free box, and keep the database where it is                                                                         |
 | [D-169](./D-169.md) | **One wrapper owns every Infisical call**, and deployment does not make one — it reads pushed GitHub secrets                                              |
 | [D-170](./D-170.md) | The Codespaces path is **deleted rather than repaired** — a development path with no users is not a feature                                               |
-| [D-177](./D-177.md) | **Vercel returns as a second production target that holds no domain** — the target, not the coupling                                                      |
 | [D-178](./D-178.md) | **A migration must work with the code already serving**; drops ship a release after the code stops using them                                             |
-| [D-183](./D-183.md) | **The Oracle tenancy goes Pay As You Go** to buy A1 capacity priority; the free ceilings now bill instead of refusing                                     |
-| [D-184](./D-184.md) | **Cloud Run `us-east4` takes production from Fly** — measured at +9 ms to Neon, against the +46 ms D-150 refused; serving since 2026-09-23, Fly destroyed |
-| [D-186](./D-186.md) | **The Vercel failover is retired** — it never served a request; Cloud Run is the only target and the coupling bans stay                                   |
-| [D-190](./D-190.md) | **A wedged Cloud Run instance is restarted by a liveness probe** on the no-database health route, not routed around by a second instance                  |
+| [D-184](./D-184.md) | **Cloud Run `us-east4` takes production from Fly** — measured at +9 ms to Neon, against the +46 ms D-184 refused; serving since 2026-09-23, Fly destroyed |
 
 ### CI, the gate and releasing
 
@@ -361,19 +347,17 @@ a hook — is a caller.
 
 ### Privacy, governance and publication
 
-| #                   | Decision                                                                                                             |
-| ------------------- | -------------------------------------------------------------------------------------------------------------------- |
-| [D-05](./D-05.md)   | _(tombstone)_ An early privacy framing, superseded by D-128 and removed before publication                           |
-| [D-48](./D-48.md)   | **A setting is only configuration if every consumer reads the config** — one hardcoded reader makes it a code change |
-| [D-110](./D-110.md) | One board, off this repository: 100 documents that were really queues of work are deleted                            |
-| [D-172](./D-172.md) | The board moves into this repository's Issues — the queue stays out of the tree, and stops being private             |
-| [D-174](./D-174.md) | **A server action revalidates exactly one path** — a second call makes the client discard the whole response         |
-| [D-128](./D-128.md) | The privacy layer becomes UK GDPR, and **the supplier register becomes code with a guard test**                      |
-| [D-147](./D-147.md) | _(tombstone)_ The regulatory position, kept privately — with the one engineering finding                             |
-| [D-158](./D-158.md) | Publish the shape, never the account — a third gate on the credential scanner                                        |
-| [D-159](./D-159.md) | What was built is published; what the operator personally owes is not                                                |
-| [D-181](./D-181.md) | **A security fix lands as a public PR with a neutral title**, pushed only when it can ship                           |
-| [D-202](./D-202.md) | **One record per live decision, edited in place**; absorbed numbers retired, never reused                            |
+| #                   | Decision                                                                                                 |
+| ------------------- | -------------------------------------------------------------------------------------------------------- |
+| [D-05](./D-05.md)   | _(tombstone)_ An early privacy framing, superseded by D-128 and removed before publication               |
+| [D-110](./D-110.md) | One board, off this repository: 100 documents that were really queues of work are deleted                |
+| [D-172](./D-172.md) | The board moves into this repository's Issues — the queue stays out of the tree, and stops being private |
+| [D-128](./D-128.md) | The privacy layer becomes UK GDPR, and **the supplier register becomes code with a guard test**          |
+| [D-147](./D-147.md) | _(tombstone)_ The regulatory position, kept privately — with the one engineering finding                 |
+| [D-158](./D-158.md) | Publish the shape, never the account — a third gate on the credential scanner                            |
+| [D-159](./D-159.md) | What was built is published; what the operator personally owes is not                                    |
+| [D-181](./D-181.md) | **A security fix lands as a public PR with a neutral title**, pushed only when it can ship               |
+| [D-202](./D-202.md) | **One record per live decision, edited in place**; absorbed numbers retired, never reused                |
 
 ### Naming and positioning
 
@@ -407,31 +391,21 @@ records removed before publication — see [What is not here](#what-is-not-here)
 | [D-40](./D-40.md)   | Supabase Auth → better-auth on owned tables                           | Active                               |
 | [D-42](./D-42.md)   | Remove the WhatsApp Cloud API integration                             | Active                               |
 | [D-43](./D-43.md)   | Rename staging → preview, and the outages it caused                   | Active                               |
-| [D-44](./D-44.md)   | Portable HTTP chat delivery; push-first with delayed email            | Active                               |
 | [D-46](./D-46.md)   | The teacher's own template drives AI compose                          | Active                               |
-| [D-48](./D-48.md)   | Analytics region becomes real configuration                           | Active                               |
-| [D-49](./D-49.md)   | Provider-neutral provision · schema · data                            | Executed by D-70 / D-89              |
-| [D-51](./D-51.md)   | The multi-region serving plane — design only, deliberately unbuilt    | Design only; not built               |
 | [D-52](./D-52.md)   | Shared key-based i18n catalog with a ratchet and a lint rule          | Active                               |
 | [D-53](./D-53.md)   | Availability rules frozen in the zone they were written in            | Active                               |
 | [D-55](./D-55.md)   | Admin capability layer + an interactive `/admin/uat` runbook          | Active                               |
 | [D-56](./D-56.md)   | `/sign-in` never auto-provisions a Teacher                            | Active                               |
-| [D-65](./D-65.md)   | R2 buckets split preview/production; env reads consolidated           | Active                               |
-| [D-66](./D-66.md)   | Infisical replaces a plaintext secrets file                           | Active                               |
-| [D-70](./D-70.md)   | Full exit from Supabase and Vercel; history squashed                  | Executed — see D-89                  |
+| [D-70](./D-70.md)   | Full exit from Supabase and Vercel; history squashed                  | Executed — see D-70                  |
 | [D-72](./D-72.md)   | One registry, `target_language` as BCP-47                             | Active (positioning → D-173)         |
 | [D-73](./D-73.md)   | Self-hosted teacher intro video + AI intro coach                      | Active (model choice → D-87)         |
-| [D-75](./D-75.md)   | Waiting-room presence and an on-demand nudge                          | Active (transport replaced)          |
-| [D-76](./D-76.md)   | Cross-app maintenance mode behind one env var                         | Active                               |
 | [D-78](./D-78.md)   | Teacher-configurable AI material style                                | Active                               |
 | [D-79](./D-79.md)   | Webhook durability: claim completion + a paid-fan-out reconcile       | Active                               |
 | [D-80](./D-80.md)   | Vocabulary difficulty separated from CEFR level                       | Active                               |
 | [D-81](./D-81.md)   | A third UI language on a registry-driven architecture                 | Active                               |
 | [D-83](./D-83.md)   | Teacher → student invitation and onboarding flow                      | Active                               |
-| [D-85](./D-85.md)   | Non-secret config moves to platform-neutral `config/env/`             | Active                               |
 | [D-87](./D-87.md)   | Model defaults split by call shape; `effort` and Haiku never coexist  | Active                               |
 | [D-88](./D-88.md)   | One-to-one is an always-on prompt directive                           | Active                               |
-| [D-89](./D-89.md)   | Production cutover executed; Vercel and Supabase decommissioned       | Active (D-177 → D-186)               |
 | [D-93](./D-93.md)   | Homework review / feedback / AI-assist architecture                   | Designed; shipping in slices         |
 | [D-94](./D-94.md)   | Production onto the self-hosted LiveKit box                           | First half reversed → D-182          |
 | [D-97](./D-97.md)   | Flashcards, speaking-time analytics, derived-offset bookmarks         | Active                               |
@@ -459,7 +433,7 @@ records removed before publication — see [What is not here](#what-is-not-here)
 | [D-135](./D-135.md) | The class recording is audio-only                                     | Active                               |
 | [D-136](./D-136.md) | Closing an account destroys its recordings                            | Active                               |
 | [D-138](./D-138.md) | Renamed to SpiralClass; 45 identifiers deliberately not renamed       | Active                               |
-| [D-139](./D-139.md) | Delete the OpenTofu modules that were never applied                   | Active (one part → D-150)            |
+| [D-139](./D-139.md) | Delete the OpenTofu modules that were never applied                   | Active (one part → D-184)            |
 | [D-140](./D-140.md) | Legibility is the governing constraint                                | Active                               |
 | [D-141](./D-141.md) | The standard breakpoint scale is restored                             | Active                               |
 | [D-142](./D-142.md) | The public demo is a rendered fixture                                 | Active (premise revised 2026-10-14)  |
@@ -468,7 +442,6 @@ records removed before publication — see [What is not here](#what-is-not-here)
 | [D-146](./D-146.md) | One heavy job at a time; the laptop becomes a queue                   | Active (in part → D-157/D-161)       |
 | [D-147](./D-147.md) | Regulatory position                                                   | Content removed; finding kept        |
 | [D-149](./D-149.md) | Group classes: one booking, many attendees                            | Scoped; narrowed by D-149 for two    |
-| [D-150](./D-150.md) | Hosting measured; the app stays where the database is                 | Decided; partly executed             |
 | [D-151](./D-151.md) | Verified student testimonials the teacher cannot write                | Active                               |
 | [D-153](./D-153.md) | Money columns say `minor_units`                                       | Active                               |
 | [D-155](./D-155.md) | A community has rules, a post and a picture                           | Active                               |
@@ -485,21 +458,16 @@ records removed before publication — see [What is not here](#what-is-not-here)
 | [D-171](./D-171.md) | One visual baseline set, owned by ubuntu-latest                       | Active                               |
 | [D-172](./D-172.md) | The backlog is this repository's Issues, not a private board          | Active                               |
 | [D-173](./D-173.md) | Any subject in the copy; the schema stays language-shaped             | Active                               |
-| [D-174](./D-174.md) | A server action revalidates exactly one path                          | Active                               |
 | [D-175](./D-175.md) | Tenant scoping is checked by a parser, not by a reader                | Active                               |
-| [D-177](./D-177.md) | Vercel is a second production target; it holds no domain              | Reversed → D-186                     |
 | [D-178](./D-178.md) | Migrations expand; contracts ship a release later, marked CONTRACT    | Active                               |
 | [D-179](./D-179.md) | CodeQL scans every PR; main refuses a merge that adds an alert        | Active                               |
 | [D-180](./D-180.md) | Test-file and decision-record counts are floors, not exact            | Active                               |
 | [D-181](./D-181.md) | A security fix is a public PR, neutral title, pushed when it can ship | Active                               |
 | [D-182](./D-182.md) | Production video back on LiveKit Cloud, the box having no capacity    | Reversed by D-187                    |
-| [D-183](./D-183.md) | The Oracle tenancy goes Pay As You Go; Always Free ceilings now bill  | Active                               |
-| [D-184](./D-184.md) | Cloud Run serves production; Fly is retired                           | Active (revisits D-150's premise)    |
+| [D-184](./D-184.md) | Cloud Run serves production; Fly is retired                           | Active (revisits D-184's premise)    |
 | [D-185](./D-185.md) | Live captions run in the browsers; a computer covers a phone          | Active (supersedes D-106, D-108)     |
-| [D-186](./D-186.md) | The Vercel failover is retired; Cloud Run is the only target          | Active (reverses D-177)              |
 | [D-187](./D-187.md) | Video on a free e2-micro; recording and transcription off again       | Active (transcription → D-189)       |
 | [D-189](./D-189.md) | The transcript is the browsers' caption text; no audio is captured    | Active (partly reverses D-187)       |
-| [D-190](./D-190.md) | A liveness probe restarts a wedged Cloud Run instance                 | Active                               |
 | [D-193](./D-193.md) | One URL per language on public pages; bare URL is English             | Active                               |
 | [D-194](./D-194.md) | The booking page's language is the teacher's; no visitor switch       | Active (records existing behaviour)  |
 | [D-195](./D-195.md) | One locale per language; a regional locale is a delta over its base   | Decided, not built                   |
@@ -520,40 +488,56 @@ held was behaviour or a rule, is listed here with where its reasoning went
 removed: applied migrations cite some of these and cannot be edited. Outside
 migrations, cite the live record instead.
 
-| #     | Where its reasoning went                                                                                                                                            |
-| ----- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| D-01  | [D-143](./D-143.md) — Payment processor moved from Mercado Pago to Stripe Connect, each teacher paid into her own Stripe account                                    |
-| D-02  | retired: OXXO cash vouchers were removed for slow settlement; OXXO now appears through the teacher's own Stripe account                                             |
-| D-03  | [packages](../features/packages.md) — Removed recurring monthly student subscriptions in favour of one-off packages                                                 |
-| D-08  | [scheduling](../features/scheduling-booking.md) — The reschedule cap became a pooled per-package schedule-change budget                                             |
-| D-09  | [packages](../features/packages.md) — Several packages are consumed FIFO by expiry through one credit ledger                                                        |
-| D-11  | [D-178](./D-178.md) — Migrations applied by hand, never by a deploy (reversed within weeks)                                                                         |
-| D-12  | [scheduling](../features/scheduling-booking.md) — Classes complete at their end time; no-show is the only manual label                                              |
-| D-14  | [student management](../features/student-management.md) — Teacher-private student notes live in their own table, never in the audit trail                           |
-| D-15  | [classes and lesson content](../features/classes-lesson-content.md) — Live-notes student visibility is a class window; writing free, live surfaces Pro              |
-| D-18  | [D-178](./D-178.md) — Production migrations re-coupled to the deploy after code shipped ahead of its schema                                                         |
-| D-30  | [packages](../features/packages.md) — A single class is sold as a one-class package, paid at reservation and auto-booked on payment                                 |
-| D-37  | [referrals and discounts](../features/referrals-discounts.md) — Discount codes are the single, teacher-funded reward primitive for referrals, with no credit ledger |
-| D-50  | [D-143](./D-143.md) — Capture the billing address at checkout; Stripe Tax stays behind an off-by-default flag                                                       |
-| D-58  | [D-143](./D-143.md) — Platform Stripe entity moved to the UK; the Connect gate widened to the cross-border payout circle                                            |
-| D-64  | [D-153](./D-153.md) — Teacher-chosen pricing currency, captured once at onboarding from a curated list                                                              |
-| D-69  | [library materials](../features/library-materials.md) — ClassContent and ClassMaterial merged into LibraryMaterial                                                  |
-| D-86  | [admin portal](../features/admin-portal.md) — Admin unit-economics estimate layer: pricing as data, a GBP view, estimates never mixed with actuals                  |
-| D-95  | [D-178](./D-178.md) — Neon PITR plus a pre-migration checkpoint branch replaced the pg_dump-to-R2 deploy gate                                                       |
-| D-96  | [subscriptions](../features/subscriptions.md) — Kept code-defined plans and one entitlements resolver; closed the enforcement gaps                                  |
-| D-99  | [D-153](./D-153.md) — Platform subscription billing currency moved from MXN to GBP                                                                                  |
-| D-111 | [packages](../features/packages.md) — A package buyer may pick the first class before paying; no sessionless booking                                                |
-| D-113 | [D-145](./D-145.md) — Manual rail made generic: the payee instrument is data, not a payment provider                                                                |
-| D-124 | [D-145](./D-145.md) — Bank-account instrument backed by a 15-scheme per-country registry                                                                            |
-| D-137 | [D-143](./D-143.md) — The platform never collects and forwards student money; teacher-held card links were in scope                                                 |
-| D-144 | [D-143](./D-143.md) — Student checkout stopped requiring a full address; buy page reordered around the buyer                                                        |
-| D-152 | [D-143](./D-143.md) — The teacher is told Stripe's fee is Stripe's; public copy quotes no percentage                                                                |
-| D-168 | [D-178](./D-178.md) — Migration history squashed to two files: a generated baseline and hand-written invariants                                                     |
-| D-176 | [D-175](./D-175.md) — The tenant a request is entitled to is carried from the auth gate to a runtime Prisma extension                                               |
-| D-188 | [D-149](./D-149.md) — Packages for two: one buyer, one account, its own credit balance                                                                              |
-| D-191 | [payments](../features/payments.md) — Money screens lead with what was earned this month, not a "safe to spend" average                                             |
-| D-192 | [admin portal](../features/admin-portal.md) — Operator test accounts are flagged and left out of every figure                                                       |
-| D-197 | [D-153](./D-153.md) — Prices are written in the reader's number format; the currency never changes                                                                  |
+| #     | Where its reasoning went                                                                                                                                                                                |
+| ----- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| D-01  | [D-143](./D-143.md) — Payment processor moved from Mercado Pago to Stripe Connect, each teacher paid into her own Stripe account                                                                        |
+| D-02  | retired: OXXO cash vouchers were removed for slow settlement; OXXO now appears through the teacher's own Stripe account                                                                                 |
+| D-03  | [packages](../features/packages.md) — Removed recurring monthly student subscriptions in favour of one-off packages                                                                                     |
+| D-08  | [scheduling](../features/scheduling-booking.md) — The reschedule cap became a pooled per-package schedule-change budget                                                                                 |
+| D-09  | [packages](../features/packages.md) — Several packages are consumed FIFO by expiry through one credit ledger                                                                                            |
+| D-11  | [D-178](./D-178.md) — Migrations applied by hand, never by a deploy (reversed within weeks)                                                                                                             |
+| D-12  | [scheduling](../features/scheduling-booking.md) — Classes complete at their end time; no-show is the only manual label                                                                                  |
+| D-14  | [student management](../features/student-management.md) — Teacher-private student notes live in their own table, never in the audit trail                                                               |
+| D-15  | [classes and lesson content](../features/classes-lesson-content.md) — Live-notes student visibility is a class window; writing free, live surfaces Pro                                                  |
+| D-18  | [D-178](./D-178.md) — Production migrations re-coupled to the deploy after code shipped ahead of its schema                                                                                             |
+| D-30  | [packages](../features/packages.md) — A single class is sold as a one-class package, paid at reservation and auto-booked on payment                                                                     |
+| D-37  | [referrals and discounts](../features/referrals-discounts.md) — Discount codes are the single, teacher-funded reward primitive for referrals, with no credit ledger                                     |
+| D-44  | [messaging-chat](../features/messaging-chat.md) — Chat drops Supabase Realtime for ~4 s visibility polling; chat notifications go push-first, then email after 3 min only if the thread is still unread |
+| D-48  | retired: PostHog region is one env knob, single source `apps/web/src/lib/analytics/posthog-region.ts`, held by `posthog-region.test.ts`                                                                 |
+| D-49  | [D-70](./D-70.md) — Database provisioning, schema and data movement as three reproducible, provider-neutral layers; tooling built ahead of need                                                         |
+| D-50  | [D-143](./D-143.md) — Capture the billing address at checkout; Stripe Tax stays behind an off-by-default flag                                                                                           |
+| D-51  | [D-70](./D-70.md) — The multi-region serving plane (pooling, routing, config, residency audit) designed and deliberately not built                                                                      |
+| D-58  | [D-143](./D-143.md) — Platform Stripe entity moved to the UK; the Connect gate widened to the cross-border payout circle                                                                                |
+| D-64  | [D-153](./D-153.md) — Teacher-chosen pricing currency, captured once at onboarding from a curated list                                                                                                  |
+| D-65  | [D-70](./D-70.md) — R2 buckets split preview/production with their own tokens; bucket list corrected; one env-prefix map reads every bucket                                                             |
+| D-66  | [D-70](./D-70.md) — Infisical replaces a hand-pasted plaintext secrets file; values travel on stdin, never argv                                                                                         |
+| D-69  | [library materials](../features/library-materials.md) — ClassContent and ClassMaterial merged into LibraryMaterial                                                                                      |
+| D-75  | [live-calls-video](../features/live-calls-video.md) — A waiting-room Nudge on demand instead of auto-ringing a scheduled class                                                                          |
+| D-76  | retired: maintenance mode is an env flag — reasons in `apps/web/src/lib/maintenance.ts`, procedure in `docs/deployment/RELEASE_AND_STAGING.md`                                                          |
+| D-85  | [D-70](./D-70.md) — Non-secret config leaves `fly.<env>.toml` for platform-neutral `config/env/` files                                                                                                  |
+| D-86  | [admin portal](../features/admin-portal.md) — Admin unit-economics estimate layer: pricing as data, a GBP view, estimates never mixed with actuals                                                      |
+| D-89  | [D-70](./D-70.md) — Production cut over to Fly + Neon; Phase 5 tore down Vercel and Supabase and removed the code coupling                                                                              |
+| D-95  | [D-178](./D-178.md) — Neon PITR plus a pre-migration checkpoint branch replaced the pg_dump-to-R2 deploy gate                                                                                           |
+| D-96  | [subscriptions](../features/subscriptions.md) — Kept code-defined plans and one entitlements resolver; closed the enforcement gaps                                                                      |
+| D-99  | [D-153](./D-153.md) — Platform subscription billing currency moved from MXN to GBP                                                                                                                      |
+| D-111 | [packages](../features/packages.md) — A package buyer may pick the first class before paying; no sessionless booking                                                                                    |
+| D-113 | [D-145](./D-145.md) — Manual rail made generic: the payee instrument is data, not a payment provider                                                                                                    |
+| D-124 | [D-145](./D-145.md) — Bank-account instrument backed by a 15-scheme per-country registry                                                                                                                |
+| D-137 | [D-143](./D-143.md) — The platform never collects and forwards student money; teacher-held card links were in scope                                                                                     |
+| D-144 | [D-143](./D-143.md) — Student checkout stopped requiring a full address; buy page reordered around the buyer                                                                                            |
+| D-150 | [D-184](./D-184.md) — Hosting decided by measured latency; the web app briefly bound for Oracle, the database kept on managed Neon                                                                      |
+| D-152 | [D-143](./D-143.md) — The teacher is told Stripe's fee is Stripe's; public copy quotes no percentage                                                                                                    |
+| D-168 | [D-178](./D-178.md) — Migration history squashed to two files: a generated baseline and hand-written invariants                                                                                         |
+| D-174 | retired: one `revalidateAfterAction` per action — reasons and measurements in `apps/web/src/lib/revalidate.ts`, held by `revalidate-once.test.ts`                                                       |
+| D-176 | [D-175](./D-175.md) — The tenant a request is entitled to is carried from the auth gate to a runtime Prisma extension                                                                                   |
+| D-177 | [D-70](./D-70.md) — Vercel returned as a no-domain production failover; the coupling stayed removed                                                                                                     |
+| D-183 | [D-184](./D-184.md) — The Oracle tenancy went Pay As You Go for capacity priority; Always Free ceilings now bill                                                                                        |
+| D-186 | [D-70](./D-70.md) — The Vercel failover was retired; Cloud Run is the only target; coupling bans stay                                                                                                   |
+| D-188 | [D-149](./D-149.md) — Packages for two: one buyer, one account, its own credit balance                                                                                                                  |
+| D-190 | [D-184](./D-184.md) — A wedged Cloud Run instance is restarted by a liveness probe on the DB-free health route                                                                                          |
+| D-191 | [payments](../features/payments.md) — Money screens lead with what was earned this month, not a "safe to spend" average                                                                                 |
+| D-192 | [admin portal](../features/admin-portal.md) — Operator test accounts are flagged and left out of every figure                                                                                           |
+| D-197 | [D-153](./D-153.md) — Prices are written in the reader's number format; the currency never changes                                                                                                      |
 
 ---
 

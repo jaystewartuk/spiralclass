@@ -1300,7 +1300,7 @@ function getClient(): PostHog | null {
     cached = new PostHog(key, {
       // POSTHOG_HOST is an explicit override; unset falls back to the
       // region-derived ingest host (NEXT_PUBLIC_POSTHOG_REGION, default US)
-      // so a single region knob flips server + browser together — see D-48.
+      // so a single region knob flips server + browser together — see lib/analytics/posthog-region.ts.
       host: process.env.POSTHOG_HOST ?? posthogRegionHosts().ingest,
       flushAt: 1,
       flushInterval: 0,

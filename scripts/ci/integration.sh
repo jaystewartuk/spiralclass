@@ -16,7 +16,7 @@
 #   * `createdb` / `psql` run INSIDE the container via `docker compose exec`,
 #     so no local libpq client is needed on the laptop.
 #   * The stale SUPABASE_* / VERCEL_ENV stubs the workflow still exports are
-#     gone: both platforms are decommissioned (D-89 Phase 5), nothing reads
+#     gone: both platforms are decommissioned (D-70 Phase 5), nothing reads
 #     them, and copying dead env into a new file is how it comes back.
 set -euo pipefail
 

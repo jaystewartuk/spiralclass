@@ -7,7 +7,7 @@ recording and lesson-insights transcription do not**, because egress does not
 fit on the machine (measured — D-187).
 
 > [!NOTE]
-> **Hand-built, not OpenTofu.** [D-150](../../docs/decisions/D-150.md) forbids
+> **Hand-built, not OpenTofu.** [D-184](../../docs/decisions/D-184.md) forbids
 > committing a module for a self-hosted box before it has been applied and a
 > state file exists, and [D-164](../../docs/decisions/D-164.md) holds a
 > runbook to the machine it describes. So this directory holds the box's

@@ -1,6 +1,6 @@
 # Production build for apps/web — this image IS what Fly runs, in both
-# environments (D-89). It began as a Fly spike alongside Vercel; Vercel and
-# Supabase were decommissioned in D-89 Phase 5, so there is no second build
+# environments (D-70). It began as a Fly spike alongside Vercel; Vercel and
+# Supabase were decommissioned in D-70 Phase 5, so there is no second build
 # path left to stay compatible with.
 
 # PINNED (M-7). `node:24-slim` is a MUTABLE tag: the digest it resolves to moves
@@ -88,8 +88,8 @@ ENV DATABASE_URL="postgresql://build:build@localhost:5432/build" \
 # key and the Stripe publishable key are all public-by-design — they ship in
 # every site's client JS; the R2/WhatsApp values are plain public URLs/phone
 # numbers — see infra/cloudflare-r2/README.md's "public URL is manual" note,
-# D-66), so pass the real ones as build args. They are sourced from
-# config/env/<env>.build.env (D-85) by scripts/env-build-args.mjs, which the
+# D-70), so pass the real ones as build args. They are sourced from
+# config/env/<env>.build.env (D-70) by scripts/env-build-args.mjs, which the
 # build+deploy path (scripts/cloudrun-deploy.sh, which the workflow calls — D-184)
 # turns into `--build-arg NAME=...` flags — see config/env/README.md:
 ARG NEXT_PUBLIC_DEPLOY_ENV
@@ -249,7 +249,7 @@ COPY --from=builder --chown=nextjs:nodejs /repo/apps/web/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /repo/apps/web/.next/static ./apps/web/.next/static
 COPY --from=builder --chown=nextjs:nodejs /repo/apps/web/public ./apps/web/public
 
-# Non-secret RUNTIME config (D-85). The entrypoint sources the file matching
+# Non-secret RUNTIME config (D-70). The entrypoint sources the file matching
 # APP_ENV (set in fly.<env>.toml) before starting the server, so these values
 # no longer need to live in fly.<env>.toml's [env]. Both env files are baked in
 # and APP_ENV selects one; the *.build.env half was already inlined at build.

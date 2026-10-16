@@ -1430,7 +1430,7 @@ async function seedBulkTeacher(
 // hard-deletes teachers, so it must NEVER touch prod — that would erase real
 // audit history (D-25) and delete live teachers.
 //
-// The guard is host-based and ENV-DRIVEN (D-89, post-Supabase): set
+// The guard is host-based and ENV-DRIVEN (D-70, post-Supabase): set
 // `PROD_DB_HOSTS` — a comma-separated list of the production database
 // hostname(s) (Neon pooled + direct) — in any environment where a prod
 // connection string could be present (the production deploy env / CI travels

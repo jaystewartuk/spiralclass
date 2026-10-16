@@ -2,7 +2,7 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 import { PRIVACY_POLICY_SECTIONS } from "@spiralclass/shared";
-// REPO_ROOT / envFilePath / parseEnvFile are the config-tooling resolvers (D-85).
+// REPO_ROOT / envFilePath / parseEnvFile are the config-tooling resolvers (D-70).
 import { REPO_ROOT, envFilePath, parseEnvFile } from "../../../../scripts/env-config.mjs";
 
 // Holds the public marketing pages' AI claims against the enablement flags that

@@ -421,17 +421,17 @@ describe("the workflows call the registry, and never restate it (D-157)", () => 
     // these steps existed in two places, the copy that got re-typed was the one
     // missing the checkpoint.
     //
-    // WIDENED BY [D-177] FROM ONE SCRIPT TO "a deploy script", because there is
+    // WIDENED BY [D-70] FROM ONE SCRIPT TO "a deploy script", because there is
     // more than one target. The rule did not change: a deploy workflow CALLS a
     // script a laptop can also run, and states none of the steps itself.
     // scripts/database-deploy.sh joined when the checkpoint and migrations moved
-    // into a job of their own ([D-177]'s addendum); the Cloud Run script
+    // into a job of their own ([D-184]); the Cloud Run script
     // replaced Fly's when the domain moved ([D-184]'s addendum). The Vercel
-    // script left with the failover ([D-186]).
+    // script left with the failover ([D-70]).
     const DEPLOY_SCRIPTS = ["scripts/cloudrun-deploy.sh", "scripts/database-deploy.sh"];
 
     // Every step a deploy script owns. The `vercel` verbs outlived the Vercel
-    // script ([D-186]): no script owns them now, so a workflow running one is a
+    // script ([D-70]): no script owns them now, so a workflow running one is a
     // deploy to a retired target with no script behind it. The checkpoint and the migration
     // runner are here because a database job that re-typed them is the
     // 2026-07 failure exactly: the copy that got re-typed lost the checkpoint.
@@ -1059,7 +1059,7 @@ describe("the deploy is triggered, never dispatched by hand", () => {
     // absence only shows up on the day it is needed.
     //
     // Both steps moved into scripts/database-deploy.sh when the production
-    // targets were split ([D-177]'s addendum); the recovery path runs it before
+    // targets were split ([D-184]); the recovery path runs it before
     // scripts/cloudrun-deploy.sh, which holds no database credential.
     const deploy = withoutComments(read("scripts", "database-deploy.sh"));
     const checkpoint = deploy.indexOf("neon-checkpoint.sh");

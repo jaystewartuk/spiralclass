@@ -27,8 +27,8 @@
 The domain is the only unavoidable cost. Everything else is $0 until usage
 forces an upgrade — hosting included since 2026-09-23, when
 [D-184](../decisions/D-184.md) moved production from Fly onto Cloud Run's
-always-free grant. That is a different route to the $0 that
-[D-150](../decisions/D-150.md) set out to reach on the Oracle box.
+always-free grant. That is a different route to the $0 that the
+2026-09-02 plan set out to reach on the Oracle box.
 
 ---
 
@@ -241,7 +241,7 @@ run lint`, so setting `TURBO_TOKEN`/`TURBO_TEAM` in the shell environment still
 > **The Oracle A1 box the rest of this section describes no longer exists.** It
 > was destroyed on 2026-09-19 and Oracle had no capacity to rebuild it
 > ([D-182](../decisions/D-182.md)). The bullets below are the arrangement
-> [D-183](../decisions/D-183.md) tried to get back to and
+> the 2026-09-20 Pay As You Go upgrade tried to get back to and
 > [D-184](../decisions/D-184.md) keeps as the way back; they are not a
 > description of anything running.
 
@@ -252,8 +252,8 @@ run lint`, so setting `TURBO_TOKEN`/`TURBO_TEAM` in the shell environment still
   Cloud "A1" ARM box (2 OCPU/12GB) — **$0/mo direct cost**, replacing
   LiveKit Cloud's participant-minute billing entirely.
 - The real cost isn't zero, it's deferred: this box has no SLA and carried a
-  documented Oracle free-tier suspension risk ([D-49](../decisions/D-49.md)) —
-  the idle-reclaim half of which [D-183](../decisions/D-183.md) retired by
+  documented Oracle free-tier suspension risk —
+  the idle-reclaim half of which [D-184](../decisions/D-184.md) retired by
   making the tenancy Pay As You Go, while the no-SLA half stands — and its
   measured
   capacity ceiling is ~15-20 concurrent 2-participant rooms before packet
@@ -267,7 +267,7 @@ run lint`, so setting `TURBO_TOKEN`/`TURBO_TEAM` in the shell environment still
   rotted.** CX22 is no longer sold and Hetzner raised prices twice in 2026;
   priced 2026-09-20, the EU ARM entry is CAX11 at €5.99/mo and CAX21 (4 vCPU,
   8 GB, 80 GB) at €10.49/mo. Re-price before quoting, and read
-  [D-183](../decisions/D-183.md) first for the two constraints that rule most
+  [D-184](../decisions/D-184.md) first for the two constraints that rule most
   of the cheap options out: Hetzner sells ARM in Germany and Finland only, so
   a media relay there sits ~160-190 ms from two people who are both in the Americas,
   and `scripts/oracle-push-images.sh` fails closed on a non-arm64 image, so an

@@ -142,7 +142,7 @@ describe("deleteLibraryMaterialAction", () => {
   it("revalidates the class page a CLASS-SCOPED delete came from, and only that", async () => {
     // A booking-scoped material renders on its class page rather than the
     // library list, so that is the page the delete was issued from and the one
-    // revalidated. One call, never two — see D-174.
+    // revalidated. One call, never two — see lib/revalidate.ts.
     state.material = { id: "m1", storagePath: null, bookingId: "b1" };
     await deleteLibraryMaterialAction(form({ materialId: "m1" }));
     expect(revalidatePathMock.mock.calls.map((c) => c[0])).toEqual(["/dashboard/classes/b1"]);

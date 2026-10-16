@@ -12,7 +12,7 @@ import { classCallRoom } from "@/lib/video/provider";
 import { listRoomParticipantIdentities } from "@/lib/video/room";
 import { logger } from "@/lib/logger";
 
-// In-class "nudge" (D-75). When one party is in the LiveKit room and the other
+// In-class "nudge" (docs/features/live-calls-video.md). When one party is in the LiveKit room and the other
 // hasn't joined, the present party can ping the missing one: a DIRECT
 // high-priority push (not the templated Notification → dispatcher pipeline) —
 // a nudge is real-time and ephemeral, so an email/inbox copy would land after
@@ -33,7 +33,8 @@ import { logger } from "@/lib/logger";
 // This is deliberately the ONLY notification lever for a scheduled call. We do
 // not auto-ring both parties at start time: for a pre-agreed slot with the
 // reminder ladder already sent (schedule-reminders.ts), an auto-ring is
-// jarring. See D-75.
+// jarring, fires even when both are already present, and does not address
+// the real failure — one person here and the other not yet.
 
 const log = logger({ surface: "class-nudge" });
 

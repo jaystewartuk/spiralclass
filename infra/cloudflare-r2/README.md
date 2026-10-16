@@ -1,7 +1,7 @@
 # R2 bucket + API token provisioning (OpenTofu, state in R2)
 
 Codifies the R2 buckets and their per-bucket API tokens as IaC — see
-[D-65](../../docs/decisions/D-65.md), which fixed the original module's
+[D-70](../../docs/decisions/D-70.md), which fixed the original module's
 bucket list against the live account and split preview from production. The manual chore this replaces: every time a
 feature needs a new bucket, someone creates it by hand in the Cloudflare
 dashboard, creates a scoped R2 API token for it, and copies the resulting
@@ -63,7 +63,7 @@ own env-var family (irregular prefixes by history, not by design — see
 | `material-podcasts` | `MATERIAL_PODCASTS_R2` | `provider.ts`'s `R2_ENV_PREFIX` (generated material podcasts)                     |
 | `recordings`        | `LIVEKIT_EGRESS_S3`    | `provider.ts`'s `R2_ENV_PREFIX` (lesson audio + recordings)                       |
 
-`student-photos` was dropped by D-65 as "speculative" but is in fact a live,
+`student-photos` was dropped from this module in July 2026 as "speculative" but is in fact a live,
 fully-wired feature (student account → upload profile photo, via a server
 action). It went unprovisioned, so uploads silently no-op'd until it
 was added here (2026-07-16). Unlike teacher-photos it's **private** (no public
@@ -91,17 +91,10 @@ has no host today, so nothing pushes its credentials.
 > intentionally deferred. Full runbook in "Post-launch production cutover"
 > below.
 >
-> `agendaprofe-backups` (DB backups, separate credentials — D-65) also stays
+> `agendaprofe-backups` (DB backups, separate credentials — D-70) also stays
 > outside this module.
 
-`student-photos` (from the original scaffold) is **not** in this list
-— it was speculative, never had a real bucket or a real env var wired to
-it (`STUDENT_PHOTOS_R2_*` was never set anywhere), so D-65 dropped it
-rather than provisioning a bucket nothing reads. The app-code reference
-(`student-photo.ts`) is unaffected and untouched — it just stays
-unconfigured, same as before.
-
-### `teacher-photos`' public URL is manual, not a Tofu output (D-66)
+### `teacher-photos`' public URL is manual, not a Tofu output (D-70)
 
 `teacher-photos` is the one `public = true` bucket, but per `variables.tf`'s
 comment, **`public` is metadata only — this module does not provision the
@@ -130,7 +123,7 @@ recurring pain.
 
 Live import against the real account on 2026-07-12 confirmed and fixed two
 things the module's original guess got wrong (see `main.tf`'s "CORRECTED LIVE"
-comments and D-65): the per-bucket tokens live in Cloudflare's
+comments and D-70): the per-bucket tokens live in Cloudflare's
 **account-scoped** token registry (`cloudflare_account_token`), not the
 user-scoped `cloudflare_api_token` the first pass guessed — importing a real token id
 against the wrong resource type 404s ("token not found") even with a
@@ -217,7 +210,7 @@ Reading state — `tofu output`, which `infra/gcp/push-cloudrun-env.sh` does —
 needs only the backend file, not
 `terraform.tfvars`.
 
-### Credentials come from Infisical's `infra` environment (D-66)
+### Credentials come from Infisical's `infra` environment (D-70)
 
 The three secrets this module needs to _run_ are pulled from Infisical's
 dedicated **`infra`** environment (the repurposed free `development` slot —
@@ -351,10 +344,10 @@ When you're ready to move production off the bare-named buckets:
 - **State bucket reuse**: this module points at the same
   `agendaprofe-tofu-state` bucket as the other infra/* modules via the
   shared `infra/backend.hcl`, just a different `key` per module
-  (concern-keyed per D-49) — no new R2 bucket for state.
+  (concern-keyed per D-70) — no new R2 bucket for state.
 - **Why per-bucket `env_prefix` instead of deriving it from `name`**: the
   four production env-var families predate this module and don't follow
   one consistent rule (`LIVEKIT_EGRESS_S3` doesn't even share the bucket's
-  own name) — see D-65. A future cleanup could rename the underlying env
+  own name) — see D-70. A future cleanup could rename the underlying env
   vars to a uniform scheme, but that's an app-code change with its own
   deploy risk, out of scope here.

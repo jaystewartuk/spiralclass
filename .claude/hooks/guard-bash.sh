@@ -149,7 +149,7 @@ infra/gcp/ scripts are the operator's own."
 fi
 
 # The database half of every deploy, on its own since the production targets
-# were split ([D-177]'s addendum). Matched on the name anywhere in the COMMAND,
+# were split ([D-184]). Matched on the name anywhere in the COMMAND,
 # like the Cloud Run scripts: `bash -c` or a path prefix is a likelier way a session
 # would reach it than a bare invocation.
 #

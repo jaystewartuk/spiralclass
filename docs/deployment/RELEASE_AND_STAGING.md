@@ -15,7 +15,7 @@ Production serves from Cloud Run ([D-184](../decisions/D-184.md)'s addendum)
 and `deploy-production.yml`'s `push` trigger is live — `pnpm promote` reads
 that trigger off the workflow file and refuses before the fast-forward if it is
 ever missing. Preview moved to the Oracle A1 box
-([D-150](../decisions/D-150.md)), which was destroyed on 2026-09-19
+([D-184](../decisions/D-184.md)), which was destroyed on 2026-09-19
 ([D-182](../decisions/D-182.md)); preview has no deploy target until it is
 rebuilt, and `scripts/oracle-deploy.sh` is the way back. Since
 [D-199](../decisions/D-199.md) a merge to `main` starts a production deploy once
@@ -130,7 +130,7 @@ exist, and `config/cloudrun/artifact-cleanup.json` keeps the five newest for
 exactly this.
 
 **Off Cloud Run:** there is no warm standby. Fly was destroyed at the cutover
-and the Vercel failover was retired ([D-186](../decisions/D-186.md)), so leaving
+and the Vercel failover was retired ([D-70](../decisions/D-70.md)), so leaving
 Cloud Run means standing up a new target and following the section below.
 
 ### If the domain ever moves again
@@ -166,7 +166,7 @@ something when they were learned. Every one is the operator's.
 ## Maintenance windows (taking the apps offline)
 
 For planned work that needs the apps offline (a destructive migration, an infra
-cutover), flip the **`MAINTENANCE_MODE`** env flag (D-76) — no code deploy
+cutover), flip the **`MAINTENANCE_MODE`** env flag — no code deploy
 needed to enter or exit. The app serves a localized 503 wall. `/api/health` and
 `/api/health/live` stay 200 so the uptime monitors don't flap. (The allowlist once
 carried a config route for a client that polled it; client and route are both
@@ -181,8 +181,8 @@ gone.)
      wins over the mounted secret file, so nothing else needs touching.
      ⚠️ `--update-env-vars`, never `--set-env-vars`, which replaces the
      service's whole environment.
-   - **Preview** has no host today; once the Oracle box serves it again
-     ([D-150](../decisions/D-150.md)), set it there.
+   - **Preview** has no host today; once it has one
+     ([D-199](../decisions/D-199.md)), set it there.
    - Optionally set `MAINTENANCE_MESSAGE="…"` and/or `MAINTENANCE_UNTIL="18:00 CST"`
      for custom copy / an ETA, and `MAINTENANCE_BYPASS_TOKEN=<random>` to let
      yourself through.
@@ -199,7 +199,8 @@ is live and `/api/health` is green. Remove `MAINTENANCE_MESSAGE`/
 `MAINTENANCE_UNTIL`/`MAINTENANCE_BYPASS_TOKEN` the same way if you set them.
 
 > `MAINTENANCE_MODE` is deliberately env-driven, not a DB row: the flag has to be
-> readable even when the DB is the thing under maintenance. See D-76.
+> readable even when the DB is the thing under maintenance. See
+> `apps/web/src/lib/maintenance.ts`.
 
 ## One-time setup (manual — do off lesson hours)
 
@@ -209,7 +210,7 @@ is live and `/api/health` is green. Remove `MAINTENANCE_MESSAGE`/
 - Apply schema + seed: put the preview `DATABASE_URL` / `DIRECT_URL` in
   Infisical's `preview` environment (`DIRECT_URL` over the **direct**
   connection, not the pooler — the pooler breaks the seed's prepared statements;
-  there is no `SUPABASE_*` env anymore, D-89), then run
+  there is no `SUPABASE_*` env anymore, D-70), then run
   `pnpm --filter spiralclass-web migrate:preview` then `pnpm seed:preview`. Both
   read the values from Infisical at run time and write no env file
   (`infra/infisical/seed-preview.sh`). (The seed hard-refuses if pointed at the
@@ -245,7 +246,7 @@ is live and `/api/health` is green. Remove `MAINTENANCE_MESSAGE`/
   dashboard. A running revision keeps the version it started with, so a changed
   secret is live only after the next deploy.
   - **prod-vs-preview is decided by `APP_URL`** (there is no `VERCEL_ENV` and no
-    `SUPABASE_*` env — D-89); the preview `noindex` header keys off the
+    `SUPABASE_*` env — D-70); the preview `noindex` header keys off the
     `NEXT_PUBLIC_DEPLOY_ENV` build arg. Preview, when it has a host again, gets
     **sandbox** Stripe/Wise/Meta/Resend keys — never live keys.
   - Note: `NEXT_PUBLIC_*` are build-time; the preview build inlines preview's, the

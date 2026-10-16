@@ -87,7 +87,7 @@ describe("the operator's decisions cannot be taken by a session", () => {
     ["pnpm promote", "promoting"],
     ["bash scripts/cloudrun-deploy.sh production --gate-already-passed", "deploying"],
     // The database job's script, which checkpoints and migrates production on
-    // its own since the targets were split ([D-177]'s addendum).
+    // its own since the targets were split ([D-184]).
     [
       "bash scripts/database-deploy.sh production --gate-already-passed",
       "migrating production by hand",

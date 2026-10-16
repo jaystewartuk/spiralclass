@@ -21,8 +21,8 @@ source "${INFISICAL_DIR}/infisical.sh"
 
 # ⚠️ THE PRODUCTION APP IS NOT ON THIS BOX, so the webhook leaves it.
 #
-# The production web app stays on Fly and production's database stays on Neon
-# (D-150's second addendum, 2026-09-04); Oracle carries LiveKit, preview and
+# The production web app is on Cloud Run and production's database stays on
+# Neon (D-184; off this box since 2026-09-04); Oracle carries LiveKit, preview and
 # preview's Postgres. So livekit-server calls the app out through Cloudflare,
 # which is the path that broke on 2026-08-30 — and the important part of that
 # outage is WHAT caused it. The D-138 rename swept 934 files in this

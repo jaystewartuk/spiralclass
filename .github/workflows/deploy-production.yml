@@ -9,13 +9,13 @@ name: Deploy production
 # either. `scripts/database-deploy.sh` and `scripts/cloudrun-deploy.sh` deploy;
 # `pnpm promote` gates. Neither is re-typed here.
 #
-# TWO JOBS, AND WHY THE DATABASE IS ONE OF ITS OWN ([D-177]'s addendum).
+# TWO JOBS, AND WHY THE DATABASE IS ONE OF ITS OWN ([D-184]).
 #
 #   database ───> cloudrun    serves spiralclass.com, then the production probes
 #
 # Cloud Run took the domain from Fly on 2026-09-23 and Fly was destroyed the
 # same day ([D-184]'s addendum). The Vercel failover that ran beside it was
-# retired the same week ([D-186]). The shape did not change: the job that serves
+# retired the same week ([D-70]). The shape did not change: the job that serves
 # the domain is the one that probes it and decides whether production shipped.
 #
 # The database job checkpoints Neon and runs the migrations, ONCE per commit,
@@ -84,9 +84,9 @@ name: Deploy production
 # together or this file looks like it changed its mind for no reason.
 #
 # The suspension came from "there are no more Fly deploys" — everything was
-# moving to the Oracle A1 box (D-150). Hours later that was narrowed: the
-# production web app stayed on Fly and production's database on Neon (D-150's
-# second addendum). The web app has since moved again, to Cloud Run ([D-184]),
+# moving to the Oracle A1 box (2026-09-02). Two days later that was narrowed:
+# the production web app stayed on Fly and production's database on Neon. The
+# web app has since moved again, to Cloud Run ([D-184] records all three),
 # and the lesson of that day still holds: a `production` branch that cannot
 # deploy is the 2026-07-19 drift waiting to happen, so a target moving is never
 # a reason to suspend this file.
@@ -137,7 +137,7 @@ on:
         description: Which production target to deploy. The database job runs first either way.
         type: choice
         # `all`, not `both`: [D-184] made it three targets, and retiring Fly
-        # and then Vercel ([D-186]) made it one. `all` stays true whatever the
+        # and then Vercel ([D-70]) made it one. `all` stays true whatever the
         # count is, which is why it was chosen over a word that would have to be
         # renamed each time.
         options: [all, cloudrun]

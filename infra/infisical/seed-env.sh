@@ -27,7 +27,7 @@
 #                                    stored value would be the wrong shape.
 #   SEED_BULK_STUDENTS_PER_TEACHER — that knob's companion, same reason (D-55).
 #   PROD_DB_HOSTS                  — the production-database refusal guard
-#                                    (D-89). It travels with the environments
+#                                    (D-70). It travels with the environments
 #                                    that carry prod credentials; a preview seed
 #                                    has no prod DB to protect and wants it
 #                                    unset, so pulling it here would be backwards.

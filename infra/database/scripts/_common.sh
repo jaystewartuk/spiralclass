@@ -1,4 +1,4 @@
-# Shared helpers for the D-49 layer-3 data-movement scripts. Sourced, not run.
+# Shared helpers for the D-70 layer-3 data-movement scripts. Sourced, not run.
 # Keep this POSIX-bash; every script sets `set -euo pipefail` before sourcing.
 
 # Print to stderr and exit non-zero.
@@ -92,7 +92,7 @@ confirm() {
 # ── Passwords never go on a command line ──────────────────────────────────
 # `ps` shows every process's arguments to every user on the machine, and these
 # scripts run for minutes against production. So a password travels only
-# through the environment, which only its owner and root can read: D-66's rule
+# through the environment, which only its owner and root can read: D-70's rule
 # for secrets, which these scripts predated until 2026-09-24.
 
 # The URL's password, percent-decoded; empty when it has none.

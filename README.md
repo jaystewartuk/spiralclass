@@ -4,7 +4,7 @@
 [![Licence: AGPL-3.0-only](https://img.shields.io/badge/licence-AGPL--3.0--only-blue.svg)](LICENSE)
 
 <!-- The two deploy workflows deliberately have no badge. Preview's is
-     suspended (D-150 moves preview to an Oracle ARM box; its workflow keeps
+     suspended (D-184 moves preview to an Oracle ARM box; its workflow keeps
      only a manual trigger until that box serves), so a badge would report the
      health of something that is not running. Production's runs behind a
      required reviewer, where a green badge would mostly mean "nobody has
@@ -602,7 +602,7 @@ two scripts the maintainer runs by hand to recover — so a deploy from a runner
 and a deploy from a laptop are the same ordered steps.
 
 ⚠️ **There is no preview host today; production's deploy is live.**
-[D-150](docs/decisions/D-150.md) moved preview to an Oracle ARM box, and preview
+[D-184](docs/decisions/D-184.md) moved preview to an Oracle ARM box, and preview
 has no deploy target until that box is rebuilt — `scripts/oracle-deploy.sh` is
 the way back. `deploy-production.yml` keeps its `push: [production]` trigger, and `pnpm
 promote` reads that trigger off the workflow file and refuses before the

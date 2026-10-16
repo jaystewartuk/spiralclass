@@ -38,8 +38,8 @@ preview.spiralclass.com {
 # ── Not configured here, on purpose ───────────────────────────────────────
 #
 # ⚠️ `spiralclass.com` IS NOT HERE, and must not be added. The production web
-# app stays on Fly (D-150's second addendum, 2026-09-04) and the apex A record
-# keeps pointing there. Adding it here would take a name Caddy cannot serve
+# app is on Cloud Run (D-184; kept off this box since 2026-09-04) and the apex
+# records point there. Adding it here would take a name Caddy cannot serve
 # and give it a certificate renewal that fails silently, on the one box whose
 # renewals already matter.
 #

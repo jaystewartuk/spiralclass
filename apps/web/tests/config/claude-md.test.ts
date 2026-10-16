@@ -213,7 +213,7 @@ describe("the operator-only rule is enforced, not merely stated", () => {
     "scripts/cloudrun-deploy.sh",
     // The database half of every production deploy, split out of the serving
     // target's script when the targets became independently deployable
-    // ([D-177]'s addendum). It checkpoints and migrates the live database, so a session
+    // ([D-184]). It checkpoints and migrates the live database, so a session
     // running it by hand is `migrate:prod` under another name.
     "scripts/database-deploy.sh",
     "migrate:prod",

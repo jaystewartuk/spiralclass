@@ -1,5 +1,8 @@
 // Single source of truth for which PostHog Cloud *region* the web app points
-// its clients at. See `docs/decisions/D-48.md`: the PostHog project
+// its clients at. A setting is only configuration if EVERY consumer reads it:
+// the region was once env-driven on the server but hardcoded US in
+// next.config.ts's proxy destinations and in ui_host, so a "config" change was
+// really a code edit, and nothing in the type system said so. The PostHog project
 // is dashboard-pinned to one region and cannot be moved by config — a region
 // switch means recreating the project in the other cloud. This knob only aims
 // our reverse proxy + browser SDK at the matching regional hosts, so that the

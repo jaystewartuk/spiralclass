@@ -1,9 +1,9 @@
-# Neon — provisioning + migration (D-49 provider swap)
+# Neon — provisioning + migration (D-70 provider swap)
 
 This directory is the "future `neon/` module" the original `database/supabase`
-Tofu module's README named a spot for, back when D-49 first planned the
+Tofu module's README named a spot for, back when D-70 first planned the
 provider swap — that module (and Supabase itself) has since been fully
-retired (D-89) and removed from the repo. This one is **not** an OpenTofu
+retired (D-70) and removed from the repo. This one is **not** an OpenTofu
 module (no stable/needed Terraform provider work has been done here) — Neon
 project creation is a manual, interactive step (console sign-in, no API key
 wired into this repo yet), so this is an operator runbook, not IaC.
@@ -233,7 +233,7 @@ reset`. Those are different operations, but confirm `restore` still works on a
 protected branch — cheaply, by protecting a throwaway branch on the **preview**
 project and restoring it — before relying on the rollback net in an incident.
 
-## Nothing stays on Supabase any more (D-89)
+## Nothing stays on Supabase any more (D-70)
 
 Storage was already on R2 by default before this squash
 (`apps/web/src/lib/storage/provider.ts`); the Supabase-storage rollback
@@ -242,7 +242,7 @@ removed once that soak period completed. `apps/web/src/lib/env.ts` has the
 current, authoritative note on this — there is no `@supabase/supabase-js`
 dependency, no `SUPABASE_*`/`NEXT_PUBLIC_SUPABASE_*` env var, and no
 Supabase code path left anywhere in the app. See
-`docs/decisions/D-89.md` for the full decommission record.
+`docs/decisions/D-70.md` for the full decommission record.
 
 ## Ongoing operational note
 

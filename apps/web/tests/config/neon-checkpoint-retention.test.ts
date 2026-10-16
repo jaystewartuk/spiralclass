@@ -1,13 +1,13 @@
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
-// REPO_ROOT is the repo-root resolver the config tooling already exports (D-85).
+// REPO_ROOT is the repo-root resolver the config tooling already exports (D-70).
 import { REPO_ROOT } from "../../../../scripts/env-config.mjs";
 
 // Locks the checkpoint-retention contract for the pre-migration Neon safety net
 // (D-178): `scripts/database-deploy.sh`'s production path creates a `pre-deploy-*`
 // branch before any migration touches production, and that step fails closed.
-// Since the production targets were split ([D-177]'s addendum) that script is
+// Since the production targets were split ([D-184]) that script is
 // the deploy workflow's `database` job, and the first step of a hand-run
 // recovery deploy, before scripts/cloudrun-deploy.sh. It was steps 1 and 2 of
 // the Fly deploy script until then, which is why older notes name Fly.

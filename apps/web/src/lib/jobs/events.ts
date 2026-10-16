@@ -100,7 +100,7 @@ async function handleNotificationQueued(data: { notificationId: string }): Promi
   const deps = makeDeps();
   const outcome = await dispatchNotification(data.notificationId, deps);
 
-  // Chat push→email cascade (D-44): the dispatcher pushed a chat message and
+  // Chat push→email cascade (docs/features/messaging-chat.md): the dispatcher pushed a chat message and
   // skipped email because the recipient has the app. Wait out the grace window
   // as a delayed job, then email only if they still haven't opened the thread.
   if (
