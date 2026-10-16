@@ -1,717 +1,315 @@
-# Feature: Student Payments & Teacher Payouts
+# Student payments
 
-## Overview
+A student pays her teacher for a package or a single class, and the money
+reaches the teacher. SpiralClass's own subscription billing to teachers is a
+separate system on the platform's Stripe account:
+[subscriptions.md](subscriptions.md). What a package is and how its balance
+moves: [packages.md](packages.md).
 
-This document covers a **student paying a teacher** for a class package (or a
-single pay-at-reservation class), and the teacher then **getting paid out**
-that money. It does not cover SpiralClass's own subscription billing to
-teachers — that is a fully separate concern on the platform's own Stripe
-account (`docs/features/subscriptions.md`).
+> [!IMPORTANT]
+> **The teacher is the merchant of record and the platform never touches the
+> money** ([D-143](../decisions/D-143.md)). Card payments are Stripe Connect
+> **direct charges** on Accounts v2, created on her connected account with the
+> `Stripe-Account` header, settling in her country at her country's rates.
+> **Never set `application_fee_amount`**, and never reintroduce a Transfer, a
+> balance-transaction read-back or a reversal-on-refund path — there is nothing
+> to reverse. A take-rate, if ever wanted, is a **billing** feature metered from
+> the webhook and put on her subscription invoice; never a payments one.
 
-Two payment rails exist side by side, and a student picks one at checkout:
+## The two rails
 
-- **Stripe Connect** (card payments) — using **direct charges** on **Accounts
-  v2** ([D-143](../decisions/D-143.md)). **The teacher is the merchant of
-  record and the platform never touches the money**: the charge is created on
-  her own connected account, settles in her country at her country's card
-  rates, and Stripe pays her out locally. There is **no Transfer**, and
-  therefore nothing to reverse on a refund or a chargeback — both debit her
-  balance directly.
+A student picks one at checkout.
 
-  **No cut is taken at the charge** — no `application_fee_amount`. The old
-  subscription-tiered marketplace commission is gone: cross-border
-  application-fee support is undocumented, account-specific, and known to fail
-  in exactly the markets the platform sells into. A take-rate remains
-  available as a **billing** feature (meter GMV from the webhook, put it on
-  her own subscription invoice, which works everywhere) and must never become
-  a payments one again.
+- **Card (Stripe Connect)** — the charge is created on the teacher's own
+  connected account; Stripe pays her out locally on her own schedule. Refunds
+  and chargebacks debit her balance directly.
+- **Manual transfer (Wise)** — the student is shown the teacher's payee
+  details and a unique reference, sends the money to her directly, marks it
+  sent, and the payment is confirmed by the teacher or by the teacher's own
+  Wise API reconciliation. Confirmation runs the same `advancePayment` reducer
+  Stripe events run, so activation, notifications and analytics are identical.
 
-- **Manual transfer** — the student is shown the teacher's payee instructions
-  plus a unique reference, sends the transfer directly to her (the money never
-  touches the platform), self-attests with "Ya envié el pago", and the teacher
-  confirms. The payment then runs the SAME `advancePayment` reducer Stripe
-  runs, so activation, notification and analytics are identical either way.
+Both rails are free on every subscription tier — **never paywall getting
+paid** — and neither carries a commission.
 
-  WHICH payee instructions is a separate axis, and the part that used to be
-  conflated with the rail ([D-145](../decisions/D-145.md)): a teacher
-  publishes one or more **payout instruments**, and each pending payment
-  records the one its student was actually shown.
+### Wise is the only manual payout instrument ([D-145](../decisions/D-145.md))
 
-  | Instrument | What the student is given                             | Auto-reconcile                                               | Currency |
-  | ---------- | ----------------------------------------------------- | ------------------------------------------------------------ | -------- |
-  | **Wise**   | A prefilled `wise.com/pay/me/<handle>` Quick-Pay link | Yes, for teachers who connect their own Wise API credentials | Any      |
+A teacher publishes **payout instruments**; a pending payment records the
+instrument its student was shown. There is one kind:
 
-  Both rails are free on **every** subscription tier — "never paywall getting
-  paid" is a hard product rule. Neither carries a commission: under direct
-  charges the platform is not in the money path on Stripe either, so both are
-  structurally exempt rather than only the transfer one.
+| Instrument | What the student is given                             | Auto-reconcile                                               | Currency |
+| ---------- | ----------------------------------------------------- | ------------------------------------------------------------ | -------- |
+| **Wise**   | A prefilled `wise.com/pay/me/<handle>` Quick-Pay link | Yes, for a teacher who connects her own Wise API credentials | Any      |
 
-### Wise is the only manual instrument, and why
+- `PayoutInstrumentKind` stays an enum (a closed union) because it is what a
+  second kind would return through. Adding a kind is a migration, on purpose.
+- **Never add a free-form payee field.** Every payee value a student pays
+  against must be machine-checkable, because an unvalidated one is the place
+  this rail loses real money with no way back. A new kind comes with a
+  validator, not a text box.
+- **`saveTeacherInstrument`** (`lib/payments/save-instrument.ts`) is the only
+  write path, and it refuses to enable an incomplete instrument.
+  `HAS_PAYOUT_RAIL_WHERE`'s SQL translation depends on that.
+- The **reference is the only matching key** on a self-attested transfer.
+  Without connected Wise credentials the teacher confirms by hand, nudged by
+  the transfer-confirm reminder (`lib/payments/transfer-confirm-reminder.ts`).
+- **`pricing-fees.ts`** (`packages/shared/src/pricing-fees.ts`) is a
+  deliberately generous estimate, used only to size the suggested Wise-rail
+  discount. **Never present it as what Stripe charges** (D-143):
+  teacher-facing copy names who charges the fee and links to Stripe's own page,
+  and public marketing quotes no percentage. Guarded in
+  `packages/shared/src/i18n/i18n.test.ts`.
+- `PaymentRail.bank_transfer` survives only on rows written before D-145.
+  "Bank transfer" is not a synonym for fee-free: a bank transfer made inside
+  Stripe checkout is a Stripe payment and carries Stripe's fee. Copy names
+  **Wise** as the rail that skips Stripe.
 
-⚠️ **There used to be a second kind.** `bank_account` held a per-country payee
-format drawn from a **15-scheme registry** —
-CLABE, PIX in Brazil, NUBAN in Nigeria, IFSC in India, IBAN across the
-roughly eighty registry countries and SWIFT/BIC as the universal fallback — so
-that supporting a new country was a registry row rather than a migration. It was
-good design for the problem as it stood.
+## Rail eligibility
 
-[D-145](../decisions/D-145.md) removed it, with the kind, the registry
-(`packages/shared/src/bank-schemes.ts`), its checksum validators, both settings
-forms, three columns, four CHECK constraints and 120 i18n keys. **Do not
-reintroduce it.**
-
-The reason it went is the interesting part. [D-143](../decisions/D-143.md) made
-the teacher merchant of record on her own Stripe account, and that account began
-presenting **SPEI** at checkout. So the local bank transfer was being offered
-twice on one page: once by Stripe, reconciling automatically, and once as a
-`bank_account` instrument the student self-attested and the teacher confirmed by
-hand. Same rail, two flows, different reliability, and no way for a buyer to
-tell which one was "right". The worse copy goes.
-
-`bank_account` was never merely slower. It was **permanently**
-teacher-confirmed — no retail bank exposes a per-teacher statement API to
-reconcile against, which was recorded as a property of the instrument rather
-than a gap that would close. Stripe closed it from the other side.
-
-**Wise stays** because it is the one thing Stripe is not:
-
-- it **auto-reconciles** through the teacher's own Wise API credentials, so it
-  was never manual in the sense `bank_account` was;
-- it is the fallback in the five countries Stripe refuses a merchant account
-  (IN, ZA, NG, ID, IS) and everywhere outside the measured Connect countries;
-- it still works if her Stripe account goes restricted.
-
-**What is deliberately kept:** `PaymentRail.bank_transfer` (rows written before
-the removal carry it) and the one-member `PayoutInstrumentKind` union — it is
-what a second kind would return through, and dropping it would make
-`teacher_payout_instruments.kind` a column that says nothing.
-
-**Accepted costs**, stated in D-145: a teacher in IN/ZA/NG/ID/IS drops to one
-rail; re-adding a country stops being a registry row and becomes a migration
-again; and nobody measured the duplicate's conversion cost, so the case rests on
-the shape of the page rather than on a funnel.
-
-### What the instrument model means in practice
-
-- **A closed union, not a payee-details builder.** Each kind gets typed columns,
-  a CHECK constraint and per-kind application validation. **Never add a
-  free-form payee-details field** — this rule outlived the registry it was
-  written for. Every payee value a student pays against must be
-  machine-checkable, because an unvalidated one on a page someone pays from is
-  the single place this rail loses real money with no way back. If a second kind
-  is ever added, it comes with a validator, not a text box.
-- **Adding a KIND is a migration, on purpose.** That is the friction the closed
-  union exists to impose.
-- **`saveTeacherInstrument` is the only write path**, and it refuses to enable an
-  incomplete instrument. `HAS_PAYOUT_RAIL_WHERE`'s SQL translation depends on
-  that invariant holding.
-- **The reference is the only matching key on a self-attested transfer.** A
-  sender's free-text field gets truncated or mistyped. Wise's API reconciliation
-  is what makes this rail workable; without connected credentials it falls back
-  to `transfer-confirm-reminder` nudging the teacher, which is the only thing
-  between a forgetful teacher and a student whose package never activates. The
-  settings form says so before she enables it.
-
-## User Stories
-
-- As a **student**, I want to pay for a class package with my card or via a
-  bank transfer, whichever is available and convenient for me.
-- As a **teacher**, I want to receive the money my students pay directly, into
-  my own account, without the platform standing between me and it.
-- As a **teacher in a country Stripe will not take as a merchant** (India,
-  South Africa, Nigeria, Indonesia, Iceland), I want a working payment rail
-  anyway — and I want my own subscription to keep working too.
-- As a **teacher**, I want to issue a full refund to a student when needed,
-  and have both of us told it happened.
-- As a **student**, I want to be told when a refund is issued, in the currency
-  I was actually charged — not to discover it by finding my package marked
-  "Reembolsado".
-- As the **platform operator**, I want a payment dispute (chargeback) recorded
-  against the teacher whose account bears it, and the disputed student's class
-  credits revoked if the dispute is lost.
-- As a **teacher**, I want a heads-up when my Stripe account needs attention
-  (extra verification, payouts paused) so I don't discover it only when a
-  payout fails silently.
-
-## Business Rules (exhaustive)
-
-### Rail selection & eligibility
-
-- **The cross-border payout circle no longer binds this rail**
-  ([D-143](../decisions/D-143.md)). It bound only because the platform made a
-  Transfer, and there is no Transfer any more: under direct charges the charge
-  is created on the teacher's own account, settles in her country, and Stripe
-  pays her out locally. `SUPPORTED_CONNECT_COUNTRIES` is now the **measured**
-  set of countries where a UK platform can create a v2 merchant account — 44
-  of them, **including the launch market**, Brazil, Japan, Singapore, Thailand,
-  Australia, New Zealand, Hong Kong, Malaysia and the UAE.
-- **Widening that set is a measurement, not a judgement.** Stripe publishes no
-  list; every code was probed against `POST /v2/core/accounts` in test mode
-  with the config the app actually creates, before being added. Known
-  refusals: **IN** (card_payments unsupported for the country), and **ZA**,
-  **NG**, **ID** ("currently unavailable for your platform"). **Iceland is a
-  deliberate absence** — it was inside the old circle and Stripe will not
-  create a merchant account for it, so do not restore it on the assumption
-  that EEA membership implies support.
-- A teacher in a country outside that measured set falls back to **the manual
-  transfer rail**, which is her only one. Country-based gating on the
-  teacher's own country field is the single mechanism for this (a legacy
-  manual per-teacher rail kill-switch was removed and must not be
-  reintroduced).
+- **`SUPPORTED_CONNECT_COUNTRIES`** (`packages/shared/src/countries.ts`) is the
+  measured set of countries where the platform can create a v2 merchant
+  account. Each code was probed against Stripe; widening it is a re-probe, not
+  a judgement. Known refusals are listed in the constant's comment — IN, ZA,
+  NG, ID and IS. Iceland is a deliberate absence; EEA membership does not imply
+  support.
+- A teacher outside that set has the Wise rail only. The teacher's own
+  `country` is the single gating mechanism; there is no per-teacher rail
+  kill-switch.
 - **Not being a merchant never blocks being billed.** A teacher Stripe refuses
-  as a merchant (IN, ZA, NG, ID, IS), or one who simply has not connected
-  yet, still gets a `customer`-configuration-only Account so her own
-  subscription can be charged.
-- A teacher can offer Stripe, the Wise instrument, both, or nothing — a student
-  sees exactly the options she has enabled and finished setting up.
-- An instrument is offerable when it is **enabled**, carries its kind's payee
-  detail (a Wisetag), and can **settle the teacher's pricing currency**. Stripe readiness requires a connected Stripe account
-  **with `charges_enabled` currently true**.
-- If a student picks a rail the teacher isn't actually ready for, checkout is
-  refused with a localized message before any rows are created (rather than
-  failing deeper in the flow). The specific instrument is re-checked at submit
-  as well as at render, so one disabled in between fails cleanly instead of
-  leaving an orphaned pending package.
+  as a merchant, or one who has not connected, still gets a v2 Account with
+  the `customer` configuration so her subscription can be charged.
+- A teacher can offer card, Wise, both, or neither; the student sees only what
+  is enabled and complete. Card needs a connected account with
+  `charges_enabled`. Wise needs the instrument enabled, a Wisetag, and support
+  for the teacher's pricing currency.
+- A rail the teacher is not ready for is refused with a localized message
+  before any row is written. The chosen instrument is re-checked at submit as
+  well as at render.
 
-### Pricing at checkout
+## Pricing at checkout
 
-- The **grandfathered custom price** on the specific teacher–student
-  relationship (if one is set) always wins over the template's catalog
-  price, on **both** rails — there is no separate grandfathered transfer price.
-  It is stored per package, per **pairing row** — `(teacher, student row,
-template)`.
-- **Every surface that shows a price and every surface that charges one must
-  resolve that pairing row the same way**, through `purchasingLinkFor`
-  (`lib/students/identity.ts`): the oldest non-archived pairing within the
-  student's identity set. A signed-in student can own several Student rows
-  (one per teacher, keyed by email), and "one row per (teacher, email)" is an
-  app-level invariant rather than a database constraint — so a duplicate
-  pairing is possible and both sides have to pick the same one. The portal
-  used to price across the whole identity set while checkout priced from the
-  pairing row alone, which is how a package could render at the teacher's
-  agreed price, labelled "tu precio acordado", and then charge the catalog
-  price at checkout.
-- A **discount code** (a teacher promo code, or a per-student referral code)
-  is resolved and applied _after_ the base/custom price, and composes last in
-  the pricing stack — every downstream row (Package, Payment, the Stripe line
-  item, and analytics) uses the final, post-discount amount.
-- A discount that drives the price to **exactly zero** refuses the whole
-  checkout with a clear message — a free class must be booked directly by the
-  teacher, never sold as a $0 package.
-- Card charges below the **currency-specific Stripe minimum charge** are
-  refused before any row is created, with a message pointing the student at
-  Wise if that rail is available for this teacher.
-- Prices are always computed and stored in the **teacher's own chosen
-  pricing currency** (see D-153) — never a hardcoded currency.
+`lib/payments/start-checkout.ts` resolves the charge in this order:
+
+1. The template's price for the rail (card price, or the non-card price on
+   Wise), or the price for two.
+2. A **grandfathered custom price** on the teacher–student pairing replaces a
+   one-person price on both rails (`effectivePriceMinorUnits`,
+   `lib/payments/grandfathered-prices.ts`); it never prices a package for two.
+   It is resolved through `purchasingLinkFor`
+   (`lib/students/identity.ts`) — the oldest non-archived pairing in the
+   student's identity set — and every surface that shows a price resolves it
+   the same way, so the page and the charge cannot disagree.
+3. One **discount or referral code**, applied last
+   ([referrals-discounts.md](referrals-discounts.md)). Every downstream row —
+   Package, Payment, the Stripe line item, analytics — uses the final amount.
+
+Then:
+
+- A final price of **zero or less** refuses the checkout; a free class is
+  booked by the teacher directly.
+- A card charge below Stripe's per-currency minimum
+  (`stripeMinChargeMinorUnits`) is refused before any row is written, with a
+  pointer to Wise when the teacher offers it.
+- Amounts are integer minor units in the teacher's own pricing currency
+  (`currencyForTeacher`), never a hardcoded one.
 
 ### The language Stripe speaks
 
-- **Stripe's own surfaces render in the language the checkout was rendered
-  in**, never the browser's: the booking page's language on the public funnel
-  (`booking_page_locale`), the student's own in the portal. Left unset, Stripe
-  follows the browser, and a buyer reads one language up to the payment form
-  and another on it.
-- That language is sent as the Checkout Session's `locale`, and as
-  `preferred_locales` on the buyer's Customer **when the Customer is created**,
-  because the receipt Stripe emails follows the Customer and not the session.
-  A Customer the teacher already has is never rewritten: she is the merchant,
-  and a language she set for a buyer in her own dashboard is hers.
-- A teacher's own Stripe surfaces — the subscription checkout and the embedded
-  onboarding in Settings → Payments — render in the language she reads the app
-  in.
-- The mapping from an app locale to Stripe's vocabulary is
-  `lib/stripe/locale.ts`. It is exhaustive, so a newly registered language does
-  not compile until someone has chosen what Stripe speaks for it.
+- Stripe's surfaces render in the language the checkout page was rendered in:
+  `booking_page_locale` on the public funnel, the student's own locale in the
+  portal — never the browser's.
+- It is sent as the Checkout Session's `locale`, and as `preferred_locales`
+  when the buyer's Customer is **created** (Stripe's receipt email follows the
+  Customer). An existing Customer on the teacher's account is never rewritten.
+- The teacher's own Stripe surfaces (subscription checkout, embedded
+  onboarding in Settings → Payments) render in her app locale.
+- The app-locale-to-Stripe mapping is `lib/stripe/locale.ts`; it is
+  exhaustive, so a new app language does not compile until it is mapped.
 
 ### Cross-rail double-charge guard
 
-- Starting a new checkout **supersedes** any other still-pending checkout
-  the same student has for the same template with the same teacher:
-  - Any open Stripe Checkout Session is actively **expired** on Stripe's
-    side (this is the step that actually prevents a late payment on the
-    stale session) — the corresponding package is marked `expired` only
-    if that expire call succeeds; if Stripe reports the session already
-    resolved (paid or already expired), the old package is left alone
-    rather than risk expiring a package that actually got paid.
-  - A pending Wise checkout is simply marked `expired` — there's no hosted
-    session to cancel, the reference just stops being offered.
-  - **Exception**: a Wise checkout the student has already marked "I sent
-    the payment" is **never superseded** — real money may be in flight, and
-    superseding it would let a legitimate transfer land against a package
-    that can no longer be activated.
-- This exists specifically so a student can't end up with two payable
-  checkouts (e.g. abandon a Stripe session, then try Wise) for the same
-  purchase intent.
+Starting a checkout **supersedes** the same student's other pending checkouts
+for the same template with the same teacher
+(`lib/payments/supersede-pending.ts`):
 
-### Payment states & the state machine
+- An open Stripe Checkout Session is **expired** on Stripe; its package is
+  marked `expired` only if that call succeeds. If Stripe says the session
+  already resolved, the package is left alone.
+- A pending Wise checkout is marked `expired`.
+- A Wise checkout the student has marked **sent** is never superseded. If one
+  was superseded and its transfer is later confirmed, it is put back to
+  `pending` and activated.
+
+## Payment state machine
 
 - `Payment.status`: `pending → paid → refunded`, or `pending → failed`.
-  `refunded` is terminal — no event can move a payment out of it.
-- Stripe is **charge-or-fail** — there is no partial-payment/underpayment
-  state on that rail. A settlement event reporting less than the expected
-  amount is treated as a data-integrity failure and the payment is flipped
-  to `failed`, not `paid` — the same treatment applies to a currency
-  mismatch between what Stripe reports and what the row was priced in.
-- A non-positive expected amount reaching the "flip to paid" step is treated
-  as an unreachable invariant violation (an upstream bug), and throws loudly
-  rather than silently activating a free package.
-- A stale/duplicate/out-of-order webhook delivery **never demotes** an
-  already-`paid` payment — e.g. a late "failed" or a currency-mismatched
-  event arriving after a payment already flipped paid is a no-op, not a
-  regression.
-- Two concurrent webhook deliveries for the same underlying event (Stripe
-  fires `checkout.session.completed` and `payment_intent.succeeded`
-  separately for one purchase) race on a guarded conditional update keyed on
-  the payment's pre-read status — exactly one delivery applies the
-  transition (and its side effects: activating the package, enqueuing
-  notifications); the other is a clean no-op.
-- Wise confirmation reuses the **exact same** state-machine reducer as
-  Stripe (a synthetic "succeeded" outcome is constructed for it), so the
-  activate/notify/analytics behavior is identical across both rails by
-  construction — they can't drift apart.
+  `refunded` is terminal.
+- Card is charge-or-fail. A settlement event reporting less than the expected
+  amount, or a different currency, flips the payment to `failed`, not `paid`.
+- A non-positive expected amount at the flip-to-paid step throws rather than
+  activating a free package.
+- A late, duplicate or out-of-order event never demotes a `paid` payment.
+- Concurrent deliveries for one purchase (`checkout.session.completed` and
+  `payment_intent.succeeded`) race on a conditional update keyed on the
+  pre-read status; exactly one applies the transition and its side effects.
+- **Activation** (`lib/payments/activate-package.ts`), shared by both rails:
+  status `active`, `purchasedAt` locked, expiry computed. Idempotent — a
+  package that is not `pending` is left alone.
 
-### Activation
+## Refunds
 
-- A `paid` payment's package is activated in one shared function used by
-  both rails: sets `active` status, locks the purchase timestamp, and
-  computes the expiry date from the template's expiration window
-  (end-of-day in the teacher's timezone). Activation is idempotent — a
-  package that isn't currently `pending` is left untouched.
-- A Wise checkout that was superseded (marked `expired`) while a real
-  transfer was quietly in flight is automatically **un-superseded** back to
-  `pending` the moment that transfer is confirmed, so a legitimate late
-  payment isn't stranded against a package that can no longer activate.
+- **Full refunds only.** No partial refund from the app.
+- A teacher can refund a `paid` **card** payment from its detail page
+  (`actions/refund.ts`). A Wise payment settled off-platform; she refunds it
+  in Wise herself.
+- The refund is created on Stripe **as the teacher**, on her connected
+  account, so it debits her balance and the platform has nothing to claw back.
+- Everything after Stripe accepts the refund is `applyRefund`
+  (`lib/payments/refund.ts`), shared by the teacher and admin
+  (`actions/admin-payments.ts`) entry points: flip payment and package to
+  `refunded` under a `status = paid` guard, void any unredeemed referral
+  reward, and notify the student and the teacher (`refund_issued_student`,
+  `refund_issued_teacher`). Each caller writes its own audit row.
+- A refund issued **in the Stripe Dashboard** arrives as `charge.refunded` and
+  drives the same flip, clawback and notices through the webhook's own state
+  machine. Whichever path lands first wins; the other is a no-op.
+- A **partial** Dashboard refund (`refunded: false` on the charge) is ignored,
+  so it never revokes the whole package.
 
-### Direct charges (the payout mechanism)
+## Disputes
 
-- The charge is created **on the teacher's own connected account**, with the
-  `Stripe-Account` header — never on the platform's account
-  ([D-143](../decisions/D-143.md)). She is the merchant of record. The money
-  settles in her country at her country's card rates, and **Stripe pays her
-  out locally**, on her own payout schedule.
-- **There is no payout job, and no Transfer.** The previous design charged on
-  the platform account, read the settled net back off the balance transaction,
-  withheld a subscription-tiered commission, and forwarded the remainder. All
-  of it is gone with `lib/payments/transfer.ts`; do not reintroduce a
-  Transfer, a balance-transaction read-back, or a reversal-on-refund path.
-  There is nothing left to reverse.
-- **No `application_fee_amount`.** Cross-border application-fee support is
-  undocumented, account-specific, and known to fail for exactly the markets
-  the platform sells into. A take-rate belongs on her subscription invoice,
-  not on her students' charges.
-- The account carries **`merchant` and `customer` configurations on one v2
-  `Account`**, with `fees_collector` and `losses_collector` both `"stripe"`.
-  That is why v2 was worth a preview API: her Account IS the billing customer,
-  so there is no Account-to-Customer mapping table to keep.
-- **Wise and bank transfers were always outside this** — that money settles
-  directly to the teacher and never touched the platform either.
-- **Strong Customer Authentication follows the teacher's country.** Under
-  direct charges the charge is already on her account, so SCA is decided by
-  the connected account's country, not the platform's, and `on_behalf_of`
-  (which attributes a _destination_ charge) is not needed. One consequence
-  is UX, not a defect: the Customer and saved card live on her account, so a
-  student buying from two teachers saves a card twice.
+- Every dispute event is upserted into one `Dispute` row keyed by Stripe's
+  dispute id, matched to a Payment and teacher through the PaymentIntent when
+  possible. An unmatched dispute is still recorded.
+- A **lost** dispute takes the amount and Stripe's dispute fee from the
+  teacher's balance (`losses_collector` is Stripe). In the app, the payment and
+  package flip to `refunded` under a guarded `updateMany` (a redelivered event
+  is a no-op), any unredeemed referral reward is voided, and both sides are
+  told (`dispute_lost_student`, `dispute_lost_teacher`). The copy is not the
+  refund copy — nothing was refunded — and accuses no one.
+- A lost dispute that matches no payment notifies nobody.
+- Every dispute event goes to Sentry: `error` for lost, `warning` for
+  `needs_response`, `info` otherwise. Operators see disputes at
+  `/admin/disputes`; teachers have no dispute screen, and evidence is
+  submitted in the Stripe Dashboard.
 
-### Refunds
+## Stripe account status
 
-- **MVP supports full refunds only** — no partial refunds from the app.
-- A **teacher-initiated** refund is only available for a `paid` **Stripe**
-  payment with a connected account and a recorded PaymentIntent; a Wise
-  payment cannot be refunded through the app (it settled off-platform — the
-  teacher would refund the student directly via Wise).
-- Refunding always: (1) issues the real Stripe refund server-side, **as the
-  teacher** — under direct charges the charge lives on her own connected
-  account, so the refund debits her balance and there is nothing for the
-  platform to claw back (D-143; the transfer reversal this step used to
-  describe went with the transfer itself); (2) flips the payment to `refunded`
-  and the package to `refunded` status, under a `status = paid` guard so a
-  concurrent second refund is a no-op rather than a duplicate; (3) writes an
-  audit-log entry with the stated reason; (4) voids any not-yet-redeemed
-  referral reward that payment had qualified; and (5) **notifies the student
-  and the teacher** that the money went back.
-- **Steps 2 to 5 are one shared function**, `applyRefund` in
-  `lib/payments/refund.ts`, used by every entry point that can refund. They
-  had drifted apart when each had its own copy: none of them notified anybody,
-  and the admin paths also skipped the referral clawback and the race guard. The student notice is the one that mattered
-  most, because it is classed money-of-record and therefore cannot be
-  silenced — it simply was never sent.
-- A refund issued **from the Stripe Dashboard** directly (bypassing the app's
-  refund button) is caught by the `charge.refunded` webhook and drives the same
-  state flip, clawback and pair of notifications. The webhook keeps its own
-  copy of that logic because it shares one state machine with the paid and
-  failed transitions; `Payment.status = refunded` is terminal, so whichever
-  path lands first wins and the other becomes a no-op — the money can never be
-  refunded twice, and neither can the notice be sent twice.
-- **A partial refund initiated from the Stripe Dashboard is deliberately
-  ignored** by the webhook (`refunded: false` on the charge event) — treating
-  it as a full refund would incorrectly revoke every remaining class on the
-  package.
-- Refunding is scoped to the teacher's own students/payments — a teacher
-  cannot refund another teacher's payment.
+From `account.updated` (`lib/payments/webhook-handler.ts`):
 
-### Disputes (chargebacks)
+- Charges disabled → enabled: `stripe_ready_teacher`, and the
+  `payout_rail_connected` analytics event.
+- Enabled → disabled: `stripe_requirements_teacher`.
+- Only the delivery that wins a conditional flip on the previous
+  `stripeChargesEnabled` value acts, so each fires once per real transition.
 
-- Every dispute sub-event (`created`, `updated`, `closed`,
-  `funds_withdrawn`, `funds_reinstated`, plus issuer-level warnings) is
-  **upserted** into one row keyed by Stripe's dispute id, so the row always
-  reflects the latest state regardless of how many events arrive.
-- The dispute is matched back to the platform's own Payment/teacher via the
-  PaymentIntent id when Stripe supplies one; a dispute Stripe can't tie back
-  (rare — a raw charge outside the app's own flow) is still recorded, just
-  unmatched, and flagged for manual ops review.
-- **A dispute that is ultimately `lost`**: the disputed amount (plus a Stripe
-  dispute fee) is pulled from **the teacher's** balance — she is the merchant
-  of record and `losses_collector` is Stripe, so the platform is never out of
-  pocket and has nothing to claw back (D-143). What still has to happen in the
-  app is revoking the credits, since the student holds live classes paid for
-  with a charged-back card: the payment flips to `refunded` and the package to
-  `refunded`, and any unredeemed referral reward is voided. The flip is a
-  guarded `updateMany`, so a redelivered `lost` / `funds_withdrawn` event is a
-  no-op on the second pass.
-- **Both sides are told** — `dispute_lost_student` and `dispute_lost_teacher`.
-  This used to happen in silence: the student's package simply became
-  "Reembolsado" with no notice, and the teacher, whose balance the money came
-  out of, had only the ops alert below, which routes to Sentry rather than to
-  her. The copy is deliberately **not** the refund copy. Nothing was refunded —
-  the money did not go back voluntarily and the student's classes are gone
-  rather than returned, so "refund issued" would be wrong about what happened
-  to both of them. Neither version accuses anyone: a chargeback is raised with
-  a card issuer, the outcome is the issuer's, and a genuine billing mix-up
-  looks identical from here.
-- A lost dispute on a charge that ties back to no payment row notifies nobody —
-  there is no student or teacher to address. It is still recorded and flagged
-  for ops.
-- Every dispute event is also surfaced to the ops alerting channel, with
-  severity scaled to how urgent it is: a `lost` dispute is the highest
-  severity (money is already gone), a dispute that `needs_response` is
-  elevated (every day of delay reduces the odds of winning it), everything
-  else is informational.
+## Abandoned checkouts
 
-### Stripe account connection status
+`lib/payments/cleanup-pending.ts` hard-deletes pending checkouts (package and
+payment):
 
-- When a teacher's Stripe account transitions from **not able to
-  charge → able to charge**, they get a one-time "you're ready to accept
-  card payments" notice, and this is tracked as the "payout rail connected"
-  analytics milestone.
-- When a teacher's account transitions the **other** way (charges get
-  disabled — e.g. Stripe needs more verification), they get an
-  action-needed alert instead.
-- Because Stripe can (and does) deliver the same `account.updated` event
-  more than once, and can deliver two in close succession, only the
-  delivery that actually wins an atomic conditional flip on the "was
-  charges-enabled" prior value performs the transition/notification — a
-  losing concurrent delivery is a clean no-op, so the milestone/notification
-  fires **exactly once** per real transition, not once per webhook
-  delivery.
+- card, after 7 days; Wise, after 14 days;
+- never a Wise payment the student has marked sent;
+- re-checked at delete time, so a payment that settled after the scan is kept.
 
-### Abandoned checkout cleanup
+A teacher can also mark a pending Wise payment as failed
+(`failWisePaymentAction`) when the student will not pay.
 
-- A pending Stripe checkout with no successful payment is hard-deleted
-  (package + payment, cascading) after **7 days**.
-- A pending Wise checkout gets a longer **14-day** grace window, since bank
-  transfers and manual reconciliation take longer than a card charge.
-- **A Wise payment the student has already marked "I sent it" is never
-  auto-deleted**, regardless of age — that would destroy the only record of
-  a transfer that may genuinely still be in flight or awaiting teacher
-  confirmation.
-- Every delete is guarded at delete-time (not just at scan-time) against a
-  payment having settled in between — a payment that confirms/auto-reconciles
-  in the gap between the sweep's scan and its delete is left alone rather
-  than cascade-deleted out from under a student who just paid.
+## Tax
 
-### Tax capture (not yet enforced)
+`STRIPE_TAX_ENABLED` (default off, `lib/stripe/tax.ts`) decides whether Stripe
+computes tax (`automatic_tax`) and whether the **student** checkout requires a
+full billing address. Off, the student checkout uses
+`billing_address_collection: "auto"` and the row keeps whatever partial address
+Stripe collected; turning the flag on later cannot complete those rows. The
+teacher's subscription checkout always requires a full address. Turning tax on
+has legal prerequisites the flag does not enforce.
 
-- `STRIPE_TAX_ENABLED` (default off) decides two things
-  (`apps/web/src/lib/stripe/tax.ts`): whether Stripe computes tax
-  (`automatic_tax`), and whether the **student** checkout requires a full
-  billing address. With it off, the student checkout uses
-  `billing_address_collection: "auto"`, so Stripe asks only for what the
-  payment method needs (often country and postcode), and the row keeps that
-  partial address. Turning the flag on later cannot complete those rows; tax
-  is computed from the address collected at the time of the charge.
-- The teacher's own **subscription** checkout always requires a full
-  address: that is the platform's own sale, where the address is a billing
-  record.
-- Turning tax on is a separate legal/business gate with prerequisites outside
-  the code that the flag does not enforce.
+## What the teacher sees she earned (`lib/cashflow.ts`)
 
-### What the teacher sees she earned (`lib/cashflow.ts`)
+- **Earned** is money for classes taught: each class earns its package price
+  divided by its class count. A no-show counts as earned.
+- **Paid in advance** is money received for classes still to teach on
+  packages that can still be redeemed. It counts priced packages only.
+- **Classes still owed** on a package are `classesLeftToTeach()`
+  (`lib/package-usage.ts`): unused classes plus booked-but-not-taught ones. A
+  class lost to a late cancellation is used and not owed; classes recorded as
+  used off-platform are not owed.
+- **Amounts are what students paid.** The screens say card payments arrive
+  lower after Stripe's fee, which SpiralClass does not receive. No net-of-fee
+  figure is shown, and no figure is presented as safe to spend.
+- **A class belongs to the month it was taught** (`scheduledStart`), with
+  months cut in the teacher's timezone.
+- The screen shows this month so far, what is booked for the rest of the month
+  (real bookings on paid packages), last month once one is closed, earnings by
+  month (up to `EARNINGS_HISTORY_MONTHS` back, empty months shown as zero, each
+  split by student with largest-remainder rounding, plus the calendar-year
+  total), and a typical month (mean and lowest of complete months, once two
+  exist).
+- Every figure is per currency, never blended.
+- **Received** in the ledger is cash by payment date — a different measure
+  from earned.
+- Students an operator marked as test accounts are left out of a real
+  teacher's figures but stay in her ledger, marked
+  ([admin-portal.md](admin-portal.md#test-accounts)).
 
-**What counts as earned**
+## The buy page (`/b/[slug]/buy`)
 
-- **Earned** is money for classes taught. Each class earns its package price
-  divided by the package's class count. A **no-show counts as earned**, as it
-  does for the earned/paid-in-advance split (see [scheduling](scheduling-booking.md), auto-completion).
-- **Paid in advance** is money received for classes she has still to teach,
-  on packages that can still be redeemed. It becomes earned as each class is
-  taught. A refund would come out of it. This is the "held" amount in the
-  code.
-- **The classes she still owes** on a package are the classes not yet used
-  (`classesTotal − classesUsed`, the same count the students page shows), plus
-  the classes booked but not yet taught.
-  - A booking uses its class when it is made, but the class is still owed
-    until it is taught.
-  - A class lost to a late cancellation is used, and not owed.
-  - Classes recorded as used off-platform (taught before she moved her
-    students here, or corrected by editing "classes remaining") are not owed,
-    although SpiralClass has no record of them being taught.
-  - This is `classesLeftToTeach()` (`lib/package-usage.ts`), the one rule the
-    students page and the money screens share.
-- **The class count under "paid in advance" counts only priced packages.** A
-  package recorded at $0 (a gift, or history brought over with no price)
-  still owes its classes, but holds no money. The line describes money, so
-  those classes are left out of it.
-- **Amounts are what students paid.** The screens say so, and say that card
-  payments reach her a little lower after Stripe's own fee, which SpiralClass
-  does not receive ([D-143](../decisions/D-143.md)). No net-of-fee figure is
-  ever shown.
+One column in the order a buyer decides: the chosen package (with Change), the
+class-time picker (required for a single class, above the pay button;
+optional for a package, after it), pay, then reassurance (photo, one
+testimonial, the 24-hour cancellation promise), then the other rails behind a
+closed disclosure.
 
-**Which month a class belongs to**
+- Slot times show in the **visitor's** timezone with the teacher's beside
+  them.
+- When `booking_page_locale` is `en`, an approximate USD figure appears beside
+  the price (`lib/pricing/approx-usd.ts`, hidden once rates are older than
+  `APPROX_MAX_AGE_DAYS`). The charge is always in her currency.
+- Card checkout is Stripe's embedded form when
+  `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` is set, otherwise the hosted page.
+- Wise checkout redirects to `/b/[slug]/buy/transfer/<reference>` with the
+  Quick-Pay link and the reference. "I've sent it" is idempotent; only the
+  first click notifies the teacher.
 
-- **A class belongs to the month it was taught** (`scheduledStart`), not the
-  month its status flipped.
-- **Months are cut on the teacher's own timezone**, never UTC. In a zone
-  behind UTC, an evening class on the last day of a month would otherwise land
-  in the next month.
+## Data
 
-**What the screens show**
+- **Payment** — amount, currency, status, `provider` (`stripe` /
+  `manual_transfer`), `rail` (`card` / `wise` / `bank_transfer` / `unknown`),
+  the instrument shown, Stripe ids, the app's `externalReference` (idempotent
+  lookup key), the transfer reference and confirmation fields, refund id and
+  time, captured billing country and address, linked discount or referral.
+- **TeacherPayoutInstrument** — one row per kind per teacher: Wisetag,
+  optional email, `enabled`, and the encrypted Wise API credentials. A payment
+  references the instrument, so confirming an old payment never points at a
+  payee she has since changed.
+- **Dispute** — Stripe dispute and charge ids, matched payment and teacher
+  (nullable), amount, currency, reason, status, evidence due date, `isFinal`.
+- **WebhookEvent** — idempotency ledger for inbound Stripe, Inngest and
+  LiveKit events.
+- **Teacher** — `stripeAccountId`, `stripeChargesEnabled`,
+  `stripePayoutsEnabled`, `pricingCurrency`, `country`.
 
-- **The hero is this month so far**: earned, with the class count.
-- **Booked for the rest of the month**: under the hero, the classes still
-  scheduled before her month ends, on paid packages. It is real bookings, not
-  a forecast, and is labelled as booked.
-- **Last month**: named and closed (e.g. "September"). It shows once she has
-  taught for longer than the current month.
-- **Earned by month** lists every month from her first taught class:
-  - up to 12 months back, newest first;
-  - a month with no classes shows as zero, so a quiet month is never hidden;
-  - each month opens to the students it was taught to, largest first, and
-    those rows add up to the month exactly (largest-remainder apportioning);
-  - the list carries the total so far this calendar year;
-  - it renders nothing until she has taught a class.
-- **A typical month** is the mean and the lowest of her complete months in
-  the history. That leaves out the current month and her first month, which
-  she started part-way through. It is stated as a fact and only once two such
-  months exist. No figure is presented as what she can safely spend.
-- **No spending advice, "safe" figure or forecast.** The platform knows
-  neither her balance nor her bills, and the money is in her own account, so
-  these screens state only what happened and what is booked. A monthly figure
-  is never compared as a percentage against a closed month.
+## Error states
 
-**Test accounts** (see [admin portal](./admin-portal.md#test-accounts))
-
-- A real teacher's figures leave out students an operator has marked as test
-  accounts. That covers earned, paid in advance, booked, the history and the
-  typical month.
-- Those students' payments stay in her ledger, marked, because they are real
-  charges on her own account.
-- A test teacher's figures include everything.
-
-**Rules that hold across all of it**
-
-- **One figure, many views.** This month, last month, each history row, each
-  student row, the year so far and the typical month all follow the rules
-  above. The September row in the history equals what "this month" read on
-  30 September.
-- **Per currency.** Every figure is per currency and is never blended across
-  currencies (see the module header).
-- **Received is a different measure.** The ledger's per-month **received**
-  subtotals are cash landing, by payment date. A package paid in August and
-  taught in September is received in August and earned in September.
-
-## User Flow
-
-**The buy page (`/b/[slug]/buy`)** is one narrow column in the order a buyer
-decides:
-
-1. Who and what: the chosen package collapses to a summary line with a
-   Change link. A required class-time picker (a single class) sits **above**
-   the pay button; an optional one sits after it.
-2. Pay.
-3. Reassurance: the teacher's photo, one published testimonial and the
-   24-hour cancellation promise.
-4. Other rails: a closed disclosure after the pay button, never the first
-   control.
-
-Slot times render in the **visitor's** timezone with the teacher's named
-beside them, and the chosen day is written out in words. On a booking page
-whose `booking_page_locale` is `en`, an approximate USD figure appears beside
-the teacher's own price (`apps/web/src/lib/pricing/approx-usd.ts`, hidden once
-the rates are over 60 days old). It is presentation only: the charge is always
-in her own currency.
-
-**Student buys a package (card):**
-
-1. Student picks a package/template and Stripe as the payment method.
-2. Server checks rail readiness, resolves final price (custom price →
-   discount code), supersedes any other pending checkout for the same
-   intent, and creates a `pending` Package + Payment in one transaction.
-3. Student is redirected to Stripe's hosted Checkout page and pays.
-4. Stripe webhook(s) confirm the charge; the payment flips to `paid`, the
-   package activates (status `active`, expiry computed), and both student
-   and teacher are notified.
-5. Nothing further happens on the platform side. The charge was created on
-   her account, so the money is already hers and Stripe pays it out on her
-   own schedule.
-
-**Student buys a package (Wise):**
-
-1. Student picks Wise; server does the same pricing/supersede/pending-row
-   steps, generating a unique, hard-to-guess payment reference.
-2. Student is shown a prefilled Wise Quick-Pay link + the reference to
-   paste, and sends the transfer directly to the teacher — money never
-   touches the platform.
-3. Student can click "I already sent it" (idempotent; only the first click
-   notifies the teacher) while waiting for confirmation.
-4. The teacher confirms receipt manually (or, if she's connected her own
-   Wise API credentials, an automated reconciler matches the transfer by
-   reference **and** amount off her balance statement — a reference match
-   with a mismatched amount is never auto-confirmed, only surfaced for
-   manual review).
-5. Confirming flips the payment to `paid` through the same shared state
-   machine Stripe uses; the package activates identically.
-
-**Teacher issues a refund:**
-
-1. From a paid Stripe payment's detail screen, teacher submits a reason.
-2. Platform calls Stripe's refund API **as the teacher** (the charge is on
-   her account, so the refund debits her balance — there is nothing to
-   reverse), flips payment/package to `refunded`, logs the action, and voids
-   any unredeemed referral reward.
-3. Student and teacher are both notified of the refund.
-
-**A card payment is disputed:**
-
-1. Stripe notifies the platform of the dispute at every stage; the platform
-   keeps one up-to-date row per dispute and alerts ops with severity scaled
-   to urgency.
-2. If the dispute is lost, the amount and the dispute fee come out of the
-   TEACHER's balance (Stripe is `losses_collector`; the platform is not in
-   the money path). The app flips the payment and package to `refunded`,
-   revoking the student's remaining credits from that package, and voids any
-   unredeemed referral reward.
-
-## Data Used
-
-- **Payment**: amount, currency, status, provider (`stripe`/`manual_transfer`),
-  rail (`card`/`wise`/`bank_transfer`/`unknown` — `bank_transfer` is retained
-  only for rows written before [D-145](../decisions/D-145.md)), the
-  **instrument** this student was
-  shown, Stripe PaymentIntent/Checkout Session ids, the app-generated
-  `externalReference` (the idempotent lookup key), the manual-transfer
-  reference and confirmation fields (who confirmed, when, auto-matched
-  timestamp, student-marked-sent timestamp), refund provider id + timestamp,
-  captured billing country/address, linked discount redemption / referral.
-- **TeacherPayoutInstrument**: one row per kind per teacher — the payee
-  details a student pays against (Wisetag and optional email), the `enabled`
-  gate, and — for Wise only — the per-teacher API credentials the statement
-  reconciler uses. A payment references the instrument rather than re-reading
-  the teacher's current details, so confirming an old payment can never
-  silently point at a payee she has since changed.
-- **Package**: the thing being paid for (see Packages doc) — one-to-many
-  with Payment (a superseded/retried checkout can leave more than one
-  Payment row against a package).
-- **Dispute**: Stripe dispute id, linked charge/PaymentIntent, matched
-  Payment/teacher (nullable — an unmatched dispute is still recorded),
-  amount, currency, reason, status, evidence-due date, whether the dispute
-  is final.
-- **WebhookEvent**: idempotency ledger for inbound provider events
-  (Stripe, Inngest, LiveKit), tracking claimed-vs-processed so a redelivered
-  event is recognized as a genuine duplicate only once fully handled.
-- **Override (audit log)**: every refund and Wise manual-confirm is written
-  here with a before/after snapshot and the actor's stated reason.
-- **Teacher**: Stripe connected account id + charges/payouts-enabled flags,
-  Wise handle + enabled flag, pricing currency, country (drives Connect
-  eligibility).
-
-## Edge Cases
-
-- **A discount code drops the price to below Stripe's per-currency minimum
-  charge.** Refused before any rows are created, with a message pointing at
-  Wise if it's available for that teacher.
-- **Student abandons a Stripe Checkout session, then retries via Wise for
-  the same package.** The first session is actively expired server-side and
-  its package marked `expired` — only the Wise attempt remains payable.
-- **Student marks a Wise payment "sent," then the teacher never confirms
-  it.** The payment is exempt from the 14-day abandoned-checkout cleanup
-  indefinitely (not just extended) — it stays visible to the teacher to
-  confirm/dispute manually.
-- **A dispute event arrives for a charge the platform doesn't recognize**
-  (e.g. a raw Stripe charge outside this flow). Still recorded, just
-  unmatched to a teacher — flagged for ops rather than silently dropped.
-- **A refund is issued from the app and from the Stripe dashboard at once.**
-  `Payment.status = refunded` is terminal and every path flips it under a
-  `status = paid` guard, so exactly one wins: one audit row, one referral
-  clawback, one notice to each party. Stripe's idempotency key collapses the
-  money movement itself.
-- **Two webhook deliveries for the same underlying settlement event arrive
-  concurrently.** Exactly one applies the paid/refunded/failed transition
-  and its side effects (package activation, notifications); the other is a
-  clean no-op — no double-notification, no double-activation.
-- **A teacher's subscription tier changes between a purchase and her
-  payout.** It makes no difference: no commission is withheld at the charge
-  under direct charges, so a tier change cannot retroactively alter what a
-  student's payment paid her.
-- **A teacher outside `SUPPORTED_CONNECT_COUNTRIES` somehow has a
-  `stripeAccountId` from a prior era.** Country-based gating on the
-  teacher's current country is the live mechanism; an account minted under
-  the platform's earlier Stripe entity stopped being payable when the
-  production key moved to the UK entity, and the fix is to disconnect it in
-  Settings → Payments, not a data migration.
-
-## Error States
-
-- **Checkout attempted for a rail the teacher isn't ready for** — refused
-  with a localized message before any Package/Payment rows are created.
-- **Student has no email on file and picks the Stripe rail** — refused
-  (Stripe Checkout requires an email); the teacher-provisioned-student-with-
-  no-email case is the only way to reach this.
-- **Stripe isn't configured on this deploy at all** (missing platform
-  credentials) — checkout fails soft with a "try Wise or come back later"
-  message instead of a hard crash.
-- **Refund attempted on a payment that isn't currently `paid`, isn't Stripe,
-  or has no recorded PaymentIntent** — rejected with a specific error code
-  per case (`not-paid`, `not-stripe`, `no-payment-intent`) surfaced back to
-  the teacher's refund form.
-- **Refund attempted by a teacher who isn't Stripe-connected** — rejected
-  before calling Stripe at all.
-- **Stripe itself rejects the refund call** — surfaced as a generic
-  Stripe-error state on the refund form; nothing is flipped in the database.
-- **Wise-confirm attempted on a payment that's already paid/refunded/failed,
-  or that isn't actually a Wise payment** — rejected with a specific code
-  per case rather than silently no-op'ing.
-- **The settled balance transaction isn't available yet when the payout job
-  runs** — the job throws so the caller (a retrying background job) tries
-  again with backoff, rather than skipping the payout.
+- Rail not ready → refused before any row is written.
+- Card chosen for a student with no email (only a teacher-added student can
+  lack one) → refused; Stripe Checkout needs an email.
+- Stripe not configured on the deploy → a "card unavailable" message, not a
+  crash.
+- Refund refused with `not-paid`, `not-stripe`, `no-payment-intent` or
+  `no-account`; a Stripe rejection shows `stripe-error` and changes nothing.
+- Confirming a payment that is not a Wise payment → `not-wise`. Confirming one
+  already paid, refunded or failed re-renders the page without an error.
 
 ## Permissions
 
-| Action                             | Teacher (own)                | Teacher (other) | Student (own purchase) | Student (other) | Admin                          |
-| ---------------------------------- | ---------------------------- | --------------- | ---------------------- | --------------- | ------------------------------ |
-| Start a checkout                   | N/A (students buy)           | N/A             | Yes                    | No              | No                             |
-| Mark "I sent the Wise payment"     | N/A                          | N/A             | Yes (own payment)      | No              | No                             |
-| Confirm a Wise payment as received | Yes (own students' payments) | No              | No                     | No              | Yes (support tooling, implied) |
-| View own payments                  | Yes                          | No              | Yes (own)              | No              | Yes                            |
-| Refund a payment                   | Yes (own, full refund only)  | No              | No                     | No              | Yes (support tooling, implied) |
-| View disputes                      | Yes (own, implied)           | No              | No                     | No              | Yes                            |
-| Connect/manage Stripe account      | Yes (own)                    | No              | No                     | No              | No                             |
-| Connect/manage Wise handle         | Yes (own)                    | No              | No                     | No              | No                             |
-
-## Open Questions
-
-- **Is there a self-serve teacher-facing dispute-evidence submission flow**,
-  or is evidence submitted directly in the Stripe Dashboard outside the app?
-  The code reviewed only stores/tracks dispute state and alerts ops — no
-  evidence-upload action was found.
-- **What admin-facing tooling exists for confirming a Wise payment or issuing
-  a refund on a teacher's behalf** (the permissions table above assumes
-  support tooling exists at the admin level, mirroring the commission-report
-  precedent in Subscriptions, but an explicit admin refund/Wise-confirm
-  action wasn't directly located in this pass).
-- **Partial refunds**: explicitly out of scope for MVP per the code
-  comments — confirm this is still current before a QA pass assumes
-  otherwise.
-- **Automated Wise reconciliation dependency**: auto-matching requires a
-  teacher to have connected her _own_ Wise Business API credentials: what
-  happens for a Wise-only teacher who never does this (permanently
-  manual-confirm-only), and is there any nudge to connect it?
+| Action                         | Teacher (own)   | Student (own) | Admin         |
+| ------------------------------ | --------------- | ------------- | ------------- |
+| Start a checkout               | —               | Yes           | No            |
+| Mark a Wise payment sent       | —               | Yes           | No            |
+| Confirm or fail a Wise payment | Yes             | No            | No            |
+| View payments                  | Yes             | Yes           | Yes           |
+| Refund a card payment          | Yes (full only) | No            | Yes (finance) |
+| View disputes                  | No              | No            | Yes           |
+| Connect Stripe, manage Wise    | Yes             | No            | No            |

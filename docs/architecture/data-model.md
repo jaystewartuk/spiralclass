@@ -1,97 +1,86 @@
 # Data model
 
 82 models, 7 migrations, 128 indexes and 23 unique constraints of PostgreSQL,
-reached through Prisma, hosted on Neon. (Not two hundred — the history was
-squashed into a regenerable baseline plus a hand-authored invariants file, and
-changes since sit on top of them; see [Migrations](#migrations).) The schema
+reached through Prisma, hosted on Neon. The schema
 (`apps/web/prisma/schema.prisma`) is heavily commented and is the authority;
 this document covers the decisions a reader cannot recover by reading columns.
 
 For the components around it see the [architecture overview](overview.md); for
-how the live diagram is generated see [ERD.md](ERD.md).
+the generated diagram at `/admin/database` see [ERD.md](ERD.md).
 
 ## Tenancy: application-level scoping, and nothing else
 
-**Every tenant-owned row carries `teacherId`, and isolation is enforced by the
-`where` clause on every query. There is no row-level security.**
+**Tenant-owned rows carry `teacherId`, and isolation is enforced by the `where`
+clause on every query. There is no row-level security.**
 
-This is the single largest security assumption in the system, and it is stated
-plainly rather than buried: a missing `where teacherId = ?` on an admin,
-webhook or service query is a **reportable vulnerability**, not a style nit.
-[`SECURITY.md`](../../SECURITY.md) says so, so that it is treated as one in
-review.
+A missing `where teacherId = ?` on an admin, webhook or service query is a
+**reportable vulnerability**, not a style nit — [`SECURITY.md`](../../SECURITY.md)
+says so. The trade (one application process, one connection pool, no Postgres
+policies to keep complete) is written down in [D-175](../decisions/D-175.md) so
+that reversing it is a decision rather than a discovery.
 
-Why it is like that: the isolation boundary would have to be re-established in
-Postgres roles and policies for a system that has exactly one application
-process and one connection pool, and the failure mode of an incomplete policy
-set is the same class of bug as a missing `where` — with the added property that
-it is invisible from the application code. That trade is defensible at this size
-and would not be at a larger one; it is written down so the reversal is a
-decision rather than a discovery.
+Two checks enforce it, and neither subsumes the other (D-175):
 
-**What checks it.** [D-175](../decisions/D-175.md) moved that assumption off
-the reviewer and onto the gate: `apps/web/scripts/tenancy-guard.mjs` parses
-every Prisma call against a model carrying `teacherId` and reports the ones
-that do not constrain themselves to a tenant, ratcheted against a baseline by
-`apps/web/tests/authz/tenancy-guard.test.ts`. A query that genuinely reads
-across tenants — the admin console does, by design — says so at the call site
-with `// tenancy-exempt: <reason>`. Read the record before assuming the check
-covers more than it does: a `where` built at runtime and raw SQL are both
-outside what it can see, and it verifies that a query names a tenant, never
-that it names the right one.
+| Check                                       | Reads                     | Asks                                                    |
+| ------------------------------------------- | ------------------------- | ------------------------------------------------------- |
+| `apps/web/scripts/tenancy-guard.mjs` (gate) | Source, every Prisma call | Does this query name a tenant at all?                   |
+| `lib/tenancy/guard.ts` (Prisma extension)   | Arguments, at runtime     | Is the tenant it names the one this request is serving? |
+
+The scanner ratchets against a baseline in
+`apps/web/tests/authz/tenancy-guard.test.ts`; a `where` built at runtime and raw
+SQL are outside what it can see. A query that reads across tenants on purpose —
+the admin console does — says so at the call site with
+`// tenancy-exempt: <reason>`, and at runtime with `runCrossTenant()`. The
+runtime guard **reports** in production and **throws** in development and test,
+unless `TENANCY_GUARD` says otherwise (`guardMode()` in `lib/tenancy/guard.ts`).
+
+Both treat a model as tenant-owned when it has a `teacherId` column. `students`
+has none — see the next section.
 
 ## Identity: a student belongs to several teachers
 
-The most consequential modelling decision in the schema. **A `Student` is a
-per-teacher row**: a human being who studies with two teachers is _two rows_,
+The most consequential modelling decision in the schema. A human being who
+studies with two teachers is **two `students` rows**, each bound to its teacher
+through a `teacher_students` pairing (keyed on `(teacher_id, student_id)`),
 joined at read time by an identity aggregation rather than being one global
-record, and `students.email` is deliberately not globally unique.
-
-That is why the student portal has no "current teacher" concept at all, why
-class credits are fungible only within a `(teacher, identity set, class length)`
-pool, and why duplicate detection and merging are first-class features. The
-rules — including which two preferences are allowed to apply across the identity
-set and why — are in
-**[multi-teacher-students.md](multi-teacher-students.md)**, which is
-authoritative for this model.
+record. `students.email` is deliberately not globally unique, and `students`
+carries no `teacher_id` of its own — a query reaches a teacher's students
+through `teacherStudents`.
 
 Do not unify to a global `Student` and do not add a global unique index on
 email: consent scoping, archive semantics, per-teacher pricing and GDPR deletion
-all depend on per-teacher rows.
+all depend on per-teacher rows. The rules — the identity set, the two
+preferences allowed to cross it, and what reads across it — are in
+**[multi-teacher-students.md](multi-teacher-students.md)**.
 
 ## Money
 
 **Every amount is an integer in minor units.** The columns say so
-(`amount_minor_units`), and there is no floating-point money anywhere in the
-schema or the code.
+(`amount_minor_units`, `price_minor_units`, …), and CHECK constraints in the
+invariants migration keep them non-negative.
 
-The major↔minor conversion is **currency-aware on both sides**, and must stay
-that way. The platform prices in about 40 curated currencies and several of them
-— CLP, JPY, KRW, VND, PYG, UGX, XAF, XOF — have **no minor unit at all**. A
-conversion that assumes two decimals multiplies those prices by a hundred.
-Adding a currency to the curated list means adding its exponent to
+The major↔minor conversion is **currency-aware on both sides**: several curated
+currencies — CLP, JPY, KRW, VND, PYG, UGX, XAF, XOF among them — have no minor
+unit, and a conversion that assumes two decimals multiplies their prices by a
+hundred. A new curated currency needs its exponent added to
 `MINOR_UNIT_EXPONENTS` in `packages/shared/src/money.ts` in the same change,
 unless it is genuinely 2-decimal.
 
-Two currency concepts are deliberately independent and must never be conflated:
+What a teacher charges her students (`teachers.pricing_currency`) and what she
+pays SpiralClass (platform billing, recorded per subscription row) are separate
+concepts with separate configuration and webhooks — see
+[payments.md](../features/payments.md) and
+[subscriptions.md](../features/subscriptions.md).
 
-| Concept                             | Column                      | Set by                  |
-| ----------------------------------- | --------------------------- | ----------------------- |
-| What a teacher charges her students | `teachers.pricing_currency` | Her, once at onboarding |
-| What a teacher pays SpiralClass     | Platform billing, GBP       | The platform            |
-
-They have separate configuration, separate Stripe accounts and separate
-webhooks. A teacher pricing in MXN is billed in GBP, and a pre-2026 subscriber
-keeps their real historical MXN price forever rather than having it
-reinterpreted.
+Currency and country codes are validated in the application layer, with only a
+format CHECK in Postgres, so adding a currency is a constant rather than a
+migration ([D-153](../decisions/D-153.md)).
 
 ## Concurrency lives in the database
 
 Booking is where correctness is bought with real constraints rather than
-application-level checking.
-
-A booking write is guarded by **three database objects**, all of which mean
-"that slot is taken":
+application-level checking. A booking write is guarded by **three database
+objects**, all of which mean "that slot is taken":
 
 | Object                                | Kind                    | Surfaces as                           |
 | ------------------------------------- | ----------------------- | ------------------------------------- |
@@ -99,111 +88,81 @@ A booking write is guarded by **three database objects**, all of which mean
 | `bookings_no_overlap_active`          | `EXCLUDE` on interval   | SQL state `23P01`, unmapped by Prisma |
 | `bookings_no_overlap_buffered`        | `EXCLUDE`, buffer-aware | SQL state `23P01`, unmapped by Prisma |
 
-The two `EXCLUDE` constraints raise `23P01`, which Prisma does not map to a
-P-code and surfaces as an unknown-request error carrying the constraint name.
-`lib/booking/slot-conflict.ts` recognises all three and maps them to one
-friendly outcome instead of a 500.
+Prisma does not map `23P01` to a P-code; it surfaces as an unknown-request
+error carrying the constraint name. `lib/booking/slot-conflict.ts` recognises
+all three and maps them to one friendly outcome instead of a 500.
 
 **A pre-flight availability check is a courtesy; the constraint is the
-guarantee.** The buffer-aware constraint indexes a denormalised column rather
-than joining to `teachers.buffer_min`, because an `EXCLUDE` constraint cannot
-join — the schema comment at that column explains the trade.
+guarantee.** An `EXCLUDE` constraint cannot join, so the buffer-aware one
+indexes `bookings.buffered_end`, which a `BEFORE INSERT` trigger derives from
+the row's `buffer_min_snapshot` — snapshotted so that changing a teacher's
+buffer never invalidates bookings already sold.
 
-Package credit consumption takes the same posture. The claim is a field
-comparison (`classes_used < classes_total`) under a row lock inside the
-transaction. The ordering rule — always draw from the soonest-to-expire eligible
-credit — decides only _preference_: if a concurrent booking drains the
-front-runner, the loser advances to the next credit rather than failing. That
-rule exists because the previous behaviour defaulted to the newest package,
-which silently drained top-ups while older paid-for classes expired unused.
-
-There is **deliberately no raw SQL in that path**, so the identical code runs
-against the real database and against the in-memory test fakes.
+Package credit consumption takes the same posture (`lib/booking/credit-ledger.ts`).
+The claim is a conditional update (`classes_used < classes_total`) inside the
+booking transaction. Credits are drawn soonest-to-expire first within one
+`(teacher, identity set, class length, seats)` pool; the ordering decides only
+_preference_ — if a concurrent booking drains the front-runner, the loser
+advances to the next credit rather than failing. There is **no raw SQL in that
+path**, so the identical code runs against the real database and the in-memory
+test fakes. Balance and expiry rules: [packages.md](../features/packages.md).
 
 ## Closed unions over free-form JSON
 
 Where a column could plausibly have been a JSON blob, it is a closed union with
-typed columns, a `CHECK` constraint and application-level validation. Two places
-where that is load-bearing:
+typed columns, a `CHECK` constraint and application-level validation:
 
 - **Payout instruments.** `teacher_payout_instruments.kind` is an enum with one
-  member today (`wise`). The union survives a single member because it is what a
-  second kind would return through, and because dropping it would make the
-  column say nothing. What must never come back is a free-form payee blob: every
-  value a student pays against has to be machine-checkable, since an unvalidated
-  one is the single place this rail loses real money with no way back. That rule
-  outlived the 15-scheme registry it was written for (removed by
-  [D-145](../decisions/D-145.md)).
-- **Testimonials.** `testimonials.source` is `teacher_curated` or
-  `student_submitted`, and a `CHECK` constraint ties `source`, `student_id` and
-  `verified_at` together so `verified_at` cannot be written without the student
-  row the claim is about. Every teacher-side write filters
-  `source: "teacher_curated"`, so a teacher can hide or delete a verified
-  testimonial but never create or edit one. The class count on the badge is
-  **derived at render time**, never stored — a copied number drifts the next
-  lesson.
-
-By contrast, scheme and currency identifiers are validated in the application
-layer rather than enumerated as Postgres types
-([D-153](../decisions/D-153.md)), deliberately: adding a currency should be a
-constant, not a migration.
+  member (`wise`), kept because it is what a second kind would return through.
+  CHECKs require a well-formed `wise_handle` on an enabled instrument. Never add
+  a free-form payee field: every value a student pays against must be
+  machine-checkable ([D-145](../decisions/D-145.md)).
+- **Testimonials.** `testimonials_verified_shape` ties `source`, `student_id`
+  and `verified_at` together, so a `student_submitted` row cannot exist without
+  the student and a `teacher_curated` row cannot carry either
+  ([D-151](../decisions/D-151.md)). Behaviour:
+  [student-acquisition.md](../features/student-acquisition.md).
+- **Payments.** A `manual_transfer` payment must carry a `payment_reference`
+  and an `instrument_id`; any other provider must not carry an instrument.
 
 ## Migrations
 
-**The squashed history is two, and the split between them is the point.**
-Every change since is an ordinary incremental migration on top of them.
+**The squashed history is two migrations, and the split between them is the
+point.** Every change since is an ordinary incremental migration on top.
 
-| Migration               | Written by | Contains                                                                     |
-| ----------------------- | ---------- | ---------------------------------------------------------------------------- |
-| `…_schema_baseline`     | Prisma     | Everything `schema.prisma` expresses — tables, enums, indexes, FKs, defaults |
-| `…_database_invariants` | A person   | The half Prisma's schema language cannot say                                 |
+| Migration               | Written by | Contains                                                                                       |
+| ----------------------- | ---------- | ---------------------------------------------------------------------------------------------- |
+| `…_schema_baseline`     | Prisma     | Everything `schema.prisma` expresses — tables, enums, indexes, FKs, defaults                   |
+| `…_database_invariants` | A person   | `btree_gist`, partial indexes, CHECK constraints, the two GiST exclusion constraints, triggers |
 
-Neither is the schema on its own; `migrate deploy` applies both, in order, and
-a database is correct only once it has run both.
+The baseline is regenerated, never edited; the hand-written half lives in its
+own file so regenerating cannot silently drop it.
+⚠️ **The drift check compares models**, so it cannot see a missing constraint —
+`apps/web/tests/migrations/invariants.integration.test.ts` inventories a
+really-migrated database for that. Read
+[`apps/web/prisma/migrations/README.md`](../../apps/web/prisma/migrations/README.md)
+before adding a migration or touching either file.
 
-The baseline is **regenerated, never edited** — `prisma migrate diff
---from-empty --to-schema` reproduces it byte for byte. That is the
-property worth protecting, and it is exactly the property a single combined file
-destroys: the hand-written SQL mixed into it would be silently dropped the first
-time anyone regenerated. So the partial indexes, the CHECK constraints, the two
-GiST exclusion constraints and the three triggers live in their own file, and
-"regenerate the first, hand-review the second" is a procedure rather than a
-thing to remember.
-
-⚠️ **The drift check compares MODELS**, so it cannot see a missing constraint.
-Read [`apps/web/prisma/migrations/README.md`](../../apps/web/prisma/migrations/README.md)
-before touching either file.
-
-**An applied migration is never edited, not even a comment.** Prisma checksums
-each file and any drift breaks `migrate deploy` on the next environment.
-Correcting a mistake means a new migration.
-
-Production migrations run behind a **Neon checkpoint branch**
-([D-178](../decisions/D-178.md)), created by `scripts/database-deploy.sh` before
-anything is applied, because a code rollback never undoes a schema change. The
-restore path is a script — `infra/database/scripts/neon-rollback.sh` — not a
-plan. See [`DB_BACKUP_RESTORE.md`](../deployment/DB_BACKUP_RESTORE.md).
-
-Every migration **expands** — add a column, backfill, switch reads — and a
-drop, rename or narrowing ships a release **after** the code that stopped
-using it, marked `CONTRACT` ([D-178](../decisions/D-178.md),
-`apps/web/tests/migrations/contract-migrations.test.ts`). The mobile app this
-once protected is gone; the reason now is the deploy itself, which migrates
-before its new code serves, so old code always meets the new schema.
-
-Only one migration-bearing branch should be in flight at a time. Two branches
-each adding a migration collide on ordering and checksums.
-
-## The live ERD
-
-`/admin/database` generates an entity-relationship diagram **from the running
-schema**, not from a checked-in picture that would rot. A drift guard fails the
-build if the generated DBML is out of step with `schema.prisma`, so the diagram
-cannot silently describe an older database. See [ERD.md](ERD.md).
+- **An applied migration is never edited, not even a comment.** Prisma
+  checksums each file and any drift breaks `migrate deploy` on the next
+  environment. Correct a mistake with a new migration.
+- **Every migration expands.** A production deploy migrates before its new code
+  serves, so old code always meets the new schema. A drop, rename or narrowing
+  ships a release _after_ the code that stopped using it, marked `CONTRACT`
+  ([D-178](../decisions/D-178.md),
+  `apps/web/tests/migrations/contract-migrations.test.ts`).
+- **Production migrations run behind a Neon checkpoint branch**, created by
+  `scripts/database-deploy.sh` before anything is applied, because a code
+  rollback never undoes a schema change. The restore path is
+  `infra/database/scripts/neon-rollback.sh` — see
+  [`DB_BACKUP_RESTORE.md`](../deployment/DB_BACKUP_RESTORE.md).
+- **Only one migration-bearing branch in flight at a time.** Two collide on
+  ordering and checksums.
 
 ## Related
 
 - [Architecture overview](overview.md) — the components around the database
+- [ERD.md](ERD.md) — the generated schema diagram and its drift guard
 - [Payments](../features/payments.md) — how a payment row reaches `paid`
 - [Packages](../features/packages.md) — credit balance, expiry and headroom
 - [`SECURITY.md`](../../SECURITY.md) — the tenancy assumption, stated as policy

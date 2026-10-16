@@ -1,9 +1,7 @@
 # AI-assisted engineering
 
-**Most of this codebase was written by an AI agent under review.** That is
-stated in the README as a fact about provenance; this document is the part that
-matters more — the system built around it, and why each piece of that system
-exists.
+**Most of this codebase was written by an AI agent under review.** This
+document is the system built around that, and why each piece of it exists.
 
 The premise is narrow and worth stating plainly: **an agent is a fast, capable
 contributor with no memory of yesterday and no stake in tomorrow.** Everything
@@ -30,12 +28,9 @@ answer fail loudly rather than merge.
 is not the disk it takes — it is the attention it displaces, and it is paid on
 every turn of every session, in every worktree, forever.
 
-It was 885 lines. Most of that was decision history that `docs/decisions/`
-already owned and product rules that `docs/features/` already owned, restated
-where they could drift. A file that long is one an agent skims, which is the
-same as one nobody wrote.
-
-So it holds three things and nothing else:
+A file that restates decision history and product rules is one an agent skims,
+and those restatements drift from the documents that own them. So it holds
+three things and nothing else:
 
 - **Invariants** — the rules that cost real money or real correctness when
   broken, each stated once, each with a pointer to the document that owns the
@@ -70,8 +65,8 @@ identically by the pre-push hook and by `gate.yml`. The full argument is in
 [workflow.md](workflow.md); what belongs here is the consequence for agent work:
 
 - **A rule stated only in prose holds exactly as long as attention does.** Every
-  invariant in `CLAUDE.md` that could be made executable has been. The
-  `tests/config/` directory is almost entirely this: 32 files that assert things
+  invariant in `CLAUDE.md` that could be made executable has been.
+  `apps/web/tests/config/` is almost entirely this: tests that assert things
   about the repository rather than about the product — that the middleware is in
   the one place Next.js loads it from, that no workflow restates a gate step,
   that Supabase has not come back, that no `docs/…` path in the tree is dangling,
@@ -81,8 +76,7 @@ identically by the pre-push hook and by `gate.yml`. The full argument is in
   for adding one: name the thing that actually went wrong.
 - **When you retire a thing, retire its guard in the same change.** A guard
   whose premise has died does not announce it — it goes on making dead code look
-  load-bearing. A route tree here outlived its client by a month for exactly
-  this reason.
+  load-bearing.
 
 The counterpart rule is in [D-140](../decisions/D-140.md): a guard that derives
 its bound from the thing it is guarding certifies the violation it exists to
@@ -96,39 +90,50 @@ The goal is not a session that asks permission constantly. It is a session that
 never has to ask about anything reversible, and cannot do the irreversible
 things at all.
 
-**Allowed without asking** — reading anything in the tree, searching it, running
-any check (`pnpm gate --allow-dirty`, `typecheck`, `lint`, `test`, a single test
-file), formatting, and read-only `git` and `gh`. These are the operations a
-session performs dozens of times an hour and none of them can lose work.
+**Allowed without asking** (`permissions.allow` in `.claude/settings.json`) —
+the checks (`pnpm gate --allow-dirty`, `typecheck`, `lint`, `test`, any
+`pnpm --filter` script), formatting, the doc-count and leak checks,
+`pnpm issue:check`, and the read-only status commands (`gate:lock`,
+`release:status`, `local:status`). None of them can lose work.
 
 **Asked every time** — `gh pr merge`, by a user-level rule that is the same in
 every repository, so a merge happens only when the operator answers the prompt.
+Nothing in this repository blocks it; a project-level deny would turn that
+prompt into a refusal here alone.
 
-**Denied outright** — `pnpm promote`, both deploy scripts,
-anything matching `migrate:prod`, `infisical`, force-pushes, hard resets, and
-reads of the credential-bearing files. Every one of these either moves real
-money, touches production data, or hands out live credentials, and none has an
-undo worth the name.
+**Denied outright** (`permissions.deny`) — `pnpm promote`, `gh release`, both
+deploy scripts and the `infra/gcp/` operator scripts, writing `gcloud` commands
+(`run deploy`, `secrets`, service-account keys), anything matching
+`migrate:prod`, `infisical`, `neon`, `psql`, the browser suite
+(`pnpm test:e2e`), and reads of the credential-bearing files. Each of these
+moves real money, touches shared or production data, hands out live
+credentials, or holds a shared resource.
 
 **Two hooks cover what a permission pattern cannot:**
 
-- `.claude/hooks/guard-bash.sh` sees the whole command line, so it catches the
-  shapes prefix matching misses — `SKIP_GATE=1 git push`, `git push
---no-verify`, `cat config/env/production.local.env`. These are precisely what
-  a model reaches for when a push looks stuck, and on this machine a push that
-  looks stuck is usually queuing on the [machine lock](workflow.md). It also
-  warns (without blocking) on a bare `git stash`, because the stash stack is
-  shared across every worktree on the machine.
+- `.claude/hooks/guard-bash.sh` (PreToolUse) sees the whole command line, so
+  it catches the shapes prefix matching misses — a gate bypass in an
+  environment variable or a flag in the middle of a push, a force-push, a read
+  of a credential file through `cat`. These are precisely what a model reaches
+  for when a push looks stuck, and a push that looks stuck is usually queuing
+  on the [machine lock](workflow.md#one-heavy-job-at-a-time). It also warns
+  (without blocking) on a bare `git stash`, because the stash stack is shared
+  across every worktree on the machine.
 - `.claude/hooks/format-edited.sh` runs prettier on the single file that just
   changed. `format` is the first step of the gate and the cheapest to fail, but
   it fails at push time — minutes after the edit, costing a full re-run and a
   second commit. A few hundred milliseconds at write time removes the class.
 
-**The rule about merging exists three times on purpose**: as a sentence in
-`CLAUDE.md`, as a deny rule, and as a hook — and
-`apps/web/tests/config/claude-md.test.ts` fails if the three drift apart. A rule
-about irreversible actions should not have a single point of failure, least of
-all a model's attention.
+- `.claude/hooks/session-start.sh` (SessionStart) runs `pnpm install` only
+  when the lockfile or workspace manifest changed since the last install.
+
+**The operator-only rule exists three times on purpose**: as a sentence in
+`CLAUDE.md`, as deny rules, and in the Bash hook.
+`apps/web/tests/config/claude-md.test.ts` fails if `CLAUDE.md` stops naming an
+operator-only command or `settings.json` stops denying it, and
+`apps/web/tests/config/agent-guardrails.test.ts` executes the hook against real
+command lines. A rule about irreversible actions should not have a single
+point of failure, least of all a model's attention.
 
 ---
 
@@ -138,16 +143,15 @@ all a model's attention.
 been decided about this, and what does it forbid?_ — by reading
 `docs/decisions/` in its own context and returning a few lines.
 
-This is the direct consequence of shrinking `CLAUDE.md`. The old file tried to
-inline the log's conclusions, which is why it was 885 lines, and it still could
-not hold 125 records. A subagent is better than the main session here for a
-structural reason rather than a clever one: the answer is short and the reading
-is long, so the reading belongs somewhere that is thrown away afterwards.
+This is the direct consequence of keeping `CLAUDE.md` small: it cannot inline
+the decision log's conclusions. A subagent is better than the main session here
+for a structural reason: the answer is short and the reading is long, so the
+reading belongs somewhere that is thrown away afterwards.
 
 The most expensive mistake available in this repository is not a bug — it is
 re-deriving a decision that was already made, measured and reversed. Putting
-back the `application_fee_amount` [D-143](../decisions/D-143.md) removed, or the
-payout instrument [D-145](../decisions/D-145.md) deleted, looks like an
+back the `application_fee_amount` [D-143](../decisions/D-143.md) removed, or a
+free-form payee field [D-145](../decisions/D-145.md) rules out, looks like an
 improvement from inside the diff.
 
 **`.claude/skills/pr/SKILL.md`** (`/pr`) is the other half: the walk from a
@@ -173,8 +177,8 @@ stops calling the checker or loses its approval, security or never-close rules.
 restating them would be a second source of truth. No skill for migrations —
 [data-model.md](../architecture/data-model.md) and
 `apps/web/prisma/migrations/README.md` own that. No review agents for
-TypeScript, Next.js or security: the gate already runs `tsc`, ESLint, two
-credential scanners and a dependency audit deterministically, and an agent that
+TypeScript, Next.js or security: the gate already runs `tsc`, ESLint, a
+credential scan, a leak check and a dependency audit deterministically, and an agent that
 re-reads the diff for the same defects is slower, less reliable, and produces
 findings nothing can act on. **An agent is worth adding when it reads more than
 it returns. Otherwise it is decoration.**
@@ -207,7 +211,7 @@ remembered.**
 
 - [`CLAUDE.md`](../../CLAUDE.md) — the rule set itself
 - [Workflow](workflow.md) — the gate, the pull request, the promote
-- [Testing](testing.md) — the five test layers and the guard tests
+- [Testing](testing.md) — the test layers and the guard tests
 - [Documentation standards](documentation.md) — where a document goes, and why
   behaviour is defined once
 - [Decision records](../decisions/README.md) — current policy, not history

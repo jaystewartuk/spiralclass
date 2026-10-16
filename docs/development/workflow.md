@@ -17,16 +17,10 @@ branch → implement + tests → push (the fast gate runs here)
 
 ## The branching model
 
-Short-lived branches off `main`, deleted after merge, prefixed by intent.
-
-| Prefix      | For                                         | Example                       |
-| ----------- | ------------------------------------------- | ----------------------------- |
-| `feat/`     | A new capability                            | `feat/student-invites-csv`    |
-| `fix/`      | A bug fix                                   | `fix/availability-empty-save` |
-| `hotfix/`   | An urgent production fix                    | `hotfix/checkout-500`         |
-| `chore/`    | Deps, config, tooling, no product behaviour | `chore/bump-next-15-6`        |
-| `refactor/` | Behaviour-preserving restructure            | `refactor/slots-extract`      |
-| `docs/`     | Docs only                                   | `docs/workflow-rewrite`       |
+Short-lived branches off `main`, deleted after merge, named as a plain kebab
+topic (`per-package-custom-price`). `pnpm pr --branch <name>` names it; from a
+detached HEAD or a `worktree-` branch with no `--branch`, `scripts/open-pr.sh`
+derives one from the last commit subject.
 
 - **`main` is the trunk.** Every change lands through a pull request — docs
   included. There is no direct-push exception.
@@ -49,14 +43,18 @@ not a hook, not a script. A guard test fails on a workflow that restates a step.
 
 There are two tiers.
 
-**Fast** — Prisma client, formatting, README counts, typecheck, lint, web unit
+**Fast** — Prisma client, formatting, doc counts, typecheck, lint, web unit
 tests with coverage floors, diff coverage on new code, package tests, credential
-scan, dependency audit. Seconds to a couple of minutes.
+scan, dependency audit.
 
 **Heavy** — the mutation spot-check, the real-database integration suite
-(Postgres, a production `next build`, migration drift) and the three browser
-suites (end-to-end, visual regression, accessibility). Twenty to forty minutes
-on one machine; about seventeen as three parallel runner jobs.
+(Postgres, a production `next build`, migration drift), the three browser
+suites (end-to-end, visual regression, accessibility) and the production image
+build. Twenty to forty minutes on one machine; on runners, one parallel job per
+step.
+
+`pnpm gate:full` runs both. The [testing guide](testing.md) describes each
+layer.
 
 Both tiers run in both places:
 
@@ -64,7 +62,7 @@ Both tiers run in both places:
 | ------------------------------------------------------------- | ----- | ------------------------------ |
 | `.githooks/pre-push`, on every push                           | fast  | the `local-gate` commit status |
 | `.github/workflows/gate.yml`, on every PR and push to `main`  | fast  | the same `local-gate` status   |
-| `.github/workflows/heavy.yml`, on every PR and push to `main` | heavy | three parallel job results     |
+| `.github/workflows/heavy.yml`, on every PR and push to `main` | heavy | one job result per heavy step  |
 
 The two fast producers cannot disagree about anything but timing, because they
 run the same registry. The hook is what makes the checks run _before_ a push
@@ -119,10 +117,8 @@ apps/web/src/app/api/{stripe,inngest}/**
 `CLAUDE.md` is the single source of that list.
 
 **The tier does not change which gate runs** ([D-157](../decisions/D-157.md)).
-It used to: the pre-push hook escalated a Tier 2 branch to the heavy tier, which
-on a shared machine fired a forty-minute run at an arbitrary moment. Since
-2026-09-05 the heavy suites run on a runner for every pull
-request regardless of tier, so escalating locally buys only earliness.
+The heavy suites run on a runner for every pull request regardless of tier, so
+escalating locally buys only earliness.
 
 What the tier still decides is **judgement**:
 
@@ -131,14 +127,14 @@ What the tier still decides is **judgement**:
 - Whether to have two risky changes in flight at once, which is two ways to
   break production and a merge order to reason about.
 - Whether to ship it now at all. **No risky-path deploy during lesson hours.**
-  Since [D-199](../decisions/D-199.md) nothing in code holds a deploy back:
-  the judgement is made when you merge, and again when you approve.
+  Nothing in code holds a deploy back ([D-199](../decisions/D-199.md)): the
+  judgement is made when you merge, and again when you approve.
 
 ## The sequence
 
 ```mermaid
 flowchart TD
-    B["Branch: feat/ fix/ chore/"] --> C["Implement, with tests"]
+    B["Branch: a kebab-case topic"] --> C["Implement, with tests"]
     C --> E["git push"]
     E --> E1["queues for the machine lock<br/>if another checkout is gating"]
     E1 --> F{"pre-push runs the FAST tier"}
@@ -147,7 +143,7 @@ flowchart TD
     G --> H["Open a PR into main"]
     H --> H1{"local-gate green on the PR head?"}
     H1 -->|"no — gate.yml posts it from a runner"| H
-    H1 -->|yes| HV["heavy.yml on the PR<br/>3 parallel jobs · ~17 min<br/>NOT a required check"]
+    H1 -->|yes| HV["heavy.yml on the PR<br/>one job per heavy step<br/>NOT a required check"]
     HV --> SP["gh pr merge --squash --delete-branch"]
     SP --> SP2["gate.yml + heavy.yml re-run<br/>on the merged commit"]
     SP2 -->|red| M["fix forward on main"]
@@ -178,7 +174,7 @@ change is not done without them. `pnpm test` for fast feedback; `pnpm gate
 
 `git push -u origin <branch>`. The hook runs the fast tier against the commit
 being pushed, and nothing leaves the machine if it is red. There is no separate
-"remember to verify first" step — that was the step that got forgotten.
+"remember to verify first" step.
 
 On success it detaches a process that posts the `local-gate` status once the
 commit reaches origin.
@@ -203,10 +199,6 @@ that sees a real database or a browser.
 gh pr merge <n> --squash --delete-branch
 ```
 
-There is no batch command. [D-157](../decisions/D-157.md) deleted `pnpm ship-pr`
-because `heavy.yml` runs the suites it existed to run, on a runner, on every
-pull request and every push to `main`. Batching then bought nothing but delay.
-
 Both workflows re-run against the merged commit, and **that pair is what
 certifies a release**: a pull-request run tests HEAD merged with base _as of that
 moment_, so if `main` moved in between, the tree that landed is not the tree that
@@ -222,13 +214,13 @@ nothing reaches production without the heavy tier green on that commit.
 
 ### 5. Preview
 
-⚠️ **There is no preview host today, so merging to `main` deploys nothing.**
-Preview moved to the Oracle box ([D-184](../decisions/D-184.md)), that box was
-destroyed on 2026-09-19 ([D-16](../decisions/D-16.md)), and preview has no
-deploy target until it is rebuilt. `scripts/oracle-deploy.sh` is the way back.
-Until then the manual pass runs against your own checkout.
+> [!WARNING]
+> **There is no preview host today.** [D-184](../decisions/D-184.md) records
+> that preview is to return as a second Cloud Run service; until it does, the
+> manual pass runs against your own checkout. See
+> [`RELEASE_AND_STAGING.md`](../deployment/RELEASE_AND_STAGING.md).
 
-Then verify: the relevant `/admin/uat` section, and your own eyes on the change.
+Verify with the relevant `/admin/uat` section and your own eyes on the change.
 
 ### 6. Promote — it happens by itself, and you approve it
 
@@ -237,8 +229,8 @@ Then verify: the relevant `/admin/uat` section, and your own eyes on the change.
 Gate or Heavy finishes on a push to `main`. It reads the **runners' verdict** for
 that exact commit: the Gate and Heavy workflows' push runs, both green
 ([D-157](../decisions/D-157.md)). It does not re-run the suites. Once both are
-green it fast-forwards `production` and stamps a `vYYYY.MM.DD.N` tag and a
-GitHub Release. The first of the two runs to finish finds the other still
+green it fast-forwards `production` and creates a `vYYYY.MM.DD.N` GitHub
+Release and its tag. The first of the two runs to finish finds the other still
 going, and holds. A red or cancelled run holds too: that commit ships with the
 next one that goes green.
 
@@ -263,12 +255,12 @@ its own credentials. GitHub asks for approval per job, so a promote asks twice.
 **The approval is the release decision**: approve outside lesson hours, or
 leave the run waiting until then. Approving ships everything merged before it.
 A hand-typed `pnpm promote` watches the run and exits non-zero unless both jobs
-are green, so a green promote means production is serving. ([D-184](../decisions/D-184.md)
-records why the database is a job of its own; [D-70](../decisions/D-70.md)
-records the Vercel failover that once ran beside them.)
+are green, so a green promote means production is serving.
+([D-184](../decisions/D-184.md) records why the database is a job of its own.)
 
-- `--force-gate` runs the full tier here instead of reading the verdict — the
-  offline and recovery path, and still the QEMU cross-build.
+- `--force-gate` runs the full tier on this machine instead of reading the
+  verdict — for an older commit whose runs GitHub has expired, or when Actions
+  is unreachable. The deploy itself still runs on the runner.
 - **`gh` unavailable means the verdict cannot be read**, and that is a refusal
   rather than a pass.
 - If the deploy fails _after_ the fast-forward, the branch moved and the app did
@@ -306,9 +298,10 @@ restore the pre-migration Neon checkpoint —
 ## Feature flags
 
 A feature too big for one clean pull request splits into vertical slices behind
-a flag (`flagEnabled("FLAG_<NAME>")`). Slices merge to `main` and reach preview
-without being exposed; the flag is on in preview and off in production until the
-whole feature is ready. **The flag flip is the launch**, decoupled from the
+a flag (`flagEnabled("FLAG_<NAME>")` from `@/lib/flags`, an environment variable
+set per environment in `config/env/<env>.runtime.env`). Slices merge to `main`
+without being exposed; the flag stays off in production until the whole feature
+is ready. **The flag flip is the launch**, decoupled from the
 deploy.
 
 ## What blocks what
@@ -343,12 +336,12 @@ fails the gate.
 point-in-time recovery plus the pre-migration checkpoint;
 `scripts/local/backup-prod-db.sh` is an unregistered on-demand tool, left
 unregistered so nothing nags about a decision already made. See
-[`LOCAL_AUTOMATION.md`](../deployment/LOCAL_AUTOMATION.md).
+[Maintenance jobs](../deployment/RELEASE_AND_STAGING.md#maintenance-jobs).
 
 ## Releases and versioning
 
-Every promote stamps an annotated `vYYYY.MM.DD.N` tag (N is that day's promote
-count) and opens a GitHub Release with auto-generated notes. That gives a named
+Every promote creates a GitHub Release tagged `vYYYY.MM.DD.N` (UTC date; N is
+that day's release count) with auto-generated notes. That gives a named
 auditable history, a rollback target by name, and release notes for free.
 
 You still ship all of `main` together. This is continuous promotion of the

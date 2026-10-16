@@ -4,11 +4,9 @@
 
 One search box, in the header of every page of the teacher app and the
 student portal, finds anything on the searcher's side of the product: pages,
-the things she does often, her own records, and the help centre's answers. It
-exists because a teacher could not find pages she used, the day plan, her
-students and her packages among them. Some of those pages sat in menus under
-names she did not use for them ("packets" live at Settings → Templates), and
-some sat in no menu at all.
+the things she does often, her own records, and the help centre's answers —
+including pages filed under names she does not use ("packets" live at
+Settings → Templates) and pages no menu lists.
 
 ## User Stories
 
@@ -38,9 +36,9 @@ A teacher's search covers:
 | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------ |
 | Page     | Every destination in the teacher nav (`packages/shared/src/nav.ts`)                                                                                                  | The page                                   |
 | Shortcut | Pages no menu lists: day plan, add a student, book a class, past classes, invitations, new message, notifications, dashboard layout, acquisition profile and results | The page                                   |
-| Student  | Everyone on her roster; archived students are included and marked                                                                                                    | The student's page                         |
+| Student  | Her roster, alphabetically, up to `RECORD_LIMITS.students`; archived students are included and marked                                                                | The student's page                         |
 | Shortcut | "Message {name}" for each active student                                                                                                                             | That conversation                          |
-| Class    | Scheduled and completed classes from 30 days back to 60 days ahead                                                                                                   | The class                                  |
+| Class    | Scheduled and completed classes from 30 days back to 60 days ahead, up to `RECORD_LIMITS.classes`                                                                    | The class                                  |
 | Package  | Her package templates that are not archived                                                                                                                          | The packages page                          |
 | Lead     | Her 200 most recent leads; archived leads are included and marked                                                                                                    | The leads tab holding it, searched for it  |
 | Material | Her 300 most recent library items that are not archived                                                                                                              | The library, searched for it at all levels |

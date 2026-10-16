@@ -94,9 +94,9 @@ key, and only on the production deployment.
 
 The local Postgres is `apps/web/docker-compose.dev.yml` — a `postgres:16` on
 **:5432** with a named volume, deliberately separate from the integration-test
-database on **:5433** (`docker-compose.test.yml`), which is wiped between runs.
-Losing the database you have been clicking through to a test teardown would be a
-bad afternoon.
+database on **:5433** (`docker-compose.test.yml`), which the integration suite
+truncates and `db:test:down` deletes. Keeping them apart means a test run never
+touches the data you have been clicking through.
 
 ```bash
 pnpm db:dev:up      # start
@@ -121,8 +121,7 @@ even a comment — Prisma checksums each file and any change breaks
 `migrate deploy`. Correct a mistake with a new migration.
 
 Only one migration-bearing branch should be in flight at a time. Two branches
-each adding a migration collide on ordering and checksums, and there is no
-editing your way out afterwards.
+each adding a migration collide on ordering and checksums.
 
 → [Data model](../architecture/data-model.md)
 
@@ -153,18 +152,17 @@ names against — see [`docs/security.md`](../security.md).
 | `pnpm gate --allow-dirty`     | Everything the pre-push hook will check, against an uncommitted tree |
 
 `just --list` is a human-facing catalog of the same commands grouped by purpose,
-and `just dev` launches `mprocs` for the long-lived dev processes. The `just`
-recipes are a thin front door — they delegate to the `pnpm` commands and never
-duplicate logic. Test and gate tasks are deliberately absent from the
-`justfile`; invoke those through `pnpm`.
+and `just dev` launches `mprocs` (`mprocs.yaml`: the dev server and the test
+database). Every `just` recipe delegates to a `pnpm` command and adds no logic
+of its own; agents call `pnpm` directly.
 
 → [Testing](testing.md) · [Workflow](workflow.md)
 
 ## When something does not start
 
 **`corepack` is not enabling pnpm.** Node 24 ships it, but a Node installed by
-some package managers disables it, and Node 25 and later do not ship it at all. `corepack enable` needs to succeed before
-anything else will.
+some package managers disables it, and Node 25 and later do not ship it at all.
+`corepack enable` needs to succeed before anything else will.
 
 **Docker is installed but the setup script still fails.** It checks
 `docker info`, not just the binary — the daemon has to be running.

@@ -1,120 +1,90 @@
 # Admin Portal
 
-## Overview
+The operator console for platform staff: support look-ups and moderation,
+payments and refunds, subscription overrides, disputes, cost and unit
+economics, notification health, live calls, and pre-release QA. It lives at
+`apps/web/src/app/admin/**`, in a sidebar of five sections (Overview, People,
+Money, Operations, Admin). An operator is an `AdminUser` row, never a Teacher or
+Student.
 
-The Admin Portal is SpiralClass's internal operator surface — used by the
-platform's own staff (not teachers, not students) to run the business:
-customer support, financial operations, payment-dispute handling, platform
-economics/cost tracking, notification-health monitoring, and pre-release QA.
+## Identity, roles and capabilities
 
-It lives at `apps/web/src/app/admin/**`, organised into a sidebar with five
-sections (Overview, People, Money, Operations, Admin).
+- `AdminUser` holds `{ email, role, disabledAt, createdById }`. `role` is the
+  `AdminRole` enum: `superadmin`, `finance`, `support`, `tester`, `engineer`.
+  `createdById` records who invited whom.
+- **Rank** (`ROLE_RANK`, `lib/admin.ts`): `superadmin` 3 > `finance` 2 >
+  `support` 1; `tester` and `engineer` are 0, so they never clear a role floor.
+- **Capabilities** (`lib/admin-capabilities.ts`, [D-25](../decisions/D-25.md))
+  are a second grant, independent of rank: `uat:run` and `schema:view`.
+  `superadmin` holds all; `tester` holds `uat:run`; `engineer` holds `uat:run`
+  and `schema:view`; `finance` and `support` hold none.
+- A gate is `requireAdmin(minRole, capability?)` — the role floor **or** the
+  capability. `requireSuperuser()` is `requireAdmin("superadmin")`.
+- A disabled `AdminUser` is treated as no row.
+- **Bootstrap.** While `admin_users` is empty, an email in `SUPERUSER_EMAILS`
+  (merged with `BUILTIN_SUPERUSERS`, which is empty) is a synthetic
+  superadmin. Its audit rows have `actorAdminId = NULL`, and each use logs a
+  warning and tags Sentry. Seed a real row from `/admin/staff`, then blank
+  `SUPERUSER_EMAILS` in production so it cannot re-arm. One real row switches
+  the bootstrap off.
+- **Mandatory MFA, no opt-out.** Every admin page and action requires TOTP to
+  be enrolled **and** a fresh step-up in this session (12 hours,
+  `ADMIN_STEPUP_TTL_MS`). Either missing redirects to `/admin/security`, the one
+  page gated only on "is an admin" so it can grant the step-up. See
+  [authentication](authentication.md#admin-two-factor-and-step-up).
+- Staff emails are left out of the "filter by teacher" lists elsewhere in
+  admin, because a staff member's own product use can create a real `Teacher`
+  row.
 
-Access is entirely separate from the Teacher and Student product surfaces: an
-operator is not a Teacher or Student row, but a row in `AdminUser`.
+## Page floors
 
-## User Stories
+What the page itself requires, from its `requireAdmin` call. The sidebar's own
+`minRole` (`NAV` in `app/admin/layout.tsx`) is lower for four pages — marked
+†: the link shows, and the page redirects to `/admin?error=forbidden`.
 
-- As a **support** staff member, I want to look up a teacher or student by
-  name/email/slug so I can answer a "why isn't this working" ticket without
-  needing database access.
-- As a **support** staff member, I want to disable a disruptive or abusive
-  teacher/student account so they can't use the platform, and re-enable one
-  once the issue is resolved.
-- As a **finance** staff member, I want to see all payments, refund one when
-  a student was wrongly charged, see subscription/billing state per teacher,
-  and comp a teacher onto a paid plan (e.g. for a partnership).
+| Section    | Page                       | Page requires                 | Sidebar shows from |
+| ---------- | -------------------------- | ----------------------------- | ------------------ |
+| Overview   | `/admin`                   | any admin                     | `support`          |
+| People     | `/admin/teachers`          | `support`                     | `support`          |
+| People     | `/admin/students` †        | `superadmin`                  | `support`          |
+| Money      | `/admin/payments`          | `finance`                     | `finance`          |
+| Money      | `/admin/money` (cash flow) | `finance`                     | `finance`          |
+| Money      | `/admin/costs`             | `finance`                     | `finance`          |
+| Money      | `/admin/economics`         | `finance`                     | `finance`          |
+| Money      | `/admin/packages`          | `support`                     | `support`          |
+| Money      | `/admin/subscriptions`     | `finance`                     | `finance`          |
+| Operations | `/admin/disputes` †        | `superadmin`                  | `finance`          |
+| Operations | `/admin/notifications`     | `support`                     | `support`          |
+| Operations | `/admin/lesson-insights`   | `superadmin`                  | `superadmin`       |
+| Operations | `/admin/audit` †           | `superadmin`                  | `support`          |
+| Operations | `/admin/live-calls`        | `support`                     | `support`          |
+| Operations | `/admin/integrations` †    | `superadmin`                  | `support`          |
+| Admin      | `/admin/storage`           | `superadmin`                  | `superadmin`       |
+| Admin      | `/admin/database` (ERD)    | `superadmin` or `schema:view` | same               |
+| Admin      | `/admin/uat`               | `superadmin` or `uat:run`     | same               |
+| Admin      | `/admin/staff`             | `superadmin`                  | `superadmin`       |
 
-* As a **finance** staff member, I want visibility into open Stripe disputes
-  (chargebacks) so nothing misses its evidence deadline.
+The student **actions** (`app/actions/admin-students.ts`: disable, enable,
+change email) require only `support`, so a support operator can call them but
+cannot open the page that offers them. Whether the stricter page floor on
+students is deliberate is not recorded anywhere; confirm before changing
+either side.
 
-- As a **superadmin**, I want to invite new staff, assign their role, and
-  disable a departing staff member's admin access.
-- As a **superadmin**, I want to run a UAT (User Acceptance Testing) checklist
-  against preview or production before/after a risky change, and have my
-  progress persist across a session.
-- As a **superadmin**, I want to see the platform's cost base (vendor
-  expenses, usage-driven estimates, FX assumptions) blended against revenue
-  to understand real unit economics, independent of the cash-flow dashboard.
+## Moderation
 
-## Business Rules (exhaustive)
-
-### Identity and role model
-
-- An operator is authorized via the `AdminUser` table: `{ email, role,
-disabledAt }`. `role` is one of `superadmin`, `finance`, `support`,
-  `tester`, `engineer` (Prisma enum `AdminRole`).
-- Role **rank** (descending privilege): `superadmin` (3) > `finance` (2) >
-  `support` (1). `tester` and `engineer` rank at **0** — below `support` —
-  deliberately: they never gain access via the rank ladder, only via an
-  explicit **capability** grant (see below).
-- **Capabilities** are a second, orthogonal grant, independent of rank:
-  `uat:run` (run the UAT checklist tool) and `schema:view` (view the
-  read-only DB schema/ERD). `superadmin` implicitly holds every capability.
-  `tester` holds `uat:run`. `engineer` holds `uat:run` + `schema:view`.
-  `finance` and `support` hold neither by default.
-- A page/action's gate is expressed as "minimum role, OR this capability" —
-  e.g. the UAT tool requires `superadmin` rank OR the `uat:run` capability,
-  which is how the narrow `tester` role reaches exactly that one tool.
-- **Env-allowlist bootstrap**: on a fresh database with zero `AdminUser` rows,
-  any email listed in `SUPERUSER_EMAILS` (env var, merged with a hardcoded
-  `BUILTIN_SUPERUSERS` set — currently empty) is treated as a synthetic
-  `superadmin` with an unattributed identity (audit rows can't attribute
-  actions to it — `actorAdminId` is `NULL`). This path is meant to be
-  transient: the intended flow is to seed one real `AdminUser` row via
-  `/admin/staff`, after which the bootstrap allowlist should be cleared. As
-  long as `AdminUser` has zero rows, the bootstrap remains active.
-- A disabled `AdminUser` row (`disabledAt` set) loses all admin access
-  immediately, regardless of role.
-- **Mandatory MFA (web)**: every admin page/action requires (1) TOTP
-  enrolled (`user.twoFactorEnabled`) AND (2) a fresh, session-bound
-  "step-up" — the admin must have actually presented a TOTP code in this
-  session recently, not just have MFA enrolled at some point in the past.
-  There is no opt-out, for any role tier. Failing either check redirects to
-  `/admin/security`, the one admin page reachable without this check (to
-  avoid a redirect loop on the page that grants the step-up).
-- Staff emails are excluded from "teacher" listings/filters shown elsewhere
-  in admin (e.g. Students/Audit "filter by teacher" dropdowns) — a staff
-  member's own dev/test session can auto-create a real `Teacher` row via
-  ordinary product use, and that shouldn't masquerade as a real teacher in
-  admin views.
-
-### Section/page role floors (web) — as coded today
-
-- **Overview** (`/admin`) — any admin tier (`support` floor).
-- **People**: Teachers (`support`), Students (`superadmin` — note: stricter
-  than Teachers; see Open Questions), Teacher/Student detail pages inherit
-  their list's floor.
-- **Money**: Payments (`finance`), Money/cash-flow (`finance`), Costs
-  (`finance`), Economics (`finance`), Packages (`support`), Subscriptions
-  (`finance`).
-- **Operations**: Disputes (`superadmin` — note: page requires superadmin
-  even though sidebar visibility is set at `finance`; see Open Questions),
-  Notifications (`support`), Lesson Insights (`superadmin`), Audit Log
-  (`superadmin` — same sidebar/page mismatch), Live Calls (`support`),
-  Integrations (`superadmin` — same mismatch).
-- **Admin**: Storage (`superadmin`), Database/ERD (`superadmin` +
-  `schema:view` capability), UAT Tools (`superadmin` + `uat:run`
-  capability), Staff (`superadmin`).
-
-### Teacher/Student moderation
-
-- A **support**-or-above operator can **disable** a Teacher or Student
-  account. Disabling requires typing a free-text reason (kept on record,
-  not just a boolean flip) and is confirmed via a destructive-action dialog.
-- A disabled Teacher/Student loses access immediately:
-  `teacher.disabledAt`/`student.disabledAt` block the session on its next
-  request.
-- **Re-enabling** a disabled account requires no reason — a single-click
-  confirm.
-- Only for teachers: a **resend magic-link** action exists (re-sends the
-  teacher's passwordless sign-in link), independent of the disable/enable
-  toggle.
+- `support`+ can **disable** a teacher or student, with a required free-text
+  reason and a destructive-action confirm. The session is refused on its next
+  request. **Re-enabling** needs no reason.
+- Teachers only: **resend magic link**.
+- Students only: **change email** for a student who lost her old inbox, after
+  out-of-band identity checks. It moves the auth identity and the student
+  rows together, disconnects Google and signs out every session — see
+  [authentication](authentication.md#changing-the-sign-in-email).
 
 ### Test accounts
 
-- A **support**-or-above operator can mark a Teacher or Student as a **test
-  account**, or unmark it. A reason is required either way, and the change is
+- `support`+ can mark or unmark a teacher or student as a **test account**
+  (`setTestAccountAction`). A reason is required either way, and the change is
   audited.
 - It changes no access, booking, payment or entitlement. It decides which
   figures the account counts in:
@@ -129,279 +99,116 @@ disabledAt }`. `role` is one of `superadmin`, `finance`, `support`,
   sign-in, booking, payment or entitlements, and never hides or deletes rows.
   It is not `comped`, which is billing.
 - A row is also treated as a test account if it matches the **shape** rule
-  (seed and fixture slugs, `.test` and `@example.com` emails).
-- **One definition.** Every figure over teachers, students, packages,
-  bookings or payments takes its exclusion from
-  `apps/web/src/lib/marketing/test-accounts.ts` — `realStudentsOf(teacher)`
-  for one teacher's figures, `REAL_PACKAGE_WHERE` / `NOT_TEST_ACCOUNT` for
-  platform roll-ups. Nothing enforces this mechanically, so a new figure must
-  remember it.
+  (`RESERVED_SLUG_PREFIXES`, and `.test` / `@example.com` emails).
+- **One definition.** Every figure over teachers, students, packages, bookings
+  or payments takes its exclusion from `apps/web/src/lib/marketing/test-accounts.ts`
+  — `realStudentsOf(teacher)` for one teacher's figures, `REAL_PACKAGE_WHERE` /
+  `NOT_TEST_ACCOUNT` for platform roll-ups. Nothing enforces this
+  mechanically, so a new figure must remember it.
 - Not yet excluded: admin CSV exports, the ledger's monthly received
   subtotals, the commission report and Wise renewals.
 - PostHog receives an `is_test_account` person property from the server and
   client identify calls; earlier events are not rewritten.
 
-### Packages (admin)
+## Money
 
-- **Cancel a package**: requires a free-text reason (kept on record, max
-  280 chars), and is a one-way action once submitted (already-refunded
-  packages show a static "already refunded" state instead of the cancel
-  form).
-- **Extend a package's expiration**: only offered when the package actually
-  has an expiry (`hasExpiry`); extend by a whole number of months (1–24).
+- **Payments** (`finance`): list and refund (`adminRefundPaymentAction`).
+  Refund rules are in [payments](payments.md).
+- **Packages** (`support`): cancel with a required reason (≤ 280 characters);
+  an already-refunded package shows a static notice instead. Extend the expiry
+  by 1–24 whole months, with a reason, only when the package has one.
+- **Subscriptions** (`finance`): put a teacher on a **comped** plan (`monthly`,
+  `annual` or `founding`), or record a **paid** plan by hand with an amount and
+  an optional payment reference (≤ 120 characters) for a teacher paying outside
+  Stripe Billing. This is an override and reconciliation path, not a billing
+  rail; billing itself is [subscriptions](subscriptions.md).
 
-### Subscriptions (Teacher billing state, admin view)
+### Disputes
 
-- An operator can put a teacher on a **comped** plan (`monthly`, `annual`,
-  or `founding` — free, staff-granted) or record a **paid** plan alongside a
-  manually-entered amount/Wise reference (used when a teacher pays via Wise
-  rather than Stripe Billing, which this UI reconciles by hand).
-- This is a completely separate mechanism from the teacher-facing Stripe
-  Billing checkout described in `docs/features/subscriptions.md` — it's the
-  admin-side override/reconciliation path, not a new billing rail.
+- One `Dispute` row per Stripe dispute (`dp_*`), upserted by the payments
+  webhook (`lib/payments/webhook-handler.ts`). Admin screens are read-only:
+  evidence is submitted in Stripe's dashboard. What a lost dispute does to the
+  student's classes is in [payments](payments.md).
+- Status is `DisputeStatus`: `warning_needs_response`, `warning_under_review`,
+  `warning_closed`, `needs_response`, `under_review`, `charge_refunded`,
+  `won`, `lost`.
+- `isFinal` is set for `won`, `lost`, `warning_closed`, or when Stripe reports
+  the charge no longer refundable.
+- The sidebar badge counts disputes with `isFinal = false` and
+  `status = needs_response`, so one is seen before `evidenceDueBy`.
+- A dispute with no matching `Payment` (`paymentId` null) is shown flagged
+  "unmatched", never hidden.
 
-### Disputes (Stripe chargebacks)
+### Costs and unit economics
 
-- One row (`Dispute`) per Stripe dispute (`dp_*`), upserted by the Stripe
-  webhook handler — **not created or edited from admin UI**; the admin
-  disputes screens are **read-only** surfaces over data Stripe pushes in. There is no in-app "respond to dispute" or "submit
-  evidence" action — evidence submission happens in the Stripe dashboard
-  directly.
-- Status values (`DisputeStatus`): `warning_needs_response`,
-  `warning_under_review`, `warning_closed`, `needs_response`,
-  `under_review`, `charge_refunded`, `won`, `lost`.
-- `isFinal` marks a dispute as resolved (won/lost/charge_refunded/
-  warning_closed) vs. still active. The admin sidebar surfaces a live count of
-  **not-final, `needs_response`** disputes as a badge, so an operator sees at a glance when a chargeback needs attention
-  before its Stripe evidence deadline (`evidenceDueBy`) passes.
-- A dispute may be **unmatched** to a local `Payment` row (`paymentId` null)
-  — e.g. a charge from outside the normal booking flow. Unmatched disputes
-  are still shown, flagged distinctly ("unmatched"), never hidden.
+Two separate systems; do not blend them.
 
-### Economics / cost tracking (`finance` floor)
-
-- `PlatformExpense`: one manually-entered row per vendor cost per calendar
-  month (native billing currency — the estimate layer only blends MXN rows
-  into net-profit totals today; there's no live FX feed, so non-MXN rows are
-  surfaced separately rather than silently converted).
-- `Integration`: a registry of third-party vendors (Stripe, Vercel/Fly,
-  Anthropic, GitHub, etc.) with a `pricingModel` (JSON) describing how their
-  cost is computed, independent of any actual monthly expense entry.
-- `UsageInput`: one manually-entered metered reading per usage metric per
-  month (e.g. minutes of video calls, emails sent) — the input the pricing
-  engine multiplies against each integration's `pricingModel` to estimate a
-  cost without a real vendor invoice yet existing.
-- `EconomicsAssumptions`: a **singleton** row (`id = "default"`) holding
-  manually-maintained FX rates (USD/MXN/EUR → GBP — GBP is the owner's
-  money-of-record here, the platform entity being UK-established) and a cost-allocation basis (default:
-  `active_teachers`), plus an `fxAsOf` marker so the UI can show "FX as of
-  {date}" rather than implying a live feed.
-- **The estimate layer's rules.** Pricing is data, not code: a provider's
-  specifics live in its `Integration.pricingModel` JSON, evaluated by one
-  generic engine (`packages/shared/src/economics-pricing.ts`) with no
-  per-provider branches, so adding an integration needs no migration and no
-  code. Integration categories are a shared constant, deliberately not an
-  extension of the actuals' `ExpenseCategory` enum. Estimates are never
-  written back into, or blended with, `/admin/money`'s actuals. FX is an
-  explicit, dated, admin-edited assumption with no live feed, and an
-  integration that cannot be priced (bad JSON, unknown currency) contributes
-  £0 with a visible warning rather than failing the page.
+- **Actuals** (`/admin/costs`, `/admin/money`): `PlatformExpense`, one
+  hand-entered row per vendor cost per month, in its billing currency.
+  Expense series and net profit total only rows in `PLATFORM_MONEY_CURRENCY`
+  (GBP, `packages/shared/src/platform-regions.ts`); other currencies are listed
+  separately, never converted. Cash flow is built from real `Payment` rows.
+- **Estimates** (`/admin/economics`): the estimate layer.
+  - `Integration` is a vendor registry seeded from `KNOWN_INTEGRATIONS`
+    (`packages/shared/src/economics-config.ts`, create-if-absent so an admin's
+    edits survive a reseed). Each row's `pricingModel` JSON says how its cost
+    is computed.
+  - `UsageInput` is one hand-entered metered reading per metric per month.
+  - `EconomicsAssumptions` is a singleton (`id = "default"`): USD, MXN and EUR
+    → GBP rates, an allocation basis (default `active_teachers`) and `fxAsOf`,
+    so the UI says "FX as of" instead of implying a live feed.
+  - **Pricing is data, not code**: one generic engine
+    (`packages/shared/src/economics-pricing.ts`) with no per-provider branches,
+    so adding an integration needs no migration and no code. Integration
+    categories are a shared constant, not the actuals' `ExpenseCategory` enum.
+    Estimates are never written into or blended with the actuals. FX is an
+    explicit, dated, admin-edited assumption, and an integration that cannot be
+    priced (bad JSON, unknown currency) contributes £0 with a visible warning
+    instead of failing the page.
 - `EconomicsAssumptions` also feeds the approximate-USD hint on the public buy
   page (`apps/web/src/lib/pricing/approx-usd.ts`), which stops rendering once
-  the rates are more than 60 days old — so a rate set for the P&L moves what
-  buyers see.
-- This is a distinct system from the Cash-Flow dashboard
-  (`docs/product/` / `project_cashflow_dashboard_decision`) — economics
-  blends estimated _costs_ against revenue for unit economics; cash-flow is
-  about earned-vs-held/safe-to-spend from real Payment rows. Don't conflate
-  the two when reasoning about "the money page."
+  the rates are more than 60 days old (`APPROX_MAX_AGE_DAYS`) — so a rate set
+  for the P&L moves what buyers see.
 
-### UAT checklist tool (`superadmin` + `uat:run`, web only)
+## Operations
 
-- `UatChecklistState`: one row per target environment (`preview`,
-  `production`), storing which checklist items are currently checked
-  (`checkedItems`, a JSON array) and who last touched it.
-- This is an **ephemeral run-tracker**, not an audit record — if the
-  runbook's checklist items are ever reordered, the stored checked-state
-  (keyed by document-order index) just resets harmlessly; it is not treated
-  as a historical compliance log. The real audit trail for the actions the
-  runbook triggers (probe, reseed, PostHog check, Stripe check) is the
-  `Override` rows those actions write via the audit-log mechanism.
+- **Notifications** (`support`): delivery health; the sidebar badge counts
+  `failed` notifications. Retry a failed send (`support`); send a broadcast
+  (`superadmin`).
+- **Lesson insights** (`superadmin`): pipeline counts and stage timestamps
+  only, never content — see [lesson insights](lesson-insights-reports.md).
+- **Live calls** (`support`): live LiveKit rooms; end a room or disconnect a
+  participant.
+- **Audit log** (`superadmin`): every admin mutation writes an `Override` row
+  through `writeOverride` (`lib/audit.ts`).
 
-### Staff management (`superadmin` only)
+## Admin tools
 
-- Only a `superadmin` can invite new staff (creating an `AdminUser` row with
-  a chosen role) or disable an existing staff member's access.
-- `AdminUser.createdById` self-references `AdminUser` (who invited whom),
-  giving a staff-invitation lineage.
+- **Staff** (`superadmin`): invite (create an `AdminUser` with a role) and
+  disable staff.
+- **UAT checklist** (`superadmin` or `uat:run`): the steps are
+  `UAT_SECTIONS` in `lib/uat/runbook-steps.ts`, with automated probe, PostHog
+  and Stripe checks and a preview reseed. `UatChecklistState` keeps one row per
+  target environment (`preview`, `production`) holding the checked item ids
+  and who last changed it, so progress survives a new device or session. It is
+  a run-tracker, not an audit record; the automated actions write `Override`
+  rows.
+- **Storage** (`superadmin`): an R2 browser. **Database** (`superadmin` or
+  `schema:view`): a read-only ERD.
 
-### Alpha allowlist (schema exists; **not wired to any code path today**)
+`AlphaAllowlistEntry` exists in the schema and is written only by the fixture
+seed (`apps/web/scripts/seed-fixtures.ts`); no application code reads it, so
+sign-up is not allowlist-gated.
 
-- `AlphaAllowlistEntry` (`email`, `addedBy`, `note`) exists as a Prisma model
-  and is present in the applied migration/generated schema, but a
-  repo-wide search found **no code that reads or writes this table** —
-  no signup gate, no admin UI page, no API route references it. See Open
-  Questions.
+## Reaching the portal
 
-## User Flow (step by step)
+1. Sign in the ordinary way (email code or Google); there is no separate admin
+   login. A staff email is sent to `/admin` after sign-in.
+2. Not signed in → `/sign-in?next=/admin`. No `AdminUser` row (and no
+   bootstrap) or a disabled one → `/`, silently.
+3. No TOTP, or no fresh step-up → `/admin/security`.
+4. A page whose floor the operator does not clear → `/admin?error=forbidden`.
+5. The sidebar shows only the links the operator's role or capability clears.
 
-**Reaching the portal (web):**
-
-1. Operator signs in via the ordinary passwordless email-OTP flow (same
-   auth as teachers/students — there is no separate admin login).
-2. Navigating to `/admin` resolves the signed-in email against `AdminUser`
-   (or the env bootstrap allowlist on an empty table). No row/email match →
-   redirected to `/`.
-3. If TOTP isn't enrolled, or this session hasn't presented a fresh TOTP
-   code, redirected to `/admin/security` to enroll/step up.
-4. Once authorized + stepped-up, the sidebar renders only the sections/links
-   the operator's role (or capability) clears.
-
-**Disabling a teacher:**
-
-1. Operator opens the teacher's detail page.
-2. Clicks "Disable"; a dialog demands a free-text reason.
-3. On submit, `teacher.disabledAt` is set; every existing session for that
-   teacher is locked out on its next request.
-4. To restore access, operator clicks "Re-enable" (no reason required).
-
-**Running the UAT checklist (web, superadmin/tester/engineer):**
-
-1. Operator opens `/admin/uat`, picks target environment (preview or
-   production).
-2. Checks off items as each is verified; state autosaves per item to
-   `UatChecklistState` for that environment, attributed to the admin.
-3. Reopening later (even a different device/session) restores exactly what
-   was checked.
-
-## Data Used (business-level entities)
-
-- `AdminUser` — staff identity + role + enable/disable state + invitation
-  lineage.
-- `AlphaAllowlistEntry` — schema present, unused (see above).
-- `UatChecklistState` — per-environment UAT run progress.
-- `Dispute` — Stripe chargebacks, read-only mirror.
-- `EconomicsAssumptions` — singleton FX + allocation config.
-- `PlatformExpense` — monthly vendor cost entries.
-- `UsageInput` — monthly usage-metric readings.
-- `Integration` — vendor registry + pricing model.
-- `Teacher`, `Student` — the entities being viewed/moderated (disable/enable,
-  contact edits, subscription overrides).
-- `Package`, `Payment`, `TeacherSubscription` — money-side entities admin
-  can view and, for packages/subscriptions, mutate directly.
-- `Notification` — platform-wide delivery health (queued/failed counts
-  surfaced as a sidebar badge).
-- `Override` — the audit-log entity every admin mutation writes to.
-
-## Edge Cases
-
-- **Fresh database, zero staff rows**: the env-allowlist bootstrap is the
-  only way in; every action taken this way is unattributed in the audit
-  log (`actorAdminId = NULL`). Operators should seed a real `AdminUser` row
-  via `/admin/staff` as soon as possible and then blank `SUPERUSER_EMAILS`
-  in production so the backdoor can't re-arm if rows are later deleted.
-- **Package with no expiry**: the "extend expiration" action is unavailable
-  entirely (there's nothing to extend) rather than shown disabled.
-- **Package already refunded**: the "cancel" action is replaced by a static
-  message rather than allowing a second, meaningless cancel.
-- **Unmatched dispute** (no local `Payment` match): still shown, flagged as
-  "unmatched" rather than hidden — the amount/currency/reason still display
-  from Stripe's own payload.
-- **Non-MXN platform expense row**: excluded from the blended net-profit
-  total shown by the Economics view (no live FX conversion exists for it),
-  but the row itself is still visible in the underlying costs list.
-- **Re-ordering the UAT runbook's checklist items**: silently resets the
-  "checked" state for that reordered position (index-keyed, not
-  item-identity-keyed) — treated as an accepted, harmless side effect, not a
-  bug to fix.
-- **Staff member also has a real Teacher account** (their own dev/test
-  session touched a teacher page): they're excluded from admin's
-  teacher-facing lists/filters so they don't show up looking like a genuine
-  customer.
-
-## Error States
-
-- Unauthenticated visit to any `/admin/*` route → redirect to
-  `/sign-in?next=/admin`.
-- Authenticated but no `AdminUser` row (and bootstrap not applicable) →
-  redirect to `/` (silently — no "access denied" page shown at this layer).
-- Authenticated, has a row, but role/capability doesn't clear a specific
-  page's floor → redirect to `/admin?error=forbidden` (an error banner on
-  the Overview page).
-- MFA not enrolled, or enrolled but no fresh step-up this session →
-  redirect to `/admin/security`.
-- Disabled `AdminUser` row → treated identically to "no row" (redirect to
-  `/`), regardless of what role they used to hold.
-
-## Permissions (view / create / edit / delete / approve / cancel by role)
-
-| Capability                                           | support                                       | finance | superadmin | tester                                | engineer        |
-| ---------------------------------------------------- | --------------------------------------------- | ------- | ---------- | ------------------------------------- | --------------- |
-| View Overview                                        | ✅                                            | ✅      | ✅         | ❌ (no rank; no capability grants it) | ❌              |
-| View/moderate Teachers                               | ✅                                            | ✅      | ✅         | ❌                                    | ❌              |
-| View/moderate Students                               | ❌ (page requires superadmin despite sidebar) | ❌      | ✅         | ❌                                    | ❌              |
-| View Payments                                        | ❌                                            | ✅      | ✅         | ❌                                    | ❌              |
-| Refund a payment                                     | ❌                                            | ✅      | ✅         | ❌                                    | ❌              |
-| View Money/cash-flow                                 | ❌                                            | ✅      | ✅         | ❌                                    | ❌              |
-| View/edit Costs (PlatformExpense)                    | ❌                                            | ✅      | ✅         | ❌                                    | ❌              |
-| View/edit Economics (assumptions/usage/integrations) | ❌                                            | ✅      | ✅         | ❌                                    | ❌              |
-| View/cancel/extend Packages                          | ✅                                            | ✅      | ✅         | ❌                                    | ❌              |
-| View/edit Subscriptions (comp/paid override)         | ❌                                            | ✅      | ✅         | ❌                                    | ❌              |
-| View Disputes                                        | ❌ (page actually requires superadmin)        | ❌      | ✅         | ❌                                    | ❌              |
-| View Notifications / retry a failed send             | ✅                                            | ✅      | ✅         | ❌                                    | ❌              |
-| View Lesson Insights                                 | ❌                                            | ❌      | ✅         | ❌                                    | ❌              |
-| View Audit Log                                       | ❌ (page actually requires superadmin)        | ❌      | ✅         | ❌                                    | ❌              |
-| View Live Calls                                      | ✅                                            | ✅      | ✅         | ❌                                    | ❌              |
-| View Integrations                                    | ❌ (page actually requires superadmin)        | ❌      | ✅         | ❌                                    | ❌              |
-| View Storage browser                                 | ❌                                            | ❌      | ✅         | ❌                                    | ❌              |
-| View Database/ERD                                    | ❌                                            | ❌      | ✅         | ❌                                    | ✅ (capability) |
-| Run UAT checklist                                    | ❌                                            | ❌      | ✅         | ✅ (capability)                       | ✅ (capability) |
-| Invite/disable staff                                 | ❌                                            | ❌      | ✅         | ❌                                    | ❌              |
-
-Notes:
-
-- "❌ (page actually requires superadmin despite sidebar)" rows mean: the
-  sidebar link is shown to that role (per `admin-sidebar`/`layout.tsx`'s
-  `minRole`), but clicking through redirects with `?error=forbidden`
-  because the page itself calls `requireSuperuser()`. This is a real,
-  present-day inconsistency — see Open Questions.
-- **Approve/cancel** actions in this domain are: disable/re-enable
-  (Teacher, Student), cancel/extend (Package), comp/paid-override
-  (Subscription), retry (failed Notification). There is no "approve" verb
-  anywhere in this domain — every mutation is either an immediate action or
-  a moderation toggle, never a queued request awaiting a second approver.
-
-## Open Questions
-
-- **Sidebar-vs-page role mismatch (Disputes, Audit Log, Students,
-  Integrations)**: the web sidebar (`layout.tsx` `NAV`) shows these links to
-  `support`/`finance` roles, but the pages themselves call
-  `requireSuperuser()`. A `support` or `finance` operator can see "Students"
-  and "Disputes" in their nav and get bounced with a forbidden error on
-  click. Is this an intentional "visible but locked" UX (e.g. so support
-  staff know the surface exists and to ask a superadmin), or an
-  unintentional drift where the page's gate was tightened after the sidebar
-  entry was added? Recommend explicitly confirming before "fixing" either
-  side.
-- **Two independent admin mechanisms remain**, and they are not the same
-  thing: the `AdminUser` table (capability-scoped staff, invited through
-  `/admin/staff`) and the `SUPERUSER_EMAILS` env allowlist. The built-in
-  allowlist constant is empty, so it cannot re-arm itself if rows are added
-  later — but a superadmin invited purely as a database row and a superuser
-  named purely in the environment are authorised by different code. Worth
-  keeping in view when changing either.
-- **`AlphaAllowlistEntry` is fully unused**: the model + migration exist,
-  but no signup flow, admin page, or API route reads/writes it anywhere in
-  the current codebase. Is this dead schema left over from a removed
-  feature (should be dropped in a future migration), or a placeholder for
-  a not-yet-built alpha-gating feature? Do not assume it currently gates
-  anything — it does not.
-- **`Dispute` has no in-app resolution workflow**: is evidence submission
-  and status transition intentionally Stripe-dashboard-only forever, or is
-  an in-app "submit evidence" / "mark as escalated" action planned? The
-  current admin screens are strictly read-only for this
-  entity.
-- **Students require `superadmin` while Teachers only require `support`**:
-  is this a deliberate stricter-PII stance on student data specifically
-  (students include minors in some cases), or an oversight? Worth
-  confirming rather than assuming either reading.
+No admin action is a request awaiting a second approver: every mutation is
+immediate and audited.

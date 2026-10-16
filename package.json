@@ -13,7 +13,6 @@
     "dev": "pnpm --filter spiralclass-web dev",
     "db:dev:up": "pnpm --filter spiralclass-web db:dev:up",
     "db:dev:down": "pnpm --filter spiralclass-web db:dev:down",
-    "docs:serve": "bash scripts/docs-serve.sh",
     "build": "node scripts/turbo.mjs run build",
     "start": "pnpm --filter spiralclass-web start",
     "lint": "node scripts/turbo.mjs run lint",

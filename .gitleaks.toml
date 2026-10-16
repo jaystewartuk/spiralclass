@@ -33,15 +33,12 @@ useDefault = true
 [[allowlists]]
 description = """
 Vendored, generated, and binary trees. Not source, and scanning them buries a
-real finding under third-party test fixtures — the Python venv under
-.venv-docs/ alone produces Box, Netlify, Unsplash and Accuweather hits from
-pydantic and urllib3 URL-parsing fixtures.
+real finding under third-party test fixtures.
 """
 paths = [
   '''(^|/)node_modules/''',
   '''(^|/)\.next/''',
   '''(^|/)\.turbo/''',
-  '''(^|/)\.venv-docs/''',
   '''(^|/)coverage/''',
   '''(^|/)pnpm-lock\.yaml$''',
   # 688 MB of screenshots and 244 committed visual baselines. gitleaks does not

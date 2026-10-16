@@ -10,7 +10,7 @@ _default:
 
 # --- dev ---------------------------------------------------------------
 
-# Launch the curated dev process dashboard (web, test db, docs)
+# Launch the curated dev process dashboard (web, test db)
 [group('dev')]
 dev:
     mprocs
@@ -19,11 +19,6 @@ dev:
 [group('dev')]
 web:
     pnpm dev
-
-# MkDocs Material docs site, hot-reloading
-[group('dev')]
-docs-serve:
-    bash scripts/docs-serve.sh
 
 # --- build ---------------------------------------------------------------
 

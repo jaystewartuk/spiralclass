@@ -1,371 +1,201 @@
 # Lesson insights & student reports
 
-## Overview
+Turns a class's transcript into teacher-facing analytics: per-class findings
+(`LessonInsight`) in five categories, a per-student `StudentLearningProfile`
+built only from findings the teacher confirmed, a pre-class brief
+(`LessonBrief`), pronunciation scores (`LessonPronunciation`, dark), and a
+spaced-repetition vocabulary queue (`VocabularyReview`) the student works
+through herself. Reasoning: [D-22](../decisions/D-22.md) (consent and
+retention) and [D-185](../decisions/D-185.md) (transcript from captions).
 
-**Status: ON in both environments since [D-185](../decisions/D-185.md)
-(2026-09-28), fed by the browsers' caption recognisers rather than by egress
-audio.** The free video box production runs on cannot carry egress
-([D-16](../decisions/D-16.md)), so the transcript is now the caption text
-the participants' browsers already produce ([D-185](../decisions/D-185.md)),
-kept — text only, never audio — for a class whose pairing has recorded
-insights consent, while the teacher has captions on. The reasoning for the
-feature itself lives in [D-185](../decisions/D-185.md) and
-[D-22](../decisions/D-22.md). The flag history is: off at first ship, on
-2026-07-21, off 2026-08-08 ahead of first promotion, on 2026-08-26, off
-2026-09-24 when production video moved to a box with no egress
-([D-16](../decisions/D-16.md)), and on again 2026-09-28 with the transcript
-taken from the captions ([D-185](../decisions/D-185.md)). **This
-pipeline reads student speech, including minors'.** What decides whether any
-given student's words are kept is the recorded per-pairing consent (D-22),
-which is guardian-only for a student under 18 — never the flag.
+> [!IMPORTANT]
+> **This pipeline reads student speech, including minors'.** Whether a given
+> student's words are kept is decided by that pairing's recorded consent —
+> the guardian's for a student under 18 — never by a flag.
 
-Two operational facts this document must not contradict: **the teacher's
-captions toggle is the trigger** — no captions, no transcript, no insights
-for that class — and **preview cannot rehearse the pipeline end-to-end**,
-because it has no LiveKit pair and the shared box posts webhooks to
-production's URL only.
+Two operational facts:
 
-`config/env/{preview,production}.runtime.env` is the source of truth on what
-is actually enabled — see the flag-by-flag breakdown under the consent gate
-below. Two things that are true regardless of any flag: nothing is captured
-for a pairing without that pairing's own consent (below), and this document
-describes the built behavior rather than asserting any given teacher has it
-switched on.
+- **The teacher's captions toggle is the trigger.** The transcript is the
+  caption text the participants' browsers already produce. No captions, no
+  transcript, no insights for that class.
+- **Preview cannot rehearse it end to end**: preview has no LiveKit key pair
+  ([live calls](live-calls-video.md#joining-and-connection)).
 
-Once enabled (per teacher, opt-in consent required), the feature turns a
-class's recorded audio into structured, teacher-facing analytics: per-class
-findings (`LessonInsight`) across five categories, a rolling
-per-student `StudentLearningProfile` built only from findings the teacher has
-confirmed, an on-demand pre-class prep brief (`LessonBrief`), pronunciation
-scoring (`LessonPronunciation`), and a spaced-repetition vocabulary queue
-(`VocabularyReview`) the student can review themselves. This is the "Reports"
-area for a teacher to track a student's progress over time, distinct from
-the pass/fail record of attendance or payments.
+## Flags
 
-## User Stories
+`config/env/{preview,production}.runtime.env` is the source of truth for what
+is on; read it rather than this page. No flag can be inferred from another.
 
-- As a teacher, I want AI to surface patterns in a student's speaking (a
-  recurring grammar mistake, a mispronounced word) without me having to
-  transcribe or review the recording myself.
-- As a teacher, I want to confirm, edit, or dismiss an AI finding before it
-  counts toward that student's tracked progress, so bad AI guesses don't
-  pollute the record.
-- As a teacher, I want a short "what to focus on" brief before a class,
-  drawing on the student's accumulated profile.
-- As a teacher, I want to control whether a student's captured audio is even
-  analyzed at all, especially for a minor student.
-- As a student, I want to optionally see a simplified view of my own
-  progress, and review vocabulary flagged from my own classes.
+| Flag                                    | Gates                                                                                                                           | Preview | Production |
+| --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- | ------- | ---------- |
+| `LESSON_INSIGHTS_TRANSCRIPTION_ENABLED` | `browserTranscriptEnabled()`: keeping caption lines as the transcript. Insights also need `ANTHROPIC_API_KEY`.                  | on      | on         |
+| `CLASS_RECORDING_ENABLED`               | The Record control and the legacy per-speaker audio capture. Does **not** gate the transcript.                                  | off     | off        |
+| `LESSON_INSIGHTS_PRONUNCIATION_ENABLED` | `pronunciationEnabled()`: Azure phoneme scoring, a second vendor receiving student voice. Needs raw audio, so never runs today. | off     | off        |
 
-## Business Rules (exhaustive)
+- The legacy audio path (`transcriptionEnabled()`: egress → R2 → Deepgram batch
+  → derive-then-discard, `lib/transcription/pipeline.ts`) needs the
+  transcription flag, a vendor key **and** recording on, so it is dormant.
+- Because pronunciation is dark, public marketing must not advertise it;
+  `apps/web/tests/config/ai-marketing-claims.test.ts` fails if a claim and its
+  flag disagree, in either direction.
 
-### Consent gate (the central rule — D-22)
+## Consent
 
-- Voice-capture-based analysis is **off by default** for every
-  teacher-student pairing. Nothing is captured or analyzed unless consent is
-  satisfied.
-- For a **minor** student, only the **guardian's** consent
-  (`guardianConsentAt`) counts — the minor's own consent can never
-  substitute.
-- For an **adult** student, only their own consent (`insightsConsentAt`)
-  counts.
-- Both consent fields default to unset/off; there is no default-on cohort.
-- If consent isn't satisfied, the audio-capture step for insights is skipped
-  silently — this does **not** affect the ordinary class call recording
-  itself, which is a separate, unrelated capability; only the
-  insights-specific voice-analysis pipeline is gated on this consent.
-- **Enablement flags, independent of per-pairing consent.** Three flags bear
-  on this pipeline, and no one of them can be inferred from another.
-  `config/env/{preview,production}.runtime.env` is the source of truth — read
-  it rather than assuming this document's description means a given half is
-  live:
-  - `LESSON_INSIGHTS_TRANSCRIPTION_ENABLED` is **on** in both environments
-    ([D-185](../decisions/D-185.md)). It was held off from the start, turned
-    on 2026-07-21, back off 2026-08-08 ahead of first promotion, on again
-    2026-08-26, off 2026-09-24 because the video box has no room for egress
-    ([D-16](../decisions/D-16.md)), and on again 2026-09-28, sourcing the
-    transcript from the browsers instead.
-    What it enables is `browserTranscriptEnabled()`
-    (`lib/transcription/config.ts`): the class's caption session carries
-    `transcriptCapture` when the flag is on and the pairing's consent is
-    recorded, and the recognising browser posts each line to
-    `POST /api/captions/transcript`. It needs no vendor key of its own; the
-    focus areas it feeds need `ANTHROPIC_API_KEY`. The legacy audio path
-    behind the same flag (`transcriptionEnabled()`, egress → R2 → Deepgram)
-    is dormant: it additionally requires recording to be enabled.
-  - `CLASS_RECORDING_ENABLED` is **off** in both environments (D-16), so the
-    teacher's Record control is hidden. When it is on, the server starts a
-    room-composite recording — provided `LIVEKIT_EGRESS_S3_*` is set (Tofu-owned,
-    in no file in this repo) and the teacher is on Pro. It does _not_ gate the
-    transcript: since D-185 that comes from the browsers. It does gate the
-    legacy egress capture of per-speaker audio (`maybeStartLessonAudioCapture`
-    requires both flags), so with it off no lesson audio is captured at all.
-  - `LESSON_INSIGHTS_PRONUNCIATION_ENABLED` is **off everywhere** — unset in
-    production, a commented example on preview — so `pronunciationEnabled()`
-    is false and no phoneme score has ever reached a student. Its own gate is
-    separate from transcription's: Phase D sends student voice to a _second_
-    vendor (Azure), whose coverage was never confirmed. Because it is dark,
-    the public marketing pages must not advertise it;
-    `apps/web/tests/config/ai-marketing-claims.test.ts` enforces that both
-    ways and fails if the flag flips without the claim being restored.
+- Off by default for every teacher-student pairing; there is no default-on
+  cohort.
+- **Adult**: her own consent (`insightsConsentAt`). **Minor**: only the
+  guardian's (`guardianConsentAt`); her own never substitutes. A class for two
+  also needs the buyer's confirmation for the second person (D-149, see
+  [live calls](live-calls-video.md#the-lesson-transcript)).
+- Without consent nothing of either speaker is kept. It does not affect the
+  call recording, which is a separate capability.
+- Recording and revoking consent is Pro.
 
-### Pipeline (async, post-class)
+## Pipeline
 
-- **The transcript is written during the class by the browsers** (D-185).
-  While captions are on, the browser that recognised a finished utterance
-  (D-185's assignment: the speaker's own, the other participant's computer, or
-  the Deepgram stream for a phone) posts its source text, speaker and an
-  estimated duration to `/api/captions/transcript`; the server re-checks
-  access and consent and appends it atomically to the booking's
-  `LessonTranscript` (provider `browser-live`). On the LiveKit `room_finished`
-  webhook — or, failing that, an Inngest job that wakes 30 minutes after the
-  scheduled end — the row is rebased to a 0-based timeline, marked `browser`,
-  and `lesson.transcript.ready` fires. From there the pipeline is as before:
-  Claude-based analysis produces `LessonInsight` rows (all tagged
-  `source: "ai"`) → teacher reviews/confirms → the student's profile is
-  recomputed. Both participants are told when learning notes start and see a
-  notes icon in the call's top bar while lines are being kept.
-- **The transcript's language is always Spanish today.** Every
-  `LessonTranscript` row, the browser-written one included, is stamped
-  `DEFAULT_LESSON_LANGUAGE` (`"es"`, `lib/transcription/config.ts`), and the
-  brief and insights read it, whatever the teacher teaches. Correct for the
-  first teacher; it must come from the booking before a teacher of another
-  language relies on insights.
-- **No audio is captured for it.** The legacy path (per-participant egress →
-  R2 → Deepgram batch → derive-then-discard, `lib/transcription/pipeline.ts`)
-  still exists in code but requires recording to be enabled, which it is not.
-- Pronunciation scoring needs raw audio (via Azure), so it cannot run from a
-  browser-written transcript; it was never on (see the flag above).
-- A transcript is kept while the teacher's account is open and deleted with
-  it ([D-22](../decisions/D-22.md)); there is no audio to retain, so
-  `Teacher.lessonAudioRetentionOptIn` only ever applies to the legacy path.
+1. While captions are on and the class's caption session carries
+   `transcriptCapture` (flag on and consent recorded), the browser that
+   recognised a finished utterance posts its text, speaker and estimated
+   duration to `POST /api/captions/transcript`. The server re-checks access and
+   consent and appends it atomically to the booking's `LessonTranscript`
+   (provider `browser-live`). Both participants are told learning notes are on
+   and see a notes icon in the call's top bar.
+2. On LiveKit `room_finished` — or an Inngest fallback 30 minutes after the
+   scheduled end (`CAPTURE_GRACE_MS`) — the row is rebased to a 0-based
+   timeline, marked `browser`, and `lesson.transcript.ready` fires. Later lines
+   are dropped.
+3. Claude produces `LessonInsight` rows (`source: "ai"`); the teacher confirms,
+   edits or dismisses; the profile is recomputed.
 
-### Insight generation and caps
+- **The transcript's language is always Spanish.** Every `LessonTranscript` is
+  stamped `DEFAULT_LESSON_LANGUAGE` (`"es"`, `lib/transcription/config.ts`),
+  and the brief and insights read it whatever the teacher teaches. It must come
+  from the booking before a teacher of another language relies on insights.
+- A transcript is kept while the teacher's account is open and deleted with it
+  ([account settings](account-settings.md#account-deletion)).
+  `Teacher.lessonAudioRetentionOptIn` applies only to the legacy audio path.
 
-- At most **3 insights per category** are generated per class (5 categories:
-  pronunciation, grammar, vocabulary, fluency, comprehension) — enforced both
-  in the prompt and defensively in code, preserving the model's own
-  most-important-first ordering.
-- **Pronunciation-finding rule flips based on data availability**: without a
-  pronunciation score for the class, the prompt explicitly forbids guessing
-  pronunciation problems from spelling alone — it can only cite an explicit
-  teacher note/correction. With a score present, findings must be anchored
-  only to scored "weak words," never invented.
-- Weak-word threshold: an accuracy score below **60** (0–100 scale, lower is
-  worse) qualifies as "weak," capped at the 12 worst words, sorted worst
-  first.
-- Malformed or partially-malformed AI output degrades gracefully — individual
-  bad items are dropped, valid ones kept; a completely malformed/empty
-  response degrades to an empty result set rather than throwing.
-- No AI credentials configured → insight/brief generation fails gracefully
-  (no analysis produced, no error surfaced to the student, teacher sees "not
-  available").
+## Insights
 
-### Confirm / edit / dismiss / add (the teacher review loop)
+- At most **3 per category** (`MAX_INSIGHTS_PER_CATEGORY`), in the model's
+  own priority order. Categories, in display order: pronunciation, grammar,
+  vocabulary, fluency, comprehension.
+- **Pronunciation findings**: without a pronunciation score, the prompt
+  forbids guessing from spelling — only an explicit teacher note or correction
+  counts. With a score, findings must anchor to scored weak words: accuracy
+  below 60 (`WEAK_WORD_ACCURACY_THRESHOLD`), the 12 worst (`MAX_WEAK_WORDS`).
+- Malformed model output drops the bad items and keeps the rest; a wholly
+  malformed reply is an empty result. No Anthropic key → nothing generated, the
+  teacher sees "not available".
 
-- **Only confirmed, non-dismissed insights ever enter a student's tracked
-  profile.** An unconfirmed AI suggestion or a dismissed one is excluded from
-  every rollup, verified by an integration test that recomputes and asserts
-  only confirmed rows contribute.
-- Confirming an insight sets `confirmedAt`, clears any `dismissedAt`, and
-  (if not already set) derives a canonical `skill` grouping key — then
-  triggers a profile recompute.
-- Editing an insight implicitly confirms it.
-- Dismissing sets `dismissedAt`, clears `confirmedAt` — a dismissed insight
-  never feeds the profile again, but the recompute still runs (to remove it
-  from a profile it may have previously contributed to before being
-  dismissed).
-- A teacher can also add her own finding directly (`source: "teacher"`),
-  which is confirmed immediately on creation.
-- Re-running AI analysis on a class only ever deletes/replaces prior
-  **unconfirmed** AI rows for that class (`source: "ai" AND confirmedAt IS
-NULL`) — a confirmed insight is never touched or removed by regeneration.
-- All of these actions are **Pro-gated**.
-- Ownership check is by `teacherId` match — accessing/editing an insight
-  belonging to another teacher's booking returns a not-found response, not a
-  403, to avoid leaking existence of another tenant's data.
+### Teacher review loop
 
-### Profile rollup (`StudentLearningProfile`)
+- **Only confirmed, non-dismissed insights enter the profile.**
+- Confirm sets `confirmedAt`, clears `dismissedAt`, derives a `skill` grouping
+  key if missing, and recomputes. Editing confirms.
+- Dismiss sets `dismissedAt`, clears `confirmedAt`, and recomputes (to remove it
+  from the profile).
+- The teacher can add her own finding (`source: "teacher"`), confirmed on
+  creation.
+- Re-running analysis replaces only **unconfirmed AI** rows for that class; a
+  confirmed insight is never touched.
+- All of these are Pro. Another teacher's insight is **not found**, not 403.
 
-- Materialized, **not** the source of truth — fully recomputed from
-  confirmed `LessonInsight` rows on every relevant mutation (confirm, edit,
-  dismiss, add).
-- Grouped `byCategory → bySkill`, each entry tracking recurrence count, first-
-  and last-seen timestamps, a trend (`"focus"`, `"improving"`, or `"new"`),
-  and the last piece of supporting evidence.
-- **Trend logic**: a skill absent from the student's last 2 classes reads as
-  "improving"; a skill seen recently that has recurred 2+ times reads
-  "focus"; anything else is "new."
-- A separate **vocabulary queue** is built from `category: "vocabulary"`
-  insights, deduplicated by normalized term (keeping the latest sighting),
-  ordered newest-first.
-- A **speaking-balance** metric (teacher-share vs. student-share of talk
-  time across lessons) is computed independently of confirmed insights
-  — from any lesson with a transcript, averaged across lessons. The lesson's
-  length is the audio duration where a legacy audio row exists, otherwise the
-  last utterance's end.
-- If a student ends up with zero confirmed insights and no speaking-balance
-  data, the stale profile row is **deleted** outright rather than left as an
-  empty shell.
+## Profile (`StudentLearningProfile`)
 
-### Pre-class brief (`LessonBrief`)
+- Materialized and fully recomputed from confirmed insights on every confirm,
+  edit, dismiss or add.
+- Grouped by category → skill, each with recurrence count, first and last seen,
+  latest evidence and a trend: a skill absent from the student's last 2 classes
+  (`RECENT_LESSONS_WINDOW`) is **improving**; seen recently and recurring 2+
+  times is **focus**; otherwise **new**.
+- A vocabulary list from `vocabulary` insights, deduplicated by normalized term
+  (latest sighting kept), newest first.
+- **Speaking balance** (teacher vs student share of talk time) comes from any
+  lesson with a transcript, independent of confirmations, averaged across
+  lessons. Lesson length is the audio duration where a legacy audio row exists,
+  otherwise the last utterance's end.
+- With no confirmed insights and no speaking-balance data, the profile row is
+  deleted. A malformed stored profile reads as "no profile".
 
-- On-demand, generated when the teacher opens an **upcoming** booking; cached
-  one per booking, only regenerated when the cached brief is older than the
-  student's profile's last update.
-- Capped at **3 focus cues** per brief.
-- Only "focus" and "new" skills are surfaced as actionable cues; "improving"
-  skills are encouragement-only and are never nagged in a brief.
-- A one-tap "Add as cue" action stages a suggested focus point straight into
-  the teacher's live lesson notes for that booking.
-- Degrades to no brief at all (never an error) if there's no profile, no
-  signal, or no AI credentials configured.
+## Pre-class brief (`LessonBrief`)
 
-### Vocabulary spaced repetition (`VocabularyReview`)
+- Generated when the teacher opens an **upcoming** booking; cached per booking
+  and regenerated only when older than the profile's last update.
+- At most **3 focus cues** (`MAX_BRIEF_FOCUS`). Only focus and new skills
+  become cues; improving ones are encouragement only.
+- "Add as cue" puts a suggestion into the booking's teacher notes
+  ([lesson notes](classes-lesson-content.md#lesson-notes)).
+- No profile, no signal or no AI key → no brief, never an error.
 
-- Classic **SM-2** algorithm. Grades are `again` / `hard` / `good` / `easy`,
-  mapped internally to quality scores.
-- First successful review: `good` → 1 day, `easy` → 4 days, `hard` → 1 day.
-- Second review (at interval = 1 day): `good` → 6 days; `hard` stays at 1
-  day.
-- Later reviews: `good` multiplies the interval by the ease factor; `hard`
-  multiplies by 1.2.
-- `again` resets the interval to 0 and re-surfaces the term in **10
-  minutes**.
-- Ease factor floors at **1.3**, defaults to **2.5**.
-- Seeding new terms from the profile's vocabulary list is idempotent — a
-  re-seed never resets an in-progress term's existing schedule.
+## Vocabulary review (`VocabularyReview`)
 
-### Visibility to the student
+SM-2 (`lib/lesson-notes/srs.ts`). Grades `again`, `hard`, `good`, `easy`.
 
-- `LessonInsight`, `LessonPronunciation`, and `LessonBrief` are **teacher-only,
-  always** — no raw transcript, quoted evidence, category, or trend detail
-  ever reaches a student directly.
-- `StudentLearningProfile` is teacher-only **by default**; a student sees only
-  a deliberately reframed derivative (skills bucketed as "improving" vs.
-  "worth practising," with no evidence, category, or trend labels), and only
-  once the teacher has explicitly toggled per-student "share progress" on
-  (off by default).
-- `VocabularyReview` is directly student-facing and actionable once seeded —
-  it's literally the student's own review queue.
-- A superadmin pipeline-health dashboard shows only **counts and stage
-  timestamps** (capturing → ready → transcribed → insights → pronunciation →
-  profiles → briefs) plus stuck-capture detection — it deliberately never
-  surfaces any transcript/insight/profile content, by design, consistent
-  with the privacy stance of D-22.
+- First review: `easy` → 4 days, otherwise 1 day.
+- Second: `hard` → 1 day, otherwise 6 days.
+- Later: `hard` × 1.2, otherwise × ease factor.
+- `again` resets and re-shows the term in **10 minutes**.
+- Ease defaults to **2.5** (`DEFAULT_EASE`), floor **1.3** (`MIN_EASE`).
+- Seeding terms from the profile is idempotent; an in-progress term's schedule
+  is never reset.
 
-## User Flow
+## What the student sees
 
-**Teacher — student detail page:**
+- `LessonInsight`, `LessonPronunciation`, `LessonBrief` and the transcript are
+  **teacher-only, always**.
+- The profile is teacher-only by default. Once **share progress** is on for
+  the pairing (`TeacherStudent.shareProgress`, default off), the student sees a
+  reframed view per teacher: skills as "improving" or "worth practising", with
+  no evidence, category or trend labels. The teacher sets it for everyone at
+  once on `/settings/booking-page` (`setProgressSharingAction`, which also sets
+  `Teacher.shareProgressByDefault` for new pairings), or per student on the
+  student page (Pro).
+- `VocabularyReview` is the student's own flashcard queue.
 
-1. Open a student's profile; see a read-only rollup card: focus areas sorted
-   by recurrence (ties favor "focus" trend), each with skill, category,
-   evidence quote, trend badge, and recurrence count, followed by a
-   vocabulary badge cloud.
-2. Below that, controls for insights consent (with a minor-specific
-   checkbox) and the "share progress with student" toggle.
+## Surfaces
 
-**Teacher — booking/class detail page:**
+- **Teacher, student page**: the profile card (focus areas by recurrence, ties
+  favouring "focus"; skill, category, evidence, trend, count; vocabulary
+  cloud), the consent controls with a minor checkbox, and the share-progress
+  toggle.
+- **Teacher, class page**: before the class, the brief; after it, findings by
+  category with Confirm, Edit, Dismiss and "add your own"; the speaking-time
+  card; and the replay page (`/dashboard/classes/[bookingId]/replay`) with the
+  transcript.
+- **Student**: "Your progress" (only if shared) and the vocabulary flashcards.
+- **Admin** (`/admin/lesson-insights`, `superadmin`): stage counts and
+  timestamps and stuck-capture detection — never content. A banner shows when
+  the legacy audio transcription path is enabled.
 
-1. **Before an upcoming class**: a prepare card shows the brief's summary and
-   up to 3 focus cues, each with a one-tap "Add as cue" that stages it into
-   live lesson notes.
-2. **After a completed/analyzed class**: a focus-areas panel groups AI
-   findings by category (fixed order: pronunciation, grammar, vocabulary,
-   fluency, comprehension), each with Confirm (choosing/confirming a skill
-   grouping), Edit, and Dismiss actions, plus a free-form "add your own
-   finding" row.
+## Error states
 
-**Student — "Your progress" (only if shared):**
-
-1. Visible per-teacher only once that teacher has turned sharing on.
-2. Shows reframed "improving" vs. "worth practising" groupings — never raw
-   category/evidence data.
-3. A one-at-a-time vocabulary flashcard review: flip to see context, grade
-   `again`/`hard`/`good`/`easy`.
-
-**Admin — pipeline health (superadmin only):**
-
-1. Sees stage counts/timestamps and stuck-capture alerts only — zero content.
-2. A warning banner appears if live transcription is enabled in production.
-
-## Data Used
-
-Per-class findings (category, summary, evidence, suggestion, timeline
-position, source), pronunciation scores (overall accuracy/fluency/
-completeness/pron + per-weak-word detail), a rolling per-student profile
-(skills grouped by category with trend/recurrence), a cached pre-class
-brief, and a vocabulary spaced-repetition schedule per (teacher, student,
-term).
-
-## Edge Cases
-
-- A student's stored profile JSON is malformed/legacy-shaped: treated as "no
-  profile" and the page renders an empty state rather than crashing.
-- Re-running analysis on a class that already has confirmed insights: only
-  unconfirmed AI rows are replaced; confirmed findings survive untouched.
-- A profile that drops to zero confirmed insights and no speaking-balance
-  data: the row is deleted rather than kept as an empty shell.
-- Seeding vocabulary review terms that already exist for that student: the
-  existing schedule is left alone (idempotent seed via database-level
-  duplicate-skip), never reset.
-- No-show or cancelled classes: not explicitly special-cased in the reviewed
-  code — the pipeline is implicitly gated on there being an actual audio
-  capture + transcript in the first place, which only happens for a class
-  that was genuinely recorded. Behavior for a cancelled/no-show booking was
-  not directly verified by a test in this pass.
-
-## Error States
-
-- Non-Pro teacher attempts to confirm/edit/dismiss/add an insight, toggle
-  consent, or toggle progress-sharing → blocked with an upgrade nudge. A route
-  handler answering the same call surfaces it as an HTTP 402 plan-limit
-  response.
-- Action targets an insight not owned by the calling teacher → not-found
-  response, no database write, no profile recompute — avoids leaking
-  cross-tenant existence.
-- Empty summary on an edit or manually-added insight → rejected as invalid
-  before any write.
-- No AI credentials configured → insight/brief generation degrades to "not
-  available," never a hard failure.
-- Pronunciation scoring is skipped (not an error) for any of: feature
-  disabled, unsupported language, no reference text available, no scoring
-  vendor configured.
+- Non-Pro teacher confirms, edits, dismisses, adds, records consent or toggles
+  one student's sharing → upgrade nudge (HTTP 402 from a route handler).
+- Another teacher's insight → not found; no write, no recompute.
+- Empty summary on an edited or added insight → rejected.
+- Pronunciation scoring skipped (not an error) when disabled, the language is
+  unsupported, there is no reference text, or no vendor is configured.
 
 ## Permissions
 
-| Action                                    | Teacher (owner) | Other teacher  | Student (own)                                 | Student (other) | Admin/superadmin                   |
-| ----------------------------------------- | --------------- | -------------- | --------------------------------------------- | --------------- | ---------------------------------- |
-| View profile/insights/pronunciation/brief | Yes             | No (not-found) | No (only a reframed progress view, if shared) | No              | Counts/timestamps only, no content |
-| Confirm/edit/dismiss an insight           | Yes (Pro)       | No             | No                                            | No              | No                                 |
-| Add a teacher-authored insight            | Yes (Pro)       | No             | No                                            | No              | No                                 |
-| Record/revoke insights consent            | Yes (Pro)       | No             | No                                            | No              | No                                 |
-| Toggle "share progress"                   | Yes (Pro)       | No             | No                                            | No              | No                                 |
-| View own reframed progress                | N/A             | N/A            | Yes, only if shared                           | No              | No                                 |
-| Grade a vocabulary review                 | N/A             | N/A            | Yes (own queue only)                          | No              | No                                 |
+| Action                                    | Owning teacher         | Student                          | Admin                      |
+| ----------------------------------------- | ---------------------- | -------------------------------- | -------------------------- |
+| View insights, profile, brief, transcript | Yes                    | No (reframed progress if shared) | Counts and timestamps only |
+| Confirm / edit / dismiss / add an insight | Yes (Pro)              | No                               | No                         |
+| Record or revoke insights consent         | Yes (Pro)              | No                               | No                         |
+| Toggle share progress                     | Yes (per student: Pro) | No                               | No                         |
+| Grade vocabulary review                   | —                      | Yes, own queue                   | No                         |
 
-Server actions and route handlers call the same underlying business-logic
-functions, so these rules cannot drift between entry points.
+Server actions and route handlers call the same functions, so these rules
+cannot drift between entry points.
 
-## Open Questions
+## Open questions
 
-- **No-show/cancelled-class behavior is unverified.** No test was found
-  asserting what happens to insight generation for a cancelled or no-show
-  booking. The pipeline appears to implicitly skip these (no recording, no
-  transcript, nothing to analyze) but this should be explicitly confirmed
-  with whoever owns the capture-trigger logic before treating it as a
-  guarantee in QA test plans.
-- **Production activation status changes independently of this document.**
-  Because the feature is gated by both per-pairing consent and a production
-  feature-flag gate, whether it is actually live for any real
-  teacher at a given moment must be checked against the deployed flag values
-  (`config/env/*.runtime.env`) and the vendor keys in Infisical, not assumed
-  from this document's description of built behavior.
-- **Transcript quality on learner speech is unmeasured.** The browser
-  recognisers and Deepgram both tend to tidy grammar, which is what the
-  grammar category looks for; the teacher-confirm loop bounds the damage, but
-  the first real class's findings should be read before the feature is
-  trusted (D-185).
+- **Cancelled and no-show classes** are not special-cased; with no captions
+  there is no transcript, but no test asserts it.
+- **Transcript quality on learner speech is unmeasured.** Recognisers tend to
+  tidy grammar, which is what the grammar category looks for; the
+  teacher-confirm loop bounds the damage ([D-185](../decisions/D-185.md)).
 - **The legacy audio path is dead code in production** — `LessonAudio`, the
-  egress capture, the Deepgram batch adapter and the admin pipeline-health
-  counts for it — and awaits its own change.
+  egress capture, the Deepgram batch adapter and the admin counts for it.

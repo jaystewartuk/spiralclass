@@ -53,7 +53,7 @@ const SKIP = new Set(["apps/web/tests/config/decision-records.test.ts"]);
  *  bytes contain `D-` sequences by coincidence. */
 const TEXT_FILE =
   /\.(ts|tsx|js|jsx|mjs|cjs|md|mdx|json|jsonc|ya?ml|toml|tf|tftpl|tfvars|sh|env|sql|prisma|txt|example|hcl|Dockerfile)$/;
-const BARE_TEXT_FILES = new Set([".gitignore", "Dockerfile", "requirements.txt", "Caddyfile"]);
+const BARE_TEXT_FILES = new Set([".gitignore", "Dockerfile", "Caddyfile"]);
 
 /**
  * A decision citation. Bounded to three digits so `D-2026-06-11` (a date this
