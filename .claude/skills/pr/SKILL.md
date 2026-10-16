@@ -19,7 +19,7 @@ deploy once the runners are green, and it waits for the operator's approval.
 
 There used to be a `/ship-pr` skill that batched all of that, because the heavy
 suites could only run on the operator's laptop and needed to run once rather
-than once per branch. [D-162](../../../docs/decisions/D-162.md) deleted it:
+than once per branch. [D-157](../../../docs/decisions/D-157.md) deleted it:
 `heavy.yml` now runs those suites on a runner, on every PR **and** on every push
 to `main`, so there is nothing left to batch and nothing to remember to run.
 

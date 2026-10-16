@@ -73,7 +73,7 @@ appears in it.</sub>
 It is published as an honest record of how one engineer builds and runs a
 payments-handling, video-carrying SaaS product alone: the architecture, the
 decisions, the things that went wrong, and the mechanisms built so they would
-not go wrong twice. More than 125 decision records in
+not go wrong twice. More than 75 decision records in
 [`docs/decisions/`](docs/decisions/README.md) are the most useful thing here —
 several of them reverse an earlier one and say why.
 
@@ -102,8 +102,7 @@ One consequence worth knowing before you read the code:
 - **The checks are defined in one file, and CI does not get a second
   opinion.** `scripts/ci/steps.mjs` is the only definition of what "green"
   means; the workflows run it and list nothing of their own. Everything ran on
-  the maintainer's laptop for three months with no workflows at all
-  ([D-129](docs/decisions/D-129.md)), and what came back
+  the maintainer's laptop for three months with no workflows at all, and what came back
   ([D-157](docs/decisions/D-157.md)) was runners, not a second definition. See
   [the gate](#the-gate-is-one-program-run-in-two-places) below.
 
@@ -458,11 +457,11 @@ runner in the same commit and there is no YAML to remember to widen. The browser
 suites carry one committed baseline set, `-linux.png`, and the visual sweep
 skips on any other platform: Playwright names a snapshot after the machine that
 took it, and the machine that asserts is the one whose verdict a release is
-certified by ([D-171](docs/decisions/D-171.md)).
+certified by ([D-157](docs/decisions/D-157.md)).
 
 **The workflows list no steps of their own, and that is the point.** For three
 months this repository had no GitHub Actions at all: `.github/workflows/` was
-deleted outright ([D-129](docs/decisions/D-129.md)) after the account's Actions
+deleted outright (2026-08-25) after the account's Actions
 allowance emptied, every private repository's workflows began failing at once,
 and production's database went eleven days without a backup while the public
 repositories stayed green. Part of what went with it was a dispatch-only copy of
@@ -478,8 +477,7 @@ workflow contains `gcloud run deploy`, `docker buildx build` or `prisma migrate
 deploy`, because the last time those steps existed in two places, the re-typed
 copy was the one missing the pre-migration database checkpoint.
 
-→ [D-119](docs/decisions/D-119.md), [D-129](docs/decisions/D-129.md),
-[D-157](docs/decisions/D-157.md), [D-161](docs/decisions/D-161.md)
+→ [D-157](docs/decisions/D-157.md)
 
 ## Running it locally
 
@@ -621,7 +619,7 @@ in [`infra/gcp-livekit/README.md`](infra/gcp-livekit/README.md).
 | Where                                      | What                                                                                             |
 | ------------------------------------------ | ------------------------------------------------------------------------------------------------ |
 | [`docs/architecture/`](docs/architecture/) | System design, the data model, how a purchase and a booking flow                                 |
-| [`docs/decisions/`](docs/decisions/)       | **More than 125 decision records.** Current policy, not history — several reverse an earlier one |
+| [`docs/decisions/`](docs/decisions/)       | **More than 75 decision records.** Current policy, not history — several reverse an earlier one |
 | [`docs/features/`](docs/features/)         | Canonical product behaviour, one document per feature                                            |
 | [`docs/development/`](docs/development/)   | Setup, testing, the change workflow, i18n, analytics                                             |
 | [`docs/deployment/`](docs/deployment/)     | Release, incident response, backup and restore, infrastructure runbooks                          |

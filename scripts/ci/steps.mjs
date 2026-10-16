@@ -1,11 +1,11 @@
 // The gate's step registry — the single source of truth for what "green"
-// means, on every machine that runs it (D-119).
+// means, on every machine that runs it (D-157).
 //
 // ⚠️ GitHub Actions is back ([D-157]) and this registry is STILL the only
 // definition of the checks. `.github/workflows/gate.yml` runs
 // `node scripts/ci/gate.mjs --tier fast` and lists no steps of its own. That
 // is the condition on which restoring Actions was safe at all: part of what
-// D-129 deleted was a dispatch-only copy of every gate job, which was a second
+// was deleted in August 2026 was a dispatch-only copy of every gate job, which was a second
 // definition of green waiting to drift. If a check is ever added to a workflow
 // instead of to this file, that failure mode is back.
 //
@@ -22,18 +22,18 @@
 //           can only disagree about timing.
 //   heavy — the mutation spot-check, the two suites that need Docker or a
 //           browser, and the production image build, WITHOUT the fast half in
-//           front of them. Run by heavy.yml on a runner, on every PR ([D-161]).
-//   full  — fast + heavy. The promote gate: `pnpm promote` runs this on the
-//           laptop before it fast-forwards `production`, and it is the tier
-//           whose receipt certifies the commit that ships.
+//           front of them. Run by heavy.yml on a runner, on every PR ([D-157]).
+//   full  — fast + heavy. What `pnpm gate:full` and `pnpm promote --force-gate`
+//           run on the laptop. Otherwise a release is certified by the Gate
+//           and Heavy runs on the exact commit, not by a local receipt.
 //
 // ⚠️ THE HEAVY HALF IS NO LONGER LAPTOP-ONLY, AND THE `e2e` STEP NOW ASSERTS
-// LESS HERE THAN IT DOES ON A RUNNER. D-157 recorded one concrete blocker — the
+// LESS HERE THAN IT DOES ON A RUNNER. One concrete blocker kept it there — the
 // visual baselines under apps/web/tests/visual were `-darwin.png` only, so
-// `e2e` could not go green on Linux — and [D-161] removed it by committing a
-// second set, `-linux.png`. [D-171] then deleted the macOS set: [D-162] had
-// already made the runners, not a local receipt, what certifies a release, so
-// the second set was bookkeeping nothing depended on. The visual sweep now
+// `e2e` could not go green on Linux — and a second set, `-linux.png`, removed
+// it (2026-09-05). The macOS set was then deleted ([D-157]): the runners, not a
+// local receipt, had already become what certifies a release, so the second
+// set was bookkeeping nothing depended on. The visual sweep now
 // skips anywhere but Linux and says so, which is worth knowing before reading
 // a local `gate:full` as the same answer a runner gives.
 //
@@ -49,7 +49,7 @@
  * @property {string}   title    what gets printed
  * @property {"fast"|"heavy"} tier   which HALF the step is in, not which tier selects it
  * @property {string[]} cmd      argv, run from the repo root
- * @property {string}   replaces the Actions job this took over from (provenance only — those workflows are deleted, D-129)
+ * @property {string}   replaces the Actions job this took over from (provenance only — those workflows are deleted, D-157)
  * @property {string[]} [needs]  external prerequisites ("docker")
  * @property {Object}   [env]    extra env for this step
  */
@@ -234,8 +234,8 @@ export const TIERS = ["fast", "heavy", "full"];
  * Steps in a tier. A step declares which HALF it is in (`fast` or `heavy`);
  * a TIER is a selection over those halves, and `full` is both.
  *
- * `heavy` is new in [D-161] and it exists because the two halves stopped
- * running on the same machine. Before D-161 there was no way to ask for the
+ * `heavy` is new in [D-157] and it exists because the two halves stopped
+ * running on the same machine. Before 2026-09-05 there was no way to ask for the
  * expensive suites WITHOUT the cheap ones in front of them, because there was
  * no reason to want one: the laptop ran both, and `full` meaning "everything"
  * was exactly right. `.github/workflows/heavy.yml` now runs integration and

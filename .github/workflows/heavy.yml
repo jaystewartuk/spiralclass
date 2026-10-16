@@ -2,10 +2,10 @@ name: Heavy
 
 # The heavy half of the gate — the mutation spot-check, the real-DB integration
 # suite, the three browser suites and the production image build — on
-# GitHub-hosted runners ([D-161]).
+# GitHub-hosted runners ([D-157]).
 #
 # The image build needs nothing from this file: ubuntu-latest ships Docker with
-# buildx, and deploy-production.yml's Fly job already builds this Dockerfile on
+# buildx, and deploy-production.yml's Cloud Run job already builds this Dockerfile on
 # the same stock runner with no setup action. Its leg pays for a `pnpm install`
 # it does not use, which is the price of every leg being the same job.
 #
@@ -14,8 +14,8 @@ name: Heavy
 # registry, `scripts/ci/gate.mjs` runs it, and the only thing below that names
 # any work is `--only "$STEP_ID"`, where STEP_ID came out of the registry two
 # jobs earlier. A `run: bash scripts/ci/e2e.sh` added here would be a second
-# definition of the tier — the exact hazard D-119 removed and D-157 re-admitted
-# Actions on the condition of never reintroducing.
+# definition of the tier — the exact hazard the single registry removed, and
+# that Actions was re-admitted on the condition of never reintroducing ([D-157]).
 #
 # WHY THE MATRIX IS DERIVED AND NOT TYPED. The obvious version of this file
 # lists three legs by name. That list agrees with steps.mjs the day it is
@@ -26,17 +26,17 @@ name: Heavy
 # answer. Add a heavy step to steps.mjs and it gets a runner in the same
 # commit.
 #
-# WHY THIS EXISTS AT ALL. Until D-161 these three suites were laptop-only, for
-# one concrete reason: the visual baselines were `-darwin.png`, so the browser
-# suites could not go green on Linux. D-161 committed a second set of
-# `-linux.png` baselines and the reason expired. What it buys is not free
+# WHY THIS EXISTS AT ALL. Until 2026-09-05 these three suites were laptop-only,
+# for one concrete reason: the visual baselines were `-darwin.png`, so the
+# browser suites could not go green on Linux. A second set of `-linux.png`
+# baselines was committed and the reason expired. What it buys is not free
 # minutes — it is the 20-40 minutes those suites held the operator's machine,
-# with every other session's push queued behind the machine lock (D-146), and
+# with every other session's push queued behind the machine lock (D-157), and
 # the fact that they ran AFTER a merge rather than before one.
 #
-# THIS RUNNER NOW OWNS THE ONLY BASELINE SET ([D-171]). The macOS half is
-# deleted and regression.spec.ts skips anywhere but Linux, because [D-162] left
-# it certifying nothing: what ships is certified by the verdict THIS workflow
+# THIS RUNNER NOW OWNS THE ONLY BASELINE SET ([D-157]). The macOS half is
+# deleted and regression.spec.ts skips anywhere but Linux, because once promote
+# read the runners' verdict it certified nothing: what ships is certified by the verdict THIS workflow
 # posts for the exact commit. So a red visual leg here is the finding, not a
 # second opinion about one, and the dispatch below is the only way to move a
 # baseline.
@@ -66,7 +66,7 @@ on:
   # what the heavy suites see and the fast tier does not.
   #
   # `pnpm ship-pr` used to close that gap by running the full tier on the laptop
-  # after each batch of merges. [D-162] deleted it: this is the same check, on a
+  # after each batch of merges. [D-157] deleted it: this is the same check, on a
   # runner, with nothing to remember to run.
   push:
     branches: [main]
@@ -226,7 +226,7 @@ jobs:
 
       - name: Run the step
         # The whole job, in one line, and the only place any work is named.
-        # --no-lock because the machine lock (D-146) serializes seven worktrees
+        # --no-lock because the machine lock (D-157) serializes seven worktrees
         # on one laptop and a runner is a fresh VM with one job on it.
         # --no-post because a single step is not a tier and must never certify
         # a commit: gate.mjs already refuses to post for a partial run, and
@@ -284,7 +284,7 @@ jobs:
     # they appear and disappear as steps are added, and a required check or an
     # external query cannot depend on a name that moves.
     #
-    # `pnpm promote` reads exactly this ([D-162]). Before it fast-forwards
+    # `pnpm promote` reads exactly this ([D-157]). Before it fast-forwards
     # `production` it asks GitHub whether the Gate and Heavy workflows both
     # concluded green for the precise commit being promoted — the certification
     # that used to be a local receipt written by `pnpm ship-pr`.

@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
  * Runs one hand-run maintenance task, records that it happened, and makes a
- * failure impossible to miss (D-129).
+ * failure impossible to miss (D-157).
  *
  *   pnpm local synthetic    # probe production
  *   pnpm local sweep        # unit suites + audit against today's clock

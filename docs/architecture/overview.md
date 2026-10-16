@@ -336,9 +336,9 @@ The decision log is the real record; this is the shape of it.
   subject became a BCP-47 code from one registry.
 - **CI**: GitHub Actions → a free Oracle box → a paid Hetzner pool →
   GitHub-hosted again → the maintainer's laptop with no workflows at all
-  ([D-119](../decisions/D-119.md), [D-129](../decisions/D-129.md)) → back onto
+  (August 2026) → back onto
   runners once the repository went public
-  ([D-157](../decisions/D-157.md), [D-161](../decisions/D-161.md)). The move to
+  ([D-157](../decisions/D-157.md)). The move to
   the laptop happened because the Actions allowance emptied mid-month and
   production went eleven days without a database backup while the public
   repositories stayed green; the move back happened because a public

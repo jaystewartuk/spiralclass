@@ -169,14 +169,14 @@ describe("visual baseline manifest", () => {
 });
 
 /**
- * ONE baseline set, and it belongs to `ubuntu-latest` ([D-171]).
+ * ONE baseline set, and it belongs to `ubuntu-latest` ([D-157]).
  *
- * Playwright suffixes a snapshot with `process.platform`, so [D-161] committed
- * each capture twice — `-darwin.png` for the laptop, `-linux.png` for the
- * runner — and this block existed to keep the two halves in lockstep. [D-162]
- * removed the macOS half's last consumer by making the runners, not a local
- * receipt, what certifies a release; D-171 deleted it and made
- * regression.spec.ts skip anywhere but Linux.
+ * Playwright suffixes a snapshot with `process.platform`, so from 2026-09-05
+ * each capture was committed twice — `-darwin.png` for the laptop, `-linux.png`
+ * for the runner — and this block existed to keep the two halves in lockstep.
+ * Making the runners, not a local receipt, what certifies a release removed the
+ * macOS half's last consumer; on 2026-09-09 it was deleted and
+ * regression.spec.ts made to skip anywhere but Linux.
  *
  * WHAT THIS STILL CATCHES is the dangerous half of the old pair, and it is the
  * reason this block did not go with the set it was watching. Playwright
@@ -224,16 +224,16 @@ describe("visual baselines", () => {
   });
 
   it("keeps the second platform's set from growing back", () => {
-    // D-171's own guard, retired in the same change as the thing it guards
+    // D-157's own guard, retired in the same change as the thing it guards
     // would otherwise be — the mistake the mobile route tree taught. A
     // `-darwin.png` here means someone ran the suite on a Mac with the skip
     // removed or bypassed, and Playwright wrote a set nothing asserts and
-    // nothing regenerates: the exact bookkeeping D-171 deleted, growing back
+    // nothing regenerates: the exact bookkeeping D-157 deleted, growing back
     // one image at a time.
     const strays = files().filter((f) => f.endsWith(".png") && !f.endsWith("-linux.png"));
     expect(
       strays,
-      `Baselines for a platform that no longer asserts anything (D-171). The visual ` +
+      `Baselines for a platform that no longer asserts anything (D-157). The visual ` +
         `sweep runs on ubuntu-latest only; delete these rather than committing them:\n` +
         strays.join("\n"),
     ).toEqual([]);

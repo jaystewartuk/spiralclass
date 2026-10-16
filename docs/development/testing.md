@@ -53,7 +53,7 @@ no Stripe account. See [below](#end-to-end-in-detail).
 **Visual regression** captures every route in `apps/web/tests/visual/routes.ts`
 at six viewports in both themes. Playwright names a snapshot after the platform
 that took it, and there is one set — `-linux.png`, asserted on `ubuntu-latest`
-and nowhere else ([D-171](../decisions/D-171.md)). The suite **skips** on a Mac
+and nowhere else ([D-157](../decisions/D-157.md)). The suite **skips** on a Mac
 and says so, `scripts/ci/e2e.sh` refuses to regenerate there, and a page whose
 look changes is re-baselined by dispatch:
 

@@ -45,13 +45,13 @@
 #
 #   IMAGE_BUILD_PLATFORM=linux/arm64 bash scripts/ci/image-build.sh
 #
-# `pnpm promote` reads the runner's verdict for this step ([D-162]), so the
+# `pnpm promote` reads the runner's verdict for this step ([D-157]), so the
 # amd64 answer that certifies a release comes from heavy.yml, not from here.
 set -euo pipefail
 
 cd "$(git rev-parse --show-toplevel)"
 
-# Serialize against every other checkout on this machine (D-146). An image
+# Serialize against every other checkout on this machine (D-157). An image
 # build is the same `next build --turbopack` the other suites run — ~3.5GB peak
 # with a 6GB heap ceiling — inside a container that competes for the same RAM.
 # Passes straight through when the gate already holds the machine.

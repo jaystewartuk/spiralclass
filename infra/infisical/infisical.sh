@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# THE ONLY FILE IN THIS REPOSITORY THAT RUNS THE INFISICAL CLI. [D-169]
+# THE ONLY FILE IN THIS REPOSITORY THAT RUNS THE INFISICAL CLI. [D-163]
 #
 # Source it, then call one of four verbs:
 #

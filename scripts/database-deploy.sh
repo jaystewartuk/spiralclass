@@ -86,8 +86,8 @@ SHA="$(git rev-parse HEAD)"
 
 # ── 1. Neon checkpoint (production only) ─────────────────────────────────
 # The pre-migration restore point D-178 made production's primary safety net,
-# and the one step that did NOT come along when D-120 moved the production
-# deploy off `fly-deploy.yml` — it lived in a composite action the deploy left
+# and the one step that did NOT come along when the production deploy moved
+# off `fly-deploy.yml` (2026-08-17) — it lived in a composite action the deploy left
 # behind, so deploying from there skipped it silently while promote.mjs's
 # summary went on claiming a checkpoint had been taken.
 #
