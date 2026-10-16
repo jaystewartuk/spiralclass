@@ -46,6 +46,18 @@ sync.
   removed — and both only ever open a plain `wa.me` link.
 - Student-only: profile photo, native (learning) language.
 
+**Interface language and reading**
+
+- Both roles pick an interface language from a list generated from the locale
+  registry, or **System Default**, which keeps following the device or browser
+  language live. The choice is stored in the `locale` cookie and the resolved
+  language is mirrored to the account.
+- Both roles have reading preferences: a text scale (1, 1.125 or 1.25 times),
+  three spacing steps (letter, word and line spacing together), and a warm
+  tint. They are stored on the account and mirrored into a cookie, so they
+  apply on first paint and follow the person between devices. Teachers meet
+  them as the first onboarding step; there is no persistent toolbar.
+
 **Sign-in email change**
 
 - Same two-step flow for both roles: request a change (sends a verification

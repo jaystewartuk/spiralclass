@@ -276,7 +276,7 @@ const config: Config = {
         // than 2.75rem or h-11 so the rule is legible at the call site: this
         // size is a decision about fingers, not a number someone liked.
         //
-        // It is also what let D-141 move the layout breakpoints back to
+        // It is also what let D-140 move the layout breakpoints back to
         // standard values — the touch concern that had been held in the
         // breakpoints lives here instead.
         target: "2.75rem",

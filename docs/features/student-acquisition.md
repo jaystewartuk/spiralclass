@@ -207,6 +207,28 @@ ranking noise.
 
 ---
 
+## Testimonials
+
+A testimonial is either one the teacher writes (`teacher_curated`) or one a
+student writes (`student_submitted`), and only the second is badged.
+
+- A signed-in student with at least one **completed** class with the teacher
+  writes one from `/my-classes/teachers/<id>`. A `no_show` does not count. One
+  per student per teacher. The name comes from the roster, never the form, and
+  the refusal reads the same whether there is no pairing or no completed class.
+- It publishes on arrival. The booking page shows **"Verified student · N
+  classes with her"**, with N counted from completed bookings at render time,
+  and an explainer line only when a badge is on the page.
+- The teacher can hide or delete a student's testimonial and cannot write or
+  edit one; her editor shows it read-only in the same list as her own. The
+  student can withdraw it, even after they stop being eligible.
+- Existing curated quotes render as before, with no "unverified" mark.
+- No `Review` or `AggregateRating` JSON-LD is emitted for either kind.
+- Nothing asks students to write one yet: an email on her behalf would need a
+  per-teacher opt-in and a rate limit.
+
+Why, and what the database enforces: [D-151](../decisions/D-151.md).
+
 ## Where the data lives
 
 - `teacher_marketing_profiles` — the four things that cannot be inferred:

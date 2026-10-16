@@ -44,12 +44,12 @@ describe("sitemap", () => {
     for (const path of ["/pricing", "/features", "/about", "/help", "/terms", "/privacy-notice"]) {
       expect(urls).toContain(`https://spiralclass.com${path}`);
     }
-    // A marketing route missing from the localized-path allowlist (D-193)
+    // A marketing route missing from the localized-path allowlist (D-72)
     // would be listed once per language at one and the same URL.
     expect(new Set(urls).size).toBe(urls.length);
   });
 
-  // D-193: each page is listed at every URL its content exists in, and each
+  // D-72: each page is listed at every URL its content exists in, and each
   // entry carries the page's whole hreflang set — the same set its metadata
   // emits, so the two cannot tell a search engine different things.
   it("lists each page in every language it exists in, with a reciprocal hreflang set", async () => {

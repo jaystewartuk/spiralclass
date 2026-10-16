@@ -18,9 +18,9 @@ import { CANCELLATION_POLICY_ANCHOR, LEGACY_CANCELLATION_ANCHOR } from "@/lib/te
 
 // The Terms of Service. A renderer with no copy of its own: the two authored
 // documents, English and its Spanish translation, are data in
-// packages/shared/src/legal/terms.ts (D-196), as the privacy policy is.
+// packages/shared/src/legal/terms.ts (D-72), as the privacy policy is.
 //
-// The URL decides which is shown (D-193): `/terms` is English and `/es/terms`
+// The URL decides which is shown (D-72): `/terms` is English and `/es/terms`
 // Spanish. Every other language's URL serves the English text, which is the
 // one that applies, with a line in the reader's language saying so. So does
 // `/es/terms` while the Spanish translation is behind the English. The old
@@ -102,7 +102,7 @@ function TermsArticle({
         <p className="text-xs text-muted-foreground">
           {document.lastUpdated} ·{" "}
           {/* A full load: the other document is the other language's URL, and
-              the root layout carries the language (D-193). */}
+              the root layout carries the language (D-72). */}
           <a
             className="underline"
             href={localizedPath("/terms", document.switchTo.locale)}

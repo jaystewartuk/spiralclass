@@ -16,7 +16,7 @@ import { createT } from "@/lib/i18n-translate";
 import { LOCALE_COOKIE, URL_LOCALE_HEADER } from "@/lib/i18n-constants";
 
 // English (en) is the default. On a public page whose URL names a language
-// (D-193) that language wins. Otherwise a `locale` cookie set by the switcher
+// (D-72) that language wins. Otherwise a `locale` cookie set by the switcher
 // wins over the browser's Accept-Language, so the manual choice persists. Which locales
 // exist, how they match Accept-Language, and the default all come from the
 // shared registry (@spiralclass/shared, packages/shared/src/i18n/locales.ts) —
@@ -37,7 +37,7 @@ export { LOCALE_COOKIE, URL_LOCALE_HEADER };
 // the reader's behalf, which is the thing DEFAULT_LOCALE exists to prevent.
 export async function getPreferredLocale(fallback: AppLocale = DEFAULT_LOCALE): Promise<AppLocale> {
   try {
-    // A public page's URL names its language (D-193), and that wins over the
+    // A public page's URL names its language (D-72), and that wins over the
     // reader's preference: `/es/pricing` is Spanish for everyone, which is
     // what lets a search engine index it. Only the middleware sets this.
     const hdrs = await headers();
@@ -86,7 +86,7 @@ export async function getLocalePreference(): Promise<LocalePreference> {
 
 /**
  * What the language picker shows as selected. Usually the stored preference,
- * but on a public page whose URL names a different language (D-193) — a
+ * but on a public page whose URL names a different language (D-72) — a
  * reader who prefers English, arriving at `/es/pricing` from a search — it
  * shows the language the page is actually in. Otherwise the picker would
  * already show English, and choosing English would not fire a change at all.
@@ -115,7 +115,7 @@ export async function getFormatMoney(): Promise<(minorUnits: number, currency?: 
 }
 
 /** Server-side counterpart of `useLocalizedHref()`: hrefs to public pages in
- * the request's locale (D-193). */
+ * the request's locale (D-72). */
 export async function getLocalizedHref(): Promise<(href: string) => string> {
   const locale = await getPreferredLocale();
   return (href: string) => localizedHref(href, locale);

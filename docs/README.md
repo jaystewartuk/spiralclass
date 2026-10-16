@@ -59,7 +59,7 @@ second source of truth to keep in step.
 **Documents describe the present.** This repository holds no backlog, no
 roadmap, no plans directory and no dated audit that ends in a findings list.
 Open work lives in [the issues](https://github.com/jaystewartuk/spiralclass/issues)
-([D-172](decisions/D-172.md)). If work falls out of a document you are writing,
+([D-164](decisions/D-164.md)). If work falls out of a document you are writing,
 file it there and keep the document to what is true now.
 
 **A superseded document is deleted, not archived.** The decision records are

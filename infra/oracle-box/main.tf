@@ -13,7 +13,7 @@ terraform {
   # R2 bucket the sibling modules use (D-70). That is still the
   # right destination and this file should get there. It is not where the
   # FIRST apply happens, for one reason: this module has never been applied,
-  # and D-139's whole complaint was a module asserting a state nobody had
+  # and D-164's whole complaint was a module asserting a state nobody had
   # reconciled. Adding a remote backend — its credentials, its bucket keys,
   # its init dance — to the same apply that first proves the module works
   # means two untested things failing at once with no way to tell which.

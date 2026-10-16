@@ -6,7 +6,7 @@
 export const LOCALE_COOKIE = "locale";
 
 /**
- * The language a public page's URL names (D-193), set by the middleware on a
+ * The language a public page's URL names (D-72), set by the middleware on a
  * localized public path and read first by getPreferredLocale. The middleware
  * deletes any value a client sends, so only it can set this.
  */

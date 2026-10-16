@@ -1,6 +1,6 @@
 # The Oracle A1 box, in OpenTofu
 
-Replaces the deleted `infra/oracle-runner` module ([D-139](../../docs/decisions/D-139.md)),
+Replaces the deleted `infra/oracle-runner` module ([D-164](../../docs/decisions/D-164.md)),
 under the reversal [D-184](../../docs/decisions/D-184.md) allowed.
 
 > [!CAUTION]
@@ -12,7 +12,7 @@ under the reversal [D-184](../../docs/decisions/D-184.md) allowed.
 > ([`infra/gcp-livekit/`](../gcp-livekit/README.md),
 > [D-16](../../docs/decisions/D-16.md)).
 >
-> That is D-139's exact fault, committed knowingly. [D-184](../../docs/decisions/D-184.md)
+> That is D-164's exact fault, committed knowingly. [D-184](../../docs/decisions/D-184.md)
 > forbade committing this before an apply precisely to avoid it, and its third
 > addendum waives that condition for one reason: the repository's history is
 > being rewritten into a NEW public repository, and a branch that is not on
@@ -48,7 +48,7 @@ LiveKit, preview and preview's data. Production video has been on Compute
 Engine since [D-16](../../docs/decisions/D-16.md), so it carries no class until
 a change moves `LIVEKIT_URL` back under D-16's three conditions.
 
-**Does not:** touch Cloudflare. D-139 deleted `infra/cloudflare` because its
+**Does not:** touch Cloudflare. D-164 deleted `infra/cloudflare` because its
 Access application was made by hand, so a first apply would create a second
 one beside it rather than adopt it. The DNS records here have the same
 problem, so they stay a hand operation and the reserved IP above is what makes
@@ -147,7 +147,7 @@ console output, not from the file. Hence mode 700 on the directory, and hence
 it must never be committed.
 
 ⚠️ **Back it up somewhere the laptop is not the only copy.** Losing it does not
-destroy the box, but it does return it to exactly the condition D-139
+destroy the box, but it does return it to exactly the condition D-164
 objected to: infrastructure nothing describes. Re-adopting would mean
 importing seven resources by hand.
 

@@ -622,7 +622,7 @@ describe("dispatchNotification", () => {
     expect(outcome.channel).toBe("email");
     const sends = email.getSends();
     expect(sends).toHaveLength(1);
-    // A Spanish email cites the Spanish document at its own URL (D-193); the
+    // A Spanish email cites the Spanish document at its own URL (D-72); the
     // bare URL is English. The anchor is shared by both documents.
     expect(sends[0].body).toMatch(/\/es\/terms#cancellation-policy/);
   });

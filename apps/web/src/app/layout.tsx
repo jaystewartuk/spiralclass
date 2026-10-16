@@ -71,7 +71,7 @@ export async function generateMetadata(): Promise<Metadata> {
       // it cannot be derived from the locale tag.
       locale: ogLocale(locale),
       alternateLocale: LAUNCHED_LOCALES.filter((l) => l.tag !== locale).map((l) => l.og),
-      // The card in the page's own language, by URL (D-193). The booking
+      // The card in the page's own language, by URL (D-72). The booking
       // funnel's file-convention card overrides this under /b/**.
       images: socialCardImages(locale),
     },

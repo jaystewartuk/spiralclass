@@ -104,7 +104,7 @@ export async function saveTimezoneAction(
   // Required on web, where there is no such thing as a stale client — the
   // form blocks on it too, so reaching this is a hand-crafted POST. Mobile
   // enforces the same rule in its own screen rather than here, because its
-  // shipped builds can predate the field (D-112, and the schema comment).
+  // shipped builds can predate the field (D-72, and the schema comment).
   if (!parsed.data.targetLanguage) {
     return {
       error: t("web.onboarding.timezone.targetLanguageRequired"),
@@ -167,7 +167,7 @@ export async function saveTimezoneAction(
   }
 
   // Seed the focus-tag pack for the chosen language NOW, at the first step of
-  // onboarding, which is the whole point of asking here (D-112). The seeder is
+  // onboarding, which is the whole point of asking here (D-72). The seeder is
   // lazy — `getTeacherFocusTags` self-seeds on the first empty read — so
   // whichever value is stored when the focus picker first renders is the pack
   // she gets, permanently: D-17 seeding is additive, so a language set after

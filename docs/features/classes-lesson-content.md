@@ -30,7 +30,7 @@ AI usage (shared with library material generation and podcast generation).
 can save and reapply.
 
 The two prior specs this page absorbed (deleted with the rest of the backlog
-by [D-110](../decisions/D-110.md)) predate two architectural shifts (the
+by [D-164](../decisions/D-164.md)) predate two architectural shifts (the
 the merge of the old standalone `ClassContent`/`ClassMaterial` models into
 `LibraryMaterial`, and the D-72 narrowing to language teaching) — treat them
 as historical rationale, not current schema truth.

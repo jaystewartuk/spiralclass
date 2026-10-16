@@ -37,7 +37,7 @@ export async function MarketingHeader({
             {/* A full load, not a client-side navigation: sign-in follows the
                 reader's own language, which a page at `/es/…` need not be in,
                 and the root layout that carries the language is only
-                re-rendered by a full load (D-193). */}
+                re-rendered by a full load (D-72). */}
             <a href="/sign-in">{t("web.signIn.title")}</a>
           </Button>
         )}

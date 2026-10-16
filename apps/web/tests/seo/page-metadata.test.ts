@@ -7,7 +7,7 @@ import type { Metadata } from "next";
 // stay out of the index (checkout funnel, auth, email-token pages).
 //
 // The locale cookie is pinned to es, as in the global tests/setup.ts mock.
-// A public page's language comes from its URL (D-193), which the middleware
+// A public page's language comes from its URL (D-72), which the middleware
 // hands on as the `x-locale` request header; each case below says which URL
 // it renders by setting that header.
 
@@ -150,7 +150,7 @@ describe("marketing pages — localized metadata + canonicals", () => {
 });
 
 describe("legal pages — advertised only in the languages they exist in", () => {
-  // Two authored documents exist (D-196): /terms is the English one and
+  // Two authored documents exist (D-72): /terms is the English one and
   // /es/terms the Spanish one, and each lists the other. Every other
   // language's URL serves the English document, so it canonicalises to
   // /terms and is not offered to search engines as a French contract.
@@ -177,7 +177,7 @@ describe("legal pages — advertised only in the languages they exist in", () =>
   });
 
   // The policy is one English document rendered from @spiralclass/shared
-  // (legal copy is never machine-translated — D-81, D-22). Its metadata — the
+  // (legal copy is never machine-translated — D-72, D-22). Its metadata — the
   // browser tab and the search snippet, which are chrome rather than legal
   // text — follows the URL's language, but every URL canonicalises to the
   // English one.

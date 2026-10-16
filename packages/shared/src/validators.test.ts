@@ -103,7 +103,7 @@ describe("packageTemplateSchema — subject (shared)", () => {
   });
 });
 
-describe("timezoneSchema — targetLanguage (shared, D-112)", () => {
+describe("timezoneSchema — targetLanguage (shared, D-72)", () => {
   const base = { timezone: "America/Costa_Rica", phoneE164: "5512345678", country: "MX" };
 
   it("accepts a code from the language registry", () => {

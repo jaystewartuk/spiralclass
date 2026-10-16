@@ -46,7 +46,7 @@ has to look at them rather than wait to be stopped.
    checklist with each item marked `[x]` or `[N/A]`. An unchecked box is a
    question for the reviewer, and there is no reviewer but the operator.
    If the change finishes a tracked issue, the Summary says `Closes #N` — that
-   line is the only thing that closes it ([D-172](../../../docs/decisions/D-172.md)),
+   line is the only thing that closes it ([D-164](../../../docs/decisions/D-164.md)),
    and an issue nothing closes is the rot Issues were chosen to avoid. A change
    that only moves one forward says `Refs #N` instead.
 5. **Run the script:**

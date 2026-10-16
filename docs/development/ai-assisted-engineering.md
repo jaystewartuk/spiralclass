@@ -156,7 +156,7 @@ opening a pull request and shipping one are different decisions, and a command
 that quietly did both would be making the second on the operator's behalf.
 
 **`.claude/skills/issue/SKILL.md`** (`/issue`) files the work a session finds
-but does not fix. [D-172](../decisions/D-172.md) put that work in Issues and
+but does not fix. [D-164](../decisions/D-164.md) put that work in Issues and
 admitted nothing enforces an issue's shape; the skill is the checklist in the
 meantime — search open and closed issues for a duplicate, send anything
 exploitable to [SECURITY.md](../../SECURITY.md) instead, write a **Done when**

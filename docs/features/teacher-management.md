@@ -38,8 +38,20 @@ where the features below interact with plan limits.
 
 ### Profile / onboarding
 
-- Required at onboarding: timezone (validated as a real IANA timezone) and a
-  phone number (international format, 8–15 digits, optional leading `+`).
+- Required at onboarding: timezone (validated as a real IANA timezone), a
+  phone number (international format, 8–15 digits, optional leading `+`), and
+  the language she teaches (`teachers.target_language`, a code from the one
+  registry in `packages/shared/src/languages.ts`). The form blocks submit
+  without it and the server action enforces the same rule. It is not prefilled
+  from the browser or the country, because neither says what she teaches.
+- The teaching language is asked at onboarding, not left to Settings, because
+  her focus tags are seeded from it on first use and seeding is additive: a
+  value set later appends its pack beside the neutral one instead of replacing
+  it. The onboarding action seeds the pack as soon as it stores the language.
+  It stays editable at Settings → Booking page.
+- The per-package **Subject** field is hidden on the onboarding templates step
+  (never cleared) and shown at `/settings/templates`, where it distinguishes
+  two otherwise identical packages for a student who holds both.
 - Country (2-letter code) and pricing currency (3-letter code) are optional
   in the form but, once set, determine the teacher's payout rail:
   - Countries inside the Stripe Connect cross-border circle (UK, US, Canada,
@@ -208,8 +220,10 @@ where the features below interact with plan limits.
 ### First-time onboarding
 
 1. Teacher signs in for the first time and is routed into onboarding.
+   The first step sets her reading preferences (text scale, spacing, tint).
 2. **Timezone & contact step**: teacher confirms/sets timezone, enters phone
-   number, and optionally sets country and pricing currency (currency
+   number, picks the language she teaches, and optionally sets country and
+   pricing currency (currency
    choices are filtered to whichever rail her country supports).
 3. **Availability step**: teacher sets buffer time, minimum notice, maximum
    advance window, and at least one weekly working-hours range per day she

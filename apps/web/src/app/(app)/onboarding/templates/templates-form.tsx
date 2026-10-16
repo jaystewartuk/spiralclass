@@ -224,7 +224,7 @@ export function TemplatesForm({
   // see a single plain "Price" field instead.
   payoutCountrySupported: boolean;
   // Per-package subject is hidden during onboarding and shown in
-  // /settings/templates (D-112): on a language-first platform the subject is a
+  // /settings/templates (D-72): on a language-first platform the subject is a
   // property of the TEACHER (`targetLanguage`, asked at step 1), so asking it
   // again per package before she has a single student is friction for the rare
   // two-language teacher's benefit. The field is only hidden, never cleared —

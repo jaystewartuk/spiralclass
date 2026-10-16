@@ -19,7 +19,7 @@ import {
  *
  * So both ends are pinned here: the ids the rendered page carries, and the ids
  * the links point at. The page renders every document through one function
- * (the documents are data, D-196), so it is checked rendered, per language.
+ * (the documents are data, D-72), so it is checked rendered, per language.
  */
 
 const urlLocale = vi.hoisted(() => ({ value: "en" }));
@@ -66,9 +66,9 @@ describe("/terms cancellation anchor", () => {
     expect(TERMS_SOURCE).not.toContain(`id="${LEGACY_CANCELLATION_ANCHOR}"`);
   });
 
-  // Each reader's own language's URL (D-193). The bare URL is the English
+  // Each reader's own language's URL (D-72). The bare URL is the English
   // document; French has no translated terms, and its URL says so in French
-  // around the English text (D-196).
+  // around the English text (D-72).
   it("builds a path, at the reader's language's URL, whose fragment the page carries", () => {
     expect(cancellationPolicyPath("en")).toBe(`/terms#${CANCELLATION_POLICY_ANCHOR}`);
     expect(cancellationPolicyPath("es")).toBe(`/es/terms#${CANCELLATION_POLICY_ANCHOR}`);

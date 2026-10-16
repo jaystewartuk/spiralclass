@@ -7,7 +7,7 @@
    (so the web cannot drift from the shared source), and the responsive scale
    from src/lib/breakpoints.ts (so the guard tests and the CSS read the same
    numbers). @theme takes literal CSS values and could do none of that — the
-   D-140 legibility floors and the D-141 breakpoint scale would have to be
+   D-140 legibility floors and breakpoint scale would have to be
    re-typed by hand, in a second place, with nothing checking the copy. v4
    supports the config file natively; this is the supported way to keep it. */
 @config "../../tailwind.config.ts";

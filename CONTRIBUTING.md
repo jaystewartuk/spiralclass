@@ -102,8 +102,8 @@ one subagent, and what was deliberately **not** built — is described in
 ## Issues, backlog and documentation
 
 - **Open work lives in this repository's Issues**
-  ([D-172](./docs/decisions/D-172.md)), and **there is no backlog in the tree**
-  ([D-110](./docs/decisions/D-110.md)) — no `TODO.md`-style files. An issue is a
+  ([D-164](./docs/decisions/D-164.md)), and **there is no backlog in the tree**
+  ([D-164](./docs/decisions/D-164.md)) — no `TODO.md`-style files. An issue is a
   closable statement of work: a sentence naming the problem from the user's
   side, the evidence, and a **Done when** line a PR can meet with `Closes #N`.
   A session files one with `/issue`. From outside, use the bug report or docs

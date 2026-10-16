@@ -29,7 +29,7 @@
 > `infra/oracle-runner/` used to sit in this repo claiming that "a `tofu
 apply`/rebuild today reproduces the box as-is". It was never applied, had no
 > state file, and had drifted from the running machine. It was deleted in
-> [D-139](../decisions/D-139.md). This file replaces it, and every command and
+> [D-164](../decisions/D-164.md). This file replaces it, and every command and
 > value below was **observed on the running box on 2026-08-29** rather than
 > copied out of a template.
 >
@@ -45,7 +45,7 @@ GitHub-hosted runners ([D-157](../decisions/D-157.md)).
 
 Losing it stopped classes — which is what happened when it could not be
 relaunched ([D-16](../decisions/D-16.md)). Rebuilding it is a hand operation
-measured in hours, which is the cost [D-139](../decisions/D-139.md) knowingly
+measured in hours, which is the cost [D-164](../decisions/D-164.md) knowingly
 accepted.
 
 ## Observed state, 2026-08-29
@@ -432,7 +432,7 @@ reboot — which is why the box had 38 days of uptime when this was written.
 ## Where the box and the deleted module disagreed
 
 Recorded because the disagreement is the evidence for
-[D-139](../decisions/D-139.md):
+[D-164](../decisions/D-164.md):
 
 - **The module was never applied and had no state.** Its README claimed a
   `tofu apply` reproduces the box. On 2026-08-29 a session believed that claim
