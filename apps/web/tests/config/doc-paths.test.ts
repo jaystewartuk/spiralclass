@@ -69,8 +69,13 @@ const DOC_PATH = /(?<![A-Za-z0-9_/.-])docs\/[A-Za-z0-9_/-]+\.[A-Za-z0-9]+/g;
  * to Tofu). None has a successor in the tree, so none can be repointed.
  *
  * Shrink this by rewriting the prose that mentions them. Do not grow it.
+ *
+ * Empty since the decision log was consolidated (D-202): the records that
+ * mentioned these paths were the last things that did. Kept, empty, so a path
+ * that has to be named after its document is gone has one visible place to
+ * go — and the ratchet below still refuses an entry nothing references.
  */
-const DELETED_DOCS = new Set([]);
+const DELETED_DOCS = new Set<string>([]);
 
 function isTextFile(name: string): boolean {
   return TEXT_FILE.test(name) || BARE_TEXT_FILES.has(name);

@@ -66,6 +66,13 @@ const CITATION = /(?<![A-Za-z0-9_-])D-(\d{1,3})(?![0-9A-Za-z_-])/g;
 const norm = (n: string): number => Number.parseInt(n, 10);
 const label = (n: number): string => `D-${String(n).padStart(2, "0")}`;
 
+/**
+ * The per-record ceiling (D-202). A record is one live decision, rewritten when
+ * it changes; one that needs more than this is two decisions, or is carrying
+ * history its How we got here should summarise. Aim for about 800.
+ */
+const MAX_RECORD_WORDS = 1500;
+
 function isTextFile(name: string): boolean {
   return TEXT_FILE.test(name) || BARE_TEXT_FILES.has(name);
 }
@@ -213,6 +220,23 @@ describe("decision records cited in the repo", () => {
     }
 
     expect(problems, problems.join("\n")).toEqual([]);
+  });
+
+  it("keeps every record under the word limit", () => {
+    const over = [...records]
+      .map((n) => {
+        const text = readFileSync(join(DECISIONS_DIR, `${label(n)}.md`), "utf8");
+        return { n, words: text.split(/\s+/).filter(Boolean).length };
+      })
+      .filter(({ words }) => words > MAX_RECORD_WORDS)
+      .map(({ n, words }) => `${label(n)}: ${words} words`);
+
+    expect(
+      over,
+      `A decision record is limited to ${MAX_RECORD_WORDS} words (D-202). Cut history ` +
+        `the How we got here section does not need, or move behaviour to docs/features/:\n` +
+        over.join("\n"),
+    ).toEqual([]);
   });
 
   it("indexes every record, exactly once, in a theme table and in the numeric index", () => {

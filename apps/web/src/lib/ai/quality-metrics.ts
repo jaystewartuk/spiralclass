@@ -14,9 +14,9 @@
 //
 // Counts only, never content — the admin sees pipeline status and figures, not
 // what was said in a lesson (D-22). Test accounts are left out of every figure
-//. `LessonInsight` does not record which model produced it, so this
-// cannot split by model; the offline evals (lib/evals/) are the before/after
-// measure for a model change.
+// (docs/features/admin-portal.md). `LessonInsight` does not record which
+// model produced it, so this cannot split by model; the offline evals
+// (lib/evals/) are the before/after measure for a model change.
 
 import { NOT_TEST_ACCOUNT } from "@/lib/marketing/test-accounts";
 import { prisma } from "@/lib/prisma";

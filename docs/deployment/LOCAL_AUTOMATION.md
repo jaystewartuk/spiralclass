@@ -174,8 +174,8 @@ bash scripts/cloudrun-deploy.sh production --gate-already-passed
 
 ⚠️ **There is no preview host today.** Preview moved to the Oracle A1 box
 ([D-184](../decisions/D-184.md)), that box was destroyed on 2026-09-19
-([D-16](../decisions/D-16.md)), and preview has no deploy target until it is
-rebuilt ([D-184](../decisions/D-184.md)). `scripts/oracle-deploy.sh` is the way
+([D-16](../decisions/D-16.md)), and preview has no deploy target until one is
+built — [D-199](../decisions/D-199.md) plans it as a second Cloud Run service. `scripts/oracle-deploy.sh` is the way
 back. Merging to `main` deploys nothing.
 
 ## What is live

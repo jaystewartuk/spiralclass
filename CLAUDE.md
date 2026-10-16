@@ -310,9 +310,9 @@ authored per language, `<slug>.es.md` beside `<slug>.md`.
 
 ## Never do
 
-- **Reintroduce Supabase or Vercel.** Supabase was decommissioned (D-70)
-  — no dependency, no env var, no code path. Vercel was too, came back as a
-  failover, and was retired again on 2026-09-23 (D-70): no deploy target, no
+- **Reintroduce Supabase or Vercel** (D-70). Supabase was decommissioned —
+  no dependency, no env var, no code path. Vercel was too, came back as a
+  failover, and was retired again: no deploy target, no
   `VERCEL_ENV` branch (`APP_URL` decides prod-vs-preview), no `@vercel/*`
   dependency, and no root `vercel.json` (Vercel reads that one automatically,
   which is a deploy trigger nobody typed). Guarded by
