@@ -1,16 +1,16 @@
 import { describe, expect, it } from "vitest";
-import { readdirSync, readFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
 
 import { REPO_ROOT, walkTree } from "./_tree";
-import { join, relative } from "node:path";
+import { dirname, join, relative, resolve } from "node:path";
 
 /**
  * Every `D-NN` written anywhere in the repo must name a decision record that
  * exists, and the log's index must list every record and only real ones.
  *
- * WHY THIS EXISTS. Decision records are cited from ~130 files — schema
+ * WHY THIS EXISTS. Decision records are cited from hundreds of files — schema
  * comments, route handlers, infra READMEs, runbooks, and each other — and the
- * citation is usually BARE prose (`// …one AI plumbing, two outputs (D-69)`)
+ * citation is usually BARE prose (`// …one AI plumbing, two outputs (D-87)`)
  * rather than a markdown link. That matters because
  * `doc-paths.test.ts` already catches the LINK form, since
  * `[D-60](../../docs/decisions/D-60.md)` is a docs path like any other. It
@@ -18,36 +18,36 @@ import { join, relative } from "node:path";
  *
  * The gap was not hypothetical. Two numbers were cited from nine code sites
  * for six weeks having never existed on `main` at all — the residue of a
- * numbering collision between branches, which
- * [D-72](../../../../docs/decisions/D-72.md) noticed, wrote down as
- * "worth backfilling", and nobody backfilled. Then 42 records were curated out
+ * numbering collision between branches. Then 42 records were curated out
  * before publication, which left 423 citations pointing at nothing until they
  * were swept by hand. A sweep with no guard behind it is a sweep that has to
  * be done again.
  *
- * This is the same failure the log keeps recording about itself: a reference
- * that rots silently costs more than one that breaks loudly, because the
- * reader who follows it has no way to tell a wrong pointer from a missing
- * document. D-110 counted ~440 of them from one reorganisation.
+ * LIVE AND RETIRED NUMBERS (D-202). The log was consolidated from 148 records
+ * to one per live decision. A number is never reused, so every number that
+ * stopped having a file is listed in the README's "Retired numbers" table with
+ * where its reasoning went. Outside applied migrations a citation must name a
+ * LIVE record — pointing a reader at a retired number sends them to a table
+ * row instead of the reasoning. Inside migrations a retired number is allowed,
+ * because those files cannot be edited (below) and the table resolves them.
  */
 
 const DECISIONS_DIR = join(REPO_ROOT, "docs", "decisions");
+const README = join(DECISIONS_DIR, "README.md");
 
 /**
- * ⚠️ APPLIED MIGRATIONS ARE EXCLUDED, and it is not an oversight.
+ * ⚠️ APPLIED MIGRATIONS ARE HELD TO A LOOSER RULE, and it is not an oversight.
  *
  * Prisma checksums every file under `prisma/migrations/`, so editing one — even
  * a comment — breaks `migrate deploy` against every database that already ran
- * it. CLAUDE.md sanctions leaving a stale reference there for exactly this
- * reason. The consequence is real and worth knowing: a record cited only by a
- * migration can never be curated out without leaving a dangling citation
- * nothing can repair, so `D-83` and `D-93` were kept for that reason alone.
+ * it. A citation there can therefore never be repointed, which is why a number
+ * cited by a migration may be retired but must stay in the Retired numbers
+ * table forever: the table is the only thing that resolves it.
  */
-const SKIP_PREFIXES = [
-  "apps/web/prisma/migrations/",
-  // THIS FILE. It writes `D-NN` tokens in prose to explain itself.
-  "apps/web/tests/config/decision-records.test.ts",
-];
+const MIGRATIONS = "apps/web/prisma/migrations/";
+
+/** THIS FILE writes `D-NN` tokens in prose to explain itself. */
+const SKIP = new Set(["apps/web/tests/config/decision-records.test.ts"]);
 
 /** Only text we can plausibly read; skips the visual-regression PNGs, whose
  *  bytes contain `D-` sequences by coincidence. */
@@ -64,6 +64,7 @@ const CITATION = /(?<![A-Za-z0-9_-])D-(\d{1,3})(?![0-9A-Za-z_-])/g;
 
 /** `D-8` and `D-08` are the same record; the files are zero-padded to two. */
 const norm = (n: string): number => Number.parseInt(n, 10);
+const label = (n: number): string => `D-${String(n).padStart(2, "0")}`;
 
 function isTextFile(name: string): boolean {
   return TEXT_FILE.test(name) || BARE_TEXT_FILES.has(name);
@@ -87,13 +88,37 @@ function existingRecords(): Set<number> {
   );
 }
 
-/** Every citation of a record that does not exist, mapped to its writers. */
-function danglingCitations(records: Set<number>): Map<number, string[]> {
-  const dangling = new Map<number, string[]>();
+/** The README split around its "Retired numbers" section, which runs to the next `## `. */
+function splitRetiredSection(readme: string): { section: string; rest: string } {
+  const start = readme.indexOf("\n## Retired numbers\n");
+  if (start === -1) return { section: "", rest: readme };
+  const next = readme.indexOf("\n## ", start + 1);
+  const end = next === -1 ? readme.length : next;
+  return { section: readme.slice(start, end), rest: readme.slice(0, start) + readme.slice(end) };
+}
+
+type RetiredRow = { n: number; destination: string; line: string };
+
+/** Rows of the Retired numbers table: `| D-NN | <where its reasoning went> |`, number in plain text. */
+function retiredRows(): RetiredRow[] {
+  const { section } = splitRetiredSection(readFileSync(README, "utf8"));
+  return [...section.matchAll(/^\| D-(\d{1,3}) +\| (.*?) *\|$/gm)].map((m) => ({
+    n: norm(m[1]),
+    destination: m[2],
+    line: m[0],
+  }));
+}
+
+/** Every citation outside `allowed`, mapped to its writers. */
+function badCitations(
+  allowed: Set<number>,
+  inScope: (file: string) => boolean,
+): Map<number, string[]> {
+  const bad = new Map<number, string[]>();
 
   for (const abs of walk()) {
     const file = relative(REPO_ROOT, abs);
-    if (SKIP_PREFIXES.some((p) => file.startsWith(p))) continue;
+    if (SKIP.has(file) || !inScope(file)) continue;
     if (!isTextFile(file.split("/").pop() ?? "")) continue;
 
     let source: string;
@@ -102,47 +127,98 @@ function danglingCitations(records: Set<number>): Map<number, string[]> {
     } catch {
       continue;
     }
+    // The Retired numbers table is the one place outside a migration that
+    // names a retired number — that is its whole job.
+    if (abs === README) source = splitRetiredSection(source).rest;
 
     for (const match of source.matchAll(CITATION)) {
       const n = norm(match[1]);
-      if (records.has(n)) continue;
-      const seen = dangling.get(n) ?? [];
+      if (allowed.has(n)) continue;
+      const seen = bad.get(n) ?? [];
       if (!seen.includes(file)) seen.push(file);
-      dangling.set(n, seen);
+      bad.set(n, seen);
     }
   }
-  return dangling;
+  return bad;
 }
+
+const report = (bad: Map<number, string[]>): string[] =>
+  [...bad]
+    .sort(([a], [b]) => a - b)
+    .map(([n, files]) => `${label(n)}\n    cited by: ${files.join(", ")}`);
 
 describe("decision records cited in the repo", () => {
   const records = existingRecords();
+  const retired = retiredRows();
+  const retiredNumbers = new Set(retired.map((r) => r.n));
 
   it("walks enough of the tree, and finds a plausible number of records", () => {
-    // Guards the guard: a walk that returned nothing, or a decisions directory
-    // that failed to parse, would pass every assertion below having checked
-    // nothing at all.
+    // Guards the guard: a walk that returned nothing, a decisions directory
+    // that failed to parse, or a table the parser no longer reads would pass
+    // every assertion below having checked nothing at all. 148 records were
+    // published before the consolidation, so live plus retired is at least that.
     expect(walk().length).toBeGreaterThan(1000);
-    expect(records.size).toBeGreaterThan(50);
+    expect(records.size).toBeGreaterThan(10);
+    expect(records.size + retiredNumbers.size).toBeGreaterThanOrEqual(148);
   });
 
-  it("names no decision record that does not exist", () => {
-    const offenders = [...danglingCitations(records)]
-      .sort(([a], [b]) => a - b)
-      .map(([n, files]) => `D-${String(n).padStart(2, "0")}\n    cited by: ${files.join(", ")}`);
+  it("names only live decision records outside applied migrations", () => {
+    const offenders = report(badCitations(records, (f) => !f.startsWith(MIGRATIONS)));
 
     expect(
       offenders,
-      `These cite a decision record that is not in docs/decisions/. Either the ` +
-        `record was curated out before publication — in which case rewrite the sentence ` +
-        `to state the fact rather than cite nothing — or the number is wrong. Do NOT ` +
-        `create a stub record to satisfy this:\n${offenders.join("\n")}`,
+      `These cite a decision record that is not in docs/decisions/. If the number is ` +
+        `in the README's Retired numbers table, cite the record it points at, or state ` +
+        `the fact the citation stood for. Otherwise the number is wrong. Do NOT create ` +
+        `a stub record to satisfy this:\n${offenders.join("\n")}`,
     ).toEqual([]);
   });
 
+  it("names a live or a retired record inside applied migrations", () => {
+    const known = new Set([...records, ...retiredNumbers]);
+    const offenders = report(badCitations(known, (f) => f.startsWith(MIGRATIONS)));
+
+    expect(
+      offenders,
+      `An applied migration cites a number that is neither a record nor in the ` +
+        `Retired numbers table. The migration cannot be edited, so add the number ` +
+        `to the table with where its reasoning went:\n${offenders.join("\n")}`,
+    ).toEqual([]);
+  });
+
+  it("keeps the Retired numbers table in agreement with the tree", () => {
+    const problems: string[] = [];
+    const seen = new Set<number>();
+
+    for (const row of retired) {
+      const id = label(row.n);
+      if (seen.has(row.n)) problems.push(`${id} is in the table twice`);
+      seen.add(row.n);
+      if (records.has(row.n)) problems.push(`${id} is retired but ${id}.md still exists`);
+
+      const dest = row.destination;
+      const links = [...dest.matchAll(/\]\(([^)]+)\)/g)].map((m) => m[1]);
+      if (links.length === 0 && !/^retired: \S/.test(dest)) {
+        problems.push(`${id} names neither a destination link nor "retired: <what it decided>"`);
+      }
+      for (const link of links) {
+        const target = resolve(dirname(README), link.split("#")[0]);
+        if (!existsSync(target)) problems.push(`${id} points at ${link}, which does not exist`);
+      }
+      for (const m of dest.matchAll(CITATION)) {
+        if (!records.has(norm(m[1]))) {
+          problems.push(`${id} points at ${label(norm(m[1]))}, which is not a live record`);
+        }
+      }
+    }
+
+    expect(problems, problems.join("\n")).toEqual([]);
+  });
+
   it("indexes every record, exactly once, in a theme table and in the numeric index", () => {
-    // The index is the only way into 124 files, so a record missing from it is
+    // The index is the only way into the log, so a record missing from it is
     // a record nobody will read, and a row naming a deleted one is a 404.
-    const readme = readFileSync(join(DECISIONS_DIR, "README.md"), "utf8");
+    const readme = splitRetiredSection(readFileSync(README, "utf8")).rest;
     const [themes, numeric] = readme.split("## Every record, by number");
     expect(numeric, "the index lost its 'Every record, by number' section").toBeDefined();
 
