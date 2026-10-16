@@ -1,429 +1,207 @@
-# Scheduling & Booking
+# Scheduling and booking
 
-## Overview
+Students book classes into a teacher's weekly availability, paying with
+credits from a [package](packages.md). A booking is a fixed slot
+(`scheduledStart` → `scheduledEnd`) that spends one credit **when it is made**.
+Cancelling early is what gives the credit back. Students cancel and reschedule
+under a **24-hour boundary** and a **pooled per-package schedule-change
+budget**; teachers can override, and every override is audited.
 
-Students book classes against a teacher's recurring weekly availability using
-class credits from a purchased **Package**. A booking is a fixed slot
-(`scheduledStart` → `scheduledEnd`) tied to one credit; once booked, that
-credit is treated as "spent" immediately (**Model B: committed at
-reservation**, not at completion) — cancelling early is what gives it back,
-not the class happening. Students can cancel or reschedule within rules built
-around a hard **24-hour boundary** and a **pooled per-package "schedule
-change" budget**. Teachers can override the system directly (self-serve
-booking on a student's behalf, blocking dates, forgiving a class) with every
-intervention logged to an audit trail. The whole flow ships on web (Next.js
-Server Actions/RSC).
+Where a teacher sets her hours, blocked dates and Google Calendar sync:
+[teacher-management.md](teacher-management.md).
 
-Source of truth: `MVP.md §6.5/§6.6/§13.6/§13.11` (referenced throughout the
-code), and the files below.
+## "Model B": a class is spent when it is booked
 
-## User Stories
+`Package.classesUsed` counts **committed bookings**, not taught classes: every
+booking with `countsAgainstPackage = true`. A class is charged to the package
+at booking and released only by something that gives it back. The code uses
+the name "Model B" for this throughout (`cancel-handler.ts`,
+`auto-complete.ts`, `overrides.ts`, `teacher-packages.ts`, `package-usage.ts`).
+Charging at completion was rejected because the remaining balance — the number
+a student decides against — would be unknowable until every booked class had
+happened.
 
-- As a **student**, I want to see a teacher's open slots and book one with a
-  class from my package, so I can schedule my next lesson.
-- As a **student**, I want to cancel a class I can no longer attend, and know
-  in advance whether I'll get the class back or lose it.
-- As a **student**, I want to move a class to a different day/time without
-  losing the credit, as long as I'm not cutting it too close.
-- As a **teacher**, I want to book a class on a student's behalf (e.g. one
-  agreed over WhatsApp) without being blocked by my own advance-notice rule.
-- As a **teacher**, I want to cancel or "forgive" a class (including one that
-  already happened) and have it returned to the student's package.
-- As a **teacher**, I want to block out a date range (vacation, sick day) and
-  have any classes that fall inside it automatically cancelled and the
-  student notified, without losing their credit.
-- As a **student/teacher**, I want double-booking to be structurally
-  impossible, even under concurrent requests from two devices.
+## Slot generation (`lib/slots.ts`)
 
-## Business Rules (exhaustive)
+1. The grid comes from `AvailabilityRule` rows: a weekday, `startTime` /
+   `endTime`, and the IANA timezone the rule was **written in**. Changing the
+   teacher's profile timezone does not reinterpret existing rules
+   ([D-53](../decisions/D-53.md)).
+2. Slots run back to back every `classDurationMin + bufferMin` inside each
+   window; a slot that does not fit whole is not offered.
+3. A slot is dropped if it overlaps a `BlockedDate` or an imported Google
+   Calendar busy block.
+4. A slot is dropped if it is before `now + minAdvanceH` or at/after
+   `now + maxAdvanceDays`.
+5. A slot is dropped if it collides with an existing booking's buffer zone,
+   using **that booking's own `bufferMinSnapshot`**, not the teacher's current
+   buffer.
+6. All slot math is UTC on the wire; wall-clock rule times are resolved in the
+   rule's own zone first.
 
-### Availability & slot generation (`lib/slots.ts`, §13.11)
+## Double-booking is prevented by the database
 
-1. A teacher's bookable grid is built from `AvailabilityRule` rows (one
-   weekday + `startTime`/`endTime` + the IANA timezone the rule was **written
-   in**, frozen at save time — not the teacher's live current timezone; see
-   D-53). Changing a teacher's profile timezone does not reinterpret existing
-   rules.
-2. Slots are generated back-to-back at `classDurationMin + bufferMin`
-   intervals inside each rule's window (no partial trailing slot that doesn't
-   fit the full class length).
-3. A candidate slot is excluded if it overlaps any `BlockedDate` range or any
-   imported Google Calendar "busy" block (Google Calendar sync is optional,
-   additive to `BlockedDate`).
-4. A candidate slot is excluded if it falls before `now + minAdvanceH` hours
-   or at/after `now + maxAdvanceDays` days (both teacher-configured).
-5. A candidate slot is excluded if it collides with any existing `scheduled`
-   booking's own buffer zone — buffers are compared using **each existing
-   booking's own frozen `bufferMinSnapshot`**, not the teacher's current
-   buffer setting, so lowering the buffer later never invalidates a slot the
-   DB would still reject for an older booking's larger reserved zone.
-6. All slot math happens in UTC on the wire; wall-clock rule times are
-   resolved in the rule's own timezone before conversion.
+- Two constraints back every insert, so the picker is a convenience, not the
+  guarantee: a partial unique index on `(teacher, scheduled_start)` for active
+  bookings, and the GiST `EXCLUDE` constraint `bookings_no_overlap_buffered`
+  over `[scheduled_start, buffered_end)` per teacher. `buffered_end` is
+  trigger-derived (`scheduled_end + buffer_min_snapshot`).
+- Either violation (Prisma `P2002`, Postgres `23P01`) reaches the user as one
+  "slot taken" message, never a 500.
+- `buffer_min_snapshot` is frozen at insert; a later buffer change never
+  resizes an existing booking's zone.
 
-### Double-booking prevention (race-proofed at the database layer)
+## Booking (`lib/booking/book-package-slot.ts`)
 
-7. Two independent DB constraints back every insert, so the read-time slot
-   picker is a convenience, not the actual guarantee: a partial unique index
-   on exact `(teacher, scheduled_start)` for active bookings, and a GiST
-   `EXCLUDE` constraint (`bookings_no_overlap_buffered`) over
-   `[scheduled_start, buffered_end)` per teacher. `buffered_end` is a
-   DB-trigger-derived column (`scheduled_end + buffer_min_snapshot`), so it
-   can never drift from the two inputs it's computed from.
-8. Any of these three failure modes (P2002 exact-start collision, or Postgres
-   error 23P01 from either EXCLUDE constraint) is surfaced to the user as one
-   friendly "slot taken" error, never a 500.
-9. `buffer_min_snapshot` is frozen onto a booking (or its reschedule
-   replacement) at insert time — a later teacher buffer change never
-   retroactively resizes an existing booking's protection zone.
+- A booking spends one credit from the student's pool for that teacher, class
+  length and seat count: the **soonest-to-expire eligible** credit
+  (`lib/booking/credit-ledger.ts`, rules in [packages.md](packages.md)).
+- A credit is eligible only if its package is `active`, has capacity, and is
+  still valid **at the class's start time**.
+- No eligible credit: `package-exhausted` (no capacity) or `package-expired`
+  (capacity, but every package lapses before the class).
+- The student is always sent `booking_confirmation`; the teacher gets
+  `booking_created_teacher` for a booking she did not make herself.
+- **Teacher self-serve booking** (`actions/teacher-booking.ts`, from
+  `/dashboard/classes/book`) bypasses only her own `minAdvanceH`.
+  Availability, blocked dates, buffers and max-advance still apply. It writes
+  an `Override` row.
 
-### Booking creation (`lib/booking/book-package-slot.ts`)
+## Cancellation (`lib/cancellation/classify.ts`, `cancel-handler.ts`)
 
-10. A booking spends **one class credit** from the student's pool of active
-    packages with that teacher **at that class length** — the credit
-    consumed is the pool's **soonest-to-expire eligible one** (FIFO-by-expiry
-    across all the student's active packages with the teacher, not
-    necessarily the package the student thinks they're spending from), atomic
-    and race-safe.
-11. A credit is only eligible if it's still valid (not expired) **at the
-    class's start time**, not merely at the moment of booking.
-12. If no eligible credit exists: `package-exhausted` (no capacity left) or
-    `package-expired` (capacity exists but every eligible package has already
-    lapsed by the class start).
-13. A teacher booking a slot herself (self-serve, e.g. "the student agreed
-    over WhatsApp") can bypass her own `minAdvanceH` rule only — availability
-    windows, blocked dates, buffers, and max-advance still fully apply. This
-    bypass can optionally be logged as an `Override` audit row.
-14. On success, a `booking_confirmation` notification is always queued to the
-    student; a mirrored `booking_created` notification to the teacher is
-    optional (used for student-initiated bookings, skipped when the teacher
-    books it herself).
+- The boundary is **`scheduledStart` minus the server clock**, in absolute
+  time. Timezones play no part; a client clock is never used.
+- **Exactly 24h00m00s ahead counts as ≥24h.** Anything less, including a class
+  already started, is <24h.
+- **Student cancel, <24h**: always allowed; the class is forfeited
+  (`classesUsed` stays) and no schedule-change unit is spent.
+- **Student cancel, ≥24h**: the class is returned (`classesUsed − 1`) and one
+  schedule-change unit is spent. With the budget exhausted, the refundable
+  cancel is refused (`schedule-changes-exhausted`); she can still forfeit the
+  class or ask the teacher.
+- **Teacher cancel** (`handleTeacherCancel`) always returns the class, at any
+  time, and spends no budget. It also works on `completed` and `no_show`
+  bookings, which makes it the "forgive a past class" tool. A reason is
+  required and an `Override` row is written.
+- The `classesUsed` decrement is floor-guarded: if it would go below 0 the
+  cancel still completes, the decrement is skipped and logged as an error.
 
-### Cancellation — the 24-hour rule (`lib/cancellation/classify.ts`, §6.6)
+## The pooled schedule-change budget
 
-> **"Model B" — the term the code uses, defined once, here.** `classesUsed` is a
-> ledger of **committed bookings**, not of taught classes: a class is charged
-> against the package the moment it is booked, and released only if something
-> refunds it. Fourteen files say "Model B" on the strength of this paragraph —
-> the schema, `cancel-handler.ts`, `auto-complete.ts`, `overrides.ts`,
-> `teacher-packages.ts`, `package-usage.ts`, the roster importer and their
-> tests — so every rule below is about **when the charge is released**, never
-> about when it is made. The alternative — charging at
-> completion — was not chosen because it makes a package's remaining balance
-> unknowable until every booked class has happened, which is the number a
-> student is deciding against.
+- **Allowance = the package's `classesTotal`**, pooled across the package and
+  counted in `Package.scheduleChangesUsed`.
+- A ≥24h student cancel and a student reschedule both spend from it. Pooling
+  closes the cancel-then-rebook loop a per-booking counter allowed.
+- The unit is charged at **cancel** time, since a rebook looks like any first
+  booking.
+- The budget is re-checked inside the mutating transaction; a concurrent
+  change on another booking of the same package that spent the last unit
+  makes the later one fail with `schedule-changes-exhausted`.
+- `Booking.rescheduleCount` is lineage beside `rescheduleOfBookingId` and gates
+  nothing; the pool is the only cap.
+- A teacher waiving a ≥24h cancellation returns the unit it spent. Restoring a
+  cancelled class to `scheduled` re-claims its credit but does not return the
+  unit.
 
-15. **The boundary is measured against `scheduledStart`, in absolute UTC
-    delta from the server clock** — never `scheduledEnd`, and never a client
-    clock. Timezone is irrelevant to the math (server is the sole source of
-    truth, §13.6).
-16. **Boundary is inclusive on the eligible side**: exactly 24h00m00s ahead
-    counts as `gte24h` (refundable); 23h59m59s or less counts as `lt24h`
-    (forfeit). A cancel attempted after the class has already started is
-    always classified `lt24h`.
-17. **`< 24h` before start (student-initiated cancel)**: the class stays
-    **forfeited** — `classesUsed` is NOT restored, no schedule-change unit is
-    spent (a penalty isn't a "move"). This is always allowed — a student can
-    always cancel, they just don't get the class back.
-18. **`≥ 24h` before start (student-initiated cancel)**: the class credit is
-    refunded (`classesUsed -= 1`) **and one unit of the package's pooled
-    "schedule change" budget is spent** (see below) — unless that budget is
-    already exhausted, in which case the refundable cancel is refused
-    outright (`schedule-changes-exhausted`). The student can still forfeit
-    the class instead (a `<24h` cancel is never blocked by the budget) or ask
-    the teacher to cancel it for them (a teacher cancel always refunds,
-    regardless of timing or budget — see below).
-19. **Teacher-initiated cancel** always refunds the class (`classesUsed -=
-1`) and never penalizes the student, regardless of how close to the class
-    time it happens. It also works on `completed` and `no_show` bookings —
-    the same action doubles as a "forgive a past class" tool (e.g. the
-    student had a legitimate reason for missing it).
-20. Every teacher cancel writes an `Override` audit row (before/after JSON,
-    reason) so the student-facing history can show why the class moved.
+## Reschedule (`lib/cancellation/reschedule-handler.ts`)
 
-### The pooled "schedule change" budget (§6.6)
+- A student may start a reschedule only if the booking is `scheduled`, the
+  budget has a unit left, and the class is ≥24h away. Otherwise:
+  `booking-not-scheduled`, `schedule-changes-exhausted` or `lt24h`.
+- The new slot must pass the full slot generator.
+- The old booking's credit is released and the new one's claimed in the same
+  transaction, so the balance does not change; one budget unit is spent.
+- The old row is set to `rescheduled` **before** the new row is inserted, so a
+  small move does not collide with the row it replaces. The new row carries
+  `rescheduleOfBookingId` and `rescheduleCount + 1`.
+- Concurrent double-submits are guarded by conditional `updateMany`s; the
+  loser gets `slot-conflict`. A package deleted mid-flow is `package-not-found`.
+- Both parties are told, with the old time (`reschedule_confirm`,
+  `reschedule_confirm_teacher`).
 
-21. **Budget = `classesTotal` of the package** — one pooled move allowed per
-    class in the package, shared across the whole package (not per-booking).
-22. Both a `≥24h` refundable student cancel and a reschedule draw from the
-    **same** pooled counter (`Package.scheduleChangesUsed`). This closes a
-    loophole from an earlier design (a per-booking `reschedule_count < 1`
-    cap): without pooling, a student could cancel `≥24h` (refund), rebook a
-    brand-new row that starts its own counter at 0, and repeat indefinitely
-    for unlimited free moves.
-23. The budget check is re-verified **inside** the mutating transaction (not
-    just at the earlier read-time eligibility check) — a concurrent
-    cancel/reschedule against a _different_ booking in the same package can
-    legitimately spend the last unit between the two reads; the later
-    transaction detects this and rolls back cleanly, reporting
-    `schedule-changes-exhausted` rather than over-spending the budget.
+**Teacher moves** (`actions/teacher-reschedule.ts`, "Manage class" → "Change
+date and time" at `/dashboard/classes/[bookingId]/reschedule`) use the same
+handler. She is exempt from the 24-hour rule and spends no budget
+(`spendScheduleChange: false`); everything else binds, except her own
+`minAdvanceH`. Only a `scheduled` class can be moved. An `Override` row
+(`teacher_reschedule_class`) is written in the same transaction; the student
+gets `reschedule_confirm` and the teacher's mirror is skipped. Errors come
+back as codes (`lib/cancellation/teacher-reschedule-errors.ts`): `not-scheduled`,
+`same-slot`, `past-slot`, plus the slot and package codes above.
 
-The counter is charged at **cancel** time, not at rebook time, because the
-booking that follows a cancel is indistinguishable from any first booking.
-`Booking.rescheduleCount` survives only as lineage beside
-`rescheduleOfBookingId` and gates nothing. A teacher waiving a `≥24h`
-cancellation returns the unit it spent; restoring a cancelled class to
-`scheduled` re-claims its credit but does **not** return the unit.
+## Completion and no-shows (`lib/cancellation/auto-complete.ts`)
 
-### Reschedule (`lib/cancellation/reschedule-handler.ts`, §6.6)
+- An hourly sweep (`auto-complete-sweep`) flips a `scheduled` booking whose
+  `scheduledEnd` has passed to `completed`. It changes no counts. The update is
+  guarded on `status = scheduled`, so a rerun is a no-op.
+- There is no "mark as completed" button. `markBookingComplete`
+  (`actions/overrides.ts`) is not surfaced in the UI.
+- A teacher can record a **no-show** on a past `scheduled` class or on a
+  `completed` one. It clears `completedAt`, writes an `Override` row and sends
+  `no_show_student`, so a late relabel sends a late message. A no-show counts
+  as delivered, like a completed class. `restoreClass` undoes it.
 
-24. A student can enter the reschedule flow only if **all** hold: (a) the
-    booking is still `status = scheduled` (not already canceled/completed —
-    those need a teacher override), (b) the package has schedule-change
-    budget left, (c) the class is `≥24h` out (same classifier as a cancel).
-25. Rescheduling does **not** change quota — the old booking's credit is
-    released (`countsAgainstPackage = false`) at the exact same moment the
-    new replacement booking's credit is claimed (`countsAgainstPackage =
-true`), netting to zero. It **does** spend one schedule-change unit (a
-    move is a move, whether done via reschedule or cancel+rebook).
-26. Mechanically: the OLD booking is flipped to `status = rescheduled`
-    **before** the new booking is inserted (so an overlapping move — e.g.
-    nudging a class 30 minutes — doesn't collide with the very row being
-    replaced under the active-only DB constraints), then a NEW booking row is
-    created with `rescheduleOfBookingId` pointing at the old one and
-    `rescheduleCount = old.rescheduleCount + 1`.
-27. The new slot must independently pass the full §13.11 slot generator
-    (availability, blocked dates, buffer, advance windows, collisions) — the
-    reschedule eligibility check above only governs whether the student may
-    _attempt_ a reschedule at all, not whether the target slot is valid.
-28. A concurrent double-submit (same booking, or same package's shared
-    budget) is guarded by `updateMany`-with-status/budget conditions inside
-    the transaction; losing the race reports `slot-conflict`; a package
-    deleted out from under the operation reports `package-not-found`
-    distinctly (not mis-reported as a slot conflict).
+## Blocking dates
 
-**Teacher-initiated moves.** A teacher can move a class too
-(`actions/teacher-reschedule.ts`), through the same handler and therefore
-under rules 25–28 unchanged. She is exempt from exactly the two rules that bound what a _student_ may do
-unilaterally: the `≥24h` window (rule 24c), and the pooled schedule-change
-budget, which her move does **not** spend (`spendScheduleChange: false`) — the
-same exemption the teacher-cancel path already takes when it refunds without
-charging it. She is **not** exempt from anything that describes reality:
-availability windows, blocked dates, Google busy blocks, buffer, collisions,
-her max-advance horizon and the package's expiration all still bind. The
-single generator input she bypasses is her own `minAdvanceH`, exactly as in
-self-serve booking (rule 13). Only a `scheduled` booking can be moved.
+- Creating a `BlockedDate` (`lib/cancellation/blocked-date-collision.ts`) cancels every `scheduled` booking whose interval
+  **overlaps** the range, through the teacher-cancel path: class returned,
+  `Override` row written, student notified.
+- Collisions are cancelled in batches of `COLLISION_CANCEL_CONCURRENCY` to
+  spare the connection pool.
+- Google Calendar busy blocks only hide slots; they never cancel an existing
+  booking.
 
-The move is **audited and announced**: an `Override` row
-(`teacher_reschedule_class`, before/after `scheduledStart`) is written inside
-the same transaction, and the student gets the ordinary `reschedule_confirm`
-notification carrying the old time. The teacher's own mirror
-(`reschedule_confirm_teacher`) is skipped — she made the move — matching
-`notifyTeacher: false` in self-serve booking.
+There is no primitive for opening one extra slot outside the weekly rules. A
+teacher either changes her rules or books the student herself.
 
-### Auto-completion (`lib/cancellation/auto-complete.ts`, §6.5)
+## Student flows
 
-29. Once `scheduledEnd` passes, a still-`scheduled` booking is flipped to
-    `completed` by an hourly sweep (`auto-complete-sweep`), not a per-booking
-    timer. This transition is quota-neutral under Model B — the class was
-    already committed at booking time, so completing it doesn't touch
-    `classesUsed` again.
-30. The transition is idempotent (`updateMany` guarded on
-    `status = scheduled`) — a retried sweep run is a safe no-op.
+- **Book**: `/my-classes/book` shows open slots for her package's class
+  length. The server re-runs the full slot check before writing; the shown
+  slots are a snapshot.
+- **Cancel**: from `/my-classes/[bookingId]` (`actions/cancel-booking.ts` →
+  `handleStudentCancel`). Outcomes: `ok` with the timing, `not-found`,
+  `wrong-status`, `schedule-changes-exhausted`. Notices are worded for the
+  outcome (`cancel_lt24h`, `cancel_gte24h_with_reschedule` and the teacher
+  mirrors).
+- **Reschedule**: `/my-classes/[bookingId]/reschedule`; eligibility is checked
+  before the picker shows.
 
-**Completion is automatic; a no-show is the one manual label.** There is no
-"mark as completed" button: under Model B completing a class changes no
-counts, so a teacher pressing it only duplicated the sweep.
-`markBookingComplete` (`actions/overrides.ts`) is kept for back-compat and is
-not surfaced. There is no grace window before completion either, because a
-teacher can record a no-show at any time on a past `scheduled` class **or on a
-`completed` one** (`canRecordNoShow`). That relabel clears `completedAt`,
-records the prior status in the `Override` row, and queues the
-`no_show_student` notification — so a very late relabel sends a late "you
-missed your class" message. A no-show counts as delivered, exactly like a
-completed class.
+## Error codes
 
-### Teacher blocking a date range (`lib/cancellation/blocked-date-collision.ts`, §6.1)
+| Code                         | Where                   | Meaning                                            |
+| ---------------------------- | ----------------------- | -------------------------------------------------- |
+| `slot-unavailable`           | book, reschedule        | The slot no longer passes generation               |
+| `slot-taken`                 | book                    | Collided at insert                                 |
+| `package-exhausted`          | book                    | No package has capacity                            |
+| `package-expired`            | book                    | Capacity exists but lapses before the class        |
+| `not-found` / `wrong-status` | cancel                  | Not the caller's booking, or no longer `scheduled` |
+| `schedule-changes-exhausted` | ≥24h cancel, reschedule | The pooled budget is spent                         |
+| `booking-not-scheduled`      | reschedule eligibility  | Booking is not `scheduled`                         |
+| `lt24h`                      | reschedule eligibility  | Less than 24 hours ahead (students only)           |
+| `slot-conflict`              | reschedule              | Collision, or a concurrent change won              |
+| `package-not-found`          | reschedule              | The package was deleted mid-flow                   |
 
-31. Creating a `BlockedDate` automatically finds every `scheduled` booking
-    whose interval **overlaps** the new blocked range (not just "starts
-    inside it" — a class starting before the block but running into it also
-    collides) and cancels each one via the standard teacher-cancel path
-    (§ rule 19 above): full refund, `Override` row logged with reason
-    `"Fecha bloqueada en tu calendario"` (or the teacher's own reason,
-    prefixed), and a notification queued that the dispatcher renders as a
-    reschedule prompt for the student.
-32. Collision cancels are processed in bounded-concurrency batches (5 at a
-    time) rather than one at a time, to avoid exhausting the DB connection
-    pool on a wide block affecting many classes.
+## Data
 
-### Availability overrides — scope note
-
-33. There is no separate "one-off addition" primitive layered on top of
-    `AvailabilityRule` for a single extra slot outside the recurring weekly
-    grid — see Open Questions. The two real override mechanisms in the
-    system are: (a) `BlockedDate`, which **removes** availability for a range
-    and cascades cancellations (rule 31), and (b) the teacher's self-serve
-    booking bypass of her own `minAdvanceH` rule (rule 13), which lets her
-    book a slot the generator wouldn't otherwise offer a student, logged via
-    the generic `Override` audit table.
-
-## User Flow
-
-### Web — student books a class
-
-1. Student opens `my-classes/book`, sees the teacher's calendar (month/week
-   view, `components/calendar/*`) with open slots for their package's class
-   length.
-2. Student picks a day and slot; server re-validates the full §13.11 chain
-   (availability, blocks, buffer, advance window, collisions) against a fresh
-   read before writing the booking — the calendar's displayed slots are a
-   snapshot, not the authority.
-3. On success, redirect to a confirmation page; `booking_confirmation`
-   notification queued (push-first, per push-first-default policy).
-4. Booking now appears in `my-classes/[bookingId]`, from which the student can
-   cancel or (if eligible) reschedule.
-
-### Web — student cancels
-
-1. From `my-classes/[bookingId]`, student submits the cancel form
-   (`cancel-form.tsx` → `actions/cancel-booking.ts` → `handleStudentCancel`).
-2. Server classifies the timing (`<24h` vs `≥24h`) against `scheduledStart`
-   and the server clock, and — for `≥24h` — checks the package's remaining
-   schedule-change budget.
-3. Outcome is one of: `ok` (with `timing`), `not-found`, `wrong-status`
-   (already moved off `scheduled`), or `schedule-changes-exhausted` (budget
-   spent — offer to forfeit instead or ask the teacher).
-4. On `ok`, the student and teacher each get a notification worded for the
-   actual timing/outcome (`cancel_lt24h`, `cancel_gte24h_with_reschedule`,
-   teacher mirrors of both).
-
-### Web — student reschedules
-
-1. From `my-classes/[bookingId]/reschedule`, eligibility is checked
-   client-visibly (status/budget/24h) before the slot picker is even shown.
-2. Student picks a new slot (`reschedule-slot-button.tsx`); server re-runs
-   the full eligibility + slot-validity chain and, on success, atomically
-   retires the old booking and creates the replacement.
-3. Both parties are notified of the change, including the _old_ scheduled
-   time for context.
-
-### Web — teacher actions
-
-1. Teacher can self-serve-book on a student's behalf from her own dashboard
-   (`actions/teacher-booking.ts`), bypassing her own advance-notice minimum
-   only.
-2. Teacher can cancel any of her own bookings (`scheduled`, `completed`, or
-   `no_show`) with a required reason — refunds the class, logs an `Override`.
-3. Teacher can **change the date and time** of a `scheduled` class from
-   "Manage class" → "Change date and time"
-   (`dashboard/classes/[bookingId]/reschedule`), which is the self-serve
-   booking screen's picker over the reschedule window: her own day nav, the
-   morning/afternoon/evening bands, both clocks on every slot, and the
-   class's current slot excluded. Committing runs
-   `actions/teacher-reschedule.ts` → the shared `applyReschedule` (rules
-   28a–28b).
-4. Teacher can block a date range from her calendar settings; any colliding
-   scheduled classes are auto-cancelled and refunded per rule 31.
-
-### Why `next-available-slots.ts` is its own module
-
-`lib/booking/next-available-slots.ts` was split out when the search had an HTTP
-caller that could not inline the generator call the way a server-rendered page
-can. Nothing needs it to be separate now; it stays because the search is worth
-testing without a page around it.
-
-## Data Used
-
-- **AvailabilityRule** — teacher's recurring weekly windows (weekday +
-  HH:MM start/end + frozen timezone).
-- **BlockedDate** — a one-off range (vacation, sick day, ad hoc block) that
-  removes availability and cascades cancellations.
-- **Package** — a student's purchased class-credit bundle: `classesTotal`,
-  `classesUsed` (committed, not merely completed), `scheduleChangesUsed`
-  (pooled move budget spent so far), `classDurationMin`, `expiresAt`.
-- **Booking** — one scheduled/rescheduled/cancelled/completed class instance:
-  `scheduledStart`/`scheduledEnd`, `status`, `countsAgainstPackage`
-  (per-booking quota-commitment flag), `rescheduleOfBookingId` /
-  `rescheduleCount`, `bufferMinSnapshot`, `bufferedEnd` (DB-trigger derived).
-- **Override** — generic audit log of teacher/admin interventions (cancels,
-  self-serve bookings, language overrides, blocked-date cascades) with
-  before/after JSON and a reason.
-- Google Calendar busy blocks (optional, additive to `BlockedDate`) via
-  `lib/calendar/google/*`.
-
-## Edge Cases
-
-- Cancelling a class that has already started: classified `lt24h` (forfeit)
-  — there's no separate "in progress" state for cancel purposes.
-- Two students racing for the same slot: the DB constraints (not the
-  read-time picker) are the actual guarantee; the loser gets a friendly
-  "slot taken" error, not a 500.
-- Two schedule-changes racing on _different_ bookings in the _same_ package,
-  both reading the budget as "available": the second one to commit inside its
-  transaction loses the race and is refused, not double-spent.
-- A package deleted between a reschedule's eligibility check and its
-  transaction: reported distinctly as `package-not-found`, not conflated with
-  `slot-conflict`.
-- `classesUsed` hitting its floor (0) on a refund path: guarded so it never
-  underflows past the DB check constraint; if it would, the cancel/refund
-  still completes but the decrement is skipped and logged loudly (an
-  already-wrong invariant upstream, not a reason to block the user-facing
-  action).
-- A teacher lowering her buffer after a booking already exists: the existing
-  booking keeps its larger frozen buffer zone; new slot offers respect it,
-  never producing an offer the DB would then reject.
-- A teacher relocating/changing her profile timezone: existing
-  `AvailabilityRule` rows keep generating slots in the zone they were
-  written in, not the new one — bookings never silently shift.
-- Same-booking double-submit (e.g. a flaky network retry, or two tabs both
-  in flight): guarded by conditional `updateMany`s so only the first actually
-  mutates state; the second observes "already moved" and is treated as a lost
-  race, not a duplicate refund/charge.
-
-## Error States
-
-- `slot-unavailable` / `slot-taken` — booking: the exact slot no longer
-  passes generation, or collided at insert time.
-- `package-exhausted` — booking: no active package has capacity.
-- `package-expired` — booking: capacity exists but every eligible package
-  will have lapsed by the class start.
-- `not-found` / `wrong-status` — cancel/reschedule: booking doesn't belong to
-  the caller's identity set, or already moved off `scheduled`.
-- `schedule-changes-exhausted` — cancel (≥24h) / reschedule: the package's
-  pooled move budget is spent; the user must forfeit instead or ask the
-  teacher.
-- `slot-conflict` — reschedule: the new slot collided, or a concurrent
-  operation won the race on the same booking/budget.
-- `package-not-found` — reschedule: the backing package was deleted mid-flow.
-- `booking-not-scheduled` — reschedule eligibility: booking isn't in
-  `scheduled` status.
-- `lt24h` — reschedule eligibility: less than 24h before class start.
-  Student-only; a teacher move is not subject to it.
-- `not-scheduled` / `same-slot` / `past-slot` — teacher reschedule: the class
-  is not `scheduled`, the chosen time is the one it already has, or the chosen
-  time is in the past. (The teacher surface returns codes, not sentences —
-  `lib/cancellation/teacher-reschedule-errors.ts` — so the wording is resolved
-  in the reader's own locale.)
+- **AvailabilityRule** — weekday, start/end time, frozen timezone.
+- **BlockedDate** — a range that removes availability and cancels colliding
+  classes.
+- **Booking** — `scheduledStart` / `scheduledEnd`, `status`,
+  `countsAgainstPackage`, `rescheduleOfBookingId`, `rescheduleCount`,
+  `bufferMinSnapshot`, `bufferedEnd`.
+- **Package** — see [packages.md](packages.md).
+- **Override** — audit log of teacher and admin interventions, with
+  before/after JSON and a reason; visible to the student in her class history.
 
 ## Permissions
 
-| Action                         | Student (own booking)                                       | Student (other's) | Teacher (own student's booking)                                             | Teacher (other's) | Admin                |
-| ------------------------------ | ----------------------------------------------------------- | ----------------- | --------------------------------------------------------------------------- | ----------------- | -------------------- |
-| View                           | Yes                                                         | No                | Yes                                                                         | No                | Yes (via `/admin`)   |
-| Create (book a slot)           | Yes                                                         | —                 | Yes (self-serve, on the student's behalf)                                   | No                | —                    |
-| Cancel                         | Yes (subject to 24h/budget rule)                            | No                | Yes (any status in `scheduled`/`completed`/`no_show`, always full refund)   | No                | Via override tooling |
-| Reschedule                     | Yes (subject to eligibility)                                | No                | Yes (`scheduled` only; exempt from the 24h rule, does not spend the budget) | No                | —                    |
-| Block dates (cascades cancels) | No                                                          | No                | Yes (own calendar only)                                                     | No                | —                    |
-| Approve                        | N/A — no approval step; a valid slot pick is self-approving |                   |                                                                             |                   |                      |
+| Action      | Student (own)                   | Teacher (own students)                                       | Admin          |
+| ----------- | ------------------------------- | ------------------------------------------------------------ | -------------- |
+| View        | Yes                             | Yes                                                          | Yes (`/admin`) |
+| Book        | Yes                             | Yes (self-serve)                                             | —              |
+| Cancel      | Yes (24h rule and budget apply) | Yes (`scheduled`, `completed`, `no_show`; returns the class) | —              |
+| Reschedule  | Yes (eligibility applies)       | Yes (`scheduled` only; no 24h rule, no budget)               | —              |
+| Block dates | No                              | Yes                                                          | —              |
 
-## Open Questions
-
-- **No documented mechanism to add a single one-off availability slot
-  outside the recurring weekly grid.** The system has a way to _remove_
-  availability for a range (`BlockedDate`) and a way for the teacher to
-  bypass her own advance-notice minimum on a self-serve booking, but no
-  distinct "open up this one extra Saturday" primitive was found. If product
-  intends teachers to offer one-off extra availability, it isn't modeled
-  today — confirm whether this is a real gap or an intentionally out-of-scope
-  case (teachers currently just adjust `AvailabilityRule` permanently or use
-  the self-serve bypass).
-- The exact UI wording/flow for how a student is told _why_ a `≥24h` cancel
-  was refused (`schedule-changes-exhausted`) versus simply not showing the
-  refund option at all wasn't traced end-to-end into the client component
-  copy — confirm the student-facing message matches the "ask your teacher"
-  fallback described in the code comments.
-- Whether there's a hard cap on how many times a single booking can be
-  rescheduled beyond the package-wide pooled budget (i.e., is
-  `rescheduleCount` itself ever checked, or purely informational/audit) was
-  not found to be enforced anywhere outside the pooled budget check —
-  confirm this is intentional (pool is the only cap).
+No booking needs approval; a valid slot is booked at once.
