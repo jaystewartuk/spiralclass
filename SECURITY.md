@@ -5,9 +5,9 @@ and students, and `spiralclass.com` is a live production site.
 
 ## Reporting a vulnerability
 
-**Do not open a GitHub issue or PR for a security problem.** Issues and PRs
-are visible to everyone with repo access, and an unfixed vulnerability
-described in one is a roadmap for abuse.
+**Do not open a GitHub issue or PR for a security problem.** This repository is
+public, so an issue or pull request is readable by anyone, and an unfixed
+vulnerability described in one is a roadmap for abuse.
 
 Instead, report privately, either way:
 
@@ -36,6 +36,8 @@ no credentials required — that is the right place to prove a finding.
   admin/webhook/service query is a reportable vulnerability, not a style nit.
 - Never commit real credentials. `.env.local` and friends are gitignored;
   secrets live in Infisical / Google Secret Manager / GitHub environments.
+  What this repository deliberately exposes, and why, is
+  [`docs/security.md`](docs/security.md).
 
 ## How a security fix lands
 
@@ -54,9 +56,10 @@ The exposure is held down by wording and timing instead:
   changed and how it was tested, and say nothing about how the flaw could be
   used; that detail stays in the private advisory until it is published. This
   is the one exception to the rule that a title names the problem it fixed.
-- **The branch is not pushed until the maintainer can merge and promote in the
-  same sitting.** A pushed branch is public, so the fix stays on the machine
-  until then. A session writing one commits it and stops short of `pnpm pr`.
+- **The branch is not pushed until the maintainer can merge and approve the
+  production deploy in the same sitting.** A pushed branch is public, so the
+  fix stays on the machine until then. A session writing one commits it and
+  stops short of `pnpm pr`.
 
 The reasoning, and what this leaves open, is
 [D-158](docs/decisions/D-158.md).

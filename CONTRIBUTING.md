@@ -57,7 +57,8 @@ credentials.
 ```
 branch → implement + tests → git push (the pre-push hook runs pnpm gate)
   → PR into main → local-gate status green → squash-merge
-  → pnpm promote → production
+  → Gate + Heavy green on main → production fast-forwarded
+  → owner approves the deploy → production
 ```
 
 - **`main` is the trunk.** Every change — docs included — lands via a pull
@@ -70,17 +71,18 @@ branch → implement + tests → git push (the pre-push hook runs pnpm gate)
   disagree about anything but timing.
 - **The heavy suites run on runners.** Mutation, real-database integration, the
   browser suites and a no-push build of the production image are parallel jobs
-  in `heavy.yml`, on every pull
-  request _and_ every push to `main`. The run against `main` is the one that
-  catches a combination broken though every PR in it was green alone. They are
-  deliberately **not** a required check — read them before merging anyway.
-- **Merging to `main` deploys nothing today.** There is no preview host until
-  the Oracle box is rebuilt. Production is only ever `pnpm promote`.
+  in `heavy.yml`, on every pull request _and_ every push to `main`. The run
+  against `main` is the one that catches a combination broken though every PR
+  in it was green alone. They are deliberately **not** a required check — read
+  them before merging anyway.
+- **A merge to `main` starts a production release**
+  ([D-199](./docs/decisions/D-199.md)). Once Gate and Heavy are green on
+  `main`, a workflow fast-forwards `production`, and the deploy waits for the
+  owner's approval before it migrates the database and again before Cloud Run.
+  There is no preview host.
 - **Tests ship with the change.** A change is not done until it ships with tests
   covering the new behaviour and the regression it fixes. There is one client,
   so that means web tests.
-- **Branch names carry intent:** `feat/` · `fix/` · `hotfix/` · `chore/` ·
-  `refactor/` · `docs/`.
 
 Full detail, including the escape hatches and what each costs:
 **[`docs/development/workflow.md`](./docs/development/workflow.md)**.
@@ -101,13 +103,12 @@ one subagent, and what was deliberately **not** built — is described in
 
 ## Issues, backlog and documentation
 
-- **Open work lives in this repository's Issues**
-  ([D-164](./docs/decisions/D-164.md)), and **there is no backlog in the tree**
-  ([D-164](./docs/decisions/D-164.md)) — no `TODO.md`-style files. An issue is a
-  closable statement of work: a sentence naming the problem from the user's
-  side, the evidence, and a **Done when** line a PR can meet with `Closes #N`.
-  A session files one with `/issue`. From outside, use the bug report or docs
-  templates.
+- **Open work lives in this repository's Issues, and there is no backlog in the
+  tree** ([D-164](./docs/decisions/D-164.md)) — no `TODO.md`-style files. An
+  issue is a closable statement of work: a sentence naming the problem from the
+  user's side, the evidence, and a **Done when** line a PR can meet with
+  `Closes #N`. A session files one with `/issue`. From outside, use the bug
+  report or docs templates.
 - New documentation goes where
   [`docs/development/documentation.md`](./docs/development/documentation.md)
   says; [`docs/README.md`](./docs/README.md) is the map. Superseded documents are
