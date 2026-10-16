@@ -3,7 +3,7 @@
 // child_process (there's no precedent for shelling out in this codebase,
 // and Vercel's serverless runtime isn't a place to invoke bash/tsx). The
 // bash script stays as-is for CLI/local use; this is a small deliberate
-// duplication of the same two checks, not a shared-code refactor. See D-55.
+// duplication of the same two checks, not a shared-code refactor. See D-25.
 import { UAT_TARGET_BASE_URL, type UatTargetEnv } from "./env-targets";
 
 export type ProbeCheckResult = { label: string; pass: boolean; detail: string };

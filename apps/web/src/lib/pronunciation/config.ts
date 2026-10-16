@@ -2,7 +2,7 @@
 // the Phase D design, D-185). Mirrors the transcription
 // gate: scoring stays dormant unless a vendor is configured AND the explicit
 // flag is on. The flag matters because Phase D sends the student's voice to a
-// SECOND external vendor (Azure) — D-21 cleared sending voice to an ASR vendor;
+// SECOND external vendor (Azure) — D-22 cleared sending voice to an ASR vendor;
 // the new-vendor coverage must be confirmed before flipping this on (see the
 // doc's compliance note).
 //

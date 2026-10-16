@@ -137,7 +137,7 @@ the pass/fail record of attendance or payments.
 - Pronunciation scoring needs raw audio (via Azure), so it cannot run from a
   browser-written transcript; it was never on (see the flag above).
 - A transcript is kept while the teacher's account is open and deleted with
-  it ([D-136](../decisions/D-136.md)); there is no audio to retain, so
+  it ([D-22](../decisions/D-22.md)); there is no audio to retain, so
   `Teacher.lessonAudioRetentionOptIn` only ever applies to the legacy path.
 
 ### Insight generation and caps
@@ -184,7 +184,7 @@ NULL`) — a confirmed insight is never touched or removed by regeneration.
 - **The verdicts are the model's score card** ([D-201](../decisions/D-201.md)).
   Confirmed over confirmed-plus-dismissed, across every AI row on real
   accounts, is shown on the admin overview — counts only, never an insight's
-  text (D-23). Unreviewed rows are shown beside it and do not dilute the rate.
+  text (D-22). Unreviewed rows are shown beside it and do not dilute the rate.
   The offline evals (`pnpm evals`) measure the same surface before a prompt or
   model change; this figure is what says whether the change held up in
   classes.
@@ -259,7 +259,7 @@ NULL`) — a confirmed insight is never touched or removed by regeneration.
   timestamps** (capturing → ready → transcribed → insights → pronunciation →
   profiles → briefs) plus stuck-capture detection — it deliberately never
   surfaces any transcript/insight/profile content, by design, consistent
-  with the privacy stance of D-21/D-22.
+  with the privacy stance of D-22.
 
 ## User Flow
 

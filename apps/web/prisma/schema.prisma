@@ -225,7 +225,7 @@ enum OverrideTargetType {
   student
   teacher
   // Platform-scoped action with no single teacher/student/booking/payment
-  // target, e.g. a UAT probe/reseed/analytics-check run (D-55).
+  // target, e.g. a UAT probe/reseed/analytics-check run (D-25).
   system
   // A LiveKit class room, for the Live Calls admin dashboard's
   // force-end-room / disconnect-participant actions. targetId is the
@@ -240,7 +240,7 @@ enum AdminRole {
   finance
   support
   // Narrow, non-technical roles gated by capability, not rank — see
-  // lib/admin-capabilities.ts and D-55. They rank BELOW support in
+  // lib/admin-capabilities.ts and D-25. They rank BELOW support in
   // ROLE_RANK (lib/admin.ts) so they see nothing via the rank ladder,
   // only whatever capabilities are explicitly granted to them.
   tester
@@ -575,7 +575,7 @@ model Teacher {
   // the private account contact channel (shown only to a student already
   // enrolled with this teacher); publishing a number on the public page is a
   // distinct consent scope and must be opted into on its own, not inherited
-  // from the account field. No automated messaging involved (D-42) — this is
+  // from the account field. No automated messaging involved (the WhatsApp Cloud API integration was removed) — this is
   // a plain wa.me deep-link, same as the kept "share on WhatsApp" buttons.
   // Same DB CHECK format as phoneE164 (teachers_public_whatsapp_e164_format);
   // enforced at the application layer via normalizeE164. Null = no button
@@ -1064,7 +1064,7 @@ model TeacherStudent {
   // framing, so progress is shared deliberately, not always-on.
   shareProgress             Boolean   @default(false) @map("share_progress")
   // Lesson-insights consent gate (D-22). Capturing a student's voice for the
-  // insights pipeline (D-185/D-21) requires an explicit, recorded consent for
+  // insights pipeline (D-185/D-22) requires an explicit, recorded consent for
   // THIS (teacher, student) pair — the visible recording indicator alone is not
   // treated as sufficient. The teacher records consent per student; `isMinor`
   // flags that a guardian's consent is the one that counts, so a minor is
@@ -3225,7 +3225,7 @@ model AdminUser {
 }
 
 // One row per environment tracking in-progress /admin/uat checklist state
-// (D-55). Ephemeral run tracker, not an audit record — the real audit trail
+// (D-25). Ephemeral run tracker, not an audit record — the real audit trail
 // is the `Override` rows the probe/reseed/PostHog-check/Stripe-check actions
 // write via writeOverride(). If the runbook's checklist items are reordered,
 // `checkedItems` (keyed by document-order index) just resets harmlessly.

@@ -87,7 +87,7 @@ describe("the required status context (D-157)", () => {
   });
 });
 
-describe("code scanning gates on new alerts, not on a check (D-179)", () => {
+describe("code scanning gates on new alerts, not on a check (D-158)", () => {
   const script = withoutComments(read("scripts", "setup-branch-protection.sh"));
 
   it("applies a code_scanning rule for CodeQL on the default branch", () => {

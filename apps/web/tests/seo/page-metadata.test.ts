@@ -177,7 +177,7 @@ describe("legal pages — advertised only in the languages they exist in", () =>
   });
 
   // The policy is one English document rendered from @spiralclass/shared
-  // (legal copy is never machine-translated — D-81, D-128). Its metadata — the
+  // (legal copy is never machine-translated — D-81, D-22). Its metadata — the
   // browser tab and the search snippet, which are chrome rather than legal
   // text — follows the URL's language, but every URL canonicalises to the
   // English one.

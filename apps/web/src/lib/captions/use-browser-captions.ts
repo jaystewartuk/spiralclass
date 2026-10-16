@@ -77,7 +77,7 @@ export function useBrowserCaptions({
   downloadProgress: number | null;
   // D-185: captions are on and this class's lines are being kept as its
   // transcript for lesson insights. Rendered to both participants, since a
-  // capture nobody can see is what D-21 forbids.
+  // capture nobody can see is what D-22 forbids.
   transcriptKept: boolean;
   // Call synchronously inside the teacher's toggle click (see
   // installOnDeviceModels for why it cannot wait).

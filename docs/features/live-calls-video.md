@@ -296,7 +296,7 @@ That lasts until preview has a LiveKit server of its own.
 24. **Both participants are told "Learning notes are on"** each time lines
     start being kept, and see a small notes icon beside the lesson clock for
     as long as they are; tapping it says what is kept (caption text, no
-    audio) and links to the privacy notice (D-21). The transcript is kept while the teacher's
+    audio) and links to the privacy notice (D-22). The transcript is kept while the teacher's
     account is open and deleted with it.
 25. Not every call gets a transcript — only when captions are on, the flag is
     on, and the consent above is on file. The legacy egress-audio path

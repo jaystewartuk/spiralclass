@@ -13,7 +13,7 @@
 //     draft was worth keeping.
 //
 // Counts only, never content — the admin sees pipeline status and figures, not
-// what was said in a lesson (D-23). Test accounts are left out of every figure
+// what was said in a lesson (D-22). Test accounts are left out of every figure
 //. `LessonInsight` does not record which model produced it, so this
 // cannot split by model; the offline evals (lib/evals/) are the before/after
 // measure for a model change.
@@ -63,28 +63,28 @@ export async function getAiQualityMetrics(): Promise<AiQualityMetrics> {
   // AI rows. Teacher-authored rows are her own findings, not the model's.
   const aiInsight = { source: "ai", ...REAL_LESSON };
   const [confirmed, dismissed, pendingInsights] = await Promise.all([
-    // tenancy-exempt: platform-wide AI acceptance figure for the admin overview — counts only (D-23)
+    // tenancy-exempt: platform-wide AI acceptance figure for the admin overview — counts only (D-22)
     prisma.lessonInsight.count({ where: { ...aiInsight, confirmedAt: { not: null } } }),
-    // tenancy-exempt: platform-wide AI acceptance figure for the admin overview — counts only (D-23)
+    // tenancy-exempt: platform-wide AI acceptance figure for the admin overview — counts only (D-22)
     prisma.lessonInsight.count({
       where: { ...aiInsight, confirmedAt: null, dismissedAt: { not: null } },
     }),
-    // tenancy-exempt: platform-wide AI acceptance figure for the admin overview — counts only (D-23)
+    // tenancy-exempt: platform-wide AI acceptance figure for the admin overview — counts only (D-22)
     prisma.lessonInsight.count({ where: { ...aiInsight, confirmedAt: null, dismissedAt: null } }),
   ]);
 
   // A draft a feedback started from counts as used even if a later regenerate
   // marked it discarded — "used" is the stronger verdict.
   const [used, discarded, pendingDrafts] = await Promise.all([
-    // tenancy-exempt: platform-wide AI acceptance figure for the admin overview — counts only (D-23)
+    // tenancy-exempt: platform-wide AI acceptance figure for the admin overview — counts only (D-22)
     prisma.homeworkAiReviewDraft.count({
       where: { ...REAL_HOMEWORK, resultingFeedback: { some: {} } },
     }),
-    // tenancy-exempt: platform-wide AI acceptance figure for the admin overview — counts only (D-23)
+    // tenancy-exempt: platform-wide AI acceptance figure for the admin overview — counts only (D-22)
     prisma.homeworkAiReviewDraft.count({
       where: { ...REAL_HOMEWORK, resultingFeedback: { none: {} }, discardedAt: { not: null } },
     }),
-    // tenancy-exempt: platform-wide AI acceptance figure for the admin overview — counts only (D-23)
+    // tenancy-exempt: platform-wide AI acceptance figure for the admin overview — counts only (D-22)
     prisma.homeworkAiReviewDraft.count({
       where: { ...REAL_HOMEWORK, resultingFeedback: { none: {} }, discardedAt: null },
     }),

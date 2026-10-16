@@ -65,7 +65,7 @@ on a runner for every pull request and every push to `main`
 ([D-157](../decisions/D-157.md)), and `pnpm gate:full` runs it locally. It is
 still not a required status check.
 
-### Code scanning — a ruleset, not a required check ([D-179](../decisions/D-179.md))
+### Code scanning — a ruleset, not a required check ([D-158](../decisions/D-158.md))
 
 The script also turns on **private vulnerability reporting** (the route
 `SECURITY.md` promises) and **CodeQL default setup**, then applies a ruleset

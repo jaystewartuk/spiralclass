@@ -314,7 +314,7 @@ export interface StripeClient {
     paymentIntentId: string,
     connectedAccountId?: string,
   ): Promise<SettledCharge | null>;
-  // Read-only retrieve used by the /admin/uat Stripe check (D-55) to confirm
+  // Read-only retrieve used by the /admin/uat Stripe check (D-25) to confirm
   // charge state directly against Stripe, independent of what our own
   // DB/webhook handling recorded.
   getCharge(chargeId: string, connectedAccountId?: string): Promise<StripeCharge>;

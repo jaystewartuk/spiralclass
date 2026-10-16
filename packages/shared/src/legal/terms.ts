@@ -5,8 +5,8 @@ import type { AppLocale } from "../i18n/locales";
 // Two authored documents: the English one, which is the text that applies,
 // and a Spanish translation of it. They are held here, beside the privacy
 // policy, rather than in the per-locale string catalog: legal text is
-// translated by a person or not at all (D-81, D-128, D-196), and a catalog is
-// where machine translation of legal text has already happened once (D-128).
+// translated by a person or not at all (D-72, D-22), and a catalog is
+// where machine translation of legal text has already happened once (D-22).
 // apps/web/src/app/terms/page.tsx renders them and holds no copy of its own.
 //
 // A translation records which English version it translates. When the English

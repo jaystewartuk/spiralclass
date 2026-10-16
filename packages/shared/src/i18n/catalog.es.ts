@@ -5910,13 +5910,13 @@ export const esMX = {
   "web.admin.lessonInsights.liveWarning.pre":
     "— la voz capturada se está enviando al proveedor de ASR y las transcripciones se están guardando,",
   "web.admin.lessonInsights.liveWarning.strong": "para cada par con consentimiento",
-  "web.admin.lessonInsights.liveWarning.mid": "(D-21/D-22). Solo deben grabarse pares de",
+  "web.admin.lessonInsights.liveWarning.mid": "(D-22). Solo deben grabarse pares de",
   "web.admin.lessonInsights.liveWarning.em": "prueba",
   "web.admin.lessonInsights.liveWarning.midEnd": "con consentimiento; apaga",
   "web.admin.lessonInsights.liveWarning.post": "entre pruebas.",
   "web.admin.lessonInsights.title": "Insights de clase — salud del pipeline",
   "web.admin.lessonInsights.subtitle":
-    "Estado operativo en todos los tenants: captura → transcripción → insights → perfil → resumen. Solo estados y conteos — no se muestra contenido de transcripciones, pronunciación o perfiles aquí (D-21/D-22).",
+    "Estado operativo en todos los tenants: captura → transcripción → insights → perfil → resumen. Solo estados y conteos — no se muestra contenido de transcripciones, pronunciación o perfiles aquí (D-22).",
   "web.admin.lessonInsights.awaitingTranscription": "Capturas esperando transcripción",
   "web.admin.lessonInsights.awaitingTranscriptionHint": 'audio "ready" aún sin transcribir',
   "web.admin.lessonInsights.stuckCaptures": "Capturas atascadas",

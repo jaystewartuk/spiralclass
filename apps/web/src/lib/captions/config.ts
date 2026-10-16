@@ -20,7 +20,7 @@ import { logger } from "@/lib/logger";
 //   2. The explicit enablement flag (LIVE_CAPTIONS_ENABLED) is on. Sending a
 //      live lesson's speech to a browser vendor's recogniser and a translation
 //      service carries the same privacy/consent weight as the transcription
-//      pipeline (D-21/D-22) — the code can ship and the key can be set while
+//      pipeline (D-22) — the code can ship and the key can be set while
 //      the switch stays off.
 //
 // Keys are read straight from process.env (like provider.ts / transcription

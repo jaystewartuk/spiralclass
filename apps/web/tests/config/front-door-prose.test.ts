@@ -91,7 +91,7 @@ function proseOnly(markdown: string): string {
 /**
  * Sentences, flattened across the line wrapping Prettier imposes. Splits on
  * terminal punctuation followed by something that can open a sentence, which
- * keeps "e.g." and "D-42." from splitting mid-thought more often than not —
+ * keeps "e.g." and "D-22." from splitting mid-thought more often than not —
  * an over-split only ever produces a SHORTER candidate, and short candidates
  * fall under the floor rather than becoming false findings.
  */

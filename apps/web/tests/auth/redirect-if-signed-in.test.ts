@@ -84,7 +84,7 @@ describe("redirectIfSignedIn", () => {
     expect(await redirectedTo("/i/abc")).toBeNull();
   });
 
-  it("asks with sign-in intent, never sign-up — visiting the page must not mint a teacher (D-56)", async () => {
+  it("asks with sign-in intent, never sign-up — visiting the page must not mint a teacher (D-40)", async () => {
     getAuthUser.mockResolvedValue({ id: "u1", email: "new@example.com" });
     await redirectedTo(null);
     expect(finalizeSignIn.mock.calls[0]?.[2]).toBe("sign-in");

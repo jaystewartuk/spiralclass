@@ -13,7 +13,7 @@ import { applyE2ESkipGuards, getPrisma, missingEnv, signInAsViaOtp } from "./_he
 // The assertion that matters is NOT "the form saved". It's that connecting the
 // rail changes what a STUDENT sees: the public booking page flips from
 // unlisted (Next's not-found UI — no payout rail fails isPubliclyListed()'s
-// hasPayoutMethod signal, D-104; the response status is still 200 here, this
+// hasPayoutMethod signal; the response status is still 200 here, this
 // build doesn't propagate notFound() to a real 404 status, so the check is
 // content-based) to an actual Wise checkout CTA. Teacher-side persistence and
 // student-side availability are wired through separate code

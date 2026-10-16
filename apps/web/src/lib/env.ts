@@ -266,13 +266,13 @@ const serverSchema = z.object({
   // start is refused until it is on AND egress storage is configured
   // (LIVEKIT_EGRESS_S3_*; lib/video/recording.ts reads this straight from
   // process.env). Recording a live lesson carries the same consent weight as
-  // captioning it (D-21/D-22), hence a flag rather than "on because storage exists".
+  // captioning it (D-22), hence a flag rather than "on because storage exists".
   CLASS_RECORDING_ENABLED: blankAsAbsent(z.string().min(1).optional()),
   // Lesson-insights pronunciation (Phase D, D-185). Azure AI Speech scores the
   // student audio inside the B pipeline; same dormant-until-configured pattern,
   // read straight from process.env. AZURE_SPEECH_KEY/REGION select the vendor;
   // LESSON_INSIGHTS_PRONUNCIATION_ENABLED is the kill-switch. NB this sends voice
-  // to a SECOND vendor — confirm the D-21 legal coverage extends to it first.
+  // to a SECOND vendor — confirm the D-22 legal coverage extends to it first.
   AZURE_SPEECH_KEY: blankAsAbsent(z.string().min(1).optional()),
   AZURE_SPEECH_REGION: blankAsAbsent(z.string().min(1).optional()),
   LESSON_INSIGHTS_PRONUNCIATION_ENABLED: blankAsAbsent(z.string().min(1).optional()),

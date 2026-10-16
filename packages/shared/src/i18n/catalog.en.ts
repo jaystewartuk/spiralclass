@@ -5907,13 +5907,13 @@ export const en = {
   "web.admin.lessonInsights.liveWarning.pre":
     "— captured voice is being sent to the ASR vendor and transcripts stored,",
   "web.admin.lessonInsights.liveWarning.strong": "for every consented pair",
-  "web.admin.lessonInsights.liveWarning.mid": "(D-21/D-22). Only consented",
+  "web.admin.lessonInsights.liveWarning.mid": "(D-22). Only consented",
   "web.admin.lessonInsights.liveWarning.em": "test",
   "web.admin.lessonInsights.liveWarning.midEnd": "pairs should be recorded; turn",
   "web.admin.lessonInsights.liveWarning.post": "off between tests.",
   "web.admin.lessonInsights.title": "Lesson insights — pipeline health",
   "web.admin.lessonInsights.subtitle":
-    "Operational status across every tenant: capture → transcript → insights → profile → brief. Statuses and counts only — no transcript, pronunciation or profile content is shown here (D-21/D-22).",
+    "Operational status across every tenant: capture → transcript → insights → profile → brief. Statuses and counts only — no transcript, pronunciation or profile content is shown here (D-22).",
   "web.admin.lessonInsights.awaitingTranscription": "Captures awaiting transcription",
   "web.admin.lessonInsights.awaitingTranscriptionHint": '"ready" audio not yet transcribed',
   "web.admin.lessonInsights.stuckCaptures": "Stuck captures",

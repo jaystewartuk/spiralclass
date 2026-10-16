@@ -7,7 +7,7 @@ import { logger } from "@/lib/logger";
 const log = logger({ surface: "purge-recordings" });
 
 // Closing a teacher's account destroys her class recordings and everything
-// derived from them (D-136).
+// derived from them (D-22).
 //
 // The privacy policy already promised this and the code did not do it. The
 // retention table in packages/shared/src/legal/privacy-policy.ts has said, since
@@ -118,7 +118,7 @@ export async function purgeTeacherRecordings(
   if (result.objectsFailed > 0) {
     // Loud, because nothing retries this: the deletion request is marked
     // complete either way, so a stranded object stays stranded until someone
-    // reads this line. Accepted and written down in D-136 rather than papered
+    // reads this line. Accepted and written down in D-22 rather than papered
     // over with a retry queue no one would watch.
     log.error("recording purge left objects behind", undefined, { teacherId, ...result });
   } else {

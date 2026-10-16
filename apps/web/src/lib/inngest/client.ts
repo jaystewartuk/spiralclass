@@ -90,7 +90,7 @@ export type Events = {
       locale: "en" | "es";
     };
   };
-  // /admin/uat's Reseed button (D-55) — reseeding is slow/bulk, so it runs
+  // /admin/uat's Reseed button (D-25) — reseeding is slow/bulk, so it runs
   // as a background job rather than blocking the admin request. Preview-only;
   // see lib/uat/env-targets.ts's assertReseedAllowed() and seed.ts's own
   // assertNotProductionTarget() for the guards.

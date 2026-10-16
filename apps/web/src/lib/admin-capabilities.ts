@@ -4,7 +4,7 @@ import type { AdminRole } from "@prisma/client";
 // lib/admin.ts (ROLE_RANK). `tester`/`engineer` rank BELOW `support` there so
 // they see nothing via rank — access to any capability-gated page comes
 // exclusively from being listed here. Add more capabilities as new tools
-// ship; one map, one place to touch. See D-55.
+// ship; one map, one place to touch. See D-25.
 export type AdminCapability = "uat:run" | "schema:view";
 
 // Every capability, so superadmin implicitly gets new ones without needing a

@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 // The AI acceptance figures on the admin overview (D-201): confirmed-over-
 // decided for lesson insights, used-over-decided for homework drafts. Counts
-// only (D-23), test accounts out.
+// only (D-22), test accounts out.
 
 const insightCount = vi.fn(async (..._: unknown[]) => 0);
 const draftCount = vi.fn(async (..._: unknown[]) => 0);

@@ -294,7 +294,7 @@ disabledAt }`. `role` is one of `superadmin`, `finance`, `support`,
 - `Override` — the audit-log entity every admin mutation writes to.
 - `LessonInsight`, `HomeworkAiReviewDraft` — the AI acceptance figures on the
   Overview (kept over decided, with the unreviewed count beside it), counts
-  only and never content ([D-23](../decisions/D-23.md),
+  only and never content ([D-22](../decisions/D-22.md),
   [D-201](../decisions/D-201.md)); test accounts are left out.
 
 ## Edge Cases
