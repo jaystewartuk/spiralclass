@@ -356,7 +356,7 @@ export type ServerEvent = WithSessionId<
         // still measurable.
         scheme?: string;
         priceMinorUnits: number;
-        // How many people the package was bought for (D-188) — 1, or 2 for a
+        // How many people the package was bought for (D-149) — 1, or 2 for a
         // package for two — so the two prices can be told apart in a funnel.
         seats?: number;
         // Which surface initiated the purchase: the anonymous booking-page
@@ -471,7 +471,7 @@ export type ServerEvent = WithSessionId<
       properties: {
         teacherId: string;
         bookingId: string;
-        // "always" = sendTiming null (D-69) — attached with no push schedule,
+        // "always" = sendTiming null — attached with no push schedule,
         // just visible on the class page.
         sendTiming: "confirmation" | "t_5d" | "t_24h" | "t_1h" | "always";
         attachmentKind: "file" | "link";
@@ -677,7 +677,7 @@ export type ServerEvent = WithSessionId<
         hasFormat: boolean;
         focusCount: number;
         hasTopic: boolean;
-        // D-69 — whether a saved lesson template's structure drove this
+        // Whether a saved lesson template's structure drove this
         // generation, mirroring class_content_generated's usedTemplate.
         usedTemplate: boolean;
       };

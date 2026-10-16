@@ -66,7 +66,7 @@ test.describe("every rail at once", () => {
     test.setTimeout(120_000);
     await page.goto("/b/paula-pagos/buy");
 
-    // Her primary template is singleClass, so D-111's rule applies: the pay
+    // Her primary template is singleClass, so the pay-at-reservation rule applies: the pay
     // button stays disabled until a slot is chosen, and (since 2026-08-30) the
     // picker sits ABOVE it so the blocking copy's "above" is true.
     await expect(page.getByText(/Pick a class time above to continue/i)).toBeVisible();

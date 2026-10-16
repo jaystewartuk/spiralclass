@@ -6,7 +6,7 @@
 # ⚠️ WHAT THIS DELIBERATELY DOES NOT DO, and each omission is load bearing
 # rather than unfinished:
 #
-#   * NO Neon checkpoint (D-95) and NO migrations. scripts/database-deploy.sh
+#   * NO Neon checkpoint (D-178) and NO migrations. scripts/database-deploy.sh
 #     owns both, and deploy-production.yml runs it as the `database` job this
 #     job `needs:`. One commit, one migration run, in the job that checkpoints
 #     first. ⚠️ FROM A LAPTOP that ordering is yours to keep: if the commit

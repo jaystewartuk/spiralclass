@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-// In-class live notes server actions (D-15). The security-relevant invariant is
+// In-class live notes server actions. The security-relevant invariant is
 // that every action is tenant-scoped: a teacher can only write notes on
 // a booking they own, and can only edit/delete/reorder/toggle notes reachable
 // through one of their own bookings. These tests pin the exact `where` clauses

@@ -37,7 +37,7 @@ import { revalidateAfterAction } from "@/lib/revalidate";
 import { createT } from "@spiralclass/shared";
 
 // The material library (docs/features/library-materials.md;
-// merged with per-class materials at D-69, docs/features/library-materials.md).
+// merged with per-class materials, docs/features/library-materials.md).
 //
 // One table, two scopes, discriminated by `bookingId`:
 //   * reusable library items (bookingId null) — level-gated, browsable, files
@@ -755,7 +755,7 @@ export async function deleteLibraryMaterialAction(formData: FormData): Promise<v
     body: material.body,
   });
   await prisma.libraryMaterial.delete({ where: { id: material.id } });
-  // A booking-scoped row (D-69) renders on its class page instead of the
+  // A booking-scoped row renders on its class page instead of the
   // library list, and the delete is issued from whichever of the two the
   // teacher is looking at. One revalidation, for that page.
   revalidateAfterAction(
@@ -777,7 +777,7 @@ async function verifyAssignmentTargets(
       where: { teacherId_studentId: { teacherId, studentId } },
       select: { studentId: true },
     }),
-    // Reusable items only — a booking-scoped material (D-69) is private to
+    // Reusable items only — a booking-scoped material is private to
     // its class and never assignable to a student's notebook.
     prisma.libraryMaterial.findFirst({
       where: { id: materialId, teacherId, bookingId: null },

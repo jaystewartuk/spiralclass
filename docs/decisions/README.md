@@ -173,32 +173,26 @@ application-level checking — a partial unique index and two `EXCLUDE`
 constraints, not a pre-flight check — and where two defaults were reversed once
 someone worked out what they actually cost a student.
 
-| #                   | Decision                                                                                       |
-| ------------------- | ---------------------------------------------------------------------------------------------- |
-| [D-08](./D-08.md)   | The reschedule cap moves to a per-package budget — the per-booking one was trivially dodged    |
-| [D-09](./D-09.md)   | **Credits are drawn soonest-to-expire first**, server-side, not newest-first by the client     |
-| [D-12](./D-12.md)   | Classes complete at their end time; "no-show" is the only manual divergence                    |
-| [D-53](./D-53.md)   | Each availability rule is frozen in the zone it was written in                                 |
-| [D-111](./D-111.md) | Package guest booking is "pick your first class" — full guest booking needs a third auth state |
-| [D-149](./D-149.md) | Group classes are one booking with many attendees, because the exclusion constraint says so    |
-| [D-188](./D-188.md) | **A package can be sold for two** — one buyer, one account, its own credit balance             |
+| #                   | Decision                                                                                    |
+| ------------------- | ------------------------------------------------------------------------------------------- |
+| [D-53](./D-53.md)   | Each availability rule is frozen in the zone it was written in                              |
+| [D-149](./D-149.md) | Group classes are one booking with many attendees, because the exclusion constraint says so |
 
 ### Identity, authentication and access
 
 A student can belong to several teachers, which is the single most consequential
 modelling decision in the product and shapes every query in the student tree.
 
-| #                   | Decision                                                                                                  |
-| ------------------- | --------------------------------------------------------------------------------------------------------- |
-| [D-25](./D-25.md)   | Superadmin hardened: mandatory MFA, append-only audit at the database, attributed impersonation           |
-| [D-38](./D-38.md)   | Teacher and Student are mutually exclusive per auth identity — a payee is not a payer                     |
-| [D-40](./D-40.md)   | **Replace Supabase Auth with better-auth on our own tables** — auth travels with the database             |
-| [D-55](./D-55.md)   | An admin capability layer beneath the rank ladder, and a runbook that is a page, not a doc                |
-| [D-56](./D-56.md)   | `/sign-in` never auto-provisions a teacher; intent comes from the page, never from a miss                 |
-| [D-83](./D-83.md)   | Teacher → student invitations: hashed tokens, one pending per pair, idempotent acceptance                 |
-| [D-104](./D-104.md) | Public listing gates on Marketplace Ready, not on having submitted the wizard                             |
-| [D-175](./D-175.md) | **Tenant scoping is checked by a parser, not by a reader** — a ratchet, and five decoys it fails          |
-| [D-176](./D-176.md) | **The tenant a request is entitled to is carried, not inferred** — the query cannot supply its own answer |
+| #                   | Decision                                                                                         |
+| ------------------- | ------------------------------------------------------------------------------------------------ |
+| [D-25](./D-25.md)   | Superadmin hardened: mandatory MFA, append-only audit at the database, attributed impersonation  |
+| [D-38](./D-38.md)   | Teacher and Student are mutually exclusive per auth identity — a payee is not a payer            |
+| [D-40](./D-40.md)   | **Replace Supabase Auth with better-auth on our own tables** — auth travels with the database    |
+| [D-55](./D-55.md)   | An admin capability layer beneath the rank ladder, and a runbook that is a page, not a doc       |
+| [D-56](./D-56.md)   | `/sign-in` never auto-provisions a teacher; intent comes from the page, never from a miss        |
+| [D-83](./D-83.md)   | Teacher → student invitations: hashed tokens, one pending per pair, idempotent acceptance        |
+| [D-104](./D-104.md) | Public listing gates on Marketplace Ready, not on having submitted the wizard                    |
+| [D-175](./D-175.md) | **Tenant scoping is checked by a parser, not by a reader** — a ratchet, and five decoys it fails |
 
 ### Video and real time
 
@@ -247,18 +241,15 @@ which is a separate control from the flag that turns the capability on.
 The recurring line: the platform owns the machinery, the teacher owns the
 method. No platform curriculum, ever.
 
-| #                   | Decision                                                                                     |
-| ------------------- | -------------------------------------------------------------------------------------------- |
-| [D-14](./D-14.md)   | Teacher-private notes get their own table and never enter the audit trail                    |
-| [D-15](./D-15.md)   | Note visibility is a time window derived from the booking, not a toggle someone can forget   |
-| [D-17](./D-17.md)   | Native structured content, not distributed PDFs; AI authoring in-house and Pro-gated         |
-| [D-20](./D-20.md)   | **Inputs are teacher-owned seeded rows, not a platform curriculum library**                  |
-| [D-46](./D-46.md)   | A teacher's own lesson template drives AI compose — wire the primitive, don't bake a method  |
-| [D-69](./D-69.md)   | `ClassContent` + `ClassMaterial` collapse into `LibraryMaterial` behind two nullable columns |
-| [D-78](./D-78.md)   | Account-level AI style as presets plus a bounded note — never a raw editable system prompt   |
-| [D-80](./D-80.md)   | Vocabulary difficulty is its own axis; CEFR level was doing double duty as a rarity dial     |
-| [D-93](./D-93.md)   | Homework review and AI-assist architecture — designed first, then built in slices            |
-| [D-107](./D-107.md) | Materials opens on a level picker: level is the only mandatory, single-valued, ordered axis  |
+| #                   | Decision                                                                                    |
+| ------------------- | ------------------------------------------------------------------------------------------- |
+| [D-17](./D-17.md)   | Native structured content, not distributed PDFs; AI authoring in-house and Pro-gated        |
+| [D-20](./D-20.md)   | **Inputs are teacher-owned seeded rows, not a platform curriculum library**                 |
+| [D-46](./D-46.md)   | A teacher's own lesson template drives AI compose — wire the primitive, don't bake a method |
+| [D-78](./D-78.md)   | Account-level AI style as presets plus a bounded note — never a raw editable system prompt  |
+| [D-80](./D-80.md)   | Vocabulary difficulty is its own axis; CEFR level was doing double duty as a rarity dial    |
+| [D-93](./D-93.md)   | Homework review and AI-assist architecture — designed first, then built in slices           |
+| [D-107](./D-107.md) | Materials opens on a level picker: level is the only mandatory, single-valued, ordered axis |
 
 ### Notifications and messaging
 
@@ -321,8 +312,6 @@ and exercised for real when the provider actually changed.
 
 | #                   | Decision                                                                                                                                                  |
 | ------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [D-11](./D-11.md)   | Migrations are applied by hand, never by a deploy                                                                                                         |
-| [D-18](./D-18.md)   | …and re-coupled, because the named risk bit: code shipped ahead of its schema                                                                             |
 | [D-26](./D-26.md)   | A staging tier and a gated promote — `main` stops deploying to production                                                                                 |
 | [D-43](./D-43.md)   | Rename staging → preview, and the two silent outages the rename actually caused                                                                           |
 | [D-49](./D-49.md)   | **Provision · schema · data as three independently reproducible layers**                                                                                  |
@@ -333,12 +322,10 @@ and exercised for real when the provider actually changed.
 | [D-76](./D-76.md)   | Maintenance mode is an env var, because a flag you cannot read while the database is down is useless                                                      |
 | [D-85](./D-85.md)   | Non-secret config leaves the host's own format — split on one question: is this a credential?                                                             |
 | [D-89](./D-89.md)   | The cutover, executed — and the decommission that removed the code coupling                                                                               |
-| [D-95](./D-95.md)   | Neon PITR plus a named pre-migration checkpoint branch replaces a dump that gated every deploy                                                            |
 | [D-115](./D-115.md) | Collapse the cron wake grid; serve the tight leg with a delayed-event chain                                                                               |
 | [D-127](./D-127.md) | Image generation moves to Vertex AI — the consumer API gates on a prepay balance                                                                          |
 | [D-139](./D-139.md) | **Delete the OpenTofu modules that were never applied** — they assert a state nobody reconciled                                                           |
 | [D-150](./D-150.md) | Measure the latency before taking the free box, and keep the database where it is                                                                         |
-| [D-168](./D-168.md) | **46 migrations become two**, split by who writes them — generated baseline, hand-authored invariants                                                     |
 | [D-169](./D-169.md) | **One wrapper owns every Infisical call**, and deployment does not make one — it reads pushed GitHub secrets                                              |
 | [D-170](./D-170.md) | The Codespaces path is **deleted rather than repaired** — a development path with no users is not a feature                                               |
 | [D-177](./D-177.md) | **Vercel returns as a second production target that holds no domain** — the target, not the coupling                                                      |
@@ -405,15 +392,8 @@ records removed before publication — see [What is not here](#what-is-not-here)
 | #                   | Decision                                                              | Status                               |
 | ------------------- | --------------------------------------------------------------------- | ------------------------------------ |
 | [D-05](./D-05.md)   | Early privacy framing                                                 | Superseded by D-128; content removed |
-| [D-08](./D-08.md)   | Reschedule cap → per-package schedule-change budget                   | Active                               |
-| [D-09](./D-09.md)   | Credit consumption is FIFO-by-expiry, server-decided                  | Active                               |
-| [D-11](./D-11.md)   | Migrations applied by hand, never by a deploy                         | Superseded by D-18                   |
-| [D-12](./D-12.md)   | Classes auto-complete at their end time                               | Active                               |
-| [D-14](./D-14.md)   | Teacher-private notes in their own table, never in the audit trail    | Active                               |
-| [D-15](./D-15.md)   | Note visibility by class window; live surfaces Pro-gated              | Active                               |
 | [D-16](./D-16.md)   | Own the call behind a `VideoProvider` seam                            | Active                               |
 | [D-17](./D-17.md)   | Native structured content, not PDFs; AI authoring in-house            | Active (model choice → D-87)         |
-| [D-18](./D-18.md)   | Re-couple production migrations to the deploy                         | Active                               |
 | [D-19](./D-19.md)   | Lesson insights: async, buy the ML, derive-then-discard               | Active (model choice → D-87)         |
 | [D-20](./D-20.md)   | Teacher-owned seeded inputs, not a platform curriculum                | Active (one call → D-72)             |
 | [D-21](./D-21.md)   | Keep-on-opt-in retention + the consent model                          | Active                               |
@@ -438,7 +418,6 @@ records removed before publication — see [What is not here](#what-is-not-here)
 | [D-56](./D-56.md)   | `/sign-in` never auto-provisions a Teacher                            | Active                               |
 | [D-65](./D-65.md)   | R2 buckets split preview/production; env reads consolidated           | Active                               |
 | [D-66](./D-66.md)   | Infisical replaces a plaintext secrets file                           | Active                               |
-| [D-69](./D-69.md)   | `ClassContent`/`ClassMaterial` merge into `LibraryMaterial`           | Active                               |
 | [D-70](./D-70.md)   | Full exit from Supabase and Vercel; history squashed                  | Executed — see D-89                  |
 | [D-72](./D-72.md)   | One registry, `target_language` as BCP-47                             | Active (positioning → D-173)         |
 | [D-73](./D-73.md)   | Self-hosted teacher intro video + AI intro coach                      | Active (model choice → D-87)         |
@@ -455,14 +434,12 @@ records removed before publication — see [What is not here](#what-is-not-here)
 | [D-89](./D-89.md)   | Production cutover executed; Vercel and Supabase decommissioned       | Active (D-177 → D-186)               |
 | [D-93](./D-93.md)   | Homework review / feedback / AI-assist architecture                   | Designed; shipping in slices         |
 | [D-94](./D-94.md)   | Production onto the self-hosted LiveKit box                           | First half reversed → D-182          |
-| [D-95](./D-95.md)   | Neon PITR + pre-migration checkpoint branches                         | Active                               |
 | [D-97](./D-97.md)   | Flashcards, speaking-time analytics, derived-offset bookmarks         | Active                               |
 | [D-104](./D-104.md) | Public listing gates on Marketplace Ready                             | Active                               |
 | [D-106](./D-106.md) | Captions move to a server-side LiveKit agent                          | Superseded by D-185                  |
 | [D-107](./D-107.md) | Materials opens on a level picker                                     | Active                               |
 | [D-108](./D-108.md) | The captions agent ships from a checkout on the box                   | Superseded by D-185                  |
 | [D-110](./D-110.md) | One board in `hq`; this repository carries no backlog                 | Active (location → D-172)            |
-| [D-111](./D-111.md) | Package guest booking is "pick your first class"                      | Decided; not built                   |
 | [D-112](./D-112.md) | Teaching language asked at onboarding                                 | Active                               |
 | [D-114](./D-114.md) | Recording and transcription off; the capture bug it exposed           | Reversed by D-131                    |
 | [D-115](./D-115.md) | Hourly cron grid + a delayed-event wake chain                         | Active                               |
@@ -490,7 +467,7 @@ records removed before publication — see [What is not here](#what-is-not-here)
 | [D-145](./D-145.md) | The manual bank-account rail is removed; Wise stays                   | Active                               |
 | [D-146](./D-146.md) | One heavy job at a time; the laptop becomes a queue                   | Active (in part → D-157/D-161)       |
 | [D-147](./D-147.md) | Regulatory position                                                   | Content removed; finding kept        |
-| [D-149](./D-149.md) | Group classes: one booking, many attendees                            | Scoped; narrowed by D-188 for two    |
+| [D-149](./D-149.md) | Group classes: one booking, many attendees                            | Scoped; narrowed by D-149 for two    |
 | [D-150](./D-150.md) | Hosting measured; the app stays where the database is                 | Decided; partly executed             |
 | [D-151](./D-151.md) | Verified student testimonials the teacher cannot write                | Active                               |
 | [D-153](./D-153.md) | Money columns say `minor_units`                                       | Active                               |
@@ -503,7 +480,6 @@ records removed before publication — see [What is not here](#what-is-not-here)
 | [D-162](./D-162.md) | The runners certify the release                                       | Active                               |
 | [D-163](./D-163.md) | One home for a deploy value — mechanism reversed by its own addendum  | Active                               |
 | [D-164](./D-164.md) | Dead runbooks are deleted, not banner-ed                              | Active                               |
-| [D-168](./D-168.md) | Migration history rebaselined into a generated + a hand-authored file | Active                               |
 | [D-169](./D-169.md) | One wrapper owns every Infisical call; deploys make none              | Active                               |
 | [D-170](./D-170.md) | The Codespaces path is deleted, not repaired                          | Active                               |
 | [D-171](./D-171.md) | One visual baseline set, owned by ubuntu-latest                       | Active                               |
@@ -511,7 +487,6 @@ records removed before publication — see [What is not here](#what-is-not-here)
 | [D-173](./D-173.md) | Any subject in the copy; the schema stays language-shaped             | Active                               |
 | [D-174](./D-174.md) | A server action revalidates exactly one path                          | Active                               |
 | [D-175](./D-175.md) | Tenant scoping is checked by a parser, not by a reader                | Active                               |
-| [D-176](./D-176.md) | The tenant is carried from the auth gate, not taken from the query    | Active                               |
 | [D-177](./D-177.md) | Vercel is a second production target; it holds no domain              | Reversed → D-186                     |
 | [D-178](./D-178.md) | Migrations expand; contracts ship a release later, marked CONTRACT    | Active                               |
 | [D-179](./D-179.md) | CodeQL scans every PR; main refuses a merge that adds an alert        | Active                               |
@@ -523,7 +498,6 @@ records removed before publication — see [What is not here](#what-is-not-here)
 | [D-185](./D-185.md) | Live captions run in the browsers; a computer covers a phone          | Active (supersedes D-106, D-108)     |
 | [D-186](./D-186.md) | The Vercel failover is retired; Cloud Run is the only target          | Active (reverses D-177)              |
 | [D-187](./D-187.md) | Video on a free e2-micro; recording and transcription off again       | Active (transcription → D-189)       |
-| [D-188](./D-188.md) | Packages for two: one buyer, one account, a separate credit balance   | Active (narrows D-149)               |
 | [D-189](./D-189.md) | The transcript is the browsers' caption text; no audio is captured    | Active (partly reverses D-187)       |
 | [D-190](./D-190.md) | A liveness probe restarts a wedged Cloud Run instance                 | Active                               |
 | [D-193](./D-193.md) | One URL per language on public pages; bare URL is English             | Active                               |
@@ -551,19 +525,32 @@ migrations, cite the live record instead.
 | D-01  | [D-143](./D-143.md) — Payment processor moved from Mercado Pago to Stripe Connect, each teacher paid into her own Stripe account                                    |
 | D-02  | retired: OXXO cash vouchers were removed for slow settlement; OXXO now appears through the teacher's own Stripe account                                             |
 | D-03  | [packages](../features/packages.md) — Removed recurring monthly student subscriptions in favour of one-off packages                                                 |
+| D-08  | [scheduling](../features/scheduling-booking.md) — The reschedule cap became a pooled per-package schedule-change budget                                             |
+| D-09  | [packages](../features/packages.md) — Several packages are consumed FIFO by expiry through one credit ledger                                                        |
+| D-11  | [D-178](./D-178.md) — Migrations applied by hand, never by a deploy (reversed within weeks)                                                                         |
+| D-12  | [scheduling](../features/scheduling-booking.md) — Classes complete at their end time; no-show is the only manual label                                              |
+| D-14  | [student management](../features/student-management.md) — Teacher-private student notes live in their own table, never in the audit trail                           |
+| D-15  | [classes and lesson content](../features/classes-lesson-content.md) — Live-notes student visibility is a class window; writing free, live surfaces Pro              |
+| D-18  | [D-178](./D-178.md) — Production migrations re-coupled to the deploy after code shipped ahead of its schema                                                         |
 | D-30  | [packages](../features/packages.md) — A single class is sold as a one-class package, paid at reservation and auto-booked on payment                                 |
 | D-37  | [referrals and discounts](../features/referrals-discounts.md) — Discount codes are the single, teacher-funded reward primitive for referrals, with no credit ledger |
 | D-50  | [D-143](./D-143.md) — Capture the billing address at checkout; Stripe Tax stays behind an off-by-default flag                                                       |
 | D-58  | [D-143](./D-143.md) — Platform Stripe entity moved to the UK; the Connect gate widened to the cross-border payout circle                                            |
 | D-64  | [D-153](./D-153.md) — Teacher-chosen pricing currency, captured once at onboarding from a curated list                                                              |
+| D-69  | [library materials](../features/library-materials.md) — ClassContent and ClassMaterial merged into LibraryMaterial                                                  |
 | D-86  | [admin portal](../features/admin-portal.md) — Admin unit-economics estimate layer: pricing as data, a GBP view, estimates never mixed with actuals                  |
+| D-95  | [D-178](./D-178.md) — Neon PITR plus a pre-migration checkpoint branch replaced the pg_dump-to-R2 deploy gate                                                       |
 | D-96  | [subscriptions](../features/subscriptions.md) — Kept code-defined plans and one entitlements resolver; closed the enforcement gaps                                  |
 | D-99  | [D-153](./D-153.md) — Platform subscription billing currency moved from MXN to GBP                                                                                  |
+| D-111 | [packages](../features/packages.md) — A package buyer may pick the first class before paying; no sessionless booking                                                |
 | D-113 | [D-145](./D-145.md) — Manual rail made generic: the payee instrument is data, not a payment provider                                                                |
 | D-124 | [D-145](./D-145.md) — Bank-account instrument backed by a 15-scheme per-country registry                                                                            |
 | D-137 | [D-143](./D-143.md) — The platform never collects and forwards student money; teacher-held card links were in scope                                                 |
 | D-144 | [D-143](./D-143.md) — Student checkout stopped requiring a full address; buy page reordered around the buyer                                                        |
 | D-152 | [D-143](./D-143.md) — The teacher is told Stripe's fee is Stripe's; public copy quotes no percentage                                                                |
+| D-168 | [D-178](./D-178.md) — Migration history squashed to two files: a generated baseline and hand-written invariants                                                     |
+| D-176 | [D-175](./D-175.md) — The tenant a request is entitled to is carried from the auth gate to a runtime Prisma extension                                               |
+| D-188 | [D-149](./D-149.md) — Packages for two: one buyer, one account, its own credit balance                                                                              |
 | D-191 | [payments](../features/payments.md) — Money screens lead with what was earned this month, not a "safe to spend" average                                             |
 | D-192 | [admin portal](../features/admin-portal.md) — Operator test accounts are flagged and left out of every figure                                                       |
 | D-197 | [D-153](./D-153.md) — Prices are written in the reader's number format; the currency never changes                                                                  |

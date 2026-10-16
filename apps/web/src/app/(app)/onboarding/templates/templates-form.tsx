@@ -249,7 +249,7 @@ export function TemplatesForm({
   soldByTemplateId?: Record<string, number>;
   emptyDescription?: string;
   /**
-   * Packages for two (D-188). Settings only, like the subject: onboarding
+   * Packages for two (D-149). Settings only, like the subject: onboarding
    * leaves it null and the controls out, and the hidden inputs still post each
    * row's two-person prices so an onboarding re-save never drops them.
    *

@@ -68,7 +68,7 @@ const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/
 // One transaction, ordered so foreign keys never block:
 //   1. notifications referencing this teacher's bookings/payments (no FK, but
 //      they'd otherwise dangle and break the in-app inbox re-render).
-//   2. booking-scoped library_materials (child of bookings — D-69 merge of
+//   2. booking-scoped library_materials (child of bookings — the merge of
 //      the old class_materials table; also covers each booking's content
 //      material) — cascade would handle it, kept explicit so the count is
 //      visible.
@@ -125,7 +125,7 @@ async function main() {
     prisma.package.count({ where: { teacherId } }),
     prisma.booking.count({ where: { teacherId } }),
     prisma.payment.count({ where: { package: { teacherId } } }),
-    // Booking-scoped rows only (D-69 merge) — a reusable library item
+    // Booking-scoped rows only (the merged materials table) — a reusable library item
     // (bookingId null) isn't part of this teacher's booking cleanup.
     prisma.libraryMaterial.count({ where: { teacherId, bookingId: { not: null } } }),
     prisma.notification.count({
@@ -165,7 +165,7 @@ async function main() {
       },
     });
     // Deleting bookings cascades their booking-scoped library_materials
-    // (D-69); deleting packages cascades payments (both FKs are ON DELETE
+    // (the merged materials table); deleting packages cascades payments (both FKs are ON DELETE
     // CASCADE). We still delete bookings before packages because
     // bookings.package_id is ON DELETE RESTRICT.
     const delBookings = await tx.booking.deleteMany({ where: { teacherId } });

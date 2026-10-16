@@ -218,7 +218,7 @@ describe("materialStyleSchema (shared)", () => {
   });
 });
 
-// Packages for two (D-188): a missing or garbled seat count is one person, so
+// Packages for two (D-149): a missing or garbled seat count is one person, so
 // nothing a stale page posts can make a checkout dearer.
 describe("checkout intents — seats and the partner confirmation", () => {
   const base = {

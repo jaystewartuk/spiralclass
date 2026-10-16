@@ -83,7 +83,7 @@ async function resolveSubject(
 }
 
 // Material-authoring logic (D-17, generalized by the ClassContent/ClassMaterial
-// → LibraryMaterial merge, D-69), factored out of the server actions so the
+// → LibraryMaterial merge), factored out of the server actions so the
 // gating, validation, Pro-cap, and AI pipeline have one implementation.
 // Returns localized messages so each caller just passes the result through.
 // No `revalidatePath` here — that is the action's job.
@@ -118,7 +118,7 @@ async function findOwnedBooking(teacherId: string, bookingId: string) {
 // The app layer treats "content" as a single slot per booking — at most one
 // body-bearing, never-scheduled (sendTiming null) material — mirroring the old
 // ClassContent row's UNIQUE booking_id even though the shared table no longer
-// enforces that in the DB (D-69: a booking could in principle hold several
+// enforces that in the DB (a booking could in principle hold several
 // body-bearing materials; the UI just doesn't offer that yet).
 async function findContentMaterial(teacherId: string, bookingId: string) {
   return prisma.libraryMaterial.findFirst({
@@ -1078,7 +1078,7 @@ export async function nextPositionInLevel(teacherId: string, levelId: string): P
 // three content types, docs/features/library-materials.md follow-up). Unlike
 // a file/link item — delete-and-re-add, unchanged — a content material's body
 // can now be edited in place, same as the booking-scoped one, sharing the
-// same version-history log (materialId is already generic, D-69).
+// same version-history log (materialId is already generic).
 
 export type SaveLibraryContentResult =
   | { ok: true; materialId: string }
@@ -1283,7 +1283,7 @@ export async function saveMaterialAttachment(input: {
   unit?: string | null;
   storagePath?: string | null;
   linkUrl?: string | null;
-  // Booking-scoped only. Null = always visible, no push (D-69) — the teacher
+  // Booking-scoped only. Null = always visible, no push — the teacher
   // explicitly chose not to schedule a notification for this attachment.
   sendTiming?: MaterialSendTiming | null;
   locale: AppLocale;

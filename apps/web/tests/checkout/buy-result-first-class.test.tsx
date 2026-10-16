@@ -7,7 +7,7 @@ import * as React from "react";
 (globalThis as Record<string, unknown>).React = React;
 
 // /b/[slug]/buy/result — pins HOW the page decides the picked first class
-// (D-111 pay-at-reservation intent) actually landed.
+// (pay-at-reservation intent) actually landed.
 //
 // The booking core spends the soonest-to-expire credit across EVERY active
 // package the student holds with the teacher (lib/booking/credit-ledger), so a

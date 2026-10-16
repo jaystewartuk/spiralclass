@@ -335,7 +335,7 @@ And **applied migrations are never edited**, not even a comment: Prisma
 checksums each file, so any drift breaks `migrate deploy`.
 
 Migrations run behind a **Neon checkpoint branch**
-([D-95](docs/decisions/D-95.md)), because a code rollback alone never undoes a
+([D-178](docs/decisions/D-178.md)), because a code rollback alone never undoes a
 schema change. The restore path is a documented script, not a plan.
 
 → [`docs/architecture/data-model.md`](docs/architecture/data-model.md)

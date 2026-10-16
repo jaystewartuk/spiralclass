@@ -1,5 +1,5 @@
 // AI compose prompt builder for materials (D-17 Phase 2, generalized by the
-// ClassContent/LibraryMaterial merge — D-69, docs/features/library-materials.md).
+// ClassContent/LibraryMaterial merge — docs/features/library-materials.md).
 //
 // Pure + side-effect-free so it's unit-testable without the Anthropic SDK. One
 // builder now serves both outputs ("one AI plumbing, two outputs"):

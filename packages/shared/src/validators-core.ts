@@ -241,7 +241,7 @@ export const packageTemplateSchema = z
     transferPriceMinorUnits: z
       .union([z.literal("").transform(() => undefined), z.coerce.number().int().nonnegative()])
       .optional(),
-    // The price for two people (D-188). Absent = not sold for two. Never a
+    // The price for two people (D-149). Absent = not sold for two. Never a
     // stand-in 0: a free two-person package is expressible, "not offered" is
     // the absence of a price.
     twoPersonPriceMinorUnits: z
@@ -337,7 +337,7 @@ export const checkoutIntentSchemaWith = (loc: Loc) => {
     templateId: z.string().uuid(),
     // The student picks a slot before paying; its UTC start rides through
     // checkout and the auto-book-on-paid job turns it into a booking once
-    // payment lands. Since D-111 that applies to any offering — required for a
+    // payment lands. That applies to any offering — required for a
     // single class (the slot IS the reservation), optional "pick your first
     // class" for a package — so absent means "not picked", not "package buy".
     // A missing field arrives as null (FormData.get) or "" (the hidden input),
@@ -377,13 +377,13 @@ export const checkoutIntentSchemaWith = (loc: Loc) => {
       (v) => (v === null || v === "" ? undefined : v),
       z.string().trim().max(40).optional(),
     ),
-    // How many people the package is for (D-188). Absent, "", or anything but
+    // How many people the package is for (D-149). Absent, "", or anything but
     // an exact 2 is one person — see parseSeats — so a missing field can
     // never make a checkout dearer. Whether the template is actually sold for
     // two is checked server-side against the database.
     seats: z.unknown().transform(parseSeats),
     // The buyer's confirmation that the second person agrees to the
-    // lesson-insights terms the buyer chooses (D-188). Required for two
+    // lesson-insights terms the buyer chooses (D-149). Required for two
     // people; startCheckout refuses a two-person checkout without it.
     partnerConsent: z.unknown().transform((v) => v === "1" || v === "on" || v === true),
   });

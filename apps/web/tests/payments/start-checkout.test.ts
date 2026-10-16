@@ -531,7 +531,7 @@ describe("startCheckout — intended slot", () => {
     expect(stored()).toEqual(start);
   });
 
-  // D-111 reversed this: a multi-class package now carries the slot too, as
+  // Reversed when first-class picking reached packages: a multi-class package now carries the slot too, as
   // "pick your first class". It used to be hard-nulled here.
   it("stores the chosen slot on a multi-class package as its first class", async () => {
     await startCheckout(
@@ -556,7 +556,7 @@ describe("startCheckout — intended slot", () => {
   });
 });
 
-// --- Packages for two (D-188) ------------------------------------------------
+// --- Packages for two (D-149) ------------------------------------------------
 
 describe("startCheckout — a package bought for two", () => {
   const forTwo = () =>

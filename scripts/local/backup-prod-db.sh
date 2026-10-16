@@ -13,7 +13,7 @@
 # a copy that lives OUTSIDE Neon entirely, taken deliberately before something
 # risky enough to want one. Take it by hand when you want that; otherwise
 # production's recovery story is Neon's PITR plus the pre-migration checkpoint
-# branch (D-95).
+# branch (D-178).
 #
 # It was .github/workflows/backup-prod-db.yml on a daily cron until D-129
 # deleted every workflow in this repo. Same contract, same verification, same
@@ -22,7 +22,7 @@
 # WHAT THIS IS NOT. It is the secondary, off-Neon disaster-recovery copy — not
 # production's rollback mechanism. That is Neon's own point-in-time restore plus
 # the pre-migration checkpoint branch scripts/database-deploy.sh creates before any
-# migration (D-95, docs/deployment/DB_BACKUP_RESTORE.md). This dump is what
+# migration (D-178, docs/deployment/DB_BACKUP_RESTORE.md). This dump is what
 # survives a Neon-account-level incident, or a bad migration noticed after the
 # PITR window closed.
 #

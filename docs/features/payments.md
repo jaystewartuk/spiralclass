@@ -435,7 +435,7 @@ template)`.
 
 - **Earned** is money for classes taught. Each class earns its package price
   divided by the package's class count. A **no-show counts as earned**, as it
-  does for the earned/paid-in-advance split ([D-12](../decisions/D-12.md)).
+  does for the earned/paid-in-advance split (see [scheduling](scheduling-booking.md), auto-completion).
 - **Paid in advance** is money received for classes she has still to teach,
   on packages that can still be redeemed. It becomes earned as each class is
   taught. A refund would come out of it. This is the "held" amount in the

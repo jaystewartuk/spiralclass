@@ -71,7 +71,6 @@ const DELETED_DOCS = new Set([
   "docs/deployment/HETZNER_PLATFORM.md",
   "docs/deployment/ORACLE_RUNNER.md",
   "docs/deployment/SELF_HOSTED_RUNNER.md",
-  "docs/engineering/DEVELOPMENT_WORKFLOW.md",
   "docs/engineering/TECH_DEBT.md",
   "docs/engineering/integrations/whatsapp.md",
   "docs/engineering/lesson-insights.md",

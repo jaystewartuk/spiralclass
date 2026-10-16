@@ -60,15 +60,15 @@ pnpm local:status        # when did the probes and the sweep last pass?
 
 ## What runs where
 
-| Job                                                        | Where                                             | How                                                                                  |
-| ---------------------------------------------------------- | ------------------------------------------------- | ------------------------------------------------------------------------------------ |
-| Merge gate (format · typecheck · lint · unit · audit)      | Laptop, every push · **and** a runner, every PR   | `.githooks/pre-push` → `pnpm gate` (D-119) · `gate.yml` (D-157)                      |
-| Heavy tier (mutation · integration · E2E · visual · image) | Runner, every PR and every push to `main`         | `heavy.yml` (D-161)                                                                  |
-| **Production deploy**                                      | Runner, triggered by promote's push               | `deploy-production.yml` → `database-deploy.sh` → `cloudrun-deploy.sh` (D-157, D-184) |
-| Preview deploy                                             | Nowhere — no preview host today                   | `scripts/oracle-deploy.sh`, once the Oracle box is rebuilt                           |
-| Production synthetic probes                                | Runner, after every production deploy; on demand  | last step of `deploy-production.yml` · `pnpm local synthetic`                        |
-| Production DB backup                                       | **Neon** (PITR + pre-migration checkpoints, D-95) | not a local job — see the [D-129](../decisions/D-129.md) addendum                    |
-| Time-bomb sweep                                            | Laptop, on demand                                 | `pnpm local sweep`                                                                   |
+| Job                                                        | Where                                              | How                                                                                  |
+| ---------------------------------------------------------- | -------------------------------------------------- | ------------------------------------------------------------------------------------ |
+| Merge gate (format · typecheck · lint · unit · audit)      | Laptop, every push · **and** a runner, every PR    | `.githooks/pre-push` → `pnpm gate` (D-119) · `gate.yml` (D-157)                      |
+| Heavy tier (mutation · integration · E2E · visual · image) | Runner, every PR and every push to `main`          | `heavy.yml` (D-161)                                                                  |
+| **Production deploy**                                      | Runner, triggered by promote's push                | `deploy-production.yml` → `database-deploy.sh` → `cloudrun-deploy.sh` (D-157, D-184) |
+| Preview deploy                                             | Nowhere — no preview host today                    | `scripts/oracle-deploy.sh`, once the Oracle box is rebuilt                           |
+| Production synthetic probes                                | Runner, after every production deploy; on demand   | last step of `deploy-production.yml` · `pnpm local synthetic`                        |
+| Production DB backup                                       | **Neon** (PITR + pre-migration checkpoints, D-178) | not a local job — see the [D-129](../decisions/D-129.md) addendum                    |
+| Time-bomb sweep                                            | Laptop, on demand                                  | `pnpm local sweep`                                                                   |
 
 **There is still no scheduler**, and no cron either. A launchd agent was
 considered and not built: it is a schedule nobody owns, and a shut laptop

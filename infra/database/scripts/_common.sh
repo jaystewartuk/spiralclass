@@ -64,7 +64,7 @@ ensure_neon_auth() {
     - a stored credential:  neonctl auth      (opens a browser once, per machine)
     - or an explicit key:   export NEON_API_KEY=…   (console.neon.tech > Account settings > API keys)
   Refusing to continue: the pre-migration checkpoint is what makes a bad
-  migration recoverable (D-95), so it is never skipped."
+  migration recoverable (D-178), so it is never skipped."
 }
 
 # Strip the password from a postgres URL so it is safe to print.

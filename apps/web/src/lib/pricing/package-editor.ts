@@ -29,7 +29,7 @@ export type PackageDraft = {
   priceMinorUnits: number;
   /** null = no manual-rail discount (the transfer price inherits the card price). */
   transferPriceMinorUnits: number | null;
-  /** The price for two people (D-188). null = not sold for two. */
+  /** The price for two people (D-149). null = not sold for two. */
   twoPersonPriceMinorUnits: number | null;
   /** The non-card price for two. null = the two-person price on every rail. */
   twoPersonTransferPriceMinorUnits: number | null;

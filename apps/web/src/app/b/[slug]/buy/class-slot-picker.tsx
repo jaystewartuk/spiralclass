@@ -35,7 +35,7 @@ function addDaysYmd(ymd: string, n: number): string {
 // server re-validates the slot when the payment lands (auto-book-on-paid), so
 // this is a convenience surface, not the source of truth.
 //
-// Used by both offerings since D-111, and `optional` is the whole difference:
+// Used by both offerings, and `optional` is the whole difference:
 // for a single class the slot IS the reservation and checkout blocks without
 // it; for a multi-class package this picks the FIRST class only, the rest are
 // booked from the portal, and skipping it must stay a first-class path rather

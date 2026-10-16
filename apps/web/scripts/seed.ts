@@ -320,7 +320,7 @@ type TemplateSpec = {
   classCount: number;
   priceMinorUnits: number;
   expirationMonths: number;
-  // Pay-at-reservation (D-111): checkout refuses money until a time is chosen,
+  // Pay-at-reservation: checkout refuses money until a time is chosen,
   // and the slot picker moves above the pay button. Distinct from classCount 1
   // — see class-offering.ts for why those are two different questions.
   singleClass?: boolean;
@@ -877,7 +877,7 @@ export function heroSpecs(): HeroSpec[] {
       //     a non-zero saving to show;
       //   * a singleClass template, so pay-at-reservation is reachable — the
       //     slot picker moves ABOVE the pay button and checkout refuses money
-      //     until a time is chosen (D-111, and the buy page's ordering rule);
+      //     until a time is chosen (and the buy page's ordering rule);
       //   * testimonials, which the landing page has always rendered and the
       //     checkout has rendered since 2026-08-30, and which no seed teacher had.
       key: "paulapagos",

@@ -1,4 +1,4 @@
-// Packages for two (D-188). A package can be bought once, by one buyer, for two
+// Packages for two (D-149). A package can be bought once, by one buyer, for two
 // people who take every class together — a couple, two siblings. The pair is
 // one student account, one package and one booking per class; what "for two"
 // changes is the price, the credit pool it spends from, and a consent note.

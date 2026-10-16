@@ -53,7 +53,7 @@ const CLAIM_GATES: Record<string, string[]> = {
   "web.landing.ai.captions": ["LIVE_CAPTIONS_ENABLED"],
   "web.features.item.liveCaptions": ["LIVE_CAPTIONS_ENABLED"],
 
-  // AI-drafted class content (D-17, D-69). No flag: it is Pro-entitlement and
+  // AI-drafted class content (D-17). No flag: it is Pro-entitlement and
   // quota gated, and every new teacher starts on the Pro trial. Credential-
   // gated only (ANTHROPIC_API_KEY, in Infisical), and it degrades to a hidden
   // control rather than a broken promise — hence the empty array.

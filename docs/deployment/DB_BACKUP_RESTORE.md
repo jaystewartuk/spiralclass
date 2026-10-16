@@ -2,7 +2,7 @@
 
 This is the operator runbook for production database safety: what protects
 production today, how to check on it, and the fastest safe recovery procedure
-if a migration or bad data change needs undoing. Rewritten 2026-07-20 (D-95)
+if a migration or bad data change needs undoing. Rewritten 2026-07-20 (D-178)
 after the D-70 Fly + Neon cutover was confirmed executed (D-89) — production
 is now confirmed on Neon (see "How do I know production is actually on Neon?"
 below), which changes the right primary mechanism from a pg_dump snapshot to
@@ -66,9 +66,9 @@ that gives up (a Neon-account-level incident, and anything noticed after the
 PITR window closes) is written down in the addendum. The rest of this section
 describes the script as it stands. A `pg_dump -Fc` → verify →
 upload-to-R2 job (`scripts/local/backup-prod-db.sh`), same contract as before
-D-95, and **run by hand from the operator's machine** — D-129 deleted
+the July 2026 move to Neon checkpoints, and **run by hand from the operator's machine** — D-129 deleted
 `backup-prod-db.yml` along with every other workflow. It does not gate a deploy
-and never did after D-95. Run it before something risky enough to want a copy
+and never did after that move. Run it before something risky enough to want a copy
 that survives a Neon-account-level incident or outlives Neon's PITR retention
 window, and otherwise about weekly. It is not routine deploy hygiene; Neon's
 PITR + the checkpoint branch cover that faster and more reliably (and without

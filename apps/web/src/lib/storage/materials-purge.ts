@@ -5,7 +5,7 @@ import { MATERIALS_BUCKET } from "./signed-urls";
 // — class materials auto-purge. One year after a class ends, file
 // attachments come down: the storage object is deleted (best-effort) and the
 // row is removed. Scoped to booking-scoped file attachments only (bookingId
-// set, storagePath set — D-69 merge of the old class_materials table),
+// set, storagePath set — the merge of the old class_materials table),
 // whether on a push schedule or "always visible" (sendTiming set or null); a
 // reusable library item (bookingId null) or a class's content (body set,
 // never a storagePath) is never touched by this job — storagePath alone

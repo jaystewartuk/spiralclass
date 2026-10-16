@@ -12,7 +12,7 @@ wired into this repo yet), so this is an operator runbook, not IaC.
 
 **Neon needs no special handling at all.** `apps/web/prisma/migrations/` holds
 two migrations with zero Supabase-specific SQL — a generated schema baseline
-and the hand-authored Postgres invariants beside it ([D-168](../../../docs/decisions/D-168.md);
+and the hand-authored Postgres invariants beside it ([D-178](../../../docs/decisions/D-178.md);
 the Supabase-era RLS, `auth.uid()`/`auth.users`, `anon`/`authenticated` grants
 and the Realtime publication went at the 2026-07-13 squash, D-70). So a fresh
 Neon database just runs `prisma migrate deploy` like any other environment —
@@ -146,7 +146,7 @@ keeping so neither is re-derived:
 1. **The agent harness's permission layer** — the thing that prompts on, or
    refuses, a destructive command. This is the real control, and unlike the two
    above it is not routed around by holding a different connection string.
-2. **Neon PITR plus the D-95 pre-migration checkpoint branch**
+2. **Neon PITR plus the D-178 pre-migration checkpoint branch**
    (`infra/database/scripts/neon-rollback.sh`) — recovery, for when something
    does get through.
 
@@ -172,7 +172,7 @@ and now refuses up front if retention no longer fits under the ceiling, so a
 forgotten rehearsal branch turns into a legible error before the deploy rather
 than a "branches limit exceeded" during it.
 Exhausting the ceiling is not a soft failure — the checkpoint is the first step
-of the production deploy job and D-95 refuses to migrate without one, so it
+of the production deploy job and D-178 refuses to migrate without one, so it
 soft-locks production deploys entirely. That happened on 2026-07-29 (fixed in
 `fea9542c` by pruning before creating); don't recreate it from the other
 direction.
@@ -192,7 +192,7 @@ for your current plan."_ Launch allows 2, Scale 5.
 
 **The risk this accepts:** nothing on Neon's side stops the production branch
 being deleted or reset by whatever holds a management credential. The
-compensating control is Neon's PITR plus the D-95 pre-migration checkpoint,
+compensating control is Neon's PITR plus the D-178 pre-migration checkpoint,
 which is what actually recovers the data if it happens — recovery rather than
 prevention, deliberately. See "Neon is left at its defaults" above for why the
 preventive options were dropped instead of stacked.
@@ -227,7 +227,7 @@ protected, so `neon-checkpoint.sh` keeps deleting them normally. Only
 `production` itself becomes undeletable, which is the point.
 
 One thing to re-check before enabling it, if the plan is ever upgraded: the
-D-95 rollback path is `neonctl branches restore production <source>`
+D-178 rollback path is `neonctl branches restore production <source>`
 (`infra/database/scripts/neon-rollback.sh`), and protection blocks `branches
 reset`. Those are different operations, but confirm `restore` still works on a
 protected branch — cheaply, by protecting a throwaway branch on the **preview**

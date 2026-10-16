@@ -16,7 +16,7 @@ type LiveNote = { id: string; body: string };
 //
 // Security is NOT trusted to any client-side signal: router.refresh() always
 // re-runs the server component, which re-applies the server-side audience
-// filter + the class-window gate (D-15) on every poll.
+// filter + the class-window gate on every poll.
 export function StudentLiveNotes({
   notes,
   windowOpen,

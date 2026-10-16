@@ -964,7 +964,7 @@ describe("saveTemplatesAction — the settings return path", () => {
   });
 });
 
-// Packages for two (D-188). The editor posts the price for two alongside each
+// Packages for two (D-149). The editor posts the price for two alongside each
 // row, index-aligned, and the teacher-wide percent once.
 describe("saveTemplatesAction — prices for two", () => {
   const rows = ["tpl-1", "tpl-2", "tpl-3", "tpl-4"].map((id) => ({

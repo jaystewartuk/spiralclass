@@ -35,7 +35,7 @@ type Template = {
   classDurationMin: number;
   priceMinorUnits: number;
   transferPriceMinorUnits: number | null;
-  // The prices for two people (D-188); null when not sold for two.
+  // The prices for two people (D-149); null when not sold for two.
   twoPersonPriceMinorUnits: number | null;
   twoPersonTransferPriceMinorUnits: number | null;
   expirationMonths: number | null;
@@ -144,7 +144,7 @@ export function PurchaseFlow({
   testimonial: CheckoutTestimonial | null;
   templates: Template[];
   initialTemplateId?: string;
-  // `?seats=2` from the booking page's "Two of us" list (D-188).
+  // `?seats=2` from the booking page's "Two of us" list (D-149).
   initialSeats?: Seats;
   stripeReady: boolean;
   // Already filtered to the offerable ones by the page (D-145). One option is

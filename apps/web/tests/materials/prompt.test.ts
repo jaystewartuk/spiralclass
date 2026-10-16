@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { CALLOUT_VARIANTS } from "@spiralclass/shared";
 import { buildMaterialPrompt, buildMaterialRefinePrompt } from "@/lib/materials/prompt";
 
-// AI compose prompt builder (D-17 Phase 2, merged at D-69 — one builder now
+// AI compose prompt builder (D-17 Phase 2, merged with library generation — one builder now
 // serves both a single class's content (forClass: true) and a standalone
 // reusable library material (forClass: false)).
 
