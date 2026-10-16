@@ -119,7 +119,7 @@ export const timezoneSchemaWith = (loc: Loc) => {
     // Settings, because a null value is not inert: `ensureTeacherFocusTags`
     // seeds the generic pack off it on first read and D-17 seeding is
     // additive, so a language set later stacks its pack on top of the wrong
-    // one instead of replacing it (D-112).
+    // one instead of replacing it (D-72).
     //
     // **Required in the onboarding form, optional at this schema layer.** The
     // onboarding action enforces it server-side. The schema-level optionality

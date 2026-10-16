@@ -44,7 +44,7 @@ export default async function TransferInstructionsPage({
 }) {
   const { slug, ref } = await params;
   // The funnel's language is the teacher's choice for her buyers, and so is
-  // the number format of the amount (D-194, D-153).
+  // the number format of the amount (D-72, D-153).
   const locale = publicFunnelLocaleFor(await funnelLocaleForSlug(slug));
   const t = getPublicFunnelT(locale);
 

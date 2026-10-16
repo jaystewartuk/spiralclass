@@ -9,7 +9,7 @@ import { REPO_ROOT, walkTree } from "./_tree";
  *
  * WHY THIS EXISTS. Nothing checked doc paths, and they rotted in silence
  * through three separate events: the 2026-07-24 reorg moved `docs/ops/*` and
- * `docs/engineering/*` into purpose-grouped folders, [D-110](../../../../docs/decisions/D-110.md)
+ * `docs/engineering/*` into purpose-grouped folders, [D-164](../../../../docs/decisions/D-164.md)
  * deleted every backlog document, and a workspace deletion took another set. Each
  * left the references behind. By 2026-09-06 there were 278 dangling pointers:
  * 87 to documents that had simply MOVED (one of them in an admin UI string a
@@ -22,7 +22,7 @@ import { REPO_ROOT, walkTree } from "./_tree";
  *
  * WHAT THE BASELINE IS. The remaining entries name documents that were
  * DELETED, not moved — verified by following each one's rename chain through
- * git to a `docs/archive/` grave that D-110 then emptied. What is left is
+ * git to a `docs/archive/` grave that D-164 then emptied. What is left is
  * overwhelmingly `docs/decisions/`, where "retiring `docs/launch/UAT_PRELAUNCH.md`"
  * is a TRUE statement about a deletion and repointing it would falsify the
  * record.
@@ -64,19 +64,13 @@ const DOC_PATH = /(?<![A-Za-z0-9_/.-])docs\/[A-Za-z0-9_/-]+\.[A-Za-z0-9]+/g;
 /**
  * Paths that name a DELETED document. Each was chased through git: every one
  * was renamed into `docs/archive/` by the 2026-07-24 reorg and deleted with
- * that tree by D-110 (#803), or deleted outright by #1046 (a whole
+ * that tree by D-164 (#803), or deleted outright by #1046 (a whole
  * workspace), #1090 (obsolete deployment runbooks) or #703 (the LiveKit box moving
  * to Tofu). None has a successor in the tree, so none can be repointed.
  *
  * Shrink this by rewriting the prose that mentions them. Do not grow it.
  */
-const DELETED_DOCS = new Set([
-  "docs/deployment/HETZNER_PLATFORM.md",
-  "docs/deployment/ORACLE_RUNNER.md",
-  "docs/deployment/SELF_HOSTED_RUNNER.md",
-  "docs/engineering/TECH_DEBT.md",
-  "docs/ops/FLY_SPIKE.md",
-]);
+const DELETED_DOCS = new Set([]);
 
 function isTextFile(name: string): boolean {
   return TEXT_FILE.test(name) || BARE_TEXT_FILES.has(name);

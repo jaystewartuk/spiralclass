@@ -128,7 +128,7 @@ describe("setLocaleAction", () => {
   });
 });
 
-// The switcher on a public page whose URL names its language (D-193): the
+// The switcher on a public page whose URL names its language (D-72): the
 // cookie cannot change that page, so the client loads the chosen language's
 // URL itself, and needs to know which language the choice resolved to.
 describe("chooseLocaleAction", () => {

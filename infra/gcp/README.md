@@ -7,7 +7,7 @@ scripts here run rarely and by the operator**, because each of them creates or
 writes something a CI job must not be able to.
 
 Not an OpenTofu module, and deliberately so — the same call
-[D-139](../../docs/decisions/D-139.md) made about the Oracle box. What these
+[D-164](../../docs/decisions/D-164.md) made about the Oracle box. What these
 scripts create is created once, changes almost never, and is easier to read as
 prose than as state that drifts from a console nobody remembers using.
 

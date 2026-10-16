@@ -1225,7 +1225,7 @@ export type ServerEvent = WithSessionId<
     }
   // --- Video call analytics audit follow-up — everything below closes a gap a
   // pre-launch video-call analytics review found (that review was deleted with
-  // the other planning documents under D-110; these events are the record). `call_started`/`call_participant_left`/`call_recording_started`
+  // the other planning documents under D-164; these events are the record). `call_started`/`call_participant_left`/`call_recording_started`
   // above predate the audit and are unchanged. ---
   | {
       // The webhook counterpart `call_started`/`call_participant_left` were

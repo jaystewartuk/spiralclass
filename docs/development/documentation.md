@@ -36,7 +36,7 @@ plus a Supabase upgrade item that D-70 had made meaningless.
 
 So:
 
-- **Work owed is an issue** on this repository ([D-172](../decisions/D-172.md)),
+- **Work owed is an issue** on this repository ([D-164](../decisions/D-164.md)),
   carrying what is wrong and a **Done when** line, so a pull request can close it
   and the closing is the only bookkeeping. Not a markdown list here, and — the
   planning board's own rule — an undated idea is an issue, never a board row.

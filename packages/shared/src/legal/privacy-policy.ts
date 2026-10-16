@@ -5,7 +5,7 @@
 //      different controllers under different countries' law; one source
 //      removes that class of bug outright.
 //   2. Legal copy is authored in English and is NOT machine-translated —
-//      the standing rule from D-81. Keeping the text out of the i18n catalog is
+//      the standing rule from D-72. Keeping the text out of the i18n catalog is
 //      how that rule is enforced structurally instead of remembered. (The page
 //      it replaces broke exactly this: its Spanish and English variants were
 //      keyed `…privacy.es.*` / `…privacy.en.*` inside a per-locale catalog, so

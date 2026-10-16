@@ -10,7 +10,7 @@ R2 bucket via bare `AWS_ACCESS_KEY_ID`/`AWS_SECRET_ACCESS_KEY` auth points
 `tofu init -backend-config=` at the **one shared, committed
 [`backend.hcl.example`](./backend.hcl.example)**, copied to a gitignored `backend.hcl`, in this directory — currently
 `cloudflare-r2` alone (`oracle-runner` also did, until it was deleted for
-never having been applied — D-139; `database/supabase` also did, until it
+never having been applied — D-164; `database/supabase` also did, until it
 was retired — D-70 — and removed from the repo; `hetzner-runner` also did,
 until it was replaced by a standalone infrastructure repo and removed). It carries only
 `bucket` and `endpoints` (the R2 account id embedded in the endpoint URL);
@@ -80,7 +80,7 @@ runbook (`infra/database/RUNBOOK.md`) is Neon's now — see
 Tofu module.
 
 The `oracle-runner` and `cloudflare` Tofu modules were both deleted in
-[D-139](../docs/decisions/D-139.md): neither had ever been applied, neither
+[D-164](../docs/decisions/D-164.md): neither had ever been applied, neither
 had a state file, and both asserted a configuration that had really been
 built and changed by hand. The Cloudflare Access gate is described in
 [`docs/deployment/DOCS_SITE.md`](../docs/deployment/DOCS_SITE.md).

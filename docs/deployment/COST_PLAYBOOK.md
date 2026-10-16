@@ -258,7 +258,7 @@ run lint`, so setting `TURBO_TOKEN`/`TURBO_TEAM` in the shell environment still
   measured
   capacity ceiling is ~15-20 concurrent 2-participant rooms before packet
   loss (measured in the LiveKit spike; its runbook was deleted by
-  [D-110](../decisions/D-110.md), the number is the part worth keeping) — then shared across both
+  [D-164](../decisions/D-164.md), the number is the part worth keeping) — then shared across both
   environments (D-16). The deferred cost is a purpose-built box once real
   concurrent load from a second/third teacher approaches that ceiling — see
   `ORACLE_LIVEKIT_PRODUCTION.md`'s "What this means going forward" for the

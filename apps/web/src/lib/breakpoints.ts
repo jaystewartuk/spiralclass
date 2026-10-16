@@ -6,51 +6,23 @@
  * `.table-stack` row-to-card collapse, the Sentry widget offset), and the
  * tests that guard both.
  *
- * ## Why these numbers and not Tailwind's defaults
+ * ## Why these numbers
  *
- * Tailwind ships `sm:640 md:768 lg:1024`, which puts EVERY tablet — 744px in
- * portrait at the narrow end, 1280px in landscape at the wide end — on the
- * desktop side of the first two breakpoints. That is the wrong call for this
- * product:
+ * They are Tailwind's defaults, plus two pointer-gated screens for the app
+ * shell (D-140). An earlier scale moved every breakpoint above the widest
+ * tablet (1281px) so a tablet got the phone layout; it also gave the phone
+ * layout to every laptop window narrower than 1281px, and was withdrawn. A
+ * width cannot tell a 1280px tablet from a 1280px window; `pointer: fine` can.
  *
- *  - A tablet is a TOUCH device. The `sm:` variants on the form primitives are
- *    the mouse affordances (`h-11 lg:h-10` on Button/Input/Select — a 44px
- *    touch target shrinking to a 40px pointer target; `text-base lg:text-sm` —
- *    16px, the size that stops mobile Safari zooming the page on focus,
- *    dropping to 14px). Firing those on a tablet hands a finger the controls
- *    drawn for a cursor.
- *  - A tablet is NARROW. The page shells cap their reading width for a desktop
- *    line length (`container max-w-2xl` / `max-w-3xl`), which on a phone is
- *    inert — the cap is wider than the viewport — but on a 1280px landscape
- *    tablet leaves ~256px of empty gutter on each side of the content.
- *
- * So the scale is shifted wholesale: nothing fires below `DESKTOP_MIN_WIDTH`,
- * and a tablet renders exactly what a phone renders — full-bleed, single
- * column, touch-sized. See docs/decisions/D-122.md.
- *
- * ## The threshold
- *
- * `TABLET_MAX_WIDTH` is the widest viewport still treated as a tablet, taken
- * from real device CSS widths rather than a round number:
+ * Real device CSS widths the tests still check against:
  *
  *   744 × 1133  iPad mini 6
  *   820 × 1180  iPad 10th gen / iPad Air 11"
  *   834 × 1194  iPad Pro 11"
- *   800 × 1280  the 800×1280dp Android tablet class — the widest of them.
- *               THIS IS THE ONE THAT MATTERS: the teacher works from an Amazon
- *               Fire HD 10 (9th gen), whose 1920×1200 panel at a 1.5 device
- *               pixel ratio is exactly 800 × 1280 CSS px. Held in a stand, in
- *               landscape, she is at 1280 — one pixel under the threshold.
- *
- * `DESKTOP_MIN_WIDTH` is one pixel past it, because CSS `min-width: N` MATCHES
- * a viewport of exactly N — at 1280px a `min-width: 1280px` query is already
- * live, which would hand the most common Android tablet in landscape the
- * desktop layout, i.e. precisely the bug this scale exists to fix.
- *
- * Deliberately on the desktop side: the 12.9" iPad Pro and Surface-class
- * devices (1366 / 1368 landscape). They share a width with the classic
- * 1366×768 laptop, so no threshold can separate them, and at 13" the desktop
- * layout is the better of the two answers.
+ *   800 × 1280  the 800×1280dp Android tablet class, including the Amazon
+ *               Fire HD 10 (9th gen) the first teacher works from: 1280 wide
+ *               in landscape. It gets the touch shell because it has no fine
+ *               pointer, not because of its width.
  */
 
 /** Widest viewport (CSS px) that still gets the full-bleed touch layout. */
@@ -65,9 +37,9 @@ export const TABLET_MAX_WIDTH = 1023;
 export const DESKTOP_MIN_WIDTH = TABLET_MAX_WIDTH + 1;
 
 /**
- * Tailwind's default scale, restored (D-141, superseding D-122).
+ * Tailwind's default scale, restored (D-140).
  *
- * D-122 replaced this wholesale — `sm` and `md` both moved to 1281px so every
+ * An earlier scale (August 2026) replaced this wholesale — `sm` and `md` both moved to 1281px so every
  * tablet got the phone layout, `lg` to 1440 and `xl` to 1680, plus a bespoke
  * `roomy` at 640. The reasoning was that a tablet is a touch device and should
  * not inherit mouse-sized targets.
@@ -84,14 +56,15 @@ export const DESKTOP_MIN_WIDTH = TABLET_MAX_WIDTH + 1;
  * does without opening a file first.
  */
 /**
- * A note on touch, because it is the thing D-122 was really trying to express.
+ * A note on touch, because it is the thing the withdrawn 1281px scale was
+ * really trying to express.
  *
  * "Is this a finger?" is not a width question, and answering it with one is
  * what forced every tablet onto the phone layout. The width tells you how much
  * room there is; `@media (pointer: coarse)` tells you what is pointing at it.
- * Target sizing belongs to the second — and under D-140 the minimum is 44px
- * everywhere regardless, so a landscape tablet on the desktop layout is not
- * handed mouse-sized controls.
+ * Target sizing belongs to the second. Note that Button, Input and Select are
+ * 44px below `lg` and shrink to 40px (`lg:h-10`) by width alone, so a
+ * landscape tablet 1024px or wider is handed 40px controls (D-140).
  *
  * Use these breakpoints for layout. Use `pointer: coarse` if a control ever
  * needs to grow beyond the standing minimum.
@@ -102,8 +75,8 @@ export const SCREENS = {
   lg: `${DESKTOP_MIN_WIDTH}px`,
   /**
    * The shell switches to its sidebar layout: wide enough, AND being pointed at
-   * with a mouse. This is the query D-122 actually wanted and could not say in
-   * a width alone.
+   * with a mouse. This is the query the withdrawn 1281px scale actually
+   * wanted and could not say in a width alone.
    *
    * It resolves two real observations at once. A laptop with a window narrower
    * than 1281px used to get the stacked phone layout — which is most

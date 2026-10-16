@@ -1,6 +1,6 @@
 import type { AppLocale } from "@spiralclass/shared";
 
-// The site-wide social card, one URL per language (D-193). Rendered by
+// The site-wide social card, one URL per language (D-72). Rendered by
 // app/social-card/[locale]/route.tsx.
 
 export const SOCIAL_CARD_SIZE = { width: 1200, height: 630 } as const;

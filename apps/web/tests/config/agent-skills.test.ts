@@ -121,7 +121,7 @@ describe("/issue keeps the rules that make filing safe on a public repository", 
 
 describe("/pr closes the loop /issue opens", () => {
   it("tells a session to write Closes #N when a PR finishes an issue", () => {
-    // D-172 chose Issues because a merged PR closes one without anybody
+    // D-164 chose Issues because a merged PR closes one without anybody
     // editing a list. That only holds if the PR says so.
     expect(skill("pr")).toContain("Closes #N");
   });

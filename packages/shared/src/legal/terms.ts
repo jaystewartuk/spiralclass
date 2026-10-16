@@ -1,6 +1,6 @@
 import type { AppLocale } from "../i18n/locales";
 
-// The Terms of Service, as data (#178 step A5, D-196).
+// The Terms of Service, as data (#178 step A5, D-72).
 //
 // Two authored documents: the English one, which is the text that applies,
 // and a Spanish translation of it. They are held here, beside the privacy
@@ -325,7 +325,7 @@ export const SPANISH_TERMS: TermsDocument = {
 
 /**
  * The translations that exist, by the locale they are written for. Legal text
- * is translated by a person (D-196); adding one is an entry here, and the
+ * is translated by a person (D-72); adding one is an entry here, and the
  * hreflang set and the page follow.
  */
 const TRANSLATIONS: Readonly<Partial<Record<AppLocale, TermsDocument>>> = {

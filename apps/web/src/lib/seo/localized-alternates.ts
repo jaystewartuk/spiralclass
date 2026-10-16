@@ -7,7 +7,7 @@ import {
   type AppLocale,
 } from "@spiralclass/shared";
 
-// The canonical URL and the hreflang set for a localized public page (D-193).
+// The canonical URL and the hreflang set for a localized public page (D-72).
 //
 // A page is advertised only in the languages its content exists in. The
 // chrome around a page is translated everywhere, but a search engine indexes
@@ -16,7 +16,7 @@ import {
 // says so here, and its other URLs canonicalise to the default one.
 
 const DOCUMENT_LANGUAGES: Readonly<Record<string, readonly AppLocale[]>> = {
-  // English, plus each translation that is current (D-196): a translation
+  // English, plus each translation that is current (D-72): a translation
   // behind the English is not advertised as the terms.
   "/terms": termsLanguages(),
   // English only (D-22).

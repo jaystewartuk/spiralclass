@@ -36,7 +36,7 @@ download link — see "Images" below.
 This page absorbed the two specs it was written from — the taxonomy spec
 (tagging, AI-generate, attach, auto-surface) and the original
 level-gated library design. Both were deleted with the rest of the backlog
-by [D-110](../decisions/D-110.md); what was current in them is here, and
+by [D-164](../decisions/D-164.md); what was current in them is here, and
 what was stale went with them.
 
 ## User Stories

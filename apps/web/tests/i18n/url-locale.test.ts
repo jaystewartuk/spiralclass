@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-// D-193: on a public page the URL names the language, and the middleware hands
+// D-72: on a public page the URL names the language, and the middleware hands
 // it on as `x-locale`. These pin the request-scoped helpers that read it.
 
 const request = vi.hoisted(() => ({

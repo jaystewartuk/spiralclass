@@ -6,7 +6,7 @@
 # AWS CLI) — it was never updated when the box's role moved to LiveKit-only.
 # The box already exists and this script's normal job (create-from-scratch)
 # shouldn't be needed again barring an Oracle reclamation; if it ever is,
-# NOTE (2026-08-29, D-139): `infra/oracle-runner` is deleted — it was never
+# NOTE (2026-08-29, D-164): `infra/oracle-runner` is deleted — it was never
 # applied. Rebuild by hand from docs/deployment/ORACLE_BOX_REBUILD.md.
 # The historical alternative was `infra/oracle-runner` (Tofu, pointed at the correct
 # `docs/deployment/oracle-livekit-cloud-init.sh`) instead of this script, or update

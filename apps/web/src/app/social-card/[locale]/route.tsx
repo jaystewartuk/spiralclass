@@ -14,7 +14,7 @@ import { BRAND_DOMAIN, BRAND_WORDMARK } from "@spiralclass/shared";
 // card sends no cookie and no Accept-Language. It was the file convention
 // `app/opengraph-image.tsx`, which has one URL, so every page's card was
 // English — `/es/pricing` previewed as an English card under a Spanish title
-// (D-193). The page names its card through `socialCardImages()`.
+// (D-72). The page names its card through `socialCardImages()`.
 //
 // Cached for a day, not a year. Next's `ImageResponse` defaults to
 // `immutable`, which is safe only for a URL carrying a content hash, and this

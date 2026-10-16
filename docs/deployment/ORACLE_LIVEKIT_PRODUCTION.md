@@ -18,7 +18,7 @@
 > [`ORACLE_BOX_REBUILD.md`](./ORACLE_BOX_REBUILD.md) and
 > [`infra/oracle-box/`](../../infra/oracle-box/README.md); the
 > `infra/oracle-runner` module this document repeatedly points at was deleted
-> in [D-139](../decisions/D-139.md), so the "the plan" column and the Tofu apply
+> in [D-164](../decisions/D-164.md), so the "the plan" column and the Tofu apply
 > steps below must not be followed.
 
 **Status: destroyed (2026-09-19).** It went live on 2026-07-21, verified
@@ -28,7 +28,7 @@ Caddy held a real Let's Encrypt cert. It served preview from 2026-07-21 and, as
 of 2026-07-21, production too — both environments shared this ONE box — until
 2026-09-16 left only production holding a key pair for it ([D-16](../decisions/D-16.md)).
 The capacity numbers it operated under came from the LiveKit spike, whose
-runbook [D-110](../decisions/D-110.md) deleted (the video architecture audit the
+runbook [D-164](../decisions/D-164.md) deleted (the video architecture audit the
 old header also cited is not in the tree either); the ~15-20-room ceiling quoted
 below is the part worth keeping.
 
@@ -38,7 +38,7 @@ Read this before assuming any part of the box comes from the repo.
 
 | Layer                                   | How it worked (to 2026-09-19)                                                                                                                                                                             | The plan                                                 |
 | --------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------- |
-| Compute, network, firewall, DNS         | Provisioned **by hand** on 2026-07-21. An OpenTofu module was written for it and never applied, then deleted ([D-139](../decisions/D-139.md)); `infra/oracle-box` is the current, also-unapplied attempt. | Apply it; the box becomes rebuildable from `tofu apply`. |
+| Compute, network, firewall, DNS         | Provisioned **by hand** on 2026-07-21. An OpenTofu module was written for it and never applied, then deleted ([D-164](../decisions/D-164.md)); `infra/oracle-box` is the current, also-unapplied attempt. | Apply it; the box becomes rebuildable from `tofu apply`. |
 | LiveKit / Egress / Caddy / Redis config | Rendered onto the box **by hand** in `~/oracle-livekit-production/`. It has since drifted from `services/*.tftpl` (secrets moved into a box-local `.env`).                                                | Rendered by Tofu at apply time.                          |
 | Upstream images                         | `docker compose pull`, tracking `:latest`.                                                                                                                                                                | Unchanged, or pinned — open question.                    |
 
@@ -318,7 +318,7 @@ production's pair is `infra/oracle-box/CUTOVER.md` step 9.
 **Provisioning a box from scratch, or a full config/toolchain refresh, is a
 hand operation** — see [`ORACLE_BOX_REBUILD.md`](./ORACLE_BOX_REBUILD.md).
 It used to say this went "through Tofu now"; it never did. The module was
-deleted in [D-139](../decisions/D-139.md) and the `tofu apply -replace` block
+deleted in [D-164](../decisions/D-164.md) and the `tofu apply -replace` block
 that stood here has been removed rather than left to be copied at 2am.
 
 Config changes on the running box are made in place, over Tailscale SSH, in
@@ -413,7 +413,7 @@ Tofu state:
    manual steps, and the runbook gives the order. This step used to read
    `cd infra/oracle-runner && $INFISICAL tofu apply` and claim one apply
    recreated all of it; that module was never applied and is now deleted
-   ([D-139](../decisions/D-139.md)). Alternatively,
+   ([D-164](../decisions/D-164.md)). Alternatively,
    stand up the Hetzner box this was always meant to graduate to (see
    "Risk-acceptance record" above) — this is the natural moment to make
    that move instead of re-provisioning the same free-tier box again.

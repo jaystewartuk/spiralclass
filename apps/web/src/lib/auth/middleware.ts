@@ -70,7 +70,7 @@ export async function updateSession(request: NextRequest) {
   requestHeaders.set("x-pathname", request.nextUrl.pathname);
   requestHeaders.set("Content-Security-Policy", buildCsp(nonce));
 
-  // One URL per language for the public pages (D-193). `x-locale` is how the
+  // One URL per language for the public pages (D-72). `x-locale` is how the
   // URL's language reaches getPreferredLocale, which reads it before the
   // cookie — so it is deleted from every incoming request first. A client
   // sending its own would otherwise choose the language of any page.
