@@ -1,0 +1,18 @@
+{
+  "surface": "homework-review",
+  "name": "history-answer-not-language",
+  "about": "A content answer about the causes of a historical event, taught by a history tutor; the review must judge the argument and emit no grammar notes.",
+  "input": {
+    "assignmentTitle": "Causes of the 1848 revolutions",
+    "assignmentInstructions": "In 150–200 words, name two causes of the 1848 revolutions in Europe and say which you think mattered more, and why.",
+    "materialExcerpt": "Key causes discussed in class: harvest failures of 1845–47 and food prices; liberal demands for constitutions and wider suffrage; nationalism in the Habsburg lands and the German states; the example of Paris in February 1848.",
+    "attemptText": "Two causes of the 1848 revolutions were the bad harvests and the demand for constitutions. The harvests of 1845 to 1847 failed, so bread was expensive and people in the cities were hungry and angry. At the same time the middle classes wanted liberal reforms like a constitution and the right to vote. I think the harvests mattered more, because hungry people were ready to go into the streets, and the liberals used that anger. Without the food crisis the liberals would have written petitions but there would not have been barricades. When Paris rose in February the news spread fast and other cities copied it, but they copied it because the same hunger was there.",
+    "attachmentTexts": [],
+    "teacherInstructions": "Focus on whether the argument answers the question.",
+    "outputLanguage": "English"
+  },
+  "languageFocused": false,
+  "expect": {
+    "mustMention": ["harvest"]
+  }
+}

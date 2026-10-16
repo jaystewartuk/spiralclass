@@ -5544,6 +5544,10 @@ export const fr = {
   "web.admin.overview.auditOverrides": "Dérogations d'audit",
   "web.admin.overview.grossPaid": "Total brut payé",
   "web.admin.overview.paymentsHint": "{count} paiements",
+  "web.admin.overview.aiInsightsKept": "Observations IA conservées",
+  "web.admin.overview.aiDraftsUsed": "Brouillons IA de devoirs utilisés",
+  "web.admin.overview.aiVerdictsHint":
+    "{kept} conservés · {rejected} rejetés · {pending} non relus",
   "web.admin.overview.refundedPayments": "Paiements remboursés",
   "web.admin.overview.queuedNotifications": "Notifications en file d'attente",
   "web.admin.overview.failedNotifications": "Notifications échouées",

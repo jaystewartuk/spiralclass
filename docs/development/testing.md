@@ -28,15 +28,16 @@ pnpm --filter @spiralclass/shared test -- src/money.test.ts
 
 There are more than 800 test files. They are not all the same kind of thing.
 
-| Layer                 | Runs                                           | Needs                         | Where                                     |
-| --------------------- | ---------------------------------------------- | ----------------------------- | ----------------------------------------- |
-| **Unit**              | every push, in the fast tier                   | nothing                       | beside the module, or `apps/web/tests/`   |
-| **Integration**       | every PR and every push to `main`, on a runner | Docker + a real Postgres      | `*.integration.test.ts`                   |
-| **End-to-end**        | same                                           | Docker + a production build   | `apps/web/tests/e2e/`                     |
-| **Visual regression** | same                                           | Chromium, committed baselines | `apps/web/tests/visual/`                  |
-| **Accessibility**     | same                                           | Chromium                      | `playwright.a11y.config.ts`               |
-| **Mutation**          | same                                           | nothing                       | `apps/web/scripts/mutation-spotcheck.mjs` |
-| **Production image**  | same                                           | Docker with buildx            | `scripts/ci/image-build.sh`               |
+| Layer                 | Runs                                                                  | Needs                                 | Where                                     |
+| --------------------- | --------------------------------------------------------------------- | ------------------------------------- | ----------------------------------------- |
+| **Unit**              | every push, in the fast tier                                          | nothing                               | beside the module, or `apps/web/tests/`   |
+| **Integration**       | every PR and every push to `main`, on a runner                        | Docker + a real Postgres              | `*.integration.test.ts`                   |
+| **End-to-end**        | same                                                                  | Docker + a production build           | `apps/web/tests/e2e/`                     |
+| **Visual regression** | same                                                                  | Chromium, committed baselines         | `apps/web/tests/visual/`                  |
+| **Accessibility**     | same                                                                  | Chromium                              | `playwright.a11y.config.ts`               |
+| **Mutation**          | same                                                                  | nothing                               | `apps/web/scripts/mutation-spotcheck.mjs` |
+| **Production image**  | same                                                                  | Docker with buildx                    | `scripts/ci/image-build.sh`               |
+| **Model evals**       | by hand, before and after a prompt or model change; never in the gate | an Anthropic key, or recorded outputs | `apps/web/evals/`, `pnpm evals`           |
 
 **Unit** is Vitest, colocated with the module it covers. This is where most of
 the suite lives and it is the only layer fast enough to run while writing code.
@@ -267,6 +268,40 @@ with the teacher's microphone fed a voice file (`DEMO_MIC_WAV`), because
 headless Chrome recognises English on the device; the script's header says
 which two columns to set for that. `tests/marketing/landing-clips.test.ts`
 holds the page's clip names to the files and to a size.
+
+## Model evals
+
+Six files ask a model for words, and every unit test of them mocks the client.
+The evals are how the output itself is measured
+([D-201](../decisions/D-201.md)). They are not tests: a run scores rather than
+passes, spends money, and needs the network, so it is never a gate step. What
+the gate holds is the registry — `apps/web/src/lib/evals/registry.ts` lists
+every call site, `tests/config/ai-evals.test.ts` fails on one that is missing,
+and the surfaces with no eval set are a list that may only shrink.
+
+```bash
+pnpm evals                                   # committed cases, production models
+pnpm evals -- --out before.json              # save the run
+pnpm evals -- --model <candidate> --out after.json --baseline before.json
+pnpm evals -- --record out/a                 # keep every output, for re-scoring
+pnpm evals -- --replay out/a                 # score recorded outputs: no key, no network
+```
+
+A case is a JSON file under `apps/web/evals/cases/<surface>/`: the input the
+surface takes and what a good answer must and must not do, in terms a function
+can check — the student's quoted words were actually said, the timestamp lands
+on the cited line, a pronunciation finding without audio scores has a teacher
+signal, a quoted span in a homework correction appears in the submission.
+Whether a finding is _insightful_ is the teacher's call, and her confirm/dismiss
+verdicts are read back on the admin overview rather than guessed at here.
+
+**Committed cases are synthetic.** A real lesson is personal data; keep those
+outside the repository and point `EVAL_CASES_DIR` at them. The guard rejects
+an email address or a phone number in a committed case.
+
+**A PR that changes a prompt builder or a model constant quotes two runs**, the
+baseline and the change, from `--out` and `--baseline`. A reviewer who does not
+see the numbers asks for them.
 
 ## The rule
 

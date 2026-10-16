@@ -57,8 +57,10 @@ export type RequestHomeworkAiReviewResult =
 
 // Business logic behind the teacher dashboard action, kept out of the route
 // (same pattern as lib/materials/handlers.ts and lib/homework/feedback.ts). Every
-// call creates a NEW draft row (regenerate = call again); nothing here mutates
-// or requires an existing draft.
+// call creates a NEW draft row (regenerate = call again). The attempt's earlier
+// drafts are marked discarded, never deleted: a regenerate is the teacher's
+// verdict on the draft she had, and that verdict is what the AI-quality figure
+// on the admin overview counts (lib/ai/quality-metrics.ts, D-201).
 export async function requestHomeworkAiReview(
   teacher: Teacher,
   attemptId: string,
@@ -162,14 +164,20 @@ export async function requestHomeworkAiReview(
     };
   }
 
-  const created = await prisma.homeworkAiReviewDraft.create({
-    data: {
-      attemptId: attempt.id,
-      teacherId: teacher.id,
-      instructions: teacherInstructions,
-      content: result.content,
-      model: anthropicModel(),
-    },
+  const created = await prisma.$transaction(async (tx) => {
+    await tx.homeworkAiReviewDraft.updateMany({
+      where: { attemptId: attempt.id, teacherId: teacher.id, discardedAt: null },
+      data: { discardedAt: new Date() },
+    });
+    return tx.homeworkAiReviewDraft.create({
+      data: {
+        attemptId: attempt.id,
+        teacherId: teacher.id,
+        instructions: teacherInstructions,
+        content: result.content,
+        model: anthropicModel(),
+      },
+    });
   });
 
   trackServerEvent({

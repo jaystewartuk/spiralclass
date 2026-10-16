@@ -44,6 +44,7 @@
     "backfill:homework-attempts": "dotenv -e ../../config/env/local.runtime.env -- tsx scripts/backfill/homework-attempts.ts",
     "backfill:student-locale": "dotenv -e ../../config/env/local.runtime.env -- tsx scripts/backfill/student-locale.ts",
     "wise:connect": "dotenv -e ../../config/env/local.runtime.env -- tsx scripts/wise/connect-teacher.ts",
+    "evals": "dotenv -e ../../config/env/local.runtime.env -- tsx scripts/evals.ts",
     "format": "prettier --write .",
     "test:coverage": "vitest run --project unit --coverage",
     "mutation:spotcheck": "node scripts/mutation-spotcheck.mjs",

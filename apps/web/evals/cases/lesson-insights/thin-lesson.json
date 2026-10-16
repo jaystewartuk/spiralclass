@@ -1,0 +1,21 @@
+{
+  "surface": "lesson-insights",
+  "name": "thin-lesson",
+  "about": "Three correct greetings and no teacher notes give no grounds for a finding; the prompt says to return few or none rather than invent.",
+  "input": {
+    "studentName": "Noor",
+    "targetLanguage": "fr",
+    "outputLanguage": "Spanish",
+    "utterances": [
+      { "speaker": "teacher", "text": "Bonjour Noor, ça va ?", "atMs": 0 },
+      { "speaker": "student", "text": "Bonjour, ça va bien, merci. Et vous ?", "atMs": 2600 },
+      { "speaker": "teacher", "text": "Très bien. On commence ?", "atMs": 6100 },
+      { "speaker": "student", "text": "Oui, d'accord.", "atMs": 8000 }
+    ],
+    "teacherCues": [],
+    "studentNotes": []
+  },
+  "expect": {
+    "maxFindings": 1
+  }
+}

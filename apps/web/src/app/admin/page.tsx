@@ -6,6 +6,7 @@ import { requireAdmin } from "@/lib/admin";
 import { prisma } from "@/lib/prisma";
 import { formatMinorUnits } from "@/lib/money";
 import { getTeacherSignupSeries } from "@/lib/admin-metrics";
+import { getAiQualityMetrics } from "@/lib/ai/quality-metrics";
 import { NOT_TEST_ACCOUNT, REAL_PACKAGE_WHERE } from "@/lib/marketing/test-accounts";
 import {
   CategoryBarChart,
@@ -14,7 +15,7 @@ import {
   CHART_SERIES_COLOR,
 } from "@/components/ui/chart";
 import { toBarSeries, type ChartDatum } from "@spiralclass/shared";
-import { getT } from "@/lib/i18n";
+import { getPreferredLocale, getT } from "@/lib/i18n";
 
 export default async function AdminOverviewPage() {
   // Authoritative gate: the overview renders platform-wide PII (every tenant's
@@ -76,7 +77,14 @@ export default async function AdminOverviewPage() {
     }),
   ]);
 
-  const signupSeries = await getTeacherSignupSeries(6);
+  const [signupSeries, aiQuality] = await Promise.all([
+    getTeacherSignupSeries(6),
+    getAiQualityMetrics(),
+  ]);
+  const locale = await getPreferredLocale();
+  const percent = new Intl.NumberFormat(locale, { style: "percent", maximumFractionDigits: 0 });
+  // A rate over no verdicts is unknown, not zero — the card shows a dash.
+  const rate = (value: number | null) => (value == null ? "—" : percent.format(value));
   const signupChart: ChartDatum[] = signupSeries.map((p) => ({
     key: p.month,
     label: p.label,
@@ -135,6 +143,24 @@ export default async function AdminOverviewPage() {
           danger={openDisputesCount > 0}
         />
         <StatCard label={t("web.admin.overview.pendingDeletions")} value={pendingDeletionsCount} />
+        <StatCard
+          label={t("web.admin.overview.aiInsightsKept")}
+          value={rate(aiQuality.insights.acceptanceRate)}
+          hint={t("web.admin.overview.aiVerdictsHint", {
+            kept: aiQuality.insights.accepted,
+            rejected: aiQuality.insights.rejected,
+            pending: aiQuality.insights.pending,
+          })}
+        />
+        <StatCard
+          label={t("web.admin.overview.aiDraftsUsed")}
+          value={rate(aiQuality.homeworkDrafts.acceptanceRate)}
+          hint={t("web.admin.overview.aiVerdictsHint", {
+            kept: aiQuality.homeworkDrafts.accepted,
+            rejected: aiQuality.homeworkDrafts.rejected,
+            pending: aiQuality.homeworkDrafts.pending,
+          })}
+        />
       </div>
 
       <Card>

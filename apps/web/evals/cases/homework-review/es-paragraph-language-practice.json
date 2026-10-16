@@ -1,0 +1,19 @@
+{
+  "surface": "homework-review",
+  "name": "es-paragraph-language-practice",
+  "about": "A short Spanish self-introduction with gender and verb slips, as language practice; corrections may quote only what was written, and the article error must be caught.",
+  "input": {
+    "assignmentTitle": "Preséntate en un párrafo",
+    "assignmentInstructions": "Write 60–80 words introducing yourself: name, age, work or study, and two things you like. Use the present tense.",
+    "materialExcerpt": null,
+    "attemptText": "Hola, me llamo Dana y tengo veintidós años. Yo soy estudiante de biología en la universidad. Me gusta mucho el musica y los libros de ciencia. Los fines de semana yo corro en el parque con mi perro, que se llama Max. Mi familia es grande y nosotros comemos juntos los domingos. Yo quiero viajar a Chile el año próximo porque me gusta las montañas.",
+    "attachmentTexts": [],
+    "teacherInstructions": null,
+    "outputLanguage": "English"
+  },
+  "languageFocused": true,
+  "expect": {
+    "mustMention": ["música"],
+    "scoreRange": [5, 9]
+  }
+}

@@ -176,6 +176,13 @@ the pass/fail record of attendance or payments.
   **unconfirmed** AI rows for that class (`source: "ai" AND confirmedAt IS
 NULL`) — a confirmed insight is never touched or removed by regeneration.
 - All of these actions are **Pro-gated**.
+- **The verdicts are the model's score card** ([D-201](../decisions/D-201.md)).
+  Confirmed over confirmed-plus-dismissed, across every AI row on real
+  accounts, is shown on the admin overview — counts only, never an insight's
+  text (D-23). Unreviewed rows are shown beside it and do not dilute the rate.
+  The offline evals (`pnpm evals`) measure the same surface before a prompt or
+  model change; this figure is what says whether the change held up in
+  classes.
 - Ownership check is by `teacherId` match — accessing/editing an insight
   belonging to another teacher's booking returns a not-found response, not a
   403, to avoid leaking existence of another tenant's data.

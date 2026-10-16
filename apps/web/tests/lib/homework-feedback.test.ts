@@ -59,12 +59,14 @@ const feedbackCreate = vi.fn(
 );
 const attemptCount = vi.fn(async (..._: unknown[]) => 1);
 const submissionUpdate = vi.fn(async (..._: unknown[]) => ({}) as unknown);
+const draftFindFirst = vi.fn(async (..._: unknown[]) => null as unknown);
 
 const prismaMock = {
   homeworkFeedback: {
     findUnique: (...a: unknown[]) => feedbackFindUnique(...a),
     create: (...a: unknown[]) => feedbackCreate(...a),
   },
+  homeworkAiReviewDraft: { findFirst: (...a: unknown[]) => draftFindFirst(...a) },
   homeworkAttempt: { count: (...a: unknown[]) => attemptCount(...a) },
   homeworkSubmission: { update: (...a: unknown[]) => submissionUpdate(...a) },
   $transaction: async (fn: (tx: unknown) => Promise<unknown>) => fn(prismaMock),
@@ -76,6 +78,7 @@ const { createHomeworkFeedback } = await import("@/lib/homework/feedback");
 beforeEach(() => {
   vi.clearAllMocks();
   feedbackFindUnique.mockResolvedValue(null);
+  draftFindFirst.mockResolvedValue(null);
   attemptCount.mockResolvedValue(1); // attempt #1 is the only/latest one
   feedbackCreate.mockResolvedValue({
     id: "f1",
@@ -87,6 +90,26 @@ beforeEach(() => {
 });
 
 describe("createHomeworkFeedback", () => {
+  // The verdict the AI-quality figure reads (lib/ai/quality-metrics.ts): the
+  // draft on screen when the feedback was sent is the one it started from.
+  it("links the feedback to the latest live AI draft for the attempt, when there is one", async () => {
+    draftFindFirst.mockResolvedValue({ id: "draft9" });
+    await createHomeworkFeedback(
+      TEACHER as never,
+      "at1",
+      { decision: "approved", content: "Nice work" },
+      "web",
+    );
+    expect(draftFindFirst).toHaveBeenCalledWith({
+      where: { attemptId: "at1", teacherId: "t1", discardedAt: null },
+      orderBy: { createdAt: "desc" },
+      select: { id: true },
+    });
+    expect(feedbackCreate).toHaveBeenCalledWith({
+      data: expect.objectContaining({ aiDraftId: "draft9" }),
+    });
+  });
+
   it("rejects a second review of an already-reviewed attempt", async () => {
     feedbackFindUnique.mockResolvedValue({ id: "existing" });
     await expect(
@@ -114,6 +137,7 @@ describe("createHomeworkFeedback", () => {
         decision: "approved",
         content: "Nice work",
         score: 8,
+        aiDraftId: null,
       },
     });
     expect(submissionUpdate).toHaveBeenCalledWith({
