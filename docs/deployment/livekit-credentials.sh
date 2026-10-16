@@ -7,9 +7,8 @@
 # pair (since 2026-09-16, D-16), so everything comes from production:
 #
 #   * LIVEKIT_URL from config/env/production.runtime.env (D-70).
-#   * The key and the secret from Infisical's production environment, at the
-#     two paths scripts/oracle-render-livekit.sh renders the box from — the key
-#     at /config, the secret at /. The key is not read from the env file: it is
+#   * The key and the secret from Infisical's production environment — the
+#     key at /config, the secret at /. The key is not read from the env file: it is
 #     `__LOCAL__` there, and the earlier version of these probes, which read it
 #     from preview's file, would have sent that placeholder as the key.
 #

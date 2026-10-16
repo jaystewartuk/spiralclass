@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Show live LiveKit room/participant activity on the self-hosted box
-# (docs/deployment/ORACLE_LIVEKIT_PRODUCTION.md) without ever writing
+# Show live LiveKit room/participant activity on production's LiveKit server
+# (infra/gcp-livekit/README.md, D-16) without ever writing
 # LIVEKIT_API_SECRET to disk. Pulls it via infra/infisical/with-secret.sh's
 # shared helper (same pattern every other Infisical-consuming task script
 # uses — see that file's own header).
