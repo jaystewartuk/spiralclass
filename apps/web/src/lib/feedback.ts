@@ -29,6 +29,21 @@ export const FEEDBACK_MESSAGE_MAX = 2000;
 export const ATTACHMENT_MAX_MB = 5;
 export const ATTACHMENT_MAX_BYTES = ATTACHMENT_MAX_MB * 1024 * 1024;
 
+/** What a screenshot can be: the raster formats phones and desktops save, HEIC
+ * and HEIF being the iPhone camera roll's own. Not `image/*`, because SVG is the
+ * image type that is also a document — it can carry script, and its preview is
+ * a blob: URL in this origin (lib/object-url.ts) — and no screenshot tool
+ * produces one. */
+export const ATTACHMENT_IMAGE_TYPES: readonly string[] = [
+  "image/png",
+  "image/jpeg",
+  "image/webp",
+  "image/gif",
+  "image/heic",
+  "image/heif",
+  "image/avif",
+];
+
 // Deliberately permissive: an email field's job here is to catch a typo like a
 // missing "@", not to adjudicate RFC 5322. A wrongly-rejected address costs us
 // the report; a wrongly-accepted one costs us a reply we could not send.
@@ -89,7 +104,7 @@ export type AttachmentResult =
  * the camera roll by the time someone opens this form.
  */
 export async function readImageAttachment(file: File): Promise<AttachmentResult> {
-  if (!file.type.startsWith("image/")) {
+  if (!ATTACHMENT_IMAGE_TYPES.includes(file.type)) {
     return { ok: false, error: "feedback.attachInvalidType" };
   }
   if (file.size > ATTACHMENT_MAX_BYTES) {

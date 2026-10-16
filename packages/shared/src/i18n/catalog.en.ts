@@ -69,7 +69,7 @@ export const en = {
   "feedback.attachHint": "Optional. Images up to {max} MB.",
   "feedback.attachRemove": "Remove {filename}",
   "feedback.attachTooLarge": "That image is over {max} MB. Try a smaller one.",
-  "feedback.attachInvalidType": "That file isn't an image.",
+  "feedback.attachInvalidType": "That file isn't a screenshot or a photo.",
   "feedback.attachReadFailed": "We couldn't read that image. Try another one.",
   "feedback.diagnosticsNote":
     "We attach this page and your browser details. Please don't include passwords or card numbers.",

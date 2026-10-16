@@ -6,6 +6,7 @@ import { usePostHog } from "posthog-js/react";
 import {
   INTRO_VIDEO_IDEAL_MAX_SEC,
   INTRO_VIDEO_IDEAL_MIN_SEC,
+  INTRO_VIDEO_UPLOAD_TYPES,
   introVideoLengthVerdict,
   formatSecondsNarrow,
 } from "@spiralclass/shared";
@@ -13,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import { FormStatus } from "@/components/ui/form-status";
 import { Label } from "@/components/ui/label";
 import { useLocale, useT } from "@/components/locale-provider";
+import { mediaObjectUrl } from "@/lib/object-url";
 import {
   finalizeIntroVideoAction,
   presignIntroVideoUploadAction,
@@ -44,10 +46,12 @@ function pickMimeType(): string | undefined {
 // <video> parse just the metadata from an object URL. Resolves null on any
 // failure (unsupported container, corrupt file, a browser reporting Infinity
 // for a stream-ish MP4) — the duration is a nice-to-have for coaching, never a
-// reason to block an upload. Always revokes the object URL.
+// reason to block an upload. A file that isn't an uploadable video type gets no
+// object URL at all (lib/object-url.ts). Always revokes the URL it made.
 export async function readVideoDurationMs(file: Blob): Promise<number | null> {
   if (typeof document === "undefined") return null;
-  const url = URL.createObjectURL(file);
+  const url = mediaObjectUrl(file, INTRO_VIDEO_UPLOAD_TYPES);
+  if (!url) return null;
   try {
     return await new Promise<number | null>((resolve) => {
       const el = document.createElement("video");
@@ -507,7 +511,7 @@ export function IntroVideoForm({
                 id="video"
                 name="video"
                 type="file"
-                accept="video/mp4,video/webm,video/quicktime"
+                accept={INTRO_VIDEO_UPLOAD_TYPES.join(",")}
                 disabled={uploading}
                 className="block w-full text-sm text-muted-foreground file:mr-3 file:rounded-md file:border file:border-input file:bg-background file:px-3 file:py-1.5 file:text-sm file:font-medium hover:file:bg-accent"
               />

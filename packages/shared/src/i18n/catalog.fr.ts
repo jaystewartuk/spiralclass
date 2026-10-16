@@ -68,7 +68,7 @@ export const fr = {
   "feedback.attachHint": "Facultatif. Images jusqu'à {max} Mo.",
   "feedback.attachRemove": "Retirer {filename}",
   "feedback.attachTooLarge": "Cette image dépasse {max} Mo. Essayez-en une plus légère.",
-  "feedback.attachInvalidType": "Ce fichier n'est pas une image.",
+  "feedback.attachInvalidType": "Ce fichier n'est ni une capture d'écran ni une photo.",
   "feedback.attachReadFailed": "Nous n'avons pas pu lire cette image. Essayez-en une autre.",
   "feedback.diagnosticsNote":
     "Nous joignons cette page et les infos de votre navigateur. N'indiquez ni mot de passe ni numéro de carte.",
