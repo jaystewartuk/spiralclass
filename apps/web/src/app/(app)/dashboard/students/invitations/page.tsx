@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { buildInvitationDashboard } from "@/lib/invitations/dashboard";
 import { InvitationsTable } from "./invitations-table";
 
-// Teacher invitation dashboard (D-83): funnel stats + a filterable roster with
+// Teacher invitation dashboard: funnel stats + a filterable roster with
 // per-student resend / cancel / copy-link actions.
 export const dynamic = "force-dynamic";
 

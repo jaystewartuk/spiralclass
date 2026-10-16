@@ -48,12 +48,9 @@ describe("buildTeacherWhere", () => {
       { bio: null },
       { templatesTouchedAt: null },
       { availabilityTouchedAt: null },
-      // D-113 made "no payout rail" the complement of a relation filter;
-      // D-124 made its bank branch generated from the scheme registry.
-      // Asserted by reference to the exported constant rather than copied:
-      // the generated clause has one arm per pricing currency, and a literal
-      // copy would have to be rewritten every time a country is added — which
-      // is the coupling the generation exists to remove. The sitemap parity
+      // "No payout rail" is the complement of a relation filter (D-145).
+      // Asserted by reference to the exported constant rather than copied.
+      // The sitemap parity
       // test is what proves the constant still agrees with the JS predicate.
       NO_PAYOUT_RAIL_WHERE,
     ]);

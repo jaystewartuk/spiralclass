@@ -7,7 +7,7 @@ import type { Metadata } from "next";
 // stay out of the index (checkout funnel, auth, email-token pages).
 //
 // The locale cookie is pinned to es, as in the global tests/setup.ts mock.
-// A public page's language comes from its URL (D-193), which the middleware
+// A public page's language comes from its URL (D-72), which the middleware
 // hands on as the `x-locale` request header; each case below says which URL
 // it renders by setting that header.
 
@@ -35,7 +35,7 @@ const teacherFindUnique = vi.fn();
 const studentFindFirst = vi.fn();
 // No configured social previews — the default for every teacher who has never
 // touched the feature, and the case that must leave og:image exactly as it was
-// (D-123). The "custom preview overrides og:image" case is covered in
+// (D-125). The "custom preview overrides og:image" case is covered in
 // tests/social-preview/og-metadata.test.ts.
 const socialPreviewFindMany = vi.fn(async () => []);
 vi.mock("@/lib/prisma", () => ({
@@ -110,7 +110,7 @@ describe("marketing pages — localized metadata + canonicals", () => {
     const { generateMetadata } = await import("@/app/pricing/page");
     const meta = await generateMetadata();
     expect(meta.title).toBe("Precios");
-    // Price is interpolated from PLAN_PRICE_MINOR_UNITS (canonical GBP, D-99) so
+    // Price is interpolated from PLAN_PRICE_MINOR_UNITS (canonical GBP, D-153) so
     // it can never drift. This was two loose `toContain`s while formatMinorUnits
     // rendered GBP as a bare code and then doubled it; now that it renders a
     // symbol plus one code, the literal is assertable — and pinning it here
@@ -150,7 +150,7 @@ describe("marketing pages — localized metadata + canonicals", () => {
 });
 
 describe("legal pages — advertised only in the languages they exist in", () => {
-  // Two authored documents exist (D-196): /terms is the English one and
+  // Two authored documents exist (D-72): /terms is the English one and
   // /es/terms the Spanish one, and each lists the other. Every other
   // language's URL serves the English document, so it canonicalises to
   // /terms and is not offered to search engines as a French contract.
@@ -177,7 +177,7 @@ describe("legal pages — advertised only in the languages they exist in", () =>
   });
 
   // The policy is one English document rendered from @spiralclass/shared
-  // (legal copy is never machine-translated — D-81, D-128). Its metadata — the
+  // (legal copy is never machine-translated — D-72, D-22). Its metadata — the
   // browser tab and the search snippet, which are chrome rather than legal
   // text — follows the URL's language, but every URL canonicalises to the
   // English one.
@@ -224,7 +224,7 @@ describe("noindex surfaces", () => {
 
 describe("teacher booking page /b/[slug]", () => {
   const params = Promise.resolve({ slug: "mira" });
-  // generateMetadata reads searchParams for `utm_content` (D-123 social
+  // generateMetadata reads searchParams for `utm_content` (D-125 social
   // previews). Empty here: these cases assert the UNTAGGED link's metadata,
   // which is exactly the path that must stay unchanged.
   const searchParams = Promise.resolve({});

@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createT } from "@spiralclass/shared";
 
 // Security audit M-8. /b/[slug]/buy/transfer/[ref] renders the teacher's payee
-// details — an account-holder name and email, or (since D-113) a CLABE, which
+// details — an account-holder name and email, or (since D-145) a CLABE, which
 // is a bank account number. The slug half of that URL is public by design, so
 // the only thing standing between a prober and that PII is the reference's
 // entropy — which is why it was widened to 48 bits, and why

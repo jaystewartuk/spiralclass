@@ -33,7 +33,7 @@ function findBookingWithLanguages(
     include: {
       teacher: { select: { id: true, teachingLanguage: true, country: true } },
       student: { select: { nativeLanguage: true } },
-      // For the transcript consent (D-188): a class for two needs the buyer's
+      // For the transcript consent (D-149): a class for two needs the buyer's
       // confirmation for the second person as well.
       package: { select: { seats: true, partnerConsentAt: true } },
     },

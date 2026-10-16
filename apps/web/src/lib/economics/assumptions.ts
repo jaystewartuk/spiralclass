@@ -1,10 +1,10 @@
-// Financial Intelligence estimate layer (D-86, S3) — the FX + allocation
+// Financial Intelligence estimate layer (slice S3) — the FX + allocation
 // assumptions the estimate layer's cost math is built on. Pure-core +
 // thin-fetch split, mirroring money-metrics.ts: `toGbpPence` (below) is a
 // pure function with no DB dependency; `getEconomicsAssumptions` is the one
 // place that reads the singleton row.
 //
-// Manually maintained — this app has no live FX feed (D-86 risk note) — so
+// Manually maintained — this app has no live FX feed — so
 // every conversion is only as fresh as the last time an admin edited the
 // assumptions row via the S4 UI.
 
@@ -61,8 +61,8 @@ export async function getEconomicsAssumptions(
 }
 
 // The major-unit-to-GBP rate for a native billing currency, or null when the
-// assumptions row has no rate for it (surfaced separately per the D-86 risk
-// note — "surface unknown-currency integrations separately" — rather than
+// assumptions row has no rate for it (surfaced separately per the estimate layer's
+// rule — "surface unknown-currency integrations separately" — rather than
 // guessed).
 export function fxRateToGbp(
   currency: string,
@@ -85,7 +85,7 @@ export function fxRateToGbp(
 // Convert an integer minor-unit amount in `currency` into integer GBP pence,
 // or null when `currency` has no known FX rate. Pure — the engine
 // (economics-pricing.ts) stays currency-agnostic and this is the one place
-// that injects FX, exactly as the D-86 doc specifies.
+// that injects FX, by design (docs/features/admin-portal.md).
 export function toGbpPence(
   minorUnits: number,
   currency: string,

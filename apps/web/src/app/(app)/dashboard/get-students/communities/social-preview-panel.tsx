@@ -27,7 +27,7 @@ import {
   type SocialPreviewState,
 } from "@/app/actions/social-preview";
 
-// The teacher-facing image editor (D-123), rendered once per community and once
+// The teacher-facing image editor (D-125), rendered once per community and once
 // for the "default" placement.
 //
 // Three deliberate UX calls:

@@ -9,8 +9,13 @@
 //   1. Append a row to LOCALES below, with `launched: false`.
 //   2. Add the matching per-locale block to ./catalog.ts (the completeness
 //      guard there fails the build until every key is translated).
-//   3. Once a native speaker has read it (D-81) and its terms and privacy
-//      policy exist as person-made translations (D-196), flip `launched`.
+//   3. Once a native speaker has read it and its terms and privacy policy
+//      exist as person-made translations (D-72), flip `launched`.
+// A second locale of a language already here (es-ES beside es, pt-PT beside
+// pt-BR) is NOT a new full row and catalog: it is a delta over its base that
+// holds only the keys whose wording differs, falling back base → DEFAULT_LOCALE
+// and never sideways into another language (D-72). Build that partial-catalog
+// type before registering one.
 // No other code changes: the language picker, Accept-Language matching, the
 // URL prefixes and hreflang, the outbound-copy bridge, and the persisted
 // preference all read this registry.
@@ -70,7 +75,7 @@ export type LocaleDefinition = {
    * browser detection, the teacher's buyer-language choice, URL prefixes,
    * redirects and hreflang — so a half-reviewed language reaches nobody who
    * did not go looking for it, and is never advertised to a search engine
-   * (D-193). Stored values still resolve, so a reviewer can read it.
+   * (D-72). Stored values still resolve, so a reviewer can read it.
    */
   launched: boolean;
 };

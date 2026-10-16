@@ -34,7 +34,7 @@ import { maybeEnqueueFiveDayMaterials, maybeEnqueueReminder, type ReminderLeg } 
 //
 // The chain is also (re)started at booking creation, by
 // inngest/functions/on-booking-created.ts re-running this same scan on every
-// `booking.created` (D-115 addendum, 2026-08-16). Without that, a wake is only
+// `booking.created` (D-115, 2026-08-16). Without that, a wake is only
 // ever armed BY a scan and scans only ran on the tick or on a wake — so a
 // booking written between ticks whose next leg fell before the next tick had
 // nothing armed for it: a class booked at 10:10 for 11:30 got its 1h leg at

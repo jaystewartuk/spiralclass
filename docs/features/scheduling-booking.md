@@ -157,6 +157,13 @@ code), and the files below.
     transaction detects this and rolls back cleanly, reporting
     `schedule-changes-exhausted` rather than over-spending the budget.
 
+The counter is charged at **cancel** time, not at rebook time, because the
+booking that follows a cancel is indistinguishable from any first booking.
+`Booking.rescheduleCount` survives only as lineage beside
+`rescheduleOfBookingId` and gates nothing. A teacher waiving a `≥24h`
+cancellation returns the unit it spent; restoring a cancelled class to
+`scheduled` re-claims its credit but does **not** return the unit.
+
 ### Reschedule (`lib/cancellation/reschedule-handler.ts`, §6.6)
 
 24. A student can enter the reschedule flow only if **all** hold: (a) the
@@ -212,6 +219,18 @@ notification carrying the old time. The teacher's own mirror
     `classesUsed` again.
 30. The transition is idempotent (`updateMany` guarded on
     `status = scheduled`) — a retried sweep run is a safe no-op.
+
+**Completion is automatic; a no-show is the one manual label.** There is no
+"mark as completed" button: under Model B completing a class changes no
+counts, so a teacher pressing it only duplicated the sweep.
+`markBookingComplete` (`actions/overrides.ts`) is kept for back-compat and is
+not surfaced. There is no grace window before completion either, because a
+teacher can record a no-show at any time on a past `scheduled` class **or on a
+`completed` one** (`canRecordNoShow`). That relabel clears `completedAt`,
+records the prior status in the `Override` row, and queues the
+`no_show_student` notification — so a very late relabel sends a late "you
+missed your class" message. A no-show counts as delivered, exactly like a
+completed class.
 
 ### Teacher blocking a date range (`lib/cancellation/blocked-date-collision.ts`, §6.1)
 

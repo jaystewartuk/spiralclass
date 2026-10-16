@@ -61,7 +61,7 @@ export type CaptionLine = {
   // both get it wrong otherwise when the two languages sit in one card.
   lang?: string;
   srcLang?: string;
-  // THE WORDS OF AN UTTERANCE STILL BEING SPOKEN (D-198). `text` is what the
+  // THE WORDS OF AN UTTERANCE STILL BEING SPOKEN (D-185). `text` is what the
   // recogniser has heard so far, in the SPEAKER's language and untranslated
   // (`lang` names it; there is no `src`), and the line is sent again, under
   // the same `id`, every time the recogniser hears more. The finished,
@@ -130,7 +130,7 @@ export function decodeCaption(bytes: Uint8Array): CaptionMessage | null {
 
 // The two roles in a captioned call, and the language each speaks → the
 // language the OTHER side should read. Bidirectional: the teacher's caption
-// stream translates INTO the student's language, and vice versa (D-27, which
+// stream translates INTO the student's language, and vice versa (D-185, which
 // replaced a hardcoded es/en swap with the resolved language pair).
 export type CallRole = "teacher" | "student";
 

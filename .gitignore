@@ -135,7 +135,7 @@ config/env/*.local.env
 # Neon CLI's local org-link file (org id only, no secrets)
 .neon
 
-# Local gate receipts (D-119). Per-machine, per-commit run state — never
+# Local gate receipts (D-157). Per-machine, per-commit run state — never
 # shared.
 .gate/
 

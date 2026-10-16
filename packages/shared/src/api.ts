@@ -53,7 +53,7 @@ export type Teacher = {
   photoUrl: string | null;
   // Public intro-video URL (version-stamped), or null when there's no video or
   // the storage bucket isn't configured. Rendered under the hero on the public
-  // booking page via <video>. Populated by toWireTeacher (D-73).
+  // booking page via <video>. Populated by toWireTeacher.
   introVideoUrl: string | null;
   // Duration of the intro video in ms (capture-time), or null when unknown.
   introVideoDurationMs: number | null;
@@ -118,7 +118,7 @@ export type Booking = {
 
 export type MaterialSendTiming = "confirmation" | "t_5d" | "t_24h" | "t_1h";
 
-// "content" is reusable native Markdown content authored in-app (D-20, Layer 4):
+// "content" is reusable native Markdown content authored in-app (D-17, Layer 4):
 // the item has a `body` instead of a file/link, rendered natively like
 // ClassContent. "file"/"link" items have a viewUrl; "content" items have a body.
 export type MaterialAttachmentKind = "file" | "link" | "content";
@@ -146,7 +146,7 @@ export type Material = {
   // client show the picture inline instead of a bare "open this" link, which
   // is the whole point for a visual learner. Absent/false = render the link.
   isImage?: boolean;
-  // Null = "always visible, no notification" (D-69's exposed always-visible
+  // Null = "always visible, no notification" (the exposed always-visible
   // state) — the attachment isn't on a push schedule at all.
   sendTiming: MaterialSendTiming | null;
   createdAt: string;
@@ -194,7 +194,7 @@ export type CallMaterial = {
 // free; authoring (PUT/generate) is Pro-gated server-side.
 export type ClassContentSource = "manual" | "ai";
 
-// The teacher's focus-tag picker, grouped by category (D-20, Layer 2) — the
+// The teacher's focus-tag picker, grouped by category (D-17, Layer 2) — the
 // mirror of the `focusGroups` the web teacher page builds for ClassContentPanel.
 // `categoryLabel` comes pre-resolved from the server (the category row's own
 // `label`) — the client never re-derives it from a key.
@@ -217,7 +217,7 @@ export type FocusTagCategoryRow = {
   position: number;
 };
 
-// A teacher's editable focus tag (D-20's deferred follow-up: "rename / add /
+// A teacher's editable focus tag (D-17's deferred follow-up: "rename / add /
 // reorder / archive") — the CRUD counterpart to the read-only picker above,
 // used by the focus-tag settings surface. `categoryId` must reference one of
 // the teacher's own active FocusTagCategoryRow ids. A save is a
@@ -244,7 +244,7 @@ export type ContinuationCandidate = {
   preview: string;
 };
 
-// In-class live notes (live-notes-panel.md, D-15). A per-booking cue list with
+// In-class live notes (docs/features/classes-lesson-content.md). A per-booking cue list with
 // two audiences from one author. The teacher endpoint returns both; the student
 // endpoint returns only `audience: "student"` rows, gated server-side to the
 // class window. `done` is meaningful only for teacher-audience cues.
@@ -384,7 +384,7 @@ export type LessonInsight = {
   skill: string | null;
 };
 
-// Speaking-time / participation analytics (D-97), one lesson's worth — see
+// Speaking-time / participation analytics, one lesson's worth — see
 // lib/lesson-notes/speaking-time.ts on the web side for how this is derived.
 export type SpeakingTimeSummary = {
   totalMs: number;
@@ -420,7 +420,7 @@ export type LibraryEntry = {
   levelLabel: string;
   attachmentKind: MaterialAttachmentKind;
   viewUrl: string | null;
-  // Markdown source when the item carries native content (D-20, Layer 4); null
+  // Markdown source when the item carries native content (D-17, Layer 4); null
   // otherwise. Rendered natively, never as raw HTML. A unified item may carry
   // this AND a file AND a link — `fileUrl`/`linkUrl` expose the other pieces.
   body?: string | null;
@@ -498,7 +498,7 @@ export type LibraryMaterialAdmin = {
   // (see toCallMaterial). Derived from the storage path server-side — the
   // client holds the signed URL, whose query string is not a filename.
   fileKind: MaterialFileKind | null;
-  // Markdown source + provenance when attachmentKind === "content" (D-20,
+  // Markdown source + provenance when attachmentKind === "content" (D-17,
   // Layer 4; source added for the unified-form parity pass so a client can
   // edit a content item in place the same way the web MaterialForm does).
   body?: string | null;
@@ -547,7 +547,7 @@ export type MaterialPodcastStatus = {
 
 export type PaymentStatus = "pending" | "paid" | "failed" | "refunded" | "partially_refunded";
 
-// The payout rail a payment ran on (D-113). `manual_transfer` is "the student
+// The payout rail a payment ran on (D-145). `manual_transfer` is "the student
 // followed payee instructions and the teacher confirmed"; WHICH instructions
 // is `instrumentKind`/`instrumentId`, because the instrument is data and not
 // a provider.
@@ -564,7 +564,7 @@ export type Payment = {
   status: PaymentStatus;
   amountCents: number;
   // ISO-4217 code recording what `amountCents` is denominated in — the
-  // teacher's own pricing currency (D-64/D-124), which is any of ~40 curated
+  // teacher's own pricing currency (D-153/D-145), which is any of ~40 curated
   // codes, not necessarily MXN. Typed as string rather than a literal union so
   // it carries the row's real stored currency for provenance.
   currency: string;
@@ -593,7 +593,7 @@ export type StudentProfile = {
   email: string | null;
   phoneE164: string | null;
   timezone: string | null;
-  // Live-caption default (D-27): the student's own language. See
+  // Live-caption default (D-185): the student's own language. See
   // caption-languages.ts. Overridable per class by the teacher.
   nativeLanguage: string;
 };
@@ -683,7 +683,7 @@ export type DiscountCode = {
   percentBps: number | null;
   amountMinorUnits: number | null;
   // Currency of the fixed `amountMinorUnits` — the teacher's own pricing
-  // currency (D-64/D-124), carried explicitly.
+  // currency (D-153/D-145), carried explicitly.
   currency: string;
   active: boolean;
   maxRedemptions: number | null;
@@ -729,7 +729,7 @@ export type Notification = {
 // this file ships into the client bundle, so it can't depend on @prisma/client.
 export type IntroVideoAnalysisStatus = "pending" | "transcribing" | "transcribed" | "failed";
 
-// Structured AI coach feedback on a teacher's intro video (D-73, Layer 3). The
+// Structured AI coach feedback on a teacher's intro video (Layer 3). The
 // coach reviews the transcript and returns a warm overall take plus concrete
 // strengths and actionable improvements (length, missing hooks — who it's for,
 // price — energy). Built by a pure prompt over the transcript; teacher-only.
@@ -749,7 +749,7 @@ export type MaterialStyleSettings = {
   learnerAge: MaterialLearnerAge | null;
   languageVariety: string | null;
   customInstructions: string | null;
-  // Teacher default vocabulary difficulty (D-80), a separate axis from the CEFR
+  // Teacher default vocabulary difficulty (D-17), a separate axis from the CEFR
   // level. `null` = the effective default (everyday). Applied to every AI
   // generation path via resolveSubject, and overridable per class.
   vocabulary: MaterialVocabulary | null;

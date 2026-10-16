@@ -1061,7 +1061,7 @@ export const fr = {
   "onboarding.templates.priceStripe": "Prix Stripe",
   "onboarding.templates.priceWise": "Prix par virement (facultatif)",
   // Shown instead of priceStripe when the teacher's country has no Stripe
-  // Connect rail at all (Wise-only, D-58) — there's no Stripe price to split
+  // Connect rail at all (Wise-only, D-143) — there's no Stripe price to split
   // from, so it's just "Price".
   "onboarding.templates.price": "Prix",
   "onboarding.templates.expirationMonths": "Expiration (mois)",
@@ -3253,7 +3253,7 @@ export const fr = {
   "web.dashboard.shareGroups.groupName": "Nom du groupe",
   "web.dashboard.shareGroups.linkForThisGroup": "Lien à publier dans ce groupe",
 
-  // Aperçus sociaux (D-123).
+  // Aperçus sociaux (D-125).
   "socialPreview.title": "Aperçu social",
   "socialPreview.subtitle":
     "L'image que les gens voient quand ce lien est partagé sur Facebook, WhatsApp ou ailleurs.",
@@ -5859,14 +5859,14 @@ export const fr = {
   "web.admin.lessonInsights.liveWarning.pre":
     "— la voix capturée est envoyée au fournisseur d'ASR et les transcriptions sont stockées,",
   "web.admin.lessonInsights.liveWarning.strong": "pour chaque paire consentante",
-  "web.admin.lessonInsights.liveWarning.mid": "(D-21/D-22). Seules les paires de",
+  "web.admin.lessonInsights.liveWarning.mid": "(D-22). Seules les paires de",
   "web.admin.lessonInsights.liveWarning.em": "test",
   "web.admin.lessonInsights.liveWarning.midEnd":
     "consenties doivent être enregistrées ; désactivez",
   "web.admin.lessonInsights.liveWarning.post": "entre les tests.",
   "web.admin.lessonInsights.title": "Insights de cours — état du pipeline",
   "web.admin.lessonInsights.subtitle":
-    "Statut opérationnel sur tous les tenants : capture → transcription → insights → profil → résumé. Statuts et compteurs uniquement — aucun contenu de transcription, de prononciation ou de profil n'est affiché ici (D-21/D-22).",
+    "Statut opérationnel sur tous les tenants : capture → transcription → insights → profil → résumé. Statuts et compteurs uniquement — aucun contenu de transcription, de prononciation ou de profil n'est affiché ici (D-22).",
   "web.admin.lessonInsights.awaitingTranscription": "Captures en attente de transcription",
   "web.admin.lessonInsights.awaitingTranscriptionHint": 'audio "ready" pas encore transcrit',
   "web.admin.lessonInsights.stuckCaptures": "Captures bloquées",
@@ -6350,7 +6350,7 @@ export const fr = {
   "web.admin.teachers.entitlements.canScheduleMaterials": "Peut programmer des supports",
   "web.admin.teachers.entitlements.canCustomPrice": "Peut fixer un prix personnalisé",
   "web.admin.teachers.entitlements.canUseLiveNotes": "Peut utiliser les notes en direct",
-  // Merged from the D-99 (PR #680) GBP-billing-currency conflict resolution
+  // Merged from the D-153 (PR #680) GBP-billing-currency conflict resolution
   // — see catalog.en.ts's identical comment.
   "web.admin.subscriptions.otherCurrencyMrrNote":
     "Non inclus ci-dessus (abonnés facturés dans une autre devise, sans conversion) :",

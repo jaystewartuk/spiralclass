@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-// resolveClassContentTemplateBody (D-46) — the tenant-scoped lookup that turns a
+// resolveClassContentTemplateBody (D-17) — the tenant-scoped lookup that turns a
 // posted templateId into the Markdown structure fed to AI compose. The security
 // property under test: only the TEACHER'S OWN template resolves; a foreign,
 // unknown, or empty id yields null so the generator falls back to its default

@@ -16,7 +16,7 @@ import { REPO_ROOT } from "../../../../scripts/env-config.mjs";
 /**
  * scripts/cloudrun-env.mjs decides what the production runtime secret holds:
  * Infisical `production` at `/`, plus the production R2 buckets' credentials
- * from infra/cloudflare-r2's Tofu state (D-65). The env-file it writes is
+ * from infra/cloudflare-r2's Tofu state (D-70). The env-file it writes is
  * covered by apps/web/tests/config/cloudrun-deploy.test.ts; this covers the set.
  */
 

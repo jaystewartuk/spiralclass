@@ -64,7 +64,7 @@ same individual across teachers.
   app exists.
 
 - A student an operator has marked as a **test account**
-  ([D-192](../decisions/D-192.md)) stays on the roster with a "Cuenta de
+  (see [admin portal](./admin-portal.md#test-accounts)) stays on the roster with a "Cuenta de
   prueba" badge, but counts in none of the roster's figures and never needs
   attention. In a test teacher's own roster everyone counts.
 
@@ -116,6 +116,14 @@ same individual across teachers.
   rejected; the same account re-accepting is treated as a harmless no-op.
 - If sending the invitation email fails outright, the never-sent invitation
   is discarded rather than left behind as a broken "ghost" invite.
+- The emailed link carries a random 256-bit token; only its SHA-256 hash is
+  stored (`lib/invitations/token.ts`). Copying a link from the dashboard
+  rotates the token, so any link emailed earlier for that invitation stops
+  working — the copied link is always the current one.
+- The invitation email is sent one-off, not through the notification
+  dispatcher, because the recipient is not a platform user yet. Acceptance
+  reuses the existing sign-in and `resolveLinkedStudent`; there is no separate
+  invitation auth path.
 
 ### Per-student notes
 
@@ -126,7 +134,16 @@ same individual across teachers.
 - A note cannot be empty and is capped at 5,000 characters.
 - Deleting or editing a note is restricted to the teacher who created it.
 - Notes are deliberately kept out of the student-visible class-history audit
-  trail, specifically so their contents can never leak to the student.
+  trail, specifically so their contents can never leak to the student. Note
+  edits are never written to `overrides`; the rows' own timestamps are the
+  only trail, and analytics events carry ids, never the body.
+- Notes are a dated journal (`StudentNote`, many rows per teacher–student
+  pair, newest first), not one text field on the roster entry, and are free on
+  every plan.
+- Notes are the teacher's own content: they are in the teacher's data export
+  and never in the student's (the same treatment as `custom_price_note`).
+  Erasing a student deletes them; merging duplicate students moves them to the
+  kept record.
 
 ### Student contact-change handling
 

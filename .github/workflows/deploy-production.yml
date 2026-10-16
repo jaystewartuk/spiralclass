@@ -9,13 +9,13 @@ name: Deploy production
 # either. `scripts/database-deploy.sh` and `scripts/cloudrun-deploy.sh` deploy;
 # `pnpm promote` gates. Neither is re-typed here.
 #
-# TWO JOBS, AND WHY THE DATABASE IS ONE OF ITS OWN ([D-177]'s addendum).
+# TWO JOBS, AND WHY THE DATABASE IS ONE OF ITS OWN ([D-184]).
 #
 #   database ───> cloudrun    serves spiralclass.com, then the production probes
 #
 # Cloud Run took the domain from Fly on 2026-09-23 and Fly was destroyed the
-# same day ([D-184]'s addendum). The Vercel failover that ran beside it was
-# retired the same week ([D-186]). The shape did not change: the job that serves
+# same day ([D-184]). The Vercel failover that ran beside it was
+# retired the same week ([D-70]). The shape did not change: the job that serves
 # the domain is the one that probes it and decides whether production shipped.
 #
 # The database job checkpoints Neon and runs the migrations, ONCE per commit,
@@ -42,20 +42,18 @@ name: Deploy production
 # THE GATE STILL RUNS FIRST. `production` is a fast-forward-only branch that
 # only scripts/ci/promote.mjs moves, by hand or from promote-on-green.yml, and
 # promote refuses unless the full tier is green for the exact commit: the
-# runners' push runs ([D-162]), or `--force-gate` run locally. So by the time
+# runners' push runs ([D-157]), or `--force-gate` run locally. So by the time
 # this workflow starts, the commit it is deploying has been certified. That
 # ordering is why `--gate-already-passed` is honest here: it is a handoff, not
 # a bypass.
 #
-# ⚠️ The full tier still runs LOCALLY before this fires, and after [D-161] that
-# is no longer because it has to. The blocker D-157 named — darwin-only visual
-# baselines — is gone, and heavy.yml runs the same suites on a runner for every
-# PR. What keeps the promote gate local is the RECEIPT: `pnpm promote` reuses a
-# green full-tier receipt bound to this exact commit, and a runner's filesystem
-# is thrown away. Certifying a release from a runner is a separate decision.
+# The full tier no longer runs locally before this fires ([D-157]): heavy.yml
+# runs the heavy half on a runner for every PR and every push to `main`, and
+# promote reads that verdict rather than a local receipt. `pnpm promote
+# --force-gate` is the local exception.
 #
 # THE HUMAN CHECKPOINT, AND WHY IT IS NOT THE 2026-07-19 DRIFT AGAIN.
-# D-120's binding lesson was that a HUMAN DISPATCH STEP left `production` 96
+# D-199's binding lesson was that a HUMAN DISPATCH STEP left `production` 96
 # commits behind what was live, so the deploy was chained into `pnpm promote`
 # and a guard test asserted it stayed chained. This moves the checkpoint into
 # the platform instead — a required reviewer on the `production` environment —
@@ -84,9 +82,9 @@ name: Deploy production
 # together or this file looks like it changed its mind for no reason.
 #
 # The suspension came from "there are no more Fly deploys" — everything was
-# moving to the Oracle A1 box (D-150). Hours later that was narrowed: the
-# production web app stayed on Fly and production's database on Neon (D-150's
-# second addendum). The web app has since moved again, to Cloud Run ([D-184]),
+# moving to the Oracle A1 box (2026-09-02). Two days later that was narrowed:
+# the production web app stayed on Fly and production's database on Neon. The
+# web app has since moved again, to Cloud Run ([D-184] records all three),
 # and the lesson of that day still holds: a `production` branch that cannot
 # deploy is the 2026-07-19 drift waiting to happen, so a target moving is never
 # a reason to suspend this file.
@@ -94,7 +92,7 @@ name: Deploy production
 # ⚠️ Preview's workflow is still suspended, and for a reason that does not
 # apply here: its target genuinely is moving, and the box is not serving yet.
 #
-# WHERE THE VALUES COME FROM ([D-163], and read its addendum before changing
+# WHERE THE VALUES COME FROM ([D-163], and read it before changing
 # this). Infisical is the source of truth, and it PUSHES a copy into this
 # environment's secrets — the same direction `infra/gcp/push-cloudrun-env.sh`
 # pushes the app's runtime secrets into Secret Manager. One vault, two push
@@ -137,7 +135,7 @@ on:
         description: Which production target to deploy. The database job runs first either way.
         type: choice
         # `all`, not `both`: [D-184] made it three targets, and retiring Fly
-        # and then Vercel ([D-186]) made it one. `all` stays true whatever the
+        # and then Vercel ([D-70]) made it one. `all` stays true whatever the
         # count is, which is why it was chosen over a word that would have to be
         # renamed each time.
         options: [all, cloudrun]
@@ -154,7 +152,7 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  # ── The database: checkpoint, then migrate. Once per commit ([D-95]) ──────
+  # ── The database: checkpoint, then migrate. Once per commit ([D-178]) ──────
   #
   # The target does not own this, and neither did any of the three that have
   # served this Neon branch. It holds the database and Neon credentials and
@@ -178,7 +176,7 @@ jobs:
     env:
       DATABASE_URL: ${{ secrets.DATABASE_URL }}
       DIRECT_URL: ${{ secrets.DIRECT_URL }}
-      # The pre-migration Neon checkpoint (D-95). It is FAIL-CLOSED — no
+      # The pre-migration Neon checkpoint (D-178). It is FAIL-CLOSED — no
       # credential, no checkpoint, no migration — and that must stay true. A
       # migration is the one thing redeploying the previous image cannot undo.
       NEON_API_KEY: ${{ secrets.NEON_API_KEY }}
@@ -262,7 +260,7 @@ jobs:
             echo "| Commit | \`${GITHUB_SHA}\` |"
             echo "| Branch | Neon \`production\` |"
             echo
-            echo "Checkpointed before migrations ran (D-95), by \`scripts/database-deploy.sh\`."
+            echo "Checkpointed before migrations ran (D-178), by \`scripts/database-deploy.sh\`."
             echo "The Cloud Run job needs this one, and holds no database credential."
           } >> "$GITHUB_STEP_SUMMARY"
 
@@ -280,7 +278,7 @@ jobs:
   # grants per JOB rather than per step — so ACTIONS_ID_TOKEN_REQUEST_URL sits
   # in front of EVERY step in this job, `pnpm install` and the Docker build
   # included, and anything in that dependency tree could mint its own token and
-  # trade it for whatever the identity behind it may reach. [D-163]'s addendum
+  # trade it for whatever the identity behind it may reach. [D-163]
   # reversed exactly that shape once already, and
   # apps/web/tests/config/local-gate.test.ts bans it in every workflow here.
   # This job is not the exception: it runs more third-party code than any other
@@ -316,7 +314,7 @@ jobs:
       # The Cloudflare origin address behind livekit.spiralclass.com, read by
       # the probe step's LiveKit certificate check when production video is on
       # the self-hosted box. Never committed: hiding the origin behind
-      # Cloudflare IS the protection (D-134). It moved here with the probe.
+      # Cloudflare IS the protection (D-16). It moved here with the probe.
       LIVEKIT_ORIGIN_IP: ${{ secrets.LIVEKIT_ORIGIN_IP }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -361,7 +359,7 @@ jobs:
         run: bash scripts/cloudrun-deploy.sh production --gate-already-passed
 
       - name: Probe what is now live
-        # The probes D-129 chained into `pnpm promote`, moved to where the
+        # The probes D-157 chained into `pnpm promote`, moved to where the
         # deploy happens. They exist because the regressions they catch — a
         # route that renders an error, a booking page with nothing purchasable,
         # a checkout with no payment rail — all return 200, so `gcloud run
@@ -370,7 +368,7 @@ jobs:
         #
         # Called directly rather than through `pnpm local synthetic`: that
         # wrapper exists to give a hand-run task the run history and the
-        # failure notification that Actions provides for free (D-129).
+        # failure notification that Actions provides for free (D-157).
         run: bash scripts/local/synthetic.sh
 
       - name: Say what shipped

@@ -3,7 +3,7 @@ import * as React from "react";
 
 (globalThis as Record<string, unknown>).React = React;
 
-// The site-wide social card, one URL per language (D-193). It was the file
+// The site-wide social card, one URL per language (D-72). It was the file
 // convention app/opengraph-image.tsx, one URL for every language, which a
 // crawler fetched with no cookie and no Accept-Language — so `/es/pricing`
 // previewed as an English card under a Spanish title.

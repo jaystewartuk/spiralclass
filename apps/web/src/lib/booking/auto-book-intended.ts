@@ -6,7 +6,7 @@ const log = logger({ surface: "auto-book-intended" });
 // Pay-at-reservation completion step.
 //
 // The student picks the slot *before* paying; the chosen UTC start is stored
-// on the Package (`intendedStartUtc`). Since D-111 that applies to ANY
+// on the Package (`intendedStartUtc`). That applies to ANY
 // offering: for a single class the slot IS the reservation and checkout
 // requires it, for a multi-class package it is an optional "pick your first
 // class" and the remaining credits are booked from the portal later. Once the

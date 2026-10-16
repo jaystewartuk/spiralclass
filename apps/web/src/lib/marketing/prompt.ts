@@ -203,7 +203,7 @@ export function buildContentUserPrompt(input: ContentPromptInput): string {
  * The image brief, derived from the finished post rather than from the raw
  * request — so the picture illustrates what was actually written.
  *
- * Reuses the D-123 pipeline's central constraint: the generated asset is a
+ * Reuses the D-125 pipeline's central constraint: the generated asset is a
  * BACKGROUND with no letters in it. All text is rendered over it by us, which
  * is why a misspelled word can never reach a teacher's feed.
  */

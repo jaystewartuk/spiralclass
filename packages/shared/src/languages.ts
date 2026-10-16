@@ -19,12 +19,14 @@
 // only against evidence.
 //
 // `asr`: Deepgram's streaming ASR must transcribe the language well AND it must
-// read naturally in the Claude translation prompt (D-27's original bar). A
+// read naturally in the Claude translation prompt (the bar captions launched with). A
 // code outside the flag still "works" for captions in the degraded sense
 // translate.ts describes, it just degrades UX.
 //
-// This platform is language-first (D-72): what a teacher teaches IS a language,
-// so this registry also backs `teachers.target_language`.
+// This registry also backs `teachers.target_language`, the teacher's subject
+// (D-72). Public copy says "any subject"; the column still holds a language
+// code from this list. Both are true at once; widening the column is its own
+// decision.
 
 import type { LocaleCode } from "./api";
 import { WORLD_LANGUAGES } from "./languages.data";

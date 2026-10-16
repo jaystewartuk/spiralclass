@@ -3,9 +3,9 @@
 # repository that checkpoints and migrates a shared database.
 #
 # It was steps 1 and 2 of the Fly deploy script until 2026-09-12, when the
-# production targets became independently deployable ([D-177]'s addendum). The
+# production targets became independently deployable ([D-184]). The
 # steps did not change; who owns them did. While they lived inside the Fly
-# deploy, the Vercel failover (since retired, [D-186]) could only be deployed
+# deploy, the Vercel failover (since retired, [D-70]) could only be deployed
 # after a Fly deploy had succeeded. The database is not any target's, and this
 # is where that stops being a comment and becomes the structure.
 #
@@ -21,7 +21,7 @@
 # The steps, in an order that is load-bearing:
 #
 #   1. (production only) checkpoint the Neon `production` branch, so a bad
-#      migration has a named restore point (D-95)
+#      migration has a named restore point (D-178)
 #   2. apply pending Prisma migrations to the target Neon branch
 #
 # Requires: pnpm, and DATABASE_URL + DIRECT_URL in the environment. Production
@@ -85,9 +85,9 @@ esac
 SHA="$(git rev-parse HEAD)"
 
 # ── 1. Neon checkpoint (production only) ─────────────────────────────────
-# The pre-migration restore point D-95 made production's primary safety net,
-# and the one step that did NOT come along when D-120 moved the production
-# deploy off `fly-deploy.yml` — it lived in a composite action the deploy left
+# The pre-migration restore point D-178 made production's primary safety net,
+# and the one step that did NOT come along when the production deploy moved
+# off `fly-deploy.yml` (2026-08-17) — it lived in a composite action the deploy left
 # behind, so deploying from there skipped it silently while promote.mjs's
 # summary went on claiming a checkpoint had been taken.
 #

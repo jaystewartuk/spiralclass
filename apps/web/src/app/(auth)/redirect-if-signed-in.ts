@@ -16,7 +16,7 @@ import { finalizeSignIn } from "@/app/actions/session";
 // and the form renders; the sign-in that follows replaces the dead cookie.
 //
 // Returns without redirecting when the landing is itself a sign-in page — an
-// identity with neither a Teacher nor a Student row (D-56's "no account"), or
+// identity with neither a Teacher nor a Student row (D-40's "no account"), or
 // a teacher-email conflict. Redirecting there would be this page redirecting
 // to itself forever; rendering the form instead lets the person sign in with
 // the address that does have an account.

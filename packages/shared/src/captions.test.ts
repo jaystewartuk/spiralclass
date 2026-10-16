@@ -75,7 +75,7 @@ describe("decodeCaption defensive parsing", () => {
 // They are OPTIONAL on the wire because any client running an older build
 // predates them, and every one of those must keep rendering subtitles
 // unchanged.
-describe("decodeCaption partial lines (D-198)", () => {
+describe("decodeCaption partial lines (D-185)", () => {
   const bytes = (o: unknown) => new TextEncoder().encode(JSON.stringify(o));
 
   it("round-trips a partial", () => {

@@ -1,9 +1,11 @@
-// Maintenance mode (D-76). A single env flag takes the app offline for a
+// Maintenance mode. A single env flag takes the app offline for a
 // planned window (a destructive migration, an infra cutover, a Stripe-entity
 // credential swap), enforced in middleware.
 //
 // Deliberately env-var driven (not a DB row): the primary use case is database
 // maintenance, and a flag you can't read while the DB is down is self-defeating.
+// Not a PostHog flag either: those load asynchronously and fail closed to
+// false, so a flag-fetch failure would read as "not in maintenance".
 // It follows the same "flip an env var, no code release" shape as the
 // flagEnabled() convention (lib/flags.ts) — read straight from process.env so a
 // maintenance check never depends on the whole env schema validating and works

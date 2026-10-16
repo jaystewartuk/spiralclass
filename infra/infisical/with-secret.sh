@@ -3,7 +3,7 @@
 # exec it. It resolves everything relative to ITSELF, so a script using it does
 # not need to live in infra/infisical/.
 #
-# Since [D-169] this is a thin adapter over infra/infisical/infisical.sh, which
+# Since [D-163] this is a thin adapter over infra/infisical/infisical.sh, which
 # is the only file that runs the CLI. What is left here is the one thing a
 # wrapper cannot do from a subprocess: export into the caller.
 #

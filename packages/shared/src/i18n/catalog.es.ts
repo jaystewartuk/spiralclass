@@ -1078,7 +1078,7 @@ export const esMX = {
   "onboarding.templates.priceStripe": "Precio Stripe",
   "onboarding.templates.priceWise": "Precio por transferencia (opcional)",
   // Shown instead of priceStripe when the teacher's country has no Stripe
-  // Connect rail at all (Wise-only, D-58) — there's no Stripe price to split
+  // Connect rail at all (Wise-only, D-143) — there's no Stripe price to split
   // from, so it's just "Price".
   "onboarding.templates.price": "Precio",
   "onboarding.templates.expirationMonths": "Vencimiento (meses)",
@@ -3284,7 +3284,7 @@ export const esMX = {
   "web.dashboard.shareGroups.groupName": "Nombre del grupo",
   "web.dashboard.shareGroups.linkForThisGroup": "Enlace para publicar en este grupo",
 
-  // Vistas previas sociales (D-123).
+  // Vistas previas sociales (D-125).
   "socialPreview.title": "Vista previa social",
   "socialPreview.subtitle":
     "La imagen que ve la gente cuando compartes este enlace en Facebook, WhatsApp o donde sea.",
@@ -5910,13 +5910,13 @@ export const esMX = {
   "web.admin.lessonInsights.liveWarning.pre":
     "— la voz capturada se está enviando al proveedor de ASR y las transcripciones se están guardando,",
   "web.admin.lessonInsights.liveWarning.strong": "para cada par con consentimiento",
-  "web.admin.lessonInsights.liveWarning.mid": "(D-21/D-22). Solo deben grabarse pares de",
+  "web.admin.lessonInsights.liveWarning.mid": "(D-22). Solo deben grabarse pares de",
   "web.admin.lessonInsights.liveWarning.em": "prueba",
   "web.admin.lessonInsights.liveWarning.midEnd": "con consentimiento; apaga",
   "web.admin.lessonInsights.liveWarning.post": "entre pruebas.",
   "web.admin.lessonInsights.title": "Insights de clase — salud del pipeline",
   "web.admin.lessonInsights.subtitle":
-    "Estado operativo en todos los tenants: captura → transcripción → insights → perfil → resumen. Solo estados y conteos — no se muestra contenido de transcripciones, pronunciación o perfiles aquí (D-21/D-22).",
+    "Estado operativo en todos los tenants: captura → transcripción → insights → perfil → resumen. Solo estados y conteos — no se muestra contenido de transcripciones, pronunciación o perfiles aquí (D-22).",
   "web.admin.lessonInsights.awaitingTranscription": "Capturas esperando transcripción",
   "web.admin.lessonInsights.awaitingTranscriptionHint": 'audio "ready" aún sin transcribir',
   "web.admin.lessonInsights.stuckCaptures": "Capturas atascadas",
@@ -6328,7 +6328,7 @@ export const esMX = {
   "web.admin.teachers.entitlements.canScheduleMaterials": "Puede programar materiales",
   "web.admin.teachers.entitlements.canCustomPrice": "Puede fijar precio personalizado",
   "web.admin.teachers.entitlements.canUseLiveNotes": "Puede usar notas en vivo",
-  // Merged from the D-99 (PR #680) GBP-billing-currency conflict resolution
+  // Merged from the D-153 (PR #680) GBP-billing-currency conflict resolution
   // — see catalog.en.ts's identical comment.
   "web.admin.subscriptions.otherCurrencyMrrNote":
     "No incluido arriba (suscriptores en otra moneda, sin conversión de divisas):",

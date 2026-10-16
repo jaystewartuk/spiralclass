@@ -66,7 +66,7 @@ export const SUBPROCESSORS: readonly Subprocessor[] = [
     location: "United States",
     gate: null,
     // config/cloudrun/production.env: REGION=us-east4 (N. Virginia). Replaced
-    // Fly.io on 2026-09-23 (D-184's addendum).
+    // Fly.io on 2026-09-23 (D-184).
     evidence: "config/cloudrun/production.env",
   },
   {
@@ -162,7 +162,7 @@ export const SUBPROCESSORS: readonly Subprocessor[] = [
   },
   {
     id: "livekit",
-    // Self-hosted on Compute Engine since D-187. The name follows where
+    // Self-hosted on Compute Engine since D-16. The name follows where
     // production's LIVEKIT_URL points — LiveKit Cloud is a different company —
     // and subprocessors.test.ts fails if the two disagree (#104).
     name: "LiveKit (self-hosted)",
@@ -188,11 +188,11 @@ export const SUBPROCESSORS: readonly Subprocessor[] = [
   {
     id: "deepgram",
     name: "Deepgram",
-    // Live captions joined on 2026-09-23 (D-185's addendum): the fallback
+    // Live captions joined on 2026-09-23 (D-185): the fallback
     // for a class where no device can recognise speech, streamed from the
     // speaker's own browser and opted out of Deepgram's model training.
     purpose:
-      "Converts speech to text for intro-video coaching, and for live captions in a class where no device in the call can recognise speech itself. Where learning insights are on, those caption lines also form the class's written transcript (D-189).",
+      "Converts speech to text for intro-video coaching, and for live captions in a class where no device in the call can recognise speech itself. Where learning insights are on, those caption lines also form the class's written transcript (D-185).",
     dataShared:
       "The audio of the teacher's intro video, or — for live captions — the speech of the teacher or a consenting student while captions are on.",
     location: "United States",
@@ -249,7 +249,7 @@ export const SUBPROCESSORS: readonly Subprocessor[] = [
       "The alternative narrator for a study podcast generated from a teacher's own material.",
     dataShared: "The narration script generated from the material. No student data.",
     location: "United States",
-    // Podcasts are switched off in every environment today (D-114 added the
+    // Podcasts are switched off in every environment today (D-185 added the
     // flag precisely so "off" would be a reviewable diff), so nothing reaches
     // this vendor at all. It is listed rather than omitted because the register
     // describes what CAN happen, and the page renders it under the heading that

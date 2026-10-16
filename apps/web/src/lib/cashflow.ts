@@ -6,7 +6,7 @@
 // paid for but not yet taught — she still owes the work, and a refund would
 // come out of it). This module makes that split visible, and files what she
 // earned by the month she taught it, which is the question she actually asks:
-// "what did September come to?" (D-191).
+// "what did September come to?"
 //
 // Basis is what the student paid: the package price (`pricePaidMinorUnits`)
 // over its class count. D-143 made her the merchant of record, so the only
@@ -14,7 +14,7 @@
 // on a card payment — charged on her own account and never seen by the
 // platform, so never estimated here. That is why the money screens say the
 // figures are what students paid, and that card payments land a little lower
-// after Stripe's fee, which SpiralClass does not receive (D-152).
+// after Stripe's fee, which SpiralClass does not receive (D-143).
 //
 // EVERY FIGURE IS SCOPED TO ONE CURRENCY. `packages.currency` is stamped per
 // package at purchase, so a teacher who changes her pricing currency with paid
@@ -141,7 +141,7 @@ export type CashFlowSummary = {
   // with the students page, whose "classes left" counts only the unbooked ones.
   heldBookedLessons: number;
   // What she earned teaching so far this calendar month, and how many classes.
-  // The headline figure (D-191).
+  // The headline figure (docs/features/payments.md).
   // `YYYY-MM` of the current month on her calendar. Its own field because
   // `months` is empty until she has taught, and a teacher who has been paid
   // but not yet taught still has a current month to name.
@@ -184,7 +184,7 @@ export type CashFlow = {
   primary: CashFlowSummary;
   // Every currency with money in it, `primary` first. **Length 1 for every
   // teacher who has never changed her pricing currency** — which is every
-  // teacher today, since a currency is chosen once at onboarding (D-64). The
+  // teacher today, since a currency is chosen once at onboarding (D-153). The
   // single-currency case therefore stays the simple case, and no surface grows
   // a currency selector for a state nobody is in.
   byCurrency: CashFlowSummary[];
@@ -444,7 +444,7 @@ export function apportion(total: number, weights: number[]): number[] {
   return parts;
 }
 
-// A no-show is forfeited time the teacher earned (D-12): it is delivered for
+// A no-show is forfeited time the teacher earned: it is delivered for
 // the earned/held split, so it is earned in the month it was booked for too.
 // One list, so the monthly figures and the all-time split cannot disagree
 // about what counts.
@@ -468,7 +468,7 @@ export async function computeTeacherCashFlow(
   // for a teacher with no packages at all — her timezone, whose calendar every
   // month is cut on, and whether she is a test account. Read first, because
   // that last one decides the queries below: a real teacher's figures leave
-  // out the operator's test students (D-192); a test teacher's do not.
+  // out the operator's test students; a test teacher's do not.
   const teacher = await prisma.teacher.findUnique({
     where: { id: teacherId },
     select: { pricingCurrency: true, timezone: true, testAccount: true },

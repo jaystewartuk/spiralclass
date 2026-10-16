@@ -10,7 +10,7 @@
 # main (classic branch protection):
 #   - Require a PR before merging, 0 required approvals (solo dev — the CI check
 #     is the gate, not a second reviewer).
-#   - Require one status check: `local-gate` (D-119).
+#   - Require one status check: `local-gate` (D-157).
 #       * Normally posted by scripts/ci/status.mjs from the operator's machine
 #         after `pnpm gate` runs the static+unit tier — CI moved onto the
 #         laptop, but the merge button still has to know about it. A commit
@@ -18,11 +18,11 @@
 #         to "waiting" until that commit is certified too; that's the property
 #         worth having.
 #       * THERE ARE TWO PRODUCERS AGAIN ([D-157]). This paragraph used to say
-#         there were none, which was true only while D-129 had deleted every
-#         workflow. `gate.yml`'s `status` job posts the same context from a
+#         there were none, which was true only while every workflow was
+#         deleted (2026-08-25 to 2026-09-04). `gate.yml`'s `status` job posts the same context from a
 #         runner, so a laptop-less day is no longer a stranded PR.
 #       * Why `local-gate` and NOT the `gate.yml` job context, which would be
-#         the obvious modern choice ([D-162] weighed it and chose this): the
+#         the obvious modern choice ([D-157] weighed it and chose this): the
 #         laptop posts `local-gate` about 90 seconds after a push, and the
 #         runner takes about ten minutes to reach the same verdict. Requiring
 #         the job would make every merge wait for the slower of two producers
@@ -40,7 +40,7 @@
 #         explain to an outside contributor rather than let them discover.
 #       * Do NOT require a `heavy.yml` context here. It is 17 minutes and it is
 #         better read than waited on; `pnpm promote` is what refuses to ship a
-#         commit it did not pass ([D-162]), which is the moment that matters.
+#         commit it did not pass ([D-157]), which is the moment that matters.
 #   - `PR integration gate` (pr-integration.yml) is gone — the real integration
 #     suite it used to gate moved to promote-only on 2026-07-21
 #     (a documented, accepted regression in catching
@@ -207,7 +207,7 @@ if [ "${PROMOTE_POLICIES}" != "main" ]; then
 fi
 echo "  ✓ only main can reach PROMOTE_TOKEN."
 
-# ── Security tab: reporting, code scanning, and merge protection (D-179) ─────
+# ── Security tab: reporting, code scanning, and merge protection (D-158) ─────
 # SECURITY.md and the issue-template contact link both send a reporter to the
 # private "Report a vulnerability" flow. With the setting off that link is a
 # dead end, and a reporter who hits one opens a public issue instead.

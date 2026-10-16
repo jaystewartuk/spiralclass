@@ -3,7 +3,7 @@
 # UAT §0 live-deployment probe — health + Stripe-webhook-refusal, run locally so
 # it costs zero CI minutes (preview isn't continuously monitored the way prod is;
 # prod's equivalent is scripts/local/synthetic.sh, run by hand and by promote —
-# there is no schedule anywhere since D-129). Same two
+# there is no schedule anywhere since D-157). Same two
 # checks as /admin/uat's §0 "Run probe" button, so the operator reads PASS/FAIL instead of
 # hand-typing curls and eyeballing status codes.
 #

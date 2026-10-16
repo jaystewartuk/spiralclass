@@ -16,7 +16,7 @@ import { r2PublicUrl } from "./r2-public-url";
 //
 // This deliberately mirrors lib/storage/teacher-photo.ts rather than the
 // private/signed chat-video.ts: an intro video is public, permanent, and served
-// straight from the R2 public host to <video> — no third-party embed. See D-73.
+// straight from the R2 public host to <video> — no third-party embed. See docs/features/teacher-management.md.
 
 export const TEACHER_VIDEO_BUCKET = "teacher-videos";
 // 50 MB accommodates ~60s of phone-quality selfie video at typical

@@ -44,12 +44,12 @@ describe("sitemap", () => {
     for (const path of ["/pricing", "/features", "/about", "/help", "/terms", "/privacy-notice"]) {
       expect(urls).toContain(`https://spiralclass.com${path}`);
     }
-    // A marketing route missing from the localized-path allowlist (D-193)
+    // A marketing route missing from the localized-path allowlist (D-72)
     // would be listed once per language at one and the same URL.
     expect(new Set(urls).size).toBe(urls.length);
   });
 
-  // D-193: each page is listed at every URL its content exists in, and each
+  // D-72: each page is listed at every URL its content exists in, and each
   // entry carries the page's whole hreflang set — the same set its metadata
   // emits, so the two cannot tell a search engine different things.
   it("lists each page in every language it exists in, with a reciprocal hreflang set", async () => {
@@ -112,13 +112,9 @@ describe("sitemap", () => {
         bio: { not: null },
         templatesTouchedAt: { not: null },
         availabilityTouchedAt: { not: null },
-        // D-113 made the payout rail a relation; D-124 made its bank branch
-        // GENERATED from the scheme registry (one arm per pricing currency,
-        // naming the schemes that can settle it). Asserted by reference to the
-        // exported constant rather than copied literally: a hand-copy of ~50
-        // generated arms would be unreadable AND would have to be re-copied
-        // every time a country is added, which is exactly the coupling the
-        // generation removes. The parity sweep below is what proves this
+        // The payout rail is a relation (D-145). Asserted by reference to the
+        // exported constant rather than copied literally, so the clause has one
+        // definition. The parity sweep below is what proves this
         // clause agrees with the JS gate.
         ...HAS_PAYOUT_RAIL_WHERE,
         // Fixtures pass every activation signal, so they are excluded by shape.
@@ -243,9 +239,8 @@ function matchesWhere(row: Record<string, unknown>, where: WhereClause): boolean
     if (typeof condition === "boolean") return value === condition;
     if (typeof condition === "string") return value === condition;
     if (isNotNullOperator(condition)) return value !== null;
-    // `schemeId: { in: [...] }` — D-124's SQL gate filters bank accounts by
-    // the scheme ids that can settle the teacher's pricing currency, a list
-    // generated from the shared registry rather than hand-written.
+    // `{ in: [...] }` — the removed bank-account branch of the SQL gate
+    // filtered by scheme id with it; kept as a general operator.
     if (isInOperator(condition)) {
       return typeof value === "string" && condition.in.includes(value);
     }
@@ -260,7 +255,7 @@ function matchesWhere(row: Record<string, unknown>, where: WhereClause): boolean
       const suffix = (condition as { endsWith: string }).endsWith;
       return typeof value === "string" && value.toLowerCase().endsWith(suffix);
     }
-    // `payoutInstruments: { some: {...} }` — D-113 moved the payout rail off
+    // `payoutInstruments: { some: {...} }` — D-145 moved the payout rail off
     // two teacher columns onto a relation, so the gate's SQL translation now
     // reaches for a relation filter. Evaluated the same way Prisma does: at
     // least one related row satisfies the whole subclause.
@@ -282,7 +277,7 @@ function matchesWhere(row: Record<string, unknown>, where: WhereClause): boolean
 
 const STAMP = new Date("2026-07-01T00:00:00Z");
 
-// The genuinely distinct payout states after D-113. "enabled but no detail"
+// The genuinely distinct payout states after D-145. "enabled but no detail"
 // is a real half-configured shape, not a synthetic one — it's what a teacher
 // looks like mid-setup.
 //

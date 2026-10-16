@@ -4,7 +4,7 @@
 [![Licence: AGPL-3.0-only](https://img.shields.io/badge/licence-AGPL--3.0--only-blue.svg)](LICENSE)
 
 <!-- The two deploy workflows deliberately have no badge. Preview's is
-     suspended (D-150 moves preview to an Oracle ARM box; its workflow keeps
+     suspended (D-184 moves preview to an Oracle ARM box; its workflow keeps
      only a manual trigger until that box serves), so a badge would report the
      health of something that is not running. Production's runs behind a
      required reviewer, where a green badge would mostly mean "nobody has
@@ -73,7 +73,7 @@ appears in it.</sub>
 It is published as an honest record of how one engineer builds and runs a
 payments-handling, video-carrying SaaS product alone: the architecture, the
 decisions, the things that went wrong, and the mechanisms built so they would
-not go wrong twice. More than 125 decision records in
+not go wrong twice. More than 25 decision records in
 [`docs/decisions/`](docs/decisions/README.md) are the most useful thing here —
 several of them reverse an earlier one and say why.
 
@@ -84,8 +84,8 @@ reading is what serves production.
 publication — UI iteration on a client that no longer exists,
 infrastructure churn whose lesson its successors carry, and implementation
 notes with no rejected alternative. The survivors are unedited except where a
-record named an account identifier ([D-158](docs/decisions/D-158.md)) or the
-maintainer's own legal position ([D-159](docs/decisions/D-159.md)). Numbering
+record named an account identifier or the maintainer's own legal position
+([D-158](docs/decisions/D-158.md)). Numbering
 was not renumbered, so the gaps are visible rather than tidied away —
 [the index says which groups went and why](docs/decisions/README.md#what-is-not-here).
 
@@ -102,8 +102,7 @@ One consequence worth knowing before you read the code:
 - **The checks are defined in one file, and CI does not get a second
   opinion.** `scripts/ci/steps.mjs` is the only definition of what "green"
   means; the workflows run it and list nothing of their own. Everything ran on
-  the maintainer's laptop for three months with no workflows at all
-  ([D-129](docs/decisions/D-129.md)), and what came back
+  the maintainer's laptop for three months with no workflows at all, and what came back
   ([D-157](docs/decisions/D-157.md)) was runners, not a second definition. See
   [the gate](#the-gate-is-one-program-run-in-two-places) below.
 
@@ -284,7 +283,7 @@ become a payments one again.
 The second rail is **Wise**, and the reason it is the only manual rail is worth
 more than the rail itself. There used to be a `bank_account` instrument behind a
 15-scheme per-country registry, so that supporting a new country was a registry
-row rather than a migration ([D-124](docs/decisions/D-124.md)) — good design for
+row rather than a migration — good design for
 the problem as it stood. Then direct charges made the teacher's own Stripe
 account present SPEI at checkout, and the same buyer was being offered the local
 bank transfer twice on one page: once reconciling in seconds, once waiting on
@@ -335,7 +334,7 @@ And **applied migrations are never edited**, not even a comment: Prisma
 checksums each file, so any drift breaks `migrate deploy`.
 
 Migrations run behind a **Neon checkpoint branch**
-([D-95](docs/decisions/D-95.md)), because a code rollback alone never undoes a
+([D-178](docs/decisions/D-178.md)), because a code rollback alone never undoes a
 schema change. The restore path is a documented script, not a plan.
 
 → [`docs/architecture/data-model.md`](docs/architecture/data-model.md)
@@ -361,16 +360,18 @@ authorisation server-side rather than trusting the client.
 ### Video
 
 LiveKit, **self-hosted** on a single free Compute Engine VM rather than LiveKit
-Cloud, fronted by Caddy ([D-187](docs/decisions/D-187.md)). The application talks to it through a
+Cloud, fronted by Caddy ([D-16](docs/decisions/D-16.md)). The application talks to it through a
 `VideoProvider` interface selected by `RTC_PROVIDER`, so the Cloud→self-hosted
 cutover changed two configuration values and zero lines of application code.
 
 Recording is room-composite Egress writing straight to R2 with per-request
 credentials, and it is switched off in production: the VM carries a class but
-not egress (D-187). Live captions run **in the participants' browsers**: speech is
+not egress (D-16). Live captions run **in the participants' browsers**: speech is
 recognised by the browser (by the other person's, when a phone cannot recognise
 during a call), translated on the device or through the app, and published into
-the room as a data message. Nothing about captions is stored.
+the room as a data message. Captions are not stored as captions; with the
+pairing's insights consent the recognised text is kept as the class transcript
+([D-185](docs/decisions/D-185.md)).
 
 The honest part: video runs on one free VM with no SLA, which is a documented
 risk acceptance with a written graduation trigger, not an oversight.
@@ -458,11 +459,11 @@ runner in the same commit and there is no YAML to remember to widen. The browser
 suites carry one committed baseline set, `-linux.png`, and the visual sweep
 skips on any other platform: Playwright names a snapshot after the machine that
 took it, and the machine that asserts is the one whose verdict a release is
-certified by ([D-171](docs/decisions/D-171.md)).
+certified by ([D-157](docs/decisions/D-157.md)).
 
 **The workflows list no steps of their own, and that is the point.** For three
 months this repository had no GitHub Actions at all: `.github/workflows/` was
-deleted outright ([D-129](docs/decisions/D-129.md)) after the account's Actions
+deleted outright (2026-08-25) after the account's Actions
 allowance emptied, every private repository's workflows began failing at once,
 and production's database went eleven days without a backup while the public
 repositories stayed green. Part of what went with it was a dispatch-only copy of
@@ -478,8 +479,7 @@ workflow contains `gcloud run deploy`, `docker buildx build` or `prisma migrate
 deploy`, because the last time those steps existed in two places, the re-typed
 copy was the one missing the pre-migration database checkpoint.
 
-→ [D-119](docs/decisions/D-119.md), [D-129](docs/decisions/D-129.md),
-[D-157](docs/decisions/D-157.md), [D-161](docs/decisions/D-161.md)
+→ [D-157](docs/decisions/D-157.md)
 
 ## Running it locally
 
@@ -602,7 +602,7 @@ two scripts the maintainer runs by hand to recover — so a deploy from a runner
 and a deploy from a laptop are the same ordered steps.
 
 ⚠️ **There is no preview host today; production's deploy is live.**
-[D-150](docs/decisions/D-150.md) moved preview to an Oracle ARM box, and preview
+[D-184](docs/decisions/D-184.md) moved preview to an Oracle ARM box, and preview
 has no deploy target until that box is rebuilt — `scripts/oracle-deploy.sh` is
 the way back. `deploy-production.yml` keeps its `push: [production]` trigger, and `pnpm
 promote` reads that trigger off the workflow file and refuses before the
@@ -618,16 +618,16 @@ in [`infra/gcp-livekit/README.md`](infra/gcp-livekit/README.md).
 
 ## Documentation map
 
-| Where                                      | What                                                                                             |
-| ------------------------------------------ | ------------------------------------------------------------------------------------------------ |
-| [`docs/architecture/`](docs/architecture/) | System design, the data model, how a purchase and a booking flow                                 |
-| [`docs/decisions/`](docs/decisions/)       | **More than 125 decision records.** Current policy, not history — several reverse an earlier one |
-| [`docs/features/`](docs/features/)         | Canonical product behaviour, one document per feature                                            |
-| [`docs/development/`](docs/development/)   | Setup, testing, the change workflow, i18n, analytics                                             |
-| [`docs/deployment/`](docs/deployment/)     | Release, incident response, backup and restore, infrastructure runbooks                          |
-| [`docs/help/`](docs/help/)                 | Customer-facing guides — the source for the in-app help centre                                   |
-| [`docs/security.md`](docs/security.md)     | What this public repository does and does not expose                                             |
-| [`CLAUDE.md`](CLAUDE.md)                   | The non-negotiable rules. Binds humans as much as agents                                         |
+| Where                                      | What                                                                                            |
+| ------------------------------------------ | ----------------------------------------------------------------------------------------------- |
+| [`docs/architecture/`](docs/architecture/) | System design, the data model, how a purchase and a booking flow                                |
+| [`docs/decisions/`](docs/decisions/)       | **More than 25 decision records.** Current policy, not history — several reverse an earlier one |
+| [`docs/features/`](docs/features/)         | Canonical product behaviour, one document per feature                                           |
+| [`docs/development/`](docs/development/)   | Setup, testing, the change workflow, i18n, analytics                                            |
+| [`docs/deployment/`](docs/deployment/)     | Release, incident response, backup and restore, infrastructure runbooks                         |
+| [`docs/help/`](docs/help/)                 | Customer-facing guides — the source for the in-app help centre                                  |
+| [`docs/security.md`](docs/security.md)     | What this public repository does and does not expose                                            |
+| [`CLAUDE.md`](CLAUDE.md)                   | The non-negotiable rules. Binds humans as much as agents                                        |
 
 If you read only one thing beyond this file, make it
 [**Three decisions, told in full**](docs/decisions/READ-THIS-FIRST.md) — the

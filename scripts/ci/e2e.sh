@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # The Playwright browser suites: happy-path E2E, visual regression and axe. Was .github/workflows/e2e.yml until
-# D-119 mirrored it here and D-129 deleted the workflow; this is the only copy.
+# it was mirrored here (2026-08-12) and the workflow deleted (2026-08-25); this is the only copy.
 #
 # Boots the same stack the workflow does — postgres:16, migrations, the Alicia
 # Moreno seed, a PRODUCTION build served by `next start` — and runs the full
@@ -13,7 +13,7 @@
 # instead of two.
 #
 # APP_URL is a *.localhost host on purpose: prod-vs-preview is decided by
-# APP_URL (D-89 Phase 5 removed the VERCEL_ENV branch), so the app must see a
+# APP_URL (D-70 Phase 5 removed the VERCEL_ENV branch), so the app must see a
 # preview-shaped origin. Chromium maps *.localhost to loopback itself; the
 # readiness probe below uses 127.0.0.1 so it doesn't depend on the OS resolver
 # agreeing.
@@ -21,7 +21,7 @@ set -euo pipefail
 
 cd "$(git rev-parse --show-toplevel)"
 
-# Serialize against every other checkout on this machine (D-146). This suite
+# Serialize against every other checkout on this machine (D-157). This suite
 # holds three singletons for its whole duration: the shared
 # `spiralclass-test-db` container, port 3000, and a production `next build`
 # with a 6GB heap ceiling followed by a fleet of Chromium workers. The port
@@ -69,7 +69,7 @@ APP_PID=""
 # "This repo" means every worktree, not just the current one. It used to mean
 # `git rev-parse --show-toplevel`, which inside a worktree is that worktree —
 # so the flag could only ever kill a stray started from the same checkout.
-# D-146 says several Claude sessions work this repo at once, each in its own
+# D-157 says several Claude sessions work this repo at once, each in its own
 # worktree, all sharing one laptop; the port-3000 collision that actually
 # happens is therefore between SIBLING worktrees, and that is the single case
 # the escape hatch could not reach. Observed 2026-09-01: three consecutive
@@ -181,7 +181,7 @@ echo "── Seed"
 echo "── Playwright browser"
 # --with-deps installs the Linux system libraries Chromium needs (libnss3,
 # libasound2 and friends) and is a no-op-with-error on macOS, so it is chosen
-# by platform rather than passed unconditionally ([D-161]). Re-running when
+# by platform rather than passed unconditionally ([D-157]). Re-running when
 # Chromium is already present is cheap on both.
 if [ "$(uname -s)" = "Linux" ]; then
   pnpm --filter spiralclass-web exec playwright install --with-deps chromium
@@ -275,13 +275,13 @@ E2E_STATUS=$?
 #
 #   VISUAL_UPDATE_SNAPSHOTS=booking bash scripts/ci/e2e.sh
 #
-# — which since [D-171] only runs on Linux, so in practice you reach it through
+# — which since [D-157] only runs on Linux, so in practice you reach it through
 # `gh workflow run heavy.yml -f update_visual_baselines=booking`. The env var is
 # still what the workflow sets, and the paragraphs below are still why the value
 # is a filter rather than a flag.
 #
 # Both halves of that are load-bearing, and each was learned the hard way while
-# regenerating for D-144:
+# regenerating for the 2026-08-30 buy-page rewrite:
 #
 #   `=all` rather than a bare `--update-snapshots` (which means "changed"),
 #   because the suite tolerates maxDiffPixelRatio 0.01 for font rasterisation
@@ -301,13 +301,13 @@ E2E_STATUS=$?
 # radius); anything else is a Playwright -g pattern matched against test titles,
 # which are "<route name> matches its baseline".
 #
-# ⚠️ THERE IS ONE BASELINE SET AND ONLY ubuntu-latest MAY WRITE IT ([D-171]).
-# Playwright suffixes a snapshot with `process.platform`, so [D-161] committed
-# two sets — `-darwin.png` for the laptop and `-linux.png` for the runner — and
+# ⚠️ THERE IS ONE BASELINE SET AND ONLY ubuntu-latest MAY WRITE IT ([D-157]).
+# Playwright suffixes a snapshot with `process.platform`, so from 2026-09-05 there
+# were two sets — `-darwin.png` for the laptop and `-linux.png` for the runner — and
 # a regeneration run could only ever see its own half. That cost was worth
-# paying while the laptop still certified releases; [D-162] ended that, so
-# D-171 deleted the macOS set and regression.spec.ts now skips anywhere but
-# Linux.
+# paying while the laptop still certified releases. Once the runners certified
+# them instead, the macOS set was deleted (2026-09-09) and regression.spec.ts now
+# skips anywhere but Linux.
 #
 # Which means a regeneration started HERE, on a Mac, would either photograph
 # nothing (the suite skips) or, with the skip bypassed, write macOS pixels into
@@ -331,7 +331,7 @@ if [ -n "${VISUAL_UPDATE_SNAPSHOTS:-}" ]; then
     echo "VISUAL_UPDATE_SNAPSHOTS is set, but this is $(uname -s), not Linux." >&2
     echo "" >&2
     echo "The visual baselines are -linux.png and are asserted on ubuntu-latest" >&2
-    echo "only (D-171). Regenerating them anywhere else writes pixels that no" >&2
+    echo "only (D-157). Regenerating them anywhere else writes pixels that no" >&2
     echo "machine asserts, or overwrites the set the gate reads with this one's" >&2
     echo "font rendering. Dispatch it instead:" >&2
     echo "" >&2

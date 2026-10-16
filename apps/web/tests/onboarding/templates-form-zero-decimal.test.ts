@@ -15,7 +15,7 @@
 // site that omits the currency multiplies a 0-decimal price by 100"); the
 // warning was about the WRITE half, and the read half had the same bug.
 //
-// CLP has been in the curated list since D-124, so a Chilean teacher on the
+// CLP has been in the curated list since the first cut (D-153), so a Chilean teacher on the
 // manual rail could reach this before D-143; widening the card rail to Japan
 // adds JPY.
 import { act } from "react";
@@ -35,7 +35,7 @@ const { formatMinorUnits: formatMinorUnitsForMock } = await vi.hoisted(
   async () => await import("@spiralclass/shared"),
 );
 vi.mock("@/components/locale-provider", () => ({
-  // D-197: the real formatter, in English, as the tests expect.
+  // D-153: the real formatter, in English, as the tests expect.
   useFormatMoney: () => (minorUnits: number, currency?: string) =>
     formatMinorUnitsForMock(minorUnits, currency, "en"),
   useT: () => (key: string) => key,

@@ -937,7 +937,7 @@ async function seedTeacherOperations(
   // beside an active package, on the surface the screenshots and the E2E suite
   // both use. Card rail, because a `manual_transfer` payment without an
   // instrument is rejected by `payments_instrument_required_for_manual_transfer`
-  // (D-113) and inventing an instrument here would put a payee value in the
+  // (D-145) and inventing an instrument here would put a payee value in the
   // database that nothing checked.
   const unpaid = await prisma.package.findMany({
     where: { teacherId: teacher.id, payments: { none: {} } },

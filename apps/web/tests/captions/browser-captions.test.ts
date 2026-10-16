@@ -300,7 +300,7 @@ describe("BrowserCaptions — the cloud fallback (two phones)", () => {
   });
 });
 
-describe("BrowserCaptions — keeping the transcript (D-189)", () => {
+describe("BrowserCaptions — keeping the transcript (D-185)", () => {
   const keptSession = () => SESSION({ transcriptCapture: true });
 
   it("keeps nothing while the session does not say the transcript is kept", async () => {
@@ -546,10 +546,10 @@ describe("BrowserCaptions — where lines go", () => {
   });
 });
 
-// D-198. Measured 2026-10-12: a teacher's phrases ran to ~500 characters, and
+// D-185. Measured 2026-10-12: a teacher's phrases ran to ~500 characters, and
 // a listener reading the translation saw nothing until each one ended and
 // its translation came back. The words now go out as they are heard.
-describe("BrowserCaptions — words as they are spoken (D-198)", () => {
+describe("BrowserCaptions — words as they are spoken (D-185)", () => {
   it("publishes the words so far, untranslated, under one id that the translated line then takes", async () => {
     const { c, published, fetch } = setup();
     c.sync(input());

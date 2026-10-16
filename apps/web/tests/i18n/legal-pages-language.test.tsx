@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { renderToStaticMarkup } from "react-dom/server";
 import { createT } from "@spiralclass/shared";
 
-// The legal pages under D-193 and D-196. The URL picks the document: /terms
+// The legal pages under D-72. The URL picks the document: /terms
 // is the English one and /es/terms the Spanish one. A language with no
 // translation by a person gets the English text, with a line in its own
 // language saying so, never a machine translation.

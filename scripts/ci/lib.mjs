@@ -26,7 +26,7 @@ export const RECEIPT_PATH = resolve(RECEIPT_DIR, "receipt.json");
  * certified (the receipt above).
  *
  * It exists because web and mobile stopped being coupled to one gated push
- * (D-120 for web; mobile shipped by hand), and the failure that arrangement invites
+ * (D-199 for web; mobile shipped by hand), and the failure that arrangement invites
  * is not a red build — it is silence. A promote that deploys web and never
  * publishes mobile leaves no trace anywhere: `production` is at the new commit,
  * the app store of record is a channel in someone else's dashboard, and nothing

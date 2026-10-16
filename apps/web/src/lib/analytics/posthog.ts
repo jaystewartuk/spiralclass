@@ -165,7 +165,7 @@ export type ServerEvent = WithSessionId<
       };
     }
   | {
-      // Teacher recorded/uploaded their public-page intro video (D-73). The
+      // Teacher recorded/uploaded their public-page intro video. The
       // conversion event of the whole teacher-side funnel — everything before
       // it (recorder opened, recording started/completed, upload started) is a
       // CLIENT event, because the server only ever hears about the attempts
@@ -213,7 +213,7 @@ export type ServerEvent = WithSessionId<
       };
     }
   | {
-      // The async AI analysis pipeline finished (D-73, Layers 2–3). Fired from
+      // The async AI analysis pipeline finished (intro-video Layers 2–3). Fired from
       // the Inngest handler for EVERY terminal outcome, including the skips —
       // "how often is analysis generated" is unanswerable without knowing how
       // often it was skipped and why.
@@ -275,7 +275,7 @@ export type ServerEvent = WithSessionId<
         // topic (e.g. "Conversación") — null when the package has no
         // template (legacy/manual packages).
         className?: string | null;
-        // The platform is 1:1-only today (no group classes — see D-16/D-88),
+        // The platform is 1:1-only today (no group classes — see D-16/D-17),
         // so this reflects the real product distinction instead: a one-off
         // single_class purchase vs a multi-class package.
         classType?: "single_class" | "package";
@@ -312,7 +312,7 @@ export type ServerEvent = WithSessionId<
         // Wise-only teacher means something different from one that dies
         // with a card option present.
         stripeReady: boolean;
-        // Renamed from `wiseReady` by D-113: the signal was always "can a
+        // Renamed from `wiseReady` by D-145: the signal was always "can a
         // student pay by transfer", and it is now true for SPEI too.
         transferReady: boolean;
         // True when the viewer is the teacher herself — she checks her own
@@ -356,7 +356,7 @@ export type ServerEvent = WithSessionId<
         // still measurable.
         scheme?: string;
         priceMinorUnits: number;
-        // How many people the package was bought for (D-188) — 1, or 2 for a
+        // How many people the package was bought for (D-149) — 1, or 2 for a
         // package for two — so the two prices can be told apart in a funnel.
         seats?: number;
         // Which surface initiated the purchase: the anonymous booking-page
@@ -399,7 +399,7 @@ export type ServerEvent = WithSessionId<
         // payment). The `post` value is reserved for a future flow
         // where teachers settle outside the system and import the receipt.
         // The manual-transfer values are the INSTRUMENT kind, not the
-        // provider: `wise` keeps the exact meaning it had before D-113, so
+        // provider: `wise` keeps the exact meaning it had before D-145, so
         // every existing PostHog funnel and saved insight survives the
         // generalization, and `bank_transfer` arrives as a new value rather than a
         // re-labelling of an old one. Same model as `prepaid` for funnel
@@ -471,7 +471,7 @@ export type ServerEvent = WithSessionId<
       properties: {
         teacherId: string;
         bookingId: string;
-        // "always" = sendTiming null (D-69) — attached with no push schedule,
+        // "always" = sendTiming null — attached with no push schedule,
         // just visible on the class page.
         sendTiming: "confirmation" | "t_5d" | "t_24h" | "t_1h" | "always";
         attachmentKind: "file" | "link";
@@ -599,7 +599,7 @@ export type ServerEvent = WithSessionId<
       };
     }
   | {
-      // Durable student profile (interests/goals) — D-20, Layer 1.
+      // Durable student profile (interests/goals) — D-17, Layer 1.
       name: "student_profile_set";
       distinctId: string;
       properties: {
@@ -611,7 +611,7 @@ export type ServerEvent = WithSessionId<
     }
   | {
       // The language a teacher teaches — the subject, and the focus-tag seed
-      // pack selector (D-20 Layer 3, narrowed to language-first by D-72).
+      // pack selector (D-17 Layer 3, narrowed to language-first by D-72).
       name: "teacher_target_language_set";
       distinctId: string;
       properties: {
@@ -659,7 +659,7 @@ export type ServerEvent = WithSessionId<
         levelId: string;
         visibility: "at_or_below" | "exact" | "all";
         attachmentKind: "file" | "link" | "content";
-        // Provenance for native-content items (D-20, Layer 4); absent for file/link.
+        // Provenance for native-content items (D-17, Layer 4); absent for file/link.
         source?: "manual" | "ai";
         // Gap G1 (docs/features/library-materials.md) — how many focus tags
         // (category/format/theme) this item was tagged with on save.
@@ -677,13 +677,13 @@ export type ServerEvent = WithSessionId<
         hasFormat: boolean;
         focusCount: number;
         hasTopic: boolean;
-        // D-69 — whether a saved lesson template's structure drove this
+        // Whether a saved lesson template's structure drove this
         // generation, mirroring class_content_generated's usedTemplate.
         usedTemplate: boolean;
       };
     }
   | {
-      // "Edit with AI" (D-73) — a teacher applied a free-text change to an
+      // "Edit with AI" — a teacher applied a free-text change to an
       // existing material's body. Burns one shared class_content AI-cap row,
       // same pool as class_content_generated / library_material_generated.
       name: "material_refined";
@@ -735,7 +735,7 @@ export type ServerEvent = WithSessionId<
       };
     }
   | {
-      // D-132 — the auto-record-classes setting flipped (Settings → Account).
+      // D-16 — the auto-record-classes setting flipped (Settings → Account).
       // Worth a signal of its own: it is the switch that decides whether the
       // insights pipeline runs on a teacher's whole timetable or only on the
       // classes she remembered to record, so adoption of it explains the
@@ -758,8 +758,8 @@ export type ServerEvent = WithSessionId<
       };
     }
   | {
-      // D-78 — teacher saved their AI material style (tone/age/variety/notes),
-      // plus D-80's vocabulary dial.
+      // D-17 — teacher saved their AI material style (tone/age/variety/notes),
+      // plus the vocabulary dial.
       name: "material_style_saved";
       distinctId: string;
       properties: {
@@ -875,7 +875,7 @@ export type ServerEvent = WithSessionId<
       distinctId: string;
       properties: {
         teacherId: string;
-        // Instrument kind for the manual rail (D-113/D-124) — `wise` keeps the
+        // Instrument kind for the manual rail (D-145) — `wise` keeps the
         // value it emitted before the generalization, so the existing
         // activation funnel is continuous across the cutover.
         rail: "stripe" | "wise" | "bank_transfer";
@@ -1014,17 +1014,17 @@ export type ServerEvent = WithSessionId<
         // Lesson continuity: how many previous-class materials were picked as
         // "continue from" context (0 = the generic continuity nudge only).
         continuationCount: number;
-        // D-20 structured inputs: how many focus tags, and whether the durable
+        // D-17 structured inputs: how many focus tags, and whether the durable
         // profile / a free-text topic contributed.
         focusCount?: number;
         hasInterests?: boolean;
         hasGoals?: boolean;
         hasTopic?: boolean;
-        // Whether the teacher's lesson template shaped the structure (D-46).
+        // Whether the teacher's lesson template shaped the structure (D-17).
         usedTemplate?: boolean;
       };
     }
-  // --- Student acquisition (docs/features/student-acquisition.md, D-24) ---
+  // --- Student acquisition (docs/features/student-acquisition.md, D-125) ---
   // Booking-page conversion funnel. `lead_captured` fires on the public route, so
   // its distinctId is the visitor's PostHog session id (anonymous) rather than a
   // teacher/student id; teacherId in properties still attaches the `teacher`
@@ -1054,7 +1054,7 @@ export type ServerEvent = WithSessionId<
         leadId: string;
       };
     }
-  // Social previews (D-123). Two events, and deliberately only two.
+  // Social previews (D-125). Two events, and deliberately only two.
   //
   // The acquisition loop these feed is ALREADY closed by the attribution
   // pipeline: shareTaggedUrl() stamps utm_content with the group's slug, the
@@ -1138,7 +1138,7 @@ export type ServerEvent = WithSessionId<
         rewardMinorUnits?: number;
       };
     }
-  // Teacher → Student invitation funnel (D-83). Teacher-side events use
+  // Teacher → Student invitation funnel. Teacher-side events use
   // distinctId = teacher.id; student-side acceptance/onboarding events use
   // distinctId = student.id so time-to-acceptance stitches across the same
   // Person. `channel` distinguishes web from the mobile deep-link accept.
@@ -1225,7 +1225,7 @@ export type ServerEvent = WithSessionId<
     }
   // --- Video call analytics audit follow-up — everything below closes a gap a
   // pre-launch video-call analytics review found (that review was deleted with
-  // the other planning documents under D-110; these events are the record). `call_started`/`call_participant_left`/`call_recording_started`
+  // the other planning documents under D-164; these events are the record). `call_started`/`call_participant_left`/`call_recording_started`
   // above predate the audit and are unchanged. ---
   | {
       // The webhook counterpart `call_started`/`call_participant_left` were
@@ -1300,7 +1300,7 @@ function getClient(): PostHog | null {
     cached = new PostHog(key, {
       // POSTHOG_HOST is an explicit override; unset falls back to the
       // region-derived ingest host (NEXT_PUBLIC_POSTHOG_REGION, default US)
-      // so a single region knob flips server + browser together — see D-48.
+      // so a single region knob flips server + browser together — see lib/analytics/posthog-region.ts.
       host: process.env.POSTHOG_HOST ?? posthogRegionHosts().ingest,
       flushAt: 1,
       flushInterval: 0,
@@ -1423,7 +1423,7 @@ export function identifyServerUser(
   properties: {
     email?: string | null;
     role: "teacher" | "student" | "admin";
-    // An operator's test account (D-192). Sent as `is_test_account` so
+    // An operator's test account. Sent as `is_test_account` so
     // PostHog's "filter out test accounts" switch can be keyed on it.
     testAccount?: boolean;
   },

@@ -1,38 +1,51 @@
 # D-NN. Short declarative title — the decision, not the topic
 
 <!--
-  Copy to the next unused number, delete this comment, and add a row to both
-  tables in README.md.
+  Before copying this, check the bar (D-202). A record is warranted only when
+  ALL THREE hold:
 
-  Sections are a checklist, not a form. Drop any that would be padding — a
-  short record beats a padded one, and every heading below is absent from at
-  least one of the best records here. What is NOT optional is the last two:
-  a decision with no stated cost has not been thought about, and a decision
-  that reverses another without saying what changed about its premise is a
-  mood, not a decision.
+    1. there were at least two real options;
+    2. a wrong choice is expensive or hard to undo; and
+    3. someone could plausibly undo it later without knowing why.
+
+  Otherwise the reasoning goes in the PR body, behaviour in docs/features/, and
+  the constraint in a guard test or a comment where the rule applies.
+
+  If a record for the topic already exists, AMEND IT rather than opening a
+  successor: rewrite what is now true, and add the change to How we got here.
+
+  Copy to the next unused number (never reuse a retired one — see the README's
+  Retired numbers table), delete this comment, and add a row to both tables in
+  README.md. Keep it under 1,500 words; aim for about 800.
 -->
 
-**Status.** Active · Decided, not built · Superseded by D-NN · Reversed by
-D-NN. If a later record reverses this one, add a dated pointer here rather
-than editing what is below — the reasoning trail is the point.
+The decision, in the first sentence, specific enough that a reader can check it
+against the code.
 
-**What changed.** The decision itself, in the first sentence. Be specific
-enough that a reader can check it against the code.
+## Why
 
-**Why.** The constraint that forced it. Where a number decided it, show the
-number and how it was taken — a measured cost beats an asserted one, and a
-record that says "measured" without saying how is worth no more than a guess.
+The constraint that forced it. Where a number decided it, show the number and
+how it was taken — a record that says "measured" without saying how is worth no
+more than a guess.
 
-**What was considered and rejected.** The alternatives, and the specific thing
-each fails on. This is usually the most useful section and the one most often
-skipped.
+## Options considered
 
-**What it constrains.** What a future change must not do, and why. Written for
-the person who will be tempted to undo this without knowing what it was for.
+- **The option** — the specific thing it fails on. This is usually the most
+  useful section and the one most often skipped.
 
-**What was affected.** The files, schema and surfaces. Enough to grep from.
+## What it cost
 
-**Trade-offs accepted, and unresolved risks.** What this did not fix, what was
-knowingly given up, what would reopen it, and what nothing currently checks.
-State the open gaps; a record that only says what went well is worth nothing
-to the next person.
+What was knowingly given up, and what is still open. A decision with no stated
+cost has not been thought about.
+
+## What it constrains
+
+What a future change must not do, and why — written for the person who will be
+tempted to undo it without knowing what it was for. Name the guard that enforces
+it, if one does.
+
+## How we got here
+
+Each earlier version of this decision, what went wrong with it and what that
+cost, and every measured number with how it was measured. When this record is
+amended, the change goes here — with what changed about the premise.

@@ -92,7 +92,7 @@ describe("maybeStartLessonAudioCapture", () => {
   const booking = { id: "b1", teacherId: "t1", studentId: "s1" };
   const consentedLink = { isMinor: false, insightsConsentAt: new Date(), guardianConsentAt: null };
 
-  // The transcription gate (D-114). Before this, transcription-off only stopped the
+  // The transcription gate (D-185). Before this, transcription-off only stopped the
   // audio at the ASR step — it had already been captured and uploaded to R2,
   // so "transcription off" still meant "student voice recorded".
   it("no-ops when transcription is disabled, even with a configured provider and consent", async () => {
@@ -104,10 +104,10 @@ describe("maybeStartLessonAudioCapture", () => {
     expect(startLessonAudioCaptures).not.toHaveBeenCalled();
   });
 
-  // D-189: the browsers write the transcript now, and this egress capture only
+  // D-185: the browsers write the transcript now, and this egress capture only
   // has somewhere to run where an egress service exists — which is what
   // recording being enabled stands for. Turning the transcription flag on for
-  // the browser path must not start an egress on a box that has none (D-187).
+  // the browser path must not start an egress on a box that has none (D-16).
   it("no-ops when recording (an egress service) is not enabled, even with the transcription flag on", async () => {
     recordingEnabled.mockReturnValueOnce(false);
 

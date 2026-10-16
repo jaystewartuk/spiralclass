@@ -16,7 +16,7 @@ import { describe, expect, it } from "vitest";
  *
  * Both are the gate bypass CLAUDE.md forbids, both are what a model reaches for
  * when a push looks stuck, and on this machine a push that looks stuck is
- * usually queuing on the lock every worktree shares (D-146). So the rule lives
+ * usually queuing on the lock every worktree shares (D-157). So the rule lives
  * in `.claude/hooks/guard-bash.sh`, which sees the whole command line.
  *
  * A hook is the worst possible place for an untested regex. It runs outside the
@@ -87,7 +87,7 @@ describe("the operator's decisions cannot be taken by a session", () => {
     ["pnpm promote", "promoting"],
     ["bash scripts/cloudrun-deploy.sh production --gate-already-passed", "deploying"],
     // The database job's script, which checkpoints and migrates production on
-    // its own since the targets were split ([D-177]'s addendum).
+    // its own since the targets were split ([D-184]).
     [
       "bash scripts/database-deploy.sh production --gate-already-passed",
       "migrating production by hand",

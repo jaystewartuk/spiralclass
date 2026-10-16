@@ -32,7 +32,7 @@ const BASE_TEACHER: Record<string, unknown> = {
   stripeChargesEnabled: false,
   pricingCurrency: "MXN",
   payoutInstruments: [],
-  // GB is inside the Stripe Connect circle (D-58) — the base fixture exercises
+  // GB is in SUPPORTED_CONNECT_COUNTRIES (D-143) — the base fixture exercises
   // the Stripe+Wise copy; the country-gating tests below override this to an
   // unsupported country to exercise the Wise-only copy.
   country: "GB",
@@ -58,7 +58,7 @@ vi.mock("@/lib/cashflow", () => ({
 }));
 vi.mock("@/lib/prisma", () => ({
   prisma: {
-    // D-113: backed by the same `teacher` fixture the page's auth returns, so
+    // D-145: backed by the same `teacher` fixture the page's auth returns, so
     // the readiness gate and the instrument query can't disagree.
     teacherPayoutInstrument: {
       findMany: async () => (teacher.payoutInstruments ?? []) as unknown[],
@@ -112,7 +112,7 @@ describe("teacher dashboard — payments card demotion", () => {
 
     // Collapsed status line, not the full setup CTA.
     expect(out).toContain("Cobros activos");
-    // "Transferencia", not "Wise": since D-113 the line names the rail, so a
+    // "Transferencia", not "Wise": since D-145 the line names the rail, so a
     // teacher whose only instrument is SPEI reads correctly too.
     expect(out).toContain("Stripe + Transferencia");
     expect(out).toContain("Administrar");
@@ -149,7 +149,7 @@ describe("teacher dashboard — payments card demotion", () => {
   });
 
   // Country-gated Stripe copy (reuses the settings/payments/page.tsx pattern):
-  // a teacher outside SUPPORTED_CONNECT_COUNTRIES (D-58) never sees Stripe
+  // a teacher outside SUPPORTED_CONNECT_COUNTRIES (D-143) never sees Stripe
   // mentioned in the setup CTA, only Wise.
   it("shows transfer-only setup copy for a teacher Stripe refuses a merchant account", async () => {
     teacher = { ...BASE_TEACHER, country: "IN" };

@@ -39,7 +39,7 @@ describe("lessonInsightsConsentOk", () => {
     ).toBe(false);
   });
 
-  // D-188: the second person in a class for two has no account and no consent
+  // D-149: the second person in a class for two has no account and no consent
   // row. The buyer's confirmation at purchase is what stands in for it.
   describe("a class paid from a package for two", () => {
     const adult = { isMinor: false, insightsConsentAt: T, guardianConsentAt: null };

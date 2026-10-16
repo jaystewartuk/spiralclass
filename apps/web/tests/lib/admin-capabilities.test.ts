@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { hasCapability } from "@/lib/admin-capabilities";
 
-// D-55: capability layer is additive to the rank ladder in lib/admin.ts.
+// D-25: capability layer is additive to the rank ladder in lib/admin.ts.
 // tester/engineer get uat:run; finance/support get nothing (by design —
 // narrow tools aren't inherited via the money-adjacent rank); superadmin
 // gets every capability.

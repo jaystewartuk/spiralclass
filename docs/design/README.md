@@ -3,8 +3,8 @@
 How the product looks, why, and what stops it drifting.
 
 This directory did not exist before 2026-08-29. Design decisions lived in
-decision records (web–mobile token parity, and
-[D-122](../decisions/D-122.md) on breakpoints) and in unusually long header
+decision records (web–mobile token parity, and a breakpoint record later
+withdrawn for [D-140](../decisions/D-140.md)) and in unusually long header
 comments on `packages/shared/src/tokens.ts` and `apps/web/src/lib/breakpoints.ts`.
 That was enough while the only reader was the person who wrote it.
 
@@ -19,7 +19,8 @@ re-art-direction changes its values:
 - An HSL mirror in `apps/web/src/app/globals.css`, guarded by
   `apps/web/src/lib/theme-parity.test.ts`, which converts HSL back to hex and
   fails on drift.
-- A custom breakpoint scale in `apps/web/src/lib/breakpoints.ts`, guarded by
+- A custom breakpoint scale in `apps/web/src/lib/breakpoints.ts` (since
+  restored to Tailwind's defaults plus a pointer gate), guarded by
   `apps/web/tests/config/responsive-breakpoints.test.ts`.
 
 The **consumption** layer leaks. `pnpm design:drift` counts it:
@@ -59,8 +60,8 @@ one un-reviewable commit, but net-new drift can and should fail today.
 **`pnpm test:visual`** — `apps/web/playwright.visual.config.ts`. Captures every
 route in `apps/web/tests/visual/routes.ts` at six viewports in both themes. The
 viewports are chosen against `breakpoints.ts`, not Tailwind's defaults: 390 and
-430 for phones, **768 because D-122 deliberately gives every tablet the phone
-layout**, 1280 because it is one pixel below `DESKTOP_MIN_WIDTH`, 1440 as the
+430 for phones, **768 because the 1281px scale of the time gave every tablet
+the phone layout**, 1280 because it was then one pixel below `DESKTOP_MIN_WIDTH`, 1440 as the
 `lg` layout, and 1920 because nothing currently responds to it.
 
 The manifest is hand-maintained — a crawl cannot know that
@@ -172,7 +173,7 @@ verified against the live site:
 - **Seven feature cards in a three-column grid** leave an orphan, and card
   heights are unequal.
 - **At 768 the header renders its desktop navigation while the body keeps the
-  phone layout.** This is D-122 working as designed, and it is also the first
+  phone layout.** This was the 1281px scale working as designed (since withdrawn, [D-140](../decisions/D-140.md)), and it is also the first
   thing a reviewer resizing a window will notice.
 - **The wordmark is inconsistent** — lowercase `spiralclass` in the header,
   `SpiralClass` in the footer and in all copy.

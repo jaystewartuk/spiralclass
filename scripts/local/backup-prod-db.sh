@@ -2,7 +2,7 @@
 # Production DB backup — pg_dump prod, verify the archive, upload to R2, keep
 # the last 14. Run it: `bash scripts/local/backup-prod-db.sh`.
 #
-# ON-DEMAND ONLY, AND NOT A PRACTICE. As of 2026-08-25 (D-129 addendum) the
+# ON-DEMAND ONLY, AND NOT A PRACTICE. As of 2026-08-25 ([D-157]) the
 # operator's decision is that **Neon already backs production up** and a
 # hand-run dump is not a routine worth keeping. So this is NOT registered in
 # scripts/local/jobs.mjs, there is no `pnpm local backup`, and nothing nags
@@ -13,16 +13,16 @@
 # a copy that lives OUTSIDE Neon entirely, taken deliberately before something
 # risky enough to want one. Take it by hand when you want that; otherwise
 # production's recovery story is Neon's PITR plus the pre-migration checkpoint
-# branch (D-95).
+# branch (D-178).
 #
-# It was .github/workflows/backup-prod-db.yml on a daily cron until D-129
-# deleted every workflow in this repo. Same contract, same verification, same
+# It was .github/workflows/backup-prod-db.yml on a daily cron until every
+# workflow in this repo was deleted on 2026-08-25. Same contract, same verification, same
 # retention; the schedule is what went away, and then the practice with it.
 #
 # WHAT THIS IS NOT. It is the secondary, off-Neon disaster-recovery copy — not
 # production's rollback mechanism. That is Neon's own point-in-time restore plus
 # the pre-migration checkpoint branch scripts/database-deploy.sh creates before any
-# migration (D-95, docs/deployment/DB_BACKUP_RESTORE.md). This dump is what
+# migration (D-178, docs/deployment/DB_BACKUP_RESTORE.md). This dump is what
 # survives a Neon-account-level incident, or a bad migration noticed after the
 # PITR window closed.
 #

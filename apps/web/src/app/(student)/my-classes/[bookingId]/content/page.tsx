@@ -34,7 +34,7 @@ export default async function ClassContentPrintPage({
     },
   });
   if (!booking) notFound();
-  // D-69: the booking-scoped "content" material — a body-bearing
+  // The booking-scoped "content" material — a body-bearing
   // LibraryMaterial with sendTiming null, always visible (no send-time gate).
   // The STUDENT copy: the resolver cuts the answer key before it gets here,
   // which matters doubly on this route because it is the printable view.

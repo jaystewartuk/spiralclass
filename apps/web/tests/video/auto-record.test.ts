@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-// maybeAutoStartRecording (D-132) — the `participant_joined` entry point that
+// maybeAutoStartRecording (D-16) — the `participant_joined` entry point that
 // starts a class's recording for a teacher who opted into autoRecordClasses,
 // so a recording (and the insights pipeline downstream of it) no longer hangs
 // off her remembering to tap Record mid-lesson.

@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { generateLessonSummary, type LessonNoteState } from "@/app/actions/lesson-notes";
 import { useT } from "@/components/locale-provider";
 
-// AI post-class summary (live-notes-panel.md "step 2", D-15). Teacher-private:
+// AI post-class summary (docs/features/classes-lesson-content.md). Teacher-private:
 // a one-tap recap built from the class's live notes. The Pro gate lives on the
 // action, so a Free teacher still sees the button and gets the upgrade nudge.
 export function LessonSummaryCard({

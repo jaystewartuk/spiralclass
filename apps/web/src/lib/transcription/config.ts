@@ -1,5 +1,5 @@
 // Transcription config + the Phase B enablement gate (lesson-insights Phase B,
-// the Phase B design, D-19).
+// the Phase B design, D-185).
 //
 // Two independent conditions must BOTH hold before any lesson audio is ever sent
 // to an ASR vendor or any transcript is stored:
@@ -21,7 +21,7 @@ export type TranscriptionConfig = {
   apiKey: string;
 };
 
-// The lesson's target language. Spanish-first (D-19) — there is no per-lesson
+// The lesson's target language. Spanish-first (D-185) — there is no per-lesson
 // target-language field yet, so default to Spanish until one is added.
 export const DEFAULT_LESSON_LANGUAGE = "es";
 
@@ -40,7 +40,7 @@ function enablementFlagOn(): boolean {
   return raw === "1" || raw === "true" || raw === "on";
 }
 
-// The gate for the transcript that lesson insights read today (D-189): the
+// The gate for the transcript that lesson insights read today (D-185): the
 // participants' browsers already recognise both speakers for live captions,
 // and with this flag on that recognised text is KEPT as the class's
 // LessonTranscript instead of being thrown away with the captions. No audio
@@ -54,8 +54,8 @@ export function browserTranscriptEnabled(): boolean {
 
 // The gate for the AUDIO pipeline (Phase B): per-speaker audio captured by a
 // LiveKit egress, sent to an ASR vendor, then discarded. Both a vendor AND the
-// flag are required — see the module note on why the flag exists. Since D-189
-// this path is dormant in production: the box has no egress (D-187), and
+// flag are required — see the module note on why the flag exists. Since D-185
+// this path is dormant in production: the box has no egress (D-16), and
 // call-recording.ts's maybeStartLessonAudioCapture additionally requires
 // recording to be enabled before it starts one.
 export function transcriptionEnabled(): boolean {

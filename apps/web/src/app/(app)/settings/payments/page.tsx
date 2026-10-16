@@ -277,7 +277,7 @@ export default async function PaymentsSettingsPage({
           </SettingRow>
         </SettingsSection>
 
-        {/* D-152. Rendered only where a card rail exists, because it is only
+        {/* D-143. Rendered only where a card rail exists, because it is only
             there that a second bill from a second company shows up. Under
             direct charges (D-143) Stripe invoices her account for its fee and
             we never see it, so this page is the only place the platform can

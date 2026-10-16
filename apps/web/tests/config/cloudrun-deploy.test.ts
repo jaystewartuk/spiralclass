@@ -86,7 +86,7 @@ describe("the service shape is the one that was measured", () => {
     expect(Number(shape.MAX_INSTANCES)).toBeLessThanOrEqual(10);
   });
 
-  describe("a wedged instance is replaced without anyone awake (D-190, #94)", () => {
+  describe("a wedged instance is replaced without anyone awake (D-184, #94)", () => {
     const probe = Object.fromEntries(
       (shape.LIVENESS_PROBE ?? "").split(",").map((kv) => kv.split("=") as [string, string]),
     );
@@ -142,7 +142,7 @@ describe("the service shape is the one that was measured", () => {
 
 describe("the deploy can ship production and cannot read it", () => {
   it("mounts the secrets as a file and never explodes them into env vars", () => {
-    // --set-env-vars would put every value in argv (D-66) AND require the
+    // --set-env-vars would put every value in argv (D-70) AND require the
     // deploy identity to hold them. --set-secrets names the secret; only the
     // runtime service account can read it.
     expect(EXECUTABLE).toContain("--set-secrets");
@@ -165,7 +165,7 @@ describe("the deploy can ship production and cannot read it", () => {
 
   it("gives the runtime identity exactly one project role, the Vertex AI caller", () => {
     // "Generate with AI" authenticates as web-runtime through the metadata
-    // server rather than with a stored key (D-127's 2026-09-24 addendum), so
+    // server rather than with a stored key (D-125, 2026-09-24), so
     // the grant that makes it work has to be one the setup script re-creates —
     // a grant made once by hand is the one a rebuilt project silently lacks,
     // and the feature then fails on the first click rather than at deploy.
@@ -422,7 +422,7 @@ describe("the script refuses before it touches anything", () => {
   });
 
   it("refuses an environment that is not production", () => {
-    // Preview belongs to Fly (D-150's addendum). A second service would be a
+    // Preview belonged to Fly when this was written (2026-09-04, [D-184]). A second service would be a
     // second thing to keep in sync for no stated reason.
     const result = run(["preview", "--gate-already-passed"]);
     expect(result.status).toBe(1);

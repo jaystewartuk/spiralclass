@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/select";
 import { useLocale, useT } from "@/components/locale-provider";
 
-// Two language selects for the per-booking caption override (D-27) — meant to
+// Two language selects for the per-booking caption override (D-185) — meant to
 // be used as OverrideAction's `children`. "Use default" (empty value) clears
 // the override for that side, falling back to the teacher/student's own
 // default language (see class-access.ts's resolution order).

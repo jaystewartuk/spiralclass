@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { useT } from "@/components/locale-provider";
 import { pricingModelSchema } from "@spiralclass/shared";
 
-// D-86 MVP pricing-model editor: a JSON textarea with live Zod validation
+// MVP pricing-model editor: a JSON textarea with live Zod validation
 // against the shared discriminated-union schema (economics-pricing.ts). A
 // structured, kind-aware editor is a fast-follow (S6+) — see the doc's
 // "Frontend" section.

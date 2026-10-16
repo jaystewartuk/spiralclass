@@ -4,7 +4,7 @@ import * as React from "react";
 
 (globalThis as Record<string, unknown>).React = React;
 
-// AI Coach panel (D-73, Layer 3) — one render per pipeline status, checking
+// AI Coach panel (Layer 3) — one render per pipeline status, checking
 // each state shows the right affordance: a processing indicator while
 // pending/transcribing, a retry button on failure, the structured feedback on
 // success, and nothing at all when no analysis has ever run.

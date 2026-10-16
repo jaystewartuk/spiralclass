@@ -190,7 +190,7 @@ describe("updateSession — redirects resolve against the public origin (APP_URL
     expect(res.headers.get("location")).toBe(`${PUBLIC_ORIGIN}/sign-in?next=%2Fadmin`);
   });
 
-  // Production and preview are different origins (D-26); the redirect origin
+  // Production and preview are different origins (D-199); the redirect origin
   // must follow APP_URL rather than being pinned to either.
   it("follows APP_URL per environment", async () => {
     envState.appUrl = "https://spiralclass.com";
@@ -226,7 +226,7 @@ describe("updateSession — ?ref= ambassador attribution", () => {
   });
 });
 
-// Maintenance mode (D-76): MAINTENANCE_MODE walls off both apps. The web half
+// Maintenance mode (lib/maintenance.ts): MAINTENANCE_MODE walls off both apps. The web half
 // runs here — before the auth gate — rewriting page requests to /maintenance
 // (503) and answering non-allowlisted API requests with a 503 JSON, while the
 // health check, the mobile config endpoint (how the app learns it's in

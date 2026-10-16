@@ -43,7 +43,7 @@ export function LanguageSelect({
   const formRef = useRef<HTMLFormElement>(null);
   const t = useT();
 
-  // On a public page whose URL names its language (D-193), the cookie cannot
+  // On a public page whose URL names its language (D-72), the cookie cannot
   // change the page: `/es/pricing` is Spanish whatever it says. So the choice
   // is saved, and then the chosen language's URL for this page is loaded —
   // fully, because the root layout carries the language too and a client-side

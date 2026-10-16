@@ -56,7 +56,7 @@ export default async function BookingPageSettings() {
   const appUrl = serverEnv().APP_URL;
   const introVideoLive = introVideoStorageConfigured();
 
-  // AI coach feedback + pipeline status on the intro video (D-73, Layer 3),
+  // AI coach feedback + pipeline status on the intro video (Layer 3),
   // if it's been generated (Pro teachers only; async after upload).
   // Teacher-only — shown in the editor.
   const [introVideoAnalysis, payoutInstruments, cheapestPackage] = await Promise.all([
@@ -206,7 +206,7 @@ export default async function BookingPageSettings() {
                 analysis={introVideoAnalysis}
               />
               {/* Only shown once a transcript actually exists — a Pro-only fact,
-                  since only the Pro coach pipeline (D-73) generates one. */}
+                  since only the Pro coach pipeline generates one. */}
               {introVideoAnalysis.hasTranscript && (
                 <div className="border-t pt-6">
                   <IntroVideoTranscriptForm
@@ -219,7 +219,7 @@ export default async function BookingPageSettings() {
         )}
 
         {/* 3 — Languages. Three separate questions that are constantly confused
-            for each other (D-72/D-73, and the booking_page_locale amendment), so
+            for each other (D-72, including the booking_page_locale amendment), so
             they are configured together with their differences visible side by
             side rather than scattered. */}
         <Card id="languages" className="scroll-mt-20">

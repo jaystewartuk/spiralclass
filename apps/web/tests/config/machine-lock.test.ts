@@ -5,7 +5,7 @@ import { join, resolve } from "node:path";
 
 import { afterEach, describe, expect, it } from "vitest";
 
-// The machine lock (D-146) is the thing that lets several Claude Code sessions
+// The machine lock (D-157) is the thing that lets several Claude Code sessions
 // share one laptop. Its guards in local-gate.test.ts read the SOURCE — that the
 // gate calls acquire, that the suites take it themselves — which is the right
 // check for "did someone unpick the wiring" and the wrong one for "does it

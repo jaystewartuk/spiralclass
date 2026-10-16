@@ -9,14 +9,14 @@ import {
   type SocialPreviewAngle,
 } from "@spiralclass/shared";
 
-// Turns a teacher's brief into the provider prompt (D-123, rewritten by the
+// Turns a teacher's brief into the provider prompt (D-125, rewritten by the
 // communities overhaul).
 //
 // Pure and colocated with its test, like lib/materials/prompt.ts — the prompt
 // is the part of an AI feature most likely to be tuned, and keeping it out of
 // the network code means tuning it never risks the call path.
 //
-// THREE rules govern everything here. The first two are unchanged from D-123
+// THREE rules govern everything here. The first two are unchanged from D-125
 // and load-bearing; the third is the correction.
 //
 // 1. THE MODEL RENDERS NO TEXT. Every caption, the teacher's name and the brand

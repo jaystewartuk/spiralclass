@@ -12,6 +12,15 @@ booking-scoped, private class content and scheduled attachments (see
 `docs/features/classes-lesson-content.md`); this document covers the
 **reusable library** side (`bookingId` null).
 
+Two nullable columns tell the rows apart: `bookingId` null is a reusable
+library item and set is private to that one class; `sendTiming` null is
+always visible with no push and set is pushed on that schedule. A
+booking-scoped row has no `levelId`. Version history (`MaterialRevision`) is
+keyed by material, and both AI entry points share one prompt builder
+(`lib/materials/prompt.ts`). Class content and per-class attachments were once
+separate tables, which meant every materials feature was built twice; keep
+them one.
+
 From the library, a teacher can attach an item to a specific reserved class
 (`BookingLibraryMaterial`) or assign it directly to a student's personal
 notebook (`StudentLibraryItem`), which is visible to that student regardless
@@ -27,7 +36,7 @@ download link — see "Images" below.
 This page absorbed the two specs it was written from — the taxonomy spec
 (tagging, AI-generate, attach, auto-surface) and the original
 level-gated library design. Both were deleted with the rest of the backlog
-by [D-110](../decisions/D-110.md); what was current in them is here, and
+by [D-164](../decisions/D-164.md); what was current in them is here, and
 what was stale went with them.
 
 ## User Stories
@@ -98,7 +107,8 @@ what was stale went with them.
   (`Level.position`); focus tags are optional and many-per-item, so they can
   only narrow a set, never partition it.
 - **No per-level counts** on the picker (explicit teacher preference), which
-  is also why the picker costs no material query at all.
+  is also why the picker costs no material query at all. Nor is a shelf
+  sub-grouped by `unit`; the existing filters were judged enough.
 - Browse state is encoded in `?level=`: absent = the picker, `?level=<id>` = a
   shelf, `?level=all` = the flat all-levels list. The rule lives in
   `packages/shared/src/materials-browse.ts` rather than in the page, so the
@@ -268,6 +278,19 @@ collapses them to one row per (class, material). Two surfaces consume it:
   the same prompt builder and template picker.
 - "Edit with AI" (refine) applies a bounded free-text change instruction
   (≤1,000 characters) to an existing body; cannot run against an empty body.
+- Every generation — material, class content, refine and podcast script — is
+  told the lesson is **one-to-one**: one teacher, one student, no pair or group
+  work, and a naturally group activity rewritten for two people
+  (`lessonFormatDirective()` in `lib/materials/prompt.ts`). It is always on;
+  there is no setting, because there is no other lesson format.
+- A teacher shapes the AI's writing through **presets and a note**, not by
+  editing the prompt: tone, learner age, language variety, vocabulary
+  difficulty and a free-text note (`/settings/materials`). They are placed after
+  the rules about the taught language and the student's name, and worded to
+  defer to them, so a note cannot override either.
+- The platform ships no lesson templates or curriculum. A template is always one
+  the teacher wrote; focus-tag packs are the only seeded content, and she can
+  edit them.
 - Generated/typed body is capped at 20,000 characters
   (`CLASS_CONTENT_MAX_CHARS`), same ceiling as class content.
 - Every save that changes the body snapshots the outgoing body to

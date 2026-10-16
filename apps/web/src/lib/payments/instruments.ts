@@ -9,7 +9,7 @@ import {
 
 export { railForKind };
 
-// Server-side resolution of a teacher's payout instruments (D-113).
+// Server-side resolution of a teacher's payout instruments (D-145).
 //
 // Every read path goes through here rather than querying
 // `teacherPayoutInstrument` directly, for two reasons:

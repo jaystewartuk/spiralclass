@@ -5,7 +5,7 @@ name: Gate
 # ⚠️ READ THIS BEFORE ADDING A STEP. This workflow deliberately does NOT know
 # what "green" means. `scripts/ci/steps.mjs` is the single registry of the
 # checks, `scripts/ci/gate.mjs` runs them, and the job below invokes that with
-# a tier name and nothing else. D-119 moved CI onto the operator's laptop and
+# a tier name and nothing else. Moving CI onto the operator's laptop (2026-08)
 # bought exactly one thing worth keeping when it moved back: ONE definition of
 # the tier. A `run: pnpm typecheck` added here would be a second one — it would
 # agree with the registry on the day it was written and diverge silently after.
@@ -15,10 +15,10 @@ name: Gate
 # splitting across runners for speed, that capability belongs in gate.mjs
 # (which already has `--only`), not in a hand-maintained list here.
 #
-# WHY THIS EXISTS AGAIN AT ALL, given D-129 deleted every workflow: Actions
-# minutes are metered on a private repository and free on a public one, and
-# this repository is public. The whole cost argument that produced D-120 and
-# D-129 was arithmetic against a 2,000-minute allowance that no longer applies.
+# WHY THIS EXISTS AGAIN AT ALL, given every workflow was deleted on 2026-08-25:
+# Actions minutes are metered on a private repository and free on a public one,
+# and this repository is public. The whole cost argument behind that deletion
+# was arithmetic against a 2,000-minute allowance that no longer applies.
 # See [D-157] for what happens if that premise reverses.
 #
 # TWO PRODUCERS, ONE PROGRAM. `.githooks/pre-push` still runs the same gate on
@@ -56,7 +56,7 @@ jobs:
     runs-on: ubuntu-latest
     # ⚠️ `ubuntu-latest` and nothing else. Larger runners are billed by the
     # minute even on a public repository, which would quietly reintroduce the
-    # exact meter D-120 and D-129 were arguing with.
+    # exact meter the August 2026 deletion was arguing with.
     # apps/web/tests/config/local-gate.test.ts asserts no workflow asks for one.
     timeout-minutes: 25
     env:
@@ -204,8 +204,8 @@ jobs:
         #
         # ⚠️ NOT `gitleaks/gitleaks-action`. That action RUNS the scan, which
         # would put a second definition of the check in a workflow file — the
-        # exact drift D-119 removed and D-157 came back on the condition of not
-        # reintroducing. And ⚠️ NOT `pnpm add gitleaks`: the npm package of
+        # exact drift the single registry removed, and that Actions came back on
+        # the condition of not reintroducing ([D-157]). And ⚠️ NOT `pnpm add gitleaks`: the npm package of
         # that name is a third party's, unrelated to this tool, and taking a
         # CREDENTIAL SCANNER from an unofficial package is the supply-chain
         # shape the scanner exists to catch.
@@ -233,7 +233,7 @@ jobs:
 
       - name: Run the fast tier
         # The whole workflow, in one line. --no-lock because the machine lock
-        # (D-146) serializes the seven worktrees on one laptop and a runner is
+        # (D-157) serializes the seven worktrees on one laptop and a runner is
         # a fresh VM with one job on it. --no-post because posting the status
         # is the next job's business: on a pull_request the commit that matters
         # is the PR head, not the merge commit this job is standing on.

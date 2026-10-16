@@ -8,7 +8,7 @@ import {
   type AppLocale,
 } from "./locales";
 
-// One URL per language for the public pages (D-193). A page in a locale other
+// One URL per language for the public pages (D-72). A page in a locale other
 // than DEFAULT_LOCALE lives under that locale's tag, lower-cased (`/es/pricing`,
 // `/fr/help/…`); the bare URL is DEFAULT_LOCALE. The URL decides the language
 // of a page it names, and nothing else does — a search engine indexes one
@@ -22,7 +22,7 @@ import {
  * The public pages that have a URL per language. Every other path — the
  * signed-in app, the student portal, admin, the API and the booking funnel —
  * is never prefixed: the app follows the person's own setting, and `/b/**`
- * follows the teacher's `booking_page_locale` (D-194).
+ * follows the teacher's `booking_page_locale` (D-72).
  *
  * A locale prefix on a path outside this list is a 404, so a prefix can never
  * make an authenticated route look public.
@@ -131,7 +131,7 @@ export type PublicLocaleRoute =
   | { kind: "redirect"; location: string; status: 302 | 308 };
 
 /**
- * What the middleware does with one request, as a pure function (D-193):
+ * What the middleware does with one request, as a pure function (D-72):
  *
  * - `/es/pricing`: rendered in Spanish, whatever the cookie or header says.
  * - `/en/pricing`: permanently redirected to `/pricing`, its one URL.
@@ -139,7 +139,7 @@ export type PublicLocaleRoute =
  *   Accept-Language matching another locale: a 302 to that locale's URL.
  *   A GET or HEAD only, and only on arrival from outside the site. A link
  *   inside the site to a bare URL was localized on purpose — "English" on the
- *   Spanish terms is the way to the text that controls (D-196) — so following
+ *   Spanish terms is the way to the text that controls (D-72) — so following
  *   it must not bounce the reader back. Otherwise it renders in DEFAULT_LOCALE.
  * - `/terms?lang=es`: the URL sent email carries, permanently redirected to
  *   `/es/terms`.

@@ -9,8 +9,8 @@ import {
 
 const px = (value: string) => Number(value.replace("px", ""));
 
-// Real device CSS viewport widths, portrait × landscape. Kept from the D-122
-// test because the devices are still the devices — what changed is what the
+// Real device CSS viewport widths, portrait × landscape. Kept from the test of
+// the withdrawn 1281px scale because the devices are still the devices — what changed is what the
 // scale is expected to do with them.
 const PHONE_WIDTHS = [320, 390, 430, 412];
 const TABLET_PORTRAIT = [744, 820, 834, 800];
@@ -19,9 +19,9 @@ const TABLET_LANDSCAPE = [
   1180, // iPad 10th gen / Air 11"
   1194, // iPad Pro 11"
   1280, // A common Android tablet in landscape, and a width teachers really
-  //       work at. Under D-122 this was one pixel under the threshold
+  //       work at. Under the withdrawn 1281px scale this was one pixel under the threshold
   //       and the whole scale was built around it; under the standard scale it
-  //       gets the desktop layout. See D-141 for why that is now acceptable.
+  //       gets the desktop width scale. See D-140 for why that is now acceptable.
 ];
 
 describe("responsive screen scale", () => {
@@ -34,7 +34,7 @@ describe("responsive screen scale", () => {
   });
 
   it("gates the shell layout on a fine pointer, not on width alone", () => {
-    // The whole point of D-141. A width cannot tell a 1280px tablet from a
+    // The whole point of D-140. A width cannot tell a 1280px tablet from a
     // 1280px laptop window, and the product was getting both wrong in opposite
     // directions: the teacher's Fire HD 10 was handed the desktop layout, and a
     // MacBook with a narrow window was handed the stacked one.
@@ -68,7 +68,7 @@ describe("responsive screen scale", () => {
     }
   });
 
-  it("gives landscape tablets the desktop layout, which D-122 deliberately withheld", () => {
+  it("gives landscape tablets the desktop layout, which the withdrawn 1281px scale deliberately withheld", () => {
     // The reversal, asserted rather than left implicit. A landscape tablet has
     // the room for two columns and people expect it to use them; the touch
     // concern that justified withholding it is now met by target size instead
@@ -99,7 +99,7 @@ describe("responsive screen scale", () => {
     expect(px(CONTAINER_MAX_WIDTH)).toBeGreaterThan(TABLET_MAX_WIDTH);
   });
 
-  it("gives the band D-122 left empty somewhere to put a layout", () => {
+  it("gives the band the withdrawn 1281px scale left empty somewhere to put a layout", () => {
     // The concrete cost of the old scale: between 640 and 1281 there was no
     // breakpoint at all, so every width in that band rendered a phone layout
     // stretched across it. `md` exists again to hold the intermediate case.

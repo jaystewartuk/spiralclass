@@ -2,7 +2,7 @@ import { readdirSync, readFileSync, statSync } from "node:fs";
 import { join, relative } from "node:path";
 import { describe, expect, it } from "vitest";
 
-// D-197: a price is written in its reader's number format. formatMinorUnits
+// D-153: a price is written in its reader's number format. formatMinorUnits
 // takes the reader's locale as its third argument, and omitting it means
 // English — right only where every reader is English. A call that forgets it
 // type-checks, lints and renders; a French reader then reads "$25,000 CLP" as
@@ -54,7 +54,7 @@ function callArity(code: string): number[] {
   return out;
 }
 
-describe("prices are formatted for their reader (D-197)", () => {
+describe("prices are formatted for their reader (D-153)", () => {
   it("passes a locale to every formatMinorUnits call outside the English-on-purpose places", () => {
     const offenders: string[] = [];
     for (const file of sourceFiles(SRC)) {

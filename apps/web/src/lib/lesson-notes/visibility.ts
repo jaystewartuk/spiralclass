@@ -1,6 +1,6 @@
 // In-class live notes — when a student-audience note is visible to the student.
 //
-// D-15: student visibility is a time window derived from the booking schedule,
+// Student visibility is a time window derived from the booking schedule,
 // not a stored flag. A teacher can draft cues days ahead without leaking them
 // early; the student sees student-audience notes only from shortly before the
 // class through shortly after it ends. Teacher-audience notes are never visible
@@ -15,7 +15,7 @@ export const NOTE_VISIBLE_BEFORE_MIN = 15;
 
 // Minutes after scheduledEnd the student panel stays open, so instructions
 // written near the end of class don't vanish the moment it's over. Deliberately
-// its own constant rather than the teacher's inter-class buffer (D-15).
+// its own constant rather than the teacher's inter-class buffer.
 export const NOTE_VISIBLE_AFTER_MIN = 30;
 
 export function lessonNoteStudentVisible(

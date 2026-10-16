@@ -221,7 +221,7 @@ async function handleSubscriptionChanged(
       }
       // The Stripe subscription's OWN currency — never re-derived from our
       // platform-region config. That's what lets the platform's canonical
-      // billing currency change (D-99: MXN → GBP) without this webhook
+      // billing currency change (D-153: MXN → GBP) without this webhook
       // silently reinterpreting an already-live MXN subscriber's next renewal
       // as if it were GBP: their Stripe subscription is still actually on the
       // MXN Price it was created with, and Stripe reports that truthfully.

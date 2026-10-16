@@ -20,7 +20,7 @@ import { capturable } from "./routes";
  * database and a production build that script boots itself — on Linux only,
  * for the reason in the skip below.
  *
- * REGENERATING has to use the same stack, and since [D-171] it also has to use
+ * REGENERATING has to use the same stack, and since [D-157] it also has to use
  * the same machine, so it is a dispatch rather than a local command:
  *
  *   gh workflow run heavy.yml -f update_visual_baselines=booking --ref <branch>
@@ -53,7 +53,7 @@ import { capturable } from "./routes";
  *   - a genuine change under the threshold PASSES, which means Playwright's
  *     default "changed" update mode writes nothing and the baseline silently
  *     keeps showing a layout that no longer ships (three regeneration runs in a
- *     row did nothing during the D-144 work before this was spotted); and
+ *     row did nothing during the 2026-08-30 buy-page work before this was spotted); and
  *   - forcing `=all` to get around that rewrites every route, because the same
  *     sub-tolerance noise differs run to run — re-baselining ~130 images onto
  *     one machine's font rendering and burying the files you meant to change.
@@ -67,14 +67,14 @@ const ROUTES = capturable("public").filter((route) => route.portfolio);
 
 test.describe("visual regression", () => {
   /**
-   * ONE baseline set, belonging to the machine that gates the merge ([D-171]).
+   * ONE baseline set, belonging to the machine that gates the merge ([D-157]).
    *
    * Playwright suffixes a snapshot with `process.platform`, so this suite used
    * to commit every capture twice — `-darwin.png` for the laptop, `-linux.png`
-   * for `ubuntu-latest` ([D-161]). [D-162] then took the laptop out of the
+   * for `ubuntu-latest`. The runners then took the laptop out of the
    * release path altogether: `pnpm promote` reads the runners' verdict for the
    * exact commit it ships, so nothing that reaches production depends on the
-   * macOS set. What was left of it was the bookkeeping D-161 predicted —
+   * macOS set. What was left of it was the bookkeeping D-157 predicted —
    * restyle a page, regenerate one set, and the other machine goes red on
    * exactly the routes you just fixed.
    *
@@ -84,13 +84,13 @@ test.describe("visual regression", () => {
    * laptop ever ran it.
    *
    * ⚠️ Do NOT "fix" the skip by widening `maxDiffPixelRatio` until macOS and
-   * Linux rasterisation both fit inside it. D-161 rejected that and the reason
+   * Linux rasterisation both fit inside it. D-157 rejected that and the reason
    * is unchanged: the tolerance already cannot see two lines of grey text
    * swapping places, and one that spans two font stacks is decorative.
    */
   test.skip(
     process.platform !== "linux",
-    `The visual baselines are -linux.png and are asserted on ubuntu-latest only (D-171); ` +
+    `The visual baselines are -linux.png and are asserted on ubuntu-latest only (D-157); ` +
       `this machine is ${process.platform}. To see how a page renders here, run ` +
       `capture.spec.ts — it writes a gallery rather than asserting against one.`,
   );

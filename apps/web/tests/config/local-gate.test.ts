@@ -7,13 +7,13 @@ import { describe, expect, it } from "vitest";
 import { STEPS, stepsForTier } from "../../../../scripts/ci/steps.mjs";
 import { JOBS } from "../../../../scripts/local/jobs.mjs";
 
-// CI runs on the operator's laptop (D-119) AND, as of D-157, on GitHub-hosted
+// CI runs on the operator's laptop AND, as of D-157, on GitHub-hosted
 // runners again — the fast tier, the heavy tier and the production deploy.
-// D-129 had deleted every workflow and composite action in this repo; the
-// premise it argued from was a private repository's metered minutes, and this
+// Every workflow and composite action in this repo had been deleted in August
+// 2026; the premise that argued from was a private repository's metered minutes, and this
 // repository is public.
 //
-// What did NOT change is the thing D-119 actually bought: one definition of
+// What did NOT change is the thing the 2026-08 move bought: one definition of
 // what the checks are (scripts/ci/steps.mjs) and one definition of what the
 // deploy is (scripts/database-deploy.sh then scripts/cloudrun-deploy.sh), both
 // of which a laptop and a runner can execute. The workflows invoke those; they do not restate them.
@@ -40,16 +40,16 @@ import { JOBS } from "../../../../scripts/local/jobs.mjs";
 //      so the assertions here are on the commands themselves.
 //   4. The deploy is triggered, never dispatched by hand. What left
 //      `production` 96 commits behind live in 2026-07-19 was a HUMAN DISPATCH
-//      STEP. `pnpm promote` still runs the full gate and still ends by pushing
+//      STEP. `pnpm promote` still checks certification and still ends by pushing
 //      `production`, and that push is what starts the deploy — so there is
 //      still nothing to remember. The approval on the `production` environment
 //      is a queued run with a notification, which is the opposite of a step
 //      that can be silently skipped.
 //   5. The maintenance jobs still EXIST as things a person can run, and their
-//      staleness is surfaced. This is the one that reverses D-120 head-on: it
+//      staleness is surfaced. This reverses a 2026-08-17 choice head-on, which
 //      kept them on Actions because "a job that silently didn't run is
 //      indistinguishable from one that did". Deleting them was the operator's
-//      call (D-129); making the silence visible is the part that has to hold.
+//      call (2026-08-25); making the silence visible is the part that has to hold.
 //      D-157 brought back workflows but deliberately NO `schedule:` trigger,
 //      so this stays true — the one exception is the production probes, which
 //      run as the last step of the production deploy.
@@ -73,7 +73,7 @@ const withoutComments = (text: string) =>
 
 const CONTEXT = "local-gate";
 
-describe("the required status context (D-119)", () => {
+describe("the required status context (D-157)", () => {
   it("status.mjs posts `local-gate`", () => {
     expect(read("scripts", "ci", "status.mjs")).toMatch(/export const CONTEXT = "local-gate";/);
   });
@@ -87,7 +87,7 @@ describe("the required status context (D-119)", () => {
   });
 });
 
-describe("code scanning gates on new alerts, not on a check (D-179)", () => {
+describe("code scanning gates on new alerts, not on a check (D-158)", () => {
   const script = withoutComments(read("scripts", "setup-branch-protection.sh"));
 
   it("applies a code_scanning rule for CodeQL on the default branch", () => {
@@ -132,7 +132,7 @@ describe("code scanning gates on new alerts, not on a check (D-179)", () => {
   });
 
   it("posts through the REST API rather than a workflow", () => {
-    // The distinction that lets the status survive D-129: `gh api` costs
+    // The distinction that let the status survive having no workflows: `gh api` costs
     // nothing and needs no runner. A status posted by a workflow would need a
     // workflow.
     const status = read("scripts", "ci", "status.mjs");
@@ -162,8 +162,8 @@ const workflows = WORKFLOW_FILES.map((file) => ({
 const jobsSection = (text: string) => text.split(/^jobs:$/m)[1] ?? "";
 
 describe("GitHub Actions is back, on stated terms (D-157)", () => {
-  // This block is the INVERSE of the one D-129 wrote, not its deletion. D-129
-  // asserted `.github/workflows` did not exist, because the constraint then was
+  // This block is the INVERSE of the one written on 2026-08-25, not its
+  // deletion. That one asserted `.github/workflows` did not exist, because the constraint then was
   // a private repo's metered minutes and every previous attempt to hold that
   // line by narrowing triggers had ended with a trigger being widened again.
   //
@@ -173,14 +173,14 @@ describe("GitHub Actions is back, on stated terms (D-157)", () => {
   // the invariants worth holding are now about what the workflows may DO.
 
   it("the workflows exist", () => {
-    // deploy-preview.yml went with Fly on 2026-09-23 ([D-184]'s addendum):
+    // deploy-preview.yml went with Fly on 2026-09-23 ([D-184]):
     // preview has no host until the Oracle box is rebuilt.
     expect(WORKFLOW_FILES.sort()).toEqual([
       "deploy-production.yml",
       "gate.yml",
-      // D-161. The heavy half of the gate — the suites D-157 recorded as
+      // D-157. The heavy half of the gate — the suites first kept
       // deliberately laptop-only, on a blocker (darwin-only visual baselines)
-      // that D-161 removed rather than worked around.
+      // that was removed rather than worked around.
       "heavy.yml",
       // D-199. Runs promote when both runners certify a push to `main`; holds
       // nothing of its own and is guarded in promote-on-green.test.ts.
@@ -189,7 +189,7 @@ describe("GitHub Actions is back, on stated terms (D-157)", () => {
   });
 
   it("no composite action came back", () => {
-    // D-129 deleted four, and every one of them had a local equivalent
+    // Four were deleted on 2026-08-25, and every one had a local equivalent
     // already. The shared unit between the laptop and a runner is a SCRIPT
     // (scripts/ci/gate.mjs, scripts/cloudrun-deploy.sh), which both can run. A
     // composite action can only run on a runner, so it is a copy of logic that
@@ -202,8 +202,8 @@ describe("GitHub Actions is back, on stated terms (D-157)", () => {
     // The free tier is `ubuntu-latest` and its same-size siblings. Larger
     // runners (`ubuntu-latest-4-cores`, `-8-cores`, `*-xlarge`, anything with a
     // `labels:` block) are billed by the minute EVEN on a public repository,
-    // which would quietly reintroduce the meter D-120 and D-129 were arguing
-    // with — and the first sign would be a bill, not a red build.
+    // which would quietly reintroduce the meter the August 2026 deletion was
+    // arguing with — and the first sign would be a bill, not a red build.
     for (const { file, text } of workflows) {
       const declared = [...text.matchAll(/^\s*runs-on:(.*)$/gm)].map((m) => m[1]);
       expect(declared.length, `${file} declares no runs-on`).toBeGreaterThan(0);
@@ -260,7 +260,7 @@ describe("GitHub Actions is back, on stated terms (D-157)", () => {
   it("no workflow runs on a schedule", () => {
     // D-157's scope is the gate and the two deploys, and stops there. A cron
     // fires whether or not anyone is looking, which is the property that made
-    // D-129's eleven-day silent backup gap possible — and `scripts/local/`
+    // August 2026's eleven-day silent backup gap possible — and `scripts/local/`
     // plus the `pnpm gate` nag is the arrangement that replaced it. Bringing
     // one back is a decision, not a drive-by addition to a workflow that
     // already exists.
@@ -358,8 +358,8 @@ describe("the workflows call the registry, and never restate it (D-157)", () => 
       .lines.join("\n");
 
   it("the gate workflow runs gate.mjs and names a tier, and nothing else", () => {
-    // The single most important assertion in this file. Part of what D-129
-    // deleted was a dispatch-only copy of every gate job, precisely because it
+    // The single most important assertion in this file. Part of what was
+    // deleted in August 2026 was a dispatch-only copy of every gate job, precisely because it
     // was a second definition of green; re-adding Actions is only safe while
     // the workflow has no opinion about what the steps are.
     expect(byName("gate.yml")).toContain("scripts/ci/gate.mjs");
@@ -372,7 +372,7 @@ describe("the workflows call the registry, and never restate it (D-157)", () => 
     // named in YAML. Such a list agrees with steps.mjs on the day it is
     // written and stops agreeing the first time a heavy step is added — the
     // new step runs in `pnpm gate:full` on the laptop, runs in no job here,
-    // and nothing says so. So the matrix is DERIVED (D-161), and this asserts
+    // and nothing says so. So the matrix is DERIVED (D-157), and this asserts
     // it stays derived.
     const heavy = byName("heavy.yml");
     expect(heavy).toMatch(/--tier heavy --list --json/);
@@ -398,7 +398,7 @@ describe("the workflows call the registry, and never restate it (D-157)", () => 
 
   it("no workflow runs a check the registry already owns", () => {
     // A `run: pnpm typecheck` here would agree with steps.mjs on the day it was
-    // written and diverge silently after — which is the drift D-119 removed,
+    // written and diverge silently after — which is the drift D-157 removed,
     // and the reason this is a guard rather than a comment.
     //
     // Derived from the registry, so a step ADDED to steps.mjs is covered from
@@ -421,17 +421,17 @@ describe("the workflows call the registry, and never restate it (D-157)", () => 
     // these steps existed in two places, the copy that got re-typed was the one
     // missing the checkpoint.
     //
-    // WIDENED BY [D-177] FROM ONE SCRIPT TO "a deploy script", because there is
+    // WIDENED BY [D-70] FROM ONE SCRIPT TO "a deploy script", because there is
     // more than one target. The rule did not change: a deploy workflow CALLS a
     // script a laptop can also run, and states none of the steps itself.
     // scripts/database-deploy.sh joined when the checkpoint and migrations moved
-    // into a job of their own ([D-177]'s addendum); the Cloud Run script
-    // replaced Fly's when the domain moved ([D-184]'s addendum). The Vercel
-    // script left with the failover ([D-186]).
+    // into a job of their own ([D-184]); the Cloud Run script
+    // replaced Fly's when the domain moved ([D-184]). The Vercel
+    // script left with the failover ([D-70]).
     const DEPLOY_SCRIPTS = ["scripts/cloudrun-deploy.sh", "scripts/database-deploy.sh"];
 
     // Every step a deploy script owns. The `vercel` verbs outlived the Vercel
-    // script ([D-186]): no script owns them now, so a workflow running one is a
+    // script ([D-70]): no script owns them now, so a workflow running one is a
     // deploy to a retired target with no script behind it. The checkpoint and the migration
     // runner are here because a database job that re-typed them is the
     // 2026-07 failure exactly: the copy that got re-typed lost the checkpoint.
@@ -494,7 +494,7 @@ describe("the workflows call the registry, and never restate it (D-157)", () => 
   it("only the production branch can reach the production deploy", () => {
     // workflow_dispatch is kept as a recovery path, so this ref guard is what
     // stops it being pointed at an arbitrary branch and shipping it. The push
-    // trigger is live (D-157's addendum 2), so this guards the recovery path
+    // trigger is live (D-157), so this guards the recovery path
     // rather than the only path.
     expect(byName("deploy-production.yml")).toContain("github.ref == 'refs/heads/production'");
   });
@@ -503,7 +503,7 @@ describe("the workflows call the registry, and never restate it (D-157)", () => 
     // Promote's anti-drift property is that the push to `production` IS the
     // trigger — with no trigger, promoting moves the branch and deploys
     // nothing, which is the 2026-07-19 incident reached from the other
-    // direction. Production's trigger is live today (D-157's addendum 2);
+    // direction. Production's trigger is live today (D-157);
     // this check is what makes taking it off again a loud failure rather than
     // a quiet one.
     //
@@ -750,8 +750,8 @@ describe("the diff-coverage gate on new code", () => {
     expect(read("apps", "web", "vitest.config.ts")).toMatch(/reporter:\s*\[[^\]]*"json"/);
   });
 });
-// The machine lock (D-146). This laptop is the only runner (D-119, D-129) and
-// it is shared by several Claude Code sessions at once, each in its own git
+// The machine lock (D-157). This laptop was the only runner (August 2026) and
+// it is still shared by several Claude Code sessions at once, each in its own git
 // worktree. Three things they contend for are singletons, and two of them
 // corrupt rather than merely queue:
 //
@@ -769,7 +769,7 @@ describe("the diff-coverage gate on new code", () => {
 // unpick by accident: that it exists, that it is machine-scoped rather than
 // per-checkout, and that the suites take it themselves so a hand-run is
 // covered too.
-describe("one heavy job at a time on this machine (D-146)", () => {
+describe("one heavy job at a time on this machine (D-157)", () => {
   it("the gate takes the lock, and releases it before the bookkeeping", () => {
     const gate = read("scripts", "ci", "gate.mjs");
     expect(gate).toContain("./lock.mjs");
@@ -838,7 +838,7 @@ describe("one heavy job at a time on this machine (D-146)", () => {
   });
 });
 
-// The Tier 2 list is no longer a gate input (D-146 removed the escalation from
+// The Tier 2 list is no longer a gate input (D-157 removed the escalation from
 // both scripts that greped for it), but it did not stop being real: it is what
 // decides whether to spend a `GATE_TIER=full` push, whether to serialize a
 // worktree, and whether to merge during lesson hours. It now lives only in
@@ -862,18 +862,18 @@ describe("the Tier 2 list survives as operator guidance", () => {
   });
 });
 
-describe("the maintenance the crons used to do still exists (D-129)", () => {
-  // D-120 kept nightly-checks.yml, synthetic.yml and backup-prod-db.yml on
-  // Actions on the argument that a laptop cannot be trusted with a schedule.
-  // D-129 accepted the operator's constraint instead — no Actions on a private
-  // repo, and no laptop scheduler either — which made those commands.
-  // The argument D-120 made was still correct about ONE thing, and it is the
+describe("the maintenance the crons used to do still exists (D-157)", () => {
+  // On 2026-08-17 nightly-checks.yml, synthetic.yml and backup-prod-db.yml were
+  // kept on Actions on the argument that a laptop cannot be trusted with a
+  // schedule. On 2026-08-25 the operator's constraint won instead — no Actions
+  // on a private repo, and no laptop scheduler either — which made those
+  // commands. The 2026-08-17 argument was still correct about ONE thing, and it is the
   // part these tests protect: the danger is not that a job is un-run, it is
   // that an un-run job looks exactly like a green one.
   const JOB_IDS = JOBS.map((job) => job.id);
 
   it("registers the jobs that are actually a practice — and no others", () => {
-    // `backup` was here until 2026-08-25 (D-129 addendum). The operator's call
+    // `backup` was here until 2026-08-25 (D-157). The operator's call
     // is that Neon already backs production up, so a hand-run pg_dump is not a
     // routine. It is out of the registry rather than merely un-run: a nag for a
     // decision already made trains the operator to ignore the whole banner, and
@@ -978,7 +978,7 @@ describe("the maintenance the crons used to do still exists (D-129)", () => {
     // The subtle way this probe could go quietly useless: check
     // https://livekit.spiralclass.com and you read CLOUDFLARE's certificate,
     // which is always valid and says nothing about whether Caddy renewed. Since
-    // D-134 proxied the record, the probe has to dial the box's own IP with SNI.
+    // D-16 proxied the record, the probe has to dial the box's own IP with SNI.
     const probes = read("scripts", "local", "synthetic.sh");
     expect(probes).toContain("LIVEKIT_ORIGIN_IP");
     expect(probes).toMatch(/openssl s_client -connect "\$\{LIVEKIT_ORIGIN_IP\}:443"/);
@@ -1017,7 +1017,7 @@ describe("the maintenance the crons used to do still exists (D-129)", () => {
 describe("the deploy is triggered, never dispatched by hand", () => {
   it("promote ends by pushing production, which IS the deploy trigger", () => {
     // The 2026-07-19 drift (production 96 commits behind live) came from a
-    // HUMAN DISPATCH STEP, not from where the build ran. D-120's answer was to
+    // HUMAN DISPATCH STEP, not from where the build ran. The 2026-08-17 answer was to
     // chain the deploy into promote; D-157 moves the build to a runner and
     // keeps the chain, because the push promote makes is what starts the
     // workflow. Nothing in between is left for anyone to remember.
@@ -1050,16 +1050,16 @@ describe("the deploy is triggered, never dispatched by hand", () => {
   });
 
   it("the local production deploy still checkpoints Neon before it migrates", () => {
-    // D-95 made a named pre-migration restore point production's primary safety
-    // net, and it was a step in fly-deploy.yml's `production` job. D-120 moved
-    // the deploy into scripts/fly-deploy.sh and left the checkpoint behind — so
+    // D-178 made a named pre-migration restore point production's primary safety
+    // net, and it was a step in fly-deploy.yml's `production` job. On 2026-08-17
+    // the deploy moved into scripts/fly-deploy.sh and left the checkpoint behind — so
     // a promote applied migrations to production with no restore point while
     // promote.mjs printed "Neon checkpoint" in its success summary either way.
     // A code rollback never undoes a migration, so this is the step whose
     // absence only shows up on the day it is needed.
     //
     // Both steps moved into scripts/database-deploy.sh when the production
-    // targets were split ([D-177]'s addendum); the recovery path runs it before
+    // targets were split ([D-184]); the recovery path runs it before
     // scripts/cloudrun-deploy.sh, which holds no database credential.
     const deploy = withoutComments(read("scripts", "database-deploy.sh"));
     const checkpoint = deploy.indexOf("neon-checkpoint.sh");
@@ -1074,7 +1074,7 @@ describe("the deploy is triggered, never dispatched by hand", () => {
     expect(deploy).toContain('if [ "$ENVIRONMENT" = "production" ]');
   });
 
-  it("promote ships only a commit the runners certified ([D-162])", () => {
+  it("promote ships only a commit the runners certified ([D-157])", () => {
     // What certifies a release stopped being a local receipt when ship-pr was
     // deleted. The receipt was a self-attestation — a file promote wrote and
     // then believed; the replacement is two workflow runs bound to the same
@@ -1135,7 +1135,7 @@ describe("the deploy is triggered, never dispatched by hand", () => {
 //
 // The back half used to be scripts/ship-pr.sh, which merged a batch and then
 // held the machine for 20-40 minutes running the full tier against merged
-// `main` (D-146). [D-162] deleted it: `heavy.yml` runs those suites on every PR
+// `main`. [D-157] deleted it: `heavy.yml` runs those suites on every PR
 // AND on every push to `main`, so the merged-tree check happens on a runner
 // with nothing to remember, and the back half is now `gh pr merge` plus
 // `pnpm promote`.
@@ -1201,7 +1201,7 @@ describe("opening a PR is the front half, and only the front half", () => {
   });
 
   it("has no back half left on disk to reach for", () => {
-    // Inverted rather than deleted, which is this file's standing habit. D-162
+    // Inverted rather than deleted, which is this file's standing habit. D-157
     // removed ship-pr because heavy.yml covers what it covered; a half-removal
     // that leaves the script, the pnpm alias or the skill behind is the failure
     // mode, because each of them still LOOKS like the supported path.
@@ -1217,16 +1217,16 @@ describe("opening a PR is the front half, and only the front half", () => {
   });
 });
 
-// D-146 moved the heavy suites to one run per BATCH, on the merged result,
+// On 2026-08-31 the heavy suites moved to one run per BATCH, on the merged result,
 // because one laptop shared by several sessions could not afford one run per
 // branch. `pnpm ship-pr` was where that run lived.
 //
-// [D-162] deleted ship-pr. The invariant it protected did NOT go with it, and
+// [D-157] deleted ship-pr. The invariant it protected did NOT go with it, and
 // this is where it now lives: the heavy suites still run against the tree that
 // actually lands, and something still refuses to ship a commit they have not
 // passed. What changed is that both of those are now automatic — a runner and
 // a query — rather than a command someone had to remember to type.
-describe("the heavy suites still see the merged tree (D-146, D-162)", () => {
+describe("the heavy suites still see the merged tree (D-157)", () => {
   const heavy = () => read(".github", "workflows", "heavy.yml");
 
   it("runs on pushes to main, not only on pull requests", () => {

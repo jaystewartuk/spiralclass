@@ -1,13 +1,13 @@
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
-// REPO_ROOT is the repo-root resolver the config tooling already exports (D-85).
+// REPO_ROOT is the repo-root resolver the config tooling already exports (D-70).
 import { REPO_ROOT } from "../../../../scripts/env-config.mjs";
 
 // Locks the checkpoint-retention contract for the pre-migration Neon safety net
-// (D-95): `scripts/database-deploy.sh`'s production path creates a `pre-deploy-*`
+// (D-178): `scripts/database-deploy.sh`'s production path creates a `pre-deploy-*`
 // branch before any migration touches production, and that step fails closed.
-// Since the production targets were split ([D-177]'s addendum) that script is
+// Since the production targets were split ([D-184]) that script is
 // the deploy workflow's `database` job, and the first step of a hand-run
 // recovery deploy, before scripts/cloudrun-deploy.sh. It was steps 1 and 2 of
 // the Fly deploy script until then, which is why older notes name Fly.
@@ -26,8 +26,8 @@ import { REPO_ROOT } from "../../../../scripts/env-config.mjs";
 // The number used to live in two files read at different times — the composite
 // action's input default (what CI passed) and the script's own KEEP (what a
 // human running it by hand got) — and they could disagree without anything
-// noticing. D-129 deleted every workflow and composite action in this repo, so
-// the script is now the only definition. What still has to hold is that the
+// noticing. the composite action was deleted with every workflow in August
+// 2026 and did not come back, so the script is now the only definition. What still has to hold is that the
 // only call site doesn't quietly override it.
 
 const SCRIPT_SH = resolve(REPO_ROOT, "infra/database/scripts/neon-checkpoint.sh");
@@ -171,7 +171,7 @@ describe("neon checkpoint retention", () => {
   });
 });
 
-// How neonctl authenticates, changed 2026-08-31 (the D-146 follow-up).
+// How neonctl authenticates, changed 2026-08-31.
 //
 // The Fly deploy script used to fetch a long-lived NEON_API_KEY from Infisical's
 // `infra` environment on every production deploy. The keys were deleted, the
@@ -179,16 +179,17 @@ describe("neon checkpoint retention", () => {
 // `production` already fast-forwarded and the app still on the previous
 // release — the branch moved and the running app did not. neonctl was always
 // the tool; only the credential changed, to the OAuth one `neonctl auth`
-// stores per machine, which is sufficient because this laptop is the only
-// thing that deploys (D-129).
+// stores per machine, which was sufficient while this laptop was the only
+// thing that deployed. A runner deploy ([D-157]) has no stored credential and
+// takes NEON_API_KEY from the `production` environment ([D-163]).
 //
 // Two things must hold, and they pull in opposite directions:
 //   1. The key is no longer REQUIRED, or the deploy is coupled to a secret
 //      again.
 //   2. The refusal is unchanged. Losing the key was never the danger; a
-//      migration with no restore point is. "No checkpoint, no deploy" (D-95)
+//      migration with no restore point is. "No checkpoint, no deploy" (D-178)
 //      has to survive a change whose whole subject is the credential.
-describe("neon auth (D-146 follow-up)", () => {
+describe("neon auth (2026-08-31 follow-up)", () => {
   const checkpoint = () => readFileSync(SCRIPT_SH, "utf8");
   const common = () =>
     readFileSync(resolve(REPO_ROOT, "infra/database/scripts/_common.sh"), "utf8");
@@ -251,7 +252,7 @@ describe("neon auth (D-146 follow-up)", () => {
   });
 
   it("...but production still refuses to migrate without a checkpoint", () => {
-    // The load-bearing half. This is D-95's rule, and the credential change
+    // The load-bearing half. This is D-178's rule, and the credential change
     // must not have relaxed it: database-deploy.sh (the Fly script's steps 1–2
     // until the targets were split) still calls the checkpoint on the
     // production path, and the script still exits non-zero when the create

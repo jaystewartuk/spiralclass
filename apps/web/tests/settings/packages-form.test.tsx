@@ -37,7 +37,7 @@ const { formatMinorUnits: formatMinorUnitsForMock } = await vi.hoisted(
   async () => await import("@spiralclass/shared"),
 );
 vi.mock("@/components/locale-provider", () => ({
-  // D-197: the real formatter, in English, as the tests expect.
+  // D-153: the real formatter, in English, as the tests expect.
   useFormatMoney: () => (minorUnits: number, currency?: string) =>
     formatMinorUnitsForMock(minorUnits, currency, "en"),
   useT: () => (key: string, vars?: Record<string, unknown>) =>

@@ -1,13 +1,13 @@
 /**
  * What a production deploy run says about production, read job by job
- * ([D-177]'s addendum).
+ * ([D-184]).
  *
  * .github/workflows/deploy-production.yml runs `database`, then `cloudrun`.
  * Production is serving the commit exactly when both are green. The run's own
  * exit status would say the same thing today, with one target; it did not
  * while a Vercel failover ran beside them, and reading the jobs by name keeps
  * the verdict about the thing serving the domain however many targets the
- * workflow grows ([D-186]).
+ * workflow grows ([D-70]).
  *
  * Pure, so a table test can hold it without a run to watch.
  */

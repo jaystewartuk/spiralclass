@@ -269,7 +269,7 @@ export function groupPaymentsByMonth<T extends LedgerEntry>(
  * left again, so including either would give her a figure she cannot reconcile
  * against her account. Per currency because a teacher who changed her pricing
  * currency has months that legitimately hold two, and adding minor units
- * across currencies produces a meaningless number (D-64).
+ * across currencies produces a meaningless number (D-153).
  */
 export function receivedByMonth(
   entries: readonly LedgerEntry[],

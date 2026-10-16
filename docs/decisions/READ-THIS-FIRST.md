@@ -16,10 +16,12 @@ anyone noticed. That is what this log is for.
 ---
 
 The rest of this page is those two at length — context, decision, what else was
-considered, and what each one cost. There are more than 125 decision records
-in this directory and these are two of them; every number below is from the
-record it cites, and where a record states a cost it is repeated here rather than
-smoothed over.
+considered, and what each one cost. There are more than 25 decision records
+in this directory and these are two of them. Every number below is from the
+record it cites — its How we got here section, or the original records at the
+[starting commit](https://github.com/jaystewartuk/spiralclass/tree/1180a397eb16f961c02054920dc1603c77407647/docs/decisions)
+of the consolidation ([D-202](./D-202.md)) — and where a record states a cost it
+is repeated here rather than smoothed over.
 
 ---
 
@@ -35,8 +37,8 @@ and a `Transfer` forwarded the settled net to the teacher's connected account.
 
 That funds flow has a hard external constraint attached to it. A Transfer must
 cross a border Stripe is willing to cross, and Stripe's cross-border payout
-circle excluded the country where the first teachers were. [D-58](./D-58.md) had
-correctly concluded that a UK entity cannot Transfer to a connected account
+circle excluded the country where the first teachers were. An earlier decision
+(July 2026, now in D-143's history) had correctly concluded that a UK entity cannot Transfer to a connected account
 outside the circle, and had excluded that country from the card rail on that basis.
 
 Two more problems shared the same cause. Which payment methods a checkout can
@@ -61,7 +63,7 @@ needed one.**
 
 - **Work around the circle with teacher-held third-party payment links** — a
   Wise link, a Mercado Pago _link de pago_, PayPal. This was the previous
-  decision, [D-137](./D-137.md), which explicitly left Connect alone. It is
+  decision (2026-08-28), which explicitly left Connect alone. It is
   rejected here because a direct charge makes the teacher merchant of record on
   Stripe itself: no second processor, no second dispute model, and no per-teacher
   link for someone to verify by hand.
@@ -108,12 +110,12 @@ needed one.**
 
 ## 2. Every CI workflow is deleted — and the condition on which they came back
 
-**[D-129](./D-129.md)** → **[D-157](./D-157.md)**
+**[D-157](./D-157.md)**
 
 ### Context
 
 The repository was private, and GitHub Actions minutes are metered on a private
-repository. [D-120](./D-120.md) had measured it: ~1,500–1,700 billable
+repository. An earlier decision (2026-08-17) had measured it: ~1,500–1,700 billable
 minutes a month against a 2,000-minute allowance, the deploy alone ~744 of them.
 Its own change brought that to roughly 780, comfortably inside the allowance, and
 it concluded the scheduled work did not need to move.
@@ -133,8 +135,8 @@ as fresh, and `pnpm gate` prints one line per overdue job — arriving at a mome
 the operator is provably at the keyboard rather than in an inbox.
 
 Ten days later (2026-08-25 → 2026-09-04, both dates in the records) the
-repository went public, the minutes became free, and three workflows came back — **on one condition, which is the substance of both
-records**:
+repository went public, the minutes became free, and three workflows came back — **on one condition, which is the substance of the
+decision**:
 
 > `scripts/ci/steps.mjs` stays the single definition of what "green" means.
 > `scripts/fly-deploy.sh` stays the single definition of what a deploy is. The
@@ -142,12 +144,12 @@ records**:
 
 ### Alternatives considered
 
-- **Keep the crons and accept the metering.** This is what D-120 decided, and the
+- **Keep the crons and accept the metering.** This is what that earlier decision concluded, and the
   arithmetic behind it was right. What changed was not the arithmetic: it was
   that a backup whose availability depends on how many minutes the month's merges
   consumed is not a backup anyone can reason about.
 - **Put the schedule on the laptop** — a launchd agent or a crontab. Rejected on
-  D-120's own argument that a laptop schedule is one nobody owns. There is no
+  the earlier decision's own argument that a laptop schedule is one nobody owns. There is no
   scheduler; there are commands with a staleness nag attached, and the honest
   description of the cadence is "weekly, when prompted".
 - **Bring the workflows back as they were.** Part of what was deleted was a
@@ -177,13 +179,14 @@ records**:
 ## What the two have in common
 
 Each one is a decision that reverses an earlier decision **without the earlier
-decision having been wrong**. D-58 was right that a UK entity cannot Transfer to
-an account outside its circle. D-120's minute arithmetic was right. In both cases what
+decision having been wrong**. The July payments decision was right that a UK
+entity cannot Transfer to an account outside its circle. The August minute
+arithmetic was right. In both cases what
 expired was the premise, not the reasoning — and the expensive part was the gap
 between when the premise died and when anyone noticed.
 
-That is what this log is for, and it is why the reversals are kept alongside what
-they reversed rather than replacing them.
+That is what this log is for, and it is why each live record keeps what it
+reversed in its How we got here section rather than dropping it.
 
 If you want more: [the index](./README.md#start-here) groups the rest by the kind
 of judgement each one shows.

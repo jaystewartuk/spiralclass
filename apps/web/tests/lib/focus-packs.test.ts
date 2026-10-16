@@ -5,7 +5,7 @@ import {
   type FocusTagSeed,
 } from "@/lib/focus-packs";
 
-// Focus-tag seed packs — D-19 Layers 2/3, narrowed to language-first by D-72
+// Focus-tag seed packs — the class-content inputs' Layers 2/3 (D-17), narrowed to language-first by D-72
 // (the music/math/generic packs and the `discipline` concept are gone; a pack is
 // now chosen by the language the teacher teaches). The packs are DATA; these
 // guard the invariants the seeder relies on.
@@ -29,7 +29,7 @@ describe("focus-tag seed packs", () => {
     expect(focusTagSeedFor(undefined).pack).toBe("language");
     expect(focusTagSeedFor("qu").seeds).toEqual(neutral.seeds);
     // The retired subject codes are just unknown languages now.
-    // A retired D-20 subject code is just an unknown language now.
+    // A retired D-17 subject code is just an unknown language now.
     expect(focusTagSeedFor("music").pack).toBe("language");
   });
 

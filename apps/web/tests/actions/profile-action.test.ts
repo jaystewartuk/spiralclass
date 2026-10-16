@@ -22,7 +22,7 @@ const state = {
     bio: null as string | null,
     profileCompletedAt: null as Date | null,
     // maybeEmitMarketplaceReady reads the payout rail off the relation
-    // (D-113); an empty list is "no transfer instrument configured".
+    // (D-145); an empty list is "no transfer instrument configured".
     pricingCurrency: "MXN",
     payoutInstruments: [] as { kind: string; enabled: boolean }[],
   },
@@ -56,7 +56,7 @@ const introVideoAnalysisFindUnique = vi.fn(
 const introVideoAnalysisUpsert = vi.fn(async () => ({}));
 vi.mock("@/lib/prisma", () => ({
   prisma: {
-    // D-113: the payout-instrument delegate. Empty by default — a test that
+    // D-145: the payout-instrument delegate. Empty by default — a test that
     // cares about a specific instrument overrides it.
     teacherPayoutInstrument: {
       findMany: async () => [],
@@ -527,7 +527,7 @@ describe("saveBookingPageLocaleAction", () => {
   });
 });
 
-// D-132 — the auto-record-classes opt-in. A checkbox action, so the whole
+// D-16 — the auto-record-classes opt-in. A checkbox action, so the whole
 // behaviour is "did an absent field mean off"; the interesting part is that it
 // writes ONLY this column, because conflating a teacher's preference about her
 // own classes with a consent decision about her students is the mistake this

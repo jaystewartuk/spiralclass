@@ -1,11 +1,11 @@
 import type { SpeakerUtterance } from "@/lib/transcription/types";
 
-// Speaking-time / participation analytics (D-97) — teacher-vs-student talk
+// Speaking-time / participation analytics — teacher-vs-student talk
 // time and the listening/speaking balance for one lesson. Pure and
 // unit-tested: the lesson's total length is anchored by `durationMs` (from
 // LessonAudio, one row per speaker — the egress pipeline) where there is one,
 // and otherwise by the last utterance's end: a transcript the browsers wrote
-// (D-189) has no audio row, but the lesson lasted at least until its last
+// (D-185) has no audio row, but the lesson lasted at least until its last
 // line. `utterances` (from LessonTranscript, already on one 0-based timeline
 // — lib/transcription/merge.ts) gives the actual talk segments per speaker.
 // The audio duration is the better anchor when present, because it also

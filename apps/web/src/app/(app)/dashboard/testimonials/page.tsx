@@ -12,7 +12,7 @@ import { listTestimonials } from "@/lib/testimonials/store";
 import { AddTestimonialPanel, TestimonialCard } from "./testimonial-forms";
 
 // Teacher editor for the public-page social proof
-// (docs/features/student-acquisition.md, D-24). Teacher-authored testimonials —
+// (docs/features/student-acquisition.md, D-125). Teacher-authored testimonials —
 // student-submitted reviews are deliberately deferred until there's volume to
 // moderate, the same reasoning as the referral engine.
 //

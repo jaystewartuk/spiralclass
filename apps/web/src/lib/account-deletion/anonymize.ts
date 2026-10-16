@@ -60,7 +60,7 @@ export type AnonymizeDeps = {
     subjectId: string,
   ) => Promise<boolean>;
   // Destroys the teacher's class recordings, insights audio, transcripts and
-  // summaries — the R2 objects as well as the rows (D-136). Injectable so the
+  // summaries — the R2 objects as well as the rows (D-22). Injectable so the
   // pure-DB tests here don't reach for storage; defaults to the real purge.
   purgeRecordings?: (teacherId: string) => Promise<unknown>;
 };
@@ -258,7 +258,7 @@ async function anonymizeTeacher(deps: AnonymizeDeps, teacherId: string): Promise
     });
   });
 
-  // Destroy her recordings and everything derived from them (D-136). Outside
+  // Destroy her recordings and everything derived from them (D-22). Outside
   // the transaction because it does network I/O against R2, and AFTER it because
   // a storage outage must not be able to block a deletion request the user has
   // already waited out the grace window for — a row whose object survives is

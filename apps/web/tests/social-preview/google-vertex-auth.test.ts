@@ -4,7 +4,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 vi.mock("server-only", () => ({}));
 
 // The self-signed-JWT → token-exchange flow (RFC 7523) this module hand-rolls
-// instead of pulling in google-auth-library (D-127) — same posture as
+// instead of pulling in google-auth-library (D-125) — same posture as
 // wise/api.ts's own node:crypto RSA signing. What matters here: the JWT is
 // signed with the RIGHT key and claims Google's token endpoint actually
 // checks, the resulting token is cached across calls (a request loop
@@ -152,7 +152,7 @@ describe("getVertexAccessToken", () => {
 });
 
 // Production runs on Cloud Run (D-184), whose metadata server hands the
-// service's own runtime identity a token on request — so the stored key D-127
+// service's own runtime identity a token on request — so the stored key D-125
 // needed on Fly can be retired. Same bounded, cached, never-throwing posture
 // as the key exchange above; what differs is where the token comes from and
 // which header proves the request came from inside the instance.

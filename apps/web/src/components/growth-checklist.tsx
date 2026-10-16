@@ -23,7 +23,7 @@ import { webNavHref } from "@/lib/nav";
 import type { AppLocale } from "@/lib/i18n";
 
 // The "Crecer" / "Grow" card on the teacher dashboard — the in-app
-// teacher-amplification guide (D-24 / STUDENT_ACQUISITION.md). The ordered
+// teacher-amplification guide (D-125 / STUDENT_ACQUISITION.md). The ordered
 // steps + their done-state come pre-resolved from the shared `growthSteps`
 // model; this component is a dumb bilingual renderer that wires each CTA to
 // the feature that executes it and fires a funnel event when a step is acted

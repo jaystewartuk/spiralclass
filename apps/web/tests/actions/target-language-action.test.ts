@@ -64,14 +64,14 @@ describe("saveTargetLanguageAction", () => {
 
   it("revalidates booking-page settings only — not the public page, not account", async () => {
     await saveTargetLanguageAction(undefined, form({ targetLanguage: "fr" }));
-    // One call per action (D-174): /b/<slug> is dynamic and refetches on its
+    // One call per action (lib/revalidate.ts): /b/<slug> is dynamic and refetches on its
     // own, and a second revalidation would cost this form its result.
     expect(revalidatePath.mock.calls.map((c) => c[0])).toEqual(["/settings/booking-page"]);
   });
 
   it("revalidates the same single path when the teacher has no slug", async () => {
     // There is no longer a slug-dependent second call to skip: the action
-    // revalidates one path either way (D-174).
+    // revalidates one path either way (lib/revalidate.ts).
     requireTeacher.mockResolvedValue({ id: "t1", bookingSlug: null });
     await saveTargetLanguageAction(undefined, form({ targetLanguage: "fr" }));
     expect(revalidatePath.mock.calls.map((c) => c[0])).toEqual(["/settings/booking-page"]);
