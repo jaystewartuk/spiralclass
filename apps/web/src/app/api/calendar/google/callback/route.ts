@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import * as Sentry from "@sentry/nextjs";
+import { getCurrentTeacher } from "@/lib/auth";
 import { serverEnv, hasGoogleCalendarCreds } from "@/lib/env";
 import {
   exchangeCodeForTokens,
@@ -9,8 +10,9 @@ import {
 import { saveGoogleConnection } from "@/lib/calendar/google/connection";
 import { syncTeacherBusy } from "@/lib/calendar/google/sync";
 
-// OAuth redirect target. Verifies our signed state (CSRF + teacher binding),
-// exchanges the code for tokens, persists the connection, and kicks off an
+// OAuth redirect target. Verifies our signed state (CSRF + teacher binding)
+// and that the signed-in teacher is the one it names, exchanges the code for
+// tokens, persists the connection, and kicks off an
 // immediate first sync. Always lands the teacher back on the calendar settings
 // page with a status query param.
 
@@ -40,6 +42,14 @@ export async function GET(req: NextRequest) {
 
   const verified = verifyOAuthState(state, serverEnv().SESSION_SECRET);
   if (!verified.ok) return settingsRedirect(appUrl, "error");
+
+  // The state names the teacher who started this consent, and only a browser
+  // signed in as that teacher may finish it. Read without requireTeacher(),
+  // which would lazily provision a teacher row for whoever is signed in.
+  const teacher = await getCurrentTeacher();
+  if (!teacher || teacher.disabledAt || teacher.id !== verified.teacherId) {
+    return settingsRedirect(appUrl, "error");
+  }
 
   try {
     const tokens = await exchangeCodeForTokens(code);
