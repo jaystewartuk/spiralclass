@@ -191,7 +191,7 @@ export function ClassCall({
   // Never set on the student call page — students keep seeing only class
   // materials (call-library-browser.tsx's endpoints are teacher-gated too).
   canBrowseLibrary?: boolean;
-  // Nudge the other party (D-75). Present when the caller's page wired a
+  // Nudge the other party (docs/features/live-calls-video.md). Present when the caller's page wired a
   // role-scoped server action; shown as a button in the waiting-room state so a
   // present user can ping a missing counterparty's devices. Absent → no button.
   onNudge?: () => Promise<NudgeResult>;
@@ -305,7 +305,7 @@ export function ClassCall({
   // fills the main area in place of the remote video (the self-view + controls
   // stay). Only `content` materials land here; file/link open externally.
   const [activeMaterial, setActiveMaterial] = useState<CallMaterial | null>(null);
-  // Nudge button state (D-75). "sent"/"cooldown" disable the button for a beat
+  // Nudge button state. "sent"/"cooldown" disable the button for a beat
   // so a present user can't spam the missing party's devices; it re-enables so a
   // genuinely-still-waiting user can nudge again.
   const [nudgeState, setNudgeState] = useState<"idle" | "sending" | "sent" | "cooldown" | "error">(

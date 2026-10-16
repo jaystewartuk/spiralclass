@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { posthogRegion, posthogRegionHosts } from "@/lib/analytics/posthog-region";
 
-// D-48 — data residency. The PostHog region is a config knob
+// Data residency. The PostHog region is a config knob
 // (NEXT_PUBLIC_POSTHOG_REGION) so a future EU move is a flip + project
 // re-create, not a code edit. These lock the host derivation for both regions
 // and the US-safe default, so nobody silently ships EU-region hosts.

@@ -14,7 +14,7 @@ describe("sentryEnvironment", () => {
     });
 
     it("derives the environment from APP_URL", () => {
-      // Vercel's VERCEL_ENV is gone (D-89); APP_URL is the sole server signal.
+      // Vercel's VERCEL_ENV is gone (D-70); APP_URL is the sole server signal.
       vi.stubEnv("APP_URL", "https://preview.spiralclass.com");
       expect(sentryEnvironment()).toBe("preview");
       vi.stubEnv("APP_URL", "https://spiralclass.com");

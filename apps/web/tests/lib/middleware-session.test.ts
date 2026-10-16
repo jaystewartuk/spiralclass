@@ -226,7 +226,7 @@ describe("updateSession — ?ref= ambassador attribution", () => {
   });
 });
 
-// Maintenance mode (D-76): MAINTENANCE_MODE walls off both apps. The web half
+// Maintenance mode (lib/maintenance.ts): MAINTENANCE_MODE walls off both apps. The web half
 // runs here — before the auth gate — rewriting page requests to /maintenance
 // (503) and answering non-allowlisted API requests with a 503 JSON, while the
 // health check, the mobile config endpoint (how the app learns it's in

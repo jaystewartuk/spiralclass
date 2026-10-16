@@ -41,7 +41,7 @@ async function ownedBookingId(bookingId: string, teacherId: string): Promise<str
 }
 
 // The page a note action was submitted from — the one path it may revalidate
-// (lib/revalidate.ts, D-174). The same cue forms are rendered on the class page
+// (lib/revalidate.ts). The same cue forms are rendered on the class page
 // and on the day plan, which marks its forms `from=plan`. Anything else,
 // including a hand-edited value, means the class page: the field only picks
 // between two fixed paths and never carries one of its own.

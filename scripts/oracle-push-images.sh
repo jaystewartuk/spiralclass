@@ -20,7 +20,7 @@
 # with livekit-server, egress, Redis and Caddy.
 #
 # ⚠️ The PREVIEW image, not the production one — the production web app is on
-# Fly and its image is never pulled onto this box (D-150's second addendum).
+# Cloud Run and its image is never pulled onto this box (D-184).
 # It is the only first-party image the box runs: live captions run in the
 # browser now (D-185), not in a container here.
 #

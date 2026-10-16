@@ -13,10 +13,10 @@
 > the box as it was on 2026-08-29.
 
 > [!NOTE]
-> **[D-150](../decisions/D-150.md) (2026-09-03) decided this box gets an
+> **A decision of 2026-09-03, now in [D-184](../decisions/D-184.md)'s history, gave this box an
 > OpenTofu definition again, and that the Next.js app moves onto Oracle
 > alongside it.** Nothing was applied before the box was destroyed, so **this
-> file was the only description of the box for as long as it existed.** D-150 also carries the
+> file was the only description of the box for as long as it existed.** D-184 also carries the
 > measurement that shaped it: this box is in `mx-queretaro-1`, 58 ms from
 > Neon's `aws-us-east-2` against the Fly machine's 12 ms (production has since
 > moved to `aws-us-east-1`, which is ~55 ms from there). When the module
@@ -132,13 +132,14 @@ the rebuild needs but compose does not read. See
 the rotation runbook, which is kept privately (see
 [`../security.md`](../security.md)).
 
-### The web app's own config, when D-150 moves it here
+### The web app's own config, when D-184 moves it here
 
 ⚠️ **Read this before the migration, not during it. The failure mode is
 silence.**
 
 As observed, the box ran LiveKit, Egress, Caddy and Redis.
-[D-150](../decisions/D-150.md) moves the Next.js app here too, and the app gets
+The hosting plan of the time would have moved the Next.js app here too (it
+never moved — [D-184](../decisions/D-184.md)), and the app gets
 its non-secret configuration a different way from everything above.
 
 **How it works on Cloud Run.** `scripts/docker-entrypoint.sh` sources

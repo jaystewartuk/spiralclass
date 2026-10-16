@@ -223,7 +223,7 @@ nothing reaches production without the heavy tier green on that commit.
 ### 5. Preview
 
 ⚠️ **There is no preview host today, so merging to `main` deploys nothing.**
-Preview moved to the Oracle box ([D-150](../decisions/D-150.md)), that box was
+Preview moved to the Oracle box ([D-184](../decisions/D-184.md)), that box was
 destroyed on 2026-09-19 ([D-182](../decisions/D-182.md)), and preview has no
 deploy target until it is rebuilt. `scripts/oracle-deploy.sh` is the way back.
 Until then the manual pass runs against your own checkout.
@@ -263,9 +263,9 @@ its own credentials. GitHub asks for approval per job, so a promote asks twice.
 **The approval is the release decision**: approve outside lesson hours, or
 leave the run waiting until then. Approving ships everything merged before it.
 A hand-typed `pnpm promote` watches the run and exits non-zero unless both jobs
-are green, so a green promote means production is serving. ([D-177](../decisions/D-177.md)'s
-addendum split the jobs; [D-186](../decisions/D-186.md) retired the Vercel
-failover that ran beside them.)
+are green, so a green promote means production is serving. ([D-184](../decisions/D-184.md)
+records why the database is a job of its own; [D-70](../decisions/D-70.md)
+records the Vercel failover that once ran beside them.)
 
 - `--force-gate` runs the full tier here instead of reading the verdict — the
   offline and recovery path, and still the QEMU cross-build.

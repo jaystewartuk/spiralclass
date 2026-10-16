@@ -10,7 +10,7 @@ terraform {
   # LOCAL STATE, DELIBERATELY, AND ONLY FOR THE FIRST APPLY.
   #
   # The deleted infra/oracle-runner module declared an S3 backend against the
-  # R2 bucket the sibling modules use (D-49). That is still the
+  # R2 bucket the sibling modules use (D-70). That is still the
   # right destination and this file should get there. It is not where the
   # FIRST apply happens, for one reason: this module has never been applied,
   # and D-139's whole complaint was a module asserting a state nobody had

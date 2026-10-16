@@ -6,7 +6,7 @@ import { REPO_ROOT } from "../../../../scripts/env-config.mjs";
 
 // A server action may revalidate AT MOST ONE PATH.
 //
-// This is the guard for the bug in D-174, which is invisible to every other
+// This is the guard for the bug described in apps/web/src/lib/revalidate.ts, which is invisible to every other
 // check in this repo: it type-checks, lints, builds, passes unit tests, and
 // only appears in a PRODUCTION build (`pnpm dev` never shows it). A second
 // `revalidatePath` in one action — even the same path twice, even layout-scoped
@@ -100,7 +100,7 @@ describe("server actions revalidate at most one path", () => {
     expect(
       offences,
       `These actions revalidate more than one path, which makes the client throw\n` +
-        `away the action's response (see apps/web/src/lib/revalidate.ts and D-174).\n` +
+        `away the action's response (see apps/web/src/lib/revalidate.ts).\n` +
         `Keep the path of the page the action is invoked from and drop the rest:\n` +
         offences.map((o) => `  ${o.file} :: ${o.fn} (${o.count} calls)`).join("\n"),
     ).toEqual([]);

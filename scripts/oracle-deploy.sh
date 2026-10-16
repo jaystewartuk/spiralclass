@@ -248,7 +248,7 @@ cat "$TMP/preview-db.env" >> "$TMP/preview.app.env"
 ok "preview points at postgres-preview, not Neon"
 
 # ⚠️ THE BOX HOLDS NO PRODUCTION DATABASE AT ALL, and that is deliberate.
-# Production stays on Neon — D-150 rejected colocating it on the operator's
+# Production stays on Neon — D-184 rejected colocating it on the operator's
 # own measured history: when backups depended on a human remembering,
 # production went ELEVEN DAYS with no backup and nobody noticed. An earlier
 # draft of this rebuild provisioned an idle Postgres here "ready if the

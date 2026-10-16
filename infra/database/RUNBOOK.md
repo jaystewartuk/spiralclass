@@ -1,21 +1,22 @@
-# DB region-migration runbook (D-49)
+# DB region-migration runbook (D-70)
 
 How to stand up a new-region Postgres and move data into it, as a reproducible
 pipeline instead of a dashboard one-way door. This is the **operator procedure**
-for [D-49](../../docs/decisions/D-49.md)'s three layers; run it only
-when the [D-48](../../docs/decisions/D-48.md) trigger fires (first EU
-user / DPA request / adverse legal read). Nothing here runs automatically.
+for [D-70](../../docs/decisions/D-70.md)'s provision · schema · data layers;
+run it when a database must move region or provider — it last ran for the
+2026-09-24 move to `aws-us-east-1` ([D-184](../../docs/decisions/D-184.md)).
+Nothing here runs automatically.
 
 The three layers are **decoupled on purpose** — each is independently
 reproducible, and every one is provider-neutral except layer 1's provisioner:
 
 | Layer         | "…"                                   | Tool                                                                                   | Where                                 |
 | ------------- | ------------------------------------- | -------------------------------------------------------------------------------------- | ------------------------------------- |
-| 1 · provision | a Postgres exists in region X         | manual, via console (`neon/`) — the original `supabase/` Tofu module was retired, D-89 | `neon/`                               |
+| 1 · provision | a Postgres exists in region X         | manual, via console (`neon/`) — the original `supabase/` Tofu module was retired, D-70 | `neon/`                               |
 | 2 · schema    | its structure is identical everywhere | Prisma `migrate deploy`, region-parameterized                                          | `apps/web/scripts/migrate-regions.ts` |
 | 3 · data      | rows get in / move between regions    | `pg_dump`/`pg_restore` + logical replication                                           | `scripts/` (this dir)                 |
 
-**Golden rule (D-49):** layer 3 uses **Postgres-native logical tools only** —
+**Golden rule (D-70):** layer 3 uses **Postgres-native logical tools only** —
 never a provider's proprietary migration/CDC service (AWS DMS et al.), which
 re-locks you. Every script here takes plain connection strings and works between
 any two real Postgres.
@@ -72,7 +73,7 @@ export TARGET_DATABASE_URL="$(neonctl connection-string production --project-id 
 # 1. Provision the target (layer 1): create a new Neon project in the target
 #    region via console.neon.tech — see ../neon/README.md. (Not Tofu — the
 #    original Supabase Tofu module's `tofu apply -var region=…` path was
-#    retired along with Supabase itself, D-89.)
+#    retired along with Supabase itself, D-70.)
 # 2. Freeze writes to SRC (maintenance mode / scale app to 0).
 # 3. Clone schema+data into the EMPTY target. Auto-verifies; exits non-zero if parity fails.
 ./db-clone-to-region.sh
@@ -120,7 +121,7 @@ $R teardown                                      # drop subscription + publicati
 the fresh target's counters sit at 1 and will hand out **colliding primary keys**
 the moment the app writes to it. Run it after the freeze, before the flip.
 
-## Rehearse first (D-49: "a reproducible deploy is only trustworthy if tested")
+## Rehearse first (D-70: "a reproducible deploy is only trustworthy if tested")
 
 Before trusting any of the above, rehearse a clone against a **throwaway** target
 — read-only w.r.t. prod, touches no real region:

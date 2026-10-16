@@ -13,7 +13,7 @@ const blankAsAbsent = <T extends z.ZodTypeAny>(schema: T) =>
 const serverSchema = z.object({
   DATABASE_URL: z.string().url(),
   DIRECT_URL: z.string().url(),
-  // (Supabase is fully retired — D-89 decommission. The database is Neon and
+  // (Supabase is fully retired — D-70 decommission. The database is Neon and
   // object storage is Cloudflare R2, see lib/storage/provider.ts. The
   // SUPABASE_* / NEXT_PUBLIC_SUPABASE_* vars and the Storage rollback provider
   // were removed once the soak completed.)
@@ -390,7 +390,7 @@ const clientSchema = z.object({
   NEXT_PUBLIC_POSTHOG_HOST: blankAsAbsent(z.string().url().optional()),
   // Which PostHog Cloud region the clients point at (reverse-proxy
   // destinations + ui_host). Default US; `eu` once the EU project exists.
-  // See D-48 — the project itself is dashboard-pinned, so this only aims the
+  // The project itself is dashboard-pinned, so this only aims the
   // clients, it does not move data.
   NEXT_PUBLIC_POSTHOG_REGION: blankAsAbsent(z.enum(["us", "eu"]).optional()),
   // Public (pk_live_*/pk_test_*) — safe to expose to the browser, loaded by

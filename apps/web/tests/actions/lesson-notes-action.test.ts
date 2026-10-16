@@ -410,7 +410,7 @@ describe("generateLessonSummary", () => {
 });
 
 // The same cue forms render on the class page and on the day plan. An action
-// may revalidate exactly one path (lib/revalidate.ts, D-174), and it has to be
+// may revalidate exactly one path (lib/revalidate.ts), and it has to be
 // the page the form was submitted from or the teacher's edit never appears.
 describe("which page a note action refreshes", () => {
   it("refreshes the class page by default", async () => {

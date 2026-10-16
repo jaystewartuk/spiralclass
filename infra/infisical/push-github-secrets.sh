@@ -36,7 +36,7 @@
 # API returns a secret's value, by design), which is exactly why re-running it
 # belongs in the rotation runbook rather than in someone's memory.
 #
-# Values flow through stdin only, never argv — the house rule (D-66), so
+# Values flow through stdin only, never argv — the house rule (D-70), so
 # nothing lands in shell history or in `ps`.
 #
 # STALE NAMES. A push only ever adds, so on its own it would make the GitHub
@@ -134,7 +134,7 @@ printf '    %s\n' ${NAMES[@]+"${NAMES[@]}"} >&2
 #   /         what the RUNNING APP needs — database URLs, Stripe, LiveKit's
 #             secret. Pushed to Fly, by design.
 #   /config   BUILD-time values, inlined into the client bundle and public by
-#             construction. Must not become Fly runtime secrets (D-85 says so
+#             construction. Must not become Fly runtime secrets (D-70 says so
 #             explicitly), and do not, because they are not at `/`.
 #   /deploy   credentials only this deploy uses — GCP_PROJECT_ID, GCP_DEPLOY_KEY,
 #             NEON_API_KEY, LIVEKIT_ORIGIN_IP. ⚠️ These MUST NOT sit at `/`: a key

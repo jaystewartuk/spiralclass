@@ -79,7 +79,7 @@ name from the deploy's `<PREFIX>_BUCKET` secret rather than assuming.
 > codebase, and will not survive a rename.
 
 - `https://spiralclass.com` — production
-- `https://preview.spiralclass.com` — preview (D-89)
+- `https://preview.spiralclass.com` — preview (D-70)
 - `http://localhost:3000` — local dev
 
 `agendaprofe.com` is deliberately **absent**: the domain is no longer in the

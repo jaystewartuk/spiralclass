@@ -542,7 +542,7 @@ describe("assertProductionCredentials", () => {
 
   it("is a no-op on a preview host even when creds are missing", async () => {
     // Preview builds with NODE_ENV=production too, but degrades gracefully.
-    // Prod-vs-preview is decided by APP_URL (Vercel's VERCEL_ENV is gone, D-89).
+    // Prod-vs-preview is decided by APP_URL (Vercel's VERCEL_ENV is gone, D-70).
     setEnv(
       withBaseRequired({
         NODE_ENV: "production",

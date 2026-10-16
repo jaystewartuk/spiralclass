@@ -55,7 +55,7 @@ still worth knowing), each now annotated with what replaced it.
 
 The spike doc, §32/§33 of the audit, and this doc's own earlier drafts all
 said **don't put production video on this specific box** —
-[D-49](../decisions/D-49.md) already ruled it out for anything prod-critical (documented capacity/suspension
+the database-portability plan had already ruled it out for anything prod-critical (documented capacity/suspension
 risk, no failover), and the measured capacity ceiling (~15-20 concurrent
 rooms, measured in the LiveKit spike) is real, not hypothetical.
 

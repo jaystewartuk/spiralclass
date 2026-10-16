@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # The production deploy. Cloud Run `web` has served spiralclass.com since the
 # 2026-09-23 cutover ([D-184]'s addendum); Fly `agendaprofe` was destroyed
-# the same day. It is the only production target ([D-186]).
+# the same day. It is the only production target ([D-70]).
 #
 # ⚠️ WHAT THIS DELIBERATELY DOES NOT DO, and each omission is load bearing
 # rather than unfinished:
@@ -62,7 +62,7 @@
 #
 # ⚠️ That property is exactly what plain `--set-env-vars` would have thrown
 # away, and it is why the secrets are not passed that way. It also keeps them
-# out of argv, which D-66 requires: gcloud's env-var flags take values as
+# out of argv, which D-70 requires: gcloud's env-var flags take values as
 # process arguments, where `ps` can read them.
 #
 # ⚠️ ONE CONSEQUENCE, stated because it is the way this goes wrong: a service
@@ -169,7 +169,7 @@ command -v gcloud >/dev/null || {
 
 # ── Authenticate, if a key was supplied ──────────────────────────────────
 #
-# The key reaches gcloud through a FILE, never through argv (D-66): gcloud's
+# The key reaches gcloud through a FILE, never through argv (D-70): gcloud's
 # --key-file takes a path, and a path is all that appears in the process list.
 # Created under umask 077 in a directory this script owns and removes, so it is
 # never world-readable and never outlives the run.
@@ -249,7 +249,7 @@ BOOST=()
 [ "${CPU_BOOST:-0}" = "1" ] && BOOST=(--cpu-boost)
 
 # The secret set, mounted as a FILE rather than exploded into env vars. Values
-# never enter argv (D-66) — only the secret's NAME does — and the deploy
+# never enter argv (D-70) — only the secret's NAME does — and the deploy
 # identity holds no `secretAccessor`, so this flag names something this script
 # cannot read. SECRETS_ENV_FILE is what tells the entrypoint to source it.
 gcloud run deploy "$SERVICE" \

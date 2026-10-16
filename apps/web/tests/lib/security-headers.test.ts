@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { buildSecurityHeaders } from "@/lib/security-headers";
 
 // See CLOUDFLARE_PLATFORM_AUDIT.md (docs/architecture) — Vercel applied HSTS
-// automatically on its own domains; Fly (production + preview since D-89)
+// automatically on its own domains; Fly (production + preview since D-70)
 // does not, so this header must be set explicitly or HTTPS-downgrade
 // protection is silently absent in production.
 

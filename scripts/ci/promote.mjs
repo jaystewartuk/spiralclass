@@ -474,7 +474,7 @@ if (noWait || !has("gh")) {
     // Ctrl-C only stops watching; the deploy carries on.
     //
     // ⚠️ NOT `--exit-status`, which answers for the RUN — red whenever any job
-    // is. While a Vercel failover ran beside Cloud Run ([D-177] to [D-186]), a
+    // is. While a Vercel failover ran beside Cloud Run (retired 2026-09-23, [D-70]), a
     // failover that could not refresh turned a release that shipped into a
     // promote reporting that production may not have moved. So the verdict
     // is read job by job, and a promote that ends green still means exactly

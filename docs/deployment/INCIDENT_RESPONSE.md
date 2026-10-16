@@ -254,7 +254,7 @@ connected with `psql`.
 
 `auth.users` was Supabase Auth's schema and no longer exists — auth is
 better-auth on plain Postgres via Prisma (D-40), fully decommissioned from
-Supabase per D-89 (§4.1 above already reflects this). better-auth's own
+Supabase per D-70 (§4.1 above already reflects this). better-auth's own
 tables are `user` and `session` (`@@map("user")` / `@@map("session")` in
 `apps/web/prisma/schema.prisma`); there is no `email_confirmed_at` /
 `last_sign_in_at` / `raw_user_meta_data` equivalent — `user."emailVerified"`

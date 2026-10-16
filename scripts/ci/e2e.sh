@@ -13,7 +13,7 @@
 # instead of two.
 #
 # APP_URL is a *.localhost host on purpose: prod-vs-preview is decided by
-# APP_URL (D-89 Phase 5 removed the VERCEL_ENV branch), so the app must see a
+# APP_URL (D-70 Phase 5 removed the VERCEL_ENV branch), so the app must see a
 # preview-shaped origin. Chromium maps *.localhost to loopback itself; the
 # readiness probe below uses 127.0.0.1 so it doesn't depend on the OS resolver
 # agreeing.

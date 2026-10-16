@@ -100,7 +100,7 @@ export async function updateSession(request: NextRequest) {
 
   const path = request.nextUrl.pathname;
 
-  // Maintenance mode (D-76). A single env flag (MAINTENANCE_MODE) takes both
+  // Maintenance mode (lib/maintenance.ts). A single env flag (MAINTENANCE_MODE) takes both
   // apps offline for a planned window. Short-circuit here — before the auth
   // gate — so every page/API hit gets the wall, EXCEPT the handful of paths
   // that must stay reachable (health check, the mobile config the app polls to

@@ -5,7 +5,7 @@ export const dynamic = "force-dynamic";
 
 // Process-liveness probe — no Postgres query, deliberately. This is what
 // the external uptime monitor hits about once a minute (it keeps a Cloud Run
-// instance warm — D-184), and it is Cloud Run's liveness probe (D-190): an
+// instance warm), and it is Cloud Run's liveness probe (D-184): an
 // instance that stops answering it for about a minute is restarted, so this
 // must stay cheap and must never touch Postgres. Fly's health checks pointed
 // here too, until Fly was retired. `/api/health` (the sibling route) does the

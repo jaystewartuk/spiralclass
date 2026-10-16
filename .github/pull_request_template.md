@@ -32,7 +32,7 @@ reviewer.
 - [ ] **New service-role / admin / webhook DB query?** Every query has an
       explicit `where teacherId = ?` filter — there is no DB-side RLS
       backstop; application-level scoping is the only tenant isolation
-      (post-D-70/D-89).
+      (post-D-70).
 - [ ] **New PII column?** Updated `apps/web/src/lib/sentry-scrub.ts`
       so the value cannot leak into Sentry events.
 - [ ] **New third-party SDK / origin?** If CSP is enforcing, added to
