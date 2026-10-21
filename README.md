@@ -44,10 +44,10 @@ appears in it.</sub>
 | know what is exposed by publishing it | [Security posture](docs/security.md)                                                                                               |
 
 > **How this repository was built.** SpiralClass was built by one person working
-> with AI coding agents; most of the code was agent-written under review. It is
-> published as a snapshot — the working repository, with its development
-> history, pull requests and issues, is private, which is why everything here
-> arrives in a single commit.
+> with AI coding agents; most of the code was agent-written under review. The
+> history before 22 September 2026 is private, which is why it starts with one
+> snapshot commit. Since then every change has landed here through a pull
+> request and the merge gate, and the board is this repository's issues.
 
 ---
 
