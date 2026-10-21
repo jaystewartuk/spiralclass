@@ -226,9 +226,25 @@ nothing reaches production without the heavy tier green on that commit.
 Preview moved to the Oracle box ([D-150](../decisions/D-150.md)), that box was
 destroyed on 2026-09-19 ([D-182](../decisions/D-182.md)), and preview has no
 deploy target until it is rebuilt. `scripts/oracle-deploy.sh` is the way back.
-Until then the manual pass runs against your own checkout.
+Until then the rehearsal runs against your own checkout, and it is one command:
 
-Then verify: the relevant `/admin/uat` section, and your own eyes on the change.
+```bash
+E2E_EXTENDED=1 bash scripts/ci/e2e.sh   # needs Docker (or Colima) running
+```
+
+It boots a fresh Postgres in Docker, migrates and seeds it, builds the
+production bundle, starts it, and runs the extended E2E journeys, the visual
+regression and the accessibility suites against it: the same script
+`heavy.yml` runs. A green Heavy run on the merged commit is the same evidence;
+run it here when you want to see it before approving, or when the runner's
+verdict is in doubt. If Postgres fails to start with `network … not found`, a
+container from an earlier Docker runtime is in the way:
+`docker compose -f apps/web/docker-compose.test.yml down --remove-orphans`.
+
+What it cannot reach is what only production has: real Google OAuth (calendar
+connect), R2 uploads (the seed skips photos with `r2-not-configured`), live
+Stripe and LiveKit. Those are the hand pass after the deploy: the relevant
+`/admin/uat` section, and your own eyes on the change.
 
 ### 6. Promote — it happens by itself, and you approve it
 
