@@ -8,7 +8,7 @@ import { normalizeTimeline } from "./merge";
 import type { CallRole } from "@spiralclass/shared";
 import type { SpeakerUtterance } from "./types";
 
-// The lesson transcript, written by the participants' browsers (D-189).
+// The lesson transcript, written by the participants' browsers (D-185).
 //
 // Live captions already recognise both speakers in every captioned class
 // (D-185): the speaker's own browser, or the other participant's computer, or

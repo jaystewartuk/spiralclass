@@ -79,7 +79,7 @@ runner in the same commit.
 
 Several worktrees share one machine. The gate, the integration suite and the
 browser suites take a **machine-wide lock**
-([D-146](../decisions/D-146.md)), so a second push **queues** rather than
+([D-157](../decisions/D-157.md)), so a second push **queues** rather than
 competing — it says so, and reprints every thirty seconds.
 
 - `pnpm gate:lock` — who holds the machine and who is in line.
@@ -118,10 +118,10 @@ apps/web/src/app/api/{stripe,inngest}/**
 
 `CLAUDE.md` is the single source of that list.
 
-**The tier does not change which gate runs** ([D-146](../decisions/D-146.md)).
+**The tier does not change which gate runs** ([D-157](../decisions/D-157.md)).
 It used to: the pre-push hook escalated a Tier 2 branch to the heavy tier, which
 on a shared machine fired a forty-minute run at an arbitrary moment. Since
-[D-161](../decisions/D-161.md) the heavy suites run on a runner for every pull
+2026-09-05 the heavy suites run on a runner for every pull
 request regardless of tier, so escalating locally buys only earliness.
 
 What the tier still decides is **judgement**:
@@ -203,7 +203,7 @@ that sees a real database or a browser.
 gh pr merge <n> --squash --delete-branch
 ```
 
-There is no batch command. [D-162](../decisions/D-162.md) deleted `pnpm ship-pr`
+There is no batch command. [D-157](../decisions/D-157.md) deleted `pnpm ship-pr`
 because `heavy.yml` runs the suites it existed to run, on a runner, on every
 pull request and every push to `main`. Batching then bought nothing but delay.
 
@@ -223,8 +223,8 @@ nothing reaches production without the heavy tier green on that commit.
 ### 5. Preview
 
 ⚠️ **There is no preview host today, so merging to `main` deploys nothing.**
-Preview moved to the Oracle box ([D-150](../decisions/D-150.md)), that box was
-destroyed on 2026-09-19 ([D-182](../decisions/D-182.md)), and preview has no
+Preview moved to the Oracle box ([D-184](../decisions/D-184.md)), that box was
+destroyed on 2026-09-19 ([D-16](../decisions/D-16.md)), and preview has no
 deploy target until it is rebuilt. `scripts/oracle-deploy.sh` is the way back.
 Until then the rehearsal runs against your own checkout, and it is one command:
 
@@ -252,7 +252,7 @@ Stripe and LiveKit. Those are the hand pass after the deploy: the relevant
 `promote-on-green.yml` runs `scripts/ci/promote.mjs --when-certified` each time
 Gate or Heavy finishes on a push to `main`. It reads the **runners' verdict** for
 that exact commit: the Gate and Heavy workflows' push runs, both green
-([D-162](../decisions/D-162.md)). It does not re-run the suites. Once both are
+([D-157](../decisions/D-157.md)). It does not re-run the suites. Once both are
 green it fast-forwards `production` and stamps a `vYYYY.MM.DD.N` tag and a
 GitHub Release. The first of the two runs to finish finds the other still
 going, and holds. A red or cancelled run holds too: that commit ships with the
@@ -279,9 +279,9 @@ its own credentials. GitHub asks for approval per job, so a promote asks twice.
 **The approval is the release decision**: approve outside lesson hours, or
 leave the run waiting until then. Approving ships everything merged before it.
 A hand-typed `pnpm promote` watches the run and exits non-zero unless both jobs
-are green, so a green promote means production is serving. ([D-177](../decisions/D-177.md)'s
-addendum split the jobs; [D-186](../decisions/D-186.md) retired the Vercel
-failover that ran beside them.)
+are green, so a green promote means production is serving. ([D-184](../decisions/D-184.md)
+records why the database is a job of its own; [D-70](../decisions/D-70.md)
+records the Vercel failover that once ran beside them.)
 
 - `--force-gate` runs the full tier here instead of reading the verdict — the
   offline and recovery path, and still the QEMU cross-build.
@@ -341,7 +341,7 @@ deploy.
 ## Nothing is scheduled
 
 There is no cron, no launchd agent and no `schedule:` trigger anywhere
-([D-129](../decisions/D-129.md)). A laptop schedule is one nobody owns, and a
+([D-157](../decisions/D-157.md)). A laptop schedule is one nobody owns, and a
 shut laptop misses it as thoroughly as it misses everything else. Two former
 crons are commands:
 
@@ -372,12 +372,10 @@ trunk; the tag is a _record_ of a promote, not a branching strategy.
 
 ## Where to go deeper
 
-- **Why the workflow is shaped this way:** [D-119](../decisions/D-119.md) (the
-  gate is one program), [D-129](../decisions/D-129.md) (every workflow deleted),
-  [D-146](../decisions/D-146.md) (one heavy job at a time),
-  [D-157](../decisions/D-157.md) (the workflows came back),
-  [D-161](../decisions/D-161.md) / [D-162](../decisions/D-162.md) (the heavy
-  suites moved to runners).
+- **Why the workflow is shaped this way:** [D-157](../decisions/D-157.md) (the
+  gate is one program, run on the laptop and on runners; one heavy job at a
+  time; nothing scheduled) and [D-199](../decisions/D-199.md) (how a merge
+  reaches production).
 - **The tests themselves:** [testing.md](testing.md)
 - **Release and preview operator runbook:**
   [`RELEASE_AND_STAGING.md`](../deployment/RELEASE_AND_STAGING.md)

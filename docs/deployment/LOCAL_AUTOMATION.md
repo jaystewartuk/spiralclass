@@ -1,16 +1,15 @@
 # Running this repo from the laptop
 
-**Nothing in this repo is scheduled anywhere.** [D-129](../decisions/D-129.md)
-deleted every workflow and every composite action — the deploy, the gate
-fallbacks, and the three crons — because a private repo's backup should not
+**Nothing in this repo is scheduled anywhere.** On 2026-08-25 every workflow
+and every composite action was deleted — the deploy, the gate fallbacks, and
+the three crons — because a private repo's backup should not
 depend on a metered allowance: when the month's minutes ran out, every private
 workflow started failing at once, and production's Postgres went eleven days
 without a backup while the public repos stayed green.
 
-[D-157](../decisions/D-157.md) brought the workflows back once the repository
-went public and the minutes became free, and
-[D-161](../decisions/D-161.md)/[D-162](../decisions/D-162.md) moved the heavy
-suites onto runners too. There is still deliberately **no `schedule:`
+The workflows came back once the repository went public and the minutes became
+free, and the heavy suites moved onto runners too
+([D-157](../decisions/D-157.md)). There is still deliberately **no `schedule:`
 trigger**, so the maintenance jobs below are commands you run, and the
 mechanism that makes "nobody ran it" visible is still the nag at the end of
 `pnpm gate`.
@@ -20,7 +19,7 @@ mechanism that makes "nobody ran it" visible is still the nag at the end of
 and `pnpm promote` records that success locally, so the staleness clock below
 clears on a deploy rather than nagging about a job that just ran.
 
-What that still costs, up front: **a shut laptop backs up nothing**. D-129
+What that still costs, up front: **a shut laptop backs up nothing**. D-157
 states that plainly, and it is the one gap the runners did not close.
 
 ## The whole workflow
@@ -60,15 +59,15 @@ pnpm local:status        # when did the probes and the sweep last pass?
 
 ## What runs where
 
-| Job                                                        | Where                                             | How                                                                                  |
-| ---------------------------------------------------------- | ------------------------------------------------- | ------------------------------------------------------------------------------------ |
-| Merge gate (format · typecheck · lint · unit · audit)      | Laptop, every push · **and** a runner, every PR   | `.githooks/pre-push` → `pnpm gate` (D-119) · `gate.yml` (D-157)                      |
-| Heavy tier (mutation · integration · E2E · visual · image) | Runner, every PR and every push to `main`         | `heavy.yml` (D-161)                                                                  |
-| **Production deploy**                                      | Runner, triggered by promote's push               | `deploy-production.yml` → `database-deploy.sh` → `cloudrun-deploy.sh` (D-157, D-184) |
-| Preview deploy                                             | Nowhere — no preview host today                   | `scripts/oracle-deploy.sh`, once the Oracle box is rebuilt                           |
-| Production synthetic probes                                | Runner, after every production deploy; on demand  | last step of `deploy-production.yml` · `pnpm local synthetic`                        |
-| Production DB backup                                       | **Neon** (PITR + pre-migration checkpoints, D-95) | not a local job — see the [D-129](../decisions/D-129.md) addendum                    |
-| Time-bomb sweep                                            | Laptop, on demand                                 | `pnpm local sweep`                                                                   |
+| Job                                                        | Where                                              | How                                                                                  |
+| ---------------------------------------------------------- | -------------------------------------------------- | ------------------------------------------------------------------------------------ |
+| Merge gate (format · typecheck · lint · unit · audit)      | Laptop, every push · **and** a runner, every PR    | `.githooks/pre-push` → `pnpm gate` · `gate.yml` (D-157)                              |
+| Heavy tier (mutation · integration · E2E · visual · image) | Runner, every PR and every push to `main`          | `heavy.yml` (D-157)                                                                  |
+| **Production deploy**                                      | Runner, triggered by promote's push                | `deploy-production.yml` → `database-deploy.sh` → `cloudrun-deploy.sh` (D-157, D-184) |
+| Preview deploy                                             | Nowhere — no preview host today                    | `scripts/oracle-deploy.sh`, once the Oracle box is rebuilt                           |
+| Production synthetic probes                                | Runner, after every production deploy; on demand   | last step of `deploy-production.yml` · `pnpm local synthetic`                        |
+| Production DB backup                                       | **Neon** (PITR + pre-migration checkpoints, D-178) | not a local job — see [D-157](../decisions/D-157.md)                                 |
+| Time-bomb sweep                                            | Laptop, on demand                                  | `pnpm local sweep`                                                                   |
 
 **There is still no scheduler**, and no cron either. A launchd agent was
 considered and not built: it is a schedule nobody owns, and a shut laptop
@@ -86,12 +85,12 @@ pnpm local sweep         # unit suites + audit, against today's date
 pnpm local:status        # when each last SUCCEEDED, and what is overdue
 ```
 
-**There is deliberately no `pnpm local backup`** (D-129 addendum, 2026-08-25):
+**There is deliberately no `pnpm local backup`** (2026-08-25, [D-157](../decisions/D-157.md)):
 **Neon backs production up**, and a hand-run pg_dump on top of that is not a
 routine. `scripts/local/backup-prod-db.sh` survives as an on-demand tool for the
 one thing Neon cannot give you — a copy living outside Neon entirely — and is
 not in the registry, so nothing nags about it. Run it by hand before a migration
-risky enough to want that copy. What this gives up is in the addendum.
+risky enough to want that copy. What this gives up is in [D-157](../decisions/D-157.md).
 
 **The thing to understand about this arrangement is that the risk is not
 forgetting — it is not knowing you forgot.** A job nobody ran looks exactly
@@ -133,7 +132,7 @@ pnpm promote
 ```
 
 One command. It **reads the runners' verdict** for this exact commit rather
-than running the suites here ([D-162](../decisions/D-162.md)) — Gate and Heavy
+than running the suites here ([D-157](../decisions/D-157.md)) — Gate and Heavy
 must both be green for the SHA — then fast-forwards `production` and cuts the
 release tag. **That push is the trigger**: `deploy-production.yml` runs, and
 after a required reviewer does Neon checkpoint → migrations → amd64 image →
@@ -174,9 +173,9 @@ bash scripts/cloudrun-deploy.sh production --gate-already-passed
 ## Deploying preview
 
 ⚠️ **There is no preview host today.** Preview moved to the Oracle A1 box
-([D-150](../decisions/D-150.md)), that box was destroyed on 2026-09-19
-([D-182](../decisions/D-182.md)), and preview has no deploy target until it is
-rebuilt ([D-183](../decisions/D-183.md)). `scripts/oracle-deploy.sh` is the way
+([D-184](../decisions/D-184.md)), that box was destroyed on 2026-09-19
+([D-16](../decisions/D-16.md)), and preview has no deploy target until one is
+built — [D-199](../decisions/D-199.md) plans it as a second Cloud Run service. `scripts/oracle-deploy.sh` is the way
 back. Merging to `main` deploys nothing.
 
 ## What is live
@@ -192,13 +191,14 @@ is behind. It knows only what THIS machine did, so an Actions deploy shows as
 
 ## What a dead laptop still costs
 
-D-129 left no fallback of any kind. [D-157](../decisions/D-157.md) and
-[D-161](../decisions/D-161.md) recovered most of it — a PR gets its
+Deleting every workflow on 2026-08-25 left no fallback of any kind. Bringing
+the workflows and the heavy suites back ([D-157](../decisions/D-157.md))
+recovered most of it — a PR gets its
 `local-gate` status from `gate.yml`, the heavy suites run on runners, and the
 production deploy runs on a runner. What is left:
 
 - **A shut laptop backs up nothing.** Neon's PITR is the answer, and the gap it
-  accepts is in the D-129 addendum.
+  accepts is in [D-157](../decisions/D-157.md).
 - **A cloud session cannot post a status itself** — but it does not need to;
   `gate.yml` posts one for the PR. Say plainly which run you saw, and never
   imply you posted a status you did not.
@@ -213,4 +213,4 @@ It already did, on one condition: **a workflow CALLS the registry or the deploy
 script and never restates what they do.** If the repository ever goes private
 again, the reversal is deleting `.github/workflows/` and nothing else —
 [D-157](../decisions/D-157.md) is written to keep that true. See
-[`COST_PLAYBOOK.md`](COST_PLAYBOOK.md) and [D-129](../decisions/D-129.md).
+[`COST_PLAYBOOK.md`](COST_PLAYBOOK.md).

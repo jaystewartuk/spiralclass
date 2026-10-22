@@ -262,7 +262,7 @@ export async function verifyEmailChangeAction(
   return { ok };
 }
 
-// Live-caption default language (D-27): the student's own language, used as
+// Live-caption default language (D-185): the student's own language, used as
 // the ASR/translation source for their own speech and the target when
 // translating the teacher, unless a specific class overrides it. Same shape
 // as the teacher's saveTeachingLanguageAction.

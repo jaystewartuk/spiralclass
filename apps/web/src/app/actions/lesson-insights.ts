@@ -18,7 +18,7 @@ import { revalidateAfterAction } from "@/lib/revalidate";
 import { createT } from "@spiralclass/shared";
 
 // Phase E teacher validation loop (the Phase E design,
-// D-19). Web server-action wrappers around the shared core
+// D-185). Web server-action wrappers around the shared core
 // (lib/lesson-notes/insight-actions.ts), which owns the ownership check and the
 // inline profile recompute — shared verbatim with the mobile routes. Here we add
 // web auth + Pro-gating + locale-aware messages + cache revalidation.

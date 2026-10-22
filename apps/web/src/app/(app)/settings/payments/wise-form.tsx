@@ -19,7 +19,7 @@ export type WiseFormProps = {
 };
 
 /**
- * The Wise payout instrument (D-113).
+ * The Wise payout instrument (D-145).
  *
  * One form, one submit: we don't split "enable" from "details", so the teacher
  * fills the handle in the same step as flipping the toggle — the validator

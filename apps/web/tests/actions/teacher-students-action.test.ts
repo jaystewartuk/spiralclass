@@ -122,7 +122,7 @@ describe("createStudentAction", () => {
     expect(studentCreate).not.toHaveBeenCalled();
   });
 
-  it("blocks adding a student whose email belongs to a Teacher account (D-38)", async () => {
+  it("blocks adding a student whose email belongs to a Teacher account (D-40)", async () => {
     state.teacherEmailConflict = { id: "teacher-x" };
     const res = await createStudentAction(
       undefined,

@@ -65,7 +65,7 @@ describe("buildPodcastScriptPrompt", () => {
     expect(user).toMatch(/verbs; daily routine/);
   });
 
-  it("always asserts the one-to-one constraint, even when unset (D-88)", () => {
+  it("always asserts the one-to-one constraint, even when unset (D-17)", () => {
     const { system } = buildPodcastScriptPrompt(base);
     expect(system).toMatch(/ONE-TO-ONE lesson/i);
     expect(system).toMatch(/NEVER include pair work, group work, team activities/i);

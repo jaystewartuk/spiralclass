@@ -127,7 +127,7 @@ export async function MaterialsTab({
   const [levels, libraryMaterials, assignments, classMaterialItems] = await Promise.all([
     getTeacherLevels(teacher.id),
     // Reusable library items only — a booking-scoped material (bookingId set,
-    // D-69) is private to its class and never assignable here.
+    // in the merged table) is private to its class and never assignable here.
     prisma.libraryMaterial.findMany({
       where: { teacherId: teacher.id, archived: false, bookingId: null },
       orderBy: [{ levelId: "asc" }, { position: "asc" }],

@@ -86,7 +86,7 @@ describe("getStripeClient gating", () => {
 });
 
 describe("getStripeClient region resolution (multi-region prep)", () => {
-  it("defaults to the GB region (the UK entity — D-58/D-99), resolving the existing env vars", () => {
+  it("defaults to the GB region (the UK entity — D-143/D-153), resolving the existing env vars", () => {
     setEnv({ hasCreds: true, nodeEnv: "production", allowStub: false });
     expect(getStripeClient()).toBe(REAL);
   });

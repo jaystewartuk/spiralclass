@@ -12918,7 +12918,7 @@
         {
           "name": "localeChosenAt",
           "type": "DateTime",
-          "note": "When a human last CHOSE this locale, as opposed to it being detected for\nthem. Null means \"nobody has picked\" — the value in `locale` came from\nsignup provisioning (Accept-Language) or a client mirroring its device.\n\nIt exists because `locale` was answering two questions at once, and the\nautomatic writer kept winning: a client that mirrored the DEVICE language\non every session check-in silently reset a teacher who had deliberately\npicked Spanish back to English. Same lesson as D-72/D-73 — split the\ncolumn rather than guess which writer meant it. Set by a language picker;\nnever by a background mirror.",
+          "note": "When a human last CHOSE this locale, as opposed to it being detected for\nthem. Null means \"nobody has picked\" — the value in `locale` came from\nsignup provisioning (Accept-Language) or a client mirroring its device.\n\nIt exists because `locale` was answering two questions at once, and the\nautomatic writer kept winning: a client that mirrored the DEVICE language\non every session check-in silently reset a teacher who had deliberately\npicked Spanish back to English. Same lesson as D-72 — split the\ncolumn rather than guess which writer meant it. Set by a language picker;\nnever by a background mirror.",
           "isPrimaryKey": false,
           "isForeignKey": false,
           "isUnique": false,

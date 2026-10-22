@@ -10,7 +10,7 @@
 //
 // ⚠️ VALUES NEVER REACH ARGV. They arrive on stdin and leave on stdout, into a
 // pipe. Nothing here writes a temporary file, and the caller passes no value as
-// an argument — see D-66, and infra/gcp/README.md's third reason.
+// an argument — see D-70, and infra/gcp/README.md's third reason.
 //
 // ⚠️ THE GRAMMAR IS scripts/docker-entrypoint.sh's, not a shell's. The
 // entrypoint reads `KEY=value` a line at a time and does NOT evaluate the
@@ -19,7 +19,7 @@
 // writing a file that silently truncates a key — the failure would otherwise
 // appear as a Zod parse error at boot, pointing at the wrong thing.
 
-/** The only environment whose buckets reach the production secret (D-65). */
+/** The only environment whose buckets reach the production secret (D-70). */
 const ENVIRONMENT = "production";
 
 /** Which source a name came from, so a clash can say where each half arrived. */

@@ -189,7 +189,7 @@ describe("PayoutStatusPanel", () => {
     const html = render({ card: "not-connected", wise: "not-connected", canBePaid: false });
     expect(html).toContain(c("web.settings.payments.status.blockedHeadline"));
     // The sentence the page never said: no rail means her booking page is
-    // unlisted (D-104's hasPayoutMethod signal), so nobody reaches a checkout.
+    // unlisted (isMarketplaceReady()'s hasPayoutMethod signal), so nobody reaches a checkout.
     expect(html).toContain(c("web.settings.payments.status.blockedBody"));
     // One call to action, anchored at the section that fixes it.
     expect(html).toContain(c("web.settings.payments.status.setUpCta"));
@@ -303,12 +303,12 @@ describe("the payments page", () => {
     expect(html).not.toContain(c("web.settings.payments.state.unavailableHere"));
     expect(html).not.toContain(c("web.settings.payments.connectStripe"));
     // ...and the fee disclosure goes with it: there is no second bill to warn
-    // about where there is no card rail (D-152).
+    // about where there is no card rail (D-143).
     expect(html).not.toContain(c("web.settings.payments.feesTitle"));
     expect(html).toContain(c("web.settings.payments.method.wise"));
   });
 
-  it("keeps the D-152 fee disclosure wherever a card rail exists", async () => {
+  it("keeps the D-143 fee disclosure wherever a card rail exists", async () => {
     const html = await pageHtml();
     expect(html).toContain(c("web.settings.payments.feesTitle"));
     expect(html).toContain(c("web.settings.payments.feesBody"));

@@ -29,7 +29,7 @@ export async function setLocaleAction(formData: FormData): Promise<void> {
   if (resolved) revalidateAfterAction("/", "layout");
 }
 
-// The switcher on a public page whose URL names its language (D-193). The
+// The switcher on a public page whose URL names its language (D-72). The
 // cookie alone cannot change that page — `/es/pricing` is Spanish whatever the
 // cookie says — so the client needs the locale the choice resolved to, and
 // loads that locale's URL itself. That load is a full one on purpose: the

@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-// saveTeachingLanguageAction (D-27): the teacher's default caption language.
+// saveTeachingLanguageAction (D-185): the teacher's default caption language.
 
 const requireTeacher = vi.fn(async () => ({ id: "t1" }));
 vi.mock("@/lib/inngest/client", () => ({ inngest: { send: vi.fn() } }));

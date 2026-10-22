@@ -7,7 +7,7 @@ import {
 // Advisory-locked find-or-create (unit-level; the integration suite exercises
 // the real advisory lock). Pin: existing rows are updated (with the phone
 // field applied only when provided), and a first purchase creates the row
-// plus the roster link. Also pins D-38: a NEW row is never created for an
+// plus the roster link. Also pins D-40: a NEW row is never created for an
 // email that already belongs to a Teacher account.
 
 function fakeDb(
@@ -141,7 +141,7 @@ describe("findOrCreateRosterStudent", () => {
     });
   });
 
-  it("refuses to create a new roster row when the email belongs to a Teacher (D-38)", async () => {
+  it("refuses to create a new roster row when the email belongs to a Teacher (D-40)", async () => {
     const { db, created } = fakeDb(null, { id: "teacher-1" });
     await expect(findOrCreateRosterStudent(base, db)).rejects.toThrow(TeacherEmailConflictError);
     expect(created).toHaveLength(0);

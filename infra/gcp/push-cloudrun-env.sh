@@ -10,7 +10,7 @@
 #     A name there that no app source reads is LEFT OUT and reported, not
 #     written (scripts/cloudrun-env.mjs, partitionByUse).
 #   * The production R2 buckets' credentials, from infra/cloudflare-r2's Tofu
-#     state — exactly what that module's push does on Fly (D-65).
+#     state — exactly what that module's push does on Fly (D-70).
 #
 # The committed runtime config (config/env/production.runtime.env) is NOT here.
 # It is public, it changes with the commit, and it is already baked into the
@@ -27,7 +27,7 @@
 # had, and it means this must be re-run after ANY rotation, in Infisical or
 # in Tofu.
 #
-# ⚠️ Values flow through STDIN only, never argv (D-66). `gcloud secrets versions
+# ⚠️ Values flow through STDIN only, never argv (D-70). `gcloud secrets versions
 # add --data-file=-` reads the composed file from a pipe; nothing here puts a
 # secret where `ps` can read it. `printf` is a bash builtin, so the composition
 # below is not a process argument either.

@@ -32,11 +32,11 @@ a `docs/development/plans/` roadmap, and a 72-file archive. They were deleted
 outright, not migrated. A second copy of a commitment rots while the queue
 moves on — the post-launch backlog was last refreshed 2026-06-07 and by August
 cited 11 documentation paths that had not existed since the 2026-07-24 reorg,
-plus a Supabase upgrade item that D-89 had made meaningless.
+plus a Supabase upgrade item that D-70 had made meaningless.
 
 So:
 
-- **Work owed is an issue** on this repository ([D-172](../decisions/D-172.md)),
+- **Work owed is an issue** on this repository ([D-164](../decisions/D-164.md)),
   carrying what is wrong and a **Done when** line, so a pull request can close it
   and the closing is the only bookkeeping. Not a markdown list here, and — the
   planning board's own rule — an undated idea is an issue, never a board row.

@@ -1,18 +1,18 @@
 # The Oracle A1 box, in OpenTofu
 
-Replaces the deleted `infra/oracle-runner` module ([D-139](../../docs/decisions/D-139.md)),
-under the reversal [D-150](../../docs/decisions/D-150.md) allowed.
+Replaces the deleted `infra/oracle-runner` module ([D-164](../../docs/decisions/D-164.md)),
+under the reversal [D-184](../../docs/decisions/D-184.md) allowed.
 
 > [!CAUTION]
 > ⚠️ **THIS MODULE HAS NOT BEEN APPLIED. NO STATE FILE EXISTS. NO BOX MATCHES
 > IT.** Read every file here as a proposal, never as a description of a
 > machine. The hand-built box it was written beside was destroyed on 2026-09-19
-> ([D-182](../../docs/decisions/D-182.md)); no Oracle box exists now, and
+> ([D-16](../../docs/decisions/D-16.md)); no Oracle box exists now, and
 > production video runs on Compute Engine
 > ([`infra/gcp-livekit/`](../gcp-livekit/README.md),
-> [D-187](../../docs/decisions/D-187.md)).
+> [D-16](../../docs/decisions/D-16.md)).
 >
-> That is D-139's exact fault, committed knowingly. [D-150](../../docs/decisions/D-150.md)
+> That is D-164's exact fault, committed knowingly. [D-184](../../docs/decisions/D-184.md)
 > forbade committing this before an apply precisely to avoid it, and its third
 > addendum waives that condition for one reason: the repository's history is
 > being rewritten into a NEW public repository, and a branch that is not on
@@ -41,14 +41,14 @@ the box this replaced.
 
 **Does not:** carry production. The production web app is on Cloud Run
 ([D-184](../../docs/decisions/D-184.md)) and production's database is on Neon
-— the 2026-09-04 topology decision, in
-[D-150](../../docs/decisions/D-150.md)'s second addendum, kept production off
+— the 2026-09-04 topology decision, recorded in
+[D-184](../../docs/decisions/D-184.md), kept production off
 this box. This box would hold
 LiveKit, preview and preview's data. Production video has been on Compute
-Engine since [D-187](../../docs/decisions/D-187.md), so it carries no class until
-a change moves `LIVEKIT_URL` back under D-182's three conditions.
+Engine since [D-16](../../docs/decisions/D-16.md), so it carries no class until
+a change moves `LIVEKIT_URL` back under D-16's three conditions.
 
-**Does not:** touch Cloudflare. D-139 deleted `infra/cloudflare` because its
+**Does not:** touch Cloudflare. D-164 deleted `infra/cloudflare` because its
 Access application was made by hand, so a first apply would create a second
 one beside it rather than adopt it. The DNS records here have the same
 problem, so they stay a hand operation and the reserved IP above is what makes
@@ -59,14 +59,14 @@ that a one-time cost rather than a recurring one.
 **Oracle halved the Always Free A1 allowance.** Measured 2026-09-04 against
 the tenancy, not inferred: `standard-a1-core-count` is **2**, used 2,
 **available 0**; `standard-a1-memory-count` is **12**, used 12, available 0.
-Earlier records, and [D-150](../../docs/decisions/D-150.md)'s reasoning, both
+Earlier records, and [D-184](../../docs/decisions/D-184.md)'s reasoning, both
 assumed 4 and 24. That is no longer true.
 
 ⚠️ **So the old box must be destroyed before this can be applied.** There is
 no Always Free capacity for a second instance. `for_each` and the `primary`
 key survive in `main.tf` for a blue-green that is not reachable today.
 
-⚠️ **And since [D-183](../../docs/decisions/D-183.md) the price of asking
+⚠️ **And since [D-184](../../docs/decisions/D-184.md) the price of asking
 anyway is a bill, not an error.** This paragraph used to read "no price buys
 one — a launch is _rejected by the service limit_, not billed", which was true
 of a Free Tier tenancy and stopped being true when this one went Pay As You Go
@@ -147,12 +147,12 @@ console output, not from the file. Hence mode 700 on the directory, and hence
 it must never be committed.
 
 ⚠️ **Back it up somewhere the laptop is not the only copy.** Losing it does not
-destroy the box, but it does return it to exactly the condition D-139
+destroy the box, but it does return it to exactly the condition D-164
 objected to: infrastructure nothing describes. Re-adopting would mean
 importing seven resources by hand.
 
 The deleted module declared an S3 backend against the R2 bucket its siblings
-use (D-49). That is still the right destination. It is not where the
+use (D-70). That is still the right destination. It is not where the
 _first_ apply happens: this module had never been applied, and putting an
 untested backend in the same run as an untested module means two things
 failing at once with no way to tell which. Migrate with

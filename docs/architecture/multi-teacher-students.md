@@ -26,7 +26,7 @@ graph LR
 
 This document is about **one person, many per-teacher rows**. Separately, and
 orthogonally, **teacher and student are mutually exclusive roles per login**
-([D-38](../decisions/D-38.md)): one human cannot be a teacher-payee and a
+([D-40](../decisions/D-40.md)): one human cannot be a teacher-payee and a
 student-payer under the same identity.
 
 That exclusivity is enforced symmetrically — at sign-in linking
@@ -110,6 +110,6 @@ Covered by `tests/students/identity.test.ts`,
 ## Related
 
 - [Data model](data-model.md) — tenancy, money, concurrency, migrations
-- [D-38](../decisions/D-38.md) — role exclusivity
+- [D-40](../decisions/D-40.md) — role exclusivity
 - [Student management](../features/student-management.md) — the product surface
 - [Account settings](../features/account-settings.md) — export and deletion

@@ -1,7 +1,7 @@
 #!/usr/bin/env sh
 # pre-push: run the gate on this machine, then let the push through. Always the
 # FAST tier, on every branch — see the tier-selection block below for why the
-# Tier 2 escalation that used to live here is gone (D-146, and see [D-162]).
+# Tier 2 escalation that used to live here is gone (see [D-157]).
 #
 # The run waits its turn. Several Claude Code sessions work this repo at once,
 # each in its own worktree, and they share one laptop, one test-database
@@ -9,7 +9,7 @@
 # pushes queue instead of thrashing. A push that seems to hang is usually
 # waiting, and says so — `pnpm gate:lock` prints who holds the machine.
 #
-# This is where CI lives (D-119). As of [D-157] it is no longer the ONLY place:
+# This is where CI lives ([D-157]). Since 2026-09-04 it is no longer the ONLY place:
 # .github/workflows/gate.yml runs the same scripts/ci/gate.mjs, from the same
 # scripts/ci/steps.mjs registry, on a GitHub-hosted runner. That is a second
 # RUNNER, not a second definition — and this hook is still the reason the
@@ -109,8 +109,8 @@ fi
 # This repo is worked on by several Claude Code sessions at once, each in its
 # own worktree, and when this was written the laptop was the only runner the
 # HEAVY tier had: the browser suite's visual baselines were macOS-rendered, so
-# the full tier could not go green on Linux ([D-157]). [D-161] added a
-# `-linux.png` set and moved that half to .github/workflows/heavy.yml, which is
+# the full tier could not go green on Linux. A `-linux.png` set (2026-09-05,
+# [D-157]) moved that half to .github/workflows/heavy.yml, which is
 # where it runs for every PR now — but the escalation below still holds THIS
 # machine, so the reasoning it records is unchanged. A
 # Tier 2 push therefore fired a 20-40 minute run — two `next build`s at a 6GB
@@ -122,7 +122,7 @@ fi
 #
 # The full tier did not go away — it moved to where the batching already lives.
 # `.github/workflows/heavy.yml` runs the heavy suites on every PR and on every
-# push to `main` ([D-161], [D-162]), so the answer this escalation buys is one a
+# push to `main` ([D-157]), so the answer this escalation buys is one a
 # runner is already computing, without holding this machine for forty minutes.
 #
 # What it still buys is TIMING. The runner answers about a commit you have

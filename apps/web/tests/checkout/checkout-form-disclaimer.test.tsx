@@ -57,7 +57,7 @@ describe("CheckoutForm — seller disclaimer", () => {
           transferPriceMinorUnits: 90_000,
           currency: "MXN",
           method,
-          // Since D-113 the form also forwards WHICH instrument was picked.
+          // Since D-145 the form also forwards WHICH instrument was picked.
           instrumentId: method === "manual_transfer" ? "inst-wise-1" : null,
           instrumentKind: method === "manual_transfer" ? ("wise" as const) : null,
           noMethods: false,

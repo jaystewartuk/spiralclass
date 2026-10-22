@@ -78,7 +78,7 @@ export default async function TeacherClassDetailPage({
   const teacher = await requireOnboardedTeacher();
   const [locale, t] = await Promise.all([getPreferredLocale(), getT()]);
 
-  // Focus-tag picker for AI compose (D-19, Layer 2). Only loaded when AI is
+  // Focus-tag picker for AI compose (class-content inputs Layer 2, D-17). Only loaded when AI is
   // configured; getTeacherFocusTags self-seeds the teacher's language pack on
   // first read. Grouped by category for the picker, in a stable order.
   const aiEnabled = hasAnthropicCreds();
@@ -120,7 +120,7 @@ export default async function TeacherClassDetailPage({
             select: { id: true, scheduledStart: true, status: true },
             orderBy: { scheduledStart: "asc" },
           },
-          // Booking-scoped file/link materials (D-69 merge of the old
+          // Booking-scoped file/link materials (the merge of the old
           // class_materials table) — every attachment has no body, whether it's
           // sent on a schedule or always visible (sendTiming null); the "content"
           // material (body set, sendTiming always null) is fetched separately
@@ -166,7 +166,7 @@ export default async function TeacherClassDetailPage({
             },
             orderBy: { attachedAt: "desc" },
           },
-          // Bookmarks (D-97) are excluded here — they're not authoring/cue content;
+          // Bookmarks are excluded here — they're not authoring/cue content;
           // they're surfaced as jump points on the replay view instead.
           lessonNotes: {
             where: { kind: "text" },
@@ -202,9 +202,9 @@ export default async function TeacherClassDetailPage({
             take: 1,
           },
           lessonTranscript: { select: { bookingId: true, utterances: true, provider: true } },
-          // Speaking-time analytics (D-97) — LessonAudio.durationMs anchors the
+          // Speaking-time analytics — LessonAudio.durationMs anchors the
           // lesson's total length where the legacy audio path wrote one;
-          // otherwise the transcript's last line does (D-189).
+          // otherwise the transcript's last line does (D-185).
           lessonAudio: { select: { durationMs: true } },
         },
       }),
@@ -219,13 +219,13 @@ export default async function TeacherClassDetailPage({
       aiEnabled
         ? getTeacherFocusGroups(teacher.id, teacher.targetLanguage, locale)
         : Promise.resolve([]),
-      // The booking-scoped "content" material (D-69 merge) — a body-bearing
+      // The booking-scoped "content" material (merged into LibraryMaterial) — a body-bearing
       // LibraryMaterial with sendTiming null, fetched separately from the
       // scheduled `materials` include above.
       getClassContentForBooking({ teacherId: teacher.id, bookingId }),
       // Picker source for "attach from library" — this teacher's active,
       // reusable items (bookingId null excludes another class's private
-      // materials, D-69). Capped for the reason #778 gives: unbounded, a
+      // materials). Capped for the reason #778 gives: unbounded, a
       // large library paid for every row on every class open.
       prisma.libraryMaterial.findMany({
         where: { teacherId: teacher.id, archived: false, bookingId: null },
@@ -253,7 +253,7 @@ export default async function TeacherClassDetailPage({
     submissionCount: a._count.submissions,
   }));
 
-  // A transcript the browsers are still writing (D-189) is not a replay yet,
+  // A transcript the browsers are still writing (D-185) is not a replay yet,
   // and its timestamps are not on the lesson timeline until it is finalised.
   const transcript =
     booking.lessonTranscript && booking.lessonTranscript.provider !== BROWSER_TRANSCRIPT_LIVE

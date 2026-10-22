@@ -1,10 +1,10 @@
 #!/usr/bin/env node
 /**
- * The machine lock (D-146) — one heavy job on this laptop at a time.
+ * The machine lock (D-157) — one heavy job on this laptop at a time.
  *
  * This exists because the gate stopped being a thing that runs in one place.
- * D-119 moved CI onto the dev machine and D-129 removed every alternative, so
- * the laptop is the only runner; meanwhile the working style became several
+ * In August 2026 CI moved onto the dev machine and every alternative was
+ * removed, so the laptop was the only runner; meanwhile the working style became several
  * Claude Code sessions at once, each in its own git worktree, each with its own
  * `.gate/` receipt and its own pre-push hook. Nothing connected them, so N
  * sessions pushing meant N simultaneous gates on a 10-core / 16GB machine.
@@ -277,7 +277,7 @@ export async function acquire(opts = {}) {
             console.log(`  ${color.dim(`${ahead} job(s) ahead of you in the queue`)}`);
           }
           console.log(
-            `  ${color.dim(`waiting for it (Ctrl-C to abort) · one heavy job at a time is deliberate, see D-146`)}`,
+            `  ${color.dim(`waiting for it (Ctrl-C to abort) · one heavy job at a time is deliberate, see D-157`)}`,
           );
           announced = true;
         } else {

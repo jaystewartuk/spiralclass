@@ -36,7 +36,7 @@ export type CaptionEntry = {
   lang?: string;
   srcLang?: string;
   // The words of an utterance still being spoken, untranslated, in `lang`
-  // (CaptionLine.partial, D-198). Its finished line replaces it.
+  // (CaptionLine.partial, D-185). Its finished line replaces it.
   partial?: true;
   // Client receipt time (epoch ms).
   at: number;

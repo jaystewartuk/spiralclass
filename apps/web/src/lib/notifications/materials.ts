@@ -9,7 +9,7 @@ const log = logger({ surface: "library" });
 //
 // A small wrapper around enqueueMaterialsSend that, given a booking + a
 // timing slot, finds the matching scheduled materials (LibraryMaterial rows
-// with this booking_id and this send_timing — D-69 merge of the old
+// with this booking_id and this send_timing — the merge of the old
 // class_materials table) and queues one materials_send notification per
 // attached material. Used by the Inngest reminder + confirmation paths so the
 // materials ride alongside the existing student-facing message at the

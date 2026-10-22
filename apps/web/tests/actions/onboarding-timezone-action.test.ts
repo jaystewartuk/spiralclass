@@ -51,7 +51,7 @@ vi.mock("@/lib/focus-tags", () => ({ ensureTeacherFocusTags }));
 
 const { saveTimezoneAction } = await import("@/app/actions/onboarding");
 
-// `targetLanguage` is required as of D-112, so every case that isn't about the
+// `targetLanguage` is required as of D-72, so every case that isn't about the
 // language supplies one by default rather than repeating it. Pass an explicit
 // "" to exercise the missing case.
 function fd(entries: Record<string, string>): FormData {
@@ -114,7 +114,7 @@ describe("saveTimezoneAction", () => {
     expect(teacherUpdate).not.toHaveBeenCalled();
   });
 
-  it("persists the submitted pricing currency (D-64)", async () => {
+  it("persists the submitted pricing currency (D-153)", async () => {
     const res = await run(
       fd({
         timezone: "Europe/London",
@@ -161,12 +161,12 @@ describe("saveTimezoneAction", () => {
   });
 });
 
-// D-112: the teaching language is asked at step 1 rather than left to Settings,
+// D-72: the teaching language is asked at step 1 rather than left to Settings,
 // and seeded there, because `getTeacherFocusTags` self-seeds on the first empty
-// read — a null language writes the generic pack permanently, and D-20 seeding
+// read — a null language writes the generic pack permanently, and D-17 seeding
 // is additive, so a language set afterwards stacks its pack on top instead of
 // replacing it.
-describe("saveTimezoneAction — teaching language (D-112)", () => {
+describe("saveTimezoneAction — teaching language (D-72)", () => {
   it("persists the submitted teaching language", async () => {
     const res = await run(
       fd({

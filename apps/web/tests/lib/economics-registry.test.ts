@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { getIntegrationRegistry } from "@/lib/economics/registry";
 
-// D-86 S3 — the Integration registry read side. Exercised against a fake
+// Economics slice S3 — the Integration registry read side. Exercised against a fake
 // Prisma client (mirrors economics-seed-registry.test.ts's fakePrisma
 // pattern) rather than a real DB.
 

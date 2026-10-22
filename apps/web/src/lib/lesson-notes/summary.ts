@@ -1,7 +1,7 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { anthropicApiKey } from "@/lib/env";
 
-// AI post-class lesson summary (live-notes-panel.md "step 2", D-15). Turns a
+// AI post-class lesson summary (docs/features/classes-lesson-content.md). Turns a
 // class's live notes — the teacher's private cues (with what got checked off)
 // and the student-facing instructions — into a short recap the teacher can skim
 // later. Teacher-only; never shown to the student. Pro-gated at the action.

@@ -27,10 +27,10 @@ export const CANCELLATION_POLICY_ANCHOR = "cancellation-policy";
 export const LEGACY_CANCELLATION_ANCHOR = "cancelaciones";
 
 /**
- * The terms' cancellation clause, at the reader's language's URL (D-193):
+ * The terms' cancellation clause, at the reader's language's URL (D-72):
  * `/es/terms#…` for a Spanish reader. A language with no translated terms
  * gets its own URL too, which serves the English document with a line in
- * that language saying so (D-196) — so the page around the clause is still
+ * that language saying so (D-72) — so the page around the clause is still
  * one the reader can navigate.
  */
 export function cancellationPolicyPath(locale: AppLocale): string {

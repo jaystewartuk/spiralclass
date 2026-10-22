@@ -2,7 +2,7 @@
 # infra/* module whose state lives in the agendaprofe-tofu-state R2 bucket
 # via bare AWS_ACCESS_KEY_ID/AWS_SECRET_ACCESS_KEY env-var auth — currently
 # infra/cloudflare-r2 (see infra/README.md — infra/database/supabase
-# also did, until it was retired, D-89; infra/hetzner-runner also did, until
+# also did, until it was retired, D-70; infra/hetzner-runner also did, until
 # it was replaced by a standalone infrastructure repo). Each
 # module's own backend "s3" block in its main.tf
 # still sets `key` (its own state-file path) — that part can't be shared,

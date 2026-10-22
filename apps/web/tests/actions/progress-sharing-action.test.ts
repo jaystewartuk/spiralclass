@@ -77,7 +77,7 @@ describe("setProgressSharingAction", () => {
     expect(transaction.mock.calls[0]![0]).toHaveLength(2);
   });
 
-  it("revalidates only the settings page the toggle is on (D-174)", async () => {
+  it("revalidates only the settings page the toggle is on", async () => {
     await setProgressSharingAction(undefined, formData(true));
     // Her public /b/<slug> reflects the setting too, but it is a dynamic route
     // with nothing prerendered to invalidate — and a second revalidation would

@@ -5,7 +5,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 // pin: the rail-readiness gate, the grandfathered custom-price override, the
 // Stripe vs. manual-transfer branch (redirect target + session args), the
 // no-email refusal on the card rail, the teacher heads-up on the transfer
-// rail, and — since D-113 — that the chosen payout instrument is resolved and
+// rail, and — since D-145 — that the chosen payout instrument is resolved and
 // written onto the Payment row.
 
 // --- module seams -----------------------------------------------------------
@@ -30,7 +30,7 @@ const state = {
   } as Record<string, unknown> | null,
   rateLimitOk: true,
   // Drives stripeTaxEnabled() through the env mock below, so both arms of the
-  // D-144 billing-address rule can be exercised.
+  // D-143 billing-address rule can be exercised.
   stripeTaxEnabled: undefined as string | undefined,
   // When set, the Stripe mocks throw with this message — standing in for a
   // revoked key, a dead connected account or an outage.
@@ -340,7 +340,7 @@ describe("startCheckout — Stripe rail", () => {
   });
 });
 
-// --- D-144: the billing address follows the tax flag ------------------------
+// --- D-143: the billing address follows the tax flag ------------------------
 //
 // The student rail used to send `billing_address_collection: "required"`
 // unconditionally, banking an address for a tax computation that is switched
@@ -349,7 +349,7 @@ describe("startCheckout — Stripe rail", () => {
 // silently undone, and so that turning tax ON is still all it takes to get a
 // full address back.
 
-describe("startCheckout — billing address (D-144)", () => {
+describe("startCheckout — billing address (D-143)", () => {
   it("asks for no more address than the payment method needs while tax is off", async () => {
     state.stripeTaxEnabled = undefined;
     await startCheckout(args());
@@ -436,7 +436,7 @@ describe("startCheckout — manual-transfer rail", () => {
     });
   });
 
-  // D-113: the instrument is what makes the rail generic. A manual payment
+  // D-145: the instrument is what makes the rail generic. A manual payment
   // whose payee instructions can't be recovered is not reconcilable, and the
   // DB CHECK rejects it — so the row must carry the id.
   it("writes the chosen instrument onto the payment row", async () => {
@@ -531,7 +531,7 @@ describe("startCheckout — intended slot", () => {
     expect(stored()).toEqual(start);
   });
 
-  // D-111 reversed this: a multi-class package now carries the slot too, as
+  // Reversed when first-class picking reached packages: a multi-class package now carries the slot too, as
   // "pick your first class". It used to be hard-nulled here.
   it("stores the chosen slot on a multi-class package as its first class", async () => {
     await startCheckout(
@@ -556,7 +556,7 @@ describe("startCheckout — intended slot", () => {
   });
 });
 
-// --- Packages for two (D-188) ------------------------------------------------
+// --- Packages for two (D-149) ------------------------------------------------
 
 describe("startCheckout — a package bought for two", () => {
   const forTwo = () =>

@@ -55,7 +55,7 @@ export default async function TeacherClassContentEditPage({
       listClassContentTemplates(teacher.id),
       // Recent version history for "restore previous version".
       listClassContentRevisionsForBooking({ teacherId: teacher.id, bookingId: booking.id }),
-      // The booking-scoped "content" material (D-69 merge) — a body-bearing
+      // The booking-scoped "content" material (merged into LibraryMaterial) — a body-bearing
       // LibraryMaterial with sendTiming null.
       getClassContentForBooking({ teacherId: teacher.id, bookingId: booking.id }),
       // Lesson continuity: this student's other classes with body-bearing

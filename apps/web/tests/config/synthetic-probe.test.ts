@@ -215,14 +215,14 @@ describe("the production probe survives a dropped connection and nothing else", 
 
 describe("the LiveKit origin check follows where production's video actually is", () => {
   /**
-   * [D-182] moved production video to LiveKit Cloud on 2026-09-19. The origin
+   * Production video moved to LiveKit Cloud on 2026-09-19 ([D-16]). The origin
    * certificate check is about the self-hosted BOX, so from that moment it was
    * a guard whose subject production no longer used — and it went red on every
    * release, reading as "production is broken" while production was fine.
    *
    * It is now derived from config/env/production.runtime.env, so it returns by
    * itself the day that file points at the box again. These two tests are the
-   * pair: one holds the skip while D-182 stands, the other proves the check has
+   * pair: one holds the skip while production dials LiveKit Cloud, the other proves the check has
    * not simply been deleted.
    */
   const livekitUrl = () =>
@@ -239,7 +239,7 @@ describe("the LiveKit origin check follows where production's video actually is"
   };
 
   it("skips the origin cert while production dials LiveKit Cloud, and says why", async () => {
-    // Guarded on the real config: if D-182 is ever reversed this expectation
+    // Guarded on the real config: while production dials the box this expectation
     // stops applying, and the next test is the one that must hold instead.
     //
     // ⚠️ Compared as a HOST. The first version asked whether the URL *contained*
@@ -251,7 +251,7 @@ describe("the LiveKit origin check follows where production's video actually is"
     if (livekitHost() === "livekit.spiralclass.com") return;
     const output = await probe(pages());
     expect(output).toContain("– LiveKit origin cert");
-    expect(output).toContain("D-182");
+    expect(output).toContain("D-16");
     expect(output, "a skipped check was counted as a failure").not.toContain(
       "could not read a certificate",
     );

@@ -3,7 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { sendPendingInviteNudges } from "@/lib/invitations/nudge";
 
 // Daily cron, 15:00 UTC (09:00 UTC-6) — reminds teachers about students
-// who haven't accepted their invitation yet (D-83). Pure handler in
+// who haven't accepted their invitation yet. Pure handler in
 // src/lib/invitations/nudge.ts; each invitation nudges at most once (dedup on
 // reminderSentAt).
 export const invitationsPendingNudgeCronFn = inngest.createFunction(

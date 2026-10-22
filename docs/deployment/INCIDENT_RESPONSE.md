@@ -31,7 +31,7 @@ Crown jewels:
 `RESEND_API_KEY`, `DATABASE_URL` password, `SESSION_SECRET`. Any of these
 landing in a public surface is an automatic SEV-0. (`META_ACCESS_TOKEN` /
 `META_WEBHOOK_VERIFY_TOKEN` were on this list until the whole WhatsApp
-Cloud API messaging integration was removed 2026-07-05, D-42 — those
+Cloud API messaging integration was removed 2026-07-05 — those
 secrets no longer exist. See §4.8 for `BETTER_AUTH_SECRET` rotation.)
 
 ---
@@ -224,7 +224,7 @@ Downstream impact: zero if rotated within Stripe's overlap window.
 ## 5. Notification obligations
 
 ⚠️ **Who must be told, on what clock, is not recorded in this repository** — see
-[D-159](../decisions/D-159.md). Establish it before an incident, not during one.
+[D-158](../decisions/D-158.md). Establish it before an incident, not during one.
 
 What this runbook does say: keep the contact address on `/privacy-notice` routed
 to a human who can pick up urgent mail, and when notifying anyone, state plainly
@@ -254,7 +254,7 @@ connected with `psql`.
 
 `auth.users` was Supabase Auth's schema and no longer exists — auth is
 better-auth on plain Postgres via Prisma (D-40), fully decommissioned from
-Supabase per D-89 (§4.1 above already reflects this). better-auth's own
+Supabase per D-70 (§4.1 above already reflects this). better-auth's own
 tables are `user` and `session` (`@@map("user")` / `@@map("session")` in
 `apps/web/prisma/schema.prisma`); there is no `email_confirmed_at` /
 `last_sign_in_at` / `raw_user_meta_data` equivalent — `user."emailVerified"`

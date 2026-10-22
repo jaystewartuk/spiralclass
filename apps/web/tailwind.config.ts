@@ -56,7 +56,7 @@ const config: Config = {
     // still defines (see `maxWidth.content` below).
     extend: {
       /**
-       * The one canonical social-card shape, 1200x630 (D-123).
+       * The one canonical social-card shape, 1200x630 (D-125).
        *
        * Named because it is a DOMAIN constant, not a layout choice: the same
        * ratio is baked into SOCIAL_PREVIEW_WIDTH/HEIGHT, into what the Satori
@@ -276,7 +276,7 @@ const config: Config = {
         // than 2.75rem or h-11 so the rule is legible at the call site: this
         // size is a decision about fingers, not a number someone liked.
         //
-        // It is also what let D-141 move the layout breakpoints back to
+        // It is also what let D-140 move the layout breakpoints back to
         // standard values — the touch concern that had been held in the
         // breakpoints lives here instead.
         target: "2.75rem",

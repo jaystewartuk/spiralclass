@@ -2,7 +2,7 @@ import { describe, expect, it, vi, beforeEach, afterEach } from "vitest";
 import type { StorageProvider } from "@/lib/storage/provider";
 
 // Tests for lib/storage/teacher-video — the public-bucket helper for a teacher's
-// intro video (D-73). Mirrors teacher-photo / testimonial-photos: one object per
+// intro video. Mirrors teacher-photo / testimonial-photos: one object per
 // teacher, replace in place, permanent public URL for the /b/<slug> page.
 
 const upload = vi.fn();

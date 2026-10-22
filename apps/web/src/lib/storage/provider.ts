@@ -16,7 +16,7 @@ const log = logger({ surface: "storage" });
 // bucket": put an object, delete objects, mint a short-lived signed URL for a
 // private object, build a stable public URL, and (best-effort) provision a
 // bucket. R2 (via the S3 API) satisfies it. (Supabase Storage did too, before
-// the D-89 decommission removed that provider.)
+// the D-70 decommission removed that provider.)
 
 export type StorageBody = Blob | File | ArrayBuffer | Uint8Array;
 

@@ -40,7 +40,7 @@ import {
 
 // The communities editor — the generalised successor to the Facebook-groups
 // page (D-125). Same rows, same ids, same per-community social previews
-// (D-123): a teacher who had three Facebook groups saved finds them here,
+// (D-125): a teacher who had three Facebook groups saved finds them here,
 // already tagged as Facebook groups, with their previews intact.
 //
 // The two surfaces were merged rather than left side by side because they were
@@ -247,7 +247,7 @@ export default async function CommunitiesPage() {
       </Panel>
 
       {/* The teacher's DEFAULT preview: what an untagged /b/<slug> share uses —
-          a WhatsApp broadcast, a bio link, a post with no community tag (D-123).
+          a WhatsApp broadcast, a bio link, a post with no community tag (D-125).
           A ruled section rather than a Card, and below the list rather than
           above it, because as the second card on the page it read as a
           community named "Default social preview". */}

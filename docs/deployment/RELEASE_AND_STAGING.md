@@ -1,22 +1,18 @@
 # Release & preview runbook
 
-Policy: **D-26**, superseded in part by **D-70** (production moved from
-Vercel+Supabase to Fly+Neon), **D-95** (database rollback moved from an R2
-pg_dump to Neon PITR + checkpoint branches), **D-119** (the test gates run on
-the operator's machine), **D-129** (which deleted every GitHub Actions
-workflow), **D-157** (which brought the workflows back once the
-repository went public and the minutes became free) and
-**D-161**/**D-162** (which moved the heavy suites onto runners and made their
-verdict what promote reads). The release/promote/rollback gate structure below
+Policy: **D-199** (how a merge reaches production), **D-157** (where the gate
+runs, and the workflows that call it), **D-70** (production left
+Vercel+Supabase) and **D-178** (database rollback is Neon PITR + checkpoint
+branches). The release/promote/rollback gate structure below
 is current.
 
 ⚠️ **There is no preview host today; production's deploy is live.**
-Production serves from Cloud Run ([D-184](../decisions/D-184.md)'s addendum)
+Production serves from Cloud Run ([D-184](../decisions/D-184.md))
 and `deploy-production.yml`'s `push` trigger is live — `pnpm promote` reads
 that trigger off the workflow file and refuses before the fast-forward if it is
 ever missing. Preview moved to the Oracle A1 box
-([D-150](../decisions/D-150.md)), which was destroyed on 2026-09-19
-([D-182](../decisions/D-182.md)); preview has no deploy target until it is
+([D-184](../decisions/D-184.md)), which was destroyed on 2026-09-19
+([D-16](../decisions/D-16.md)); preview has no deploy target until it is
 rebuilt, and `scripts/oracle-deploy.sh` is the way back. Since
 [D-199](../decisions/D-199.md) a merge to `main` starts a production deploy once
 Gate and Heavy are green, and it waits for the owner's approval on the
@@ -29,7 +25,7 @@ flow, and rollback.
 ## Everyday release flow
 
 1. Branch, commit, `git push` — the pre-push hook runs the fast gate on your
-   machine and posts the `local-gate` status once the push lands (D-119). Open a
+   machine and posts the `local-gate` status once the push lands (D-157). Open a
    PR into `main`; when that status is green on the PR head, branch protection
    unlocks the merge button. (No laptop? **`gate.yml` posts the same context on
    the PR** — D-157 — so the PR is not stranded. Say plainly which run you saw,
@@ -41,13 +37,13 @@ flow, and rollback.
    validates the _commit_, so a green run means the version you're about to
    hand-test is the version that will clear promote. Usually unnecessary now —
    **`heavy.yml` runs that same half on every PR and every push to `main`**
-   ([D-161](../decisions/D-161.md)), and promote reads its verdict. Spend the
+   ([D-157](../decisions/D-157.md)), and promote reads its verdict. Spend the
    20-40 minute local hold only when you need the answer before the PR is open.
 3. When ready (and **outside lesson hours**), with `main` checked out and
    up to date, run **`pnpm promote`**. To ship an older reviewed commit, check
    it out first — the gate certifies the exact commit that ships.
 4. It **reads the runners' verdict** for that exact commit — Gate and Heavy
-   both green for the SHA ([D-162](../decisions/D-162.md)) — asks for
+   both green for the SHA ([D-157](../decisions/D-157.md)) — asks for
    confirmation, fast-forwards the `production` branch and stamps a
    `vYYYY.MM.DD.N` tag + GitHub Release. **That push triggers
    `deploy-production.yml`.**
@@ -78,7 +74,7 @@ instead. Only the five newest images are kept, so that is the rollback depth.
 
 **This only rolls back code, never the database.** A code rollback does not
 undo a migration or bad data change. `scripts/database-deploy.sh` checkpoints
-the Neon `production` branch before every production migration (D-95) —
+the Neon `production` branch before every production migration (D-178) —
 restore it in seconds with `infra/database/scripts/neon-rollback.sh`, Neon's
 own point-in-time restore. See [`DB_BACKUP_RESTORE.md`](./DB_BACKUP_RESTORE.md) for the full
 restore procedure and the fastest safe recovery path for a failed migration.
@@ -130,7 +126,7 @@ exist, and `config/cloudrun/artifact-cleanup.json` keeps the five newest for
 exactly this.
 
 **Off Cloud Run:** there is no warm standby. Fly was destroyed at the cutover
-and the Vercel failover was retired ([D-186](../decisions/D-186.md)), so leaving
+and the Vercel failover was retired ([D-70](../decisions/D-70.md)), so leaving
 Cloud Run means standing up a new target and following the section below.
 
 ### If the domain ever moves again
@@ -166,7 +162,7 @@ something when they were learned. Every one is the operator's.
 ## Maintenance windows (taking the apps offline)
 
 For planned work that needs the apps offline (a destructive migration, an infra
-cutover), flip the **`MAINTENANCE_MODE`** env flag (D-76) — no code deploy
+cutover), flip the **`MAINTENANCE_MODE`** env flag — no code deploy
 needed to enter or exit. The app serves a localized 503 wall. `/api/health` and
 `/api/health/live` stay 200 so the uptime monitors don't flap. (The allowlist once
 carried a config route for a client that polled it; client and route are both
@@ -181,8 +177,8 @@ gone.)
      wins over the mounted secret file, so nothing else needs touching.
      ⚠️ `--update-env-vars`, never `--set-env-vars`, which replaces the
      service's whole environment.
-   - **Preview** has no host today; once the Oracle box serves it again
-     ([D-150](../decisions/D-150.md)), set it there.
+   - **Preview** has no host today; once it has one
+     ([D-199](../decisions/D-199.md)), set it there.
    - Optionally set `MAINTENANCE_MESSAGE="…"` and/or `MAINTENANCE_UNTIL="18:00 CST"`
      for custom copy / an ETA, and `MAINTENANCE_BYPASS_TOKEN=<random>` to let
      yourself through.
@@ -199,7 +195,8 @@ is live and `/api/health` is green. Remove `MAINTENANCE_MESSAGE`/
 `MAINTENANCE_UNTIL`/`MAINTENANCE_BYPASS_TOKEN` the same way if you set them.
 
 > `MAINTENANCE_MODE` is deliberately env-driven, not a DB row: the flag has to be
-> readable even when the DB is the thing under maintenance. See D-76.
+> readable even when the DB is the thing under maintenance. See
+> `apps/web/src/lib/maintenance.ts`.
 
 ## One-time setup (manual — do off lesson hours)
 
@@ -209,7 +206,7 @@ is live and `/api/health` is green. Remove `MAINTENANCE_MESSAGE`/
 - Apply schema + seed: put the preview `DATABASE_URL` / `DIRECT_URL` in
   Infisical's `preview` environment (`DIRECT_URL` over the **direct**
   connection, not the pooler — the pooler breaks the seed's prepared statements;
-  there is no `SUPABASE_*` env anymore, D-89), then run
+  there is no `SUPABASE_*` env anymore, D-70), then run
   `pnpm --filter spiralclass-web migrate:preview` then `pnpm seed:preview`. Both
   read the values from Infisical at run time and write no env file
   (`infra/infisical/seed-preview.sh`). (The seed hard-refuses if pointed at the
@@ -245,12 +242,12 @@ is live and `/api/health` is green. Remove `MAINTENANCE_MESSAGE`/
   dashboard. A running revision keeps the version it started with, so a changed
   secret is live only after the next deploy.
   - **prod-vs-preview is decided by `APP_URL`** (there is no `VERCEL_ENV` and no
-    `SUPABASE_*` env — D-89); the preview `noindex` header keys off the
+    `SUPABASE_*` env — D-70); the preview `noindex` header keys off the
     `NEXT_PUBLIC_DEPLOY_ENV` build arg. Preview, when it has a host again, gets
     **sandbox** Stripe/Wise/Meta/Resend keys — never live keys.
   - Note: `NEXT_PUBLIC_*` are build-time; the preview build inlines preview's, the
     production build inlines production's. This is why prod is a rebuild, not an
-    artifact-promote (see D-26).
+    artifact-promote (see D-199).
 - **Server Action skew**: there is no Cloud Run equivalent of Vercel's Skew Protection.
   The client-side reload fallback (`src/lib/server-action-recovery.ts`) is the
   **sole** mechanism — when a browser running a previous deploy posts a stale

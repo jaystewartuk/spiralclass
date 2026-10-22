@@ -9,7 +9,7 @@ import { REPO_ROOT, walkTree } from "./_tree";
  *
  * WHY THIS EXISTS. Nothing checked doc paths, and they rotted in silence
  * through three separate events: the 2026-07-24 reorg moved `docs/ops/*` and
- * `docs/engineering/*` into purpose-grouped folders, [D-110](../../../../docs/decisions/D-110.md)
+ * `docs/engineering/*` into purpose-grouped folders, [D-164](../../../../docs/decisions/D-164.md)
  * deleted every backlog document, and a workspace deletion took another set. Each
  * left the references behind. By 2026-09-06 there were 278 dangling pointers:
  * 87 to documents that had simply MOVED (one of them in an admin UI string a
@@ -22,7 +22,7 @@ import { REPO_ROOT, walkTree } from "./_tree";
  *
  * WHAT THE BASELINE IS. The remaining entries name documents that were
  * DELETED, not moved — verified by following each one's rename chain through
- * git to a `docs/archive/` grave that D-110 then emptied. What is left is
+ * git to a `docs/archive/` grave that D-164 then emptied. What is left is
  * overwhelmingly `docs/decisions/`, where "retiring `docs/launch/UAT_PRELAUNCH.md`"
  * is a TRUE statement about a deletion and repointing it would falsify the
  * record.
@@ -45,6 +45,9 @@ const SKIP_PREFIXES = [
   "apps/web/tests/config/doc-paths.test.ts",
 ];
 
+const MIGRATIONS = "apps/web/prisma/migrations/";
+const RECORD_PATH = /^docs\/decisions\/D-\d{1,3}\.md$/;
+
 /** Only text we can plausibly read; skip images, fonts, archives, lockfiles. */
 const TEXT_FILE =
   /\.(ts|tsx|js|jsx|mjs|cjs|md|mdx|json|jsonc|ya?ml|toml|tf|tfvars|sh|env|sql|prisma|txt|example|hcl|Dockerfile)$/;
@@ -61,33 +64,18 @@ const DOC_PATH = /(?<![A-Za-z0-9_/.-])docs\/[A-Za-z0-9_/-]+\.[A-Za-z0-9]+/g;
 /**
  * Paths that name a DELETED document. Each was chased through git: every one
  * was renamed into `docs/archive/` by the 2026-07-24 reorg and deleted with
- * that tree by D-110 (#803), or deleted outright by #1046 (a whole
+ * that tree by D-164 (#803), or deleted outright by #1046 (a whole
  * workspace), #1090 (obsolete deployment runbooks) or #703 (the LiveKit box moving
  * to Tofu). None has a successor in the tree, so none can be repointed.
  *
  * Shrink this by rewriting the prose that mentions them. Do not grow it.
+ *
+ * Empty since the decision log was consolidated (D-202): the records that
+ * mentioned these paths were the last things that did. Kept, empty, so a path
+ * that has to be named after its document is gone has one visible place to
+ * go — and the ratchet below still refuses an entry nothing references.
  */
-const DELETED_DOCS = new Set([
-  "docs/deployment/HETZNER_PLATFORM.md",
-  "docs/deployment/ORACLE_RUNNER.md",
-  "docs/deployment/SELF_HOSTED_RUNNER.md",
-  "docs/engineering/DEVELOPMENT_WORKFLOW.md",
-  "docs/engineering/ENTITLEMENTS_AUDIT.md",
-  "docs/engineering/TECH_DEBT.md",
-  "docs/engineering/integrations/whatsapp.md",
-  "docs/engineering/lesson-insights.md",
-  "docs/engineering/live-notes-panel.md",
-  "docs/launch/UAT_PRELAUNCH.md",
-  "docs/ops/FLY_SPIKE.md",
-  "docs/ops/PREVIEW_DEPLOYMENTS.md",
-  "docs/ops/PRODUCTION_CUTOVER.md",
-  "docs/orientation/04-levels-and-materials.md",
-  "docs/orientation/09-infrastructure-and-deployment.md",
-  "docs/product/FINANCIAL_INTELLIGENCE.md",
-  "docs/product/HOMEWORK_WORKFLOW.md",
-  "docs/product/MATERIALS_TAXONOMY.md",
-  "docs/product/SUBSCRIPTIONS.md",
-]);
+const DELETED_DOCS = new Set<string>([]);
 
 function isTextFile(name: string): boolean {
   return TEXT_FILE.test(name) || BARE_TEXT_FILES.has(name);
@@ -125,6 +113,10 @@ function danglingReferences(): Map<string, string[]> {
       const path = match[0];
       // `present` is the walk's own view, so a path it contains exists.
       if (present.has(path)) continue;
+      // An applied migration cannot be edited, so a decision record it links
+      // may since have been retired (D-202). decision-records.test.ts holds
+      // that number to the README's Retired numbers table instead.
+      if (file.startsWith(MIGRATIONS) && RECORD_PATH.test(path)) continue;
       const seen = dangling.get(path) ?? [];
       if (!seen.includes(file)) seen.push(file);
       dangling.set(path, seen);

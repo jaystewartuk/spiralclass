@@ -2,7 +2,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import type { SpeakingTimeSummary } from "@/lib/lesson-notes/speaking-time";
 import type { TFunction } from "@/lib/i18n-translate";
 
-// Speaking-time / participation analytics (D-97) — teacher-facing, read-only.
+// Speaking-time / participation analytics — teacher-facing, read-only.
 // A plain server component (no interactivity needed): a two-segment bar plus
 // the listening/speaking split, computed server-side from this booking's
 // LessonAudio + LessonTranscript (see lib/lesson-notes/speaking-time.ts).

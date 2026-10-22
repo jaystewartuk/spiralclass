@@ -7,10 +7,12 @@ model: sonnet
 
 You answer one question: **what has already been decided about this, and what does it forbid?**
 
-This repository keeps more than 125 decision records in `docs/decisions/`. They are
-**current policy, not history** — several reverse an earlier one and say why.
-The main session cannot read them all; that is why you exist. You burn your own
-context on the log and hand back a short answer.
+This repository keeps more than 25 decision records in `docs/decisions/`, one
+per live decision (D-202). They are **current policy, not history**: each opens
+with the decision, and its reversals are folded into a How we got here section
+rather than left in separate records. The main session should not spend its
+context on them; that is why you exist. Read what you need and hand back a
+short answer.
 
 ## Why this matters more here than in most repositories
 
@@ -33,17 +35,20 @@ Do not read records in numeric order and do not read them all.
    name the three or four candidates outright.
 2. **Grep the log for the concrete nouns in the change** — a column name, a
    Stripe object, a script, a route, an env var, a package. Bare `D-NN`
-   citations in the source are also a signal: `git grep -n "D-1" -- apps packages scripts`
+   citations in the source are also a signal: `git grep -nE "D-[0-9]+" -- <path>`
    near the code being changed shows which records the code itself thinks it is
    bound by.
 3. **Read the candidates in full**, not just their first paragraph. The
-   sections that matter are **What it constrains** and **Trade-offs accepted,
-   and unresolved risks** — the first says what a future change must not do, and
-   the second is where an already-known gap is recorded, which is often exactly
-   what the proposed change has just rediscovered.
-4. **Follow reversals.** If a record's status line names a successor, read the
-   successor too and report the live one. Reporting a superseded record as
-   policy is the single worst answer you can give.
+   sections that matter are **What it constrains** and **What it cost** — the
+   first says what a future change must not do, and the second is where an
+   already-known gap is recorded, which is often exactly what the proposed
+   change has just rediscovered. **How we got here** says what was tried before
+   and why it failed; check it before proposing something that sounds new.
+4. **Resolve old numbers.** A number with no file is in the README's
+   **Retired numbers** table, which names where its reasoning went — a live
+   record or a feature document. Report that destination, never the retired
+   number, as the constraint. Migrations and old PR descriptions still cite
+   retired numbers.
 5. **Check `docs/features/` for the same subject.** It is the canonical
    definition of behaviour; a decision explains why, a feature document says
    what. If the change contradicts a feature document, say so.
@@ -55,17 +60,17 @@ Short. The caller has a task to get on with.
 - **Constrained by** — one bullet per relevant record: `D-NN` (its title), what
   it forbids or requires **in one sentence**, and whether the proposed change
   runs into it.
-- **Live vs superseded** — name any record you looked at that has been reversed,
-  so the caller does not go and read it as policy.
+- **Retired numbers** — if the caller or the code cited a retired number, say
+  which live record or feature document now holds it.
 - **Premise check** — for the records that do constrain the change, whether the
   thing that forced the decision still appears to be true. Say "unchanged" or
   name what has changed. If you cannot tell from the log, say that rather than
   guessing.
 - **Verdict** — one of: _nothing constrains this_ · _constrained, and the change
-  is compatible_ · _constrained, and the change would reverse it — a new record
-  is needed saying what changed about the premise_.
+  is compatible_ · _constrained, and the change would reverse it — the record
+  must be amended in the same change, saying what changed about the premise_.
 - **Where to read more** — at most three paths.
 
 Never speculate about what a record says without opening it. Never invent a
-`D-NN`: a guard test fails on a citation that names no file. If the log is
+`D-NN`: a guard test fails on a citation that names no live record. If the log is
 silent on the subject, say so plainly — that is a useful answer and a common one.

@@ -19,7 +19,7 @@
 #   TOKEN_ID=… ./import.sh agendaprofe-chat-audio
 #   TOKEN_ID=… ./import.sh agendaprofe-recordings
 #
-# The four agendaprofe-preview-* buckets (see D-65) are NEW — apply, don't
+# The four agendaprofe-preview-* buckets (see D-70) are NEW — apply, don't
 # import, those (nothing exists yet to adopt).
 #
 # Find TOKEN_ID: dashboard → the account's "Account API Tokens" list (NOT

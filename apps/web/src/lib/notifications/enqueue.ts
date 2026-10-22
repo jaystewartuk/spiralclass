@@ -833,7 +833,7 @@ export type SubscriptionNotificationMetadata = {
   amountMinorUnits?: number;
   // ISO-4217 currency the `amountMinorUnits` above is denominated in, recorded
   // at enqueue time off the live Stripe object. The platform bills in GBP
-  // since D-99 and billed a pre-D-99 subscriber in MXN, and neither figure may
+  // since D-153 and billed a pre-D-99 subscriber in MXN, and neither figure may
   // be reinterpreted later — so the currency travels with the amount rather
   // than being re-derived at render time. Absent only on rows queued before
   // this field existed; the dispatcher falls back to the platform region's

@@ -11,7 +11,7 @@ import { useT } from "@/components/locale-provider";
  *
  * It was a bare `<Button type="submit">` sitting directly under the account
  * status, one stray tap from stopping every card payment on her booking page —
- * and, when it is her only rail, from unlisting the page altogether (D-104).
+ * and, when it is her only rail, from unlisting the page altogether.
  * That is the most consequential control on this screen and it had the least
  * friction of anything on it.
  *

@@ -134,7 +134,7 @@ describe("deleteManualPackageAction", () => {
     expect(state.overrides[0].action).toBe("delete_manual_package");
     expect(state.overrides[0].after).toBeNull();
     // One revalidation, for the student page this action is invoked from
-    // (D-174); the roster list refetches on navigation.
+    // (lib/revalidate.ts); the roster list refetches on navigation.
     expect(revalidatePath.mock.calls.map((c) => c[0])).toEqual(["/dashboard/students/s1"]);
   });
 });

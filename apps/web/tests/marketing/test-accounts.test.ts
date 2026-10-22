@@ -57,7 +57,7 @@ describe("isTestAccount", () => {
   });
 });
 
-describe("a recorded test account (D-192)", () => {
+describe("a recorded test account", () => {
   it("is a test account whatever its slug and email look like", () => {
     expect(
       isTestAccount({ bookingSlug: "mira-lopez", email: "mira@correo.invalid", testAccount: true }),

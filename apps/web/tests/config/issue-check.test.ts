@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { lintIssue, pathsIn, similarIssues, tokens } from "../../../../scripts/issue-check.mjs";
 
 // scripts/issue-check.mjs is the executable half of the /issue skill: the shape
-// D-172 describes and said nothing enforced, the labels `gh issue create` would
+// D-164 describes and said nothing enforced, the labels `gh issue create` would
 // reject, and the gate's own leak detectors run over a draft before a public
 // repository publishes it.
 //

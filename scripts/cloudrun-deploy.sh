@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 # The production deploy. Cloud Run `web` has served spiralclass.com since the
-# 2026-09-23 cutover ([D-184]'s addendum); Fly `agendaprofe` was destroyed
-# the same day. It is the only production target ([D-186]).
+# 2026-09-23 cutover ([D-184]); Fly `agendaprofe` was destroyed
+# the same day. It is the only production target ([D-70]).
 #
 # ⚠️ WHAT THIS DELIBERATELY DOES NOT DO, and each omission is load bearing
 # rather than unfinished:
 #
-#   * NO Neon checkpoint (D-95) and NO migrations. scripts/database-deploy.sh
+#   * NO Neon checkpoint (D-178) and NO migrations. scripts/database-deploy.sh
 #     owns both, and deploy-production.yml runs it as the `database` job this
 #     job `needs:`. One commit, one migration run, in the job that checkpoints
 #     first. ⚠️ FROM A LAPTOP that ordering is yours to keep: if the commit
@@ -56,13 +56,13 @@
 # account is never granted `secretAccessor`, so it can name the secret in a
 # --set-secrets flag and still not read its contents. Only the RUNTIME service
 # account can. This deploys production and cannot read it — the same boundary
-# [D-163]'s addendum drew for the runner, and for the same reason: a step that
+# [D-163] drew for the runner, and for the same reason: a step that
 # can reach the vault hands that capability to every other step in the job,
 # `pnpm install` included.
 #
 # ⚠️ That property is exactly what plain `--set-env-vars` would have thrown
 # away, and it is why the secrets are not passed that way. It also keeps them
-# out of argv, which D-66 requires: gcloud's env-var flags take values as
+# out of argv, which D-70 requires: gcloud's env-var flags take values as
 # process arguments, where `ps` can read them.
 #
 # ⚠️ ONE CONSEQUENCE, stated because it is the way this goes wrong: a service
@@ -76,7 +76,7 @@
 # of the usual advice and was reversed rather than chosen. WIF needs
 # `id-token: write`; GitHub grants that per JOB, not per step; and this job
 # builds a Docker image — so every lifecycle script in the dependency tree would
-# run with a token-minting endpoint in front of it. [D-163]'s addendum reversed
+# run with a token-minting endpoint in front of it. [D-163] reversed
 # that exact shape once, and apps/web/tests/config/local-gate.test.ts bans it in
 # every workflow here. This job is the worst candidate for an exception, not the
 # best: it runs more third-party code than any other.
@@ -98,7 +98,7 @@ case "$ENVIRONMENT" in
     echo "usage: scripts/cloudrun-deploy.sh production --gate-already-passed" >&2
     echo "" >&2
     echo "Only \`production\` exists as a Cloud Run target. Preview has no host until" >&2
-    echo "the Oracle box is rebuilt (D-184's addendum), and a second service would be" >&2
+    echo "the Oracle box is rebuilt (D-184), and a second service would be" >&2
     echo "a second thing to keep in sync for no stated reason." >&2
     exit 1
     ;;
@@ -169,7 +169,7 @@ command -v gcloud >/dev/null || {
 
 # ── Authenticate, if a key was supplied ──────────────────────────────────
 #
-# The key reaches gcloud through a FILE, never through argv (D-66): gcloud's
+# The key reaches gcloud through a FILE, never through argv (D-70): gcloud's
 # --key-file takes a path, and a path is all that appears in the process list.
 # Created under umask 077 in a directory this script owns and removes, so it is
 # never world-readable and never outlives the run.
@@ -249,7 +249,7 @@ BOOST=()
 [ "${CPU_BOOST:-0}" = "1" ] && BOOST=(--cpu-boost)
 
 # The secret set, mounted as a FILE rather than exploded into env vars. Values
-# never enter argv (D-66) — only the secret's NAME does — and the deploy
+# never enter argv (D-70) — only the secret's NAME does — and the deploy
 # identity holds no `secretAccessor`, so this flag names something this script
 # cannot read. SECRETS_ENV_FILE is what tells the entrypoint to source it.
 gcloud run deploy "$SERVICE" \

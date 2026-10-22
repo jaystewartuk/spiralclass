@@ -23,7 +23,7 @@ export type LessonNoteRow = {
   done: boolean;
 };
 
-// In-class live notes (docs/features/classes-lesson-content.md, D-12). Two columns
+// In-class live notes (docs/features/classes-lesson-content.md). Two columns
 // from one author: private teacher cues + student-facing instructions. Realtime
 // sync and present mode are later phases; this is the static authoring surface.
 export function LessonNotesPanel({

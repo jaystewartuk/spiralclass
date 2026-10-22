@@ -49,7 +49,7 @@ describe("nav model", () => {
   it("promotes the class-content surfaces into their own 'Materiales' group", () => {
     const contentKeys = navGroup("content").map((i) => i.key);
     // The teaching-content surfaces are their own group now, in order — not
-    // buried in config. `materialStyle` (D-78) joins them: the AI-material
+    // buried in config. `materialStyle` (D-17) joins them: the AI-material
     // tone/style settings sit with the surfaces that feed the AI engine.
     expect(contentKeys).toEqual([
       "materials",

@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-// D-38: Teacher and Student are mutually exclusive roles per auth identity.
+// D-40: Teacher and Student are mutually exclusive roles per auth identity.
 // Pins the "conflict" branch of resolveLinkedStudent surfacing a clear,
 // locale-aware redirect — not a silent dead end — across every caller:
 // finalizeSignIn (this file) and the mobile /api/mobile/auth/verify-otp route
@@ -38,7 +38,7 @@ beforeEach(() => {
   state.linkStatus = "none";
 });
 
-describe("finalizeSignIn — Teacher/Student conflict (D-38)", () => {
+describe("finalizeSignIn — Teacher/Student conflict (D-40)", () => {
   it("redirects to sign-in with an explanatory error instead of linking", async () => {
     state.linkStatus = "conflict";
     expect(await finalizeSignIn(null, USER)).toBe("/sign-in?error=teacher-email-conflict");
@@ -49,7 +49,7 @@ describe("finalizeSignIn — Teacher/Student conflict (D-38)", () => {
   });
 });
 
-describe("finalizeSignIn — brand-new identity intent gating (D-56)", () => {
+describe("finalizeSignIn — brand-new identity intent gating (D-40)", () => {
   it("refuses to provision a teacher on the sign-in default and bounces with no-account", async () => {
     expect(await finalizeSignIn(null, USER)).toBe(
       "/sign-in?error=no-account&email=mira%40example.com",

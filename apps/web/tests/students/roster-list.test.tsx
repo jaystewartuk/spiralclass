@@ -90,7 +90,7 @@ describe("RosterList — the balance column", () => {
 });
 
 describe("RosterList — the note chip", () => {
-  it("marks an operator's test student, so a teacher can tell it from a real one (D-192)", () => {
+  it("marks an operator's test student, so a teacher can tell it from a real one", () => {
     expect(renderRoster([student({ testAccount: true })])).toContain("Test account");
     expect(renderRoster([student()])).not.toContain("Test account");
   });

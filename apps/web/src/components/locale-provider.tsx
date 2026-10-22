@@ -50,7 +50,7 @@ export function useT(): TFunction {
   return useContext(LocaleContext).t;
 }
 
-/** `formatMinorUnits` bound to the active locale (D-197): the price's own
+/** `formatMinorUnits` bound to the active locale (D-153): the price's own
  * currency, written the way this reader writes numbers. */
 export function useFormatMoney(): (minorUnits: number, currency?: string) => string {
   const locale = useLocale();
@@ -60,7 +60,7 @@ export function useFormatMoney(): (minorUnits: number, currency?: string) => str
   );
 }
 
-/** An href to a public page in the active locale's URL (D-193): `/pricing`
+/** An href to a public page in the active locale's URL (D-72): `/pricing`
  * becomes `/es/pricing` in a Spanish tree. A link that stays in the language
  * it was rendered in is what keeps a client-side navigation safe, because the
  * root layout, which carries the language too, is not re-rendered by one.

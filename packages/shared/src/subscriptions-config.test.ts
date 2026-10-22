@@ -8,7 +8,7 @@ import {
 } from "./subscriptions-config";
 
 describe("planPriceMinorUnits", () => {
-  it("returns the GBP price by default (canonical billing currency as of D-99)", () => {
+  it("returns the GBP price by default (canonical billing currency as of D-153)", () => {
     expect(planPriceMinorUnits("monthly")).toBe(799);
     expect(planPriceMinorUnits("annual")).toBe(7_990);
     expect(planPriceMinorUnits("founding")).toBe(599);

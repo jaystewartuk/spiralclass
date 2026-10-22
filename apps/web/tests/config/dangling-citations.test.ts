@@ -12,7 +12,7 @@ import { REPO_ROOT, walkTree } from "./_tree";
  * audit, a video-call analytics review, a captions access review, and a list of
  * product issues found by the pilot teacher. The code cited them by section:
  * `§13.2` for tenancy, `§6.6` for the cancellation rule, `§6.8` for overrides.
- * [D-110](../../../../docs/decisions/D-110.md) then deleted every one of those
+ * [D-164](../../../../docs/decisions/D-164.md) then deleted every one of those
  * documents, on the rule that `docs/features/` describes what was BUILT and a
  * plan for work is not a description of it. The citations stayed: 464 of them,
  * across 188 files, pointing at nothing.
@@ -37,7 +37,7 @@ import { REPO_ROOT, walkTree } from "./_tree";
  *   - a section of a PUBLISHED standard (`RFC 5545 §3.3.11`), which a reader
  *     can look up;
  *   - a numbered item of a decision record that is in this tree, cited as
- *     "D-19 item 6" rather than "D-19 §6" — the record is here, so the pointer
+ *     "D-NN item 6" rather than "D-NN §6" — the record is here, so the pointer
  *     resolves;
  *   - `Slice N`, which is not a pointer at all. It names a delivery milestone
  *     the way "Phase 2" does, and a reader loses nothing by not finding a
@@ -83,7 +83,7 @@ describe("no comment cites a document that is not here", () => {
     expect(
       offenders,
       "A `§N` citation points at a document a reader cannot open — the pre-launch " +
-        "spec and the four review documents were all deleted by D-110 once the work " +
+        "spec and the four review documents were all deleted by D-164 once the work " +
         "shipped. Say what the section said, and link `docs/features/` if a document " +
         "still owns that behaviour. Do not add an exception.\n" +
         offenders.join("\n"),

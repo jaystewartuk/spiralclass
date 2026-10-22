@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 
 // Portable near-real-time refresh (no Supabase Realtime — keeps the DB
-// portable, D-49/D-44): fast-poll `onTick` while the tab is visible, and
+// portable, D-70): fast-poll `onTick` while the tab is visible, and
 // fire it instantly whenever the tab regains visibility/focus. Polling
 // pauses while hidden so we don't hammer the server in the background.
 // Mirrors chat-room.tsx's polling pattern (the original portable-realtime

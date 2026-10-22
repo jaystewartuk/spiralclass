@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-// Shared server-side intro-video analytics (D-73). Both the web Server Action
+// Shared server-side intro-video analytics. Both the web Server Action
 // every caller emits through this, so the property shape can't drift
 // between surfaces — a funnel spanning both is only meaningful if the events
 // are otherwise identical.

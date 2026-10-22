@@ -1,13 +1,14 @@
 # The LiveKit box on Compute Engine
 
-Production's video server since [D-187](../../docs/decisions/D-187.md):
+Production's video server since [D-16](../../docs/decisions/D-16.md):
 `livekit-server` and Caddy on one **Always Free `e2-micro`** in `us-east1`,
 reached at `wss://livekit.spiralclass.com`. Classes run on it; **class
-recording and lesson-insights transcription do not**, because egress does not
-fit on the machine (measured — D-187).
+recording does not**, because egress does not fit on the machine (measured —
+D-16). The lesson transcript needs no egress: it is the caption text the
+browsers recognise ([D-185](../../docs/decisions/D-185.md)).
 
 > [!NOTE]
-> **Hand-built, not OpenTofu.** [D-150](../../docs/decisions/D-150.md) forbids
+> **Hand-built, not OpenTofu.** [D-184](../../docs/decisions/D-184.md) forbids
 > committing a module for a self-hosted box before it has been applied and a
 > state file exists, and [D-164](../../docs/decisions/D-164.md) holds a
 > runbook to the machine it describes. So this directory holds the box's
@@ -44,7 +45,7 @@ Measured 2026-09-24 with `lk load-test` from outside Google:
   trigger: a second teacher with overlapping classes means an `e2-medium`
   (~$25/month), which is also the size that fits egress.
 - **Not egress.** With the app's three audio recordings added, egress killed two
-  of them for CPU inside a minute and the call degraded. D-187 has the numbers.
+  of them for CPU inside a minute and the call degraded. D-16 has the numbers.
 
 ## Building it
 
@@ -90,7 +91,7 @@ gcloud compute instances create livekit --project="$P" --zone=us-east1-b \
 Then, by hand:
 
 1. **Cloudflare:** the `livekit` A record → the address above, **proxied**
-   ([D-134](../../docs/decisions/D-134.md)). `Always Use HTTPS` must not apply
+   ([D-16](../../docs/decisions/D-16.md)). `Always Use HTTPS` must not apply
    to this hostname, or Caddy's http-01 challenge on :80 never reaches the box
    and no certificate is issued.
 2. **Wait for `### READY`** on the serial console (below), then for Caddy's

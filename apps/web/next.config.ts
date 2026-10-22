@@ -66,7 +66,7 @@ const config: NextConfig = {
   // (pub-*.r2.dev). Both entries below must be here or next/image rejects the
   // host and the optimizer 400s the photo.
   //
-  // No Supabase entry: the Supabase project was torn down at the D-89 Phase 5
+  // No Supabase entry: the Supabase project was torn down at the D-70 Phase 5
   // decommission, so a `*.supabase.co` remote pattern would only allow-list a
   // host that 404s everything now — removed as dead config (any stored photo
   // URL from before the R2 migration is already unreachable regardless of
@@ -109,7 +109,7 @@ const config: NextConfig = {
   // (posthog-node, server-side analytics capture) is unaffected and remains the primary pipeline.
   //
   // Region is US by default (decision 2026-06-03 — closest to the launch market).
-  // The region is now config-driven (D-48): set NEXT_PUBLIC_POSTHOG_REGION=eu
+  // The region is config-driven (src/lib/analytics/posthog-region.ts): set NEXT_PUBLIC_POSTHOG_REGION=eu
   // to flip the proxy destinations below AND ui_host in posthog-provider.tsx
   // together (both read the same knob). The one-liner here mirrors
   // src/lib/analytics/posthog-region.ts — kept inline so next.config stays

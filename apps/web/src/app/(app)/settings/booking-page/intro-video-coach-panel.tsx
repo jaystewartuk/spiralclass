@@ -26,7 +26,7 @@ const MAX_POLL_MS = 3 * 60 * 1000;
 
 const PROCESSING_STATUSES: IntroVideoAnalysisStatus[] = ["pending", "transcribing"];
 
-// AI Coach feedback panel (D-73, Layer 3). Seeded from the server-rendered
+// AI Coach feedback panel (intro-video Layer 3). Seeded from the server-rendered
 // `initial` state (so a fresh page load — including "left and came back" —
 // always reflects the true current status with no refresh needed), then
 // polls while the pipeline is still running so a teacher who stays on the

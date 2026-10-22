@@ -1054,7 +1054,7 @@ export const en = {
   "onboarding.templates.priceStripe": "Stripe price",
   "onboarding.templates.priceWise": "Transfer price (optional)",
   // Shown instead of priceStripe when the teacher's country has no Stripe
-  // Connect rail at all (Wise-only, D-58) — there's no Stripe price to split
+  // Connect rail at all (Wise-only, D-143) — there's no Stripe price to split
   // from, so it's just "Price".
   "onboarding.templates.price": "Price",
   "onboarding.templates.expirationMonths": "Expires (months)",
@@ -3262,7 +3262,7 @@ export const en = {
   "web.dashboard.shareGroups.groupName": "Group name",
   "web.dashboard.shareGroups.linkForThisGroup": "Link to post in this group",
 
-  // Social previews (D-123) — the image a shared booking link previews with.
+  // Social previews (D-125) — the image a shared booking link previews with.
   "socialPreview.title": "Social preview",
   "socialPreview.subtitle":
     "The image people see when this link is shared on Facebook, WhatsApp or anywhere else.",
@@ -3668,7 +3668,7 @@ export const en = {
   "web.settings.billing.foundingCloses": "Closes {date}",
   "web.settings.billing.backToPlans": "Back to plans",
   "web.settings.billing.stripeNote": "Payments are handled by Stripe.",
-  // D-152: a paying teacher lands here and needs to know this bill is not the
+  // D-143: a paying teacher lands here and needs to know this bill is not the
   // only cost of getting paid — the processing fee is Stripe's, billed to her.
   "web.settings.billing.feesTitle": "This is what you pay us — not what it costs to get paid",
   "web.settings.billing.feesBody":
@@ -3995,7 +3995,7 @@ export const en = {
   "web.settings.payments.saveWise": "Save Wise",
   "web.settings.payments.savingBankAccount": "Saving...",
   "web.settings.payments.saveBankAccount": "Save bank account",
-  // D-152: the one place that spells out that the plan and the processing fee
+  // D-143: the one place that spells out that the plan and the processing fee
   // are two different bills, from two different companies.
   "web.settings.payments.feesTitle": "Your plan and Stripe's fee are separate",
   "web.settings.payments.feesBody":
@@ -5493,7 +5493,7 @@ export const en = {
     "Founding price ({price}) locked for life — limited to the first {cap} teachers.",
   "web.pricing.annualNote": "Same Pro features, ~2 months free.",
   "web.pricing.startTrial": "Start your free trial",
-  // D-152. Two costs, one of them ours. Deliberately quotes no percentage for
+  // D-143. Two costs, one of them ours. Deliberately quotes no percentage for
   // Stripe: since D-143 the rate is Stripe's, set per country and per card, and
   // a number we cannot stand behind next to "0% commission" is what turns an
   // honest disclosure into a misleading one. Name who charges it, link to them.
@@ -5907,13 +5907,13 @@ export const en = {
   "web.admin.lessonInsights.liveWarning.pre":
     "— captured voice is being sent to the ASR vendor and transcripts stored,",
   "web.admin.lessonInsights.liveWarning.strong": "for every consented pair",
-  "web.admin.lessonInsights.liveWarning.mid": "(D-21/D-22). Only consented",
+  "web.admin.lessonInsights.liveWarning.mid": "(D-22). Only consented",
   "web.admin.lessonInsights.liveWarning.em": "test",
   "web.admin.lessonInsights.liveWarning.midEnd": "pairs should be recorded; turn",
   "web.admin.lessonInsights.liveWarning.post": "off between tests.",
   "web.admin.lessonInsights.title": "Lesson insights — pipeline health",
   "web.admin.lessonInsights.subtitle":
-    "Operational status across every tenant: capture → transcript → insights → profile → brief. Statuses and counts only — no transcript, pronunciation or profile content is shown here (D-21/D-22).",
+    "Operational status across every tenant: capture → transcript → insights → profile → brief. Statuses and counts only — no transcript, pronunciation or profile content is shown here (D-22).",
   "web.admin.lessonInsights.awaitingTranscription": "Captures awaiting transcription",
   "web.admin.lessonInsights.awaitingTranscriptionHint": '"ready" audio not yet transcribed',
   "web.admin.lessonInsights.stuckCaptures": "Stuck captures",
@@ -6323,7 +6323,7 @@ export const en = {
   "web.admin.teachers.entitlements.canScheduleMaterials": "Can schedule materials",
   "web.admin.teachers.entitlements.canCustomPrice": "Can set custom price",
   "web.admin.teachers.entitlements.canUseLiveNotes": "Can use live notes",
-  // Merged from the D-99 (PR #680) GBP-billing-currency conflict resolution
+  // Merged from the D-153 (PR #680) GBP-billing-currency conflict resolution
   // — this branch's `main` had already split catalog.ts into per-locale
   // files (was one combined file when this PR forked); its one new key
   // (currency-partitioned admin MRR note) is appended here instead.

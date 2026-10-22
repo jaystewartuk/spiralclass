@@ -6,7 +6,7 @@
 // per-request, emitted from middleware instead (see lib/csp.ts).
 //
 // HSTS: Vercel applied this automatically on the apex + www hosts. Production
-// and preview both moved off Vercel onto Fly (D-89), which does not set HSTS
+// and preview both moved off Vercel onto Fly (D-70), which does not set HSTS
 // for you — so without an explicit header here, HTTPS-downgrade protection
 // silently went dark on both environments during that cutover. No `preload`
 // directive: submitting to browsers' built-in HSTS preload list is a

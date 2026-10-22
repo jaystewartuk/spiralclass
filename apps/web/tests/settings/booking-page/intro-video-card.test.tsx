@@ -7,7 +7,7 @@ import * as React from "react";
 
 (globalThis as Record<string, unknown>).React = React;
 
-// Public-page intro video card (D-73 fix): previously the <video poster> was
+// Public-page intro video card fix: previously the <video poster> was
 // the teacher's profile photo, which duplicated the same headshot twice on
 // the page. Regression coverage for "a teacher's profile picture must never
 // be used as the introduction video thumbnail" — this component takes no

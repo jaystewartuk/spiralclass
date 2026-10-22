@@ -103,7 +103,7 @@ export default async function LessonReplayPage({
 
       <ReplayViewer
         recordingUrl={recordingUrl}
-        // D-135: the composite is audio-only now. Legacy `.mp4` rows recorded
+        // D-16: the composite is audio-only now. Legacy `.mp4` rows recorded
         // before that are still video and still have to render as video, so the
         // player is chosen per recording rather than globally.
         recordingKind={isAudioOnlyRecordingKey(recording?.storageKey) ? "audio" : "video"}

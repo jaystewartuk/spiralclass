@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { useT } from "@/components/locale-provider";
 
 // "This package is for two people" on the record- and edit-package forms
-// (D-188). A package the teacher records for two draws from its own credit
+// (D-149). A package the teacher records for two draws from its own credit
 // balance, like one bought for two — but nobody confirmed at checkout that the
 // second person agrees to lesson insights, so insights capture stays off for
 // its classes. The hint says so, because nothing else on the screen would.

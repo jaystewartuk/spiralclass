@@ -1,6 +1,6 @@
 import { logger } from "@/lib/logger";
 
-// Live in-class captions config + availability gate (D-27, D-185).
+// Live in-class captions config + availability gate (D-185).
 //
 // Captions run in the participants' browsers (D-185): each direction of speech
 // is recognised by a browser's own SpeechRecognition — the speaker's, or the
@@ -20,7 +20,7 @@ import { logger } from "@/lib/logger";
 //   2. The explicit enablement flag (LIVE_CAPTIONS_ENABLED) is on. Sending a
 //      live lesson's speech to a browser vendor's recogniser and a translation
 //      service carries the same privacy/consent weight as the transcription
-//      pipeline (D-21/D-22) — the code can ship and the key can be set while
+//      pipeline (D-22) — the code can ship and the key can be set while
 //      the switch stays off.
 //
 // Keys are read straight from process.env (like provider.ts / transcription
@@ -71,7 +71,7 @@ export function captionsConfigured(): boolean {
 
 // Is the phone-to-phone fallback configured — the paid streaming
 // speech-to-text a speaker's own browser uses when no browser in the class
-// can recognise (D-185's addendum)? Not a condition of the feature: without
+// can recognise (D-185)? Not a condition of the feature: without
 // it, two phones get a "needs a computer" notice instead of captions, exactly
 // as before the fallback existed. The key is the one post-class transcription
 // already uses, so it is normally present wherever captions are on.

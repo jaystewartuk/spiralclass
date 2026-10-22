@@ -832,7 +832,7 @@ const languageOverrideSchema = z.object({
   reason: reasonField,
 });
 
-// Live-caption per-booking language override (D-27): "sometimes they change
+// Live-caption per-booking language override (D-185): "sometimes they change
 // language" for one class. Unlike bufferMinSnapshot, this is intentionally
 // NOT locked at booking-creation time — it's editable any time before/during
 // the class (see the schema comment on Booking.teacherLanguageOverride).

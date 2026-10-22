@@ -18,8 +18,8 @@
 # or created by hand. It is the `labels:` keys below, and only those, that it
 # declines to create.
 #
-# `github-actions` was removed by D-129, when there was nothing left to pin,
-# and comes back with the workflows ([D-157]). It is not decoration: this
+# `github-actions` was removed on 2026-08-25, when every workflow was deleted
+# and nothing was left to pin, and came back with the workflows ([D-157]). It is not decoration: this
 # repository requires every action to be pinned to a full 40-character commit
 # SHA (`sha_pinning_required` is on, so `@v4` is REJECTED by policy, not merely
 # frowned at), and a SHA pin is a pin to a specific version forever. Without

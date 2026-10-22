@@ -17,7 +17,7 @@ import { useT } from "@/components/locale-provider";
 import { saveMaterialStyleAction, type ProfileState } from "@/app/actions/profile";
 import { SegmentedControl } from "./segmented-control";
 
-// AI material style editor (D-78, plus D-80's vocabulary dial).
+// AI material style editor, with the vocabulary dial (D-17).
 //
 // The page's job is to make an abstract preference concrete, so every dial
 // carries a live effect line paraphrasing the directive the prompt builder
@@ -29,7 +29,7 @@ import { SegmentedControl } from "./segmented-control";
 // and the prompt gets no directive, so output is byte-identical to never having
 // opted in. Vocabulary is the exception — see VOCAB_FALLBACK.
 
-/** What a null `vocabulary` resolves to at generation time (D-80). */
+/** What a null `vocabulary` resolves to at generation time (D-17). */
 const VOCAB_FALLBACK = "everyday";
 
 type StyleOption = { value: string; labelKey: StringKey; effectKey: StringKey };
@@ -86,8 +86,8 @@ const AGE_OPTIONS: readonly StyleOption[] = [
 ];
 
 // No "automatic" option, because there is no automatic: a null vocabulary
-// resolves to `everyday` during generation (D-80 — that directive is always
-// emitted, unlike the D-78 ones). Offering "Default" and "Everyday" as two
+// resolves to `everyday` during generation (D-17 — that directive is always
+// emitted, unlike the tone/age/variety/note ones). Offering "Default" and "Everyday" as two
 // answers to the same question would be a distinction the teacher cannot act
 // on. So the control SHOWS everyday while the column is still null and posts ""
 // until she picks — an untouched row keeps following the global default if it

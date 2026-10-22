@@ -102,7 +102,7 @@ describe("computeProfile", () => {
     });
   });
 
-  it("passes speakingBalance through unchanged (D-97)", () => {
+  it("passes speakingBalance through unchanged", () => {
     const balance = { teacherSharePct: 40, studentSharePct: 55, lessonsCounted: 3 };
     const profile = computeProfile([], LESSONS, balance);
     expect(profile.speakingBalance).toEqual(balance);

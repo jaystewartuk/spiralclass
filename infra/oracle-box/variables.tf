@@ -29,7 +29,7 @@ variable "ocpus" {
 
     ⚠️ **Raising this now costs money.** Until 2026-09-20 the tenancy was Free
     Tier and a larger request was REJECTED by the service limit rather than
-    billed. [D-183](../../docs/decisions/D-183.md) upgraded it to Pay As You
+    billed. [D-184](../../docs/decisions/D-184.md) upgraded it to Pay As You
     Go to get A1 capacity priority, which keeps everything at or under this
     number free and bills everything above it. The guard rail is gone; the
     number is now the whole of it.
@@ -44,7 +44,7 @@ variable "memory_in_gbs" {
     of it. Measured on the running box: 11,927 MB total, 2,119 MB used, with
     all five LiveKit containers together holding 703 MB.
 
-    ⚠️ Same warning as `ocpus`: since [D-183](../../docs/decisions/D-183.md)
+    ⚠️ Same warning as `ocpus`: since [D-184](../../docs/decisions/D-184.md)
     made the tenancy Pay As You Go, going over 12 bills rather than being
     refused. The measurement above is the argument that it never needs to.
   EOT
@@ -86,7 +86,7 @@ variable "boot_volume_gb" {
 
     ⚠️ **200 is now a ceiling you can cross, not one that stops you.** The
     tenancy went Pay As You Go on 2026-09-20
-    ([D-183](../../docs/decisions/D-183.md)), so the 201st gigabyte is billed
+    ([D-184](../../docs/decisions/D-184.md)), so the 201st gigabyte is billed
     rather than refused — and because this is the whole allowance on ONE
     volume, any second volume, anywhere in the tenancy, is over the line by
     definition.
@@ -143,7 +143,7 @@ variable "tailscale_authkey" {
 variable "region" {
   description = <<-EOT
     OCI region. ⚠️ Not a free choice: Always Free resources can only exist in
-    the tenancy's HOME region, and this tenancy's home is Querétaro. D-150
+    the tenancy's HOME region, and this tenancy's home is Querétaro. D-184
     measured what that costs — 58 ms to Neon's aws-us-east-2 against the Fly
     machine's 12 ms — and concluded nothing available fixes it.
   EOT

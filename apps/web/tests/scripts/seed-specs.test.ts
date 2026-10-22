@@ -113,7 +113,7 @@ describe("seed hero specs", () => {
   });
 
   it("covers a booking page sold in a language the teacher does not read", () => {
-    // D-73's fourth language field. Nothing varied it, so the public funnel's
+    // D-72's fourth language field. Nothing varied it, so the public funnel's
     // locale resolution was only ever exercised at its default.
     expect(specs.some((s) => s.bookingPageLocale != null)).toBe(true);
   });

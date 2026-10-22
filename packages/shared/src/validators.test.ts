@@ -103,7 +103,7 @@ describe("packageTemplateSchema — subject (shared)", () => {
   });
 });
 
-describe("timezoneSchema — targetLanguage (shared, D-112)", () => {
+describe("timezoneSchema — targetLanguage (shared, D-72)", () => {
   const base = { timezone: "America/Costa_Rica", phoneE164: "5512345678", country: "MX" };
 
   it("accepts a code from the language registry", () => {
@@ -131,7 +131,7 @@ describe("timezoneSchema — targetLanguage (shared, D-112)", () => {
   });
 });
 
-describe("resolveVocabulary (shared, D-80)", () => {
+describe("resolveVocabulary (shared, D-17)", () => {
   it("the class override replaces the teacher default", () => {
     expect(resolveVocabulary("advanced", "basic")).toBe("advanced");
     expect(resolveVocabulary("basic", "native")).toBe("basic");
@@ -179,7 +179,7 @@ describe("materialStyleSchema (shared)", () => {
     }
   });
 
-  it("accepts a vocabulary difficulty and coerces blank to null (D-80)", () => {
+  it("accepts a vocabulary difficulty and coerces blank to null (D-17)", () => {
     const ok = materialStyleSchema().safeParse({ vocabulary: "basic" });
     expect(ok.success).toBe(true);
     if (ok.success) expect(ok.data.vocabulary).toBe("basic");
@@ -218,7 +218,7 @@ describe("materialStyleSchema (shared)", () => {
   });
 });
 
-// Packages for two (D-188): a missing or garbled seat count is one person, so
+// Packages for two (D-149): a missing or garbled seat count is one person, so
 // nothing a stale page posts can make a checkout dearer.
 describe("checkout intents — seats and the partner confirmation", () => {
   const base = {

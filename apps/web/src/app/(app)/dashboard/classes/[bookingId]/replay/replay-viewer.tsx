@@ -15,7 +15,7 @@ import type { ReplayBookmark } from "@/lib/lesson-notes/bookmarks";
 // page does all the data fetching/gating server-side.
 //
 // The player is an <audio> or a <video> depending on `recordingKind`: room
-// composites are audio-only as of D-135, but recordings made before that are
+// composites are audio-only as of D-16, but recordings made before that are
 // `.mp4` with video and still have to play. Both elements are HTMLMediaElement,
 // so the seek/play logic below is identical for either and is written once.
 

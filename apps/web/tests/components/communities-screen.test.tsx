@@ -5,7 +5,7 @@ import type { PromotionRules } from "@spiralclass/shared";
 
 (globalThis as Record<string, unknown>).React = React;
 
-// The communities screen (D-125 / D-123) after the "this page is confusing"
+// The communities screen (D-125) after the "this page is confusing"
 // report and the communities overhaul. The rewrite's whole claim is READ FIRST,
 // EDIT ON REQUEST — so these pin the properties that claim rests on, none of
 // which the type system can:

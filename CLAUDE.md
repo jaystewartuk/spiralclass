@@ -205,7 +205,7 @@ one type-checks, lints and builds.
   `saveTeacherInstrument` is the only write path.
 - **`pricing-fees.ts` is a deliberately generous estimate**, used only to size
   the Wise-rail discount suggestion. **Never present it as what Stripe
-  charges** (D-152): teacher-facing copy names who charges the fee and links to
+  charges** (D-143): teacher-facing copy names who charges the fee and links to
   Stripe's own page, and public marketing quotes no percentage at all. Guarded
   in `packages/shared/src/i18n/i18n.test.ts`.
 - **"Bank transfer" is not a synonym for fee-free** — a transfer made _inside_
@@ -260,7 +260,7 @@ one type-checks, lints and builds.
 - **Four language columns, all allowed to diverge**: `target_language` (what
   she teaches) · `teaching_language` (what she teaches in) · `locale` (what
   **she** reads) · `booking_page_locale` (what her **buyers** read). Conflating
-  two of them has broken production twice; D-72, D-73 and D-133 are the record.
+  two of them has broken production twice; D-72 is the record.
 - **The public funnel (`/b/**`) renders in `booking_page_locale`**, resolved by
   `publicFunnelLocaleFor()`. The pages, the client layout and the social card
   all derive from that one value. **Never from the visitor's locale** — the
@@ -310,9 +310,9 @@ authored per language, `<slug>.es.md` beside `<slug>.md`.
 
 ## Never do
 
-- **Reintroduce Supabase or Vercel.** Supabase was decommissioned in D-89
-  Phase 5 — no dependency, no env var, no code path. Vercel was too, came back
-  as a failover (D-177), and was retired again (D-186): no deploy target, no
+- **Reintroduce Supabase or Vercel** (D-70). Supabase was decommissioned —
+  no dependency, no env var, no code path. Vercel was too, came back as a
+  failover, and was retired again: no deploy target, no
   `VERCEL_ENV` branch (`APP_URL` decides prod-vs-preview), no `@vercel/*`
   dependency, and no root `vercel.json` (Vercel reads that one automatically,
   which is a deploy trigger nobody typed). Guarded by
@@ -327,8 +327,8 @@ authored per language, `<slug>.es.md` beside `<slug>.md`.
 - **Add a `run:` step to a workflow that performs a check** — see the gate,
   above.
 - **Add a `TODO.md`, a backlog, a plans directory, or a dated audit whose last
-  section is a findings list** (D-110). No queue lives in the tree — work owed
-  is an issue on this repository ([D-172](docs/decisions/D-172.md)), where a
+  section is a findings list** (D-164). No queue lives in the tree — work owed
+  is an issue on this repository ([D-164](docs/decisions/D-164.md)), where a
   pull request can close it.
 - **Archive a superseded document** — delete it. Git history is the archive,
   and unlike a directory it cannot be mistaken for current policy.
@@ -357,9 +357,9 @@ build` does not fail on type errors by itself.
   _"fix: class list dedupe"_. The body says why; the diff says what. **A
   security fix is the exception** — neutral title, pushed only when it can ship
   ([SECURITY.md](SECURITY.md#how-a-security-fix-lands)).
-- **A change that sets or reverses policy gets a decision record** — copy
-  `docs/decisions/_template.md` to the next unused number and add a row to both
-  tables in its README.
+- **A decision record only when** there were two real options, a wrong choice
+  is costly to undo, and someone could undo it unknowingly (D-202). Amend the
+  topic's record; else PR body, `docs/features/`, a guard. `docs/decisions/_template.md`.
 
 ---
 

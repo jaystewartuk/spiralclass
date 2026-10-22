@@ -10,7 +10,7 @@ import { INNGEST_APP_ID } from "@/lib/inngest/app-id";
 // reminders, payout transfers, …) is still accepted but has no subscriber and
 // silently stops running. This is exactly what caused the 2026-07-07 total
 // email+push notification outage after the app id was renamed
-// clases-estructuradas → agendaprofe (D-43) without a re-sync.
+// clases-estructuradas → agendaprofe without a re-sync.
 //
 // The 2026-08-29 product rename to SpiralClass (D-138) deliberately did NOT
 // touch this id, for the reason above: it is a live registration key, not a

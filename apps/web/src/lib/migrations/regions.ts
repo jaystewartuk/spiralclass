@@ -1,9 +1,9 @@
-// D-49 layer 2 (schema): keep the DB schema identical across every region by
+// D-70 layer 2 (schema): keep the DB schema identical across every region by
 // running `prisma migrate deploy` against a *list* of regional connection
 // strings instead of a single one. This module is the pure, testable core; the
 // runner that actually shells out to prisma is `scripts/migrate-regions.ts`.
 //
-// Vendor-neutral by construction (D-49): a "region" is just a Postgres
+// Vendor-neutral by construction (D-70): a "region" is just a Postgres
 // connection string. Nothing here knows or cares whether it points at Supabase,
 // Neon, RDS, or self-hosted Postgres — that is exactly the portability the
 // three-layer model buys.
@@ -36,7 +36,7 @@ function isNonEmptyString(v: unknown): v is string {
  * - **Single-region (today's default):** leave `MIGRATE_REGIONS` unset (or
  *   blank) and the ambient `DATABASE_URL` / `DIRECT_URL` become one target named
  *   "default" — byte-for-byte the current behavior. So landing this is a
- *   behavioral no-op until a second region actually exists (D-49 sequencing:
+ *   behavioral no-op until a second region actually exists (D-70 sequencing:
  *   the mechanism ships before the trigger, dormant until needed).
  *
  * Throws on any malformed multi-region config rather than silently skipping a

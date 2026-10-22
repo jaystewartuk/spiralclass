@@ -94,7 +94,7 @@ export const timezoneSchemaWith = (loc: Loc) => {
     // @spiralclass/shared pricing-currency.ts) the picker offers. Optional at
     // the schema layer so a pre-existing client that predates this field
     // keeps working — it omits it and the teacher stays on the column
-    // default. Locked after onboarding — see D-64.
+    // default. Locked after onboarding — see D-153.
     pricingCurrency: z
       .string()
       .trim()
@@ -117,9 +117,9 @@ export const timezoneSchemaWith = (loc: Loc) => {
     // platform is language-first (D-72). A BCP-47 code from the one registry
     // (`languages.ts`), asked here at onboarding step 1 rather than left to
     // Settings, because a null value is not inert: `ensureTeacherFocusTags`
-    // seeds the generic pack off it on first read and D-20 seeding is
+    // seeds the generic pack off it on first read and D-17 seeding is
     // additive, so a language set later stacks its pack on top of the wrong
-    // one instead of replacing it (D-112).
+    // one instead of replacing it (D-72).
     //
     // **Required in the onboarding form, optional at this schema layer.** The
     // onboarding action enforces it server-side. The schema-level optionality
@@ -241,7 +241,7 @@ export const packageTemplateSchema = z
     transferPriceMinorUnits: z
       .union([z.literal("").transform(() => undefined), z.coerce.number().int().nonnegative()])
       .optional(),
-    // The price for two people (D-188). Absent = not sold for two. Never a
+    // The price for two people (D-149). Absent = not sold for two. Never a
     // stand-in 0: a free two-person package is expressible, "not offered" is
     // the absence of a price.
     twoPersonPriceMinorUnits: z
@@ -337,7 +337,7 @@ export const checkoutIntentSchemaWith = (loc: Loc) => {
     templateId: z.string().uuid(),
     // The student picks a slot before paying; its UTC start rides through
     // checkout and the auto-book-on-paid job turns it into a booking once
-    // payment lands. Since D-111 that applies to any offering — required for a
+    // payment lands. That applies to any offering — required for a
     // single class (the slot IS the reservation), optional "pick your first
     // class" for a package — so absent means "not picked", not "package buy".
     // A missing field arrives as null (FormData.get) or "" (the hidden input),
@@ -351,7 +351,7 @@ export const checkoutIntentSchemaWith = (loc: Loc) => {
     studentPhone: optionalPhoneInput(loc),
     paymentMethod: z.enum(["stripe", "manual_transfer"]).default("stripe"),
     // Which payout instrument the student picked, for `manual_transfer`
-    // (D-113). Absent for Stripe. The server re-checks ownership and
+    // (D-145). Absent for Stripe. The server re-checks ownership and
     // offerability — this only bounds the shape.
     //
     // Absent arrives as null (FormData.get) or "" (the always-present hidden
@@ -377,20 +377,20 @@ export const checkoutIntentSchemaWith = (loc: Loc) => {
       (v) => (v === null || v === "" ? undefined : v),
       z.string().trim().max(40).optional(),
     ),
-    // How many people the package is for (D-188). Absent, "", or anything but
+    // How many people the package is for (D-149). Absent, "", or anything but
     // an exact 2 is one person — see parseSeats — so a missing field can
     // never make a checkout dearer. Whether the template is actually sold for
     // two is checked server-side against the database.
     seats: z.unknown().transform(parseSeats),
     // The buyer's confirmation that the second person agrees to the
-    // lesson-insights terms the buyer chooses (D-188). Required for two
+    // lesson-insights terms the buyer chooses (D-149). Required for two
     // people; startCheckout refuses a two-person checkout without it.
     partnerConsent: z.unknown().transform((v) => v === "1" || v === "on" || v === true),
   });
 };
 export type CheckoutIntentInput = z.infer<ReturnType<typeof checkoutIntentSchemaWith>>;
 
-// Booking-page lead capture (docs/features/student-acquisition.md, D-24):
+// Booking-page lead capture (docs/features/student-acquisition.md, D-125):
 // a visitor who isn't ready to buy leaves their contact details and an optional
 // message so the teacher can follow up. The number here is a contact detail
 // the teacher uses to reply manually, not
@@ -531,7 +531,7 @@ export type MaterialTone = (typeof MATERIAL_TONES)[number];
 export const MATERIAL_LEARNER_AGES = ["kids", "teens", "adults"] as const;
 export type MaterialLearnerAge = (typeof MATERIAL_LEARNER_AGES)[number];
 
-// Vocabulary difficulty (D-80) — a SEPARATE axis from the CEFR language level.
+// Vocabulary difficulty (D-17) — a SEPARATE axis from the CEFR language level.
 // The CEFR level controls grammar complexity, sentence structures, discourse,
 // and abstractness of ideas; this controls how common/rare the WORDS are
 // (word frequency, idioms, uncommon synonyms, technical/literary terms). The
@@ -555,7 +555,7 @@ export const MATERIAL_VOCABULARIES = ["basic", "everyday", "advanced", "native"]
 export type MaterialVocabulary = (typeof MATERIAL_VOCABULARIES)[number];
 // The effective vocabulary when neither the class override nor the teacher
 // default is set. Deliberately conservative (common vocabulary) so a high CEFR
-// level does not silently pull in rare words — the D-80 product goal.
+// level does not silently pull in rare words — the D-17 product goal.
 export const DEFAULT_MATERIAL_VOCABULARY: MaterialVocabulary = "everyday";
 
 // Resolve the vocabulary difficulty that actually drives generation, applying
@@ -571,7 +571,7 @@ export function resolveVocabulary(
 }
 
 // Lesson format — the participant configuration AI-generated material is
-// written for (D-88). The platform supports ONE shape today: a `Booking` has
+// written for (D-17). The platform supports ONE shape today: a `Booking` has
 // exactly one `studentId` — there is no multi-student booking anywhere in the
 // schema — so `one_to_one` is the only value and every material-generation
 // prompt asserts it unconditionally (see `lessonFormatDirective` in
@@ -604,7 +604,7 @@ export const materialStyleSchemaWith = (loc: Loc) => {
   return z.object({
     tone: z.preprocess(blankToNull, z.enum(MATERIAL_TONES).nullable()).default(null),
     learnerAge: z.preprocess(blankToNull, z.enum(MATERIAL_LEARNER_AGES).nullable()).default(null),
-    // Teacher default vocabulary difficulty (D-80). Nullable → the effective
+    // Teacher default vocabulary difficulty (D-17). Nullable → the effective
     // default (everyday). Written by the settings-page save action — the form
     // posts the stored value back unchanged unless the teacher moves the dial.
     vocabulary: z.preprocess(blankToNull, z.enum(MATERIAL_VOCABULARIES).nullable()).default(null),
@@ -730,7 +730,7 @@ export type PortalCheckoutIntentInput = z.infer<typeof portalCheckoutIntentSchem
 // Settings form for /settings/payments — Wise card. The DB CHECK
 // constraints mirror these for defense-in-depth.
 
-// --- Payout instruments (D-113) --------------------------------------------
+// --- Payout instruments (D-145) --------------------------------------------
 //
 // One schema per instrument kind rather than one schema with a `kind`
 // discriminator and every field optional: each kind's required field is
@@ -793,7 +793,7 @@ export const transferConfirmSchemaWith = (loc: Loc) => {
   });
 };
 
-// --- Teacher → Student invitations (D-83) ----------------------------------
+// --- Teacher → Student invitations (docs/features/student-management.md) ----
 
 // A single invitee (form or one parsed row). Email required (that's the
 // acceptance target); name optional (falls back to the email/roster name).

@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # The real-DB integration gate. Was .github/workflows/integration.yml until
-# D-119 mirrored it here and D-129 deleted the workflow; this is the only copy.
+# it was mirrored here (2026-08-12) and the workflow deleted (2026-08-25); this
+# is the only copy.
 #
 # Same four things, in the same order, against the same postgres:16 image:
 #   1. a production `next build --turbopack` (route/slug/manifest validation)
@@ -16,13 +17,13 @@
 #   * `createdb` / `psql` run INSIDE the container via `docker compose exec`,
 #     so no local libpq client is needed on the laptop.
 #   * The stale SUPABASE_* / VERCEL_ENV stubs the workflow still exports are
-#     gone: both platforms are decommissioned (D-89 Phase 5), nothing reads
+#     gone: both platforms are decommissioned (D-70 Phase 5), nothing reads
 #     them, and copying dead env into a new file is how it comes back.
 set -euo pipefail
 
 cd "$(git rev-parse --show-toplevel)"
 
-# Serialize against every other checkout on this machine (D-146). This suite
+# Serialize against every other checkout on this machine (D-157). This suite
 # owns shared, singleton resources for its whole duration: the
 # `spiralclass-test-db` container (one fixed name, one port 5433, no matter
 # which worktree booted it) and a `next build` running with a 6GB heap ceiling.

@@ -15,7 +15,7 @@ import {
 import { useLocale, useT } from "@/components/locale-provider";
 import { saveNativeLanguageAction, type ContactFormState } from "@/app/actions/student-contact";
 
-// Live-caption default (D-27): the student's own language — mirrors
+// Live-caption default (D-185): the student's own language — mirrors
 // app/(app)/settings/account/teaching-language-form.tsx on the teacher side.
 export function NativeLanguageForm({ initialLanguage }: { initialLanguage: string }) {
   const t = useT();

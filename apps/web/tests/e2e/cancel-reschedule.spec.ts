@@ -202,7 +202,7 @@ test.describe.serial("student cancel + reschedule journeys", () => {
     await checkoutForm.locator('input[name="studentEmail"]').fill(studentEmail);
     await continueBtn.click();
 
-    // 2. Lands on the transfer instructions page (D-113 generalized the URL
+    // 2. Lands on the transfer instructions page (D-145 generalized the URL
     //    off /buy/wise/ to /buy/transfer/), reference + "Open Wise", then the
     //    student claims they've paid.
     await expect(page).toHaveURL(/\/buy\/transfer\//);

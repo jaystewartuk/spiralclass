@@ -13,7 +13,7 @@
 // arithmetic below is therefore currency-aware now; getting that wrong is a
 // 100x error, not a rounding one.
 //
-// The constants were named `STRIPE_UK_*` until D-152. They are not UK-specific
+// The constants were named `STRIPE_UK_*` until D-143. They are not UK-specific
 // any more and never should have read as Stripe's published UK rate card once
 // the charge moved onto the teacher's own account — the rename is so no caller
 // can present this as "what Stripe charges", which it is not.
@@ -24,11 +24,11 @@
 // transfer rail than on cards — the only direction that cannot cost her money.
 // A per-country fee table would be the honest fix if this ever became binding.
 //
-// ⚠️ IT IS NOT A PRICE CLAIM, AND MUST NEVER BE PRESENTED AS ONE (D-152).
+// ⚠️ IT IS NOT A PRICE CLAIM, AND MUST NEVER BE PRESENTED AS ONE (D-143).
 // `STRIPE_WORST_CASE_RATE` is OUR pessimistic upper bound, not Stripe's rate
-// for any particular teacher. Teacher-facing copy quotes
-// `DISCLOSED_CARD_FEE_RANGE` — the honest span of Stripe's own published
-// rates — and always attributes the fee to Stripe rather than to SpiralClass.
+// for any particular teacher. Teacher-facing copy links to
+// `STRIPE_PRICING_URL`, shows a figure only through
+// `stripeWorstCaseRatePercent()` labelled as our estimate, and always attributes the fee to Stripe rather than to SpiralClass.
 // Quoting 5.25% as "Stripe charges you" is both wrong for nearly every teacher
 // and a price claim the platform cannot stand behind.
 //
@@ -66,7 +66,7 @@ const STRIPE_WORST_CASE_RATE = STRIPE_INTERNATIONAL_RATE + STRIPE_CURRENCY_CONVE
  * Stripe's own pricing page, the ONLY figure the platform points a teacher at
  * for what a card payment will actually cost her.
  *
- * D-152: public marketing surfaces deliberately quote NO percentage. Under
+ * D-143: public marketing surfaces deliberately quote NO percentage. Under
  * direct charges the rate is Stripe's, set per country and per card type, and
  * the platform has no way to know which one applies to a given teacher or a
  * given charge. Publishing a number we cannot stand behind on a page that also

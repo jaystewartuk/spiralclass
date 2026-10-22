@@ -3,7 +3,7 @@ import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { LOCALES, LOCALIZED_PUBLIC_PATHS } from "@spiralclass/shared";
 
-// D-193 rests on two facts about app/, and nothing else checks either.
+// D-72 rests on two facts about app/, and nothing else checks either.
 //
 // 1. A prefixed URL that is not a public page — `/es/dashboard` — is passed
 //    through by the middleware untouched, and is a 404 only because no route

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Failure alerting for the hand-run maintenance tasks (D-129).
+# Failure alerting for the hand-run maintenance tasks (D-157).
 #
 #   bash scripts/local/notify.sh <urgent|high|default> "<title>" "<message>"
 #

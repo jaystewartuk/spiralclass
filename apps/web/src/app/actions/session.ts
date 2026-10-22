@@ -9,7 +9,7 @@ import { loadAdminActor } from "@/lib/admin";
 type SignedInUser = { id: string; email: string };
 
 // Which button/form the user actually used to get here — sourced from the
-// page, never inferred from whether the identity is unmatched (D-56). Only
+// page, never inferred from whether the identity is unmatched (D-40). Only
 // "sign-up" is allowed to lazy-create a Teacher row for a brand-new
 // identity; "sign-in" (the default) bounces to a clear "no account" message
 // instead. This is what stops a mistyped/unrostered email typed into the
@@ -70,7 +70,7 @@ export async function finalizeSignIn(
   // identity with neither a Teacher nor a linked Student row only gets
   // routed to onboarding (where requireTeacher() lazy-creates the Teacher
   // row) when the user actually came through /sign-up. A /sign-in with an
-  // unmatched identity means "no account for this email" — D-56 — never a
+  // unmatched identity means "no account for this email" — D-40 — never a
   // silent teacher signup.
   if (intent === "sign-up") return "/onboarding/reading";
   return `/sign-in?error=no-account&email=${encodeURIComponent(user.email)}`;

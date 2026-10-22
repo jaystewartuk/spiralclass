@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-// In-class live notes server actions (D-15). The security-relevant invariant is
+// In-class live notes server actions. The security-relevant invariant is
 // that every action is tenant-scoped: a teacher can only write notes on
 // a booking they own, and can only edit/delete/reorder/toggle notes reachable
 // through one of their own bookings. These tests pin the exact `where` clauses
@@ -410,7 +410,7 @@ describe("generateLessonSummary", () => {
 });
 
 // The same cue forms render on the class page and on the day plan. An action
-// may revalidate exactly one path (lib/revalidate.ts, D-174), and it has to be
+// may revalidate exactly one path (lib/revalidate.ts), and it has to be
 // the page the form was submitted from or the teacher's edit never appears.
 describe("which page a note action refreshes", () => {
   it("refreshes the class page by default", async () => {

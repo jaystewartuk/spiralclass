@@ -17,7 +17,7 @@ import { publicUrl } from "@/lib/public-url";
 // session is fully readable — no need to thread the user through by hand.
 export async function GET(req: NextRequest): Promise<NextResponse> {
   const next = safeNextPath(req.nextUrl.searchParams.get("next"));
-  // Threaded through by GoogleSignInButton's callbackURL query string (D-56) —
+  // Threaded through by GoogleSignInButton's callbackURL query string (D-40) —
   // only "sign-up" may lazy-create a Teacher for a brand-new identity.
   const intent = req.nextUrl.searchParams.get("intent") === "sign-up" ? "sign-up" : "sign-in";
 

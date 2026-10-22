@@ -4,7 +4,7 @@ import { introVideoCoachEnabled } from "@/lib/intro-video/config";
 
 // The intro-video coach is dormant unless BOTH an explicit flag is on AND an ASR
 // vendor is configured — a separate gate from the lesson-insights transcription
-// flag (D-73). A misconfiguration can never quietly start spending ASR minutes.
+// flag. A misconfiguration can never quietly start spending ASR minutes.
 
 afterEach(() => vi.unstubAllEnvs());
 

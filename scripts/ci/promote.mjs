@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 /**
- * Promote to production (D-119).
+ * Promote to production (D-157).
  *
- * NEITHER THE GATE NOR THE DEPLOY RUNS HERE ANY MORE ([D-157], [D-162]). This
+ * NEITHER THE GATE NOR THE DEPLOY RUNS HERE ANY MORE ([D-157]). This
  * script READS the runners' verdict on the exact commit — the Gate and Heavy
  * workflows, both green for this SHA, from their push-to-`main` runs — and then
  * fast-forwards the `production` branch. That push triggers
@@ -10,10 +10,10 @@
  * Neon checkpoint), then scripts/cloudrun-deploy.sh — the amd64 image, the
  * Cloud Run deploy, the Inngest sync — and the production probes. Promote
  * judges production by those two jobs (scripts/ci/deploy-verdict.mjs). Cloud Run has held the domain since the
- * 2026-09-23 cutover ([D-184]'s addendum); it was Fly before.
+ * 2026-09-23 cutover ([D-184]); it was Fly before.
  *
  * WHY THE DEPLOY MOVED, AND WHY THAT IS NOT THE 2026-07-19 DRIFT AGAIN.
- * D-120 chained the deploy into this command because a HUMAN DISPATCH STEP had
+ * In August 2026 the deploy was chained into this command because a HUMAN DISPATCH STEP had
  * left `production` 96 commits behind what was live. The chain is what
  * mattered, not where the build ran — and it is intact: the push at the end of
  * this script IS the trigger, so there is still nothing to remember. The
@@ -59,7 +59,7 @@
  * WHO RUNS THIS ([D-199]). Usually a runner, not a person:
  * .github/workflows/promote-on-green.yml runs it with `--when-certified` each
  * time Gate or Heavy finishes green on a push to `main`, so a merge starts its
- * own deploy and `production` cannot fall behind `main` unnoticed (D-120). The
+ * own deploy and `production` cannot fall behind `main` unnoticed (D-199). The
  * deploy still waits for the owner's approval on the `production` environment.
  * That click, not this command, is when production changes, and it is where
  * the lesson-hours judgement now lives. Typed by hand this is unchanged: it
@@ -91,7 +91,7 @@ import { capture, check, git, has, run } from "./lib.mjs";
 const args = process.argv.slice(2);
 const yes = args.includes("--yes") || args.includes("-y");
 // Accepted and inert. It used to mean "reuse the local full-tier receipt"; there
-// is no receipt any more ([D-162]), and the runners either certified this commit
+// is no receipt any more ([D-157]), and the runners either certified this commit
 // or they did not. Kept so a runbook or a habit that passes it keeps working
 // rather than dying on an unknown flag — the same treatment `--mobile` got.
 const skipGate = args.includes("--skip-gate");
@@ -146,7 +146,7 @@ try {
       "`production` would move the branch and deploy nothing.",
       "",
       "Production deploys to Cloud Run and that workflow's trigger is supposed",
-      "to be live (D-157's addendum 2, D-184's addendum). If it has been taken",
+      "to be live (D-157, D-184). If it has been taken",
       "off, put it back rather than working around this.",
       "",
       "Nothing is broken — production is still serving whatever shipped last.",
@@ -240,7 +240,7 @@ console.log(`\n  Promoting ${short} — ${behind} commit(s) ahead of production.
 console.log(capture("git", ["log", "--oneline", `${productionSha}..${sha}`]));
 
 // ── Gate ─────────────────────────────────────────────────────────────────────
-// WHAT CERTIFIES THE COMMIT THAT SHIPS ([D-162]).
+// WHAT CERTIFIES THE COMMIT THAT SHIPS ([D-157]).
 //
 // The runners do. `gate.yml` runs the fast tier and `heavy.yml` runs the
 // mutation spot-check, integration and the browser suites, both on every push
@@ -248,7 +248,7 @@ console.log(capture("git", ["log", "--oneline", `${productionSha}..${sha}`]));
 // nobody had to remember to use.
 //
 // This replaces a local full-tier receipt written by `pnpm ship-pr`, which
-// D-162 deleted. That receipt was a self-attestation: a file this script wrote
+// D-157 deleted. That receipt was a self-attestation: a file this script wrote
 // and then believed. What replaces it is bound to the same SHA, produced by the
 // machine that also builds the production image, and checkable by anyone with
 // the repository open.
@@ -410,7 +410,7 @@ if (has("gh")) {
 // migrates in its database job, then runs scripts/cloudrun-deploy.sh and the
 // probes.
 //
-// The chain D-120 insisted on is intact — nothing here is left for a human to
+// The chain D-199 insisted on is intact — nothing here is left for a human to
 // remember. What IS left for a human is the approvals on the `production`
 // environment, which GitHub asks for per job: the database job, then the
 // target. Each is a queued run with a notification rather than a
@@ -474,7 +474,7 @@ if (noWait || !has("gh")) {
     // Ctrl-C only stops watching; the deploy carries on.
     //
     // ⚠️ NOT `--exit-status`, which answers for the RUN — red whenever any job
-    // is. While a Vercel failover ran beside Cloud Run ([D-177] to [D-186]), a
+    // is. While a Vercel failover ran beside Cloud Run (retired 2026-09-23, [D-70]), a
     // failover that could not refresh turned a release that shipped into a
     // promote reporting that production may not have moved. So the verdict
     // is read job by job, and a promote that ends green still means exactly
@@ -498,7 +498,7 @@ if (noWait || !has("gh")) {
     // here. The nag in `pnpm gate` asks "when did this last SUCCEED", and the
     // answer really is "just now" — leaving the receipt unwritten would print a
     // standing warning about a job that had in fact just run, which is the
-    // banner-nobody-reads failure D-129's addendum warned about.
+    // banner-nobody-reads failure the 2026-08-25 backup decision warned about.
     if (deployOk) {
       recordRun("synthetic", {
         ok: true,

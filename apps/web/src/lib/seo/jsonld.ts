@@ -53,7 +53,7 @@ export function webSiteJsonLd(baseUrl: string) {
 // plan is cohort-gated and deliberately excluded; callers pass the evergreen
 // plans from @/lib/subscriptions/config so prices can never drift from the
 // source of truth. `currency` is the platform's own canonical billing
-// currency (PLATFORM_MONEY_CURRENCY, GBP as of D-99) — these are ALL priced
+// currency (PLATFORM_MONEY_CURRENCY, GBP as of D-153) — these are ALL priced
 // in the same currency (a single canonical platform subscription price), so
 // one currency for the whole Offers list is correct, unlike
 // teacherProfileJsonLd below where each package can carry its own.
@@ -168,7 +168,7 @@ export function teacherProfileJsonLd(input: {
   // ISO-3166-1 alpha-2 (Teacher.country); null until onboarding captures it.
   country?: string | null;
   // Each package carries ITS OWN currency (a teacher prices in her own chosen
-  // currency — D-64), unlike pricingJsonLd's single platform-wide currency —
+  // currency — D-153), unlike pricingJsonLd's single platform-wide currency —
   // never hardcode one here. classDurationMin drives each Offer's
   // itemOffered.hasCourseInstance duration.
   packages: Array<{
@@ -177,7 +177,7 @@ export function teacherProfileJsonLd(input: {
     currency: string;
     classDurationMin?: number;
   }>;
-  // The intro video (D-73), when recorded. `transcriptText` is ONLY passed
+  // The intro video, when recorded. `transcriptText` is ONLY passed
   // when the teacher has opted in (introVideoTranscriptPublicOptIn) AND a
   // transcript actually exists — the caller decides that, not this builder.
   video?: {
@@ -259,7 +259,7 @@ export function teacherProfileJsonLd(input: {
     });
   }
 
-  // The intro video (D-73) — richer content than the 280-char bio, and
+  // The intro video — richer content than the 280-char bio, and
   // otherwise invisible to a text crawler. `transcript` only appears when the
   // caller passed one (teacher opted in AND it exists); the video markup
   // itself doesn't depend on that opt-in, since the video is already public.

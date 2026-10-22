@@ -5,13 +5,13 @@
 // SAME document from the SAME source. This page is a renderer and
 // deliberately holds no copy of its own — it is on the `i18n/no-literal-string`
 // allowlist, and legal text is authored in English and never machine-translated
-// (D-81), so the two rules together mean the words belong in a data module
+// (D-72), so the two rules together mean the words belong in a data module
 // rather than here or in the i18n catalog.
 //
 // What this replaced: a bilingual hand-written notice whose two variants were keyed `…privacy.es.*` / `…privacy.en.*`
 // inside a per-locale catalog. `catalog.fr.ts` had therefore machine-translated
 // both variants into French, so a French reader was shown a link labelled
-// "Español" that rendered in French. The controller is UK-established (D-58)
+// "Español" that rendered in French. The controller is UK-established (D-143)
 // and the Terms are already governed by the laws of England and Wales, so the
 // document is UK GDPR / DPA 2018 shaped.
 
@@ -62,7 +62,7 @@ export default async function PrivacyNoticePage() {
       </Link>
 
       {/* Said in the reader's own language, at every URL but the English one:
-          the policy exists only in English until a person translates it (D-196). */}
+          the policy exists only in English until a person translates it (D-72). */}
       {!pageLanguages("/privacy-notice").includes(locale) && (
         <p className="rounded-md border bg-muted/40 p-3 text-xs text-muted-foreground">
           {t("web.legal.englishOnly")}

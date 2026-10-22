@@ -251,7 +251,7 @@ describe("accessibility", () => {
   });
 });
 
-// D-198: the words of a phrase are on screen while it is being said.
+// D-185: the words of a phrase are on screen while it is being said.
 describe("words still being spoken", () => {
   const partial: CaptionEntry = {
     id: "1",

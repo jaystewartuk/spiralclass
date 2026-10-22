@@ -423,9 +423,8 @@ export function phoneCountryOptions(
 
 /**
  * Builds a `wa.me` deep-link that opens a chat with `e164` pre-filled with
- * `message` — the plain, no-Meta-integration WhatsApp link D-42 kept (see
- * `docs/decisions/D-42.md`) after the automated Cloud API send rail was
- * removed. Used by the booking page's "Chat on WhatsApp" button, so the link
+ * `message` — a plain, no-Meta-integration WhatsApp link, kept when the
+ * automated Cloud API send rail was removed (docs/features/notifications.md). Used by the booking page's "Chat on WhatsApp" button, so the link
  * is built from the exact same stored number everywhere. `wa.me` wants bare digits — no `+`,
  * no separators — so this strips everything but `[0-9]` regardless of how
  * `e164` is formatted. Returns null for an empty/unparseable number so

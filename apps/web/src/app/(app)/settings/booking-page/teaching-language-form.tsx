@@ -14,7 +14,7 @@ import {
 import { useLocale, useT } from "@/components/locale-provider";
 import { saveTeachingLanguageAction, type ProfileState } from "@/app/actions/profile";
 
-// Live-caption default (D-27): the language this teacher teaches IN — the
+// Live-caption default (D-185): the language this teacher teaches IN — the
 // ASR/translation source unless a specific class overrides it (see the
 // per-booking language control on the class detail page). A fixed ~12-option
 // list, so a plain Select rather than the searchable Combobox.

@@ -216,7 +216,7 @@ export interface SeedOptions {
 // Generate + upload one seeded teacher's monogram, then hand back the
 // photo_path to store on her row. The path is returned unconditionally, even
 // when the upload failed: `hasPhoto` is one of isPubliclyListed()'s signals
-// (D-104) and several seeded teachers are meant to be listed, so the column
+// and several seeded teachers are meant to be listed, so the column
 // must not depend on whether this env happens to have R2 credentials. A failed
 // upload is announced rather than swallowed — on preview it is the whole bug
 // this function exists to fix.
@@ -320,7 +320,7 @@ type TemplateSpec = {
   classCount: number;
   priceMinorUnits: number;
   expirationMonths: number;
-  // Pay-at-reservation (D-111): checkout refuses money until a time is chosen,
+  // Pay-at-reservation: checkout refuses money until a time is chosen,
   // and the slot picker moves above the pay button. Distinct from classCount 1
   // — see class-offering.ts for why those are two different questions.
   singleClass?: boolean;
@@ -349,11 +349,11 @@ type HeroSpec = {
   // The teacher's own country — decides which bank schemes and Connect
   // behaviour apply. Defaults to SEED_COUNTRY.
   country?: string;
-  // Which language HER BUYERS read (D-73's fourth language field). Nothing in
+  // Which language HER BUYERS read (D-72's fourth language field). Nothing in
   // the seed varied it, so the public funnel's locale resolution was only ever
   // exercised at its default.
   bookingPageLocale?: string;
-  // Social proof on the landing page and, since D-144, in the checkout itself.
+  // Social proof on the landing page and, since 2026-08-30, in the checkout itself.
   testimonials?: { authorName: string; authorNote?: string; body: string }[];
   // Give this hero a placeholder intro video, so the video card is reachable in
   // a seeded environment at all. Opt-in per hero — see seedTeacherIntroVideo.
@@ -862,7 +862,7 @@ export function heroSpecs(): HeroSpec[] {
     {
       // --- EVERY RAIL AT ONCE, plus the booking-page surface. ---------------
       // The multi-rail teacher: card AND a transfer, which is what renders the
-      // payment-method chooser at all — since D-144 a disclosure ("Prefer to
+      // payment-method chooser at all — since 2026-08-30 a disclosure ("Prefer to
       // pay by bank transfer?") rather than the first control on the page, so
       // without a hero like this neither the disclosure nor the picker inside
       // it is reachable in any seeded environment.
@@ -877,9 +877,9 @@ export function heroSpecs(): HeroSpec[] {
       //     a non-zero saving to show;
       //   * a singleClass template, so pay-at-reservation is reachable — the
       //     slot picker moves ABOVE the pay button and checkout refuses money
-      //     until a time is chosen (D-111, and the ordering rule from D-144);
+      //     until a time is chosen (and the buy page's ordering rule);
       //   * testimonials, which the landing page has always rendered and the
-      //     checkout has rendered since D-144, and which no seed teacher had.
+      //     checkout has rendered since 2026-08-30, and which no seed teacher had.
       key: "paulapagos",
       name: "Paula Pagos",
       email: "paula.pagos@spiralclass.test",
@@ -888,7 +888,7 @@ export function heroSpecs(): HeroSpec[] {
       stripeReady: true,
       instruments: [{ kind: "wise" }],
       // She sells to English speakers, like the first live teacher — the
-      // exact case D-73 exists for, and the one that makes the approximate-USD
+      // exact case `booking_page_locale` exists for, and the one that makes the approximate-USD
       // price render. Every other hero leaves this at its default.
       bookingPageLocale: "en",
       introVideo: true,
@@ -1044,7 +1044,7 @@ async function seedStudentWithUsage(
     tz: string;
     // The teacher's Wise instrument, when she has one. A manual-transfer
     // payment must carry it — `payments_instrument_required_for_manual_transfer`
-    // rejects the insert otherwise (D-113).
+    // rejects the insert otherwise (D-145).
     wiseInstrumentId?: string | null;
   },
 ) {
@@ -1190,7 +1190,7 @@ async function seedHero(
       locale: "en",
       bookingSlug: hero.slug,
       headline: hero.headline,
-      // hasPhoto/hasBio signals for isPubliclyListed() (D-104). The photo is a
+      // hasPhoto/hasBio signals for isPubliclyListed(). The photo is a
       // monogram generated and uploaded under this hero's own id, so the
       // pointer is true in whichever bucket the seed ran against; bio is a
       // generic placeholder derived from the headline. Neither is asserted by
@@ -1215,7 +1215,7 @@ async function seedHero(
             stripePayoutsEnabled: true,
           }
         : {}),
-      // D-113: the manual rail is a payout-instrument row, not teacher columns.
+      // D-145: the manual rail is a payout-instrument row, not teacher columns.
       //
       // `wiseOnly` stays a distinct flag rather than folding into `instruments`
       // because the Maestro Wise flow depends on those heroes having EXACTLY
@@ -1366,7 +1366,7 @@ async function seedBulkTeacher(
       locale: "en",
       bookingSlug: `seed-teacher-${i}`,
       // hasPhoto/hasBio/templatesTouched/availabilityTouched signals for
-      // isPubliclyListed() (D-104) — see the identical comment on seedHero's
+      // isPubliclyListed() — see the identical comment on seedHero's
       // teacher.create above.
       photoPath: await seedTeacherPhoto(deps, teacherId, name, email),
       bio: `${name}'s bio.`,
@@ -1430,7 +1430,7 @@ async function seedBulkTeacher(
 // hard-deletes teachers, so it must NEVER touch prod — that would erase real
 // audit history (D-25) and delete live teachers.
 //
-// The guard is host-based and ENV-DRIVEN (D-89, post-Supabase): set
+// The guard is host-based and ENV-DRIVEN (D-70, post-Supabase): set
 // `PROD_DB_HOSTS` — a comma-separated list of the production database
 // hostname(s) (Neon pooled + direct) — in any environment where a prod
 // connection string could be present (the production deploy env / CI travels
@@ -1709,12 +1709,12 @@ export async function seedAll(
       // re-seed is the only place it comes back. Resolves to null (no image,
       // initials monogram instead) in envs without R2 configured (local).
       photoPath: await seedTeacherPhoto(deps, anaId, "Alicia Moreno", SEED_EMAIL),
-      // Real short bio text — isPubliclyListed()'s hasBio signal (D-104) needs
+      // Real short bio text — isPubliclyListed()'s hasBio signal needs
       // this non-null, same as templatesTouchedAt/availabilityTouchedAt below.
       bio: "Profesora de inglés con más de 10 años de experiencia enseñando a adultos.",
       onboardingCompleteAt: now,
       country: SEED_COUNTRY,
-      // Marketplace Ready's other two sub-signals (D-104, isMarketplaceReady()):
+      // Marketplace Ready's other two sub-signals (isMarketplaceReady()):
       // "reviewed the offer" / "reviewed the schedule". Every seed teacher is
       // meant to represent an already-active real teacher, not one mid-wizard,
       // so both stamp to `now` alongside the templates/availability they're
@@ -2157,7 +2157,7 @@ async function loadUserIdByEmailMap(prisma: PrismaClient): Promise<Map<string, s
   return new Map(rows.map((r) => [r.email, r.id]));
 }
 
-// Exported so the /admin/uat Reseed action's Inngest function (D-55) can call
+// Exported so the /admin/uat Reseed action's Inngest function (D-25) can call
 // the exact same seeding path as the CLI, rather than duplicating the
 // user-provisioning / storage upload wiring above. `opts` lets that caller
 // pass the same bulk-volume knobs the CLI reads from
@@ -2287,7 +2287,7 @@ export async function main(opts?: {
     });
   }
 
-  // Financial Intelligence estimate layer (D-86, S2) — same rationale as the
+  // Financial Intelligence estimate layer (slice S2) — same rationale as the
   // admin_users loop above: a platform-wide registry, not a per-teacher/
   // student fixture, so it's create-if-absent here in main() rather than in
   // seedAll() (which the integration test harness also calls against a
