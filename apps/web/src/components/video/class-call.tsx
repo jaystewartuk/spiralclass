@@ -22,6 +22,7 @@ import {
   MicOff,
   Minimize2,
   MonitorUp,
+  NotebookPen,
   MonitorX,
   PhoneOff,
   PictureInPicture2,
@@ -86,6 +87,7 @@ import {
 } from "@spiralclass/shared";
 import { CallControlsDrawer } from "./call-controls-drawer";
 import { CallMaterialsPanel, CallMaterialViewer } from "./call-materials-panel";
+import { CallQuickNote, type QuickNoteInput, type QuickNoteResult } from "./call-quick-note";
 import {
   computeStageTileStyle,
   resolveTileRole,
@@ -144,6 +146,7 @@ export function ClassCall({
   canBrowseLibrary,
   onNudge,
   onBookmark,
+  onQuickNote,
   chatHref,
   onLeave,
 }: {
@@ -199,6 +202,9 @@ export function ClassCall({
   // Present only on the teacher's call page (server action bound to the
   // booking); absent → no button.
   onBookmark?: () => Promise<{ ok: true } | { ok: false; reason: string }>;
+  // Teacher's call page only (never passed to the student's): saves a one-line
+  // focus area for this class as the teacher's own finding.
+  onQuickNote?: (input: QuickNoteInput) => Promise<QuickNoteResult>;
 }) {
   const t = useT();
   const router = useRouter();
@@ -268,6 +274,7 @@ export function ClassCall({
   const [bookmarked, setBookmarked] = useState(false);
   const [bookmarkPending, setBookmarkPending] = useState(false);
   const [bookmarkError, setBookmarkError] = useState<string | null>(null);
+  const [quickNoteOpen, setQuickNoteOpen] = useState(false);
   // True while LiveKit is auto-reconnecting after a transient drop (common on
   // mobile networks). We surface a banner instead of leaving the call frozen
   // and silent; LiveKit fires Disconnected (→ the error UI) only if it gives up.
@@ -1718,6 +1725,17 @@ export function ClassCall({
           },
         ]
       : []),
+    ...(onQuickNote && role !== "student"
+      ? [
+          {
+            key: "quick-note",
+            icon: NotebookPen,
+            label: t("call.quickNote"),
+            onSelect: () => setQuickNoteOpen(true),
+            active: quickNoteOpen,
+          },
+        ]
+      : []),
   ];
 
   if (typeof document === "undefined") return null;
@@ -2453,6 +2471,15 @@ export function ClassCall({
                       label={bookmarked ? t("call.bookmarked") : t("call.bookmark")}
                     />
                   )}
+                  {onQuickNote && role !== "student" && (
+                    <CallButton
+                      onClick={() => setQuickNoteOpen(true)}
+                      active={quickNoteOpen}
+                      secondary
+                      icon={NotebookPen}
+                      label={t("call.quickNote")}
+                    />
+                  )}
                   {/* Teacher-only. The student's in-call Materials button is
                     deliberately gone: during a call the teacher drives what
                     the student looks at (the open-for choice sheet), so a
@@ -2470,6 +2497,13 @@ export function ClassCall({
                     />
                   )}
                   <CallMoreMenu items={moreItems} />
+                  {onQuickNote && role !== "student" && (
+                    <CallQuickNote
+                      open={quickNoteOpen}
+                      onClose={() => setQuickNoteOpen(false)}
+                      onSubmit={onQuickNote}
+                    />
+                  )}
                   <CallButton onClick={leave} danger icon={PhoneOff} label={t("call.leave")} />
                 </div>
               </CallControlsDrawer>
