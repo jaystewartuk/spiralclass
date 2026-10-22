@@ -4895,6 +4895,11 @@ export const esMX = {
   "web.notificationPrefs.category.classMaterials": "Material y tareas",
   "web.notificationPrefs.categoryHint.classMaterials":
     "El material que comparte tu profe, las tareas asignadas, la retroalimentación y las fechas límite.",
+  "web.notificationGap.categoryOff":
+    "{name} tiene desactivadas las notificaciones de {category}, así que no se le avisará de esto. Sí aparece en su portal.",
+  "web.notificationGap.paused":
+    "Las notificaciones de {name} están en pausa, así que no se le avisará de esto. Sí aparece en su portal.",
+  "web.notificationGap.turnOn": "Activar notificaciones",
   "web.notificationPrefs.category.expiryReminders": "Avisos de paquete",
   "web.notificationPrefs.categoryHint.expiryReminders":
     "Cuando un paquete está por vencer y cuando terminas uno.",

@@ -136,7 +136,7 @@ describe("findOrCreateRosterStudent", () => {
       class_reminders: true,
       booking_updates: true,
       messages: true,
-      class_materials: false,
+      class_materials: true,
       expiry_reminders: false,
     });
   });

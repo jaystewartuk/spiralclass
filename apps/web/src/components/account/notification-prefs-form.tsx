@@ -85,13 +85,18 @@ const TEACHER_CHANNELS: { id: TeacherNotificationChannel; labelKey: StringKey }[
 ];
 
 // Groups the student category list under two headings instead of one flat
-// stack of 5 checkboxes — matches defaultNewStudentNotificationPrefs()
+// stack of 5 checkboxes — matches defaultNewStudentNotificationPrefs() (D-204)
 // (lib/notifications/preferences.ts) so what's visually "essential" is also
 // what's actually on by default. PostHog showed new students bouncing back
 // to this screen repeatedly right after signup; a flat unlabeled list of 5
 // toggles was the likely cause. Teacher categories stay a flat list — this
 // is scoped to the student experience only.
-const STUDENT_ESSENTIAL_CATEGORIES = new Set(["class_reminders", "booking_updates", "messages"]);
+const STUDENT_ESSENTIAL_CATEGORIES = new Set([
+  "class_reminders",
+  "booking_updates",
+  "messages",
+  "class_materials",
+]);
 
 type ChannelProps = {
   emailOptIn: boolean;

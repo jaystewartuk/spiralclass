@@ -30,6 +30,7 @@ import { ManageClassMenu } from "./manage-class-menu";
 import { MaterialsPanel } from "./materials-panel";
 import { AtLevelMaterialsCard } from "./at-level-materials-card";
 import { HomeworkPanel } from "./homework-panel";
+import { NotificationGapNotice } from "@/components/notification-gap-notice";
 import { LessonNotesPanel } from "./lesson-notes-panel";
 import { LessonSummaryCard } from "./lesson-summary-card";
 import { FocusAreasCard } from "./focus-areas-card";
@@ -101,7 +102,14 @@ export default async function TeacherClassDetailPage({
         relationLoadStrategy: "join",
         include: {
           student: {
-            select: { id: true, name: true, email: true, nativeLanguage: true, timezone: true },
+            select: {
+              id: true,
+              name: true,
+              email: true,
+              nativeLanguage: true,
+              timezone: true,
+              notificationPrefs: true,
+            },
           },
           package: {
             select: {
@@ -628,6 +636,18 @@ export default async function TeacherClassDetailPage({
       )}
 
       {brief && <PrepareCard bookingId={booking.id} brief={brief.brief} />}
+
+      {/* Class materials and homework notify under one category; when this
+          student has it off (or is still paused after a roster import) the
+          teacher is told once, here, rather than finding out from a student
+          who never heard (D-204). */}
+      <NotificationGapNotice
+        studentId={booking.student.id}
+        studentName={booking.student.name}
+        prefs={booking.student.notificationPrefs as object | null}
+        category="class_materials"
+        t={t}
+      />
 
       {/* Materials sit high up — attaching or authoring class content is one of
           the most frequent things a teacher does on this screen. */}

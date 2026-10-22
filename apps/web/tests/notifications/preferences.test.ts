@@ -42,14 +42,14 @@ describe("allDisabledPrefs", () => {
 });
 
 describe("defaultNewStudentNotificationPrefs", () => {
-  it("keeps only the class-critical + messaging categories on by default", () => {
+  it("starts everything the teacher sends on, and only the renewal nudges off (D-204)", () => {
     const prefs = defaultNewStudentNotificationPrefs();
     // Every category has an explicit value — no relying on "absent = on".
     for (const c of NOTIFICATION_CATEGORIES) expect(prefs).toHaveProperty(c);
     expect(isCategoryEnabled(prefs, "class_reminders")).toBe(true);
     expect(isCategoryEnabled(prefs, "booking_updates")).toBe(true);
     expect(isCategoryEnabled(prefs, "messages")).toBe(true);
-    expect(isCategoryEnabled(prefs, "class_materials")).toBe(false);
+    expect(isCategoryEnabled(prefs, "class_materials")).toBe(true);
     expect(isCategoryEnabled(prefs, "expiry_reminders")).toBe(false);
   });
 
