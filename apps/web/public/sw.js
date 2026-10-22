@@ -42,7 +42,8 @@ self.addEventListener("push", (event) => {
     return;
   }
 
-  const title = typeof payload.title === "string" ? payload.title : "SpiralClass";
+  const title =
+    typeof payload.title === "string" && payload.title.trim() ? payload.title : "SpiralClass";
   const body = typeof payload.body === "string" ? payload.body : "";
   const deepLink = typeof payload.deepLink === "string" ? payload.deepLink : null;
 

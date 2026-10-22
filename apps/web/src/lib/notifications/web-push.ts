@@ -97,6 +97,18 @@ export function getWebPushClient(): WebPushClient {
   return cachedClient;
 }
 
+// The wire body. A push with no title renders as a blank card, so an empty
+// title falls back to the product name here and again in public/sw.js.
+export function serializeWebPushPayload(payload: WebPushPayload): string {
+  return JSON.stringify({
+    title: payload.title.trim() || "SpiralClass",
+    body: payload.body,
+    deepLink: payload.deepLink,
+    tag: payload.tag,
+    urgent: payload.urgent === true,
+  });
+}
+
 export function createRealWebPushClient(config?: VapidConfig): WebPushClient {
   return {
     async send(input) {
@@ -118,13 +130,7 @@ export function createRealWebPushClient(config?: VapidConfig): WebPushClient {
         return result;
       }
 
-      const body = JSON.stringify({
-        title: input.payload.title,
-        body: input.payload.body,
-        deepLink: input.payload.deepLink,
-        tag: input.payload.tag,
-        urgent: input.payload.urgent === true,
-      });
+      const body = serializeWebPushPayload(input.payload);
 
       const codes = new Set<string>();
       await Promise.all(
