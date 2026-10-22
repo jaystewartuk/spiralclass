@@ -260,6 +260,31 @@ describe("resolveCaptionSession", () => {
     });
   });
 
+  it("hands both participants the TEACHER's subtitle timing, read through the parser", async () => {
+    bookingFindFirst.mockResolvedValue(
+      bookingRow({
+        teacher: {
+          id: "t1",
+          teachingLanguage: "es",
+          country: "MX",
+          captionTiming: { pauseMs: 800, maxChars: 9999 },
+        },
+      }),
+    );
+    teacherStudentFindUnique.mockResolvedValue(null);
+    const expected = { timing: { pauseMs: 800, maxChars: 300 } };
+    expect(await resolveCaptionSession("b1", TEACHER)).toMatchObject(expected);
+    expect(await resolveCaptionSession("b1", STUDENT)).toMatchObject(expected);
+  });
+
+  it("leaves both dials off for a teacher who never set them", async () => {
+    bookingFindFirst.mockResolvedValue(bookingRow());
+    teacherStudentFindUnique.mockResolvedValue(null);
+    expect(await resolveCaptionSession("b1", STUDENT)).toMatchObject({
+      timing: { pauseMs: 0, maxChars: 0 },
+    });
+  });
+
   it("asks whether the class's transcript is kept, with the package for a class for two", async () => {
     bookingFindFirst.mockResolvedValue(
       bookingRow({ package: { seats: 2, partnerConsentAt: new Date("2026-09-01") } }),

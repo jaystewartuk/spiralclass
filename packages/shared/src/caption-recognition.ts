@@ -17,6 +17,7 @@
 // the browsers leave uncovered.
 
 import type { CallRole, CaptionDirection, CaptionLine } from "./captions";
+import type { CaptionTiming } from "./caption-timing";
 
 // ---------------------------------------------------------------------------
 // The class's caption session — what POST /api/captions/config returns
@@ -53,6 +54,10 @@ export type CaptionSession = {
   // insights consent (D-22) is recorded. The recognising browser posts the
   // line to /api/captions/transcript; both browsers show that it is kept.
   transcriptCapture: boolean;
+  // The teacher's own subtitle timing (caption-timing.ts), live-read with the
+  // rest of the session so a change on her settings page reaches a class
+  // already running. Applied by whichever browser recognises a speaker.
+  timing: CaptionTiming;
 };
 
 // ---------------------------------------------------------------------------

@@ -84,13 +84,11 @@ export type CaptionBandProps = {
   hasTranscript: boolean;
 };
 
-// Type sizes for the two lines, and how many lines the band shows at that
-// size. A step here changes both text sizes together, so the
-// original/translation hierarchy holds as the whole band scales. `xl` exists
-// because "make the subtitles bigger" is the single most common
-// accessibility request captions get, and the old band had no answer.
+// Type sizes for a subtitle line, and how many lines the band shows at that
+// size. `xl` exists because "make the subtitles bigger" is the single most
+// common accessibility request captions get, and the old band had no answer.
 //
-// `maxLines` shrinks as the type grows. Three lines of extra-large bilingual
+// `maxLines` shrinks as the type grows. Three lines of extra-large
 // text is roughly a dozen lines of wrapped copy — it stops being a subtitle
 // band and becomes a wall across the other person's face. Someone who has
 // asked for bigger text has asked to read, not to read MORE at once.
@@ -99,24 +97,20 @@ export type CaptionBandProps = {
 // default right for a phone held at arm's length and too small for a monitor
 // across a desk — a student on a computer reported the subtitles as too small
 // to read, at the default, never having found the size control.
-const SIZE_CLASSES: Record<CaptionSize, { primary: string; secondary: string; maxLines: number }> =
-  {
-    m: {
-      primary: "text-lg md:text-2xl",
-      secondary: "text-sm md:text-base",
-      maxLines: 3,
-    },
-    l: {
-      primary: "text-2xl md:text-3xl",
-      secondary: "text-base md:text-xl",
-      maxLines: 2,
-    },
-    xl: {
-      primary: "text-3xl md:text-4xl",
-      secondary: "text-xl md:text-2xl",
-      maxLines: 2,
-    },
-  };
+const SIZE_CLASSES: Record<CaptionSize, { primary: string; maxLines: number }> = {
+  m: {
+    primary: "text-lg md:text-2xl",
+    maxLines: 3,
+  },
+  l: {
+    primary: "text-2xl md:text-3xl",
+    maxLines: 2,
+  },
+  xl: {
+    primary: "text-3xl md:text-4xl",
+    maxLines: 2,
+  },
+};
 
 // Docked, the strip's height comes out of the material above it, so it shows
 // the current exchange at the default size and only the current line at the
@@ -350,7 +344,6 @@ export function CaptionBand({
       >
         {docked && shown.length === 0 ? (
           <DockedStandby
-            display={prefs.display}
             sizes={sizes}
             listening={awaitingFirstLine ? t("call.captionsListening") : null}
           />
@@ -409,22 +402,20 @@ function CaptionLineView({
   // made a new turn's subtitle a third taller than the line it introduced.
   inlineSpeaker: boolean;
   display: CaptionDisplay;
-  sizes: { primary: string; secondary: string };
+  sizes: { primary: string };
   speakerName: (identity: string) => string | null;
   unknownSpeakerLabel: string;
 }) {
-  // WHICH LINE IS BIG. In "both" mode the ORIGINAL is the prominent one and
-  // the translation sits under it — the same convention dual-subtitle
-  // language study uses everywhere, and the right one here: the learner is
-  // listening to those exact words, so the text she is matching to the sound
-  // must be the text she reads first. The translation is there to make it
-  // mean something, which is a supporting job. When there is no source (the
-  // speaker was already talking in the reader's language, so the Agent sent
-  // no `src`) the translation is simply the only line, at full size.
+  // ONE LINE, never two. The original above its translation was a mode here
+  // until the one teacher using it said it was confusing — two languages in
+  // the same place, twice the text to take in while someone is still talking —
+  // and asked for it to go rather than for a smaller default. A reader sees
+  // the translation, or (to test herself) the original; when there is no
+  // source (the speaker was already talking in the reader's language, so the
+  // Agent sent no `src`) the translation is the only line either way.
   const original = entry.src;
-  const showOriginal = original != null && display !== "translation";
-  const showTranslation = display !== "original" || original == null;
-  const primaryIsOriginal = showOriginal;
+  const showOriginal = original != null && display === "original";
+  const showTranslation = !showOriginal;
 
   const name = entry.from ? speakerName(entry.from) : null;
   const label = entry.from ? (name ?? unknownSpeakerLabel) : null;
@@ -473,17 +464,10 @@ function CaptionLineView({
         <p
           lang={entry.lang}
           // No colour of its own: it inherits the line's recency colour from
-          // the wrapper, so an aged-out line dims as ONE thing. A fixed
-          // `text-on-dark-muted` here made the translation of the oldest line
-          // BRIGHTER than the original above it, inverting the hierarchy
-          // exactly where it mattered least and confused most.
-          className={cn(
-            primaryIsOriginal
-              ? cn(sizes.secondary, "mt-1 leading-snug font-normal opacity-80")
-              : cn(sizes.primary, "leading-snug font-medium"),
-          )}
+          // the wrapper, so an aged-out line dims as one thing.
+          className={cn(sizes.primary, "leading-snug font-medium")}
         >
-          {!showOriginal && inlineLabel}
+          {inlineLabel}
           {entry.text}
         </p>
       )}
@@ -519,19 +503,16 @@ function ListeningLine({ label }: { label: string }) {
 // drift away from: `h-lh` is one line at that element's own font size and
 // line height. "Listening…" sits inside it, not on top of it.
 function DockedStandby({
-  display,
   sizes,
   listening,
 }: {
-  display: CaptionDisplay;
-  sizes: { primary: string; secondary: string };
+  sizes: { primary: string };
   listening: string | null;
 }) {
   return (
     <div data-caption-standby className="relative w-full">
       <div aria-hidden className="invisible">
         <div className={cn(sizes.primary, "h-lh leading-snug")} />
-        {display === "both" && <div className={cn(sizes.secondary, "mt-1 h-lh leading-snug")} />}
       </div>
       {listening && (
         <div className="absolute inset-0 flex items-center justify-center">
@@ -627,11 +608,6 @@ function CaptionSettings({
   // segmented controls of three, which is what keeps the popover SHORT enough
   // to open upward at all — see the height note on the container below.
   const displays: { value: CaptionDisplay; label: string; name: string }[] = [
-    {
-      value: "both",
-      label: t("call.captionsDisplayBothShort"),
-      name: t("call.captionsDisplayBoth"),
-    },
     {
       value: "translation",
       label: t("call.captionsDisplayTranslationShort"),

@@ -14,7 +14,10 @@
 // a desktop want different sizes), it must survive a page reload mid-lesson,
 // and it has no business round-tripping through the database.
 
-export type CaptionDisplay = "both" | "translation" | "original";
+// "both" (original above translation) is gone: the one teacher using it found
+// two languages in one place confusing. A browser that stored it reads as the
+// default below, since an unknown value degrades field by field.
+export type CaptionDisplay = "translation" | "original";
 export type CaptionSize = "m" | "l" | "xl";
 
 export type CaptionPreferences = {
@@ -34,23 +37,10 @@ export type CaptionPreferences = {
   visibleWithContent: boolean;
   // "translation" is the default because the reader who has never seen this
   // product before has to be able to read the subtitles without first being
-  // taught how to read them. Two languages stacked is the richer view for a
-  // lesson already under way, and the wrong first thing to put in front of
-  // someone meeting the platform on an introductory call: twice the text,
-  // half of it in the language they came here not to have yet.
-  //
-  // The asymmetry is the whole argument. A student who wants the source
-  // sentence is one tap away in the settings popover this band owns, and she
-  // will find it, because she is here every week. A prospective student on a
-  // twenty-minute call cannot be talked through a popover while somebody is
-  // selling to her — so the default has to be the mode that needs no
-  // explanation, and the richer mode has to be the one you opt into.
-  //
-  // This only ever reaches a browser with NO stored preference: parse below
-  // degrades field by field, so a reader who has already chosen a mode keeps
-  // the one she chose. The people it actually reaches are new viewers.
-  //
-  // "original" remains for the viewer deliberately testing herself.
+  // taught how to read them. "original" is for the viewer deliberately
+  // testing herself, one tap away in the settings popover this band owns.
+  // A reader who stored a mode keeps it; only a browser with none (or with
+  // the retired "both") gets the default.
   display: CaptionDisplay;
   size: CaptionSize;
 };
@@ -96,7 +86,7 @@ export function toggleCaptionsHerePatch(
 // which is the same split use-caption-ticker.ts and caption-feed.ts use.
 export const CAPTION_PREFERENCES_STORAGE_KEY = "spiralclass.captionPreferences";
 
-const DISPLAYS: readonly CaptionDisplay[] = ["both", "translation", "original"];
+const DISPLAYS: readonly CaptionDisplay[] = ["translation", "original"];
 const SIZES: readonly CaptionSize[] = ["m", "l", "xl"];
 
 // Parse whatever is in storage into a valid preference set, field by field.
