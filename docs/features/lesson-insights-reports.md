@@ -8,7 +8,8 @@ audio.** The free video box production runs on cannot carry egress
 ([D-187](../decisions/D-187.md)), so the transcript is now the caption text
 the participants' browsers already produce ([D-185](../decisions/D-185.md)),
 kept — text only, never audio — for a class whose pairing has recorded
-insights consent, while the teacher has captions on. The reasoning for the
+insights consent, **whether or not captions are showing**
+([D-203](../decisions/D-203.md)). The reasoning for the
 feature itself lives in [D-19](../decisions/D-19.md),
 [D-21](../decisions/D-21.md) and [D-22](../decisions/D-22.md). The flag
 history is: off at first ship, on at [D-94](../decisions/D-94.md)
@@ -20,8 +21,9 @@ given student's words are kept is the recorded per-pairing consent (D-22),
 which is guardian-only for a student under 18 — never the flag.
 
 Two operational facts this document must not contradict: **the teacher's
-captions toggle is the trigger** — no captions, no transcript, no insights
-for that class — and **preview cannot rehearse the pipeline end-to-end**,
+captions toggle is not the trigger** — it only decides whether captions are
+shown; a consenting class is recognised and kept with it off, and the
+"Learning notes on" indicator shows either way (D-203) — and **preview cannot rehearse the pipeline end-to-end**,
 because it has no LiveKit pair and the shared box posts webhooks to
 production's URL only.
 
@@ -113,7 +115,7 @@ the pass/fail record of attendance or payments.
 ### Pipeline (async, post-class)
 
 - **The transcript is written during the class by the browsers** (D-189).
-  While captions are on, the browser that recognised a finished utterance
+  Whether or not captions are showing (D-203), the browser that recognised a finished utterance
   (D-185's assignment: the speaker's own, the other participant's computer, or
   the Deepgram stream for a phone) posts its source text, speaker and an
   estimated duration to `/api/captions/transcript`; the server re-checks

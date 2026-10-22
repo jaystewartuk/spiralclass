@@ -51,6 +51,14 @@ import {
 // viewer is the one reading it. Lines per speaker keep their spoken order even
 // though translations resolve at different speeds.
 //
+// Recognition does not depend on the captions being SHOWN. The teacher's
+// switch is the DISPLAY: with it off nothing is translated, published or
+// shown, but while the session says the transcript is being kept the
+// recognisers still run and every finished line still goes to `keep` — a
+// student who no longer needs subtitles is still taught, and still gets a
+// learning profile (D-203). The switch can flip mid-class without restarting
+// a recogniser.
+//
 // When the session says the class's transcript is being kept (D-189:
 // `transcriptCapture`, the flag plus this pairing's insights consent), each
 // piece is also handed to `keep` — source text, speaker, and this browser's
@@ -72,7 +80,9 @@ export type CaptionRoomView = {
 export type BrowserCaptionsInput = {
   // Null until the config route answers, and when it answers "off".
   session: CaptionSession | null;
-  // The teacher's switch, as this browser sees it.
+  // The teacher's switch, as this browser sees it: whether captions are SHOWN.
+  // It never decides whether the transcript is kept (session.transcriptCapture
+  // does).
   captionsOn: boolean;
   // Whether this browser can recognise during a call (canRecognizeDuringCall).
   selfCapable: boolean;
@@ -155,6 +165,9 @@ export class BrowserCaptions {
   private seq = 0;
   private lastStatus = "";
   private disposed = false;
+  // Whether captions are shown right now; read when a line arrives, so the
+  // switch flipping never restarts a recogniser.
+  private display = false;
   private readonly now: () => number;
   // The teacher's subtitle timing, refreshed by every sync from the session
   // so a settings change reaches utterances already in flight.
@@ -168,10 +181,11 @@ export class BrowserCaptions {
     if (this.disposed) return;
     const { session, room } = input;
     this.timing = session?.timing ?? CAPTION_TIMING_DEFAULTS;
+    this.display = input.captionsOn;
     const desired = new Map<CallRole, { key: string; start: () => Running }>();
     let uncaptioned: CallRole[] = [];
 
-    if (session && input.captionsOn) {
+    if (session && (input.captionsOn || session.transcriptCapture)) {
       const me = session.role;
       const other: CallRole = me === "teacher" ? "student" : "teacher";
       const present = { [me]: true, [other]: room.remote !== null } as Record<CallRole, boolean>;
@@ -188,6 +202,7 @@ export class BrowserCaptions {
       });
       uncaptioned = SPEAKERS.filter(
         (s) =>
+          input.captionsOn &&
           assignment[s] === null &&
           room.remote !== null &&
           (s === "teacher" || session.studentConsent),
@@ -300,6 +315,7 @@ export class BrowserCaptions {
       const id = run.partialId ?? undefined;
       run.partialId = null;
       if (args.session.transcriptCapture) this.keep(text, durationMs, args);
+      if (!this.display) return;
       run.chain = run.chain.then(() => this.deliver(text, id, translator, args)).catch(() => {});
     };
     const chunker = new CaptionChunker({
@@ -318,7 +334,7 @@ export class BrowserCaptions {
     // the part not already cut is shown, under a new id once a cut has taken
     // the old one.
     const onPartial = (heard: string) => {
-      if (this.disposed) return;
+      if (this.disposed || !this.display) return;
       const rest = chunker.partial(heard);
       if (!rest) return;
       run.partialId ??= captionLineId(args.speakerIdentity, this.now(), this.seq++);
@@ -414,7 +430,7 @@ export class BrowserCaptions {
       const pieceId = id;
       id = undefined;
       const translated = await translator.translate(piece);
-      if (translated === null || this.disposed) continue;
+      if (translated === null || this.disposed || !this.display) continue;
       const line = buildCaptionLine({
         id: pieceId,
         translated,

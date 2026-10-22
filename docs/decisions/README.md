@@ -258,6 +258,7 @@ which is a separate control from the flag that turns the capability on.
 | [D-131](./D-131.md) | Turn them back on, and correct the four sentences of the privacy policy that said otherwise  |
 | [D-136](./D-136.md) | Closing an account destroys its recordings — making a published promise true                 |
 | [D-201](./D-201.md) | A model call site ships with an eval set; the teacher's verdict on its output is a figure    |
+| [D-203](./D-203.md) | The class transcript is kept whether or not subtitles are shown; the switch is display only  |
 
 ### Teaching content and materials
 
@@ -573,6 +574,7 @@ records removed before publication — see [What is not here](#what-is-not-here)
 | [D-199](./D-199.md) | A merge starts its own production deploy, behind the approval         | Active (narrows D-119, D-157)        |
 | [D-200](./D-200.md) | Preview returns on Cloud Run, deployed by every merge                 | Decided, not built (reverses D-184)  |
 | [D-201](./D-201.md) | A model call site ships with an eval set; verdicts become a figure    | Active (narrows D-87)                |
+| [D-203](./D-203.md) | The transcript is kept with subtitles off; the switch is display only | Active (reverses part of D-189)      |
 | [D-204](./D-204.md) | New students hear what teachers send; unreachable sends say so        | Active (reverses a code default)     |
 
 ---
