@@ -2816,6 +2816,7 @@ export const esMX = {
   "web.dashboard.students.tab.navLabel": "Vistas de este alumno",
   "web.dashboard.students.tab.overview": "Resumen",
   "web.dashboard.students.tab.learning": "Aprendizaje",
+  "web.dashboard.students.tab.profile": "Perfil de aprendizaje",
   "web.dashboard.students.tab.materials": "Materiales",
   "web.dashboard.students.tab.settings": "Ajustes",
   "web.dashboard.students.header.theirTime": "{time} en {city}",
@@ -2861,6 +2862,15 @@ export const esMX = {
   "web.studentProfile.trend.focus": "Enfocar",
   "web.studentProfile.trend.improving": "Mejorando",
   "web.studentProfile.trend.new": "Nueva",
+  "web.studentProfile.signalsTitle": "Cómo habla",
+  "web.studentProfile.signalsDescription":
+    "Patrones de fluidez y comprensión a lo largo de las clases.",
+  "web.studentProfile.focusTitle": "Qué trabajar",
+  "web.studentProfile.hintToggle": "Ejemplo",
+  "web.studentProfile.addTitle": "Añade tu propia área de enfoque",
+  "web.studentProfile.addNoClass":
+    "Podrás añadir un área de enfoque cuando este alumno haya tenido una clase.",
+  "web.studentProfile.addNote": "Se guarda como confirmada y se asocia a su clase más reciente.",
   "web.studentLevel.label": "Nivel",
   "web.studentLevel.notSet": "Sin asignar",
   "web.studentLevel.hint":

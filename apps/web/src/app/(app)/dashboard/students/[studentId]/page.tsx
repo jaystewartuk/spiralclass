@@ -17,6 +17,7 @@ import { resolveStudentTab } from "./student-detail-nav";
 import { OverviewTab } from "./tab-overview";
 import { PackagesTab } from "./tab-packages";
 import { LearningTab } from "./tab-learning";
+import { ProfileTab } from "./tab-profile";
 import { MaterialsTab } from "./tab-materials";
 import { SettingsTab } from "./tab-settings";
 
@@ -288,6 +289,10 @@ export default async function TeacherStudentDetailPage({
 
       {tab === "learning" && (
         <LearningTab studentId={studentId} teacher={teacher} t={t} link={link} />
+      )}
+
+      {tab === "profile" && (
+        <ProfileTab studentId={studentId} teacher={teacher} t={t} link={link} />
       )}
 
       {tab === "materials" && (

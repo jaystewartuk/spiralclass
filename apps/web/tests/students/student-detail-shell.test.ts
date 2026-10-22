@@ -97,7 +97,7 @@ vi.mock("@/lib/prisma", () => ({
   },
 }));
 
-// The five panels are rendered by their own async components and covered by
+// The six panels are rendered by their own async components and covered by
 // their own tests; here they stand in as markers, which is what lets this file
 // assert WHICH one the URL selected without also asserting its contents.
 vi.mock("@/app/(app)/dashboard/students/[studentId]/tab-overview", () => ({
@@ -108,6 +108,9 @@ vi.mock("@/app/(app)/dashboard/students/[studentId]/tab-packages", () => ({
 }));
 vi.mock("@/app/(app)/dashboard/students/[studentId]/tab-learning", () => ({
   LearningTab: () => React.createElement("div", { "data-panel": "learning" }),
+}));
+vi.mock("@/app/(app)/dashboard/students/[studentId]/tab-profile", () => ({
+  ProfileTab: () => React.createElement("div", { "data-panel": "profile" }),
 }));
 vi.mock("@/app/(app)/dashboard/students/[studentId]/tab-materials", () => ({
   MaterialsTab: () => React.createElement("div", { "data-panel": "materials" }),
@@ -161,7 +164,7 @@ describe("teacher student detail — the shell above the views", () => {
 
   it("renders exactly the view the URL names", async () => {
     expect(await html()).toContain('data-panel="overview"');
-    for (const tab of ["packages", "learning", "materials", "settings"]) {
+    for (const tab of ["packages", "learning", "profile", "materials", "settings"]) {
       const out = await html({ tab });
       expect(out).toContain(`data-panel="${tab}"`);
       expect(out).not.toContain('data-panel="overview"');

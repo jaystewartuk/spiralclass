@@ -7,7 +7,7 @@ import {
 } from "@/lib/materials/student-materials";
 
 /**
- * The five views of one student, and the URL that addresses each.
+ * The six views of one student, and the URL that addresses each.
  *
  * WHY VIEWS AT ALL. This screen used to be eleven cards in one column, every
  * one of them expanded, with an editing form open inside most of them: the
@@ -21,7 +21,7 @@ import {
  * one thing.
  *
  * The order is the order a teacher needs them in: what is happening with this
- * student, what she has bought, what to teach her, what has been sent, and
+ * student, what she has bought, what to teach her, what has been recorded about how she learns, what has been sent, and
  * finally the details that change once a year.
  *
  * WHY LINKS AND `?tab=`, not a client tab widget. The tab survives a refresh,
@@ -30,7 +30,14 @@ import {
  * rather than all eleven sections' worth on every load. The cost is a
  * navigation per switch, which Next prefetches.
  */
-export const STUDENT_TABS = ["overview", "packages", "learning", "materials", "settings"] as const;
+export const STUDENT_TABS = [
+  "overview",
+  "packages",
+  "learning",
+  "profile",
+  "materials",
+  "settings",
+] as const;
 
 export type StudentTab = (typeof STUDENT_TABS)[number];
 
@@ -41,6 +48,7 @@ export const STUDENT_TAB_LABEL_KEY: Record<StudentTab, StringKey> = {
   overview: "web.dashboard.students.tab.overview",
   packages: "web.dashboard.students.section.packages",
   learning: "web.dashboard.students.tab.learning",
+  profile: "web.dashboard.students.tab.profile",
   materials: "web.dashboard.students.tab.materials",
   settings: "web.dashboard.students.tab.settings",
 };
