@@ -2062,17 +2062,38 @@ enum PodcastStatus {
   failed
 }
 
-// One row per successful AI class-content generation, used only to enforce the
-// per-teacher monthly cap (D-17: Pro + a monthly ceiling on AI spend). Tenant
-// column without a teachers FK, mirroring lesson_notes — app code scopes reads
-// by teacher_id and RLS is the defense-in-depth gate.
+// One row per successful AI materials call — compose, library generate, refine,
+// podcast script. The monthly cap counts these rows (D-17: Pro + a monthly
+// ceiling on AI spend). Since D-202 the row is also the teacher's verdict on
+// what came back: the output body, the refine instruction that produced it,
+// and `keptAt` when a save of AI-sourced content contained it. A generation
+// that is never kept was discarded or refined past. `body` and `instruction`
+// are cleared after 30 days (lib/materials/generations.ts) and on account
+// deletion; the row itself stays, because the cap counts it. Tenant column
+// without a teachers FK, mirroring lesson_notes — app code scopes reads by
+// teacher_id.
 model ClassContentGeneration {
-  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  teacherId String   @map("teacher_id") @db.Uuid
-  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+  id          String                  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  teacherId   String                  @map("teacher_id") @db.Uuid
+  createdAt   DateTime                @default(now()) @map("created_at") @db.Timestamptz
+  // Null on rows written before D-202.
+  kind        MaterialGenerationKind?
+  body        String?
+  instruction String?
+  // The material the output was saved into, set with keptAt.
+  materialId  String?                 @map("material_id") @db.Uuid
+  keptAt      DateTime?               @map("kept_at") @db.Timestamptz
 
   @@index([teacherId, createdAt])
   @@map("class_content_generations")
+}
+
+// Which materials call produced a ClassContentGeneration row (D-202).
+enum MaterialGenerationKind {
+  class_content
+  library_material
+  refine
+  podcast_script
 }
 
 // A teacher-authored, reusable lesson skeleton (docs/features/classes-lesson-content.md

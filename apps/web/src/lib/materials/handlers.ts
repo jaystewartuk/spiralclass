@@ -30,6 +30,7 @@ import {
   type MaterialRevisionRow,
 } from "@/lib/materials/revisions";
 import { maybeAutoDraftAssignmentFromMaterial } from "@/lib/homework/auto-draft";
+import { markKeptGenerations, recordMaterialGeneration } from "@/lib/materials/generations";
 
 const log = logger({ surface: "materials-handlers" });
 
@@ -237,6 +238,15 @@ export async function saveClassContentForBooking(input: {
       chars: validation.body.length,
     },
   });
+
+  // The teacher's verdict on the generation this body came from (D-202).
+  if (input.source === "ai") {
+    await markKeptGenerations({
+      teacherId: input.teacherId,
+      materialId: row.id,
+      savedBody: validation.body,
+    });
+  }
 
   // Homework auto-draft (docs/features/homework.md). Best-effort internally;
   // never fails the content save.
@@ -604,7 +614,11 @@ export async function generateClassContentForBooking(input: {
   }
 
   // One row per success — what the monthly cap counts. Failures don't burn quota.
-  await prisma.classContentGeneration.create({ data: { teacherId: input.teacherId } });
+  await recordMaterialGeneration({
+    teacherId: input.teacherId,
+    kind: "class_content",
+    body: result.body,
+  });
 
   trackServerEvent({
     name: "class_content_generated",
@@ -792,7 +806,11 @@ export async function generateLibraryMaterialForTeacher(input: {
 
   // Shares class_content_generations with class-content compose — one
   // monthly AI cap across both outputs, not two.
-  await prisma.classContentGeneration.create({ data: { teacherId: input.teacherId } });
+  await recordMaterialGeneration({
+    teacherId: input.teacherId,
+    kind: "library_material",
+    body: result.body,
+  });
 
   trackServerEvent({
     name: "library_material_generated",
@@ -910,8 +928,10 @@ export async function prepareLibraryMaterialPrompt(input: {
 export async function recordLibraryMaterialGeneration(
   teacherId: string,
   meta: PreparedLibraryPrompt,
+  // The streamed text as the teacher received it (D-202).
+  body: string,
 ): Promise<void> {
-  await prisma.classContentGeneration.create({ data: { teacherId } });
+  await recordMaterialGeneration({ teacherId, kind: "library_material", body });
   trackServerEvent({
     name: "library_material_generated",
     distinctId: teacherId,
@@ -1005,7 +1025,14 @@ export async function refineMaterialForTeacher(input: {
 
   // One row per success — shares the class-content generation quota with the
   // generate paths ("one AI plumbing," one cap). Failures don't burn quota.
-  await prisma.classContentGeneration.create({ data: { teacherId: input.teacherId } });
+  // The instruction is her own words for what was wrong with the version
+  // before (D-202).
+  await recordMaterialGeneration({
+    teacherId: input.teacherId,
+    kind: "refine",
+    body: result.body,
+    instruction,
+  });
 
   trackServerEvent({
     name: "material_refined",
@@ -1157,6 +1184,13 @@ export async function saveLibraryContentMaterial(input: {
       },
       select: { id: true },
     });
+    if (input.source === "ai") {
+      await markKeptGenerations({
+        teacherId: input.teacherId,
+        materialId: row.id,
+        savedBody: validation.body,
+      });
+    }
     return { ok: true, materialId: row.id };
   }
 
@@ -1187,6 +1221,14 @@ export async function saveLibraryContentMaterial(input: {
       tagCount: 0,
     },
   });
+
+  if (input.source === "ai") {
+    await markKeptGenerations({
+      teacherId: input.teacherId,
+      materialId: row.id,
+      savedBody: validation.body,
+    });
+  }
 
   return { ok: true, materialId: row.id };
 }
