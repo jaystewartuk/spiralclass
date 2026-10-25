@@ -311,6 +311,16 @@ the non-suppressible types above, which cannot be turned off by anyone.
 - A student on an onboarding hold who completes checkout has the hold
   lifted automatically — any notification-worthy event that happens after
   that point resumes normal delivery.
+- A push never goes out untitled: an empty title becomes the product name
+  on the wire and again in the service worker, and an inbox row whose booking
+  or payment has since been deleted shows a generic title with an explanatory
+  body rather than an empty one. Every template's push copy is asserted
+  non-blank in every language.
+- A student who uses a computer and has no registered device gets email
+  only. Email stops silently if their address ever hard-bounced (the
+  provider then suppresses it while still accepting the send), so "she gets
+  no notifications" is checked in `/admin/notifications` by the row's status
+  (`failed`/`delivered`) rather than assumed.
 - A device shared between two people (or one person's teacher and student
   identity on the same phone) only ever gets pushes for the most recently
   registered role/token on that device.

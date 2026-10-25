@@ -7739,6 +7739,7 @@ export const fr = {
   "email.packagePlaceholder.text": "votre forfait",
   "email.packagePlaceholder.text2": "un forfait",
   "inbox.fallback.title": "Notification",
+  "inbox.fallback.body": "Le cours ou le paiement concerné n’est plus disponible.",
   "email.studentAcquisitionPlanTeacher.subject": "Votre plan de la semaine : {count} actions",
   "email.studentAcquisitionPlanTeacher.subject_one": "Votre plan de la semaine : {count} action",
   "email.studentAcquisitionPlanTeacher.textBody":

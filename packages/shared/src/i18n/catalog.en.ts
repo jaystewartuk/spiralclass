@@ -7664,6 +7664,7 @@ export const en = {
   "email.packagePlaceholder.text": "your package",
   "email.packagePlaceholder.text2": "a package",
   "inbox.fallback.title": "Notification",
+  "inbox.fallback.body": "The class or payment this was about is no longer available.",
   "email.studentAcquisitionPlanTeacher.subject": "Your plan this week: {count} actions",
   "email.studentAcquisitionPlanTeacher.subject_one": "Your plan this week: {count} action",
   "email.studentAcquisitionPlanTeacher.textBody":

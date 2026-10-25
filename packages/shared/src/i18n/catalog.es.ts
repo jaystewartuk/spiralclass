@@ -7693,6 +7693,7 @@ export const esMX = {
   "email.packagePlaceholder.text": "tu paquete",
   "email.packagePlaceholder.text2": "un paquete",
   "inbox.fallback.title": "Notificación",
+  "inbox.fallback.body": "La clase o el pago de este aviso ya no está disponible.",
   "email.studentAcquisitionPlanTeacher.subject": "Tu plan de esta semana: {count} acciones",
   "email.studentAcquisitionPlanTeacher.subject_one": "Tu plan de esta semana: {count} acción",
   "email.studentAcquisitionPlanTeacher.textBody":
