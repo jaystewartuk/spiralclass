@@ -275,6 +275,11 @@ NULL`) — a confirmed insight is never touched or removed by regeneration.
 3. Then the controls for insights consent (with a minor-specific checkbox)
    and the "share progress with student" toggle.
 
+**Teacher — during the call:** the call's **Quick note** control saves a
+one-line focus area for the class being taught (`source: "teacher"`, confirmed
+on creation, the same write as "add your own finding" below), so a teacher who
+spots a recurring error mid-class does not have to remember it afterwards.
+
 **Teacher — booking/class detail page:**
 
 1. **Before an upcoming class**: a prepare card shows the brief's summary and

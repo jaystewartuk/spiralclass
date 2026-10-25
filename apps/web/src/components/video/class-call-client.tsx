@@ -4,6 +4,7 @@ import dynamic from "next/dynamic";
 import type { CallMaterial } from "@spiralclass/shared";
 import type { CallGrant } from "@/lib/video/provider";
 import type { NudgeResult } from "@/lib/video/nudge";
+import type { QuickNoteInput, QuickNoteResult } from "./call-quick-note";
 
 // livekit-client is browser-only (WebRTC, media devices). Load the call UI with
 // ssr:false so none of it runs during the server render pass — server components
@@ -28,6 +29,7 @@ export function ClassCallClient({
   canBrowseLibrary,
   onNudge,
   onBookmark,
+  onQuickNote,
   onLeave,
 }: {
   grant: CallGrant;
@@ -51,6 +53,7 @@ export function ClassCallClient({
   canBrowseLibrary?: boolean;
   onNudge?: () => Promise<NudgeResult>;
   onBookmark?: () => Promise<{ ok: true } | { ok: false; reason: string }>;
+  onQuickNote?: (input: QuickNoteInput) => Promise<QuickNoteResult>;
   onLeave?: () => void;
 }) {
   return (
@@ -69,6 +72,7 @@ export function ClassCallClient({
       canBrowseLibrary={canBrowseLibrary}
       onNudge={onNudge}
       onBookmark={onBookmark}
+      onQuickNote={onQuickNote}
       onLeave={onLeave}
     />
   );

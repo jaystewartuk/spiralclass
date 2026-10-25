@@ -103,11 +103,18 @@ That lasts until preview has a LiveKit server of its own.
    `web_push_subscriptions` now.
 8. **Bookmark** (teacher-only): a one-tap marker of "this moment" during the
    call, for later review via a replay view.
+   **Quick note** (teacher-only, Pro): a one-line note typed during the call
+   — "practise the subjunctive next class" — saved as the teacher's own
+   confirmed focus area for this class, so it reaches the student's learning
+   profile and the next pre-class brief
+   ([lesson insights](lesson-insights-reports.md)). Enter saves, the field
+   empties for the next one, and a category (default grammar) and a skill are
+   optional. The student never sees the control or the note.
 9. Additional controls: leave/hang-up, minimize, picture-in-picture,
    camera-flip/swap, materials viewer, "go to chat" shortcut.
    - On a phone (below `sm`) the row is icons only and keeps microphone,
      camera, captions, materials and leave; the rest (flip camera, message,
-     screen share, record, bookmark) sit behind **More**, so the row is one
+     screen share, record, bookmark, quick note) sit behind **More**, so the row is one
      line instead of a third of the screen.
    - **The top bar**, a row above the stage that never covers it: each
      side's notes on the left (collapsible), the other person's name and the
@@ -439,6 +446,7 @@ That lasts until preview has a LiveKit server of its own.
 | Set per-class language override | Yes                          | No                                    | No         |
 | Send a nudge                    | Yes                          | Yes                                   | No         |
 | Bookmark a moment               | Yes                          | No                                    | No         |
+| Quick note (focus area)         | Yes (Pro)                    | No                                    | No         |
 | View transcript/lesson insights | Yes (own class)              | Not confirmed — see Open Questions    | No         |
 
 ## Open Questions
