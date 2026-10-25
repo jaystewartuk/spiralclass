@@ -108,6 +108,8 @@ async function html(sp: { mf?: string; mg?: string } = {}): Promise<string> {
     t: createT("es"),
     filter: parseMaterialsFilter(sp.mf),
     groupBy: parseMaterialsGroupBy(sp.mg),
+    studentName: "Student",
+    notificationPrefs: null,
   });
   return renderToStaticMarkup(el);
 }

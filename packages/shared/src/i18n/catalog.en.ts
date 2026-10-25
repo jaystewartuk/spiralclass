@@ -4907,6 +4907,11 @@ export const en = {
   "web.notificationPrefs.category.classMaterials": "Class materials and homework",
   "web.notificationPrefs.categoryHint.classMaterials":
     "Materials your teacher shares, homework set, feedback, and due dates.",
+  "web.notificationGap.categoryOff":
+    "{name} has notifications for {category} turned off, so they will not be told about this. It still appears in their portal.",
+  "web.notificationGap.paused":
+    "{name}'s notifications are paused, so they will not be told about this. It still appears in their portal.",
+  "web.notificationGap.turnOn": "Turn notifications on",
   "web.notificationPrefs.category.expiryReminders": "Package reminders",
   "web.notificationPrefs.categoryHint.expiryReminders":
     "When a package is about to expire, and when you finish one.",

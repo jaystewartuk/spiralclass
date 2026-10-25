@@ -303,6 +303,8 @@ export default async function TeacherStudentDetailPage({
           t={t}
           filter={materialsFilter}
           groupBy={materialsGroupBy}
+          studentName={link.student.name}
+          notificationPrefs={link.student.notificationPrefs as object | null}
         />
       )}
 

@@ -123,6 +123,17 @@ the non-suppressible types above, which cannot be turned off by anyone.
 
 - Students can toggle these categories: class reminders, booking updates,
   class materials, expiry reminders, and messages (chat).
+- **A new student starts with everything their teacher sends switched on** —
+  class reminders, booking updates, class materials and homework, and
+  messages. Only expiry reminders (package renewal nudges) start off
+  ([D-204](../decisions/D-204.md)). Students created before D-204 keep whatever
+  was stored; an explicit opt-out is never overridden. A student imported from a
+  roster CSV starts with every category off until the teacher launches them.
+- **The teacher is told when a send will not reach the student.** On the class
+  page and the student's Materials tab, a teacher-only notice says when the
+  student has class materials and homework notifications off, or is still
+  paused after an import, and that the item still appears in the student's
+  portal. It describes the gap; it does not change the student's setting.
 - Teachers can toggle these categories: class reminders, class activity,
   student progress, subscription, growth, and messages (chat).
 - For each category, a user can additionally choose which channel(s)

@@ -279,10 +279,11 @@ method. No platform curriculum, ever.
 
 ### Notifications and messaging
 
-| #                 | Decision                                                                                 |
-| ----------------- | ---------------------------------------------------------------------------------------- |
-| [D-44](./D-44.md) | Drop Realtime for portable polling; push-first with a delayed email only if still unread |
-| [D-75](./D-75.md) | A waiting-room nudge on demand, rather than auto-ringing a scheduled appointment         |
+| #                   | Decision                                                                                 |
+| ------------------- | ---------------------------------------------------------------------------------------- |
+| [D-44](./D-44.md)   | Drop Realtime for portable polling; push-first with a delayed email only if still unread |
+| [D-75](./D-75.md)   | A waiting-room nudge on demand, rather than auto-ringing a scheduled appointment         |
+| [D-204](./D-204.md) | New students hear what their teacher sends; unreachable sends say so                     |
 
 ### Acquisition and the public funnel
 
@@ -572,6 +573,7 @@ records removed before publication — see [What is not here](#what-is-not-here)
 | [D-199](./D-199.md) | A merge starts its own production deploy, behind the approval         | Active (narrows D-119, D-157)        |
 | [D-200](./D-200.md) | Preview returns on Cloud Run, deployed by every merge                 | Decided, not built (reverses D-184)  |
 | [D-201](./D-201.md) | A model call site ships with an eval set; verdicts become a figure    | Active (narrows D-87)                |
+| [D-204](./D-204.md) | New students hear what teachers send; unreachable sends say so        | Active (reverses a code default)     |
 
 ---
 

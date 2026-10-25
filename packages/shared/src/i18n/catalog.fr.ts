@@ -4896,6 +4896,11 @@ export const fr = {
   "web.notificationPrefs.category.classMaterials": "Supports et devoirs",
   "web.notificationPrefs.categoryHint.classMaterials":
     "Les supports partagés par votre professeur, les devoirs donnés, les retours et les dates limites.",
+  "web.notificationGap.categoryOff":
+    "{name} a désactivé les notifications pour {category} : {name} ne sera pas prévenu·e de ceci. Cela apparaît quand même dans son espace.",
+  "web.notificationGap.paused":
+    "Les notifications de {name} sont en pause : {name} ne sera pas prévenu·e de ceci. Cela apparaît quand même dans son espace.",
+  "web.notificationGap.turnOn": "Activer les notifications",
   "web.notificationPrefs.category.expiryReminders": "Rappels de forfait",
   "web.notificationPrefs.categoryHint.expiryReminders":
     "Quand un forfait est sur le point d'expirer, et quand vous en terminez un.",

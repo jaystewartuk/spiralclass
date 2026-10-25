@@ -232,20 +232,23 @@ export function allDisabledPrefs(): Record<NotificationCategory, boolean> {
   >;
 }
 
-// Default prefs stamped on every newly-created Student row (self-serve
-// checkout, teacher invite, teacher-added roster entry — see the four
-// student.create call sites). PostHog showed new students hitting
-// /settings/notifications repeatedly right after signup — a sign the
-// previous behavior (leaving notificationPrefs null, which isCategoryEnabled
-// reads as "everything on") was too noisy on day one. Trims the default to
-// what a student needs to not miss a class or a teacher message; the
-// lower-urgency nudge categories start off and are one tap away to enable.
+// Default prefs stamped on every newly-created Student row (teacher-added
+// roster entry, teacher invitation, self-serve checkout — the three
+// student.create call sites; the roster CSV import is the deliberate
+// exception, see allDisabledPrefs above). D-204: everything a student's own
+// teacher sends or schedules for her — reminders, booking changes, chat, and
+// class materials and homework — starts ON, because those are the teacher doing
+// her job and a send that is dropped silently reads to the teacher as
+// delivered. Only the renewal/expiry nudges start off: that is the platform
+// talking about the student's package, not the teacher talking to the student,
+// and it is one tap away to enable. An explicit opt-out is still honoured; this
+// changes only what a NEW row starts as, never a stored value.
 export function defaultNewStudentNotificationPrefs(): Record<NotificationCategory, boolean> {
   return {
     class_reminders: true,
     booking_updates: true,
     messages: true,
-    class_materials: false,
+    class_materials: true,
     expiry_reminders: false,
   };
 }
