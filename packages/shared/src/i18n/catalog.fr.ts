@@ -2779,6 +2779,7 @@ export const fr = {
   "web.dashboard.students.tab.navLabel": "Vues de cet élève",
   "web.dashboard.students.tab.overview": "Aperçu",
   "web.dashboard.students.tab.learning": "Apprentissage",
+  "web.dashboard.students.tab.profile": "Profil d'apprentissage",
   "web.dashboard.students.tab.materials": "Supports",
   "web.dashboard.students.tab.settings": "Paramètres",
   "web.dashboard.students.header.theirTime": "{time} à {city}",
@@ -2824,6 +2825,16 @@ export const fr = {
   "web.studentProfile.trend.focus": "À travailler",
   "web.studentProfile.trend.improving": "En progrès",
   "web.studentProfile.trend.new": "Nouveau",
+  "web.studentProfile.signalsTitle": "Façon de parler",
+  "web.studentProfile.signalsDescription":
+    "Tendances de fluidité et de compréhension au fil des cours.",
+  "web.studentProfile.focusTitle": "À travailler",
+  "web.studentProfile.hintToggle": "Exemple",
+  "web.studentProfile.addTitle": "Ajouter votre propre axe de travail",
+  "web.studentProfile.addNoClass":
+    "Vous pourrez ajouter un axe de travail une fois que cet élève aura eu un cours.",
+  "web.studentProfile.addNote":
+    "Enregistré comme confirmé, et rattaché à son cours le plus récent.",
   "web.studentLevel.label": "Niveau",
   "web.studentLevel.notSet": "Non défini",
   "web.studentLevel.hint":
