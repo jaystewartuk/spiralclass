@@ -49,7 +49,24 @@ overrides:
   "@grpc/grpc-js@>=1.14.0 <1.14.5": "1.14.5" # GHSA-5375-pq7m-f5r2, GHSA-99f4-grh7-6pcq, GHSA-m9gg-hp2v-232j
   protobufjs@>=8.0.0 <8.4.1: "8.7.1" # GHSA-66ff-xgx4-vchm, GHSA-75px-5xx7-5xc7, GHSA-jvwf-75h9-cwgg, GHSA-685m-2w69-288q, GHSA-wcpc-wj8m-hjx6
   protobufjs@<=7.6.0: "7.6.5" # GHSA-wcpc-wj8m-hjx6 (grpc/proto-loader's protobufjs 7.x line)
-  undici@>=7.0.0 <7.29.1: "7.29.1" # GHSA-hm92-r4w5-c3mj, GHSA-vmh5-mc38-953g, GHSA-vxpw-j846-p89q, GHSA-4cwx-7wf7-3272, GHSA-rfgv-xxqx-mfg5, GHSA-w293-vg96-wgc3
+  # Widened 2026-10-25, <7.29.1 -> <7.30.1: GHSA-xjj6-f33q-929c reaches the 7.29.1
+  # this pin installed (a new advisory against an unchanged lockfile). One rule
+  # per package, so a narrower stale pin cannot win. Reached only through
+  # better-auth > vitest > jsdom, i.e. an optional test peer, but the gate does
+  # not grade on reachability.
+  undici@>=7.0.0 <7.30.1: "7.30.1" # GHSA-hm92-r4w5-c3mj, GHSA-vmh5-mc38-953g, GHSA-vxpw-j846-p89q, GHSA-4cwx-7wf7-3272, GHSA-rfgv-xxqx-mfg5, GHSA-w293-vg96-wgc3, GHSA-xjj6-f33q-929c
+  # 2026-10-25: transitive-only, no workspace dependency involved. dompurify is
+  # posthog-js's; body-parser is inngest > express's (the 1.x line, which has a
+  # patched release).
+  dompurify@<3.4.17: "3.4.17" # DOMPurify SAFE_FOR_TEMPLATES bypass (critical) and IN_PLACE (high), patched in 3.4.17
+  body-parser@<1.20.9: "1.20.9" # GHSA-27r3-jxmh-p828
+  # zod's 4.x line, which is better-auth's. Scoped to the two parents that
+  # resolve it, NOT `zod@>=4.0.0`: a range selector also rewrites the optional
+  # `^3.25.0 || ^4.0.0` peers of @anthropic-ai/sdk and inngest onto 4.x, away
+  # from the 3.25.x the workspace itself runs. The workspace's own zod has no
+  # patched release at all - see auditConfig.ignoreGhsas below.
+  "@better-auth/core>zod": "4.6.7" # GHSA-mrhx-c7xc-m3w5
+  "better-auth>zod": "4.6.7" # GHSA-mrhx-c7xc-m3w5
   ws@>=8.0.0 <8.21.0: "8.21.1" # GHSA-96hv-2xvq-fx4p
   ws@>=7.0.0 <7.5.11: "7.5.13" # GHSA-96hv-2xvq-fx4p
   vite@<=6.4.3: "6.4.4" # GHSA-fx2h-pf6j-xcff, GHSA-587h-7wmj-h5pm (better-auth's optional vitest peer chain)
@@ -214,8 +231,21 @@ overrides:
 # left to ignore. If `pnpm
 # audit --prod --audit-level high` reddens on image-size again, something has
 # pulled metro back in — find that, do not re-add the entry.
+#
+# Re-added 2026-10-25, one entry, and the only kind that belongs here: a high
+# advisory with NO patched release on the line we run. GHSA-mrhx-c7xc-m3w5
+# (zod memory exhaustion in the v4 array parser, "<4.6.6") is reported against
+# the workspace's own zod@3.25.76, but 3.x has no patch at all - the fix is
+# 4.6.6 and moving 76 files from zod 3 to zod 4 is its own change. What makes it
+# safe to carry is that the vulnerable code is `zod/v4/core`, which 3.25.x ships
+# beside the v3 API and loads only when something imports `zod/v4`; the root
+# `zod` entry re-exports v3 alone. Nothing here imports `zod/v4`, and the
+# 4.x copy that better-auth really does run is overridden to 4.6.7 above.
+# apps/web/tests/config/zod-advisory-ignore.test.ts fails if any of that stops
+# being true, and if this list grows by anything else.
 auditConfig:
-  ignoreGhsas: []
+  ignoreGhsas:
+    - GHSA-mrhx-c7xc-m3w5
 
 # pnpm 11 replaced onlyBuiltDependencies/ignoredBuiltDependencies with this single
 # allow/deny map (name -> boolean). Kept in parity with the old onlyBuiltDependencies
