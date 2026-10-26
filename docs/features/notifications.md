@@ -127,8 +127,13 @@ the non-suppressible types above, which cannot be turned off by anyone.
   class reminders, booking updates, class materials and homework, and
   messages. Only expiry reminders (package renewal nudges) start off
   ([D-204](../decisions/D-204.md)). Students created before D-204 keep whatever
-  was stored; an explicit opt-out is never overridden. A student imported from a
-  roster CSV starts with every category off until the teacher launches them.
+  was stored; an explicit opt-out is never overridden. The one exception is a
+  one-time data migration (`20261025230000_backfill_untouched_class_materials_pref`)
+  that turned class materials on for a student who has never signed in and whose
+  stored preferences were still exactly the old default; a student who has signed
+  in is left alone, because a saved choice and the old default look the same. A
+  student imported from a roster CSV starts with every category off until the
+  teacher launches them.
 - **The teacher is told when a send will not reach the student.** On the class
   page and the student's Materials tab, a teacher-only notice says when the
   student has class materials and homework notifications off, or is still
