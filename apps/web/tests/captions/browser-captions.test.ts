@@ -872,6 +872,31 @@ describe("BrowserCaptions — the transcript without subtitles (D-203)", () => {
     expect(first.stopped).toBe(false);
   });
 
+  it("keeps whole utterances, not the teacher's subtitle timing's cuts, while subtitles are off", async () => {
+    let id = 0;
+    const timers = new Map<number, () => void>();
+    const { c, kept, published } = setup({
+      setTimeout: (fn) => {
+        timers.set(++id, fn);
+        return id;
+      },
+      clearTimeout: (h) => void timers.delete(h as number),
+    });
+    c.sync(
+      hidden({
+        session: SESSION({ transcriptCapture: true, timing: { pauseMs: 800, maxChars: 40 } }),
+      }),
+    );
+    live()[0].onPartial?.("one two three four five six seven eight nine ten");
+    for (const fn of [...timers.values()]) fn();
+    live()[0].onFinal("one two three four five six seven eight nine ten eleven");
+    await flush();
+    expect(kept.map((l) => l.text)).toEqual([
+      "one two three four five six seven eight nine ten eleven",
+    ]);
+    expect(published).toHaveLength(0);
+  });
+
   it("does not report speakers as uncaptioned while nothing is meant to be shown", () => {
     const { c, statuses } = setup({ SpeechRecognition: null });
     c.sync(hidden({ selfCapable: false }));
