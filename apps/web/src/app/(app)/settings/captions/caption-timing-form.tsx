@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useId, useState } from "react";
+import { startTransition, useActionState, useId, useState } from "react";
 import {
   CAPTION_MAX_CHARS_MAX,
   CAPTION_MAX_CHARS_MIN,
@@ -60,7 +60,18 @@ export function CaptionTimingForm({ initial }: { initial: CaptionTiming }) {
   const lines = previewCaptionCuts(t("web.settings.captionTiming.preview.sample"), draft);
 
   return (
-    <form action={formAction} className="space-y-6">
+    // Not `action={formAction}`: React resets a form when its action settles,
+    // and a controlled <select> then falls back to the option it had on first
+    // render — the saved value was right and the dropdown showed the old one.
+    // Dispatching from a transition runs the same action without the reset.
+    <form
+      onSubmit={(e) => {
+        e.preventDefault();
+        const data = new FormData(e.currentTarget);
+        startTransition(() => formAction(data));
+      }}
+      className="space-y-6"
+    >
       <Card>
         <CardHeader>
           <CardTitle as="h2" className="text-lg">
