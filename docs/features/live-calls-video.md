@@ -168,6 +168,26 @@ That lasts until preview has a LiveKit server of its own.
     utterances are translated or kept for the transcript, and a translation
     that takes longer than 6 seconds is dropped. There is no server-side captions process: the one paid path
     (below) streams from a participant's own browser to Deepgram.
+    - **A subtitle is one language, never two.** A reader sees the
+      translation, or — to test herself — the original. Original-above-
+      translation was removed: the one teacher using it found two languages
+      in one place confusing. A browser that had stored it reads as the
+      translation.
+    - **The teacher sets when a line is cut** (`/settings/captions`,
+      `CaptionTiming` in `packages/shared/src/caption-timing.ts`, stored in
+      `teachers.caption_timing`). The browser decides on its own that an
+      utterance is finished, by waiting for the speaker to stop, so a fast
+      speaker who never pauses gets one wall of text at the end. Two dials
+      cut sooner: a **pause** (400–3000 ms with nothing new heard, translate
+      what was heard) and a **maximum length** (40–300 characters waiting,
+      cut at the last finished word). Both default to off, which is the
+      browser's own behaviour. The cut part is delivered as a finished line
+      and remembered, so neither the next partials nor the browser's eventual
+      final repeat it (`lib/captions/caption-chunker.ts`). The values travel
+      in the caption session, so the recognising browser applies them whoever
+      it belongs to and a change reaches a class already running at the next
+      config poll. It sits between the recogniser and everything downstream:
+      the transcript keeps the same cut pieces.
     - **Who recognises whom.** Each person's speech is recognised by their
       own browser when it can recognise during a call — today that means
       Chrome on a computer. When it cannot (Android Chrome measurably hears

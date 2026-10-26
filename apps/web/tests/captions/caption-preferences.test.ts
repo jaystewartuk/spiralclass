@@ -15,8 +15,7 @@ describe("parseCaptionPreferences", () => {
   it("defaults to the translation alone, medium, visible", () => {
     // The default is the product decision, and it is aimed at the reader who
     // has no stored preference yet: a first-time viewer, who must be able to
-    // read the band without being told how. "both" is the richer mode and is
-    // one tap away for the student who wants it. See preferences.ts.
+    // read the band without being told how. See preferences.ts.
     expect(DEFAULT_CAPTION_PREFERENCES).toEqual({
       visible: true,
       visibleWithContent: true,
@@ -29,7 +28,7 @@ describe("parseCaptionPreferences", () => {
     // Everyone with a stored preference today has no `visibleWithContent`.
     // Reading its absence as "hidden" would take the subtitles this change
     // adds away from exactly the people who already use them.
-    const stored = { visible: true, display: "both", size: "l" };
+    const stored = { visible: true, display: "original", size: "l" };
     expect(parseCaptionPreferences(JSON.stringify(stored))).toEqual({
       ...stored,
       visibleWithContent: true,
@@ -66,6 +65,16 @@ describe("parseCaptionPreferences", () => {
       visibleWithContent: true,
       display: "translation",
       size: "xl",
+    });
+  });
+
+  it("reads the retired 'both' mode as the translation alone and keeps the rest", () => {
+    // Original-above-translation was removed (one line, never two); a browser
+    // that stored it must neither break nor lose its size.
+    const stored = { visible: true, visibleWithContent: true, display: "both", size: "l" };
+    expect(parseCaptionPreferences(JSON.stringify(stored))).toEqual({
+      ...stored,
+      display: "translation",
     });
   });
 

@@ -693,12 +693,10 @@ export const fr = {
   "call.captionsListening": "Écoute en cours…",
   "call.captionsSpeakerUnknown": "Intervenant",
   "call.captionsDisplayLegend": "Afficher",
-  "call.captionsDisplayBoth": "Original et traduction",
   "call.captionsDisplayTranslation": "Traduction seule",
   "call.captionsDisplayOriginal": "Original seul",
   // Formes courtes pour le contrôle segmenté. Les formes longues ci-dessus
   // restent le nom accessible.
-  "call.captionsDisplayBothShort": "Les deux",
   "call.captionsDisplayTranslationShort": "Traduction",
   "call.captionsDisplayOriginalShort": "Original",
   "call.captionsSizeLegend": "Taille du texte",
@@ -3433,6 +3431,34 @@ export const fr = {
   "web.settings.account.sectionNavLabel": "Sections du compte",
   "web.settings.account.memberSince": "Sur SpiralClass depuis {date}",
   "web.settings.account.notificationsManage": "Gérer les notifications",
+  "web.settings.account.captionTimingTitle": "Rythme des sous-titres",
+  "web.settings.account.captionTimingDescription":
+    "À quelle vitesse les paroles d'un élève sont traduites pendant qu'il parle encore.",
+  "web.settings.account.captionTimingManage": "Régler le rythme des sous-titres",
+  "web.settings.captionTiming.title": "Rythme des sous-titres",
+  "web.settings.captionTiming.subtitle":
+    "Choisissez comment les sous-titres en direct sont découpés en lignes. Cela s'applique à tous vos cours, sur les deux écrans.",
+  "web.settings.captionTiming.cardTitle": "Quand traduire",
+  "web.settings.captionTiming.cardDescription":
+    "Par défaut, le navigateur attend que la personne s'arrête de parler, puis traduit tout d'un coup. Ces deux réglages le font traduire plus tôt. Trop tôt, et les sous-titres se réduisent à des mots isolés : changez un réglage à la fois.",
+  "web.settings.captionTiming.pause.label": "Traduire après une pause de",
+  "web.settings.captionTiming.pause.hint":
+    "Quand personne n'a rien dit de nouveau pendant ce temps, ce qui a été dit jusque-là est traduit. Plus court, c'est plus rapide, mais cela coupe les phrases en plein milieu.",
+  "web.settings.captionTiming.pause.off": "Le navigateur décide",
+  "web.settings.captionTiming.pause.option": "{ms} ms",
+  "web.settings.captionTiming.maxChars.label": "Ne jamais attendre pour traduire plus de",
+  "web.settings.captionTiming.maxChars.hint":
+    "Pour ceux qui parlent vite sans pause : un long passage est coupé après environ ce nombre de caractères, à la fin d'un mot.",
+  "web.settings.captionTiming.maxChars.off": "Sans limite",
+  "web.settings.captionTiming.maxChars.option": "{count} caractères",
+  "web.settings.captionTiming.preview.title": "Ce que cela donnerait",
+  "web.settings.captionTiming.preview.description":
+    "Quelqu'un qui parle vite, avec une seule respiration au milieu. Chaque ligne ci-dessous est un sous-titre.",
+  "web.settings.captionTiming.preview.sample":
+    "Yesterday I went to the market with my sister and we bought some tomatoes | but then it started to rain so we ran home and I forgot the bread",
+  "web.settings.captionTiming.reset": "Revenir au réglage par défaut",
+  "web.settings.captionTiming.unsaved": "Vous avez des modifications non enregistrées.",
+  "web.settings.captionTiming.savedMessage": "Rythme des sous-titres enregistré.",
   "web.settings.account.channels.emailOn": "E-mail activé",
   "web.settings.account.channels.emailOff": "E-mail désactivé",
   "web.settings.account.channels.pushOn": "Push activé",
@@ -6786,6 +6812,9 @@ export const fr = {
   "web.search.keywords.invitations": "invitations en attente envoyées",
   "web.search.keywords.newMessage": "rédiger écrire envoyer message nouveau chat",
   "web.search.keywords.notificationsInbox": "alertes cloche nouveautés",
+  "web.search.action.captionTiming.detail":
+    "À quelle vitesse les sous-titres en direct sont traduits.",
+  "web.search.keywords.captionTiming": "sous-titres captions retard délai pause traduction vitesse",
   "web.search.keywords.customizeDashboard": "réorganiser masquer raccourcis disposition",
   "web.search.keywords.acquisitionProfile": "profil marketing public niche",
   "web.search.keywords.acquisitionResults": "statistiques visites trafic résultats",

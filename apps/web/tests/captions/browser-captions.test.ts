@@ -34,6 +34,7 @@ const SESSION = (over: Partial<CaptionSession> = {}): CaptionSession => ({
   studentConsentGiver: "student",
   cloudRecognition: false,
   transcriptCapture: false,
+  timing: { pauseMs: 0, maxChars: 0 },
   ...over,
 });
 
@@ -679,5 +680,137 @@ describe("BrowserCaptions — words as they are spoken (D-198)", () => {
     );
     clouds[0].onPartial?.("hola");
     expect(published).toEqual([expect.objectContaining({ text: "hola", partial: true })]);
+  });
+});
+
+// The teacher's subtitle timing (caption-timing.ts): cutting an utterance
+// short of the browser's own final, without ever repeating or losing a word.
+describe("BrowserCaptions — the teacher's subtitle timing", () => {
+  // A hand-driven clock so a pause is a number, not a wait.
+  function clock() {
+    let next = 1;
+    const timers = new Map<number, { at: number; fn: () => void }>();
+    let now = 0;
+    return {
+      setTimeout: (fn: () => void, ms: number) => {
+        const id = next++;
+        timers.set(id, { at: now + ms, fn });
+        return id;
+      },
+      clearTimeout: (h: unknown) => void timers.delete(h as number),
+      advance(ms: number) {
+        now += ms;
+        for (const [id, t] of [...timers]) {
+          if (t.at <= now) {
+            timers.delete(id);
+            t.fn();
+          }
+        }
+      },
+    };
+  }
+  const timed = (timing: { pauseMs: number; maxChars: number }) =>
+    SESSION({ timing, transcriptCapture: true });
+  const texts = (lines: CaptionLine[]) => lines.filter((l) => !l.partial).map((l) => l.text);
+
+  it("does nothing the browser would not do with both dials off", async () => {
+    const k = clock();
+    const { c, published } = setup({ setTimeout: k.setTimeout, clearTimeout: k.clearTimeout });
+    c.sync(input());
+    recognizers[0].onPartial?.("uno dos tres");
+    k.advance(60_000);
+    await flush();
+    expect(texts(published)).toEqual([]);
+    recognizers[0].onFinal("uno dos tres cuatro");
+    await flush();
+    expect(texts(published)).toEqual(["EN(uno dos tres cuatro)"]);
+  });
+
+  it("translates what was heard once nothing new has been heard for the pause", async () => {
+    const k = clock();
+    const { c, published, kept } = setup({
+      setTimeout: k.setTimeout,
+      clearTimeout: k.clearTimeout,
+    });
+    c.sync(input({ session: timed({ pauseMs: 800, maxChars: 0 }) }));
+    recognizers[0].onPartial?.("uno dos");
+    k.advance(500);
+    recognizers[0].onPartial?.("uno dos tres"); // more speech restarts the wait
+    k.advance(500);
+    await flush();
+    expect(texts(published)).toEqual([]);
+    k.advance(400);
+    await flush();
+    expect(texts(published)).toEqual(["EN(uno dos tres)"]);
+    expect(kept.map((l) => l.text)).toEqual(["uno dos tres"]);
+  });
+
+  it("does not repeat the cut part when the utterance carries on and the browser finishes it", async () => {
+    const k = clock();
+    const { c, published, kept } = setup({
+      setTimeout: k.setTimeout,
+      clearTimeout: k.clearTimeout,
+    });
+    c.sync(input({ session: timed({ pauseMs: 800, maxChars: 0 }) }));
+    recognizers[0].onPartial?.("uno dos tres");
+    k.advance(800);
+    recognizers[0].onPartial?.("uno dos tres cuatro cinco");
+    recognizers[0].onFinal("uno dos tres cuatro cinco seis");
+    await flush();
+    expect(texts(published)).toEqual(["EN(uno dos tres)", "EN(cuatro cinco seis)"]);
+    expect(kept.map((l) => l.text)).toEqual(["uno dos tres", "cuatro cinco seis"]);
+  });
+
+  it("drops the browser's final when everything in it was already cut", async () => {
+    const k = clock();
+    const { c, published, kept } = setup({
+      setTimeout: k.setTimeout,
+      clearTimeout: k.clearTimeout,
+    });
+    c.sync(input({ session: timed({ pauseMs: 800, maxChars: 0 }) }));
+    recognizers[0].onPartial?.("uno dos tres");
+    k.advance(800);
+    recognizers[0].onFinal("uno dos tres");
+    await flush();
+    expect(texts(published)).toEqual(["EN(uno dos tres)"]);
+    expect(kept).toHaveLength(1);
+  });
+
+  it("cuts a run with no pause at the length limit, before the word still being heard", async () => {
+    const k = clock();
+    const { c, published } = setup({ setTimeout: k.setTimeout, clearTimeout: k.clearTimeout });
+    c.sync(input({ session: timed({ pauseMs: 0, maxChars: 40 }) }));
+    recognizers[0].onPartial?.("one two three four five six seven eight nine ten");
+    await flush();
+    expect(texts(published)).toEqual(["EN(one two three four five six seven eight nine)"]);
+    // What is left is shown as the next partial, under its own id.
+    const partials = published.filter((l) => l.partial);
+    expect(partials.at(-1)?.text).toBe("ten");
+    recognizers[0].onFinal("one two three four five six seven eight nine ten eleven");
+    await flush();
+    expect(texts(published).at(-1)).toBe("EN(ten eleven)");
+  });
+
+  it("applies a changed setting to an utterance already in flight", async () => {
+    const k = clock();
+    const { c, published } = setup({ setTimeout: k.setTimeout, clearTimeout: k.clearTimeout });
+    c.sync(input({ session: timed({ pauseMs: 0, maxChars: 0 }) }));
+    recognizers[0].onPartial?.("uno dos");
+    c.sync(input({ session: timed({ pauseMs: 600, maxChars: 0 }) }));
+    recognizers[0].onPartial?.("uno dos tres");
+    k.advance(600);
+    await flush();
+    expect(texts(published)).toEqual(["EN(uno dos tres)"]);
+  });
+
+  it("cuts nothing after the recogniser is stopped", async () => {
+    const k = clock();
+    const { c, published } = setup({ setTimeout: k.setTimeout, clearTimeout: k.clearTimeout });
+    c.sync(input({ session: timed({ pauseMs: 800, maxChars: 0 }) }));
+    recognizers[0].onPartial?.("uno dos");
+    c.dispose();
+    k.advance(5_000);
+    await flush();
+    expect(texts(published)).toEqual([]);
   });
 });

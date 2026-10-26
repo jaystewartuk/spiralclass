@@ -298,6 +298,7 @@ export const TEACHER_ROUTES: Route[] = [
   },
   { path: "/settings/focus-tags", name: "settings-focus-tags", tier: "teacher" },
   { path: "/settings/materials", name: "settings-materials", tier: "teacher" },
+  { path: "/settings/captions", name: "settings-captions", tier: "teacher" },
   { path: "/settings/payments", name: "settings-payments", tier: "teacher" },
   { path: "/settings/billing", name: "settings-billing", tier: "teacher" },
   { path: "/settings/notifications", name: "settings-notifications", tier: "teacher" },

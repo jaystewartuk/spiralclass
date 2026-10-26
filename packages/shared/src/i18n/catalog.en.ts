@@ -690,12 +690,10 @@ export const en = {
   "call.captionsListening": "Listening…",
   "call.captionsSpeakerUnknown": "Speaker",
   "call.captionsDisplayLegend": "Show",
-  "call.captionsDisplayBoth": "Original and translation",
   "call.captionsDisplayTranslation": "Translation only",
   "call.captionsDisplayOriginal": "Original only",
   // Short forms for the segmented control. The long forms above stay as the
   // accessible name, so an abbreviation costs a screen-reader user nothing.
-  "call.captionsDisplayBothShort": "Both",
   "call.captionsDisplayTranslationShort": "Translation",
   "call.captionsDisplayOriginalShort": "Original",
   "call.captionsSizeLegend": "Text size",
@@ -3435,6 +3433,34 @@ export const en = {
   "web.settings.account.sectionNavLabel": "Account sections",
   "web.settings.account.memberSince": "With SpiralClass since {date}",
   "web.settings.account.notificationsManage": "Manage notifications",
+  "web.settings.account.captionTimingTitle": "Subtitle timing",
+  "web.settings.account.captionTimingDescription":
+    "How soon a student's words are translated while they are still talking.",
+  "web.settings.account.captionTimingManage": "Adjust subtitle timing",
+  "web.settings.captionTiming.title": "Subtitle timing",
+  "web.settings.captionTiming.subtitle":
+    "Choose how live subtitles are cut into lines. It applies to every class, on both screens.",
+  "web.settings.captionTiming.cardTitle": "When to translate",
+  "web.settings.captionTiming.cardDescription":
+    "By default the browser waits until the speaker stops, then translates everything at once. These two settings make it translate sooner. Too soon and the subtitles turn into single words, so change one at a time.",
+  "web.settings.captionTiming.pause.label": "Translate after a pause of",
+  "web.settings.captionTiming.pause.hint":
+    "When nobody has said anything new for this long, what was said so far is translated. Shorter is quicker but cuts mid-thought.",
+  "web.settings.captionTiming.pause.off": "When the browser decides",
+  "web.settings.captionTiming.pause.option": "{ms} ms",
+  "web.settings.captionTiming.maxChars.label": "Never wait to translate more than",
+  "web.settings.captionTiming.maxChars.hint":
+    "For fast speakers who do not pause: a long run is cut after about this many characters, at the end of a word.",
+  "web.settings.captionTiming.maxChars.off": "No limit",
+  "web.settings.captionTiming.maxChars.option": "{count} characters",
+  "web.settings.captionTiming.preview.title": "How it would read",
+  "web.settings.captionTiming.preview.description":
+    "A fast speaker with one breath in the middle. Each line below is one subtitle.",
+  "web.settings.captionTiming.preview.sample":
+    "Yesterday I went to the market with my sister and we bought some tomatoes | but then it started to rain so we ran home and I forgot the bread",
+  "web.settings.captionTiming.reset": "Back to default",
+  "web.settings.captionTiming.unsaved": "You have unsaved changes.",
+  "web.settings.captionTiming.savedMessage": "Subtitle timing saved.",
   "web.settings.account.channels.emailOn": "Email on",
   "web.settings.account.channels.emailOff": "Email off",
   "web.settings.account.channels.pushOn": "Push on",
@@ -6747,6 +6773,8 @@ export const en = {
   "web.search.keywords.invitations": "invites pending sent",
   "web.search.keywords.newMessage": "compose write send message new chat",
   "web.search.keywords.notificationsInbox": "alerts bell inbox updates",
+  "web.search.action.captionTiming.detail": "How soon live subtitles are translated.",
+  "web.search.keywords.captionTiming": "subtitles captions lag delay pause translation speed",
   "web.search.keywords.customizeDashboard": "reorder hide tiles shortcuts layout",
   "web.search.keywords.acquisitionProfile": "marketing profile audience niche",
   "web.search.keywords.acquisitionResults": "analytics stats visitors traffic results",

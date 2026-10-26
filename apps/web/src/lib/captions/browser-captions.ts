@@ -1,4 +1,5 @@
 import {
+  CAPTION_TIMING_DEFAULTS,
   assignRecognizers,
   buildCaptionLine,
   buildPartialCaptionLine,
@@ -7,7 +8,9 @@ import {
   type CallRole,
   type CaptionLine,
   type CaptionSession,
+  type CaptionTiming,
 } from "@spiralclass/shared";
+import { CaptionChunker } from "@/lib/captions/caption-chunker";
 import { CaptionTranslator, type TranslationRefusal } from "@/lib/captions/caption-translator";
 import {
   CloudRecognizer,
@@ -122,6 +125,8 @@ export type BrowserCaptionsDeps = {
   // hook re-reads the config, which re-runs the assignment.
   onRefused: (reason: TranslationRefusal) => void;
   now?: () => number;
+  setTimeout?: (fn: () => void, ms: number) => unknown;
+  clearTimeout?: (handle: unknown) => void;
   createRecognizer?: (options: RecognizerOptions) => { start(): void; stop(): void };
   createCloudRecognizer?: (options: CloudRecognizerOptions) => { start(): void; stop(): void };
 };
@@ -151,6 +156,9 @@ export class BrowserCaptions {
   private lastStatus = "";
   private disposed = false;
   private readonly now: () => number;
+  // The teacher's subtitle timing, refreshed by every sync from the session
+  // so a settings change reaches utterances already in flight.
+  private timing: CaptionTiming = CAPTION_TIMING_DEFAULTS;
 
   constructor(private readonly deps: BrowserCaptionsDeps) {
     this.now = deps.now ?? Date.now;
@@ -159,6 +167,7 @@ export class BrowserCaptions {
   sync(input: BrowserCaptionsInput): void {
     if (this.disposed) return;
     const { session, room } = input;
+    this.timing = session?.timing ?? CAPTION_TIMING_DEFAULTS;
     const desired = new Map<CallRole, { key: string; start: () => Running }>();
     let uncaptioned: CallRole[] = [];
 
@@ -281,7 +290,10 @@ export class BrowserCaptions {
       lastFinalAt: this.now(),
       partialId: null,
     };
-    const onFinal = (text: string) => {
+    // A finished piece of speech, from the browser's own final or from a cut
+    // on the teacher's timing: kept, then translated in spoken order, under
+    // the id its partials were shown under.
+    const finish = (text: string) => {
       const at = this.now();
       const durationMs = Math.min(Math.max(0, at - run.lastFinalAt), MAX_KEPT_LINE_MS);
       run.lastFinalAt = at;
@@ -290,13 +302,28 @@ export class BrowserCaptions {
       if (args.session.transcriptCapture) this.keep(text, durationMs, args);
       run.chain = run.chain.then(() => this.deliver(text, id, translator, args)).catch(() => {});
     };
+    const chunker = new CaptionChunker({
+      timing: () => this.timing,
+      cut: finish,
+      setTimeout: this.deps.setTimeout,
+      clearTimeout: this.deps.clearTimeout,
+    });
+    const onFinal = (text: string) => {
+      const rest = chunker.final(text);
+      if (rest) finish(rest);
+      else run.partialId = null;
+    };
     // Not through the chain: a partial is shown the moment it is heard, even
-    // while the previous utterance is still waiting on its translation.
+    // while the previous utterance is still waiting on its translation. Only
+    // the part not already cut is shown, under a new id once a cut has taken
+    // the old one.
     const onPartial = (heard: string) => {
       if (this.disposed) return;
+      const rest = chunker.partial(heard);
+      if (!rest) return;
       run.partialId ??= captionLineId(args.speakerIdentity, this.now(), this.seq++);
       const line = buildPartialCaptionLine({
-        heard,
+        heard: rest,
         sourceLanguage: args.direction.source,
         speakerIdentity: args.speakerIdentity,
         listenerIdentity: args.listenerIdentity,
@@ -338,6 +365,14 @@ export class BrowserCaptions {
         onStopped,
       });
     }
+    const recognizer = run.recognizer;
+    run.recognizer = {
+      start: () => recognizer.start(),
+      stop: () => {
+        chunker.stop();
+        recognizer.stop();
+      },
+    };
     run.recognizer.start();
     return run;
   }

@@ -701,13 +701,11 @@ export const esMX = {
   "call.captionsListening": "Escuchando…",
   "call.captionsSpeakerUnknown": "Quien habla",
   "call.captionsDisplayLegend": "Mostrar",
-  "call.captionsDisplayBoth": "Original y traducción",
   "call.captionsDisplayTranslation": "Solo la traducción",
   "call.captionsDisplayOriginal": "Solo el original",
   // Formas cortas para el control segmentado. Las largas de arriba siguen
   // siendo el nombre accesible, así que abreviar no le cuesta nada a quien
   // usa un lector de pantalla.
-  "call.captionsDisplayBothShort": "Ambos",
   "call.captionsDisplayTranslationShort": "Traducción",
   "call.captionsDisplayOriginalShort": "Original",
   "call.captionsSizeLegend": "Tamaño del texto",
@@ -3461,6 +3459,34 @@ export const esMX = {
   "web.settings.account.sectionNavLabel": "Secciones de la cuenta",
   "web.settings.account.memberSince": "En SpiralClass desde {date}",
   "web.settings.account.notificationsManage": "Administrar notificaciones",
+  "web.settings.account.captionTimingTitle": "Tiempo de los subtítulos",
+  "web.settings.account.captionTimingDescription":
+    "Qué tan pronto se traducen las palabras de un alumno mientras sigue hablando.",
+  "web.settings.account.captionTimingManage": "Ajustar el tiempo de los subtítulos",
+  "web.settings.captionTiming.title": "Tiempo de los subtítulos",
+  "web.settings.captionTiming.subtitle":
+    "Elige cómo se cortan en líneas los subtítulos en vivo. Se aplica a todas tus clases, en las dos pantallas.",
+  "web.settings.captionTiming.cardTitle": "Cuándo traducir",
+  "web.settings.captionTiming.cardDescription":
+    "Por defecto el navegador espera a que la persona termine de hablar y traduce todo de una vez. Estos dos ajustes hacen que traduzca antes. Si es demasiado pronto, los subtítulos se vuelven palabras sueltas; cambia uno a la vez.",
+  "web.settings.captionTiming.pause.label": "Traducir tras una pausa de",
+  "web.settings.captionTiming.pause.hint":
+    "Si nadie dice nada nuevo durante este tiempo, se traduce lo dicho hasta ahora. Más corto es más rápido, pero corta las ideas a la mitad.",
+  "web.settings.captionTiming.pause.off": "Lo decide el navegador",
+  "web.settings.captionTiming.pause.option": "{ms} ms",
+  "web.settings.captionTiming.maxChars.label": "No esperar a traducir más de",
+  "web.settings.captionTiming.maxChars.hint":
+    "Para quien habla rápido y no hace pausas: un tramo largo se corta tras unos tantos caracteres, al final de una palabra.",
+  "web.settings.captionTiming.maxChars.off": "Sin límite",
+  "web.settings.captionTiming.maxChars.option": "{count} caracteres",
+  "web.settings.captionTiming.preview.title": "Cómo se leería",
+  "web.settings.captionTiming.preview.description":
+    "Una persona que habla rápido, con una sola respiración en medio. Cada línea de abajo es un subtítulo.",
+  "web.settings.captionTiming.preview.sample":
+    "Yesterday I went to the market with my sister and we bought some tomatoes | but then it started to rain so we ran home and I forgot the bread",
+  "web.settings.captionTiming.reset": "Volver al valor por defecto",
+  "web.settings.captionTiming.unsaved": "Tienes cambios sin guardar.",
+  "web.settings.captionTiming.savedMessage": "Tiempo de los subtítulos guardado.",
   "web.settings.account.channels.emailOn": "Correo activado",
   "web.settings.account.channels.emailOff": "Correo desactivado",
   "web.settings.account.channels.pushOn": "Push activado",
@@ -6753,6 +6779,9 @@ export const esMX = {
   "web.search.keywords.invitations": "invitaciones pendientes enviadas",
   "web.search.keywords.newMessage": "redactar escribir enviar mensaje nuevo chat",
   "web.search.keywords.notificationsInbox": "alertas campana avisos novedades",
+  "web.search.action.captionTiming.detail": "Qué tan pronto se traducen los subtítulos en vivo.",
+  "web.search.keywords.captionTiming":
+    "subtítulos captions retraso demora pausa traducción velocidad",
   "web.search.keywords.customizeDashboard": "reordenar ocultar accesos diseño",
   "web.search.keywords.acquisitionProfile": "perfil de marketing público nicho",
   "web.search.keywords.acquisitionResults": "estadísticas visitas tráfico resultados",

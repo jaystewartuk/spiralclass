@@ -108,6 +108,7 @@ const SESSION = (
   studentConsentGiver: "student",
   cloudRecognition: false,
   transcriptCapture: false,
+  timing: { pauseMs: 0, maxChars: 0 },
   ...over,
 });
 
