@@ -55,7 +55,6 @@ export function useBrowserCaptions({
   bookingId,
   role,
   teacherCaptionsOn,
-  prefetchSession,
   showLocal,
 }: {
   room: Room | null;
@@ -64,9 +63,6 @@ export function useBrowserCaptions({
   // The teacher's own toggle state. Ignored on the student's side, which
   // reads the teacher's attribute instead.
   teacherCaptionsOn: boolean;
-  // The teacher's call page, when it can show the toggle: fetch the session
-  // at connect rather than at the first toggle.
-  prefetchSession: boolean;
   // Render a line this browser recognised for its own viewer.
   showLocal: (line: CaptionLine) => void;
 }): {
@@ -75,15 +71,15 @@ export function useBrowserCaptions({
   status: BrowserCaptionsStatus;
   // 0..1 while an on-device translation model downloads, else null.
   downloadProgress: number | null;
-  // D-189: captions are on and this class's lines are being kept as its
-  // transcript for lesson insights. Rendered to both participants, since a
-  // capture nobody can see is what D-21 forbids.
+  // D-189/D-203: this class's lines are being kept as its transcript for
+  // lesson insights — whether or not captions are shown. Rendered to both
+  // participants, since a capture nobody can see is what D-21 forbids.
   transcriptKept: boolean;
   // Call synchronously inside the teacher's toggle click (see
   // installOnDeviceModels for why it cannot wait).
   prepareOnDevice: () => void;
   // The class's caption session as last read, or null before the first read
-  // and while captions are off for this class.
+  // and while the feature is off for this class.
   session: CaptionSession | null;
   // Whether the other participant is in the room.
   otherPresent: boolean;
@@ -186,7 +182,12 @@ export function useBrowserCaptions({
   // The class's caption session: fetched when needed, re-read every minute
   // while captions are on, and re-read at once after a refusal or a consent
   // given from the call.
-  const wantSession = Boolean(room && bookingId && (captionsOn || prefetchSession));
+  // Always, once the room is up: whether the class's transcript is kept is
+  // the session's say-so, not the teacher's captions switch (D-203).
+  // Poll while anything depends on the session staying true: captions shown,
+  // or lines being kept (a consent revoked mid-class must stop the capture).
+  const poll = captionsOn || Boolean(session?.transcriptCapture);
+  const wantSession = Boolean(room && bookingId);
   useEffect(() => {
     if (!wantSession || !bookingId) return;
     let cancelled = false;
@@ -209,12 +210,12 @@ export function useBrowserCaptions({
       }
     };
     void load();
-    const timer = captionsOn ? setInterval(load, CONFIG_POLL_MS) : null;
+    const timer = poll ? setInterval(load, CONFIG_POLL_MS) : null;
     return () => {
       cancelled = true;
       if (timer) clearInterval(timer);
     };
-  }, [wantSession, bookingId, captionsOn, refetchKey, remoteConsentNudge]);
+  }, [wantSession, bookingId, poll, refetchKey, remoteConsentNudge]);
 
   // One controller per room.
   const controllerRef = useRef<BrowserCaptions | null>(null);
@@ -293,7 +294,7 @@ export function useBrowserCaptions({
       });
   }, [room]);
 
-  const transcriptKept = captionsOn && Boolean(session?.transcriptCapture);
+  const transcriptKept = Boolean(session?.transcriptCapture);
   const otherPresent = view?.remote != null;
 
   return {

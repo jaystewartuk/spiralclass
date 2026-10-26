@@ -140,14 +140,12 @@ function Harness(props: {
   room: FakeRoom | null;
   role: "teacher" | "student";
   teacherCaptionsOn: boolean;
-  prefetchSession: boolean;
 }) {
   latest = useBrowserCaptions({
     room: props.room as never,
     bookingId: "b1",
     role: props.role,
     teacherCaptionsOn: props.teacherCaptionsOn,
-    prefetchSession: props.prefetchSession,
     showLocal: (line) => shown.push(line),
   });
   return null;
@@ -199,7 +197,7 @@ const configCalls = () => fetchMock.mock.calls.filter(([u]) => u === "/api/capti
 describe("useBrowserCaptions — what it tells the room", () => {
   it("publishes that this browser can recognise during a call", async () => {
     const room = new FakeRoom("t1");
-    await render({ room, role: "teacher", teacherCaptionsOn: false, prefetchSession: false });
+    await render({ room, role: "teacher", teacherCaptionsOn: false });
     expect(room.localParticipant.setAttributes).toHaveBeenCalledWith({ captionsAsr: "1" });
   });
 
@@ -209,12 +207,12 @@ describe("useBrowserCaptions — what it tells the room", () => {
       configurable: true,
     });
     const room = new FakeRoom("s1");
-    await render({ room, role: "student", teacherCaptionsOn: false, prefetchSession: false });
+    await render({ room, role: "student", teacherCaptionsOn: false });
     expect(room.localParticipant.setAttributes).toHaveBeenCalledWith({ captionsAsr: "0" });
   });
 
   it("does nothing without a room", async () => {
-    await render({ room: null, role: "teacher", teacherCaptionsOn: true, prefetchSession: true });
+    await render({ room: null, role: "teacher", teacherCaptionsOn: true });
     expect(fetchMock).not.toHaveBeenCalled();
     expect(latest.captionsOn).toBe(true);
   });
@@ -224,7 +222,7 @@ describe("useBrowserCaptions — the class's caption session", () => {
   it("fetches it at connect for the teacher, before any toggle, and does not poll while off", async () => {
     vi.useFakeTimers({ toFake: ["setInterval"] });
     const room = new FakeRoom("t1");
-    await render({ room, role: "teacher", teacherCaptionsOn: false, prefetchSession: true });
+    await render({ room, role: "teacher", teacherCaptionsOn: false });
     expect(configCalls()).toHaveLength(1);
     expect(JSON.parse(String(configCalls()[0][1]?.body))).toEqual({ bookingId: "b1" });
     act(() => vi.advanceTimersByTime(CONFIG_POLL_MS * 2));
@@ -236,18 +234,18 @@ describe("useBrowserCaptions — the class's caption session", () => {
     vi.useFakeTimers({ toFake: ["setInterval"] });
     const room = new FakeRoom("t1");
     room.join(new FakeParticipant("s1", { id: "s1-mic", readyState: "live" }));
-    await render({ room, role: "teacher", teacherCaptionsOn: true, prefetchSession: true });
+    await render({ room, role: "teacher", teacherCaptionsOn: true });
     const before = configCalls().length;
     act(() => vi.advanceTimersByTime(CONFIG_POLL_MS));
     await settle();
     expect(configCalls().length).toBe(before + 1);
   });
 
-  it("does not ask the server at all for a student while the teacher's switch is off", async () => {
+  it("asks the server for a student while the switch is off, because the transcript is the session's say-so (D-203)", async () => {
     const room = new FakeRoom("s1");
     room.join(new FakeParticipant("t1", { id: "t1-mic", readyState: "live" }));
-    await render({ room, role: "student", teacherCaptionsOn: false, prefetchSession: false });
-    expect(fetchMock).not.toHaveBeenCalled();
+    await render({ room, role: "student", teacherCaptionsOn: false });
+    expect(configCalls()).toHaveLength(1);
     expect(latest.captionsOn).toBe(false);
   });
 });
@@ -258,7 +256,7 @@ describe("useBrowserCaptions — recognising and delivering", () => {
     room.join(new FakeParticipant("s1", { id: "s1-mic", readyState: "live" }));
     const student = room.remoteParticipants.get("s1")!;
     student.attributes.captionsAsr = "1";
-    await render({ room, role: "teacher", teacherCaptionsOn: true, prefetchSession: true });
+    await render({ room, role: "teacher", teacherCaptionsOn: true });
 
     expect(FakeRecognition.instances).toHaveLength(1);
     const rec = FakeRecognition.instances[0];
@@ -277,7 +275,7 @@ describe("useBrowserCaptions — recognising and delivering", () => {
     const room = new FakeRoom("t1");
     room.join(new FakeParticipant("s1", { id: "s1-mic", readyState: "live" }));
     room.remoteParticipants.get("s1")!.attributes.captionsAsr = "0";
-    await render({ room, role: "teacher", teacherCaptionsOn: true, prefetchSession: true });
+    await render({ room, role: "teacher", teacherCaptionsOn: true });
 
     const remoteRec = FakeRecognition.instances.find(
       (r) => (r.track as { id: string }).id === "s1-mic",
@@ -319,7 +317,7 @@ describe("useBrowserCaptions — recognising and delivering", () => {
     const room = new FakeRoom("t1");
     room.join(new FakeParticipant("s1", { id: "s1-mic", readyState: "live" }));
     room.remoteParticipants.get("s1")!.attributes.captionsAsr = "0";
-    await render({ room, role: "teacher", teacherCaptionsOn: true, prefetchSession: true });
+    await render({ room, role: "teacher", teacherCaptionsOn: true });
 
     expect(latest.status).toEqual({ uncaptioned: [], stopped: null });
     expect(FakeRecognition.instances).toHaveLength(0);
@@ -333,7 +331,7 @@ describe("useBrowserCaptions — recognising and delivering", () => {
     const teacher = new FakeParticipant("t1", { id: "t1-mic", readyState: "live" });
     teacher.attributes.captionsAsr = "1";
     room.join(teacher);
-    await render({ room, role: "student", teacherCaptionsOn: false, prefetchSession: false });
+    await render({ room, role: "student", teacherCaptionsOn: false });
     expect(latest.captionsOn).toBe(false);
 
     teacher.attributes.captionsOn = "true";
@@ -350,7 +348,7 @@ describe("useBrowserCaptions — recognising and delivering", () => {
     const room = new FakeRoom("t1");
     room.join(new FakeParticipant("s1", { id: "s1-mic", readyState: "live" }));
     configReplies = [{ ok: true, enabled: false }];
-    await render({ room, role: "teacher", teacherCaptionsOn: true, prefetchSession: true });
+    await render({ room, role: "teacher", teacherCaptionsOn: true });
     expect(FakeRecognition.instances).toHaveLength(0);
   });
 
@@ -358,7 +356,7 @@ describe("useBrowserCaptions — recognising and delivering", () => {
     const room = new FakeRoom("t1");
     room.join(new FakeParticipant("s1", { id: "s1-mic", readyState: "live" }));
     room.remoteParticipants.get("s1")!.attributes.captionsAsr = "1";
-    await render({ room, role: "teacher", teacherCaptionsOn: true, prefetchSession: true });
+    await render({ room, role: "teacher", teacherCaptionsOn: true });
     const before = configCalls().length;
     fetchMock.mockImplementationOnce(
       async () => new Response(JSON.stringify({ reason: "captions-off" }), { status: 403 }),
@@ -380,7 +378,7 @@ describe("useBrowserCaptions — keeping the transcript (D-189)", () => {
     const room = new FakeRoom("t1");
     room.join(new FakeParticipant("s1", { id: "s1-mic", readyState: "live" }));
     room.remoteParticipants.get("s1")!.attributes.captionsAsr = "1";
-    await render({ room, role: "teacher", teacherCaptionsOn: true, prefetchSession: true });
+    await render({ room, role: "teacher", teacherCaptionsOn: true });
     expect(latest.transcriptKept).toBe(true);
 
     FakeRecognition.instances[0].final("hola");
@@ -400,20 +398,44 @@ describe("useBrowserCaptions — keeping the transcript (D-189)", () => {
     const room = new FakeRoom("t1");
     room.join(new FakeParticipant("s1", { id: "s1-mic", readyState: "live" }));
     room.remoteParticipants.get("s1")!.attributes.captionsAsr = "1";
-    await render({ room, role: "teacher", teacherCaptionsOn: true, prefetchSession: true });
+    await render({ room, role: "teacher", teacherCaptionsOn: true });
     FakeRecognition.instances[0].final("hola");
     await settle();
     expect(transcriptCalls()).toHaveLength(0);
     expect(latest.transcriptKept).toBe(false);
   });
 
-  it("reports nothing kept while captions are off, whatever the session says", async () => {
+  it("reports lines kept with captions off, so the indicator shows (D-203)", async () => {
     configReplies = [
       { ok: true, enabled: true, session: SESSION("teacher", { transcriptCapture: true }) },
     ];
     const room = new FakeRoom("t1");
-    await render({ room, role: "teacher", teacherCaptionsOn: false, prefetchSession: true });
+    await render({ room, role: "teacher", teacherCaptionsOn: false });
+    expect(latest.transcriptKept).toBe(true);
+    expect(latest.captionsOn).toBe(false);
+  });
+
+  it("reports nothing kept with captions off when the session does not say so", async () => {
+    configReplies = [
+      { ok: true, enabled: true, session: SESSION("teacher", { transcriptCapture: false }) },
+    ];
+    const room = new FakeRoom("t1");
+    await render({ room, role: "teacher", teacherCaptionsOn: false });
     expect(latest.transcriptKept).toBe(false);
+  });
+
+  it("posts a consenting class's lines with captions off, and no caption is shown", async () => {
+    configReplies = [
+      { ok: true, enabled: true, session: SESSION("teacher", { transcriptCapture: true }) },
+    ];
+    const room = new FakeRoom("t1");
+    room.join(new FakeParticipant("s1", { id: "s1-mic", readyState: "live" }));
+    room.remoteParticipants.get("s1")!.attributes.captionsAsr = "1";
+    await render({ room, role: "teacher", teacherCaptionsOn: false });
+    FakeRecognition.instances[0].final("hola");
+    await settle();
+    expect(transcriptCalls()).toHaveLength(1);
+    expect(room.localParticipant.publishData).not.toHaveBeenCalled();
   });
 
   it("keeps captioning when the transcript route fails", async () => {
@@ -423,7 +445,7 @@ describe("useBrowserCaptions — keeping the transcript (D-189)", () => {
     const room = new FakeRoom("t1");
     room.join(new FakeParticipant("s1", { id: "s1-mic", readyState: "live" }));
     room.remoteParticipants.get("s1")!.attributes.captionsAsr = "1";
-    await render({ room, role: "teacher", teacherCaptionsOn: true, prefetchSession: true });
+    await render({ room, role: "teacher", teacherCaptionsOn: true });
     fetchMock.mockImplementationOnce(async () => {
       throw new Error("offline");
     });
@@ -448,7 +470,7 @@ describe("useBrowserCaptions — on-device models", () => {
       }),
     };
     const room = new FakeRoom("t1");
-    await render({ room, role: "teacher", teacherCaptionsOn: false, prefetchSession: true });
+    await render({ room, role: "teacher", teacherCaptionsOn: false });
 
     act(() => latest.prepareOnDevice());
     expect(order).toEqual(["translator:es-en", "translator:en-es", "speech:es-MX", "speech:en"]);
@@ -461,7 +483,7 @@ describe("useBrowserCaptions — on-device models", () => {
     const install = vi.fn(async () => true);
     FakeRecognition.install = install as never;
     const room = new FakeRoom("t1");
-    await render({ room, role: "teacher", teacherCaptionsOn: false, prefetchSession: true });
+    await render({ room, role: "teacher", teacherCaptionsOn: false });
     act(() => latest.prepareOnDevice());
     expect(
       install.mock.calls.map((c) => (c as unknown as [{ langs: string[] }])[0].langs[0]),
@@ -471,8 +493,9 @@ describe("useBrowserCaptions — on-device models", () => {
   it("does nothing before the session has arrived", async () => {
     const install = vi.fn(async () => true);
     FakeRecognition.install = install as never;
+    configReplies = [{ ok: true, enabled: false }];
     const room = new FakeRoom("t1");
-    await render({ room, role: "teacher", teacherCaptionsOn: false, prefetchSession: false });
+    await render({ room, role: "teacher", teacherCaptionsOn: false });
     act(() => latest.prepareOnDevice());
     expect(install).not.toHaveBeenCalled();
   });
@@ -488,7 +511,7 @@ describe("useBrowserCaptions — a consent given from the call", () => {
     const teacher = new FakeParticipant("t1", { id: "t1-mic", readyState: "live" });
     teacher.attributes.captionsOn = "true";
     room.join(teacher);
-    await render({ room, role: "student", teacherCaptionsOn: false, prefetchSession: false });
+    await render({ room, role: "student", teacherCaptionsOn: false });
     expect(latest.session?.studentConsent).toBe(false);
     expect(latest.otherPresent).toBe(true);
     // Before: this capable browser recognises only the teacher, from her track.
@@ -511,7 +534,7 @@ describe("useBrowserCaptions — a consent given from the call", () => {
     const room = new FakeRoom("t1");
     const student = new FakeParticipant("s1", { id: "s1-mic", readyState: "live" });
     room.join(student);
-    await render({ room, role: "teacher", teacherCaptionsOn: true, prefetchSession: true });
+    await render({ room, role: "teacher", teacherCaptionsOn: true });
     const before = configCalls().length;
 
     student.attributes.captionsConsent = "1700000000000";
@@ -525,7 +548,7 @@ describe("useBrowserCaptions — a consent given from the call", () => {
     const room = new FakeRoom("t1");
     const student = new FakeParticipant("s1", { id: "s1-mic", readyState: "live" });
     room.join(student);
-    await render({ room, role: "teacher", teacherCaptionsOn: true, prefetchSession: true });
+    await render({ room, role: "teacher", teacherCaptionsOn: true });
     const before = configCalls().length;
 
     student.attributes.captionsAsr = "1";
@@ -537,7 +560,7 @@ describe("useBrowserCaptions — a consent given from the call", () => {
 
   it("says nobody else is here before the other participant joins", async () => {
     const room = new FakeRoom("t1");
-    await render({ room, role: "teacher", teacherCaptionsOn: true, prefetchSession: true });
+    await render({ room, role: "teacher", teacherCaptionsOn: true });
     expect(latest.otherPresent).toBe(false);
   });
 });

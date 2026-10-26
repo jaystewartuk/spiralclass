@@ -246,14 +246,21 @@ export function cloudRecognitionRefusal(args: {
   participants: readonly RoomParticipantAttributes[];
   callerIdentity: string;
   teacherIdentity: string;
+  // The class's session says its transcript is being kept (consent recorded,
+  // D-203): the phone's stream is then warranted with the captions switch off,
+  // because the lines are wanted for the transcript, not for the screen.
+  transcriptCapture?: boolean;
 }): CloudRecognitionRefusal | null {
-  const { participants, callerIdentity, teacherIdentity } = args;
+  const { participants, callerIdentity, teacherIdentity, transcriptCapture } = args;
   if (!participants.some((p) => p.identity === callerIdentity)) return "caller-absent";
   // Nobody to caption for (assignRecognizers asks the same).
   if (!participants.some((p) => p.identity !== callerIdentity)) return "alone";
-  // Only the teacher's own switch counts (D-27).
+  // Only the teacher's own switch counts (D-27) — unless the transcript is
+  // what the stream is for, which the server decided from recorded consent.
   const teacher = participants.find((p) => p.identity === teacherIdentity);
-  if (teacher?.attributes[CAPTIONS_ON_ATTRIBUTE] !== "true") return "captions-off";
+  if (!transcriptCapture && teacher?.attributes[CAPTIONS_ON_ATTRIBUTE] !== "true") {
+    return "captions-off";
+  }
   if (participants.some((p) => p.attributes[CAPTIONS_RECOGNIZER_ATTRIBUTE] === "1")) {
     return "browser-can-recognise";
   }

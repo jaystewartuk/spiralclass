@@ -814,3 +814,92 @@ describe("BrowserCaptions — the teacher's subtitle timing", () => {
     expect(texts(published)).toEqual([]);
   });
 });
+
+describe("BrowserCaptions — the transcript without subtitles (D-203)", () => {
+  const consenting = () => SESSION({ transcriptCapture: true });
+  const hidden = (over: Partial<BrowserCaptionsInput> = {}) =>
+    input({ captionsOn: false, session: consenting(), ...over });
+
+  it("recognises and keeps a consenting class's lines with subtitles off", async () => {
+    const { c, kept, published, shown, fetch } = setup();
+    c.sync(hidden());
+    expect(live()).toHaveLength(1);
+    live()[0].onFinal("hola");
+    await flush();
+    expect(kept).toEqual([{ bookingId: "b1", speaker: "teacher", text: "hola", durationMs: 0 }]);
+    // Display only: nothing translated, published or shown.
+    expect(fetch).not.toHaveBeenCalled();
+    expect(published).toHaveLength(0);
+    expect(shown).toHaveLength(0);
+  });
+
+  it("shows no partial line while subtitles are off", () => {
+    const { c, published, shown } = setup();
+    c.sync(hidden());
+    live()[0].onPartial?.("ho");
+    expect(published).toHaveLength(0);
+    expect(shown).toHaveLength(0);
+  });
+
+  it("keeps nothing for a class without recorded consent, subtitles off", () => {
+    const { c } = setup();
+    c.sync(input({ captionsOn: false, session: SESSION({ transcriptCapture: false }) }));
+    expect(recognizers).toHaveLength(0);
+  });
+
+  it("never recognises the student's speech without her captions consent", () => {
+    const { c } = setup();
+    c.sync(
+      hidden({
+        session: SESSION({ transcriptCapture: true, studentConsent: false }),
+        room: { ...input().room, remote: { identity: "s1", micTrack: remoteMic, capable: false } },
+      }),
+    );
+    expect(live().map((r) => r.track)).toEqual([localMic]);
+  });
+
+  it("keeps recognising across the switch flipping, and starts showing lines", async () => {
+    const { c, published } = setup();
+    c.sync(hidden());
+    const first = live()[0];
+    c.sync(input({ session: consenting() }));
+    expect(recognizers).toHaveLength(1);
+    expect(first.stopped).toBe(false);
+    first.onFinal("hola");
+    await flush();
+    expect(published).toHaveLength(1);
+    c.sync(hidden());
+    expect(first.stopped).toBe(false);
+  });
+
+  it("keeps whole utterances, not the teacher's subtitle timing's cuts, while subtitles are off", async () => {
+    let id = 0;
+    const timers = new Map<number, () => void>();
+    const { c, kept, published } = setup({
+      setTimeout: (fn) => {
+        timers.set(++id, fn);
+        return id;
+      },
+      clearTimeout: (h) => void timers.delete(h as number),
+    });
+    c.sync(
+      hidden({
+        session: SESSION({ transcriptCapture: true, timing: { pauseMs: 800, maxChars: 40 } }),
+      }),
+    );
+    live()[0].onPartial?.("one two three four five six seven eight nine ten");
+    for (const fn of [...timers.values()]) fn();
+    live()[0].onFinal("one two three four five six seven eight nine ten eleven");
+    await flush();
+    expect(kept.map((l) => l.text)).toEqual([
+      "one two three four five six seven eight nine ten eleven",
+    ]);
+    expect(published).toHaveLength(0);
+  });
+
+  it("does not report speakers as uncaptioned while nothing is meant to be shown", () => {
+    const { c, statuses } = setup({ SpeechRecognition: null });
+    c.sync(hidden({ selfCapable: false }));
+    expect(statuses.at(-1)).toEqual({ uncaptioned: [], stopped: null });
+  });
+});

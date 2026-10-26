@@ -386,6 +386,27 @@ describe("cloudRecognitionRefusal", () => {
     expect(verdict([student()])).toBe("alone");
   });
 
+  it("allows the stream with the switch off when the class's transcript is kept", () => {
+    const off = [teacher({ captionsOn: "false" }), student()];
+    expect(
+      cloudRecognitionRefusal({
+        participants: off,
+        callerIdentity: "s1",
+        teacherIdentity: "t1",
+        transcriptCapture: true,
+      }),
+    ).toBeNull();
+    // The rest of the warrant still applies.
+    expect(
+      cloudRecognitionRefusal({
+        participants: [teacher({ captionsOn: "false", captionsAsr: "1" }), student()],
+        callerIdentity: "s1",
+        teacherIdentity: "t1",
+        transcriptCapture: true,
+      }),
+    ).toBe("browser-can-recognise");
+  });
+
   it("refuses while the teacher's switch is off, trusting only her attribute", () => {
     expect(verdict([teacher({ captionsOn: "false" }), student()])).toBe("captions-off");
     // The student setting the switch on herself counts for nothing.

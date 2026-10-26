@@ -924,7 +924,6 @@ export function ClassCall({
     bookingId,
     role,
     teacherCaptionsOn: captionsOn,
-    prefetchSession: Boolean(canCaption),
     showLocal: captions.addLine,
   });
   // Announced here rather than by the top-bar icon, which unmounts while the

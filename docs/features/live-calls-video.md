@@ -280,10 +280,13 @@ That lasts until preview has a LiveKit server of its own.
 
 ### The lesson transcript & lesson insights
 
-20. The transcript is the **caption text** (D-189): while captions are on,
-    the browser that recognised a finished utterance also posts its source
-    text, speaker and estimated duration to `POST /api/captions/transcript`.
-    It is **not** derived from the A/V recording and **no audio is captured**
+20. The transcript is the **caption text** (D-189): the browser that
+    recognised a finished utterance also posts its source text, speaker and
+    estimated duration to `POST /api/captions/transcript`. **The teacher's
+    captions switch does not decide this** ([D-203](../decisions/D-203.md)):
+    with it off, the recognisers still run while the session says
+    `transcriptCapture`, but nothing is translated, published or shown — the
+    switch is the display. It is **not** derived from the A/V recording and **no audio is captured**
     for it.
 21. A class's lines are kept only when its caption session says
     `transcriptCapture`: the transcription flag is on AND that **specific
@@ -301,11 +304,16 @@ That lasts until preview has a LiveKit server of its own.
     arrives after that is dropped.
 24. **Both participants are told "Learning notes are on"** each time lines
     start being kept, and see a small notes icon beside the lesson clock for
-    as long as they are; tapping it says what is kept (caption text, no
+    as long as they are — also when no caption is on screen; the session is
+    read when the call connects, so the notice appears then (D-203); tapping
+    it says what is kept (caption text, no
     audio) and links to the privacy notice (D-21). The transcript is kept while the teacher's
     account is open and deleted with it.
-25. Not every call gets a transcript — only when captions are on, the flag is
-    on, and the consent above is on file. The legacy egress-audio path
+25. Not every call gets a transcript — only when the flag is on and the
+    consent above is on file, whether or not captions are showing. A
+    student's own speech is additionally recognised only with her captions
+    consent (D-22). A phone-to-phone class streams to Deepgram for the
+    transcript too (D-203). The legacy egress-audio path
     (`lib/transcription/pipeline.ts`) additionally requires recording to be
     enabled, so it is dormant.
 
