@@ -270,13 +270,14 @@ pnpm promote
 Use it to ship an older commit, to certify with `--force-gate` when the
 verdict cannot be read, or when the runner is broken.
 
-**That push is the trigger.** `deploy-production.yml` runs two jobs, each
-behind the `production` environment's required reviewer. First, `database`
-(`scripts/database-deploy.sh`: Neon checkpoint, then migrations). Then
-`cloudrun` (`scripts/cloudrun-deploy.sh`: a **native amd64** image, the Cloud
-Run deploy, the Inngest sync; then the production probes). Each job holds only
-its own credentials. GitHub asks for approval per job, so a promote asks twice.
-**The approval is the release decision**: approve outside lesson hours, or
+**That push is the trigger.** `deploy-production.yml` runs two jobs. First,
+`database` (`scripts/database-deploy.sh`: Neon checkpoint, then migrations),
+behind the `production` environment's required reviewer. Then `cloudrun`
+(`scripts/cloudrun-deploy.sh`: a **native amd64** image, the Cloud Run deploy,
+the Inngest sync; then the production probes), on the `production-app`
+environment, which has no reviewer and starts only after the database job
+([D-205](../decisions/D-205.md)). Each job holds only its own credentials. **A
+promote asks once.** **The approval is the release decision**: approve outside lesson hours, or
 leave the run waiting until then. Approving ships everything merged before it.
 A hand-typed `pnpm promote` watches the run and exits non-zero unless both jobs
 are green, so a green promote means production is serving. ([D-177](../decisions/D-177.md)'s

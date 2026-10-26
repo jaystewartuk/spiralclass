@@ -181,6 +181,34 @@ if [ "${EXISTING_POLICIES}" != "production" ]; then
 fi
 echo "  ✓ every production deploy waits for ${REPO%%/*}, and only the production branch can deploy."
 
+# ── production-app: the Cloud Run job's values, with no reviewer (D-205) ─────
+# GitHub asks for approval once per job on a reviewed environment, so a second
+# reviewed job meant a second click that guarded nothing: by then the
+# migrations had run. The Cloud Run job uses this environment instead, and
+# still cannot start unapproved, because it `needs:` the database job, which
+# can. What keeps it safe is who can reach it: only the `production` branch,
+# which only an admin moves.
+echo "Applying the production-app environment on ${REPO}…"
+gh api -X PUT "repos/${REPO}/environments/production-app" --input - >/dev/null <<JSON
+{
+  "wait_timer": 0,
+  "deployment_branch_policy": { "protected_branches": false, "custom_branch_policies": true }
+}
+JSON
+APP_POLICIES="$(gh api "repos/${REPO}/environments/production-app/deployment-branch-policies" --jq '[.branch_policies[].name] | join(",")')"
+if [ -z "${APP_POLICIES}" ]; then
+  gh api -X POST "repos/${REPO}/environments/production-app/deployment-branch-policies" \
+    -f name=production -f type=branch >/dev/null
+  APP_POLICIES="production"
+fi
+if [ "${APP_POLICIES}" != "production" ]; then
+  echo "  ✗ the production-app environment's branch policies are '${APP_POLICIES}', not just 'production'." >&2
+  echo "    Fix them in Settings → Environments → production-app → Deployment branches." >&2
+  exit 1
+fi
+echo "  ✓ only the production branch can reach the Cloud Run job's values."
+echo "    Its secrets come from infra/infisical/push-github-secrets.sh."
+
 # ── promote: the environment PROMOTE_TOKEN lives in (D-199) ──────────────────
 # promote-on-green.yml fast-forwards `production` with a token acting as the
 # owner. Only `main` may reach this environment, so a workflow on any other

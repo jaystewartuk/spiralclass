@@ -36,8 +36,19 @@ name: Deploy production
 # job runs first either way, because no target may reach a schema the commit
 # has not migrated. A push deploys every target.
 #
-# ⚠️ Approvals are PER JOB on GitHub, not per run. A push asks twice: once for
-# the database job, then once for the target.
+# ONE APPROVAL PER DEPLOY ([D-205]). GitHub asks once per job that uses an
+# environment with a reviewer, so the two jobs use two environments:
+#
+#   database   `production`       the required reviewer — the release decision
+#   cloudrun   `production-app`   no reviewer; `production` branch only
+#
+# The Cloud Run job needs no click of its own because it `needs:` the database
+# job, which cannot start unapproved. Approving the database job ships the
+# commit. Two environments also make the credential split above a property of
+# GitHub rather than of this file: neither job could read the other's values
+# even by naming them. ⚠️ Anything that adds a job on `production-app` without
+# `needs: [database]` reopens a deploy nobody approved —
+# apps/web/tests/config/local-gate.test.ts refuses it.
 #
 # THE GATE STILL RUNS FIRST. `production` is a fast-forward-only branch that
 # only scripts/ci/promote.mjs moves, by hand or from promote-on-green.yml, and
@@ -299,8 +310,10 @@ jobs:
     if: ${{ github.ref == 'refs/heads/production' && (github.event_name != 'workflow_dispatch' || inputs.target == 'all' || inputs.target == 'cloudrun') }}
     runs-on: ubuntu-latest # ⚠️ Never a larger runner — those are billed even on a public repo.
     timeout-minutes: 45
+    # No reviewer: this job starts only after the approved database job
+    # (`needs:` above), so one click ships both ([D-205]).
     environment:
-      name: production
+      name: production-app
       url: https://spiralclass.com
     env:
       GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}

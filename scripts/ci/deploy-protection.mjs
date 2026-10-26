@@ -9,6 +9,14 @@
  *      bypass it, and only the `production` branch may use it. Every deploy
  *      run waits for that reviewer before the database job starts, whoever
  *      moved the branch, and whatever credential they used.
+ *
+ *      The Cloud Run job's values live in a SECOND environment,
+ *      `production-app`, with no reviewer ([D-205]): one approval per deploy,
+ *      not one per job. It is safe only because that job `needs:` the database
+ *      job, so it cannot start until the reviewer approved, and because only
+ *      the `production` branch may use that environment either — which is the
+ *      half of it this module checks. The `needs:` is held in
+ *      apps/web/tests/config/local-gate.test.ts.
  *   2. The `production` BRANCH can be moved only by a repository admin (an
  *      `update` rule whose only bypass is the admin role). It also has a
  *      separate, bypass-free ruleset that stops anyone force-pushing or deleting
@@ -29,18 +37,31 @@ export const ADMIN_ROLE_ID = 5;
 
 export const PRODUCTION_REF = "refs/heads/production";
 
+/** The environment the Cloud Run job reads its values from, with no reviewer of its own (D-205). */
+export const APP_ENVIRONMENT = "production-app";
+
 /**
  * @param {{
  *   environment: any;
  *   branchPolicies: ReadonlyArray<string>;
+ *   appEnvironment: any;
+ *   appBranchPolicies: ReadonlyArray<string>;
  *   rulesets: ReadonlyArray<any>;
  * }} settings
  *   `environment` is `GET repos/{repo}/environments/production`,
- *   `branchPolicies` the names from its `deployment-branch-policies`, and
- *   `rulesets` every ruleset as `GET repos/{repo}/rulesets/{id}` returns it.
+ *   `branchPolicies` the names from its `deployment-branch-policies`,
+ *   `appEnvironment` and `appBranchPolicies` the same two for
+ *   `production-app`, and `rulesets` every ruleset as
+ *   `GET repos/{repo}/rulesets/{id}` returns it.
  * @returns {string[]} What is wrong, one sentence each. Empty means protected.
  */
-export function deployProtectionProblems({ environment, branchPolicies, rulesets }) {
+export function deployProtectionProblems({
+  environment,
+  branchPolicies,
+  appEnvironment,
+  appBranchPolicies,
+  rulesets,
+}) {
   const problems = [];
 
   if (!environment) {
@@ -62,14 +83,25 @@ export function deployProtectionProblems({ environment, branchPolicies, rulesets
     problems.push("Admins can bypass the `production` environment's reviewer.");
   }
 
-  const policy = environment.deployment_branch_policy;
-  const onlyProduction =
-    policy?.custom_branch_policies === true &&
-    branchPolicies.length === 1 &&
-    branchPolicies[0] === "production";
-  if (!onlyProduction) {
+  const onlyProduction = (env, policies) =>
+    env.deployment_branch_policy?.custom_branch_policies === true &&
+    policies.length === 1 &&
+    policies[0] === "production";
+  if (!onlyProduction(environment, branchPolicies)) {
     problems.push(
       "The `production` environment's secrets are not limited to the `production` branch.",
+    );
+  }
+
+  // No reviewer is required here, and one is not refused: it would only bring
+  // back the second click D-205 removed. What matters is who can reach it.
+  if (!appEnvironment) {
+    problems.push(
+      `There is no \`${APP_ENVIRONMENT}\` environment, so the Cloud Run job has no credentials to deploy with.`,
+    );
+  } else if (!onlyProduction(appEnvironment, appBranchPolicies)) {
+    problems.push(
+      `The \`${APP_ENVIRONMENT}\` environment's secrets are not limited to the \`production\` branch.`,
     );
   }
 
