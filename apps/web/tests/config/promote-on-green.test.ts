@@ -50,6 +50,10 @@ const PROTECTED = {
       { type: "required_reviewers", prevent_self_review: false, reviewers: [{}] },
     ],
   },
+  appEnvironment: {
+    deployment_branch_policy: { protected_branches: false, custom_branch_policies: true },
+    protection_rules: [{ type: "branch_policy" }],
+  },
   policies: { branch_policies: [{ name: "production" }] },
   rulesets: {
     "1": historyRuleset,
@@ -71,6 +75,10 @@ const say = (value) => { process.stdout.write(typeof value === "string" ? value 
 const settings = JSON.parse(process.env.STUB_SETTINGS);
 if (cmd === "api") {
   if (path === "repos/{owner}/{repo}/environments/production") say(settings.environment);
+  if (path === "repos/{owner}/{repo}/environments/production-app") {
+    if (settings.appEnvironment) say(settings.appEnvironment);
+    process.stderr.write("HTTP 404"); process.exit(1);
+  }
   if (path.endsWith("/deployment-branch-policies")) say(settings.policies);
   if (path === "repos/{owner}/{repo}/rulesets") say(Object.keys(settings.rulesets).map((id) => ({ id })));
   const ruleset = path.match(/rulesets\\/(\\d+)$/);
@@ -208,6 +216,17 @@ describe("promote --when-certified", () => {
     });
     expect(result.status).toBe(1);
     expect(result.stderr).toContain("no required reviewer");
+    expect(originProduction()).toBe(shipped);
+  });
+
+  it("still refuses, red, when the Cloud Run job's environment does not exist (D-205)", () => {
+    const shipped = originProduction();
+    const result = promote(ARGS, [run("Gate", "success"), run("Heavy", "success")], {
+      ...PROTECTED,
+      appEnvironment: null,
+    });
+    expect(result.status).toBe(1);
+    expect(result.stderr).toContain("no `production-app` environment");
     expect(originProduction()).toBe(shipped);
   });
 

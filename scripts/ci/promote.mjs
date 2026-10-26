@@ -84,7 +84,7 @@ import { readFileSync } from "node:fs";
 import { createInterface } from "node:readline/promises";
 
 import { recordRun } from "../local/receipts.mjs";
-import { deployProtectionProblems } from "./deploy-protection.mjs";
+import { APP_ENVIRONMENT, deployProtectionProblems } from "./deploy-protection.mjs";
 import { deployVerdict } from "./deploy-verdict.mjs";
 import { capture, check, git, has, run } from "./lib.mjs";
 
@@ -176,16 +176,25 @@ try {
   const policies = readJson(
     "repos/{owner}/{repo}/environments/production/deployment-branch-policies",
   );
+  // A missing app environment is a 404, so null here is "absent", and the
+  // check names it. Its policies are read only when it exists.
+  const appEnvironment = readJson(`repos/{owner}/{repo}/environments/${APP_ENVIRONMENT}`);
+  const appPolicies = appEnvironment
+    ? readJson(`repos/{owner}/{repo}/environments/${APP_ENVIRONMENT}/deployment-branch-policies`)
+    : { branch_policies: [] };
   const summaries = readJson("repos/{owner}/{repo}/rulesets");
   const rulesets = Array.isArray(summaries)
     ? summaries.map((summary) => readJson(`repos/{owner}/{repo}/rulesets/${summary.id}`))
     : null;
+  const names = (list) => (list.branch_policies ?? []).map((policy) => policy.name);
 
   const problems =
-    environment && policies && rulesets && !rulesets.includes(null)
+    environment && policies && appPolicies && rulesets && !rulesets.includes(null)
       ? deployProtectionProblems({
           environment,
-          branchPolicies: (policies.branch_policies ?? []).map((policy) => policy.name),
+          branchPolicies: names(policies),
+          appEnvironment,
+          appBranchPolicies: names(appPolicies),
           rulesets,
         })
       : [
@@ -411,10 +420,10 @@ if (has("gh")) {
 // probes.
 //
 // The chain D-120 insisted on is intact — nothing here is left for a human to
-// remember. What IS left for a human is the approvals on the `production`
-// environment, which GitHub asks for per job: the database job, then the
-// target. Each is a queued run with a notification rather than a
-// step that can be silently skipped. See deploy-production.yml's header.
+// remember. What IS left for a human is the one approval on the `production`
+// environment, on the database job; the Cloud Run job follows it by itself
+// (D-205). It is a queued run with a notification rather than a step that can
+// be silently skipped. See deploy-production.yml's header.
 const RUN_URL = `https://github.com/${capture("gh", ["repo", "view", "--json", "nameWithOwner", "-q", ".nameWithOwner"]) || "jaystewartuk/spiralclass"}/actions/workflows/deploy-production.yml`;
 
 let deployOk = true;
@@ -431,7 +440,7 @@ if (noWait || !has("gh")) {
 } else {
   console.log("\n── Waiting for the deploy workflow");
   console.log(
-    `  It needs two approvals on the production environment — the database job, then the target: ${RUN_URL}\n`,
+    `  It needs one approval on the production environment, on the database job; Cloud Run follows: ${RUN_URL}\n`,
   );
   // Matched on the HEAD SHA, not "the most recent run on this branch" — the
   // previous promote's run is also on this branch, and watching that one would

@@ -44,7 +44,7 @@ that needs `KEY=VALUE` shape has to rebuild it.
 Nothing left in `infra/infisical/` duplicates the old boilerplate. The scripts
 that remain here are genuinely about Infisical — each pushes a whole set of
 values into one consumer, rather than merely consuming one secret:
-`push-github-secrets.sh` (the deploy workflow's environment). Cloud Run's own
+`push-github-secrets.sh` (the deploy workflow's two environments). Cloud Run's own
 push lives with the rest of its setup, as `infra/gcp/push-cloudrun-env.sh`.
 
 ## Account setup (cloud free tier)
@@ -504,10 +504,10 @@ in the build.env file like the rest now. None of this touches Infisical.
 Every consumer holds a derived copy, and a rotation is not done until each copy
 is re-pushed. All operator-only:
 
-| Script                                   | Writes                                               |
-| ---------------------------------------- | ---------------------------------------------------- |
-| `infra/gcp/push-cloudrun-env.sh`         | Cloud Run's one runtime secret (production)          |
-| `infra/infisical/push-github-secrets.sh` | the `production` GitHub Environment the deploy reads |
+| Script                                   | Writes                                                                               |
+| ---------------------------------------- | ------------------------------------------------------------------------------------ |
+| `infra/gcp/push-cloudrun-env.sh`         | Cloud Run's one runtime secret (production)                                          |
+| `infra/infisical/push-github-secrets.sh` | the `production` and `production-app` GitHub Environments the deploy's two jobs read |
 
 Cloud Run picks a new secret version up only when a deploy rolls a new
 revision. `docs/deployment/INCIDENT_RESPONSE.md` §4 is the rotation order.

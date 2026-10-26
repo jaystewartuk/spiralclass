@@ -393,6 +393,7 @@ a hook — is a caller.
 | [D-180](./D-180.md) | The two counts every PR moves are stated as floors, so open branches stop conflicting on them  |
 | [D-199](./D-199.md) | **A merge starts its own production deploy**; the owner's approval is the release decision     |
 | [D-200](./D-200.md) | Preview returns as a second Cloud Run service, deployed by every merge before the approval     |
+| [D-205](./D-205.md) | A production deploy asks for **one approval**, on the database job; Cloud Run follows it       |
 
 ### Privacy, governance and publication
 
@@ -576,6 +577,7 @@ records removed before publication — see [What is not here](#what-is-not-here)
 | [D-201](./D-201.md) | A model call site ships with an eval set; verdicts become a figure    | Active (narrows D-87)                |
 | [D-203](./D-203.md) | The transcript is kept with subtitles off; the switch is display only | Active (reverses part of D-189)      |
 | [D-204](./D-204.md) | New students hear what teachers send; unreachable sends say so        | Active (reverses a code default)     |
+| [D-205](./D-205.md) | One approval per production deploy, on the database job               | Active (narrows D-157, D-199)        |
 
 ---
 

@@ -119,6 +119,12 @@ anything, and it fails closed when it cannot read them.
   [D-157](../decisions/D-157.md) put on the _environment_ rather than the
   branch: a pending approval is a queued run with a notification, not a step
   that can be silently forgotten.
+- **The `production-app` environment holds the Cloud Run job's values and has
+  no reviewer** ([D-205](../decisions/D-205.md)), so a deploy asks once, not
+  once per job. Only the `production` branch may use it, which promote checks
+  too. The job cannot start unapproved because it `needs:` the database job,
+  and `apps/web/tests/config/local-gate.test.ts` refuses any job on it that
+  does not.
 - **A second ruleset, `production: only an admin moves it`**, holds a single
   `update` rule whose only bypass actor is the repository admin role. It does
   not reject the promote fast-forward, because the operator pushing it is the
