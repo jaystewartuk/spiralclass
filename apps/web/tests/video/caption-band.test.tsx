@@ -577,3 +577,247 @@ describe("the transcript panel", () => {
     expect(el.textContent).toContain("call.captionsTranscriptEmpty");
   });
 });
+
+// A student on a desktop: the subtitles covered part of her teacher's face.
+// Every answer here is the reader's own, and none of them changes anyone
+// else's screen.
+describe("keeping the subtitles off the other person's face", () => {
+  const three = [
+    bilingual,
+    { ...bilingual, id: "2", src: "Segunda", text: "Second" },
+    { ...bilingual, id: "3", src: "Tercera", text: "Third" },
+  ];
+  const openSettings = (el: HTMLElement) => {
+    act(() => (el.querySelector('[aria-label="call.captionsSettings"]') as HTMLElement).click());
+    return el.querySelector('[role="group"]') as HTMLElement;
+  };
+  const pointer = (target: Element, type: string, clientY: number) =>
+    act(() => {
+      target.dispatchEvent(new MouseEvent(type, { bubbles: true, clientY, button: 0 }));
+    });
+
+  it("has a size below the default", () => {
+    const el = render({ prefs: { ...DEFAULT_CAPTION_PREFERENCES, size: "s" } });
+    const line = [...el.querySelectorAll("p")].find((p) =>
+      p.textContent?.includes("How are you today?"),
+    );
+    expect(line?.className).toContain("text-base");
+    expect(line?.className).toContain("md:text-lg");
+    const small = openSettings(el).querySelector('[aria-label="call.captionsSizeS"]');
+    expect(small?.getAttribute("aria-pressed")).toBe("true");
+  });
+
+  it("shows sizes as a growing glyph, named in full, so no language overflows the row", () => {
+    // In Spanish "Muy grande" ran off the popover's edge, and in English
+    // "Extra large" wrapped inside its segment (seen in a local call).
+    const group = openSettings(render());
+    const keys = [
+      "call.captionsSizeS",
+      "call.captionsSizeM",
+      "call.captionsSizeL",
+      "call.captionsSizeXl",
+    ];
+    for (const key of keys) {
+      const button = group.querySelector(`[aria-label="${key}"]`) as HTMLElement;
+      expect(button.textContent).toBe("");
+      expect(button.querySelector("svg")).not.toBeNull();
+    }
+  });
+
+  it("shows only as many lines as the reader asked for", () => {
+    const one = render({ entries: three, prefs: { ...DEFAULT_CAPTION_PREFERENCES, lines: 1 } });
+    expect(one.textContent).toContain("Third");
+    expect(one.textContent).not.toContain("Second");
+    const two = render({ entries: three, prefs: { ...DEFAULT_CAPTION_PREFERENCES, lines: 2 } });
+    expect(two.textContent).toContain("Second");
+    expect(two.textContent).not.toContain("How are you today?");
+  });
+
+  it("never shows more lines than the size allows, whatever was asked", () => {
+    // Three lines of extra-large text is the wall across a face that the size
+    // ceiling exists to prevent; asking for three does not lift it.
+    const el = render({
+      entries: three,
+      prefs: { ...DEFAULT_CAPTION_PREFERENCES, size: "xl", lines: 3 },
+    });
+    expect(el.textContent).not.toContain("How are you today?");
+  });
+
+  it("offers only the line counts that would change something", () => {
+    const group = openSettings(render({ prefs: { ...DEFAULT_CAPTION_PREFERENCES, size: "xl" } }));
+    expect(group.querySelector('[aria-label="call.captionsLinesName"]')).not.toBeNull();
+    const counts = [...group.querySelectorAll("button")]
+      .map((b) => b.textContent)
+      .filter((t) => /^\d$/.test(t ?? ""));
+    expect(counts).toEqual(["1", "2"]);
+    // A stored 3 reads as the 2 that is actually showing.
+    const two = [...group.querySelectorAll("button")].find((b) => b.textContent === "2");
+    expect(two?.getAttribute("aria-pressed")).toBe("true");
+  });
+
+  it("sets the line count and the position from its settings", () => {
+    const onPrefsChange = vi.fn();
+    const group = openSettings(render({ onPrefsChange }));
+    act(() =>
+      (
+        [...group.querySelectorAll("button")].find((b) => b.textContent === "1") as HTMLElement
+      ).click(),
+    );
+    expect(onPrefsChange).toHaveBeenCalledWith({ lines: 1 });
+    for (const [key, position] of [
+      ["call.captionsPositionTop", "top"],
+      ["call.captionsPositionBelow", "below"],
+      ["call.captionsPositionBottom", "bottom"],
+    ] as const) {
+      act(() => (group.querySelector(`[aria-label="${key}"]`) as HTMLElement).click());
+      expect(onPrefsChange).toHaveBeenCalledWith({ position });
+    }
+  });
+
+  it("sits along the top edge when moved there, panel first and controls under it", () => {
+    const band = render({
+      prefs: { ...DEFAULT_CAPTION_PREFERENCES, position: "top" },
+      tileParked: true,
+    }).firstElementChild as HTMLElement;
+    expect(band.dataset.position).toBe("top");
+    expect(band.className).toContain("top-3");
+    expect(band.className).toContain("flex-col-reverse");
+    expect(band.className).not.toContain("bottom-3");
+    // Tiles park at the bottom; reserving their column up here would narrow
+    // the subtitles for nothing.
+    expect(band.className).not.toContain("pr-32");
+  });
+
+  it("does not stretch the panel for the popover at the top, where it drops into the stage", () => {
+    const el = render({ prefs: { ...DEFAULT_CAPTION_PREFERENCES, position: "top" } });
+    openSettings(el);
+    expect((el.querySelector('[role="log"]') as HTMLElement).className).not.toContain("min-h-40");
+    // At the bottom it still does, so the popover is not clipped by the stage.
+    const bottom = render();
+    openSettings(bottom);
+    expect((bottom.querySelector('[role="log"]') as HTMLElement).className).toContain("min-h-40");
+  });
+
+  it("moves to the other edge with one press of its move button", () => {
+    const onPrefsChange = vi.fn();
+    const el = render({ onPrefsChange });
+    act(() => (el.querySelector('[aria-label="call.captionsMoveToTop"]') as HTMLElement).click());
+    expect(onPrefsChange).toHaveBeenCalledWith({ position: "top" });
+
+    const back = vi.fn();
+    const top = render({
+      onPrefsChange: back,
+      prefs: { ...DEFAULT_CAPTION_PREFERENCES, position: "top" },
+    });
+    act(() =>
+      (top.querySelector('[aria-label="call.captionsMoveToBottom"]') as HTMLElement).click(),
+    );
+    expect(back).toHaveBeenCalledWith({ position: "bottom" });
+  });
+
+  it("snaps to the half of the stage it is dragged into, and only once", () => {
+    container.getBoundingClientRect = () =>
+      ({ top: 0, bottom: 400, height: 400, left: 0, right: 600, width: 600 }) as DOMRect;
+    const onPrefsChange = vi.fn();
+    const el = render({ onPrefsChange });
+    const handle = el.querySelector('[aria-label="call.captionsMoveToTop"]') as HTMLElement;
+    const band = el.firstElementChild as HTMLElement;
+
+    pointer(handle, "pointerdown", 380);
+    pointer(handle, "pointermove", 100);
+    // The band follows the pointer while it is held.
+    expect(band.style.transform).toBe("translateY(-280px)");
+    pointer(handle, "pointerup", 100);
+    // The click that ends a drag must not also toggle it back.
+    act(() => handle.click());
+    expect(onPrefsChange.mock.calls).toEqual([[{ position: "top" }]]);
+    expect(band.style.transform).toBe("");
+
+    // Let go in the lower half and it stays at the bottom.
+    const stay = vi.fn();
+    const again = render({ onPrefsChange: stay });
+    const h = again.querySelector('[aria-label="call.captionsMoveToTop"]') as HTMLElement;
+    pointer(h, "pointerdown", 380);
+    pointer(h, "pointermove", 300);
+    pointer(h, "pointerup", 300);
+    expect(stay).toHaveBeenCalledWith({ position: "bottom" });
+  });
+
+  it("does not let a drag on the subtitles reach the stage's tile-swap handler", () => {
+    // The stage's handler is a React prop on an ancestor, as in class-call.tsx.
+    const stage = vi.fn();
+    act(() =>
+      root.render(
+        <div onPointerDown={stage}>
+          <CaptionBand
+            entries={[bilingual]}
+            prefs={DEFAULT_CAPTION_PREFERENCES}
+            onPrefsChange={() => {}}
+            speakerName={() => null}
+            tileParked={false}
+            awaitingFirstLine={false}
+            hasTranscript
+            onOpenTranscript={() => {}}
+          />
+        </div>,
+      ),
+    );
+    const handle = container.querySelector('[aria-label="call.captionsMoveToTop"]') as HTMLElement;
+    pointer(handle, "pointerdown", 10);
+    expect(stage).not.toHaveBeenCalled();
+    // The control is the only thing that opts out: the rest of the stage
+    // still gets its pointer events.
+    pointer(container.firstElementChild as HTMLElement, "pointerdown", 10);
+    expect(stage).toHaveBeenCalledTimes(1);
+  });
+
+  it("has no move button docked, where there is no edge to move to", () => {
+    const el = render({ docked: true });
+    expect(el.querySelector('[aria-label="call.captionsMoveToTop"]')).toBeNull();
+    expect(el.querySelector('[aria-label="call.captionsMoveToBottom"]')).toBeNull();
+  });
+
+  it("below a camera, its ✕ hides the subtitles everywhere, not for materials", () => {
+    // Docked because the reader asked for "below", with no worksheet open:
+    // "hide with materials" would hide nothing she can see.
+    const onPrefsChange = vi.fn();
+    const el = render({ docked: true, contentOwnsStage: false, onPrefsChange });
+    expect(el.querySelector('[aria-label="call.captionsHideWithContent"]')).toBeNull();
+    act(() => (el.querySelector('[aria-label="call.captionsHideMine"]') as HTMLElement).click());
+    expect(onPrefsChange).toHaveBeenCalledWith({ visible: false });
+  });
+
+  it("below a camera, a standing 'not over materials' choice does not collapse the strip", () => {
+    const el = render({
+      docked: true,
+      contentOwnsStage: false,
+      prefs: { ...DEFAULT_CAPTION_PREFERENCES, position: "below", visibleWithContent: false },
+    });
+    expect(el.querySelector('[role="log"]')).not.toBeNull();
+    expect(el.textContent).toContain(bilingual.text);
+  });
+});
+
+// Measured in a real call: moved to the top, the band's scrim hid the
+// "camera and mic are off" message completely. That row is also where the
+// audio-blocked and captions-consent prompts appear, both of which need a tap.
+describe("at the top, under the call's status messages", () => {
+  const top = { ...DEFAULT_CAPTION_PREFERENCES, position: "top" as const };
+
+  it("sits below the messages when there are some", () => {
+    const band = render({ prefs: top, topInset: 60 }).firstElementChild as HTMLElement;
+    expect(band.style.top).toBe("68px");
+  });
+
+  it("takes the edge when there are none", () => {
+    const band = render({ prefs: top, topInset: 0 }).firstElementChild as HTMLElement;
+    expect(band.style.top).toBe("");
+    expect(band.className).toContain("top-3");
+  });
+
+  it("ignores the messages at the bottom, which they never reach", () => {
+    const band = render({ topInset: 60 }).firstElementChild as HTMLElement;
+    expect(band.style.top).toBe("");
+    expect(band.className).toContain("bottom-3");
+  });
+});

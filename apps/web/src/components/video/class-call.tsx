@@ -378,6 +378,20 @@ export function ClassCall({
     ro.observe(el);
     return () => ro.disconnect();
   }, [minimized]);
+  // How far the status stack reaches down into the stage, so subtitles the
+  // reader moved to the top sit under its messages rather than over them.
+  // Measured in a real call: at the top, the band's scrim hid a "camera and
+  // mic are off" pill completely, and the same row is where the audio-blocked
+  // and captions-consent prompts appear — both of which need a tap. Zero when
+  // the stack is empty, so the band takes the edge when there is nothing there.
+  //
+  // Elements in state rather than refs: the stage mounts after the pre-join
+  // screen, and an effect keyed on a ref ran once against nothing and never
+  // measured again (seen in a local call). The measuring effect sits beside
+  // `captionPlacement`, below, because it depends on `contentOwnsStage`.
+  const [stageEl, setStageEl] = useState<HTMLDivElement | null>(null);
+  const [statusStackEl, setStatusStackEl] = useState<HTMLDivElement | null>(null);
+  const [statusStackReach, setStatusStackReach] = useState(0);
   const tileBounds = useCallback(
     (): SelfViewBounds => ({
       screenW: typeof window === "undefined" ? 400 : window.innerWidth,
@@ -1609,7 +1623,33 @@ export function ClassCall({
     swapped,
   });
   const remoteIsBig = stage.main === "remote";
-  const captionPlacement = resolveCaptionPlacement({ minimized, contentOwnsStage, roomCaptionsOn });
+  const captionPlacement = resolveCaptionPlacement({
+    minimized,
+    contentOwnsStage,
+    roomCaptionsOn,
+    belowStage: captionPrefs.position === "below",
+  });
+  useEffect(() => {
+    const stack = statusStackEl;
+    const stage = stageEl;
+    // A stale reach left behind here is harmless: the only reader is the
+    // over-stage band, which renders only when neither of these is true.
+    if (!stack || !stage || minimized || contentOwnsStage) return;
+    const measure = () =>
+      setStatusStackReach(
+        stack.childElementCount === 0
+          ? 0
+          : Math.max(
+              0,
+              Math.round(stack.getBoundingClientRect().bottom - stage.getBoundingClientRect().top),
+            ),
+      );
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(stack);
+    ro.observe(stage);
+    return () => ro.disconnect();
+  }, [stageEl, statusStackEl, minimized, contentOwnsStage]);
   const localIsBig = stage.main === "local";
   // Minimized mode shows exactly one tile (the current primary) and nothing
   // else — see canMinimize above for why material/screen-share are excluded
@@ -1883,6 +1923,7 @@ export function ClassCall({
             nothing else. */}
           {!minimized && (
             <div
+              ref={setStatusStackEl}
               className={cn(
                 "flex flex-col items-center gap-2",
                 contentOwnsStage
@@ -1999,7 +2040,7 @@ export function ClassCall({
             </div>
           )}
 
-          <div className="relative flex-1 overflow-hidden">
+          <div ref={setStageEl} className="relative flex-1 overflow-hidden">
             <div
               ref={remoteRef}
               style={computeStageTileStyle(remoteRole, {
@@ -2255,6 +2296,7 @@ export function ClassCall({
                 onPrefsChange={setCaptionPrefs}
                 speakerName={speakerName}
                 tileParked={tileParkedAtBottom}
+                topInset={statusStackReach}
                 // Only until the FIRST line of the call, not in every pause
                 // between sentences: once subtitles have demonstrably worked,
                 // a "Listening…" pill blinking in and out of every gap in the
@@ -2338,13 +2380,16 @@ export function ClassCall({
             <div ref={controlsRef}>
               {/* The subtitles, docked: a strip between the stage and the
               controls while a material or a screen share fills the stage, so
-              they are readable WITH the worksheet rather than instead of it.
+              they are readable WITH the worksheet rather than instead of it —
+              and over a plain camera too, for a reader who asked for her
+              subtitles below the video rather than over it.
               Inside controlsRef on purpose — the stage is the flex-1 above, so
               it shrinks by exactly this strip, and the measured controls height
               that bounds a dragged camera tile grows by it. */}
               {captionPlacement === "docked" && (
                 <CaptionBand
                   docked
+                  contentOwnsStage={contentOwnsStage}
                   entries={captions.visible}
                   prefs={captionPrefs}
                   onPrefsChange={setCaptionPrefs}
