@@ -18,7 +18,21 @@
 // two languages in one place confusing. A browser that stored it reads as the
 // default below, since an unknown value degrades field by field.
 export type CaptionDisplay = "translation" | "original";
-export type CaptionSize = "m" | "l" | "xl";
+// "s" exists because one size up was right for one student and too much for
+// the next: the first said the desktop default was too small to read, so it
+// went up a step, and a second then said it covered the teacher's face.
+export type CaptionSize = "s" | "m" | "l" | "xl";
+// How many subtitles the band holds at once — a ceiling the size can lower
+// further (see caption-band.tsx). Separate from the size because the line
+// count, not the type, is most of the band's height: a reader can keep large
+// letters and still give the video back by asking for one line.
+export type CaptionLines = 1 | 2 | 3;
+// Where the band sits. "bottom" and "top" are over the video; "below" is a
+// strip under the stage that never covers it, the same strip the band already
+// becomes when a worksheet owns the stage. Language lessons are the case for
+// it: a reader watching the teacher's mouth form a word is reading the lesson
+// too, and a band over the lower third of a webcam frame is usually over it.
+export type CaptionPosition = "bottom" | "top" | "below";
 
 export type CaptionPreferences = {
   // Whether the band renders on this screen at all. Independent of the room
@@ -43,6 +57,8 @@ export type CaptionPreferences = {
   // the retired "both") gets the default.
   display: CaptionDisplay;
   size: CaptionSize;
+  lines: CaptionLines;
+  position: CaptionPosition;
 };
 
 export const DEFAULT_CAPTION_PREFERENCES: CaptionPreferences = {
@@ -50,6 +66,8 @@ export const DEFAULT_CAPTION_PREFERENCES: CaptionPreferences = {
   visibleWithContent: true,
   display: "translation",
   size: "m",
+  lines: 3,
+  position: "bottom",
 };
 
 // Are the subtitles showing on this screen right now, given what is on the
@@ -87,7 +105,9 @@ export function toggleCaptionsHerePatch(
 export const CAPTION_PREFERENCES_STORAGE_KEY = "spiralclass.captionPreferences";
 
 const DISPLAYS: readonly CaptionDisplay[] = ["translation", "original"];
-const SIZES: readonly CaptionSize[] = ["m", "l", "xl"];
+const SIZES: readonly CaptionSize[] = ["s", "m", "l", "xl"];
+const LINES: readonly CaptionLines[] = [1, 2, 3];
+const POSITIONS: readonly CaptionPosition[] = ["bottom", "top", "below"];
 
 // Parse whatever is in storage into a valid preference set, field by field.
 // A stored blob from an older build (or a hand-edited one) must degrade to
@@ -116,5 +136,11 @@ export function parseCaptionPreferences(raw: string | null): CaptionPreferences 
     size: SIZES.includes(obj.size as CaptionSize)
       ? (obj.size as CaptionSize)
       : DEFAULT_CAPTION_PREFERENCES.size,
+    lines: LINES.includes(obj.lines as CaptionLines)
+      ? (obj.lines as CaptionLines)
+      : DEFAULT_CAPTION_PREFERENCES.lines,
+    position: POSITIONS.includes(obj.position as CaptionPosition)
+      ? (obj.position as CaptionPosition)
+      : DEFAULT_CAPTION_PREFERENCES.position,
   };
 }

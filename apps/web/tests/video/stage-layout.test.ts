@@ -32,7 +32,18 @@ describe("resolveCaptionPlacement", () => {
     ).toBe("none");
   });
 
+  it("docks them under a camera when the reader asked for them below the video", () => {
+    // A student on a desktop: the overlay covered part of her teacher's face.
+    expect(resolveCaptionPlacement({ ...base, belowStage: true })).toBe("docked");
+    // The strip holds its height between sentences, so it is not reserved for
+    // a room that is not captioning — the same rule as under a material.
+    expect(resolveCaptionPlacement({ ...base, belowStage: true, roomCaptionsOn: false })).toBe(
+      "none",
+    );
+  });
+
   it("shows nothing in the minimized bubble", () => {
+    expect(resolveCaptionPlacement({ ...base, minimized: true, belowStage: true })).toBe("none");
     expect(resolveCaptionPlacement({ ...base, minimized: true })).toBe("none");
     expect(resolveCaptionPlacement({ ...base, minimized: true, contentOwnsStage: true })).toBe(
       "none",

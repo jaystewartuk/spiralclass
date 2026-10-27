@@ -267,6 +267,15 @@ That lasts until preview has a LiveKit server of its own.
       holds its height between sentences so a worksheet does not reflow as
       people speak. The transcript opens from either. (`resolveCaptionPlacement`
       in `apps/web/src/lib/video/stage-layout.ts`.)
+    - **Each reader decides how much of the video they cover, on her own
+      screen only.** From the band's settings: text size (small to extra
+      large), how many lines show at once (1–3, never more than the size
+      allows), and the position — over the video at the bottom (the default)
+      or the top, or **below the video**, the same strip used under a material,
+      which never covers the other person. A move button on the band sends it
+      to the other edge with a tap, or can be dragged; it snaps to the top or
+      bottom edge and never stops in between. All of it is remembered in that
+      browser, so a phone and a computer can differ.
     - **Each reader can put them away, on her own screen only, in two
       scopes.** Hiding them over a camera hides them everywhere. Hiding them
       under a material hides them only while a material or screen share is

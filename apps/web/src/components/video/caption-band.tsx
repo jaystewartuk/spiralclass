@@ -1,12 +1,18 @@
 "use client";
 
-import { useEffect, useId, useMemo, useRef, useState } from "react";
-import { Captions, ScrollText, Settings2, Type, X } from "lucide-react";
+import { useEffect, useId, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { Captions, MoveVertical, ScrollText, Settings2, Type, X } from "lucide-react";
 import { useT } from "@/components/locale-provider";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import type { CaptionEntry } from "@/lib/captions/caption-feed";
-import type { CaptionDisplay, CaptionPreferences, CaptionSize } from "@/lib/captions/preferences";
+import type {
+  CaptionDisplay,
+  CaptionLines,
+  CaptionPosition,
+  CaptionPreferences,
+  CaptionSize,
+} from "@/lib/captions/preferences";
 
 // The live-subtitle surface. Three pieces, in the order a reader meets them:
 // the band over the video, the settings popover that band owns, and the
@@ -62,6 +68,11 @@ export type CaptionBandProps = {
   // subtitles in the middle of the screen. Subtitles keep the bottom edge; a
   // corner obstruction gets a corner-shaped answer.
   tileParked: boolean;
+  // How far the call's status messages reach down into the stage, in px —
+  // zero when there are none. Moved to the top, the band sits under them:
+  // its scrim would otherwise hide a message that may need a tap (the
+  // audio-blocked prompt, the captions-consent ask).
+  topInset?: number;
   // A material or a screen share owns the stage, so the band is a STRIP OF ITS
   // OWN below it rather than an overlay on it. The band used to be removed
   // outright in that state, on the grounds that subtitles must not sit on the
@@ -75,6 +86,12 @@ export type CaptionBandProps = {
   // and a worksheet that reflowed every time someone finished a sentence
   // would be worse than no subtitles at all.
   docked?: boolean;
+  // Whether that strip is there because a material or screen share owns the
+  // stage, rather than because the reader put her subtitles below the video.
+  // It decides what the ✕ means: "not over this worksheet" in the first case,
+  // the everywhere switch in the second, where there is no worksheet to mean.
+  // Defaults to `docked`, which was the only reason to dock before.
+  contentOwnsStage?: boolean;
   // True once the room is captioning but before the first line lands. ASR
   // plus translation is a second or two, and silence in that gap reads as
   // "it didn't work" — this is the difference between a feature that feels
@@ -97,7 +114,14 @@ export type CaptionBandProps = {
 // default right for a phone held at arm's length and too small for a monitor
 // across a desk — a student on a computer reported the subtitles as too small
 // to read, at the default, never having found the size control.
-const SIZE_CLASSES: Record<CaptionSize, { primary: string; maxLines: number }> = {
+//
+// `s` is below that default, for the opposite report: on a desktop, `m`'s
+// three lines covered part of the teacher's face.
+const SIZE_CLASSES: Record<CaptionSize, { primary: string; maxLines: CaptionLines }> = {
+  s: {
+    primary: "text-base md:text-lg",
+    maxLines: 3,
+  },
   m: {
     primary: "text-lg md:text-2xl",
     maxLines: 3,
@@ -117,7 +141,14 @@ const SIZE_CLASSES: Record<CaptionSize, { primary: string; maxLines: number }> =
 // larger ones. Two extra-large bilingual lines measured ~200px in a browser,
 // on a laptop window that left the worksheet 110px — the subtitles had become
 // the stage. The transcript is where the rest lives.
-const DOCKED_MAX_LINES: Record<CaptionSize, number> = { m: 2, l: 1, xl: 1 };
+const DOCKED_MAX_LINES: Record<CaptionSize, CaptionLines> = { s: 2, m: 2, l: 1, xl: 1 };
+
+// How many lines the band shows: the reader's own choice, never more than her
+// type size allows in this layout. Exported for the settings popover, which
+// offers only the counts that would actually change something.
+export function captionLineCeiling(size: CaptionSize, docked: boolean): CaptionLines {
+  return docked ? DOCKED_MAX_LINES[size] : SIZE_CLASSES[size].maxLines;
+}
 
 export function CaptionBand({
   entries,
@@ -125,19 +156,33 @@ export function CaptionBand({
   onPrefsChange,
   speakerName,
   tileParked,
+  topInset = 0,
   docked = false,
+  contentOwnsStage = docked,
   awaitingFirstLine,
   onOpenTranscript,
   hasTranscript,
 }: CaptionBandProps) {
   const t = useT();
   const [settingsOpen, setSettingsOpen] = useState(false);
+  // The popover's measured height, so the panel can hold room for it (see
+  // the min-height note on the panel below).
+  const [settingsHeight, setSettingsHeight] = useState(0);
   const settingsId = useId();
   const controlsRef = useRef<HTMLDivElement>(null);
+  const bandRef = useRef<HTMLDivElement>(null);
   const sizes = SIZE_CLASSES[prefs.size];
+  const lineCeiling = captionLineCeiling(prefs.size, docked);
   // The feed hands over everything still inside its lifetime; the band
-  // decides how much of that fits at the reader's chosen type size.
-  const shown = entries.slice(-(docked ? DOCKED_MAX_LINES[prefs.size] : sizes.maxLines));
+  // decides how much of that fits at the reader's chosen size and line count.
+  const shown = entries.slice(-Math.min(prefs.lines, lineCeiling));
+  // Over the video, at the top edge. Only ever over a camera: docked, the
+  // strip is a row of the layout and has no edge to choose.
+  const atTop = !docked && prefs.position === "top";
+  const drag = useBandDrag({
+    stageOf: () => bandRef.current?.parentElement ?? null,
+    onDrop: (position) => onPrefsChange({ position }),
+  });
 
   // Nothing to show and nothing to say: render no element at all, so the
   // stage is genuinely clear rather than holding an invisible box over the
@@ -160,7 +205,7 @@ export function CaptionBand({
   // The transcript button stays beside it: wanting the worksheet clear is not
   // the same as not wanting to know what was just said, and this is the state
   // in which the transcript is the only place the lines are going.
-  if (docked && !prefs.visibleWithContent) {
+  if (docked && contentOwnsStage && !prefs.visibleWithContent) {
     return (
       <div
         data-docked="collapsed"
@@ -214,13 +259,27 @@ export function CaptionBand({
       // (and so in the tab order) in both layouts. No tile clearance: the
       // camera tiles are parked in the stage's corners, and the stage ends
       // where this strip begins.
+      //
+      // AT THE TOP when the reader moved it there. `flex-col-reverse` puts the
+      // panel against the top edge and the controls under it, still first in
+      // the DOM. No tile clearance up there either: tiles park at the bottom.
+      ref={bandRef}
       data-docked={docked || undefined}
+      data-position={docked ? undefined : atTop ? "top" : "bottom"}
+      style={{
+        ...(drag.offset ? { transform: `translateY(${drag.offset}px)` } : {}),
+        // Under the status messages, with the same gap they keep between
+        // themselves. Inline because it is measured; `top-3` is the answer
+        // when there are none.
+        ...(atTop && topInset > 0 ? { top: topInset + 8 } : {}),
+      }}
       className={
         docked
           ? "relative z-20 mx-auto flex w-full max-w-3xl flex-row-reverse items-end gap-2 px-3 pt-1 lg:px-4"
           : cn(
-              "pointer-events-none absolute inset-x-0 bottom-3 z-20 mx-auto flex max-w-3xl flex-col items-center gap-1 pl-3 lg:bottom-4 lg:gap-1.5 lg:pl-4",
-              tileParked ? "pr-32 lg:pr-4" : "pr-3 lg:pr-4",
+              "pointer-events-none absolute inset-x-0 z-20 mx-auto flex max-w-3xl items-center gap-1 pl-3 lg:gap-1.5 lg:pl-4",
+              atTop ? "top-3 flex-col-reverse lg:top-4" : "bottom-3 flex-col lg:bottom-4",
+              tileParked && !atTop ? "pr-32 lg:pr-4" : "pr-3 lg:pr-4",
             )
       }
     >
@@ -251,6 +310,25 @@ export function CaptionBand({
             onClose={() => setSettingsOpen(false)}
             outsideOf={controlsRef}
             opensUpward={docked}
+            lineCeiling={lineCeiling}
+            onMeasure={setSettingsHeight}
+          />
+        )}
+        {/* Moves the band between the top and the bottom of the video. Drag it
+        and it snaps to whichever half it is let go in; tap it (or press it
+        from the keyboard) and it goes to the other edge. Over a camera only —
+        docked, there is no edge to move to, and "below the video" is in the
+        settings. */}
+        {!docked && (
+          <BandButton
+            {...drag.handlers}
+            onClick={() => {
+              if (drag.consumeClick()) return;
+              onPrefsChange({ position: atTop ? "bottom" : "top" });
+            }}
+            label={atTop ? t("call.captionsMoveToBottom") : t("call.captionsMoveToTop")}
+            icon={<MoveVertical className="h-4 w-4" aria-hidden />}
+            className="cursor-grab touch-none active:cursor-grabbing"
           />
         )}
         {hasTranscript && (
@@ -274,9 +352,9 @@ export function CaptionBand({
           // is only acceptable when the name tells them apart.
           onClick={() => {
             setSettingsOpen(false);
-            onPrefsChange(docked ? { visibleWithContent: false } : { visible: false });
+            onPrefsChange(contentOwnsStage ? { visibleWithContent: false } : { visible: false });
           }}
-          label={docked ? t("call.captionsHideWithContent") : t("call.captionsHideMine")}
+          label={contentOwnsStage ? t("call.captionsHideWithContent") : t("call.captionsHideMine")}
           icon={<X className="h-4 w-4" aria-hidden />}
         />
       </div>
@@ -338,9 +416,21 @@ export function CaptionBand({
           // popover has the room it was promised in every caption state.
           //
           // Not when docked: the popover opens upward there (see
-          // CaptionSettings), so there is nothing to make room for.
-          settingsOpen && !docked && "min-h-40",
+          // CaptionSettings), so there is nothing to make room for. Nor at
+          // the top, where the controls sit under the panel and the popover
+          // drops into the open stage below them.
+          //
+          // `min-h-40` is the floor for the first paint; the measured height
+          // takes over once the popover has laid out. A fixed floor sized the
+          // popover once, when it had two rows, and it has four now — and a
+          // locale whose labels wrap makes any fixed number wrong again.
+          settingsOpen && !docked && !atTop && "min-h-40",
         )}
+        style={
+          settingsOpen && !docked && !atTop && settingsHeight > 0
+            ? { minHeight: settingsHeight }
+            : undefined
+        }
       >
         {docked && shown.length === 0 ? (
           <DockedStandby
@@ -540,12 +630,77 @@ function DockedStandby({
   );
 }
 
+// Dragging the band between the top and bottom of the video. Vertical only,
+// and it snaps to an edge on release: a band left anywhere in between is a band
+// in the middle of someone's face, which is the one place subtitles must never
+// settle, and a free position would also have to be re-fitted to every stage
+// size the call goes through. The band follows the pointer while dragging so
+// the gesture visibly does something.
+const DRAG_THRESHOLD_PX = 4;
+
+function useBandDrag({
+  stageOf,
+  onDrop,
+}: {
+  stageOf: () => HTMLElement | null;
+  onDrop: (position: Extract<CaptionPosition, "top" | "bottom">) => void;
+}) {
+  const [offset, setOffset] = useState(0);
+  const start = useRef<{ y: number; moved: boolean } | null>(null);
+  // A drag ends in a pointerup AND a click. The click must not then also
+  // toggle the edge, or every drag would land on the opposite side of where it
+  // was let go.
+  const swallowClick = useRef(false);
+
+  const handlers = {
+    onPointerDown: (e: React.PointerEvent<HTMLButtonElement>) => {
+      // Not the stage's: it has its own pointer handlers for tile-drag and
+      // tap-to-swap, and moving the subtitles must not also swap the video.
+      e.stopPropagation();
+      if (e.button !== 0) return;
+      e.currentTarget.setPointerCapture?.(e.pointerId);
+      start.current = { y: e.clientY, moved: false };
+    },
+    onPointerMove: (e: React.PointerEvent<HTMLButtonElement>) => {
+      const s = start.current;
+      if (!s) return;
+      const dy = e.clientY - s.y;
+      if (Math.abs(dy) > DRAG_THRESHOLD_PX) s.moved = true;
+      if (s.moved) setOffset(dy);
+    },
+    onPointerUp: (e: React.PointerEvent<HTMLButtonElement>) => {
+      const s = start.current;
+      start.current = null;
+      setOffset(0);
+      if (!s?.moved) return;
+      swallowClick.current = true;
+      const stage = stageOf()?.getBoundingClientRect();
+      if (!stage) return;
+      onDrop(e.clientY < stage.top + stage.height / 2 ? "top" : "bottom");
+    },
+    onPointerCancel: () => {
+      start.current = null;
+      setOffset(0);
+    },
+  };
+
+  const consumeClick = () => {
+    const swallowed = swallowClick.current;
+    swallowClick.current = false;
+    return swallowed;
+  };
+
+  return { offset, handlers, consumeClick };
+}
+
 function BandButton({
   onClick,
   label,
   icon,
   expanded,
   controls,
+  className,
+  ...pointer
 }: {
   onClick: () => void;
   label: string;
@@ -554,16 +709,24 @@ function BandButton({
   // The id of the region this button opens. Paired with aria-expanded so a
   // screen reader can say not just that something opened but what.
   controls?: string;
-}) {
+  className?: string;
+} & Pick<
+  React.ButtonHTMLAttributes<HTMLButtonElement>,
+  "onPointerDown" | "onPointerMove" | "onPointerUp" | "onPointerCancel"
+>) {
   return (
     <button
       type="button"
       onClick={onClick}
+      {...pointer}
       aria-label={label}
       title={label}
       aria-expanded={expanded}
       aria-controls={controls}
-      className="flex h-7 w-7 items-center justify-center rounded-full bg-scrim-2 text-white opacity-60 backdrop-blur-md transition hover:bg-scrim-3 hover:opacity-100 focus-visible:opacity-100 lg:h-8 lg:w-8"
+      className={cn(
+        "flex h-7 w-7 items-center justify-center rounded-full bg-scrim-2 text-white opacity-60 backdrop-blur-md transition hover:bg-scrim-3 hover:opacity-100 focus-visible:opacity-100 lg:h-8 lg:w-8",
+        className,
+      )}
     >
       {icon}
     </button>
@@ -584,6 +747,8 @@ function CaptionSettings({
   // ref in CaptionBand.
   outsideOf,
   opensUpward,
+  lineCeiling,
+  onMeasure,
 }: {
   id: string;
   prefs: CaptionPreferences;
@@ -591,8 +756,25 @@ function CaptionSettings({
   onClose: () => void;
   outsideOf: React.RefObject<HTMLElement | null>;
   opensUpward: boolean;
+  // The most lines this size allows in this layout; counts above it would
+  // change nothing, so they are not offered.
+  lineCeiling: CaptionLines;
+  onMeasure: (height: number) => void;
 }) {
   const t = useT();
+  const ref = useRef<HTMLDivElement>(null);
+
+  // Reports this popover's height to the band, which holds that much room
+  // under its controls. Measured, not assumed — see the panel's min-height.
+  useLayoutEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    onMeasure(el.offsetHeight);
+    if (typeof ResizeObserver === "undefined") return;
+    const observer = new ResizeObserver(() => onMeasure(el.offsetHeight));
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [onMeasure]);
 
   // Dismiss on Escape and on a click outside — the two gestures a popover
   // owes anyone who opened it mid-call and now wants their video back.
@@ -621,9 +803,10 @@ function CaptionSettings({
     };
   }, [onClose, outsideOf]);
 
-  // Short visible labels, full phrasing as the accessible name. Both rows are
-  // segmented controls of three, which is what keeps the popover SHORT enough
-  // to open upward at all — see the height note on the container below.
+  // Short visible labels, full phrasing as the accessible name. Every row is
+  // a segmented control (options across, not stacked), which is what keeps the
+  // popover SHORT enough to open upward at all — see the height note on the
+  // container below.
   const displays: { value: CaptionDisplay; label: string; name: string }[] = [
     {
       value: "translation",
@@ -636,14 +819,40 @@ function CaptionSettings({
       name: t("call.captionsDisplayOriginal"),
     },
   ];
-  const sizes: { value: CaptionSize; label: string }[] = [
-    { value: "m", label: t("call.captionsSizeM") },
-    { value: "l", label: t("call.captionsSizeL") },
-    { value: "xl", label: t("call.captionsSizeXl") },
+  // The size row shows the letter glyph growing, not four words. Four words
+  // did not fit: "Extra large" wrapped inside its segment in English, and in
+  // Spanish "Muy grande" ran off the popover's edge (both seen in a local
+  // call). The glyph needs no translation and IS the thing being chosen; the
+  // name is the full word, for a screen reader and on hover.
+  const sizes: { value: CaptionSize; label: string; glyph: string }[] = [
+    { value: "s", label: t("call.captionsSizeS"), glyph: "h-3 w-3" },
+    { value: "m", label: t("call.captionsSizeM"), glyph: "h-4 w-4" },
+    { value: "l", label: t("call.captionsSizeL"), glyph: "h-5 w-5" },
+    { value: "xl", label: t("call.captionsSizeXl"), glyph: "h-6 w-6" },
+  ];
+  const lineCounts = ([1, 2, 3] as const).filter((n) => n <= lineCeiling);
+  const shownLines = Math.min(prefs.lines, lineCeiling);
+  const positions: { value: CaptionPosition; label: string; name: string }[] = [
+    {
+      value: "bottom",
+      label: t("call.captionsPositionBottomShort"),
+      name: t("call.captionsPositionBottom"),
+    },
+    {
+      value: "top",
+      label: t("call.captionsPositionTopShort"),
+      name: t("call.captionsPositionTop"),
+    },
+    {
+      value: "below",
+      label: t("call.captionsPositionBelowShort"),
+      name: t("call.captionsPositionBelow"),
+    },
   ];
 
   return (
     <div
+      ref={ref}
       id={id}
       // role="group", not "dialog": this is a disclosure hanging off a
       // button with aria-expanded/aria-controls, not a modal. Calling it a
@@ -665,9 +874,10 @@ function CaptionSettings({
       // Overlaying the subtitles while you adjust them is not a cost worth
       // avoiding: the popover is 256px against a panel three times that wide,
       // so the lines stay legible beside it and the change you make is
-      // visible as you make it. Both rows are segmented (three across, not
-      // three stacked) to keep it to ~150px; the cap is the backstop for a
-      // locale whose labels wrap.
+      // visible as you make it. Every row is segmented (options across, not
+      // stacked) to keep it short; the band measures it and holds that much
+      // room (see the panel's min-height), and the cap is the backstop for a
+      // stage too short to hold it.
       //
       // UPWARD when the band is docked, which is the same reasoning arriving
       // at the other answer. The docked strip sits outside the stage, so
@@ -704,9 +914,46 @@ function CaptionSettings({
           {sizes.map((option) => (
             <SegmentButton
               key={option.value}
-              label={option.label}
+              label={<Type className={option.glyph} aria-hidden />}
+              name={option.label}
               selected={prefs.size === option.value}
               onSelect={() => onChange({ size: option.value })}
+            />
+          ))}
+        </div>
+      </fieldset>
+      {/* Hidden when the size allows only one line here (large text, docked):
+      a single option is not a choice. */}
+      {lineCounts.length > 1 && (
+        <fieldset className="mt-3">
+          <legend className="mb-1.5 text-sm font-semibold text-on-dark-faint">
+            {t("call.captionsLinesLegend")}
+          </legend>
+          <div className="flex gap-1.5">
+            {lineCounts.map((n) => (
+              <SegmentButton
+                key={n}
+                label={String(n)}
+                name={t("call.captionsLinesName", { count: n })}
+                selected={shownLines === n}
+                onSelect={() => onChange({ lines: n })}
+              />
+            ))}
+          </div>
+        </fieldset>
+      )}
+      <fieldset className="mt-3">
+        <legend className="mb-1.5 text-sm font-semibold text-on-dark-faint">
+          {t("call.captionsPositionLegend")}
+        </legend>
+        <div className="flex gap-1.5">
+          {positions.map((option) => (
+            <SegmentButton
+              key={option.value}
+              label={option.label}
+              name={option.name}
+              selected={prefs.position === option.value}
+              onSelect={() => onChange({ position: option.value })}
             />
           ))}
         </div>
@@ -715,7 +962,7 @@ function CaptionSettings({
   );
 }
 
-// One segment of a three-across control. `name` carries the full phrasing for
+// One segment of a segmented control. `name` carries the full phrasing for
 // assistive tech when the visible label is abbreviated to fit.
 function SegmentButton({
   label,
@@ -723,7 +970,7 @@ function SegmentButton({
   selected,
   onSelect,
 }: {
-  label: string;
+  label: React.ReactNode;
   name?: string;
   selected: boolean;
   onSelect: () => void;
@@ -740,7 +987,7 @@ function SegmentButton({
         // control someone taps mid-lesson on a phone as much as anywhere.
         // Height was never what made this popover too tall — three of these
         // stacked was.
-        "min-h-target flex-1 rounded-lg px-1.5 text-center text-sm leading-tight font-medium transition",
+        "flex min-h-target flex-1 items-center justify-center rounded-lg px-1.5 text-center text-sm leading-tight font-medium transition",
         selected ? "bg-overlay-4 text-scrim-3" : "bg-overlay-1 text-white hover:bg-overlay-2",
       )}
     >
