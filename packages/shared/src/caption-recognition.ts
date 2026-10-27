@@ -379,25 +379,33 @@ export function buildCaptionLine(args: {
 // long the speaker goes without a pause.
 export const PARTIAL_TAIL_CHARS = 140;
 
-// The partial for an utterance still being spoken: what has been heard so
-// far, in the speaker's language, untranslated (D-198). Null when nothing
+// The partial for an utterance still being spoken (D-198). Null when nothing
 // has been heard yet.
+//
+// When the reader reads the speaker's own language, it carries the words heard
+// so far. When her subtitles are a TRANSLATION it carries no words at all —
+// `text` is empty and `lang` is the reader's — and the band shows the speaker
+// as still talking. Untranslated words under the last translated line put two
+// languages on screen at once, which the teacher and student testing the one-line
+// band both found as confusing as the original-above-translation (D-206).
 export function buildPartialCaptionLine(args: {
   heard: string;
   sourceLanguage: string;
+  targetLanguage: string;
   speakerIdentity: string;
   listenerIdentity: string;
   id: string;
 }): CaptionLine | null {
   const heard = args.heard.replace(/\s+/g, " ").trim();
   if (!heard) return null;
+  const translated = baseLanguage(args.sourceLanguage) !== baseLanguage(args.targetLanguage);
   return {
     t: "line",
     for: args.listenerIdentity,
     id: args.id,
-    text: partialTail(heard),
+    text: translated ? "" : partialTail(heard),
     from: args.speakerIdentity,
-    lang: args.sourceLanguage,
+    lang: translated ? args.targetLanguage : args.sourceLanguage,
     partial: true,
   };
 }

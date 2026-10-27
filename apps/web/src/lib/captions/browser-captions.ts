@@ -38,11 +38,12 @@ import {
 // speech-to-text fallback (cloud-recognizer.ts) and publishes the result like
 // any line of its own speaker's. The other browser runs nothing for them.
 //
-// While an utterance is being spoken its words so far go out (or are shown)
-// as they are heard, untranslated, as a `partial` line under one id; the
-// finished, translated line then takes that same id and replaces it, so the
-// listener is never left with nothing on screen while a phrase runs on
-// (D-198). Partials are never kept and never translated.
+// While an utterance is being spoken a `partial` line goes out (or is shown)
+// under one id; the finished, translated line then takes that same id and
+// replaces it, so the listener is never left with nothing on screen while a
+// phrase runs on (D-198). It carries the words heard so far only when the
+// reader reads the speaker's language; otherwise it only says the speaker is
+// talking (D-206). Partials are never kept and never translated.
 //
 // Each finished utterance is split to the route's size, translated, built
 // into a CaptionLine, and then either PUBLISHED to the other participant —
@@ -341,6 +342,7 @@ export class BrowserCaptions {
       const line = buildPartialCaptionLine({
         heard: rest,
         sourceLanguage: args.direction.source,
+        targetLanguage: args.direction.target,
         speakerIdentity: args.speakerIdentity,
         listenerIdentity: args.listenerIdentity,
         id: run.partialId,

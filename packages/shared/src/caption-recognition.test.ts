@@ -291,12 +291,13 @@ describe("buildCaptionLine", () => {
 describe("buildPartialCaptionLine", () => {
   const base = {
     sourceLanguage: "es",
+    targetLanguage: "es-MX",
     speakerIdentity: "t1",
     listenerIdentity: "s1",
     id: "t1:1-0",
   };
 
-  it("carries the words heard so far, untranslated, in the speaker's language", () => {
+  it("carries the words heard so far to a reader of the speaker's language", () => {
     expect(buildPartialCaptionLine({ ...base, heard: "  hola   a todos " })).toEqual({
       t: "line",
       for: "s1",
@@ -304,6 +305,21 @@ describe("buildPartialCaptionLine", () => {
       text: "hola a todos",
       from: "t1",
       lang: "es",
+      partial: true,
+    });
+  });
+
+  it("carries no words to a reader of a translation, only that the speaker is talking", () => {
+    // D-206: untranslated words under the last translated line were two
+    // languages on screen at once, which a teacher and her student both found
+    // confusing.
+    expect(buildPartialCaptionLine({ ...base, targetLanguage: "en", heard: "hola" })).toEqual({
+      t: "line",
+      for: "s1",
+      id: "t1:1-0",
+      text: "",
+      from: "t1",
+      lang: "en",
       partial: true,
     });
   });

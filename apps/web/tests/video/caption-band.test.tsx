@@ -29,7 +29,7 @@ vi.mock("@/components/locale-provider", () => ({
   useLocale: () => "en",
 }));
 
-const { CaptionBand } = await import("@/components/video/caption-band");
+const { CaptionBand, CaptionTranscript } = await import("@/components/video/caption-band");
 
 let container: HTMLDivElement;
 let root: Root;
@@ -272,6 +272,38 @@ describe("words still being spoken", () => {
   });
 });
 
+// D-206. A teacher and her student, testing the one-language band, still saw
+// two languages: the untranslated words of the phrase being spoken under the
+// translation of the last one. A reader of a translation now gets a wordless
+// partial, and the band shows the speaker as talking.
+describe("a phrase still being spoken, for a reader of the translation", () => {
+  const speaking: CaptionEntry = {
+    id: "2",
+    text: "",
+    from: "teacher-1",
+    lang: "en",
+    partial: true,
+    at: 2_000,
+  };
+
+  it("shows dots under the speaker's name, and no words", () => {
+    const el = render({ entries: [speaking] });
+    expect(el.querySelector("[data-caption-dots]")).not.toBeNull();
+    expect(el.textContent).toBe("Mira");
+  });
+
+  it("never leaves two languages on screen under the last translated line", () => {
+    for (const display of ["translation", "original"] as const) {
+      const el = render({
+        entries: [bilingual, speaking],
+        prefs: { ...DEFAULT_CAPTION_PREFERENCES, display },
+      });
+      const langs = new Set([...el.querySelectorAll("[lang]")].map((n) => n.getAttribute("lang")));
+      expect(langs.size).toBe(1);
+    }
+  });
+});
+
 describe("the reader's preferences", () => {
   it("renders nothing when the reader has hidden subtitles", () => {
     // The control a student never had: the room switch is her teacher's, but
@@ -501,5 +533,47 @@ describe("docked under a material", () => {
     // And the panel is not stretched to make room for a popover that no
     // longer opens over it.
     expect((html.querySelector('[role="log"]') as HTMLElement).className).not.toContain("min-h-40");
+  });
+});
+
+describe("the transcript panel", () => {
+  function renderTranscript(props: Partial<React.ComponentProps<typeof CaptionTranscript>> = {}) {
+    act(() =>
+      root.render(
+        <CaptionTranscript
+          entries={[bilingual]}
+          display="translation"
+          speakerName={(id) => (id === "teacher-1" ? "Mira" : null)}
+          onClose={() => {}}
+          {...props}
+        />,
+      ),
+    );
+    return container;
+  }
+
+  // jsdom has no layout; the panel follows the live edge by scrolling.
+  beforeEach(() => {
+    Element.prototype.scrollIntoView = () => {};
+  });
+
+  it("shows the translation alone, as the band does", () => {
+    const el = renderTranscript();
+    expect(el.textContent).toContain("How are you today?");
+    expect(el.textContent).not.toContain("¿Cómo estás hoy?");
+  });
+
+  it("shows the original alone in the reader's original mode", () => {
+    const el = renderTranscript({ display: "original" });
+    expect(el.textContent).toContain("¿Cómo estás hoy?");
+    expect(el.textContent).not.toContain("How are you today?");
+    expect(el.querySelector('[lang="es"]')).not.toBeNull();
+  });
+
+  it("leaves out a phrase still being spoken that carries no words", () => {
+    const el = renderTranscript({
+      entries: [{ id: "2", text: "", from: "teacher-1", lang: "en", partial: true, at: 2_000 }],
+    });
+    expect(el.textContent).toContain("call.captionsTranscriptEmpty");
   });
 });

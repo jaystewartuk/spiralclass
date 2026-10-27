@@ -163,8 +163,12 @@ That lasts until preview has a LiveKit server of its own.
     `POST /api/captions/translate` through Google Cloud Translation.
     **The words are on screen while they are being said**
     ([D-198](../decisions/D-198.md)): what the recogniser has heard of the
-    phrase in progress goes to the listener at once, untranslated, and the
-    finished, translated line replaces it when the phrase ends. Only finished
+    phrase in progress goes to the listener at once and the finished,
+    translated line replaces it when the phrase ends. A listener who reads the
+    speaker's language gets the words as they are heard; one who reads a
+    translation gets no words, only the speaker's name with dots, so the band
+    never shows two languages
+    ([D-206](../decisions/D-206.md)). Only finished
     utterances are translated or kept for the transcript, and a translation
     that takes longer than 6 seconds is dropped. There is no server-side captions process: the one paid path
     (below) streams from a participant's own browser to Deepgram.
@@ -172,7 +176,8 @@ That lasts until preview has a LiveKit server of its own.
       translation, or — to test herself — the original. Original-above-
       translation was removed: the one teacher using it found two languages
       in one place confusing. A browser that had stored it reads as the
-      translation.
+      translation. The in-call transcript panel follows the same mode, one
+      language per entry.
     - **The teacher sets when a line is cut** (`/settings/captions`,
       `CaptionTiming` in `packages/shared/src/caption-timing.ts`, stored in
       `teachers.caption_timing`). The browser decides on its own that an
