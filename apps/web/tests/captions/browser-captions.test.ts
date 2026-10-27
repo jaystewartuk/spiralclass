@@ -550,33 +550,37 @@ describe("BrowserCaptions — where lines go", () => {
 // D-198. Measured 2026-10-12: a teacher's phrases ran to ~500 characters, and
 // a listener reading the translation saw nothing until each one ended and
 // its translation came back. The words now go out as they are heard.
-describe("BrowserCaptions — words as they are spoken (D-198)", () => {
-  it("publishes the words so far, untranslated, under one id that the translated line then takes", async () => {
+// D-206: a reader of a TRANSLATION is told only that the speaker is talking —
+// the words themselves would be a second language on her screen.
+describe("BrowserCaptions — words as they are spoken (D-198, D-206)", () => {
+  // A student who reads the teacher's own language: nothing to translate, so
+  // the words go out as they are heard.
+  const sameLanguage = () =>
+    input({
+      session: SESSION({
+        directions: {
+          teacher: { source: "es", target: "es" },
+          student: { source: "es", target: "es" },
+        },
+      }),
+    });
+
+  it("publishes a wordless partial under one id that the translated line then takes", async () => {
     const { c, published, fetch } = setup();
     c.sync(input());
     recognizers[0].onPartial?.("¿Cómo");
     recognizers[0].onPartial?.("¿Cómo estás");
     expect(fetch).not.toHaveBeenCalled();
-    expect(published).toEqual([
-      {
-        t: "line",
-        for: "s1",
-        id: "t1:1000-0",
-        text: "¿Cómo",
-        from: "t1",
-        lang: "es",
-        partial: true,
-      },
-      {
-        t: "line",
-        for: "s1",
-        id: "t1:1000-0",
-        text: "¿Cómo estás",
-        from: "t1",
-        lang: "es",
-        partial: true,
-      },
-    ]);
+    const speaking = {
+      t: "line",
+      for: "s1",
+      id: "t1:1000-0",
+      text: "",
+      from: "t1",
+      lang: "en",
+      partial: true,
+    };
+    expect(published).toEqual([speaking, speaking]);
     recognizers[0].onFinal("¿Cómo estás?");
     await flush();
     expect(published[2]).toEqual({
@@ -591,6 +595,23 @@ describe("BrowserCaptions — words as they are spoken (D-198)", () => {
     });
   });
 
+  it("publishes the words so far to a reader of the speaker's own language", () => {
+    const { c, published } = setup();
+    c.sync(sameLanguage());
+    recognizers[0].onPartial?.("¿Cómo estás");
+    expect(published).toEqual([
+      expect.objectContaining({ text: "¿Cómo estás", lang: "es", partial: true }),
+    ]);
+  });
+
+  it("never puts an untranslated word on the wire for a reader of a translation", () => {
+    const { c, published } = setup();
+    c.sync(input());
+    recognizers[0].onPartial?.("¿Cómo");
+    recognizers[0].onPartial?.("¿Cómo estás hoy");
+    expect(published.every((l) => l.text === "")).toBe(true);
+  });
+
   it("starts a new id for the next utterance", async () => {
     const { c, published } = setup();
     c.sync(input());
@@ -602,7 +623,7 @@ describe("BrowserCaptions — words as they are spoken (D-198)", () => {
     expect(ids).toEqual(["p:t1:1000-0", "p:t1:1000-1", "f:t1:1000-0"]);
   });
 
-  it("shows the next utterance's words while the previous one is still being translated", async () => {
+  it("shows the next utterance is being spoken while the previous one is still being translated", async () => {
     let release: () => void = () => {};
     const slow = new Promise<void>((r) => (release = r));
     const fetch = vi.fn(async (_u: string | URL | Request, init?: RequestInit) => {
@@ -615,13 +636,13 @@ describe("BrowserCaptions — words as they are spoken (D-198)", () => {
     recognizers[0].onFinal("una frase larga");
     recognizers[0].onPartial?.("y la siguiente");
     await flush();
-    expect(published).toEqual([expect.objectContaining({ text: "y la siguiente", partial: true })]);
+    expect(published).toEqual([expect.objectContaining({ text: "", partial: true })]);
     release();
     await flush();
     expect(published[1]).toMatchObject({ text: "EN(una frase larga)" });
   });
 
-  it("shows, never publishes, the words of the other participant it is recognising", () => {
+  it("shows, never publishes, the partial of the other participant it is recognising", () => {
     const { c, published, shown } = setup();
     c.sync(
       input({
@@ -634,8 +655,8 @@ describe("BrowserCaptions — words as they are spoken (D-198)", () => {
       expect.objectContaining({
         for: "t1",
         from: "s1",
-        lang: "en",
-        text: "How are",
+        lang: "es",
+        text: "",
         partial: true,
       }),
     ]);
@@ -650,7 +671,7 @@ describe("BrowserCaptions — words as they are spoken (D-198)", () => {
 
   it("carries only the tail of a long run of speech, cut at a word", () => {
     const { c, published } = setup();
-    c.sync(input());
+    c.sync(sameLanguage());
     recognizers[0].onPartial?.(`${"palabra ".repeat(40)}final`);
     const text = published[0].text;
     expect(text.startsWith("…palabra")).toBe(true);
@@ -679,7 +700,7 @@ describe("BrowserCaptions — words as they are spoken (D-198)", () => {
       }),
     );
     clouds[0].onPartial?.("hola");
-    expect(published).toEqual([expect.objectContaining({ text: "hola", partial: true })]);
+    expect(published).toEqual([expect.objectContaining({ text: "", partial: true })]);
   });
 });
 
@@ -785,7 +806,8 @@ describe("BrowserCaptions — the teacher's subtitle timing", () => {
     expect(texts(published)).toEqual(["EN(one two three four five six seven eight nine)"]);
     // What is left is shown as the next partial, under its own id.
     const partials = published.filter((l) => l.partial);
-    expect(partials.at(-1)?.text).toBe("ten");
+    const cut = published.find((l) => !l.partial);
+    expect(partials.at(-1)?.id).not.toBe(cut?.id);
     recognizers[0].onFinal("one two three four five six seven eight nine ten eleven");
     await flush();
     expect(texts(published).at(-1)).toBe("EN(ten eleven)");

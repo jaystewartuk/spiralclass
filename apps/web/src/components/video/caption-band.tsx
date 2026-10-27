@@ -416,6 +416,11 @@ function CaptionLineView({
   const original = entry.src;
   const showOriginal = original != null && display === "original";
   const showTranslation = !showOriginal;
+  // A phrase still being spoken that will arrive translated carries no words
+  // (D-206): the speaker's untranslated words under the last translated line
+  // were two languages on screen again. Dots hold its place instead, so the
+  // reader can see the subtitle is coming rather than wondering if it broke.
+  const speaking = entry.partial && entry.text === "";
 
   const name = entry.from ? speakerName(entry.from) : null;
   const label = entry.from ? (name ?? unknownSpeakerLabel) : null;
@@ -460,7 +465,13 @@ function CaptionLineView({
           {original}
         </p>
       )}
-      {showTranslation && (
+      {speaking && (
+        <div className={cn(sizes.primary, "flex h-lh items-center justify-center gap-2")}>
+          {inlineLabel}
+          <BreathingDots />
+        </div>
+      )}
+      {showTranslation && !speaking && (
         <p
           lang={entry.lang}
           // No colour of its own: it inherits the line's recency colour from
@@ -481,17 +492,23 @@ function CaptionLineView({
 function ListeningLine({ label }: { label: string }) {
   return (
     <div className="flex items-center gap-2">
-      <span className="flex items-end gap-1" aria-hidden>
-        {[0, 1, 2].map((i) => (
-          <span
-            key={i}
-            className="h-1.5 w-1.5 rounded-full bg-on-dark-muted motion-safe:animate-pulse"
-            style={{ animationDelay: `${i * 160}ms` }}
-          />
-        ))}
-      </span>
+      <BreathingDots />
       <span className="text-sm text-on-dark-muted">{label}</span>
     </div>
+  );
+}
+
+function BreathingDots() {
+  return (
+    <span data-caption-dots className="flex items-end gap-1" aria-hidden>
+      {[0, 1, 2].map((i) => (
+        <span
+          key={i}
+          className="h-1.5 w-1.5 rounded-full bg-on-dark-muted motion-safe:animate-pulse"
+          style={{ animationDelay: `${i * 160}ms` }}
+        />
+      ))}
+    </span>
   );
 }
 
@@ -742,16 +759,28 @@ function SegmentButton({
 // written to the server, which is what lets the privacy notice keep saying
 // nothing is stored — and is why the panel says so itself rather than
 // leaving a student to assume her teacher is keeping a record.
+//
+// One language per entry, in the reader's own display mode — the same rule as
+// the band. Original-above-translation came out of the band but stayed here,
+// so the panel went on showing a teacher both languages she had asked never
+// to see together.
 export function CaptionTranscript({
   entries,
+  display,
   speakerName,
   onClose,
 }: {
   entries: CaptionEntry[];
+  display: CaptionDisplay;
   speakerName: (identity: string) => string | null;
   onClose: () => void;
 }) {
   const t = useT();
+  // A wordless partial (D-206) has nothing to read back.
+  const readable = useMemo(
+    () => entries.filter((entry) => !(entry.partial && entry.text === "")),
+    [entries],
+  );
   const bottomRef = useRef<HTMLDivElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   // Follow the live edge, but ONLY while the reader is already at it. Someone
@@ -762,7 +791,7 @@ export function CaptionTranscript({
 
   useEffect(() => {
     if (pinned) bottomRef.current?.scrollIntoView({ block: "end" });
-  }, [entries.length, pinned]);
+  }, [readable.length, pinned]);
 
   // Escape closes it. The panel covers a third of the stage, so the fastest
   // way back to the other person's face has to be a key, not a hunt for the
@@ -777,7 +806,7 @@ export function CaptionTranscript({
     return () => document.removeEventListener("keydown", onKey);
   }, [onClose]);
 
-  const startedAt = entries[0]?.at;
+  const startedAt = readable[0]?.at;
   const clock = useMemo(() => {
     if (startedAt == null) return () => "";
     return (at: number) => {
@@ -826,24 +855,23 @@ export function CaptionTranscript({
         }}
         className="flex-1 space-y-3 overflow-y-auto px-4 py-3"
       >
-        {entries.length === 0 ? (
+        {readable.length === 0 ? (
           <p className="text-sm text-on-dark-faint">{t("call.captionsTranscriptEmpty")}</p>
         ) : (
-          entries.map((entry) => {
+          readable.map((entry) => {
             const name = entry.from ? speakerName(entry.from) : null;
+            const showOriginal = entry.src != null && display === "original";
             return (
               <div key={entry.id} className="text-sm">
                 <p className="flex items-center gap-2 text-sm text-on-dark-faint">
                   <span className="font-mono">{clock(entry.at)}</span>
                   {name && <span className="font-medium">{name}</span>}
                 </p>
-                {entry.src && (
-                  <p lang={entry.srcLang} className="leading-snug font-medium text-on-dark">
-                    {entry.src}
-                  </p>
-                )}
-                <p lang={entry.lang} className="leading-snug text-on-dark-muted">
-                  {entry.text}
+                <p
+                  lang={showOriginal ? entry.srcLang : entry.lang}
+                  className="leading-snug font-medium text-on-dark"
+                >
+                  {showOriginal ? entry.src : entry.text}
                 </p>
               </div>
             );

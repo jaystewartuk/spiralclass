@@ -238,6 +238,7 @@ on it.
 | [D-187](./D-187.md) | **Production video moves to a free `e2-micro`** — measured to carry a class, not its recording, so recording goes off     |
 | [D-189](./D-189.md) | **The lesson transcript is the caption text the browsers already recognise**, kept with consent — no audio, no egress     |
 | [D-198](./D-198.md) | **A caption shows the words as they are spoken**; the translation replaces them when the phrase ends                      |
+| [D-206](./D-206.md) | **A reader of a translation never sees untranslated words**; a phrase in progress shows as the speaker talking            |
 
 ### The lesson-AI pipeline, and the consent that gates it
 
@@ -578,6 +579,7 @@ records removed before publication — see [What is not here](#what-is-not-here)
 | [D-203](./D-203.md) | The transcript is kept with subtitles off; the switch is display only | Active (reverses part of D-189)      |
 | [D-204](./D-204.md) | New students hear what teachers send; unreachable sends say so        | Active (reverses a code default)     |
 | [D-205](./D-205.md) | One approval per production deploy, on the database job               | Active (narrows D-157, D-199)        |
+| [D-206](./D-206.md) | A translation's reader sees dots mid-phrase, never the original       | Active (narrows D-198)               |
 
 ---
 

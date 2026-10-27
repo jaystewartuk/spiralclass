@@ -2268,6 +2268,7 @@ export function ClassCall({
             {transcriptOpen && !minimized && (
               <CaptionTranscript
                 entries={captions.transcript}
+                display={captionPrefs.display}
                 speakerName={speakerName}
                 onClose={() => setTranscriptOpen(false)}
               />
