@@ -5212,7 +5212,6 @@ export const en = {
   "web.siteFooter.terms": "Terms",
   "web.siteFooter.privacy": "Privacy",
   "web.siteFooter.sourceCode": "Source code",
-  "web.siteFooter.madeBy": "Made by",
   "web.themeToggle.switchToLight": "Switch to light mode",
   "web.themeToggle.switchToDark": "Switch to dark mode",
   "web.themeToggle.light": "Light",
