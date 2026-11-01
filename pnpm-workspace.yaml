@@ -126,6 +126,12 @@ overrides:
   # Exact pin, not an open-ended ">=", for the dedup reason the 2026-07-20
   # sweep documents above.
   deepmerge-ts@<8.0.0: "8.0.1" # GHSA-ggr8-5vv4-36mx
+  # 2026-11-01: failed the gate's audit step on every branch. Reached only through
+  # inngest > @opentelemetry/auto-instrumentations-node > instrumentation-host-metrics,
+  # and the advisory is Windows-only, but the gate does not grade on reachability.
+  # A patched line exists, so an override rather than a seat on ignoreGhsas. Exact
+  # pin, for the dedup reason the 2026-07-20 sweep documents above.
+  systeminformation@<5.33.16: "5.33.19" # GHSA-3f7j-7jwc-fxfj
   # 2026-07-26: that same maintenance pass bumped @radix-ui/react-slot to
   # 1.3.1, which added a top-level `createContext` call with no "use client"
   # directive — a real upstream RSC regression (radix-ui/primitives#4072),
