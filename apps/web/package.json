@@ -133,7 +133,7 @@
     "playwright": "^1.63.0",
     "postcss": "^8.5.28",
     "prettier": "^3.9.9",
-    "prisma": "^7.10.0",
+    "prisma": "^7.10.1",
     "prisma-dbml-generator": "^0.12.0",
     "tailwindcss": "^4.3.3",
     "tsx": "^4.23.15",
