@@ -173,11 +173,12 @@ thing a log can show that a codebase cannot.
 
 ### Teaching content and AI
 
-| #                   | Decision                                                                                   |
-| ------------------- | ------------------------------------------------------------------------------------------ |
-| [D-17](./D-17.md)   | **Lesson content is native, drafted from inputs the teacher owns**; no platform curriculum |
-| [D-87](./D-87.md)   | Models are chosen per call shape, and a call that passes `effort` never runs on Haiku      |
-| [D-201](./D-201.md) | A model call site ships with an eval set; the teacher's verdict on its output is a figure  |
+| #                   | Decision                                                                                           |
+| ------------------- | -------------------------------------------------------------------------------------------------- |
+| [D-17](./D-17.md)   | **Lesson content is native, drafted from inputs the teacher owns**; no platform curriculum         |
+| [D-87](./D-87.md)   | Models are chosen per call shape, and a call that passes `effort` never runs on Haiku              |
+| [D-201](./D-201.md) | A model call site ships with an eval set; the teacher's verdict on its output is a figure          |
+| [D-202](./D-202.md) | An AI materials call records its output and whether the teacher kept it; text clears after 30 days |
 
 ### Acquisition and the public funnel
 
@@ -239,6 +240,7 @@ thing a log can show that a codebase cannot.
 | [D-185](./D-185.md) | Captions are recognised in the participants' browsers, and the lesson transcript is that caption text                                                                  |
 | [D-199](./D-199.md) | A merge to `main` starts its own release, and the owner's approval is the only human step                                                                              |
 | [D-201](./D-201.md) | A model call site ships with an eval set; verdicts become a figure                                                                                                     |
+| [D-202](./D-202.md) | An AI materials call records its output and whether the teacher kept it; text clears after 30 days                                                                     |
 | [D-207](./D-207.md) | The decision log keeps one record per live decision, edited in place                                                                                                   |
 
 | [D-198](./D-198.md) | A caption shows words as spoken; translation replaces them when the phrase ends |

@@ -291,6 +291,14 @@ collapses them to one row per (class, material). Two surfaces consume it:
 - The platform ships no lesson templates or curriculum. A template is always one
   the teacher wrote; focus-tag packs are the only seeded content, and she can
   edit them.
+- **Every successful generation and refine records its verdict**
+  ([D-202](../decisions/D-202.md)). The quota row keeps the kind of call, the
+  text the teacher received and, for a refine, her instruction. A save whose
+  source is AI and whose body contains that text marks it kept, on that
+  material. A generation never kept was discarded or refined past. A
+  hand-typed save is never credited to the model. The text and instruction
+  are cleared after 30 days and when the account is deleted; the rows stay
+  for the cap.
 - Generated/typed body is capped at 20,000 characters
   (`CLASS_CONTENT_MAX_CHARS`), same ceiling as class content.
 - Every save that changes the body snapshots the outgoing body to

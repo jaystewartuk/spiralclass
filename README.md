@@ -140,7 +140,7 @@ graph TB
 
     SH["packages/shared<br/>wire types · Zod validators · money<br/>pricing + entitlement config · i18n catalog"]
 
-    DB[("PostgreSQL / Neon<br/>82 models · 9 migrations")]
+    DB[("PostgreSQL / Neon<br/>82 models · 10 migrations")]
     JOBS["Inngest<br/>durable background execution"]
 
     subgraph external["External services"]
@@ -311,7 +311,7 @@ change.
 
 ### Database
 
-82 models, 9 migrations, 128 indexes, 23 unique constraints. Postgres via
+82 models, 10 migrations, 128 indexes, 23 unique constraints. Postgres via
 Prisma, on Neon.
 
 **The squashed history is two migrations, and the split is deliberate.** Every
