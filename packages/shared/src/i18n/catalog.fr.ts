@@ -5202,7 +5202,6 @@ export const fr = {
   "web.siteFooter.terms": "Conditions",
   "web.siteFooter.privacy": "Confidentialité",
   "web.siteFooter.sourceCode": "Code source",
-  "web.siteFooter.madeBy": "Créé par",
   "web.themeToggle.switchToLight": "Passer en mode clair",
   "web.themeToggle.switchToDark": "Passer en mode sombre",
   "web.themeToggle.light": "Clair",

@@ -5216,7 +5216,6 @@ export const esMX = {
   "web.siteFooter.terms": "Términos",
   "web.siteFooter.privacy": "Privacidad",
   "web.siteFooter.sourceCode": "Código fuente",
-  "web.siteFooter.madeBy": "Hecho por",
   "web.themeToggle.switchToLight": "Cambiar a modo claro",
   "web.themeToggle.switchToDark": "Cambiar a modo oscuro",
   "web.themeToggle.light": "Claro",
