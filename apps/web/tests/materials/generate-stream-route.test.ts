@@ -103,6 +103,8 @@ describe("POST materials/generate/stream", () => {
     expect(body).toBe("# Hola mundo");
     expect(done).toBe(true);
     expect(recordLibraryMaterialGeneration).toHaveBeenCalledTimes(1);
+    // The record carries exactly what was streamed to the teacher (D-202).
+    expect((recordLibraryMaterialGeneration.mock.calls as unknown[][])[0]![2]).toBe("# Hola mundo");
   });
 
   it("keeps markdown newlines intact across frame boundaries", async () => {

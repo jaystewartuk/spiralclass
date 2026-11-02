@@ -15,6 +15,7 @@ import {
 } from "@/lib/materials/config";
 import type { PodcastPromptInput } from "@/lib/materials/podcast-prompt";
 import { mintMaterialPodcastSignedUrl } from "@/lib/storage/material-podcast";
+import { recordMaterialGeneration } from "@/lib/materials/generations";
 
 const log = logger({ surface: "materials-podcast" });
 
@@ -288,7 +289,7 @@ export async function completePodcast(input: {
     },
   });
   if (res.count === 0) return { burned: false }; // already finalized by a prior run
-  await prisma.classContentGeneration.create({ data: { teacherId: input.teacherId } });
+  await recordMaterialGeneration({ teacherId: input.teacherId, kind: "podcast_script" });
   trackServerEvent({
     name: "material_podcast_generated",
     distinctId: input.teacherId,
