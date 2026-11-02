@@ -104,6 +104,12 @@ function mkdocsOnlySyntax(): string[] {
 }
 
 describe("relative links between Markdown files", () => {
+  it("requires an explicit file extension while accepting directory links", () => {
+    expect(resolves(resolve(REPO_ROOT, "docs/README.md"))).toBe(true);
+    expect(resolves(resolve(REPO_ROOT, "docs/README"))).toBe(false);
+    expect(resolves(resolve(REPO_ROOT, "docs"))).toBe(true);
+  });
+
   it("reads enough Markdown to be checking anything", () => {
     // Guards the guard: an empty walk would pass the assertion below having
     // opened not one file.
