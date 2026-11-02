@@ -13190,6 +13190,18 @@
           "default": null
         },
         {
+          "name": "captionTiming",
+          "type": "Json",
+          "note": null,
+          "isPrimaryKey": false,
+          "isForeignKey": false,
+          "isUnique": false,
+          "isNotNull": false,
+          "isEnum": false,
+          "enumName": null,
+          "default": null
+        },
+        {
           "name": "dashboardTileOrder",
           "type": "Json",
           "note": null,

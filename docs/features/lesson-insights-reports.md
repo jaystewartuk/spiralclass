@@ -8,7 +8,8 @@ audio.** The free video box production runs on cannot carry egress
 ([D-187](../decisions/D-187.md)), so the transcript is now the caption text
 the participants' browsers already produce ([D-185](../decisions/D-185.md)),
 kept — text only, never audio — for a class whose pairing has recorded
-insights consent, while the teacher has captions on. The reasoning for the
+insights consent, **whether or not captions are showing**
+([D-203](../decisions/D-203.md)). The reasoning for the
 feature itself lives in [D-19](../decisions/D-19.md),
 [D-21](../decisions/D-21.md) and [D-22](../decisions/D-22.md). The flag
 history is: off at first ship, on at [D-94](../decisions/D-94.md)
@@ -20,8 +21,9 @@ given student's words are kept is the recorded per-pairing consent (D-22),
 which is guardian-only for a student under 18 — never the flag.
 
 Two operational facts this document must not contradict: **the teacher's
-captions toggle is the trigger** — no captions, no transcript, no insights
-for that class — and **preview cannot rehearse the pipeline end-to-end**,
+captions toggle is not the trigger** — it only decides whether captions are
+shown; a consenting class is recognised and kept with it off, and the
+"Learning notes on" indicator shows either way (D-203) — and **preview cannot rehearse the pipeline end-to-end**,
 because it has no LiveKit pair and the shared box posts webhooks to
 production's URL only.
 
@@ -113,7 +115,7 @@ the pass/fail record of attendance or payments.
 ### Pipeline (async, post-class)
 
 - **The transcript is written during the class by the browsers** (D-189).
-  While captions are on, the browser that recognised a finished utterance
+  Whether or not captions are showing (D-203), the browser that recognised a finished utterance
   (D-185's assignment: the speaker's own, the other participant's computer, or
   the Deepgram stream for a phone) posts its source text, speaker and an
   estimated duration to `/api/captions/transcript`; the server re-checks
@@ -260,12 +262,25 @@ NULL`) — a confirmed insight is never touched or removed by regeneration.
 
 **Teacher — student detail page:**
 
-1. Open a student's profile; see a read-only rollup card: focus areas sorted
-   by recurrence (ties favor "focus" trend), each with skill, category,
-   evidence quote, trend badge, and recurrence count, followed by a
-   vocabulary badge cloud.
-2. Below that, controls for insights consent (with a minor-specific
-   checkbox) and the "share progress with student" toggle.
+1. Open a student and choose the **Learning profile** tab (its own view,
+   apart from the Learning tab's level and goal forms). It shows, sorted by
+   recurrence (ties favor "focus" trend), first **how they speak** — the
+   fluency and comprehension entries (hesitation, filler words, pace,
+   listening…) — then **what to work on** — every other category — each row a
+   skill, category, trend badge and recurrence count, then the vocabulary
+   badge cloud. No timestamps, and no quote on the row: the last example is a
+   collapsed hint, cut to 80 characters (`lib/lesson-notes/profile-view.ts`).
+2. Below that, a form to **add her own focus area** (source `teacher`,
+   confirmed on creation, the same write path as the class page's "add your
+   own"). It attaches to the student's most recent class that took place, so
+   it is unavailable before the first class.
+3. Then the controls for insights consent (with a minor-specific checkbox)
+   and the "share progress with student" toggle.
+
+**Teacher — during the call:** the call's **Quick note** control saves a
+one-line focus area for the class being taught (`source: "teacher"`, confirmed
+on creation, the same write as "add your own finding" below), so a teacher who
+spots a recurring error mid-class does not have to remember it afterwards.
 
 **Teacher — booking/class detail page:**
 

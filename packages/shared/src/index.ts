@@ -5,6 +5,7 @@ export * from "./calendar-layout";
 export * from "./notifications";
 export * from "./captions";
 export * from "./caption-recognition";
+export * from "./caption-timing";
 export * from "./call-material";
 export * from "./call-material-open";
 export * from "./email-suggest";

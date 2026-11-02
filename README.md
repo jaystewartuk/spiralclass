@@ -44,10 +44,10 @@ appears in it.</sub>
 | know what is exposed by publishing it | [Security posture](docs/security.md)                                                                                               |
 
 > **How this repository was built.** SpiralClass was built by one person working
-> with AI coding agents; most of the code was agent-written under review. It is
-> published as a snapshot — the working repository, with its development
-> history, pull requests and issues, is private, which is why everything here
-> arrives in a single commit.
+> with AI coding agents; most of the code was agent-written under review. The
+> history before 22 September 2026 is private, which is why it starts with one
+> snapshot commit. Since then every change has landed here through a pull
+> request and the merge gate, and the board is this repository's issues.
 
 ---
 
@@ -73,7 +73,7 @@ appears in it.</sub>
 It is published as an honest record of how one engineer builds and runs a
 payments-handling, video-carrying SaaS product alone: the architecture, the
 decisions, the things that went wrong, and the mechanisms built so they would
-not go wrong twice. More than 125 decision records in
+not go wrong twice. More than 150 decision records in
 [`docs/decisions/`](docs/decisions/README.md) are the most useful thing here —
 several of them reverse an earlier one and say why.
 
@@ -133,7 +133,7 @@ graph TB
     WEB["Next.js 15 web app<br/>teacher · student · public booking · admin"]
 
     subgraph app["apps/web — the only server"]
-        RSC["Server Components<br/>+ 71 server-action modules"]
+        RSC["Server Components<br/>+ 72 server-action modules"]
         API["62 route handlers<br/>by audience: teacher · student · public · internal"]
         MW["middleware.ts<br/>CSP nonce · session gate · ?ref= attribution"]
         LIB["src/lib/** — one folder per bounded concern<br/>payments · booking · cancellation · subscriptions<br/>auth · notifications · chat · homework · video"]
@@ -141,7 +141,7 @@ graph TB
 
     SH["packages/shared<br/>wire types · Zod validators · money<br/>pricing + entitlement config · i18n catalog"]
 
-    DB[("PostgreSQL / Neon<br/>82 models · 8 migrations")]
+    DB[("PostgreSQL / Neon<br/>82 models · 10 migrations")]
     JOBS["Inngest<br/>durable background execution"]
 
     subgraph external["External services"]
@@ -312,7 +312,7 @@ change.
 
 ### Database
 
-82 models, 8 migrations, 128 indexes, 23 unique constraints. Postgres via
+82 models, 10 migrations, 128 indexes, 23 unique constraints. Postgres via
 Prisma, on Neon.
 
 **The squashed history is two migrations, and the split is deliberate.** Every
@@ -621,7 +621,7 @@ in [`infra/gcp-livekit/README.md`](infra/gcp-livekit/README.md).
 | Where                                      | What                                                                                             |
 | ------------------------------------------ | ------------------------------------------------------------------------------------------------ |
 | [`docs/architecture/`](docs/architecture/) | System design, the data model, how a purchase and a booking flow                                 |
-| [`docs/decisions/`](docs/decisions/)       | **More than 125 decision records.** Current policy, not history — several reverse an earlier one |
+| [`docs/decisions/`](docs/decisions/)       | **More than 150 decision records.** Current policy, not history — several reverse an earlier one |
 | [`docs/features/`](docs/features/)         | Canonical product behaviour, one document per feature                                            |
 | [`docs/development/`](docs/development/)   | Setup, testing, the change workflow, i18n, analytics                                             |
 | [`docs/deployment/`](docs/deployment/)     | Release, incident response, backup and restore, infrastructure runbooks                          |

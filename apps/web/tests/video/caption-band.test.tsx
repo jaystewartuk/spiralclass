@@ -4,14 +4,10 @@
 // it a LANGUAGE LESSON's subtitles rather than a meeting's, each of which a
 // refactor could quietly undo without breaking anything visibly:
 //
-//   1. In "both" mode the ORIGINAL is the prominent line, not the
-//      translation. The learner is listening to those exact words; the text
-//      she matches to the sound has to be the text she reads first. Losing
-//      this would leave the mode present and pedagogically pointless.
-//      "both" is not the shipped default — the default is the translation
-//      alone, aimed at a reader who has never chosen (see preferences.ts) —
-//      so most of the cases below ask for it explicitly through
-//      BOTH_LANGUAGES rather than inheriting it.
+//   1. One language per subtitle, never two. Original-above-translation was
+//      removed because the one teacher using it found two languages in one
+//      place confusing; the translation is the default and the original is
+//      the opt-in for a reader testing herself (see preferences.ts).
 //   2. The band announces itself to a screen reader (role="log" +
 //      aria-live), and each line carries its own `lang`. Without the
 //      attribute a reader speaks Spanish with English phonemes — on the one
@@ -33,7 +29,7 @@ vi.mock("@/components/locale-provider", () => ({
   useLocale: () => "en",
 }));
 
-const { CaptionBand } = await import("@/components/video/caption-band");
+const { CaptionBand, CaptionTranscript } = await import("@/components/video/caption-band");
 
 let container: HTMLDivElement;
 let root: Root;
@@ -48,14 +44,6 @@ afterEach(() => {
   act(() => root.unmount());
   container.remove();
 });
-
-// What the band renders once a reader has opted into both languages. Most of
-// what this file pins is bilingual layout — which line is prominent, how many
-// survive a small screen, how they scale together — and none of that is
-// reachable from the shipped default. Spelling it out here also means a change
-// to the DEFAULT is a one-line change to this file's expectations rather than
-// a diff across twelve cases.
-const BOTH_LANGUAGES = { ...DEFAULT_CAPTION_PREFERENCES, display: "both" } as const;
 
 const bilingual: CaptionEntry = {
   id: "1",
@@ -72,7 +60,7 @@ function render(props: Partial<React.ComponentProps<typeof CaptionBand>> = {}) {
     root.render(
       <CaptionBand
         entries={[bilingual]}
-        prefs={BOTH_LANGUAGES}
+        prefs={DEFAULT_CAPTION_PREFERENCES}
         onPrefsChange={() => {}}
         speakerName={(id) => (id === "teacher-1" ? "Mira" : null)}
         tileParked={false}
@@ -87,15 +75,7 @@ function render(props: Partial<React.ComponentProps<typeof CaptionBand>> = {}) {
 }
 
 describe("what the band shows", () => {
-  it('shows the original AND the translation in "both" mode', () => {
-    const el = render();
-    expect(el.textContent).toContain("¿Cómo estás hoy?");
-    expect(el.textContent).toContain("How are you today?");
-  });
-
   it("shows the translation alone on the shipped default", () => {
-    // The reader this reaches is the one who has never chosen: a first-time
-    // viewer, for whom two languages at once is the wrong first thing to see.
     // Pinned here as well as in caption-preferences.test.ts because that test
     // pins the VALUE and this one pins what the value does on screen.
     const el = render({ prefs: DEFAULT_CAPTION_PREFERENCES });
@@ -103,18 +83,25 @@ describe("what the band shows", () => {
     expect(el.textContent).not.toContain("¿Cómo estás hoy?");
   });
 
-  it("makes the ORIGINAL the prominent line, not the translation", () => {
-    // The whole pedagogical claim of this band. If a refactor ever swaps
-    // these, subtitles quietly stop teaching and start merely explaining.
+  it("never puts the original and the translation on screen together", () => {
+    for (const display of ["translation", "original"] as const) {
+      const el = render({ prefs: { ...DEFAULT_CAPTION_PREFERENCES, display } });
+      const lines = [...el.querySelectorAll("p")].filter(
+        (p) =>
+          p.textContent?.includes("¿Cómo estás hoy?") ||
+          p.textContent?.includes("How are you today?"),
+      );
+      expect(lines).toHaveLength(1);
+    }
+  });
+
+  it("offers only the translation and the original in its settings", () => {
     const el = render();
-    const original = [...el.querySelectorAll("p")].find((p) =>
-      p.textContent?.includes("¿Cómo estás hoy?"),
-    );
-    const translation = [...el.querySelectorAll("p")].find((p) =>
-      p.textContent?.includes("How are you today?"),
-    );
-    expect(original?.className).toContain("text-lg");
-    expect(translation?.className).toContain("text-sm");
+    act(() => (el.querySelector('[aria-label="call.captionsSettings"]') as HTMLElement).click());
+    const group = el.querySelector('[role="group"]') as HTMLElement;
+    expect(group.querySelector('[aria-label="call.captionsDisplayTranslation"]')).not.toBeNull();
+    expect(group.querySelector('[aria-label="call.captionsDisplayOriginal"]')).not.toBeNull();
+    expect(group.textContent).not.toContain("captionsDisplayBoth");
   });
 
   it("is a size larger on a computer screen at the default size", () => {
@@ -167,16 +154,12 @@ describe("what the band shows", () => {
     // there — the outer container also "contains" every line's text.
     const lines = [...(render({ entries: three }).querySelector('[role="log"]')?.children ?? [])];
     expect(lines).toHaveLength(3);
-    const oldest = lines.find((d) => d.textContent?.includes("¿Cómo estás hoy?"));
+    const oldest = lines.find((d) => d.textContent?.includes("How are you today?"));
     expect(oldest?.className).toContain("hidden");
     expect(oldest?.className).toContain("lg:block");
     // The two most recent are never hidden.
-    expect(lines.find((d) => d.textContent?.includes("Tercera"))?.className).not.toContain(
-      "hidden",
-    );
-    expect(lines.find((d) => d.textContent?.includes("Segunda"))?.className).not.toContain(
-      "hidden",
-    );
+    expect(lines.find((d) => d.textContent?.includes("Third"))?.className).not.toContain("hidden");
+    expect(lines.find((d) => d.textContent?.includes("Second"))?.className).not.toContain("hidden");
   });
 
   it("shows fewer lines as the text gets bigger", () => {
@@ -188,13 +171,13 @@ describe("what the band shows", () => {
       { ...bilingual, id: "2", src: "Segunda", text: "Second" },
       { ...bilingual, id: "3", src: "Tercera", text: "Third" },
     ];
-    expect(render({ entries: three }).textContent).toContain("¿Cómo estás hoy?");
+    expect(render({ entries: three }).textContent).toContain("How are you today?");
     const big = render({
       entries: three,
-      prefs: { ...BOTH_LANGUAGES, size: "xl" },
+      prefs: { ...DEFAULT_CAPTION_PREFERENCES, size: "xl" },
     });
-    expect(big.textContent).not.toContain("¿Cómo estás hoy?");
-    expect(big.textContent).toContain("Tercera");
+    expect(big.textContent).not.toContain("How are you today?");
+    expect(big.textContent).toContain("Third");
   });
 
   it("falls back to a neutral label for a speaker the room no longer knows", () => {
@@ -239,14 +222,13 @@ describe("accessibility", () => {
   });
 
   it("tags each line with its own language", () => {
-    const el = render();
-    const original = [...el.querySelectorAll("p")].find((p) =>
-      p.textContent?.includes("¿Cómo estás hoy?"),
-    );
-    const translation = [...el.querySelectorAll("p")].find((p) =>
-      p.textContent?.includes("How are you today?"),
-    );
+    const original = render({
+      prefs: { ...DEFAULT_CAPTION_PREFERENCES, display: "original" },
+    }).querySelector("p[lang]");
+    expect(original?.textContent).toContain("¿Cómo estás hoy?");
     expect(original?.getAttribute("lang")).toBe("es");
+    const translation = render().querySelector("p[lang]");
+    expect(translation?.textContent).toContain("How are you today?");
     expect(translation?.getAttribute("lang")).toBe("en");
   });
 });
@@ -262,7 +244,7 @@ describe("words still being spoken", () => {
     at: 1_000,
   };
 
-  it.each(["translation", "original", "both"] as const)(
+  it.each(["translation", "original"] as const)(
     'shows them, in the speaker\'s language, in "%s" mode',
     (display) => {
       const el = render({ entries: [partial], prefs: { ...DEFAULT_CAPTION_PREFERENCES, display } });
@@ -281,10 +263,44 @@ describe("words still being spoken", () => {
     const el = render({ entries: [partial] });
     const before = [...el.querySelectorAll("p")].find((n) => n.textContent === "¿Cómo estás");
     render({ entries: [bilingual] });
-    const after = [...el.querySelectorAll("p")].find((n) => n.textContent === "¿Cómo estás hoy?");
+    const after = [...el.querySelectorAll("p")].find(
+      (n) => n.textContent === "How are you today?" || n.textContent === "Mira¿Cómo estás hoy?",
+    );
     expect(after).toBeDefined();
     expect(before?.isConnected).toBe(false);
     expect(after?.closest('[aria-hidden="true"]')).toBeNull();
+  });
+});
+
+// D-206. A teacher and her student, testing the one-language band, still saw
+// two languages: the untranslated words of the phrase being spoken under the
+// translation of the last one. A reader of a translation now gets a wordless
+// partial, and the band shows the speaker as talking.
+describe("a phrase still being spoken, for a reader of the translation", () => {
+  const speaking: CaptionEntry = {
+    id: "2",
+    text: "",
+    from: "teacher-1",
+    lang: "en",
+    partial: true,
+    at: 2_000,
+  };
+
+  it("shows dots under the speaker's name, and no words", () => {
+    const el = render({ entries: [speaking] });
+    expect(el.querySelector("[data-caption-dots]")).not.toBeNull();
+    expect(el.textContent).toBe("Mira");
+  });
+
+  it("never leaves two languages on screen under the last translated line", () => {
+    for (const display of ["translation", "original"] as const) {
+      const el = render({
+        entries: [bilingual, speaking],
+        prefs: { ...DEFAULT_CAPTION_PREFERENCES, display },
+      });
+      const langs = new Set([...el.querySelectorAll("[lang]")].map((n) => n.getAttribute("lang")));
+      expect(langs.size).toBe(1);
+    }
   });
 });
 
@@ -292,32 +308,28 @@ describe("the reader's preferences", () => {
   it("renders nothing when the reader has hidden subtitles", () => {
     // The control a student never had: the room switch is her teacher's, but
     // whether the band covers the video is hers.
-    const el = render({ prefs: { ...BOTH_LANGUAGES, visible: false } });
+    const el = render({ prefs: { ...DEFAULT_CAPTION_PREFERENCES, visible: false } });
     expect(el.innerHTML).toBe("");
   });
 
   it("shows only the translation on request", () => {
-    const el = render({ prefs: { ...BOTH_LANGUAGES, display: "translation" } });
+    const el = render({ prefs: { ...DEFAULT_CAPTION_PREFERENCES, display: "translation" } });
     expect(el.textContent).toContain("How are you today?");
     expect(el.textContent).not.toContain("¿Cómo estás hoy?");
   });
 
   it("shows only the original on request", () => {
-    const el = render({ prefs: { ...BOTH_LANGUAGES, display: "original" } });
+    const el = render({ prefs: { ...DEFAULT_CAPTION_PREFERENCES, display: "original" } });
     expect(el.textContent).toContain("¿Cómo estás hoy?");
     expect(el.textContent).not.toContain("How are you today?");
   });
 
-  it("scales both lines together at a larger text size", () => {
-    const el = render({ prefs: { ...BOTH_LANGUAGES, size: "xl" } });
-    const original = [...el.querySelectorAll("p")].find((p) =>
-      p.textContent?.includes("¿Cómo estás hoy?"),
-    );
+  it("scales the line at a larger text size", () => {
+    const el = render({ prefs: { ...DEFAULT_CAPTION_PREFERENCES, size: "xl" } });
     const translation = [...el.querySelectorAll("p")].find((p) =>
       p.textContent?.includes("How are you today?"),
     );
-    expect(original?.className).toContain("text-3xl");
-    expect(translation?.className).toContain("text-xl");
+    expect(translation?.className).toContain("text-3xl");
   });
 
   it("stays anchored to the BOTTOM whether or not a tile is parked", () => {
@@ -379,14 +391,13 @@ describe("docked under a material", () => {
     // The floor used to be min-h-24 to min-h-36 — sized to three buttons
     // stacked beside the text, about three times one subtitle line, all of it
     // taken from the worksheet above.
-    const rows = (prefs: typeof BOTH_LANGUAGES | typeof DEFAULT_CAPTION_PREFERENCES) =>
+    const rows = (prefs: typeof DEFAULT_CAPTION_PREFERENCES) =>
       render({ docked: true, entries: [], prefs })
         .querySelector("[data-caption-standby] .invisible")
         ?.querySelectorAll(".h-lh").length;
-    // The shipped default shows the translation alone: one line of reserve.
+    // One language per subtitle in either mode: one line of reserve.
     expect(rows(DEFAULT_CAPTION_PREFERENCES)).toBe(1);
-    // Both languages is two lines per subtitle, so two lines of reserve.
-    expect(rows(BOTH_LANGUAGES)).toBe(2);
+    expect(rows({ ...DEFAULT_CAPTION_PREFERENCES, display: "original" })).toBe(1);
 
     const html = render({ docked: true, entries: [] });
     expect((html.querySelector('[role="log"]') as HTMLElement).className).not.toMatch(/\bmin-h-/);
@@ -419,11 +430,12 @@ describe("docked under a material", () => {
     expect(line.querySelector("span")?.textContent).toBe("Mira");
     expect([...html.querySelectorAll("p")].some((p) => p.textContent === "Mira")).toBe(false);
 
-    // In both languages the name leads the prominent (original) line, once.
-    const both = render({ docked: true });
-    const original = both.querySelector('p[lang="es"]') as HTMLElement;
+    // Showing the original, the name leads that line, once.
+    const original = render({
+      docked: true,
+      prefs: { ...DEFAULT_CAPTION_PREFERENCES, display: "original" },
+    }).querySelector('p[lang="es"]') as HTMLElement;
     expect(original.querySelector("span")?.textContent).toBe("Mira");
-    expect((both.querySelector('p[lang="en"]') as HTMLElement).querySelector("span")).toBeNull();
 
     // Over the camera the name keeps its own row.
     const overCamera = render();
@@ -438,7 +450,7 @@ describe("docked under a material", () => {
   it("still goes away when the reader hides subtitles", () => {
     const html = render({
       docked: true,
-      prefs: { ...BOTH_LANGUAGES, visible: false },
+      prefs: { ...DEFAULT_CAPTION_PREFERENCES, visible: false },
     });
     expect(html.innerHTML).toBe("");
   });
@@ -452,7 +464,11 @@ describe("docked under a material", () => {
 
     // And only the current line once the text is large: two extra-large
     // bilingual lines took more of a laptop window than the worksheet kept.
-    const large = render({ docked: true, entries, prefs: { ...BOTH_LANGUAGES, size: "xl" } });
+    const large = render({
+      docked: true,
+      entries,
+      prefs: { ...DEFAULT_CAPTION_PREFERENCES, size: "xl" },
+    });
     expect(large.textContent).not.toContain("line 2");
     expect(large.textContent).toContain("line 3");
   });
@@ -481,7 +497,7 @@ describe("docked under a material", () => {
     const onOpenTranscript = vi.fn();
     const html = render({
       docked: true,
-      prefs: { ...BOTH_LANGUAGES, visibleWithContent: false },
+      prefs: { ...DEFAULT_CAPTION_PREFERENCES, visibleWithContent: false },
       onPrefsChange,
       onOpenTranscript,
     });
@@ -503,7 +519,7 @@ describe("docked under a material", () => {
   });
 
   it("does not put them away over the camera because of the materials switch", () => {
-    const html = render({ prefs: { ...BOTH_LANGUAGES, visibleWithContent: false } });
+    const html = render({ prefs: { ...DEFAULT_CAPTION_PREFERENCES, visibleWithContent: false } });
     expect(html.querySelector('[role="log"]')).not.toBeNull();
   });
 
@@ -517,5 +533,291 @@ describe("docked under a material", () => {
     // And the panel is not stretched to make room for a popover that no
     // longer opens over it.
     expect((html.querySelector('[role="log"]') as HTMLElement).className).not.toContain("min-h-40");
+  });
+});
+
+describe("the transcript panel", () => {
+  function renderTranscript(props: Partial<React.ComponentProps<typeof CaptionTranscript>> = {}) {
+    act(() =>
+      root.render(
+        <CaptionTranscript
+          entries={[bilingual]}
+          display="translation"
+          speakerName={(id) => (id === "teacher-1" ? "Mira" : null)}
+          onClose={() => {}}
+          {...props}
+        />,
+      ),
+    );
+    return container;
+  }
+
+  // jsdom has no layout; the panel follows the live edge by scrolling.
+  beforeEach(() => {
+    Element.prototype.scrollIntoView = () => {};
+  });
+
+  it("shows the translation alone, as the band does", () => {
+    const el = renderTranscript();
+    expect(el.textContent).toContain("How are you today?");
+    expect(el.textContent).not.toContain("¿Cómo estás hoy?");
+  });
+
+  it("shows the original alone in the reader's original mode", () => {
+    const el = renderTranscript({ display: "original" });
+    expect(el.textContent).toContain("¿Cómo estás hoy?");
+    expect(el.textContent).not.toContain("How are you today?");
+    expect(el.querySelector('[lang="es"]')).not.toBeNull();
+  });
+
+  it("leaves out a phrase still being spoken that carries no words", () => {
+    const el = renderTranscript({
+      entries: [{ id: "2", text: "", from: "teacher-1", lang: "en", partial: true, at: 2_000 }],
+    });
+    expect(el.textContent).toContain("call.captionsTranscriptEmpty");
+  });
+});
+
+// A student on a desktop: the subtitles covered part of her teacher's face.
+// Every answer here is the reader's own, and none of them changes anyone
+// else's screen.
+describe("keeping the subtitles off the other person's face", () => {
+  const three = [
+    bilingual,
+    { ...bilingual, id: "2", src: "Segunda", text: "Second" },
+    { ...bilingual, id: "3", src: "Tercera", text: "Third" },
+  ];
+  const openSettings = (el: HTMLElement) => {
+    act(() => (el.querySelector('[aria-label="call.captionsSettings"]') as HTMLElement).click());
+    return el.querySelector('[role="group"]') as HTMLElement;
+  };
+  const pointer = (target: Element, type: string, clientY: number) =>
+    act(() => {
+      target.dispatchEvent(new MouseEvent(type, { bubbles: true, clientY, button: 0 }));
+    });
+
+  it("has a size below the default", () => {
+    const el = render({ prefs: { ...DEFAULT_CAPTION_PREFERENCES, size: "s" } });
+    const line = [...el.querySelectorAll("p")].find((p) =>
+      p.textContent?.includes("How are you today?"),
+    );
+    expect(line?.className).toContain("text-base");
+    expect(line?.className).toContain("md:text-lg");
+    const small = openSettings(el).querySelector('[aria-label="call.captionsSizeS"]');
+    expect(small?.getAttribute("aria-pressed")).toBe("true");
+  });
+
+  it("shows sizes as a growing glyph, named in full, so no language overflows the row", () => {
+    // In Spanish "Muy grande" ran off the popover's edge, and in English
+    // "Extra large" wrapped inside its segment (seen in a local call).
+    const group = openSettings(render());
+    const keys = [
+      "call.captionsSizeS",
+      "call.captionsSizeM",
+      "call.captionsSizeL",
+      "call.captionsSizeXl",
+    ];
+    for (const key of keys) {
+      const button = group.querySelector(`[aria-label="${key}"]`) as HTMLElement;
+      expect(button.textContent).toBe("");
+      expect(button.querySelector("svg")).not.toBeNull();
+    }
+  });
+
+  it("shows only as many lines as the reader asked for", () => {
+    const one = render({ entries: three, prefs: { ...DEFAULT_CAPTION_PREFERENCES, lines: 1 } });
+    expect(one.textContent).toContain("Third");
+    expect(one.textContent).not.toContain("Second");
+    const two = render({ entries: three, prefs: { ...DEFAULT_CAPTION_PREFERENCES, lines: 2 } });
+    expect(two.textContent).toContain("Second");
+    expect(two.textContent).not.toContain("How are you today?");
+  });
+
+  it("never shows more lines than the size allows, whatever was asked", () => {
+    // Three lines of extra-large text is the wall across a face that the size
+    // ceiling exists to prevent; asking for three does not lift it.
+    const el = render({
+      entries: three,
+      prefs: { ...DEFAULT_CAPTION_PREFERENCES, size: "xl", lines: 3 },
+    });
+    expect(el.textContent).not.toContain("How are you today?");
+  });
+
+  it("offers only the line counts that would change something", () => {
+    const group = openSettings(render({ prefs: { ...DEFAULT_CAPTION_PREFERENCES, size: "xl" } }));
+    expect(group.querySelector('[aria-label="call.captionsLinesName"]')).not.toBeNull();
+    const counts = [...group.querySelectorAll("button")]
+      .map((b) => b.textContent)
+      .filter((t) => /^\d$/.test(t ?? ""));
+    expect(counts).toEqual(["1", "2"]);
+    // A stored 3 reads as the 2 that is actually showing.
+    const two = [...group.querySelectorAll("button")].find((b) => b.textContent === "2");
+    expect(two?.getAttribute("aria-pressed")).toBe("true");
+  });
+
+  it("sets the line count and the position from its settings", () => {
+    const onPrefsChange = vi.fn();
+    const group = openSettings(render({ onPrefsChange }));
+    act(() =>
+      (
+        [...group.querySelectorAll("button")].find((b) => b.textContent === "1") as HTMLElement
+      ).click(),
+    );
+    expect(onPrefsChange).toHaveBeenCalledWith({ lines: 1 });
+    for (const [key, position] of [
+      ["call.captionsPositionTop", "top"],
+      ["call.captionsPositionBelow", "below"],
+      ["call.captionsPositionBottom", "bottom"],
+    ] as const) {
+      act(() => (group.querySelector(`[aria-label="${key}"]`) as HTMLElement).click());
+      expect(onPrefsChange).toHaveBeenCalledWith({ position });
+    }
+  });
+
+  it("sits along the top edge when moved there, panel first and controls under it", () => {
+    const band = render({
+      prefs: { ...DEFAULT_CAPTION_PREFERENCES, position: "top" },
+      tileParked: true,
+    }).firstElementChild as HTMLElement;
+    expect(band.dataset.position).toBe("top");
+    expect(band.className).toContain("top-3");
+    expect(band.className).toContain("flex-col-reverse");
+    expect(band.className).not.toContain("bottom-3");
+    // Tiles park at the bottom; reserving their column up here would narrow
+    // the subtitles for nothing.
+    expect(band.className).not.toContain("pr-32");
+  });
+
+  it("does not stretch the panel for the popover at the top, where it drops into the stage", () => {
+    const el = render({ prefs: { ...DEFAULT_CAPTION_PREFERENCES, position: "top" } });
+    openSettings(el);
+    expect((el.querySelector('[role="log"]') as HTMLElement).className).not.toContain("min-h-40");
+    // At the bottom it still does, so the popover is not clipped by the stage.
+    const bottom = render();
+    openSettings(bottom);
+    expect((bottom.querySelector('[role="log"]') as HTMLElement).className).toContain("min-h-40");
+  });
+
+  it("moves to the other edge with one press of its move button", () => {
+    const onPrefsChange = vi.fn();
+    const el = render({ onPrefsChange });
+    act(() => (el.querySelector('[aria-label="call.captionsMoveToTop"]') as HTMLElement).click());
+    expect(onPrefsChange).toHaveBeenCalledWith({ position: "top" });
+
+    const back = vi.fn();
+    const top = render({
+      onPrefsChange: back,
+      prefs: { ...DEFAULT_CAPTION_PREFERENCES, position: "top" },
+    });
+    act(() =>
+      (top.querySelector('[aria-label="call.captionsMoveToBottom"]') as HTMLElement).click(),
+    );
+    expect(back).toHaveBeenCalledWith({ position: "bottom" });
+  });
+
+  it("snaps to the half of the stage it is dragged into, and only once", () => {
+    container.getBoundingClientRect = () =>
+      ({ top: 0, bottom: 400, height: 400, left: 0, right: 600, width: 600 }) as DOMRect;
+    const onPrefsChange = vi.fn();
+    const el = render({ onPrefsChange });
+    const handle = el.querySelector('[aria-label="call.captionsMoveToTop"]') as HTMLElement;
+    const band = el.firstElementChild as HTMLElement;
+
+    pointer(handle, "pointerdown", 380);
+    pointer(handle, "pointermove", 100);
+    // The band follows the pointer while it is held.
+    expect(band.style.transform).toBe("translateY(-280px)");
+    pointer(handle, "pointerup", 100);
+    // The click that ends a drag must not also toggle it back.
+    act(() => handle.click());
+    expect(onPrefsChange.mock.calls).toEqual([[{ position: "top" }]]);
+    expect(band.style.transform).toBe("");
+
+    // Let go in the lower half and it stays at the bottom.
+    const stay = vi.fn();
+    const again = render({ onPrefsChange: stay });
+    const h = again.querySelector('[aria-label="call.captionsMoveToTop"]') as HTMLElement;
+    pointer(h, "pointerdown", 380);
+    pointer(h, "pointermove", 300);
+    pointer(h, "pointerup", 300);
+    expect(stay).toHaveBeenCalledWith({ position: "bottom" });
+  });
+
+  it("does not let a drag on the subtitles reach the stage's tile-swap handler", () => {
+    // The stage's handler is a React prop on an ancestor, as in class-call.tsx.
+    const stage = vi.fn();
+    act(() =>
+      root.render(
+        <div onPointerDown={stage}>
+          <CaptionBand
+            entries={[bilingual]}
+            prefs={DEFAULT_CAPTION_PREFERENCES}
+            onPrefsChange={() => {}}
+            speakerName={() => null}
+            tileParked={false}
+            awaitingFirstLine={false}
+            hasTranscript
+            onOpenTranscript={() => {}}
+          />
+        </div>,
+      ),
+    );
+    const handle = container.querySelector('[aria-label="call.captionsMoveToTop"]') as HTMLElement;
+    pointer(handle, "pointerdown", 10);
+    expect(stage).not.toHaveBeenCalled();
+    // The control is the only thing that opts out: the rest of the stage
+    // still gets its pointer events.
+    pointer(container.firstElementChild as HTMLElement, "pointerdown", 10);
+    expect(stage).toHaveBeenCalledTimes(1);
+  });
+
+  it("has no move button docked, where there is no edge to move to", () => {
+    const el = render({ docked: true });
+    expect(el.querySelector('[aria-label="call.captionsMoveToTop"]')).toBeNull();
+    expect(el.querySelector('[aria-label="call.captionsMoveToBottom"]')).toBeNull();
+  });
+
+  it("below a camera, its ✕ hides the subtitles everywhere, not for materials", () => {
+    // Docked because the reader asked for "below", with no worksheet open:
+    // "hide with materials" would hide nothing she can see.
+    const onPrefsChange = vi.fn();
+    const el = render({ docked: true, contentOwnsStage: false, onPrefsChange });
+    expect(el.querySelector('[aria-label="call.captionsHideWithContent"]')).toBeNull();
+    act(() => (el.querySelector('[aria-label="call.captionsHideMine"]') as HTMLElement).click());
+    expect(onPrefsChange).toHaveBeenCalledWith({ visible: false });
+  });
+
+  it("below a camera, a standing 'not over materials' choice does not collapse the strip", () => {
+    const el = render({
+      docked: true,
+      contentOwnsStage: false,
+      prefs: { ...DEFAULT_CAPTION_PREFERENCES, position: "below", visibleWithContent: false },
+    });
+    expect(el.querySelector('[role="log"]')).not.toBeNull();
+    expect(el.textContent).toContain(bilingual.text);
+  });
+});
+
+// Measured in a real call: moved to the top, the band's scrim hid the
+// "camera and mic are off" message completely. That row is also where the
+// audio-blocked and captions-consent prompts appear, both of which need a tap.
+describe("at the top, under the call's status messages", () => {
+  const top = { ...DEFAULT_CAPTION_PREFERENCES, position: "top" as const };
+
+  it("sits below the messages when there are some", () => {
+    const band = render({ prefs: top, topInset: 60 }).firstElementChild as HTMLElement;
+    expect(band.style.top).toBe("68px");
+  });
+
+  it("takes the edge when there are none", () => {
+    const band = render({ prefs: top, topInset: 0 }).firstElementChild as HTMLElement;
+    expect(band.style.top).toBe("");
+    expect(band.className).toContain("top-3");
+  });
+
+  it("ignores the messages at the bottom, which they never reach", () => {
+    const band = render({ topInset: 60 }).firstElementChild as HTMLElement;
+    expect(band.style.top).toBe("");
+    expect(band.className).toContain("bottom-3");
   });
 });

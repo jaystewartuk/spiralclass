@@ -775,6 +775,17 @@ export type ServerEvent = WithSessionId<
       };
     }
   | {
+      // A teacher saved how her live subtitles are cut into lines
+      // (CaptionTiming); 0 = left to the browser.
+      name: "caption_timing_saved";
+      distinctId: string;
+      properties: {
+        teacherId: string;
+        pauseMs: number;
+        maxChars: number;
+      };
+    }
+  | {
       name: "library_item_assigned";
       distinctId: string;
       properties: {

@@ -192,9 +192,9 @@ export const SUBPROCESSORS: readonly Subprocessor[] = [
     // for a class where no device can recognise speech, streamed from the
     // speaker's own browser and opted out of Deepgram's model training.
     purpose:
-      "Converts speech to text for intro-video coaching, and for live captions in a class where no device in the call can recognise speech itself. Where learning insights are on, those caption lines also form the class's written transcript (D-189).",
+      "Converts speech to text for intro-video coaching, and for live captions in a class where no device in the call can recognise speech itself. Where learning insights are on, those caption lines also form the class's written transcript, whether or not captions are showing (D-189, D-203).",
     dataShared:
-      "The audio of the teacher's intro video, or — for live captions — the speech of the teacher or a consenting student while captions are on.",
+      "The audio of the teacher's intro video, or — for live captions — the speech of the teacher or a consenting student while captions are on, or while the class's learning-insights transcript is being kept.",
     location: "United States",
     gate: "DEEPGRAM_API_KEY",
     evidence: "vendor documentation",

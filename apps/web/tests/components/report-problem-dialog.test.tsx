@@ -401,6 +401,31 @@ describe("ReportProblemDialog", () => {
     expect(dialog().textContent).toContain("feedback.attachInvalidType");
   });
 
+  it("gives an SVG carrying script no preview URL and no place in the report", async () => {
+    render();
+    setValue(textarea(), GOOD_MESSAGE);
+    const svg = {
+      name: "screenshot.svg",
+      type: "image/svg+xml",
+      size: 80,
+      arrayBuffer: async () =>
+        new TextEncoder().encode("<svg xmlns='http://www.w3.org/2000/svg' onload='alert(1)'/>")
+          .buffer,
+    } as unknown as File;
+    const picker = query<HTMLInputElement>('[role="dialog"] input[type="file"]')!;
+    Object.defineProperty(picker, "files", { value: [svg], configurable: true });
+    await act(async () => {
+      picker.dispatchEvent(new Event("change", { bubbles: true }));
+    });
+
+    expect(dialog().textContent).toContain("feedback.attachInvalidType");
+    expect(createObjectURL).not.toHaveBeenCalled();
+    expect(dialog().querySelector("img")).toBeNull();
+    await submit();
+    const [, hint] = lastPayload();
+    expect(hint.attachments).toBeUndefined();
+  });
+
   // ---------- the draft ----------
 
   it("keeps a half-written report when the dialog is dismissed", () => {

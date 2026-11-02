@@ -103,11 +103,18 @@ That lasts until preview has a LiveKit server of its own.
    `web_push_subscriptions` now.
 8. **Bookmark** (teacher-only): a one-tap marker of "this moment" during the
    call, for later review via a replay view.
+   **Quick note** (teacher-only, Pro): a one-line note typed during the call
+   — "practise the subjunctive next class" — saved as the teacher's own
+   confirmed focus area for this class, so it reaches the student's learning
+   profile and the next pre-class brief
+   ([lesson insights](lesson-insights-reports.md)). Enter saves, the field
+   empties for the next one, and a category (default grammar) and a skill are
+   optional. The student never sees the control or the note.
 9. Additional controls: leave/hang-up, minimize, picture-in-picture,
    camera-flip/swap, materials viewer, "go to chat" shortcut.
    - On a phone (below `sm`) the row is icons only and keeps microphone,
      camera, captions, materials and leave; the rest (flip camera, message,
-     screen share, record, bookmark) sit behind **More**, so the row is one
+     screen share, record, bookmark, quick note) sit behind **More**, so the row is one
      line instead of a third of the screen.
    - **The top bar**, a row above the stage that never covers it: each
      side's notes on the left (collapsible), the other person's name and the
@@ -156,11 +163,36 @@ That lasts until preview has a LiveKit server of its own.
     `POST /api/captions/translate` through Google Cloud Translation.
     **The words are on screen while they are being said**
     ([D-198](../decisions/D-198.md)): what the recogniser has heard of the
-    phrase in progress goes to the listener at once, untranslated, and the
-    finished, translated line replaces it when the phrase ends. Only finished
+    phrase in progress goes to the listener at once and the finished,
+    translated line replaces it when the phrase ends. A listener who reads the
+    speaker's language gets the words as they are heard; one who reads a
+    translation gets no words, only the speaker's name with dots, so the band
+    never shows two languages
+    ([D-206](../decisions/D-206.md)). Only finished
     utterances are translated or kept for the transcript, and a translation
     that takes longer than 6 seconds is dropped. There is no server-side captions process: the one paid path
     (below) streams from a participant's own browser to Deepgram.
+    - **A subtitle is one language, never two.** A reader sees the
+      translation, or — to test herself — the original. Original-above-
+      translation was removed: the one teacher using it found two languages
+      in one place confusing. A browser that had stored it reads as the
+      translation. The in-call transcript panel follows the same mode, one
+      language per entry.
+    - **The teacher sets when a line is cut** (`/settings/captions`,
+      `CaptionTiming` in `packages/shared/src/caption-timing.ts`, stored in
+      `teachers.caption_timing`). The browser decides on its own that an
+      utterance is finished, by waiting for the speaker to stop, so a fast
+      speaker who never pauses gets one wall of text at the end. Two dials
+      cut sooner: a **pause** (400–3000 ms with nothing new heard, translate
+      what was heard) and a **maximum length** (40–300 characters waiting,
+      cut at the last finished word). Both default to off, which is the
+      browser's own behaviour. The cut part is delivered as a finished line
+      and remembered, so neither the next partials nor the browser's eventual
+      final repeat it (`lib/captions/caption-chunker.ts`). The values travel
+      in the caption session, so the recognising browser applies them whoever
+      it belongs to and a change reaches a class already running at the next
+      config poll. It sits between the recogniser and everything downstream:
+      the transcript keeps the same cut pieces.
     - **Who recognises whom.** Each person's speech is recognised by their
       own browser when it can recognise during a call — today that means
       Chrome on a computer. When it cannot (Android Chrome measurably hears
@@ -235,6 +267,15 @@ That lasts until preview has a LiveKit server of its own.
       holds its height between sentences so a worksheet does not reflow as
       people speak. The transcript opens from either. (`resolveCaptionPlacement`
       in `apps/web/src/lib/video/stage-layout.ts`.)
+    - **Each reader decides how much of the video they cover, on her own
+      screen only.** From the band's settings: text size (small to extra
+      large), how many lines show at once (1–3, never more than the size
+      allows), and the position — over the video at the bottom (the default)
+      or the top, or **below the video**, the same strip used under a material,
+      which never covers the other person. A move button on the band sends it
+      to the other edge with a tap, or can be dragged; it snaps to the top or
+      bottom edge and never stops in between. All of it is remembered in that
+      browser, so a phone and a computer can differ.
     - **Each reader can put them away, on her own screen only, in two
       scopes.** Hiding them over a camera hides them everywhere. Hiding them
       under a material hides them only while a material or screen share is
@@ -253,10 +294,13 @@ That lasts until preview has a LiveKit server of its own.
 
 ### The lesson transcript & lesson insights
 
-20. The transcript is the **caption text** (D-189): while captions are on,
-    the browser that recognised a finished utterance also posts its source
-    text, speaker and estimated duration to `POST /api/captions/transcript`.
-    It is **not** derived from the A/V recording and **no audio is captured**
+20. The transcript is the **caption text** (D-189): the browser that
+    recognised a finished utterance also posts its source text, speaker and
+    estimated duration to `POST /api/captions/transcript`. **The teacher's
+    captions switch does not decide this** ([D-203](../decisions/D-203.md)):
+    with it off, the recognisers still run while the session says
+    `transcriptCapture`, but nothing is translated, published or shown — the
+    switch is the display. It is **not** derived from the A/V recording and **no audio is captured**
     for it.
 21. A class's lines are kept only when its caption session says
     `transcriptCapture`: the transcription flag is on AND that **specific
@@ -274,11 +318,16 @@ That lasts until preview has a LiveKit server of its own.
     arrives after that is dropped.
 24. **Both participants are told "Learning notes are on"** each time lines
     start being kept, and see a small notes icon beside the lesson clock for
-    as long as they are; tapping it says what is kept (caption text, no
+    as long as they are — also when no caption is on screen; the session is
+    read when the call connects, so the notice appears then (D-203); tapping
+    it says what is kept (caption text, no
     audio) and links to the privacy notice (D-21). The transcript is kept while the teacher's
     account is open and deleted with it.
-25. Not every call gets a transcript — only when captions are on, the flag is
-    on, and the consent above is on file. The legacy egress-audio path
+25. Not every call gets a transcript — only when the flag is on and the
+    consent above is on file, whether or not captions are showing. A
+    student's own speech is additionally recognised only with her captions
+    consent (D-22). A phone-to-phone class streams to Deepgram for the
+    transcript too (D-203). The legacy egress-audio path
     (`lib/transcription/pipeline.ts`) additionally requires recording to be
     enabled, so it is dormant.
 
@@ -439,6 +488,7 @@ That lasts until preview has a LiveKit server of its own.
 | Set per-class language override | Yes                          | No                                    | No         |
 | Send a nudge                    | Yes                          | Yes                                   | No         |
 | Bookmark a moment               | Yes                          | No                                    | No         |
+| Quick note (focus area)         | Yes (Pro)                    | No                                    | No         |
 | View transcript/lesson insights | Yes (own class)              | Not confirmed — see Open Questions    | No         |
 
 ## Open Questions

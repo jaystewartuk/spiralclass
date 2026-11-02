@@ -166,7 +166,7 @@ export async function renderInboxItem(
     return {
       ...base,
       title: t("inbox.fallback.title"),
-      body: "",
+      body: t("inbox.fallback.body"),
       href: null,
       deepLink: null,
       deepLinkName: null,

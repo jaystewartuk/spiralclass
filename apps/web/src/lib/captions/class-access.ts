@@ -1,6 +1,7 @@
 import "server-only";
 import type { Booking, Prisma, Student, Teacher } from "@prisma/client";
 import {
+  parseCaptionTiming,
   recognitionLocale,
   resolveCaptionDirection,
   type CaptionDirection,
@@ -20,7 +21,7 @@ import { lessonTranscriptCaptureOk } from "@/lib/transcription/browser-transcrip
 // chooses a language: /api/captions/translate re-resolves the direction from
 // the booking on every call.
 type BookingWithLanguages = Booking & {
-  teacher: Pick<Teacher, "id" | "teachingLanguage" | "country">;
+  teacher: Pick<Teacher, "id" | "teachingLanguage" | "country" | "captionTiming">;
   student: Pick<Student, "nativeLanguage">;
   package: { seats: number; partnerConsentAt: Date | null } | null;
 };
@@ -31,7 +32,9 @@ function findBookingWithLanguages(
   return prisma.booking.findFirst({
     where,
     include: {
-      teacher: { select: { id: true, teachingLanguage: true, country: true } },
+      teacher: {
+        select: { id: true, teachingLanguage: true, country: true, captionTiming: true },
+      },
       student: { select: { nativeLanguage: true } },
       // For the transcript consent (D-188): a class for two needs the buyer's
       // confirmation for the second person as well.
@@ -120,6 +123,8 @@ export async function resolveCaptionSession(
     studentConsentGiver: consent.giver,
     cloudRecognition: cloudCaptionsConfigured(),
     transcriptCapture: await lessonTranscriptCaptureOk(prisma, booking),
+    // Read through the parser: the column is JSON and not to be trusted.
+    timing: parseCaptionTiming(booking.teacher.captionTiming),
   };
 }
 

@@ -34,6 +34,7 @@ const SESSION = (over: Partial<CaptionSession> = {}): CaptionSession => ({
   studentConsentGiver: "student",
   cloudRecognition: false,
   transcriptCapture: false,
+  timing: { pauseMs: 0, maxChars: 0 },
   ...over,
 });
 
@@ -549,33 +550,37 @@ describe("BrowserCaptions — where lines go", () => {
 // D-198. Measured 2026-10-12: a teacher's phrases ran to ~500 characters, and
 // a listener reading the translation saw nothing until each one ended and
 // its translation came back. The words now go out as they are heard.
-describe("BrowserCaptions — words as they are spoken (D-198)", () => {
-  it("publishes the words so far, untranslated, under one id that the translated line then takes", async () => {
+// D-206: a reader of a TRANSLATION is told only that the speaker is talking —
+// the words themselves would be a second language on her screen.
+describe("BrowserCaptions — words as they are spoken (D-198, D-206)", () => {
+  // A student who reads the teacher's own language: nothing to translate, so
+  // the words go out as they are heard.
+  const sameLanguage = () =>
+    input({
+      session: SESSION({
+        directions: {
+          teacher: { source: "es", target: "es" },
+          student: { source: "es", target: "es" },
+        },
+      }),
+    });
+
+  it("publishes a wordless partial under one id that the translated line then takes", async () => {
     const { c, published, fetch } = setup();
     c.sync(input());
     recognizers[0].onPartial?.("¿Cómo");
     recognizers[0].onPartial?.("¿Cómo estás");
     expect(fetch).not.toHaveBeenCalled();
-    expect(published).toEqual([
-      {
-        t: "line",
-        for: "s1",
-        id: "t1:1000-0",
-        text: "¿Cómo",
-        from: "t1",
-        lang: "es",
-        partial: true,
-      },
-      {
-        t: "line",
-        for: "s1",
-        id: "t1:1000-0",
-        text: "¿Cómo estás",
-        from: "t1",
-        lang: "es",
-        partial: true,
-      },
-    ]);
+    const speaking = {
+      t: "line",
+      for: "s1",
+      id: "t1:1000-0",
+      text: "",
+      from: "t1",
+      lang: "en",
+      partial: true,
+    };
+    expect(published).toEqual([speaking, speaking]);
     recognizers[0].onFinal("¿Cómo estás?");
     await flush();
     expect(published[2]).toEqual({
@@ -590,6 +595,23 @@ describe("BrowserCaptions — words as they are spoken (D-198)", () => {
     });
   });
 
+  it("publishes the words so far to a reader of the speaker's own language", () => {
+    const { c, published } = setup();
+    c.sync(sameLanguage());
+    recognizers[0].onPartial?.("¿Cómo estás");
+    expect(published).toEqual([
+      expect.objectContaining({ text: "¿Cómo estás", lang: "es", partial: true }),
+    ]);
+  });
+
+  it("never puts an untranslated word on the wire for a reader of a translation", () => {
+    const { c, published } = setup();
+    c.sync(input());
+    recognizers[0].onPartial?.("¿Cómo");
+    recognizers[0].onPartial?.("¿Cómo estás hoy");
+    expect(published.every((l) => l.text === "")).toBe(true);
+  });
+
   it("starts a new id for the next utterance", async () => {
     const { c, published } = setup();
     c.sync(input());
@@ -601,7 +623,7 @@ describe("BrowserCaptions — words as they are spoken (D-198)", () => {
     expect(ids).toEqual(["p:t1:1000-0", "p:t1:1000-1", "f:t1:1000-0"]);
   });
 
-  it("shows the next utterance's words while the previous one is still being translated", async () => {
+  it("shows the next utterance is being spoken while the previous one is still being translated", async () => {
     let release: () => void = () => {};
     const slow = new Promise<void>((r) => (release = r));
     const fetch = vi.fn(async (_u: string | URL | Request, init?: RequestInit) => {
@@ -614,13 +636,13 @@ describe("BrowserCaptions — words as they are spoken (D-198)", () => {
     recognizers[0].onFinal("una frase larga");
     recognizers[0].onPartial?.("y la siguiente");
     await flush();
-    expect(published).toEqual([expect.objectContaining({ text: "y la siguiente", partial: true })]);
+    expect(published).toEqual([expect.objectContaining({ text: "", partial: true })]);
     release();
     await flush();
     expect(published[1]).toMatchObject({ text: "EN(una frase larga)" });
   });
 
-  it("shows, never publishes, the words of the other participant it is recognising", () => {
+  it("shows, never publishes, the partial of the other participant it is recognising", () => {
     const { c, published, shown } = setup();
     c.sync(
       input({
@@ -633,8 +655,8 @@ describe("BrowserCaptions — words as they are spoken (D-198)", () => {
       expect.objectContaining({
         for: "t1",
         from: "s1",
-        lang: "en",
-        text: "How are",
+        lang: "es",
+        text: "",
         partial: true,
       }),
     ]);
@@ -649,7 +671,7 @@ describe("BrowserCaptions — words as they are spoken (D-198)", () => {
 
   it("carries only the tail of a long run of speech, cut at a word", () => {
     const { c, published } = setup();
-    c.sync(input());
+    c.sync(sameLanguage());
     recognizers[0].onPartial?.(`${"palabra ".repeat(40)}final`);
     const text = published[0].text;
     expect(text.startsWith("…palabra")).toBe(true);
@@ -678,6 +700,228 @@ describe("BrowserCaptions — words as they are spoken (D-198)", () => {
       }),
     );
     clouds[0].onPartial?.("hola");
-    expect(published).toEqual([expect.objectContaining({ text: "hola", partial: true })]);
+    expect(published).toEqual([expect.objectContaining({ text: "", partial: true })]);
+  });
+});
+
+// The teacher's subtitle timing (caption-timing.ts): cutting an utterance
+// short of the browser's own final, without ever repeating or losing a word.
+describe("BrowserCaptions — the teacher's subtitle timing", () => {
+  // A hand-driven clock so a pause is a number, not a wait.
+  function clock() {
+    let next = 1;
+    const timers = new Map<number, { at: number; fn: () => void }>();
+    let now = 0;
+    return {
+      setTimeout: (fn: () => void, ms: number) => {
+        const id = next++;
+        timers.set(id, { at: now + ms, fn });
+        return id;
+      },
+      clearTimeout: (h: unknown) => void timers.delete(h as number),
+      advance(ms: number) {
+        now += ms;
+        for (const [id, t] of [...timers]) {
+          if (t.at <= now) {
+            timers.delete(id);
+            t.fn();
+          }
+        }
+      },
+    };
+  }
+  const timed = (timing: { pauseMs: number; maxChars: number }) =>
+    SESSION({ timing, transcriptCapture: true });
+  const texts = (lines: CaptionLine[]) => lines.filter((l) => !l.partial).map((l) => l.text);
+
+  it("does nothing the browser would not do with both dials off", async () => {
+    const k = clock();
+    const { c, published } = setup({ setTimeout: k.setTimeout, clearTimeout: k.clearTimeout });
+    c.sync(input());
+    recognizers[0].onPartial?.("uno dos tres");
+    k.advance(60_000);
+    await flush();
+    expect(texts(published)).toEqual([]);
+    recognizers[0].onFinal("uno dos tres cuatro");
+    await flush();
+    expect(texts(published)).toEqual(["EN(uno dos tres cuatro)"]);
+  });
+
+  it("translates what was heard once nothing new has been heard for the pause", async () => {
+    const k = clock();
+    const { c, published, kept } = setup({
+      setTimeout: k.setTimeout,
+      clearTimeout: k.clearTimeout,
+    });
+    c.sync(input({ session: timed({ pauseMs: 800, maxChars: 0 }) }));
+    recognizers[0].onPartial?.("uno dos");
+    k.advance(500);
+    recognizers[0].onPartial?.("uno dos tres"); // more speech restarts the wait
+    k.advance(500);
+    await flush();
+    expect(texts(published)).toEqual([]);
+    k.advance(400);
+    await flush();
+    expect(texts(published)).toEqual(["EN(uno dos tres)"]);
+    expect(kept.map((l) => l.text)).toEqual(["uno dos tres"]);
+  });
+
+  it("does not repeat the cut part when the utterance carries on and the browser finishes it", async () => {
+    const k = clock();
+    const { c, published, kept } = setup({
+      setTimeout: k.setTimeout,
+      clearTimeout: k.clearTimeout,
+    });
+    c.sync(input({ session: timed({ pauseMs: 800, maxChars: 0 }) }));
+    recognizers[0].onPartial?.("uno dos tres");
+    k.advance(800);
+    recognizers[0].onPartial?.("uno dos tres cuatro cinco");
+    recognizers[0].onFinal("uno dos tres cuatro cinco seis");
+    await flush();
+    expect(texts(published)).toEqual(["EN(uno dos tres)", "EN(cuatro cinco seis)"]);
+    expect(kept.map((l) => l.text)).toEqual(["uno dos tres", "cuatro cinco seis"]);
+  });
+
+  it("drops the browser's final when everything in it was already cut", async () => {
+    const k = clock();
+    const { c, published, kept } = setup({
+      setTimeout: k.setTimeout,
+      clearTimeout: k.clearTimeout,
+    });
+    c.sync(input({ session: timed({ pauseMs: 800, maxChars: 0 }) }));
+    recognizers[0].onPartial?.("uno dos tres");
+    k.advance(800);
+    recognizers[0].onFinal("uno dos tres");
+    await flush();
+    expect(texts(published)).toEqual(["EN(uno dos tres)"]);
+    expect(kept).toHaveLength(1);
+  });
+
+  it("cuts a run with no pause at the length limit, before the word still being heard", async () => {
+    const k = clock();
+    const { c, published } = setup({ setTimeout: k.setTimeout, clearTimeout: k.clearTimeout });
+    c.sync(input({ session: timed({ pauseMs: 0, maxChars: 40 }) }));
+    recognizers[0].onPartial?.("one two three four five six seven eight nine ten");
+    await flush();
+    expect(texts(published)).toEqual(["EN(one two three four five six seven eight nine)"]);
+    // What is left is shown as the next partial, under its own id.
+    const partials = published.filter((l) => l.partial);
+    const cut = published.find((l) => !l.partial);
+    expect(partials.at(-1)?.id).not.toBe(cut?.id);
+    recognizers[0].onFinal("one two three four five six seven eight nine ten eleven");
+    await flush();
+    expect(texts(published).at(-1)).toBe("EN(ten eleven)");
+  });
+
+  it("applies a changed setting to an utterance already in flight", async () => {
+    const k = clock();
+    const { c, published } = setup({ setTimeout: k.setTimeout, clearTimeout: k.clearTimeout });
+    c.sync(input({ session: timed({ pauseMs: 0, maxChars: 0 }) }));
+    recognizers[0].onPartial?.("uno dos");
+    c.sync(input({ session: timed({ pauseMs: 600, maxChars: 0 }) }));
+    recognizers[0].onPartial?.("uno dos tres");
+    k.advance(600);
+    await flush();
+    expect(texts(published)).toEqual(["EN(uno dos tres)"]);
+  });
+
+  it("cuts nothing after the recogniser is stopped", async () => {
+    const k = clock();
+    const { c, published } = setup({ setTimeout: k.setTimeout, clearTimeout: k.clearTimeout });
+    c.sync(input({ session: timed({ pauseMs: 800, maxChars: 0 }) }));
+    recognizers[0].onPartial?.("uno dos");
+    c.dispose();
+    k.advance(5_000);
+    await flush();
+    expect(texts(published)).toEqual([]);
+  });
+});
+
+describe("BrowserCaptions — the transcript without subtitles (D-203)", () => {
+  const consenting = () => SESSION({ transcriptCapture: true });
+  const hidden = (over: Partial<BrowserCaptionsInput> = {}) =>
+    input({ captionsOn: false, session: consenting(), ...over });
+
+  it("recognises and keeps a consenting class's lines with subtitles off", async () => {
+    const { c, kept, published, shown, fetch } = setup();
+    c.sync(hidden());
+    expect(live()).toHaveLength(1);
+    live()[0].onFinal("hola");
+    await flush();
+    expect(kept).toEqual([{ bookingId: "b1", speaker: "teacher", text: "hola", durationMs: 0 }]);
+    // Display only: nothing translated, published or shown.
+    expect(fetch).not.toHaveBeenCalled();
+    expect(published).toHaveLength(0);
+    expect(shown).toHaveLength(0);
+  });
+
+  it("shows no partial line while subtitles are off", () => {
+    const { c, published, shown } = setup();
+    c.sync(hidden());
+    live()[0].onPartial?.("ho");
+    expect(published).toHaveLength(0);
+    expect(shown).toHaveLength(0);
+  });
+
+  it("keeps nothing for a class without recorded consent, subtitles off", () => {
+    const { c } = setup();
+    c.sync(input({ captionsOn: false, session: SESSION({ transcriptCapture: false }) }));
+    expect(recognizers).toHaveLength(0);
+  });
+
+  it("never recognises the student's speech without her captions consent", () => {
+    const { c } = setup();
+    c.sync(
+      hidden({
+        session: SESSION({ transcriptCapture: true, studentConsent: false }),
+        room: { ...input().room, remote: { identity: "s1", micTrack: remoteMic, capable: false } },
+      }),
+    );
+    expect(live().map((r) => r.track)).toEqual([localMic]);
+  });
+
+  it("keeps recognising across the switch flipping, and starts showing lines", async () => {
+    const { c, published } = setup();
+    c.sync(hidden());
+    const first = live()[0];
+    c.sync(input({ session: consenting() }));
+    expect(recognizers).toHaveLength(1);
+    expect(first.stopped).toBe(false);
+    first.onFinal("hola");
+    await flush();
+    expect(published).toHaveLength(1);
+    c.sync(hidden());
+    expect(first.stopped).toBe(false);
+  });
+
+  it("keeps whole utterances, not the teacher's subtitle timing's cuts, while subtitles are off", async () => {
+    let id = 0;
+    const timers = new Map<number, () => void>();
+    const { c, kept, published } = setup({
+      setTimeout: (fn) => {
+        timers.set(++id, fn);
+        return id;
+      },
+      clearTimeout: (h) => void timers.delete(h as number),
+    });
+    c.sync(
+      hidden({
+        session: SESSION({ transcriptCapture: true, timing: { pauseMs: 800, maxChars: 40 } }),
+      }),
+    );
+    live()[0].onPartial?.("one two three four five six seven eight nine ten");
+    for (const fn of [...timers.values()]) fn();
+    live()[0].onFinal("one two three four five six seven eight nine ten eleven");
+    await flush();
+    expect(kept.map((l) => l.text)).toEqual([
+      "one two three four five six seven eight nine ten eleven",
+    ]);
+    expect(published).toHaveLength(0);
+  });
+
+  it("does not report speakers as uncaptioned while nothing is meant to be shown", () => {
+    const { c, statuses } = setup({ SpeechRecognition: null });
+    c.sync(hidden({ selfCapable: false }));
+    expect(statuses.at(-1)).toEqual({ uncaptioned: [], stopped: null });
   });
 });

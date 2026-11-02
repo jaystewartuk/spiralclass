@@ -263,6 +263,18 @@ export default async function AccountSettingsPage({
           </SettingRow>
 
           <SettingRow
+            title={t("web.settings.account.captionTimingTitle")}
+            description={t("web.settings.account.captionTimingDescription")}
+            action={
+              <Button asChild variant="outline">
+                <Link href="/settings/captions">
+                  {t("web.settings.account.captionTimingManage")}
+                </Link>
+              </Button>
+            }
+          />
+
+          <SettingRow
             title={t("web.settings.account.notificationsTitle")}
             description={t("web.settings.account.notificationsDescription")}
             action={

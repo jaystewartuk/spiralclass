@@ -1,4 +1,5 @@
 import {
+  CAPTION_TIMING_DEFAULTS,
   assignRecognizers,
   buildCaptionLine,
   buildPartialCaptionLine,
@@ -7,7 +8,9 @@ import {
   type CallRole,
   type CaptionLine,
   type CaptionSession,
+  type CaptionTiming,
 } from "@spiralclass/shared";
+import { CaptionChunker } from "@/lib/captions/caption-chunker";
 import { CaptionTranslator, type TranslationRefusal } from "@/lib/captions/caption-translator";
 import {
   CloudRecognizer,
@@ -35,11 +38,12 @@ import {
 // speech-to-text fallback (cloud-recognizer.ts) and publishes the result like
 // any line of its own speaker's. The other browser runs nothing for them.
 //
-// While an utterance is being spoken its words so far go out (or are shown)
-// as they are heard, untranslated, as a `partial` line under one id; the
-// finished, translated line then takes that same id and replaces it, so the
-// listener is never left with nothing on screen while a phrase runs on
-// (D-198). Partials are never kept and never translated.
+// While an utterance is being spoken a `partial` line goes out (or is shown)
+// under one id; the finished, translated line then takes that same id and
+// replaces it, so the listener is never left with nothing on screen while a
+// phrase runs on (D-198). It carries the words heard so far only when the
+// reader reads the speaker's language; otherwise it only says the speaker is
+// talking (D-206). Partials are never kept and never translated.
 //
 // Each finished utterance is split to the route's size, translated, built
 // into a CaptionLine, and then either PUBLISHED to the other participant —
@@ -47,6 +51,14 @@ import {
 // browser recognised the other person because their device cannot and this
 // viewer is the one reading it. Lines per speaker keep their spoken order even
 // though translations resolve at different speeds.
+//
+// Recognition does not depend on the captions being SHOWN. The teacher's
+// switch is the DISPLAY: with it off nothing is translated, published or
+// shown, but while the session says the transcript is being kept the
+// recognisers still run and every finished line still goes to `keep` — a
+// student who no longer needs subtitles is still taught, and still gets a
+// learning profile (D-203). The switch can flip mid-class without restarting
+// a recogniser.
 //
 // When the session says the class's transcript is being kept (D-189:
 // `transcriptCapture`, the flag plus this pairing's insights consent), each
@@ -69,7 +81,9 @@ export type CaptionRoomView = {
 export type BrowserCaptionsInput = {
   // Null until the config route answers, and when it answers "off".
   session: CaptionSession | null;
-  // The teacher's switch, as this browser sees it.
+  // The teacher's switch, as this browser sees it: whether captions are SHOWN.
+  // It never decides whether the transcript is kept (session.transcriptCapture
+  // does).
   captionsOn: boolean;
   // Whether this browser can recognise during a call (canRecognizeDuringCall).
   selfCapable: boolean;
@@ -122,6 +136,8 @@ export type BrowserCaptionsDeps = {
   // hook re-reads the config, which re-runs the assignment.
   onRefused: (reason: TranslationRefusal) => void;
   now?: () => number;
+  setTimeout?: (fn: () => void, ms: number) => unknown;
+  clearTimeout?: (handle: unknown) => void;
   createRecognizer?: (options: RecognizerOptions) => { start(): void; stop(): void };
   createCloudRecognizer?: (options: CloudRecognizerOptions) => { start(): void; stop(): void };
 };
@@ -150,7 +166,13 @@ export class BrowserCaptions {
   private seq = 0;
   private lastStatus = "";
   private disposed = false;
+  // Whether captions are shown right now; read when a line arrives, so the
+  // switch flipping never restarts a recogniser.
+  private display = false;
   private readonly now: () => number;
+  // The teacher's subtitle timing, refreshed by every sync from the session
+  // so a settings change reaches utterances already in flight.
+  private timing: CaptionTiming = CAPTION_TIMING_DEFAULTS;
 
   constructor(private readonly deps: BrowserCaptionsDeps) {
     this.now = deps.now ?? Date.now;
@@ -159,10 +181,12 @@ export class BrowserCaptions {
   sync(input: BrowserCaptionsInput): void {
     if (this.disposed) return;
     const { session, room } = input;
+    this.timing = session?.timing ?? CAPTION_TIMING_DEFAULTS;
+    this.display = input.captionsOn;
     const desired = new Map<CallRole, { key: string; start: () => Running }>();
     let uncaptioned: CallRole[] = [];
 
-    if (session && input.captionsOn) {
+    if (session && (input.captionsOn || session.transcriptCapture)) {
       const me = session.role;
       const other: CallRole = me === "teacher" ? "student" : "teacher";
       const present = { [me]: true, [other]: room.remote !== null } as Record<CallRole, boolean>;
@@ -179,6 +203,7 @@ export class BrowserCaptions {
       });
       uncaptioned = SPEAKERS.filter(
         (s) =>
+          input.captionsOn &&
           assignment[s] === null &&
           room.remote !== null &&
           (s === "teacher" || session.studentConsent),
@@ -281,23 +306,43 @@ export class BrowserCaptions {
       lastFinalAt: this.now(),
       partialId: null,
     };
-    const onFinal = (text: string) => {
+    // A finished piece of speech, from the browser's own final or from a cut
+    // on the teacher's timing: kept, then translated in spoken order, under
+    // the id its partials were shown under.
+    const finish = (text: string) => {
       const at = this.now();
       const durationMs = Math.min(Math.max(0, at - run.lastFinalAt), MAX_KEPT_LINE_MS);
       run.lastFinalAt = at;
       const id = run.partialId ?? undefined;
       run.partialId = null;
       if (args.session.transcriptCapture) this.keep(text, durationMs, args);
+      if (!this.display) return;
       run.chain = run.chain.then(() => this.deliver(text, id, translator, args)).catch(() => {});
     };
+    const chunker = new CaptionChunker({
+      timing: () => this.timing,
+      cut: finish,
+      setTimeout: this.deps.setTimeout,
+      clearTimeout: this.deps.clearTimeout,
+    });
+    const onFinal = (text: string) => {
+      const rest = chunker.final(text);
+      if (rest) finish(rest);
+      else run.partialId = null;
+    };
     // Not through the chain: a partial is shown the moment it is heard, even
-    // while the previous utterance is still waiting on its translation.
+    // while the previous utterance is still waiting on its translation. Only
+    // the part not already cut is shown, under a new id once a cut has taken
+    // the old one.
     const onPartial = (heard: string) => {
-      if (this.disposed) return;
+      if (this.disposed || !this.display) return;
+      const rest = chunker.partial(heard);
+      if (!rest) return;
       run.partialId ??= captionLineId(args.speakerIdentity, this.now(), this.seq++);
       const line = buildPartialCaptionLine({
-        heard,
+        heard: rest,
         sourceLanguage: args.direction.source,
+        targetLanguage: args.direction.target,
         speakerIdentity: args.speakerIdentity,
         listenerIdentity: args.listenerIdentity,
         id: run.partialId,
@@ -338,6 +383,14 @@ export class BrowserCaptions {
         onStopped,
       });
     }
+    const recognizer = run.recognizer;
+    run.recognizer = {
+      start: () => recognizer.start(),
+      stop: () => {
+        chunker.stop();
+        recognizer.stop();
+      },
+    };
     run.recognizer.start();
     return run;
   }
@@ -379,7 +432,7 @@ export class BrowserCaptions {
       const pieceId = id;
       id = undefined;
       const translated = await translator.translate(piece);
-      if (translated === null || this.disposed) continue;
+      if (translated === null || this.disposed || !this.display) continue;
       const line = buildCaptionLine({
         id: pieceId,
         translated,

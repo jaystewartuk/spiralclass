@@ -12,16 +12,17 @@ import {
 // never cost the reader the other settings she chose.
 
 describe("parseCaptionPreferences", () => {
-  it("defaults to the translation alone, medium, visible", () => {
+  it("defaults to the translation alone, medium, three lines, at the bottom, visible", () => {
     // The default is the product decision, and it is aimed at the reader who
     // has no stored preference yet: a first-time viewer, who must be able to
-    // read the band without being told how. "both" is the richer mode and is
-    // one tap away for the student who wants it. See preferences.ts.
+    // read the band without being told how. See preferences.ts.
     expect(DEFAULT_CAPTION_PREFERENCES).toEqual({
       visible: true,
       visibleWithContent: true,
       display: "translation",
       size: "m",
+      lines: 3,
+      position: "bottom",
     });
   });
 
@@ -29,10 +30,12 @@ describe("parseCaptionPreferences", () => {
     // Everyone with a stored preference today has no `visibleWithContent`.
     // Reading its absence as "hidden" would take the subtitles this change
     // adds away from exactly the people who already use them.
-    const stored = { visible: true, display: "both", size: "l" };
+    const stored = { visible: true, display: "original", size: "l" };
     expect(parseCaptionPreferences(JSON.stringify(stored))).toEqual({
       ...stored,
       visibleWithContent: true,
+      lines: 3,
+      position: "bottom",
     });
     expect(
       parseCaptionPreferences(JSON.stringify({ ...stored, visibleWithContent: "no" }))
@@ -53,29 +56,75 @@ describe("parseCaptionPreferences", () => {
   });
 
   it("round-trips a fully valid stored preference set", () => {
-    const stored = { visible: false, visibleWithContent: false, display: "original", size: "xl" };
+    const stored = {
+      visible: false,
+      visibleWithContent: false,
+      display: "original",
+      size: "xl",
+      lines: 1,
+      position: "below",
+    };
     expect(parseCaptionPreferences(JSON.stringify(stored))).toEqual(stored);
+  });
+
+  it("round-trips the small size, every line count and every position", () => {
+    for (const size of ["s", "m", "l", "xl"] as const) {
+      expect(parseCaptionPreferences(JSON.stringify({ size })).size).toBe(size);
+    }
+    for (const lines of [1, 2, 3] as const) {
+      expect(parseCaptionPreferences(JSON.stringify({ lines })).lines).toBe(lines);
+    }
+    for (const position of ["bottom", "top", "below"] as const) {
+      expect(parseCaptionPreferences(JSON.stringify({ position })).position).toBe(position);
+    }
   });
 
   it("keeps the valid fields when one is invalid", () => {
     // A reader who set extra-large text and then hit a build that renamed a
     // display mode must not silently lose her text size too.
-    const stored = { visible: false, display: "sideways", size: "xl" };
+    const stored = { visible: false, display: "sideways", size: "xl", position: "top" };
     expect(parseCaptionPreferences(JSON.stringify(stored))).toEqual({
       visible: false,
       visibleWithContent: true,
       display: "translation",
       size: "xl",
+      lines: 3,
+      position: "top",
+    });
+  });
+
+  it("discards a line count or position it does not know, for the default", () => {
+    // "2" is a string, 4 and 0 are out of range, "middle" was never a
+    // position: a band parked mid-face is the thing positions exist to avoid.
+    for (const lines of ["2", 4, 0, null]) {
+      expect(parseCaptionPreferences(JSON.stringify({ lines })).lines).toBe(3);
+    }
+    for (const position of ["middle", "left", 1]) {
+      expect(parseCaptionPreferences(JSON.stringify({ position })).position).toBe("bottom");
+    }
+  });
+
+  it("reads the retired 'both' mode as the translation alone and keeps the rest", () => {
+    // Original-above-translation was removed (one line, never two); a browser
+    // that stored it must neither break nor lose its size.
+    const stored = { visible: true, visibleWithContent: true, display: "both", size: "l" };
+    expect(parseCaptionPreferences(JSON.stringify(stored))).toEqual({
+      ...stored,
+      display: "translation",
+      lines: 3,
+      position: "bottom",
     });
   });
 
   it("ignores unknown fields from a future or hand-edited blob", () => {
-    const stored = { visible: true, display: "translation", size: "l", position: "top" };
+    const stored = { visible: true, display: "translation", size: "l", opacity: 0.5 };
     expect(parseCaptionPreferences(JSON.stringify(stored))).toEqual({
       visible: true,
       visibleWithContent: true,
       display: "translation",
       size: "l",
+      lines: 3,
+      position: "bottom",
     });
   });
 
