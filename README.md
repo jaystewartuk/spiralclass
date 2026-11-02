@@ -461,14 +461,13 @@ graph LR
     subgraph deploy["deploy-production.yml"]
         A1["owner approval"]
         DB["scripts/database-deploy.sh<br/>Neon checkpoint + migrations"]
-        A2["owner approval"]
         BUILD["scripts/cloudrun-deploy.sh<br/>amd64 build + Cloud Run deploy"]
         PROBE["production probes"]
     end
     RUN["Cloud Run — web, us-east4"]
     NEON[("Neon<br/>production branch")]
 
-    MERGE --> G --> PROMOTE --> A1 --> DB --> A2 --> BUILD --> RUN
+    MERGE --> G --> PROMOTE --> A1 --> DB --> BUILD --> RUN
     BUILD --> PROBE
     DB -.migrations.-> NEON
     RUN --> NEON
@@ -478,7 +477,7 @@ graph LR
 only human step** ([D-199](docs/decisions/D-199.md)). When Gate and Heavy are
 both green on `main`'s push run, `promote-on-green.yml` fast-forwards
 `production`; that push triggers the deploy, which waits for approval before
-the database job and again before Cloud Run. The approval is a queued run with
+the database job; Cloud Run follows after migrations ([D-205](docs/decisions/D-205.md)). The approval is a queued run with
 a notification attached, so it cannot be forgotten silently the way a manual
 dispatch once was. `pnpm promote` remains the by-hand route to the same
 fast-forward. It reads the `push` trigger off `deploy-production.yml` and

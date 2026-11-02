@@ -123,6 +123,20 @@ describe("relative links between Markdown files", () => {
 });
 
 describe("Markdown written for GitHub, the only renderer", () => {
+  it.each(["!!! note", "  !!! warning", "??? note", "???+ tip"])(
+    "rejects MkDocs syntax: %s",
+    (source) => {
+      expect(MKDOCS_ADMONITION.test(source)).toBe(true);
+    },
+  );
+
+  it.each(["> [!NOTE]", "> [!WARNING]", "Is this allowed???", "This matters!!!"])(
+    "accepts GitHub syntax and ordinary punctuation: %s",
+    (source) => {
+      expect(MKDOCS_ADMONITION.test(source)).toBe(false);
+    },
+  );
+
   it("uses no MkDocs-only admonition syntax", () => {
     const offenders = mkdocsOnlySyntax();
     expect(

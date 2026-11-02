@@ -78,7 +78,8 @@ branch → implement + tests → git push (the pre-push hook runs pnpm gate)
 - **A merge to `main` starts a production release**
   ([D-199](./docs/decisions/D-199.md)). Once Gate and Heavy are green on
   `main`, a workflow fast-forwards `production`, and the deploy waits for the
-  owner's approval before it migrates the database and again before Cloud Run.
+  owner's approval before it migrates the database; Cloud Run follows after migrations
+  ([D-205](docs/decisions/D-205.md)).
   There is no preview host.
 - **Tests ship with the change.** A change is not done until it ships with tests
   covering the new behaviour and the regression it fixes. There is one client,

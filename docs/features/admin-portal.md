@@ -70,6 +70,13 @@ cannot open the page that offers them. Whether the stricter page floor on
 students is deliberate is not recorded anywhere; confirm before changing
 either side.
 
+## AI acceptance on Overview
+
+`LessonInsight` and `HomeworkAiReviewDraft` supply acceptance figures (kept
+among decided, with unreviewed counts beside them). They exclude test accounts
+and expose counts only, never content ([D-22](../decisions/D-22.md),
+[D-201](../decisions/D-201.md)).
+
 ## Moderation
 
 - `support`+ can **disable** a teacher or student, with a required free-text

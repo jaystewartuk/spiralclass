@@ -15,9 +15,9 @@ retention) and [D-185](../decisions/D-185.md) (transcript from captions).
 
 Two operational facts:
 
-- **The teacher's captions toggle is the trigger.** The transcript is the
-  caption text the participants' browsers already produce. No captions, no
-  transcript, no insights for that class.
+- **The teacher's captions toggle only controls display.** A consenting class
+  is recognised and kept whether or not captions are showing; both participants
+  see the learning-notes indicator ([D-203](../decisions/D-203.md)).
 - **Preview cannot rehearse it end to end**: preview has no LiveKit key pair
   ([live calls](live-calls-video.md#joining-and-connection)).
 
@@ -163,30 +163,14 @@ SM-2 (`lib/lesson-notes/srs.ts`). Grades `again`, `hard`, `good`, `easy`.
 
 ## Surfaces
 
-1. Open a student and choose the **Learning profile** tab (its own view,
-   apart from the Learning tab's level and goal forms). It shows, sorted by
-   recurrence (ties favor "focus" trend), first **how they speak** — the
-   fluency and comprehension entries (hesitation, filler words, pace,
-   listening…) — then **what to work on** — every other category — each row a
-   skill, category, trend badge and recurrence count, then the vocabulary
-   badge cloud. No timestamps, and no quote on the row: the last example is a
-   collapsed hint, cut to 80 characters (`lib/lesson-notes/profile-view.ts`).
-2. Below that, a form to **add her own focus area** (source `teacher`,
-   confirmed on creation, the same write path as the class page's "add your
-   own"). It attaches to the student's most recent class that took place, so
-   it is unavailable before the first class.
-3. Then the controls for insights consent (with a minor-specific checkbox)
-   and the "share progress with student" toggle.
-
-**Teacher — during the call:** the call's **Quick note** control saves a
-one-line focus area for the class being taught (`source: "teacher"`, confirmed
-on creation, the same write as "add your own finding" below), so a teacher who
-spots a recurring error mid-class does not have to remember it afterwards.
-
-- **Teacher, student page**: the profile card (focus areas by recurrence, ties
-  favouring "focus"; skill, category, evidence, trend, count; vocabulary
-  cloud), the consent controls with a minor checkbox, and the share-progress
-  toggle.
+- **Teacher, student page**: the **Learning profile** tab groups fluency and
+  comprehension under how they speak, then other focus areas, followed by the
+  vocabulary cloud. Rows show skill, category, trend and recurrence count;
+  evidence is collapsed and cut to 80 characters (`lib/lesson-notes/profile-view.ts`).
+  The teacher can add her own focus area, attached to the latest class that took
+  place, and manage insights consent and progress sharing.
+- **Teacher, during the call**: **Quick note** saves a one-line focus area for
+  the current class (`source: "teacher"`, confirmed on creation).
 - **Teacher, class page**: before the class, the brief; after it, findings by
   category with Confirm, Edit, Dismiss and "add your own"; the speaking-time
   card; and the replay page (`/dashboard/classes/[bookingId]/replay`) with the

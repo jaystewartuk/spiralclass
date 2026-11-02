@@ -101,7 +101,7 @@ Chosen per template by whether `preferences.ts` gives it a category:
   one-time data migration (`20261025230000_backfill_untouched_class_materials_pref`)
   that turned class materials on for a student who has never signed in and whose
   stored preferences were still exactly the old default; a student who has signed
-  in is left alone, because a saved choice and the old default look the same. A
+  in is left alone, because a saved choice and the old default look the same.
 
 ### New students and the onboarding hold
 
@@ -165,6 +165,19 @@ Chosen per template by whether `preferences.ts` gives it a category:
 `suppressed`. Suppression (preference, hold, archived pairing) is recorded
 separately from failure. A recipient with no push subscription and email
 turned off receives nothing for a suppressible notification, by design.
+
+## Delivery edge cases
+
+- The class page and student's Materials tab tell the teacher when the student
+  has materials and homework notifications off or is on an onboarding hold.
+  The item still appears in the student's portal; the notice changes no preference.
+- A push never goes out untitled: an empty title becomes the product name on
+  the wire and in the service worker. An inbox row whose booking or payment was
+  deleted gets a generic title and explanatory body. Every template's push copy
+  is asserted non-blank in every language.
+- A student with no registered push device gets email only. A hard-bounced
+  address may be suppressed by the provider even when it accepts the send;
+  investigate the row's status in `/admin/notifications`.
 
 ## Permissions
 

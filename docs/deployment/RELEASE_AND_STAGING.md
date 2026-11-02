@@ -25,9 +25,11 @@ Policy: [D-199](../decisions/D-199.md) (a merge starts its own release),
 When Gate and Heavy both finish green on the push run for a commit on `main`,
 `promote-on-green.yml` fast-forwards `production`, and that push starts
 `deploy-production.yml`. The run waits for the owner's approval on the
-`production` environment — **once per job**: first the `database` job
+`production` environment — **once, on the `database` job**
+([D-205](../decisions/D-205.md))
 (`scripts/database-deploy.sh production`: Neon checkpoint, then migrations),
-then the `cloudrun` job (`scripts/cloudrun-deploy.sh production`: native amd64
+then the `cloudrun` job, on `production-app` without another approval
+(`scripts/cloudrun-deploy.sh production`: native amd64
 image, `gcloud run deploy`, Inngest sync, production probes).
 
 Approve outside lesson hours. Approving ships everything merged before it.

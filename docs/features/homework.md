@@ -102,15 +102,7 @@ contains one auto-drafts a real assignment (below).
   so it can be audited or regenerated. Grading never needs it: at the cap, or
   with no Anthropic key, she reviews by hand.
 
-## Reminders
-
-Daily crons (`lib/inngest/functions/homework-reminder-nudge.ts`) nudge a
-student whose assignment is still unsubmitted (no submission, or a draft):
-
-- **Due soon** — `dueAt` within the next 24 hours (16:00 UTC run).
-- **Overdue** — `dueAt` passed (18:00 UTC run).
-
-## AI review verdicts
+### AI review verdicts
 
 - **A draft leaves a verdict** ([D-201](../decisions/D-201.md)). Feedback sent
   while an AI review draft is on screen is linked to that draft — the latest
@@ -119,6 +111,14 @@ student whose assignment is still unsubmitted (no submission, or a draft):
   earlier drafts discarded, never deleted. Used-over-decided is the figure the
   admin overview shows; it is a ceiling, since a teacher who read a draft and
   wrote her own still counts as having started from it.
+
+## Reminders
+
+Daily crons (`lib/inngest/functions/homework-reminder-nudge.ts`) nudge a
+student whose assignment is still unsubmitted (no submission, or a draft):
+
+- **Due soon** — `dueAt` within the next 24 hours (16:00 UTC run).
+- **Overdue** — `dueAt` passed (18:00 UTC run).
 
 Each is sent at most once per assignment, skips disabled students and archived
 pairings, and respects the student's `class_materials` category
