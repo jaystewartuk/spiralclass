@@ -1,449 +1,171 @@
-# Cost Playbook
+# Cost playbook
 
-> **Audience:** whoever pays this project's infrastructure bill — and anyone
-> running a project in the same shape (Next.js / Neon Postgres / Stripe-ish).
-> **Goal:** run as close to $0/month as possible at this scale, with a clear,
-> ordered list of what to pay for first when usage actually demands it.
->
-> **Scale assumption:** one teacher + their students. Tens of MAU, not
-> thousands. If a project crosses into hundreds of MAU, re-read the
-> "When to actually start paying" section.
+What each hosted dependency costs at this scale — one teacher and their
+students, tens of monthly users — what keeps it near $0, and the order to start
+paying in when usage demands it. The admin costs page and the expense vendor
+list are structured from this file
+(`apps/web/src/lib/money-metrics.ts`, `packages/shared/src/expenses-config.ts`).
 
-## TL;DR
+Vendor prices and free allowances below are quoted from the vendors and
+change; **verify before quoting one**.
 
-| Component           | Provider                       | Plan          | Monthly          |
-| ------------------- | ------------------------------ | ------------- | ---------------- |
-| Hosting             | Google Cloud Run               | Always-free   | $0 (D-184)       |
-| Database            | Neon                           | Free          | $0 (verify)      |
-| Auth                | better-auth (in-app)           | n/a           | $0               |
-| Storage             | Cloudflare R2                  | Free          | $0               |
-| Error tracking      | Sentry                         | Developer     | $0               |
-| Transactional email | Resend                         | Free          | $0               |
-| Uptime monitor      | UptimeRobot **or** BetterStack | Free          | $0               |
-| LLM (if used)       | Anthropic API                  | Pay-as-you-go | ~$0–5            |
-| Domain              | Registrar of choice            | n/a           | ~$1 (≈ $12/yr)   |
-| **Total**           |                                |               | **~$1/mo + LLM** |
+## Summary
 
-The domain is the only unavoidable cost. Everything else is $0 until usage
-forces an upgrade — hosting included since 2026-09-23, when
-[D-184](../decisions/D-184.md) moved production from Fly onto Cloud Run's
-always-free grant. That is a different route to the $0 that the
-2026-09-02 plan set out to reach on the Oracle box.
+| Component           | Provider                          | Plan              | Monthly         |
+| ------------------- | --------------------------------- | ----------------- | --------------- |
+| Hosting             | Google Cloud Run                  | Always-free grant | $0              |
+| Database            | Neon                              | Free              | $0              |
+| Video               | LiveKit on a Compute Engine VM    | Always Free VM    | ~$3.65 (its IP) |
+| Auth                | better-auth (in-app)              | n/a               | $0              |
+| Storage             | Cloudflare R2                     | Free              | $0              |
+| Error tracking      | Sentry                            | Developer         | $0              |
+| Transactional email | Resend                            | Free              | $0              |
+| Uptime monitor      | HetrixTools                       | Free              | $0              |
+| CI                  | GitHub Actions, public repository | `ubuntu-latest`   | $0              |
+| LLM                 | Anthropic API                     | Pay-as-you-go     | ~$0–7           |
+| Domain              | Registrar                         | n/a               | ~$1 (≈ $12/yr)  |
 
----
+## By component
 
-## Stack by component
+### Hosting — Google Cloud Run ([D-184](../decisions/D-184.md))
 
-### Hosting — Google Cloud Run
+- Scales to zero and bills compute, requests and egress past an always-free
+  grant this traffic barely touches. D-184 carries the arithmetic; read it
+  before re-deriving any of this.
+- The two ways it stops being free — stored images and spend — are in
+  [`infra/gcp/README.md`](../../infra/gcp/README.md).
 
-- **Cost shape:** Cloud Run scales to zero and bills compute, requests and
-  egress past an always-free grant that this traffic barely touches.
-  [D-184](../decisions/D-184.md) carries the arithmetic; read it before
-  re-deriving any of this.
-- **The two ways it stops being free** — stored images and spend — are in
-  [`infra/gcp/README.md`](../../infra/gcp/README.md). ⚠️ Cloud Run has **no
-  hard spending cap**: a crawl or a loop bills rather than throttles, and the
-  budget alert described there is what tells you.
-- **Why it fits:** a single classroom's traffic leaves the service idle most
-  of the time, and an idle service costs nothing. The price is a cold start,
-  which the liveness monitor in
-  [`RELEASE_AND_STAGING.md`](./RELEASE_AND_STAGING.md) keeps away from real
-  visitors.
+> [!WARNING]
+> Cloud Run has **no hard spending cap**: a crawl or a loop bills rather than
+> throttles, and the budget alert in `infra/gcp/README.md` is what tells you.
+
+- The price of scale-to-zero is a cold start, which the liveness monitor keeps
+  away from real visitors
+  ([`RELEASE_AND_STAGING.md`](./RELEASE_AND_STAGING.md#cloud-run-serves-production-d-184)).
 
 ### Database — Neon Free
 
-- **Free quota:** generous free tier (storage + compute-hours; verify
-  the current limits), branching, one project.
-- **Why keep it:** serverless Postgres that scales to zero — you pay
-  ~nothing while idle, and it's a plain Postgres wire-protocol DB with
-  no vendor lock-in on the data layer.
-- **Multi-project tip:** one project per side-project keeps quotas and
-  branches isolated.
-- **Risk — auto-suspend:** free-tier compute suspends after a period of
-  inactivity and cold-starts on the next connection (verify the current
-  window). During the school year a teacher + students keep it warm;
-  summer break and holidays are the danger window. Cold-start is a
-  sub-second-to-few-seconds resume — acceptable for an alpha.
+- Serverless Postgres that scales to zero, with the branching and PITR that
+  [D-178](../decisions/D-178.md)'s checkpoint relies on. The account's plan and
+  why no paid plan was bought are in
+  [`infra/database/neon/README.md`](../../infra/database/neon/README.md).
+- **Compute auto-suspends** when idle and resumes on the next connection; the
+  first request after a quiet period pays the wake-up. That, or outgrowing the
+  free compute-hours, is the trigger that moves Neon to a paid plan first.
+
+> [!WARNING]
+> Any check against `/api/health` more often than every five minutes keeps
+> Neon's compute awake and spends the free compute-hours. The uptime monitor
+> stays on `/api/health/live`, which never queries the database.
+
+### Video — LiveKit on Compute Engine ([D-16](../decisions/D-16.md))
+
+- One Always Free `e2-micro`
+  ([`infra/gcp-livekit/`](../../infra/gcp-livekit/README.md)). The only line on
+  its bill is the static IPv4 address, about $3.65 a month. It carries a class
+  but not egress, so class recording is off.
+- **Graduation trigger:** two overlapping classes, which means an `e2-medium`
+  — also the size that fits egress. D-16 and the module README carry the
+  measurements and price.
+- **The rollback is LiveKit Cloud's free tier**, kept as a commented line in
+  `config/env/production.runtime.env`. It is a hard cap of 5,000
+  participant-minutes a month (about 41 two-person class-hours), not a meter.
+- **Captions:** recognised in the browsers for free. The paid fallbacks —
+  Google Cloud Translation for translation and Deepgram streaming for two-phone
+  calls — are priced in [D-185](../decisions/D-185.md).
+- Recordings already in R2 ride the storage line below.
 
 ### Auth — better-auth (in-app)
 
-- **Cost:** $0. Auth runs inside the web app (`better-auth`) against the
-  Neon Postgres DB — there's no separate auth vendor or per-MAU billing.
-- **Why it fits:** no external auth service to pay for or rate-limit;
-  the only email involved (magic-link / OTP) goes through Resend (below).
+$0. Auth runs inside the web app against the Neon database; the only email it
+sends (magic link, OTP) goes through Resend.
 
 ### Storage — Cloudflare R2
 
-- **Free quota:** 10 GB storage, **zero egress fees** (verify the
-  current free allowances). R2 is meaningfully cheaper than S3 at scale
-  precisely because of the egress pricing.
-- **Why it fits:** user uploads and call/lesson-audio artifacts live in
-  R2; at a single classroom's volume this stays well inside free.
+Uploads and recorded lesson audio. 10 GB free and **zero egress fees**, which
+is why it is the end-state storage rather than a tier to grow out of.
 
 ### Error tracking — Sentry Developer
 
-- **Free quota:** 5k errors/mo, 10k tracing spans/mo, 1 user, multiple
-  projects sharing the cap.
-- **Skip Sentry Uptime.** Uptime is Team-plan only ($26/mo). Use a
-  free uptime monitor instead.
+5k errors and 10k tracing spans a month, one user. Sentry's own uptime checks
+are a paid-plan feature; the uptime monitor is HetrixTools instead.
 
-### Transactional email — Resend
+### Transactional email — Resend Free
 
-- **Free quota:** 3,000 emails/month, 100/day, one verified domain
-  per account.
-- **Why Resend:** better-auth has no built-in mail sender and Neon isn't
-  an email service, so transactional email needs a dedicated provider.
-  Resend's 100/day free tier is a drop-in for magic-link, OTP, and
-  notification email.
-- **Multi-project tip:** one Resend account covers multiple verified
-  domains; the 3k/mo cap is shared.
+3,000 emails a month, 100 a day, shared across the account's domains.
+`assertProductionCredentials()` in `apps/web/src/lib/env.ts` refuses to boot
+production without an email provider's credentials — Resend's, or Amazon
+SES's, which `apps/web/src/lib/email/index.ts` prefers when both are set.
 
-### Uptime monitor — UptimeRobot or BetterStack
+### Uptime monitor — HetrixTools Free
 
-- **UptimeRobot free:** 50 monitors, 5-minute interval.
-- **BetterStack free:** 10 monitors, 3-minute interval, prettier
-  dashboard.
-- **Setup:** point at `/api/health` (already exists — returns 200 on
-  success, 503 on DB unreachable). Alert after 2 consecutive
-  failures so a single transient blip doesn't page you.
+The check `spiralclass production liveness` hits
+`https://spiralclass.com/api/health/live` about once a minute. It catches an
+outage between deploys, which the post-deploy probes do not, and it is what
+keeps a Cloud Run instance warm ([D-184](../decisions/D-184.md)).
 
-### CI/CD — GitHub Actions
+### CI — GitHub Actions
 
-> **From 2026-08-25 to 2026-09-04 this line item was £0 because there was
-> nothing to bill.** Every workflow and composite action in this repo was
-> deleted — the deploy, the dispatch-only gate fallbacks, and all three crons —
-> and everything ran on the operator's machine, by hand
-> ([`LOCAL_AUTOMATION.md`](./LOCAL_AUTOMATION.md)). It is £0 now because the
-> repository is public ([D-157](../decisions/D-157.md)). The rest of this section
-> is kept as the reasoning trail, because the levers it describes are the ones
-> that would matter again if the repository went private. The "stay private"
-> bullets below predate publication and no longer describe this repository.
->
-> **What tipped it was not the arithmetic.** The 2026-08-17 cut had already
-> measured the month down to ~780 billable minutes, comfortably inside the allowance. What
-> the arithmetic did not prevent was the allowance emptying anyway: every
-> private repo's workflows started failing at once, and production's Postgres
-> went **eleven days with no backup** while the public repos stayed green. A
-> backup whose availability depends on how many minutes the month's merges
-> consumed is not a backup you can reason about, at any price.
+$0 because the repository is public ([D-157](../decisions/D-157.md)).
 
-- **Free tier:** 2,000 Linux minutes/month on a **private** repo. Stay private.
-- **Do NOT go public to save minutes.** Public repos do get unlimited free
-  Actions, but SpiralClass is a **commercial product with potential resale
-  value**, so this is the wrong trade: a public repo exposes the _implementation_
-  (data model, payout/fee logic, auth + security flows — the real moat; the
-  product idea is already visible to anyone who signs up), hands attackers a map
-  of a money-handling app, and muddies the IP/due-diligence story in any future
-  sale. Keep it private.
-- **Largest structural cut — 2026-08-12: the test tiers moved
-  onto the dev machine.** The per-PR fan-out (`main-checks.yml` → five parallel
-  `checks.yml` jobs, each with its own `pnpm install`, on every push to every
-  PR) and the promote fan-out (integration + E2E + the browser suites)
-  now run locally via `pnpm gate` / `pnpm gate:full`, at zero Actions minutes.
-  What still bills: the web deploy (`fly-deploy.yml` — Fly is amd64-only and
-  this laptop is arm64), three crons, and any dispatched fallback run. Combined
-  with taking mobile builds and OTA publishes out of CI, the two biggest recurring line items
-  are gone; the trims below are now the second-order levers, not the first.
-- **Second structural cut — 2026-08-17: the web deploy followed**, into
-  `pnpm promote` itself (~744 billable min/month, the largest single line).
-- **Final cut — 2026-08-25: everything else, deleted.** The three crons
-  became `pnpm local synthetic | sweep`, run by hand with a staleness
-  nag in the gate; the dispatch-only fallbacks went with them, which saves no
-  minutes and removes the only path that worked without this machine. That cost
-  is stated in [D-157](../decisions/D-157.md) rather than discovered later.
-- **Biggest minute sinks while Actions was still in use, in order:** the deploy
-  workflow (image build dominates); the nightly sweep (slimmed on 2026-08-12 to the
-  unit suites + audit — the only checks a clock can break — via
-  `time_dependent_only`); a dispatched fallback gate; chatty Dependabot (each PR
-  re-ran the full matrix). Dependabot itself stays: it is not Actions and spends
-  no minutes, though its `github-actions` ecosystem was removed with the
-  workflows it had nothing left to pin.
-- **Levers applied here (see `../development/workflow.md`):**
-  path-filter heavy suites so docs and copy PRs skip them; gate a not-yet-live
-  suite behind a repo variable so it costs 0 (E2E behind `E2E_ENABLED`); cut
-  cron frequency where an external monitor already covers liveness (synthetic →
-  6h, UptimeRobot is primary); batch Dependabot monthly. Use `cancel-in-progress`
-  concurrency so a rapid second push doesn't double-bill. **Turborepo remote
-  cache (Vercel), free tier:** the gate's `typecheck`/`lint` steps
-  (`turbo run typecheck` / `turbo run lint`) read/write Vercel's remote cache
-  when `TURBO_TOKEN`/`TURBO_TEAM` are set, so a push that doesn't touch a
-  workspace's inputs gets a cache hit instead of re-running it — cuts wall-clock
-  on every run, self-hosted or not, and costs nothing (Vercel Remote Cache has
-  no separate paid tier). One-time setup: create a Vercel **Account Settings →
-  Tokens** access token scoped to your own Vercel team, add it as the repo
-  secret `TURBO_TOKEN`, and add the team slug as the repo **variable**
-  `TURBO_TEAM` (both under Settings → Secrets and variables → Actions). The
-  slug is not a secret, but it names an account, so it is a `vars` entry rather
-  than a literal in the workflow — this repository is public. **It applies to the local gate
-  too**: `pnpm gate` runs the same `turbo run typecheck` / `turbo
-run lint`, so setting `TURBO_TOKEN`/`TURBO_TEAM` in the shell environment still
-  buys the cache hits. Without them, turbo falls back to its local cache — never
-  a hard failure.
-- **The escalation ladder is retired: the repository is public, so the minutes
-  are free** ([D-157](../decisions/D-157.md)). Every rung it used to list was
-  premised on staying private — a self-hosted runner, pay-as-you-go overage,
-  GitHub Team — and none applies while a public repo bills nothing for
-  `ubuntu-latest`. ⚠️ **`ubuntu-latest` and nothing else**: a larger runner is
-  billed by the minute even on a public repo, and a guard test fails on one.
-  The self-hosting experiments this section used to narrate — an Oracle A1
-  cloud runner, a paid Hetzner `self-hosted-x86` pool, a physical home mini-PC
-  — are all reversed and their runbooks deleted
-  ([D-164](../decisions/D-164.md)). The surviving arc is
-  in [D-157](../decisions/D-157.md); the question
-  is settled, so **do not re-derive it**.
+- **`ubuntu-latest` only.** A larger runner bills by the minute even on a
+  public repository; `apps/web/tests/config/local-gate.test.ts` fails on one.
+- **Turborepo remote cache (Vercel's free tier):** `gate.yml` and `heavy.yml`
+  read the `TURBO_TOKEN` secret and the `TURBO_TEAM` variable; set the same two
+  in your shell and the local gate shares the cache. Without them turbo falls
+  back to its local cache — never a failure.
+- If the repository ever goes private again, the minutes stop being free;
+  D-157 is written so that the reversal is deleting `.github/workflows/`.
 
 ### LLM — Anthropic API, pay-as-you-go
 
-- **Why pay-per-use beats subscriptions for side-projects:** at this
-  traffic, monthly LLM spend is in single dollars. A flat $20 plan
-  loses.
-- **Default to Haiku 4.5** for any task that doesn't need Opus-level
-  reasoning (~$1 / 1M input tokens). Reach for Sonnet/Opus only when
-  the task fails on Haiku.
-  - **Caveat — Haiku 4.5 does not support `output_config.effort`.** It is a
-    pre-4.6 model, so passing `effort` is rejected with a **400** (it works on
-    Opus 4.5 at low/medium/high, and on 4.6+ models). A call site that passes
-    `effort` cannot be moved to Haiku without dropping the parameter first.
-    This has bitten twice: live captions (every utterance 502'd, subtitles
-    silently blank) and the first draft of
-    [D-87](../decisions/D-87.md) (would have 400'd every material
-    generation). Check the call site before applying the default above.
-- **One API key, one bill, one dashboard** across every side-project —
-  no setup friction for new projects.
-- **SpiralClass uses the API for AI class-content compose** — see the
-  dedicated section below for the per-generation cost, how to read spend,
-  and how to tune the monthly cap.
+Every call uses the **platform** key, never a teacher's.
+[D-87](../decisions/D-87.md) set the model per surface:
 
-### Object storage — Cloudflare R2
+| Surface                                         | Model                                          | Where                                                                                  |
+| ----------------------------------------------- | ---------------------------------------------- | -------------------------------------------------------------------------------------- |
+| Class-content and library compose               | `claude-sonnet-5` (override `ANTHROPIC_MODEL`) | `anthropicModel()` in `apps/web/src/lib/env.ts`                                        |
+| Lesson summary · insights · brief · intro coach | `claude-haiku-4-5`                             | constants in `apps/web/src/lib/lesson-notes/`, `apps/web/src/lib/intro-video/coach.ts` |
 
-- Already on **Cloudflare R2** (10 GB free, **zero egress fees**) for
-  user uploads and lesson/call-audio artifacts.
-- R2 is meaningfully cheaper than S3 at scale because of the egress
-  pricing, so there's no cheaper tier to defer to — this is the
-  end-state storage.
+> [!WARNING]
+> **Haiku 4.5 rejects `output_config.effort` with a 400.** The compose call
+> sites in `apps/web/src/lib/ai/anthropic.ts` pass `effort: "medium"`, so
+> compose cannot move to Haiku without dropping the parameter first (and the
+> guard in `apps/web/tests/lib/env.test.ts`). It has bitten twice: live
+> captions and the first draft of D-87.
 
-### Video — self-hosted LiveKit (Compute Engine `e2-micro`, D-16)
+## AI class-content compose ([D-17](../decisions/D-17.md))
 
-- **Today:** production video runs on one Always Free `e2-micro` on Compute
-  Engine ([D-16](../decisions/D-16.md),
-  [`infra/gcp-livekit/`](../../infra/gcp-livekit/README.md)). The only line on
-  its bill is the static IPv4 address, about $3.65/mo. It carries a class but
-  not egress, so class recording is off. D-16's graduation trigger is two
-  overlapping classes, which means an `e2-medium`.
-- **The rollback is LiveKit Cloud's free Build tier**
-  ([D-16](../decisions/D-16.md)), kept as a commented line in the runtime env
-  file. That tier is a hard cap, not a meter: 5,000 WebRTC participant-minutes
-  a month, no overage, service stops. A 2-person class-hour spends 120 of them,
-  so it is roughly 41 class-hours, and the next rung is Ship at $50/mo — an
-  order of magnitude above any box on this page.
-
-> [!IMPORTANT]
-> **The Oracle A1 box the rest of this section describes no longer exists.** It
-> was destroyed on 2026-09-19 and Oracle had no capacity to rebuild it
-> ([D-16](../decisions/D-16.md)). The bullets below are the arrangement
-> the 2026-09-20 Pay As You Go upgrade tried to get back to and
-> [D-184](../decisions/D-184.md) keeps as the way back; they are not a
-> description of anything running.
-
-- Previously the largest variable-cost vendor was never listed here at all
-  (a real gap — see `docs/features/live-calls-video.md`). From
-  D-16 until 2026-09-19, both preview and production ran on a self-hosted LiveKit stack
-  (`livekit-server` + `livekit-egress` + Redis + Caddy) on a free-tier Oracle
-  Cloud "A1" ARM box (2 OCPU/12GB) — **$0/mo direct cost**, replacing
-  LiveKit Cloud's participant-minute billing entirely.
-- The real cost isn't zero, it's deferred: this box has no SLA and carried a
-  documented Oracle free-tier suspension risk —
-  the idle-reclaim half of which [D-184](../decisions/D-184.md) retired by
-  making the tenancy Pay As You Go, while the no-SLA half stands — and its
-  measured
-  capacity ceiling is ~15-20 concurrent 2-participant rooms before packet
-  loss (measured in the LiveKit spike; its runbook was deleted by
-  [D-164](../decisions/D-164.md), the number is the part worth keeping) — then shared across both
-  environments (D-16). The deferred cost is a purpose-built box once real
-  concurrent load from a second/third teacher approaches that ceiling — see
-  `ORACLE_LIVEKIT_PRODUCTION.md`'s "What this means going forward" for the
-  exact graduation trigger.
-  ⚠️ **This line used to name "Hetzner CX22, ~$4.59/mo" and both halves have
-  rotted.** CX22 is no longer sold and Hetzner raised prices twice in 2026;
-  priced 2026-09-20, the EU ARM entry is CAX11 at €5.99/mo and CAX21 (4 vCPU,
-  8 GB, 80 GB) at €10.49/mo. Re-price before quoting, and read
-  [D-184](../decisions/D-184.md) first for the two constraints that rule most
-  of the cheap options out: Hetzner sells ARM in Germany and Finland only, so
-  a media relay there sits ~160-190 ms from two people who are both in the Americas,
-  and `scripts/oracle-push-images.sh` fails closed on a non-arm64 image, so an
-  x86 box brings the QEMU cross-build back with it.
-- Recording storage rides the existing R2 line above (Egress uploaded
-  directly, no separate line item). Recording has been off in production
-  since D-16; recordings already in R2 are untouched.
-- Live captions cost nothing to run in the browser; their translation
-  fallback is Google Cloud Translation, free for the first 500,000 characters
-  a month and $20 per million after that (checked 2026-09-23 —
-  [D-185](../decisions/D-185.md)). Post-class transcription (Deepgram) is the
-  same pay-as-you-go line as the Anthropic section below.
-
-### Analytics — skip until you need it
-
-- Don't add PostHog / Plausible / GA until there's a question you
-  can't answer without them. Free tiers exist (PostHog 1M events/mo)
-  but adding them costs build time, page weight, and consent-banner
-  complexity.
-
----
-
-## Reusing this stack across multiple side-projects
-
-| Service          | Cap per account                                    | Per-project isolation strategy                                    |
-| ---------------- | -------------------------------------------------- | ----------------------------------------------------------------- |
-| Google Cloud Run | One always-free grant per billing account (verify) | One service per side-project, **sharing** the grant.              |
-| Neon Free        | One project on the free tier (verify)              | One project per side-project — fresh free-tier quotas each.       |
-| Sentry Developer | 1 user, multiple projects, **shared** 5k errors/mo | One project per app, watch the shared cap.                        |
-| Resend Free      | Multiple domains, **shared** 3k emails/mo          | One verified domain per app, watch the shared cap.                |
-| UptimeRobot Free | 50 monitors                                        | One monitor per app's `/api/health`.                              |
-| Anthropic API    | Single account                                     | Separate API keys per app if you want per-project usage tracking. |
-
-You can run ~5 small side-projects on this stack before any single
-free tier starts pinching.
-
----
-
-## When to actually start paying
-
-Don't upgrade preemptively. Upgrade only when one of these triggers
-fires, in priority order:
-
-1. **Neon paid tier — ~$19/mo (verify).** Trigger: DB outgrows the
-   free-tier storage/compute allowance **or** the project becomes
-   load-bearing enough that a free-tier cold-start after summer break
-   is unacceptable **or** you need more compute-hours / longer history
-   / point-in-time recovery. This is almost always the _first_ paid
-   upgrade.
-
-2. **Cloud Run past the free grant — pay-as-you-go (verify).** Trigger:
-   sustained traffic outgrows the always-free grant, **or** you need
-   always-on instances or more regions. There's no commercial restriction to
-   trip here — it's purely a usage/spend threshold, and the budget alert in
-   [`infra/gcp/README.md`](../../infra/gcp/README.md) is how you find out.
-
-3. **Sentry Team — $26/mo.** Trigger: you hit 5k errors/mo (usually
-   a sign something is broken, not a sign to upgrade). Or you want
-   Sentry's built-in Uptime to consolidate alerts.
-
-4. **Resend Pro — $20/mo.** Trigger: >3k emails/mo **or** you need
-
-   > 100 emails in a single day (e.g. a launch announcement).
-
-5. **Anthropic — already pay-as-you-go.** No "upgrade" — just
-   monitor monthly spend in the dashboard.
-
-**Total cost progression as a project grows:**
-
-- Pre-launch / alpha: ~$1/mo (domain only)
-- Launched, single classroom: ~$1–5/mo (domain + LLM usage)
-- Sticky enough to need Neon paid: ~$20/mo (verify)
-- Commercial + sticky: ~$40/mo (+ Cloud Run usage past the free grant) (verify)
-- Real product: $70+/mo (all baseline paid plans) (verify)
-
-The jump from $0 to $26 is where most side-projects die. Don't take
-it until you have to.
-
----
-
-## Project-specific notes for SpiralClass
-
-- Domain (`spiralclass.com`) already registered.
-- Production is Cloud Run `web` in `us-east4`, inside the always-free grant
-  (D-184). There is no preview host until the Oracle box is rebuilt.
-- Neon project provisioned. Free tier. ⚠️ **Free-tier auto-suspend
-  cold-starts are the live risk** — a first request after a quiet period pays
-  the wake-up. It has not bitten during a lesson, and it is the trigger that
-  moves Neon to the paid tier first (see "When to actually start paying").
-- Cloudflare R2 bucket provisioned for uploads / lesson audio.
-- Sentry project provisioned. Developer tier.
-- Resend is wired and its credentials are part of
-  `assertProductionCredentials()` in `apps/web/src/lib/env.ts`, so production
-  refuses to boot without them.
-- **The external uptime monitor is a free HetrixTools check**
-  (`spiralclass production liveness`, active since 2026-08-25) hitting
-  `https://spiralclass.com/api/health/live` about once a minute. It catches an
-  outage between deploys, which the probes at the end of every deploy do not,
-  and it is also what keeps a Cloud Run instance warm ([D-184](../decisions/D-184.md)).
-  ⚠️ Keep it on `/api/health/live`: a sub-5-minute check against `/api/health`
-  holds Neon's compute awake and exhausts the free plan's CU-hours.
-
----
-
-## AI class-content compose (D-17)
-
-The only place SpiralClass spends LLM tokens today is **AI class-content
-compose** — the teacher's "draft this with AI" button on the class-content
-panel. It calls the Anthropic API on the **platform** key only (never through
-Connect), drafts Markdown the teacher reviews before saving, and is gated three
-ways so spend stays bounded: the **Pro** entitlement, a per-call ceiling, and a
+The teacher's "draft this with AI" button. It drafts Markdown the teacher
+reviews before saving, and spend is bounded three ways: the **Pro**
+entitlement, a per-call ceiling (`max_tokens: 4096`, `effort: "medium"`), and a
 **per-teacher monthly cap**.
 
 ### What a generation costs
 
-The call is `claude-sonnet-5` (override with `ANTHROPIC_MODEL`), `max_tokens:
-4096`, `effort: "medium"`.
+On Sonnet 5 at $3 / $15 per million input / output tokens:
 
-| Model              | Where                                           | Input / 1M                                 | Output / 1M               |
-| ------------------ | ----------------------------------------------- | ------------------------------------------ | ------------------------- |
-| `claude-sonnet-5`  | class-content / library compose                 | $3.00 (**$2.00 intro through 2026-08-31**) | $15.00 (**$10.00 intro**) |
-| `claude-haiku-4-5` | lesson summary · insights · brief · intro coach | $1.00                                      | $5.00                     |
-| `claude-opus-4-8`  | _(prior default on all five — for comparison)_  | $5.00                                      | $25.00                    |
+- **Input** — the student's level, up to ~25 covered notebook titles, the
+  student's name and the instruction scaffold: 1–2K tokens, ≈ $0.003–0.006.
+- **Output** — bounded by `max_tokens` plus thinking: ≈ $0.03–0.06 at the
+  ceiling.
+- **Worst case ≈ $0.07 per generation**, so the cap bounds one teacher at
+  about **$7 a month**, scaling linearly per Pro teacher. These are estimates;
+  replace them with observed numbers.
 
-> **Changed in [D-87](../decisions/D-87.md) (2026-07-19), as a
-> per-surface split — not a blanket move.** All five customer-facing defaults
-> were `claude-opus-4-8`. The four short, structured calls (lesson summary,
-> insights, brief, intro coach — 1024–2048 `max_tokens`, no `effort`) went to
-> `claude-haiku-4-5`, a flat **5× cut on both axes**. Class-content compose
-> stayed a tier up on `claude-sonnet-5`: it is long-form customer-visible
-> pedagogical output, the only streaming surface, the only one at `max_tokens:
-4096` — and the only one passing `output_config.effort`, which **400s on
-> Haiku 4.5**. That still cuts compose cost **~40%** vs Opus 4.8 (**~60%** at
-> intro pricing). Read D-87 before treating "switch to a cheaper model" as an
-> available lever — it has largely been pulled, and on compose the remaining
-> step down is blocked by the `effort` constraint, not just by quality.
-
-Rough envelope per generation (compose, on Sonnet 5 at standard pricing):
-
-- **Input** is small — the prompt is the student's level label, up to ~25
-  already-covered notebook titles, the student's name, and the instruction
-  scaffold: on the order of 1–2K tokens, so ≈ **$0.003–0.006**.
-- **Output** is bounded by `max_tokens` (4096) plus thinking; a full class plan
-  runs a few thousand tokens, so ≈ **$0.03–0.06** at the ceiling.
-- **Worst case ≈ $0.07 per generation** (≈ **$0.045** at intro pricing);
-  typical is lower. These are _estimates_ — replace them with observed numbers
-  once real usage exists (see below).
-
-At the current cap that bounds a single teacher at **100 × ~$0.07 ≈ $7/month**
-worst case (~$4.50 at intro pricing), down from ≈$15/month on Opus 4.8. With
-one teacher (Alicia Moreno) that is the whole exposure; it scales linearly per Pro
-teacher.
-
-**Class content is the only capped surface.** Lesson summaries, insights,
-briefs, and intro-video coaching call Anthropic on the same platform key with
-no equivalent monthly ceiling. Those four are on Haiku after D-87 (a 5× cut on
-their prior Opus cost), so the uncapped exposure got much cheaper — but if the
-Anthropic bill surprises you, check the Console usage dashboard against _all_
-of those surfaces — not just `class_content_generated`.
+**Class content is the only capped surface.** Summaries, insights, briefs and
+intro coaching have no monthly ceiling. If the bill surprises you, check the
+Anthropic Console against all of them.
 
 ### How to read spend
 
-Two independent sources:
-
-1. **PostHog event `class_content_generated`** — captured once per _successful_
-   generation (`apps/web/src/app/actions/class-content.ts`). Properties:
-   `teacherId`, `bookingId`, `hasLevel`, `coveredCount`. Count this event over a
-   window for generation volume, and break down by `teacherId` to find the
-   heaviest users. **Caveat:** the event does **not** carry token counts or
-   cost — it tells you _how many_ generations happened, not how many tokens they
-   burned. For actual token/$ spend, read the **Anthropic Console** usage
-   dashboard for the platform key over the same window and divide by the event
-   count to get a real per-generation cost.
-2. **`class_content_generations` table** — one row per successful generation,
-   `(teacher_id, created_at)`. This is what the cap counts. It's the
-   source of truth for "how close is teacher X to the cap this month":
+1. **PostHog event `class_content_generated`** — one per successful generation
+   (`apps/web/src/lib/materials/handlers.ts`), with `teacherId`, `bookingId`
+   and the prompt's shape. It counts generations, not tokens: divide the
+   Console's spend for the same window by the count for a real
+   per-generation cost.
+2. **`class_content_generations` table** — one row per success, which is what
+   the cap counts:
 
    ```sql
    select teacher_id, count(*) as used_this_month
@@ -453,52 +175,39 @@ Two independent sources:
    order by used_this_month desc;
    ```
 
-   (The cap counts a **UTC** calendar month — `monthStartUtc()` in
-   `src/lib/materials/config.ts`.)
+   The cap counts a **UTC** calendar month (`monthStartUtc()` in
+   `apps/web/src/lib/materials/config.ts`).
 
-### Tuning the monthly cap
+### Tuning the cap
 
-The cap is the named constant `CLASS_CONTENT_AI_MONTHLY_CAP` (currently **100**)
-in `src/lib/materials/config.ts` — change it there; the action, the panel,
-and the tests all read from it. Guidance:
+The cap is `CLASS_CONTENT_AI_MONTHLY_CAP` (**100**) in
+`apps/web/src/lib/materials/config.ts`; the action, the panel and the tests
+read it from there.
 
-- **It's a spend ceiling, not a UX limit.** A teacher who hits it can still
-  hand-author content — they just lose the AI draft for the rest of the month.
-  Keep it generous enough that normal use never touches it.
-- **Raise it** if the `used_this_month` query shows real teachers bumping the
-  cap while per-generation cost (from the Console) stays low — the cap is
-  costing UX more than it's saving dollars.
-- **Lower it** only if observed cost per generation comes in much higher than
-  the ~$0.03 estimate above, or if a single teacher's volume becomes a
-  meaningful share of platform cost. Re-derive the target from
-  `cap × observed_cost_per_generation × Pro_teacher_count` against whatever
-  monthly LLM budget you're comfortable with.
-- **Other levers before the cap:** the per-call `max_tokens` and `effort`
-  (`config.ts` / `lib/ai/anthropic.ts`) bound a single generation's size;
-  dropping `effort` to `low` or trimming `max_tokens` cuts the per-generation
-  cost directly. **The cheaper-model lever is nearly spent** — D-87 already
-  moved the four short surfaces to Haiku, the cheapest current tier, and
-  compose to Sonnet 5. Compose cannot follow them down to Haiku: its call sites
-  pass `output_config.effort`, which 400s on pre-4.6 models. Dropping `effort`
-  from all four call sites in `lib/ai/anthropic.ts` (and the guard test in
-  `tests/lib/env.test.ts`) would unblock a Haiku move — that is a code change
-  with its own quality cost, not an env flip. In the other direction,
-  `ANTHROPIC_MODEL` moves compose back up to Opus with an env change and no
-  deploy (and only that surface — the lesson-notes and intro-coach constants
-  are hardcoded and need a code change; see D-87's risks). **Also note the
-  Sonnet 5 introductory pricing expires 2026-08-31** — compose cost rises ~50%
-  on that date with no code change; re-check this envelope then.
+- **It is a spend ceiling, not a UX limit.** A teacher at the cap can still
+  write content by hand. Keep it generous enough that normal use never touches
+  it.
+- **Raise it** if real teachers hit it while observed per-generation cost
+  stays low.
+- **Lower it** only if observed cost is well above the estimate above.
+  Re-derive from `cap × observed cost per generation × Pro teacher count`.
+- **Before the cap:** `max_tokens` and `effort` bound a single generation. The
+  cheaper-model lever is nearly spent (D-87). `ANTHROPIC_MODEL` moves compose
+  with an environment change and no code change; the four Haiku surfaces are
+  constants and need a code change.
 
-## What to do when starting the next side-project
+## When to start paying
 
-1. Buy domain.
-2. New Cloud Run service (same billing account — see `infra/gcp/README.md`).
-3. New Neon project (fresh free tier).
-4. New Sentry project (same org, watch shared error cap).
-5. Add Resend domain (same account, watch shared email cap).
-6. Add `/api/health` route. Add UptimeRobot monitor.
-7. Re-use the same Anthropic API key (or create a new one per project
-   for separate usage tracking).
+Upgrade only when a trigger fires, in this order:
 
-Total setup cost: ~$12 (domain). Total monthly cost: $1 until usage
-forces an upgrade.
+1. **Neon paid plan.** The database outgrows the free allowance, a cold start
+   after a quiet period becomes unacceptable, or a longer restore window is
+   needed. Almost always the first paid upgrade.
+2. **LiveKit `e2-medium`.** Two overlapping classes (D-16).
+3. **Cloud Run past the free grant.** Sustained traffic outgrows it, or
+   always-on instances are needed; the budget alert says when.
+4. **Sentry Team.** 5k errors a month is usually a sign something is broken,
+   not a reason to upgrade.
+5. **Resend Pro.** More than 3k emails a month or 100 in one day.
+
+Anthropic is already pay-as-you-go: watch the monthly spend.

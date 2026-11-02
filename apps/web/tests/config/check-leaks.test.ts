@@ -267,7 +267,7 @@ describe("scanner coverage", () => {
   const covers = (path: string) => scanned.includes(path);
 
   it("reads files at the repo root", () => {
-    for (const f of ["CLAUDE.md", "README.md", "Dockerfile", "justfile", "wrangler.jsonc"]) {
+    for (const f of ["CLAUDE.md", "README.md", "Dockerfile", "justfile", "turbo.json"]) {
       expect(covers(f), `${f} is tracked but unscanned`).toBe(true);
     }
   });

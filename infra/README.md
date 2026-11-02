@@ -82,8 +82,7 @@ Tofu module.
 The `oracle-runner` and `cloudflare` Tofu modules were both deleted in
 [D-164](../docs/decisions/D-164.md): neither had ever been applied, neither
 had a state file, and both asserted a configuration that had really been
-built and changed by hand. The Cloudflare Access gate is described in
-[`docs/deployment/DOCS_SITE.md`](../docs/deployment/DOCS_SITE.md).
+built and changed by hand.
 `infra/cloudflare/` exists again, but not as a module: it holds the R2 bucket
 CORS runbook ([`R2_CORS.md`](./cloudflare/R2_CORS.md)) and its JSON.
 

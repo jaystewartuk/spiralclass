@@ -89,11 +89,6 @@ next-env.d.ts
 apps/web/scripts/import/data/
 .env*
 
-# MkDocs docs site: local build output + throwaway Python venv.
-# The site is built by Cloudflare Pages from mkdocs.yml; see docs/deployment/DOCS_SITE.md.
-/site/
-.venv-docs/
-
 # Terraform (infra/) — never commit state, filled tfvars, or filled backend
 # config; the *.example files ship.
 **/.terraform/*

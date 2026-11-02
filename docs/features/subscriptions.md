@@ -1,402 +1,205 @@
-# Feature: Teacher Subscriptions (SpiralClass Free / Pro)
+# Teacher subscriptions (Free / Pro)
 
-## Overview
+SpiralClass charges **teachers** a subscription. It is separate from a teacher
+being paid by her students ([payments.md](payments.md)). Each teacher has one
+`TeacherSubscription` row; its plan, status and the clock decide what she can
+do.
 
-SpiralClass itself charges **teachers** a subscription to unlock the full
-product — this is entirely separate from a teacher getting paid by her own
-students (see `docs/features/payments.md`). A teacher account has exactly one
-subscription record that resolves to a plan (**Free**, **Pro Monthly**, **Pro
-Annual**, or **Founding**) and a lifecycle status, which together decide what
-that teacher can do: how many students/package templates she can have, and
-whether Pro-only features (class materials, live notes, custom pricing, intro
-calls, the AI intro-video coach) are unlocked.
+> [!IMPORTANT]
+>
+> - **The teacher's own v2 `Account` is the billing customer.** There is no
+>   platform `Customer` object and no mapping table: subscriptions are created
+>   with `customer_account`. `teacher_subscriptions.stripe_customer_id` means
+>   "the thing we bill" and holds `acct_…` for everyone since
+>   [D-143](../decisions/D-143.md). A teacher with no merchant account is still
+>   billable.
+> - **Subscription billing is a platform charge**: platform secret key, no
+>   `Stripe-Account` header, its own webhook endpoint
+>   (`/api/stripe/billing-webhook`) and secret (`STRIPE_BILLING_WEBHOOK_SECRET`).
+>   A lesson payment belongs entirely to the teacher; never confuse the two.
+> - **Never paywall getting paid** — both payment rails are free on every tier
+>   — and **never delete teacher data on downgrade**; over-cap data is
+>   grandfathered read-only.
 
-Every new teacher gets a genuinely usable **permanent Free tier** and a
-**30-day full-Pro trial** with no card required. Nobody is ever locked out of
-the product for non-payment — a lapsed/declined/canceled subscription always
-falls back to Free, never to a disabled account. The platform's own billing
-is charged directly on SpiralClass's Stripe account via **Stripe Billing**
-(Customer/Price/Subscription/Invoice) — it is **never** routed through Stripe
-Connect, and has its own separate webhook, distinct from the teacher-payout
-webhook.
+## Plans
 
-## User Stories
+Prices and every number below live in
+`packages/shared/src/subscriptions-config.ts`, re-exported for the app by
+`apps/web/src/lib/subscriptions/config.ts`.
 
-- As a **new teacher**, I want a real trial of the full product with no card
-  required, so I can decide if it's worth paying for before committing.
-- As a **teacher on Free**, I want to know exactly what I'm capped at (active
-  students, package templates) and what upgrading unlocks, without ever
-  losing data I already have.
-- As a **teacher**, I want to subscribe monthly or annually (with a discount
-  for paying annually), manage my payment method, and cancel any time without
-  being charged again after the current period ends.
-- As one of the **first teachers on the platform**, I want a shot at a
-  cheaper price that's locked in for as long as I keep subscribing.
-- As the **platform operator**, I want to comp specific accounts (internal,
-  partners) to full Pro without ever billing them.
-- As the **platform operator**, I want a lightweight way to pay an ambassador
-  a referral commission without building a full referral/credit-ledger
-  engine.
+| Plan           | Price  | Interval | Notes                                                 |
+| -------------- | ------ | -------- | ----------------------------------------------------- |
+| Free           | £0     | —        | Permanent and usable; never a locked-out state        |
+| Monthly (Pro)  | £7.99  | month    |                                                       |
+| Annual (Pro)   | £79.90 | year     | 10× monthly                                           |
+| Founding (Pro) | £5.99  | month    | Price locked for the life of the subscription; cohort |
+| Comped (Pro)   | —      | —        | A flag, not a plan: never billed, always full Pro     |
 
-## Business Rules (exhaustive)
+- New checkouts price in **GBP** ([D-153](../decisions/D-153.md)). A subscriber
+  billed in MXN before D-153 keeps the currency and price stored on her own row,
+  taken from her Stripe objects; nothing re-derives them from today's table.
+- Money is integer minor units.
+- What a teacher charges her students is her own pricing currency and has
+  nothing to do with this table.
 
-### Plans & pricing
+## Trial and grace
 
-| Plan           | Price  | Interval | Notes                                               |
-| -------------- | ------ | -------- | --------------------------------------------------- |
-| Free           | £0     | —        | Permanent, genuinely usable, not a locked-out state |
-| Monthly (Pro)  | £7.99  | /month   |                                                     |
-| Annual (Pro)   | £79.90 | /year    | Exactly 10× monthly (~2 months free)                |
-| Founding (Pro) | £5.99  | /month   | Price **locked for life**, cohort-gated             |
-| Comped (Pro)   | —      | —        | Internal flag, never billed, always full Pro        |
+- Every new teacher starts `trialing` with full Pro for `TRIAL_DAYS` (30), no
+  card.
+- `TRIAL_ENDING_NOTICE_DAYS` (3) before the end she gets one "trial ending"
+  notice.
+- A failed renewal sets `past_due`; she keeps full Pro for
+  `PAST_DUE_GRACE_DAYS` (7) with an "update payment" banner.
+- An unsubscribed trial end, an elapsed grace window, or a cancellation that
+  reaches period end all drop her to `free`. There is no suspended or disabled
+  billing state.
+- A daily sweep (`subscription-sweep`, `lib/subscriptions/sweep.ts`) performs
+  the time-based transitions Stripe does not know about and sends the
+  trial-ending notice.
 
-- Canonical billing currency is **GBP** as of **D-153** (2026). It was **MXN**
-  before that (a launch-era default). A pre-D-99 subscriber's
-  actual billing currency is whatever is stored on their own subscription
-  row, sourced from their real Stripe object — it is **never** reinterpreted
-  or re-derived from "what's canonical today." Only brand-new checkouts
-  resolve through the GBP price table.
-- Money throughout is integer minor units (pence for GBP, centavos for MXN).
-- This pricing/currency is entirely independent from what a teacher charges
-  her own students (that's the teacher's own chosen marketplace pricing
-  currency, default MXN, chosen once at onboarding — see D-153 and the
-  Payments doc).
+## Entitlements
 
-### Trial
+`entitlementsFor()` is the one resolver
+(`packages/shared/src/subscriptions-entitlements.ts`, imported in the app from
+`apps/web/src/lib/subscriptions/entitlements.ts`). Never branch on plan or tier
+anywhere else. The server gate is authoritative; a Pro lock shown before a
+click is UX on top of it.
 
-- Every new teacher starts in `trialing` status with full Pro access for
-  **30 days**, no card required (`TRIAL_DAYS`).
-- **3 days before** the trial ends, the teacher gets a one-time "trial
-  ending soon" notice (`TRIAL_ENDING_NOTICE_DAYS`).
-- If the teacher hasn't subscribed by the time the trial ends, they fall to
-  **Free** — never locked out, never a disabled account.
+- **Effective status is clock-aware.** A `trialing` row past `trialEndsAt`, or
+  a `past_due` row past its grace, resolves to Free before the sweep updates
+  it. It never upgrades a stale row. A missing row resolves to Free.
+- `comped` is independent of status: a comped teacher is always Pro.
+- **Free caps**: `FREE_MAX_ACTIVE_STUDENTS` (3) active students and
+  `FREE_MAX_PACKAGE_TEMPLATES` (1) active templates. Pro — including trialing
+  and past-due grace — is unlimited.
+- The caps block only the teacher's own deliberate adds (adding a student,
+  adding a template). The public booking page and checkout are never gated, so
+  a Free teacher keeps taking new students over the cap.
+- **Downgrade deletes nothing.** Over-cap students, templates and packages keep
+  working; she cannot add past the cap until she upgrades.
+- **Pro-only capabilities**:
 
-### Past-due grace
+  | Entitlement              | Gates                                                                    |
+  | ------------------------ | ------------------------------------------------------------------------ |
+  | `canScheduleMaterials`   | Scheduling class materials and authoring/AI-composing class content      |
+  | `canCustomPrice`         | Per-student custom prices                                                |
+  | `canUseLiveNotes`        | Live-notes present mode and the realtime student panel (writing is free) |
+  | `canUseIntroVideoCoach`  | The intro-video AI coach (recording and showing the video is free)       |
+  | `canUseHomeworkAiReview` | The AI review draft of a homework submission (manual review is free)     |
+  | `canSellForTwo`          | Switching on a package for two ([D-149](../decisions/D-149.md))          |
 
-- If a recurring charge fails, the subscription enters `past_due` and the
-  teacher **keeps full Pro** for a **7-day grace window**
-  (`PAST_DUE_GRACE_DAYS`), with a persistent "update your payment method"
-  banner.
-- If the grace period elapses without a successful charge, the subscription
-  drops to **Free** (again, never a hard lockout).
+- Plans, caps and capabilities are code constants changed by pull request, not
+  a database-editable matrix.
 
-### Free-tier caps
+## Founding cohort
 
-- **Active students**: capped at **3** (`FREE_MAX_ACTIVE_STUDENTS`).
-- **Package templates**: capped at **1** (`FREE_MAX_PACKAGE_TEMPLATES`).
-- Pro (any paid plan, including while trialing or in past-due grace) is
-  **unlimited** on both.
-- **Downgrade never deletes data.** An already-over-cap teacher who drops to
-  Free keeps every existing student/template/package fully functional
-  (grandfathered, read-only against the cap) — she just can't **add** past
-  the cap until she upgrades again.
-- **The public self-booking/checkout flow is never gated by these caps** —
-  a hard product rule is "never paywall getting paid." A Free teacher's
-  booking page keeps accepting new students/purchases even over the nominal
-  cap; the cap only blocks the teacher's own _deliberate_ adds (roster
-  add-student, template creation).
+- Open while **both** hold: fewer than `FOUNDING_MAX_TEACHERS` (50) teachers
+  have ever entered the founding plan, and the date is before `LAUNCH_DATE` +
+  `FOUNDING_WINDOW_DAYS` (90). The `FoundingCohort` row holds the headcount and
+  optional operator overrides of the cutoff and cap
+  (`getFoundingCohortState`, `lib/subscriptions/service.ts`).
+- The headcount only increases, so a lapsed founding subscriber's place is not
+  returned to the cohort.
+- With launch on 2026-05-27, the window closed on 2026-08-25 and Founding no
+  longer renders at checkout. A Founding checkout attempted after the cohort
+  closes is refused with `founding-closed`.
+- The founding price is locked for the life of that subscription:
+  `lockedPriceMinorUnits` and `currency` on the row win over the table.
+- Founding is reachable **only through checkout**. It is excluded from the
+  Customer Portal's switchable prices (the portal declaration lists the two
+  other prices individually, and a unit test asserts the founding price id is
+  absent), and the billing webhook logs an error if a subscription becomes
+  founding while the cohort is closed. An existing Monthly or Annual
+  subscriber cannot move to Founding.
+- A founding subscription that lapses drops to Free, which clears the plan and
+  the locked price. Resubscribing is a new checkout under whatever the cohort
+  state is then.
 
-### Pro-only features (all resolved through one entitlements function)
+## Checkout, portal and cancellation
 
-- **Class-materials scheduling** and **class-content authoring/AI compose**
-  (`canScheduleMaterials`) — viewing existing materials/content stays free;
-  authoring/scheduling new ones is Pro.
-- **Per-student custom pricing** (`canCustomPrice`).
-- **Live notes** — authoring notes is free on every tier; the **live**
-  surfaces (present mode, the realtime student panel) are Pro
-  (`canUseLiveNotes`).
-- **Intro-video AI coach** (`canUseIntroVideoCoach`) — recording/showing the
-  intro video is always free; only the AI transcription/coaching analysis is
-  gated.
-
-### Marketplace commission (tiered by subscription — separate from the plan price)
-
-A percentage of the **settled Stripe net** is withheld before a teacher's
-payout Transfer (see Payments doc), tiered by subscription standing:
-
-| Standing                                       | Rate                 |
-| ---------------------------------------------- | -------------------- |
-| Free                                           | 8%                   |
-| Pro (Monthly/Annual, including while trialing) | 3%                   |
-| Founding (while effectively Pro)               | 0% (locked for life) |
-| Comped                                         | 0%                   |
-
-- A **lapsed** Founding subscription (canceled/expired, no longer effectively
-  Pro) falls through to the ordinary Free rate like any other non-Pro
-  teacher — the 0% rate is conditioned on currently being Pro, not merely on
-  having once held the founding plan.
-- **Wise payouts are structurally exempt** from this commission — the
-  platform never touches Wise money, so Wise-only teachers are monetized via
-  the subscription alone, not a commission cut.
-
-### Founding cohort
-
-- Open only while **both** hold: fewer than **50** teachers have ever taken
-  the founding plan (`FOUNDING_MAX_TEACHERS`), **and** the current date is
-  within **90 days** of the platform's launch date (`FOUNDING_WINDOW_DAYS`
-  from `LAUNCH_DATE`). Whichever condition is hit first closes the cohort.
-- The founding price is **locked for the life of that subscription** even if
-  the config-table price changes later, or the currency changes (D-153): a
-  subscriber's own stored `lockedPriceMinorUnits`/`currency` is authoritative,
-  never re-derived from the table after activation.
-
-### Lifecycle & status transitions
-
-States: `trialing | active | past_due | canceled | free` (+ an orthogonal
-`comped` boolean — a comped teacher can be `active` with `comped: true`; a
-comped teacher is always treated as fully Pro regardless of status).
-
-- New teacher (or every pre-existing teacher at the historical migration
-  deploy) → `trialing`.
-- Subscribes successfully → `active`.
-- A charge fails → `past_due` (7-day grace, still full Pro).
-- Trial ends unsubscribed, OR grace elapses unpaid, OR the teacher cancels →
-  **`free`**. This is the only "downgrade" path; there is no separate
-  suspended/disabled state for billing reasons.
-- The **effective** status is computed live and clock-aware, not purely
-  read off the database row: a `trialing` row whose `trialEndsAt` has
-  already passed resolves to Free even before a scheduled sweep flips the
-  row, and a `past_due` row whose grace window has elapsed likewise resolves
-  to Free early. This defends against a lagging background job ever granting
-  Pro past its actual expiry. It never works in the other direction — this
-  computation never _upgrades_ a stale row.
-- A missing/unknown subscription record resolves to Free — never an error,
-  never a lockout.
-- A background sweep drives the time-based transitions Stripe itself can't
-  know about (the app's own no-card trial), plus the one-time "trial ending
-  soon" nudge.
-
-### Cancellation
-
-- Canceling is **cancel at period end** — the teacher keeps Pro through the
-  end of the period already paid for, then drops to Free. No proration is
-  given for canceling mid-cycle.
-- Stripe reports that window as an **`active` subscription carrying
-  `cancel_at_period_end`**, not as a cancellation, and
-  `teacher_subscriptions.cancel_at_period_end` mirrors it. That column is what
-  lets the product tell "renews on the 14th" apart from "ends on the 14th":
-  every other field on the row is identical in both cases. It is distinct from
-  `canceled_at`, which is stamped only once the subscription has actually
-  ended. Until the column existed the webhook parsed the flag and discarded it,
-  and Plan & billing announced a "Next charge" to a teacher who had just made
-  sure there would not be one.
-- **The portal is declared in this repo, not in the Dashboard.**
-  `apps/web/src/lib/stripe/portal-configuration.ts` is the source of truth for
-  what a teacher can do in it — change card, switch Monthly/Annual, see her
-  invoices, cancel at period end — and
+- `startBillingCheckout` (`lib/subscriptions/start-billing-checkout.ts`) opens
+  Stripe Checkout, hosted or embedded, for Monthly, Annual or (while open)
+  Founding. It refuses a comped teacher (`already-comped`) and one with a live
+  `active` or `past_due` subscription (`already-subscribed`) — a failed payment
+  is fixed with a new card in the portal, not a second subscription.
+- On success the subscription is `active` with the plan's price locked onto the
+  row.
+- **The Customer Portal is declared in this repository**:
+  `apps/web/src/lib/stripe/portal-configuration.ts` (change card, switch
+  between Monthly and Annual, see invoices, cancel at period end).
   `pnpm --filter spiralclass-web stripe:portal:sync --apply` applies it and
-  prints the id to pin in `STRIPE_BILLING_PORTAL_CONFIG_ID`. Before this,
-  passing no configuration meant Stripe used a default it creates lazily on the
-  first session from ITS defaults: the behaviour behind every "Manage billing"
-  button was defined by nothing reviewable and changeable by any Dashboard
-  click. Unset, the old lazy behaviour still applies — the variable is
-  deliberately not part of `hasBillingCreds()`, because billing must not go
-  dark over an unpinned portal.
-- Between cancelling and the period end, Plan & billing says the plan **ends**
-  on that date and offers **Resume subscription** (the same Customer Portal
-  door). There is deliberately **no app-wide banner** for this state — she
-  chose it, and following her around the product about her own decision is
-  nagging. The banner is reserved for the two states that cost her something
-  unless she acts: a running trial and a failed payment.
+  prints the id to pin in `STRIPE_BILLING_PORTAL_CONFIG_ID`. Unset, Stripe's
+  default portal applies; the variable is deliberately not part of
+  `hasBillingCreds()`, so billing never goes dark over an unpinned portal.
+- Switching Monthly → Annual prorates immediately; Annual → Monthly takes effect
+  at the end of the paid period.
+- **Cancellation is at period end**, with no proration. Stripe reports that
+  window as an `active` subscription with `cancel_at_period_end`, mirrored in
+  `teacher_subscriptions.cancel_at_period_end`; that column is what lets Plan &
+  billing say "ends on" instead of "renews on". `canceled_at` is stamped only
+  once the subscription has actually ended.
+- While a cancellation is pending, Plan & billing shows the end date and
+  **Resume subscription** (the portal). There is no app-wide banner for it;
+  the banner is for a running trial and a failed payment.
 
-### Comped accounts
+## Operator tools (finance role)
 
-- A `comped` flag is fully independent of `status`/`plan` — it means "never
-  billed, always full Pro," applied to specific internal/partner accounts by
-  an admin action. Comped is idempotent to apply.
+In `apps/web/src/app/actions/admin-subscriptions.ts`, both requiring
+`requireAdmin("finance")` and both writing an audit row:
 
-### Referral / ambassador commission (lightweight — not the full referral engine)
+- **Comp** (`markSubscriptionComped`) — activates the subscription with
+  `comped: true` under a plan label (default founding), keeping her existing
+  billing currency. Idempotent.
+- **Mark a cycle paid by hand** (`markSubscriptionPaidManually`) — for a
+  teacher who pays by transfer: records a `SubscriptionInvoice` with
+  `provider: "manual"`, fee 0, and activates the subscription for 30 days at
+  the amount entered. There is no self-serve transfer checkout.
 
-- A `?ref=CODE` link stamps attribution onto the referred teacher's account
-  at signup — no codes ledger, no credit system.
-- The commission report computes, per ambassador, a configured share of the
-  **net** of every **paid** subscription invoice within the referred teacher's
-  **first 12 months** (`COMMISSION_WINDOW_MONTHS`). ⚠️ **The share itself is
-  deployment configuration** (`COMMISSION_RATE_PERCENT`), not a constant in
-  this repository — it is the term of a private arrangement. Unset resolves to
-  zero, so an unconfigured deployment reports a visible nothing rather than a
-  plausible wrong number.
-- Refunded/voided invoices are excluded from the commission base (clawback —
-  an invoice that was refunded doesn't generate ambassador commission).
-- A referred teacher who never upgrades past Free produces no invoices, so
-  the referral earns the ambassador nothing.
-- Paid **out-of-band** (a manual monthly transfer to the ambassador) — this
-  is a reporting/export tool, not an automated payout rail.
+## Ambassador commission
 
-### Manual/Wise subscription payment (phase-2, admin-only)
+A teacher-referral arrangement, unrelated to the student referral program in
+[referrals-discounts.md](referrals-discounts.md):
 
-- The primary rail is Stripe Billing + its hosted Customer Portal (card
-  update, cancel).
-- A secondary manual rail exists for teachers who pay by transfer: an admin
-  (finance role) can mark a billing cycle paid by hand
-  (`markSubscriptionPaidManually`), recording a `provider: "wise"` invoice
-  and activating the subscription for a 30-day period. This is an explicit
-  admin tool, not a self-serve checkout — there is no automated Wise
-  subscription-payment rail yet.
+- `?ref=CODE` on the signup link is kept in a cookie and stamped on
+  `Teacher.referralSource` when the teacher row is created.
+- The commission report (`lib/subscriptions/commission.ts`) pays a share of
+  the **net** of each `paid` subscription invoice in the referred teacher's
+  first `COMMISSION_WINDOW_MONTHS` (12). Invoices in any other status are
+  excluded.
+- **The share is deployment configuration** (`COMMISSION_RATE_PERCENT`), not a
+  constant here — it is the term of a private arrangement. Unset means zero,
+  shown as zero.
+- The report does not partition by currency; an operator checks an MXN/GBP mix
+  by eye.
+- It is paid out of band; the report is an export, not a payout rail.
 
-### Tax capture
+## Data
 
-- Both the subscription checkout and the student-payment checkout capture
-  the payer's billing country/address regardless of whether tax is actually
-  computed. A separate kill-switch (default off) turns on automatic tax
-  calculation later with no need to backfill this already-captured data —
-  that switch is a legal/business decision (VAT/GST registration), not a
-  code change.
+- **TeacherSubscription** (one per teacher) — `plan`, `status`, `comped`,
+  `lockedPriceMinorUnits`, `currency`, `stripeCustomerId`,
+  `stripeSubscriptionId`, `trialEndsAt`, `currentPeriodEnd`,
+  `cancelAtPeriodEnd`, `canceledAt`, captured billing country and address.
+- **SubscriptionInvoice** (one per cycle) — period, amount, fee, `net`
+  (stored; the commission base), currency, status (`paid` / `open` /
+  `failed` / `void`), `provider` (`stripe` / `manual`), manual payment
+  reference.
+- **FoundingCohort** — headcount and optional cutoff/cap overrides.
+- **Teacher.referralSource** — ambassador attribution.
 
-## User Flow
+## Edge cases
 
-**New teacher onboarding:**
-
-1. Teacher signs up → subscription row created in `trialing`, 30-day
-   trial, full Pro, no card required.
-2. Teacher uses the product freely for 30 days.
-3. ~3 days before trial end, teacher is notified.
-4. Trial ends: if not subscribed, teacher automatically drops to Free (no
-   action required, no lockout — just reduced caps/features going forward).
-
-**Upgrading to Pro:**
-
-1. Teacher (on Free, trialing, or past_due) opens the billing/upgrade
-   screen and picks Monthly, Annual, or (if the cohort is still open)
-   Founding.
-2. Redirected to Stripe's hosted checkout for the platform's own Stripe
-   Billing product.
-3. On successful payment, the subscription activates (`active`), with the
-   plan's price locked onto the subscription row (permanently, for
-   Founding).
-4. Teacher can manage payment method / cancel any time via the Stripe
-   Customer Portal.
-
-**Payment fails on renewal:**
-
-1. Subscription flips to `past_due`; teacher keeps full Pro and sees a
-   persistent "update payment" banner.
-2. If fixed within 7 days, the next successful charge returns the
-   subscription to `active`.
-3. If not fixed within 7 days, the subscription drops to `free`.
-
-**Teacher cancels:**
-
-1. Teacher cancels via the Customer Portal.
-2. Pro access continues through the already-paid period; at period end the
-   subscription becomes `free`. No partial refund/proration.
-
-**Admin comps an account:**
-
-1. Admin (finance role) uses the comp tool, choosing a plan label
-   (defaults to founding) and an optional reason.
-2. Subscription is activated with `comped: true` — always resolves to full
-   Pro regardless of any future billing event; the action is logged to the
-   audit trail.
-
-## Data Used
-
-- **TeacherSubscription** (one per teacher): plan, status, `comped` flag,
-  `lockedPriceMinorUnits`, currency, Stripe customer/subscription ids,
-  `trialEndsAt`, `currentPeriodEnd`.
-- **SubscriptionInvoice** (one per billing cycle): rail-agnostic
-  (`stripe`/`wise`), amount, fee, **net** (persisted explicitly — this is the
-  ambassador-commission base), status, period start/end.
-- **FoundingCohort**: single source-of-truth row tracking headcount and the
-  cohort's cutoff/cap.
-- **Teacher.referralSource**: nullable ambassador attribution stamped at
-  signup.
-- **Entitlements** (computed, not stored): plan, effective status, `isPro`,
-  `isTrialing`, `isPastDue`, `comped`, the Pro-feature booleans and the
-  student/template limits — always derived live from the subscription row +
-  current clock via the one resolver, `entitlementsFor()` in
-  `packages/shared/src/subscriptions-entitlements.ts`, never read as raw DB
-  fields elsewhere. There is no commission rate: nothing is withheld at the
-  charge. Plans, caps and capabilities are code-defined constants changed
-  through a pull request, deliberately not a database-editable matrix. The
-  server gate is authoritative; a control that shows a Pro lock before the
-  teacher clicks is UX on top of it, never instead of it.
-
-## Edge Cases
-
-- **A teacher's trial ends at 2am while the nightly sweep hasn't run yet.**
-  The effective-status computation resolves them to Free immediately based
-  on the clock, regardless of whether the sweep has physically updated the
-  database row — so no window exists where a stale row grants extra Pro
-  time.
-- **A Founding subscriber's plan lapses (cancels or fails through grace).**
-  Their marketplace commission rate reverts to the Free rate, not the locked
-  Founding rate — 0% commission is a _currently-Pro_ founding perk, not a
-  permanent grant tied to having once subscribed as Founding.
-- **The founding cohort closes mid-checkout** (50th teacher activates, or the
-  90-day window passes) while another teacher is on the pricing page. The
-  next checkout attempt for Founding should be refused; confirm the exact UI
-  behavior (see Open Questions).
-- **A pre-D-99 MXN subscriber renews after the platform's canonical currency
-  switched to GBP.** Their renewal/upgrade math continues to use their own
-  stored MXN price/currency — never silently re-priced into GBP.
-- **An ambassador's referred cohort spans both currencies** (some invoices
-  MXN, some GBP). The ambassador commission report
-  (`apps/web/src/lib/subscriptions/commission.ts`) does not partition by
-  currency, so the admin running it checks the mix by eye.
-- **A comped teacher is also billed** (shouldn't happen, but if a Stripe event
-  arrived for a comped account) — comped teachers are treated as Pro
-  regardless of `status`, so a stray billing event doesn't change their
-  actual entitlements even if it updates other fields.
-- **Downgrading to Free while over both caps simultaneously** (e.g. 6
-  students and 3 templates on a lapsed Pro account) — both stay fully
-  read-only-over-cap; the teacher can't add either until re-upgrading.
-- **A referred teacher upgrades, then requests a refund on their first
-  invoice.** The commission report excludes that invoice from the
-  ambassador's payable total (clawback).
-
-## Error States
-
-- **Upgrade checkout attempted for Founding after the cohort has closed** —
-  should be refused/hidden; exact user-facing message not confirmed in this
-  pass (see Open Questions).
-- **Stripe Billing webhook fails/misfires** — the effective-status
-  computation's clock-based downgrade is the safety net that prevents a
-  missed webhook from granting indefinite Pro access; it does not, by
-  itself, ever _upgrade_ a teacher, so a missed "payment succeeded" webhook
-  could leave a teacher wrongly on `past_due`/`free` until reconciled.
-- **Admin comp/manual-paid actions require the `finance` admin role** —
-  attempting either without it is rejected before any subscription row is
-  touched.
+- **A missed "payment succeeded" webhook** can leave a teacher on `past_due` or
+  `free` until reconciled; the clock-based downgrade never grants Pro on its
+  own.
+- **A stray billing event for a comped teacher** may update fields but cannot
+  change her entitlements.
 
 ## Permissions
 
-| Action                            | Teacher (own) | Teacher (other) | Student | Admin (finance role) | Admin (other roles)    |
-| --------------------------------- | ------------- | --------------- | ------- | -------------------- | ---------------------- |
-| View own plan/entitlements        | Yes           | No              | N/A     | Yes (any teacher)    | Read-only, unconfirmed |
-| Subscribe / change plan           | Yes           | No              | N/A     | No                   | No                     |
-| Cancel own subscription           | Yes           | No              | N/A     | No                   | No                     |
-| Comp a subscription               | No            | No              | No      | Yes                  | No                     |
-| Mark a cycle paid manually (Wise) | No            | No              | No      | Yes                  | No                     |
-| View commission report            | No            | No              | No      | Yes (implied)        | Unconfirmed            |
-
-## Open Questions
-
-- **Exact UI behavior when the Founding cohort closes mid-session** (does the
-  option simply disappear, or does an in-flight checkout get rejected with a
-  specific message?) — not confirmed from the code reviewed.
-- **Which admin roles beyond `finance` can view (not act on) subscription
-  data** — the comp/manual-paid actions explicitly require `finance`; broader
-  read access wasn't traced in this pass.
-- ~~**Is there a self-serve annual-to-monthly (or vice versa) plan-switch
-  flow**~~ — **answered, and there is one now.** It was neither: the
-  in-product grid is hidden for a paid subscriber (starting a second checkout
-  would double-bill her, so `startBillingCheckout` refuses outright), and the
-  portal had `subscription_update` disabled, so switching was reachable nowhere
-  at all. The portal configuration this repo now declares enables it between
-  **Monthly and Annual only**: an upgrade prorates immediately, and a downgrade
-  is scheduled for the end of the period she has already paid for
-  (`decreasing_item_amount`).
-- ~~**Founding plan availability for an existing Monthly/Annual subscriber**~~ —
-  **answered: never, by design.** Founding is reachable only through checkout,
-  which is where `getFoundingCohortState` gates it on the cap and the cutoff,
-  and it is deliberately excluded from the portal's switchable prices. All
-  three plans are prices on one Stripe product, so naming that product would
-  have let any subscriber move herself onto the £5.99 price past the cap, past
-  the cutoff, and permanently — founding is price-locked for the life of the
-  subscription. The exclusion is enforced in three places because Stripe's half
-  of it cannot be read back: the declaration lists the two prices individually,
-  a unit test asserts the founding id appears nowhere in the configuration, and
-  the billing webhook logs an error if a subscription becomes founding while
-  the cohort is shut. (The window closed on 2026-08-25 — launch plus
-  `FOUNDING_WINDOW_DAYS` — so the plan no longer renders at checkout either.)
+| Action                                                        | Teacher (own) | Admin (finance) |
+| ------------------------------------------------------------- | ------------- | --------------- |
+| View plan and entitlements                                    | Yes           | Yes             |
+| Subscribe, switch, cancel                                     | Yes (portal)  | No              |
+| Comp a subscription                                           | No            | Yes             |
+| Mark a cycle paid manually                                    | No            | Yes             |
+| View `/admin/subscriptions` (including the commission report) | No            | Yes             |

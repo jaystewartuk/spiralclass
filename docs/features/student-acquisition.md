@@ -1,7 +1,7 @@
 # Student acquisition
 
-**Consigue alumnos** (Get students) is where a teacher goes to get her next
-student. It is a command centre, not a marketing dashboard: it answers one
+**Get students** (`/dashboard/get-students`) is where a teacher goes to get her
+next student. It is a command centre, not a marketing dashboard: it answers one
 question, what should I do today, and everything else on the screen is arranged
 under that answer.
 
@@ -19,9 +19,10 @@ Decision of record: [D-125](../decisions/D-125.md).
 - **Last 30 days** — visits, enquiries and new students, small and at the
   bottom, because this screen is for doing rather than reading.
 
-Three destinations sit one level down: **Comunidades** (where she can reach
-learners), **Resultados** (what is actually working), and **Tu perfil** (the four
-things the system cannot infer).
+Three destinations sit one level down: **Communities** (where she can reach
+learners), **Results** (what is actually working), and her **acquisition
+profile** (the four things the system cannot infer). The old
+`/dashboard/share-groups` path redirects to Communities.
 
 ---
 
@@ -32,17 +33,18 @@ The plan is decided by a pure function, `buildWeeklyPlan` in
 its inputs and unit-tested rather than prompted. It reads:
 
 - **Community results** — visits, enquiries and students attributed to each
-  community over the last 120 days.
+  community over the last 120 days (`lib/marketing/plan.ts`).
 - **Recency** — when she last posted to each community, with a five-day cooldown
   per community and a three-week cooldown per content kind within a community.
 - **What she has** — a published testimonial, an active package, real
   availability, a photo, at least one student. These are prerequisites, not
   preferences: a testimonial post is never planned for a teacher with no
   testimonial, because the alternative is a model inventing a student quote.
-- **Her time** — the plan is sized to the minutes per week she stated, at about
-  twelve minutes per action, between two and seven actions.
-- **Referral moments** — a student whose lesson completed recently and who has
-  not been asked in ninety days.
+- **Her time** — the plan is sized to the minutes per week she stated, at
+  `MINUTES_PER_ACTION` per action, between `MIN_ACTIONS_PER_WEEK` and
+  `MAX_ACTIONS_PER_WEEK` actions.
+- **Referral moments** — a student with a lesson completed in the last three
+  weeks who has not been asked in ninety days (`referralCandidatesFor`).
 
 Ordering is deliberate: the highest-confidence action comes first, so a teacher
 who only ever does the top item is still doing the best available thing. A
@@ -59,12 +61,13 @@ acquires students in places where an advertisement is unwelcome.
 
 A community is a place a teacher can reach learners: a Facebook group, a Reddit
 community, a WhatsApp circle, an Instagram audience, somewhere local. It carries
-a **promotion policy** — open, limited, prohibited, or unconfirmed — which is
-what the community's own rules say, as she recorded them.
+a **promotion policy** — `open`, `limited`, `prohibited` or `unknown` (shown as
+unconfirmed; the default) — which is what the community's own rules say, as she
+recorded them.
 
 This field is the enforcement point of the whole system. A promotional action is
-never planned into a community that is not open or limited, and **unconfirmed is
-treated as not allowed**: a teacher who has not told us a community's rules gets
+never planned into a community that is not `open` or `limited`, and **`unknown`
+is treated as not allowed**: a teacher who has not told us a community's rules gets
 educational content there, never an offer. Silence is not consent.
 
 Reddit communities default to prohibited, because Reddit's own culture treats
@@ -86,7 +89,7 @@ split by what the app can honestly enforce:
   is not a promotion.
 - **Links** — an explicit answer that overrides the platform's own convention
   in both directions. A `no` stops a tracked code being minted at all; a `yes`
-  still cannot open a community whose policy is prohibited or unconfirmed.
+  still cannot open a community whose policy is `prohibited` or `unknown`.
 - **Anything else the rules say** — free text, which rides into the generation
   prompt as quoted rules and is **not enforceable**. The UI says so in as many
   words, because a teacher who believes otherwise will trust it with something
@@ -193,12 +196,12 @@ The results screen shows the funnel by channel, by community and by content type
 over thirty or ninety days, then a short list of findings. Each finding is
 labelled:
 
-- **Dato / Observed** — a raw fact, or an honest statement that there is not yet
+- **Observed** — a raw fact, or an honest statement that there is not yet
   enough data.
-- **Patrón / Pattern** — a comparison that cleared both a sample-size floor
-  (twenty visits on each side) and an effect-size floor (a difference of at least
-  one and a half times).
-- **Sugerencia / Suggestion** — an action implied by the findings above it.
+- **Pattern** — a comparison that cleared both a sample-size floor
+  (`MIN_VISITS_FOR_COMPARISON` visits on each side) and an effect-size floor
+  (`MIN_EFFECT_RATIO`), both in `packages/shared/src/marketing/insights.ts`.
+- **Suggestion** — an action implied by the findings above it.
 
 Nothing here is generated. Every number is a count and every finding is
 arithmetic, so a language model never gets to conclude that a channel is working.

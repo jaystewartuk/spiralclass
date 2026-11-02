@@ -1,49 +1,64 @@
 # Deployment and operations
 
-Operator runbooks for releasing and running SpiralClass. These are procedures
+Operator runbooks for releasing and running SpiralClass. They are procedures
 followed with production credentials in hand, which is why they are the one
 place in `docs/` that keeps UPPERCASE filenames.
 
-For how a change gets _to_ a release, see
+How a change gets _to_ a release is
 [development/workflow.md](../development/workflow.md).
 
 ## Releasing
 
-- **[Release and staging](RELEASE_AND_STAGING.md)** — the normal release path in
-  full: environments, rollback, maintenance windows, one-time setup.
-- **[Running this repo from the laptop](LOCAL_AUTOMATION.md)** — the deploy and
-  maintenance commands themselves, and what runs on a runner instead.
-- **[Branch protection](BRANCH_PROTECTION.md)** — what `main` requires and how
-  to re-apply it. The rule is a settings-page object, so this document and
-  `scripts/setup-branch-protection.sh` are its version control.
+| File                                             | What it is for                                                                                                                                                      |
+| ------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [RELEASE_AND_STAGING.md](RELEASE_AND_STAGING.md) | Approving a release, promoting and deploying by hand, rollback, Cloud Run, moving the domain, maintenance windows, the unscheduled maintenance jobs, one-time setup |
+| [BRANCH_PROTECTION.md](BRANCH_PROTECTION.md)     | What `main` and `production` require, `PROMOTE_TOKEN`, and how to re-apply it all with `scripts/setup-branch-protection.sh`                                         |
 
 ## When something is wrong
 
-- **[Incident response](INCIDENT_RESPONSE.md)** — security and operational
-  response, checklist-shaped.
-- **[Database backup and restore](DB_BACKUP_RESTORE.md)** — production recovery,
-  Neon PITR and pre-migration checkpoint branches.
+| File                                         | What it is for                                                                         |
+| -------------------------------------------- | -------------------------------------------------------------------------------------- |
+| [INCIDENT_RESPONSE.md](INCIDENT_RESPONSE.md) | Security and operational response, checklist-shaped, including secret rotation         |
+| [DB_BACKUP_RESTORE.md](DB_BACKUP_RESTORE.md) | Neon PITR, pre-migration checkpoint branches, the restore procedure, the off-Neon dump |
 
-## Platform
+## Platform and cost
 
-- **[The LiveKit box on Compute Engine](../../infra/gcp-livekit/README.md)** —
-  the self-hosted video server production uses today
-  ([D-16](../decisions/D-16.md)).
-- **[Cloud Run](../../infra/gcp/README.md)** — the production web target's
-  one-time setup ([D-184](../decisions/D-184.md)).
-- **[Oracle LiveKit production](ORACLE_LIVEKIT_PRODUCTION.md)** and
-  **[Oracle box rebuild](ORACLE_BOX_REBUILD.md)** — the former video box,
-  destroyed on 2026-09-19 ([D-16](../decisions/D-16.md)). Kept as the record
-  of the Oracle way back, not a description of anything running.
-- **[Cost playbook](COST_PLAYBOOK.md)** — what each hosted dependency costs at
-  this scale, and the levers already pulled.
-- **[Docs site](DOCS_SITE.md)** — the MkDocs build behind `pnpm docs:serve`.
+| File                                                               | What it is for                                                                    |
+| ------------------------------------------------------------------ | --------------------------------------------------------------------------------- |
+| [`infra/gcp/README.md`](../../infra/gcp/README.md)                 | The Cloud Run production target's one-time setup ([D-184](../decisions/D-184.md)) |
+| [`infra/gcp-livekit/README.md`](../../infra/gcp-livekit/README.md) | The LiveKit video server production uses today ([D-16](../decisions/D-16.md))     |
+| [COST_PLAYBOOK.md](COST_PLAYBOOK.md)                               | What each hosted dependency costs at this scale, and the order to start paying in |
 
-> **The secrets-rotation runbook is not in this repository.** It named every
-> credential, where it lives and what each one reaches — no values, but a map
-> of the estate, which is useful to an attacker and to no reader here. It is
-> kept privately; [`../security.md`](../security.md) describes the split
-> between the committed non-secret configuration tier and everything else.
+## Scripts in this folder
+
+| Script                                               | What it does                                                                                                              |
+| ---------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| [`livekit-activity.sh`](livekit-activity.sh)         | `pnpm livekit:activity` — live room and participant table from production's LiveKit server, via the `lk` CLI              |
+| [`livekit-activity-ink.sh`](livekit-activity-ink.sh) | `pnpm livekit:activity:ink` — the same, as the Ink dashboard in `packages/livekit-activity-cli`                           |
+| [`livekit-credentials.sh`](livekit-credentials.sh)   | Sourced by the two above: exports production's LiveKit URL and key pair from Infisical without writing the secret to disk |
+
+## The former Oracle box
+
+The Oracle A1 box that ran LiveKit and preview was destroyed on 2026-09-19 and
+could not be relaunched ([D-16](../decisions/D-16.md)). Nothing described in
+these files is running.
+[`infra/oracle-box/`](../../infra/oracle-box/README.md) is the unapplied module
+for it ([D-184](../decisions/D-184.md)); preview's planned return is a Cloud Run
+service instead ([D-199](../decisions/D-199.md)).
+
+- [ORACLE_LIVEKIT_PRODUCTION.md](ORACLE_LIVEKIT_PRODUCTION.md) — the box as it
+  ran, and what building it by hand taught (the two firewall layers).
+- [ORACLE_BOX_REBUILD.md](ORACLE_BOX_REBUILD.md) — the hand rebuild procedure,
+  observed from the running box.
+- `oracle-*.sh` — the launch, provisioning, cloud-init and cleanup scripts those
+  two runbooks call.
+
+> [!NOTE]
+> **The secrets-rotation runbook is not in this repository.** It mapped every
+> credential, where it lives and what it reaches — no values, but a map of the
+> estate, useful to an attacker and to no reader here. It is kept privately;
+> [`../security.md`](../security.md) describes the split between the committed
+> non-secret configuration and everything else.
 
 ## Related
 
