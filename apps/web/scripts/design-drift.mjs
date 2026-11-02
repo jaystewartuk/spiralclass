@@ -1,5 +1,5 @@
 // Design-system drift scanner — the measuring instrument for the design
-// re-architecture (D-139).
+// re-architecture (D-140).
 //
 // The token DEFINITION layer in this repo is disciplined: one hex source
 // (packages/shared/src/tokens.ts), an HSL mirror in globals.css guarded by

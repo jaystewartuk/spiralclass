@@ -364,9 +364,9 @@ export async function prepareActivity(input: {
         teacherId: input.teacherId,
         isPro: input.isPro,
         teachingLanguage: context.subject,
-        // The D-123 angle axis, mapped from the richer content kind. A tip is
+        // The D-125 angle axis, mapped from the richer content kind. A tip is
         // a tip; anything promotional is a promo card; social proof reads as
-        // motivation. One axis stays one axis (D-123) rather than growing a
+        // motivation. One axis stays one axis (D-125) rather than growing a
         // parallel enum here.
         angle: imageAngleFor(kind),
         topic:

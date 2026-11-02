@@ -77,10 +77,10 @@ describe("finalizeSignIn — superuser routing", () => {
     );
   });
 
-  it("bounces a non-superuser with no teacher/student row to no-account on the sign-in default (D-56)", async () => {
+  it("bounces a non-superuser with no teacher/student row to no-account on the sign-in default (D-40)", async () => {
     // Under better-auth (D-40) every verified email has a User row — there's
     // no more "verified but no account" state at the identity layer. But
-    // D-56 only lets an explicit sign-up intent provision a Teacher for a
+    // D-40 only lets an explicit sign-up intent provision a Teacher for a
     // fresh identity — the sign-in default refuses instead of silently
     // becoming a new signup.
     expect(await finalizeSignIn(null, { id: "u-3", email: "nadie@example.com" })).toBe(

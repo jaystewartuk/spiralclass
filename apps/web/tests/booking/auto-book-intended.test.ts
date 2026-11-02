@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 // autoBookIntendedSlot is the pay-at-reservation completion step: once a
 // payment lands (payment.paid), it turns the slot the student chose at checkout
-// into a booking. Since D-111 that covers multi-class packages too ("pick your
+// into a booking. That covers multi-class packages too ("pick your
 // first class"), which is what the idempotency tests below are really about —
 // the cheap balance check is exact only for a 1-class package. These tests pin
 // the guards (no intent, not-active, both idempotency paths) and the graceful
@@ -80,7 +80,7 @@ describe("autoBookIntendedSlot", () => {
     expect(bookPackageSlot).not.toHaveBeenCalled();
   });
 
-  // The regression D-111 named: on a 4-class package the balance check reads
+  // The regression named when first-class picking reached packages: on a 4-class package the balance check reads
   // 1 >= 4 → false after the first booking, so a re-delivered payment.paid
   // would fall through to the booking core without this second guard.
   it("is idempotent for a package: a re-delivered event finds the intended slot booked", async () => {

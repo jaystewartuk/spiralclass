@@ -1,5 +1,5 @@
 import { type StringKey } from "@spiralclass/shared";
-// Focus-tag seed packs — docs/features/classes-lesson-content.md, D-20, narrowed to
+// Focus-tag seed packs — docs/features/classes-lesson-content.md, D-17, narrowed to
 // language-first by D-72.
 //
 // The single source of truth for the "what to work on" defaults a teacher starts
@@ -241,7 +241,7 @@ function packKeyFor(targetLanguage: string | null | undefined): string {
 
 // Resolve the language a teacher teaches (possibly null/unknown) to its ordered
 // seed pack. Unknown or unset → the neutral language pack, so there is always a
-// usable default. Replaces D-20's focusTagSeedFor(discipline).
+// usable default. Replaces D-17's focusTagSeedFor(discipline).
 export function focusTagSeedFor(targetLanguage: string | null | undefined): {
   pack: string;
   seeds: FocusTagSeed[];

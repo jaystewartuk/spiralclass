@@ -109,7 +109,7 @@ export type RecognizerOptions = {
   lang: string;
   onFinal: (text: string) => void;
   // What has been heard of the utterance still being spoken, each time the
-  // browser hears more (D-198). Optional: a caller that only wants finals
+  // browser hears more (D-185). Optional: a caller that only wants finals
   // passes nothing.
   onPartial?: (heard: string) => void;
   // Called once, when the recogniser gives up for good.
@@ -191,7 +191,7 @@ export class TrackRecognizer {
     recognition.continuous = true;
     // Partials are shown as they are heard, untranslated, so a listener is
     // never left watching someone talk with no subtitle while a phrase runs
-    // on (D-198). Only finals are translated and kept.
+    // on (D-185). Only finals are translated and kept.
     recognition.interimResults = true;
     const local = this.local;
     if (local) recognition.processLocally = true;

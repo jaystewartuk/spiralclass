@@ -9,8 +9,8 @@ import { Prisma } from "@prisma/client";
 
 // /admin/teachers — pins the QUERY SHAPE, against the schema itself.
 //
-// The page 500'd in production from D-113 until 2026-09-06 on a `where` that
-// filtered `teacher.wiseApiProfileId`, a column D-113 had moved onto the
+// The page 500'd in production from 2026-08-23 until 2026-09-06 on a `where` that
+// filtered `teacher.wiseApiProfileId`, a column the 2026-08-23 change had moved onto the
 // payout INSTRUMENT, and its `select` still asked the instrument for
 // `schemeId`/`details`, which D-145 dropped. Both are runtime-only failures:
 // Prisma's `Subset` types accept an unknown key inside a spread `where`

@@ -1,7 +1,7 @@
 # Docs site (docs.spiralclass.com)
 
 > [!NOTE]
-> **2026-08-29 (D-139): `infra/cloudflare` is deleted.** It was never applied
+> **2026-08-29 (D-164): `infra/cloudflare` is deleted.** It was never applied
 > and had no state, and a first `apply` would have created a _second_ Access
 > application on the same hostname rather than adopting the hand-made one.
 > This document is now the only description of that gate.
@@ -59,7 +59,7 @@ thing this path needs that Pages gave for free.
 > was done.
 
 **There is no Terraform for this any more.** `infra/cloudflare/` was deleted
-on 2026-08-29 ([D-139](../decisions/D-139.md)) precisely because applying it
+on 2026-08-29 ([D-164](../decisions/D-164.md)) precisely because applying it
 would have created a _second_ Access application on the same hostname instead
 of adopting the hand-made one, and its single `domain` variable could not
 express the `self_hosted_domains` list that protects both hostnames.

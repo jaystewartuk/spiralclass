@@ -12,7 +12,7 @@ describe("computeSpeakingTime", () => {
     expect(computeSpeakingTime([{ durationMs: null }], [])).toBeNull();
   });
 
-  // D-189: a transcript the browsers wrote has no LessonAudio row, so the last
+  // D-185: a transcript the browsers wrote has no LessonAudio row, so the last
   // line's end anchors the lesson's length instead.
   it("anchors the total on the last utterance when there is no audio row", () => {
     const summary = computeSpeakingTime(

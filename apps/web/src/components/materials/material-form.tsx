@@ -200,7 +200,7 @@ export function MaterialForm({
     source: ClassContentSource;
   } | null>(null);
   // "Edit with AI" instruction — the free-text change the teacher asks for. The
-  // raw-Markdown textarea is gone (D-73): the body renders read-only and every
+  // raw-Markdown textarea is gone: the body renders read-only and every
   // change to it goes through the AI refine control below (or a full regenerate
   // / version-history restore). This kills hand-typed Markdown syntax errors.
   const [instruction, setInstruction] = useState("");
@@ -511,7 +511,7 @@ export function MaterialForm({
   }
 
   // The body, as section cards the teacher can restructure directly — the
-  // raw-Markdown textarea is gone (D-73) and, as of MATERIAL_EDITING phase 2,
+  // raw-Markdown textarea is gone and, as of MATERIAL_EDITING phase 2,
   // the read-only preview it left behind is an editor. Each card is rendered by
   // the same MaterialDocument renderer the student sees, so this IS the preview;
   // move/duplicate/delete/add and per-section AI refine ride on top of it, all
@@ -873,7 +873,7 @@ export function MaterialForm({
           )}
 
           {aiEnabled && body.trim() ? (
-            // Read-only rendered body + "Edit with AI" (D-73), collapsed behind
+            // Read-only rendered body + "Edit with AI", collapsed behind
             // a disclosure so Save is reachable without scrolling past a long
             // body. The body posts via the hidden field kept OUTSIDE the
             // collapsible so collapsing never drops it from the save form.

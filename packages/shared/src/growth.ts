@@ -1,6 +1,6 @@
 // The "Crecer" / "Grow" checklist — the in-app teacher-amplification guide.
 //
-// D-24 / the student-acquisition design: SpiralClass does not run a
+// D-125 / the student-acquisition design: SpiralClass does not run a
 // marketplace; instead it makes the traffic and word-of-mouth a teacher already
 // drives convert and compound. This module is the ROI-ordered playbook that ties
 // the already-shipped acquisition features (profile, testimonials, the share
@@ -42,7 +42,7 @@ export type GrowthSignals = {
   // isConnectCountrySupported(teacher.country) || already linked, and only
   // once the platform itself has Stripe creds configured). false swaps the
   // payment step's "todo" copy to a Wise-only variant so a teacher outside
-  // the Stripe Connect circle (D-58) isn't told to "Connect Stripe" only to
+  // SUPPORTED_CONNECT_COUNTRIES (D-143) isn't told to "Connect Stripe" only to
   // hit the country-unsupported wall on the settings page. Optional so a
   // fixture that predates this field degrades to the pre-existing Stripe+Wise
   // copy rather than guessing wrong.
@@ -483,7 +483,7 @@ export function shareChannelLabel(channel: ShareChannel, locale: NavLocale): str
  * carrying the old slug are already posted in that group and will keep being
  * crawled for as long as the post lives. Matching on the id suffix means a
  * rename never orphans an already-shared link from the social preview attached
- * to it (D-123).
+ * to it (D-125).
  *
  * Returns null when the value isn't a slug we minted, so a hand-typed or
  * third-party `utm_content` resolves to "no group" rather than to an arbitrary

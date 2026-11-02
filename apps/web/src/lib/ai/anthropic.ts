@@ -21,7 +21,7 @@ import type { HomeworkAiReviewContent } from "@spiralclass/shared";
 const log = logger({ surface: "ai" });
 
 // In-house Claude integration for material compose (D-17, generalized by the
-// ClassContent/LibraryMaterial merge — D-69: one call path for both a single
+// ClassContent/LibraryMaterial merge: one call path for both a single
 // class's content and a standalone reusable material). Routed through the
 // PLATFORM Anthropic key only — never per-teacher, never entangled with the
 // Connect payout rail. The client is constructed lazily so the module imports

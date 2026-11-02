@@ -104,7 +104,7 @@ export async function saveTimezoneAction(
   // Required on web, where there is no such thing as a stale client — the
   // form blocks on it too, so reaching this is a hand-crafted POST. Mobile
   // enforces the same rule in its own screen rather than here, because its
-  // shipped builds can predate the field (D-112, and the schema comment).
+  // shipped builds can predate the field (D-72, and the schema comment).
   if (!parsed.data.targetLanguage) {
     return {
       error: t("web.onboarding.timezone.targetLanguageRequired"),
@@ -141,7 +141,7 @@ export async function saveTimezoneAction(
       // Only overwrite the currency when sent, and only before
       // onboarding completes in practice (the stepper never revisits this
       // page afterward) — a self-service change post-onboarding is out of
-      // scope (D-64), same as country.
+      // scope (D-153), same as country.
       ...(parsed.data.pricingCurrency ? { pricingCurrency: parsed.data.pricingCurrency } : {}),
       // What she teaches (D-72). Same only-when-sent posture as the two above.
       ...(parsed.data.targetLanguage ? { targetLanguage: parsed.data.targetLanguage } : {}),
@@ -167,10 +167,10 @@ export async function saveTimezoneAction(
   }
 
   // Seed the focus-tag pack for the chosen language NOW, at the first step of
-  // onboarding, which is the whole point of asking here (D-112). The seeder is
+  // onboarding, which is the whole point of asking here (D-72). The seeder is
   // lazy — `getTeacherFocusTags` self-seeds on the first empty read — so
   // whichever value is stored when the focus picker first renders is the pack
-  // she gets, permanently: D-20 seeding is additive, so a language set after
+  // she gets, permanently: D-17 seeding is additive, so a language set after
   // that read stacks its pack on top of the generic one instead of replacing
   // it. Seeding here means the read never happens with a null language.
   // Best-effort and idempotent, exactly as in `saveTargetLanguageAction`.
@@ -354,7 +354,7 @@ export async function saveTemplatesAction(
   // back to the Stripe price at checkout. We never store 0 to mean
   // "fallback" — that would make a free Wise checkout impossible to express.
   const wisePrices = formData.getAll("tpl_wise_price") as string[];
-  // The price for two people and its non-card price (D-188), major units like
+  // The price for two people and its non-card price (D-149), major units like
   // the rest. Empty = not sold for two / same price on every rail.
   const twoPrices = formData.getAll("tpl_two_price") as string[];
   const twoWisePrices = formData.getAll("tpl_two_wise_price") as string[];
@@ -362,7 +362,7 @@ export async function saveTemplatesAction(
   const keeps = formData.getAll("tpl_keep") as string[]; // "1" if the keep checkbox was checked
 
   // A teacher outside the Stripe Connect payout circle has no card rail at all
-  // (D-58), so there is no "Stripe price" for a Wise price to be a discount
+  // (D-143), so there is no "Stripe price" for a Wise price to be a discount
   // OFF. TemplatesForm already hides the whole split for her and shows a single
   // plain "Price" — but hiding a control is not the same as clearing its value,
   // and the hidden input kept resubmitting whatever `transferPriceMinorUnits` was
@@ -413,7 +413,7 @@ export async function saveTemplatesAction(
     return describeTemplateError(parsed.error, locale);
   }
 
-  // The teacher-wide suggestion for what two people pay (D-188). Only the
+  // The teacher-wide suggestion for what two people pay (D-149). Only the
   // settings screen renders the field; a submit without it (onboarding) leaves
   // the saved value alone rather than resetting it to the default.
   const rawPercent = formData.get("two_person_percent");
@@ -428,7 +428,7 @@ export async function saveTemplatesAction(
     };
   }
 
-  // Selling for two is Pro (D-149, D-188), gated like the template cap: only
+  // Selling for two is Pro (D-149), gated like the template cap: only
   // switching a NEW one on is refused, so a downgraded teacher keeps every
   // two-person price already on her booking page.
   const alreadyForTwo = await prisma.packageTemplate.findMany({

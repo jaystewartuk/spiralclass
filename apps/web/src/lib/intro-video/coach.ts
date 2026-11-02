@@ -2,7 +2,7 @@ import Anthropic from "@anthropic-ai/sdk";
 import type { IntroCoachFeedback } from "@spiralclass/shared";
 import { anthropicApiKey } from "@/lib/env";
 
-// AI intro-video coach (D-73, Layer 3). Reviews the transcript of a teacher's
+// AI intro-video coach (Layer 3). Reviews the transcript of a teacher's
 // own public intro video and returns a warm overall take plus concrete
 // strengths and actionable improvements — the differentiated payoff of owning
 // the video. Teacher-only, Pro-gated at the pipeline. Mirrors lesson-notes/

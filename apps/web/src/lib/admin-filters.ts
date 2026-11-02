@@ -40,7 +40,7 @@ export type TeacherFilterableRow = {
   availabilityTouchedAt: Date | string | null;
   stripeChargesEnabled: boolean;
   pricingCurrency: string;
-  // D-113: the payout rail is a relation now, not two teacher columns.
+  // D-145: the payout rail is a relation now, not two teacher columns.
   payoutInstruments: readonly InstrumentReadiness[];
 };
 

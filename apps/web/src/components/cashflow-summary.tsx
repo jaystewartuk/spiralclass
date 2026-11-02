@@ -9,7 +9,8 @@ import type { TFunction } from "@/lib/i18n-translate";
 import type { CashFlow, CashFlowSummary, MonthEarnings } from "@/lib/cashflow";
 
 /*
- * The teacher's earnings, on the dashboard and the Payments page (D-191).
+ * The teacher's earnings, on the dashboard and the Payments page. The rules
+ * are in docs/features/payments.md.
  *
  * WHAT THESE ANSWER, in the order a teacher asks:
  *
@@ -25,8 +26,7 @@ import type { CashFlow, CashFlowSummary, MonthEarnings } from "@/lib/cashflow";
  * revenue average under a label banking apps use for "cash minus the bills you
  * have coming" — and we know neither her balance nor her bills. Teachers read
  * it as the name of the money box, not as an answer; the question they asked
- * was "how much did I close the month with", which it never showed. D-191 has
- * the research and the reasoning.
+ * was "how much did I close the month with", which it never showed.
  *
  * Both surfaces take the whole `CashFlow`, because money is per currency. ONE
  * currency is the case to optimize for — every teacher today — so a
@@ -199,7 +199,7 @@ function Row({ term, detail, value }: { term: string; detail?: string; value: st
 /**
  * "Your earnings": this month, last month, paid in advance — the same three
  * answers as the dashboard tile, with room to say what "paid in advance" means
- * and what the amounts are (what students paid; D-152 on Stripe's fee).
+ * and what the amounts are (what students paid; D-143 on Stripe's fee).
  */
 export async function EarningsSummary({ cashFlow }: { cashFlow: CashFlow }) {
   const [t, locale] = await Promise.all([getT(), getPreferredLocale()]);

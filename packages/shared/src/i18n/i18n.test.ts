@@ -355,7 +355,7 @@ describe("no user-facing copy carries the pre-D-138 product name", () => {
   });
 });
 
-describe("the card fee is disclosed, and attributed to Stripe (D-152)", () => {
+describe("the card fee is disclosed, and attributed to Stripe (D-143)", () => {
   // D-143 made the TEACHER the merchant of record: a card charge settles on her
   // own connected account and Stripe bills its processing fee there, where the
   // platform never sees it. Two failure modes follow, and this guards both.

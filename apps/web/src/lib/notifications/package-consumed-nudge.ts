@@ -13,7 +13,7 @@ import { isCategoryEnabled, type NotificationPrefs } from "./preferences";
 //     personally — the highest-converting channel this product has.
 //
 // The product's whole revenue model is "buy N classes, use them, buy again"
-// (docs/decisions/D-03.md); this sweep is the automated half of that loop.
+// (docs/features/packages.md); this sweep is the automated half of that loop.
 //
 // Dedup is one nudge per package, ever, keyed off prior notification rows'
 // metadata.packageId — same mechanism as the expiry nudge. The teacher row

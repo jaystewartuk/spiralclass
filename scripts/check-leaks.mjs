@@ -90,7 +90,7 @@ const SCAN_EXTENSIONS = [
   ".sh",
   ".example",
   ".tfvars",
-  // config/env/*.env is the committed non-secret tier (D-85). It is the single
+  // config/env/*.env is the committed non-secret tier (D-70). It is the single
   // likeliest place for a real credential to be pasted by mistake — it already
   // looks like an env file and it is already committed — and until 2026-09 the
   // scanner did not look at it at all.

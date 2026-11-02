@@ -14,7 +14,7 @@ import {
 } from "@/lib/transcription/browser-transcript";
 
 // POST /api/captions/transcript — keep one recognised caption line as part of
-// the class's transcript for lesson insights (D-189). The browser that
+// the class's transcript for lesson insights (D-185). The browser that
 // recognised a finished utterance (its own speaker's, or the other person's
 // when their device cannot — D-185) sends the source text here, and the
 // server appends it to the booking's LessonTranscript.

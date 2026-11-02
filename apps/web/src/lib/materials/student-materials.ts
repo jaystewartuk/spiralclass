@@ -59,7 +59,7 @@ export type StudentMaterialItem = {
   // never the whole body. Null for a file/link row.
   bodyHead: string | null;
   attachmentKind: StudentMaterialKind;
-  // Where the material lives: "class" = private to this booking (D-69
+  // Where the material lives: "class" = private to this booking (a
   // booking-scoped row), "library" = a reusable item attached to or opened in
   // this class. Drives the badge, not the grouping.
   origin: "class" | "library";

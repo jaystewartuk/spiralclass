@@ -1,4 +1,4 @@
-// Intro-video shared model (D-73). Pure logic the web `<video>` card needs, so
+// Intro-video shared model. Pure logic the web `<video>` card needs, so
 // playback analytics come from one set of thresholds rather than each caller
 // inventing its own.
 //

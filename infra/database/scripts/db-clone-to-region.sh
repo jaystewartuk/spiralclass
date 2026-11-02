@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
-# D-49 layer 3 (data) — logical clone of one Postgres into another via
+# D-70 layer 3 (data) — logical clone of one Postgres into another via
 # pg_dump | pg_restore. The universal, vendor-neutral region-move path: works
 # between any two Postgres of compatible major version, any provider, any region
 # (Supabase↔Supabase, Supabase→Neon, →RDS, →self-hosted). NEVER a provider's
-# proprietary migration service (they re-lock you — D-49).
+# proprietary migration service (they re-lock you — D-70).
 #
 # Usage:
 #   SOURCE_DATABASE_URL=… TARGET_DATABASE_URL=… db-clone-to-region.sh [options]
@@ -42,7 +42,7 @@
 # SpiralClass's data scale that is minutes. For a near-zero-downtime cutover use
 # db-logical-replication.sh instead.
 #
-# Security (D-49): the dump is streamed source→target through a pipe, so no PII
+# Security (D-70): the dump is streamed source→target through a pipe, so no PII
 # snapshot is ever written to disk. Connection strings come from argv/env and are
 # never logged — only host/db are shown.
 set -euo pipefail
@@ -111,7 +111,7 @@ esac
 # --- Plan + confirm ----------------------------------------------------------
 cat >&2 <<PLAN
 
-  D-49 layer-3 clone
+  D-70 layer-3 clone
   ------------------
   mode     : ${MODE}
   schemas  : ${SCHEMAS}
@@ -146,7 +146,7 @@ if [ "$MODE" = "data-only" ]; then
   # `ALTER TABLE ... DISABLE TRIGGER ALL`, which is SUPERUSER-only for the
   # system RI (foreign-key) triggers — so it fails on every managed Postgres
   # (Neon/RDS/Supabase: "permission denied: ... is a system trigger"), breaking
-  # the any-two-Postgres portability D-49 is built on. Instead do the
+  # the any-two-Postgres portability D-70 is built on. Instead do the
   # owner-permitted equivalent: capture + DROP the FK constraints (which removes
   # their RI triggers), DISABLE TRIGGER USER (owner-allowed, unlike ALL), load,
   # then re-enable + re-ADD. CHECK / exclusion constraints stay enforced — real

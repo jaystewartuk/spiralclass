@@ -16,7 +16,7 @@ import { flushAnalytics, trackServerEvent } from "@/lib/analytics/posthog";
 type MarketplaceReadyPrisma = Pick<PrismaClient, "teacher">;
 
 // A teacher has a payout rail when Stripe can charge for her OR at least one
-// of her payout instruments is offerable at her own pricing currency (D-113).
+// of her payout instruments is offerable at her own pricing currency (D-145).
 //
 // The currency half matters rather than being belt-and-braces: SPEI only moves
 // MXN, so a teacher priced in GBP whose only instrument is SPEI cannot in fact

@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { canSee, type NavItem } from "@/lib/admin-nav-visibility";
 
-// D-55: tester/engineer rank BELOW every existing tier (support/finance/
+// D-25: tester/engineer rank BELOW every existing tier (support/finance/
 // superadmin) so they see nothing via rank — only a capability-gated item
 // should be visible to them. This is what makes them "narrow" roles rather
 // than a new rung on the money-adjacent ladder.

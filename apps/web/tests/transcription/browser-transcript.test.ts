@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-// The lesson transcript written by the participants' browsers (D-189):
+// The lesson transcript written by the participants' browsers (D-185):
 // consent decided server-side per class, one atomic append per line so two
 // browsers cannot lose each other's lines, and a finalise that runs once
 // whichever of the two completion signals (webhook, fallback job) arrives
@@ -61,7 +61,7 @@ describe("lessonTranscriptCaptureOk", () => {
     ).toBe(false);
   });
 
-  it("needs the buyer's confirmation for the second person of a class for two (D-188)", async () => {
+  it("needs the buyer's confirmation for the second person of a class for two (D-149)", async () => {
     const forTwo = { ...booking, package: { seats: 2, partnerConsentAt: null } };
     expect(await lessonTranscriptCaptureOk(db(consented) as never, forTwo)).toBe(false);
     const confirmed = { ...booking, package: { seats: 2, partnerConsentAt: new Date() } };

@@ -16,7 +16,7 @@ import { classCallRoom } from "@/lib/video/provider";
 import { listRoomParticipantAttributes } from "@/lib/video/room";
 
 // POST /api/captions/stt-token — live captions' phone-to-phone fallback
-// (D-185's addendum). When no browser in a class can recognise speech, each
+// (D-185). When no browser in a class can recognise speech, each
 // speaker's own browser streams its microphone to Deepgram, and this route
 // hands it what it needs to open that socket: a token from Deepgram's
 // /v1/auth/grant that only has to outlive the handshake, and the listen URL,

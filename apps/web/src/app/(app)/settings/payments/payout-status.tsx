@@ -19,7 +19,7 @@ import type { PayoutReadiness, RailState } from "./payout-readiness";
  *    plain text, which is both invisible to a screen reader as a state and
  *    unreadable to anyone who cannot separate the hues.
  *  - **Say the consequence.** No rail does not merely mean "not set up" — it
- *    means her public booking page is unlisted (D-104's `hasPayoutMethod`
+ *    means her public booking page is unlisted (isMarketplaceReady()'s `hasPayoutMethod`
  *    signal) and no student can reach a checkout at all. That is the single
  *    most important sentence on the screen and the page never said it.
  *  - **One call to action.** When she cannot be paid, the panel ends with the

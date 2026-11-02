@@ -6,22 +6,22 @@ Every scheduled class has a corresponding live video call, joined by the
 teacher and student from a per-booking room. Calls run on **self-hosted
 LiveKit** at `livekit.spiralclass.com`: one free Compute Engine `e2-micro`
 running `livekit-server` and Caddy, with no egress —
-[D-187](../decisions/D-187.md), [`infra/gcp-livekit/`](../../infra/gcp-livekit/README.md).
+[D-16](../decisions/D-16.md), [`infra/gcp-livekit/`](../../infra/gcp-livekit/README.md).
 It carries one class at a time comfortably; a second overlapping class is the
 trigger for a bigger machine. **Preview has no video** (see "Joining /
 connection" below). On top of the core call (mute/camera/screen-share/leave),
 the product layers three Pro-gated, legal/consent-sensitive capabilities:
 **recording** (teacher-controlled capture of the whole class, audio-only since
-D-135), **live captions** (real-time speech-to-text + translation of both
+D-16), **live captions** (real-time speech-to-text + translation of both
 people, run in their browsers — [D-185](../decisions/D-185.md)), and the
 **lesson transcript** (the caption lines, kept with the student's insights
 consent as the class's transcript for the lesson-insights pipeline —
-[D-189](../decisions/D-189.md)). **Captions and the transcript are on in
+[D-185](../decisions/D-185.md)). **Captions and the transcript are on in
 production; recording is off**: it needs egress, which the box cannot carry,
-so D-187 switched it off. The behaviour below is what each does when on.
+so D-16 switched it off. The behaviour below is what each does when on.
 
 Source: `apps/web/src/lib/video/*`, `apps/web/src/lib/captions/*`,
-`apps/web/src/lib/transcription/*`, `docs/decisions/D-187.md`,
+`apps/web/src/lib/transcription/*`, `docs/decisions/D-16.md`,
 `infra/gcp-livekit/README.md`.
 
 ## User Stories
@@ -77,7 +77,7 @@ Source: `apps/web/src/lib/video/*`, `apps/web/src/lib/captions/*`,
    session with a new token.
 
 **Preview has no video.** Preview holds no LiveKit key pair
-([D-94](../decisions/D-94.md)'s 2026-09-16 addendum), so `getVideoProvider()`
+([D-16](../decisions/D-16.md)'s 2026-09-16 addendum), so `getVideoProvider()`
 returns null there. Both call pages on preview show "Video calling isn't
 switched on yet", the student's class page shows no join button, and recording,
 live captions and post-call transcription cannot run there, whatever
@@ -224,7 +224,7 @@ That lasts until preview has a LiveKit server of its own.
       browser refuses the download without one); until then, and on any
       browser without a translator, lines go through the server.
 16. **Both directions are captioned, behind one switch.** The teacher's
-    toggle is the room's single switch (D-27, teacher-toggled) and covers
+    toggle is the room's single switch (D-185, teacher-toggled) and covers
     both people. The teacher's speech is translated into the student's
     language and needs no consent record; the **student's speech is captioned
     only with her recorded captions consent** (her guardian's, for a minor —
@@ -294,7 +294,7 @@ That lasts until preview has a LiveKit server of its own.
 
 ### The lesson transcript & lesson insights
 
-20. The transcript is the **caption text** (D-189): the browser that
+20. The transcript is the **caption text** (D-185): the browser that
     recognised a finished utterance also posts its source text, speaker and
     estimated duration to `POST /api/captions/transcript`. **The teacher's
     captions switch does not decide this** ([D-203](../decisions/D-203.md)):
@@ -307,7 +307,7 @@ That lasts until preview has a LiveKit server of its own.
     student's recorded insights consent** exists. For a **minor student**, the
     student's own consent is explicitly **not sufficient by itself** — a
     guardian's consent must be on file. A class for two also needs the buyer's
-    confirmation for the second person (D-188). The route re-checks this per
+    confirmation for the second person (D-149). The route re-checks this per
     line; without it, nothing of either speaker is kept.
 22. A missing teacher-student pairing record blocks keeping outright.
 23. Lines are appended atomically to one per-booking `LessonTranscript`
@@ -321,7 +321,7 @@ That lasts until preview has a LiveKit server of its own.
     as long as they are — also when no caption is on screen; the session is
     read when the call connects, so the notice appears then (D-203); tapping
     it says what is kept (caption text, no
-    audio) and links to the privacy notice (D-21). The transcript is kept while the teacher's
+    audio) and links to the privacy notice (D-22). The transcript is kept while the teacher's
     account is open and deleted with it.
 25. Not every call gets a transcript — only when the flag is on and the
     consent above is on file, whether or not captions are showing. A
@@ -494,14 +494,14 @@ That lasts until preview has a LiveKit server of its own.
 ## Open Questions
 
 - **Decision-doc numbering discrepancy**: the LiveKit self-host cutover +
-  legal-gate override (PR #670, 2026-07-21) is filed under **D-94**. A
+  legal-gate override (PR #670, 2026-07-21) is filed under **D-16**. A
   short-lived numbering collision meant some contemporaneous notes filed the
-  same change under a different number; D-94 is authoritative.
+  same change under a different number; D-16 is authoritative.
 - **Production LiveKit connectivity cannot be confirmed from the repo.** The
   Oracle-era version of this question — whether production's
   `LIVEKIT_API_SECRET` matched the self-hosted box — ended with that box, which
-  was destroyed on 2026-09-19 ([D-182](../decisions/D-182.md)). Production now
-  uses the Compute Engine box, and [D-187](../decisions/D-187.md) names the
+  was destroyed on 2026-09-19 ([D-16](../decisions/D-16.md)). Production now
+  uses the Compute Engine box, and [D-16](../decisions/D-16.md) names the
   first class booked and joined through the app after its deploy as the check;
   no record in the tree says that class has run. If the pair in production's
   secrets is not the box's own, calls fail to connect outright rather than
@@ -513,7 +513,7 @@ That lasts until preview has a LiveKit server of its own.
   service's secret) rather than assuming.
   The feature flags (`LIVE_CAPTIONS_ENABLED`, `CLASS_RECORDING_ENABLED`,
   `LESSON_INSIGHTS_TRANSCRIPTION_ENABLED`) are confirmed ON in production
-  per D-94, but "flag on" has already once meant "silently dark" in this
+  per D-16, but "flag on" has already once meant "silently dark" in this
   product's history (the Vercel→Fly cutover incident) — do not treat flag
   state alone as proof the feature works end-to-end for real users.
 - **The teacher-facing surface that displays `LessonTranscript` /

@@ -2,7 +2,7 @@
 // steps (runbook-steps.ts): confirms charge/transfer/refund state directly
 // against Stripe's API — Stripe's own source of truth, independent of what
 // our DB/webhook handling recorded (uat-verify.ts already proves the DB
-// side). See D-55.
+// side). See D-25.
 import { prisma } from "@/lib/prisma";
 import { getStripeClient } from "@/lib/stripe";
 import { isProductionDeployment } from "@/lib/env";

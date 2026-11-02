@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 //
-// The language switcher (D-193). On a public page whose URL names its
+// The language switcher (D-72). On a public page whose URL names its
 // language, the cookie cannot change the page — `/es/pricing` is Spanish
 // whatever it says — so the switcher saves the choice and then loads the
 // chosen language's URL for the same page, as a new document. Everywhere else

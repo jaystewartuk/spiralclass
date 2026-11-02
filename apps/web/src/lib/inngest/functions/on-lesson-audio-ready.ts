@@ -12,7 +12,7 @@ const log = logger({ surface: "lesson-audio-ready" });
 // `lesson.audio.ready`). Phase B turns that audio into a transcript.
 //
 // ⛔ Gated. The whole transcription path is BLOCKED on the privacy/consent legal
-// sign-off (D-19 item 6) — until `transcriptionEnabled()` (an explicit flag AND a
+// sign-off (D-22) — until `transcriptionEnabled()` (an explicit flag AND a
 // configured vendor) is true, this stays in Phase A behaviour: structured-log
 // only, no audio sent anywhere, no transcript stored. Flipping the flag (after
 // sign-off) switches it to the real pipeline with no code change.

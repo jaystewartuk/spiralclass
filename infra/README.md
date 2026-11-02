@@ -10,12 +10,12 @@ R2 bucket via bare `AWS_ACCESS_KEY_ID`/`AWS_SECRET_ACCESS_KEY` auth points
 `tofu init -backend-config=` at the **one shared, committed
 [`backend.hcl.example`](./backend.hcl.example)**, copied to a gitignored `backend.hcl`, in this directory — currently
 `cloudflare-r2` alone (`oracle-runner` also did, until it was deleted for
-never having been applied — D-139; `database/supabase` also did, until it
-was retired — D-89 — and removed from the repo; `hetzner-runner` also did,
+never having been applied — D-164; `database/supabase` also did, until it
+was retired — D-70 — and removed from the repo; `hetzner-runner` also did,
 until it was replaced by a standalone infrastructure repo and removed). It carries only
 `bucket` and `endpoints` (the R2 account id embedded in the endpoint URL);
 neither is secret. Each module's own `main.tf` still sets its own `key`
-(state-file path, concern-keyed per D-49) directly in its `backend "s3"`
+(state-file path, concern-keyed per D-70) directly in its `backend "s3"`
 block — Tofu backend blocks can't read variables, so that part genuinely
 can't be shared, only the bucket+endpoint half can.
 
@@ -72,15 +72,15 @@ the repo.
 | `aws-ses`       | SES sender IAM user + Cloudflare DNS for email                    | own `backend.hcl` (see above) | `push-infisical-secrets.sh` `cd`s into `../infisical` for its `infisical secrets set` calls — that subcommand has no `--project-config-dir` flag (unlike `infisical run`), confirmed via `--help` |
 
 `database/supabase` (the original Supabase-project Tofu module) was removed
-from the repo entirely — Supabase itself is fully decommissioned (D-89) and
+from the repo entirely — Supabase itself is fully decommissioned (D-70) and
 the module's own status had already said "kept for history" for a while
-before it was actually deleted. Its layer-1 slot in the D-49 region-migration
+before it was actually deleted. Its layer-1 slot in the D-70 region-migration
 runbook (`infra/database/RUNBOOK.md`) is Neon's now — see
 `infra/database/neon/README.md`, which is a manual/console runbook, not a
 Tofu module.
 
 The `oracle-runner` and `cloudflare` Tofu modules were both deleted in
-[D-139](../docs/decisions/D-139.md): neither had ever been applied, neither
+[D-164](../docs/decisions/D-164.md): neither had ever been applied, neither
 had a state file, and both asserted a configuration that had really been
 built and changed by hand. The Cloudflare Access gate is described in
 [`docs/deployment/DOCS_SITE.md`](../docs/deployment/DOCS_SITE.md).
@@ -90,7 +90,7 @@ CORS runbook ([`R2_CORS.md`](./cloudflare/R2_CORS.md)) and its JSON.
 The Oracle box was described by
 [`docs/deployment/ORACLE_BOX_REBUILD.md`](../docs/deployment/ORACLE_BOX_REBUILD.md),
 transcribed from the running machine, until it was destroyed on 2026-09-19
-([D-182](../docs/decisions/D-182.md)); `oracle-box/` is the unapplied module
+([D-16](../docs/decisions/D-16.md)); `oracle-box/` is the unapplied module
 for rebuilding it. Production video now runs on the hand-built Compute Engine
 box in [`gcp-livekit/`](./gcp-livekit/README.md), and the Cloud Run target's
 one-time setup is in [`gcp/`](./gcp/README.md). Neither is a Tofu module.

@@ -414,7 +414,7 @@ describe("socialPreviewAiEnabled on Cloud Run with no stored key", () => {
     expect(socialPreviewAiEnabled()).toBe(true);
   });
 
-  it("is still off without the flag — an ambient credential switches nothing on (D-114)", async () => {
+  it("is still off without the flag — an ambient credential switches nothing on (D-185)", async () => {
     setEnv(
       withBaseRequired({
         SOCIAL_PREVIEW_AI_ENABLED: undefined,
@@ -542,7 +542,7 @@ describe("assertProductionCredentials", () => {
 
   it("is a no-op on a preview host even when creds are missing", async () => {
     // Preview builds with NODE_ENV=production too, but degrades gracefully.
-    // Prod-vs-preview is decided by APP_URL (Vercel's VERCEL_ENV is gone, D-89).
+    // Prod-vs-preview is decided by APP_URL (Vercel's VERCEL_ENV is gone, D-70).
     setEnv(
       withBaseRequired({
         NODE_ENV: "production",
@@ -653,7 +653,7 @@ describe("assertProductionCredentials — field-encryption guard", () => {
   });
 });
 
-// D-114. Podcasts were the one student-facing AI surface with no enablement
+// Since 2026-08-08 (D-185). Podcasts were the one student-facing AI surface with no enablement
 // flag — availability was decided purely by whether a TTS key happened to be
 // present, so the only way to turn them off was to pull a secret. These lock
 // the two-condition shape (a vendor is configured AND the flag is on) that

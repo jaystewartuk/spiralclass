@@ -23,7 +23,7 @@
 # `id-token: write` on the deploy job; GitHub grants that per JOB rather than
 # per step; and that job builds the Docker image — so every lifecycle script in
 # the dependency tree would run with a token-minting endpoint in front of it.
-# [D-163]'s addendum reversed that exact shape once already, and
+# [D-163] reversed that exact shape once already, and
 # apps/web/tests/config/local-gate.test.ts bans it in every workflow in this
 # repository. A job that runs `pnpm install` is the worst candidate for an
 # exception, not the best.
@@ -128,7 +128,7 @@ gcloud secrets add-iam-policy-binding "$SECRET_NAME" \
 say "The one Google API the app calls — Vertex AI, for \"Generate with AI\""
 # The runtime identity's ONLY project-level role. It is what lets
 # lib/ai/google-vertex-auth.ts take a token from the metadata server instead of
-# holding a long-lived service account key (D-127's 2026-09-24 addendum).
+# holding a long-lived service account key (D-125, 2026-09-24).
 # aiplatform.user can call models and cannot change IAM, read a secret or touch
 # the service — so it widens nothing the secret boundary above protects.
 gcloud projects add-iam-policy-binding "$PROJECT" \

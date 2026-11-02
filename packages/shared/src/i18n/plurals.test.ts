@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { createT } from "./translate";
 
 /**
- * Plural selection (D-142).
+ * Plural selection.
  *
  * The bug that prompted this: the booking page rendered "1 classes × 50 min"
  * whenever a package held one class but was not flagged `singleClass`. The

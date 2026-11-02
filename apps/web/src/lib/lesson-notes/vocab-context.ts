@@ -2,7 +2,7 @@ import type { PrismaClient } from "@prisma/client";
 
 import { normaliseSkill } from "./skills";
 
-// Vocabulary flashcard study mode (D-97) — the flip side of a card. A
+// Vocabulary flashcard study mode — the flip side of a card. A
 // VocabularyReview row only stores the bare term (SM-2 state), so the "back
 // of the card" is recovered from the LessonInsight it was confirmed from:
 // same teacher+student, category "vocabulary", matching term. No new data

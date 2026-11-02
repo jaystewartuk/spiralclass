@@ -1,5 +1,5 @@
 // Backfill HomeworkAttempt rows for HomeworkSubmissions that predate the
-// attempt-history schema (docs/features/homework.md, D-93). The
+// attempt-history schema (docs/features/homework.md). The
 // shipped homework feature only ever had ONE state per (assignment, student)
 // — a resubmission overwrote the same row in place — so every submitted
 // row's entire history is exactly one attempt: attempt 1, a snapshot of the

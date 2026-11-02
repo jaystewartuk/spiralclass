@@ -41,8 +41,22 @@ sync.
   (managed on a separate booking-page settings screen, not the main account
   page). The booking-page WhatsApp number is a separate opt-in field from
   the account phone above — it's shown publicly on `/b/<slug>` as a "Chat on
-  WhatsApp" button, while the account phone stays private (see D-42).
+  WhatsApp" button, while the account phone stays private. Neither number
+  is used for automated messaging — the WhatsApp Cloud API integration was
+  removed — and both only ever open a plain `wa.me` link.
 - Student-only: profile photo, native (learning) language.
+
+**Interface language and reading**
+
+- Both roles pick an interface language from a list generated from the locale
+  registry, or **System Default**, which keeps following the device or browser
+  language live. The choice is stored in the `locale` cookie and the resolved
+  language is mirrored to the account.
+- Both roles have reading preferences: a text scale (1, 1.125 or 1.25 times),
+  three spacing steps (letter, word and line spacing together), and a warm
+  tint. They are stored on the account and mirrored into a cookie, so they
+  apply on first paint and follow the person between devices. Teachers meet
+  them as the first onboarding step; there is no persistent toolbar.
 
 **Sign-in email change**
 
@@ -134,6 +148,14 @@ sync.
     (already-cancelled/missing billing is treated as a successful no-op;
     a genuine billing-system failure stops the process so it can be
     retried rather than completing a broken deletion).
+  - Teacher, also: her class recordings, per-speaker lesson audio,
+    transcripts and summaries are destroyed — the stored files first, then
+    the rows, one file at a time; a row whose file could not be deleted is
+    left so it can still be found, and an error is logged. This never blocks
+    the deletion itself and nothing retries it
+    (`lib/account-deletion/purge-recordings.ts`, [D-22](../decisions/D-22.md)).
+    A student's deletion purges no recordings: they belong to the teacher's
+    account.
   - Student: similarly anonymized/tombstoned; the link back to the
     sign-in identity is severed; any stored contact-change history and
     private teacher notes about that student (both of which can carry

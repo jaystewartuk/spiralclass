@@ -11,7 +11,7 @@ import { revalidateAfterAction } from "@/lib/revalidate";
 
 export type PayoutInstrumentState = { error?: string; ok?: string } | undefined;
 
-// Persist one payout instrument configured in /settings/payments (D-113).
+// Persist one payout instrument configured in /settings/payments (D-145).
 //
 // One action per kind. D-145 left one kind, so there is one action — but it
 // stays shaped per kind rather than collapsing into a polymorphic one, because

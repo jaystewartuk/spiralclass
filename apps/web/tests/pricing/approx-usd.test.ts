@@ -44,7 +44,7 @@ describe("approxUsdFrom", () => {
   });
 
   it("returns null for a currency the assumptions row has no rate for", () => {
-    // A Brazilian teacher: real, offerable (D-64), and absent from the P&L's
+    // A Brazilian teacher: real, offerable (D-153), and absent from the P&L's
     // four-currency pivot. Guessing here would be inventing a price.
     expect(approxUsdFrom(50_000, "BRL", assumptions(), NOW)).toBeNull();
   });

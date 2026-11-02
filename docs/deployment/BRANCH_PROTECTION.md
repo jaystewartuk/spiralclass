@@ -35,8 +35,8 @@ producers that run the same tier from the same registry
   which runs the fast tier on the commit being pushed and posts once the push
   lands).
 - `.github/workflows/gate.yml`'s `Post the local-gate status` job, on a
-  GitHub-hosted runner for every pull request into `main`. D-129 deleted every
-  workflow; [D-157](../decisions/D-157.md) brought this one back once the
+  GitHub-hosted runner for every pull request into `main`. Every workflow was
+  deleted on 2026-08-25; [D-157](../decisions/D-157.md) brought this one back once the
   repository was public and Actions minutes were free. A session with no
   laptop and no `gh` therefore still gets the status onto its PR — say which
   run you actually saw, and never imply you posted one you did not.
@@ -45,13 +45,13 @@ A commit status attaches to **one commit**, so a green `local-gate` cannot drift
 onto later work: push another commit and the PR is unmergeable again until that
 commit is certified too. That is the property being bought here; it is not
 resistant to someone posting green by hand, which is an accepted trade for a
-solo repo (see D-119's unresolved risks).
+solo repo (see [D-157](../decisions/D-157.md)).
 
 Do **not** require any `checks / …` context. Those jobs no longer exist at all
-(D-129 deleted them, and `gate.yml` does not recreate them); before that they only ran on dispatch
+(they were deleted on 2026-08-25, and `gate.yml` does not recreate them); before that they only ran on dispatch
 now, so requiring one would leave every PR waiting for a run nobody started —
 the exact failure the 2026-07-18 manual-only sweep caused, which Phase 1 had to
-undo on 2026-07-20. (Before D-119 the required check was the aggregate
+undo on 2026-07-20. (Before 2026-08-12 the required check was the aggregate
 `checks / Typecheck / lint / unit / audit` job, for a related reason: its
 sub-jobs include a `mutation` job that is _skipped_ on PRs, and a required
 skipped check never posts success.)
@@ -62,10 +62,10 @@ PRs. It was moved back to promote-only on 2026-07-21 — a
 deliberate cost trade — and removed outright once demoted, since it was never a
 required status check. That suite is now in the heavy tier: `heavy.yml` runs it
 on a runner for every pull request and every push to `main`
-([D-161](../decisions/D-161.md)), and `pnpm gate:full` runs it locally. It is
+([D-157](../decisions/D-157.md)), and `pnpm gate:full` runs it locally. It is
 still not a required status check.
 
-### Code scanning — a ruleset, not a required check ([D-179](../decisions/D-179.md))
+### Code scanning — a ruleset, not a required check ([D-158](../decisions/D-158.md))
 
 The script also turns on **private vulnerability reporting** (the route
 `SECURITY.md` promises) and **CodeQL default setup**, then applies a ruleset
@@ -90,7 +90,7 @@ run by `promote-on-green.yml` when both runners certify a push to `main`
 **reject that push and break deploys**.
 Production is already gated upstream — promote refuses to fast-forward unless
 the Gate and Heavy workflows are both green for the exact commit
-([D-162](../decisions/D-162.md)), and `--force-gate` runs the full tier locally
+([D-157](../decisions/D-157.md)), and `--force-gate` runs the full tier locally
 instead when the verdict cannot be read.
 
 `scripts/setup-branch-protection.sh` applies a **ruleset** (not classic

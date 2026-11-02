@@ -1,4 +1,4 @@
-// SpiralClass — Financial Intelligence taxonomy + integration seed (D-86).
+// SpiralClass — Financial Intelligence taxonomy + integration seed (docs/features/admin-portal.md).
 //
 // The estimate layer's cost categories and usage meters. Both are curated,
 // extensible `as const` lists (NOT Prisma enums) so a new category, metric, or
@@ -10,7 +10,7 @@
 // (7 values, the ACTUALS taxonomy that's load-bearing across money-metrics.ts
 // and the /admin/costs page). The estimate layer classifies infrastructure by
 // what it IS (13 categories), not how an invoice was bucketed; coupling the two
-// would drag the actuals page into every change here. See D-86.
+// would drag the actuals page into every change here.
 
 import type { PricingModel } from "./economics-pricing";
 
@@ -85,7 +85,7 @@ export type KnownIntegration = {
 // runs on — still tune per row in the admin UI; the seed never overwrites an
 // edited row.
 //
-// METER CONFLATION (important, see D-86 usage-extract): the 9 USAGE_METRICS are
+// METER CONFLATION (important, see apps/web/scripts/economics-usage-extract.ts): the 9 USAGE_METRICS are
 // coarse, so multiple providers can key off ONE meter and each bills the full
 // amount:
 //   • `video_minutes` drives deepgram/assemblyai (LessonAudio transcription

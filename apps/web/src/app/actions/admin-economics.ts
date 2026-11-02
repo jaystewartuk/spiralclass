@@ -15,7 +15,7 @@ import {
 } from "@spiralclass/shared";
 import { revalidateAfterAction } from "@/lib/revalidate";
 
-// Financial Intelligence estimate layer (D-86, S4) — the write side of
+// Financial Intelligence estimate layer (slice S4) — the write side of
 // `/admin/economics`: Integration registry CRUD, UsageInput upsert/delete,
 // and the singleton EconomicsAssumptions update. Mirrors admin-costs.ts
 // (finance role, Zod, revalidatePath, `writeOverride` audit) but every write
@@ -84,7 +84,7 @@ function readIntegrationFields(formData: FormData) {
   };
 }
 
-// The pricing-model textarea is free-form JSON (D-86 MVP — a structured
+// The pricing-model textarea is free-form JSON (an MVP — a structured
 // editor is a fast-follow), so it needs its own two-stage parse: JSON syntax
 // first, then the shared discriminated-union schema. Both failures return
 // the same shape as a Zod field error so the form can render one error slot.

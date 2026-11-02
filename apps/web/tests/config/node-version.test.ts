@@ -20,7 +20,7 @@ import { REPO_ROOT } from "./_tree";
  * The devcontainer was the expensive one: Node 22 does not satisfy
  * `engines.node >= 24.15.0`, so it could not have run `pnpm install` at all —
  * while its own comment asserted the opposite, "to match every CI job … all pin
- * node 22", which no job had done since the Dockerfile moved off 22. D-170
+ * node 22", which no job had done since the Dockerfile moved off 22. D-164
  * deleted that path rather than repairing it, on the ground that nobody used
  * it. `.nvmrc` was the same drift without the second failure.
  *

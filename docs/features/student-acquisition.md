@@ -71,7 +71,7 @@ Reddit communities default to prohibited, because Reddit's own culture treats
 unsolicited self-promotion as spam and starting anywhere else would ship the ban
 as the default experience.
 
-### What "limited" actually means ([D-155](../decisions/D-155.md))
+### What "limited" actually means ([D-125](../decisions/D-125.md))
 
 `limited` was the honest answer for most real groups, and on its own it said
 nothing further — so the teacher recorded the coarse policy and kept the real
@@ -123,7 +123,7 @@ The image brief has three authors, and the UI names them in those terms:
    rather than replacing.
 
 Her caption is still drawn over the image by SpiralClass rather than by the
-image model ([D-123](../decisions/D-123.md)): a misspelt Spanish meme posted by
+image model ([D-125](../decisions/D-125.md)): a misspelt Spanish meme posted by
 a Spanish teacher discredits the exact expertise she is advertising, and accents
 are where image models fail.
 
@@ -150,6 +150,10 @@ Reddit treats unsolicited promotion as spam, so a product that automated the
 posting would be handing teachers a ban rather than a marketing department. The
 teacher keeps her own account and her own voice; she reviews, edits if she wants
 to, and posts.
+
+It is also not a marketplace: SpiralClass sends a teacher no students from a
+directory and lists no teacher beside another. Everything here amplifies the
+traffic and word of mouth she already has.
 
 ---
 
@@ -203,6 +207,28 @@ ranking noise.
 
 ---
 
+## Testimonials
+
+A testimonial is either one the teacher writes (`teacher_curated`) or one a
+student writes (`student_submitted`), and only the second is badged.
+
+- A signed-in student with at least one **completed** class with the teacher
+  writes one from `/my-classes/teachers/<id>`. A `no_show` does not count. One
+  per student per teacher. The name comes from the roster, never the form, and
+  the refusal reads the same whether there is no pairing or no completed class.
+- It publishes on arrival. The booking page shows **"Verified student · N
+  classes with her"**, with N counted from completed bookings at render time,
+  and an explainer line only when a badge is on the page.
+- The teacher can hide or delete a student's testimonial and cannot write or
+  edit one; her editor shows it read-only in the same list as her own. The
+  student can withdraw it, even after they stop being eligible.
+- Existing curated quotes render as before, with no "unverified" mark.
+- No `Review` or `AggregateRating` JSON-LD is emitted for either kind.
+- Nothing asks students to write one yet: an email on her behalf would need a
+  per-teacher opt-in and a rate limit.
+
+Why, and what the database enforces: [D-151](../decisions/D-151.md).
+
 ## Where the data lives
 
 - `teacher_marketing_profiles` — the four things that cannot be inferred:
@@ -220,6 +246,6 @@ ranking noise.
   `promo_links_allowed`, `promo_notes`) and the community's own image
   instructions (`meme_brief`).
 - `social_preview_images` — the image library, generated or uploaded, shared
-  with the social-preview pipeline ([D-123](../decisions/D-123.md)). The
+  with the social-preview pipeline ([D-125](../decisions/D-125.md)). The
   teacher's general image instructions and her visual register live beside her
   acquisition profile, on `teacher_marketing_profiles`.

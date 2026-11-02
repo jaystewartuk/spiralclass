@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 //
 // IntroVideoForm — the teacher's recorder card. These pin the record-vs-upload
-// EMPHASIS decision from the D-73 review, which is a product decision that
+// EMPHASIS decision from the intro-video review, which is a product decision that
 // a refactor could silently undo: recording in-app is the primary path (a warm
 // phone selfie converts better than a produced marketing clip, and it is the
 // only path with a known duration, orientation and length cap), while upload is

@@ -6,7 +6,7 @@ import {
   type EconomicsAssumptionsValues,
 } from "@/lib/economics/assumptions";
 
-// D-86 S3 — the FX conversion layer. `fxRateToGbp`/`toGbpPence` are pure;
+// Economics slice S3 — the FX conversion layer. `fxRateToGbp`/`toGbpPence` are pure;
 // `getEconomicsAssumptions` is the one DB read, exercised here against a fake
 // Prisma client (mirrors tests/lib/economics-seed-registry.test.ts's
 // fakePrisma pattern) rather than a real DB.

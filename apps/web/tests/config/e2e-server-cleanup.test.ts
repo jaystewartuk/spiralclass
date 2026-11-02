@@ -75,7 +75,7 @@ describe("scripts/ci/e2e.sh — app teardown", () => {
   it("scopes the auto-kill to EVERY worktree of this repo, not just the current one", () => {
     // `git rev-parse --show-toplevel` inside a worktree is that worktree, so
     // scoping to it meant E2E_KILL_PORT_HOG could only ever reach a stray
-    // started from the same checkout. D-146 has several sessions working this
+    // started from the same checkout. D-157 has several sessions working this
     // repo at once in separate worktrees on one laptop, so the port-3000
     // collision that actually occurs is between SIBLINGS — the one case the
     // escape hatch could not reach. Observed 2026-09-01: three consecutive

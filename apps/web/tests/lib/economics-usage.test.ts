@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { getUsageForMonth, getUsageHistory } from "@/lib/economics/usage";
 
-// D-86 S3 — the UsageInput read side. Exercised against a fake Prisma client
+// Economics slice S3 — the UsageInput read side. Exercised against a fake Prisma client
 // (mirrors economics-seed-registry.test.ts's fakePrisma pattern) rather than
 // a real DB. NOW is mid-month so nothing accidentally lands on a boundary,
 // matching money-metrics.test.ts's convention.

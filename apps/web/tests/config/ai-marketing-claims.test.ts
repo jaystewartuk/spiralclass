@@ -2,7 +2,7 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 import { PRIVACY_POLICY_SECTIONS } from "@spiralclass/shared";
-// REPO_ROOT / envFilePath / parseEnvFile are the config-tooling resolvers (D-85).
+// REPO_ROOT / envFilePath / parseEnvFile are the config-tooling resolvers (D-70).
 import { REPO_ROOT, envFilePath, parseEnvFile } from "../../../../scripts/env-config.mjs";
 
 // Holds the public marketing pages' AI claims against the enablement flags that
@@ -32,7 +32,7 @@ import { REPO_ROOT, envFilePath, parseEnvFile } from "../../../../scripts/env-co
 // version-controlled. It cannot check vendor credentials (DEEPGRAM_API_KEY,
 // ANTHROPIC_API_KEY, GOOGLE_TTS_API_KEY/ELEVENLABS_API_KEY), which live in
 // Infisical/`fly secrets` — a flag being on is necessary, not sufficient. The
-// captions config header and D-94 make the same point: "flag on" has already
+// captions config header makes the same point: "flag on" has already
 // once meant "silently dark" in this product's history.
 
 const LANDING_PAGE = resolve(REPO_ROOT, "apps/web/src/app/page.tsx");
@@ -48,20 +48,20 @@ const BOOKING_INCLUDED = resolve(REPO_ROOT, "apps/web/src/app/b/[slug]/whats-inc
 // all (credential-gated only, and it degrades to a hidden control rather than a
 // broken promise) — still listed here, so rule (1) stays exhaustive.
 const CLAIM_GATES: Record<string, string[]> = {
-  // Live captions (D-27, D-185): each side reads the other's words in their
+  // Live captions (D-185): each side reads the other's words in their
   // own language, recognised and translated in the browsers.
   "web.landing.ai.captions": ["LIVE_CAPTIONS_ENABLED"],
   "web.features.item.liveCaptions": ["LIVE_CAPTIONS_ENABLED"],
 
-  // AI-drafted class content (D-17, D-69). No flag: it is Pro-entitlement and
+  // AI-drafted class content (D-17). No flag: it is Pro-entitlement and
   // quota gated, and every new teacher starts on the Pro trial. Credential-
   // gated only (ANTHROPIC_API_KEY, in Infisical), and it degrades to a hidden
   // control rather than a broken promise — hence the empty array.
   "web.landing.ai.lessonPlans": [],
 
-  // Learning notes after class (D-19, D-22, D-189): the caption transcript,
+  // Learning notes after class (D-185, D-22): the caption transcript,
   // kept with the pairing's insights consent, becomes findings the teacher
-  // confirms. The flag is the one D-189 turned back on.
+  // confirms. The flag is the one turned back on 2026-09-28.
   "web.landing.ai.learningNotes": ["LESSON_INSIGHTS_TRANSCRIPTION_ENABLED"],
 
   // "Review with AI" on a homework submission (lib/homework/ai-review.ts).
@@ -78,8 +78,8 @@ const CLAIM_GATES: Record<string, string[]> = {
   "web.landing.ai.srs": [],
   "web.features.item.srs": [],
 
-  // Intro-video AI coach (D-73): AI feedback on the teacher's OWN public intro
-  // video — deliberately outside the D-19/D-114 student-data gate. Pro-gated at
+  // Intro-video AI coach: AI feedback on the teacher's OWN public intro
+  // video — deliberately outside the D-185 student-data gate. Pro-gated at
   // the pipeline, but every new teacher starts on the Pro trial, so a visitor
   // signing up today can reach it.
   "web.landing.ai.videoCoach": ["INTRO_VIDEO_COACH_ENABLED"],
@@ -157,11 +157,11 @@ const NON_AI_CLAIMS = new Set([
 // regression half: re-adding any of these cards without also turning its flag on
 // fails here rather than shipping.
 //
-// Podcasts joined pronunciation here in D-114, because podcasts had no flag at
-// all until D-114 added one, so the only way to turn them off was to pull a
-// vendor secret. Insights were here under D-114, moved up to CLAIM_GATES when
-// D-131 turned the transcription flag back on, came back here under D-187,
-// and left again with D-189: the transcript now comes from the browsers'
+// Podcasts joined pronunciation here on 2026-08-08, because podcasts had no
+// flag at all until then, so the only way to turn them off was to pull a
+// vendor secret. Insights were here from 2026-08-08, moved up to CLAIM_GATES
+// when the transcription flag came back on 2026-08-26, came back here on
+// 2026-09-24 (D-16), and left again on 2026-09-28 (D-185): the transcript now comes from the browsers'
 // caption recognisers, so the flag is on without any egress. The insights
 // cards themselves were not re-added to the marketing pages in that change —
 // re-adding one means listing it in CLAIM_GATES under
@@ -280,16 +280,16 @@ describe("public AI claims match production enablement flags", () => {
     });
   }
 
-  // Stated out loud for the same reason D-114, D-131 and D-187 did: these two
+  // Stated out loud for the same reason every earlier flip did: these two
   // decide whether a student's voice is captured at all, so their state is
   // something a test says rather than something you learn by reading an env
-  // file. D-187 turned both off because the box has no egress. D-189 turned
+  // file. D-16 turned both off because the box has no egress. D-185 turned
   // TRANSCRIPTION back on without one: the transcript is the caption text the
   // participants' browsers already recognise, kept with the pairing's insights
   // consent. Recording stays off — it still needs egress. Changing either is a
   // real decision — change this test in the same commit, and the sentences in
   // packages/shared/src/legal/privacy-policy.ts with it.
-  it("class recording is off and transcription is on in production (D-187, D-189)", () => {
+  it("class recording is off and transcription is on in production (D-16, D-185)", () => {
     expect(flagOn("CLASS_RECORDING_ENABLED")).toBe(false);
     expect(flagOn("LESSON_INSIGHTS_TRANSCRIPTION_ENABLED")).toBe(true);
   });

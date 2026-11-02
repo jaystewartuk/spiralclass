@@ -119,7 +119,7 @@ unique index and two `EXCLUDE` constraints, all of which mean "that slot is
 taken". A pre-flight availability check is a courtesy; the constraint is the
 guarantee. Applied migrations are never edited — Prisma checksums each file —
 and production migrations run behind a Neon checkpoint branch
-([D-95](../decisions/D-95.md)), because a code rollback never undoes a schema
+([D-178](../decisions/D-178.md)), because a code rollback never undoes a schema
 change.
 
 The `/admin/database` console generates a live ERD from the running schema
@@ -314,31 +314,31 @@ nobody reads.
 
 The decision log is the real record; this is the shape of it.
 
-- **Hosting**: Vercel + Supabase → Fly.io + Neon ([D-70](../decisions/D-70.md),
-  [D-89](../decisions/D-89.md)) → Google Cloud Run + Neon
+- **Hosting**: Vercel + Supabase → Fly.io + Neon ([D-70](../decisions/D-70.md))
+  → Google Cloud Run + Neon
   ([D-184](../decisions/D-184.md)). Supabase is fully decommissioned, and the
   Fly app was destroyed at the 2026-09-23 cutover. There is still
   no `VERCEL_ENV` branch — production versus preview is decided by `APP_URL` —
-  and that decoupling is what let Vercel come back as a failover
-  ([D-177](../decisions/D-177.md)) with no application change. That failover
-  never served a request and was retired ([D-186](../decisions/D-186.md)).
+  and that decoupling is what let Vercel come back as a failover with no
+  application change. That failover never served a request and was retired
+  ([D-70](../decisions/D-70.md)).
   Production serves from Cloud Run, the only target.
 - **Payments**: separate charges and transfers → direct charges on Accounts v2
   ([D-143](../decisions/D-143.md)). The platform stopped touching the money.
 - **Platform entity**: consolidated in the UK
-  ([D-58](../decisions/D-58.md)), and platform billing moved to GBP
-  ([D-99](../decisions/D-99.md)). Because every call site resolves credentials
+  ([D-143](../decisions/D-143.md)), and platform billing moved to GBP
+  ([D-153](../decisions/D-153.md)). Because every call site resolves credentials
   through one function, each swap was configuration rather than code.
-- **Video**: LiveKit Cloud → self-hosted ([D-94](../decisions/D-94.md)). Two
+- **Video**: LiveKit Cloud → self-hosted ([D-16](../decisions/D-16.md)). Two
   config values, no application code.
 - **Subject scope**: English-teaching → language-agnostic
-  ([D-72](../decisions/D-72.md), [D-73](../decisions/D-73.md)). A teacher's
+  ([D-72](../decisions/D-72.md)). A teacher's
   subject became a BCP-47 code from one registry.
 - **CI**: GitHub Actions → a free Oracle box → a paid Hetzner pool →
   GitHub-hosted again → the maintainer's laptop with no workflows at all
-  ([D-119](../decisions/D-119.md), [D-129](../decisions/D-129.md)) → back onto
+  (August 2026) → back onto
   runners once the repository went public
-  ([D-157](../decisions/D-157.md), [D-161](../decisions/D-161.md)). The move to
+  ([D-157](../decisions/D-157.md)). The move to
   the laptop happened because the Actions allowance emptied mid-month and
   production went eleven days without a database backup while the public
   repositories stayed green; the move back happened because a public

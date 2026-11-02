@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-// Marking a teacher or a student as an operator's test account (D-192). The
+// Marking a teacher or a student as an operator's test account. The
 // only write path for `testAccount`: admin-gated, a reason required, and the
 // audit row written in the same transaction as the change.
 

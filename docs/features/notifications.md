@@ -44,7 +44,17 @@ the non-suppressible types above, which cannot be turned off by anyone.
 ### Channels and delivery modes
 
 - Two delivery channels exist: **push** and **email** (Resend). There is no
-  WhatsApp channel (removed).
+  WhatsApp channel. The Meta WhatsApp Cloud API integration (send client,
+  delivery webhook, template sync, per-user WhatsApp opt-in) was removed on
+  2026-07-05: Meta's business verification was a multi-day, repeatedly
+  blocked onboarding for a channel that was never launch-critical. Two things
+  were kept on purpose: the phone number, renamed `phone_e164` and used as a
+  plain contact field (duplicate detection, roster display, merge), and plain
+  `wa.me` deep-links (support, "share your booking link", a teacher's
+  message-my-student button, the booking page's opt-in "Chat on WhatsApp"),
+  which open the WhatsApp app and use no Meta integration. If automated
+  WhatsApp reminders come back, the expected route is a business solution
+  provider that carries the verification, not the direct Cloud API.
 - **`push` has ONE transport: browser Web Push**, to a signed-in web session
   that has turned notifications on for that device.
   - ⚠️ It had two. The second was removed: no device could hold one of its

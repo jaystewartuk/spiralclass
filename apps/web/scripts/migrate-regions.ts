@@ -1,4 +1,4 @@
-// D-49 layer 2 runner: `prisma migrate deploy` against every region in turn.
+// D-70 layer 2 runner: `prisma migrate deploy` against every region in turn.
 //
 // Replaces a bare `prisma migrate deploy` in the build + the manual migrate:*
 // scripts. With no MIGRATE_REGIONS set it runs exactly once against the ambient

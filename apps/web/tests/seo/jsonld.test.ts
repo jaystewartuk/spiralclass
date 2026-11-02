@@ -173,7 +173,7 @@ describe("teacherProfileJsonLd", () => {
     ]);
   });
 
-  // D-64 lets a teacher price her packages in her own chosen currency
+  // D-153 lets a teacher price her packages in her own chosen currency
   // (GBP/USD/EUR/MXN/COP/ARS/CLP/PEN/BRL) — this must never be hardcoded to
   // MXN regardless of what the teacher actually picked.
   it("uses each package's OWN currency, not a hardcoded one", () => {

@@ -38,8 +38,20 @@ where the features below interact with plan limits.
 
 ### Profile / onboarding
 
-- Required at onboarding: timezone (validated as a real IANA timezone) and a
-  phone number (international format, 8–15 digits, optional leading `+`).
+- Required at onboarding: timezone (validated as a real IANA timezone), a
+  phone number (international format, 8–15 digits, optional leading `+`), and
+  the language she teaches (`teachers.target_language`, a code from the one
+  registry in `packages/shared/src/languages.ts`). The form blocks submit
+  without it and the server action enforces the same rule. It is not prefilled
+  from the browser or the country, because neither says what she teaches.
+- The teaching language is asked at onboarding, not left to Settings, because
+  her focus tags are seeded from it on first use and seeding is additive: a
+  value set later appends its pack beside the neutral one instead of replacing
+  it. The onboarding action seeds the pack as soon as it stores the language.
+  It stays editable at Settings → Booking page.
+- The per-package **Subject** field is hidden on the onboarding templates step
+  (never cleared) and shown at `/settings/templates`, where it distinguishes
+  two otherwise identical packages for a student who holds both.
 - Country (2-letter code) and pricing currency (3-letter code) are optional
   in the form but, once set, determine the teacher's payout rail:
   - Countries inside the Stripe Connect cross-border circle (UK, US, Canada,
@@ -56,6 +68,70 @@ where the features below interact with plan limits.
 - Onboarding also captures working hours (see below) and package/pricing
   templates (subject to the Free-tier template cap — see subscriptions doc)
   before the teacher is marked as fully onboarded.
+
+### Intro video (booking page)
+
+- A teacher can add one short intro video to her public booking page,
+  recorded in the browser or uploaded. It is a file SpiralClass stores and
+  serves into a `<video>` element — **never a YouTube/Vimeo/Loom embed** —
+  because the AI coach, the transcript in the page's structured data and any
+  future captions all need the media itself, which an embed on someone else's
+  platform does not give us.
+- It lives in its own **public** R2 bucket (`teacher-videos`,
+  `lib/storage/teacher-video.ts`), not the private, signed chat-video path: the
+  booking page is public and crawled, and a signed URL would expire inside the
+  page cache. One object per teacher, so a re-record replaces it; the URL
+  carries a `?v=` cache-buster from the teacher row's `updatedAt`.
+- Limits: 50 MB and about 5 minutes. Upload goes browser-to-R2 with a presigned
+  `PUT` (a gallery clip exceeds the 25 MB server-action body limit), which is
+  why the CSP allows R2 in `connect-src` and `blob:`/`https:` in `media-src`
+  (pinned in `apps/web/tests/lib/csp.test.ts`).
+- With `NEXT_PUBLIC_TEACHER_VIDEOS_R2_PUBLIC_URL` unset the editor card and the
+  public video are both hidden; nothing breaks.
+- **The AI coach** is layered on the file. Layer 1 is the video; Layer 2
+  transcribes it (an Inngest job on `intro-video.ready`, batch Deepgram) into
+  `IntroVideoAnalysis`; Layer 3 asks Claude for feedback
+  (`{overall, strengths[], improvements[]}`), shown **only to the teacher** in
+  the booking-page editor, never on `/b/<slug>`. Layers 2–3 need their own flag,
+  `INTRO_VIDEO_COACH_ENABLED`, plus an ASR key, and are Pro
+  (`canUseIntroVideoCoach`); the feedback step is best-effort and a failure
+  leaves the transcript in place. It is not behind the lesson-insights consent
+  gate because it analyses the teacher's own public clip — no student data.
+- The transcription language is her `teaching_language` (what she speaks in the
+  clip) and the feedback is written in her `locale` — never her
+  `target_language`, which is the subject she teaches and diverges from both for
+  a teacher of English who teaches in Spanish.
+- Not built: auto-captions and a drafted bio/headline from the transcript, and
+  moderation tooling for teacher-hosted video beyond the account holder being
+  accountable for it.
+
+### Public listing (Marketplace Ready)
+
+- Finishing onboarding does **not** make a teacher public. Her booking page
+  (`/b/<slug>`), its buy page, social card, lead capture, the anonymous
+  checkout and the sitemap all gate on `isPubliclyListed()`
+  (`apps/web/src/lib/marketplace-ready.ts`): `isMarketplaceReady()`
+  (`packages/shared/src/activation.ts`) and not moderation-disabled.
+- Marketplace Ready is six signals, all required: onboarding complete, a
+  photo, a bio, package templates saved at least once (`templatesTouchedAt`),
+  availability saved at least once (`availabilityTouchedAt`), and a payout
+  rail — Stripe can charge, or a payout instrument is offerable at her
+  pricing currency. The untouched starter seed does not count as reviewed.
+- It is the **only** activation state that changes behaviour. Every other
+  state (`firstBookingReceived`, `activeTeacher`, …) is informational, and
+  `marketplaceReadyAt` is a one-time analytics cache, never read by a gate.
+- **Not gated on it:** the authenticated teacher app (she must reach
+  Settings to become ready) and every existing-relationship flow — a student
+  who already has this teacher keeps buying from the portal.
+- The gate applied to every teacher at once when it shipped (2026-07-25),
+  with no grace period: a teacher with no payout rail could not be paid
+  anyway, so the cost was visibility, not revenue.
+- The sitemap and the admin `stalled=yes` filter (onboarded
+  `STALLED_TEACHER_DAYS`+ days ago, still not ready) translate the predicate
+  into a Prisma `where` by hand; a change to `isMarketplaceReady()` must be
+  mirrored there.
+- Once a Stripe account exists, `country` cannot change: Stripe fixes a
+  connected account's country at creation.
 
 ### Availability (working hours)
 
@@ -144,8 +220,10 @@ where the features below interact with plan limits.
 ### First-time onboarding
 
 1. Teacher signs in for the first time and is routed into onboarding.
+   The first step sets her reading preferences (text scale, spacing, tint).
 2. **Timezone & contact step**: teacher confirms/sets timezone, enters phone
-   number, and optionally sets country and pricing currency (currency
+   number, picks the language she teaches, and optionally sets country and
+   pricing currency (currency
    choices are filtered to whichever rail her country supports).
 3. **Availability step**: teacher sets buffer time, minimum notice, maximum
    advance window, and at least one weekly working-hours range per day she
@@ -154,8 +232,9 @@ where the features below interact with plan limits.
    (capped on Free plan).
 5. **Preview step**: teacher reviews her public booking page before
    finishing.
-6. Onboarding is marked complete; the teacher's booking page becomes fully
-   live.
+6. Onboarding is marked complete. The booking page goes live only once the
+   teacher is also Marketplace Ready (see Public listing above); until then
+   `/b/<slug>` 404s and Settings → Booking page names what is missing.
 
 ### Editing working hours later
 

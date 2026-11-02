@@ -59,4 +59,4 @@ The exposure is held down by wording and timing instead:
   until then. A session writing one commits it and stops short of `pnpm pr`.
 
 The reasoning, and what this leaves open, is
-[D-181](docs/decisions/D-181.md).
+[D-158](docs/decisions/D-158.md).

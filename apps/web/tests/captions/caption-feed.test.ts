@@ -101,7 +101,7 @@ describe("reduceCaptionFeed", () => {
   });
 });
 
-// D-198: the words of a phrase are shown while it is being said, then the
+// D-185: the words of a phrase are shown while it is being said, then the
 // finished, translated line takes their place.
 describe("reduceCaptionFeed — partials", () => {
   const step = (state: CaptionFeedState, l: CaptionLine, at: number) =>

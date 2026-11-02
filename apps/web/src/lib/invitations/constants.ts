@@ -1,4 +1,4 @@
-// Tunables for the Teacher → Student invitation flow (D-83). Named constants,
+// Tunables for the Teacher → Student invitation flow (docs/features/student-management.md). Named constants,
 // mirroring the config-object convention used across the codebase, so the
 // lifecycle windows live in one place.
 

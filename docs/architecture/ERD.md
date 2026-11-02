@@ -6,7 +6,7 @@ it is generated **from the schema**, not hand-drawn and not parsed from
 migration history.
 
 - **Page:** `apps/web/src/app/admin/database/page.tsx` — superadmin (or the
-  `engineer` capability `schema:view`, D-55).
+  `engineer` capability `schema:view`, D-25).
 - **Stack:** [React Flow](https://reactflow.dev) (`@xyflow/react`) for the
   interactive canvas, [ELK.js](https://github.com/kieler/elkjs) (`layered`
   algorithm) for automatic layout.

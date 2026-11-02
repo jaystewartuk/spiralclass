@@ -3,13 +3,13 @@ name: Promote on green
 # A merge to `main` starts its own production deploy ([D-199]).
 #
 # ⚠️ This workflow decides nothing. `scripts/ci/promote.mjs` reads the runners'
-# verdict ([D-162]), checks that production is still the owner's alone
+# verdict ([D-157]), checks that production is still the owner's alone
 # (scripts/ci/deploy-protection.mjs), and fast-forwards `production`. That push
 # triggers deploy-production.yml, which waits for the owner's approval on the
 # `production` environment before the database job, and again before Cloud
 # Run. This file runs promote with `--when-certified` and restates none of it.
 #
-# WHY. D-120's binding lesson was that a step nobody is forced to take gets
+# WHY. D-199's binding lesson was that a step nobody is forced to take gets
 # forgotten: `production` once sat 96 commits behind `main`. `pnpm promote` was
 # that step, typed by hand. The approval is now the one human step left, and it
 # cannot be forgotten silently: it is a queued run with a notification. That
@@ -25,7 +25,7 @@ name: Promote on green
 # as part of the next one that goes green.
 #
 # NOT A SCHEDULE. `workflow_run` fires when a run finishes, which is the moment
-# somebody merged. local-gate.test.ts still bans `schedule:` everywhere (D-129).
+# somebody merged. local-gate.test.ts still bans `schedule:` everywhere (D-157).
 #
 # ⚠️ THE TOKEN. PROMOTE_TOKEN is a fine-grained token for this repository only,
 # acting as the owner. It has to be the owner: the `production` ruleset lets

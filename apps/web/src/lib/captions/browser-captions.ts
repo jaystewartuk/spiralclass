@@ -60,7 +60,7 @@ import {
 // learning profile (D-203). The switch can flip mid-class without restarting
 // a recogniser.
 //
-// When the session says the class's transcript is being kept (D-189:
+// When the session says the class's transcript is being kept (D-185:
 // `transcriptCapture`, the flag plus this pairing's insights consent), each
 // piece is also handed to `keep` — source text, speaker, and this browser's
 // estimate of how long it took to say — BEFORE translation, so the transcript
@@ -101,7 +101,7 @@ export type BrowserCaptionsStatus = {
   stopped: RecognizerStopReason | null;
 };
 
-// One recognised line to keep as part of the class's transcript (D-189).
+// One recognised line to keep as part of the class's transcript (D-185).
 export type KeptLine = {
   bookingId: string;
   speaker: CallRole;
@@ -128,7 +128,7 @@ export type BrowserCaptionsDeps = {
   publish: (line: CaptionLine) => Promise<void>;
   // Show a line to this viewer.
   showLocal: (line: CaptionLine) => void;
-  // Keep a line as part of the class's transcript (D-189). Only called while
+  // Keep a line as part of the class's transcript (D-185). Only called while
   // the session's `transcriptCapture` is true.
   keep: (line: KeptLine) => void;
   onStatus: (status: BrowserCaptionsStatus) => void;

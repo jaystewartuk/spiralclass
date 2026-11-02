@@ -93,7 +93,7 @@ export default async function StudentBookingDetailPage({
           orderBy: { scheduledStart: "asc" },
         },
         // Booking-scoped file/link attachments — scheduled or always-visible
-        // (D-69 merge of the old class_materials table) — excludes the
+        // (the merge of the old class_materials table) — excludes the
         // "content" material (body set), fetched separately below.
         materials: {
           where: { body: null },
@@ -136,7 +136,7 @@ export default async function StudentBookingDetailPage({
           },
           orderBy: { attachedAt: "desc" },
         },
-        // D-15: only student-audience notes ever reach the student; teacher cues
+        // Only student-audience notes ever reach the student; teacher cues
         // are never selected here. Visibility is further gated to the class window
         // below.
         lessonNotes: {
@@ -320,7 +320,7 @@ export default async function StudentBookingDetailPage({
   const isScheduled = booking.status === "scheduled";
   const isPast = booking.scheduledStart <= now;
 
-  // D-15: the live notes panel opens only inside the class window (derived from
+  // The live notes panel opens only inside the class window (derived from
   // the schedule, no stored flag). Outside it, instructions stay hidden. We pass
   // the window state down so the client panel subscribes to Realtime while it's
   // open even before the first instruction exists (phase 1c).
@@ -450,7 +450,7 @@ export default async function StudentBookingDetailPage({
           during the live window — but only when the call genuinely works for this
           booking (teacher on Pro + LiveKit configured), so a Free teacher's
           student never sees a button that goes nowhere. The live-notes panel
-          below stays window-gated (D-15). Styled as the primary CTA rather
+          below stays window-gated. Styled as the primary CTA rather
           than a plain card so it's unmissable near the top of the page. */}
       {callAvailable && (
         <CallCta

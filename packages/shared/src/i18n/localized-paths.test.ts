@@ -13,7 +13,7 @@ import {
   unlocalizedPath,
 } from "./localized-paths";
 
-// D-193: one URL per language for the public pages, the bare URL in
+// D-72: one URL per language for the public pages, the bare URL in
 // DEFAULT_LOCALE, and the URL — not the cookie or the header — deciding what
 // a page it names renders in.
 
@@ -191,7 +191,7 @@ describe("resolvePublicLocaleRoute", () => {
 
   // A link inside the site to a bare URL was localized on purpose. The
   // "English" link on the Spanish terms is the way to the text that controls
-  // (D-196); bouncing a Spanish-preferring reader back to /es/terms would make
+  // (D-72); bouncing a Spanish-preferring reader back to /es/terms would make
   // it unreachable for them.
   it("never redirects a link followed from inside the site", () => {
     expect(route("/terms", { cookie: "es", accept: "es-MX", fromThisSite: true })).toEqual({

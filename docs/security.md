@@ -69,7 +69,7 @@ PostHog region and host; and every feature flag.
 
 The self-hosted LiveKit box's origin IP is **not** in this repository. It used
 to be, on the reasoning that it is already the published `A` record for
-`livekit.spiralclass.com`; [D-134](decisions/D-134.md) removed it anyway,
+`livekit.spiralclass.com`; [D-16](decisions/D-16.md) removed it anyway,
 because hiding the origin behind Cloudflare _is_ the protection and the `A`
 record now points at the edge. `scripts/local/synthetic.sh` reads it from
 `LIVEKIT_ORIGIN_IP` and exits rather than guess.

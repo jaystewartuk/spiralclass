@@ -6,7 +6,7 @@ import { whatsAppChatUrl } from "@spiralclass/shared";
 import { Button } from "@/components/ui/button";
 
 // "Chat on WhatsApp" on the public booking page — a plain wa.me deep-link
-// (D-42: no Meta Cloud API involved, same kind of link as the "share your
+// (no Meta Cloud API involved, same kind of link as the "share your
 // booking link" / support buttons elsewhere in the app), shown only when the
 // teacher opted a number in via Settings → Booking page. Pre-fills a short
 // intro message so the teacher opens the chat already knowing which page the

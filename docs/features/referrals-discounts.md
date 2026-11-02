@@ -67,8 +67,12 @@ here only so it isn't confused with the student referral program.
   not appear to apply to SpiralClass's own platform subscription checkout
   (the Pro/Founding plans a teacher pays for) — see Open Questions.
 - Only one discount code can be applied per checkout. A discount is applied
-  after the base package price and after any per-student custom price
-  override, and never brings the price below zero.
+  after the base package price, the card/transfer price split and any
+  per-student custom price override, and never brings the price below zero.
+- **A discount is teacher-funded.** It is only a lower charge, so it comes out
+  of her price; the platform subsidises nothing and there is no separate money
+  to move. Discount codes are the single reward primitive for referrals, for
+  both sides, and there is no credit ledger.
 - A discount code can be "reserved" for one specific student (this is how
   referral rewards work, below) — to anyone else, a reserved code behaves
   as if it doesn't exist.
@@ -206,6 +210,9 @@ here only so it isn't confused with the student referral program.
   per checkout.
 - A discount would reduce the price below zero — clamped at zero, never
   negative.
+- A burst of concurrent checkouts on one code — the total redemption limit is
+  counted just before the checkout transaction, without a lock, so it can be
+  exceeded slightly (bounded by the per-IP and per-buyer rate limits).
 - A referred payment is refunded after the referrer's reward has already
   been redeemed — the reward isn't clawed back; the teacher absorbs the
   cost.

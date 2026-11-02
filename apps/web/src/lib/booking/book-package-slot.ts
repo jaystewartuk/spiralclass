@@ -84,7 +84,7 @@ export type BookablePackage = {
   classesUsed: number;
   classesTotal: number;
   classDurationMin: number;
-  // One person or two (D-188) — part of the pool the class is paid from.
+  // One person or two (D-149) — part of the pool the class is paid from.
   seats: number;
   expiresAt: Date | null;
 };

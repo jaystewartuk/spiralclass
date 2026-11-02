@@ -65,7 +65,7 @@ export default async function ResultadoPage({
           classDurationMin: true,
           expiresAt: true,
           template: { select: { name: true } },
-          // Pay-at-reservation intent (D-111): the slot the student picked at
+          // Pay-at-reservation intent: the slot the student picked at
           // checkout — the reservation for a single class, the first class for
           // a package.
           intendedStartUtc: true,

@@ -5,7 +5,7 @@ import {
   refreshDefaultIntegrations,
 } from "@/lib/economics/seed-registry";
 
-// D-86 S2 — the create-if-absent seed for the Integration registry. Uses a
+// Economics slice S2 — the create-if-absent seed for the Integration registry. Uses a
 // fake Prisma `integration.createMany` that mimics the real unique-`key`
 // `skipDuplicates` semantics (mirrors tests/wise/credentials.test.ts's
 // fakePrisma pattern) rather than a real DB — the createMany/skipDuplicates

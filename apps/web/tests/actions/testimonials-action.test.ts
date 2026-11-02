@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { TESTIMONIAL_BODY_MAX } from "@/lib/testimonials/limits";
 
-// Teacher-authored testimonials CRUD (public-page social proof, D-24). Every
+// Teacher-authored testimonials CRUD (public-page social proof, D-125). Every
 // mutation must: validate, gate on requireOnboardedTeacher, scope the write by
 // teacherId (so a teacher can't touch another's row — count==0 → not-found),
 // and revalidate both the editor and the public booking page.

@@ -45,10 +45,10 @@ export type Entitlements = {
   // Pro entitlements (the resolver is the single gate for all of them).
   canScheduleMaterials: boolean;
   canCustomPrice: boolean;
-  // Live notes (D-15): authoring is free, but the live surfaces — present mode
+  // Live notes: authoring is free, but the live surfaces — present mode
   // and the realtime student panel — are Pro.
   canUseLiveNotes: boolean;
-  // Intro-video AI coach (D-73, Layer 2/3): transcribe the teacher's public
+  // Intro-video AI coach (Layer 2/3): transcribe the teacher's public
   // intro video and coach them on it (+ captions, draft bio). A Pro growth tool
   // — recording/showing the video is always free; only the AI analysis is gated.
   canUseIntroVideoCoach: boolean;
@@ -57,7 +57,7 @@ export type Entitlements = {
   // always free; only the AI-assist draft is gated, same "AI analysis is Pro"
   // pattern as canUseIntroVideoCoach.
   canUseHomeworkAiReview: boolean;
-  // Selling a package for two people (D-188). Pro, as D-149 makes every
+  // Selling a package for two people. Pro, as D-149 makes every
   // multi-person offering: it multiplies what a teacher earns per hour. Gated
   // at the package editor only — a two-person offer already on a template
   // stays buyable after a downgrade, because the booking page and checkout

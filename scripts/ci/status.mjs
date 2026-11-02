@@ -1,13 +1,13 @@
 #!/usr/bin/env node
 /**
  * Posts the `local-gate` commit status that branch protection on `main`
- * requires (D-119).
+ * requires (D-157).
  *
  * This is the load-bearing half of a gate that runs before the push rather
  * than after it: the checks run here, but the PR still has to show that they
  * did. It is a commit STATUS, posted through the REST API — not a workflow —
- * which is why it survived D-129 having deleted every workflow in this repo,
- * and why it needs no change now that [D-157] has brought some back. A commit
+ * which is why it survived every workflow in this repo being deleted in
+ * August 2026, and why it needs no change now that [D-157] has brought some back. A commit
  * status is bound to ONE commit SHA, so a green status can't drift onto later
  * work — push a new commit and the PR goes back to "waiting" until that commit
  * is certified too. That property is what makes a locally-run gate worth
@@ -19,7 +19,7 @@
  * from a runner. Whichever reports last for a given SHA wins.
  *
  * It is self-attested by construction: nothing stops someone posting green by
- * hand. That's an accepted trade for a solo repo (see D-119) — the value is the
+ * hand. That's an accepted trade for a solo repo (see D-157) — the value is the
  * mechanical "did you actually run it against THIS commit", not protection from
  * a determined operator lying to themselves.
  *

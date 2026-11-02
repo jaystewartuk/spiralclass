@@ -27,8 +27,8 @@
 The domain is the only unavoidable cost. Everything else is $0 until usage
 forces an upgrade — hosting included since 2026-09-23, when
 [D-184](../decisions/D-184.md) moved production from Fly onto Cloud Run's
-always-free grant. That is a different route to the $0 that
-[D-150](../decisions/D-150.md) set out to reach on the Oracle box.
+always-free grant. That is a different route to the $0 that the
+2026-09-02 plan set out to reach on the Oracle box.
 
 ---
 
@@ -109,17 +109,18 @@ always-free grant. That is a different route to the $0 that
 
 ### CI/CD — GitHub Actions
 
-> **As of [D-129](../decisions/D-129.md) (2026-08-25) this line item is £0 and
-> there is nothing left to tune.** Every workflow and composite action in this
-> repo is deleted — the deploy, the dispatch-only gate fallbacks, and all three
-> crons. Everything runs on the operator's machine, by hand
-> ([`LOCAL_AUTOMATION.md`](./LOCAL_AUTOMATION.md)). The rest of this section is
-> kept as the reasoning trail, because the levers it describes are the ones that
-> would matter again if Actions ever came back — and because the "stay private"
-> argument below is unchanged and still binding.
+> **From 2026-08-25 to 2026-09-04 this line item was £0 because there was
+> nothing to bill.** Every workflow and composite action in this repo was
+> deleted — the deploy, the dispatch-only gate fallbacks, and all three crons —
+> and everything ran on the operator's machine, by hand
+> ([`LOCAL_AUTOMATION.md`](./LOCAL_AUTOMATION.md)). It is £0 now because the
+> repository is public ([D-157](../decisions/D-157.md)). The rest of this section
+> is kept as the reasoning trail, because the levers it describes are the ones
+> that would matter again if the repository went private. The "stay private"
+> bullets below predate publication and no longer describe this repository.
 >
-> **What tipped it was not the arithmetic.** D-120 had already measured the
-> month down to ~780 billable minutes, comfortably inside the allowance. What
+> **What tipped it was not the arithmetic.** The 2026-08-17 cut had already
+> measured the month down to ~780 billable minutes, comfortably inside the allowance. What
 > the arithmetic did not prevent was the allowance emptying anyway: every
 > private repo's workflows started failing at once, and production's Postgres
 > went **eleven days with no backup** while the public repos stayed green. A
@@ -134,7 +135,7 @@ always-free grant. That is a different route to the $0 that
   product idea is already visible to anyone who signs up), hands attackers a map
   of a money-handling app, and muddies the IP/due-diligence story in any future
   sale. Keep it private.
-- **Largest structural cut to date — D-119 (2026-08-12): the test tiers moved
+- **Largest structural cut — 2026-08-12: the test tiers moved
   onto the dev machine.** The per-PR fan-out (`main-checks.yml` → five parallel
   `checks.yml` jobs, each with its own `pnpm install`, on every push to every
   PR) and the promote fan-out (integration + E2E + the browser suites)
@@ -143,15 +144,15 @@ always-free grant. That is a different route to the $0 that
   this laptop is arm64), three crons, and any dispatched fallback run. Combined
   with taking mobile builds and OTA publishes out of CI, the two biggest recurring line items
   are gone; the trims below are now the second-order levers, not the first.
-- **Second structural cut — D-120 (2026-08-17): the web deploy followed**, into
+- **Second structural cut — 2026-08-17: the web deploy followed**, into
   `pnpm promote` itself (~744 billable min/month, the largest single line).
-- **Final cut — D-129 (2026-08-25): everything else, deleted.** The three crons
+- **Final cut — 2026-08-25: everything else, deleted.** The three crons
   became `pnpm local synthetic | sweep`, run by hand with a staleness
   nag in the gate; the dispatch-only fallbacks went with them, which saves no
   minutes and removes the only path that worked without this machine. That cost
-  is stated in D-129 rather than discovered later.
+  is stated in [D-157](../decisions/D-157.md) rather than discovered later.
 - **Biggest minute sinks while Actions was still in use, in order:** the deploy
-  workflow (image build dominates); the nightly sweep (slimmed at D-119 to the
+  workflow (image build dominates); the nightly sweep (slimmed on 2026-08-12 to the
   unit suites + audit — the only checks a clock can break — via
   `time_dependent_only`); a dispatched fallback gate; chatty Dependabot (each PR
   re-ran the full matrix). Dependabot itself stays: it is not Actions and spends
@@ -173,8 +174,8 @@ always-free grant. That is a different route to the $0 that
   secret `TURBO_TOKEN`, and add the team slug as the repo **variable**
   `TURBO_TEAM` (both under Settings → Secrets and variables → Actions). The
   slug is not a secret, but it names an account, so it is a `vars` entry rather
-  than a literal in the workflow — this repository is public. **Post-D-129 this applies to the
-  local gate instead**: `pnpm gate` runs the same `turbo run typecheck` / `turbo
+  than a literal in the workflow — this repository is public. **It applies to the local gate
+  too**: `pnpm gate` runs the same `turbo run typecheck` / `turbo
 run lint`, so setting `TURBO_TOKEN`/`TURBO_TEAM` in the shell environment still
   buys the cache hits. Without them, turbo falls back to its local cache — never
   a hard failure.
@@ -188,8 +189,7 @@ run lint`, so setting `TURBO_TOKEN`/`TURBO_TEAM` in the shell environment still
   cloud runner, a paid Hetzner `self-hosted-x86` pool, a physical home mini-PC
   — are all reversed and their runbooks deleted
   ([D-164](../decisions/D-164.md)). The surviving arc is
-  [D-119](../decisions/D-119.md) → [D-129](../decisions/D-129.md) →
-  [D-157](../decisions/D-157.md) → [D-161](../decisions/D-161.md); the question
+  in [D-157](../decisions/D-157.md); the question
   is settled, so **do not re-derive it**.
 
 ### LLM — Anthropic API, pay-as-you-go
@@ -222,16 +222,16 @@ run lint`, so setting `TURBO_TOKEN`/`TURBO_TEAM` in the shell environment still
   pricing, so there's no cheaper tier to defer to — this is the
   end-state storage.
 
-### Video — self-hosted LiveKit (Compute Engine `e2-micro`, D-187)
+### Video — self-hosted LiveKit (Compute Engine `e2-micro`, D-16)
 
 - **Today:** production video runs on one Always Free `e2-micro` on Compute
-  Engine ([D-187](../decisions/D-187.md),
+  Engine ([D-16](../decisions/D-16.md),
   [`infra/gcp-livekit/`](../../infra/gcp-livekit/README.md)). The only line on
   its bill is the static IPv4 address, about $3.65/mo. It carries a class but
-  not egress, so class recording is off. D-187's graduation trigger is two
+  not egress, so class recording is off. D-16's graduation trigger is two
   overlapping classes, which means an `e2-medium`.
 - **The rollback is LiveKit Cloud's free Build tier**
-  ([D-182](../decisions/D-182.md)), kept as a commented line in the runtime env
+  ([D-16](../decisions/D-16.md)), kept as a commented line in the runtime env
   file. That tier is a hard cap, not a meter: 5,000 WebRTC participant-minutes
   a month, no overage, service stops. A 2-person class-hour spends 120 of them,
   so it is roughly 41 class-hours, and the next rung is Ship at $50/mo — an
@@ -240,26 +240,26 @@ run lint`, so setting `TURBO_TOKEN`/`TURBO_TEAM` in the shell environment still
 > [!IMPORTANT]
 > **The Oracle A1 box the rest of this section describes no longer exists.** It
 > was destroyed on 2026-09-19 and Oracle had no capacity to rebuild it
-> ([D-182](../decisions/D-182.md)). The bullets below are the arrangement
-> [D-183](../decisions/D-183.md) tried to get back to and
+> ([D-16](../decisions/D-16.md)). The bullets below are the arrangement
+> the 2026-09-20 Pay As You Go upgrade tried to get back to and
 > [D-184](../decisions/D-184.md) keeps as the way back; they are not a
 > description of anything running.
 
 - Previously the largest variable-cost vendor was never listed here at all
   (a real gap — see `docs/features/live-calls-video.md`). From
-  D-94 until 2026-09-19, both preview and production ran on a self-hosted LiveKit stack
+  D-16 until 2026-09-19, both preview and production ran on a self-hosted LiveKit stack
   (`livekit-server` + `livekit-egress` + Redis + Caddy) on a free-tier Oracle
   Cloud "A1" ARM box (2 OCPU/12GB) — **$0/mo direct cost**, replacing
   LiveKit Cloud's participant-minute billing entirely.
 - The real cost isn't zero, it's deferred: this box has no SLA and carried a
-  documented Oracle free-tier suspension risk ([D-49](../decisions/D-49.md)) —
-  the idle-reclaim half of which [D-183](../decisions/D-183.md) retired by
+  documented Oracle free-tier suspension risk —
+  the idle-reclaim half of which [D-184](../decisions/D-184.md) retired by
   making the tenancy Pay As You Go, while the no-SLA half stands — and its
   measured
   capacity ceiling is ~15-20 concurrent 2-participant rooms before packet
   loss (measured in the LiveKit spike; its runbook was deleted by
-  [D-110](../decisions/D-110.md), the number is the part worth keeping) — then shared across both
-  environments (D-94). The deferred cost is a purpose-built box once real
+  [D-164](../decisions/D-164.md), the number is the part worth keeping) — then shared across both
+  environments (D-16). The deferred cost is a purpose-built box once real
   concurrent load from a second/third teacher approaches that ceiling — see
   `ORACLE_LIVEKIT_PRODUCTION.md`'s "What this means going forward" for the
   exact graduation trigger.
@@ -267,14 +267,14 @@ run lint`, so setting `TURBO_TOKEN`/`TURBO_TEAM` in the shell environment still
   rotted.** CX22 is no longer sold and Hetzner raised prices twice in 2026;
   priced 2026-09-20, the EU ARM entry is CAX11 at €5.99/mo and CAX21 (4 vCPU,
   8 GB, 80 GB) at €10.49/mo. Re-price before quoting, and read
-  [D-183](../decisions/D-183.md) first for the two constraints that rule most
+  [D-184](../decisions/D-184.md) first for the two constraints that rule most
   of the cheap options out: Hetzner sells ARM in Germany and Finland only, so
   a media relay there sits ~160-190 ms from two people who are both in the Americas,
   and `scripts/oracle-push-images.sh` fails closed on a non-arm64 image, so an
   x86 box brings the QEMU cross-build back with it.
 - Recording storage rides the existing R2 line above (Egress uploaded
   directly, no separate line item). Recording has been off in production
-  since D-187; recordings already in R2 are untouched.
+  since D-16; recordings already in R2 are untouched.
 - Live captions cost nothing to run in the browser; their translation
   fallback is Google Cloud Translation, free for the first 500,000 characters
   a month and $20 per million after that (checked 2026-09-23 —

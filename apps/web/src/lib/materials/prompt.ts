@@ -1,5 +1,5 @@
 // AI compose prompt builder for materials (D-17 Phase 2, generalized by the
-// ClassContent/LibraryMaterial merge — D-69, docs/features/library-materials.md).
+// ClassContent/LibraryMaterial merge — docs/features/library-materials.md).
 //
 // Pure + side-effect-free so it's unit-testable without the Anthropic SDK. One
 // builder now serves both outputs ("one AI plumbing, two outputs"):
@@ -9,7 +9,7 @@
 //   * forClass: false — a standalone reusable library item, seeded by a level
 //     and the teacher's own category/format/theme taxonomy instead of one
 //     student's profile.
-// Both accept an optional lesson template (D-46): when present, its section
+// Both accept an optional lesson template (D-17): when present, its section
 // headings become the required structure regardless of scope.
 
 import {
@@ -27,10 +27,10 @@ import type {
 
 import type { AppLocale } from "@/lib/i18n";
 
-// Lesson format (D-88) — the platform is one-to-one only today (a `Booking`
+// Lesson format (D-17) — the platform is one-to-one only today (a `Booking`
 // has exactly one `studentId`; there is no multi-student booking concept
 // anywhere in the schema), so this directive is ALWAYS emitted, unlike the
-// D-78 style directives above which are opt-in. It is a switch on a typed
+// style directives above (tone, age, variety, note) which are opt-in. It is a switch on a typed
 // enum (`LessonFormat`, `@spiralclass/shared`) rather than a bare string so
 // that group-class support later is additive: add a "group" value to
 // `LESSON_FORMATS` and a case here, without touching any call site. Exported
@@ -45,7 +45,7 @@ export function lessonFormatDirective(format: LessonFormat | null | undefined): 
   }
 }
 
-// AI material style directives (teacher account-level, D-78). Each returns "" when
+// AI material style directives (teacher account-level, D-17). Each returns "" when
 // its field is unset, so `.filter(Boolean)` on the system array drops it and the
 // prompt is byte-identical to before the teacher opted in. These tune HOW the
 // model writes; they are appended AFTER the language-axis, structure, and
@@ -96,8 +96,8 @@ function customInstructionsDirective(custom: string | null | undefined): string 
   return `The teacher has additional style instructions that apply to all their materials. Follow them as fully as you can, but only where they do not conflict with the rules above about which language(s) to write in, the required structure, or the student's name — those rules always take priority. The instructions: "${c}"`;
 }
 
-// Vocabulary difficulty directive (D-80) — the axis the CEFR level no longer
-// controls. Always emitted (unlike the D-78 style directives): the whole point
+// Vocabulary difficulty directive (D-17) — the axis the CEFR level no longer
+// controls. Always emitted (unlike the tone/age/variety/note style directives): the whole point
 // of the feature is that the DEFAULT is accessible vocabulary, so a null
 // preference resolves to the everyday baseline rather than "no directive".
 // This governs ONLY word choice (frequency, idioms, uncommon synonyms,
@@ -163,7 +163,7 @@ export type MaterialPromptInput = {
   // authored. When present, it is the STRUCTURE the generated material must
   // follow: the model keeps these headings, in this order, and fills each for
   // the target, instead of the default shape. Teacher-owned data, never a
-  // platform curriculum (D-46). Length-bounded by the caller.
+  // platform curriculum (D-17). Length-bounded by the caller.
   templateBody?: string | null;
   // true = generating one specific class's content (booking-scoped);
   // false = a standalone reusable library material. Drives the framing and
@@ -187,21 +187,21 @@ export type MaterialPromptInput = {
   // than leaving the model to infer a subject from the output language (the
   // original bug: a language name was the only concrete noun in the prompt).
   targetLanguage?: string | null;
-  // AI material style (teacher account-level, D-78). All optional; unset =
+  // AI material style (teacher account-level, D-17). All optional; unset =
   // no directive, so today's output is unchanged. Read once by
   // handlers.ts#resolveSubject and applied to every generation path.
   tone?: MaterialTone | null;
   learnerAge?: MaterialLearnerAge | null;
   languageVariety?: string | null;
   customInstructions?: string | null;
-  // Vocabulary difficulty (D-80) — a separate axis from `levelLabel`. Controls
+  // Vocabulary difficulty (D-17) — a separate axis from `levelLabel`. Controls
   // word frequency / idioms / uncommon synonyms / technical terms only; the
   // CEFR level still drives grammar, structure, and concepts. The caller
   // resolves the effective value (class override ?? teacher default ?? everyday)
   // via resolveVocabulary; null here falls back to the everyday baseline inside
   // the directive, so the default output uses accessible vocabulary.
   vocabulary?: MaterialVocabulary | null;
-  // Lesson format (D-88). `undefined`/`null` resolves to `DEFAULT_LESSON_FORMAT`
+  // Lesson format (D-17). `undefined`/`null` resolves to `DEFAULT_LESSON_FORMAT`
   // ("one_to_one") inside `lessonFormatDirective` — there is no caller today
   // that would pass anything else, since the platform has no group-class
   // concept yet. Present so a future caller can pass a resolved teacher/class
@@ -236,7 +236,7 @@ export function buildMaterialPrompt(input: MaterialPromptInput): MaterialPrompt 
     input.forClass
       ? `You are an assistant that helps a private teacher prepare the written content for one class.`
       : `You are an assistant that helps a private teacher draft a reusable teaching material — something saved once and used across many classes, not written for a single lesson.`,
-    // One-to-one constraint (D-88) — foundational context, right after the
+    // One-to-one constraint (D-17) — foundational context, right after the
     // opening framing and before the subject, so it governs every activity
     // the model writes below rather than being a late caveat.
     lessonFormatDirective(input.lessonFormat),
@@ -271,7 +271,7 @@ export function buildMaterialPrompt(input: MaterialPromptInput): MaterialPrompt 
         : input.forClass
           ? `Keep it focused on a single class: a clear objective, the material to cover, a few worked examples, and a short practice or homework section.`
           : `Shape the material as a self-contained, ready-to-use resource: a clear title, the content itself, and (where relevant) a short practice or answer section.`,
-    // CEFR level (D-80): controls GRAMMAR complexity, sentence structures,
+    // CEFR level (D-17): controls GRAMMAR complexity, sentence structures,
     // discourse complexity, and the abstractness of ideas — deliberately NOT
     // the vocabulary difficulty, which the directive below owns. This split is
     // the fix for "a high level produced words even the teacher didn't know":
@@ -281,14 +281,14 @@ export function buildMaterialPrompt(input: MaterialPromptInput): MaterialPrompt 
       : input.forClass
         ? `Student level: not set — assume an introductory grammar and concept level.`
         : `Pitch the grammar and concepts to an introductory level, since no level was specified.`,
-    // Word choice, independent of the level above (D-80). Always present.
+    // Word choice, independent of the level above (D-17). Always present.
     vocabularyDirective(input.vocabulary),
     input.forClass
       ? (input.continueFromMaterials ?? []).some((m) => m.body.trim())
         ? `This class is a direct continuation of the previous class material given below (see "Continuing from"). Treat it as what the student already worked on: briefly reinforce the most important points rather than re-teaching them in full, then move forward — expand on what was introduced and/or bring in the natural next topic. Do not simply repeat that material, and do not jump to something unrelated to it.`
         : `Build on what has already been covered rather than repeating it.`
       : "",
-    // Teacher's account-level style (D-78) — how to write, layered on top of
+    // Teacher's account-level style (D-17) — how to write, layered on top of
     // the subject/structure/level rules above without changing them.
     toneDirective(input.tone),
     learnerAgeDirective(input.learnerAge),
@@ -391,17 +391,17 @@ export type MaterialRefinePromptInput = {
   // The language being TAUGHT — the subject (D-72), resolved to its English name
   // by the caller. Null when the teacher hasn't set one.
   targetLanguage?: string | null;
-  // AI material style (teacher account-level, D-78) — carried into a refine so a
+  // AI material style (teacher account-level, D-17) — carried into a refine so a
   // small edit doesn't quietly regress the material back toward the default
   // academic voice. Learner age / level are generation-only and omitted here.
   tone?: MaterialTone | null;
   languageVariety?: string | null;
   customInstructions?: string | null;
-  // Vocabulary difficulty (D-80) — carried into a refine so an edit doesn't
+  // Vocabulary difficulty (D-17) — carried into a refine so an edit doesn't
   // regress a Basic-vocabulary material back toward rarer words. Teacher-level
   // only (a refine has no booking/class context), same as tone above.
   vocabulary?: MaterialVocabulary | null;
-  // Lesson format (D-88) — carried into a refine so a free-text edit can't
+  // Lesson format (D-17) — carried into a refine so a free-text edit can't
   // reintroduce group/pair/team activities into an already-compliant
   // material. See `MaterialPromptInput.lessonFormat`.
   lessonFormat?: LessonFormat | null;
@@ -417,7 +417,7 @@ export function buildMaterialRefinePrompt(input: MaterialRefinePromptInput): Mat
 
   const system = [
     `You are an assistant that helps a private teacher revise an existing teaching material written in Markdown.`,
-    // One-to-one constraint (D-88) — same rule as buildMaterialPrompt, so a
+    // One-to-one constraint (D-17) — same rule as buildMaterialPrompt, so a
     // refine can't drift the material back toward group/pair/team activities.
     lessonFormatDirective(input.lessonFormat),
     target
@@ -440,7 +440,7 @@ export function buildMaterialRefinePrompt(input: MaterialRefinePromptInput): Mat
     // undo it — subordinate to the preservation rule above (custom last).
     toneDirective(input.tone),
     // Word choice on a refine: keep the material's vocabulary at the intended
-    // difficulty rather than drifting rarer while applying the edit (D-80).
+    // difficulty rather than drifting rarer while applying the edit (D-17).
     `When applying the change, keep the material's word choice at its intended difficulty. ${vocabularyDirective(input.vocabulary)}`,
     languageVarietyDirective(input.languageVariety, target),
     customInstructionsDirective(input.customInstructions),

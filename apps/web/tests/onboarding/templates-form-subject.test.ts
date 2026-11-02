@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 //
-// D-112: per-package "Subject" is hidden on the onboarding templates step and
+// D-72: per-package "Subject" is hidden on the onboarding templates step and
 // kept at /settings/templates. On a language-first platform the subject is a
 // property of the TEACHER (`targetLanguage`, asked at onboarding step 1), so
 // asking it again per package before she has a single student is friction that
@@ -31,7 +31,7 @@ const { formatMinorUnits: formatMinorUnitsForMock } = await vi.hoisted(
   async () => await import("@spiralclass/shared"),
 );
 vi.mock("@/components/locale-provider", () => ({
-  // D-197: the real formatter, in English, as the tests expect.
+  // D-153: the real formatter, in English, as the tests expect.
   useFormatMoney: () => (minorUnits: number, currency?: string) =>
     formatMinorUnitsForMock(minorUnits, currency, "en"),
   useT: () => (key: string) => key,
@@ -64,7 +64,7 @@ function visibleSubjectInputs(container: HTMLElement): Element[] {
   return Array.from(container.querySelectorAll('input[id^="subject-"]'));
 }
 
-describe("TemplatesForm — subject visibility (D-112)", () => {
+describe("TemplatesForm — subject visibility (D-72)", () => {
   let container: HTMLDivElement;
   let root: Root;
 

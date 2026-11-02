@@ -14,7 +14,7 @@ import { formatDateInZone } from "@/lib/tz";
 import { ReferralProgramForm, type ProgramInitial } from "./referral-program-form";
 
 // The teacher's referral surface: one program per teacher, off by default,
-// free on every tier (D-24).
+// free on every tier (D-125).
 //
 // The ORDER of this page is adaptive, on the same principle as
 // /dashboard/get-students: a screen shows you what to DO before what to read.

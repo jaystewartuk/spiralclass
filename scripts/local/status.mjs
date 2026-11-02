@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * When did each hand-run maintenance task last succeed? (D-129)
+ * When did each hand-run maintenance task last succeed? (D-157)
  *
  *   pnpm local:status
  *
@@ -63,7 +63,7 @@ export function staleWarnings() {
 
 function main() {
   const states = jobStates();
-  console.log("\n  Hand-run maintenance (D-129) — nothing runs these but you.\n");
+  console.log("\n  Hand-run maintenance (D-157) — nothing runs these but you.\n");
   for (const { job, record, ageHours, stale, lastRed } of states) {
     const mark = stale ? color.yellow("!") : color.green("✓");
     const green = ageHours === null ? "never run" : `last green ${fmtAge(ageHours)}`;

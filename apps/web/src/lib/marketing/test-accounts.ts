@@ -1,5 +1,5 @@
 /**
- * Which accounts are tests rather than people — the ONE definition (D-192).
+ * Which accounts are tests rather than people — the ONE definition (docs/features/admin-portal.md).
  *
  * Two ways a row is a test account, and both count everywhere:
  *

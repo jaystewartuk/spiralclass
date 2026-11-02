@@ -5,8 +5,9 @@ import { describe, expect, it } from "vitest";
 /**
  * A destructive migration names itself a contract (D-178).
  *
- * A production deploy migrates before its new code is live, and since D-177's
- * addendum the database job can succeed while the Fly job fails. Old code
+ * A production deploy migrates before its new code is live, and since the
+ * 2026-09-12 split (D-184) the database job can succeed while the serving job
+ * fails. Old code
  * therefore meets every new schema, for the length of a build at least. A
  * migration that drops, renames or narrows something breaks that code, unless
  * it ships a release after the code that stopped using it.

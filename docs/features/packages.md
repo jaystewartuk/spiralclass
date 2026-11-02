@@ -10,6 +10,14 @@ single pay-per-class offering), and each purchase (or manually recorded
 off-platform sale) creates one **package** instance for one student against
 one template.
 
+There is **no recurring student subscription**. An early version sold monthly
+subscriptions with a fixed quota of classes and removed them: pre-approvals,
+renewal failures, grace periods, monthly quotas and re-materialised bookings
+were more machinery than the product needed. A student buys a package, uses it
+and buys again; the consumed-package nudge
+(`apps/web/src/lib/notifications/package-consumed-nudge.ts`) prompts the
+repurchase.
+
 Packages are the bridge between money (`docs/features/payments.md`) and
 scheduling: a package holds a class count and an expiry date; a booking
 consumes one class from a package and is restored or not depending on
@@ -47,7 +55,7 @@ handling) live in a separate scheduling doc; this doc describes just enough of
 - A `PackageTemplate` belongs to exactly one teacher and defines: `name`,
   optional `subject` (free-text topic label, e.g. "Conversation" or "Business
   Spanish"), `classCount`, `classDurationMin` (default 50), `priceMinorUnits`,
-  `currency` (the teacher's chosen pricing currency, default MXN — see D-64),
+  `currency` (the teacher's chosen pricing currency, default MXN — see D-153),
   an optional `transferPriceMinorUnits` override, and `expirationMonths`.
 - **Every template must declare an expiration window in months.** This is
   required at the application/validation layer (not a hard DB constraint, for
@@ -57,7 +65,24 @@ handling) live in a separate scheduling doc; this doc describes just enough of
   pinned to `1` regardless of what's submitted (a tampered/stale form value
   can't sell "5 single classes" — the class count is force-set server-side).
   The student pays at the moment they reserve a specific time slot, rather
-  than buying a balance and booking later.
+  than buying a balance and booking later. It is a package of one, not a
+  separate product: checkout, payment and booking are reused unchanged. The
+  chosen slot rides on `packages.intended_start_utc` until `payment.paid`
+  lets the `auto-book-on-paid` job book it. The in-portal repurchase flow
+  (`/my-classes/buy`) has no slot picker, so a single class bought there is
+  paid first and booked from the balance.
+- **A multi-class package can carry its first class.** The buy page shows the
+  same slot picker for a package, **optional**, with a skip that stays a
+  first-class path. A chosen start rides checkout as `Package.intendedStartUtc`
+  and auto-book-on-paid (`lib/booking/auto-book-intended.ts`) books it when the
+  payment lands; the remaining credits are booked from the student portal after
+  sign-in. Nothing holds the slot before payment lands, so pre-payment copy
+  must not promise it is reserved; if it is taken or past by then, the credit
+  simply stays bookable. A paid buyer with no session cannot book later
+  classes: a third "paid but not signed in" authorization state on the booking
+  path was deliberately not built. A re-delivered payment event must not
+  re-book — the auto-book step checks for an existing booking at that start,
+  because on a multi-class package the balance check alone does not stop it.
 - **Wise-only pricing override**: a teacher may set a lower price for the
   Wise rail than for Stripe (to pass along the card-processing savings, or
   charge the same). If `transferPriceMinorUnits` is null, the Wise price falls back
@@ -152,7 +177,7 @@ remaining` so the booking/credit ledger treats it identically to a
   template's `expirationMonths` (if any) is applied from "now"; otherwise no
   expiry is set. An explicit date must be in the future.
 
-### Packages for two people ([D-188](../decisions/D-188.md))
+### Packages for two people ([D-149](../decisions/D-149.md))
 
 - A template may also be sold **for two people who take every class
   together** — a couple, two siblings. It then carries a price for two
@@ -260,8 +285,9 @@ created as part of that flow and flips to `active` when payment clears.
   window, archived flag.
 - **Package**: one purchased/recorded instance — teacher, student, optional
   template link, classes total/used, schedule-change budget used, duration,
-  price paid, currency, purchase date, expiry date, intended start time (for
-  pay-at-reservation single classes), status.
+  price paid, currency, purchase date, expiry date, intended start time (the
+  slot picked before paying — required for a single class, an optional first
+  class for a package), status.
 - **Booking**: references a package; carries whether it currently counts
   against that package's balance.
 - **Payment**: the money side of a platform purchase (see Payments doc) —

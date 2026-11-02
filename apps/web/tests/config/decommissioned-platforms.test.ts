@@ -4,14 +4,14 @@ import { join, relative, resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 import { REPO_ROOT } from "../../../../scripts/env-config.mjs";
 
-// Supabase and Vercel are both decommissioned, and Vercel twice: D-89 Phase 5
-// tore the project down, [D-177] brought it back as a failover that held no
-// domain, and [D-186] retired that failover again. Read the history before
+// Supabase and Vercel are both decommissioned, and Vercel twice: Phase 5 tore
+// the project down, it came back as a failover that held no domain, and that
+// failover was retired on 2026-09-23 — all in [D-70]. Read the history before
 // widening or relaxing anything here:
 //
 //   * Supabase is gone entirely — no @supabase/supabase-js dependency, no
 //     SUPABASE_* / NEXT_PUBLIC_SUPABASE_* reads, no platform, no target.
-//   * Vercel is gone as a target, and the COUPLING D-89 removed never came
+//   * Vercel is gone as a target, and the COUPLING D-70 removed never came
 //     back even while it was one: no VERCEL_ENV branch in the app, no
 //     @vercel/* dependency, no root vercel.json. prod-vs-preview is decided by
 //     APP_URL. The failover needed no application change, which is the
@@ -20,7 +20,7 @@ import { REPO_ROOT } from "../../../../scripts/env-config.mjs";
 // So the patterns below guard the coupling, and BANNED_FILES now also guards
 // the target's own machinery — the deploy script, its config directory and the
 // env push — because a second path to production is what a partial revert of
-// D-186 would quietly restore.
+// D-70 would quietly restore.
 //
 // That state is currently held by convention alone. A reintroduction would not
 // fail any existing check — it type-checks, lints, and builds, and on a preview
@@ -47,7 +47,7 @@ const PACKAGE_JSONS = ["package.json", "apps/web/package.json", "packages/shared
  *
  * This is the gap D-164 found: the `Dockerfile` still declared `SUPABASE_URL`,
  * `SUPABASE_ANON_KEY` and `SUPABASE_SERVICE_ROLE_KEY` as build-time `ENV`,
- * feeding a Zod schema that had dropped all three when D-89 decommissioned
+ * feeding a Zod schema that had dropped all three when D-70 decommissioned
  * Supabase — for months, past every run of this file, because a Dockerfile is
  * not under `apps/web/src`. Placeholder credentials for a torn-down platform
  * are not load-bearing, but they are the strongest possible signal to the next
@@ -77,14 +77,14 @@ const NO_COMMENT_CONFIGS = new Set(["turbo.json"]);
 const BARE_NAME_PATTERNS: ReadonlyArray<{ pattern: RegExp; why: string }> = [
   {
     pattern: /\b(NEXT_PUBLIC_)?SUPABASE_[A-Z_]+\b/,
-    why: "names a SUPABASE_* variable — Supabase is decommissioned (D-89 Phase 5)",
+    why: "names a SUPABASE_* variable — Supabase is decommissioned (D-70 Phase 5)",
   },
   {
     pattern: /\bVERCEL_[A-Z_]+\b/,
     why:
       "names a VERCEL_* variable in committed build/deploy config — Vercel is decommissioned " +
-      "(D-186), and the app learning which platform it is on is what APP_URL already answers " +
-      "(D-89 Phase 5)",
+      "(D-70), and the app learning which platform it is on is what APP_URL already answers " +
+      "(D-70 Phase 5)",
   },
 ];
 
@@ -92,9 +92,9 @@ const BARE_NAME_PATTERNS: ReadonlyArray<{ pattern: RegExp; why: string }> = [
  * Files that must not come back at all.
  *
  * `vercel.json` is the config Vercel reads AUTOMATICALLY, so committing one is
- * how a repository acquires a deploy trigger nobody typed — D-89 ruled that out
- * and D-150's addendum settled it again ("every deploy runs through GitHub
- * Actions"). The rest is the failover's own machinery, retired by [D-186]: a
+ * how a repository acquires a deploy trigger nobody typed — [D-70] rules that
+ * out: every deploy runs through GitHub Actions. The rest is the failover's own
+ * machinery, retired on 2026-09-23 ([D-70]): a
  * deploy script, the config only it read, and the push that kept the project's
  * copy of production secrets fresh. Any one of them back, alone, is a path to
  * production — or a set of live secrets — that no release exercises.
@@ -102,15 +102,15 @@ const BARE_NAME_PATTERNS: ReadonlyArray<{ pattern: RegExp; why: string }> = [
 const BANNED_FILES: ReadonlyArray<readonly [string, string]> = [
   [
     "vercel.json",
-    "is the config Vercel reads AUTOMATICALLY, which is a deploy trigger nobody typed (D-89, D-186)",
+    "is the config Vercel reads AUTOMATICALLY, which is a deploy trigger nobody typed (D-70)",
   ],
-  ["vercel.jsonc", "same as vercel.json (D-186)"],
-  ["config/vercel", "configured the retired Vercel failover (D-186)"],
-  ["scripts/vercel-deploy.sh", "deployed the retired Vercel failover (D-186)"],
-  ["scripts/vercel-env.mjs", "synced production secrets into the retired Vercel project (D-186)"],
+  ["vercel.jsonc", "same as vercel.json (D-70)"],
+  ["config/vercel", "configured the retired Vercel failover (D-70)"],
+  ["scripts/vercel-deploy.sh", "deployed the retired Vercel failover (D-70)"],
+  ["scripts/vercel-env.mjs", "synced production secrets into the retired Vercel project (D-70)"],
   [
     "infra/infisical/push-vercel-env.sh",
-    "pushed production secrets into the retired Vercel project (D-186)",
+    "pushed production secrets into the retired Vercel project (D-70)",
   ],
 ];
 
@@ -118,11 +118,11 @@ const BANNED_FILES: ReadonlyArray<readonly [string, string]> = [
 const DEPLOY_CONFIG_PATTERNS: ReadonlyArray<{ pattern: RegExp; why: string }> = [
   {
     pattern: /\b(NEXT_PUBLIC_)?SUPABASE_[A-Z_]+\s*=/,
-    why: "sets a SUPABASE_* variable — Supabase is decommissioned (D-89 Phase 5) and no schema reads it",
+    why: "sets a SUPABASE_* variable — Supabase is decommissioned (D-70 Phase 5) and no schema reads it",
   },
   {
     pattern: /\bVERCEL_(ENV|URL)\s*=/,
-    why: "sets a VERCEL_* variable — the app must stay platform-neutral (D-89 Phase 5, D-186); prod-vs-preview is decided by APP_URL",
+    why: "sets a VERCEL_* variable — the app must stay platform-neutral (D-70 Phase 5); prod-vs-preview is decided by APP_URL",
   },
 ];
 
@@ -136,24 +136,24 @@ const DEPLOY_CONFIG_PATTERNS: ReadonlyArray<{ pattern: RegExp; why: string }> = 
 const BANNED_PATTERNS: ReadonlyArray<{ pattern: RegExp; why: string }> = [
   {
     pattern: /process\.env\.(NEXT_PUBLIC_)?SUPABASE_[A-Z_]+/,
-    why: "reads a SUPABASE_* env var — Supabase is decommissioned (D-89 Phase 5); the database is Neon and object storage is Cloudflare R2",
+    why: "reads a SUPABASE_* env var — Supabase is decommissioned (D-70 Phase 5); the database is Neon and object storage is Cloudflare R2",
   },
   {
     // The single most load-bearing pattern in the file. The app reads neither
     // of these: prod-vs-preview is decided by APP_URL, which is why it moved
     // from Vercel to Fly to Cloud Run — and briefly ran on Vercel again as a
-    // failover ([D-177], retired by [D-186]) — with no application change.
+    // failover (2026-09-10 to 2026-09-23, [D-70]) — with no application change.
     pattern: /process\.env\.VERCEL_(ENV|URL)\b/,
-    why: "branches on a VERCEL_* env var — the app must stay platform-neutral (D-89 Phase 5, D-186); prod-vs-preview is decided by APP_URL",
+    why: "branches on a VERCEL_* env var — the app must stay platform-neutral (D-70 Phase 5); prod-vs-preview is decided by APP_URL",
   },
   {
     pattern: /from\s+["']@supabase\/|require\(\s*["']@supabase\//,
-    why: "imports the Supabase SDK — Supabase is decommissioned (D-89 Phase 5)",
+    why: "imports the Supabase SDK — Supabase is decommissioned (D-70 Phase 5)",
   },
 ];
 
 // A runtime `@vercel/*` import is the coupling this whole file exists to
-// prevent (D-89 Phase 5, D-186).
+// prevent (D-70).
 const BANNED_DEPENDENCIES = [/^@supabase\//, /^@vercel\/(?!analytics$)/];
 
 const SOURCE_EXTENSIONS = [".ts", ".tsx", ".js", ".jsx", ".mjs"];
@@ -243,7 +243,7 @@ describe("decommissioned platforms stay decommissioned", () => {
     expect(
       banned,
       `${relPath} depends on ${banned.join(", ")} — Supabase and Vercel are decommissioned ` +
-        `(D-89 Phase 5). Do not reintroduce the dependency.`,
+        `(D-70 Phase 5). Do not reintroduce the dependency.`,
     ).toEqual([]);
   });
 

@@ -1,4 +1,4 @@
-// Parser for the non-secret config files in config/env/ (D-85).
+// Parser for the non-secret config files in config/env/ (D-70).
 //
 // The .env grammar is the strict intersection of what bash (docker-entrypoint.sh
 // + dev.sh), this Node module, and the same shell in the Docker image can all

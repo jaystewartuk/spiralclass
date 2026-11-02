@@ -111,7 +111,7 @@ export function useCaptionFeed(room: Room | null): CaptionFeed {
 // side of the call.
 //
 // The teacher's client writes `captionsOn` as a LiveKit participant
-// attribute (D-27), which both browsers read to decide what to recognise
+// attribute (D-185), which both browsers read to decide what to recognise
 // (use-browser-captions.ts). LiveKit broadcasts attribute changes to every
 // participant, so the STUDENT reads the same flag for the band too — without
 // it, her only evidence that subtitles existed was a line appearing, one

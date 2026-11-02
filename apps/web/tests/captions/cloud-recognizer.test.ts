@@ -11,7 +11,7 @@ import {
   type WebSocketCtorLike,
 } from "@/lib/captions/cloud-recognizer";
 
-// The phone-to-phone fallback's streaming client (D-185's addendum), against
+// The phone-to-phone fallback's streaming client (D-185), against
 // a fake WebSocket, MediaRecorder, token route and clock: it opens the socket
 // with the token as the bearer subprotocol, records the call's own mic track
 // into it, passes on finals only, reconnects with backoff on a fresh token,

@@ -23,7 +23,7 @@
 
 // Credits are fungible only within one (teacher, student-identity-set, class
 // length, seats) pool — you can't spend a 50-minute credit on a 25-minute
-// class, and you can't spend a one-person credit on a class for two (D-188).
+// class, and you can't spend a one-person credit on a class for two (D-149).
 // The seat axis is D-149's "format" axis for the one multi-person shape that
 // ships: a class for two costs more per class than a class for one, so a
 // shared pool would let a cheaper credit pay for a dearer class.
@@ -200,7 +200,7 @@ export type BookablePackageLite = {
 export type CreditPoolSummary = {
   teacherId: string;
   classDurationMin: number;
-  // 2 = the balance of packages bought for two (D-188), shown apart from the
+  // 2 = the balance of packages bought for two (D-149), shown apart from the
   // one-person balance so the split never reads as missing classes.
   seats: number;
   classesLeft: number;

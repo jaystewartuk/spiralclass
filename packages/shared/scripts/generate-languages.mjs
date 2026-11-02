@@ -21,7 +21,7 @@ const en = new Intl.DisplayNames(["en"], { type: "language", fallback: "none" })
 const es = new Intl.DisplayNames(["es"], { type: "language", fallback: "none" });
 
 // Live captions need Deepgram streaming ASR + a language that reads naturally in
-// the Claude translation prompt (D-27's bar). Everything else is teachable
+// the Claude translation prompt (the bar captions launched with). Everything else is teachable
 // but not captionable.
 const ASR = new Set(["es", "en", "pt", "fr", "de", "it", "nl", "ja", "ko", "zh", "ru", "hi"]);
 

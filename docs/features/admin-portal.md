@@ -111,7 +111,7 @@ disabledAt }`. `role` is one of `superadmin`, `finance`, `support`,
   teacher's passwordless sign-in link), independent of the disable/enable
   toggle.
 
-### Test accounts ([D-192](../decisions/D-192.md))
+### Test accounts
 
 - A **support**-or-above operator can mark a Teacher or Student as a **test
   account**, or unmark it. A reason is required either way, and the change is
@@ -123,7 +123,23 @@ disabledAt }`. `role` is one of `superadmin`, `finance`, `support`,
     her earnings, paid in advance and roster figures.
   - **A test teacher** sees everything.
 - Test in a test teacher. When a real teacher's live page has to be tested as
-  a buyer, mark that student first.
+  a buyer, mark that student first, and refund the charge after.
+- The flag is set **only** by that admin action — never self-serve, by a
+  teacher, a student or an API handler, and never inferred. It never gates
+  sign-in, booking, payment or entitlements, and never hides or deletes rows.
+  It is not `comped`, which is billing.
+- A row is also treated as a test account if it matches the **shape** rule
+  (seed and fixture slugs, `.test` and `@example.com` emails).
+- **One definition.** Every figure over teachers, students, packages,
+  bookings or payments takes its exclusion from
+  `apps/web/src/lib/marketing/test-accounts.ts` — `realStudentsOf(teacher)`
+  for one teacher's figures, `REAL_PACKAGE_WHERE` / `NOT_TEST_ACCOUNT` for
+  platform roll-ups. Nothing enforces this mechanically, so a new figure must
+  remember it.
+- Not yet excluded: admin CSV exports, the ledger's monthly received
+  subtotals, the commission report and Wise renewals.
+- PostHog receives an `is_test_account` person property from the server and
+  client identify calls; earlier events are not rewritten.
 
 ### Packages (admin)
 
@@ -177,9 +193,23 @@ disabledAt }`. `role` is one of `superadmin`, `finance`, `support`,
   cost without a real vendor invoice yet existing.
 - `EconomicsAssumptions`: a **singleton** row (`id = "default"`) holding
   manually-maintained FX rates (USD/MXN/EUR → GBP — GBP is the owner's
-  money-of-record here per D-58) and a cost-allocation basis (default:
+  money-of-record here, the platform entity being UK-established) and a cost-allocation basis (default:
   `active_teachers`), plus an `fxAsOf` marker so the UI can show "FX as of
   {date}" rather than implying a live feed.
+- **The estimate layer's rules.** Pricing is data, not code: a provider's
+  specifics live in its `Integration.pricingModel` JSON, evaluated by one
+  generic engine (`packages/shared/src/economics-pricing.ts`) with no
+  per-provider branches, so adding an integration needs no migration and no
+  code. Integration categories are a shared constant, deliberately not an
+  extension of the actuals' `ExpenseCategory` enum. Estimates are never
+  written back into, or blended with, `/admin/money`'s actuals. FX is an
+  explicit, dated, admin-edited assumption with no live feed, and an
+  integration that cannot be priced (bad JSON, unknown currency) contributes
+  £0 with a visible warning rather than failing the page.
+- `EconomicsAssumptions` also feeds the approximate-USD hint on the public buy
+  page (`apps/web/src/lib/pricing/approx-usd.ts`), which stops rendering once
+  the rates are more than 60 days old — so a rate set for the P&L moves what
+  buyers see.
 - This is a distinct system from the Cash-Flow dashboard
   (`docs/product/` / `project_cashflow_dashboard_decision`) — economics
   blends estimated _costs_ against revenue for unit economics; cash-flow is
@@ -264,7 +294,7 @@ disabledAt }`. `role` is one of `superadmin`, `finance`, `support`,
 - `Override` — the audit-log entity every admin mutation writes to.
 - `LessonInsight`, `HomeworkAiReviewDraft` — the AI acceptance figures on the
   Overview (kept over decided, with the unreviewed count beside it), counts
-  only and never content ([D-23](../decisions/D-23.md),
+  only and never content ([D-22](../decisions/D-22.md),
   [D-201](../decisions/D-201.md)); test accounts are left out.
 
 ## Edge Cases

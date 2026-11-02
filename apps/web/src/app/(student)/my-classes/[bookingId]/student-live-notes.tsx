@@ -11,12 +11,12 @@ type LiveNote = { id: string; body: string };
 // window is open we poll and re-run the server component on an interval, so a
 // note the teacher adds or edits mid-class appears without a manual refresh
 // (was a Supabase Realtime `postgres_changes` subscription — moved to portable
-// polling per D-49/D-44 to keep the DB provider-swappable; see
+// polling per D-70 to keep the DB provider-swappable; see
 // use-visibility-polling.ts).
 //
 // Security is NOT trusted to any client-side signal: router.refresh() always
 // re-runs the server component, which re-applies the server-side audience
-// filter + the class-window gate (D-15) on every poll.
+// filter + the class-window gate on every poll.
 export function StudentLiveNotes({
   notes,
   windowOpen,

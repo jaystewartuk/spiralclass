@@ -50,7 +50,7 @@ webhook.
 | Founding (Pro) | £5.99  | /month   | Price **locked for life**, cohort-gated             |
 | Comped (Pro)   | —      | —        | Internal flag, never billed, always full Pro        |
 
-- Canonical billing currency is **GBP** as of **D-99** (2026). It was **MXN**
+- Canonical billing currency is **GBP** as of **D-153** (2026). It was **MXN**
   before that (a launch-era default). A pre-D-99 subscriber's
   actual billing currency is whatever is stored on their own subscription
   row, sourced from their real Stripe object — it is **never** reinterpreted
@@ -59,7 +59,7 @@ webhook.
 - Money throughout is integer minor units (pence for GBP, centavos for MXN).
 - This pricing/currency is entirely independent from what a teacher charges
   her own students (that's the teacher's own chosen marketplace pricing
-  currency, default MXN, chosen once at onboarding — see D-64 and the
+  currency, default MXN, chosen once at onboarding — see D-153 and the
   Payments doc).
 
 ### Trial
@@ -136,7 +136,7 @@ payout Transfer (see Payments doc), tiered by subscription standing:
   within **90 days** of the platform's launch date (`FOUNDING_WINDOW_DAYS`
   from `LAUNCH_DATE`). Whichever condition is hit first closes the cohort.
 - The founding price is **locked for the life of that subscription** even if
-  the config-table price changes later, or the currency changes (D-99): a
+  the config-table price changes later, or the currency changes (D-153): a
   subscriber's own stored `lockedPriceMinorUnits`/`currency` is authoritative,
   never re-derived from the table after activation.
 
@@ -302,10 +302,15 @@ comped teacher is always treated as fully Pro regardless of status).
 - **Teacher.referralSource**: nullable ambassador attribution stamped at
   signup.
 - **Entitlements** (computed, not stored): plan, effective status, `isPro`,
-  `isTrialing`, `isPastDue`, `comped`, the five Pro-feature booleans, student/
-  template limits, and the marketplace commission rate — always derived live
-  from the subscription row + current clock via the one resolver function,
-  never read as raw DB fields elsewhere.
+  `isTrialing`, `isPastDue`, `comped`, the Pro-feature booleans and the
+  student/template limits — always derived live from the subscription row +
+  current clock via the one resolver, `entitlementsFor()` in
+  `packages/shared/src/subscriptions-entitlements.ts`, never read as raw DB
+  fields elsewhere. There is no commission rate: nothing is withheld at the
+  charge. Plans, caps and capabilities are code-defined constants changed
+  through a pull request, deliberately not a database-editable matrix. The
+  server gate is authoritative; a control that shows a Pro lock before the
+  teacher clicks is UX on top of it, never instead of it.
 
 ## Edge Cases
 
@@ -325,6 +330,10 @@ comped teacher is always treated as fully Pro regardless of status).
 - **A pre-D-99 MXN subscriber renews after the platform's canonical currency
   switched to GBP.** Their renewal/upgrade math continues to use their own
   stored MXN price/currency — never silently re-priced into GBP.
+- **An ambassador's referred cohort spans both currencies** (some invoices
+  MXN, some GBP). The ambassador commission report
+  (`apps/web/src/lib/subscriptions/commission.ts`) does not partition by
+  currency, so the admin running it checks the mix by eye.
 - **A comped teacher is also billed** (shouldn't happen, but if a Stripe event
   arrived for a comped account) — comped teachers are treated as Pro
   regardless of `status`, so a stray billing event doesn't change their

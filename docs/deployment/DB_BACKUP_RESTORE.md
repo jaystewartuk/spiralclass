@@ -2,8 +2,8 @@
 
 This is the operator runbook for production database safety: what protects
 production today, how to check on it, and the fastest safe recovery procedure
-if a migration or bad data change needs undoing. Rewritten 2026-07-20 (D-95)
-after the D-70 Fly + Neon cutover was confirmed executed (D-89) — production
+if a migration or bad data change needs undoing. Rewritten 2026-07-20 (D-178)
+after the D-70 Fly + Neon cutover was confirmed executed — production
 is now confirmed on Neon (see "How do I know production is actually on Neon?"
 below), which changes the right primary mechanism from a pg_dump snapshot to
 Neon's own point-in-time restore (PITR) and branching.
@@ -42,7 +42,7 @@ ordering to keep correct.
 Old checkpoints beyond the most recent 5 (per branch, tunable via `--keep`) are
 pruned automatically in the same step. The retention number lives once, in
 `neon-checkpoint.sh`; `apps/web/tests/config/local-gate.test.ts` pins the
-local script's checkpoint-before-migrate ordering, so the D-120 regression that
+local script's checkpoint-before-migrate ordering, so the August 2026 regression that
 dropped it from the local path can't recur silently.
 
 Retention is bounded from both directions and the script enforces the upper
@@ -58,17 +58,17 @@ accident. To read a checkpoint's data directly, attach one on demand with
 `neonctl branches add-compute <name>`.
 
 **Secondary, off-platform: `scripts/local/backup-prod-db.sh` — ON DEMAND, NOT A
-ROUTINE.** ⚠️ **Decided 2026-08-25** ([D-129](../decisions/D-129.md) addendum):
+ROUTINE.** ⚠️ **Decided 2026-08-25** ([D-157](../decisions/D-157.md)):
 **Neon backs production up**, so there is no `pnpm local backup`, no registered
 job and no staleness nag. Run this by hand when you specifically want a copy
 that lives outside Neon — before a migration risky enough to justify it. What
 that gives up (a Neon-account-level incident, and anything noticed after the
-PITR window closes) is written down in the addendum. The rest of this section
+PITR window closes) is written down in [D-157](../decisions/D-157.md). The rest of this section
 describes the script as it stands. A `pg_dump -Fc` → verify →
 upload-to-R2 job (`scripts/local/backup-prod-db.sh`), same contract as before
-D-95, and **run by hand from the operator's machine** — D-129 deleted
-`backup-prod-db.yml` along with every other workflow. It does not gate a deploy
-and never did after D-95. Run it before something risky enough to want a copy
+the July 2026 move to Neon checkpoints, and **run by hand from the operator's machine** — `backup-prod-db.yml` was
+deleted along with every other workflow on 2026-08-25. It does not gate a deploy
+and never did after that move. Run it before something risky enough to want a copy
 that survives a Neon-account-level incident or outlives Neon's PITR retention
 window, and otherwise about weekly. It is not routine deploy hygiene; Neon's
 PITR + the checkpoint branch cover that faster and more reliably (and without
@@ -77,7 +77,7 @@ the pg_dump/pg_restore client-version fragility that broke this exact job on
 pinning a major, for that reason).
 
 **You do not find out it has not run, and that is now intentional.** The
-staleness receipt and the `pnpm gate` nag that D-129 built for this job went
+staleness receipt and the `pnpm gate` nag built for this job went
 with the job itself on 2026-08-25 — a standing warning about a decision already
 made trains you to skim the banner the other jobs depend on. Production's
 recovery story is Neon's, above.
@@ -92,9 +92,9 @@ failed dump, or a dump that does not verify is an error, never a skip. It needs
 `libpq` (`brew install libpq`) and `awscli` on the machine.
 
 **Which database does the backup actually back up?** The Neon
-cutover **has been executed** (D-89; `docs/decisions/D-89.md`).
+cutover **has been executed** (D-70; `docs/decisions/D-70.md`).
 Production runs on Cloud Run (Fly until 2026-09-23, D-184) + a **Neon
-production project**; Supabase is decommissioned (D-89 Phase 5). `PROD_BACKUP_DB_URL`
+production project**; Supabase is decommissioned (D-70 Phase 5). `PROD_BACKUP_DB_URL`
 was repointed to the Neon production project's direct connection string at
 cutover, in the same step that `PROD_DATABASE_URL`/`PROD_DIRECT_URL` were set
 (`PRODUCTION_CUTOVER.md` Phase 3) — otherwise the job would keep "succeeding"
@@ -156,7 +156,7 @@ drift from reality.
 
 ## Rollback procedure — a production migration fails or ships bad data
 
-**Production is on Neon (D-89), so Neon branching + PITR via
+**Production is on Neon (D-70), so Neon branching + PITR via
 `neon-rollback.sh` is THE fast path.** The R2 dump restore below is the
 fallback for when the incident falls outside Neon's PITR retention window
 (and no checkpoint branch covers it either), or you need a target off Neon
@@ -190,7 +190,7 @@ entirely.
    necessarily need a restore at all.
 6. Exit maintenance mode once verified.
 
-**This is a major payoff of the Neon cutover** (`PRODUCTION_CUTOVER.md`, D-89)
+**This is a major payoff of the Neon cutover** (`PRODUCTION_CUTOVER.md`, D-70)
 from a disaster-recovery standpoint, independent of any other cutover
 motivation: PITR + branching turns "restore prod" from an hours-scale manual
 operation into a minutes-scale, low-risk one.
@@ -263,8 +263,7 @@ preferred whenever the incident is within PITR/checkpoint coverage.
 3. **An actual restore drill.** Pick a quiet window, checkpoint a scratch
    branch, restore it, and confirm the whole procedure above works
    end-to-end. Nothing here has been exercised for real yet.
-4. **Branch protection on `production`** — unchanged from the previous
-   recommendation, still not implemented, and now largely moot: branch
-   protection is a paid feature on private repos on this plan, and there is no
-   `PROMOTE_TOKEN` actor left to allow, since promoting is a local command
-   (D-119/D-129). `CLAUDE.md` documents the opposite as deliberate.
+4. **Branch protection on `production`** — done. A ruleset lets only an admin
+   move the branch, the `production` environment requires the owner's
+   approval, and `pnpm promote` refuses without both
+   ([D-199](../decisions/D-199.md), [`BRANCH_PROTECTION.md`](./BRANCH_PROTECTION.md)).

@@ -1,9 +1,9 @@
-# Neon — provisioning + migration (D-49 provider swap)
+# Neon — provisioning + migration (D-70 provider swap)
 
 This directory is the "future `neon/` module" the original `database/supabase`
-Tofu module's README named a spot for, back when D-49 first planned the
+Tofu module's README named a spot for, back when D-70 first planned the
 provider swap — that module (and Supabase itself) has since been fully
-retired (D-89) and removed from the repo. This one is **not** an OpenTofu
+retired (D-70) and removed from the repo. This one is **not** an OpenTofu
 module (no stable/needed Terraform provider work has been done here) — Neon
 project creation is a manual, interactive step (console sign-in, no API key
 wired into this repo yet), so this is an operator runbook, not IaC.
@@ -12,7 +12,7 @@ wired into this repo yet), so this is an operator runbook, not IaC.
 
 **Neon needs no special handling at all.** `apps/web/prisma/migrations/` holds
 two migrations with zero Supabase-specific SQL — a generated schema baseline
-and the hand-authored Postgres invariants beside it ([D-168](../../../docs/decisions/D-168.md);
+and the hand-authored Postgres invariants beside it ([D-178](../../../docs/decisions/D-178.md);
 the Supabase-era RLS, `auth.uid()`/`auth.users`, `anon`/`authenticated` grants
 and the Realtime publication went at the 2026-07-13 squash, D-70). So a fresh
 Neon database just runs `prisma migrate deploy` like any other environment —
@@ -94,7 +94,7 @@ neonctl projects list --org-id "$NEON_ORG_ID" --output json
 
 The production project is `spiralclass-use1`, id from `neonctl projects list`.
 There is no preview project: preview has no host
-([D-184](../../../docs/decisions/D-184.md)'s addendum). The table that stood
+([D-184](../../../docs/decisions/D-184.md)). The table that stood
 here named two projects, `agendaprofe-preview` and `agendaprofe-production`,
 long after neither existed under those names.
 
@@ -146,7 +146,7 @@ keeping so neither is re-derived:
 1. **The agent harness's permission layer** — the thing that prompts on, or
    refuses, a destructive command. This is the real control, and unlike the two
    above it is not routed around by holding a different connection string.
-2. **Neon PITR plus the D-95 pre-migration checkpoint branch**
+2. **Neon PITR plus the D-178 pre-migration checkpoint branch**
    (`infra/database/scripts/neon-rollback.sh`) — recovery, for when something
    does get through.
 
@@ -172,7 +172,7 @@ and now refuses up front if retention no longer fits under the ceiling, so a
 forgotten rehearsal branch turns into a legible error before the deploy rather
 than a "branches limit exceeded" during it.
 Exhausting the ceiling is not a soft failure — the checkpoint is the first step
-of the production deploy job and D-95 refuses to migrate without one, so it
+of the production deploy job and D-178 refuses to migrate without one, so it
 soft-locks production deploys entirely. That happened on 2026-07-29 (fixed in
 `fea9542c` by pruning before creating); don't recreate it from the other
 direction.
@@ -192,7 +192,7 @@ for your current plan."_ Launch allows 2, Scale 5.
 
 **The risk this accepts:** nothing on Neon's side stops the production branch
 being deleted or reset by whatever holds a management credential. The
-compensating control is Neon's PITR plus the D-95 pre-migration checkpoint,
+compensating control is Neon's PITR plus the D-178 pre-migration checkpoint,
 which is what actually recovers the data if it happens — recovery rather than
 prevention, deliberately. See "Neon is left at its defaults" above for why the
 preventive options were dropped instead of stacked.
@@ -227,13 +227,13 @@ protected, so `neon-checkpoint.sh` keeps deleting them normally. Only
 `production` itself becomes undeletable, which is the point.
 
 One thing to re-check before enabling it, if the plan is ever upgraded: the
-D-95 rollback path is `neonctl branches restore production <source>`
+D-178 rollback path is `neonctl branches restore production <source>`
 (`infra/database/scripts/neon-rollback.sh`), and protection blocks `branches
 reset`. Those are different operations, but confirm `restore` still works on a
 protected branch — cheaply, by protecting a throwaway branch on the **preview**
 project and restoring it — before relying on the rollback net in an incident.
 
-## Nothing stays on Supabase any more (D-89)
+## Nothing stays on Supabase any more (D-70)
 
 Storage was already on R2 by default before this squash
 (`apps/web/src/lib/storage/provider.ts`); the Supabase-storage rollback
@@ -242,7 +242,7 @@ removed once that soak period completed. `apps/web/src/lib/env.ts` has the
 current, authoritative note on this — there is no `@supabase/supabase-js`
 dependency, no `SUPABASE_*`/`NEXT_PUBLIC_SUPABASE_*` env var, and no
 Supabase code path left anywhere in the app. See
-`docs/decisions/D-89.md` for the full decommission record.
+`docs/decisions/D-70.md` for the full decommission record.
 
 ## Ongoing operational note
 

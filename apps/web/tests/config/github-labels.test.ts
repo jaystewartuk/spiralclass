@@ -33,7 +33,7 @@ const REPO_LABELS = new Set([
   "accessibility",
   "ci",
   "dependencies",
-  // The triage priorities D-172 describes, named by the /issue skill.
+  // The triage priorities D-164 describes, named by the /issue skill.
   "p1",
   "p2",
   "p3",

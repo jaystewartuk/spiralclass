@@ -52,7 +52,7 @@ type PricedTemplate = {
  * grandfathered transfer price, so the rail only matters when no agreed price
  * exists. Same call the flat column made.
  *
- * An agreed price is a price for ONE person (D-188): it was agreed for the
+ * An agreed price is a price for ONE person (D-149): it was agreed for the
  * package as she has always bought it, so it never prices the package bought
  * for two. A student held at an old one-person rate who buys for two pays the
  * two-person catalog price.

@@ -5,14 +5,15 @@ description: File work owed as a GitHub issue on this repository — search open
 
 # /issue
 
-Open work lives in this repository's Issues ([D-172](../../../docs/decisions/D-172.md)),
-and there is still no queue in the tree ([D-110](../../../docs/decisions/D-110.md)).
+Open work lives in this repository's Issues ([D-164](../../../docs/decisions/D-164.md)),
+and there is still no queue in the tree ([D-164](../../../docs/decisions/D-164.md)).
 An issue is a **closable statement of work**: it says what is wrong or missing
 and what "done" looks like, so that a pull request can close it and the closing
 is the only bookkeeping.
 
-D-172 records that **nothing enforces that shape**. This skill is the checklist
-that stands in for the missing check. It ends at a filed issue and its URL.
+Nothing enforces that shape on an issue filed outside this skill
+([D-164](../../../docs/decisions/D-164.md)). This skill, and the `pnpm
+issue:check` it runs, is the checklist that stands in for the missing check. It ends at a filed issue and its URL.
 
 ## Why it asks before filing
 
@@ -181,7 +182,7 @@ An investigation that turns up several things files them in one pass:
   `apps/web/tests/config/github-labels.test.ts` as well as `gh label create`,
   and that belongs in a PR.
 - **It never writes the work into a file in the tree instead** — no `TODO.md`,
-  no findings section at the end of a document (D-110).
+  no findings section at the end of a document (D-164).
 
 ## Closing the loop
 

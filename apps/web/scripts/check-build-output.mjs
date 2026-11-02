@@ -27,7 +27,7 @@
  *      downloads her language and not every language. See catalog-chunks.mjs.
  *
  * Runs after `next build` in scripts/ci/integration.sh (was integration.yml
- * until D-129 deleted every workflow in this repo).
+ * until every workflow in this repo was deleted in August 2026).
  *
  *   node scripts/check-build-output.mjs [.next]
  */

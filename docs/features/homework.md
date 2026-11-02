@@ -23,7 +23,9 @@ review she reads before writing her own feedback; drafts are stored in
 `HomeworkAiReviewDraft` and counted against `HOMEWORK_AI_REVIEW_MONTHLY_CAP`
 (`lib/homework/config.ts`, `lib/homework/ai-review.ts`). Grading never
 requires it — a teacher who hits the cap, or whose deploy has no Anthropic
-key, still reviews and grades by hand.
+key, still reviews and grades by hand. An AI review is produced only when the
+teacher asks for one, is shown only to her, and is never sent to the student;
+the draft is kept rather than discarded, so it can be audited or regenerated.
 
 **What is designed but not built**, and is called out again under
 [Open Questions](#open-questions) so this document does not overclaim:

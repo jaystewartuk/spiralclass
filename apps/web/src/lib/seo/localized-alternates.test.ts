@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { LOCALES, LOCALIZED_PUBLIC_PATHS } from "@spiralclass/shared";
 import { localizedAlternates, pageLanguages } from "./localized-alternates";
 
-// D-193: every URL of a public page carries the same hreflang set, with
+// D-72: every URL of a public page carries the same hreflang set, with
 // x-default on the bare URL, and a page is advertised only in the languages
 // its content exists in.
 
@@ -34,7 +34,7 @@ describe("localizedAlternates", () => {
     }
   });
 
-  // Legal text is translated by a person or not at all (D-196). Listing
+  // Legal text is translated by a person or not at all (D-72). Listing
   // /fr/terms as the French terms would point French searchers at an English
   // contract.
   it("advertises the legal documents only in the languages they are written in", () => {

@@ -15,7 +15,7 @@ import { useT } from "@/components/locale-provider";
 // Rendered only when the server has both Google credentials configured
 // (hasGoogleAuthCreds), so an unconfigured env never shows a dead button.
 //
-// `intent` (D-56) mirrors the email-OTP form's hidden field — "sign-up" is
+// `intent` (D-40) mirrors the email-OTP form's hidden field — "sign-up" is
 // the only value that lets /auth/complete's finalizeSignIn lazy-create a
 // Teacher for a brand-new identity. Carried through the OAuth round trip via
 // the callbackURL query string since there's no form post to attach it to.

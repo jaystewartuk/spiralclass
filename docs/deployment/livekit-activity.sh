@@ -5,8 +5,8 @@
 # shared helper (same pattern every other Infisical-consuming task script
 # uses — see that file's own header).
 #
-# ⚠️ Production's pair, because preview holds none (D-94's 2026-09-16
-# addendum) — docs/deployment/livekit-credentials.sh reads it and says where
+# ⚠️ Production's pair, because preview holds none (since 2026-09-16,
+# D-16) — docs/deployment/livekit-credentials.sh reads it and says where
 # from. The official `lk` CLI then talks to the server's API over LIVEKIT_URL,
 # so no SSH is needed.
 #

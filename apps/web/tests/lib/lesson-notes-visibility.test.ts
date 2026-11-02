@@ -5,7 +5,7 @@ import {
   NOTE_VISIBLE_BEFORE_MIN,
 } from "@/lib/lesson-notes/visibility";
 
-// D-12 — the student panel opens NOTE_VISIBLE_BEFORE_MIN before the class and
+// The student panel opens NOTE_VISIBLE_BEFORE_MIN before the class and
 // closes NOTE_VISIBLE_AFTER_MIN after it ends. Single source of truth for the
 // gated student read paths.
 

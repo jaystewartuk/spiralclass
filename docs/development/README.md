@@ -23,4 +23,4 @@ system design use [architecture/](../architecture/README.md).
 
 > This repository holds no backlog file and no plans directory. Work owed is an
 > issue — see [docs/README.md](../README.md#conventions) and
-> [D-172](../decisions/D-172.md).
+> [D-164](../decisions/D-164.md).

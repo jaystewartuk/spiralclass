@@ -2,8 +2,8 @@
 
 These files hold every **non-secret** environment value for the web app,
 per environment. They replace what used to live in the Fly configs' `[env]`
-and `[build.args]` tables (D-85). Genuine secrets still live in Infisical — see
-`infra/infisical/README.md` and D-66.
+and `[build.args]` tables (D-70). Genuine secrets still live in Infisical — see
+`infra/infisical/README.md` and D-70.
 
 Splitting the config out of one host's own config format is what lets **any**
 environment consume it — Cloud Run and a plain local checkout load the exact

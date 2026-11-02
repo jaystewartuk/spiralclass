@@ -1,5 +1,5 @@
 #!/bin/bash
-# The whole LiveKit box on Compute Engine, as its boot script (D-187).
+# The whole LiveKit box on Compute Engine, as its boot script (D-16).
 #
 # Runs as root on EVERY boot (instance metadata `startup-script`). The install
 # half is guarded, so a reboot only re-renders config and restarts the stack —
@@ -11,7 +11,7 @@
 # class-shaped call uses ~0.12 core, but adding the app's three audio
 # recordings made egress kill two of them within a minute for CPU. Class
 # recording and lesson-insights transcription are off in production for that
-# reason (D-187). Do not add egress back here without a bigger machine.
+# reason (D-16). Do not add egress back here without a bigger machine.
 set -euo pipefail
 
 MD=http://metadata.google.internal/computeMetadata/v1
@@ -72,7 +72,7 @@ logging:
   level: info
 EOF
 
-# Signalling only. The hostname is proxied by Cloudflare (D-134), so the
+# Signalling only. The hostname is proxied by Cloudflare (D-16), so the
 # certificate can only come from the http-01 challenge on :80; media never
 # resolves this name — ICE candidates carry the box's own address (--node-ip).
 cat > "$DIR/Caddyfile" <<EOF

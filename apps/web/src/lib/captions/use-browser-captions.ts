@@ -44,7 +44,7 @@ import { installOnDeviceModels } from "@/lib/captions/recognizer";
 //     every minute while captions stay on: a consent revoked, a language
 //     changed or a plan downgraded mid-class reaches both browsers within a
 //     poll — the live re-check the retired captions agent's own config poll
-//     gave (D-106), kept when captions moved into the browser (D-185).
+//     gave (D-185), kept when captions moved into the browser (D-185).
 
 export const CONFIG_POLL_MS = 60_000;
 
@@ -71,9 +71,9 @@ export function useBrowserCaptions({
   status: BrowserCaptionsStatus;
   // 0..1 while an on-device translation model downloads, else null.
   downloadProgress: number | null;
-  // D-189/D-203: this class's lines are being kept as its transcript for
+  // D-185/D-203: this class's lines are being kept as its transcript for
   // lesson insights — whether or not captions are shown. Rendered to both
-  // participants, since a capture nobody can see is what D-21 forbids.
+  // participants, since a capture nobody can see is what D-22 forbids.
   transcriptKept: boolean;
   // Call synchronously inside the teacher's toggle click (see
   // installOnDeviceModels for why it cannot wait).
@@ -158,7 +158,7 @@ export function useBrowserCaptions({
   const captionsOn = useMemo(() => {
     if (role === "teacher") return teacherCaptionsOn;
     if (!room) return false;
-    // Only the teacher's switch counts (D-27). Until the session names her,
+    // Only the teacher's switch counts (D-185). Until the session names her,
     // any other participant's flag is enough to go and ask the server — which
     // is what then names her.
     const teacherIdentity = session?.teacherIdentity;

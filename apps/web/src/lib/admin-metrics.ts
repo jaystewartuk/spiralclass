@@ -32,7 +32,7 @@ export async function getTeacherSignupSeries(
 ): Promise<SignupPoint[]> {
   const months = recentMonths(now, monthsBack);
   const teachers = await prisma.teacher.findMany({
-    // Operators' test teachers are not signups (D-192).
+    // Operators' test teachers are not signups.
     where: { createdAt: { gte: monthWindowStart(now, monthsBack) }, ...NOT_TEST_ACCOUNT },
     select: { createdAt: true },
   });

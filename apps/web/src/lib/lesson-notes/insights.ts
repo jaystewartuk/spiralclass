@@ -5,7 +5,7 @@ import { languageName } from "@spiralclass/shared";
 import { anthropicApiKey } from "@/lib/env";
 
 // AI lesson insights — Phase C (the Phase C design,
-// D-19). The structured evolution of the free-text lesson_summaries: instead of
+// D-185). The structured evolution of the free-text lesson_summaries: instead of
 // prose, it emits typed, categorised, evidence-anchored focus areas ("work on
 // your subjunctive") from a transcript + the teacher's live-notes. Teacher-only;
 // Pro-gated upstream (only Pro lessons get captured/transcribed). Mirrors
@@ -52,7 +52,7 @@ export type InsightsInput = {
   studentNotes: { body: string }[];
   // The language the summary/evidence/suggestion text is written in — the
   // teacher's reading language, as an English name ("French"); see
-  // localeEnglishName(). Independent of targetLanguage (D-72/D-73).
+  // localeEnglishName(). Independent of targetLanguage (D-72).
   outputLanguage: string;
   // Phase D: audio-grounded
   // pronunciation scores, present only when scoring ran. When present, the
@@ -94,7 +94,7 @@ export function buildInsightsPrompt(input: InsightsInput): { system: string; use
 
   // The class is taught IN the target language, which is independent of the
   // language the findings are written in (the teacher's own reading language —
-  // D-72/D-73's four-language-fields lesson applies here too). Without this
+  // D-72's four-language-fields lesson applies here too). Without this
   // rule the model has judged a student's TARGET-language grammar by some
   // other language's rules (e.g. flagging correct Spanish as wrong), because
   // the target language was passed as inert context rather than as the
