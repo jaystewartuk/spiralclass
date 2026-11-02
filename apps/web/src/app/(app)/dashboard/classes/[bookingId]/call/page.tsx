@@ -11,6 +11,7 @@ import { recordingEnabled } from "@/lib/video/recording";
 import { liveCaptionsEnabled } from "@/lib/captions/config";
 import { nudgeFromTeacher } from "@/app/actions/call-nudge";
 import { createLessonBookmark } from "@/app/actions/lesson-notes";
+import { addInsight } from "@/app/actions/lesson-insights";
 import { Button } from "@/components/ui/button";
 import { CallSessionBootstrap } from "@/components/video/call-session-bootstrap";
 import { CallNotesCard } from "@/components/video/call-notes-card";
@@ -104,6 +105,7 @@ export default async function TeacherCallPage({
       canBrowseLibrary
       onNudge={nudgeFromTeacher.bind(null, booking.id)}
       onBookmark={createLessonBookmark.bind(null, booking.id)}
+      onQuickNote={addInsight.bind(null, booking.id)}
     />
   );
 }

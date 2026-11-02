@@ -8,20 +8,22 @@ audio.** The free video box production runs on cannot carry egress
 ([D-16](../decisions/D-16.md)), so the transcript is now the caption text
 the participants' browsers already produce ([D-185](../decisions/D-185.md)),
 kept — text only, never audio — for a class whose pairing has recorded
-insights consent, while the teacher has captions on. The reasoning for the
-feature itself lives in [D-185](../decisions/D-185.md) and
-[D-22](../decisions/D-22.md). The flag history is: off at first ship, on
-2026-07-21, off 2026-08-08 ahead of first promotion, on 2026-08-26, off
-2026-09-24 when production video moved to a box with no egress
-([D-16](../decisions/D-16.md)), and on again 2026-09-28 with the transcript
-taken from the captions ([D-185](../decisions/D-185.md)). **This
+insights consent, **whether or not captions are showing**
+([D-203](../decisions/D-203.md)). The reasoning for the
+feature itself lives in [D-185](../decisions/D-185.md),
+[D-22](../decisions/D-22.md) and [D-22](../decisions/D-22.md). The flag
+history is: off at first ship, on at [D-16](../decisions/D-16.md)
+(2026-07-21), off again at [D-185](../decisions/D-185.md) (2026-08-08) ahead
+of first promotion, on again at [D-185](../decisions/D-185.md) (2026-08-26),
+off again at D-16 (2026-09-24), and on again at D-185 (2026-09-28). **This
 pipeline reads student speech, including minors'.** What decides whether any
 given student's words are kept is the recorded per-pairing consent (D-22),
 which is guardian-only for a student under 18 — never the flag.
 
 Two operational facts this document must not contradict: **the teacher's
-captions toggle is the trigger** — no captions, no transcript, no insights
-for that class — and **preview cannot rehearse the pipeline end-to-end**,
+captions toggle is not the trigger** — it only decides whether captions are
+shown; a consenting class is recognised and kept with it off, and the
+"Learning notes on" indicator shows either way (D-203) — and **preview cannot rehearse the pipeline end-to-end**,
 because it has no LiveKit pair and the shared box posts webhooks to
 production's URL only.
 
@@ -59,7 +61,7 @@ the pass/fail record of attendance or payments.
 
 ## Business Rules (exhaustive)
 
-### Consent gate (the central rule — D-22)
+### Consent gate (the central rule — D-185/D-22/D-22)
 
 - Voice-capture-based analysis is **off by default** for every
   teacher-student pairing. Nothing is captured or analyzed unless consent is
@@ -80,11 +82,12 @@ the pass/fail record of attendance or payments.
   it rather than assuming this document's description means a given half is
   live:
   - `LESSON_INSIGHTS_TRANSCRIPTION_ENABLED` is **on** in both environments
-    ([D-185](../decisions/D-185.md)). It was held off from the start, turned
-    on 2026-07-21, back off 2026-08-08 ahead of first promotion, on again
-    2026-08-26, off 2026-09-24 because the video box has no room for egress
-    ([D-16](../decisions/D-16.md)), and on again 2026-09-28, sourcing the
-    transcript from the browsers instead.
+    ([D-185](../decisions/D-185.md)). It was held off from the start, turned on
+    by [D-16](../decisions/D-16.md) (2026-07-21), turned back off by
+    [D-185](../decisions/D-185.md) (2026-08-08) ahead of first promotion,
+    turned on again by [D-185](../decisions/D-185.md) (2026-08-26), off again
+    by D-16 (2026-09-24) because the video box has no room for egress, and on
+    again by D-185, which sources the transcript from the browsers instead.
     What it enables is `browserTranscriptEnabled()`
     (`lib/transcription/config.ts`): the class's caption session carries
     `transcriptCapture` when the flag is on and the pairing's consent is
@@ -112,7 +115,7 @@ the pass/fail record of attendance or payments.
 ### Pipeline (async, post-class)
 
 - **The transcript is written during the class by the browsers** (D-185).
-  While captions are on, the browser that recognised a finished utterance
+  Whether or not captions are showing (D-203), the browser that recognised a finished utterance
   (D-185's assignment: the speaker's own, the other participant's computer, or
   the Deepgram stream for a phone) posts its source text, speaker and an
   estimated duration to `/api/captions/transcript`; the server re-checks
@@ -125,12 +128,6 @@ the pass/fail record of attendance or payments.
   `source: "ai"`) → teacher reviews/confirms → the student's profile is
   recomputed. Both participants are told when learning notes start and see a
   notes icon in the call's top bar while lines are being kept.
-- **The transcript's language is always Spanish today.** Every
-  `LessonTranscript` row, the browser-written one included, is stamped
-  `DEFAULT_LESSON_LANGUAGE` (`"es"`, `lib/transcription/config.ts`), and the
-  brief and insights read it, whatever the teacher teaches. Correct for the
-  first teacher; it must come from the booking before a teacher of another
-  language relies on insights.
 - **No audio is captured for it.** The legacy path (per-participant egress →
   R2 → Deepgram batch → derive-then-discard, `lib/transcription/pipeline.ts`)
   still exists in code but requires recording to be enabled, which it is not.
@@ -207,7 +204,7 @@ NULL`) — a confirmed insight is never touched or removed by regeneration.
   insights, deduplicated by normalized term (keeping the latest sighting),
   ordered newest-first.
 - A **speaking-balance** metric (teacher-share vs. student-share of talk
-  time across lessons) is computed independently of confirmed insights
+  time across lessons, D-185) is computed independently of confirmed insights
   — from any lesson with a transcript, averaged across lessons. The lesson's
   length is the audio duration where a legacy audio row exists, otherwise the
   last utterance's end.
@@ -259,18 +256,31 @@ NULL`) — a confirmed insight is never touched or removed by regeneration.
   timestamps** (capturing → ready → transcribed → insights → pronunciation →
   profiles → briefs) plus stuck-capture detection — it deliberately never
   surfaces any transcript/insight/profile content, by design, consistent
-  with the privacy stance of D-22.
+  with the privacy stance of D-22/D-22.
 
 ## User Flow
 
 **Teacher — student detail page:**
 
-1. Open a student's profile; see a read-only rollup card: focus areas sorted
-   by recurrence (ties favor "focus" trend), each with skill, category,
-   evidence quote, trend badge, and recurrence count, followed by a
-   vocabulary badge cloud.
-2. Below that, controls for insights consent (with a minor-specific
-   checkbox) and the "share progress with student" toggle.
+1. Open a student and choose the **Learning profile** tab (its own view,
+   apart from the Learning tab's level and goal forms). It shows, sorted by
+   recurrence (ties favor "focus" trend), first **how they speak** — the
+   fluency and comprehension entries (hesitation, filler words, pace,
+   listening…) — then **what to work on** — every other category — each row a
+   skill, category, trend badge and recurrence count, then the vocabulary
+   badge cloud. No timestamps, and no quote on the row: the last example is a
+   collapsed hint, cut to 80 characters (`lib/lesson-notes/profile-view.ts`).
+2. Below that, a form to **add her own focus area** (source `teacher`,
+   confirmed on creation, the same write path as the class page's "add your
+   own"). It attaches to the student's most recent class that took place, so
+   it is unavailable before the first class.
+3. Then the controls for insights consent (with a minor-specific checkbox)
+   and the "share progress with student" toggle.
+
+**Teacher — during the call:** the call's **Quick note** control saves a
+one-line focus area for the class being taught (`source: "teacher"`, confirmed
+on creation, the same write as "add your own finding" below), so a teacher who
+spots a recurring error mid-class does not have to remember it afterwards.
 
 **Teacher — booking/class detail page:**
 

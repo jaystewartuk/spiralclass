@@ -119,10 +119,17 @@ export function emailFromIdToken(idToken: string | null): string | null {
 
 // ---- Signed OAuth state (CSRF + teacher binding) -------------------------
 // Mirrors the HMAC opt-out token: base64url(payload).base64url(sig), where
-// payload = { t: teacherId, e: epochSeconds }, signed with SESSION_SECRET.
+// payload = { t: teacherId, k: "google-calendar", e: epochSeconds }, signed with
+// SESSION_SECRET. The email opt-out and notification-settings links are signed
+// with the same secret in the same shape, and they also carry a teacher id and
+// an issue time, so the `k` discriminator is what keeps either of them from
+// verifying as a state. The callback binds the state to the signed-in teacher
+// as well; a valid state alone connects nothing.
+
+const STATE_KIND = "google-calendar";
 
 export function signOAuthState(teacherId: string, secret: string, now: Date = new Date()): string {
-  const body = JSON.stringify({ t: teacherId, e: Math.floor(now.getTime() / 1000) });
+  const body = JSON.stringify({ t: teacherId, k: STATE_KIND, e: Math.floor(now.getTime() / 1000) });
   const encoded = base64url(Buffer.from(body, "utf8"));
   const sig = createHmac("sha256", secret).update(encoded).digest();
   return `${encoded}.${base64url(sig)}`;
@@ -130,7 +137,7 @@ export function signOAuthState(teacherId: string, secret: string, now: Date = ne
 
 export type VerifyStateResult =
   | { ok: true; teacherId: string }
-  | { ok: false; reason: "malformed" | "bad-signature" | "expired" };
+  | { ok: false; reason: "malformed" | "bad-signature" | "expired" | "wrong-kind" };
 
 export function verifyOAuthState(
   state: string,
@@ -152,7 +159,7 @@ export function verifyOAuthState(
     return { ok: false, reason: "bad-signature" };
   }
 
-  let body: { t?: string; e?: number };
+  let body: { t?: string; k?: string; e?: number };
   try {
     body = JSON.parse(base64urlDecode(encoded).toString("utf8"));
   } catch {
@@ -161,6 +168,7 @@ export function verifyOAuthState(
   if (typeof body.t !== "string" || typeof body.e !== "number") {
     return { ok: false, reason: "malformed" };
   }
+  if (body.k !== STATE_KIND) return { ok: false, reason: "wrong-kind" };
   const age = Math.floor(now.getTime() / 1000) - body.e;
   if (age < 0 || age > STATE_TTL_SECONDS) return { ok: false, reason: "expired" };
   return { ok: true, teacherId: body.t };

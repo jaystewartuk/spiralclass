@@ -133,6 +133,22 @@ the non-suppressible types above, which cannot be turned off by anyone.
 
 - Students can toggle these categories: class reminders, booking updates,
   class materials, expiry reminders, and messages (chat).
+- **A new student starts with everything their teacher sends switched on** —
+  class reminders, booking updates, class materials and homework, and
+  messages. Only expiry reminders (package renewal nudges) start off
+  ([D-204](../decisions/D-204.md)). Students created before D-204 keep whatever
+  was stored; an explicit opt-out is never overridden. The one exception is a
+  one-time data migration (`20261025230000_backfill_untouched_class_materials_pref`)
+  that turned class materials on for a student who has never signed in and whose
+  stored preferences were still exactly the old default; a student who has signed
+  in is left alone, because a saved choice and the old default look the same. A
+  student imported from a roster CSV starts with every category off until the
+  teacher launches them.
+- **The teacher is told when a send will not reach the student.** On the class
+  page and the student's Materials tab, a teacher-only notice says when the
+  student has class materials and homework notifications off, or is still
+  paused after an import, and that the item still appears in the student's
+  portal. It describes the gap; it does not change the student's setting.
 - Teachers can toggle these categories: class reminders, class activity,
   student progress, subscription, growth, and messages (chat).
 - For each category, a user can additionally choose which channel(s)
@@ -321,6 +337,16 @@ the non-suppressible types above, which cannot be turned off by anyone.
 - A student on an onboarding hold who completes checkout has the hold
   lifted automatically — any notification-worthy event that happens after
   that point resumes normal delivery.
+- A push never goes out untitled: an empty title becomes the product name
+  on the wire and again in the service worker, and an inbox row whose booking
+  or payment has since been deleted shows a generic title with an explanatory
+  body rather than an empty one. Every template's push copy is asserted
+  non-blank in every language.
+- A student who uses a computer and has no registered device gets email
+  only. Email stops silently if their address ever hard-bounced (the
+  provider then suppresses it while still accepting the send), so "she gets
+  no notifications" is checked in `/admin/notifications` by the row's status
+  (`failed`/`delivered`) rather than assumed.
 - A device shared between two people (or one person's teacher and student
   identity on the same phone) only ever gets pushes for the most recently
   registered role/token on that device.

@@ -533,6 +533,13 @@ model Teacher {
   // here — money-of-record / security / billing-critical teacher notices are
   // never gated by this map (see teacherTemplateCategory).
   notificationPrefs                Json?     @map("notification_prefs")
+  // How this teacher wants live subtitles cut into lines: `{ pauseMs,
+  // maxChars }`, each 0 = leave it to the browser (CaptionTiming in
+  // @spiralclass/shared, read through parseCaptionTiming — never trust the
+  // stored shape). NULL for every existing teacher means both off, i.e. what
+  // shipped before the dials. Resolved into the caption session for both
+  // participants of a class.
+  captionTiming                    Json?     @map("caption_timing")
   // Per-teacher order/visibility for the dashboard "Day to day" nav grid —
   // an array of `{key, hidden}` objects (NavKey from packages/shared/src/nav.ts).
   // NULL (the default for every existing teacher) means the canonical default

@@ -125,14 +125,19 @@ export function resolveTileRole(input: {
 // The dock is reserved only while the room is captioning. It holds its height
 // between sentences (see CaptionBand), so reserving it for a class that never
 // turned captions on would take a row from every worksheet for nothing.
+//
+// A reader can also ask for the dock over a plain camera (`belowStage`, the
+// "below" position in her subtitle settings): subtitles that never cover the
+// other person's face, for a row or two of video height.
 export type CaptionPlacement = "over-stage" | "docked" | "none";
 
 export function resolveCaptionPlacement(input: {
   minimized: boolean;
   contentOwnsStage: boolean;
   roomCaptionsOn: boolean;
+  belowStage?: boolean;
 }): CaptionPlacement {
   if (input.minimized) return "none";
-  if (!input.contentOwnsStage) return "over-stage";
+  if (!input.contentOwnsStage && !input.belowStage) return "over-stage";
   return input.roomCaptionsOn ? "docked" : "none";
 }

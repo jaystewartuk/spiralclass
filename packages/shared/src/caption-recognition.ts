@@ -13,10 +13,11 @@
 // when their device cannot, the other participant's desktop browser does it
 // from the call audio it already receives. And when NEITHER device can —
 // two phones — the speaker's own browser streams their microphone to a paid
-// speech-to-text service instead ("cloud", D-185), the one case
+// speech-to-text service instead ("cloud", D-185's addendum), the one case
 // the browsers leave uncovered.
 
 import type { CallRole, CaptionDirection, CaptionLine } from "./captions";
+import type { CaptionTiming } from "./caption-timing";
 
 // ---------------------------------------------------------------------------
 // The class's caption session — what POST /api/captions/config returns
@@ -53,6 +54,10 @@ export type CaptionSession = {
   // insights consent (D-22) is recorded. The recognising browser posts the
   // line to /api/captions/transcript; both browsers show that it is kept.
   transcriptCapture: boolean;
+  // The teacher's own subtitle timing (caption-timing.ts), live-read with the
+  // rest of the session so a change on her settings page reaches a class
+  // already running. Applied by whichever browser recognises a speaker.
+  timing: CaptionTiming;
 };
 
 // ---------------------------------------------------------------------------
@@ -241,14 +246,21 @@ export function cloudRecognitionRefusal(args: {
   participants: readonly RoomParticipantAttributes[];
   callerIdentity: string;
   teacherIdentity: string;
+  // The class's session says its transcript is being kept (consent recorded,
+  // D-203): the phone's stream is then warranted with the captions switch off,
+  // because the lines are wanted for the transcript, not for the screen.
+  transcriptCapture?: boolean;
 }): CloudRecognitionRefusal | null {
-  const { participants, callerIdentity, teacherIdentity } = args;
+  const { participants, callerIdentity, teacherIdentity, transcriptCapture } = args;
   if (!participants.some((p) => p.identity === callerIdentity)) return "caller-absent";
   // Nobody to caption for (assignRecognizers asks the same).
   if (!participants.some((p) => p.identity !== callerIdentity)) return "alone";
-  // Only the teacher's own switch counts (D-185).
+  // Only the teacher's own switch counts (D-185) — unless the transcript is
+  // what the stream is for, which the server decided from recorded consent.
   const teacher = participants.find((p) => p.identity === teacherIdentity);
-  if (teacher?.attributes[CAPTIONS_ON_ATTRIBUTE] !== "true") return "captions-off";
+  if (!transcriptCapture && teacher?.attributes[CAPTIONS_ON_ATTRIBUTE] !== "true") {
+    return "captions-off";
+  }
   if (participants.some((p) => p.attributes[CAPTIONS_RECOGNIZER_ATTRIBUTE] === "1")) {
     return "browser-can-recognise";
   }
@@ -338,7 +350,7 @@ export function buildCaptionLine(args: {
   seq: number;
   now: number;
   // The id the utterance's partials were shown under, so the finished line
-  // replaces them in place (D-185). Omitted when there were none.
+  // replaces them in place (D-198). Omitted when there were none.
   id?: string;
 }): CaptionLine {
   const line: CaptionLine = {
@@ -367,25 +379,33 @@ export function buildCaptionLine(args: {
 // long the speaker goes without a pause.
 export const PARTIAL_TAIL_CHARS = 140;
 
-// The partial for an utterance still being spoken: what has been heard so
-// far, in the speaker's language, untranslated (D-185). Null when nothing
+// The partial for an utterance still being spoken (D-198). Null when nothing
 // has been heard yet.
+//
+// When the reader reads the speaker's own language, it carries the words heard
+// so far. When her subtitles are a TRANSLATION it carries no words at all —
+// `text` is empty and `lang` is the reader's — and the band shows the speaker
+// as still talking. Untranslated words under the last translated line put two
+// languages on screen at once, which the teacher and student testing the one-line
+// band both found as confusing as the original-above-translation (D-206).
 export function buildPartialCaptionLine(args: {
   heard: string;
   sourceLanguage: string;
+  targetLanguage: string;
   speakerIdentity: string;
   listenerIdentity: string;
   id: string;
 }): CaptionLine | null {
   const heard = args.heard.replace(/\s+/g, " ").trim();
   if (!heard) return null;
+  const translated = baseLanguage(args.sourceLanguage) !== baseLanguage(args.targetLanguage);
   return {
     t: "line",
     for: args.listenerIdentity,
     id: args.id,
-    text: partialTail(heard),
+    text: translated ? "" : partialTail(heard),
     from: args.speakerIdentity,
-    lang: args.sourceLanguage,
+    lang: translated ? args.targetLanguage : args.sourceLanguage,
     partial: true,
   };
 }

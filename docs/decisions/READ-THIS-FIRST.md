@@ -20,7 +20,7 @@ considered, and what each one cost. There are more than 25 decision records
 in this directory and these are two of them. Every number below is from the
 record it cites — its How we got here section, or the original records at the
 [starting commit](https://github.com/jaystewartuk/spiralclass/tree/1180a397eb16f961c02054920dc1603c77407647/docs/decisions)
-of the consolidation ([D-202](./D-202.md)) — and where a record states a cost it
+of the consolidation ([D-207](./D-207.md)) — and where a record states a cost it
 is repeated here rather than smoothed over.
 
 ---

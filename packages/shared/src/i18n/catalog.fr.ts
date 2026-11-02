@@ -68,7 +68,7 @@ export const fr = {
   "feedback.attachHint": "Facultatif. Images jusqu'à {max} Mo.",
   "feedback.attachRemove": "Retirer {filename}",
   "feedback.attachTooLarge": "Cette image dépasse {max} Mo. Essayez-en une plus légère.",
-  "feedback.attachInvalidType": "Ce fichier n'est pas une image.",
+  "feedback.attachInvalidType": "Ce fichier n'est ni une capture d'écran ni une photo.",
   "feedback.attachReadFailed": "Nous n'avons pas pu lire cette image. Essayez-en une autre.",
   "feedback.diagnosticsNote":
     "Nous joignons cette page et les infos de votre navigateur. N'indiquez ni mot de passe ni numéro de carte.",
@@ -597,6 +597,15 @@ export const fr = {
   "call.bookmark": "Marquer",
   "call.bookmarked": "Marqué !",
   "call.bookmarkError": "Impossible d'ajouter le marqueur. Veuillez réessayer.",
+  "call.quickNote": "Note rapide",
+  "call.quickNoteHint":
+    "Note de quoi pratiquer au prochain cours. Elle est enregistrée comme axe de travail de cet élève, et vous seul la voyez.",
+  "call.quickNotePlaceholder": "p. ex. pratiquer le subjonctif",
+  "call.quickNoteSkill": "Compétence (facultatif)",
+  "call.quickNoteSave": "Enregistrer la note",
+  "call.quickNoteSaved": "Ajoutée aux axes de travail de cet élève.",
+  "call.quickNoteError": "Impossible d'enregistrer la note. Veuillez réessayer.",
+  "call.quickNoteClose": "Fermer",
   "call.captionsOn": "Sous-titres",
   "call.captionsOff": "Masquer les sous-titres",
   "call.screenShareOn": "Partager l'écran",
@@ -684,18 +693,29 @@ export const fr = {
   "call.captionsListening": "Écoute en cours…",
   "call.captionsSpeakerUnknown": "Intervenant",
   "call.captionsDisplayLegend": "Afficher",
-  "call.captionsDisplayBoth": "Original et traduction",
   "call.captionsDisplayTranslation": "Traduction seule",
   "call.captionsDisplayOriginal": "Original seul",
   // Formes courtes pour le contrôle segmenté. Les formes longues ci-dessus
   // restent le nom accessible.
-  "call.captionsDisplayBothShort": "Les deux",
   "call.captionsDisplayTranslationShort": "Traduction",
   "call.captionsDisplayOriginalShort": "Original",
   "call.captionsSizeLegend": "Taille du texte",
+  "call.captionsSizeS": "Petit",
   "call.captionsSizeM": "Moyen",
   "call.captionsSizeL": "Grand",
   "call.captionsSizeXl": "Très grand",
+  "call.captionsLinesLegend": "Lignes",
+  "call.captionsLinesName_one": "Afficher {count} ligne à la fois",
+  "call.captionsLinesName": "Afficher jusqu'à {count} lignes à la fois",
+  "call.captionsPositionLegend": "Position",
+  "call.captionsPositionBottom": "Sur la vidéo, en bas",
+  "call.captionsPositionTop": "Sur la vidéo, en haut",
+  "call.captionsPositionBelow": "Sous la vidéo, jamais dessus",
+  "call.captionsPositionBottomShort": "En bas",
+  "call.captionsPositionTopShort": "En haut",
+  "call.captionsPositionBelowShort": "Dessous",
+  "call.captionsMoveToTop": "Déplacer les sous-titres en haut",
+  "call.captionsMoveToBottom": "Déplacer les sous-titres en bas",
   "call.captionsTranscript": "Transcription",
   "call.captionsTranscriptEmpty": "Personne n'a encore parlé.",
   "call.captionsTranscriptPrivacy": "Reste sur cet appareil et disparaît quand vous partez.",
@@ -2779,6 +2799,7 @@ export const fr = {
   "web.dashboard.students.tab.navLabel": "Vues de cet élève",
   "web.dashboard.students.tab.overview": "Aperçu",
   "web.dashboard.students.tab.learning": "Apprentissage",
+  "web.dashboard.students.tab.profile": "Profil d'apprentissage",
   "web.dashboard.students.tab.materials": "Supports",
   "web.dashboard.students.tab.settings": "Paramètres",
   "web.dashboard.students.header.theirTime": "{time} à {city}",
@@ -2824,6 +2845,16 @@ export const fr = {
   "web.studentProfile.trend.focus": "À travailler",
   "web.studentProfile.trend.improving": "En progrès",
   "web.studentProfile.trend.new": "Nouveau",
+  "web.studentProfile.signalsTitle": "Façon de parler",
+  "web.studentProfile.signalsDescription":
+    "Tendances de fluidité et de compréhension au fil des cours.",
+  "web.studentProfile.focusTitle": "À travailler",
+  "web.studentProfile.hintToggle": "Exemple",
+  "web.studentProfile.addTitle": "Ajouter votre propre axe de travail",
+  "web.studentProfile.addNoClass":
+    "Vous pourrez ajouter un axe de travail une fois que cet élève aura eu un cours.",
+  "web.studentProfile.addNote":
+    "Enregistré comme confirmé, et rattaché à son cours le plus récent.",
   "web.studentLevel.label": "Niveau",
   "web.studentLevel.notSet": "Non défini",
   "web.studentLevel.hint":
@@ -3413,6 +3444,34 @@ export const fr = {
   "web.settings.account.sectionNavLabel": "Sections du compte",
   "web.settings.account.memberSince": "Sur SpiralClass depuis {date}",
   "web.settings.account.notificationsManage": "Gérer les notifications",
+  "web.settings.account.captionTimingTitle": "Rythme des sous-titres",
+  "web.settings.account.captionTimingDescription":
+    "À quelle vitesse les paroles d'un élève sont traduites pendant qu'il parle encore.",
+  "web.settings.account.captionTimingManage": "Régler le rythme des sous-titres",
+  "web.settings.captionTiming.title": "Rythme des sous-titres",
+  "web.settings.captionTiming.subtitle":
+    "Choisissez comment les sous-titres en direct sont découpés en lignes. Cela s'applique à tous vos cours, sur les deux écrans.",
+  "web.settings.captionTiming.cardTitle": "Quand traduire",
+  "web.settings.captionTiming.cardDescription":
+    "Par défaut, le navigateur attend que la personne s'arrête de parler, puis traduit tout d'un coup. Ces deux réglages le font traduire plus tôt. Trop tôt, et les sous-titres se réduisent à des mots isolés : changez un réglage à la fois.",
+  "web.settings.captionTiming.pause.label": "Traduire après une pause de",
+  "web.settings.captionTiming.pause.hint":
+    "Quand personne n'a rien dit de nouveau pendant ce temps, ce qui a été dit jusque-là est traduit. Plus court, c'est plus rapide, mais cela coupe les phrases en plein milieu.",
+  "web.settings.captionTiming.pause.off": "Le navigateur décide",
+  "web.settings.captionTiming.pause.option": "{ms} ms",
+  "web.settings.captionTiming.maxChars.label": "Ne jamais attendre pour traduire plus de",
+  "web.settings.captionTiming.maxChars.hint":
+    "Pour ceux qui parlent vite sans pause : un long passage est coupé après environ ce nombre de caractères, à la fin d'un mot.",
+  "web.settings.captionTiming.maxChars.off": "Sans limite",
+  "web.settings.captionTiming.maxChars.option": "{count} caractères",
+  "web.settings.captionTiming.preview.title": "Ce que cela donnerait",
+  "web.settings.captionTiming.preview.description":
+    "Quelqu'un qui parle vite, avec une seule respiration au milieu. Chaque ligne ci-dessous est un sous-titre.",
+  "web.settings.captionTiming.preview.sample":
+    "Yesterday I went to the market with my sister and we bought some tomatoes | but then it started to rain so we ran home and I forgot the bread",
+  "web.settings.captionTiming.reset": "Revenir au réglage par défaut",
+  "web.settings.captionTiming.unsaved": "Vous avez des modifications non enregistrées.",
+  "web.settings.captionTiming.savedMessage": "Rythme des sous-titres enregistré.",
   "web.settings.account.channels.emailOn": "E-mail activé",
   "web.settings.account.channels.emailOff": "E-mail désactivé",
   "web.settings.account.channels.pushOn": "Push activé",
@@ -4876,6 +4935,11 @@ export const fr = {
   "web.notificationPrefs.category.classMaterials": "Supports et devoirs",
   "web.notificationPrefs.categoryHint.classMaterials":
     "Les supports partagés par votre professeur, les devoirs donnés, les retours et les dates limites.",
+  "web.notificationGap.categoryOff":
+    "{name} a désactivé les notifications pour {category} : {name} ne sera pas prévenu·e de ceci. Cela apparaît quand même dans son espace.",
+  "web.notificationGap.paused":
+    "Les notifications de {name} sont en pause : {name} ne sera pas prévenu·e de ceci. Cela apparaît quand même dans son espace.",
+  "web.notificationGap.turnOn": "Activer les notifications",
   "web.notificationPrefs.category.expiryReminders": "Rappels de forfait",
   "web.notificationPrefs.categoryHint.expiryReminders":
     "Quand un forfait est sur le point d'expirer, et quand vous en terminez un.",
@@ -5138,7 +5202,6 @@ export const fr = {
   "web.siteFooter.terms": "Conditions",
   "web.siteFooter.privacy": "Confidentialité",
   "web.siteFooter.sourceCode": "Code source",
-  "web.siteFooter.madeBy": "Créé par",
   "web.themeToggle.switchToLight": "Passer en mode clair",
   "web.themeToggle.switchToDark": "Passer en mode sombre",
   "web.themeToggle.light": "Clair",
@@ -6761,6 +6824,9 @@ export const fr = {
   "web.search.keywords.invitations": "invitations en attente envoyées",
   "web.search.keywords.newMessage": "rédiger écrire envoyer message nouveau chat",
   "web.search.keywords.notificationsInbox": "alertes cloche nouveautés",
+  "web.search.action.captionTiming.detail":
+    "À quelle vitesse les sous-titres en direct sont traduits.",
+  "web.search.keywords.captionTiming": "sous-titres captions retard délai pause traduction vitesse",
   "web.search.keywords.customizeDashboard": "réorganiser masquer raccourcis disposition",
   "web.search.keywords.acquisitionProfile": "profil marketing public niche",
   "web.search.keywords.acquisitionResults": "statistiques visites trafic résultats",
@@ -7739,6 +7805,7 @@ export const fr = {
   "email.packagePlaceholder.text": "votre forfait",
   "email.packagePlaceholder.text2": "un forfait",
   "inbox.fallback.title": "Notification",
+  "inbox.fallback.body": "Le cours ou le paiement concerné n’est plus disponible.",
   "email.studentAcquisitionPlanTeacher.subject": "Votre plan de la semaine : {count} actions",
   "email.studentAcquisitionPlanTeacher.subject_one": "Votre plan de la semaine : {count} action",
   "email.studentAcquisitionPlanTeacher.textBody":

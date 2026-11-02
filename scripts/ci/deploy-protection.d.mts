@@ -8,11 +8,18 @@ export const ADMIN_ROLE_ID: number;
 
 export const PRODUCTION_REF: string;
 
+/** The environment the Cloud Run job reads its values from, with no reviewer of its own (D-205). */
+export const APP_ENVIRONMENT: string;
+
 export interface DeployProtectionSettings {
   /** `GET repos/{repo}/environments/production`, or null when it does not exist. */
   environment: unknown;
   /** The branch-policy names from the environment's `deployment-branch-policies`. */
   branchPolicies: ReadonlyArray<string>;
+  /** `GET repos/{repo}/environments/production-app`, or null when it does not exist. */
+  appEnvironment: unknown;
+  /** The branch-policy names from that environment's `deployment-branch-policies`. */
+  appBranchPolicies: ReadonlyArray<string>;
   /** Every ruleset, as `GET repos/{repo}/rulesets/{id}` returns it. */
   rulesets: ReadonlyArray<unknown>;
 }

@@ -30,6 +30,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useT } from "@/components/locale-provider";
 import { getSupportContext } from "@/lib/analytics/posthog-browser";
 import {
+  ATTACHMENT_IMAGE_TYPES,
   ATTACHMENT_MAX_MB,
   FEEDBACK_MESSAGE_MAX,
   FEEDBACK_TOPICS,
@@ -40,6 +41,7 @@ import {
   type FeedbackErrors,
   type FeedbackTopic,
 } from "@/lib/feedback";
+import { mediaObjectUrl } from "@/lib/object-url";
 import { supportMailto, supportWhatsAppUrl } from "@/lib/support";
 import { cn } from "@/lib/utils";
 
@@ -103,7 +105,7 @@ export function ReportProblemDialog({
     filename: string;
     contentType: string;
     data: Uint8Array;
-    previewUrl: string;
+    previewUrl: string | null;
   } | null>(null);
   const [attachError, setAttachError] = useState<string | null>(null);
   const [errors, setErrors] = useState<FeedbackErrors>({});
@@ -202,7 +204,9 @@ export function ReportProblemDialog({
       filename: result.filename,
       contentType: result.contentType,
       data: result.data,
-      previewUrl: URL.createObjectURL(file),
+      // The type was already held to this list above; the preview is minted
+      // through it anyway, so no picked file can get a URL without it.
+      previewUrl: mediaObjectUrl(file, ATTACHMENT_IMAGE_TYPES),
     });
   }
 
@@ -442,12 +446,14 @@ export function ReportProblemDialog({
                 />
                 {attachment && (
                   <div className="flex items-center gap-3 rounded-md border border-border bg-muted/40 p-2">
-                    {/* eslint-disable-next-line @next/next/no-img-element -- a local object URL, not a remote asset next/image can optimise */}
-                    <img
-                      src={attachment.previewUrl}
-                      alt=""
-                      className="h-10 w-10 rounded border border-border object-cover"
-                    />
+                    {attachment.previewUrl && (
+                      // eslint-disable-next-line @next/next/no-img-element -- a local object URL, not a remote asset next/image can optimise
+                      <img
+                        src={attachment.previewUrl}
+                        alt=""
+                        className="h-10 w-10 rounded border border-border object-cover"
+                      />
+                    )}
                     <span className="min-w-0 flex-1 truncate text-xs">{attachment.filename}</span>
                     <Button
                       type="button"

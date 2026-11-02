@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  ATTACHMENT_IMAGE_TYPES,
   ATTACHMENT_MAX_BYTES,
   ATTACHMENT_MAX_MB,
   FEEDBACK_MESSAGE_MIN,
@@ -114,6 +115,19 @@ describe("readImageAttachment", () => {
   it("rejects a non-image", async () => {
     const result = await readImageAttachment(
       fileOf({ name: "notes.pdf", type: "application/pdf" }),
+    );
+    expect(result).toEqual({ ok: false, error: "feedback.attachInvalidType" });
+  });
+
+  it.each(ATTACHMENT_IMAGE_TYPES)("accepts %s as a screenshot", async (type) => {
+    expect((await readImageAttachment(fileOf({ type }))).ok).toBe(true);
+  });
+
+  // An SVG is an image/* type that is also a document able to run script, so
+  // `image/` alone is not enough to make a file a screenshot.
+  it("rejects an SVG, even though its type starts with image/", async () => {
+    const result = await readImageAttachment(
+      fileOf({ name: "screenshot.svg", type: "image/svg+xml" }),
     );
     expect(result).toEqual({ ok: false, error: "feedback.attachInvalidType" });
   });

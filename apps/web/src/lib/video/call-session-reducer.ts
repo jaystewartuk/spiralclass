@@ -7,6 +7,7 @@
 import type { CallGrant } from "@/lib/video/provider";
 import type { CallMaterial } from "@spiralclass/shared";
 import type { NudgeResult } from "@/lib/video/nudge";
+import type { QuickNoteInput, QuickNoteResult } from "@/components/video/call-quick-note";
 
 export type CallSessionInput = {
   bookingId: string;
@@ -33,6 +34,8 @@ export type CallSessionInput = {
   canBrowseLibrary?: boolean;
   onNudge?: () => Promise<NudgeResult>;
   onBookmark?: () => Promise<{ ok: true } | { ok: false; reason: string }>;
+  // Teacher's page only — saves a one-line focus area for this class.
+  onQuickNote?: (input: QuickNoteInput) => Promise<QuickNoteResult>;
 };
 
 export type CallSessionAction = { type: "start"; input: CallSessionInput } | { type: "end" };

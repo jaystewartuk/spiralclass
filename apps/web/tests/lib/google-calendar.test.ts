@@ -2,9 +2,12 @@ import { describe, expect, it } from "vitest";
 
 import { signOAuthState, verifyOAuthState, emailFromIdToken } from "@/lib/calendar/google/oauth";
 import { parseFreeBusy } from "@/lib/calendar/google/freebusy";
+import { signEmailOptOutToken } from "@/lib/email/opt-out-token";
+import { signNotificationSettingsToken } from "@/lib/notifications/settings-link-token";
 
 const SECRET = "test-session-secret-at-least-16-chars";
 const TEACHER = "11111111-1111-1111-1111-111111111111";
+const STUDENT = "22222222-2222-2222-2222-222222222222";
 
 describe("OAuth state token", () => {
   it("round-trips the teacher id", () => {
@@ -38,6 +41,21 @@ describe("OAuth state token", () => {
 
   it("rejects malformed input", () => {
     expect(verifyOAuthState("nonsense", SECRET).ok).toBe(false);
+  });
+
+  // Both are signed with SESSION_SECRET in the same shape, carry a teacher id
+  // and an issue time, and go out in every email.
+  it("rejects an email opt-out link's token, though it is signed with the same secret", () => {
+    const token = signEmailOptOutToken({ studentId: STUDENT, teacherId: TEACHER }, SECRET);
+    expect(verifyOAuthState(token, SECRET)).toEqual({ ok: false, reason: "wrong-kind" });
+  });
+
+  it("rejects a notification-settings link's token, though it is signed with the same secret", () => {
+    const token = signNotificationSettingsToken(
+      { recipientId: STUDENT, recipientType: "student", teacherId: TEACHER },
+      SECRET,
+    );
+    expect(verifyOAuthState(token, SECRET)).toEqual({ ok: false, reason: "wrong-kind" });
   });
 });
 

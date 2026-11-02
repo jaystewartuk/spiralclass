@@ -8,7 +8,7 @@ reversal and every measured number.
 
 This log is **current policy, not history** — before reversing anything a
 decision constrains, read its `D-NN.md` first, and amend that record rather
-than opening a successor ([D-202](./D-202.md)).
+than opening a successor ([D-207](./D-207.md)).
 
 Until October 2026 the log was append-only: 148 records, most of them links in
 chains of reversals. Those were folded into the records below, and the
@@ -130,6 +130,12 @@ thing a log can show that a codebase cannot.
 | [D-175](./D-175.md) | **Tenant isolation is checked by the application twice** — a parser and a runtime extension |
 | [D-178](./D-178.md) | **Migrations run inside the deploy, behind a checkpoint**, so every one must expand only    |
 
+### Student communication
+
+| #                   | Decision                                                                             |
+| ------------------- | ------------------------------------------------------------------------------------ |
+| [D-204](./D-204.md) | What a teacher sends, a new student is told about by default; failed sends are shown |
+
 ### Identity and access
 
 | #                 | Decision                                                                                        |
@@ -152,6 +158,7 @@ thing a log can show that a codebase cannot.
 | ------------------- | ------------------------------------------------------------------------------------------ |
 | [D-157](./D-157.md) | **One registry defines green**; the laptop and the runners run it, no workflow restates it |
 | [D-199](./D-199.md) | **A merge starts its own release**; the owner's approval is the only human step            |
+| [D-205](./D-205.md) | One production approval, on the database job                                               |
 | [D-163](./D-163.md) | The secret store pushes every deploy value out; no CI job can read it                      |
 
 ### Video, captions and transcripts
@@ -160,6 +167,9 @@ thing a log can show that a codebase cannot.
 | ------------------- | --------------------------------------------------------------------------------------------- |
 | [D-16](./D-16.md)   | **The class call is ours**, on LiveKit behind a provider seam, on one free machine, no egress |
 | [D-185](./D-185.md) | Captions are recognised in the browsers, and the lesson transcript is that caption text       |
+| [D-198](./D-198.md) | A caption shows words as spoken; translation replaces them when the phrase ends               |
+| [D-203](./D-203.md) | The class transcript is kept with subtitles off; the switch controls display only             |
+| [D-206](./D-206.md) | Translation readers see a wordless partial while a phrase is spoken                           |
 
 ### Teaching content and AI
 
@@ -191,7 +201,7 @@ thing a log can show that a codebase cannot.
 | [D-22](./D-22.md)   | **A student's voice is kept only on recorded consent**, and the privacy promises are code           |
 | [D-158](./D-158.md) | The repository publishes the shape and the engineering, never an account or the operator's exposure |
 | [D-164](./D-164.md) | Nothing in the tree describes what does not exist; work owed is an issue                            |
-| [D-202](./D-202.md) | **One record per live decision, edited in place**; retired numbers are never reused                 |
+| [D-207](./D-207.md) | **One record per live decision, edited in place**; retired numbers are never reused                 |
 
 ---
 
@@ -229,13 +239,19 @@ thing a log can show that a codebase cannot.
 | [D-185](./D-185.md) | Captions are recognised in the participants' browsers, and the lesson transcript is that caption text                                                                  |
 | [D-199](./D-199.md) | A merge to `main` starts its own release, and the owner's approval is the only human step                                                                              |
 | [D-201](./D-201.md) | A model call site ships with an eval set; verdicts become a figure                                                                                                     |
-| [D-202](./D-202.md) | The decision log keeps one record per live decision, edited in place                                                                                                   |
+| [D-207](./D-207.md) | The decision log keeps one record per live decision, edited in place                                                                                                   |
+
+| [D-198](./D-198.md) | A caption shows words as spoken; translation replaces them when the phrase ends |
+| [D-203](./D-203.md) | The class transcript is kept whether or not subtitles are shown; the switch is display only |
+| [D-204](./D-204.md) | What a teacher sends, a new student is told about by default; failed sends are shown |
+| [D-205](./D-205.md) | One production approval, on the database job |
+| [D-206](./D-206.md) | Translation readers see a wordless partial while a phrase is spoken |
 
 ## Retired numbers
 
 A number whose record was absorbed into a live one, or dropped because what it
 held was behaviour or a rule, is listed here with where its reasoning went
-([D-202](./D-202.md)). A retired number is never reused, and a row is never
+([D-207](./D-207.md)). A retired number is never reused, and a row is never
 removed: applied migrations cite some of these and cannot be edited. Outside
 migrations, cite the live record instead.
 
@@ -358,7 +374,6 @@ migrations, cite the live record instead.
 | D-195 | [D-72](./D-72.md) — One locale per language until a region earns one; a regional locale is a delta                                                                                                      |
 | D-196 | [D-72](./D-72.md) — Legal text is translated by a person, English controls, no launch without it                                                                                                        |
 | D-197 | [D-153](./D-153.md) — Prices are written in the reader's number format; the currency never changes                                                                                                      |
-| D-198 | [D-185](./D-185.md) — A caption shows the words as spoken; the translation replaces them when the phrase ends                                                                                           |
 | D-200 | [D-199](./D-199.md) — Preview returns as a second Cloud Run service deployed by every merge (decided, not built)                                                                                        |
 
 ---

@@ -7,7 +7,7 @@ import {
 } from "@/app/(app)/dashboard/students/[studentId]/student-detail-nav";
 import { parseMaterialsFilter, parseMaterialsGroupBy } from "@/lib/materials/student-materials";
 
-// The student screen's five views are URL state, so the URL is the contract:
+// The student screen's six views are URL state, so the URL is the contract:
 // what a `?tab=` value resolves to, and what the links the page emits actually
 // say. Both halves are pure, and both are round-tripped here — a builder that
 // emits a value the parser rejects is a link that silently lands somewhere else.

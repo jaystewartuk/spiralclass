@@ -11,6 +11,17 @@
 export const INTRO_VIDEO_IDEAL_MIN_SEC = 30;
 export const INTRO_VIDEO_IDEAL_MAX_SEC = 60;
 
+// The file types a teacher can pick to upload as an intro video: the picker's
+// `accept` list, and the only types the editor reads a duration from before the
+// upload. The presign handler's content-type map in apps/web
+// (lib/storage/teacher-video.ts, whose test holds the two together) takes each
+// of these, plus the codec-qualified webm types the in-app recorder produces.
+export const INTRO_VIDEO_UPLOAD_TYPES: readonly string[] = [
+  "video/mp4",
+  "video/webm",
+  "video/quicktime",
+];
+
 // How a finished take compares to the ideal window. Surfaced to the teacher
 // immediately after recording (before upload) so she can retake on the spot,
 // rather than waiting for the async AI coach to tell her the same thing after

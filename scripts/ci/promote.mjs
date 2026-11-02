@@ -2,7 +2,7 @@
 /**
  * Promote to production (D-157).
  *
- * NEITHER THE GATE NOR THE DEPLOY RUNS HERE ANY MORE ([D-157]). This
+ * NEITHER THE GATE NOR THE DEPLOY RUNS HERE ANY MORE ([D-157], [D-157]). This
  * script READS the runners' verdict on the exact commit — the Gate and Heavy
  * workflows, both green for this SHA, from their push-to-`main` runs — and then
  * fast-forwards the `production` branch. That push triggers
@@ -10,10 +10,10 @@
  * Neon checkpoint), then scripts/cloudrun-deploy.sh — the amd64 image, the
  * Cloud Run deploy, the Inngest sync — and the production probes. Promote
  * judges production by those two jobs (scripts/ci/deploy-verdict.mjs). Cloud Run has held the domain since the
- * 2026-09-23 cutover ([D-184]); it was Fly before.
+ * 2026-09-23 cutover ([D-184]'s addendum); it was Fly before.
  *
  * WHY THE DEPLOY MOVED, AND WHY THAT IS NOT THE 2026-07-19 DRIFT AGAIN.
- * In August 2026 the deploy was chained into this command because a HUMAN DISPATCH STEP had
+ * D-199 chained the deploy into this command because a HUMAN DISPATCH STEP had
  * left `production` 96 commits behind what was live. The chain is what
  * mattered, not where the build ran — and it is intact: the push at the end of
  * this script IS the trigger, so there is still nothing to remember. The
@@ -84,7 +84,7 @@ import { readFileSync } from "node:fs";
 import { createInterface } from "node:readline/promises";
 
 import { recordRun } from "../local/receipts.mjs";
-import { deployProtectionProblems } from "./deploy-protection.mjs";
+import { APP_ENVIRONMENT, deployProtectionProblems } from "./deploy-protection.mjs";
 import { deployVerdict } from "./deploy-verdict.mjs";
 import { capture, check, git, has, run } from "./lib.mjs";
 
@@ -146,7 +146,7 @@ try {
       "`production` would move the branch and deploy nothing.",
       "",
       "Production deploys to Cloud Run and that workflow's trigger is supposed",
-      "to be live (D-157, D-184). If it has been taken",
+      "to be live (D-157's addendum 2, D-184's addendum). If it has been taken",
       "off, put it back rather than working around this.",
       "",
       "Nothing is broken — production is still serving whatever shipped last.",
@@ -176,16 +176,25 @@ try {
   const policies = readJson(
     "repos/{owner}/{repo}/environments/production/deployment-branch-policies",
   );
+  // A missing app environment is a 404, so null here is "absent", and the
+  // check names it. Its policies are read only when it exists.
+  const appEnvironment = readJson(`repos/{owner}/{repo}/environments/${APP_ENVIRONMENT}`);
+  const appPolicies = appEnvironment
+    ? readJson(`repos/{owner}/{repo}/environments/${APP_ENVIRONMENT}/deployment-branch-policies`)
+    : { branch_policies: [] };
   const summaries = readJson("repos/{owner}/{repo}/rulesets");
   const rulesets = Array.isArray(summaries)
     ? summaries.map((summary) => readJson(`repos/{owner}/{repo}/rulesets/${summary.id}`))
     : null;
+  const names = (list) => (list.branch_policies ?? []).map((policy) => policy.name);
 
   const problems =
-    environment && policies && rulesets && !rulesets.includes(null)
+    environment && policies && appPolicies && rulesets && !rulesets.includes(null)
       ? deployProtectionProblems({
           environment,
-          branchPolicies: (policies.branch_policies ?? []).map((policy) => policy.name),
+          branchPolicies: names(policies),
+          appEnvironment,
+          appBranchPolicies: names(appPolicies),
           rulesets,
         })
       : [
@@ -411,10 +420,10 @@ if (has("gh")) {
 // probes.
 //
 // The chain D-199 insisted on is intact — nothing here is left for a human to
-// remember. What IS left for a human is the approvals on the `production`
-// environment, which GitHub asks for per job: the database job, then the
-// target. Each is a queued run with a notification rather than a
-// step that can be silently skipped. See deploy-production.yml's header.
+// remember. What IS left for a human is the one approval on the `production`
+// environment, on the database job; the Cloud Run job follows it by itself
+// (D-205). It is a queued run with a notification rather than a step that can
+// be silently skipped. See deploy-production.yml's header.
 const RUN_URL = `https://github.com/${capture("gh", ["repo", "view", "--json", "nameWithOwner", "-q", ".nameWithOwner"]) || "jaystewartuk/spiralclass"}/actions/workflows/deploy-production.yml`;
 
 let deployOk = true;
@@ -431,7 +440,7 @@ if (noWait || !has("gh")) {
 } else {
   console.log("\n── Waiting for the deploy workflow");
   console.log(
-    `  It needs two approvals on the production environment — the database job, then the target: ${RUN_URL}\n`,
+    `  It needs one approval on the production environment, on the database job; Cloud Run follows: ${RUN_URL}\n`,
   );
   // Matched on the HEAD SHA, not "the most recent run on this branch" — the
   // previous promote's run is also on this branch, and watching that one would
@@ -474,7 +483,7 @@ if (noWait || !has("gh")) {
     // Ctrl-C only stops watching; the deploy carries on.
     //
     // ⚠️ NOT `--exit-status`, which answers for the RUN — red whenever any job
-    // is. While a Vercel failover ran beside Cloud Run (retired 2026-09-23, [D-70]), a
+    // is. While a Vercel failover ran beside Cloud Run ([D-184] to [D-70]), a
     // failover that could not refresh turned a release that shipped into a
     // promote reporting that production may not have moved. So the verdict
     // is read job by job, and a promote that ends green still means exactly
@@ -498,7 +507,7 @@ if (noWait || !has("gh")) {
     // here. The nag in `pnpm gate` asks "when did this last SUCCEED", and the
     // answer really is "just now" — leaving the receipt unwritten would print a
     // standing warning about a job that had in fact just run, which is the
-    // banner-nobody-reads failure the 2026-08-25 backup decision warned about.
+    // banner-nobody-reads failure D-157's addendum warned about.
     if (deployOk) {
       recordRun("synthetic", {
         ok: true,

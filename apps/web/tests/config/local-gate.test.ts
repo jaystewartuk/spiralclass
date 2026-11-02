@@ -485,10 +485,31 @@ describe("the workflows call the registry, and never restate it (D-157)", () => 
     // The environment is both the approval gate and the credential boundary:
     // production's GCP key and database URLs exist only inside it, so no other
     // workflow in this repository can reach them even by typo.
-    expect(byName("deploy-production.yml")).toMatch(/environment:\n\s+name: production/);
+    expect(byName("deploy-production.yml")).toMatch(/environment:\n\s+name: production\n/);
     for (const { file, text } of workflows.filter((w) => w.file !== "deploy-production.yml")) {
       expect(text, `${file} can reach production credentials`).not.toContain("name: production");
     }
+  });
+
+  it("every job on production-app waits for the approved database job (D-205)", () => {
+    // production-app has no reviewer: one approval, on the database job, ships
+    // the commit. That is safe only while each job on production-app `needs:`
+    // the database job, so it cannot start unapproved. A job on it without that
+    // would deploy production with nobody having approved anything.
+    const deploy = byName("deploy-production.yml");
+    const jobs = deploy.slice(deploy.indexOf("\njobs:\n")).split(/\n(?= {2}[a-z][\w-]*:\n)/);
+    const onApp = jobs.filter((job) => /^\s+name: production-app$/m.test(job));
+    expect(onApp.length, "a job on production-app").toBeGreaterThan(0);
+    for (const job of onApp) {
+      const id = /^ {2}([\w-]+):/.exec(job)?.[1];
+      expect(job, `${id} runs on production-app without needing the database job`).toMatch(
+        /^ {4}needs: \[database\]$/m,
+      );
+    }
+    const database = jobs.find((job) => /^ {2}database:/.test(job)) ?? "";
+    expect(database, "the database job carries the reviewer").toMatch(
+      /environment:\n\s+name: production\n/,
+    );
   });
 
   it("only the production branch can reach the production deploy", () => {

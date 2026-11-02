@@ -1,7 +1,7 @@
 # D-NN. Short declarative title — the decision, not the topic
 
 <!--
-  Before copying this, check the bar (D-202). A record is warranted only when
+  Before copying this, check the bar (D-207). A record is warranted only when
   ALL THREE hold:
 
     1. there were at least two real options;

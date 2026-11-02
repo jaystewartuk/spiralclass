@@ -45,7 +45,7 @@ function enablementFlagOn(): boolean {
 // and with this flag on that recognised text is KEPT as the class's
 // LessonTranscript instead of being thrown away with the captions. No audio
 // is captured and no vendor is called for it, so the flag alone decides —
-// captions' own gates (LIVE_CAPTIONS_ENABLED, the teacher's toggle, the Pro
+// captions' own gates (LIVE_CAPTIONS_ENABLED, the Pro
 // plan) and the per-pairing insights consent (D-22) still apply on top,
 // resolved per class in lib/captions/class-access.ts.
 export function browserTranscriptEnabled(): boolean {

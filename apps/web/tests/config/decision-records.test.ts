@@ -23,7 +23,7 @@ import { dirname, join, relative, resolve } from "node:path";
  * were swept by hand. A sweep with no guard behind it is a sweep that has to
  * be done again.
  *
- * LIVE AND RETIRED NUMBERS (D-202). The log was consolidated from 148 records
+ * LIVE AND RETIRED NUMBERS (D-207). The log was consolidated from 148 records
  * to one per live decision. A number is never reused, so every number that
  * stopped having a file is listed in the README's "Retired numbers" table with
  * where its reasoning went. Outside applied migrations a citation must name a
@@ -67,7 +67,7 @@ const norm = (n: string): number => Number.parseInt(n, 10);
 const label = (n: number): string => `D-${String(n).padStart(2, "0")}`;
 
 /**
- * The per-record ceiling (D-202). A record is one live decision, rewritten when
+ * The per-record ceiling (D-207). A record is one live decision, rewritten when
  * it changes; one that needs more than this is two decisions, or is carrying
  * history its How we got here should summarise. Aim for about 800.
  */
@@ -233,7 +233,7 @@ describe("decision records cited in the repo", () => {
 
     expect(
       over,
-      `A decision record is limited to ${MAX_RECORD_WORDS} words (D-202). Cut history ` +
+      `A decision record is limited to ${MAX_RECORD_WORDS} words (D-207). Cut history ` +
         `the How we got here section does not need, or move behaviour to docs/features/:\n` +
         over.join("\n"),
     ).toEqual([]);

@@ -35,7 +35,7 @@
 # retired (D-116) and the checks it couldn't run are no longer duplicated on
 # GitHub, so there is nothing left to be redundant with.
 #
-# The hook also prints the maintenance nag (D-129): the time-bomb sweep has no
+# The hook also prints the maintenance nag (D-157): the time-bomb sweep has no
 # scheduler of any kind, so `pnpm gate` says when it is overdue. That output
 # comes from the gate, not from here — and the gate deliberately suppresses it
 # on a runner, where there is no operator at a keyboard to read it. The

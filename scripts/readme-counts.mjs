@@ -64,7 +64,7 @@ const CHECKED = [
   // `docs/decisions/README.md` is deliberately NOT here, and the reason is
   // worth knowing before somebody adds it: a decision log states numbers ABOUT
   // THE PAST on purpose. It says the log held 148 records before the
-  // consolidation (D-202), true and about a tree that no longer exists, and the
+  // consolidation (D-207), true and about a tree that no longer exists, and the
   // records it indexes are full of such numbers. Holding a history-bearing document to
   // the present tree is a category error, so its own heading states no count at
   // all — the index below it lists every record, and

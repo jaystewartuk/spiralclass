@@ -11,7 +11,10 @@ import { REPO_ROOT } from "../../../../scripts/env-config.mjs";
 /**
  * Only the repository owner ships production. That is two GitHub settings (a
  * required reviewer on the `production` environment, and an admin-only
- * `update` rule on the `production` branch), and a setting is not a file, so
+ * `update` rule on the `production` branch) — plus, since D-205, a
+ * `production-app` environment that only the `production` branch can reach,
+ * holding the Cloud Run job's values with no reviewer of its own. A setting is
+ * not a file, so
  * nothing in the tree fails when one goes. Until 2026-09-23 the docs described
  * the reviewer while the environment had none, and a promote deployed with
  * nobody approving it.
@@ -49,15 +52,34 @@ const adminOnlyRuleset = {
   bypass_actors: [{ actor_id: ADMIN_ROLE_ID, actor_type: "RepositoryRole", bypass_mode: "always" }],
 };
 
+// No reviewer: the database job's approval is the one click (D-205).
+const appEnvironment = {
+  can_admins_bypass: true,
+  deployment_branch_policy: { protected_branches: false, custom_branch_policies: true },
+  protection_rules: [{ type: "branch_policy" }],
+};
+
 const protectedSettings = {
   environment: protectedEnvironment,
   branchPolicies: ["production"],
+  appEnvironment,
+  appBranchPolicies: ["production"],
   rulesets: [historyRuleset, adminOnlyRuleset],
 };
 
 describe("deployProtectionProblems", () => {
   it("passes when only the owner can move the branch and approve the deploy", () => {
     expect(deployProtectionProblems(protectedSettings)).toEqual([]);
+  });
+
+  it("accepts a reviewer on production-app — a second click is wasted, not unsafe", () => {
+    const reviewed = {
+      ...appEnvironment,
+      protection_rules: [{ type: "branch_policy" }, reviewerRule],
+    };
+    expect(deployProtectionProblems({ ...protectedSettings, appEnvironment: reviewed })).toEqual(
+      [],
+    );
   });
 
   it.each([
@@ -143,6 +165,21 @@ describe("deployProtectionProblems", () => {
       /force-pushes and deletion/,
     ],
     ["no history ruleset at all", { rulesets: [adminOnlyRuleset] }, /force-pushes and deletion/],
+    [
+      "no production-app environment, so the Cloud Run job has no credentials",
+      { appEnvironment: null },
+      /no `production-app` environment/,
+    ],
+    [
+      "any branch allowed to use production-app",
+      { appEnvironment: { ...appEnvironment, deployment_branch_policy: null } },
+      /`production-app` environment's secrets are not limited/,
+    ],
+    [
+      "a second branch allowed to use production-app",
+      { appBranchPolicies: ["production", "main"] },
+      /`production-app` environment's secrets are not limited/,
+    ],
   ])("refuses %s", (_, override, message) => {
     const problems = deployProtectionProblems({ ...protectedSettings, ...override });
     expect(problems.join("\n")).toMatch(message);
@@ -189,6 +226,15 @@ describe("what setup-branch-protection.sh applies is what promote accepts", () =
     return JSON.parse(body!.replace("${OWNER_ID}", "1"));
   }
 
+  function appPayload() {
+    const body =
+      /environments\/production-app" --input - >\/dev\/null <<JSON\n([\s\S]*?)\nJSON/.exec(
+        SETUP,
+      )?.[1];
+    expect(body, "production-app heredoc").toBeDefined();
+    return JSON.parse(body!);
+  }
+
   it("passes the check as applied", () => {
     const history = payload("RULESET_PAYLOAD", {
       RULESET_NAME: "production: fast-forward only, no delete",
@@ -216,9 +262,21 @@ describe("what setup-branch-protection.sh applies is what promote accepts", () =
       deployProtectionProblems({
         environment,
         branchPolicies: ["production"],
+        appEnvironment: {
+          deployment_branch_policy: appPayload().deployment_branch_policy,
+          protection_rules: [{ type: "branch_policy" }],
+        },
+        appBranchPolicies: ["production"],
         rulesets: [history, adminOnly],
       }),
     ).toEqual([]);
+  });
+
+  it("limits production-app to the production branch and gives it no reviewer", () => {
+    expect(appPayload().reviewers).toBeUndefined();
+    expect(SETUP).toContain(
+      'environments/production-app/deployment-branch-policies" \\\n    -f name=production -f type=branch',
+    );
   });
 
   it("resolves the reviewer's account id at run time rather than writing one down", () => {

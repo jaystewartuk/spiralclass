@@ -36,7 +36,8 @@ vi.mock("@/app/(app)/settings/booking-page/intro-video-coach-panel", () => ({
   IntroVideoCoachPanel: () => null,
 }));
 
-const { IntroVideoForm } = await import("@/app/(app)/settings/booking-page/intro-video-form");
+const { IntroVideoForm, readVideoDurationMs } =
+  await import("@/app/(app)/settings/booking-page/intro-video-form");
 
 const ANALYSIS = { status: null, coach: null, error: null };
 
@@ -138,5 +139,54 @@ describe("IntroVideoForm — record/upload hierarchy", () => {
     );
     // Revealed WITHOUT the teacher having to find the disclosure herself.
     expect(container.querySelector('input[type="file"]')).not.toBeNull();
+  });
+});
+
+describe("readVideoDurationMs — the duration read before an upload", () => {
+  let createObjectURL: ReturnType<typeof vi.fn>;
+  let revokeObjectURL: ReturnType<typeof vi.fn>;
+
+  beforeEach(() => {
+    // jsdom implements neither.
+    createObjectURL = vi.fn(() => "blob:probe");
+    revokeObjectURL = vi.fn();
+    vi.stubGlobal("URL", Object.assign(Object.create(URL), { createObjectURL, revokeObjectURL }));
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    vi.restoreAllMocks();
+  });
+
+  // The picker's `accept` list is only a hint — "All files" is one click away —
+  // and an object URL serves a picked file back in this origin with whatever
+  // type its extension gave it. So nothing but an uploadable video gets one.
+  it.each([
+    ["an HTML page", "intro.html", "text/html", "<script>alert(document.domain)</script>"],
+    [
+      "an SVG carrying script",
+      "intro.svg",
+      "image/svg+xml",
+      "<svg xmlns='http://www.w3.org/2000/svg' onload='alert(document.domain)'/>",
+    ],
+    ["a file whose extension says nothing", "intro", "", "<script>alert(document.domain)</script>"],
+  ])("gives %s no object URL", async (_label, name, type, body) => {
+    expect(await readVideoDurationMs(new File([body], name, { type }))).toBeNull();
+    expect(createObjectURL).not.toHaveBeenCalled();
+  });
+
+  it("reads an uploadable video's duration off a detached <video>, then revokes its URL", async () => {
+    const createElement = vi.spyOn(document, "createElement");
+    const file = new File([new Uint8Array([0, 0, 0, 24])], "intro.mp4", { type: "video/mp4" });
+
+    const pending = readVideoDurationMs(file);
+    const video = createElement.mock.results.at(-1)!.value as HTMLVideoElement;
+    expect(createObjectURL).toHaveBeenCalledWith(file);
+    expect(video.src).toBe("blob:probe");
+    Object.defineProperty(video, "duration", { value: 42.4 });
+    video.onloadedmetadata!(new Event("loadedmetadata"));
+
+    expect(await pending).toBe(42_400);
+    expect(revokeObjectURL).toHaveBeenCalledWith("blob:probe");
   });
 });

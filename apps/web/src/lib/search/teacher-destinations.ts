@@ -2,6 +2,7 @@ import {
   Bell,
   BookOpen,
   CalendarPlus,
+  Captions,
   History,
   LayoutGrid,
   type LucideIcon,
@@ -157,6 +158,14 @@ export const TEACHER_ACTIONS: readonly TeacherAction[] = [
     detail: "web.search.action.notificationsInbox.detail",
     keywords: "web.search.keywords.notificationsInbox",
     icon: Bell,
+  },
+  {
+    id: "captionTiming",
+    href: "/settings/captions",
+    label: "web.settings.captionTiming.title",
+    detail: "web.search.action.captionTiming.detail",
+    keywords: "web.search.keywords.captionTiming",
+    icon: Captions,
   },
   {
     id: "customizeDashboard",

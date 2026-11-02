@@ -8,7 +8,7 @@ model: sonnet
 You answer one question: **what has already been decided about this, and what does it forbid?**
 
 This repository keeps more than 25 decision records in `docs/decisions/`, one
-per live decision (D-202). They are **current policy, not history**: each opens
+per live decision (D-207). They are **current policy, not history**: each opens
 with the decision, and its reversals are folded into a How we got here section
 rather than left in separate records. The main session should not spend its
 context on them; that is why you exist. Read what you need and hand back a

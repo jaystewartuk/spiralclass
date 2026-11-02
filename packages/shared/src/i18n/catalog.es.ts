@@ -72,7 +72,7 @@ export const esMX = {
   "feedback.attachHint": "Opcional. Imágenes de hasta {max} MB.",
   "feedback.attachRemove": "Quitar {filename}",
   "feedback.attachTooLarge": "Esa imagen pesa más de {max} MB. Prueba con una más pequeña.",
-  "feedback.attachInvalidType": "Ese archivo no es una imagen.",
+  "feedback.attachInvalidType": "Ese archivo no es una captura ni una foto.",
   "feedback.attachReadFailed": "No pudimos leer esa imagen. Prueba con otra.",
   "feedback.diagnosticsNote":
     "Adjuntamos esta página y datos de tu navegador. No incluyas contraseñas ni números de tarjeta.",
@@ -606,6 +606,15 @@ export const esMX = {
   "call.bookmark": "Marcar",
   "call.bookmarked": "¡Marcado!",
   "call.bookmarkError": "No se pudo agregar el marcador. Inténtalo de nuevo.",
+  "call.quickNote": "Nota rápida",
+  "call.quickNoteHint":
+    "Anota algo para practicar en la próxima clase. Se guarda como área de enfoque de este estudiante y solo tú la ves.",
+  "call.quickNotePlaceholder": "p. ej. practicar el subjuntivo",
+  "call.quickNoteSkill": "Habilidad (opcional)",
+  "call.quickNoteSave": "Guardar nota",
+  "call.quickNoteSaved": "Guardada en las áreas de enfoque de este estudiante.",
+  "call.quickNoteError": "No se pudo guardar la nota. Inténtalo de nuevo.",
+  "call.quickNoteClose": "Cerrar",
   "call.captionsOn": "Subtítulos",
   "call.captionsOff": "Quitar subtítulos",
   "call.screenShareOn": "Compartir pantalla",
@@ -692,19 +701,30 @@ export const esMX = {
   "call.captionsListening": "Escuchando…",
   "call.captionsSpeakerUnknown": "Quien habla",
   "call.captionsDisplayLegend": "Mostrar",
-  "call.captionsDisplayBoth": "Original y traducción",
   "call.captionsDisplayTranslation": "Solo la traducción",
   "call.captionsDisplayOriginal": "Solo el original",
   // Formas cortas para el control segmentado. Las largas de arriba siguen
   // siendo el nombre accesible, así que abreviar no le cuesta nada a quien
   // usa un lector de pantalla.
-  "call.captionsDisplayBothShort": "Ambos",
   "call.captionsDisplayTranslationShort": "Traducción",
   "call.captionsDisplayOriginalShort": "Original",
   "call.captionsSizeLegend": "Tamaño del texto",
+  "call.captionsSizeS": "Pequeño",
   "call.captionsSizeM": "Mediano",
   "call.captionsSizeL": "Grande",
   "call.captionsSizeXl": "Muy grande",
+  "call.captionsLinesLegend": "Líneas",
+  "call.captionsLinesName_one": "Mostrar {count} línea a la vez",
+  "call.captionsLinesName": "Mostrar hasta {count} líneas a la vez",
+  "call.captionsPositionLegend": "Posición",
+  "call.captionsPositionBottom": "Sobre el video, abajo",
+  "call.captionsPositionTop": "Sobre el video, arriba",
+  "call.captionsPositionBelow": "Debajo del video, nunca encima",
+  "call.captionsPositionBottomShort": "Abajo",
+  "call.captionsPositionTopShort": "Arriba",
+  "call.captionsPositionBelowShort": "Debajo",
+  "call.captionsMoveToTop": "Mover los subtítulos arriba",
+  "call.captionsMoveToBottom": "Mover los subtítulos abajo",
   "call.captionsTranscript": "Transcripción",
   "call.captionsTranscriptEmpty": "Todavía nadie ha hablado.",
   "call.captionsTranscriptPrivacy": "Se queda en este dispositivo y se borra al salir.",
@@ -2816,6 +2836,7 @@ export const esMX = {
   "web.dashboard.students.tab.navLabel": "Vistas de este alumno",
   "web.dashboard.students.tab.overview": "Resumen",
   "web.dashboard.students.tab.learning": "Aprendizaje",
+  "web.dashboard.students.tab.profile": "Perfil de aprendizaje",
   "web.dashboard.students.tab.materials": "Materiales",
   "web.dashboard.students.tab.settings": "Ajustes",
   "web.dashboard.students.header.theirTime": "{time} en {city}",
@@ -2861,6 +2882,15 @@ export const esMX = {
   "web.studentProfile.trend.focus": "Enfocar",
   "web.studentProfile.trend.improving": "Mejorando",
   "web.studentProfile.trend.new": "Nueva",
+  "web.studentProfile.signalsTitle": "Cómo habla",
+  "web.studentProfile.signalsDescription":
+    "Patrones de fluidez y comprensión a lo largo de las clases.",
+  "web.studentProfile.focusTitle": "Qué trabajar",
+  "web.studentProfile.hintToggle": "Ejemplo",
+  "web.studentProfile.addTitle": "Añade tu propia área de enfoque",
+  "web.studentProfile.addNoClass":
+    "Podrás añadir un área de enfoque cuando este alumno haya tenido una clase.",
+  "web.studentProfile.addNote": "Se guarda como confirmada y se asocia a su clase más reciente.",
   "web.studentLevel.label": "Nivel",
   "web.studentLevel.notSet": "Sin asignar",
   "web.studentLevel.hint":
@@ -3442,6 +3472,34 @@ export const esMX = {
   "web.settings.account.sectionNavLabel": "Secciones de la cuenta",
   "web.settings.account.memberSince": "En SpiralClass desde {date}",
   "web.settings.account.notificationsManage": "Administrar notificaciones",
+  "web.settings.account.captionTimingTitle": "Tiempo de los subtítulos",
+  "web.settings.account.captionTimingDescription":
+    "Qué tan pronto se traducen las palabras de un alumno mientras sigue hablando.",
+  "web.settings.account.captionTimingManage": "Ajustar el tiempo de los subtítulos",
+  "web.settings.captionTiming.title": "Tiempo de los subtítulos",
+  "web.settings.captionTiming.subtitle":
+    "Elige cómo se cortan en líneas los subtítulos en vivo. Se aplica a todas tus clases, en las dos pantallas.",
+  "web.settings.captionTiming.cardTitle": "Cuándo traducir",
+  "web.settings.captionTiming.cardDescription":
+    "Por defecto el navegador espera a que la persona termine de hablar y traduce todo de una vez. Estos dos ajustes hacen que traduzca antes. Si es demasiado pronto, los subtítulos se vuelven palabras sueltas; cambia uno a la vez.",
+  "web.settings.captionTiming.pause.label": "Traducir tras una pausa de",
+  "web.settings.captionTiming.pause.hint":
+    "Si nadie dice nada nuevo durante este tiempo, se traduce lo dicho hasta ahora. Más corto es más rápido, pero corta las ideas a la mitad.",
+  "web.settings.captionTiming.pause.off": "Lo decide el navegador",
+  "web.settings.captionTiming.pause.option": "{ms} ms",
+  "web.settings.captionTiming.maxChars.label": "No esperar a traducir más de",
+  "web.settings.captionTiming.maxChars.hint":
+    "Para quien habla rápido y no hace pausas: un tramo largo se corta tras unos tantos caracteres, al final de una palabra.",
+  "web.settings.captionTiming.maxChars.off": "Sin límite",
+  "web.settings.captionTiming.maxChars.option": "{count} caracteres",
+  "web.settings.captionTiming.preview.title": "Cómo se leería",
+  "web.settings.captionTiming.preview.description":
+    "Una persona que habla rápido, con una sola respiración en medio. Cada línea de abajo es un subtítulo.",
+  "web.settings.captionTiming.preview.sample":
+    "Yesterday I went to the market with my sister and we bought some tomatoes | but then it started to rain so we ran home and I forgot the bread",
+  "web.settings.captionTiming.reset": "Volver al valor por defecto",
+  "web.settings.captionTiming.unsaved": "Tienes cambios sin guardar.",
+  "web.settings.captionTiming.savedMessage": "Tiempo de los subtítulos guardado.",
   "web.settings.account.channels.emailOn": "Correo activado",
   "web.settings.account.channels.emailOff": "Correo desactivado",
   "web.settings.account.channels.pushOn": "Push activado",
@@ -4895,6 +4953,11 @@ export const esMX = {
   "web.notificationPrefs.category.classMaterials": "Material y tareas",
   "web.notificationPrefs.categoryHint.classMaterials":
     "El material que comparte tu profe, las tareas asignadas, la retroalimentación y las fechas límite.",
+  "web.notificationGap.categoryOff":
+    "{name} tiene desactivadas las notificaciones de {category}, así que no se le avisará de esto. Sí aparece en su portal.",
+  "web.notificationGap.paused":
+    "Las notificaciones de {name} están en pausa, así que no se le avisará de esto. Sí aparece en su portal.",
+  "web.notificationGap.turnOn": "Activar notificaciones",
   "web.notificationPrefs.category.expiryReminders": "Avisos de paquete",
   "web.notificationPrefs.categoryHint.expiryReminders":
     "Cuando un paquete está por vencer y cuando terminas uno.",
@@ -5153,7 +5216,6 @@ export const esMX = {
   "web.siteFooter.terms": "Términos",
   "web.siteFooter.privacy": "Privacidad",
   "web.siteFooter.sourceCode": "Código fuente",
-  "web.siteFooter.madeBy": "Hecho por",
   "web.themeToggle.switchToLight": "Cambiar a modo claro",
   "web.themeToggle.switchToDark": "Cambiar a modo oscuro",
   "web.themeToggle.light": "Claro",
@@ -6729,6 +6791,9 @@ export const esMX = {
   "web.search.keywords.invitations": "invitaciones pendientes enviadas",
   "web.search.keywords.newMessage": "redactar escribir enviar mensaje nuevo chat",
   "web.search.keywords.notificationsInbox": "alertas campana avisos novedades",
+  "web.search.action.captionTiming.detail": "Qué tan pronto se traducen los subtítulos en vivo.",
+  "web.search.keywords.captionTiming":
+    "subtítulos captions retraso demora pausa traducción velocidad",
   "web.search.keywords.customizeDashboard": "reordenar ocultar accesos diseño",
   "web.search.keywords.acquisitionProfile": "perfil de marketing público nicho",
   "web.search.keywords.acquisitionResults": "estadísticas visitas tráfico resultados",
@@ -7693,6 +7758,7 @@ export const esMX = {
   "email.packagePlaceholder.text": "tu paquete",
   "email.packagePlaceholder.text2": "un paquete",
   "inbox.fallback.title": "Notificación",
+  "inbox.fallback.body": "La clase o el pago de este aviso ya no está disponible.",
   "email.studentAcquisitionPlanTeacher.subject": "Tu plan de esta semana: {count} acciones",
   "email.studentAcquisitionPlanTeacher.subject_one": "Tu plan de esta semana: {count} acción",
   "email.studentAcquisitionPlanTeacher.textBody":

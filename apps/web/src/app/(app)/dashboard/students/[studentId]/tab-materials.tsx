@@ -23,6 +23,7 @@ import {
   setLibraryItemCompletedAction,
   unassignLibraryMaterialAction,
 } from "@/app/actions/library";
+import { NotificationGapNotice } from "@/components/notification-gap-notice";
 import { AssignMaterialForm } from "./assign-material-form";
 import { studentDetailHref } from "./student-detail-nav";
 
@@ -116,6 +117,8 @@ export async function MaterialsTab({
   t,
   filter,
   groupBy,
+  studentName,
+  notificationPrefs,
 }: {
   studentId: string;
   teacher: Teacher;
@@ -123,6 +126,8 @@ export async function MaterialsTab({
   t: TFunction;
   filter: StudentMaterialsFilter;
   groupBy: StudentMaterialsGroupBy;
+  studentName: string;
+  notificationPrefs: object | null;
 }) {
   const [levels, libraryMaterials, assignments, classMaterialItems] = await Promise.all([
     getTeacherLevels(teacher.id),
@@ -232,6 +237,16 @@ export async function MaterialsTab({
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
+          {/* Assigning a library item notifies her under class_materials; say
+              so here when that is off, because the item reaches her portal
+              either way (D-204). */}
+          <NotificationGapNotice
+            studentId={studentId}
+            studentName={studentName}
+            prefs={notificationPrefs}
+            category="class_materials"
+            t={t}
+          />
           {assignments.length > 0 && (
             <ul className="space-y-2">
               {assignments.map((a) => {

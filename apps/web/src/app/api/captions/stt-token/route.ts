@@ -30,8 +30,8 @@ import { listRoomParticipantAttributes } from "@/lib/video/room";
 //
 // This route is what spends Deepgram minutes, so it also checks the fallback
 // is WARRANTED: LiveKit's own view of the room must show the caller and
-// someone else present, the teacher's switch on, and no browser saying it can
-// recognise — otherwise a signed-in participant could stream from a room a
+// someone else present, the teacher's switch on (or the class's transcript
+// being kept, D-203), and no browser saying it can recognise — otherwise a signed-in participant could stream from a room a
 // computer is captioning for free. Grants are budgeted per caller per class
 // and per class per day; each grant is logged, never any audio. The time
 // actually streamed is not visible from here (the browser talks to Deepgram
@@ -105,6 +105,7 @@ export async function POST(req: Request): Promise<Response> {
       participants,
       callerIdentity: callerId,
       teacherIdentity: session.teacherIdentity,
+      transcriptCapture: session.transcriptCapture,
     });
     if (refusal) {
       log.info("caption stt token refused", { bookingId, speaker, refusal });

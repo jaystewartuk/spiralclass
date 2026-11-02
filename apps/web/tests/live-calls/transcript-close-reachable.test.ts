@@ -45,7 +45,10 @@ const RENDER_CONDITION = /^\s*\{[^}]*&&\s*\($/;
 describe("the transcript's close button", () => {
   it("is out of reach of the window controls, which live in the top bar", () => {
     const bar = source.indexOf("<CallTopBar");
-    const stage = source.indexOf('<div className="relative flex-1 overflow-hidden">');
+    // The stage may carry a ref (the subtitles measure against it).
+    const stage = source.search(
+      /<div (?:ref=\{\w+\} )?className="relative flex-1 overflow-hidden">/,
+    );
     expect(bar).toBeGreaterThan(-1);
     expect(stage).toBeGreaterThan(bar);
     for (const label of ['t("call.minimize")', 't("call.popOut")']) {
