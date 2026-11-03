@@ -150,6 +150,14 @@ EOF
 PREVIEW_DB_USER="${PREVIEW_DB_USER:-spiralclass_preview}"
 PREVIEW_DB_NAME="${PREVIEW_DB_NAME:-spiralclass_preview}"
 
+# ⚠️ On first deploy to a rebuilt box there is no `.env`, so PREVIEW_DB_PASSWORD
+# is unset and `set -u` makes expanding it fatal. Generate one here so the render
+# never aborts on it. Generated passwords are base64 with `/+=` stripped, which
+# also keeps them free of `$` that compose's `.env` interpolation would mangle.
+# A redeploy passes PREVIEW_DB_PASSWORD in from the box's `.env` (see
+# oracle-deploy.sh), so this branch only fires on the very first deploy.
+PREVIEW_DB_PASSWORD="${PREVIEW_DB_PASSWORD:-$(openssl rand -base64 24 | tr -d '/+=')}"
+
 # APP_INTERNAL_BASE_URL is here for scripts/oracle-deploy.sh, which reads it
 # back to probe the webhook's origin for redirects. No compose service reads it.
 cat > "$OUT/.env" <<EOF
