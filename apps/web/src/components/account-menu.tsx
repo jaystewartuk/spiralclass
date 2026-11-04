@@ -89,7 +89,9 @@ export function AccountMenu({
           photoUrl={account?.photoUrl}
           size="sm"
         />
-        <span className="hidden max-w-48 truncate xl:block">{triggerName}</span>
+        {/* Not from 1280px, where the inline nav starts: in Spanish the links and
+            the name together ran the menu 16px off the screen. The avatar stays. */}
+        <span className="hidden max-w-48 truncate 2xl:block">{triggerName}</span>
         <ChevronDown
           aria-hidden
           className={cn("h-4 w-4 text-muted-foreground transition-transform", open && "rotate-180")}

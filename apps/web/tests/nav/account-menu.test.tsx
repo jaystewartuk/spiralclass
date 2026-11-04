@@ -124,6 +124,12 @@ describe("AccountMenu", () => {
     expect(document.activeElement).toBe(order[order.length - 1]);
   });
 
+  it("keeps the name out of the bar until there is room for it beside the inline nav", () => {
+    const classes = trigger().querySelector("span.truncate")?.className.split(/\s+/);
+    expect(classes).toContain("2xl:block");
+    expect(classes).not.toContain("xl:block");
+  });
+
   it("closes on Escape and gives the trigger its focus back", () => {
     openMenu();
     act(() => {
