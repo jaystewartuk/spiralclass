@@ -411,7 +411,7 @@ pnpm test:e2e                # Playwright
 pnpm gate --allow-dirty      # the fast tier the pre-push hook will run
 ```
 
-There are more than 800 test files across five layers — unit, real-database
+There are more than 900 test files across five layers — unit, real-database
 integration, Playwright end-to-end, visual regression and accessibility — plus a
 mutation spot-check that measures whether the unit suite would actually catch a
 defect, and a per-PR diff-coverage floor on new code. Coverage measures `src/lib/**`,
