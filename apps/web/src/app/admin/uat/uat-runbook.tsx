@@ -359,7 +359,7 @@ export function UatRunbook({
                       max={200}
                       value={bulkTeachers}
                       onChange={(e) => setBulkTeachers(e.target.value)}
-                      className="h-10 w-24 text-sm"
+                      className="w-24 lg:h-10 lg:text-sm"
                     />
                   </div>
                   <div className="space-y-1">
@@ -374,7 +374,7 @@ export function UatRunbook({
                       max={50}
                       value={studentsPerBulkTeacher}
                       onChange={(e) => setStudentsPerBulkTeacher(e.target.value)}
-                      className="h-10 w-24 text-sm"
+                      className="w-24 lg:h-10 lg:text-sm"
                     />
                   </div>
                   <Button

@@ -447,7 +447,7 @@ function RawTextBlockEditor({
         {...field}
         rows={block.type === "paragraph" ? 3 : 5}
         placeholder={t("material.editor.block.textPlaceholder")}
-        className={block.type === "code" ? "font-mono text-sm" : undefined}
+        className={block.type === "code" ? "font-mono lg:text-sm" : undefined}
       />
       {field.value.trim() && (
         <div className="mt-2 rounded-md border bg-muted/20 px-3 py-2">
@@ -540,7 +540,7 @@ function ListItemRow({
       <Input
         {...field}
         placeholder={t("material.editor.block.itemPlaceholder")}
-        className="h-8 text-sm"
+        className="lg:h-8 lg:text-sm"
       />
       <IconButton
         label={t("material.editor.block.moveItemUp")}
@@ -606,7 +606,7 @@ function CalloutBlockEditor({
         <Input
           {...titleField}
           placeholder={t("material.editor.block.calloutTitlePlaceholder")}
-          className="h-8 flex-1 text-sm"
+          className="flex-1 lg:h-8 lg:text-sm"
         />
         <Button type="button" variant="ghost" size="sm" onClick={onDone}>
           {t("material.editor.block.done")}
@@ -714,7 +714,7 @@ function TableCellInput({
   bold?: boolean;
 }) {
   const field = useDeferredText(value, onCommit);
-  return <Input {...field} className={cn("h-8 text-sm", bold && "font-semibold")} />;
+  return <Input {...field} className={cn("lg:h-8 lg:text-sm", bold && "font-semibold")} />;
 }
 
 /** An image edits as its CAPTION plus a replace-the-picture button — there is
@@ -738,12 +738,13 @@ function ImageBlockEditor({
     <BlockChrome label={t("material.editor.block.type.image")} onDelete={onDelete} onDone={onDone}>
       <div className="space-y-2">
         <MaterialDocument body={serializeBlock(block)} />
-        <div className="flex items-center gap-2">
+        {/* Stacked on a phone: on one row, the replace button left the caption 72px. */}
+        <div className="flex flex-col items-start gap-2 sm:flex-row sm:items-center">
           <Input
             {...altField}
             placeholder={t("material.editor.block.imageAltPlaceholder")}
             aria-label={t("material.editor.block.imageAltLabel")}
-            className="h-8 flex-1 text-sm"
+            className="sm:flex-1 lg:h-8 lg:text-sm"
           />
           <ImageUploadButton
             label={t("material.editor.block.imageReplace")}
@@ -866,19 +867,19 @@ function TimelineBlockEditor({
               {...past}
               aria-label={t("material.editor.block.timelinePastLabel")}
               placeholder={t("material.editor.block.timelinePastLabel")}
-              className="h-8 flex-1 text-sm"
+              className="flex-1 lg:h-8 lg:text-sm"
             />
             <Input
               {...now}
               aria-label={t("material.editor.block.timelineNowLabel")}
               placeholder={t("material.editor.block.timelineNowLabel")}
-              className="h-8 flex-1 text-sm"
+              className="flex-1 lg:h-8 lg:text-sm"
             />
             <Input
               {...future}
               aria-label={t("material.editor.block.timelineFutureLabel")}
               placeholder={t("material.editor.block.timelineFutureLabel")}
-              className="h-8 flex-1 text-sm"
+              className="flex-1 lg:h-8 lg:text-sm"
             />
           </div>
         </fieldset>
@@ -992,7 +993,12 @@ function TimelineTextInput({
 }) {
   const field = useDeferredText(value, onCommit);
   return (
-    <Input {...field} aria-label={label} placeholder={placeholder} className="h-8 flex-1 text-sm" />
+    <Input
+      {...field}
+      aria-label={label}
+      placeholder={placeholder}
+      className="flex-1 lg:h-8 lg:text-sm"
+    />
   );
 }
 
@@ -1022,7 +1028,7 @@ function TimelinePositionInput({
       max={TIMELINE_MAX}
       aria-label={label}
       title={label}
-      className="h-8 w-16 text-sm"
+      className="w-16 lg:h-8 lg:text-sm"
     />
   );
 }
