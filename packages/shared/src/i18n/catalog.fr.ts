@@ -2725,6 +2725,10 @@ export const fr = {
   "web.dashboard.students.archive.confirmReactivate": "Réactiver cet élève dans votre liste ?",
   "web.dashboard.students.archive.confirmArchive":
     "Archiver cet élève ? Il reste joignable et ses forfaits sont inchangés — il quitte simplement votre liste active et cesse de recevoir des rappels.",
+  "web.dashboard.students.archive.warningUpcoming":
+    "Cet élève a des cours réservés. Ils restent réservés, mais il ne recevra aucun rappel.",
+  "web.dashboard.students.archive.warningClassesLeft":
+    "Cours restants : {count}. Le forfait ne change pas, mais l'élève ne recevra plus de rappels.",
   "web.dashboard.students.archive.reasonPlaceholder":
     "Note facultative (ex. cours en pause pour l'instant).",
   "web.dashboard.students.archive.helpLabel": "Aide sur l'archivage",

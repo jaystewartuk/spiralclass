@@ -24,6 +24,10 @@ she posts in: [student-acquisition.md](student-acquisition.md).
   lifecycle notifications for it stop, and the portal stops offering this
   teacher's packages. Bookings, packages, her login and her other teachers are
   untouched. The teacher can reactivate.
+  The teacher can do it from each row of the list or from the student's settings tab.
+  Both confirmations say what it would cost that student: classes on the
+  calendar first, otherwise the classes left (`archiveWarning`). A warning
+  never blocks it.
 - **Onboarding hold.** A student the teacher adds by hand
   (`createStudentAction`) or invites starts on an onboarding hold, which the
   teacher lifts with **Go live** (`setStudentLiveAction`, audited). What it

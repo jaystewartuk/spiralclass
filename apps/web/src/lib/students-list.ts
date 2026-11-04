@@ -1,3 +1,4 @@
+import type { TFunction } from "@/lib/i18n-translate";
 /**
  * The decisions the teacher roster makes before it renders anything.
  *
@@ -223,6 +224,38 @@ export function rosterFlags(student: RosterStudent, now: Date, timezone: string)
     unbooked: pkg != null && !spent && !student.hasUpcomingClass,
     lowBalance: pkg != null && !spent && pkg.left <= LOW_BALANCE_CLASSES,
   };
+}
+
+/**
+ * What archiving this student would cost them, if anything.
+ *
+ * Archiving silences every lifecycle notification for the pairing while leaving
+ * bookings and packages exactly as they are, so a student with a class ahead
+ * would still be expected at it and never be reminded. Couples make this easy to
+ * get wrong: both can be on the roster with only one holding the package. A class
+ * on the calendar outranks a balance, because it is the nearer loss.
+ */
+export type ArchiveWarning = { kind: "upcoming" } | { kind: "classesLeft"; count: number } | null;
+
+export function archiveWarning(input: {
+  hasUpcomingClass: boolean;
+  classesLeft: number;
+}): ArchiveWarning {
+  if (input.hasUpcomingClass) return { kind: "upcoming" };
+  if (input.classesLeft > 0) return { kind: "classesLeft", count: input.classesLeft };
+  return null;
+}
+
+/** The sentence both archive confirmations show, or null when nothing is lost. */
+export function archiveWarningText(
+  input: { hasUpcomingClass: boolean; classesLeft: number },
+  t: TFunction,
+): string | null {
+  const warning = archiveWarning(input);
+  if (!warning) return null;
+  return warning.kind === "upcoming"
+    ? t("web.dashboard.students.archive.warningUpcoming")
+    : t("web.dashboard.students.archive.warningClassesLeft", { count: warning.count });
 }
 
 /**

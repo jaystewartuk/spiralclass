@@ -7,6 +7,7 @@ import { requireOnboardedTeacher } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { formatMinorUnits } from "@/lib/money";
 import { classesLeftToTeach } from "@/lib/package-usage";
+import { archiveWarningText } from "@/lib/students-list";
 import { getDualZoneTime } from "@/lib/date-display";
 import { getPreferredLocale, getT } from "@/lib/i18n";
 import { classProximity } from "@/lib/classes-list";
@@ -309,7 +310,16 @@ export default async function TeacherStudentDetailPage({
       )}
 
       {tab === "settings" && (
-        <SettingsTab studentId={studentId} teacher={teacher} t={t} link={link} />
+        <SettingsTab
+          studentId={studentId}
+          teacher={teacher}
+          t={t}
+          link={link}
+          archiveWarning={archiveWarningText(
+            { hasUpcomingClass: nextBooking != null, classesLeft },
+            t,
+          )}
+        />
       )}
     </PageShell>
   );

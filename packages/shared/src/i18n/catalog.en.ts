@@ -2739,6 +2739,10 @@ export const en = {
   "web.dashboard.students.archive.confirmReactivate": "Reactivate this student on your roster?",
   "web.dashboard.students.archive.confirmArchive":
     "Archive this student? They stay reachable and their packages are untouched — they just leave your active roster and stop receiving reminders.",
+  "web.dashboard.students.archive.warningUpcoming":
+    "This student has classes booked. They stay booked, but the student will get no reminders for them.",
+  "web.dashboard.students.archive.warningClassesLeft":
+    "Classes left: {count}. The package stays as it is, but the student will stop getting reminders.",
   "web.dashboard.students.archive.reasonPlaceholder":
     "Optional note (e.g. paused lessons for now).",
   "web.dashboard.students.archive.helpLabel": "Help on archiving",

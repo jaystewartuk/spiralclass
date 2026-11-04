@@ -2,9 +2,16 @@ import Link from "next/link";
 import { ChevronRight } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { initialsFrom } from "@/lib/initials";
-import { rosterFlags, rosterNote, type RosterNote, type RosterStudent } from "@/lib/students-list";
+import {
+  archiveWarningText,
+  rosterFlags,
+  rosterNote,
+  type RosterNote,
+  type RosterStudent,
+} from "@/lib/students-list";
 import type { TFunction } from "@/lib/i18n-translate";
 import { cn } from "@/lib/utils";
+import { RosterArchiveButton } from "./roster-archive-button";
 
 /**
  * The roster, as one continuous list.
@@ -44,8 +51,30 @@ export function RosterList({
   return (
     <ul className="divide-y divide-border">
       {students.map((student) => (
-        <li key={student.studentId}>
+        <li key={student.studentId} className="relative lg:flex lg:items-center">
           <RosterRow student={student} now={now} timezone={timezone} t={t} />
+          {/* A sibling of the row's link, not inside it: a button nested in an
+              anchor is invalid, and a tap on it would also open the student.
+              On a phone it sits in the corner under the balance, because a
+              column of its own squeezed the name and made every row taller. */}
+          {!student.archived && (
+            <div className="absolute right-2 bottom-1 lg:static lg:shrink-0 lg:pr-4">
+              <RosterArchiveButton
+                studentId={student.studentId}
+                name={student.name}
+                label={t("web.dashboard.students.archive.archive")}
+                description={t("web.dashboard.students.archive.confirmArchive")}
+                warning={archiveWarningText(
+                  {
+                    hasUpcomingClass: student.hasUpcomingClass,
+                    classesLeft: student.activePackage?.left ?? 0,
+                  },
+                  t,
+                )}
+                cancelLabel={t("common.cancel")}
+              />
+            </div>
+          )}
         </li>
       ))}
     </ul>
@@ -71,7 +100,9 @@ function RosterRow({
     <Link
       href={`/dashboard/students/${student.studentId}`}
       className={cn(
-        "flex min-h-target items-start gap-3 px-4 py-3 transition-colors hover:bg-muted/50 lg:px-6",
+        "flex min-h-target min-w-0 flex-1 items-start gap-3 px-4 py-3 transition-colors hover:bg-muted/50 lg:px-6",
+        // Room for the archive button in the corner, on the rows that have one.
+        !student.archived && "min-h-28 lg:min-h-target",
         // Archived rows are de-emphasised by REMOVING colour, not by adding
         // transparency. The old `opacity-70` on the whole section multiplied
         // through the muted text underneath it and dropped it below AA — the

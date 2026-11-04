@@ -809,7 +809,9 @@ export async function toggleStudentArchive(
   });
   await flushAnalytics();
 
-  revalidateAfterAction(`/dashboard/students/${parsed.data.studentId}`);
+  // The layout scope covers both places this is invoked from: the student's own
+  // page and the list, whose row has to leave it.
+  revalidateAfterAction("/dashboard/students", "layout");
   return {
     ok: archiving
       ? t("web.action.overrides.studentArchived")
