@@ -48,7 +48,7 @@ export function CalendarSyncPanel({
           // see the Copy button beside the field, and not enough for someone
           // who cannot.
           aria-label={t("web.calendarSync.feedUrlLabel")}
-          className="font-mono text-xs"
+          className="font-mono lg:text-xs"
         />
         <Button type="button" variant="outline" onClick={copy} className="shrink-0">
           {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}

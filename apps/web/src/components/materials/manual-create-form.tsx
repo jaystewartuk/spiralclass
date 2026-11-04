@@ -110,7 +110,7 @@ export function ManualCreateForm({
             clearError("content");
           }}
           rows={12}
-          className="font-mono text-sm"
+          className="font-mono lg:text-sm"
           placeholder={t("classContent.author.placeholder")}
         />
         <p

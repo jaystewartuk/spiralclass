@@ -81,7 +81,7 @@ export function RefundButton({ paymentId, disabled }: { paymentId: string; disab
           maxLength={280}
           aria-required="true"
           placeholder={t("web.admin.payments.reasonForRefund")}
-          className="h-8 text-xs"
+          className="lg:h-8 lg:text-xs"
         />
         {state?.error && <span className="text-xs text-destructive">{state.error}</span>}
       </form>

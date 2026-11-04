@@ -214,7 +214,7 @@ function SectionTitleInput({
           e.currentTarget.blur();
         }
       }}
-      className="h-8 min-w-0 flex-1 border-transparent bg-transparent px-1 text-xs font-medium shadow-none hover:border-input"
+      className="h-9 min-w-0 flex-1 border-transparent bg-transparent px-1 font-medium shadow-none hover:border-input lg:h-8 lg:text-xs"
     />
   );
 }

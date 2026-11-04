@@ -48,7 +48,7 @@ export function PricingModelEditor({
         onChange={(e) => onChange(e.target.value)}
         rows={8}
         invalid={!!error}
-        className="font-mono text-xs"
+        className="font-mono lg:text-xs"
         required
       />
       <p className="text-xs text-muted-foreground">
