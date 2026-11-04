@@ -435,6 +435,8 @@ Rules:
   also its alt text and nothing else asks for one. The teacher can still leave
   it empty: in a "describe this picture" exercise, a descriptive caption would
   give the answer away.
+- AI generation draws one tense timeline when a material teaches a verb tense
+  (`timeline` block), and never for anything else.
 - AI generation remains **text-only**: nothing in the prompt emits image
   syntax, so a generated draft never references a picture that doesn't exist.
 
