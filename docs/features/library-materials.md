@@ -429,6 +429,8 @@ Rules:
   a URL for a picture that only appears inside an `[!answer]` block. An
   external https image is **not** fetched into a PDF, and a key that fails to
   sign degrades to its caption rather than failing the whole download.
+- AI generation draws one tense timeline when a material teaches a verb tense
+  (`timeline` block), and never for anything else.
 - AI generation remains **text-only**: nothing in the prompt emits image
   syntax, so a generated draft never references a picture that doesn't exist.
 

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { CALLOUT_VARIANTS } from "@spiralclass/shared";
+import { CALLOUT_VARIANTS, parseMaterialDoc } from "@spiralclass/shared";
 import { buildMaterialPrompt, buildMaterialRefinePrompt } from "@/lib/materials/prompt";
 
 // AI compose prompt builder (D-17 Phase 2, merged with library generation — one builder now
@@ -790,5 +790,25 @@ describe("buildMaterialRefinePrompt — material style", () => {
     });
     expect(system).toMatch(/ONE-TO-ONE lesson/i);
     expect(system).toMatch(/NEVER include pair work, group work, team activities/i);
+  });
+});
+
+describe("buildMaterialPrompt — the drawn tense timeline", () => {
+  const { system } = buildMaterialPrompt({ topic: "x", forClass: false, locale: "es" });
+
+  it("spells a timeline the parser draws", () => {
+    const fence = /```timeline\n[\s\S]*?```/.exec(system)?.[0] ?? "";
+    expect(parseMaterialDoc(fence).blocks.map((b) => b.type)).toEqual(["timeline"]);
+  });
+
+  it("limits it to verb tenses and says where finished events go", () => {
+    expect(system).toContain("Only when the material teaches a verb tense");
+    expect(system).toContain("Anything already finished goes below 50");
+    expect(system).toContain("never use one for distance");
+  });
+
+  it("no longer forbids the fence a timeline is written in", () => {
+    expect(system).toContain("do not wrap the whole document in a code fence");
+    expect(system).not.toContain("or a surrounding code fence");
   });
 });
