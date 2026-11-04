@@ -153,6 +153,7 @@ const CHANGE_LABEL = {
   delete: "material.editor.changed.delete",
   duplicate: "material.editor.changed.duplicate",
   insert: "material.editor.changed.insert",
+  rename: "material.editor.changed.rename",
   refine: "material.editor.changed.refine",
   editBlocks: "material.editor.changed.editBlocks",
 } as const;
@@ -179,6 +180,42 @@ function AddSectionRow({ onAdd }: { onAdd: () => void }) {
       </button>
       <span className="h-px flex-1 bg-border opacity-40 transition-opacity group-hover:opacity-100" />
     </div>
+  );
+}
+
+/** A section's title, editable in place. It commits when focus leaves, like a
+ * block's fields, so a half-typed title never reshapes the document. The whole
+ * title is selected on focus, because the usual edit replaces "New section". */
+function SectionTitleInput({
+  title,
+  label,
+  onRename,
+}: {
+  title: string;
+  label: string;
+  onRename: (title: string) => void;
+}) {
+  const [value, setValue] = useState(title);
+  return (
+    <Input
+      value={value}
+      aria-label={label}
+      onChange={(e) => setValue(e.target.value)}
+      onFocus={(e) => e.target.select()}
+      onBlur={() => {
+        const next = value.trim();
+        if (next && next !== title) onRename(next);
+        else setValue(title);
+      }}
+      onKeyDown={(e) => {
+        // Enter must not submit the material form this editor sits inside.
+        if (e.key === "Enter") {
+          e.preventDefault();
+          e.currentTarget.blur();
+        }
+      }}
+      className="h-8 min-w-0 flex-1 border-transparent bg-transparent px-1 text-xs font-medium shadow-none hover:border-input"
+    />
   );
 }
 
@@ -209,7 +246,16 @@ function SectionCard({
   return (
     <section className="rounded-md border bg-background" aria-label={title}>
       <div className="flex items-center gap-1 rounded-t-md border-b bg-muted/40 px-2 py-1">
-        <span className="min-w-0 flex-1 truncate text-xs font-medium">{title}</span>
+        {section.level === null ? (
+          <span className="min-w-0 flex-1 truncate text-xs font-medium">{title}</span>
+        ) : (
+          <SectionTitleInput
+            key={section.title ?? ""}
+            title={section.title ?? ""}
+            label={t("material.editor.sectionTitleLabel")}
+            onRename={(next) => onAction({ kind: "rename", index: section.index, title: next })}
+          />
+        )}
         <IconButton
           label={t("material.editor.moveUp")}
           disabled={isFirst}

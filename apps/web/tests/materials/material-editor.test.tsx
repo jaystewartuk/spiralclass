@@ -148,3 +148,12 @@ describe("MaterialEditor — sole-card delete guard", () => {
     }
   });
 });
+
+describe("MaterialEditor — section titles", () => {
+  it("offers an editable title on a headed section and none on a lead section", () => {
+    const withLead = html({ body: "A lead paragraph.\n\n## 1. Warm-up\n\nSay hello." });
+    expect(withLead.match(/aria-label="material\.editor\.sectionTitleLabel"/g)).toHaveLength(1);
+    expect(withLead).toContain('value="1. Warm-up"');
+    expect(withLead).toContain("material.editor.leadSection");
+  });
+});

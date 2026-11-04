@@ -69,7 +69,7 @@ export async function uploadMaterialImage(opts: {
   if (error) {
     log.warn("upload failed", { error: error.message });
     return {
-      error: t("web.action.materialImage.uploadFailed", { message: error.message }),
+      error: t("web.action.materialImage.uploadFailed"),
     };
   }
 

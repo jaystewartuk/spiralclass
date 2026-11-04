@@ -479,6 +479,8 @@ export const esMX = {
   "material.editor.changed.duplicate": "Sección duplicada",
   "material.editor.changed.insert": "Sección añadida",
   "material.editor.changed.refine": "Sección editada con IA",
+  "material.editor.changed.rename": "Título de la sección cambiado",
+  "material.editor.sectionTitleLabel": "Título de la sección",
   "material.editor.changed.editBlocks": "Contenido de la sección editado",
   "material.editor.aiSectionChanged": "La IA actualizó esta sección.",
   "material.editor.undoAiChange": "Deshacer cambio de IA",
@@ -6858,7 +6860,7 @@ export const esMX = {
   "web.action.photo.choose": "Elige una imagen primero.",
   "web.action.photo.type": "Usa una imagen JPG, PNG o WebP.",
   "web.action.photo.tooLarge": "La imagen debe pesar menos de 5 MB.",
-  "web.action.photo.uploadFailed": "No pudimos subir la imagen: {error}",
+  "web.action.photo.uploadFailed": "No pudimos subir la imagen. Inténtalo de nuevo.",
   "web.action.testimonial.bodyLength":
     "Escribe unas palabras sobre tus clases (máximo {max} caracteres).",
   "web.action.testimonial.notEligible":
@@ -7148,9 +7150,9 @@ export const esMX = {
     "Las clases restantes pueden ser como máximo {max} para este paquete.",
   "web.action.materialImage.chooseType": "Elige una imagen JPG, PNG, WebP o GIF.",
   "web.action.materialImage.tooLarge": "La imagen no puede pesar más de {mb} MB.",
-  "web.action.materialImage.uploadFailed": "No pudimos subir la imagen: {message}",
+  "web.action.materialImage.uploadFailed": "No pudimos subir la imagen. Inténtalo de nuevo.",
   "web.action.materialFile.tooLarge": "El archivo no puede pesar más de 25 MB.",
-  "web.action.materialFile.uploadFailed": "No pudimos subir el archivo: {message}",
+  "web.action.materialFile.uploadFailed": "No pudimos subir el archivo. Inténtalo de nuevo.",
   "web.action.referral.ownCode": "No puedes usar tu propio código de referido.",
   "web.action.referral.firstPurchaseOnly":
     "Los códigos de referido solo aplican en tu primera compra.",
