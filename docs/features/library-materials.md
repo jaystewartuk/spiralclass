@@ -244,6 +244,8 @@ collapses them to one row per (class, material). Two surfaces consume it:
 - A saved `ClassContentTemplate`'s structure can be followed from either the
   class-content or the library "Generate with AI" entry point — both share
   the same prompt builder and template picker.
+- A section's title is edited in place on its card. A blank title is refused,
+  and the card's body is untouched.
 - "Edit with AI" (refine) applies a bounded free-text change instruction
   (≤1,000 characters) to an existing body; cannot run against an empty body.
 - Every generation — material, class content, refine and podcast script — is
@@ -429,6 +431,10 @@ Rules:
   a URL for a picture that only appears inside an `[!answer]` block. An
   external https image is **not** fetched into a PDF, and a key that fails to
   sign degrades to its caption rather than failing the whole download.
+- A new image opens on its caption in the block editor, because the caption is
+  also its alt text and nothing else asks for one. The teacher can still leave
+  it empty: in a "describe this picture" exercise, a descriptive caption would
+  give the answer away.
 - AI generation draws one tense timeline when a material teaches a verb tense
   (`timeline` block), and never for anything else.
 - AI generation remains **text-only**: nothing in the prompt emits image

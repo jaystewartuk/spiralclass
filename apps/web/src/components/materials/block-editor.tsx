@@ -195,12 +195,16 @@ function BlockListEditor({
     onChange(next);
   }
 
+  // A new image opens straight on its caption. The caption is also its alt text
+  // and nothing else asks for one, so left closed it stayed empty.
+  function addBlock(index: number, block: MaterialBlock) {
+    changeStructural(insertBlockAt(blocks, index, block));
+    if (block.type === "image") setEditing(index);
+  }
+
   return (
     <div className="group/blocklist space-y-1.5">
-      <AddBlockRow
-        subdued={blocks.length > 0}
-        onAdd={(block) => changeStructural(insertBlockAt(blocks, 0, block))}
-      />
+      <AddBlockRow subdued={blocks.length > 0} onAdd={(block) => addBlock(0, block)} />
       {blocks.map((block, i) => (
         <div key={i} className="space-y-1.5">
           <EditableBlock
@@ -212,10 +216,7 @@ function BlockListEditor({
             onEditText={(text) => onChange(editBlockText(blocks, i, text))}
             onDelete={() => changeStructural(removeBlockAt(blocks, i))}
           />
-          <AddBlockRow
-            subdued={i < blocks.length - 1}
-            onAdd={(block) => changeStructural(insertBlockAt(blocks, i + 1, block))}
-          />
+          <AddBlockRow subdued={i < blocks.length - 1} onAdd={(block) => addBlock(i + 1, block)} />
         </div>
       ))}
     </div>

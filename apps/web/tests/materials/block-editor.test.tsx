@@ -30,6 +30,11 @@ vi.mock("@/components/locale-provider", () => ({
   useLocale: () => "es",
 }));
 
+vi.mock("@/lib/materials/upload-image", () => ({
+  MATERIAL_IMAGE_ACCEPT: "image/png",
+  uploadMaterialImageFile: vi.fn(async () => ({ src: "material-image:t1/library/images/a.png" })),
+}));
+
 const { SectionBlockEditor } = await import("@/components/materials/block-editor");
 const { editorSections, emptySectionEditorState } = await import("@spiralclass/shared");
 
@@ -549,6 +554,30 @@ describe("SectionBlockEditor", () => {
       // And the op refuses even if the control were reached anyway.
       act(() => remove.click());
       expect(onAction).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("adding an image", () => {
+    it("opens the new image on its caption, so it does not stay without alt text", async () => {
+      act(() => {
+        root.render(React.createElement(Harness, { initialMarkdown: "Some text.", onAction }));
+      });
+      const add = Array.from(container.querySelectorAll("button")).findLast((b) =>
+        b.textContent?.includes("material.editor.block.add"),
+      )!;
+      act(() => add.click());
+      const input = container.querySelector<HTMLInputElement>('input[type="file"]')!;
+      Object.defineProperty(input, "files", {
+        configurable: true,
+        value: [new File(["x"], "scene.png", { type: "image/png" })],
+      });
+      await act(async () => {
+        input.dispatchEvent(new Event("change", { bubbles: true }));
+      });
+
+      const caption = container.querySelector('[aria-label="material.editor.block.imageAltLabel"]');
+      expect(caption).not.toBeNull();
+      expect(document.activeElement).toBe(caption);
     });
   });
 });
