@@ -476,7 +476,7 @@ export async function saveTeacherPhotoAction(
   if (upErr) {
     log.warn("upload failed", { error: upErr });
     return {
-      error: t("web.action.photo.uploadFailed", { error: upErr }),
+      error: t("web.action.photo.uploadFailed"),
     };
   }
 
