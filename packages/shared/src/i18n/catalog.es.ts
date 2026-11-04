@@ -2762,6 +2762,10 @@ export const esMX = {
   "web.dashboard.students.archive.confirmReactivate": "¿Reactivar a este alumno en tu listado?",
   "web.dashboard.students.archive.confirmArchive":
     "¿Dar de baja a este alumno? Sigue siendo contactable y sus paquetes no cambian — solo sale de tu listado activo y deja de recibir recordatorios.",
+  "web.dashboard.students.archive.warningUpcoming":
+    "Este alumno tiene clases agendadas. Siguen agendadas, pero no recibirá recordatorios de ellas.",
+  "web.dashboard.students.archive.warningClassesLeft":
+    "Clases restantes: {count}. El paquete no cambia, pero el alumno dejará de recibir recordatorios.",
   "web.dashboard.students.archive.reasonPlaceholder":
     "Nota opcional (ej. pausa las clases por ahora).",
   "web.dashboard.students.archive.helpLabel": "Ayuda sobre dar de baja",
