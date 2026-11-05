@@ -606,6 +606,9 @@ export async function generateClassContentForBooking(input: {
         message: t("materials.ai.classUnavailable"),
       };
     }
+    if (result.reason === "truncated") {
+      return { ok: false, code: "error", message: t("materials.ai.generateTooLong") };
+    }
     return {
       ok: false,
       code: "error",
@@ -796,6 +799,9 @@ export async function generateLibraryMaterialForTeacher(input: {
         code: "not-configured",
         message: t("materials.ai.libraryUnavailable"),
       };
+    }
+    if (result.reason === "truncated") {
+      return { ok: false, code: "error", message: t("materials.ai.generateTooLong") };
     }
     return {
       ok: false,
@@ -1015,6 +1021,9 @@ export async function refineMaterialForTeacher(input: {
         code: "not-configured",
         message: t("materials.ai.refineUnavailable"),
       };
+    }
+    if (result.reason === "truncated") {
+      return { ok: false, code: "error", message: t("materials.ai.refineTooLong") };
     }
     return {
       ok: false,

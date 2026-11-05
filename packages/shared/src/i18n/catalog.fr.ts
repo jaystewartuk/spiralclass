@@ -7907,6 +7907,10 @@ export const fr = {
   "materials.ai.refineUnavailable":
     "La modification par IA n'est pas disponible pour le moment. Vous pouvez toujours modifier le support vous-même.",
   "materials.ai.refineFailed": "Impossible d'appliquer la modification. Veuillez réessayer.",
+  "materials.ai.generateTooLong":
+    "Le support est trop long pour être terminé. Essayez un sujet plus précis ou générez-le en deux parties.",
+  "materials.ai.refineTooLong":
+    "Le résultat est trop long pour être terminé, donc rien n'a été modifié. Demandez une modification plus petite ou divisez le support en deux.",
   "materials.ai.podcastLimitReached":
     "Vous avez atteint la limite mensuelle de génération par IA ({cap}). Vous pouvez toujours rédiger et enregistrer le contenu vous-même.",
   "materials.ai.podcastUnavailable":
