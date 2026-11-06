@@ -270,6 +270,10 @@ collapses them to one row per (class, material). Two surfaces consume it:
   for the cap.
 - Generated/typed body is capped at 20,000 characters
   (`CLASS_CONTENT_MAX_CHARS`), same ceiling as class content.
+- **An AI result is only ever offered whole.** When the model runs out of room
+  or passes that ceiling, the teacher is told it came out too long, a refine
+  leaves her material unchanged, and no quota is used. A live generation keeps
+  what it had written on screen beside that message.
 - Every save that changes the body snapshots the outgoing body to
   `MaterialRevision`, capped at 20 revisions per material, oldest pruned
   first. A no-op save creates no revision. Restoring a revision is itself a

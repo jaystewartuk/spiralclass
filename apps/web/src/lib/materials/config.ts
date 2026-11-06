@@ -21,6 +21,22 @@ export type ClassContentSource = "manual" | "ai";
 // AI generation.
 export const CLASS_CONTENT_MAX_CHARS = 20_000;
 
+// Per-call output ceiling for material compose, refine and podcast scripts. It
+// has to hold a whole CLASS_CONTENT_MAX_CHARS document in a script that spends
+// more tokens per character than Spanish does, AND the model's thinking, which
+// draws on the same budget. Only tokens actually produced are billed, so this
+// bounds a runaway; it does not raise the cost of a normal call.
+export const MATERIAL_MAX_OUTPUT_TOKENS = 16_000;
+
+// The model stopped because it ran out of room, so what it wrote is the front
+// of a document. Never offered to the teacher as a finished draft.
+export class MaterialIncompleteError extends Error {
+  constructor() {
+    super("material output incomplete");
+    this.name = "MaterialIncompleteError";
+  }
+}
+
 // Per-teacher monthly cap on AI compose generations (D-17: Pro + a monthly
 // ceiling so token spend is bounded) — shared by class-content and
 // library-material generation ("one AI plumbing, two outputs," one quota, not

@@ -180,7 +180,7 @@ export const KNOWN_INTEGRATIONS: readonly KnownIntegration[] = [
       currency: "USD",
     },
     billingModel:
-      "Pay-as-you-go per token (Haiku 4.5 default, $1/$5 per MTok). ~$0.05/generation avg; COST_PLAYBOOK worst case ~$0.15/gen (max_tokens 4096), capped ~100/mo per teacher.",
+      "Pay-as-you-go per token (Haiku 4.5 default, $1/$5 per MTok). ~$0.05/generation avg; COST_PLAYBOOK worst case ~$0.26/gen (max_tokens 16000), capped ~100/mo per teacher.",
     billingUrl: "https://console.anthropic.com/settings/billing",
     docsUrl: "https://www.anthropic.com/pricing",
   },

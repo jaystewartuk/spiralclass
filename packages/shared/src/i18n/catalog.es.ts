@@ -7851,6 +7851,10 @@ export const esMX = {
   "materials.ai.refineUnavailable":
     "La edición con IA no está disponible ahora. Aún puedes editar el material tú mismo.",
   "materials.ai.refineFailed": "No se pudo aplicar el cambio. Inténtalo de nuevo.",
+  "materials.ai.generateTooLong":
+    "El material quedó demasiado largo y no se pudo terminar. Prueba con un tema más concreto o genéralo en dos partes.",
+  "materials.ai.refineTooLong":
+    "El resultado quedó demasiado largo y no se pudo terminar, así que no se cambió nada. Pide un cambio más pequeño o divide el material en dos.",
   "materials.ai.podcastLimitReached":
     "Alcanzaste el límite de generaciones con IA de este mes ({cap}). Aún puedes crear el contenido tú mismo.",
   "materials.ai.podcastUnavailable": "La generación de podcast no está disponible ahora.",

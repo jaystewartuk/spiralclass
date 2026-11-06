@@ -138,7 +138,7 @@ Every call uses the **platform** key, never a teacher's.
 
 The teacher's "draft this with AI" button. It drafts Markdown the teacher
 reviews before saving, and spend is bounded three ways: the **Pro**
-entitlement, a per-call ceiling (`max_tokens: 4096`, `effort: "medium"`), and a
+entitlement, a per-call ceiling (`MATERIAL_MAX_OUTPUT_TOKENS`, `effort: "medium"`), and a
 **per-teacher monthly cap**.
 
 ### What a generation costs
@@ -147,10 +147,10 @@ On Sonnet 5 at $3 / $15 per million input / output tokens:
 
 - **Input** — the student's level, up to ~25 covered notebook titles, the
   student's name and the instruction scaffold: 1–2K tokens, ≈ $0.003–0.006.
-- **Output** — bounded by `max_tokens` plus thinking: ≈ $0.03–0.06 at the
-  ceiling.
-- **Worst case ≈ $0.07 per generation**, so the cap bounds one teacher at
-  about **$7 a month**, scaling linearly per Pro teacher. These are estimates;
+- **Output** — thinking and text share `max_tokens` (16,000), and only tokens
+  produced are billed: ≈ $0.24 at the ceiling, which a normal call is far below.
+- **Worst case ≈ $0.26 per generation**, so the cap bounds one teacher at
+  about **$26 a month**, scaling linearly per Pro teacher. These are estimates;
   replace them with observed numbers.
 
 **Class content is the only capped surface.** Summaries, insights, briefs and

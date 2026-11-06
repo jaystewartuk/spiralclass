@@ -30,9 +30,11 @@ const state = {
   pro: true,
   generationsThisMonth: 0,
   generate: { ok: true, body: "# Generated" } as
-    { ok: true; body: string } | { ok: false; reason: "not-configured" | "empty" | "error" },
+    | { ok: true; body: string }
+    | { ok: false; reason: "not-configured" | "empty" | "truncated" | "error" },
   refine: { ok: true, body: "# Refined" } as
-    { ok: true; body: string } | { ok: false; reason: "not-configured" | "empty" | "error" },
+    | { ok: true; body: string }
+    | { ok: false; reason: "not-configured" | "empty" | "truncated" | "error" },
 };
 vi.mock("@/lib/subscriptions/enforce", () => ({
   gateProFeature: vi.fn(async () =>
@@ -1098,6 +1100,19 @@ describe("refineMaterialForTeacher", () => {
     });
     expect(r.ok).toBe(false);
     if (!r.ok) expect(r.code).toBe("error");
+    expect(genCreate).not.toHaveBeenCalled();
+  });
+
+  it("tells the teacher a result that did not fit changed nothing, and burns no quota", async () => {
+    state.refine = { ok: false, reason: "truncated" };
+    const r = await refineMaterialForTeacher({
+      teacherId: "t1",
+      currentBody: "# Hi",
+      instruction: "add ten exercises",
+      locale: "en",
+    });
+    expect(r.ok).toBe(false);
+    if (!r.ok) expect(r.message).toContain("nothing was changed");
     expect(genCreate).not.toHaveBeenCalled();
   });
 

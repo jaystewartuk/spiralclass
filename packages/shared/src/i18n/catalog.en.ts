@@ -7820,6 +7820,10 @@ export const en = {
   "materials.ai.refineUnavailable":
     "AI editing isn't available right now. You can still edit the material yourself.",
   "materials.ai.refineFailed": "Couldn't apply the change. Please try again.",
+  "materials.ai.generateTooLong":
+    "The material came out too long to finish. Try a narrower topic, or generate it in two parts.",
+  "materials.ai.refineTooLong":
+    "The result came out too long to finish, so nothing was changed. Ask for a smaller change, or split the material in two.",
   "materials.ai.podcastLimitReached":
     "You've reached this month's AI generation limit ({cap}). You can still write and record content yourself.",
   "materials.ai.podcastUnavailable": "Podcast generation isn't available right now.",
