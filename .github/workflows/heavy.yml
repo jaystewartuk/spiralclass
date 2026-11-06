@@ -200,7 +200,7 @@ jobs:
           echo "NODE_VERSION=$major" >> "$GITHUB_ENV"
           echo "Node $major, from the Dockerfile."
 
-      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: ${{ env.NODE_VERSION }}
           # Round-trips the pnpm store through the Actions cache. On an
@@ -253,7 +253,7 @@ jobs:
         # and fails while a captured route has no committed image. Look at the
         # images.
         if: ${{ always() }}
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: heavy-${{ matrix.step.id }}-output
           path: |
@@ -271,7 +271,7 @@ jobs:
         # image by image before committing IS the guard; nothing here merges
         # them for you, deliberately.
         if: ${{ always() && inputs.update_visual_baselines != '' }}
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: visual-baselines-linux
           path: apps/web/tests/visual/regression.spec.ts-snapshots/*-linux.png
