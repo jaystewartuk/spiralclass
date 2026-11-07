@@ -23,7 +23,9 @@ export function SettingsTab({
   teacher,
   t,
   link,
+  archiveWarning = null,
 }: {
+  archiveWarning?: string | null;
   studentId: string;
   teacher: Teacher & { country: string };
   t: TFunction;
@@ -90,7 +92,11 @@ export function SettingsTab({
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <StudentArchiveButton studentId={studentId} archived={link.archivedAt != null} />
+          <StudentArchiveButton
+            studentId={studentId}
+            archived={link.archivedAt != null}
+            warning={archiveWarning}
+          />
         </CardContent>
       </Card>
     </div>

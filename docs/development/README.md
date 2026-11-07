@@ -9,6 +9,7 @@ Everything a contributor needs, in the order you need it.
 | [workflow.md](workflow.md)                               | How a change goes from a branch to production: the gate, the pull request, the promote, the rollback.       |
 | [i18n.md](i18n.md)                                       | The key-based string catalog, its guards, the four per-teacher language fields, and URL-per-language pages. |
 | [analytics.md](analytics.md)                             | PostHog conventions: event naming, client/server pairs, identification, flags, experiments, replay privacy. |
+| [exemplars.md](exemplars.md)                             | Which existing file to copy for each common kind of change                                                  |
 | [documentation.md](documentation.md)                     | Where a new document goes, and how documents are written for GitHub.                                        |
 | [ai-assisted-engineering.md](ai-assisted-engineering.md) | How this repository is worked with agents: the context budget, the executable rules, the permission model.  |
 

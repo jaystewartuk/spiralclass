@@ -7,7 +7,7 @@ import {
 } from "@/lib/materials/handlers";
 import { generateMaterialStream } from "@/lib/ai/anthropic";
 import { hasAnthropicCreds } from "@/lib/env";
-import { CLASS_CONTENT_MAX_CHARS } from "@/lib/materials/config";
+import { CLASS_CONTENT_MAX_CHARS, MaterialIncompleteError } from "@/lib/materials/config";
 import { isAppLocale, DEFAULT_LOCALE } from "@spiralclass/shared";
 import { logger } from "@/lib/logger";
 
@@ -36,6 +36,9 @@ const log = logger({ surface: "materials-generate-stream" });
 // U+001F (unit separator) — sent as the last frame's payload on success. Won't
 // appear in generated Markdown; the client treats its absence as a failure.
 const DONE = "\u001F";
+// U+001E (record separator) — the last frame when the document did not fit, so
+// the client can say why it stopped instead of the generic failure. No quota.
+const TOO_LONG = "\u001E";
 
 const bodySchema = z.object({
   topic: z.string().max(2000).optional().default(""),
@@ -99,15 +102,12 @@ export async function POST(req: Request): Promise<Response> {
       const received: string[] = [];
       try {
         for await (const delta of generateMaterialStream(prep.promptInput)) {
-          // Bound the streamed body to the same ceiling the non-streaming path
-          // slices to; stop enqueuing once reached (the model usually stops on
-          // its own well before this).
-          const remaining = CLASS_CONTENT_MAX_CHARS - total;
-          if (remaining <= 0) break;
-          const chunk = delta.length > remaining ? delta.slice(0, remaining) : delta;
-          total += chunk.length;
-          received.push(chunk);
-          controller.enqueue(frame(chunk));
+          // Past the ceiling the document cannot be saved whole, so this is the
+          // same failure as the model running out of tokens, not a success.
+          total += delta.length;
+          if (total > CLASS_CONTENT_MAX_CHARS) throw new MaterialIncompleteError();
+          received.push(delta);
+          controller.enqueue(frame(delta));
         }
         // Success — burn one quota row, then mark the stream complete.
         await recordLibraryMaterialGeneration(teacherId, prep.meta, received.join(""));
@@ -116,7 +116,12 @@ export async function POST(req: Request): Promise<Response> {
       } catch (err) {
         // Closing WITHOUT the DONE frame signals failure to the client.
         // "Failures don't burn quota" — recordLibraryMaterialGeneration never ran.
-        log.error("stream generation failed", err);
+        if (err instanceof MaterialIncompleteError) {
+          log.warn("stream generation did not fit", { chars: total });
+          controller.enqueue(frame(TOO_LONG));
+        } else {
+          log.error("stream generation failed", err);
+        }
         controller.close();
       }
     },

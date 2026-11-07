@@ -17,6 +17,7 @@ import {
   BrowserCaptions,
   type BrowserCaptionsStatus,
   type CaptionRoomView,
+  type RecognitionUnusableReason,
 } from "@/lib/captions/browser-captions";
 import {
   browserCanRecognizeDuringCall,
@@ -47,6 +48,7 @@ import { installOnDeviceModels } from "@/lib/captions/recognizer";
 //     gave (D-185), kept when captions moved into the browser (D-185).
 
 export const CONFIG_POLL_MS = 60_000;
+export const SPEECH_SAMPLE_MS = 1_000;
 
 const INITIAL_STATUS: BrowserCaptionsStatus = { uncaptioned: [], stopped: null };
 
@@ -56,6 +58,7 @@ export function useBrowserCaptions({
   role,
   teacherCaptionsOn,
   showLocal,
+  onRecognitionUnusable,
 }: {
   room: Room | null;
   bookingId: string | undefined;
@@ -65,6 +68,8 @@ export function useBrowserCaptions({
   teacherCaptionsOn: boolean;
   // Render a line this browser recognised for its own viewer.
   showLocal: (line: CaptionLine) => void;
+  // This browser stopped claiming it can recognise, and why.
+  onRecognitionUnusable?: (reason: RecognitionUnusableReason) => void;
 }): {
   // The room's switch as this browser sees it.
   captionsOn: boolean;
@@ -88,10 +93,15 @@ export function useBrowserCaptions({
   // captioning her within seconds rather than at the next minute's poll.
   consentGiven: () => void;
 } {
-  const selfCapable = useMemo(
+  const apiCapable = useMemo(
     () => typeof window !== "undefined" && browserCanRecognizeDuringCall(window),
     [],
   );
+  // The API exists, but this browser's recognition turned out not to work
+  // (D-185). The claim stays withdrawn for this call, so the other browser or
+  // the cloud fallback keeps the job instead of the two trading it back.
+  const [unusable, setUnusable] = useState(false);
+  const selfCapable = apiCapable && !unusable;
   const [session, setSession] = useState<CaptionSession | null>(null);
   const sessionRef = useRef<CaptionSession | null>(null);
   const [status, setStatus] = useState<BrowserCaptionsStatus>(INITIAL_STATUS);
@@ -99,12 +109,14 @@ export function useBrowserCaptions({
   const [roomVersion, setRoomVersion] = useState(0);
   const [refetchKey, setRefetchKey] = useState(0);
   const showLocalRef = useRef(showLocal);
+  const onUnusableRef = useRef(onRecognitionUnusable);
   // Latest values for callbacks that must stay stable: the toggle click reads
   // the session, the controller hands lines to whatever showLocal is now.
   useEffect(() => {
     sessionRef.current = session;
     showLocalRef.current = showLocal;
-  }, [session, showLocal]);
+    onUnusableRef.current = onRecognitionUnusable;
+  }, [session, showLocal, onRecognitionUnusable]);
 
   // Every room event that can change who is here, what they publish, or
   // what their attributes say.
@@ -248,6 +260,15 @@ export function useBrowserCaptions({
       },
       onStatus: setStatus,
       onRefused: () => setRefetchKey((k) => k + 1),
+      onUnusable: (reason) => {
+        onUnusableRef.current?.(reason);
+        // The room's copy first: the server refuses the fallback's token while
+        // LiveKit still says this browser can recognise.
+        void room.localParticipant
+          .setAttributes({ [CAPTIONS_RECOGNIZER_ATTRIBUTE]: "0" })
+          .catch(() => {})
+          .finally(() => setUnusable(true));
+      },
     });
     controllerRef.current = controller;
     return () => {
@@ -255,6 +276,20 @@ export function useBrowserCaptions({
       controllerRef.current = null;
       setStatus(INITIAL_STATUS);
     };
+  }, [room]);
+
+  useEffect(() => {
+    if (!room) return;
+    const timer = setInterval(() => {
+      controllerRef.current?.noteSpeech(
+        {
+          local: room.localParticipant.isSpeaking,
+          remote: [...room.remoteParticipants.values()][0]?.isSpeaking ?? false,
+        },
+        SPEECH_SAMPLE_MS,
+      );
+    }, SPEECH_SAMPLE_MS);
+    return () => clearInterval(timer);
   }, [room]);
 
   useEffect(() => {

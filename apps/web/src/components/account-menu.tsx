@@ -79,17 +79,19 @@ export function AccountMenu({
         size="sm"
         aria-expanded={open}
         aria-controls={menuId}
-        aria-label={menuLabel}
         onClick={toggle}
         className={cn("gap-2 rounded-full pr-2 pl-1", open && "bg-muted/60")}
       >
+        <span className="sr-only">{menuLabel} </span>
         <AccountAvatar
           name={account?.name}
           email={account?.email}
           photoUrl={account?.photoUrl}
           size="sm"
         />
-        <span className="hidden max-w-48 truncate xl:block">{triggerName}</span>
+        {/* Not from 1280px, where the inline nav starts: in Spanish the links and
+            the name together ran the menu 16px off the screen. The avatar stays. */}
+        <span className="hidden max-w-48 truncate 2xl:block">{triggerName}</span>
         <ChevronDown
           aria-hidden
           className={cn("h-4 w-4 text-muted-foreground transition-transform", open && "rotate-180")}

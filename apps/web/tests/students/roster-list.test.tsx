@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { renderToStaticMarkup } from "react-dom/server";
 import * as React from "react";
 
@@ -6,8 +6,12 @@ import * as React from "react";
 // same arrangement as the other SSR tests on this surface.
 (globalThis as Record<string, unknown>).React = React;
 
+// The row's archive button imports the server action, which needs a server env.
+// What the action does is covered in tests/overrides/actions.test.ts.
+vi.mock("@/app/actions/overrides", () => ({ toggleStudentArchive: vi.fn() }));
+
 import { createT } from "@/lib/i18n-translate";
-import type { RosterStudent } from "@/lib/students-list";
+import { archiveWarningText, type RosterStudent } from "@/lib/students-list";
 import { RosterList } from "@/app/(app)/dashboard/students/roster-list";
 import { RosterListHeader, RosterToolbar } from "@/app/(app)/dashboard/students/roster-toolbar";
 
@@ -227,5 +231,34 @@ describe("RosterListHeader", () => {
     const html = render(3, "balance");
     expect(html).toContain('aria-current="true"');
     expect(html).not.toContain('aria-current="page"');
+  });
+});
+
+describe("RosterList — archiving from the list", () => {
+  it("offers archiving on an active row, outside the row's link", () => {
+    const html = renderRoster([student()]);
+    expect(html).toContain('aria-label="Archive: Mira López"');
+    const link = html.slice(html.indexOf("<a "), html.indexOf("</a>"));
+    expect(link).not.toContain("Archive");
+  });
+
+  it("does not offer it on a row already archived", () => {
+    expect(renderRoster([student({ archived: true })])).not.toContain("Archive: Mira");
+  });
+});
+
+describe("archiveWarningText — what archiving would cost", () => {
+  it("warns about a booked class before a balance", () => {
+    expect(archiveWarningText({ hasUpcomingClass: true, classesLeft: 8 }, t)).toBe(
+      t("web.dashboard.students.archive.warningUpcoming"),
+    );
+  });
+
+  it("names the classes left when nothing is booked", () => {
+    expect(archiveWarningText({ hasUpcomingClass: false, classesLeft: 6 }, t)).toContain("6");
+  });
+
+  it("says nothing for a record with nothing on it, like a couple's second person", () => {
+    expect(archiveWarningText({ hasUpcomingClass: false, classesLeft: 0 }, t)).toBeNull();
   });
 });

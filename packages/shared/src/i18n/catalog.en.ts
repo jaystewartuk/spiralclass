@@ -472,6 +472,8 @@ export const en = {
   "material.editor.changed.duplicate": "Section duplicated",
   "material.editor.changed.insert": "Section added",
   "material.editor.changed.refine": "Section edited with AI",
+  "material.editor.changed.rename": "Section renamed",
+  "material.editor.sectionTitleLabel": "Section title",
   "material.editor.changed.editBlocks": "Section content edited",
   "material.editor.aiSectionChanged": "AI updated this section.",
   "material.editor.undoAiChange": "Undo AI change",
@@ -2739,6 +2741,10 @@ export const en = {
   "web.dashboard.students.archive.confirmReactivate": "Reactivate this student on your roster?",
   "web.dashboard.students.archive.confirmArchive":
     "Archive this student? They stay reachable and their packages are untouched — they just leave your active roster and stop receiving reminders.",
+  "web.dashboard.students.archive.warningUpcoming":
+    "This student has classes booked. They stay booked, but the student will get no reminders for them.",
+  "web.dashboard.students.archive.warningClassesLeft":
+    "Classes left: {count}. The package stays as it is, but the student will stop getting reminders.",
   "web.dashboard.students.archive.reasonPlaceholder":
     "Optional note (e.g. paused lessons for now).",
   "web.dashboard.students.archive.helpLabel": "Help on archiving",
@@ -6846,7 +6852,7 @@ export const en = {
   "web.action.photo.choose": "Choose an image first.",
   "web.action.photo.type": "Use a JPG, PNG or WebP image.",
   "web.action.photo.tooLarge": "The image must be under 5 MB.",
-  "web.action.photo.uploadFailed": "We couldn't upload the image: {error}",
+  "web.action.photo.uploadFailed": "We couldn't upload the image. Please try again.",
   "web.action.testimonial.bodyLength":
     "Write a few words about your classes (under {max} characters).",
   "web.action.testimonial.notEligible":
@@ -7121,9 +7127,9 @@ export const en = {
   "web.action.packageField.atMost": "Classes left can be at most {max} for this package.",
   "web.action.materialImage.chooseType": "Choose a JPG, PNG, WebP or GIF image.",
   "web.action.materialImage.tooLarge": "The image can't be larger than {mb} MB.",
-  "web.action.materialImage.uploadFailed": "We couldn't upload the image: {message}",
+  "web.action.materialImage.uploadFailed": "We couldn't upload the image. Please try again.",
   "web.action.materialFile.tooLarge": "The file can't be larger than 25 MB.",
-  "web.action.materialFile.uploadFailed": "We couldn't upload the file: {message}",
+  "web.action.materialFile.uploadFailed": "We couldn't upload the file. Please try again.",
   "web.action.referral.ownCode": "You can't use your own referral code.",
   "web.action.referral.firstPurchaseOnly": "Referral codes only apply to your first purchase.",
   "web.action.classContent.writeFirst": "Write some content first.",
@@ -7814,6 +7820,10 @@ export const en = {
   "materials.ai.refineUnavailable":
     "AI editing isn't available right now. You can still edit the material yourself.",
   "materials.ai.refineFailed": "Couldn't apply the change. Please try again.",
+  "materials.ai.generateTooLong":
+    "The material came out too long to finish. Try a narrower topic, or generate it in two parts.",
+  "materials.ai.refineTooLong":
+    "The result came out too long to finish, so nothing was changed. Ask for a smaller change, or split the material in two.",
   "materials.ai.podcastLimitReached":
     "You've reached this month's AI generation limit ({cap}). You can still write and record content yourself.",
   "materials.ai.podcastUnavailable": "Podcast generation isn't available right now.",

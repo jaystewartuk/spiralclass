@@ -41,6 +41,7 @@ truth — not a longer version of this one.
 | How does the database work?          | [docs/architecture/data-model.md](docs/architecture/data-model.md)                         |
 | How do I test it?                    | [docs/development/testing.md](docs/development/testing.md)                                 |
 | How does a change reach production?  | [docs/development/workflow.md](docs/development/workflow.md)                               |
+| Which file should new code copy?     | [docs/development/exemplars.md](docs/development/exemplars.md)                             |
 | How is this repo worked with agents? | [docs/development/ai-assisted-engineering.md](docs/development/ai-assisted-engineering.md) |
 | What does publishing this expose?    | [docs/security.md](docs/security.md)                                                       |
 
@@ -126,6 +127,8 @@ pnpm --filter @spiralclass/shared test -- src/money.test.ts
 and the two operator scripts in `infra/gcp/`, `scripts/database-deploy.sh`,
 anything matching `migrate:prod`, and `infisical`. These are denied in `.claude/settings.json` and
 by a `PreToolUse` hook, so you will be stopped rather than trusted to remember.
+Under Codex only the hook applies, and only once it is trusted, so treat this
+list as yours to honour.
 Writing `gcloud` (`run deploy`, `secrets versions`, service-account keys) is
 denied the same way; **reading** it — `describe`, `list`, `logging read` — is
 not, because measuring a target is how the decision to use one gets taken.

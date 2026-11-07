@@ -469,6 +469,8 @@ export const fr = {
   "material.editor.changed.duplicate": "Section dupliquée",
   "material.editor.changed.insert": "Section ajoutée",
   "material.editor.changed.refine": "Section modifiée avec l'IA",
+  "material.editor.changed.rename": "Titre de la section modifié",
+  "material.editor.sectionTitleLabel": "Titre de la section",
   "material.editor.changed.editBlocks": "Contenu de la section modifié",
   "material.editor.aiSectionChanged": "L'IA a mis à jour cette section.",
   "material.editor.undoAiChange": "Annuler la modification de l'IA",
@@ -2725,6 +2727,10 @@ export const fr = {
   "web.dashboard.students.archive.confirmReactivate": "Réactiver cet élève dans votre liste ?",
   "web.dashboard.students.archive.confirmArchive":
     "Archiver cet élève ? Il reste joignable et ses forfaits sont inchangés — il quitte simplement votre liste active et cesse de recevoir des rappels.",
+  "web.dashboard.students.archive.warningUpcoming":
+    "Cet élève a des cours réservés. Ils restent réservés, mais il ne recevra aucun rappel.",
+  "web.dashboard.students.archive.warningClassesLeft":
+    "Cours restants : {count}. Le forfait ne change pas, mais l'élève ne recevra plus de rappels.",
   "web.dashboard.students.archive.reasonPlaceholder":
     "Note facultative (ex. cours en pause pour l'instant).",
   "web.dashboard.students.archive.helpLabel": "Aide sur l'archivage",
@@ -6886,7 +6892,7 @@ export const fr = {
   "web.action.photo.choose": "Choisissez d'abord une image.",
   "web.action.photo.type": "Utilisez une image JPG, PNG ou WebP.",
   "web.action.photo.tooLarge": "L'image doit faire moins de 5 Mo.",
-  "web.action.photo.uploadFailed": "Nous n'avons pas pu téléverser l'image : {error}",
+  "web.action.photo.uploadFailed": "Nous n'avons pas pu téléverser l'image. Veuillez réessayer.",
   "web.action.testimonial.bodyLength":
     "Écrivez quelques mots sur vos cours (moins de {max} caractères).",
   "web.action.testimonial.notEligible":
@@ -7184,9 +7190,11 @@ export const fr = {
   "web.action.packageField.atMost": "Il peut rester au maximum {max} cours pour ce forfait.",
   "web.action.materialImage.chooseType": "Choisissez une image JPG, PNG, WebP ou GIF.",
   "web.action.materialImage.tooLarge": "L'image ne peut pas dépasser {mb} Mo.",
-  "web.action.materialImage.uploadFailed": "Nous n'avons pas pu téléverser l'image : {message}",
+  "web.action.materialImage.uploadFailed":
+    "Nous n'avons pas pu téléverser l'image. Veuillez réessayer.",
   "web.action.materialFile.tooLarge": "Le fichier ne peut pas dépasser 25 Mo.",
-  "web.action.materialFile.uploadFailed": "Nous n'avons pas pu téléverser le fichier : {message}",
+  "web.action.materialFile.uploadFailed":
+    "Nous n'avons pas pu téléverser le fichier. Veuillez réessayer.",
   "web.action.referral.ownCode": "Vous ne pouvez pas utiliser votre propre code de parrainage.",
   "web.action.referral.firstPurchaseOnly":
     "Les codes de parrainage ne s'appliquent qu'à votre premier achat.",
@@ -7899,6 +7907,10 @@ export const fr = {
   "materials.ai.refineUnavailable":
     "La modification par IA n'est pas disponible pour le moment. Vous pouvez toujours modifier le support vous-même.",
   "materials.ai.refineFailed": "Impossible d'appliquer la modification. Veuillez réessayer.",
+  "materials.ai.generateTooLong":
+    "Le support est trop long pour être terminé. Essayez un sujet plus précis ou générez-le en deux parties.",
+  "materials.ai.refineTooLong":
+    "Le résultat est trop long pour être terminé, donc rien n'a été modifié. Demandez une modification plus petite ou divisez le support en deux.",
   "materials.ai.podcastLimitReached":
     "Vous avez atteint la limite mensuelle de génération par IA ({cap}). Vous pouvez toujours rédiger et enregistrer le contenu vous-même.",
   "materials.ai.podcastUnavailable":

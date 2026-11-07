@@ -117,6 +117,16 @@ export type KeptLine = {
 // would otherwise claim the silence as speech.
 export const MAX_KEPT_LINE_MS = 60_000;
 
+// How much of someone speaking, added up, a browser recogniser may hear
+// without producing a single word before it counts as not working (D-185).
+// Long enough that a recogniser restarting between sessions cannot reach it;
+// a working one shows partials within a second or two of speech.
+export const UNHEARD_SPEECH_LIMIT_MS = 30_000;
+
+// Why this browser stopped claiming it can recognise: a recogniser's error
+// code or give-up reason, or "silent" when people spoke and it heard nothing.
+export type RecognitionUnusableReason = string;
+
 export type BrowserCaptionsDeps = {
   SpeechRecognition: SpeechRecognitionCtorLike | null;
   Translator: TranslatorApiLike | null;
@@ -135,6 +145,9 @@ export type BrowserCaptionsDeps = {
   // The server refused a translation for a reason retrying cannot fix; the
   // hook re-reads the config, which re-runs the assignment.
   onRefused: (reason: TranslationRefusal) => void;
+  // This browser's recognition does not work, whatever the API says. Called at
+  // most once; the hook withdraws the claim, and the next sync re-assigns.
+  onUnusable?: (reason: RecognitionUnusableReason) => void;
   now?: () => number;
   setTimeout?: (fn: () => void, ms: number) => unknown;
   clearTimeout?: (handle: unknown) => void;
@@ -144,6 +157,11 @@ export type BrowserCaptionsDeps = {
 
 type Running = {
   key: string;
+  kind: "browser" | "cloud";
+  // Whether this recogniser's speaker is this browser's own person.
+  mine: boolean;
+  // Speech heard on the call since this recogniser last produced a word.
+  unheardSpeechMs: number;
   recognizer: { start(): void; stop(): void };
   // Serialises this speaker's lines so they are shown in the order spoken.
   chain: Promise<void>;
@@ -163,6 +181,8 @@ export class BrowserCaptions {
   // for the same track and language, which would fail the same way.
   private readonly givenUp = new Set<string>();
   private stopped: RecognizerStopReason | null = null;
+  private stoppedKind: "browser" | "cloud" | null = null;
+  private reportedUnusable = false;
   private seq = 0;
   private lastStatus = "";
   private disposed = false;
@@ -181,6 +201,13 @@ export class BrowserCaptions {
   sync(input: BrowserCaptionsInput): void {
     if (this.disposed) return;
     const { session, room } = input;
+    // A browser recogniser's give-up says nothing once this browser no longer
+    // claims to recognise: someone else has the job, or `uncaptioned` says
+    // nobody does.
+    if (!input.selfCapable && this.stoppedKind === "browser") {
+      this.stopped = null;
+      this.stoppedKind = null;
+    }
     this.timing = session?.timing ?? CAPTION_TIMING_DEFAULTS;
     this.display = input.captionsOn;
     const desired = new Map<CallRole, { key: string; start: () => Running }>();
@@ -271,6 +298,25 @@ export class BrowserCaptions {
     this.report({ uncaptioned, stopped: this.stopped });
   }
 
+  // Called about once a second with who is speaking on the call, as LiveKit
+  // measures it. Only a recogniser's own results prove it works: an API that
+  // exists, a session that starts and even a clean stream of "no-speech" can
+  // all be true of a browser that will never return a word.
+  noteSpeech(speaking: { local: boolean; remote: boolean }, elapsedMs: number): void {
+    if (this.disposed) return;
+    for (const run of this.running.values()) {
+      if (run.kind !== "browser" || !(run.mine ? speaking.local : speaking.remote)) continue;
+      run.unheardSpeechMs += elapsedMs;
+      if (run.unheardSpeechMs >= UNHEARD_SPEECH_LIMIT_MS) this.reportUnusable("silent");
+    }
+  }
+
+  private reportUnusable(reason: RecognitionUnusableReason): void {
+    if (this.reportedUnusable) return;
+    this.reportedUnusable = true;
+    this.deps.onUnusable?.(reason);
+  }
+
   dispose(): void {
     this.disposed = true;
     for (const run of this.running.values()) run.recognizer.stop();
@@ -301,6 +347,9 @@ export class BrowserCaptions {
     });
     const run: Running = {
       key: args.key,
+      kind: args.kind,
+      mine: args.publish,
+      unheardSpeechMs: 0,
       chain: Promise.resolve(),
       recognizer: { start() {}, stop() {} },
       lastFinalAt: this.now(),
@@ -326,6 +375,7 @@ export class BrowserCaptions {
       clearTimeout: this.deps.clearTimeout,
     });
     const onFinal = (text: string) => {
+      run.unheardSpeechMs = 0;
       const rest = chunker.final(text);
       if (rest) finish(rest);
       else run.partialId = null;
@@ -335,6 +385,7 @@ export class BrowserCaptions {
     // the part not already cut is shown, under a new id once a cut has taken
     // the old one.
     const onPartial = (heard: string) => {
+      run.unheardSpeechMs = 0;
       if (this.disposed || !this.display) return;
       const rest = chunker.partial(heard);
       if (!rest) return;
@@ -355,7 +406,9 @@ export class BrowserCaptions {
       this.givenUp.add(args.key);
       if (this.running.get(args.speaker) === run) this.running.delete(args.speaker);
       this.stopped = reason;
+      this.stoppedKind = args.kind;
       this.report({ uncaptioned: [], stopped: reason });
+      if (args.kind === "browser") this.reportUnusable(reason);
     };
     if (args.kind === "cloud") {
       const create =
@@ -381,6 +434,7 @@ export class BrowserCaptions {
         onFinal,
         onPartial,
         onStopped,
+        onUnusable: (error) => this.reportUnusable(error),
       });
     }
     const recognizer = run.recognizer;

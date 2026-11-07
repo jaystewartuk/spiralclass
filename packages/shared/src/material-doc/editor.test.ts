@@ -167,6 +167,37 @@ describe("applySectionAction — delete / duplicate / insert", () => {
   });
 });
 
+describe("applySectionAction — rename", () => {
+  it("retitles the section, keeps its body, and undo restores the old title", () => {
+    const start = emptySectionEditorState(DOC);
+    const next = applySectionAction(start, { kind: "rename", index: 2, title: "Conversación" });
+    expect(titles(next.body)).toContain("Conversación");
+    expect(titles(next.body)).not.toContain("2. Practice");
+    expect(next.body).toContain("Repeat after me.");
+    expect(next.ids).toEqual(start.ids);
+    expect(undoSectionAction(next).body).toBe(start.body);
+  });
+
+  it("renames a section the editor just inserted", () => {
+    const inserted = applySectionAction(emptySectionEditorState(DOC), {
+      kind: "insert",
+      index: 2,
+      title: "New section",
+    });
+    const next = applySectionAction(inserted, { kind: "rename", index: 2, title: "Scenes" });
+    expect(titles(next.body)).toContain("Scenes");
+    expect(titles(next.body)).not.toContain("New section");
+  });
+
+  it("does nothing for a blank title, an unknown index or the lead section", () => {
+    const start = emptySectionEditorState(DOC);
+    expect(applySectionAction(start, { kind: "rename", index: 2, title: "  " })).toBe(start);
+    expect(applySectionAction(start, { kind: "rename", index: 99, title: "X" })).toBe(start);
+    const lead = emptySectionEditorState("Just a lead paragraph.\n\n## One\n\nBody.");
+    expect(applySectionAction(lead, { kind: "rename", index: 0, title: "X" })).toBe(lead);
+  });
+});
+
 describe("applySectionAction — undo", () => {
   it("restores the exact previous body, one step at a time", () => {
     const start = emptySectionEditorState(DOC);

@@ -31,6 +31,15 @@ type PerLanguage = Record<AppLocale, RegExp[]>;
 const everyLanguage = (patterns: PerLanguage): RegExp[] => Object.values(patterns).flat();
 
 describe("locale registry", () => {
+  it("has no copy that interpolates a raw error, which shows a reader a storage code", () => {
+    for (const [locale, catalog] of Object.entries(strings)) {
+      const offenders = Object.entries(catalog)
+        .filter(([, text]) => /\{(error|message)\}/.test(String(text)))
+        .map(([key]) => `${locale}:${key}`);
+      expect(offenders).toEqual([]);
+    }
+  });
+
   it("exposes every registered locale as a catalog block", () => {
     for (const locale of LOCALES) {
       expect(strings[locale.tag]).toBeDefined();

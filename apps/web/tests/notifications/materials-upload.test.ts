@@ -210,14 +210,15 @@ describe("uploadMaterialAction — file path", () => {
     );
   });
 
-  it("surfaces the supabase error when storage upload fails", async () => {
+  it("says the upload failed without showing the storage error", async () => {
     state.storageUploadShouldFail = true;
     const errSpy = vi.spyOn(console, "error").mockImplementation(() => {});
     const result = await uploadMaterialAction(
       undefined,
       form({ bookingId: BOOKING_ID, sendTiming: "t_1h", file: mkFile("a.pdf", 1024) }),
     );
-    expect(result?.error).toMatch(/storage 500/);
+    expect(result?.error).toMatch(/No pudimos subir el archivo/);
+    expect(result?.error).not.toMatch(/storage 500/);
     expect(state.materials).toHaveLength(0);
     expect(trackEventMock).not.toHaveBeenCalled();
     errSpy.mockRestore();

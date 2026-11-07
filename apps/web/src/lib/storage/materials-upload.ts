@@ -48,7 +48,7 @@ export async function resolveMaterialAttachment(opts: {
     if (upErr) {
       log.warn("upload failed", { error: upErr.message });
       return {
-        error: t("web.action.materialFile.uploadFailed", { message: upErr.message }),
+        error: t("web.action.materialFile.uploadFailed"),
       };
     }
     return { ok: { kind: "file", storagePath: path } };

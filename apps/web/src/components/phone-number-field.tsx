@@ -93,7 +93,7 @@ export function PhoneNumberField({
           required={required}
           value={phone}
           onChange={(e) => onPhoneChange(e.target.value)}
-          className="h-9 rounded-l-none rounded-r-md border-0 text-sm shadow-none focus-visible:ring-0 lg:h-9"
+          className="h-9 rounded-l-none rounded-r-md border-0 shadow-none focus-visible:ring-0 lg:h-9 lg:text-sm"
         />
       </div>
       {hint ? <p className="text-xs text-muted-foreground">{hint}</p> : null}

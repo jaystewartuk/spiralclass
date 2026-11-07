@@ -479,6 +479,8 @@ export const esMX = {
   "material.editor.changed.duplicate": "Sección duplicada",
   "material.editor.changed.insert": "Sección añadida",
   "material.editor.changed.refine": "Sección editada con IA",
+  "material.editor.changed.rename": "Título de la sección cambiado",
+  "material.editor.sectionTitleLabel": "Título de la sección",
   "material.editor.changed.editBlocks": "Contenido de la sección editado",
   "material.editor.aiSectionChanged": "La IA actualizó esta sección.",
   "material.editor.undoAiChange": "Deshacer cambio de IA",
@@ -2762,6 +2764,10 @@ export const esMX = {
   "web.dashboard.students.archive.confirmReactivate": "¿Reactivar a este alumno en tu listado?",
   "web.dashboard.students.archive.confirmArchive":
     "¿Dar de baja a este alumno? Sigue siendo contactable y sus paquetes no cambian — solo sale de tu listado activo y deja de recibir recordatorios.",
+  "web.dashboard.students.archive.warningUpcoming":
+    "Este alumno tiene clases agendadas. Siguen agendadas, pero no recibirá recordatorios de ellas.",
+  "web.dashboard.students.archive.warningClassesLeft":
+    "Clases restantes: {count}. El paquete no cambia, pero el alumno dejará de recibir recordatorios.",
   "web.dashboard.students.archive.reasonPlaceholder":
     "Nota opcional (ej. pausa las clases por ahora).",
   "web.dashboard.students.archive.helpLabel": "Ayuda sobre dar de baja",
@@ -6854,7 +6860,7 @@ export const esMX = {
   "web.action.photo.choose": "Elige una imagen primero.",
   "web.action.photo.type": "Usa una imagen JPG, PNG o WebP.",
   "web.action.photo.tooLarge": "La imagen debe pesar menos de 5 MB.",
-  "web.action.photo.uploadFailed": "No pudimos subir la imagen: {error}",
+  "web.action.photo.uploadFailed": "No pudimos subir la imagen. Inténtalo de nuevo.",
   "web.action.testimonial.bodyLength":
     "Escribe unas palabras sobre tus clases (máximo {max} caracteres).",
   "web.action.testimonial.notEligible":
@@ -7144,9 +7150,9 @@ export const esMX = {
     "Las clases restantes pueden ser como máximo {max} para este paquete.",
   "web.action.materialImage.chooseType": "Elige una imagen JPG, PNG, WebP o GIF.",
   "web.action.materialImage.tooLarge": "La imagen no puede pesar más de {mb} MB.",
-  "web.action.materialImage.uploadFailed": "No pudimos subir la imagen: {message}",
+  "web.action.materialImage.uploadFailed": "No pudimos subir la imagen. Inténtalo de nuevo.",
   "web.action.materialFile.tooLarge": "El archivo no puede pesar más de 25 MB.",
-  "web.action.materialFile.uploadFailed": "No pudimos subir el archivo: {message}",
+  "web.action.materialFile.uploadFailed": "No pudimos subir el archivo. Inténtalo de nuevo.",
   "web.action.referral.ownCode": "No puedes usar tu propio código de referido.",
   "web.action.referral.firstPurchaseOnly":
     "Los códigos de referido solo aplican en tu primera compra.",
@@ -7845,6 +7851,10 @@ export const esMX = {
   "materials.ai.refineUnavailable":
     "La edición con IA no está disponible ahora. Aún puedes editar el material tú mismo.",
   "materials.ai.refineFailed": "No se pudo aplicar el cambio. Inténtalo de nuevo.",
+  "materials.ai.generateTooLong":
+    "El material quedó demasiado largo y no se pudo terminar. Prueba con un tema más concreto o genéralo en dos partes.",
+  "materials.ai.refineTooLong":
+    "El resultado quedó demasiado largo y no se pudo terminar, así que no se cambió nada. Pide un cambio más pequeño o divide el material en dos.",
   "materials.ai.podcastLimitReached":
     "Alcanzaste el límite de generaciones con IA de este mes ({cap}). Aún puedes crear el contenido tú mismo.",
   "materials.ai.podcastUnavailable": "La generación de podcast no está disponible ahora.",

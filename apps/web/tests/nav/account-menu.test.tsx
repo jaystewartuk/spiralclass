@@ -88,7 +88,8 @@ describe("AccountMenu", () => {
 
   it("is a labelled disclosure, closed until it is asked for", () => {
     expect(trigger().getAttribute("aria-expanded")).toBe("false");
-    expect(trigger().getAttribute("aria-label")).toBe("web.accountMenu.menuLabel");
+    expect(trigger().textContent).toContain("web.accountMenu.menuLabel");
+    expect(trigger().textContent).toContain("Alicia Moreno");
     expect(panel()).toBeUndefined();
   });
 
@@ -122,6 +123,12 @@ describe("AccountMenu", () => {
     expect(document.activeElement).toBe(order[0]);
     press("End");
     expect(document.activeElement).toBe(order[order.length - 1]);
+  });
+
+  it("keeps the name out of the bar until there is room for it beside the inline nav", () => {
+    const classes = trigger().querySelector("span.truncate")?.className.split(/\s+/);
+    expect(classes).toContain("2xl:block");
+    expect(classes).not.toContain("xl:block");
   });
 
   it("closes on Escape and gives the trigger its focus back", () => {

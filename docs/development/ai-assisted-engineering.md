@@ -135,6 +135,16 @@ operator-only command or `settings.json` stops denying it, and
 command lines. A rule about irreversible actions should not have a single
 point of failure, least of all a model's attention.
 
+**Codex reads the same rules through links.** `AGENTS.md` and `.codex/hooks/*`
+are symlinks to `CLAUDE.md` and `.claude/hooks/*`, and
+`apps/web/tests/config/codex-parity.test.ts` fails if they or the subagent text
+drift apart. ⚠️ **The protection is weaker under Codex.** The deny list in
+`.claude/settings.json` does not apply, and Codex skips a hook nobody has
+trusted without saying so. It did exactly that when tested in a fresh worktree
+on 2026-11-04. After changing a hook, or starting from a new path, trust the
+hooks with `/hooks` in Codex. The pre-push hook does not depend on any of this,
+but a Codex session is not blocked from bypassing it until `guard-bash.sh` runs.
+
 ---
 
 ## Delegation: read less, not more
@@ -171,6 +181,11 @@ draft. It lints the title and the end state, rejects labels that do not exist,
 runs the gate's own leak detectors over the text, and ranks the closest open and
 closed issues. `apps/web/tests/config/agent-skills.test.ts` fails if the skill
 stops calling the checker or loses its approval, security or never-close rules.
+
+**[`exemplars.md`](exemplars.md)** names the file to copy for each common kind
+of change, because an agent otherwise copies what is nearest.
+`apps/web/tests/config/exemplars.test.ts` fails if a named file disappears or
+picks up a defect the repository can already detect.
 
 **What was deliberately not built.** No skill for writing a decision record —
 `docs/decisions/_template.md` and its README already say how, and a skill
