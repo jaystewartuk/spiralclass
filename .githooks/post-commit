@@ -1,0 +1,10 @@
+#!/usr/bin/env sh
+# Back this repo up to the operator's Proton Drive vault after every commit, merge
+# and rebase. This repo's core.hooksPath (.githooks) bypasses the global hooks in
+# ~/.config/git/hooks, which do the same everywhere else.
+#
+# A machine without ~/.local/bin/vault-backup (a contributor, a cloud session, CI)
+# skips this silently. The backup runs in the background and never fails a commit.
+[ -x "$HOME/.local/bin/vault-backup" ] || exit 0
+nohup "$HOME/.local/bin/vault-backup" "$(git rev-parse --path-format=absolute --git-common-dir)" >/dev/null 2>&1 &
+exit 0
