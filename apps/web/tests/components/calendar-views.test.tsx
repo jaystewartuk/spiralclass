@@ -100,7 +100,7 @@ describe("month grid cells", () => {
     const container = document.createElement("div");
     container.innerHTML = await renderMonth([
       ev({ ymd: "2026-09-01", startMinutes: 540 }),
-      ev({ ymd: "2026-09-01", startMinutes: 660, timeLabel: "11:00", title: "Alex River" }),
+      ev({ ymd: "2026-09-01", startMinutes: 660, timeLabel: "11:00", title: "Tom Whitfield" }),
     ]);
     const cell = container.querySelector('a[href$="d=2026-09-01"]')!;
     const name = cell.getAttribute("aria-label") ?? cell.textContent ?? "";
@@ -110,7 +110,7 @@ describe("month grid cells", () => {
       "09:00",
       "María González",
       "11:00",
-      "Alex River",
+      "Tom Whitfield",
     ]) {
       expect(name).toContain(text);
     }
