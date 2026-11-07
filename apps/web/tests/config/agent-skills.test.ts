@@ -37,7 +37,7 @@ const commandsIn = (source: string) =>
 
 describe("every project skill is well-formed", () => {
   it("finds the skills at all", () => {
-    expect(skillNames).toEqual(expect.arrayContaining(["issue", "pr"]));
+    expect(skillNames).toEqual(expect.arrayContaining(["issue", "pr", "work-backlog"]));
   });
 
   it.each(skillNames)("%s has a SKILL.md whose name matches its directory", (name) => {
@@ -124,5 +124,41 @@ describe("/pr closes the loop /issue opens", () => {
     // D-164 chose Issues because a merged PR closes one without anybody
     // editing a list. That only holds if the PR says so.
     expect(skill("pr")).toContain("Closes #N");
+  });
+});
+
+describe("/work-backlog keeps a bounded issue-to-PR session", () => {
+  const source = skill("work-backlog");
+  const commands = commandsIn(source);
+
+  it("reads the live queue and competing PRs before changing code", () => {
+    expect(commands).toMatch(/gh issue list --state open --label p1/);
+    expect(commands).toMatch(/gh pr list --state open/);
+    expect(source).toContain("including draft PRs");
+    expect(source).toContain("outstanding backlog PR across invocations");
+    expect(source).toContain("resume it in its existing");
+    expect(source).toContain("If none qualify, stop");
+    expect(source).toContain("Never\nfall through to `p2` or deferred `p3`");
+  });
+
+  it("requires evidence before delivering through the existing gate and PR skill", () => {
+    expect(source).toContain("regression test before the fix");
+    expect(source).toContain("pnpm gate --allow-dirty");
+    expect(source).toContain(".claude/skills/call-local/SKILL.md");
+    expect(source).toContain("explicit security review for Tier 2");
+    expect(source).toContain(".claude/skills/pr/SKILL.md");
+    expect(source).toContain("Closes #N");
+    expect(source).toContain("Pending is not\ngreen");
+  });
+
+  it("stops at review and routes sensitive findings away from public automation", () => {
+    expect(source).toContain("Never merge, deploy or promote");
+    expect(source).toContain("never schedule the next run");
+    expect(source).toContain("do not start a second issue");
+    expect(source).toContain("Do not edit, close, relabel, assign, or comment on issues");
+    expect(source).toContain("SECURITY.md");
+    expect(source).toContain("do not publish exploit details");
+    expect(source).toContain("read private direction documents");
+    expect(commands).not.toMatch(/gh (?:issue (?:edit|close)|pr merge)|pnpm promote/);
   });
 });
