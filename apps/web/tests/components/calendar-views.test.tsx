@@ -96,6 +96,26 @@ describe("month grid cells", () => {
     expect(html).toContain("web.calendar.noClasses");
   });
 
+  it("includes the visible class times and names in each day's accessible name", async () => {
+    const container = document.createElement("div");
+    container.innerHTML = await renderMonth([
+      ev({ ymd: "2026-09-01", startMinutes: 540 }),
+      ev({ ymd: "2026-09-01", startMinutes: 660, timeLabel: "11:00", title: "Alex River" }),
+    ]);
+    const cell = container.querySelector('a[href$="d=2026-09-01"]')!;
+    const name = cell.getAttribute("aria-label") ?? cell.textContent ?? "";
+    for (const text of [
+      "Tue, Sep 1",
+      "classCount(count=2)",
+      "09:00",
+      "María González",
+      "11:00",
+      "Alex River",
+    ]) {
+      expect(name).toContain(text);
+    }
+  });
+
   it("paints every cell background OPAQUE", async () => {
     // The 1px rules between cells are the container's `bg-border` showing
     // through a `gap-px`, so a translucent cell fill composites over BORDER

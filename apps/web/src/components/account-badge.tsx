@@ -76,10 +76,12 @@ export function AccountBadge({
         "inline-flex max-w-64 cursor-default items-center gap-2 rounded-full py-0.5 pr-2 pl-0.5 text-sm text-foreground focus-visible:ring-3 focus-visible:ring-ring focus-visible:outline-hidden",
         className,
       )}
-      aria-label={`${signedInAs} ${label}${aside ? ` (${aside})` : ""}`}
     >
+      <span className="sr-only">{`${signedInAs} ${label}${aside ? ` (${aside})` : ""}`}</span>
       {avatar}
-      <span className={cn("truncate", nameClassName)}>{label}</span>
+      <span aria-hidden className={cn("truncate", nameClassName)}>
+        {label}
+      </span>
     </button>
   );
 
