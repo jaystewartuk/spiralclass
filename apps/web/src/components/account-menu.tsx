@@ -79,10 +79,10 @@ export function AccountMenu({
         size="sm"
         aria-expanded={open}
         aria-controls={menuId}
-        aria-label={menuLabel}
         onClick={toggle}
         className={cn("gap-2 rounded-full pr-2 pl-1", open && "bg-muted/60")}
       >
+        <span className="sr-only">{menuLabel} </span>
         <AccountAvatar
           name={account?.name}
           email={account?.email}

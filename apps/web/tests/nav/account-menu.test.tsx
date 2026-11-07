@@ -88,7 +88,8 @@ describe("AccountMenu", () => {
 
   it("is a labelled disclosure, closed until it is asked for", () => {
     expect(trigger().getAttribute("aria-expanded")).toBe("false");
-    expect(trigger().getAttribute("aria-label")).toBe("web.accountMenu.menuLabel");
+    expect(trigger().textContent).toContain("web.accountMenu.menuLabel");
+    expect(trigger().textContent).toContain("Alicia Moreno");
     expect(panel()).toBeUndefined();
   });
 
