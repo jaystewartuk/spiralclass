@@ -8,16 +8,16 @@ import { buildPoolConfig } from "@/lib/db-pool";
 /**
  * How many statements Prisma actually puts on the wire per query.
  *
- * WHY THIS EXISTS. `fly.production.toml` and [D-150] both cost the app's
+ * WHY THIS EXISTS. `fly.production.toml` and [D-184] both cost the app's
  * latency on a stated multiplier:
  *
  *   > Prisma spends FOUR round trips on every single query
  *   > (BEGIN → query → COMMIT → DEALLOCATE ALL)
  *
  * That number decided a region (Fly `ord` over `dfw`), and it decided against
- * free hosting in [D-150] — 58 ms × 28 round trips is the ~1.3 s that record
- * refused to pay. [D-184] then quoted it again to argue Cloud Run's +9 ms was
- * affordable.
+ * free hosting in September 2026 ([D-184]) — 58 ms × 28 round trips is the
+ * ~1.3 s refused then. The Cloud Run move quoted it again to argue its +9 ms
+ * was affordable.
  *
  * ⚠️ **Nothing has ever verified it.** It is the documented signature of
  * Prisma ≤6's Rust engine with `pgbouncer=true` in the connection string. This
@@ -43,7 +43,7 @@ import { buildPoolConfig } from "@/lib/db-pool";
  * (`lib/db-pool.ts` explains why) — so there is no pipelining to make the two
  * diverge.
  */
-describeIntegration("what Prisma puts on the wire (D-150's multiplier)", () => {
+describeIntegration("what Prisma puts on the wire (D-184's multiplier)", () => {
   let sql: string[] = [];
   let prisma: PrismaClient;
   let pool: Pool;
@@ -130,7 +130,7 @@ describeIntegration("what Prisma puts on the wire (D-150's multiplier)", () => {
     const statements = await statementsFor(() => prisma.teacher.findMany({ take: 1 }));
 
     // The assertion that matters. If this ever fails with BEGIN/COMMIT around
-    // a plain read, D-150's multiplier is live again and every latency figure
+    // a plain read, D-184's multiplier is live again and every latency figure
     // derived from it — D-184's included — needs re-deriving, not re-quoting.
     expect(wrapping(statements), `Prisma wrapped a plain read: ${statements.join(" | ")}`).toEqual(
       [],
@@ -147,7 +147,7 @@ describeIntegration("what Prisma puts on the wire (D-150's multiplier)", () => {
 
   it("keeps a read with a relation to a single statement (relationJoins)", async () => {
     // `relationJoins` is on in schema.prisma, so an `include` should become one
-    // joined query rather than a query per relation. This is the shape D-150
+    // joined query rather than a query per relation. This is the shape D-184
     // actually costed — a class-detail read — so it is the one whose statement
     // count its arithmetic depends on.
     const statements = await statementsFor(() =>
@@ -175,7 +175,7 @@ describeIntegration("what Prisma puts on the wire (D-150's multiplier)", () => {
   it("costs ONE statement per read, not the four the tree used to claim", async () => {
     // The headline, asserted as a number rather than a range so that a
     // regression toward the old behaviour fails here and names itself. If this
-    // goes back to 4, fly.production.toml's region comment, D-150's ~1.3 s and
+    // goes back to 4, fly.production.toml's region comment, D-184's ~1.3 s and
     // D-184's +9 ms arithmetic all need re-deriving rather than re-quoting.
     const statements = await statementsFor(() => prisma.teacher.findMany({ take: 1 }));
     expect(

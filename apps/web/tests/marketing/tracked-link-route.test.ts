@@ -51,7 +51,7 @@ describe("GET /g/[code]", () => {
   it("tags the destination when — and only when — the community has a social preview", async () => {
     // A crawler scraping the posted /g/<code> follows this redirect and reads
     // the tags of what it lands on, so an untagged destination resolved no
-    // group preview: D-123's per-community card was unreachable through the
+    // group preview: D-125's per-community card was unreachable through the
     // very link D-125 tells teachers to post. The clean-landing property is
     // kept for every teacher who never configured one (the case above).
     vi.mocked(prisma.marketingActivity.findUnique).mockResolvedValue({

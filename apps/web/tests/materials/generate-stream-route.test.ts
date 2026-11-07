@@ -40,7 +40,10 @@ vi.mock("@/lib/logger", () => ({
 
 const { POST } = await import("@/app/api/materials/generate/stream/route");
 
+const { CLASS_CONTENT_MAX_CHARS, MaterialIncompleteError } = await import("@/lib/materials/config");
+
 const DONE = "\u001F";
+const TOO_LONG = "\u001E";
 
 function req(body: unknown): Request {
   return new Request("http://test.local/api/materials/generate/stream", {
@@ -103,6 +106,8 @@ describe("POST materials/generate/stream", () => {
     expect(body).toBe("# Hola mundo");
     expect(done).toBe(true);
     expect(recordLibraryMaterialGeneration).toHaveBeenCalledTimes(1);
+    // The record carries exactly what was streamed to the teacher (D-202).
+    expect((recordLibraryMaterialGeneration.mock.calls as unknown[][])[0]![2]).toBe("# Hola mundo");
   });
 
   it("keeps markdown newlines intact across frame boundaries", async () => {
@@ -122,6 +127,26 @@ describe("POST materials/generate/stream", () => {
     expect(res.headers.get("content-type")).toContain("text/event-stream");
     expect(res.headers.get("cache-control")).toContain("no-transform");
     expect(res.headers.get("x-accel-buffering")).toBe("no");
+  });
+
+  it("says the draft did not fit, without DONE or quota, when the model runs out of room", async () => {
+    async function* outOfRoom() {
+      yield "partial";
+      throw new MaterialIncompleteError();
+    }
+    generateMaterialStream.mockReturnValue(outOfRoom());
+    const raw = await drainRaw(await POST(req({ topic: "x" })));
+    expect(raw).toContain(JSON.stringify(TOO_LONG));
+    expect(raw).not.toContain(JSON.stringify(DONE));
+    expect(recordLibraryMaterialGeneration).not.toHaveBeenCalled();
+  });
+
+  it("treats passing the character ceiling as not fitting, not as a finished draft", async () => {
+    generateMaterialStream.mockReturnValue(deltas("x".repeat(CLASS_CONTENT_MAX_CHARS), "one more"));
+    const raw = await drainRaw(await POST(req({ topic: "x" })));
+    expect(raw).toContain(JSON.stringify(TOO_LONG));
+    expect(raw).not.toContain(JSON.stringify(DONE));
+    expect(recordLibraryMaterialGeneration).not.toHaveBeenCalled();
   });
 
   it("closes without the DONE frame and burns no quota when generation throws mid-stream", async () => {

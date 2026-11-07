@@ -97,7 +97,10 @@ curl -sf -o /dev/null http://localhost:7880/ || die "LiveKit did not come up —
 echo "  ok"
 
 step "A class between ${TEACHER} and ${STUDENT}, starting now"
-booking="$(sql "select b.id from bookings b join teachers t on t.id=b.teacher_id join students s on s.id=b.student_id where t.email='${TEACHER}' and s.email='${STUDENT}' and b.status='scheduled' order by b.scheduled_start limit 1")"
+booking="$(sql "select b.id from bookings b join teachers t on t.id=b.teacher_id join students s on s.id=b.student_id where t.email='${TEACHER}' and s.email='${STUDENT}' and b.status='scheduled' order by abs(extract(epoch from b.scheduled_start - now())) limit 1")"
+# Nearest to now, not earliest: a rerun within the hour must reuse the class the
+# last run moved. An older class would be moved on top of it and hit the
+# exclusion constraint.
 [ -n "$booking" ] || die "no scheduled class between ${TEACHER} and ${STUDENT} — try --seed, or another --student"
 # buffered_end moves with the times: bookings_no_overlap_buffered is an
 # exclusion constraint over (scheduled_start, buffered_end).

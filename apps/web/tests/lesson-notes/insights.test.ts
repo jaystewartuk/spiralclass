@@ -65,7 +65,7 @@ describe("buildInsightsPrompt", () => {
 
   // Regression: the reading language (the TEACHER's own language) and the
   // target language (what the class is taught IN) are independent facts — same
-  // four-language-fields lesson as D-72/D-73, applied to this prompt. Passing
+  // four-language-fields lesson as D-72, applied to this prompt. Passing
   // the target language as inert context let the model grade a student's
   // target-language grammar by some other language's rules (the reported bug:
   // a Spanish teacher's class producing an English finding that

@@ -120,7 +120,7 @@ export function TimezoneForm({
   // initial guess, but never synced afterward.
   const [phoneCountry, setPhoneCountry] = useState<string>(initialCountry ?? "");
   // The language she TEACHES (D-72's `targetLanguage`), asked here rather than
-  // left to Settings — see D-112. Deliberately NOT prefilled from the browser
+  // left to Settings — see D-72. Deliberately NOT prefilled from the browser
   // locale or the country: neither is evidence of what she teaches (a Spanish-speaking
   // teacher of French would get "Spanish" from both), and a wrong default she
   // has to notice is worse than an empty required field she has to answer.

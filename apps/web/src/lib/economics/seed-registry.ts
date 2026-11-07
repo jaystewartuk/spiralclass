@@ -2,7 +2,7 @@ import type { Prisma, PrismaClient } from "@prisma/client";
 import { prisma as defaultPrisma } from "@/lib/prisma";
 import { KNOWN_INTEGRATIONS } from "@spiralclass/shared";
 
-// Financial Intelligence estimate layer (D-86, S2) — idempotent create-if-
+// Financial Intelligence estimate layer (slice S2) — idempotent create-if-
 // absent seed of the Integration registry from the shared KNOWN_INTEGRATIONS
 // list. Relies on the unique `key` index: `skipDuplicates` makes re-running
 // this a no-op for any integration already in the DB and only inserts rows

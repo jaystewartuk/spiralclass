@@ -20,13 +20,14 @@ import { defineConfig, devices } from "@playwright/test";
  * exactly like the a11y one, and for the same reasons.
  *
  * THE VIEWPORT MATRIX IS THE POINT, and it is chosen against
- * src/lib/breakpoints.ts (D-122) rather than against Tailwind's defaults,
- * which this app does not use:
+ * src/lib/breakpoints.ts. That scale is Tailwind's defaults plus two
+ * pointer-gated shell screens (D-140); the widths below were chosen under an
+ * earlier 1281px scale and still bracket the boundaries that matter:
  *
  *   390   iPhone 14 / the common phone. Below `roomy` (640).
  *   430   iPhone Pro Max. Still phone layout, but where long French labels
  *         start to fit and English ones look sparse.
- *   768   The tablet width that, under D-122, deliberately still gets the
+ *   768   `md`, unused today. Under the withdrawn 1281px scale it got the
  *         PHONE layout. The most contentious width in the product and the one
  *         a reviewer resizing the window will land on first.
  *   1280  TABLET_MAX_WIDTH — one pixel below DESKTOP_MIN_WIDTH. The boundary

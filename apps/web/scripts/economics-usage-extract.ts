@@ -1,5 +1,5 @@
 /**
- * Financial Intelligence — usage extractor (D-86).
+ * Financial Intelligence — usage extractor (docs/features/admin-portal.md).
  *
  * Computes the real values for the 9 economics USAGE_METRICS from the live
  * database for one calendar month, so the /admin/economics Usage tab is seeded

@@ -111,7 +111,7 @@ gate is red, fix it and report what failed."
 fi
 
 if [[ "$command_line" =~ (git[[:space:]]+push|git[[:space:]]+commit).*(--no-verify|[[:space:]]-n[[:space:]]|[[:space:]]-n$) ]]; then
-  block "--no-verify skips the hook that IS the gate (D-119)." \
+  block "--no-verify skips the hook that IS the gate (D-157)." \
     "The pre-push hook is what posts the 'local-gate' status branch protection requires.
 A push without it leaves a pull request that cannot merge."
 fi
@@ -149,7 +149,7 @@ infra/gcp/ scripts are the operator's own."
 fi
 
 # The database half of every deploy, on its own since the production targets
-# were split ([D-177]'s addendum). Matched on the name anywhere in the COMMAND,
+# were split ([D-184]). Matched on the name anywhere in the COMMAND,
 # like the Cloud Run scripts: `bash -c` or a path prefix is a likelier way a session
 # would reach it than a bare invocation.
 #
@@ -166,7 +166,7 @@ fi
 
 if [[ "$command_line" == *migrate:prod* ]] || [[ "$command_line" == *migrate:preview* ]]; then
   block "This runs migrations against a shared database." \
-    "Production migrations run inside the deploy, behind a Neon checkpoint (D-95).
+    "Production migrations run inside the deploy, behind a Neon checkpoint (D-178).
 Locally, use 'pnpm --filter spiralclass-web prisma:migrate'."
 fi
 

@@ -6,7 +6,7 @@ import { teacherVideoPublicUrl } from "@/lib/storage/teacher-video";
 import type { TranscriptionProvider } from "@/lib/transcription/provider";
 import type { Utterance } from "@/lib/transcription/types";
 
-// Layer 2 of the intro-video coach (D-73): turn a teacher's recorded/uploaded
+// Layer 2 of the intro-video coach: turn a teacher's recorded/uploaded
 // public intro video into a transcript, asynchronously, on the Inngest rail.
 //
 // The video lives in a PUBLIC R2 bucket, so — unlike lesson audio, which needs a

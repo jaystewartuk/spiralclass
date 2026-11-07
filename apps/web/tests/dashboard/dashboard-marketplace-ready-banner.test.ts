@@ -53,7 +53,7 @@ vi.mock("@/lib/cashflow", () => ({
 }));
 vi.mock("@/lib/prisma", () => ({
   prisma: {
-    // D-113: backed by the same `teacher` fixture the page's auth returns.
+    // D-145: backed by the same `teacher` fixture the page's auth returns.
     teacherPayoutInstrument: {
       findMany: async () => (teacher.payoutInstruments ?? []) as unknown[],
     },

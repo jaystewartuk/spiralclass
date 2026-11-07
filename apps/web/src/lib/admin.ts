@@ -13,7 +13,7 @@ const log = logger({ surface: "admin" });
 
 // Role hierarchy (descending privilege). Higher tiers automatically
 // satisfy lower-tier role requirements. `tester`/`engineer` rank below every
-// existing tier on purpose — they're narrow, capability-gated roles (D-55,
+// existing tier on purpose — they're narrow, capability-gated roles (D-25,
 // see lib/admin-capabilities.ts), not a rung on this ladder. They should
 // never satisfy any existing `minRole` floor via rank; access comes only
 // from an explicitly granted capability.
@@ -108,7 +108,7 @@ export const ADMIN_MFA_PATH = "/admin/security";
 // requireAdmin(), which layers the mandatory AAL2 requirement on top.
 // `capability`, when given, is an alternate path to authorization alongside
 // `minRole` — an actor passes if EITHER their rank meets `minRole` OR they
-// hold the named capability (D-55). This is how narrow roles like `tester`/
+// hold the named capability (D-25). This is how narrow roles like `tester`/
 // `engineer`, which rank below every existing tier, reach a specific page
 // without inheriting anything else on the rank ladder.
 export async function resolveAdminActor(

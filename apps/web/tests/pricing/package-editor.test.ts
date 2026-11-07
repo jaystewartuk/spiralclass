@@ -215,7 +215,7 @@ describe("duplicatePackageName", () => {
   });
 });
 
-// Packages for two (D-188).
+// Packages for two (D-149).
 describe("deriveTwoAuto — is the price for two still the suggested one?", () => {
   it("is true while it equals the percent of the one-person price", () => {
     expect(deriveTwoAuto(240_000, 360_000, 150, "MXN")).toBe(true);

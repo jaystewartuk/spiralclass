@@ -3,7 +3,7 @@
 import { createContext, useContext } from "react";
 import { DEFAULT_PRICING_CURRENCY } from "@spiralclass/shared";
 
-// The acting teacher's own pricing currency (D-64), published once by the
+// The acting teacher's own pricing currency (D-153), published once by the
 // `(app)` layout so every Client Component that reads or writes one of HER
 // money fields agrees on its denomination.
 //

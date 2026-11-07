@@ -31,6 +31,15 @@ type PerLanguage = Record<AppLocale, RegExp[]>;
 const everyLanguage = (patterns: PerLanguage): RegExp[] => Object.values(patterns).flat();
 
 describe("locale registry", () => {
+  it("has no copy that interpolates a raw error, which shows a reader a storage code", () => {
+    for (const [locale, catalog] of Object.entries(strings)) {
+      const offenders = Object.entries(catalog)
+        .filter(([, text]) => /\{(error|message)\}/.test(String(text)))
+        .map(([key]) => `${locale}:${key}`);
+      expect(offenders).toEqual([]);
+    }
+  });
+
   it("exposes every registered locale as a catalog block", () => {
     for (const locale of LOCALES) {
       expect(strings[locale.tag]).toBeDefined();
@@ -355,7 +364,7 @@ describe("no user-facing copy carries the pre-D-138 product name", () => {
   });
 });
 
-describe("the card fee is disclosed, and attributed to Stripe (D-152)", () => {
+describe("the card fee is disclosed, and attributed to Stripe (D-143)", () => {
   // D-143 made the TEACHER the merchant of record: a card charge settles on her
   // own connected account and Stripe bills its processing fee there, where the
   // platform never sees it. Two failure modes follow, and this guards both.

@@ -1,4 +1,4 @@
-// Shared target-environment plumbing for /admin/uat (D-55): which base URL
+// Shared target-environment plumbing for /admin/uat (D-25): which base URL
 // the probe/reseed hit, and the guard that keeps Reseed preview-only. Kept
 // in one place so every UAT action agrees on what "preview" vs "production"
 // means.

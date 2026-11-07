@@ -23,7 +23,7 @@ describe("social preview config", () => {
 
   it("gives Free a real allowance and Pro a larger one", () => {
     // Deliberately NOT a flat Pro gate: this is the feature that turns a Free
-    // teacher into a paying one (D-123).
+    // teacher into a paying one (D-125).
     expect(socialPreviewMonthlyCap(false)).toBe(SOCIAL_PREVIEW_AI_FREE_MONTHLY_ALLOWANCE);
     expect(socialPreviewMonthlyCap(true)).toBe(SOCIAL_PREVIEW_AI_PRO_MONTHLY_CAP);
     expect(SOCIAL_PREVIEW_AI_FREE_MONTHLY_ALLOWANCE).toBeGreaterThan(0);

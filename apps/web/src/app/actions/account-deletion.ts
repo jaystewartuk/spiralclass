@@ -29,7 +29,7 @@ import { createT } from "@spiralclass/shared";
 //
 // Tax-record retention: we anonymize the user-identifying columns
 // (email, name, phone) but keep Payment rows for the period UK tax law
-// requires. The platform entity is UK-established (D-58); the operative
+// requires. The platform entity is UK-established (D-143); the operative
 // period is the one the published privacy policy states — six years for
 // payment and invoice records (`packages/shared/src/legal/privacy-policy.ts`).
 // That file is the single source of truth, so don't restate a number here.

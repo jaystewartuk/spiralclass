@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { STUDENT_PROFILE_MAX_CHARS } from "@/lib/student-profile-fields";
 
-// Teacher-private student profile (interests + goals on teacher_students, D-20).
+// Teacher-private student profile (interests + goals on teacher_students, D-17).
 // Pins: the per-field length cap, the teacher_id-scoped link lookup (a student
 // not on this teacher's list → refusal, no write), empty-string → null
 // transform, and the analytics + revalidate side-effects.

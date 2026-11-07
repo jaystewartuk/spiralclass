@@ -108,7 +108,7 @@ async function createCheckoutIntentCore(
   formData: FormData,
 ): Promise<CheckoutState> {
   // The public funnel speaks the teacher's booking-page language, never the
-  // visitor's (CLAUDE.md, D-133): its errors and the Stripe line item the
+  // visitor's (CLAUDE.md, D-72): its errors and the Stripe line item the
   // buyer keeps as a receipt included. Reading the visitor's cookie here put
   // "para 2 personas" on a Spanish-browser buyer's receipt from an English
   // page. An unknown slug resolves to the fallback; the lookup below 404s it.

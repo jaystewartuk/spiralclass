@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-// D-193: on a public page the URL names the language, and the middleware hands
+// D-72: on a public page the URL names the language, and the middleware hands
 // it on as `x-locale`. These pin the request-scoped helpers that read it.
 
 const request = vi.hoisted(() => ({
@@ -84,7 +84,7 @@ describe("getLocalizedHref", () => {
 });
 
 describe("getFormatMoney", () => {
-  // D-197: the reader's number format, the price's own currency.
+  // D-153: the reader's number format, the price's own currency.
   it("writes prices the way the request's reader writes numbers", async () => {
     request.headers.set("x-locale", "fr");
     expect((await getFormatMoney())(25_000, "CLP")).toMatch(/^25\s000\s\$ CLP$/);

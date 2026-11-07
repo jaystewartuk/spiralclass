@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Push the SES-sender IAM credential from this module's OpenTofu state to
-# Infisical's "preview" environment (see infra/infisical/README.md and D-66).
+# Infisical's "preview" environment (see infra/infisical/README.md and D-70).
 # Preview has no host today (D-184). Production is set by hand in Infisical's
 # "production" environment — see README.md.
 #

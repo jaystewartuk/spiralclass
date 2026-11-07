@@ -18,7 +18,7 @@ export type SubscriptionOverview = {
   byPlan: Record<SubscriptionPlan, number>;
   byStatus: Record<SubscriptionStatus, number>;
   // Monthly Recurring Revenue in the canonical currency (PLATFORM_MONEY_CURRENCY,
-  // GBP as of D-99) — sum of the monthly-equivalent of every actively-billed
+  // GBP as of D-153) — sum of the monthly-equivalent of every actively-billed
   // (non-comped) subscription THAT BILLS IN THAT CURRENCY. Annual is /12.
   // Computed from each row's own persisted `lockedPriceMinorUnits`, never
   // re-derived from today's config table — a subscriber's locked price is
@@ -44,7 +44,7 @@ export async function getSubscriptionOverview(
   now: Date = new Date(),
 ): Promise<SubscriptionOverview> {
   const subs = await prisma.teacherSubscription.findMany({
-    // An operator's test teacher is not a subscriber (D-192).
+    // An operator's test teacher is not a subscriber.
     where: { teacher: NOT_TEST_ACCOUNT },
     select: {
       plan: true,
@@ -174,7 +174,7 @@ export async function getWiseRenewalsDue(
 
   return (
     subs
-      // `manual` since D-113 split the billing provider off the payout rail's
+      // `manual` since D-145 split the billing provider off the payout rail's
       // enum. In practice that still means Wise — it is the only way a teacher
       // pays SpiralClass outside Stripe — but the value names the concern
       // (an admin recorded a transfer we received) rather than the vendor.

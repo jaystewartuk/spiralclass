@@ -139,7 +139,7 @@ export default async function LeadsPage({
     now,
     // The reply goes to someone who read her BOOKING PAGE, not her dashboard,
     // and those are allowed to be different languages — the whole point of
-    // `booking_page_locale` (D-73's lesson, applied a fourth time). Her own
+    // `booking_page_locale` (D-72's lesson, applied a fourth time). Her own
     // UI locale would put a Spanish subject line in front of the English
     // speakers the platform's first teacher actually sells to.
     replySubject: getPublicFunnelT(teacher.bookingPageLocale)("web.dashboard.leads.replySubject"),

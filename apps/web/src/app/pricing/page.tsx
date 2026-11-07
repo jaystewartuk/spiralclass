@@ -152,7 +152,7 @@ export default async function PricingPage() {
         </Card>
       </div>
 
-      {/* D-152. The plan price above is not the whole cost of running her
+      {/* D-143. The plan price above is not the whole cost of running her
           business, and under direct charges (D-143) she meets Stripe's fee on
           her OWN Stripe account without us ever showing it to her. Saying so
           here, next to the prices, is the only place the two costs can be told

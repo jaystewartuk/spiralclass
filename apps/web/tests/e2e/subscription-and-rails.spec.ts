@@ -40,10 +40,10 @@ test.describe("payment rails (public checkout)", () => {
   test("teacher with no rail is not publicly listed", async ({ page }) => {
     test.setTimeout(120_000);
     // Brand-new teacher mid-trial who hasn't connected a payment rail yet.
-    // isPubliclyListed() (D-104) requires hasPayoutMethod, so a no-rail
+    // isPubliclyListed() requires hasPayoutMethod, so a no-rail
     // teacher's public page renders Next's not-found UI rather than the old
     // "no online payment" notice — that notice-based behavior was removed by
-    // the D-104 activation-model gate; there is no in-between "listed but
+    // the Marketplace Ready listing gate; there is no in-between "listed but
     // can't pay" state anymore. (The response status is still 200 here —
     // this build doesn't propagate notFound() to a real 404 status — so the
     // check is content-based, not status-based.)

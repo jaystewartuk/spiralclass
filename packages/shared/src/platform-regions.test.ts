@@ -18,7 +18,7 @@ describe("currencyForRegion", () => {
     expect(currencyForRegion(null)).toBe("GBP");
     expect(currencyForRegion(undefined)).toBe("GBP");
     expect(currencyForRegion("")).toBe("GBP");
-    // A legacy stored value from before the D-99 GB rename (existing DB rows
+    // A legacy stored value from before the D-153 GB rename (existing DB rows
     // are backfilled by migration, but this guards the pre-migration instant
     // and any row a stray write recreates) also falls back safely.
     expect(currencyForRegion("MX")).toBe("GBP");

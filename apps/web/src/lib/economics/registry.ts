@@ -1,6 +1,6 @@
-// Financial Intelligence estimate layer (D-86, S3) — the Integration
+// Financial Intelligence estimate layer (slice S3) — the Integration
 // registry read side. Fetches rows and Zod-parses each `pricingModel` JSON
-// column at the read boundary (fail-soft per the D-86 risk note: an
+// column at the read boundary (fail-soft by design: an
 // unparseable model degrades to `pricingModel: null` — estimate.ts turns
 // that into £0 + a warning badge — rather than 500-ing the whole dashboard).
 

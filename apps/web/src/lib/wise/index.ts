@@ -2,7 +2,7 @@
 //
 // Only the parts that are genuinely about Wise live here. The payment
 // reference moved to lib/payments/reference.ts and the readiness/pricing
-// gates to lib/payments/instruments.ts when D-113 made the manual rail
+// gates to lib/payments/instruments.ts when D-145 made the manual rail
 // generic — Wise is one instrument now, not the rail.
 //
 // Wise's public API does not expose a "create payment link" endpoint as of
@@ -16,7 +16,7 @@
 //     handles. If a teacher's handle stops working, the page still renders
 //     with the bare handle and the student picks the amount manually.
 //   * `buildWisePayUrl` accepts the payment's own currency (Teacher.pricingCurrency,
-//     D-64) — always pass it explicitly; the "MXN" default only exists for the
+//     D-153) — always pass it explicitly; the "MXN" default only exists for the
 //     shouldn't-happen case of an unset value.
 
 import { minorUnitsToMajor, currencyExponent } from "@spiralclass/shared";

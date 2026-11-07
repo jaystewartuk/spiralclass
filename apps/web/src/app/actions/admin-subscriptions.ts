@@ -76,7 +76,7 @@ export async function markSubscriptionComped(
 // (`provider` + `manualPaymentRef`), so automating it would add a reconciler
 // and change no schema — which is why nothing is stubbed out in advance here.
 // Adding the automated half is its own decision, and this repository does not
-// carry forward-looking work (D-110).
+// carry forward-looking work (D-164).
 const manualPaidSchema = z.object({
   teacherId: z.string().uuid(),
   plan: z.enum(["monthly", "annual", "founding"]),

@@ -2,9 +2,9 @@ import { describe, expect, it, vi } from "vitest";
 import type { LocaleDefinition } from "./locale-registry";
 
 // A locale lands with `launched: false` while its catalog is written and read
-// by a native speaker (D-81), and before its legal translations exist (D-196).
-// Until it is flipped it must reach no reader who did not go looking, and no
-// search engine (D-193). Every locale shipped today is launched, so this adds
+// by a native speaker, and before its legal translations exist (D-72). Until it
+// is flipped it must reach no reader who did not go looking, and no search
+// engine. Every locale shipped today is launched, so this adds
 // an unlaunched German row to the registry and checks each reader-facing path
 // leaves it out while stored values still resolve.
 

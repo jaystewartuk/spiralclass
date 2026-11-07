@@ -34,7 +34,7 @@ export function PostHogProvider({ children }: { children: React.ReactNode }) {
     // /ingest → the regional cloud). NEXT_PUBLIC_POSTHOG_HOST is an optional
     // escape hatch to point the client straight at PostHog (e.g. debugging the
     // proxy). ui_host is the regional PostHog app host for outbound links —
-    // region is NEXT_PUBLIC_POSTHOG_REGION (default US); see D-48.
+    // region is NEXT_PUBLIC_POSTHOG_REGION (default US); see lib/analytics/posthog-region.ts.
     const apiHost = process.env.NEXT_PUBLIC_POSTHOG_HOST || "/ingest";
     initBrowserAnalytics({ key, apiHost, uiHost: posthogRegionHosts().ui });
     return null;

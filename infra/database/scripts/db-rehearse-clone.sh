@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# D-49 layer 3 (data) — rehearse a region clone against a THROWAWAY target, so
+# D-70 layer 3 (data) — rehearse a region clone against a THROWAWAY target, so
 # the reproducible move is actually trusted before it matters. Spins an
 # ephemeral Postgres, clones the source into it (schema+data), verifies parity
 # (row count + content checksum), and tears the target down. Read-only w.r.t.
@@ -13,7 +13,7 @@
 #   - default: a local Docker `postgres:<major>` container (major matched to the
 #     source), on REHEARSE_PORT (default 55432), auto-removed on exit.
 #   - REHEARSE_TARGET_URL=<url>: use this already-empty database instead of
-#     Docker (e.g. a Supabase/Neon branch — D-49 calls out branching as ideal
+#     Docker (e.g. a Supabase/Neon branch — D-70 calls out branching as ideal
 #     for cheap rehearsal). Not dropped, only cloned into + verified.
 set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"

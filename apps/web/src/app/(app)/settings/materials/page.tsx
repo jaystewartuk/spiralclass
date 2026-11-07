@@ -5,7 +5,7 @@ import { requireTeacher } from "@/lib/auth";
 import { getPreferredLocale, getT } from "@/lib/i18n";
 import { MaterialStyleForm } from "./material-style-form";
 
-// Teacher-facing "AI material style" settings (D-78, D-80). A dedicated page
+// Teacher-facing "AI material style" settings (D-17). A dedicated page
 // reached from the Materials hub, where the teacher tunes how the AI writes
 // every generated material: tone/register, learner age, vocabulary difficulty,
 // target-language variety, and a free-text note. All account-level: read
@@ -22,7 +22,7 @@ export default async function MaterialStyleSettingsPage() {
     learnerAge: (teacher.materialLearnerAge as MaterialStyleSettings["learnerAge"]) ?? null,
     languageVariety: teacher.materialLanguageVariety,
     customInstructions: teacher.materialCustomInstructions,
-    // Vocabulary difficulty (D-80). It reached this page with the redesign;
+    // Vocabulary difficulty (D-17). It reached this page with the redesign;
     // before that it was a dial no teacher could actually reach.
     vocabulary: (teacher.materialVocabulary as MaterialStyleSettings["vocabulary"]) ?? null,
   };

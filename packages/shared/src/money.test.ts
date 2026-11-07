@@ -144,7 +144,7 @@ describe("formatMinorUnits", () => {
 
   it("defaults to MXN when no currency is passed", () => {
     // MXN is the curated list's DEFAULT, not its content — the product prices
-    // in about forty currencies (D-64). The default exists so the call sites
+    // in about forty currencies (D-153). The default exists so the call sites
     // that predate multi-currency keep their exact output; it is not a claim
     // that there is one currency, and a new call site should pass the row's own.
     expect(formatMinorUnits(150_000)).toBe(formatMinorUnits(150_000, "MXN"));
@@ -162,7 +162,7 @@ describe("formatMinorUnits", () => {
   });
 
   it("never repeats the currency code, for any currency a teacher can price in", () => {
-    // The bug class, guarded across the whole curated list (D-64) rather than
+    // The bug class, guarded across the whole curated list (D-153) rather than
     // the handful of codes spelled out above — a currency added to that list
     // without a CLDR narrow symbol must still come out with one code.
     for (const code of PRICING_CURRENCIES) {
@@ -205,9 +205,9 @@ describe("formatMinorUnits", () => {
   });
 });
 
-// D-197: the number follows the reader, the currency never does.
+// D-153: the number follows the reader, the currency never does.
 describe("formatMinorUnits in the reader's number format", () => {
-  // The measurement D-197 was decided on: Spanish and English readers see
+  // The measurement D-153 was decided on: Spanish and English readers see
   // exactly what everyone saw under the old en-US formatter.
   it.each([
     [150_000, "MXN"],

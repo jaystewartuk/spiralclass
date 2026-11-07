@@ -208,7 +208,7 @@ describe("verifySignInCodeAction", () => {
     expect(finalizeSignIn).toHaveBeenCalledWith("/my-classes/123", {}, "sign-in");
   });
 
-  it("defaults intent to sign-in when the field is missing (D-56)", async () => {
+  it("defaults intent to sign-in when the field is missing (D-40)", async () => {
     try {
       await verifySignInCodeAction(undefined, form({ email: "a@b.com", code: "123456" }));
     } catch {

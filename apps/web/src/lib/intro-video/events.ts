@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { trackServerEvent } from "@/lib/analytics/posthog";
 
-// Server-side intro-video analytics (D-73), owned here so no caller can drift
+// Server-side intro-video analytics, owned here so no caller can drift
 // on property names or shapes — the funnel is only meaningful if every
 // `surface` stamps otherwise-identical events.
 //

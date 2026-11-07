@@ -7,7 +7,7 @@ import { describeIntegration, getTestPrisma } from "../_setup/test-db";
  * The squashed history in `prisma/migrations/` is two files: a baseline
  * generated from `schema.prisma`, and `20260906120100_database_invariants` —
  * the partial indexes, CHECK constraints, exclusion constraints, list-column
- * NOT NULLs and triggers Prisma's schema language cannot express (D-168).
+ * NOT NULLs and triggers Prisma's schema language cannot express (D-178).
  *
  * The migration-drift check in `scripts/ci/integration.sh` diffs MODELS, so it
  * is blind to every object below: drop the whole second migration and it still
@@ -27,7 +27,7 @@ import { describeIntegration, getTestPrisma } from "../_setup/test-db";
  * cost, and it is the intended one — an invariant nobody listed is an
  * invariant nobody notices going missing.
  */
-describeIntegration("database invariants (D-168)", () => {
+describeIntegration("database invariants (D-178)", () => {
   // ---------------------------------------------------------------------
   // Partial indexes. Six are uniqueness rules scoped to a subset of rows —
   // "at most one PENDING x", not "at most one x" — which is exactly what a

@@ -21,8 +21,8 @@ source "${INFISICAL_DIR}/infisical.sh"
 
 # ⚠️ THE PRODUCTION APP IS NOT ON THIS BOX, so the webhook leaves it.
 #
-# The production web app stays on Fly and production's database stays on Neon
-# (D-150's second addendum, 2026-09-04); Oracle carries LiveKit, preview and
+# The production web app is on Cloud Run and production's database stays on
+# Neon (D-184; off this box since 2026-09-04); Oracle carries LiveKit, preview and
 # preview's Postgres. So livekit-server calls the app out through Cloudflare,
 # which is the path that broke on 2026-08-30 — and the important part of that
 # outage is WHAT caused it. The D-138 rename swept 934 files in this
@@ -132,8 +132,8 @@ cpu_cost:
   #
   # It means egress reserves 2 of this box's 2 OCPUs for one composite. That
   # is egress refusing to run two at once, which on this machine is correct:
-  # D-131 records it wanting 4 OCPUs, and one 51-minute class produced an
-  # 846 MB file and dropped 2,586 frames before D-135 made recordings
+  # LiveKit's egress guidance wants 4 OCPUs, and one 51-minute class produced an
+  # 846 MB file and dropped 2,586 frames before D-16 made recordings
   # audio-only.
   room_composite_cpu_cost: 2
 EOF

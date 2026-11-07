@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-// runStripeCheck (D-55, §B/§G automation) must refuse to run when the
+// runStripeCheck (D-25, §B/§G automation) must refuse to run when the
 // selected `env` doesn't match what this deployment actually is — otherwise
 // it silently checks preview data while labeling the report "production" (or
 // vice versa), since the Prisma/Stripe clients it uses always point at

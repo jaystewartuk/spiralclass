@@ -100,7 +100,7 @@ export function matchCredits(credits: WiseCredit[], payments: ReconcilePayment[]
 // A teacher row carrying the id plus the credential columns the client
 // factory needs.
 // One Wise INSTRUMENT plus the teacher it belongs to. Auto-reconcile is an
-// instrument capability, not a teacher one (D-113) — which is precisely why
+// instrument capability, not a teacher one (D-145) — which is precisely why
 // there is no SPEI equivalent of this module and never will be: that rail's
 // retail banks expose no per-teacher statement API.
 type ReconcileTeacher = TeacherWiseCreds & {

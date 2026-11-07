@@ -3,7 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { enqueue } from "@/lib/jobs/enqueue";
 import { scanAndScheduleNextWake } from "@/lib/notifications/reminder-scan";
 
-// The reminder wake chain's third entry point (D-115 addendum, 2026-08-16):
+// The reminder wake chain's third entry point (D-115, 2026-08-16):
 // re-run the reminder scan the moment a booking is created.
 //
 // The gap this closes. `reminder-scan-cron` ticks hourly and serves the tight

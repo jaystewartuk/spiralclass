@@ -7,7 +7,7 @@ import { describe, expect, it } from "vitest";
 // with its inline `$RS` reveal — so the skeleton and the page have to agree
 // about SHAPE, not merely look busy.
 //
-// They stopped agreeing. D-144 rewrote the buy page into one narrow column
+// They stopped agreeing. The 2026-08-30 rewrite put the buy page into one narrow column
 // (`mx-auto max-w-lg`) and left this skeleton on the old two-column container
 // (`lg:max-w-4xl`) listing package rows the page no longer renders. Every load
 // painted the abandoned design for a beat and then jumped, and production logs

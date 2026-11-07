@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 import type { PrismaClient } from "@prisma/client";
 import { getStudentClassContent } from "@/lib/materials/class-content";
 
-// The student's copy of a class's native written content (D-17/D-69). This
+// The student's copy of a class's native written content (D-17). This
 // resolver exists so the three student surfaces that read that row — the web
 // class page, the web print view and the mobile class-detail endpoint — cannot
 // disagree about how much of it a student is shown. The teacher's own read

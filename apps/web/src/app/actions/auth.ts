@@ -26,7 +26,7 @@ export type ActionState = { error?: string; ok?: boolean; retryAfterMs?: number 
 // brand-new account. Anti-enumeration comes for free — better-auth always
 // attempts the send regardless of whether the email is known.
 //
-// The bare User row is harmless on its own — D-56 gates the APP-LEVEL role
+// The bare User row is harmless on its own — D-40 gates the APP-LEVEL role
 // provisioning (Teacher lazy-create) on an explicit `intent` field the form
 // sends, not on whether the email happens to be unmatched: /sign-in never
 // mints a Teacher for a brand-new identity, only /sign-up does.
@@ -131,7 +131,7 @@ export async function verifySignInCodeAction(
   const nameRaw = formData.get("name");
   const name = typeof nameRaw === "string" && nameRaw.trim() ? nameRaw.trim() : undefined;
   const next = safeNextPath(formData.get("next"));
-  // Which form posted here (D-56) — only "sign-up" may lazy-create a Teacher
+  // Which form posted here (D-40) — only "sign-up" may lazy-create a Teacher
   // for a brand-new identity in finalizeSignIn. Defaults to the safer
   // "sign-in" if the field is missing rather than trusting an unexpected value.
   const intent = formData.get("intent") === "sign-up" ? "sign-up" : "sign-in";

@@ -3,7 +3,7 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 // The non-secret config tooling lives at the repo root (scripts/), not under
-// apps/web — these files feed Fly and local dev alike (D-85).
+// apps/web — these files feed Fly and local dev alike (D-70).
 import {
   ENVIRONMENTS,
   ENV_DIR,
@@ -86,7 +86,7 @@ describe("config/env non-secret files", () => {
   });
 });
 
-describe("preview holds no LiveKit key pair (D-94's 2026-09-16 addendum)", () => {
+describe("preview holds no LiveKit key pair (D-16, since 2026-09-16)", () => {
   // The only LiveKit server is production's, and preview gets no credentials
   // for it. This sees the committed files. Infisical's preview environment is
   // the other place a pair could come from, and nothing in the tree can read
@@ -137,7 +137,7 @@ describe("preview holds no LiveKit key pair (D-94's 2026-09-16 addendum)", () =>
   });
 });
 
-describe("the platform sets only what it owns (D-85)", () => {
+describe("the platform sets only what it owns (D-70)", () => {
   // Fly's [env] table was held to the platform-owned keys, so config could not
   // drift back out of config/env/. Cloud Run's equivalent is the one
   // --update-env-vars the deploy passes: APP_ENV chooses the runtime file and

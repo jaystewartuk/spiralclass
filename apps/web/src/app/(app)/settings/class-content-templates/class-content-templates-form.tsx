@@ -723,7 +723,7 @@ function TemplateRow({
                 onChange={(e) => onChange({ body: e.target.value })}
                 rows={12}
                 spellCheck={false}
-                className="min-h-48 font-mono text-sm leading-relaxed"
+                className="min-h-48 font-mono leading-relaxed lg:text-sm"
                 placeholder={t("classContentTemplates.editor.bodyPlaceholder")}
                 invalid={bodyInvalid}
                 aria-describedby={bodyInvalid ? `${errorId} ${helpId}` : helpId}

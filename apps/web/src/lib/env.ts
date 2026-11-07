@@ -13,7 +13,7 @@ const blankAsAbsent = <T extends z.ZodTypeAny>(schema: T) =>
 const serverSchema = z.object({
   DATABASE_URL: z.string().url(),
   DIRECT_URL: z.string().url(),
-  // (Supabase is fully retired — D-89 decommission. The database is Neon and
+  // (Supabase is fully retired — D-70 decommission. The database is Neon and
   // object storage is Cloudflare R2, see lib/storage/provider.ts. The
   // SUPABASE_* / NEXT_PUBLIC_SUPABASE_* vars and the Storage rollback provider
   // were removed once the soak completed.)
@@ -152,9 +152,9 @@ const serverSchema = z.object({
   // set it wins over ElevenLabs; when neither is set the podcast action is
   // hidden/blocked (never a page break). VOICE/LANGUAGE_CODE override the
   // per-locale defaults resolved in google-tts.ts.
-  // Gemini image generation — the social-preview image rail (D-123), served
+  // Gemini image generation — the social-preview image rail (D-125), served
   // through VERTEX AI rather than the public Generative Language API (AI
-  // Studio). That switch (D-127) is entirely about billing, not the model:
+  // Studio). That switch (D-125) is entirely about billing, not the model:
   // AI Studio's API-key surface gates every call on a separate "Prepay"
   // balance with no postpaid option, while Vertex bills the SAME model
   // through ordinary Cloud Billing — the account already used for every
@@ -241,7 +241,7 @@ const serverSchema = z.object({
   // `mailto:` or https URL the push service can use to contact us about a
   // misbehaving application server. Required by the VAPID spec.
   VAPID_SUBJECT: blankAsAbsent(z.string().min(1).optional()),
-  // Lesson-insights transcription (Phase B, D-19). All optional and read
+  // Lesson-insights transcription (Phase B, D-185). All optional and read
   // straight from process.env by the transcription layer (so availability never
   // depends on the whole schema validating); declared here for documentation.
   // DEEPGRAM_API_KEY / ASSEMBLYAI_API_KEY pick the ASR vendor (only Deepgram has
@@ -251,7 +251,7 @@ const serverSchema = z.object({
   DEEPGRAM_API_KEY: blankAsAbsent(z.string().min(1).optional()),
   ASSEMBLYAI_API_KEY: blankAsAbsent(z.string().min(1).optional()),
   LESSON_INSIGHTS_TRANSCRIPTION_ENABLED: blankAsAbsent(z.string().min(1).optional()),
-  // Live in-class captions (D-27, D-185). Speech is recognised in the
+  // Live in-class captions (D-185). Speech is recognised in the
   // participants' browsers; each finished utterance is translated on the device
   // where the browser can, and otherwise by POST /api/captions/translate through
   // Google Cloud Translation with GOOGLE_TRANSLATE_API_KEY — an API key
@@ -266,13 +266,13 @@ const serverSchema = z.object({
   // start is refused until it is on AND egress storage is configured
   // (LIVEKIT_EGRESS_S3_*; lib/video/recording.ts reads this straight from
   // process.env). Recording a live lesson carries the same consent weight as
-  // captioning it (D-21/D-22), hence a flag rather than "on because storage exists".
+  // captioning it (D-22), hence a flag rather than "on because storage exists".
   CLASS_RECORDING_ENABLED: blankAsAbsent(z.string().min(1).optional()),
-  // Lesson-insights pronunciation (Phase D, D-19). Azure AI Speech scores the
+  // Lesson-insights pronunciation (Phase D, D-185). Azure AI Speech scores the
   // student audio inside the B pipeline; same dormant-until-configured pattern,
   // read straight from process.env. AZURE_SPEECH_KEY/REGION select the vendor;
   // LESSON_INSIGHTS_PRONUNCIATION_ENABLED is the kill-switch. NB this sends voice
-  // to a SECOND vendor — confirm the D-21 legal coverage extends to it first.
+  // to a SECOND vendor — confirm the D-22 legal coverage extends to it first.
   AZURE_SPEECH_KEY: blankAsAbsent(z.string().min(1).optional()),
   AZURE_SPEECH_REGION: blankAsAbsent(z.string().min(1).optional()),
   LESSON_INSIGHTS_PRONUNCIATION_ENABLED: blankAsAbsent(z.string().min(1).optional()),
@@ -352,7 +352,7 @@ const serverSchema = z.object({
   FIELD_ENCRYPTION_REQUIRED: blankAsAbsent(z.string().min(1).optional()),
   // Wise automated reconciliation (poll-wise-statements cron). The API
   // credentials are PER-TEACHER (stored encrypted on the Teacher row), and so
-  // is the balance currency to reconcile (Teacher.pricingCurrency, D-64) — this
+  // is the balance currency to reconcile (Teacher.pricingCurrency, D-153) — this
   // is the only platform-wide knob left, optional:
   //   * WISE_API_BASE: override for sandbox
   //     (https://api.sandbox.transferwise.tech). Defaults to production.
@@ -390,7 +390,7 @@ const clientSchema = z.object({
   NEXT_PUBLIC_POSTHOG_HOST: blankAsAbsent(z.string().url().optional()),
   // Which PostHog Cloud region the clients point at (reverse-proxy
   // destinations + ui_host). Default US; `eu` once the EU project exists.
-  // See D-48 — the project itself is dashboard-pinned, so this only aims the
+  // The project itself is dashboard-pinned, so this only aims the
   // clients, it does not move data.
   NEXT_PUBLIC_POSTHOG_REGION: blankAsAbsent(z.enum(["us", "eu"]).optional()),
   // Public (pk_live_*/pk_test_*) — safe to expose to the browser, loaded by
@@ -632,7 +632,7 @@ export function hasGoogleTtsCreds(): boolean {
   return Boolean(googleTtsApiKey());
 }
 
-// --- Gemini image generation (social previews, D-123/D-127) -----------------
+// --- Gemini image generation (social previews, D-125) -------------------------
 
 // Same de-quoting defence as anthropicApiKey(): a value pasted into a
 // secrets manager WITH its surrounding quotes otherwise reaches Google
@@ -650,7 +650,7 @@ function dequote(raw: string): string {
  * the off-GCP path (on Cloud Run the runtime identity needs no key; see
  * runsOnCloudRun()). `undefined` when unset, malformed base64, or the decoded
  * JSON is missing either field — any of which must degrade to "no key", never
- * a boot-time crash, per the same D-114 two-condition shape every other AI
+ * a boot-time crash, per the same D-185 two-condition shape every other AI
  * capability here uses. */
 export function geminiVertexServiceAccount():
   { clientEmail: string; privateKey: string } | undefined {
@@ -705,14 +705,14 @@ export function hasGeminiImageCreds(): boolean {
 // or newer model is an env change, not a deploy. Defaults to the Flash image
 // tier: it is the cheapest credible quality for this job, and the axis the
 // pricier tiers win on (rendering text INSIDE the image) is one we design away
-// entirely — SpiralClass renders every character itself (D-123).
+// entirely — SpiralClass renders every character itself (D-125).
 export function geminiImageModel(): string {
   return serverEnv().GEMINI_IMAGE_MODEL ?? "gemini-3.1-flash-image";
 }
 
 // The single gate the social-preview UI and the generate action read.
 //
-// The two-condition shape every other AI capability here uses (D-114): a
+// The two-condition shape every other AI capability here uses (D-185): a
 // vendor is configured AND an explicit enablement flag is on. A credential
 // appearing in the secrets manager must not, by itself, switch on a surface
 // that spends money per click and puts model output on a teacher's public
@@ -743,7 +743,7 @@ export function hasTtsCreds(): boolean {
   return hasGoogleTtsCreds() || hasElevenLabsCreds();
 }
 
-// The single gate the podcast UI and the request action read (D-114).
+// The single gate the podcast UI and the request action read (D-185).
 //
 // Same two-condition shape as every other AI capability here — a vendor is
 // configured AND an explicit enablement flag is on — for the same reason

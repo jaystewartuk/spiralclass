@@ -35,7 +35,7 @@ function formatDuration(sinceMs: number): string {
 
 // A room's `name` is the booking id (see lib/video/provider.ts's
 // classCallRoom) — shorten it so the table doesn't blow out to full-width
-// UUIDs when there's only ever 1-2 rooms live at once (1:1 lessons, D-88).
+// UUIDs when there's only ever 1-2 rooms live at once (1:1 lessons, D-17).
 function shortRoomLabel(name: string): string {
   const bookingId = name.replace(/^class-/, "");
   return bookingId.length > 12 ? `${bookingId.slice(0, 8)}…` : bookingId;

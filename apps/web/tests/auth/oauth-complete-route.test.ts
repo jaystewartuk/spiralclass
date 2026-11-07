@@ -86,7 +86,7 @@ describe("GET /auth/complete", () => {
     );
   });
 
-  it("passes intent: sign-up through from the GoogleSignInButton's callbackURL query (D-56)", async () => {
+  it("passes intent: sign-up through from the GoogleSignInButton's callbackURL query (D-40)", async () => {
     getSession.mockResolvedValue({ user: { id: "u1", email: "mira@example.com" } });
 
     await GET(req("/auth/complete?intent=sign-up"));

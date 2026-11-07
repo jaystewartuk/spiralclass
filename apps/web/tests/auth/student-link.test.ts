@@ -6,7 +6,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 //   * else the OLDEST unlinked rostered row with that email is linked;
 //   * a concurrent first sign-in that loses the unique-constraint race
 //     (P2002) re-reads and returns the winner's row;
-//   * Teacher and Student are mutually exclusive per auth identity (D-38):
+//   * Teacher and Student are mutually exclusive per auth identity (D-40):
 //     if this auth user already owns a Teacher row, refuse to link instead
 //     of silently merging the two identities.
 
@@ -147,7 +147,7 @@ describe("resolveLinkedStudent", () => {
     });
   });
 
-  it("refuses to link when this auth identity already owns a Teacher row (D-38)", async () => {
+  it("refuses to link when this auth identity already owns a Teacher row (D-40)", async () => {
     state.rows = [row({ id: "s1", email: "mira@example.com" })];
     state.teacherIds = ["u1"];
     expect(await resolveLinkedStudent({ id: "u1", email: "mira@example.com" })).toEqual({

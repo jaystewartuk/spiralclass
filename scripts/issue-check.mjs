@@ -2,7 +2,7 @@
 /**
  * Check an issue draft before it is published, and audit the ones already open.
  *
- * WHY THIS EXISTS. D-172 moved open work into this repository's Issues and
+ * WHY THIS EXISTS. D-164 moved open work into this repository's Issues and
  * recorded, as an unresolved risk, that "nothing enforces the issue shape … a
  * drift check is possible and is not built". The /issue skill is a checklist;
  * this is the part of the checklist a machine does better than a model:
@@ -37,7 +37,7 @@ import { fileURLToPath } from "node:url";
 
 import { findIdentifiers, findPeople, findPersonalData, findSecrets } from "./check-leaks.mjs";
 
-/** The priorities D-172's weekly triage sets. */
+/** The priorities D-164's weekly triage sets. */
 export const PRIORITY_LABELS = ["p1", "p2", "p3"];
 
 /** Labels that say what kind of work an issue is. */
@@ -271,7 +271,7 @@ if (fileURLToPath(import.meta.url) === resolve(process.argv[1] ?? "")) {
       if (result.errors.length > 0) failing += 1;
       printFindings(`#${issue.number} ${issue.title}`, result);
     }
-    console.log(`\nissue-check --audit: ${open.length} open, ${failing} not in the D-172 shape.`);
+    console.log(`\nissue-check --audit: ${open.length} open, ${failing} not in the D-164 shape.`);
     process.exit(failing > 0 ? 1 : 0);
   }
 

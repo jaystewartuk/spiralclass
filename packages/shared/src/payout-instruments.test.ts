@@ -22,7 +22,7 @@ const wise = (over: Partial<InstrumentReadiness> = {}): InstrumentReadiness => (
 
 describe("kind union", () => {
   it("is closed to wise alone since D-145", () => {
-    // D-113 shipped three kinds and D-124 folded them to two. `bank_account`
+    // The 2026-08-23 rail had two kinds, `wise` and `bank_account`. `bank_account`
     // is gone because Stripe now presents the teacher's own country's bank
     // transfer with automatic reconciliation, which a self-attested one never
     // could — it had become the strictly worse copy, offered beside it.

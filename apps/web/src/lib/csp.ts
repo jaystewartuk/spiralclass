@@ -78,7 +78,7 @@ export function buildCsp(nonce: string): string {
     // this — it's for the standalone HTML routes.
     "style-src": ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
     "img-src": ["'self'", "data:", "blob:", "https:"],
-    // <video> playback (D-73): the teacher intro video is served from the public
+    // <video> playback: the teacher intro video is served from the public
     // R2 bucket (an https host), and the booking-page editor previews an
     // in-browser recording from a `blob:` object URL before upload. Mirrors the
     // broad `https:` in img-src (the R2 public host varies per environment) so a
@@ -108,13 +108,13 @@ export function buildCsp(nonce: string): string {
       // (WebRTC media itself is ICE/STUN/TURN, not governed by connect-src.)
       "https://*.livekit.cloud",
       "wss://*.livekit.cloud",
-      // Self-hosted LiveKit: production's video server since D-187
-      // (infra/gcp-livekit/). LiveKit Cloud above is the rollback (D-182), so
+      // Self-hosted LiveKit: production's video server since D-16
+      // (infra/gcp-livekit/). LiveKit Cloud above is the rollback (D-16), so
       // both stay listed rather than making this env-conditional.
       "https://livekit.spiralclass.com",
       "wss://livekit.spiralclass.com",
       // Deepgram streaming speech-to-text, for live captions' phone-to-phone
-      // fallback (D-185's addendum): when no browser in a class can
+      // fallback (D-185): when no browser in a class can
       // recognise speech, the speaker's own browser opens this socket and
       // streams its microphone, authenticated by a short-lived token from
       // /api/captions/stt-token. Only the wss host — every other Deepgram
@@ -122,7 +122,7 @@ export function buildCsp(nonce: string): string {
       // connect-src governs. Without it the socket is silently blocked under
       // enforcement and two phones get no captions.
       "wss://api.deepgram.com",
-      // Intro-video upload (D-73): the booking-page editor uploads the video
+      // Intro-video upload: the booking-page editor uploads the video
       // straight to R2 via a presigned PUT (bypassing the 25 MB Server-Action
       // body limit), so the browser opens a direct connection to the R2 S3 API
       // host. The wildcard covers the per-account subdomain.

@@ -2,7 +2,7 @@ import type { IntroCoachFeedback, IntroVideoAnalysisStatus } from "@spiralclass/
 import { prisma } from "@/lib/prisma";
 import { introVideoTranscriptText } from "@/lib/seo/jsonld";
 
-// Load a teacher's AI coach feedback (D-73, Layer 3) for the booking-page editor
+// Load a teacher's AI coach feedback (Layer 3) for the booking-page editor
 // — null until it's been generated (Pro teachers only, async after upload).
 // Teacher-only; never surfaced on the public /b/<slug> page.
 export async function loadIntroVideoCoach(teacherId: string): Promise<IntroCoachFeedback | null> {

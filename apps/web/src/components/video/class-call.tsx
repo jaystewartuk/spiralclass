@@ -47,6 +47,7 @@ import { guardAudioPlaybackResume } from "@/lib/video/audio-playback";
 import { startCallRecording, stopCallRecording } from "@/app/actions/call-recording";
 import { useCaptionFeed, useRoomCaptionsEnabled } from "@/lib/captions/use-caption-feed";
 import { useBrowserCaptions } from "@/lib/captions/use-browser-captions";
+import { browserBrands } from "@/lib/captions/recognition-environment";
 import { captionsConsentPrompt } from "@/lib/captions/consent-prompt";
 import { useRemoteParticipant } from "@/lib/video/use-remote-participant";
 import { useCaptionPreferences } from "@/lib/captions/use-caption-preferences";
@@ -176,7 +177,7 @@ export function ClassCall({
   // Teacher-only: shows a Record/Stop control. The recording itself runs on the
   // server (LiveKit Egress via the call-recording actions); this just toggles it.
   canRecord?: boolean;
-  // Teacher-only: shows the single Subtitles toggle for the call (D-27 —
+  // Teacher-only: shows the single Subtitles toggle for the call (D-185 —
   // "teacher-toggled" from the start; captions were briefly bidirectional
   // with each side controlling its own independent toggle, which let the two
   // flap and race against each other). The student never gets this control;
@@ -194,11 +195,11 @@ export function ClassCall({
   // Never set on the student call page — students keep seeing only class
   // materials (call-library-browser.tsx's endpoints are teacher-gated too).
   canBrowseLibrary?: boolean;
-  // Nudge the other party (D-75). Present when the caller's page wired a
+  // Nudge the other party (docs/features/live-calls-video.md). Present when the caller's page wired a
   // role-scoped server action; shown as a button in the waiting-room state so a
   // present user can ping a missing counterparty's devices. Absent → no button.
   onNudge?: () => Promise<NudgeResult>;
-  // In-call bookmark (D-97): one tap marks "this moment" for the replay view.
+  // In-call bookmark: one tap marks "this moment" for the replay view.
   // Present only on the teacher's call page (server action bound to the
   // booking); absent → no button.
   onBookmark?: () => Promise<{ ok: true } | { ok: false; reason: string }>;
@@ -269,7 +270,7 @@ export function ClassCall({
   const [recordPending, setRecordPending] = useState(false);
   // Surfaced when a Record/Stop toggle is rejected, so it's never a silent no-op.
   const [recordError, setRecordError] = useState<string | null>(null);
-  // In-call bookmark (D-97) — `bookmarked` flashes true briefly after a
+  // In-call bookmark — `bookmarked` flashes true briefly after a
   // successful tap as the only feedback; `bookmarkPending` debounces repeats.
   const [bookmarked, setBookmarked] = useState(false);
   const [bookmarkPending, setBookmarkPending] = useState(false);
@@ -287,7 +288,7 @@ export function ClassCall({
   // one thing that fixes it — a tap — was never asked for, and the failure
   // reached us only as an unhandled AbortError (lib/video/audio-playback.ts).
   const [audioBlocked, setAudioBlocked] = useState(false);
-  // Teacher's subtitles toggle (D-27). Ephemeral like the mic/record controls —
+  // Teacher's subtitles toggle (D-185). Ephemeral like the mic/record controls —
   // turning it on starts captioning her speech for the student; off clears it.
   const [captionsOn, setCaptionsOn] = useState(false);
   // First-time captions privacy notice — shown as an in-video card only until
@@ -312,7 +313,7 @@ export function ClassCall({
   // fills the main area in place of the remote video (the self-view + controls
   // stay). Only `content` materials land here; file/link open externally.
   const [activeMaterial, setActiveMaterial] = useState<CallMaterial | null>(null);
-  // Nudge button state (D-75). "sent"/"cooldown" disable the button for a beat
+  // Nudge button state. "sent"/"cooldown" disable the button for a beat
   // so a present user can't spam the missing party's devices; it re-enables so a
   // genuinely-still-waiting user can nudge again.
   const [nudgeState, setNudgeState] = useState<"idle" | "sending" | "sent" | "cooldown" | "error">(
@@ -925,7 +926,7 @@ export function ClassCall({
   // either publishes the line to the other participant or feeds it straight
   // into this viewer's own caption feed. The teacher's toggle (captionsOn,
   // below) sets the one participant attribute both browsers read as the
-  // room's switch (D-27); the student's instance never sets it.
+  // room's switch (D-185); the student's instance never sets it.
   const captions = useCaptionFeed(room);
   // The room's switch as seen from EITHER side — the teacher's own toggle
   // state on her screen, and the same flag read off her participant
@@ -939,6 +940,11 @@ export function ClassCall({
     role,
     teacherCaptionsOn: captionsOn,
     showLocal: captions.addLine,
+    onRecognitionUnusable: (reason) =>
+      posthog?.capture(
+        "call_captions_recognition_unusable",
+        analyticsProps({ reason, browserBrands: browserBrands(window) }),
+      ),
   });
   // Announced here rather than by the top-bar icon, which unmounts while the
   // call is minimised (learning-notes-indicator.tsx).
@@ -1464,7 +1470,7 @@ export function ClassCall({
     }
   }, [bookingId, recording, recordPending, t, posthog, analyticsProps]);
 
-  // The room's one captions switch (D-27: teacher-toggled). Only rendered for
+  // The room's one captions switch (D-185: teacher-toggled). Only rendered for
   // the teacher (see canCaption's doc comment); it sets the participant
   // attribute both browsers read before recognising EITHER side's speech
   // (D-185), and the student's speech still separately requires her consent
@@ -1522,7 +1528,7 @@ export function ClassCall({
     setShowCaptionsNotice(false);
   }, []);
 
-  // One-tap bookmark (D-97) — not a toggle: each press adds another marker.
+  // One-tap bookmark — not a toggle: each press adds another marker.
   // `bookmarked` flashes briefly as the only feedback (there's nothing to
   // undo/reflect, unlike Record).
   const addBookmark = useCallback(async () => {
@@ -1852,8 +1858,8 @@ export function ClassCall({
               startAt={scheduledStartAt}
               endAt={scheduledEndAt}
               // The recognised lines are being kept as this class's
-              // transcript for lesson insights (D-189). Shown to both
-              // people: a capture with no visible indicator is what D-21
+              // transcript for lesson insights (D-185). Shown to both
+              // people: a capture with no visible indicator is what D-22
               // forbids.
               indicators={browserCaptions.transcriptKept && <LearningNotesIndicator />}
               controls={
@@ -2468,7 +2474,7 @@ export function ClassCall({
                   />
                   {/* THE TEACHER'S control is the room's switch: it decides
                   whether anyone's speech is transcribed at all, which is a
-                  privacy and cost decision and rightly hers alone (D-27). */}
+                  privacy and cost decision and rightly hers alone (D-185). */}
                   {canCaption && bookingId && (
                     <CallButton
                       onClick={toggleCaptions}

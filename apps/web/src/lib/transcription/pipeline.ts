@@ -9,7 +9,7 @@ import type { LessonAudioStore } from "./lesson-audio-store";
 import type { Speaker, SpeakerUtterance } from "./types";
 import { scoreAndStorePronunciation as defaultScorePronunciation } from "@/lib/pronunciation/score";
 
-// Phase B pipeline core (lesson-insights Phase B, D-19). One run per
+// Phase B pipeline core (lesson-insights Phase B, D-185). One run per
 // `lesson.audio.ready` event: read the per-speaker audio from R2, transcribe it,
 // merge it into the booking's transcript, mark the file transcribed, and —
 // when every file is in — fire `lesson.transcript.ready` for Phase C. Then
@@ -170,7 +170,7 @@ export async function processLessonAudioReady(
     });
   }
 
-  // 6. Derive-then-discard, keep-on-opt-in (D-19 item 6): delete the raw audio unless
+  // 6. Derive-then-discard, keep-on-opt-in (D-185): delete the raw audio unless
   //    the teacher opted to retain it for playback.
   const teacher = await prisma.teacher.findUnique({
     where: { id: audio.teacherId },

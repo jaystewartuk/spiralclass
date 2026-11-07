@@ -4,7 +4,7 @@ import { getPreferredLocale, getT } from "@/lib/i18n";
 import { getTeacherFocusCategories, getTeacherFocusTags } from "@/lib/focus-tags";
 import { TagsManager } from "./tags-manager";
 
-// Teacher-editable focus tags + categories (D-20's deferred follow-up;
+// Teacher-editable focus tags + categories (D-17's deferred follow-up;
 // category later became its own manageable taxonomy rather than free text). The
 // seed packs in lib/focus-packs.ts give every teacher a usable "what to work
 // on" picker with zero setup, but they were never meant to be the ceiling —

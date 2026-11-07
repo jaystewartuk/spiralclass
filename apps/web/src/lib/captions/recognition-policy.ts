@@ -96,6 +96,11 @@ export function afterRecognitionEnd(end: RecognitionEnd): RecognitionAction {
 
 export const LOCAL_FAILURES_BEFORE_REMOTE = 2;
 
+// Failures in a row, with not a word heard between them, before this browser
+// stops claiming it can recognise (D-185). The backoff makes five about half
+// a minute, longer than an ordinary network blip.
+export const FAILURES_BEFORE_UNUSABLE = 5;
+
 // Whether an end counts as a failure for the backoff counter. A session that
 // ended because nobody spoke is the normal rhythm of a lesson, not a fault.
 export function isFailure(error: RecognitionErrorCode | null): boolean {

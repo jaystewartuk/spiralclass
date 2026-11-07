@@ -2,11 +2,11 @@
 
 Secrets manager for everything the production app (Cloud Run `web`) needs at
 runtime, **except** the R2 credentials, which stay
-Tofu-owned (`infra/cloudflare-r2/`, D-65) — don't move those here.
+Tofu-owned (`infra/cloudflare-r2/`, D-70) — don't move those here.
 
 It replaced a plaintext `.env.fly.local` that was being pasted into `fly
 secrets set` by hand, back when production ran on Fly. See
-`docs/decisions/D-66.md` for why.
+`docs/decisions/D-70.md` for why.
 
 ## Adding a new script that needs a secret
 
@@ -50,7 +50,7 @@ push lives with the rest of its setup, as `infra/gcp/push-cloudrun-env.sh`.
 ## Account setup (cloud free tier)
 
 1. Sign up at [infisical.com](https://infisical.com) (free tier — unlimited
-   secrets/environments, fine for a solo project; see D-66 for why not
+   secrets/environments, fine for a solo project; see D-70 for why not
    self-hosted).
 2. Create one project: **SpiralClass**.
 3. Repurpose the default `dev`/`staging`/`prod` trio Infisical creates into
@@ -92,8 +92,8 @@ reads them.
 | `CLOUDFLARE_API_TOKEN`            | the `cloudflare` provider                                                                                                                 | account-scoped provider token (`infra/cloudflare`, `infra/cloudflare-r2`)                                                                                                                                                                                                                                                                                                                                                                                                                                        |
 | `AWS_ACCESS_KEY_ID`               | OpenTofu's `s3` state backend                                                                                                             | `agendaprofe-tofu-state` R2 access key id                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
 | `AWS_SECRET_ACCESS_KEY`           | OpenTofu's `s3` state backend                                                                                                             | `agendaprofe-tofu-state` R2 secret                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
-| `TF_VAR_tailscale_authkey_oracle` | hand-copied into the box's `.env`/config during a rebuild (D-139 — was a Tofu `TF_VAR_*` binding until `infra/oracle-runner` was deleted) | Tailscale auth key, from Tailscale admin console → Settings → Keys. **Reusable ON, Ephemeral OFF** (long-lived box, never routinely destroyed — ephemeral would risk Tailscale pruning it after ~30-60min offline, which a slow reboot could exceed). See the rotation runbook (kept privately — see `docs/security.md`)                                                                                                                                                                                         |
-| `TF_VAR_livekit_api_secret`       | hand-copied onto the box (D-139 — was a Tofu `TF_VAR_*` binding; interpolated into `livekit.yaml`/`egress.yaml`)                          | LiveKit API secret — the genuinely sensitive half of the box's key pair (signs/verifies tokens). Must exactly match the app-side `LIVEKIT_API_SECRET` (this same project's `preview`/`production` environments) — see the rotation runbook (kept privately — see `docs/security.md`) for the full rotation coupling. The paired, non-secret key **id** (`LIVEKIT_API_KEY`) is deliberately NOT here — it is read straight from the committed `config/env/production.runtime.env` instead, so the id has one home |
+| `TF_VAR_tailscale_authkey_oracle` | hand-copied into the box's `.env`/config during a rebuild (D-164 — was a Tofu `TF_VAR_*` binding until `infra/oracle-runner` was deleted) | Tailscale auth key, from Tailscale admin console → Settings → Keys. **Reusable ON, Ephemeral OFF** (long-lived box, never routinely destroyed — ephemeral would risk Tailscale pruning it after ~30-60min offline, which a slow reboot could exceed). See the rotation runbook (kept privately — see `docs/security.md`)                                                                                                                                                                                         |
+| `TF_VAR_livekit_api_secret`       | hand-copied onto the box (D-164 — was a Tofu `TF_VAR_*` binding; interpolated into `livekit.yaml`/`egress.yaml`)                          | LiveKit API secret — the genuinely sensitive half of the box's key pair (signs/verifies tokens). Must exactly match the app-side `LIVEKIT_API_SECRET` (this same project's `preview`/`production` environments) — see the rotation runbook (kept privately — see `docs/security.md`) for the full rotation coupling. The paired, non-secret key **id** (`LIVEKIT_API_KEY`) is deliberately NOT here — it is read straight from the committed `config/env/production.runtime.env` instead, so the id has one home |
 
 Every key name in this table must match exactly what its consuming
 provider/SDK expects — `infisical run --env=infra --` injects secrets under
@@ -108,7 +108,7 @@ Shared across the `infra/` modules: `CLOUDFLARE_API_TOKEN` by `cloudflare` +
 per-command with `infisical run --env=infra -- tofu <cmd>` — off argv, out of
 shell history. (`infra/database/supabase`, the one module that used raw
 `SUPABASE_ACCESS_TOKEN` exports instead of this pattern, is retired —
-D-89/Neon migration completed; the module was removed from the repo.)
+D-70/Neon migration completed; the module was removed from the repo.)
 
 - **The `AWS_*` names are load-bearing, not a mislabel.** OpenTofu's
   `backend "s3"` reaches R2 over the S3 API and reads credentials via the AWS
@@ -129,7 +129,7 @@ D-89/Neon migration completed; the module was removed from the repo.)
 Most of the vars below are the _same value_ in preview and production today
 (Resend, Sentry, Inngest, Google OAuth client, etc.) — only a handful
 actually differ per environment (`DATABASE_URL`/`DIRECT_URL`, the Stripe
-keys once production gets its own Stripe account per D-58, `APP_URL`).
+keys once production gets its own Stripe account, `APP_URL`).
 
 Infisical doesn't have automatic environment inheritance, but it does support
 **secret references**: a secret's value can be `${preview.SOME_KEY}`,
@@ -192,7 +192,7 @@ somewhere `env.ts`'s `serverSchema` doesn't cover (e.g. read directly off
 Cross-referenced against `apps/web/src/lib/env.ts`'s `serverSchema` — a
 starting point, not the ground truth. R2 vars
 (`*_R2_*`, `CHAT_AUDIO_R2_*`, `LIVEKIT_EGRESS_S3_*`) are deliberately
-excluded — Tofu-owned, D-65.
+excluded — Tofu-owned, D-70.
 
 ```
 DATABASE_URL
@@ -224,7 +224,7 @@ VAPID_SUBJECT
 
 ### Where to get each value
 
-**Neon** (console.neon.tech — Supabase was decommissioned D-89; see
+**Neon** (console.neon.tech — Supabase was decommissioned D-70; see
 `infra/database/neon/README.md`):
 
 - `DATABASE_URL` — project's Connection Details panel → **Pooled** connection
@@ -300,7 +300,7 @@ vendor's dashboard):
 - `INNGEST_EVENT_KEY` — Manage → Event Keys.
 - `INNGEST_SIGNING_KEY` — Manage → Signing Key.
 
-**Vertex AI (Gemini image generation, D-127)** — **no secret in
+**Vertex AI (Gemini image generation, D-125)** — **no secret in
 production.** Vertex has no bare-API-key auth surface, so every call carries
 an OAuth2 token, and on Cloud Run `lib/ai/google-vertex-auth.ts` gets that
 token from the metadata server for the service's own runtime identity
@@ -317,8 +317,8 @@ live in `config/env/*.runtime.env`, not here.
   runtime identity, which is what made the switch safe to deploy before the
   key was removed — so a copy left in Infisical `production` keeps a
   long-lived key live in the running service for no benefit. If you find one
-  there, it is the pre-2026-09-24 key; D-127's addendum says how it is
-  retired. D-127 also says why Vertex rather than the simpler
+  there, it is the pre-2026-09-24 key; D-125 says how it is
+  retired, and why Vertex rather than the simpler
   `X-Goog-Api-Key` the public Gemini API offers (that surface gates every
   call on a separate Prepay balance a linked Cloud Billing account doesn't
   satisfy).
@@ -350,7 +350,7 @@ server's configured key pair):
 
 **Reclassified out of this list (2026-07-12), same secret-vs-not test as the
 Supabase/Sentry/PostHog move above** — moved to committed config (now
-`config/env/`, D-85): `BETTER_AUTH_URL`,
+`config/env/`, D-70): `BETTER_AUTH_URL`,
 `APP_URL`, `RESEND_FROM` (all just URLs/an email address, no credential
 value), `STRIPE_PRICE_MONTHLY`/`ANNUAL`/`FOUNDING` (Stripe Price IDs — public
 identifiers, not secrets), `WISE_API_BASE` (an API base URL),
@@ -372,12 +372,12 @@ hard cutover switch paired 1:1 with `FIELD_ENCRYPTION_KEY`
 see `docs/security.md` §11.3), so setting it without the matching
 key already live in Infisical hard-fails boot.
 
-> **Where the non-secret values live (D-85).** They sit in
+> **Where the non-secret values live (D-70).** They sit in
 > `config/env/<env>.runtime.env` (runtime) and `config/env/<env>.build.env`
 > (`NEXT_PUBLIC_*` build-args), which every host and local dev load alike. They
 > started out in the Fly configs' `[env]`/`[build.args]` tables, which are
 > gone; the secret-vs-non-secret split this section documents is unchanged.
-> See `config/env/README.md` and `docs/decisions/D-85.md`.
+> See `config/env/README.md` and `docs/decisions/D-70.md`.
 
 **`SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SENTRY_DSN`, `POSTHOG_KEY`,
 `POSTHOG_HOST` deliberately removed from this list — moved to committed
@@ -406,7 +406,7 @@ are real `env.ts` secrets read by `apps/web`.
 > those were ever imported — there is no such cleanup to do. (That same stale
 > note also called Stripe and LiveKit "not set"; their secrets — `STRIPE_*`,
 > `LIVEKIT_API_SECRET` — are in fact present.) The non-secret values now live
-> in `config/env/` (D-85), never in `fly secrets`.
+> in `config/env/` (D-70), never in `fly secrets`.
 >
 > ⚠️ **That correction checked the wrong app, and the conclusion does not
 > hold for production (2026-09-05).** It ran against
@@ -414,7 +414,7 @@ are real `env.ts` secrets read by `apps/web`.
 > both. A live `fly secrets list --app agendaprofe` shows
 > **`SUPABASE_PROD_DIRECT_URL` is set on production** — a direct Postgres
 > connection string for a platform decommissioned by
-> [D-89](../../docs/decisions/D-89.md), sitting on the live app for roughly
+> [D-70](../../docs/decisions/D-70.md), sitting on the live app for roughly
 > seven weeks after the note that said there was nothing to clean up.
 >
 > Nothing reads it and nothing can start reading it:
@@ -450,7 +450,7 @@ uses, which is the worst state for one to be in.
 
 - **`DEEPGRAM_API_KEY` was live on Fly preview** (confirmed 2026-07-17).
   Deepgram backs intro-video coaching, post-class transcription and, since
-  [D-185](../../docs/decisions/D-185.md)'s addendum, live captions'
+  [D-185](../../docs/decisions/D-185.md), live captions'
   phone-to-phone fallback: the server mints short-lived tokens from it with
   `/v1/auth/grant`, which needs a key with Deepgram's **Member** role or
   above. Live captions otherwise run in the browser and need
@@ -488,7 +488,7 @@ Don't pre-populate speculative future config that's neither read by the code
 nor plausibly needed soon — but do add anything `production` holds that this
 list is missing.
 
-**`NEXT_PUBLIC_*` build-time vars — now handled (D-85, was a gap).**
+**`NEXT_PUBLIC_*` build-time vars — now handled (D-70, was a gap).**
 `NEXT_PUBLIC_*` vars are inlined into the client bundle at **Docker build
 time**, not read from the runtime secret — see the comment block in the root
 `Dockerfile`. They all live in `config/env/<env>.build.env` now, and

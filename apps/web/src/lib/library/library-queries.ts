@@ -58,7 +58,7 @@ export function buildLibraryWhere(f: LibraryFilters): Prisma.LibraryMaterialWher
   const where: Prisma.LibraryMaterialWhereInput = {
     teacherId: f.teacherId,
     // Never drop this — the table is shared with private booking-scoped rows
-    // (D-69); this page/endpoint only ever manages the reusable library.
+    // and this page/endpoint only ever manages the reusable library.
     bookingId: null,
     archived: f.archived,
   };

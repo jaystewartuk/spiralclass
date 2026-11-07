@@ -13,9 +13,12 @@ import { useT } from "@/components/locale-provider";
 export function StudentArchiveButton({
   studentId,
   archived,
+  warning = null,
 }: {
   studentId: string;
   archived: boolean;
+  /** What archiving would cost this student, said before she confirms. */
+  warning?: string | null;
 }) {
   const t = useT();
   const [state, formAction, pending] = useActionState<OverrideState, FormData>(
@@ -34,7 +37,9 @@ export function StudentArchiveButton({
       onSubmit={(e) => {
         const message = archived
           ? t("web.dashboard.students.archive.confirmReactivate")
-          : t("web.dashboard.students.archive.confirmArchive");
+          : [t("web.dashboard.students.archive.confirmArchive"), warning]
+              .filter(Boolean)
+              .join("\n\n");
         if (!confirm(message)) e.preventDefault();
       }}
     >

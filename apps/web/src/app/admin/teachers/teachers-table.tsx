@@ -35,7 +35,7 @@ export type TeacherRow = {
   bio: string | null;
   templatesTouchedAt: Date | null;
   availabilityTouchedAt: Date | null;
-  // D-113: the payout rail, plus the Wise auto-reconcile credential that moved
+  // D-145: the payout rail, plus the Wise auto-reconcile credential that moved
   // onto the instrument with it. `schemeId`/`details` were here until D-145
   // dropped the bank_account kind they described.
   payoutInstruments: {
@@ -169,7 +169,7 @@ export function TeachersTable({
       },
       {
         // "Wise API connected" — the auto-reconcile credential, which lives on
-        // the Wise instrument since D-113. Still Wise-specific on purpose:
+        // the Wise instrument since D-145. Still Wise-specific on purpose:
         // SPEI has no statement API to connect to.
         id: "wise",
         accessorFn: (row) => (wiseApiConnected(row) ? 1 : 0),

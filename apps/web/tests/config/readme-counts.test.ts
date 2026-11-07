@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { expectedFor, reconcile } from "../../../../scripts/readme-counts.mjs";
 
-// D-180: the two counts nearly every pull request moves are stated as floors,
+// The two counts nearly every pull request moves are stated as floors,
 // so open branches stop conflicting on one line of README.md and testing.md.
 // These pin the arithmetic and the one new failure mode — an exact count of a
 // floored thing, which the floored pattern cannot see.

@@ -115,6 +115,7 @@ export function AiGenerateFlow({
   const [streamError, setStreamError] = useState<string | null>(null);
   const streamAbort = useRef<AbortController | null>(null);
   const DONE = "";
+  const TOO_LONG = "\u001E";
 
   async function generateStream() {
     streamAbort.current?.abort();
@@ -162,6 +163,10 @@ export function AiGenerateFlow({
           if (text === DONE) {
             completed = true;
             break read;
+          }
+          if (text === TOO_LONG) {
+            setStreamError(t("materials.ai.generateTooLong"));
+            return;
           }
           bodyAcc += text;
           setBody(bodyAcc);

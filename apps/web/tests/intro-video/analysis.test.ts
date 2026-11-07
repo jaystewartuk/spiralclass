@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 // loadIntroVideoAnalysisState feeds the booking-page editor's live
-// processing/success/failure UI (D-73, Layer 3) — richer than
+// processing/success/failure UI (Layer 3) — richer than
 // loadIntroVideoCoach (which only ever returns the feedback, not the
 // pipeline's current status/error). No prior coverage existed for either.
 

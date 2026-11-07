@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  browserBrands,
   browserCanRecognizeDuringCall,
   mediaRecorderCtor,
   recognitionEnvironment,
@@ -92,5 +93,24 @@ describe("webSocketCtor / mediaRecorderCtor", () => {
     expect(mediaRecorderCtor({ MediaRecorder: MR })).toBe(MR);
     expect(webSocketCtor({})).toBeNull();
     expect(mediaRecorderCtor({ MediaRecorder: {} })).toBeNull();
+  });
+});
+
+describe("browserBrands", () => {
+  it("names the browser, without the placeholder brand", () => {
+    expect(
+      browserBrands({
+        navigator: {
+          userAgentData: {
+            brands: [{ brand: "Not?A_Brand" }, { brand: "Chromium" }, { brand: "Brave" }],
+          },
+        },
+      }),
+    ).toEqual(["Chromium", "Brave"]);
+  });
+
+  it("is empty for a browser without Client Hints", () => {
+    expect(browserBrands({ navigator: { userAgent: "Safari" } })).toEqual([]);
+    expect(browserBrands({})).toEqual([]);
   });
 });

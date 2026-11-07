@@ -3,7 +3,7 @@
 // multiline value, so docker/build-push-action (and scripts/cloudrun-deploy.sh) can
 // pass them as --build-arg. Replaces the old scripts/fly-build-args.py, which
 // read fly.<env>.toml's [build.args] — that table moved to
-// config/env/<env>.build.env (D-85), and this reads the new source of truth.
+// config/env/<env>.build.env (D-70), and this reads the new source of truth.
 //
 // Why not re-type the values into the workflow: they are per-environment
 // (preview and production point at different Supabase projects / R2 buckets)

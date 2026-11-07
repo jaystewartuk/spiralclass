@@ -3,7 +3,7 @@
 # apps/web/scripts/seed.ts reads from Infisical — the list, and the reason each
 # value is or is not on it, lives in seed-env.sh — and calls tsx directly,
 # bypassing the `seed:preview` pnpm script's `dotenv -e .env.preview.local`,
-# which needs a file this deliberately never creates. See docs/decisions/D-66.md.
+# which needs a file this deliberately never creates. See docs/decisions/D-70.md.
 #
 # Requires: the Infisical CLI installed and logged in (`infisical login`).
 #

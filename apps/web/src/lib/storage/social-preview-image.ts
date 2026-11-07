@@ -2,7 +2,7 @@ import { getStorageProvider, PUBLIC_VERSIONED_ASSET_CACHE_CONTROL } from "./prov
 import { r2PublicUrl } from "./r2-public-url";
 import { TEACHER_PHOTO_BUCKET } from "./teacher-photo";
 
-// Storage lifecycle for social-preview BACKGROUNDS (D-123).
+// Storage lifecycle for social-preview BACKGROUNDS (D-125).
 //
 // These live in the SAME public bucket as teacher profile photos and
 // testimonial avatars (`teacher-photos`), under the teacher's own prefix:

@@ -16,7 +16,7 @@ import { tenancyGuardExtension } from "@/lib/tenancy/guard";
 //
 // Two things now check that rather than trusting it, and neither is a database
 // policy: `scripts/tenancy-guard.mjs` reads the source before the push (D-175),
-// and the extension below reads the arguments as the query runs (D-176). Both
+// and the extension below reads the arguments as the query runs. Both
 // are application-level. The reversal to real RLS is tracked in Issues.
 declare global {
   var __prisma: PrismaClient | undefined;
@@ -43,7 +43,7 @@ function buildPrismaClient(): PrismaClient {
   // there, at boot, with a better message than a database client could give.
   const client = new PrismaClient({ log, adapter: pgAdapter(process.env.DATABASE_URL ?? "") });
 
-  // The tenancy guard (D-176). It compares each query's arguments against the
+  // The tenancy guard (D-175). It compares each query's arguments against the
   // tenant the auth gate said this request is for, and it is the only thing in
   // the repository that can see a `where` assembled at runtime — the static
   // scanner reads source and cannot.

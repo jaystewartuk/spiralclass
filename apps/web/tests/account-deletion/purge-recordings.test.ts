@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-// Closing a teacher's account destroys her recordings (D-136). The property that
+// Closing a teacher's account destroys her recordings (D-22). The property that
 // matters most here is the ORDER: the row is the only pointer to the R2 object,
 // so a row must never be deleted while its object is still there.
 

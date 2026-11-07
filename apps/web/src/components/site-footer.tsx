@@ -6,7 +6,7 @@ import { usePathname } from "next/navigation";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { useLocalizedHref, useT } from "@/components/locale-provider";
 import { cn } from "@/lib/utils";
-import { BRAND_NAME, CONTROLLER, SOURCE_CODE_URL } from "@spiralclass/shared";
+import { BRAND_NAME, SOURCE_CODE_URL } from "@spiralclass/shared";
 
 export function SiteFooter({ localeToggle }: { localeToggle?: ReactNode }) {
   const pathname = usePathname();
@@ -87,18 +87,6 @@ export function SiteFooter({ localeToggle }: { localeToggle?: ReactNode }) {
 
         <p className="text-sm text-subtle">
           © {year} {BRAND_NAME}
-        </p>
-
-        <p className="text-sm text-subtle">
-          {t("web.siteFooter.madeBy")}{" "}
-          <a
-            href="https://jaystewart.co.uk"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="transition-colors hover:text-foreground"
-          >
-            {CONTROLLER.name}
-          </a>
         </p>
       </div>
     </footer>

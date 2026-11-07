@@ -1,6 +1,6 @@
 import { permanentRedirect } from "next/navigation";
 
-// The instructions page lives at /b/[slug]/buy/transfer/[ref] since D-113
+// The instructions page lives at /b/[slug]/buy/transfer/[ref] since D-145
 // generalized the manual rail. This path stays because students hold it in an
 // open tab or an emailed link, and a 404 there is a student who sent money and
 // then can't find the reference they were told to quote.

@@ -37,7 +37,7 @@ export function WiseRenewalForm({
       <Input
         name="manualPaymentRef"
         placeholder={t("web.admin.subscriptions.wiseReferencePlaceholder")}
-        className="h-8 w-48 text-xs"
+        className="w-48 lg:h-8 lg:text-xs"
       />
       <Button
         type="submit"

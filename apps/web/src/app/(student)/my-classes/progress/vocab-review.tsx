@@ -6,7 +6,7 @@ import { gradeVocabulary } from "@/app/actions/student-vocab";
 import type { Grade } from "@/lib/lesson-notes/srs";
 import { useT } from "@/components/locale-provider";
 
-// Phase F, Half 2 (one-term-at-a-time review) + D-97 flashcard study mode: the
+// Phase F, Half 2 (one-term-at-a-time review) + the flashcard study mode: the
 // SAME due queue, now shown as a flip card — tap to reveal the confirming
 // lesson's evidence/suggestion (attachVocabContext), then grade. Grading
 // reschedules the term via the SRS scheduler (server action) and advances

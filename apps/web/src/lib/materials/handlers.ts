@@ -30,6 +30,7 @@ import {
   type MaterialRevisionRow,
 } from "@/lib/materials/revisions";
 import { maybeAutoDraftAssignmentFromMaterial } from "@/lib/homework/auto-draft";
+import { markKeptGenerations, recordMaterialGeneration } from "@/lib/materials/generations";
 
 const log = logger({ surface: "materials-handlers" });
 
@@ -58,7 +59,7 @@ async function resolveSubject(
     where: { id: teacherId },
     select: {
       targetLanguage: true,
-      // AI material style (D-78) — read here so every generation path (class
+      // AI material style (D-17) — read here so every generation path (class
       // content, library, streamed, refine) inherits the teacher's preference.
       // Stored values were validated on write (materialStyleSchema); the prompt
       // builders also ignore any unknown value (switch default → no directive).
@@ -66,7 +67,7 @@ async function resolveSubject(
       materialLearnerAge: true,
       materialLanguageVariety: true,
       materialCustomInstructions: true,
-      // Vocabulary difficulty default (D-80). The booking-scoped generator
+      // Vocabulary difficulty default (D-17). The booking-scoped generator
       // overrides it per class; the library/refine paths use it as-is. Resolved
       // to a concrete value by the prompt builder (null → everyday).
       materialVocabulary: true,
@@ -83,7 +84,7 @@ async function resolveSubject(
 }
 
 // Material-authoring logic (D-17, generalized by the ClassContent/ClassMaterial
-// → LibraryMaterial merge, D-69), factored out of the server actions so the
+// → LibraryMaterial merge), factored out of the server actions so the
 // gating, validation, Pro-cap, and AI pipeline have one implementation.
 // Returns localized messages so each caller just passes the result through.
 // No `revalidatePath` here — that is the action's job.
@@ -118,7 +119,7 @@ async function findOwnedBooking(teacherId: string, bookingId: string) {
 // The app layer treats "content" as a single slot per booking — at most one
 // body-bearing, never-scheduled (sendTiming null) material — mirroring the old
 // ClassContent row's UNIQUE booking_id even though the shared table no longer
-// enforces that in the DB (D-69: a booking could in principle hold several
+// enforces that in the DB (a booking could in principle hold several
 // body-bearing materials; the UI just doesn't offer that yet).
 async function findContentMaterial(teacherId: string, bookingId: string) {
   return prisma.libraryMaterial.findFirst({
@@ -237,6 +238,15 @@ export async function saveClassContentForBooking(input: {
       chars: validation.body.length,
     },
   });
+
+  // The teacher's verdict on the generation this body came from (D-202).
+  if (input.source === "ai") {
+    await markKeptGenerations({
+      teacherId: input.teacherId,
+      materialId: row.id,
+      savedBody: validation.body,
+    });
+  }
 
   // Homework auto-draft (docs/features/homework.md). Best-effort internally;
   // never fails the content save.
@@ -445,7 +455,7 @@ export async function generateClassContentForBooking(input: {
   bookingId: string;
   topic: string;
   focusTagIds: string[];
-  // The teacher's chosen lesson template (D-46) — its structure shapes the
+  // The teacher's chosen lesson template (D-17) — its structure shapes the
   // output. Optional and tenant-scoped on resolve; a foreign/unknown/absent id
   // falls back to the default shape.
   templateId?: string | null;
@@ -455,7 +465,7 @@ export async function generateClassContentForBooking(input: {
   // drafts her library in French wants her classes in French too, so this is
   // not a library-only input.
   language?: string | null;
-  // Per-class vocabulary difficulty (D-80). `undefined` = leave this class's
+  // Per-class vocabulary difficulty (D-17). `undefined` = leave this class's
   // stored override untouched and generate with whatever it already is;
   // a value or explicit `null` = set the booking's override to it (null clears
   // the override, falling back to the teacher default) BEFORE generating, so
@@ -497,7 +507,7 @@ export async function generateClassContentForBooking(input: {
     // student.name is passed into the prompt so the model uses the ONE correct
     // name and never reproduces a stray name from the template/interests/goals
     // (the wrong-student-name bug). vocabularyOverride is this class's stored
-    // vocabulary-difficulty override (D-80).
+    // vocabulary-difficulty override (D-17).
     select: {
       id: true,
       studentId: true,
@@ -513,7 +523,7 @@ export async function generateClassContentForBooking(input: {
     };
   }
 
-  // Persist the class's vocabulary override when the caller supplied one (D-80),
+  // Persist the class's vocabulary override when the caller supplied one (D-17),
   // so the compose picker doubles as the class setting. `undefined` leaves the
   // stored value alone; a value/null writes it. Resolve the effective value the
   // generation will use: class override ?? teacher default ?? everyday.
@@ -545,7 +555,7 @@ export async function generateClassContentForBooking(input: {
   });
 
   // Resolve the teacher's chosen template (tenant-scoped) and bound the slice we
-  // inject as the lesson structure (D-46).
+  // inject as the lesson structure (D-17).
   const templateBody = (
     await resolveClassContentTemplateBody(input.teacherId, input.templateId)
   )?.slice(0, CLASS_CONTENT_TEMPLATE_PROMPT_MAX_CHARS);
@@ -584,7 +594,7 @@ export async function generateClassContentForBooking(input: {
     language: input.language ?? null,
     ...subject,
     // The class override beats the teacher default `subject.vocabulary`, so it
-    // must be applied AFTER the spread (D-80).
+    // must be applied AFTER the spread (D-17).
     vocabulary: resolveVocabulary(classVocabulary, subject.vocabulary),
   });
 
@@ -596,6 +606,9 @@ export async function generateClassContentForBooking(input: {
         message: t("materials.ai.classUnavailable"),
       };
     }
+    if (result.reason === "truncated") {
+      return { ok: false, code: "error", message: t("materials.ai.generateTooLong") };
+    }
     return {
       ok: false,
       code: "error",
@@ -604,7 +617,11 @@ export async function generateClassContentForBooking(input: {
   }
 
   // One row per success — what the monthly cap counts. Failures don't burn quota.
-  await prisma.classContentGeneration.create({ data: { teacherId: input.teacherId } });
+  await recordMaterialGeneration({
+    teacherId: input.teacherId,
+    kind: "class_content",
+    body: result.body,
+  });
 
   trackServerEvent({
     name: "class_content_generated",
@@ -703,7 +720,7 @@ export async function generateLibraryMaterialForTeacher(input: {
   topic: string;
   levelId?: string | null;
   focusTagIds: string[];
-  // The teacher's chosen lesson template (D-46) — same structure-following as
+  // The teacher's chosen lesson template (D-17) — same structure-following as
   // the booking-scoped generator.
   templateId?: string | null;
   locale: AppLocale;
@@ -757,7 +774,7 @@ export async function generateLibraryMaterialForTeacher(input: {
     : null;
 
   // Resolve the teacher's chosen template (tenant-scoped) and bound the slice we
-  // inject as the material's structure (D-46), same as the class-content path.
+  // inject as the material's structure (D-17), same as the class-content path.
   const templateBody = (
     await resolveClassContentTemplateBody(input.teacherId, input.templateId)
   )?.slice(0, CLASS_CONTENT_TEMPLATE_PROMPT_MAX_CHARS);
@@ -783,6 +800,9 @@ export async function generateLibraryMaterialForTeacher(input: {
         message: t("materials.ai.libraryUnavailable"),
       };
     }
+    if (result.reason === "truncated") {
+      return { ok: false, code: "error", message: t("materials.ai.generateTooLong") };
+    }
     return {
       ok: false,
       code: "error",
@@ -792,7 +812,11 @@ export async function generateLibraryMaterialForTeacher(input: {
 
   // Shares class_content_generations with class-content compose — one
   // monthly AI cap across both outputs, not two.
-  await prisma.classContentGeneration.create({ data: { teacherId: input.teacherId } });
+  await recordMaterialGeneration({
+    teacherId: input.teacherId,
+    kind: "library_material",
+    body: result.body,
+  });
 
   trackServerEvent({
     name: "library_material_generated",
@@ -910,8 +934,10 @@ export async function prepareLibraryMaterialPrompt(input: {
 export async function recordLibraryMaterialGeneration(
   teacherId: string,
   meta: PreparedLibraryPrompt,
+  // The streamed text as the teacher received it (D-202).
+  body: string,
 ): Promise<void> {
-  await prisma.classContentGeneration.create({ data: { teacherId } });
+  await recordMaterialGeneration({ teacherId, kind: "library_material", body });
   trackServerEvent({
     name: "library_material_generated",
     distinctId: teacherId,
@@ -919,7 +945,7 @@ export async function recordLibraryMaterialGeneration(
   });
 }
 
-// ---------- "Edit with AI" refine (D-73) ----------
+// ---------- "Edit with AI" refine ----------
 //
 // The change-in-place counterpart to the generate paths above: instead of
 // composing a fresh material, it applies a teacher's free-text instruction to an
@@ -996,6 +1022,9 @@ export async function refineMaterialForTeacher(input: {
         message: t("materials.ai.refineUnavailable"),
       };
     }
+    if (result.reason === "truncated") {
+      return { ok: false, code: "error", message: t("materials.ai.refineTooLong") };
+    }
     return {
       ok: false,
       code: "error",
@@ -1005,7 +1034,14 @@ export async function refineMaterialForTeacher(input: {
 
   // One row per success — shares the class-content generation quota with the
   // generate paths ("one AI plumbing," one cap). Failures don't burn quota.
-  await prisma.classContentGeneration.create({ data: { teacherId: input.teacherId } });
+  // The instruction is her own words for what was wrong with the version
+  // before (D-202).
+  await recordMaterialGeneration({
+    teacherId: input.teacherId,
+    kind: "refine",
+    body: result.body,
+    instruction,
+  });
 
   trackServerEvent({
     name: "material_refined",
@@ -1078,7 +1114,7 @@ export async function nextPositionInLevel(teacherId: string, levelId: string): P
 // three content types, docs/features/library-materials.md follow-up). Unlike
 // a file/link item — delete-and-re-add, unchanged — a content material's body
 // can now be edited in place, same as the booking-scoped one, sharing the
-// same version-history log (materialId is already generic, D-69).
+// same version-history log (materialId is already generic).
 
 export type SaveLibraryContentResult =
   | { ok: true; materialId: string }
@@ -1157,6 +1193,13 @@ export async function saveLibraryContentMaterial(input: {
       },
       select: { id: true },
     });
+    if (input.source === "ai") {
+      await markKeptGenerations({
+        teacherId: input.teacherId,
+        materialId: row.id,
+        savedBody: validation.body,
+      });
+    }
     return { ok: true, materialId: row.id };
   }
 
@@ -1187,6 +1230,14 @@ export async function saveLibraryContentMaterial(input: {
       tagCount: 0,
     },
   });
+
+  if (input.source === "ai") {
+    await markKeptGenerations({
+      teacherId: input.teacherId,
+      materialId: row.id,
+      savedBody: validation.body,
+    });
+  }
 
   return { ok: true, materialId: row.id };
 }
@@ -1283,7 +1334,7 @@ export async function saveMaterialAttachment(input: {
   unit?: string | null;
   storagePath?: string | null;
   linkUrl?: string | null;
-  // Booking-scoped only. Null = always visible, no push (D-69) — the teacher
+  // Booking-scoped only. Null = always visible, no push — the teacher
   // explicitly chose not to schedule a notification for this attachment.
   sendTiming?: MaterialSendTiming | null;
   locale: AppLocale;

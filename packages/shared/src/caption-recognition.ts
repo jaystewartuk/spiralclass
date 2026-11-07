@@ -49,7 +49,7 @@ export type CaptionSession = {
   // a speaker no browser here can recognise may be assigned "cloud". Both
   // clients read it from the same answer, so they agree on the assignment.
   cloudRecognition: boolean;
-  // D-189: whether each recognised line is also kept, as the class's
+  // D-185: whether each recognised line is also kept, as the class's
   // transcript for lesson insights — the flag is on and this pairing's
   // insights consent (D-22) is recorded. The recognising browser posts the
   // line to /api/captions/transcript; both browsers show that it is kept.
@@ -165,7 +165,7 @@ export function canRecognizeDuringCall(env: RecognitionEnvironment): boolean {
 // both attributes to run the same assignment below.
 export const CAPTIONS_RECOGNIZER_ATTRIBUTE = "captionsAsr";
 
-// The teacher's room-wide captions switch (D-27: teacher-toggled). Only the
+// The teacher's room-wide captions switch (D-185: teacher-toggled). Only the
 // teacher's own attribute is ever trusted as the switch.
 export const CAPTIONS_ON_ATTRIBUTE = "captionsOn";
 
@@ -255,7 +255,7 @@ export function cloudRecognitionRefusal(args: {
   if (!participants.some((p) => p.identity === callerIdentity)) return "caller-absent";
   // Nobody to caption for (assignRecognizers asks the same).
   if (!participants.some((p) => p.identity !== callerIdentity)) return "alone";
-  // Only the teacher's own switch counts (D-27) — unless the transcript is
+  // Only the teacher's own switch counts (D-185) — unless the transcript is
   // what the stream is for, which the server decided from recorded consent.
   const teacher = participants.find((p) => p.identity === teacherIdentity);
   if (!transcriptCapture && teacher?.attributes[CAPTIONS_ON_ATTRIBUTE] !== "true") {

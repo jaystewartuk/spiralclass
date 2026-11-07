@@ -16,6 +16,7 @@ import type { CaptionLine, CaptionSession } from "@spiralclass/shared";
 (globalThis as Record<string, unknown>).IS_REACT_ACT_ENVIRONMENT = true;
 
 const { useBrowserCaptions, CONFIG_POLL_MS } = await import("@/lib/captions/use-browser-captions");
+const { UNHEARD_SPEECH_LIMIT_MS } = await import("@/lib/captions/browser-captions");
 
 // ---- fakes ---------------------------------------------------------------
 
@@ -46,6 +47,7 @@ class FakeRecognition {
 type Attrs = Record<string, string>;
 class FakeParticipant {
   attributes: Attrs = {};
+  isSpeaking = false;
   constructor(
     public identity: string,
     public micTrack: { id: string; readyState: string } | null,
@@ -140,6 +142,7 @@ function Harness(props: {
   room: FakeRoom | null;
   role: "teacher" | "student";
   teacherCaptionsOn: boolean;
+  onRecognitionUnusable?: (reason: string) => void;
 }) {
   latest = useBrowserCaptions({
     room: props.room as never,
@@ -147,6 +150,7 @@ function Harness(props: {
     role: props.role,
     teacherCaptionsOn: props.teacherCaptionsOn,
     showLocal: (line) => shown.push(line),
+    onRecognitionUnusable: props.onRecognitionUnusable,
   });
   return null;
 }
@@ -367,7 +371,7 @@ describe("useBrowserCaptions — recognising and delivering", () => {
   });
 });
 
-describe("useBrowserCaptions — keeping the transcript (D-189)", () => {
+describe("useBrowserCaptions — keeping the transcript (D-185)", () => {
   const transcriptCalls = () =>
     fetchMock.mock.calls.filter(([u]) => u === "/api/captions/transcript");
 
@@ -562,5 +566,56 @@ describe("useBrowserCaptions — a consent given from the call", () => {
     const room = new FakeRoom("t1");
     await render({ room, role: "teacher", teacherCaptionsOn: true });
     expect(latest.otherPresent).toBe(false);
+  });
+});
+
+describe("useBrowserCaptions — withdrawing the claim to recognise", () => {
+  async function classWithATablet(onRecognitionUnusable = vi.fn()) {
+    vi.useFakeTimers({ toFake: ["setInterval"] });
+    const room = new FakeRoom("t1");
+    const tablet = new FakeParticipant("s1", { id: "s1-mic", readyState: "live" });
+    tablet.attributes.captionsAsr = "0";
+    room.join(tablet);
+    await render({ room, role: "teacher", teacherCaptionsOn: true, onRecognitionUnusable });
+    return { room, tablet, onRecognitionUnusable };
+  }
+
+  it("tells the room it cannot recognise after all, once speech has gone unheard", async () => {
+    const { room, tablet, onRecognitionUnusable } = await classWithATablet();
+    expect(FakeRecognition.instances.length).toBeGreaterThan(0);
+    tablet.isSpeaking = true;
+    act(() => vi.advanceTimersByTime(UNHEARD_SPEECH_LIMIT_MS));
+    await settle();
+    expect(onRecognitionUnusable).toHaveBeenCalledWith("silent");
+    expect(room.localParticipant.attributes.captionsAsr).toBe("0");
+  });
+
+  it("stops its own recognisers once the claim is withdrawn", async () => {
+    const { room, tablet } = await classWithATablet();
+    const aborted = vi.fn();
+    for (const r of FakeRecognition.instances) r.abort = aborted;
+    tablet.isSpeaking = true;
+    act(() => vi.advanceTimersByTime(UNHEARD_SPEECH_LIMIT_MS));
+    await settle();
+    expect(aborted).toHaveBeenCalled();
+    expect(room.localParticipant.attributes.captionsAsr).toBe("0");
+    expect(latest.status.uncaptioned).toEqual(["teacher", "student"]);
+  });
+
+  it("withdraws here even if the room could not be told", async () => {
+    const { room, tablet } = await classWithATablet();
+    room.localParticipant.setAttributes.mockRejectedValue(new Error("offline"));
+    tablet.isSpeaking = true;
+    act(() => vi.advanceTimersByTime(UNHEARD_SPEECH_LIMIT_MS));
+    await settle();
+    expect(latest.status.uncaptioned).toEqual(["teacher", "student"]);
+  });
+
+  it("leaves a recogniser alone while nobody is speaking", async () => {
+    const { room, onRecognitionUnusable } = await classWithATablet();
+    act(() => vi.advanceTimersByTime(UNHEARD_SPEECH_LIMIT_MS * 2));
+    await settle();
+    expect(onRecognitionUnusable).not.toHaveBeenCalled();
+    expect(room.localParticipant.attributes.captionsAsr).toBe("1");
   });
 });

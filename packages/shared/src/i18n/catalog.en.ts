@@ -472,6 +472,8 @@ export const en = {
   "material.editor.changed.duplicate": "Section duplicated",
   "material.editor.changed.insert": "Section added",
   "material.editor.changed.refine": "Section edited with AI",
+  "material.editor.changed.rename": "Section renamed",
+  "material.editor.sectionTitleLabel": "Section title",
   "material.editor.changed.editBlocks": "Section content edited",
   "material.editor.aiSectionChanged": "AI updated this section.",
   "material.editor.undoAiChange": "Undo AI change",
@@ -1074,7 +1076,7 @@ export const en = {
   "onboarding.templates.priceStripe": "Stripe price",
   "onboarding.templates.priceWise": "Transfer price (optional)",
   // Shown instead of priceStripe when the teacher's country has no Stripe
-  // Connect rail at all (Wise-only, D-58) — there's no Stripe price to split
+  // Connect rail at all (Wise-only, D-143) — there's no Stripe price to split
   // from, so it's just "Price".
   "onboarding.templates.price": "Price",
   "onboarding.templates.expirationMonths": "Expires (months)",
@@ -2739,6 +2741,10 @@ export const en = {
   "web.dashboard.students.archive.confirmReactivate": "Reactivate this student on your roster?",
   "web.dashboard.students.archive.confirmArchive":
     "Archive this student? They stay reachable and their packages are untouched — they just leave your active roster and stop receiving reminders.",
+  "web.dashboard.students.archive.warningUpcoming":
+    "This student has classes booked. They stay booked, but the student will get no reminders for them.",
+  "web.dashboard.students.archive.warningClassesLeft":
+    "Classes left: {count}. The package stays as it is, but the student will stop getting reminders.",
   "web.dashboard.students.archive.reasonPlaceholder":
     "Optional note (e.g. paused lessons for now).",
   "web.dashboard.students.archive.helpLabel": "Help on archiving",
@@ -3290,7 +3296,7 @@ export const en = {
   "web.dashboard.shareGroups.groupName": "Group name",
   "web.dashboard.shareGroups.linkForThisGroup": "Link to post in this group",
 
-  // Social previews (D-123) — the image a shared booking link previews with.
+  // Social previews (D-125) — the image a shared booking link previews with.
   "socialPreview.title": "Social preview",
   "socialPreview.subtitle":
     "The image people see when this link is shared on Facebook, WhatsApp or anywhere else.",
@@ -3724,7 +3730,7 @@ export const en = {
   "web.settings.billing.foundingCloses": "Closes {date}",
   "web.settings.billing.backToPlans": "Back to plans",
   "web.settings.billing.stripeNote": "Payments are handled by Stripe.",
-  // D-152: a paying teacher lands here and needs to know this bill is not the
+  // D-143: a paying teacher lands here and needs to know this bill is not the
   // only cost of getting paid — the processing fee is Stripe's, billed to her.
   "web.settings.billing.feesTitle": "This is what you pay us — not what it costs to get paid",
   "web.settings.billing.feesBody":
@@ -4051,7 +4057,7 @@ export const en = {
   "web.settings.payments.saveWise": "Save Wise",
   "web.settings.payments.savingBankAccount": "Saving...",
   "web.settings.payments.saveBankAccount": "Save bank account",
-  // D-152: the one place that spells out that the plan and the processing fee
+  // D-143: the one place that spells out that the plan and the processing fee
   // are two different bills, from two different companies.
   "web.settings.payments.feesTitle": "Your plan and Stripe's fee are separate",
   "web.settings.payments.feesBody":
@@ -5212,7 +5218,6 @@ export const en = {
   "web.siteFooter.terms": "Terms",
   "web.siteFooter.privacy": "Privacy",
   "web.siteFooter.sourceCode": "Source code",
-  "web.siteFooter.madeBy": "Made by",
   "web.themeToggle.switchToLight": "Switch to light mode",
   "web.themeToggle.switchToDark": "Switch to dark mode",
   "web.themeToggle.light": "Light",
@@ -5554,7 +5559,7 @@ export const en = {
     "Founding price ({price}) locked for life — limited to the first {cap} teachers.",
   "web.pricing.annualNote": "Same Pro features, ~2 months free.",
   "web.pricing.startTrial": "Start your free trial",
-  // D-152. Two costs, one of them ours. Deliberately quotes no percentage for
+  // D-143. Two costs, one of them ours. Deliberately quotes no percentage for
   // Stripe: since D-143 the rate is Stripe's, set per country and per card, and
   // a number we cannot stand behind next to "0% commission" is what turns an
   // honest disclosure into a misleading one. Name who charges it, link to them.
@@ -5968,13 +5973,13 @@ export const en = {
   "web.admin.lessonInsights.liveWarning.pre":
     "— captured voice is being sent to the ASR vendor and transcripts stored,",
   "web.admin.lessonInsights.liveWarning.strong": "for every consented pair",
-  "web.admin.lessonInsights.liveWarning.mid": "(D-21/D-22). Only consented",
+  "web.admin.lessonInsights.liveWarning.mid": "(D-22). Only consented",
   "web.admin.lessonInsights.liveWarning.em": "test",
   "web.admin.lessonInsights.liveWarning.midEnd": "pairs should be recorded; turn",
   "web.admin.lessonInsights.liveWarning.post": "off between tests.",
   "web.admin.lessonInsights.title": "Lesson insights — pipeline health",
   "web.admin.lessonInsights.subtitle":
-    "Operational status across every tenant: capture → transcript → insights → profile → brief. Statuses and counts only — no transcript, pronunciation or profile content is shown here (D-21/D-22).",
+    "Operational status across every tenant: capture → transcript → insights → profile → brief. Statuses and counts only — no transcript, pronunciation or profile content is shown here (D-22).",
   "web.admin.lessonInsights.awaitingTranscription": "Captures awaiting transcription",
   "web.admin.lessonInsights.awaitingTranscriptionHint": '"ready" audio not yet transcribed',
   "web.admin.lessonInsights.stuckCaptures": "Stuck captures",
@@ -6384,7 +6389,7 @@ export const en = {
   "web.admin.teachers.entitlements.canScheduleMaterials": "Can schedule materials",
   "web.admin.teachers.entitlements.canCustomPrice": "Can set custom price",
   "web.admin.teachers.entitlements.canUseLiveNotes": "Can use live notes",
-  // Merged from the D-99 (PR #680) GBP-billing-currency conflict resolution
+  // Merged from the D-153 (PR #680) GBP-billing-currency conflict resolution
   // — this branch's `main` had already split catalog.ts into per-locale
   // files (was one combined file when this PR forked); its one new key
   // (currency-partitioned admin MRR note) is appended here instead.
@@ -6847,7 +6852,7 @@ export const en = {
   "web.action.photo.choose": "Choose an image first.",
   "web.action.photo.type": "Use a JPG, PNG or WebP image.",
   "web.action.photo.tooLarge": "The image must be under 5 MB.",
-  "web.action.photo.uploadFailed": "We couldn't upload the image: {error}",
+  "web.action.photo.uploadFailed": "We couldn't upload the image. Please try again.",
   "web.action.testimonial.bodyLength":
     "Write a few words about your classes (under {max} characters).",
   "web.action.testimonial.notEligible":
@@ -7122,9 +7127,9 @@ export const en = {
   "web.action.packageField.atMost": "Classes left can be at most {max} for this package.",
   "web.action.materialImage.chooseType": "Choose a JPG, PNG, WebP or GIF image.",
   "web.action.materialImage.tooLarge": "The image can't be larger than {mb} MB.",
-  "web.action.materialImage.uploadFailed": "We couldn't upload the image: {message}",
+  "web.action.materialImage.uploadFailed": "We couldn't upload the image. Please try again.",
   "web.action.materialFile.tooLarge": "The file can't be larger than 25 MB.",
-  "web.action.materialFile.uploadFailed": "We couldn't upload the file: {message}",
+  "web.action.materialFile.uploadFailed": "We couldn't upload the file. Please try again.",
   "web.action.referral.ownCode": "You can't use your own referral code.",
   "web.action.referral.firstPurchaseOnly": "Referral codes only apply to your first purchase.",
   "web.action.classContent.writeFirst": "Write some content first.",
@@ -7815,6 +7820,10 @@ export const en = {
   "materials.ai.refineUnavailable":
     "AI editing isn't available right now. You can still edit the material yourself.",
   "materials.ai.refineFailed": "Couldn't apply the change. Please try again.",
+  "materials.ai.generateTooLong":
+    "The material came out too long to finish. Try a narrower topic, or generate it in two parts.",
+  "materials.ai.refineTooLong":
+    "The result came out too long to finish, so nothing was changed. Ask for a smaller change, or split the material in two.",
   "materials.ai.podcastLimitReached":
     "You've reached this month's AI generation limit ({cap}). You can still write and record content yourself.",
   "materials.ai.podcastUnavailable": "Podcast generation isn't available right now.",

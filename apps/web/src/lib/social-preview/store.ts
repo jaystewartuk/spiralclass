@@ -18,7 +18,7 @@ import {
 } from "@/lib/storage/social-preview-image";
 
 // Social previews: reads, writes and — the load-bearing part — RESOLUTION
-// (D-123). It exists here so no two callers can disagree about ownership,
+// (D-125). It exists here so no two callers can disagree about ownership,
 // ordering or fallback; the server actions are the only caller now.
 
 /** Start of the current UTC calendar month — the quota window. Mirrors
@@ -266,7 +266,7 @@ export type DeleteImageResult = { ok: true } | { ok: false; reason: "not-found" 
  * Delete one image, and everything that would otherwise be left dangling.
  *
  * The FK from SocialPreview and MarketingActivity is `Restrict` on purpose
- * (D-123/D-125): an asset a live share link previews must not vanish
+ * (D-125): an asset a live share link previews must not vanish
  * underneath it. So this does not force its way past that constraint, it
  * resolves it:
  *

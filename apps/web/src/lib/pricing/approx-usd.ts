@@ -12,7 +12,7 @@ import {
 // The problem it solves is one number: A price of 6,000 pesos tells a buyer in Chicago
 // nothing at all, and they have to decide whether to keep reading before they
 // can find out. `≈ US$345` under it is the whole fix. The charge does not
-// change — the teacher's currency is still what settles (D-64, and under D-143
+// change — the teacher's currency is still what settles (D-153, and under D-143
 // her Stripe account settles in her own country), so this is presentation and
 // nothing else.
 //

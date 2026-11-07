@@ -9,7 +9,7 @@ import type { MaterialTiming } from "@/lib/notifications/materials";
 //     only see materials whose send time has elapsed.
 // "confirmation" materials send at booking time, which is always in the
 // past once the class exists. `timing` is null for a booking-scoped
-// LibraryMaterial that isn't on a push schedule at all (D-69: the merged
+// LibraryMaterial that isn't on a push schedule at all (the merged
 // "content" material) — those are always visible, no elapsing to check.
 export function materialSendTimeElapsed(
   timing: MaterialTiming | null,

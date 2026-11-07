@@ -2,7 +2,7 @@
 /**
  * What is actually live, and what is merely merged.
  *
- * Before D-120 this question had a mechanical answer: a push moved the
+ * Before 2026-08-17 this question had a mechanical answer: a push moved the
  * branch and CI shipped web and mobile from it, so "the branch" was the answer.
  * Now three things ship separately — preview web, production web, and mobile,
  * from a laptop — and nothing anywhere disagrees when one of them is skipped.

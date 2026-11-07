@@ -2,7 +2,12 @@ import "server-only";
 import Anthropic from "@anthropic-ai/sdk";
 import { anthropicApiKey, anthropicModel, hasAnthropicCreds } from "@/lib/env";
 import { logger } from "@/lib/logger";
-import { CLASS_CONTENT_MAX_CHARS, PODCAST_SCRIPT_MAX_CHARS } from "@/lib/materials/config";
+import {
+  CLASS_CONTENT_MAX_CHARS,
+  MATERIAL_MAX_OUTPUT_TOKENS,
+  MaterialIncompleteError,
+  PODCAST_SCRIPT_MAX_CHARS,
+} from "@/lib/materials/config";
 import {
   buildMaterialPrompt,
   buildMaterialRefinePrompt,
@@ -21,7 +26,7 @@ import type { HomeworkAiReviewContent } from "@spiralclass/shared";
 const log = logger({ surface: "ai" });
 
 // In-house Claude integration for material compose (D-17, generalized by the
-// ClassContent/LibraryMaterial merge — D-69: one call path for both a single
+// ClassContent/LibraryMaterial merge: one call path for both a single
 // class's content and a standalone reusable material). Routed through the
 // PLATFORM Anthropic key only — never per-teacher, never entangled with the
 // Connect payout rail. The client is constructed lazily so the module imports
@@ -38,13 +43,57 @@ function anthropic(): Anthropic {
 }
 
 export type GenerateMaterialResult =
-  { ok: true; body: string } | { ok: false; reason: "not-configured" | "empty" | "error" };
+  | { ok: true; body: string }
+  | { ok: false; reason: "not-configured" | "empty" | "truncated" | "error" };
+
+// One long-form call: streamed under the hood because a call this size can run
+// for minutes, collected into the final message. Returns the text together with
+// why the model stopped, because a response cut off by max_tokens is a
+// successful HTTP call carrying half a document.
+async function composeText(
+  system: string,
+  user: string,
+): Promise<{ text: string; stopReason: Anthropic.Message["stop_reason"] }> {
+  const message = await anthropic()
+    .messages.stream({
+      model: anthropicModel(),
+      max_tokens: MATERIAL_MAX_OUTPUT_TOKENS,
+      output_config: { effort: "medium" },
+      system,
+      messages: [{ role: "user", content: user }],
+    })
+    .finalMessage();
+
+  const text = message.content
+    .filter((b): b is Anthropic.TextBlock => b.type === "text")
+    .map((b) => b.text)
+    .join("")
+    .trim();
+  return { text, stopReason: message.stop_reason };
+}
+
+// A body is only ever returned whole. Slicing an over-long one to the ceiling
+// would hand the teacher the same cut-off document as running out of tokens.
+async function composeMaterialBody(system: string, user: string): Promise<GenerateMaterialResult> {
+  const { text, stopReason } = await composeText(system, user);
+  if (stopReason === "max_tokens" || text.length > CLASS_CONTENT_MAX_CHARS) {
+    log.warn("material output did not fit", { stopReason, chars: text.length });
+    return { ok: false, reason: "truncated" };
+  }
+  if (!text) return { ok: false, reason: "empty" };
+  // A refusal part-way through is also not a finished document.
+  if (stopReason !== "end_turn") {
+    log.warn("material output stopped early", { stopReason, chars: text.length });
+    return { ok: false, reason: "error" };
+  }
+  return { ok: true, body: text };
+}
 
 // Generate a material's Markdown body — either a single class's content
 // (forClass: true) or a standalone reusable library item (forClass: false).
 // Returns the raw Markdown for the teacher to review and edit before saving —
-// this never writes to the DB. Output is bounded by max_tokens; the saved
-// body is re-validated against the same ceiling on the way in.
+// this never writes to the DB. A body that does not fit comes back as
+// "truncated", never cut; the saved body is re-validated on the way in.
 export async function generateMaterial(
   input: MaterialPromptInput,
 ): Promise<GenerateMaterialResult> {
@@ -53,25 +102,9 @@ export async function generateMaterial(
   const { system, user } = buildMaterialPrompt(input);
 
   try {
-    // Non-streaming: a single class's content fits comfortably under this cap,
-    // and the cap keeps generation (and cost) bounded. effort "medium" balances
-    // quality against token spend (docs/deployment/COST_PLAYBOOK.md).
-    const message = await anthropic().messages.create({
-      model: anthropicModel(),
-      max_tokens: 4096,
-      output_config: { effort: "medium" },
-      system,
-      messages: [{ role: "user", content: user }],
-    });
-
-    const body = message.content
-      .filter((b): b is Anthropic.TextBlock => b.type === "text")
-      .map((b) => b.text)
-      .join("")
-      .trim();
-
-    if (!body) return { ok: false, reason: "empty" };
-    return { ok: true, body: body.slice(0, CLASS_CONTENT_MAX_CHARS) };
+    // effort "medium" balances quality against token spend
+    // (docs/deployment/COST_PLAYBOOK.md).
+    return await composeMaterialBody(system, user);
   } catch (err) {
     log.error("material generation failed", err);
     return { ok: false, reason: "error" };
@@ -92,22 +125,7 @@ export async function refineMaterial(
   const { system, user } = buildMaterialRefinePrompt(input);
 
   try {
-    const message = await anthropic().messages.create({
-      model: anthropicModel(),
-      max_tokens: 4096,
-      output_config: { effort: "medium" },
-      system,
-      messages: [{ role: "user", content: user }],
-    });
-
-    const body = message.content
-      .filter((b): b is Anthropic.TextBlock => b.type === "text")
-      .map((b) => b.text)
-      .join("")
-      .trim();
-
-    if (!body) return { ok: false, reason: "empty" };
-    return { ok: true, body: body.slice(0, CLASS_CONTENT_MAX_CHARS) };
+    return await composeMaterialBody(system, user);
   } catch (err) {
     log.error("material refine failed", err);
     return { ok: false, reason: "error" };
@@ -115,7 +133,8 @@ export async function refineMaterial(
 }
 
 export type GeneratePodcastScriptResult =
-  { ok: true; script: string } | { ok: false; reason: "not-configured" | "empty" | "error" };
+  | { ok: true; script: string }
+  | { ok: false; reason: "not-configured" | "empty" | "truncated" | "error" };
 
 // Generate the spoken monologue a material's podcast narrates — the text half
 // of podcast generation, before ElevenLabs renders it to audio. Same platform
@@ -130,20 +149,8 @@ export async function generatePodcastScript(
   const { system, user } = buildPodcastScriptPrompt(input);
 
   try {
-    const message = await anthropic().messages.create({
-      model: anthropicModel(),
-      max_tokens: 4096,
-      output_config: { effort: "medium" },
-      system,
-      messages: [{ role: "user", content: user }],
-    });
-
-    const script = message.content
-      .filter((b): b is Anthropic.TextBlock => b.type === "text")
-      .map((b) => b.text)
-      .join("")
-      .trim();
-
+    const { text: script, stopReason } = await composeText(system, user);
+    if (stopReason === "max_tokens") return { ok: false, reason: "truncated" };
     if (!script) return { ok: false, reason: "empty" };
     return { ok: true, script: script.slice(0, PODCAST_SCRIPT_MAX_CHARS) };
   } catch (err) {
@@ -195,7 +202,9 @@ export async function generateHomeworkAiReview(
 // Streaming variant for the "watch it write" live-generation UI: yields
 // Markdown text deltas as the model produces them. Throws Error("not-configured")
 // when no creds; a mid-stream provider failure surfaces as an iterator throw the
-// caller catches. Like generateMaterial this NEVER writes to the DB and does not
+// caller catches, including MaterialIncompleteError when the model ran out of
+// room, because the deltas already sent are then only the front of a document.
+// Like generateMaterial this NEVER writes to the DB and does not
 // enforce the monthly cap — the route gates before starting and records the
 // quota only on successful completion.
 export async function* generateMaterialStream(
@@ -206,7 +215,7 @@ export async function* generateMaterialStream(
   const { system, user } = buildMaterialPrompt(input);
   const stream = anthropic().messages.stream({
     model: anthropicModel(),
-    max_tokens: 4096,
+    max_tokens: MATERIAL_MAX_OUTPUT_TOKENS,
     output_config: { effort: "medium" },
     system,
     messages: [{ role: "user", content: user }],
@@ -217,4 +226,8 @@ export async function* generateMaterialStream(
       yield event.delta.text;
     }
   }
+
+  const { stop_reason: stopReason } = await stream.finalMessage();
+  if (stopReason === "max_tokens") throw new MaterialIncompleteError();
+  if (stopReason !== "end_turn") throw new Error(`material stream stopped: ${stopReason}`);
 }

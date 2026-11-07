@@ -56,6 +56,7 @@ function makeDeps(now: Date): {
   deletedNotifications: string[];
   deletedContactChanges: string[];
   deletedNotes: string[];
+  clearedGenerationText: { teacherId: string; body: null; instruction: null }[];
 } {
   const teachers: FakeTeacher[] = [];
   const students: FakeStudent[] = [];
@@ -65,6 +66,7 @@ function makeDeps(now: Date): {
   const deletedNotifications: string[] = [];
   const deletedContactChanges: string[] = [];
   const deletedNotes: string[] = [];
+  const clearedGenerationText: { teacherId: string; body: null; instruction: null }[] = [];
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const fake: any = {
@@ -127,6 +129,18 @@ function makeDeps(now: Date): {
         return { count: 1 };
       },
     },
+    classContentGeneration: {
+      updateMany: async ({
+        where,
+        data,
+      }: {
+        where: { teacherId: string };
+        data: { body: null; instruction: null };
+      }) => {
+        clearedGenerationText.push({ teacherId: where.teacherId, ...data });
+        return { count: 1 };
+      },
+    },
     studentContactChange: {
       deleteMany: async ({ where }: { where: { studentId: string } }) => {
         deletedContactChanges.push(where.studentId);
@@ -139,7 +153,7 @@ function makeDeps(now: Date): {
         return { count: 1 };
       },
     },
-    // D-136: closing a teacher's account destroys her recordings. Empty here —
+    // D-22: closing a teacher's account destroys her recordings. Empty here —
     // the purge itself is covered in purge-recordings.test.ts; what this stub
     // buys is that anonymizeTeacher still completes (and still revokes sessions)
     // with the purge wired in.
@@ -160,6 +174,7 @@ function makeDeps(now: Date): {
     deletedNotifications,
     deletedContactChanges,
     deletedNotes,
+    clearedGenerationText,
   };
 }
 
@@ -199,6 +214,8 @@ describe("anonymizeMaturedDeletions", () => {
     expect(env.requests[0].anonymizedAt).toEqual(now);
     expect(env.deletedPushSubscriptions).toEqual(["t1"]);
     expect(env.deletedNotifications).toEqual(["t1"]);
+    // Her AI materials text and refine instructions go with the account (D-202).
+    expect(env.clearedGenerationText).toEqual([{ teacherId: "t1", body: null, instruction: null }]);
   });
 
   it("does not touch requests whose scheduled_for is in the future", async () => {
@@ -274,7 +291,7 @@ describe("anonymizeMaturedDeletions", () => {
   });
 
   it("purges a deleted teacher's recordings, and a purge failure can't block the deletion", async () => {
-    // D-136. The privacy policy has promised since D-131 that a class recording
+    // D-22. The privacy policy has promised since 2026-08-26 that a class recording
     // lives only "while the teacher's account is open"; nothing enforced it.
     const now = new Date("2026-06-01T00:00:00Z");
     const env = makeDeps(now);

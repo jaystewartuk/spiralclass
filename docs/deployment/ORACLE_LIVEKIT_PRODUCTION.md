@@ -3,10 +3,10 @@
 > [!IMPORTANT]
 > **This machine no longer exists.** `infra/oracle-box/CUTOVER.md` step 3
 > terminated it on 2026-09-19 to free the tenancy for a rebuild, and every
-> relaunch was refused for lack of host capacity ([D-182](../decisions/D-182.md)).
+> relaunch was refused for lack of host capacity ([D-16](../decisions/D-16.md)).
 > Production video moved to LiveKit Cloud that night, and since 2026-09-24 runs
 > on an Always Free `e2-micro` on Compute Engine
-> ([D-187](../decisions/D-187.md)) — its build record is
+> ([D-16](../decisions/D-16.md)) — its build record is
 > [`infra/gcp-livekit/README.md`](../../infra/gcp-livekit/README.md), and that
 > is the document for the box that serves today.
 >
@@ -18,17 +18,17 @@
 > [`ORACLE_BOX_REBUILD.md`](./ORACLE_BOX_REBUILD.md) and
 > [`infra/oracle-box/`](../../infra/oracle-box/README.md); the
 > `infra/oracle-runner` module this document repeatedly points at was deleted
-> in [D-139](../decisions/D-139.md), so the "the plan" column and the Tofu apply
+> in [D-164](../decisions/D-164.md), so the "the plan" column and the Tofu apply
 > steps below must not be followed.
 
 **Status: destroyed (2026-09-19).** It went live on 2026-07-21, verified
 end-to-end from the public internet — DNS resolved, both firewall layers (OCI
 security list + host iptables, see "Manual step 1") allowed the right ports, and
 Caddy held a real Let's Encrypt cert. It served preview from 2026-07-21 and, as
-of D-94 (2026-07-21), production too — both environments shared this ONE box —
-until D-94's 2026-09-16 addendum left only production holding a key pair for it.
+of 2026-07-21, production too — both environments shared this ONE box — until
+2026-09-16 left only production holding a key pair for it ([D-16](../decisions/D-16.md)).
 The capacity numbers it operated under came from the LiveKit spike, whose
-runbook [D-110](../decisions/D-110.md) deleted (the video architecture audit the
+runbook [D-164](../decisions/D-164.md) deleted (the video architecture audit the
 old header also cited is not in the tree either); the ~15-20-room ceiling quoted
 below is the part worth keeping.
 
@@ -38,7 +38,7 @@ Read this before assuming any part of the box comes from the repo.
 
 | Layer                                   | How it worked (to 2026-09-19)                                                                                                                                                                             | The plan                                                 |
 | --------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------- |
-| Compute, network, firewall, DNS         | Provisioned **by hand** on 2026-07-21. An OpenTofu module was written for it and never applied, then deleted ([D-139](../decisions/D-139.md)); `infra/oracle-box` is the current, also-unapplied attempt. | Apply it; the box becomes rebuildable from `tofu apply`. |
+| Compute, network, firewall, DNS         | Provisioned **by hand** on 2026-07-21. An OpenTofu module was written for it and never applied, then deleted ([D-164](../decisions/D-164.md)); `infra/oracle-box` is the current, also-unapplied attempt. | Apply it; the box becomes rebuildable from `tofu apply`. |
 | LiveKit / Egress / Caddy / Redis config | Rendered onto the box **by hand** in `~/oracle-livekit-production/`. It has since drifted from `services/*.tftpl` (secrets moved into a box-local `.env`).                                                | Rendered by Tofu at apply time.                          |
 | Upstream images                         | `docker compose pull`, tracking `:latest`.                                                                                                                                                                | Unchanged, or pinned — open question.                    |
 
@@ -55,7 +55,7 @@ still worth knowing), each now annotated with what replaced it.
 
 The spike doc, §32/§33 of the audit, and this doc's own earlier drafts all
 said **don't put production video on this specific box** —
-[D-49](../decisions/D-49.md) already ruled it out for anything prod-critical (documented capacity/suspension
+the database-portability plan had already ruled it out for anything prod-critical (documented capacity/suspension
 risk, no failover), and the measured capacity ceiling (~15-20 concurrent
 rooms, measured in the LiveKit spike) is real, not hypothetical.
 
@@ -71,7 +71,7 @@ residual, real risk is **operational**, not capacity: no SLA, Oracle account
 suspensions are documented as a real occurrence, no redundancy if the box
 goes down mid-class.
 
-**D-94 update (2026-07-21):** production was cut over onto this SAME box,
+**D-16 update (2026-07-21):** production was cut over onto this SAME box,
 not a second one — reaffirming the risk acceptance above rather than
 introducing a new one. The ~15-20-room ceiling now has to absorb combined
 preview+production traffic, not just preview's. Still accepted at current
@@ -134,7 +134,7 @@ infrastructure. Because of a pre-existing coupling
 unfixed during Phase 1) turning this on also starts per-participant
 lesson-audio capture to R2 for consenting students — not the downstream AI
 transcription/analysis (`LESSON_INSIGHTS_TRANSCRIPTION_ENABLED` stays off,
-separately gated, still legal-blocked per D-21). Consent (D-22) still gates
+separately gated, still legal-blocked). Consent (D-22) still gates
 who this applies to; nothing here changes the consent model, only that the
 capture side of the already-consented-to pipeline now actually runs instead
 of being silently prevented by the coupling bug.
@@ -270,7 +270,7 @@ obtained successfully"`) — no separate action needed once DNS + ports were
 correct.
 
 **The record is PROXIED (orange cloud) as of 2026-08-27**
-([D-134](../decisions/D-134.md)) — it was DNS-only until then, so
+([D-16](../decisions/D-16.md)) — it was DNS-only until then, so
 `dig +short livekit.spiralclass.com A` now returns Cloudflare edge addresses,
 not the box's IP. Only the wss signalling on :443 resolves this name, and
 Cloudflare's proxy carries WebSockets natively; RTC media never resolves it
@@ -288,7 +288,7 @@ directly for debugging, use the IP from
 
 Add an **A record**, proxied (orange cloud — Cloudflare carries the wss
 signalling fine, and RTC media goes straight to the box's own IP via ICE, so
-it never touches the proxy; see [D-134](../decisions/D-134.md)):
+it never touches the proxy; see [D-16](../decisions/D-16.md)):
 
 ```
 livekit.spiralclass.com  A  203.0.113.10
@@ -310,7 +310,7 @@ This step used to say production's secret must be set to match preview's.
 That no longer holds. The box's `livekit.yaml` is rendered from Infisical's
 **production** environment by `scripts/oracle-render-livekit.sh`, so the box
 and production's app read one pair from one place. Preview holds no LiveKit
-pair at all ([D-94](../decisions/D-94.md)'s 2026-09-16 addendum). Rotating
+pair at all (since 2026-09-16, [D-16](../decisions/D-16.md)). Rotating
 production's pair is `infra/oracle-box/CUTOVER.md` step 9.
 
 ## Deploying / redeploying
@@ -318,7 +318,7 @@ production's pair is `infra/oracle-box/CUTOVER.md` step 9.
 **Provisioning a box from scratch, or a full config/toolchain refresh, is a
 hand operation** — see [`ORACLE_BOX_REBUILD.md`](./ORACLE_BOX_REBUILD.md).
 It used to say this went "through Tofu now"; it never did. The module was
-deleted in [D-139](../decisions/D-139.md) and the `tofu apply -replace` block
+deleted in [D-164](../decisions/D-164.md) and the `tofu apply -replace` block
 that stood here has been removed rather than left to be copied at 2am.
 
 Config changes on the running box are made in place, over Tailscale SSH, in
@@ -350,7 +350,7 @@ curl -sS https://livekit.spiralclass.com/   # once DNS+ports are live — should
   container crash or box reboot without intervention.
 - **Certificate:** `pnpm local synthetic` checks Caddy's cert on the ORIGIN
   IP (not the Cloudflare edge, whose cert is always valid) and fails under
-  21 days remaining. Since [D-134](../decisions/D-134.md) proxied the record,
+  21 days remaining. Since [D-16](../decisions/D-16.md) proxied the record,
   TLS-ALPN-01 cannot work at all and renewal rests solely on HTTP-01
   surviving Cloudflare's redirect — one path where there were two, hence
   the probe. A box replacement must update `LIVEKIT_ORIGIN_IP` in
@@ -413,7 +413,7 @@ Tofu state:
    manual steps, and the runbook gives the order. This step used to read
    `cd infra/oracle-runner && $INFISICAL tofu apply` and claim one apply
    recreated all of it; that module was never applied and is now deleted
-   ([D-139](../decisions/D-139.md)). Alternatively,
+   ([D-164](../decisions/D-164.md)). Alternatively,
    stand up the Hetzner box this was always meant to graduate to (see
    "Risk-acceptance record" above) — this is the natural moment to make
    that move instead of re-provisioning the same free-tier box again.

@@ -56,7 +56,7 @@ describe("web nav resolver", () => {
 
   it("exposes the 'Contenido' group with materials + focus tags + lesson templates", () => {
     const keys = webNavGroup("content", "en").map((l) => l.key);
-    // `materialStyle` (D-78) joined the group — AI-material tone/style settings.
+    // `materialStyle` (D-17) joined the group — AI-material tone/style settings.
     expect(keys).toEqual(["materials", "focusTags", "classContentTemplates", "materialStyle"]);
     const byKey = Object.fromEntries(webNavGroup("content", "en").map((l) => [l.key, l]));
     expect(byKey.materials.href).toBe("/dashboard/materials");

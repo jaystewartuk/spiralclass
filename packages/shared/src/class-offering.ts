@@ -1,4 +1,4 @@
-// A package template gets asked two different questions, and until D-144's
+// A package template gets asked two different questions, and until the buy-page rewrite's
 // follow-up one boolean — `singleClass` — was answering both of them.
 //
 //   1. "Is this ONE class?"  A fact about the offering's SHAPE. It decides the
@@ -7,7 +7,7 @@
 //
 //   2. "Does paying RESERVE the slot?"  A fact about how it is SOLD. It decides
 //      whether checkout refuses to take money until a time is chosen
-//      (pay-at-reservation, D-111) and whether the first-class picker sits
+//      (pay-at-reservation) and whether the first-class picker sits
 //      above the pay button or below it.
 //
 // Those coincide for every template a teacher sets up deliberately, which is

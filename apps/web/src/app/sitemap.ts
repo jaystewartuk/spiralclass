@@ -30,7 +30,7 @@ const MARKETING_ROUTES = [
 // (lib/marketplace-ready.ts), which the page/buy-page 404 logic uses directly;
 // a plain JS predicate can't run inside a Prisma `where`, so this must be kept
 // in sync with that function by hand.
-// One entry per URL a public page has (D-193), each carrying the page's whole
+// One entry per URL a public page has (D-72), each carrying the page's whole
 // hreflang set — the same set its metadata emits (localizedAlternates), so the
 // sitemap and the page cannot tell a search engine two different things. A
 // page is listed only in the languages its content exists in.

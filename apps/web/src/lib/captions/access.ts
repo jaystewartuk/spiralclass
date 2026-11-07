@@ -41,7 +41,7 @@ export async function captionAccessFor(
   if (!session) return { ok: false, reason: "not-found" };
 
   // The teacher's plan owns the feature, whoever is asking (the call page's
-  // own gate, lesson_notes, D-15).
+  // own gate, lesson_notes).
   const gate = await gateProFeature(session.teacherIdentity, "lesson_notes");
   if (!gate.ok) return { ok: false, reason: "not-entitled" };
 

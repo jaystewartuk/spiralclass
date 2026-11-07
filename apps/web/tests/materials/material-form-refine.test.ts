@@ -4,7 +4,7 @@ import * as React from "react";
 
 (globalThis as Record<string, unknown>).React = React;
 
-// "Edit with AI" (D-73) — the unified MaterialForm no longer offers a single
+// "Edit with AI" — the unified MaterialForm no longer offers a single
 // raw-Markdown textarea bound to the WHOLE body; MATERIAL_EDITING phase 4
 // restored direct text editing, but per block, through the section/block
 // editor (material-editor.tsx / block-editor.tsx) — so a paragraph's own
@@ -71,7 +71,7 @@ function renderForm(aiEnabled: boolean, withExisting = true, isPro = true) {
   );
 }
 
-describe("MaterialForm — Edit with AI (D-73)", () => {
+describe("MaterialForm — Edit with AI", () => {
   it("renders the body preview-first (no open editors) when AI is on", () => {
     const html = renderForm(true);
     // Preview-first (Phase 5): the body renders exactly as the student sees

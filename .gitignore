@@ -89,11 +89,6 @@ next-env.d.ts
 apps/web/scripts/import/data/
 .env*
 
-# MkDocs docs site: local build output + throwaway Python venv.
-# The site is built by Cloudflare Pages from mkdocs.yml; see docs/deployment/DOCS_SITE.md.
-/site/
-.venv-docs/
-
 # Terraform (infra/) — never commit state, filled tfvars, or filled backend
 # config; the *.example files ship.
 **/.terraform/*
@@ -135,7 +130,7 @@ config/env/*.local.env
 # Neon CLI's local org-link file (org id only, no secrets)
 .neon
 
-# Local gate receipts (D-119). Per-machine, per-commit run state — never
+# Local gate receipts (D-157). Per-machine, per-commit run state — never
 # shared.
 .gate/
 

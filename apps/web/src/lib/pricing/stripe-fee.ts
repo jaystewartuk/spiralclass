@@ -4,7 +4,7 @@
 //
 // `stripeWorstCaseRatePercent` is the platform's deliberately-pessimistic upper
 // bound, used to size a suggested transfer discount — never quote it to a
-// teacher as "what Stripe charges" (D-152). See that module's header.
+// teacher as "what Stripe charges" (D-143). See that module's header.
 export {
   stripeWorstCaseRatePercent,
   computeWisePriceFromStripe,

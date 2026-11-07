@@ -3,7 +3,7 @@ import type { AdminRole } from "@prisma/client";
 
 // Pure nav-visibility logic, split out of app/admin/layout.tsx so it's
 // testable without pulling in that file's Server Component / analytics
-// dependencies (D-55).
+// dependencies (D-25).
 
 // Sidebar grouping (D-6x supercharged nav) — replaces the old binary
 // primary/secondary split (inline bar vs. account dropdown) now that every

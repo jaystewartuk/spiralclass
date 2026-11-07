@@ -40,7 +40,7 @@ vi.mock("next/navigation", () => ({
 
 vi.mock("@/lib/prisma", () => ({
   prisma: {
-    // D-113: the payout-instrument delegate. Empty by default — a test that
+    // D-145: the payout-instrument delegate. Empty by default — a test that
     // cares about a specific instrument overrides it.
     teacherPayoutInstrument: {
       findMany: async () => [],
@@ -226,7 +226,7 @@ describe("createCheckoutIntent", () => {
     expect(res).toEqual({ clientSecret: "cs_1_secret_abc", externalReference: "ref-1" });
   });
 
-  it("rejects checkout when the email belongs to a Teacher account (D-38)", async () => {
+  it("rejects checkout when the email belongs to a Teacher account (D-40)", async () => {
     findOrCreateRosterStudent.mockRejectedValueOnce(new TeacherEmailConflictError("conflict"));
     const res = await run(formData());
     expect(res).toHaveProperty("error");
@@ -235,7 +235,7 @@ describe("createCheckoutIntent", () => {
 });
 
 // The public funnel speaks the teacher's booking-page language, never the
-// visitor's (CLAUDE.md, D-133). The locale cookie is pinned to es in these
+// visitor's (CLAUDE.md, D-72). The locale cookie is pinned to es in these
 // tests, so an English booking page proves the checkout ignores it.
 describe("createCheckoutIntent — the booking page's language, not the visitor's", () => {
   it("checks out in the booking page's language whatever the visitor's cookie says", async () => {

@@ -1,11 +1,11 @@
-// Financial Intelligence estimate layer (D-86, S3) — the Overview
+// Financial Intelligence estimate layer (slice S3) — the Overview
 // orchestrator. Pure-core + thin-fetch split, mirroring money-metrics.ts:
 // `summarizeIntegrationCosts` / `rollupByCategory` / `rollupByIntegration` /
 // `totalCostPence` are pure and unit-tested directly; `getEconomicsOverview`
 // is the one place that fetches the registry, usage, assumptions, and reused
 // revenue series and wires them together.
 //
-// Revenue is reused, not reinvented (D-86): MRR from getSubscriptionOverview
+// Revenue is reused, not reinvented: MRR from getSubscriptionOverview
 // (canonical-currency centavos, plus a per-currency map for any legacy
 // subscriber still billing in a pre-D-99 currency). It used to add the latest
 // month's withheld commission from `getCommissionSeries`; D-143 removed both
@@ -58,7 +58,7 @@ export type IntegrationEstimate = {
 
 // Estimate every integration's monthly cost against one month's usage,
 // converting to GBP. `unresolvedKeys` is every integration that couldn't be
-// priced (bad pricing-model JSON or unknown currency) — the D-86 doc's "£0 +
+// priced (bad pricing-model JSON or unknown currency) — the "£0 +
 // warning badge" surface, not silently dropped.
 export function summarizeIntegrationCosts(
   integrations: EstimateInput[],
@@ -228,7 +228,7 @@ export async function getEconomicsOverview(
   const totalPence = totalCostPence(estimates);
 
   // MRR, converted to GBP pence per-currency and summed — never assume every
-  // subscriber bills in one currency. The canonical bucket (GBP as of D-99)
+  // subscriber bills in one currency. The canonical bucket (GBP as of D-153)
   // converts at rate 1; a legacy pre-D-99 subscriber still on their old
   // currency converts through its own FX assumption instead of being dropped
   // or (worse) blended in as if it were already GBP.

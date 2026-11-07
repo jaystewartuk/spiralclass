@@ -3,7 +3,7 @@
 # named Neon branch checkpoint of a parent branch (default
 # `production`). Prune-then-create, not the reverse — see the prune call
 # below for why the order is load-bearing. This is the
-# pre-deploy safety point that replaced the old pg_dump-to-R2 step (see D-95):
+# pre-deploy safety point that replaced the old pg_dump-to-R2 step (see D-178):
 # a Neon branch is copy-on-write against the parent's WAL history, so creating
 # one is seconds regardless of database size, and rolling back to it is
 # `neon-rollback.sh` away — no separate restore target to provision, no
@@ -75,7 +75,8 @@ LABEL=""
 # definition of that number — scripts/database-deploy.sh calls this script without
 # --keep precisely so it stays that way. (It used to be duplicated in
 # .github/actions/neon-checkpoint/action.yml, which passed it explicitly; that
-# action and every workflow in this repo were deleted by D-129.) Bounded from
+# action was deleted with every workflow in August 2026 and did not come
+# back.) Bounded from
 # both sides and both bounds fail silently — too high hits the Neon project's
 # branch ceiling mid-deploy, too low leaves no restore point for a bad migration
 # noticed days later. A guard test enforces the range and the no-override:
@@ -138,7 +139,7 @@ BRANCHES_JSON="$("${NEON[@]}" branches list --output json </dev/null)"
 # --- Precondition: does this retention target fit under the branch ceiling? ---
 # Neon enforces a per-project branch limit. Blowing through it surfaces as
 # `branches create` failing with "branches limit exceeded" — and because the
-# checkpoint is the FIRST step of the production deploy job (D-95 refuses to
+# checkpoint is the FIRST step of the production deploy job (D-178 refuses to
 # migrate without one), that aborts a production deploy with an error naming
 # the symptom rather than the cause. Checking it up front turns "the deploy
 # died at the Neon step" into "--keep is set higher than this project allows,
@@ -244,7 +245,7 @@ prune_to() {
 # Neon's per-project branch ceiling: `branches create` failed with "branches
 # limit exceeded", `set -e` aborted, and the prune that would have freed a slot
 # was never reached. Because the checkpoint is the FIRST step of the production
-# deploy job (D-95 refuses to migrate without one), that soft-locked production
+# deploy job (D-178 refuses to migrate without one), that soft-locked production
 # deploys entirely — every subsequent attempt failed identically, with no
 # self-healing path. Production 2026-07-29: a fully-gated promote fast-forwarded
 # `production`, the mobile OTA shipped, and the web deploy never ran, leaving

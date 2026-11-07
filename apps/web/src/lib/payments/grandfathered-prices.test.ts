@@ -68,7 +68,7 @@ describe("effectivePriceMinorUnits", () => {
     expect(effectivePriceMinorUnits(prices, tpl("a", 185_000), "stripe")).toBe(0);
   });
 
-  // D-188: an agreed price was agreed for one person. Letting it price the
+  // D-149: an agreed price was agreed for one person. Letting it price the
   // package bought for two would sell two people the class at one person's
   // old rate.
   it("never applies a one-person agreed price to the package bought for two", () => {

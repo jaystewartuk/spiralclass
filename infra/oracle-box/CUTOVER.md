@@ -7,7 +7,7 @@ while live video is down. Follow it in order.
 > **What this box carries, since the 2026-09-04 topology decision:** the
 > LiveKit stack, the preview web app and preview's Postgres. **The production
 > web app is on Cloud Run ([D-184](../../docs/decisions/D-184.md)) and
-> production's database stays on Neon** — see D-150's second addendum. So the
+> production's database stays on Neon** — see [D-184](../../docs/decisions/D-184.md). So the
 > outage this procedure risks is **live classes**, not the site:
 > `spiralclass.com` is served by Cloud Run throughout and its DNS records are
 > never touched here.
@@ -335,7 +335,7 @@ it runs.
 
 ⚡ This is the one part of the migration with no rollback story of its own, and
 it is fine: preview's data is seeded and disposable, which is the entire reason
-D-150's objection to colocating Postgres does not apply to it. If that ever
+D-184's objection to colocating Postgres does not apply to it. If that ever
 stops being true, the decision needs re-opening.
 
 ## 7. ⚠️ Verify before DNS, not after
@@ -394,8 +394,8 @@ the whole point of doing it in this order.
   the whole allowance still holds at the volume level, so the box feels fine
   right up until a deploy fills 47 GB. The deploy script warns below 150 GB.
 
-- **The database latency D-150 requires.** Take it here, over the tailnet,
-  before DNS moves. D-150 says in as many words that the migration must not cut
+- **The database latency D-184 requires.** Take it here, over the tailnet,
+  before DNS moves. D-184 says in as many words that the migration must not cut
   DNS before the real number replaces its 1.3-second estimate, and that the
   decision should be re-opened if it comes back far worse.
 
@@ -412,7 +412,7 @@ the whole point of doing it in this order.
 must be issued — and tls-alpn-01 cannot work through Cloudflare's proxy, so
 http-01 is the only path.
 
-That makes D-134's invariant govern both: **"Always Use HTTPS" must be OFF and
+That makes D-16's invariant govern both: **"Always Use HTTPS" must be OFF and
 SSL mode must be Full on the zone.** Turn it on and issuance fails silently
 until the certificate expires and every class stops.
 
@@ -447,7 +447,7 @@ spiralclass-preview`. It has to pass before anything else here means much:
 - **Rotate production's LiveKit API key pair, and take preview's away.** The
   pair was also exposed in that transcript, and rotating is cheapest now, while
   `livekit.yaml` is being rewritten anyway. Preview holds **no** LiveKit pair
-  from here on ([D-94](../../docs/decisions/D-94.md)'s 2026-09-16 addendum).
+  from here on (since 2026-09-16, [D-16](../../docs/decisions/D-16.md)).
   Do it outside lesson hours, because every class in progress drops when
   livekit-server restarts in step 3.
   1. **Generate a new pair** —
@@ -483,7 +483,7 @@ spiralclass-preview`. It has to pass before anything else here means much:
      switched on yet". `pnpm livekit:activity` still lists rooms, because it reads
      production's pair.
 - ⚠️ **Take the NOT-APPLIED banner off `infra/oracle-box/README.md`** — it is
-  the whole price of having merged this module before applying it (D-150's
+  the whole price of having merged this module before applying it (D-184's
   third addendum), and it is worthless if it outlives the apply. A reader who
   finds a banner that is no longer true stops believing the next one.
 - **Put the deploy on GitHub Actions, which is where it belongs** (operator,
@@ -495,7 +495,7 @@ spiralclass-preview`. It has to pass before anything else here means much:
   operator session to borrow; and the **GHCR** build-and-push that replaces
   `oracle-push-images.sh`, on an `ubuntu-24.04-arm` runner. A preview deploy
   workflow with a `push` trigger against this box is the last step of that,
-  not the first — see D-157's addendum. (The old `deploy-preview.yml` was
+  not the first — see D-157. (The old `deploy-preview.yml` was
   deleted with Fly on 2026-09-23; git history has it.)
 - **Repoint Infisical's preview `DATABASE_URL` and `DIRECT_URL`** at the box's
   Postgres, or delete the orphaned Neon preview project. Until one of those
@@ -507,4 +507,4 @@ spiralclass-preview`. It has to pass before anything else here means much:
   as of D-158. ⚠️ **The repository is published from this tree**, so anything
   added back here is added in public — see `scripts/check-no-identifiers.sh`.
 - **Update `ORACLE_BOX_REBUILD.md`.** Its "Rebuild" section is what this file
-  replaces, and D-150 said so.
+  replaces, and D-184 said so.

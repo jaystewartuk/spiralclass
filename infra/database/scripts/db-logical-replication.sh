@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
-# D-49 layer 3 (data) — near-zero-downtime region cutover via Postgres logical
+# D-70 layer 3 (data) — near-zero-downtime region cutover via Postgres logical
 # replication. The other tier (db-clone-to-region.sh) needs a write-freeze;
 # this one seeds the target and then STREAMS the delta so the freeze is just the
 # final flip. Postgres-native only (CREATE PUBLICATION / SUBSCRIPTION) — never a
-# provider's proprietary CDC service (D-49).
+# provider's proprietary CDC service (D-70).
 #
 # Prereqs: the SOURCE must run with wal_level=logical (Supabase: enable in
 # dashboard; self-hosted: postgresql.conf). The TARGET must ALREADY have the

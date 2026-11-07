@@ -10,7 +10,7 @@ import { OverviewPanel } from "./overview-panel";
 import { IntegrationsPanel, type IntegrationRow } from "./integrations-panel";
 import { UsagePanel, type UsageEntry } from "./usage-panel";
 
-// One nav entry + in-page tabs (D-86 doc's Frontend section), not four route
+// One nav entry + in-page tabs (the original estimate-layer design), not four route
 // segments — keeps the admin sidebar lean. Deep-linkable via `?tab=` so a
 // bookmark/share lands on the right panel; state also lives in useState so
 // switching tabs doesn't wait on a server round-trip.

@@ -2,7 +2,7 @@
 // queries PostHog's HogQL Query API directly (server-side, using the
 // existing POSTHOG_PERSONAL_API_KEY — already configured for local
 // feature-flag evaluation, apps/web/src/lib/env.ts) for the events the
-// runbook's earlier sections should have generated. See D-55.
+// runbook's earlier sections should have generated. See D-25.
 import { serverEnv } from "@/lib/env";
 import { posthogRegionHosts } from "@/lib/analytics/posthog-region";
 import type { UatTargetEnv } from "./env-targets";

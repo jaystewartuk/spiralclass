@@ -2,9 +2,9 @@
 
 > [!IMPORTANT]
 > **The box this file was observed from was destroyed on 2026-09-19**
-> ([D-182](../decisions/D-182.md)), and no Oracle box has served since.
+> ([D-16](../decisions/D-16.md)), and no Oracle box has served since.
 > Production video runs on a Compute Engine `e2-micro`
-> ([D-187](../decisions/D-187.md),
+> ([D-16](../decisions/D-16.md),
 > [`infra/gcp-livekit/README.md`](../../infra/gcp-livekit/README.md)). What
 > follows is the record of that machine and the hand procedure for the Oracle
 > way back ([D-184](../decisions/D-184.md)); where it and
@@ -13,10 +13,10 @@
 > the box as it was on 2026-08-29.
 
 > [!NOTE]
-> **[D-150](../decisions/D-150.md) (2026-09-03) decided this box gets an
+> **A decision of 2026-09-03, now in [D-184](../decisions/D-184.md)'s history, gave this box an
 > OpenTofu definition again, and that the Next.js app moves onto Oracle
 > alongside it.** Nothing was applied before the box was destroyed, so **this
-> file was the only description of the box for as long as it existed.** D-150 also carries the
+> file was the only description of the box for as long as it existed.** D-184 also carries the
 > measurement that shaped it: this box is in `mx-queretaro-1`, 58 ms from
 > Neon's `aws-us-east-2` against the Fly machine's 12 ms (production has since
 > moved to `aws-us-east-1`, which is ~55 ms from there). When the module
@@ -29,7 +29,7 @@
 > `infra/oracle-runner/` used to sit in this repo claiming that "a `tofu
 apply`/rebuild today reproduces the box as-is". It was never applied, had no
 > state file, and had drifted from the running machine. It was deleted in
-> [D-139](../decisions/D-139.md). This file replaces it, and every command and
+> [D-164](../decisions/D-164.md). This file replaces it, and every command and
 > value below was **observed on the running box on 2026-08-29** rather than
 > copied out of a template.
 >
@@ -44,8 +44,8 @@ retired in 2026-07 after three reversals in as many days, and CI now runs on
 GitHub-hosted runners ([D-157](../decisions/D-157.md)).
 
 Losing it stopped classes — which is what happened when it could not be
-relaunched ([D-182](../decisions/D-182.md)). Rebuilding it is a hand operation
-measured in hours, which is the cost [D-139](../decisions/D-139.md) knowingly
+relaunched ([D-16](../decisions/D-16.md)). Rebuilding it is a hand operation
+measured in hours, which is the cost [D-164](../decisions/D-164.md) knowingly
 accepted.
 
 ## Observed state, 2026-08-29
@@ -132,13 +132,14 @@ the rebuild needs but compose does not read. See
 the rotation runbook, which is kept privately (see
 [`../security.md`](../security.md)).
 
-### The web app's own config, when D-150 moves it here
+### The web app's own config, when D-184 moves it here
 
 ⚠️ **Read this before the migration, not during it. The failure mode is
 silence.**
 
 As observed, the box ran LiveKit, Egress, Caddy and Redis.
-[D-150](../decisions/D-150.md) moves the Next.js app here too, and the app gets
+The hosting plan of the time would have moved the Next.js app here too (it
+never moved — [D-184](../decisions/D-184.md)), and the app gets
 its non-secret configuration a different way from everything above.
 
 **How it works on Cloud Run.** `scripts/docker-entrypoint.sh` sources
@@ -344,7 +345,7 @@ The http-01 path was verified end-to-end on 2026-08-29 and it does work:
 > challenge with a redirect, http-01 fails, and — because tls-alpn-01 is
 > already impossible through the proxy — **renewal fails silently until the
 > certificate expires and every class stops.** This is
-> [D-134](../decisions/D-134.md)'s risk, and it is now the _only_ remaining
+> [D-16](../decisions/D-16.md)'s risk, and it is now the _only_ remaining
 > path rather than one of two.
 >
 > **This invariant is a probe, not just this paragraph.** `pnpm local
@@ -371,9 +372,8 @@ synthetic` asserts the challenge path is answered by Caddy (308) rather than
 >   warning.
 >
 > ⚠️ **Neither runs on a clock.** There is no cron and no systemd timer on the
-> box — verified, both crontabs are empty — and [D-129](../decisions/D-129.md)
-> deleted every scheduled
-> workflow, so these run by hand and on `pnpm promote`. `pnpm gate` nags when
+> box — verified, both crontabs are empty — and every scheduled workflow was
+> deleted on 2026-08-25 and none came back ([D-157](../decisions/D-157.md)), so these run by hand and on `pnpm promote`. `pnpm gate` nags when
 > the `synthetic` receipt goes stale after 7 days, which is the dead-man's
 > switch, but it only nags at a push. **A month without pushing is a month
 > without either probe**, and the first signal would again be a teacher
@@ -432,7 +432,7 @@ reboot — which is why the box had 38 days of uptime when this was written.
 ## Where the box and the deleted module disagreed
 
 Recorded because the disagreement is the evidence for
-[D-139](../decisions/D-139.md):
+[D-164](../decisions/D-164.md):
 
 - **The module was never applied and had no state.** Its README claimed a
   `tofu apply` reproduces the box. On 2026-08-29 a session believed that claim

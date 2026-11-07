@@ -41,7 +41,7 @@ import type { InlineNode, MaterialDoc } from "./types";
 export const SECTION_UNDO_LIMIT = 20;
 
 export type SectionActionKind =
-  "move" | "delete" | "duplicate" | "insert" | "refine" | "editBlocks";
+  "move" | "delete" | "duplicate" | "insert" | "rename" | "refine" | "editBlocks";
 
 export type SectionAction =
   /** Splice semantics, same as the shared op: remove `from`, insert at `to`. */
@@ -53,6 +53,10 @@ export type SectionAction =
   | { kind: "duplicate"; index: number }
   /** Insert an empty, titled section BEFORE `index` (`sections.length` appends). */
   | { kind: "insert"; index: number; title: string }
+  /** Retitle the card at `index`. A no-op on the lead section, which has no
+   * heading to change, and on a blank title, which would leave a heading with
+   * nothing in it. Formatting inside the old heading does not survive. */
+  | { kind: "rename"; index: number; title: string }
   /** Splice an AI-refined section back in. `id` names the target card — the
    * one identity that survives moves, renumbering and unrelated edits while
    * the model round trip is in flight. If the card was deleted meanwhile the
@@ -235,6 +239,13 @@ function nextSections(
       const at = clamp(action.index, 0, sections.length);
       sections.splice(at, 0, newSection(action.title, state.level));
       ids.splice(at, 0, freshId());
+      return { sections, ids };
+    }
+    case "rename": {
+      const section = sections[action.index];
+      const title = action.title.trim();
+      if (!section?.heading || !title) return null;
+      section.heading = { ...section.heading, inlines: [{ type: "text", value: title }] };
       return { sections, ids };
     }
     case "refine": {

@@ -72,7 +72,7 @@ export function CheckoutForm({
 }: {
   slug: string;
   templateId: string;
-  // How many people the package is for (D-188). The prices above are already
+  // How many people the package is for (D-149). The prices above are already
   // the ones for this many people; this only posts the count and asks the
   // buyer to confirm for the second person.
   seats?: 1 | 2;
@@ -82,7 +82,7 @@ export function CheckoutForm({
   method: Method;
   // The chosen instrument, for `manual_transfer`. Null for Stripe. Forwarded
   // as a hidden field so the server knows WHICH payee instructions this
-  // student was shown (D-113); `instrumentKind` is the analytics label, kept
+  // student was shown (D-145); `instrumentKind` is the analytics label, kept
   // in the same vocabulary as checkout_started/payment_received.
   instrumentId: string | null;
   instrumentKind: PayoutInstrumentKind | null;
@@ -175,7 +175,7 @@ export function CheckoutForm({
         // abandons (left before submit, or JS never ran) from server-side
         // drop-offs. No PII in the payload; the email/name live only in the
         // server event's resolved student id.
-        // Stamped with the visitor's intro-video watch state (D-73) so the
+        // Stamped with the visitor's intro-video watch state so the
         // "does watching the intro convert better?" question is ONE insight
         // with a breakdown, rather than a hand-computed ratio between two
         // separate funnels that don't share a denominator. `watched: false` is
