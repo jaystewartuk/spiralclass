@@ -1,6 +1,6 @@
 import path from "node:path";
 import type { NextConfig } from "next";
-import { withSentryConfig } from "@sentry/nextjs";
+import { withSentryConfig } from "@sentry/nextjs/config";
 import { buildSecurityHeaders } from "./src/lib/security-headers";
 
 // Repo root, two levels up from apps/web/. Set as outputFileTracingRoot
@@ -233,19 +233,19 @@ const config: NextConfig = {
 // instrumentation hooks attach. Without it, Sentry.init() runs but
 // the runtime client ends up uninitialized in serverless deploys.
 //
-// `silent` keeps the build noise down; `disableLogger` strips the
-// verbose console-log integration. Source-map upload stays opt-in
+// `silent` keeps the build noise down; `webpack.treeshake.removeDebugLogging`
+// strips the SDK's debug statements. Source-map upload stays opt-in
 // (requires SENTRY_AUTH_TOKEN at build time) — without it the plugin
 // just skips the upload step.
 //
 // Turbopack note (2026-07-14): the standalone (production image) build uses
-// `next build --turbopack`. Sentry SDK v10 supports Turbopack — there's no
+// `next build --turbopack`. Sentry SDK v11 supports Turbopack — there's no
 // webpack plugin pass, so the large build-time memory cost the webpack plugin
 // used to add is gone. Kept unconditional so runtime Sentry stays wired on both
 // the Turbopack image build and the webpack `pnpm build`.
 export default withSentryConfig(config, {
   silent: !process.env.CI,
-  disableLogger: true,
+  webpack: { treeshake: { removeDebugLogging: true } },
   // Tunnel browser-side Sentry events through our own origin (same idea as the
   // PostHog /ingest proxy above): ad/privacy blockers block requests to
   // *.sentry.io by hostname, silently dropping client error reports
