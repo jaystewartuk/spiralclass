@@ -3,6 +3,7 @@ import type { CaptionLine, CaptionSession } from "@spiralclass/shared";
 import {
   BrowserCaptions,
   MAX_KEPT_LINE_MS,
+  UNHEARD_SPEECH_LIMIT_MS,
   type BrowserCaptionsDeps,
   type BrowserCaptionsInput,
   type KeptLine,
@@ -923,5 +924,153 @@ describe("BrowserCaptions — the transcript without subtitles (D-203)", () => {
     const { c, statuses } = setup({ SpeechRecognition: null });
     c.sync(hidden({ selfCapable: false }));
     expect(statuses.at(-1)).toEqual({ uncaptioned: [], stopped: null });
+  });
+});
+
+// A tablet and a computer, measured on 2026-11-04: the computer's browser passed
+// the capability check, so it held both directions and the fallback was refused,
+// and it recognised nothing for 52 minutes.
+describe("BrowserCaptions — a browser that claims it can recognise and cannot", () => {
+  const onATablet = (over: Partial<BrowserCaptionsInput> = {}) =>
+    input({
+      room: {
+        localIdentity: "t1",
+        localMicTrack: localMic,
+        remote: { identity: "s1", micTrack: remoteMic, capable: false },
+      },
+      ...over,
+    });
+  const speech = (c: BrowserCaptions, ms: number, speaking = { local: true, remote: true }) => {
+    for (let at = 0; at < ms; at += 1_000) c.noteSpeech(speaking, 1_000);
+  };
+
+  it("reports itself unusable when people have spoken and nothing was heard", () => {
+    const onUnusable = vi.fn();
+    const { c } = setup({ onUnusable });
+    c.sync(onATablet());
+    speech(c, UNHEARD_SPEECH_LIMIT_MS - 1_000);
+    expect(onUnusable).not.toHaveBeenCalled();
+    speech(c, 1_000);
+    expect(onUnusable).toHaveBeenCalledTimes(1);
+    expect(onUnusable).toHaveBeenCalledWith("silent");
+  });
+
+  it("reports once however long it goes on", () => {
+    const onUnusable = vi.fn();
+    const { c } = setup({ onUnusable });
+    c.sync(onATablet());
+    speech(c, UNHEARD_SPEECH_LIMIT_MS * 3);
+    expect(onUnusable).toHaveBeenCalledTimes(1);
+  });
+
+  it("does not count silence, however long", () => {
+    const onUnusable = vi.fn();
+    const { c } = setup({ onUnusable });
+    c.sync(onATablet());
+    speech(c, UNHEARD_SPEECH_LIMIT_MS * 3, { local: false, remote: false });
+    expect(onUnusable).not.toHaveBeenCalled();
+  });
+
+  it("only counts the speech of the person each recogniser is listening to", () => {
+    const onUnusable = vi.fn();
+    const { c } = setup({ onUnusable });
+    // Both browsers can: this one only recognises its own person.
+    c.sync(input());
+    speech(c, UNHEARD_SPEECH_LIMIT_MS * 2, { local: false, remote: true });
+    expect(onUnusable).not.toHaveBeenCalled();
+    speech(c, UNHEARD_SPEECH_LIMIT_MS, { local: true, remote: false });
+    expect(onUnusable).toHaveBeenCalledWith("silent");
+  });
+
+  it("starts the count again whenever a word is heard", () => {
+    const onUnusable = vi.fn();
+    const { c } = setup({ onUnusable });
+    c.sync(onATablet());
+    speech(c, UNHEARD_SPEECH_LIMIT_MS - 1_000);
+    for (const r of live()) r.onPartial?.("hola");
+    speech(c, UNHEARD_SPEECH_LIMIT_MS - 1_000);
+    for (const r of live()) r.onFinal("hola");
+    speech(c, UNHEARD_SPEECH_LIMIT_MS - 1_000);
+    expect(onUnusable).not.toHaveBeenCalled();
+  });
+
+  it("counts while only the transcript is being kept, with the switch off", () => {
+    const onUnusable = vi.fn();
+    const { c } = setup({ onUnusable });
+    c.sync(onATablet({ captionsOn: false, session: SESSION({ transcriptCapture: true }) }));
+    speech(c, UNHEARD_SPEECH_LIMIT_MS);
+    expect(onUnusable).toHaveBeenCalledWith("silent");
+  });
+
+  it("does not hold a cloud stream to the same test", () => {
+    const onUnusable = vi.fn();
+    const { c } = setup({ onUnusable });
+    c.sync(
+      input({
+        selfCapable: false,
+        session: SESSION({ cloudRecognition: true }),
+        room: {
+          localIdentity: "t1",
+          localMicTrack: localMic,
+          remote: { identity: "s1", micTrack: remoteMic, capable: false },
+        },
+      }),
+    );
+    expect(clouds).toHaveLength(1);
+    speech(c, UNHEARD_SPEECH_LIMIT_MS * 2);
+    expect(onUnusable).not.toHaveBeenCalled();
+  });
+
+  it("passes on a recogniser that keeps failing, and one that gives up", () => {
+    const onUnusable = vi.fn();
+    const failing = setup({ onUnusable });
+    failing.c.sync(onATablet());
+    recognizers[0].onUnusable?.("network");
+    expect(onUnusable).toHaveBeenLastCalledWith("network");
+
+    recognizers = [];
+    onUnusable.mockClear();
+    const giving = setup({ onUnusable });
+    giving.c.sync(onATablet());
+    recognizers[0].onStopped("permission");
+    expect(onUnusable).toHaveBeenLastCalledWith("permission");
+  });
+
+  it("hands the job to the cloud once the claim is withdrawn, and drops the old warning", () => {
+    const { c, statuses } = setup();
+    const session = SESSION({ cloudRecognition: true });
+    c.sync(onATablet({ session }));
+    recognizers[0].onStopped("permission");
+    expect(statuses.at(-1)).toEqual({ uncaptioned: [], stopped: "permission" });
+
+    c.sync(onATablet({ session, selfCapable: false }));
+    // recognizers[0] stopped itself; the fake does not record that.
+    expect(live().filter((r) => r !== recognizers[0])).toHaveLength(0);
+    expect(clouds.filter((r) => r.started && !r.stopped)).toHaveLength(1);
+    expect(statuses.at(-1)).toEqual({ uncaptioned: [], stopped: null });
+  });
+
+  it("says nobody can caption when there is no fallback to take over", () => {
+    const { c, statuses } = setup();
+    c.sync(onATablet({ selfCapable: false }));
+    expect(statuses.at(-1)).toEqual({ uncaptioned: ["teacher", "student"], stopped: null });
+  });
+
+  it("keeps a cloud stream's give-up on screen", () => {
+    const { c, statuses } = setup();
+    const noneCan = onATablet({ selfCapable: false, session: SESSION({ cloudRecognition: true }) });
+    c.sync(noneCan);
+    clouds[0].onStopped("unavailable");
+    c.sync(noneCan);
+    expect(statuses.at(-1)).toEqual({ uncaptioned: [], stopped: "unavailable" });
+  });
+
+  it("ignores speech after dispose", () => {
+    const onUnusable = vi.fn();
+    const { c } = setup({ onUnusable });
+    c.sync(onATablet());
+    c.dispose();
+    speech(c, UNHEARD_SPEECH_LIMIT_MS);
+    expect(onUnusable).not.toHaveBeenCalled();
   });
 });
