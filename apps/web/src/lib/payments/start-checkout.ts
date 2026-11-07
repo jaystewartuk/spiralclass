@@ -556,6 +556,7 @@ export async function startCheckout(args: StartCheckoutArgs): Promise<StartCheck
       // carry it keep meaning what they meant.
       method: instrument ? railForKind(instrument.kind) : "stripe",
       priceMinorUnits,
+      currency,
       seats: args.seats,
       source: args.source,
       locale: args.locale,

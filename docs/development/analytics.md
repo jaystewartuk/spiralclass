@@ -87,7 +87,12 @@ under **different names**, because they measure different moments:
   the instant the buy form submits — JS ran, validation passed — while
   `checkout_started` (server, `src/lib/payments/start-checkout.ts`) fires once
   the Payment row exists. The gap between them separates client-side abandons
-  from server-side drop-offs.
+  from server-side drop-offs. `checkout_started` carries `priceMinorUnits`
+  and its own `currency` for both Stripe and Wise purchases.
+- `checkout_failed` reports a failed payment attempt (including settlement
+  amount/currency integrity failures), with its resolved `rail`. Natural
+  expiry and superseded sessions do not emit it or send a failure notice;
+  events recorded before this distinction may include abandoned checkouts.
 - `teacher_signed_in` / `teacher_signup_completed` fire from the better-auth
   `session.create.after` hook and lazy Teacher provisioning, so one server-side
   place covers every way a session can be created.

@@ -144,6 +144,10 @@ for the same template with the same teacher
 
 - `Payment.status`: `pending → paid → refunded`, or `pending → failed`.
   `refunded` is terminal.
+- An unpaid checkout that expires naturally or is superseded still records
+  `Payment.status = failed`, through a distinct expiry transition. It sends
+  **no notice** and emits no `checkout_failed`: expiry is not a declined
+  payment attempt. A real failed attempt retains its failure notice and event.
 - Card is charge-or-fail. A settlement event reporting less than the expected
   amount, or a different currency, flips the payment to `failed`, not `paid`.
 - A non-positive expected amount at the flip-to-paid step throws rather than
