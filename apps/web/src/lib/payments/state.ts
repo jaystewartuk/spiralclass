@@ -49,6 +49,11 @@ export type StripeOutcomeInput =
       rail: PaymentRail;
     }
   | {
+      kind: "expired";
+      paymentIntentId: string | null;
+      rail: PaymentRail;
+    }
+  | {
       kind: "refunded";
       paymentIntentId: string | null;
     };
@@ -60,7 +65,7 @@ export type AdvanceOutcome =
       sideEffects: { activatePackage: true; notify: "payment_received" };
     }
   | {
-      action: "flip-failed";
+      action: "flip-failed" | "flip-expired";
       next: PaymentSnapshot;
       sideEffects: { activatePackage: false; notify: null };
     }
@@ -104,12 +109,14 @@ export function advancePayment(
     };
   }
 
-  if (outcome.kind === "failed") {
+  if (outcome.kind === "failed" || outcome.kind === "expired") {
     if (current.status === "paid") {
       return { action: "noop", reason: "ignore-failed-after-paid" };
     }
     return {
-      action: "flip-failed",
+      // Keep the stored status for compatibility, but distinguish an
+      // expired checkout from an attempted payment for downstream effects.
+      action: outcome.kind === "expired" ? "flip-expired" : "flip-failed",
       next: {
         ...current,
         status: "failed",

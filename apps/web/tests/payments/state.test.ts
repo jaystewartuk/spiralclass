@@ -61,6 +61,53 @@ describe("advancePayment (Stripe)", () => {
     });
   });
 
+  describe("checkout expiry is not a failed payment attempt", () => {
+    it("records failed status through a distinct silent transition", () => {
+      const result = advancePayment(
+        snapshot(),
+        {
+          kind: "expired",
+          paymentIntentId: null,
+          rail: "unknown",
+        },
+        NOW,
+      );
+      expect(result).toMatchObject({
+        action: "flip-expired",
+        next: { status: "failed", providerPaymentId: null },
+        sideEffects: { activatePackage: false, notify: null },
+      });
+    });
+
+    it.each(["paid", "refunded"] as const)("never demotes %s on expiry", (status) => {
+      expect(
+        advancePayment(
+          snapshot({ status }),
+          {
+            kind: "expired",
+            paymentIntentId: null,
+            rail: "unknown",
+          },
+          NOW,
+        ).action,
+      ).toBe("noop");
+    });
+
+    it("can still settle an expired checkout when success arrives late", () => {
+      const expired = advancePayment(
+        snapshot(),
+        {
+          kind: "expired",
+          paymentIntentId: null,
+          rail: "unknown",
+        },
+        NOW,
+      );
+      if (expired.action !== "flip-expired") throw new Error();
+      expect(advancePayment(expired.next, succeeded(), NOW).action).toBe("flip-paid");
+    });
+  });
+
   describe("pending → failed (charge-or-fail; no underpayment branch)", () => {
     it("flips pending to failed on a failed outcome", () => {
       const result = advancePayment(

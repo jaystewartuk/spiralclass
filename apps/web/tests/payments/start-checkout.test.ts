@@ -330,6 +330,12 @@ describe("startCheckout — Stripe rail", () => {
     };
     expect(call.lineItem.currency).toBe("gbp");
     expect(call.lineItem.amountMinorUnits).toBe(800);
+    expect(trackServerEvent).toHaveBeenCalledWith(
+      expect.objectContaining({
+        name: "checkout_started",
+        properties: expect.objectContaining({ priceMinorUnits: 800, currency: "GBP" }),
+      }),
+    );
   });
 
   it("refuses a zero total (fully-discounted) on the card rail without crashing", async () => {

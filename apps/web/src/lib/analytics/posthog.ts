@@ -356,6 +356,7 @@ export type ServerEvent = WithSessionId<
         // still measurable.
         scheme?: string;
         priceMinorUnits: number;
+        currency: string;
         // How many people the package was bought for (D-149) — 1, or 2 for a
         // package for two — so the two prices can be told apart in a funnel.
         seats?: number;
