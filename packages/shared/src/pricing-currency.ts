@@ -1,10 +1,10 @@
-// SpiralClass — teacher pricing-currency registry (D-64).
+// SpiralClass — teacher pricing-currency registry (D-153).
 //
 // A teacher picks ONE currency for their whole business, captured once at
 // onboarding and never changed afterward — the same capture-once posture as
 // `Teacher.country` (see countries.ts). This is a genuinely different
 // concept from `platform-regions.ts`'s `currencyForRegion` (the settlement
-// currency of the platform's own Stripe *entity* — GBP since D-99, for
+// currency of the platform's own Stripe *entity* — GBP since D-153, for
 // everyone, because there is exactly one entity): pricing currency is what
 // the TEACHER chooses to sell in, independent of which entity settles it.
 //
@@ -24,9 +24,9 @@
 //     `paymentMethod === "stripe"` does), so Stripe's presentment-currency
 //     support is irrelevant to this list.
 //
-// Sizing history: D-64 cut the manual-rail list to six LatAm currencies, a
-// deliberate bet on the stated growth market when the rail was Wise-only.
-// D-124 widened it, because the constraint that justified the narrow cut is
+// Sizing history (D-153): in July 2026 the manual-rail list was six LatAm
+// currencies, a deliberate bet on the stated growth market when the rail was
+// Wise-only. On 2026-08-23 it was widened, because the constraint that justified the narrow cut is
 // gone: a teacher can now publish a bank account in her own country, and
 // pinning her to six Latin American currencies would have made the rail
 // reachable without being usable — a Nigerian teacher with a working NUBAN
@@ -40,7 +40,7 @@ export const CONNECT_CIRCLE_PRICING_CURRENCIES = ["GBP", "USD", "EUR"] as const;
 export type ConnectCirclePricingCurrency = (typeof CONNECT_CIRCLE_PRICING_CURRENCIES)[number];
 
 export const MANUAL_RAIL_PRICING_CURRENCIES = [
-  // Latin America — the launch market and the original D-64 cut.
+  // Latin America — the launch market and the original D-153 cut.
   "MXN",
   "COP",
   "ARS",
@@ -271,7 +271,7 @@ export function currencyForTeacher(teacher: { pricingCurrency?: string | null })
  * checkout core validates against it BEFORE creating any rows.
  *
  * This MUST be keyed by the teacher's actual pricing currency, not a single MXN
- * constant: a Connect-circle teacher (D-64) prices in GBP/USD/EUR, where a
+ * constant: a teacher pricing in GBP/USD/EUR (once the card rail's only list), where a
  * normal single-class price (e.g. £8) sits far above Stripe's real minimum but
  * below the old 1000-minor-unit MXN gate — which was blocking those sales
  * outright. Values are Stripe's published per-currency minimums (~US$0.50

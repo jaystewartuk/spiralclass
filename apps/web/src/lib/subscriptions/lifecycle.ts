@@ -382,7 +382,7 @@ export async function recordSubscriptionInvoice(
     periodStart: Date;
     periodEnd: Date;
     status: SubscriptionInvoiceStatus;
-    // Billing's own enum, not the payout rail's (D-113 split them).
+    // Billing's own enum, not the payout rail's (D-145 split them).
     provider?: SubscriptionPaymentProvider;
     paidAt?: Date | null;
   },
@@ -430,7 +430,7 @@ export async function notifyPaymentSucceeded(
     teacherId: string;
     amountMinorUnits: number;
     // Stripe's own invoice currency. The receipt must state the currency she
-    // was charged in — GBP since D-99, MXN for a pre-D-99 subscriber — and
+    // was charged in — GBP since D-153, MXN for a pre-D-99 subscriber — and
     // never a re-derived one.
     currency: string;
     nextChargeAt: Date | null;

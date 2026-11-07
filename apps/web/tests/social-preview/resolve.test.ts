@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-// Resolution is the load-bearing half of D-123: it decides which image (if
+// Resolution is the load-bearing half of D-125: it decides which image (if
 // any) a given shared link previews with, and its FALLBACK is what guarantees
 // every link shared before this feature existed behaves exactly as it did.
 

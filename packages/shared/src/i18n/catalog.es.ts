@@ -479,6 +479,8 @@ export const esMX = {
   "material.editor.changed.duplicate": "Sección duplicada",
   "material.editor.changed.insert": "Sección añadida",
   "material.editor.changed.refine": "Sección editada con IA",
+  "material.editor.changed.rename": "Título de la sección cambiado",
+  "material.editor.sectionTitleLabel": "Título de la sección",
   "material.editor.changed.editBlocks": "Contenido de la sección editado",
   "material.editor.aiSectionChanged": "La IA actualizó esta sección.",
   "material.editor.undoAiChange": "Deshacer cambio de IA",
@@ -1098,7 +1100,7 @@ export const esMX = {
   "onboarding.templates.priceStripe": "Precio Stripe",
   "onboarding.templates.priceWise": "Precio por transferencia (opcional)",
   // Shown instead of priceStripe when the teacher's country has no Stripe
-  // Connect rail at all (Wise-only, D-58) — there's no Stripe price to split
+  // Connect rail at all (Wise-only, D-143) — there's no Stripe price to split
   // from, so it's just "Price".
   "onboarding.templates.price": "Precio",
   "onboarding.templates.expirationMonths": "Vencimiento (meses)",
@@ -2762,6 +2764,10 @@ export const esMX = {
   "web.dashboard.students.archive.confirmReactivate": "¿Reactivar a este alumno en tu listado?",
   "web.dashboard.students.archive.confirmArchive":
     "¿Dar de baja a este alumno? Sigue siendo contactable y sus paquetes no cambian — solo sale de tu listado activo y deja de recibir recordatorios.",
+  "web.dashboard.students.archive.warningUpcoming":
+    "Este alumno tiene clases agendadas. Siguen agendadas, pero no recibirá recordatorios de ellas.",
+  "web.dashboard.students.archive.warningClassesLeft":
+    "Clases restantes: {count}. El paquete no cambia, pero el alumno dejará de recibir recordatorios.",
   "web.dashboard.students.archive.reasonPlaceholder":
     "Nota opcional (ej. pausa las clases por ahora).",
   "web.dashboard.students.archive.helpLabel": "Ayuda sobre dar de baja",
@@ -3314,7 +3320,7 @@ export const esMX = {
   "web.dashboard.shareGroups.groupName": "Nombre del grupo",
   "web.dashboard.shareGroups.linkForThisGroup": "Enlace para publicar en este grupo",
 
-  // Vistas previas sociales (D-123).
+  // Vistas previas sociales (D-125).
   "socialPreview.title": "Vista previa social",
   "socialPreview.subtitle":
     "La imagen que ve la gente cuando compartes este enlace en Facebook, WhatsApp o donde sea.",
@@ -5216,7 +5222,6 @@ export const esMX = {
   "web.siteFooter.terms": "Términos",
   "web.siteFooter.privacy": "Privacidad",
   "web.siteFooter.sourceCode": "Código fuente",
-  "web.siteFooter.madeBy": "Hecho por",
   "web.themeToggle.switchToLight": "Cambiar a modo claro",
   "web.themeToggle.switchToDark": "Cambiar a modo oscuro",
   "web.themeToggle.light": "Claro",
@@ -5973,13 +5978,13 @@ export const esMX = {
   "web.admin.lessonInsights.liveWarning.pre":
     "— la voz capturada se está enviando al proveedor de ASR y las transcripciones se están guardando,",
   "web.admin.lessonInsights.liveWarning.strong": "para cada par con consentimiento",
-  "web.admin.lessonInsights.liveWarning.mid": "(D-21/D-22). Solo deben grabarse pares de",
+  "web.admin.lessonInsights.liveWarning.mid": "(D-22). Solo deben grabarse pares de",
   "web.admin.lessonInsights.liveWarning.em": "prueba",
   "web.admin.lessonInsights.liveWarning.midEnd": "con consentimiento; apaga",
   "web.admin.lessonInsights.liveWarning.post": "entre pruebas.",
   "web.admin.lessonInsights.title": "Insights de clase — salud del pipeline",
   "web.admin.lessonInsights.subtitle":
-    "Estado operativo en todos los tenants: captura → transcripción → insights → perfil → resumen. Solo estados y conteos — no se muestra contenido de transcripciones, pronunciación o perfiles aquí (D-21/D-22).",
+    "Estado operativo en todos los tenants: captura → transcripción → insights → perfil → resumen. Solo estados y conteos — no se muestra contenido de transcripciones, pronunciación o perfiles aquí (D-22).",
   "web.admin.lessonInsights.awaitingTranscription": "Capturas esperando transcripción",
   "web.admin.lessonInsights.awaitingTranscriptionHint": 'audio "ready" aún sin transcribir',
   "web.admin.lessonInsights.stuckCaptures": "Capturas atascadas",
@@ -6391,7 +6396,7 @@ export const esMX = {
   "web.admin.teachers.entitlements.canScheduleMaterials": "Puede programar materiales",
   "web.admin.teachers.entitlements.canCustomPrice": "Puede fijar precio personalizado",
   "web.admin.teachers.entitlements.canUseLiveNotes": "Puede usar notas en vivo",
-  // Merged from the D-99 (PR #680) GBP-billing-currency conflict resolution
+  // Merged from the D-153 (PR #680) GBP-billing-currency conflict resolution
   // — see catalog.en.ts's identical comment.
   "web.admin.subscriptions.otherCurrencyMrrNote":
     "No incluido arriba (suscriptores en otra moneda, sin conversión de divisas):",
@@ -6855,7 +6860,7 @@ export const esMX = {
   "web.action.photo.choose": "Elige una imagen primero.",
   "web.action.photo.type": "Usa una imagen JPG, PNG o WebP.",
   "web.action.photo.tooLarge": "La imagen debe pesar menos de 5 MB.",
-  "web.action.photo.uploadFailed": "No pudimos subir la imagen: {error}",
+  "web.action.photo.uploadFailed": "No pudimos subir la imagen. Inténtalo de nuevo.",
   "web.action.testimonial.bodyLength":
     "Escribe unas palabras sobre tus clases (máximo {max} caracteres).",
   "web.action.testimonial.notEligible":
@@ -7145,9 +7150,9 @@ export const esMX = {
     "Las clases restantes pueden ser como máximo {max} para este paquete.",
   "web.action.materialImage.chooseType": "Elige una imagen JPG, PNG, WebP o GIF.",
   "web.action.materialImage.tooLarge": "La imagen no puede pesar más de {mb} MB.",
-  "web.action.materialImage.uploadFailed": "No pudimos subir la imagen: {message}",
+  "web.action.materialImage.uploadFailed": "No pudimos subir la imagen. Inténtalo de nuevo.",
   "web.action.materialFile.tooLarge": "El archivo no puede pesar más de 25 MB.",
-  "web.action.materialFile.uploadFailed": "No pudimos subir el archivo: {message}",
+  "web.action.materialFile.uploadFailed": "No pudimos subir el archivo. Inténtalo de nuevo.",
   "web.action.referral.ownCode": "No puedes usar tu propio código de referido.",
   "web.action.referral.firstPurchaseOnly":
     "Los códigos de referido solo aplican en tu primera compra.",
@@ -7846,6 +7851,10 @@ export const esMX = {
   "materials.ai.refineUnavailable":
     "La edición con IA no está disponible ahora. Aún puedes editar el material tú mismo.",
   "materials.ai.refineFailed": "No se pudo aplicar el cambio. Inténtalo de nuevo.",
+  "materials.ai.generateTooLong":
+    "El material quedó demasiado largo y no se pudo terminar. Prueba con un tema más concreto o genéralo en dos partes.",
+  "materials.ai.refineTooLong":
+    "El resultado quedó demasiado largo y no se pudo terminar, así que no se cambió nada. Pide un cambio más pequeño o divide el material en dos.",
   "materials.ai.podcastLimitReached":
     "Alcanzaste el límite de generaciones con IA de este mes ({cap}). Aún puedes crear el contenido tú mismo.",
   "materials.ai.podcastUnavailable": "La generación de podcast no está disponible ahora.",

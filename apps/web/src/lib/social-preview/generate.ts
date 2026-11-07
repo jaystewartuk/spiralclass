@@ -24,7 +24,7 @@ import { createSocialPreviewImage, socialPreviewQuota } from "./store";
 
 const log = logger({ surface: "social-preview" });
 
-// One AI generation, end to end (D-123). Owned here so every caller enforces
+// One AI generation, end to end (D-125). Owned here so every caller enforces
 // the same gate, the same cap and the same failure vocabulary.
 //
 // Ordering is deliberate — every cheap refusal happens before a paid call:

@@ -15,7 +15,7 @@ import { socialPreviewImagePublicUrl } from "@/lib/storage/social-preview-image"
 
 const log = logger({ surface: "social-preview" });
 
-// The COMPOSED social card (D-123): the teacher's chosen background with every
+// The COMPOSED social card (D-125): the teacher's chosen background with every
 // character of text drawn by us on top.
 //
 // Why this is a render-on-demand route rather than a baked PNG in object

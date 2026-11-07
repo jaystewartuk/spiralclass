@@ -32,7 +32,7 @@ const renewalState = {
 
 vi.mock("@/lib/prisma", () => ({
   prisma: {
-    // D-113: the payout-instrument delegate. Empty by default — a test that
+    // D-145: the payout-instrument delegate. Empty by default — a test that
     // cares about a specific instrument overrides it.
     teacherPayoutInstrument: {
       findMany: async () => [],
@@ -136,7 +136,7 @@ describe("getSubscriptionOverview", () => {
     expect(o.byPlan).toEqual({ free: 0, monthly: 0, annual: 0, founding: 0 });
   });
 
-  // D-99: a not-yet-renewed pre-existing MXN subscriber must contribute to
+  // D-153: a not-yet-renewed pre-existing MXN subscriber must contribute to
   // mrrOtherCurrencyMinorUnits, never get silently summed into the canonical GBP
   // mrrMinorUnits as if it were the same unit.
   it("keeps a legacy non-canonical-currency subscriber's MRR out of mrrMinorUnits", async () => {

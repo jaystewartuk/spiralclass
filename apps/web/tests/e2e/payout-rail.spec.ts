@@ -13,7 +13,7 @@ import { applyE2ESkipGuards, getPrisma, missingEnv, signInAsViaOtp } from "./_he
 // The assertion that matters is NOT "the form saved". It's that connecting the
 // rail changes what a STUDENT sees: the public booking page flips from
 // unlisted (Next's not-found UI — no payout rail fails isPubliclyListed()'s
-// hasPayoutMethod signal, D-104; the response status is still 200 here, this
+// hasPayoutMethod signal; the response status is still 200 here, this
 // build doesn't propagate notFound() to a real 404 status, so the check is
 // content-based) to an actual Wise checkout CTA. Teacher-side persistence and
 // student-side availability are wired through separate code
@@ -69,7 +69,7 @@ test.describe.serial("connect a payout rail (§A+)", () => {
     await expect
       .poll(
         async () => {
-          // D-113: the rail is a TeacherPayoutInstrument row, not two
+          // D-145: the rail is a TeacherPayoutInstrument row, not two
           // columns on the teacher.
           const i = await prisma.teacherPayoutInstrument.findFirst({
             where: { teacher: { email: NO_RAIL_TEACHER_EMAIL }, kind: "wise" },
@@ -100,7 +100,7 @@ test.describe.serial("connect a payout rail (§A+)", () => {
   test.afterAll(async () => {
     if (missingEnv.length > 0 || process.env.E2E_EXTENDED !== "1") return;
     const prisma = getPrisma();
-    // The payout rail is a RELATION since D-113, so resetting it means
+    // The payout rail is a RELATION since D-145, so resetting it means
     // deleting the rows this run created — a scalar update can't clear it, and
     // the `wise*` teacher columns it used to null out no longer exist.
     await prisma.teacherPayoutInstrument

@@ -1,6 +1,7 @@
 import { baseLanguage } from "@spiralclass/shared";
 import {
   afterRecognitionEnd,
+  FAILURES_BEFORE_UNUSABLE,
   isFailure,
   type RecognitionErrorCode,
 } from "@/lib/captions/recognition-policy";
@@ -109,11 +110,14 @@ export type RecognizerOptions = {
   lang: string;
   onFinal: (text: string) => void;
   // What has been heard of the utterance still being spoken, each time the
-  // browser hears more (D-198). Optional: a caller that only wants finals
+  // browser hears more (D-185). Optional: a caller that only wants finals
   // passes nothing.
   onPartial?: (heard: string) => void;
   // Called once, when the recogniser gives up for good.
   onStopped: (reason: RecognizerStopReason) => void;
+  // Called once, when sessions keep failing with nothing heard. The recogniser
+  // keeps retrying; the caller decides whether something else takes over.
+  onUnusable?: (error: RecognitionErrorCode) => void;
   setTimeout?: (fn: () => void, ms: number) => unknown;
   clearTimeout?: (handle: unknown) => void;
 };
@@ -124,6 +128,7 @@ export class TrackRecognizer {
   private timer: unknown = null;
   private running = false;
   private failures = 0;
+  private reportedUnusable = false;
   private lastError: RecognitionErrorCode | null = null;
   private lang: string;
   // Whether to ask for on-device recognition: true once the browser reports
@@ -137,6 +142,7 @@ export class TrackRecognizer {
       setTimeout: (fn, ms) => globalThis.setTimeout(fn, ms),
       clearTimeout: (h) => globalThis.clearTimeout(h as ReturnType<typeof setTimeout>),
       onPartial: () => {},
+      onUnusable: () => {},
       ...options,
     };
     this.lang = options.lang;
@@ -191,7 +197,7 @@ export class TrackRecognizer {
     recognition.continuous = true;
     // Partials are shown as they are heard, untranslated, so a listener is
     // never left watching someone talk with no subtitle while a phrase runs
-    // on (D-198). Only finals are translated and kept.
+    // on (D-185). Only finals are translated and kept.
     recognition.interimResults = true;
     const local = this.local;
     if (local) recognition.processLocally = true;
@@ -205,11 +211,11 @@ export class TrackRecognizer {
         const result = event.results[i];
         const text = result[0].transcript.trim();
         if (!text) continue;
+        this.failures = 0;
         if (!result.isFinal) {
           heard = heard ? `${heard} ${text}` : text;
           continue;
         }
-        this.failures = 0;
         this.opts.onFinal(text);
       }
       if (heard) this.opts.onPartial(heard);
@@ -238,6 +244,12 @@ export class TrackRecognizer {
   private afterEnd(error: RecognitionErrorCode | null, local: boolean): void {
     if (!this.running) return;
     if (isFailure(error)) this.failures += 1;
+    if (error && this.failures >= FAILURES_BEFORE_UNUSABLE && !this.reportedUnusable) {
+      this.reportedUnusable = true;
+      this.opts.onUnusable(error);
+      // The caller may have stopped this recogniser from inside that call.
+      if (!this.running) return;
+    }
     const action = afterRecognitionEnd({
       error,
       consecutiveFailures: this.failures,

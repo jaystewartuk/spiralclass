@@ -19,7 +19,7 @@ deploy once the runners are green, and it waits for the operator's approval.
 
 There used to be a `/ship-pr` skill that batched all of that, because the heavy
 suites could only run on the operator's laptop and needed to run once rather
-than once per branch. [D-162](../../../docs/decisions/D-162.md) deleted it:
+than once per branch. [D-157](../../../docs/decisions/D-157.md) deleted it:
 `heavy.yml` now runs those suites on a runner, on every PR **and** on every push
 to `main`, so there is nothing left to batch and nothing to remember to run.
 
@@ -46,7 +46,7 @@ has to look at them rather than wait to be stopped.
    checklist with each item marked `[x]` or `[N/A]`. An unchecked box is a
    question for the reviewer, and there is no reviewer but the operator.
    If the change finishes a tracked issue, the Summary says `Closes #N` — that
-   line is the only thing that closes it ([D-172](../../../docs/decisions/D-172.md)),
+   line is the only thing that closes it ([D-164](../../../docs/decisions/D-164.md)),
    and an issue nothing closes is the rot Issues were chosen to avoid. A change
    that only moves one forward says `Refs #N` instead.
 5. **Run the script:**

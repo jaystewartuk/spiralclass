@@ -1,7 +1,7 @@
 #!/bin/bash
 # Oracle A1 (Always Free, arm64) first-boot toolchain — LiveKit-only.
 #
-# 2026-08-29 (D-139): infra/oracle-runner is DELETED — never applied. THIS
+# 2026-08-29 (D-164): infra/oracle-runner is DELETED — never applied. THIS
 # script is the first-boot provisioning path again; see
 # docs/deployment/ORACLE_BOX_REBUILD.md. Historical note below:
 # SUPERSEDED as infra/oracle-runner's default: that module rendered

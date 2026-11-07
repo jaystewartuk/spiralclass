@@ -1,4 +1,4 @@
-// SpiralClass — Financial Intelligence pricing engine (D-86).
+// SpiralClass — Financial Intelligence pricing engine (docs/features/admin-portal.md).
 //
 // A generic, provider-agnostic model of what a third-party integration costs
 // per month, evaluated against usage meters. There is deliberately NO
@@ -9,7 +9,7 @@
 //
 // The engine is CURRENCY-PURE — every function returns an amount in the
 // pricing model's own native minor units (USD cents, MXN centavos, GBP pence,
-// …). Converting to the dashboard's display currency (GBP, per D-58) is a
+// …). Converting to the dashboard's display currency (GBP, per D-143) is a
 // separate concern handled by the app-side lib layer, exactly as
 // `money-metrics.ts` refuses to blend currencies itself. This keeps the whole
 // engine trivially unit-testable with no FX or clock dependency.
@@ -152,7 +152,7 @@ export const pricingModelSchema = z.discriminatedUnion("kind", [
 
 // Fail-soft parse for the DB read boundary: an unparseable model returns null
 // so a single bad row degrades to £0 + a warning badge rather than 500-ing the
-// whole dashboard (D-86 risk note).
+// whole dashboard.
 export function parsePricingModel(value: unknown): PricingModel | null {
   const result = pricingModelSchema.safeParse(value);
   return result.success ? result.data : null;

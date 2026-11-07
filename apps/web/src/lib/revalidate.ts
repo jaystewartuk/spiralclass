@@ -16,7 +16,13 @@ import { revalidatePath } from "next/cache";
  * next 15.5.25 / react 19.2.3, and still present on next 16.3.4, where the
  * permanent hang becomes a flat 10-second stall. Verified both directions:
  * one page-scoped call for the current route works; two calls, two calls to
- * the same path, and one layout-scoped call all break it. See D-174.
+ * the same path, and one layout-scoped call all break it. On 16.3.4 the stall
+ * measured 10001, 10000, 10001 and 10002 ms over four consecutive trials. If a
+ * later Next release appears to fix this, re-measure all four cases on a
+ * production build before relaxing the rule or its guard; the upgrade alone is
+ * not evidence. Still unverified: the "layout" callers below, and whether a
+ * list is fresh after browser back/forward, which restores from the client
+ * cache rather than refetching.
  *
  * Dropping the extra calls costs nothing here: `next build` prerenders NO
  * route in this app (every route is `ƒ`, server-rendered on demand), so there

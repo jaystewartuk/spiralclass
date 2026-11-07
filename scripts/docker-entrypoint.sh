@@ -1,6 +1,6 @@
 #!/bin/sh
 # Fly/Docker container entrypoint. Sources the non-secret RUNTIME config for
-# this environment (config/env/<APP_ENV>.runtime.env, D-85) into the process
+# this environment (config/env/<APP_ENV>.runtime.env, D-70) into the process
 # env, then execs the server. This is the runtime half of moving non-secret
 # config out of fly.<env>.toml's [env] into git-versioned, platform-neutral
 # files — the build half (NEXT_PUBLIC_*) is baked in at image build time via

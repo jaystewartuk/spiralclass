@@ -3,7 +3,7 @@ import { baseLanguage } from "@spiralclass/shared";
 import { deepgramApiKey } from "@/lib/captions/config";
 
 // Deepgram streaming speech-to-text for live captions' phone-to-phone
-// fallback (D-185's addendum). When no browser in a class can recognise
+// fallback (D-185). When no browser in a class can recognise
 // speech, each speaker's own browser streams its microphone straight to
 // Deepgram. The long-lived DEEPGRAM_API_KEY never leaves the server: the
 // browser is handed a short-lived token from Deepgram's /v1/auth/grant, and
@@ -146,7 +146,7 @@ export function deepgramLiveLanguage(locale: string): string | null {
 
 // The socket URL the browser opens. interim_results so the words of a phrase
 // still being spoken are shown as they are heard, like the browser
-// recogniser's partials (D-198). Deepgram bills streaming by audio duration
+// recogniser's partials (D-185). Deepgram bills streaming by audio duration
 // (its pricing page, 2026-10-12), and only finals are translated, so the
 // interims add messages, not cost.
 // smart_format adds punctuation and casing a reader expects.

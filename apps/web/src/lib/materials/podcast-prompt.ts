@@ -39,7 +39,7 @@ export type PodcastPromptInput = {
   // Roughly how long the finished podcast should run, in minutes. Shapes the
   // word budget (~PODCAST_WORDS_PER_MINUTE words/min); a soft target, not a cap.
   targetDurationMin: number;
-  // Lesson format (D-88) — same axis as buildMaterialPrompt's, threaded
+  // Lesson format (D-17) — same axis as buildMaterialPrompt's, threaded
   // through here so the narrated episode never invents pair/group/team
   // activities the source material doesn't have reason to include either.
   lessonFormat?: LessonFormat | null;
@@ -57,7 +57,7 @@ export function buildPodcastScriptPrompt(input: PodcastPromptInput): MaterialPro
 
   const system = [
     `You are a scriptwriter turning one teacher's teaching material into a short, single-narrator educational podcast — a warm, engaging spoken monologue the student listens to, not a document they read.`,
-    // One-to-one constraint (D-88) — same rule as buildMaterialPrompt: the
+    // One-to-one constraint (D-17) — same rule as buildMaterialPrompt: the
     // narration must never coach the listener into a group/pair/team activity.
     lessonFormatDirective(input.lessonFormat),
     target

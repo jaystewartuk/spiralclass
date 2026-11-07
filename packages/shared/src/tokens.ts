@@ -247,7 +247,7 @@ export const typeScale = {
 } as const;
 
 // ---------------------------------------------------------------------------
-// D-140 / D-141 palette — ink and gold
+// D-140 palette — ink and gold
 // ---------------------------------------------------------------------------
 //
 // Added alongside the palette above rather than replacing it. This export

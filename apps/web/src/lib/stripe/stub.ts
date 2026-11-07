@@ -36,7 +36,7 @@ export type StubStripeClient = StripeClient & {
   seedPaymentIntent(intent: StripePaymentIntent): void;
   // Simulate a settled charge so getSettledCharge returns a known net.
   seedSettledCharge(paymentIntentId: string, settled: SettledCharge): void;
-  // Simulate a charge so getCharge (the UAT Stripe check, D-55) returns it.
+  // Simulate a charge so getCharge (the UAT Stripe check, D-25) returns it.
   seedCharge(charge: StripeCharge): void;
   // Billing seams.
   seedSubscription(subscription: StripeSubscription): void;

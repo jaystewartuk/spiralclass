@@ -10,7 +10,7 @@ import { revalidateAfterAction } from "@/lib/revalidate";
 import { createT } from "@spiralclass/shared";
 
 // Durable student profile — interests + goals (docs/product/roadmap/
-// CLASS_CONTENT_INPUTS.md, D-20, Layer 1).
+// CLASS_CONTENT_INPUTS.md, D-17, Layer 1).
 //
 // These live on teacher_students (the student's profile WITH THIS TEACHER) and
 // are fed into every AI class-content generation. They are teacher-private,

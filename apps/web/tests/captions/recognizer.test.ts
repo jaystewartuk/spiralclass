@@ -50,6 +50,7 @@ function make(opts: { Ctor?: SpeechRecognitionCtorLike; lang?: string } = {}) {
   const onFinal = vi.fn();
   const onPartial = vi.fn();
   const onStopped = vi.fn();
+  const onUnusable = vi.fn();
   const r = new TrackRecognizer({
     Ctor: opts.Ctor ?? (FakeRecognition as unknown as SpeechRecognitionCtorLike),
     track,
@@ -57,6 +58,7 @@ function make(opts: { Ctor?: SpeechRecognitionCtorLike; lang?: string } = {}) {
     onFinal,
     onPartial,
     onStopped,
+    onUnusable,
     setTimeout: (fn, ms) => {
       timers.push({ fn, ms });
       return timers.length;
@@ -65,7 +67,7 @@ function make(opts: { Ctor?: SpeechRecognitionCtorLike; lang?: string } = {}) {
       timers = [];
     },
   });
-  return { r, onFinal, onPartial, onStopped };
+  return { r, onFinal, onPartial, onStopped, onUnusable };
 }
 
 const latest = () => FakeRecognition.instances[FakeRecognition.instances.length - 1];
@@ -98,7 +100,7 @@ describe("TrackRecognizer", () => {
     expect(onFinal).toHaveBeenCalledWith("hola");
   });
 
-  // D-198: a listener sees the words of a phrase as it is spoken, not only
+  // D-185: a listener sees the words of a phrase as it is spoken, not only
   // once it ends — measured 2026-10-12, a teacher's phrases ran to ~500
   // characters before a single subtitle appeared.
   it("hands the utterance in flight to onPartial, never to onFinal", () => {
@@ -333,5 +335,57 @@ describe("installOnDeviceModels", () => {
         translatorPairs: [{ sourceLanguage: "es", targetLanguage: "en" }],
       }),
     ).not.toThrow();
+  });
+});
+
+describe("TrackRecognizer — a recogniser that never hears anything", () => {
+  const failOnce = (error: string) => {
+    latest().end(error);
+    runTimers();
+  };
+
+  it("reports itself unusable after five failures in a row, once, and keeps retrying", () => {
+    const { r, onUnusable, onStopped } = make();
+    r.start();
+    for (let i = 0; i < 4; i++) failOnce("network");
+    expect(onUnusable).not.toHaveBeenCalled();
+    failOnce("network");
+    expect(onUnusable).toHaveBeenCalledTimes(1);
+    expect(onUnusable).toHaveBeenCalledWith("network");
+    const sessions = FakeRecognition.instances.length;
+    failOnce("network");
+    failOnce("network");
+    expect(onUnusable).toHaveBeenCalledTimes(1);
+    expect(FakeRecognition.instances.length).toBe(sessions + 2);
+    expect(onStopped).not.toHaveBeenCalled();
+  });
+
+  it("does not schedule another session when the report stops it", () => {
+    const { r, onUnusable } = make();
+    onUnusable.mockImplementation(() => r.stop());
+    r.start();
+    for (let i = 0; i < 4; i++) failOnce("network");
+    latest().end("network");
+    expect(onUnusable).toHaveBeenCalledTimes(1);
+    expect(timers).toHaveLength(0);
+  });
+
+  it("starts counting again after a word is heard, partial or final", () => {
+    const { r, onUnusable } = make();
+    r.start();
+    for (let i = 0; i < 4; i++) failOnce("network");
+    latest().onresult?.({
+      resultIndex: 0,
+      results: [{ isFinal: false, 0: { transcript: "hola" } }],
+    });
+    for (let i = 0; i < 4; i++) failOnce("network");
+    expect(onUnusable).not.toHaveBeenCalled();
+  });
+
+  it("does not call a silent lesson a failure", () => {
+    const { r, onUnusable } = make();
+    r.start();
+    for (let i = 0; i < 10; i++) failOnce("no-speech");
+    expect(onUnusable).not.toHaveBeenCalled();
   });
 });

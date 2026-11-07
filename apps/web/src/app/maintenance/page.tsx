@@ -4,7 +4,7 @@ import { Logo } from "@/components/brand/logo";
 import { maintenanceMessage, maintenanceUntil } from "@/lib/maintenance";
 import { RetryButton } from "./retry-button";
 
-// The maintenance wall (D-76). Middleware rewrites every non-allowlisted page
+// The maintenance wall (lib/maintenance.ts). Middleware rewrites every non-allowlisted page
 // request here with a 503 while MAINTENANCE_MODE is on. Copy comes from the
 // shared catalog; an operator can override the body with MAINTENANCE_MESSAGE
 // and add an ETA with MAINTENANCE_UNTIL.

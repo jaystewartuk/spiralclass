@@ -29,7 +29,7 @@ export default async function AdminIntegrationsPage() {
   const t = await getT();
 
   const env = serverEnv();
-  // Auto-reconcile credentials live on the Wise INSTRUMENT since D-113 —
+  // Auto-reconcile credentials live on the Wise INSTRUMENT since D-145 —
   // it is an instrument capability, not a teacher one.
   const wiseConnectedTeachers = await prisma.teacherPayoutInstrument.count({
     where: { kind: "wise", wiseApiProfileId: { not: null } },

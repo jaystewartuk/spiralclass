@@ -203,7 +203,7 @@ describe("attachLibraryMaterialToBookingAction", () => {
     expect(enqueueMaterialsSendMock).not.toHaveBeenCalled();
   });
 
-  it("revalidates the class page it was invoked from, and only that (D-174)", async () => {
+  it("revalidates the class page it was invoked from, and only that", async () => {
     await attachLibraryMaterialToBookingAction(
       undefined,
       form({ bookingId: BOOKING_ID, libraryMaterialId: "file-mat", sendTiming: "t_24h" }),
@@ -281,7 +281,7 @@ describe("detachLibraryMaterialFromBookingAction", () => {
     expect(state.attachments).toHaveLength(0);
   });
 
-  it("revalidates the class page it was invoked from, and only that (D-174)", async () => {
+  it("revalidates the class page it was invoked from, and only that", async () => {
     await detachLibraryMaterialFromBookingAction(
       form({ bookingId: BOOKING_ID, libraryMaterialId: "file-mat" }),
     );

@@ -1,6 +1,6 @@
 import path from "node:path";
 import type { NextConfig } from "next";
-import { withSentryConfig } from "@sentry/nextjs";
+import { withSentryConfig } from "@sentry/nextjs/config";
 import { buildSecurityHeaders } from "./src/lib/security-headers";
 
 // Repo root, two levels up from apps/web/. Set as outputFileTracingRoot
@@ -66,7 +66,7 @@ const config: NextConfig = {
   // (pub-*.r2.dev). Both entries below must be here or next/image rejects the
   // host and the optimizer 400s the photo.
   //
-  // No Supabase entry: the Supabase project was torn down at the D-89 Phase 5
+  // No Supabase entry: the Supabase project was torn down at the D-70 Phase 5
   // decommission, so a `*.supabase.co` remote pattern would only allow-list a
   // host that 404s everything now — removed as dead config (any stored photo
   // URL from before the R2 migration is already unreachable regardless of
@@ -109,7 +109,7 @@ const config: NextConfig = {
   // (posthog-node, server-side analytics capture) is unaffected and remains the primary pipeline.
   //
   // Region is US by default (decision 2026-06-03 — closest to the launch market).
-  // The region is now config-driven (D-48): set NEXT_PUBLIC_POSTHOG_REGION=eu
+  // The region is config-driven (src/lib/analytics/posthog-region.ts): set NEXT_PUBLIC_POSTHOG_REGION=eu
   // to flip the proxy destinations below AND ui_host in posthog-provider.tsx
   // together (both read the same knob). The one-liner here mirrors
   // src/lib/analytics/posthog-region.ts — kept inline so next.config stays
@@ -233,19 +233,19 @@ const config: NextConfig = {
 // instrumentation hooks attach. Without it, Sentry.init() runs but
 // the runtime client ends up uninitialized in serverless deploys.
 //
-// `silent` keeps the build noise down; `disableLogger` strips the
-// verbose console-log integration. Source-map upload stays opt-in
+// `silent` keeps the build noise down; `webpack.treeshake.removeDebugLogging`
+// strips the SDK's debug statements. Source-map upload stays opt-in
 // (requires SENTRY_AUTH_TOKEN at build time) — without it the plugin
 // just skips the upload step.
 //
 // Turbopack note (2026-07-14): the standalone (production image) build uses
-// `next build --turbopack`. Sentry SDK v10 supports Turbopack — there's no
+// `next build --turbopack`. Sentry SDK v11 supports Turbopack — there's no
 // webpack plugin pass, so the large build-time memory cost the webpack plugin
 // used to add is gone. Kept unconditional so runtime Sentry stays wired on both
 // the Turbopack image build and the webpack `pnpm build`.
 export default withSentryConfig(config, {
   silent: !process.env.CI,
-  disableLogger: true,
+  webpack: { treeshake: { removeDebugLogging: true } },
   // Tunnel browser-side Sentry events through our own origin (same idea as the
   // PostHog /ingest proxy above): ad/privacy blockers block requests to
   // *.sentry.io by hostname, silently dropping client error reports

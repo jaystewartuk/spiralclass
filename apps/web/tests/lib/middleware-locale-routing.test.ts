@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { NextRequest } from "next/server";
 
-// D-193: one URL per language for the public pages. The decision itself is a
+// D-72: one URL per language for the public pages. The decision itself is a
 // pure function tested in packages/shared (localized-paths.test.ts); this pins
 // what the middleware does with it on real NextRequests — the rewrite, the
 // header it hands the page, and the redirects. middleware-session.test.ts

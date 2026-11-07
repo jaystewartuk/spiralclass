@@ -9,7 +9,7 @@ import { describeIntegration } from "../_setup/test-db";
  * The region-move clone, run for real against the migrated test database.
  *
  * WHY THIS EXISTS. `infra/database/scripts/db-clone-to-region.sh` is how
- * production moves region (D-49), and until 2026-09-23 it had never been run
+ * production moves region (D-70), and until 2026-09-23 it had never been run
  * against this schema. Its first rehearsal — Neon `us-east-2` into `us-east-1`
  * — failed twice: once on macOS bash 3.2 (guarded by
  * `tests/config/shell-empty-arrays.test.ts`), then because `pg_dump -n public`

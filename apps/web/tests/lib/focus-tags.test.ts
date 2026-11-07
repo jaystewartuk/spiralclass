@@ -22,7 +22,7 @@ import {
 } from "@/lib/focus-tags";
 import { focusTagSeedFor, FOCUS_TAG_BUILTIN_CATEGORIES, FORMAT_TAG_SEEDS } from "@/lib/focus-packs";
 
-// focus-tags.ts logic — D-19 Layer 2 (category became its own
+// focus-tags.ts logic — the class-content inputs' Layer 2, D-17 (category became its own
 // manageable taxonomy instead of a free-text/fixed-enum field). The DB
 // helpers take an injectable `db`, so we exercise the seeding/offset/resolve
 // logic with a hand-rolled fake (mirrors how levels are integration-tested,

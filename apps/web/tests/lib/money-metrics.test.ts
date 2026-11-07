@@ -119,7 +119,7 @@ describe("summarizeRevenueSeries", () => {
     expect(s.every((p) => p.netMinorUnits === 0)).toBe(true);
   });
 
-  // D-99: a not-yet-renewed pre-existing MXN invoice must not be blended into
+  // D-153: a not-yet-renewed pre-existing MXN invoice must not be blended into
   // the canonical GBP total as if it were the same unit.
   it("excludes a non-primary-currency invoice from the total", () => {
     const s = summarizeRevenueSeries(

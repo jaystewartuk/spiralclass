@@ -1,5 +1,5 @@
 // Material domain constants + validation (docs/features/library-materials.md,
-// D-69 merge of ClassContent/ClassMaterial into LibraryMaterial).
+// the merge of ClassContent/ClassMaterial into LibraryMaterial).
 //
 // A material's body is Markdown text rendered natively (react-markdown, raw
 // HTML disabled). Keep these as named constants — the panels, the server
@@ -20,6 +20,22 @@ export type ClassContentSource = "manual" | "ai";
 // plan (or a full worksheet) with examples; short enough to bound a row and an
 // AI generation.
 export const CLASS_CONTENT_MAX_CHARS = 20_000;
+
+// Per-call output ceiling for material compose, refine and podcast scripts. It
+// has to hold a whole CLASS_CONTENT_MAX_CHARS document in a script that spends
+// more tokens per character than Spanish does, AND the model's thinking, which
+// draws on the same budget. Only tokens actually produced are billed, so this
+// bounds a runaway; it does not raise the cost of a normal call.
+export const MATERIAL_MAX_OUTPUT_TOKENS = 16_000;
+
+// The model stopped because it ran out of room, so what it wrote is the front
+// of a document. Never offered to the teacher as a finished draft.
+export class MaterialIncompleteError extends Error {
+  constructor() {
+    super("material output incomplete");
+    this.name = "MaterialIncompleteError";
+  }
+}
 
 // Per-teacher monthly cap on AI compose generations (D-17: Pro + a monthly
 // ceiling so token spend is bounded) — shared by class-content and
@@ -49,7 +65,7 @@ export const CLASS_CONTENT_TEMPLATE_LABEL_MAX_CHARS = 80;
 export const CLASS_CONTENT_TEMPLATE_MAX_PER_TEACHER = 100;
 
 // How much of a teacher's lesson template we inject into the AI compose prompt
-// as the section skeleton (D-46). A template body can be up to the full
+// as the section skeleton (D-17). A template body can be up to the full
 // CLASS_CONTENT_MAX_CHARS ceiling, but the useful *structure* (headings + short
 // hints) is small; bounding the injected slice keeps the prompt (and cost)
 // tight and stops a teacher from pasting an entire filled lesson into the

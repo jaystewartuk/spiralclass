@@ -11,7 +11,7 @@ import { formatGbp, formatMinorUnits } from "@spiralclass/shared";
 export type ChartValueFormat =
   | { valueFormat?: "number"; currency?: never }
   | { valueFormat: "minorUnits"; currency: string }
-  // Always pence: the Financial Intelligence estimate layer (D-86) is GBP-only.
+  // Always pence: the Financial Intelligence estimate layer is GBP-only.
   | { valueFormat: "gbp"; currency?: never };
 
 export function chartValueFormatter(format: ChartValueFormat): (n: number) => string {

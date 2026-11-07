@@ -48,7 +48,7 @@ export const GLOSSARY: Record<AppLocale, Glossary> = {
   es: {
     address:
       "“tú” to the reader, and “ustedes” for more than one — Latin American " +
-      "Spanish, with no “vosotros” (D-195).",
+      "Spanish, with no “vosotros” (D-72).",
     terms: {
       teacher: "profe",
       student: "alumno",
@@ -63,7 +63,7 @@ export const GLOSSARY: Record<AppLocale, Glossary> = {
     forbidden: [
       {
         pattern: /\b(vosotros|vosotras|vuestro|vuestra|vuestros|vuestras)\b/i,
-        why: "Spain's plural address; the catalog is Latin American Spanish (D-195).",
+        why: "Spain's plural address; the catalog is Latin American Spanish (D-72).",
       },
     ],
   },

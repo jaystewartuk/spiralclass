@@ -1,13 +1,13 @@
 import type { TranslationRefusal } from "@/lib/captions/caption-translator";
 import type { RecognizerStopReason } from "@/lib/captions/recognizer";
 
-// Live captions' phone-to-phone fallback, in the browser (D-185's addendum).
+// Live captions' phone-to-phone fallback, in the browser (D-185).
 // When no browser in the class can recognise speech — Android Chrome hears
 // nothing while the call holds the microphone, measured — the speaker's own
 // browser records the call's OWN microphone track with MediaRecorder and
 // streams it to Deepgram over a WebSocket, turning each final transcript into
 // the same onFinal a browser recogniser produces, and each interim one into
-// its onPartial (D-198). The controller then
+// its onPartial (D-185). The controller then
 // translates and publishes it exactly as it does any other line.
 //
 // It records the LiveKit track, never a second getUserMedia capture, so the

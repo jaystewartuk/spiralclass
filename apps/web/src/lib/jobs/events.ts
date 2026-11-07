@@ -25,7 +25,7 @@ import type { JobDefinition } from "./register";
 //
 // SCOPE: notifications + podcast + admin-reseed. The four dormant AI handlers
 // (lesson-audio/transcript/insights/intro-video) are intentionally NOT ported
-// yet — they're flag-gated OFF (legal/consent-blocked, D-19/D-21/D-22; intro
+// yet — they're flag-gated OFF (legal/consent-blocked, D-185/D-22; intro
 // coach dormant), their producers still emit to Inngest, and Inngest still
 // serves them until a later phase. Mixed routing per event-type is safe: every
 // handler is idempotent and the flag only decides which backend each converted
@@ -100,7 +100,7 @@ async function handleNotificationQueued(data: { notificationId: string }): Promi
   const deps = makeDeps();
   const outcome = await dispatchNotification(data.notificationId, deps);
 
-  // Chat push→email cascade (D-44): the dispatcher pushed a chat message and
+  // Chat push→email cascade (docs/features/messaging-chat.md): the dispatcher pushed a chat message and
   // skipped email because the recipient has the app. Wait out the grace window
   // as a delayed job, then email only if they still haven't opened the thread.
   if (

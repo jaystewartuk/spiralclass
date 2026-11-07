@@ -30,7 +30,7 @@ export default async function AdminTeacherDetailPage({
     where: { id },
     include: {
       packageTemplates: { where: { archived: false } },
-      // Auto-reconcile credentials moved onto the Wise instrument (D-113).
+      // Auto-reconcile credentials moved onto the Wise instrument (D-145).
       // Selected explicitly rather than through INSTRUMENT_SELECT, which
       // deliberately omits the credential columns.
       payoutInstruments: { select: { kind: true, enabled: true, wiseApiProfileId: true } },

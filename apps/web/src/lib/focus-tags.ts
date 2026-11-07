@@ -13,7 +13,7 @@ import {
 import { createT } from "@spiralclass/shared";
 
 // Focus tags — the teacher's "what to work on" taxonomy that seeds AI
-// class-content compose (docs/features/classes-lesson-content.md, D-20).
+// class-content compose (docs/features/classes-lesson-content.md, D-17).
 //
 // Mirrors src/lib/levels.ts: tags are teacher-scoped rows seeded from a pack
 // (chosen by the language the teacher teaches), not a fixed enum, so packs stay
@@ -274,7 +274,7 @@ export async function getTeacherFocusGroups(
     .filter((g) => g.tags.length > 0);
 }
 
-// ---- Teacher-editable CRUD (D-20's deferred follow-up + the category redesign) ----
+// ---- Teacher-editable CRUD (D-17's deferred follow-up + the category redesign) ----
 //
 // The seed packs above give every teacher a usable picker with zero setup, but
 // they were never meant to be the ceiling — a teacher who needs a sixth

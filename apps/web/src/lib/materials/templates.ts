@@ -13,7 +13,7 @@ type Db = PrismaClient | Prisma.TransactionClient;
 
 // Reusable lesson skeletons (task 3) — "start a new material from a template"
 // instead of retyping the same structure every time. Teacher-scoped.
-// Independent of the ClassContent/ClassMaterial merge (D-69) — a
+// Independent of the ClassContent/ClassMaterial merge — a
 // template is a Markdown skeleton, not a material itself.
 
 export type ClassContentTemplateRow = { id: string; label: string; body: string };
@@ -30,7 +30,7 @@ export async function listClassContentTemplates(
   });
 }
 
-// Resolve a chosen template's body for AI compose (D-46), tenant-scoped: only
+// Resolve a chosen template's body for AI compose (D-17), tenant-scoped: only
 // the teacher's OWN template resolves, so a posted id from another teacher (or a
 // stale/deleted one) yields null and the generator falls back to its default
 // shape — never an error, never another teacher's structure. Mirrors the

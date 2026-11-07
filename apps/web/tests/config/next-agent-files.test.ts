@@ -18,9 +18,10 @@ import { describe, expect, it } from "vitest";
 //
 // So the guard is on the arrival, not on the content:
 //   - the option stays off, so nothing is generated;
-//   - neither file is tracked, so if the option is ever removed and a dev
-//     server recreates them, the commit that adds them fails here rather than
-//     riding along in an unrelated diff.
+//   - neither file is tracked below the root, so if the option is ever removed
+//     and a dev server recreates them, the commit that adds them fails here
+//     rather than riding along in an unrelated diff. The root AGENTS.md is a
+//     deliberate symlink to CLAUDE.md, held by codex-parity.test.ts.
 //
 // If the Next block is wanted, it belongs in the root CLAUDE.md, written
 // deliberately, where tests/config/claude-md.test.ts holds it and an upstream
@@ -54,10 +55,10 @@ describe("next dev's generated agent files", () => {
     }
   });
 
-  it("keeps the root CLAUDE.md as the only one in the repo", () => {
+  it("keeps the root files as the only ones in the repo", () => {
     // Guards the guard too: this fails if the glob stops matching anything,
     // since the root file must always be found.
     expect(tracked("*CLAUDE.md")).toEqual(["CLAUDE.md"]);
-    expect(tracked("*AGENTS.md")).toEqual([]);
+    expect(tracked("*AGENTS.md")).toEqual(["AGENTS.md"]);
   });
 });

@@ -146,7 +146,7 @@ describe("saveStudentTestimonial", () => {
     expect(upsertStudentTestimonial).not.toHaveBeenCalled();
   });
 
-  it("revalidates only the page the student wrote it from (D-174)", async () => {
+  it("revalidates only the page the student wrote it from", async () => {
     await saveStudentTestimonial(undefined, form({ teacherId: TEACHER, body: "Great classes." }));
     expect(revalidatePath.mock.calls.map((c) => c[0])).toEqual([`/my-classes/teachers/${TEACHER}`]);
   });

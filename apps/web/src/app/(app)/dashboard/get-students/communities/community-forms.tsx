@@ -412,7 +412,7 @@ export function CommunityCard({
   window: promoWindow,
   post,
   postSummary,
-  // The community's image editor (D-123), passed in from the server page so
+  // The community's image editor (D-125), passed in from the server page so
   // this client component never loads or knows about preview data.
   preview,
   previewSummary,

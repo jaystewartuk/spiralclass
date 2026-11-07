@@ -13,7 +13,7 @@ const log = logger({ surface: "ai" });
 // (unlike the public Generative Language API / AI Studio) has no separate
 // "Prepay" product — it bills through the SAME Cloud Billing account as every
 // other GCP service, postpaid. The API-key surface doesn't exist on Vertex;
-// every call is OAuth2 (D-127).
+// every call is OAuth2 (D-125).
 //
 // Two sources, tried in this order:
 //
@@ -31,7 +31,7 @@ const log = logger({ surface: "ai" });
 //   2. The Cloud Run runtime identity, when there is no key and the process
 //      runs on Cloud Run (runsOnCloudRun()). The metadata server hands out a
 //      token for the service's own service account (`web-runtime`) on request —
-//      no stored credential, nothing to rotate, nothing to leak. D-127 chose a
+//      no stored credential, nothing to rotate, nothing to leak. D-125 chose a
 //      key only because production then ran on Fly, which has no metadata
 //      server; since D-184 it does not.
 //

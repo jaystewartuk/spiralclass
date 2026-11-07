@@ -314,7 +314,7 @@ export interface StripeClient {
     paymentIntentId: string,
     connectedAccountId?: string,
   ): Promise<SettledCharge | null>;
-  // Read-only retrieve used by the /admin/uat Stripe check (D-55) to confirm
+  // Read-only retrieve used by the /admin/uat Stripe check (D-25) to confirm
   // charge state directly against Stripe, independent of what our own
   // DB/webhook handling recorded.
   getCharge(chargeId: string, connectedAccountId?: string): Promise<StripeCharge>;
@@ -648,7 +648,7 @@ export function fetchStripeClient(deps: {
               // This is the conversion half of D-143 and it is only reachable
               // because the charge is hers: offerable methods are decided by the
               // MERCHANT's country, so one teacher's checkout can present
-              // OXXO and SPEI, a Brazilian one Pix, a Dutch one iDEAL. A UK
+              // OXXO and SPEI, a Brazilian one Boleto, a Dutch one iDEAL. A UK
               // platform charge could offer none of them at any price.
               //
               // This was `payment_method_types: ["card"]`, and the reason given

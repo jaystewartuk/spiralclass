@@ -4,13 +4,13 @@
 #
 # 2026-07-21: this box is CI-runner-retired — it's dedicated to
 # self-hosted LiveKit (docs/deployment/ORACLE_LIVEKIT_PRODUCTION.md) now, and
-# `infra/oracle-runner` (deleted 2026-08-29, D-139) had its `cloud_init_file`
+# `infra/oracle-runner` (deleted 2026-08-29, D-164) had its `cloud_init_file`
 # default moved to
 # `oracle-livekit-cloud-init.sh` (LiveKit-only: Docker/Tailscale/git/gh, NOT
 # the Node/build-essential/postgresql-client/AWS-CLI toolchain below). Do NOT
 # register a GitHub Actions runner on this box (the old step below, kept
 # struck through for history only) and do NOT run THIS script to re-provision
-# it — use `oracle-livekit-cloud-init.sh` instead. Kept by D-139 as the record
+# it — use `oracle-livekit-cloud-init.sh` instead. Kept by D-164 as the record
 # of what that toolchain was, in case the CI-runner role is ever deliberately
 # revived; its runbook was deleted in D-164 because the role is not coming back
 # (CI is `ubuntu-latest`, and nothing else).

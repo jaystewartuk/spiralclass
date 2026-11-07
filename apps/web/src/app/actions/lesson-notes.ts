@@ -16,9 +16,9 @@ import { DAY_PLAN_PATH } from "@/lib/lesson-notes/day-plan";
 
 const log = logger({ surface: "lesson-notes" });
 
-// In-class live notes (docs/features/classes-lesson-content.md, D-15).
+// In-class live notes (docs/features/classes-lesson-content.md).
 //
-// Authoring is intentionally NOT a Pro feature (D-15): every teacher can write
+// Authoring is intentionally NOT a Pro feature: every teacher can write
 // cues and instructions. The Pro gate lands later on the live surfaces (present
 // mode, the realtime student panel), not here. Each action is tenant-scoped via
 // requireOnboardedTeacher() + a booking ownership check, mirroring the class
@@ -41,7 +41,7 @@ async function ownedBookingId(bookingId: string, teacherId: string): Promise<str
 }
 
 // The page a note action was submitted from — the one path it may revalidate
-// (lib/revalidate.ts, D-174). The same cue forms are rendered on the class page
+// (lib/revalidate.ts). The same cue forms are rendered on the class page
 // and on the day plan, which marks its forms `from=plan`. Anything else,
 // including a hand-edited value, means the class page: the field only picks
 // between two fixed paths and never carries one of its own.
@@ -118,7 +118,7 @@ export async function copyNotesFromLastClass(
   return { ok: true };
 }
 
-// In-call bookmark (D-97) — a one-tap "mark this moment" during the live
+// In-call bookmark — a one-tap "mark this moment" during the live
 // call. Plain callable action (bookingId) => result, called from the
 // call-page button, not a <form> — mirrors app/actions/call-nudge.ts.
 export async function createLessonBookmark(
@@ -273,7 +273,7 @@ export async function moveLessonNote(formData: FormData): Promise<void> {
   revalidateAfterAction(notesPagePath(note.bookingId, formData));
 }
 
-// AI post-class summary (live-notes-panel.md "step 2", D-15). Generates a short
+// AI post-class summary (docs/features/classes-lesson-content.md). Generates a short
 // teacher-private recap from the class's live notes via Claude and stores it
 // (one per booking; regenerating overwrites). This is a Pro live-notes surface,
 // so it's gated like present mode; authoring stays free. Only offered once the

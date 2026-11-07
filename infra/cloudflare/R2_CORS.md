@@ -56,7 +56,7 @@ Only buckets that receive a **browser-side presigned PUT**:
 
 | Bucket key          | Env prefix             | What uploads to it                                     |
 | ------------------- | ---------------------- | ------------------------------------------------------ |
-| `teacher-videos`    | `TEACHER_VIDEOS_R2`    | Teacher intro video (D-73), booking-page settings      |
+| `teacher-videos`    | `TEACHER_VIDEOS_R2`    | Teacher intro video, booking-page settings             |
 | `chat-audio`        | `CHAT_AUDIO_R2`        | Chat voice notes, video, images and files (one bucket) |
 | `class-materials`   | `CLASS_MATERIALS_R2`   | Homework file uploads                                  |
 | `material-podcasts` | `MATERIAL_PODCASTS_R2` | Generated material podcasts                            |
@@ -79,7 +79,7 @@ name from the deploy's `<PREFIX>_BUCKET` secret rather than assuming.
 > codebase, and will not survive a rename.
 
 - `https://spiralclass.com` — production
-- `https://preview.spiralclass.com` — preview (D-89)
+- `https://preview.spiralclass.com` — preview (D-70)
 - `http://localhost:3000` — local dev
 
 `agendaprofe.com` is deliberately **absent**: the domain is no longer in the

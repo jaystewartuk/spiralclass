@@ -6,7 +6,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 vi.mock("server-only", () => ({}));
 
 // listClassContentRevisionsForBooking / restoreClassContentRevisionForBooking
-// (task 5, generalized at D-69) — the booking-ownership-scoped wrappers
+// (task 5, generalized to any material) — the booking-ownership-scoped wrappers
 // around materials/revisions.ts, now backed by LibraryMaterial (bookingId
 // set, sendTiming null) instead of the dropped ClassContent table.
 

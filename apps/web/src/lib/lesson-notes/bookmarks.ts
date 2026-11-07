@@ -1,6 +1,6 @@
 import type { PrismaClient } from "@prisma/client";
 
-// In-call bookmarks (D-97) — a one-tap "mark this moment" action during a
+// In-call bookmarks — a one-tap "mark this moment" action during a
 // live class, layered on the existing LessonNote mechanism (kind='bookmark')
 // rather than a new model. Surfaced as jump points on the lesson replay view.
 //

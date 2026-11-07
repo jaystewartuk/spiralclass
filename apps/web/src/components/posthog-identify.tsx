@@ -31,7 +31,7 @@ type Props = {
   // group analytics so usage can be sliced per teacher, not just per
   // user. Omitted for students (they can belong to several teachers).
   teacherId?: string | null;
-  // An operator's test account (D-192): set as the `is_test_account` person
+  // An operator's test account: set as the `is_test_account` person
   // property on every mount — not only at identify, which fires once per
   // person — so marking an account takes effect without a new sign-in.
   testAccount?: boolean;

@@ -95,7 +95,7 @@ describe("scrubSentryEvent — regex-based scrubbing of free text", () => {
     expect(out.message).toBe("Sent SMS to [redacted-phone], fallback [redacted-phone]");
   });
 
-  // D-124 opened the payout rail past one country, so the numeric rule covers the
+  // The August 2026 bank-account kind opened the payout rail past one country, so the numeric rule covers the
   // whole 15-22 band rather than exactly 18: a CLABE (18), a Peruvian CCI
   // (20), an Argentine CBU (22) and the long domestic account numbers either
   // side of them all reach logs the same way.
@@ -129,7 +129,7 @@ describe("scrubSentryEvent — regex-based scrubbing of free text", () => {
   });
 
   // The whole `details` blob on a payout instrument is redacted by KEY, not
-  // by pattern: its fields are per-country and open-ended (D-124), so
+  // by pattern: its fields are per-country and open-ended (under the removed bank-account kind), so
   // enumerating what might be inside it is the one approach guaranteed to
   // miss a country added later.
   it("redacts a payout instrument's details object wholesale", () => {

@@ -1,5 +1,5 @@
 // Structured UAT runbook content — the canonical source for /admin/uat
-// (D-55). Edit this file directly;
+// (D-25). Edit this file directly;
 // there is no markdown doc and no build step. Each item has a stable `id` so
 // checklist state and the automated action bindings are explicit data, not
 // text-matching against rendered markdown.

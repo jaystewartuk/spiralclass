@@ -9,7 +9,7 @@ terraform {
   }
 
   # State lives in the same R2 bucket as the other infra/* modules on the
-  # shared backend, per D-49 — concern-keyed, not vendor-keyed. See
+  # shared backend, per D-70 — concern-keyed, not vendor-keyed. See
   # ../backend.hcl.
   backend "s3" {
     key = "infra/cloudflare-r2.tfstate"

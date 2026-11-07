@@ -88,7 +88,7 @@ describe("GET /api/admin/export/payments", () => {
 
     expect(header[3]).toBe("amount_minor_units");
     // The currency sits immediately beside the amount on purpose: an amount is
-    // meaningless without it once a teacher can price in ~40 currencies (D-64).
+    // meaningless without it once a teacher can price in ~40 currencies (D-153).
     expect(header[4]).toBe("currency");
     expect(header).not.toContain("amount_centavos");
   });

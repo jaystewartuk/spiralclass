@@ -11,7 +11,7 @@ set -euo pipefail
 #
 # It used to be scripts/ship-pr.sh, which drained open PRs in a batch and held
 # the machine for 20-40 minutes running the full tier against merged `main`.
-# [D-162] deleted it: `.github/workflows/heavy.yml` runs those suites on every
+# [D-157] deleted it: `.github/workflows/heavy.yml` runs those suites on every
 # PR and on every push to `main`, so the merged-tree check happens on a runner
 # and this laptop is not in the path at all.
 #

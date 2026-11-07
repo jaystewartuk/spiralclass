@@ -11,7 +11,7 @@ import { ErdViewer } from "./erd-viewer";
 // touches the live database or parses DBML at runtime.
 //
 // Gated to superadmin, with the `schema:view` capability as the alternate path
-// so the narrow `engineer` role (D-55) can reach it without inheriting the rest
+// so the narrow `engineer` role (D-25) can reach it without inheriting the rest
 // of the superadmin surface.
 export const metadata = { title: "Database ERD" };
 

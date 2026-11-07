@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi, type Mock } from "vitest";
 
-// The two payout-instrument save actions (D-113). Each validates before
+// The two payout-instrument save actions (D-145). Each validates before
 // writing and redirects on success; both go through `saveTeacherInstrument`,
 // so the `payout_rail_connected` off→on gate is asserted once per kind rather
 // than trusted to stay in sync by inspection.

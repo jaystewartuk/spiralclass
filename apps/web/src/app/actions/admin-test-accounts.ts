@@ -9,8 +9,7 @@ import { revalidateAfterAction } from "@/lib/revalidate";
 import { createT } from "@spiralclass/shared";
 
 /**
- * Mark a teacher or a student as an operator's test account, or unmark it
- * (D-192).
+ * Mark a teacher or a student as an operator's test account, or unmark it.
  *
  * The ONLY write path for `testAccount`: an admin, with a reason, audited in
  * the same transaction as the change. Read-side only — it never touches

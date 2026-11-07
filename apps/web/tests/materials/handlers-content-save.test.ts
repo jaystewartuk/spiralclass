@@ -30,9 +30,11 @@ const state = {
   pro: true,
   generationsThisMonth: 0,
   generate: { ok: true, body: "# Generated" } as
-    { ok: true; body: string } | { ok: false; reason: "not-configured" | "empty" | "error" },
+    | { ok: true; body: string }
+    | { ok: false; reason: "not-configured" | "empty" | "truncated" | "error" },
   refine: { ok: true, body: "# Refined" } as
-    { ok: true; body: string } | { ok: false; reason: "not-configured" | "empty" | "error" },
+    | { ok: true; body: string }
+    | { ok: false; reason: "not-configured" | "empty" | "truncated" | "error" },
 };
 vi.mock("@/lib/subscriptions/enforce", () => ({
   gateProFeature: vi.fn(async () =>
@@ -46,7 +48,7 @@ const refineMaterial = vi.fn(async () => state.refine);
 vi.mock("@/lib/ai/anthropic", () => ({ generateMaterial, refineMaterial }));
 
 // The booking-scoped "content" material — a LibraryMaterial row with
-// bookingId set, sendTiming null, body set (D-69). Tests mutate
+// bookingId set, sendTiming null, body set. Tests mutate
 // `contentStored` to model the row that "exists" before a given save.
 let contentStored: { id: string; body: string; contentSource: string } | null = null;
 let libraryMaterialStored: { id: string; body: string; contentSource: string } | null = null;
@@ -68,7 +70,10 @@ let continuationRows: {
   classUses?: { booking: ContinuationClass }[];
 }[] = [];
 const materialFindMany = vi.fn(async (_args?: any) => continuationRows);
-const genCreate = vi.fn(async () => ({}));
+const genCreate = vi.fn(async (..._: unknown[]) => ({}));
+// D-202: a save of AI-sourced content looks for the generation it contains.
+const genFindMany = vi.fn(async (..._: unknown[]) => [] as { id: string; body: string }[]);
+const genUpdateMany = vi.fn(async (..._: unknown[]) => ({ count: 1 }));
 const revisionCreate = vi.fn(async () => ({}));
 const revisionFindMany = vi.fn(async () => [] as { id: string }[]);
 const revisionDeleteMany = vi.fn(async () => ({ count: 0 }));
@@ -80,7 +85,7 @@ let teacherRow: { targetLanguage: string | null; materialVocabulary?: string | n
   targetLanguage: "es",
 };
 const teacherFindUnique = vi.fn(async () => teacherRow);
-// D-80: the booking-scoped generator reads the class's vocabulary override and
+// D-17: the booking-scoped generator reads the class's vocabulary override and
 // (when the caller supplies one) writes it back. Model both.
 let bookingVocabularyOverride: string | null = null;
 const bookingUpdate = vi.fn(async (_args: any) => ({ id: "b1" }) as any);
@@ -115,6 +120,8 @@ vi.mock("@/lib/prisma", () => ({
     classContentGeneration: {
       count: vi.fn(async () => state.generationsThisMonth),
       create: genCreate,
+      findMany: genFindMany,
+      updateMany: genUpdateMany,
     },
     teacherStudent: {
       findUnique: vi.fn(async () => ({ level: { label: "A2" }, interests: null, goals: null })),
@@ -150,6 +157,9 @@ beforeEach(() => {
   materialCreate.mockClear().mockResolvedValue({ id: "m1" });
   materialUpdate.mockClear().mockResolvedValue({ id: "m1" });
   genCreate.mockClear();
+  genFindMany.mockReset();
+  genFindMany.mockResolvedValue([]);
+  genUpdateMany.mockClear();
   generateMaterial.mockClear();
   revisionCreate.mockClear();
   revisionFindMany.mockClear().mockResolvedValue([]);
@@ -224,6 +234,41 @@ describe("saveClassContentForBooking", () => {
     });
     // Nothing existed before this save — no revision worth snapshotting.
     expect(revisionCreate).not.toHaveBeenCalled();
+  });
+
+  // D-202: the save is the teacher's verdict on the generation it contains.
+  it("marks the generation an AI-sourced save contains as kept, on that material", async () => {
+    genFindMany.mockResolvedValue([
+      { id: "g1", body: "# Hi" },
+      { id: "g2", body: "# Something she discarded" },
+    ]);
+    await saveClassContentForBooking({
+      teacherId: "t1",
+      bookingId: "b1",
+      body: "# Hi",
+      source: "ai",
+      locale: "en",
+    });
+    expect((genFindMany.mock.calls as any)[0][0].where).toMatchObject({
+      teacherId: "t1",
+      keptAt: null,
+    });
+    expect(genUpdateMany).toHaveBeenCalledWith({
+      where: { id: { in: ["g1"] }, teacherId: "t1" },
+      data: { keptAt: expect.any(Date), materialId: "m1" },
+    });
+  });
+
+  it("never credits a hand-typed save to the model", async () => {
+    await saveClassContentForBooking({
+      teacherId: "t1",
+      bookingId: "b1",
+      body: "# Hi",
+      source: "manual",
+      locale: "en",
+    });
+    expect(genFindMany).not.toHaveBeenCalled();
+    expect(genUpdateMany).not.toHaveBeenCalled();
   });
 
   it("updates the existing content material when one already exists", async () => {
@@ -321,11 +366,15 @@ describe("generateClassContentForBooking", () => {
     // correct name and never reproduce a stray name from the template/profile
     // (the wrong-student-name bug).
     expect(seed.studentName).toBe("Renata Ocampo");
-    // A successful generation is recorded for the monthly cap.
+    // A successful generation is recorded for the monthly cap, with what the
+    // teacher received (D-202).
     expect(genCreate).toHaveBeenCalledTimes(1);
+    expect(genCreate).toHaveBeenCalledWith({
+      data: { teacherId: "t1", kind: "class_content", body: "# Generated", instruction: null },
+    });
   });
 
-  it("resolves the class vocabulary override over the teacher default and persists it (D-80)", async () => {
+  it("resolves the class vocabulary override over the teacher default and persists it (D-17)", async () => {
     teacherRow = { targetLanguage: "es", materialVocabulary: "everyday" };
     const r = await generateClassContentForBooking({
       teacherId: "t1",
@@ -345,7 +394,7 @@ describe("generateClassContentForBooking", () => {
     );
   });
 
-  it("uses the stored class override when the caller passes none, and doesn't rewrite it (D-80)", async () => {
+  it("uses the stored class override when the caller passes none, and doesn't rewrite it (D-17)", async () => {
     bookingVocabularyOverride = "advanced";
     teacherRow = { targetLanguage: "es", materialVocabulary: "basic" };
     await generateClassContentForBooking({
@@ -361,7 +410,7 @@ describe("generateClassContentForBooking", () => {
     expect(bookingUpdate).not.toHaveBeenCalled();
   });
 
-  it("falls back to the teacher default when neither the class nor the call sets vocabulary (D-80)", async () => {
+  it("falls back to the teacher default when neither the class nor the call sets vocabulary (D-17)", async () => {
     teacherRow = { targetLanguage: "es", materialVocabulary: "native" };
     await generateClassContentForBooking({
       teacherId: "t1",
@@ -374,7 +423,7 @@ describe("generateClassContentForBooking", () => {
     expect(seed.vocabulary).toBe("native");
   });
 
-  it("threads the chosen template's structure into the generation seed (D-46)", async () => {
+  it("threads the chosen template's structure into the generation seed (D-17)", async () => {
     templateFindFirst.mockResolvedValue({ body: "## Bienvenida\n## Proyecto" });
     const r = await generateClassContentForBooking({
       teacherId: "t1",
@@ -897,7 +946,9 @@ describe("generateLibraryMaterialForTeacher", () => {
     const seed = (generateMaterial.mock.calls as any)[0][0];
     expect(seed.levelLabel).toBe("B1");
     expect(seed.forClass).toBe(false);
-    expect(genCreate).toHaveBeenCalledTimes(1);
+    expect(genCreate).toHaveBeenCalledWith({
+      data: { teacherId: "t1", kind: "library_material", body: "# Generated", instruction: null },
+    });
   });
 
   it("blocks once the monthly cap is reached", async () => {
@@ -1029,7 +1080,10 @@ describe("refineMaterialForTeacher", () => {
     });
     expect(r).toEqual({ ok: true, body: "# Refined" });
     expect(refineMaterial).toHaveBeenCalledTimes(1);
-    expect(genCreate).toHaveBeenCalledTimes(1);
+    // Her instruction is recorded beside the output it produced (D-202).
+    expect(genCreate).toHaveBeenCalledWith({
+      data: { teacherId: "t1", kind: "refine", body: "# Refined", instruction: "make it shorter" },
+    });
     // The current body + instruction reach the model call.
     const seed = (refineMaterial.mock.calls as any)[0][0];
     expect(seed.currentBody).toBe("# Original");
@@ -1046,6 +1100,19 @@ describe("refineMaterialForTeacher", () => {
     });
     expect(r.ok).toBe(false);
     if (!r.ok) expect(r.code).toBe("error");
+    expect(genCreate).not.toHaveBeenCalled();
+  });
+
+  it("tells the teacher a result that did not fit changed nothing, and burns no quota", async () => {
+    state.refine = { ok: false, reason: "truncated" };
+    const r = await refineMaterialForTeacher({
+      teacherId: "t1",
+      currentBody: "# Hi",
+      instruction: "add ten exercises",
+      locale: "en",
+    });
+    expect(r.ok).toBe(false);
+    if (!r.ok) expect(r.message).toContain("nothing was changed");
     expect(genCreate).not.toHaveBeenCalled();
   });
 

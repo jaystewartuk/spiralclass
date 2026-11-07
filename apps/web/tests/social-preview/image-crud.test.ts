@@ -6,7 +6,7 @@ vi.mock("server-only", () => ({}));
 // stored image is FOR.
 //
 // Deletion is the operation with teeth. The FK from SocialPreview and
-// MarketingActivity is `Restrict` on purpose (D-123/D-125) — an asset a live
+// MarketingActivity is `Restrict` on purpose (D-125) — an asset a live
 // share link previews must not vanish underneath it — so what is pinned here is
 // that deletion RESOLVES that constraint rather than forcing past it: a post
 // she already marked done blocks it, a draft's reference is cleared, a

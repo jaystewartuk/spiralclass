@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-// Teacher-editable focus tags + categories (D-20 deferred follow-up;
+// Teacher-editable focus tags + categories (D-17 deferred follow-up;
 // category later moved from free text into its own manageable
 // taxonomy). Covered here: the Pro gate, FormData → row parsing
 // (create/archive), and validation — the actual seed/read/group logic is

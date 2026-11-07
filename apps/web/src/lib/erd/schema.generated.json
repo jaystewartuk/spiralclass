@@ -204,6 +204,16 @@
       ]
     },
     {
+      "name": "MaterialGenerationKind",
+      "schema": "public",
+      "values": [
+        "class_content",
+        "library_material",
+        "refine",
+        "podcast_script"
+      ]
+    },
+    {
       "name": "MaterialSendTiming",
       "schema": "public",
       "values": [
@@ -2303,6 +2313,66 @@
           "isEnum": false,
           "enumName": null,
           "default": "now()()"
+        },
+        {
+          "name": "kind",
+          "type": "MaterialGenerationKind",
+          "note": null,
+          "isPrimaryKey": false,
+          "isForeignKey": false,
+          "isUnique": false,
+          "isNotNull": false,
+          "isEnum": true,
+          "enumName": "MaterialGenerationKind",
+          "default": null
+        },
+        {
+          "name": "body",
+          "type": "String",
+          "note": null,
+          "isPrimaryKey": false,
+          "isForeignKey": false,
+          "isUnique": false,
+          "isNotNull": false,
+          "isEnum": false,
+          "enumName": null,
+          "default": null
+        },
+        {
+          "name": "instruction",
+          "type": "String",
+          "note": null,
+          "isPrimaryKey": false,
+          "isForeignKey": false,
+          "isUnique": false,
+          "isNotNull": false,
+          "isEnum": false,
+          "enumName": null,
+          "default": null
+        },
+        {
+          "name": "materialId",
+          "type": "String",
+          "note": null,
+          "isPrimaryKey": false,
+          "isForeignKey": false,
+          "isUnique": false,
+          "isNotNull": false,
+          "isEnum": false,
+          "enumName": null,
+          "default": null
+        },
+        {
+          "name": "keptAt",
+          "type": "DateTime",
+          "note": null,
+          "isPrimaryKey": false,
+          "isForeignKey": false,
+          "isUnique": false,
+          "isNotNull": false,
+          "isEnum": false,
+          "enumName": null,
+          "default": null
         }
       ],
       "indexes": [],
@@ -12918,7 +12988,7 @@
         {
           "name": "localeChosenAt",
           "type": "DateTime",
-          "note": "When a human last CHOSE this locale, as opposed to it being detected for\nthem. Null means \"nobody has picked\" — the value in `locale` came from\nsignup provisioning (Accept-Language) or a client mirroring its device.\n\nIt exists because `locale` was answering two questions at once, and the\nautomatic writer kept winning: a client that mirrored the DEVICE language\non every session check-in silently reset a teacher who had deliberately\npicked Spanish back to English. Same lesson as D-72/D-73 — split the\ncolumn rather than guess which writer meant it. Set by a language picker;\nnever by a background mirror.",
+          "note": "When a human last CHOSE this locale, as opposed to it being detected for\nthem. Null means \"nobody has picked\" — the value in `locale` came from\nsignup provisioning (Accept-Language) or a client mirroring its device.\n\nIt exists because `locale` was answering two questions at once, and the\nautomatic writer kept winning: a client that mirrored the DEVICE language\non every session check-in silently reset a teacher who had deliberately\npicked Spanish back to English. Same lesson as D-72 — split the\ncolumn rather than guess which writer meant it. Set by a language picker;\nnever by a background mirror.",
           "isPrimaryKey": false,
           "isForeignKey": false,
           "isUnique": false,

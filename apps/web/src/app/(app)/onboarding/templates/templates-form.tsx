@@ -219,12 +219,12 @@ export function TemplatesForm({
   submitLabel?: string;
   // From `isConnectCountrySupported(teacher.country)` — a teacher outside the
   // Stripe Connect payout circle never gets a Stripe rail at all (Wise is her
-  // only rail, D-58), so the "Stripe price" / "charge less for Wise" split is
+  // only rail, D-143), so the "Stripe price" / "charge less for Wise" split is
   // meaningless: there's no Stripe price to discount against. Those teachers
   // see a single plain "Price" field instead.
   payoutCountrySupported: boolean;
   // Per-package subject is hidden during onboarding and shown in
-  // /settings/templates (D-112): on a language-first platform the subject is a
+  // /settings/templates (D-72): on a language-first platform the subject is a
   // property of the TEACHER (`targetLanguage`, asked at step 1), so asking it
   // again per package before she has a single student is friction for the rare
   // two-language teacher's benefit. The field is only hidden, never cleared —
@@ -249,7 +249,7 @@ export function TemplatesForm({
   soldByTemplateId?: Record<string, number>;
   emptyDescription?: string;
   /**
-   * Packages for two (D-188). Settings only, like the subject: onboarding
+   * Packages for two (D-149). Settings only, like the subject: onboarding
    * leaves it null and the controls out, and the hidden inputs still post each
    * row's two-person prices so an onboarding re-save never drops them.
    *
@@ -1318,7 +1318,7 @@ function PackageCard({
                     <Label htmlFor={`wise-discount-${key}`} className="text-sm">
                       {t("onboarding.templates.wiseDiscountLabel")}
                     </Label>
-                    {/* D-152: the rate comes from the same constant that sizes
+                    {/* D-143: the rate comes from the same constant that sizes
                         the discount, so the number in the sentence can never
                         drift from the arithmetic — and the copy attributes it
                         to US as an estimate, not to Stripe as its rate. */}

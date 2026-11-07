@@ -1,9 +1,9 @@
 import { type PayoutInstrument, type StringKey } from "@spiralclass/shared";
 import { buildWisePayUrl } from "@/lib/wise";
 
-// The payee block a student actually pays against (D-124, D-145).
+// The payee block a student actually pays against (D-145).
 //
-// One builder, used by the web instructions page. Before D-124 each surface
+// One builder, used by the web instructions page. Before the August 2026 registry each surface
 // reached into
 // the instrument and picked out `wiseHandle` or `clabe` by hand; three
 // hand-written versions of "which fields does this account have" is three
@@ -13,7 +13,7 @@ import { buildWisePayUrl } from "@/lib/wise";
 // D-145 removed the registry with the `bank_account` kind, and this stayed a
 // builder rather than collapsing back into the page. The shape is what callers
 // are written against, and it is the seam a second kind would return
-// through — the lesson from before D-124 was that inlining it is what let the
+// through — the lesson from before the registry was that inlining it is what let the
 // surfaces drift.
 
 export type PayeeField = {

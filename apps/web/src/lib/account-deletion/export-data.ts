@@ -72,7 +72,7 @@ export async function buildTeacherExport(
             select: { templateId: true, priceMinorUnits: true, currency: true },
           },
           customPriceNote: true,
-          // Teacher-authored durable student profile (D-20, Layer 1) — the
+          // Teacher-authored durable student profile (D-17, Layer 1) — the
           // teacher's own content, like customPriceNote: included here, never in
           // the student export.
           interests: true,

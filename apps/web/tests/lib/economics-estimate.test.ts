@@ -13,7 +13,7 @@ import {
   type IntegrationEstimate,
 } from "@/lib/economics/estimate";
 
-// D-86 S3 — the Overview panel's pure cost math. All inputs here are
+// Economics slice S3 — the Overview panel's pure cost math. All inputs here are
 // pre-fetched plain objects; no DB dependency, mirroring
 // money-metrics.test.ts's summarize* tests.
 

@@ -469,6 +469,8 @@ export const fr = {
   "material.editor.changed.duplicate": "Section dupliquée",
   "material.editor.changed.insert": "Section ajoutée",
   "material.editor.changed.refine": "Section modifiée avec l'IA",
+  "material.editor.changed.rename": "Titre de la section modifié",
+  "material.editor.sectionTitleLabel": "Titre de la section",
   "material.editor.changed.editBlocks": "Contenu de la section modifié",
   "material.editor.aiSectionChanged": "L'IA a mis à jour cette section.",
   "material.editor.undoAiChange": "Annuler la modification de l'IA",
@@ -1081,7 +1083,7 @@ export const fr = {
   "onboarding.templates.priceStripe": "Prix Stripe",
   "onboarding.templates.priceWise": "Prix par virement (facultatif)",
   // Shown instead of priceStripe when the teacher's country has no Stripe
-  // Connect rail at all (Wise-only, D-58) — there's no Stripe price to split
+  // Connect rail at all (Wise-only, D-143) — there's no Stripe price to split
   // from, so it's just "Price".
   "onboarding.templates.price": "Prix",
   "onboarding.templates.expirationMonths": "Expiration (mois)",
@@ -2725,6 +2727,10 @@ export const fr = {
   "web.dashboard.students.archive.confirmReactivate": "Réactiver cet élève dans votre liste ?",
   "web.dashboard.students.archive.confirmArchive":
     "Archiver cet élève ? Il reste joignable et ses forfaits sont inchangés — il quitte simplement votre liste active et cesse de recevoir des rappels.",
+  "web.dashboard.students.archive.warningUpcoming":
+    "Cet élève a des cours réservés. Ils restent réservés, mais il ne recevra aucun rappel.",
+  "web.dashboard.students.archive.warningClassesLeft":
+    "Cours restants : {count}. Le forfait ne change pas, mais l'élève ne recevra plus de rappels.",
   "web.dashboard.students.archive.reasonPlaceholder":
     "Note facultative (ex. cours en pause pour l'instant).",
   "web.dashboard.students.archive.helpLabel": "Aide sur l'archivage",
@@ -3284,7 +3290,7 @@ export const fr = {
   "web.dashboard.shareGroups.groupName": "Nom du groupe",
   "web.dashboard.shareGroups.linkForThisGroup": "Lien à publier dans ce groupe",
 
-  // Aperçus sociaux (D-123).
+  // Aperçus sociaux (D-125).
   "socialPreview.title": "Aperçu social",
   "socialPreview.subtitle":
     "L'image que les gens voient quand ce lien est partagé sur Facebook, WhatsApp ou ailleurs.",
@@ -5202,7 +5208,6 @@ export const fr = {
   "web.siteFooter.terms": "Conditions",
   "web.siteFooter.privacy": "Confidentialité",
   "web.siteFooter.sourceCode": "Code source",
-  "web.siteFooter.madeBy": "Créé par",
   "web.themeToggle.switchToLight": "Passer en mode clair",
   "web.themeToggle.switchToDark": "Passer en mode sombre",
   "web.themeToggle.light": "Clair",
@@ -5923,14 +5928,14 @@ export const fr = {
   "web.admin.lessonInsights.liveWarning.pre":
     "— la voix capturée est envoyée au fournisseur d'ASR et les transcriptions sont stockées,",
   "web.admin.lessonInsights.liveWarning.strong": "pour chaque paire consentante",
-  "web.admin.lessonInsights.liveWarning.mid": "(D-21/D-22). Seules les paires de",
+  "web.admin.lessonInsights.liveWarning.mid": "(D-22). Seules les paires de",
   "web.admin.lessonInsights.liveWarning.em": "test",
   "web.admin.lessonInsights.liveWarning.midEnd":
     "consenties doivent être enregistrées ; désactivez",
   "web.admin.lessonInsights.liveWarning.post": "entre les tests.",
   "web.admin.lessonInsights.title": "Insights de cours — état du pipeline",
   "web.admin.lessonInsights.subtitle":
-    "Statut opérationnel sur tous les tenants : capture → transcription → insights → profil → résumé. Statuts et compteurs uniquement — aucun contenu de transcription, de prononciation ou de profil n'est affiché ici (D-21/D-22).",
+    "Statut opérationnel sur tous les tenants : capture → transcription → insights → profil → résumé. Statuts et compteurs uniquement — aucun contenu de transcription, de prononciation ou de profil n'est affiché ici (D-22).",
   "web.admin.lessonInsights.awaitingTranscription": "Captures en attente de transcription",
   "web.admin.lessonInsights.awaitingTranscriptionHint": 'audio "ready" pas encore transcrit',
   "web.admin.lessonInsights.stuckCaptures": "Captures bloquées",
@@ -6414,7 +6419,7 @@ export const fr = {
   "web.admin.teachers.entitlements.canScheduleMaterials": "Peut programmer des supports",
   "web.admin.teachers.entitlements.canCustomPrice": "Peut fixer un prix personnalisé",
   "web.admin.teachers.entitlements.canUseLiveNotes": "Peut utiliser les notes en direct",
-  // Merged from the D-99 (PR #680) GBP-billing-currency conflict resolution
+  // Merged from the D-153 (PR #680) GBP-billing-currency conflict resolution
   // — see catalog.en.ts's identical comment.
   "web.admin.subscriptions.otherCurrencyMrrNote":
     "Non inclus ci-dessus (abonnés facturés dans une autre devise, sans conversion) :",
@@ -6887,7 +6892,7 @@ export const fr = {
   "web.action.photo.choose": "Choisissez d'abord une image.",
   "web.action.photo.type": "Utilisez une image JPG, PNG ou WebP.",
   "web.action.photo.tooLarge": "L'image doit faire moins de 5 Mo.",
-  "web.action.photo.uploadFailed": "Nous n'avons pas pu téléverser l'image : {error}",
+  "web.action.photo.uploadFailed": "Nous n'avons pas pu téléverser l'image. Veuillez réessayer.",
   "web.action.testimonial.bodyLength":
     "Écrivez quelques mots sur vos cours (moins de {max} caractères).",
   "web.action.testimonial.notEligible":
@@ -7185,9 +7190,11 @@ export const fr = {
   "web.action.packageField.atMost": "Il peut rester au maximum {max} cours pour ce forfait.",
   "web.action.materialImage.chooseType": "Choisissez une image JPG, PNG, WebP ou GIF.",
   "web.action.materialImage.tooLarge": "L'image ne peut pas dépasser {mb} Mo.",
-  "web.action.materialImage.uploadFailed": "Nous n'avons pas pu téléverser l'image : {message}",
+  "web.action.materialImage.uploadFailed":
+    "Nous n'avons pas pu téléverser l'image. Veuillez réessayer.",
   "web.action.materialFile.tooLarge": "Le fichier ne peut pas dépasser 25 Mo.",
-  "web.action.materialFile.uploadFailed": "Nous n'avons pas pu téléverser le fichier : {message}",
+  "web.action.materialFile.uploadFailed":
+    "Nous n'avons pas pu téléverser le fichier. Veuillez réessayer.",
   "web.action.referral.ownCode": "Vous ne pouvez pas utiliser votre propre code de parrainage.",
   "web.action.referral.firstPurchaseOnly":
     "Les codes de parrainage ne s'appliquent qu'à votre premier achat.",
@@ -7900,6 +7907,10 @@ export const fr = {
   "materials.ai.refineUnavailable":
     "La modification par IA n'est pas disponible pour le moment. Vous pouvez toujours modifier le support vous-même.",
   "materials.ai.refineFailed": "Impossible d'appliquer la modification. Veuillez réessayer.",
+  "materials.ai.generateTooLong":
+    "Le support est trop long pour être terminé. Essayez un sujet plus précis ou générez-le en deux parties.",
+  "materials.ai.refineTooLong":
+    "Le résultat est trop long pour être terminé, donc rien n'a été modifié. Demandez une modification plus petite ou divisez le support en deux.",
   "materials.ai.podcastLimitReached":
     "Vous avez atteint la limite mensuelle de génération par IA ({cap}). Vous pouvez toujours rédiger et enregistrer le contenu vous-même.",
   "materials.ai.podcastUnavailable":

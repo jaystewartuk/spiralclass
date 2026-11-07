@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-// D-64: platformCurrency() used to read a single platform-wide env var
+// D-153: platformCurrency() used to read a single platform-wide env var
 // (WISE_BALANCE_CURRENCY) for every teacher — a non-MXN-priced Wise-rail
 // teacher's incoming credits were never fetched at all. This pins the fix:
 // wiseClientForTeacher resolves the balance to poll from the teacher's own

@@ -14,7 +14,7 @@ import { WISE_TOKEN_COLUMN, WISE_KEY_COLUMN, generateWiseSigningKeypair } from "
 // the teacher uploading the public half to Wise.
 //
 // These live on the teacher's WISE INSTRUMENT rather than on the teacher
-// (D-113): auto-reconciliation is a capability of the instrument, not of the
+// (D-145): auto-reconciliation is a capability of the instrument, not of the
 // person. That is what makes it structural rather than surprising that the
 // SPEI instrument has no equivalent — retail banks on that rail expose no
 // per-teacher statement API, so a SPEI payment is teacher-confirmed forever.

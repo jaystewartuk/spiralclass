@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { buildIntroCoachPrompt, parseIntroCoachFeedback } from "@/lib/intro-video/coach";
 
-// AI intro-video coach (D-73, Layer 3). The prompt is built purely (no network)
+// AI intro-video coach (Layer 3). The prompt is built purely (no network)
 // and the model's JSON is parsed defensively, so both are unit-tested here; the
 // network call itself (generateIntroCoachFeedback) is exercised via its
 // IntroCoachUnavailableError degrade path in the pipeline tests.

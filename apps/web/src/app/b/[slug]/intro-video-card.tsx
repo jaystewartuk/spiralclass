@@ -14,7 +14,7 @@ import { LogoMark } from "@/components/brand/logo";
 import { useT } from "@/components/locale-provider";
 import { markIntroVideoWatched } from "@/lib/analytics/intro-video-watch";
 
-// Public-page intro video card (D-73). Previously used the teacher's profile
+// Public-page intro video card. Previously used the teacher's profile
 // photo as the <video poster>, which duplicated the same headshot twice on
 // the page (once as the hero photo, again squashed into the video frame) and
 // read as a bug rather than a thumbnail. So it renders a branded play overlay

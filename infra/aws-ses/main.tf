@@ -13,7 +13,7 @@ terraform {
   }
 
   # State lives in the same R2 bucket as every other module here
-  # (infra/cloudflare-r2), per D-49 —
+  # (infra/cloudflare-r2), per D-70 —
   # concern-keyed, not vendor-keyed. See backend.hcl.example.
   #
   # IMPORTANT — two DIFFERENT AWS credential sets are in play in this one

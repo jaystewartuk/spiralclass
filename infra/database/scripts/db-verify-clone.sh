@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# D-49 layer 3 (data) — parity check between two Postgres databases. For every
+# D-70 layer 3 (data) — parity check between two Postgres databases. For every
 # base table in the chosen schema(s) it compares (a) the row count and (b) an
 # order-independent content checksum, and reports any divergence. A clone (or a
 # logical-replication cutover) you cannot verify is a clone you cannot trust.

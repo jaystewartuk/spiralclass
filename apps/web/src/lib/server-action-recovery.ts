@@ -52,7 +52,7 @@
 // There is no Skew Protection sitting in front of this any more. It used to be
 // the primary defense — Vercel's deployment routing pinned each browser session
 // to the deployment that served its HTML, so names always resolved — but Vercel
-// is decommissioned (D-89) and the app runs on Fly, where every request lands on
+// is decommissioned (D-70) and the app runs on Fly, where every request lands on
 // whatever release is current. What remains in front of this is Next's
 // `deploymentId` stamping in next.config.ts — which was itself inert until
 // 2026-09-03, reading a NEXT_DEPLOYMENT_ID nothing set, and now carries the

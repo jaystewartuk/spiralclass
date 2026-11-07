@@ -22,7 +22,7 @@ import { clientIp, rateLimit } from "@/lib/rate-limit";
 //
 // Every instrument shares the frame — amount, reference, "I've sent it" — and
 // differs only in step 1, the payee instructions themselves. That split is the
-// whole point of D-113: Wise supplies a prefilled Quick-Pay URL where SPEI
+// whole point of D-145: Wise supplies a prefilled Quick-Pay URL where SPEI
 // supplies a CLABE the student types into their banking app, and neither is
 // "the rail".
 //
@@ -44,7 +44,7 @@ export default async function TransferInstructionsPage({
 }) {
   const { slug, ref } = await params;
   // The funnel's language is the teacher's choice for her buyers, and so is
-  // the number format of the amount (D-194, D-197).
+  // the number format of the amount (D-72, D-153).
   const locale = publicFunnelLocaleFor(await funnelLocaleForSlug(slug));
   const t = getPublicFunnelT(locale);
 

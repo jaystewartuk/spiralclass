@@ -46,9 +46,9 @@ const STAGE_COLORS: Record<Stage, string> = STAGE_ORDER.reduce(
   {} as Record<Stage, string>,
 );
 
-// Lesson-insights PIPELINE HEALTH (D-05/D-21/D-22). A purpose-built operational
+// Lesson-insights PIPELINE HEALTH (D-22). A purpose-built operational
 // view: row STATUSES, COUNTS and TIMESTAMPS only — deliberately NO transcript,
-// pronunciation, insight or profile CONTENT. The voice-derived content is the
+// pronunciation, insight or profile CONTENT. The voice-derived content is
 // the most sensitive data in the system, so it is not surfaced here; this
 // view exists to operate and debug the pipeline (e.g. "captures land but no
 // transcript"), not to read students' lessons. Superadmin-gated.

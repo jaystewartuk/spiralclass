@@ -12,7 +12,7 @@ import { Label } from "@/components/ui/label";
 import { useT } from "@/components/locale-provider";
 
 /**
- * Mark or unmark a teacher or student as an operator's test account (D-192).
+ * Mark or unmark a teacher or student as an operator's test account.
  * One form for both, because it is one flag with one meaning; a reason is
  * required either way and kept on the audit record.
  */

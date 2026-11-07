@@ -9,7 +9,7 @@ import {
   type TermsDocument,
 } from "./terms";
 
-// The Terms of Service as data (D-196): the English text applies, the Spanish
+// The Terms of Service as data (D-72): the English text applies, the Spanish
 // one is a translation of a recorded English version, and a translation that
 // falls behind is not served as the terms.
 

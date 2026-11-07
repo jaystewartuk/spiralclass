@@ -8,7 +8,7 @@ import { CallNotesCard } from "@/components/video/call-notes-card";
 type LiveNote = { id: string; body: string };
 
 // The student's live-notes overlay during the call itself (live-notes-panel.md
-// step 3, D-15/D-16). The page server-renders `notes` once at load, same as the
+// step 3, D-16). The page server-renders `notes` once at load, same as the
 // booking-detail StudentLiveNotes card — but unlike that card, this had no
 // realtime subscription: a note the teacher added or edited after the student
 // already joined the call never appeared until the student reloaded the call
