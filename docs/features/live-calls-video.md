@@ -180,6 +180,13 @@ live captions and post-call transcription cannot run there, whatever
       browser recognises it from the call audio it already receives. Both
       browsers compute this from the same room state (each publishes whether
       it can, as a participant attribute), so they agree without talking.
+    - **A browser that claims it can recognise has to prove it.** The speech
+      API can exist in a browser that never returns a word. A browser
+      withdraws its claim for the rest of the call when its recogniser gives
+      up, fails five times in a row with nothing heard, or hears nothing
+      through 30 seconds of speech on the call. The other browser then takes
+      over, or the Deepgram fallback when there is none, and the failure is
+      recorded with the browser's own name for itself.
     - **When neither browser can — two phones.** Each person's own browser
       records their call microphone track and streams it to Deepgram
       (Nova-3, with interim results for the words in progress, opted out of
@@ -413,8 +420,9 @@ live captions and post-call transcription cannot run there, whatever
 - Both people on phones: nothing can be captioned in the browser, and both
   screens say so rather than showing a band that listens forever.
 - A browser whose microphone permission is refused, or that cannot recognise
-  the class's language: its recogniser stops for good and its screen says
-  captions stopped on this device.
+  the class's language: its recogniser stops for good and it hands the job on,
+  as any browser whose recognition does not work does. If nobody can take over,
+  both screens say captions need a computer.
 - Both parties try to screen-share near-simultaneously: whoever's toggle
   lands first wins; the other party's control is disabled while the first
   share is active.

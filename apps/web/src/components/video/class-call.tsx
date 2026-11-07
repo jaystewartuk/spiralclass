@@ -47,6 +47,7 @@ import { guardAudioPlaybackResume } from "@/lib/video/audio-playback";
 import { startCallRecording, stopCallRecording } from "@/app/actions/call-recording";
 import { useCaptionFeed, useRoomCaptionsEnabled } from "@/lib/captions/use-caption-feed";
 import { useBrowserCaptions } from "@/lib/captions/use-browser-captions";
+import { browserBrands } from "@/lib/captions/recognition-environment";
 import { captionsConsentPrompt } from "@/lib/captions/consent-prompt";
 import { useRemoteParticipant } from "@/lib/video/use-remote-participant";
 import { useCaptionPreferences } from "@/lib/captions/use-caption-preferences";
@@ -939,6 +940,11 @@ export function ClassCall({
     role,
     teacherCaptionsOn: captionsOn,
     showLocal: captions.addLine,
+    onRecognitionUnusable: (reason) =>
+      posthog?.capture(
+        "call_captions_recognition_unusable",
+        analyticsProps({ reason, browserBrands: browserBrands(window) }),
+      ),
   });
   // Announced here rather than by the top-bar icon, which unmounts while the
   // call is minimised (learning-notes-indicator.tsx).

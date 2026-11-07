@@ -62,6 +62,15 @@ export function recognitionEnvironment(win: BrowserLike): RecognitionEnvironment
   };
 }
 
+// The browser's own name for itself. Every Chromium browser can send the same
+// "Chrome/N" user agent; the brands are what tell one from another. Recorded
+// when recognition fails, so the next failure names its browser.
+export function browserBrands(win: BrowserLike): string[] {
+  return (win.navigator?.userAgentData?.brands ?? [])
+    .map((b) => b.brand)
+    .filter((brand) => !/not.?a.?brand/i.test(brand));
+}
+
 export function browserCanRecognizeDuringCall(win: BrowserLike): boolean {
   return canRecognizeDuringCall(recognitionEnvironment(win));
 }
