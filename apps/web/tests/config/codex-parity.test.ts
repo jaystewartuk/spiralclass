@@ -1,5 +1,6 @@
 import { accessSync, constants, lstatSync, readFileSync, readdirSync, readlinkSync } from "node:fs";
 import { join, resolve } from "node:path";
+import { spawnSync } from "node:child_process";
 
 import { describe, expect, it } from "vitest";
 
@@ -49,6 +50,29 @@ describe("AGENTS.md", () => {
   it("is a symlink to CLAUDE.md, so that the two cannot disagree", () => {
     expect(lstatSync(path("AGENTS.md")).isSymbolicLink()).toBe(true);
     expect(readlinkSync(path("AGENTS.md"))).toBe("CLAUDE.md");
+  });
+});
+
+describe("the backlog skill is available in fresh Codex checkouts", () => {
+  it("links Codex discovery to the canonical project skill", () => {
+    const link = path(".agents/skills/work-backlog/SKILL.md");
+    expect(lstatSync(link).isSymbolicLink()).toBe(true);
+    expect(readlinkSync(link)).toBe("../../../.claude/skills/work-backlog/SKILL.md");
+    expect(read(".agents/skills/work-backlog/SKILL.md")).toBe(
+      read(".claude/skills/work-backlog/SKILL.md"),
+    );
+  });
+
+  it("allows the leak scanner to batch ignore checks through the discovery directory", () => {
+    // A directory symlink makes Git abort with 'beyond a symbolic link',
+    // causing the scanner to report ignored private config as publishable.
+    const result = spawnSync("git", ["check-ignore", "--stdin"], {
+      cwd: REPO_ROOT,
+      input: ".agents/skills/work-backlog/SKILL.md\n.agents/skills/pr/SKILL.md\n",
+      encoding: "utf8",
+    });
+    expect(result.status, result.stderr).toBe(0);
+    expect(result.stdout.trim()).toBe(".agents/skills/pr/SKILL.md");
   });
 });
 
