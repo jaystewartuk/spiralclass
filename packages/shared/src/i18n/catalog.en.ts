@@ -676,6 +676,10 @@ export const en = {
   "call.notesExplain":
     "This class's captions are saved as text to suggest what to work on next. No audio is recorded.",
   "call.notesLearnMore": "Learn more",
+  "call.captionsBrowserUnsupported":
+    "Captions can't run in this browser. Try Chrome on a computer.",
+  "call.captionsOtherSpeechStopped":
+    "Captions of the other person have stopped. Ask them to join from Chrome on a computer.",
   "call.captionsStopped": "Captions stopped on this device — check the microphone permission.",
   "call.captionsServiceUnavailable":
     "Captions stopped on this device — the captioning service couldn't be reached.",

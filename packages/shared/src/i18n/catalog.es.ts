@@ -684,6 +684,10 @@ export const esMX = {
   "call.notesExplain":
     "Los subtítulos de esta clase se guardan como texto para sugerir qué trabajar a continuación. No se graba audio.",
   "call.notesLearnMore": "Más información",
+  "call.captionsBrowserUnsupported":
+    "Los subtítulos no funcionan en este navegador. Prueba con Chrome en una computadora.",
+  "call.captionsOtherSpeechStopped":
+    "Se detuvieron los subtítulos de la otra persona. Pídele que entre desde Chrome en una computadora.",
   "call.captionsStopped":
     "Los subtítulos se detuvieron en este dispositivo — revisa el permiso del micrófono.",
   "call.captionsServiceUnavailable":

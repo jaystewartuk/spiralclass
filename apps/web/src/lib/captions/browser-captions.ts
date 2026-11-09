@@ -18,6 +18,7 @@ import {
   type MediaRecorderCtorLike,
   type WebSocketCtorLike,
 } from "@/lib/captions/cloud-recognizer";
+import type { AudioContextCtorLike } from "@/lib/captions/pcm-capture";
 import {
   TrackRecognizer,
   type RecognizerOptions,
@@ -133,6 +134,7 @@ export type BrowserCaptionsDeps = {
   // What the cloud fallback records and streams with; null where absent.
   WebSocket: WebSocketCtorLike | null;
   MediaRecorder: MediaRecorderCtorLike | null;
+  AudioContext?: AudioContextCtorLike | null;
   fetch: typeof fetch;
   // Send a line to the other participant (its `for`).
   publish: (line: CaptionLine) => Promise<void>;
@@ -148,6 +150,9 @@ export type BrowserCaptionsDeps = {
   // This browser's recognition does not work, whatever the API says. Called at
   // most once; the hook withdraws the claim, and the next sync re-assigns.
   onUnusable?: (reason: RecognitionUnusableReason) => void;
+  // This browser's cloud fallback gave up on its own person's speech, or
+  // (null) that no longer stands. Nothing else in the room can know.
+  onCloudStopped?: (reason: RecognizerStopReason | null) => void;
   now?: () => number;
   setTimeout?: (fn: () => void, ms: number) => unknown;
   clearTimeout?: (handle: unknown) => void;
@@ -228,6 +233,8 @@ export class BrowserCaptions {
         studentConsent: session.studentConsent,
         cloudAvailable: session.cloudRecognition,
       });
+      // Someone else has this speaker now, so the give-up no longer stands.
+      if (assignment[me] !== "cloud") this.clearCloudStop();
       uncaptioned = SPEAKERS.filter(
         (s) =>
           input.captionsOn &&
@@ -311,6 +318,13 @@ export class BrowserCaptions {
     }
   }
 
+  private clearCloudStop(): void {
+    if (this.stoppedKind !== "cloud") return;
+    this.stopped = null;
+    this.stoppedKind = null;
+    this.deps.onCloudStopped?.(null);
+  }
+
   private reportUnusable(reason: RecognitionUnusableReason): void {
     if (this.reportedUnusable) return;
     this.reportedUnusable = true;
@@ -335,6 +349,7 @@ export class BrowserCaptions {
     listenerIdentity: string;
     publish: boolean;
   }): Running {
+    if (args.kind === "cloud") this.clearCloudStop();
     const translator = new CaptionTranslator({
       bookingId: args.session.bookingId,
       speaker: args.speaker,
@@ -409,6 +424,7 @@ export class BrowserCaptions {
       this.stoppedKind = args.kind;
       this.report({ uncaptioned: [], stopped: reason });
       if (args.kind === "browser") this.reportUnusable(reason);
+      else this.deps.onCloudStopped?.(reason);
     };
     if (args.kind === "cloud") {
       const create =
@@ -419,6 +435,7 @@ export class BrowserCaptions {
         fetch: this.deps.fetch,
         WebSocket: this.deps.WebSocket,
         MediaRecorder: this.deps.MediaRecorder,
+        AudioContext: this.deps.AudioContext ?? null,
         onFinal,
         onPartial,
         onStopped,

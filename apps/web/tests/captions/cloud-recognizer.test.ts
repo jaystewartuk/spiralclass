@@ -410,3 +410,109 @@ describe("pickCloudMimeType / transcriptOf", () => {
     expect(transcriptOf(new ArrayBuffer(2))).toBeNull();
   });
 });
+
+describe("CloudRecognizer — a browser that cannot record Deepgram's formats", () => {
+  function audioContext() {
+    const processor = {
+      connect: vi.fn(),
+      disconnect: vi.fn(),
+      onaudioprocess: null as
+        ((e: { inputBuffer: { getChannelData(c: number): Float32Array } }) => void) | null,
+    };
+    const close = vi.fn(async () => {});
+    const constructed = vi.fn();
+    const Ctor = class {
+      sampleRate = 16_000;
+      destination = {};
+      resume = async () => {};
+      close = close;
+      constructor() {
+        constructed();
+      }
+      createMediaStreamSource = () => ({ connect: vi.fn(), disconnect: vi.fn() });
+      createScriptProcessor = () => processor;
+      createGain = () => ({ connect: vi.fn(), disconnect: vi.fn(), gain: { value: 1 } });
+    } as unknown as NonNullable<CloudRecognizerOptions["AudioContext"]>;
+    const frame = () =>
+      processor.onaudioprocess?.({
+        inputBuffer: { getChannelData: () => new Float32Array([0.5, 0.5]) },
+      });
+    return { Ctor, frame, close, constructed };
+  }
+  // Safari before 18.4: MediaRecorder exists, and refuses WebM and Ogg.
+  const mp4Only = {
+    isTypeSupported: () => false,
+  } as unknown as MediaRecorderCtorLike;
+  const tokenBody = () =>
+    JSON.parse(String(tokenFetch.mock.calls.at(-1)?.[1]?.body)) as Record<string, unknown>;
+
+  beforeEach(() => {
+    FakeSocket.instances = [];
+    FakeRecorder.instances = [];
+    timers = [];
+    clock = 0;
+    tokenReplies = [];
+    tokenFetch.mockClear();
+  });
+
+  it("asks for a raw-audio socket and streams samples once it opens", async () => {
+    const a = audioContext();
+    const { r, stopped } = setup({ MediaRecorder: mp4Only, AudioContext: a.Ctor });
+    r.start();
+    await flush();
+    expect(tokenBody()).toEqual({ bookingId: "b1", pcm: true });
+    a.frame();
+    expect(socket().sent).toHaveLength(0);
+    socket().open();
+    a.frame();
+    expect(socket().sent).toHaveLength(1);
+    expect(socket().sent[0]).toBeInstanceOf(ArrayBuffer);
+    expect(FakeRecorder.instances).toHaveLength(0);
+    expect(stopped).toEqual([]);
+  });
+
+  it("still gives up when there is no way to capture raw audio either", async () => {
+    const { r, stopped } = setup({ MediaRecorder: mp4Only, AudioContext: null });
+    r.start();
+    await flush();
+    expect(stopped).toEqual(["unsupported"]);
+    expect(tokenFetch).not.toHaveBeenCalled();
+  });
+
+  it("prefers a recorder where one works, and says nothing about raw audio", async () => {
+    const a = audioContext();
+    const { r } = setup({ AudioContext: a.Ctor });
+    r.start();
+    await flush();
+    expect(tokenBody()).toEqual({ bookingId: "b1" });
+    expect(a.constructed).not.toHaveBeenCalled();
+  });
+
+  it("keeps one capture across a reconnect and sends to the new socket", async () => {
+    const a = audioContext();
+    const { r } = setup({ MediaRecorder: mp4Only, AudioContext: a.Ctor });
+    r.start();
+    await flush();
+    socket().open();
+    const first = socket();
+    first.drop();
+    a.frame();
+    expect(first.sent).toHaveLength(0);
+    await fireTimer();
+    socket().open();
+    a.frame();
+    expect(socket()).not.toBe(first);
+    expect(socket().sent).toHaveLength(1);
+    expect(a.constructed).toHaveBeenCalledTimes(1);
+    expect(a.close).not.toHaveBeenCalled();
+  });
+
+  it("releases the capture on stop", async () => {
+    const a = audioContext();
+    const { r } = setup({ MediaRecorder: mp4Only, AudioContext: a.Ctor });
+    r.start();
+    await flush();
+    r.stop();
+    expect(a.close).toHaveBeenCalledTimes(1);
+  });
+});

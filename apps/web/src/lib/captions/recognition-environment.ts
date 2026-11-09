@@ -1,5 +1,6 @@
 import { canRecognizeDuringCall, type RecognitionEnvironment } from "@spiralclass/shared";
 import type { MediaRecorderCtorLike, WebSocketCtorLike } from "@/lib/captions/cloud-recognizer";
+import type { AudioContextCtorLike } from "@/lib/captions/pcm-capture";
 import type { SpeechRecognitionCtorLike, TranslatorApiLike } from "@/lib/captions/recognizer";
 
 // Reading the browser for live captions (D-185): which speech and translation
@@ -14,6 +15,7 @@ type BrowserLike = {
   Translator?: unknown;
   WebSocket?: unknown;
   MediaRecorder?: unknown;
+  AudioContext?: unknown;
   navigator?: {
     userAgent?: string;
     userAgentData?: { mobile?: boolean; brands?: { brand: string }[] };
@@ -43,6 +45,10 @@ export function mediaRecorderCtor(win: BrowserLike): MediaRecorderCtorLike | nul
   return typeof win.MediaRecorder === "function"
     ? (win.MediaRecorder as MediaRecorderCtorLike)
     : null;
+}
+
+export function audioContextCtor(win: BrowserLike): AudioContextCtorLike | null {
+  return typeof win.AudioContext === "function" ? (win.AudioContext as AudioContextCtorLike) : null;
 }
 
 // Phones and tablets, from the Client Hints bit where the browser has it and
