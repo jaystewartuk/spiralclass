@@ -945,6 +945,11 @@ export function ClassCall({
         "call_captions_recognition_unusable",
         analyticsProps({ reason, browserBrands: browserBrands(window) }),
       ),
+    onCloudStopped: (reason) =>
+      posthog?.capture(
+        "call_captions_cloud_stopped",
+        analyticsProps({ reason, browserBrands: browserBrands(window) }),
+      ),
   });
   // Announced here rather than by the top-bar icon, which unmounts while the
   // call is minimised (learning-notes-indicator.tsx).
@@ -1994,9 +1999,17 @@ export function ClassCall({
                   label={t(
                     browserCaptions.status.stopped === "unavailable"
                       ? "call.captionsServiceUnavailable"
-                      : "call.captionsStopped",
+                      : browserCaptions.status.stopped === "unsupported"
+                        ? "call.captionsBrowserUnsupported"
+                        : "call.captionsStopped",
                   )}
                 />
+              )}
+              {/* The other person's browser gave up on their speech. Both
+                browsers agree the fallback has the job, so only this says it
+                is not being done. */}
+              {roomCaptionsOn && browserCaptions.otherSpeechStopped && (
+                <StatusPill tone="attention" label={t("call.captionsOtherSpeechStopped")} />
               )}
               {/* Camera-switch failure — brief, non-blocking (the camera
                 keeps working on whichever device it already had). */}

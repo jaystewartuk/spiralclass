@@ -676,6 +676,10 @@ export const fr = {
   "call.notesExplain":
     "Les sous-titres de ce cours sont enregistrés sous forme de texte pour suggérer sur quoi travailler ensuite. Aucun audio n'est enregistré.",
   "call.notesLearnMore": "En savoir plus",
+  "call.captionsBrowserUnsupported":
+    "Les sous-titres ne fonctionnent pas dans ce navigateur. Essayez Chrome sur un ordinateur.",
+  "call.captionsOtherSpeechStopped":
+    "Les sous-titres de l'autre personne se sont arrêtés. Demandez-lui de rejoindre depuis Chrome sur un ordinateur.",
   "call.captionsStopped":
     "Les sous-titres se sont arrêtés sur cet appareil — vérifiez l'autorisation du micro.",
   "call.captionsServiceUnavailable":

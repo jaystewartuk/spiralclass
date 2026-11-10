@@ -1,5 +1,5 @@
 import "server-only";
-import { baseLanguage } from "@spiralclass/shared";
+import { baseLanguage, CLOUD_PCM_SAMPLE_RATE } from "@spiralclass/shared";
 import { deepgramApiKey } from "@/lib/captions/config";
 
 // Deepgram streaming speech-to-text for live captions' phone-to-phone
@@ -157,13 +157,19 @@ export function deepgramLiveLanguage(locale: string): string | null {
 // duration necessary to process the request" (Deepgram's documentation,
 // 2026-09-23). This is a live lesson's speech, a student's among it, and the
 // captions are promised to be stored nowhere.
-export function deepgramListenUrl(language: string): string {
+//
+// `pcm` is for a browser sending raw samples: unlike a containerised stream,
+// Deepgram has to be told what those are.
+export function deepgramListenUrl(language: string, { pcm = false } = {}): string {
   const params = new URLSearchParams({
     model: DEEPGRAM_LIVE_MODEL,
     language,
     smart_format: "true",
     interim_results: "true",
     mip_opt_out: "true",
+    ...(pcm
+      ? { encoding: "linear16", sample_rate: String(CLOUD_PCM_SAMPLE_RATE), channels: "1" }
+      : {}),
   });
   return `${LISTEN_URL}?${params.toString()}`;
 }

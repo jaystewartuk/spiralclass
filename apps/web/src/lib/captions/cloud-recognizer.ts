@@ -1,4 +1,9 @@
 import type { TranslationRefusal } from "@/lib/captions/caption-translator";
+import {
+  createPcmCapture,
+  type AudioContextCtorLike,
+  type PcmCapture,
+} from "@/lib/captions/pcm-capture";
 import type { RecognizerStopReason } from "@/lib/captions/recognizer";
 
 // Live captions' phone-to-phone fallback, in the browser (D-185).
@@ -27,7 +32,7 @@ export type WebSocketLike = {
   onmessage: ((event: { data: unknown }) => void) | null;
   onclose: (() => void) | null;
   onerror: (() => void) | null;
-  send(data: Blob | string): void;
+  send(data: Blob | ArrayBuffer | string): void;
   close(code?: number): void;
 };
 export type WebSocketCtorLike = new (url: string, protocols: string[]) => WebSocketLike;
@@ -50,6 +55,8 @@ export type CloudRecognizerOptions = {
   fetch: typeof fetch;
   WebSocket: WebSocketCtorLike | null;
   MediaRecorder: MediaRecorderCtorLike | null;
+  // What raw audio is captured with when MediaRecorder has no usable format.
+  AudioContext?: AudioContextCtorLike | null;
   onFinal: (text: string) => void;
   // The words of the segment still being spoken, as Deepgram revises them.
   onPartial?: (heard: string) => void;
@@ -66,8 +73,8 @@ export type CloudRecognizerOptions = {
 
 // Opus in a WebM container is what Chrome (Android included) records, and
 // Deepgram detects a containerised stream without being told the encoding.
-// Ogg/Opus is Firefox's. A browser that can record neither gives up rather
-// than send Deepgram something it will reject.
+// Ogg/Opus is Firefox's. A browser that can record neither (Safari before
+// 18.4) streams raw samples instead (pcm-capture.ts).
 export const CLOUD_MIME_TYPES = ["audio/webm;codecs=opus", "audio/webm", "audio/ogg;codecs=opus"];
 
 // Small enough that a phrase reaches Deepgram as it is spoken, large enough
@@ -125,6 +132,8 @@ export class CloudRecognizer {
   private running = false;
   private ws: WebSocketLike | null = null;
   private recorder: MediaRecorderLike | null = null;
+  // Outlives a reconnect: frames between sockets are simply not sent.
+  private pcm: PcmCapture | null = null;
   private timer: unknown = null;
   private failures = 0;
   private openedAt: number | null = null;
@@ -136,6 +145,7 @@ export class CloudRecognizer {
       clearTimeout: (h) => globalThis.clearTimeout(h as ReturnType<typeof setTimeout>),
       now: Date.now,
       onPartial: () => {},
+      AudioContext: null,
       ...options,
     };
   }
@@ -151,17 +161,19 @@ export class CloudRecognizer {
     if (this.timer !== null) this.opts.clearTimeout(this.timer);
     this.timer = null;
     this.teardown(true);
+    this.pcm?.stop();
+    this.pcm = null;
   }
 
   private async connect(): Promise<void> {
     if (!this.running) return;
     const mimeType = pickCloudMimeType(this.opts.MediaRecorder);
-    if (!mimeType || !this.opts.WebSocket) {
+    if (!this.opts.WebSocket || (!mimeType && !this.startPcm())) {
       this.giveUp("unsupported");
       return;
     }
 
-    const answer = await this.requestToken();
+    const answer = await this.requestToken(!mimeType);
     if (!this.running) return;
     if (answer.kind === "give-up") {
       if (answer.refusal) this.opts.onRefused(answer.refusal);
@@ -188,7 +200,7 @@ export class CloudRecognizer {
     ws.onopen = () => {
       if (this.ws !== ws) return;
       this.openedAt = this.opts.now();
-      this.startRecording(ws, mimeType);
+      if (mimeType) this.startRecording(ws, mimeType);
     };
     ws.onmessage = (event) => {
       if (this.ws !== ws) return;
@@ -208,6 +220,20 @@ export class CloudRecognizer {
       if (healthy) this.failures = 0;
       this.failed(null);
     };
+  }
+
+  private startPcm(): boolean {
+    if (!this.opts.AudioContext) return false;
+    this.pcm ??= createPcmCapture({
+      AudioContext: this.opts.AudioContext,
+      stream: this.opts.createStream(this.opts.track),
+      onFrame: (frame) => {
+        if (this.ws && this.openedAt !== null && this.ws.readyState === WS_OPEN) {
+          this.ws.send(frame);
+        }
+      },
+    });
+    return this.pcm !== null;
   }
 
   private startRecording(ws: WebSocketLike, mimeType: string): void {
@@ -232,13 +258,13 @@ export class CloudRecognizer {
     }
   }
 
-  private async requestToken(): Promise<TokenAnswer> {
+  private async requestToken(pcm: boolean): Promise<TokenAnswer> {
     let res: Response;
     try {
       res = await this.opts.fetch("/api/captions/stt-token", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ bookingId: this.opts.bookingId }),
+        body: JSON.stringify({ bookingId: this.opts.bookingId, ...(pcm ? { pcm } : {}) }),
       });
     } catch {
       return { kind: "retry", afterMs: null };

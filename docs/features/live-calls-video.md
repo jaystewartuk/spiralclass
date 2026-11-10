@@ -187,8 +187,10 @@ live captions and post-call transcription cannot run there, whatever
       through 30 seconds of speech on the call. The other browser then takes
       over, or the Deepgram fallback when there is none, and the failure is
       recorded with the browser's own name for itself.
-    - **When neither browser can — two phones.** Each person's own browser
-      records their call microphone track and streams it to Deepgram
+    - **When neither browser can — two phones, or a phone and Safari.** Each
+      person's own browser records their call microphone track (or, where it
+      cannot record a format Deepgram detects, as in Safari before 18.4,
+      captures it as raw 16 kHz samples) and streams it to Deepgram
       (Nova-3, with interim results for the words in progress, opted out of
       Deepgram's model training), and the
       transcript goes through the same translate-and-publish path. This is
@@ -202,7 +204,9 @@ live captions and post-call transcription cannot run there, whatever
       never reaches the browser. Grants are rate-limited per caller per class
       and per class per day, and each is logged. Without `DEEPGRAM_API_KEY`
       the fallback is off and two phones are told captions need one of them
-      on Chrome on a computer, as before.
+      on Chrome on a computer, as before. If a browser's stream gives up for
+      good, the other person is told their partner's speech has stopped
+      being captioned, and `call_captions_cloud_stopped` records why.
     - A line one browser recognises for its own speaker is published to the
       other participant over LiveKit's reliable data channel, addressed to
       them. A line a browser recognises from the other person is shown on
