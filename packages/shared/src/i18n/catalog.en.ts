@@ -5275,8 +5275,7 @@ export const en = {
   "web.about.trust.dataProtected.body":
     "Encryption in transit, restricted access, and a plain-language privacy notice about what we keep and why.",
   "web.about.trust.realTeacher.title": "Built with a real teacher",
-  "web.about.trust.realTeacher.body":
-    "Every feature was tested in a working teacher's real classes before it ever reached anyone else.",
+  "web.about.trust.realTeacher.body": "Built around a working teacher's needs and feedback.",
   "web.about.trust.globalPay.title": "Get paid, wherever you are",
   "web.about.trust.globalPay.body":
     "By card through Stripe where it's available, or direct bank transfer through Wise everywhere else — there's always a way to get paid.",
@@ -5484,7 +5483,7 @@ export const en = {
   "web.landing.fit.abroad.body":
     "Stripe pays you in your country at your country's rates, Wise reaches you where Stripe doesn't, and every class time is shown to each person in their own zone.",
   "web.landing.quote.attribution": "A Spanish teacher on SpiralClass, its first",
-  "web.landing.quote.context": "Her classes shaped every feature on this page.",
+  "web.landing.quote.context": "Her classes and feedback help shape SpiralClass.",
   "web.landing.pricing.title": "Free to start. Free to get paid, on every plan.",
   "web.landing.pricing.body":
     "A free plan for as long as you want it, and Pro for the AI and the extras, with {days} days to try it and no card. Both payment rails are free whatever you choose.",
@@ -5531,7 +5530,7 @@ export const en = {
     "SpiralClass hosts the live lesson and layers on AI no marketplace gives you.",
   "web.landing.ai.captions.title": "A video classroom with subtitles in their language",
   "web.landing.ai.captions.body":
-    "The class happens inside SpiralClass, no Zoom link, no second app. Turn on captions and your words appear on your student's screen as you speak, then translated when the sentence ends. Theirs come back to you the same way. It runs in the browser and nothing is stored.",
+    "The class happens inside SpiralClass, no Zoom link, no second app. Turn on captions and your words appear on your student's screen as you speak, then translated when the sentence ends. Theirs come back to you the same way. Captions run in the browser; SpiralClass does not record the audio. With the student's consent, caption text is kept for learning notes.",
   "web.landing.ai.srs.title": "Vocabulary that comes back before it's forgotten",
   "web.landing.ai.srs.body":
     "The words you confirm go into the student's own review queue, spaced so each one returns just before it would slip. They see what they're improving at, in their own app.",
@@ -5543,7 +5542,7 @@ export const en = {
     "Two-way Google Calendar and a subscribable iCal feed — your classes live alongside everything else in your day.",
   "web.landing.social.title": "Built with a working teacher",
   "web.landing.social.body":
-    "Every feature on this page was used in real classes before it reached anyone else. The code is public, so you can check how your students' data and your money are handled.",
+    "Built around a working teacher's needs and feedback. The code is public, so you can check how your students' data and your money are handled.",
   "web.pricing.perk.remindersPushEmail": "Push and email reminders",
   "web.pricing.perk.unlimitedStudents": "Unlimited students",
   "web.pricing.perk.unlimitedTemplates": "Unlimited package templates",

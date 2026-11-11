@@ -234,7 +234,13 @@ describe("public marketing copy makes no unverifiable scale claim", () => {
   });
 
   // Every public marketing surface, not just the bio the claim was found in.
-  const PUBLIC_PREFIXES = ["web.about.", "web.home.", "web.features.", "web.pricing."];
+  const PUBLIC_PREFIXES = [
+    "web.about.",
+    "web.home.",
+    "web.landing.",
+    "web.features.",
+    "web.pricing.",
+  ];
 
   for (const locale of LOCALES) {
     it(`has no unbacked headcount in ${locale.tag} marketing copy`, () => {
@@ -246,6 +252,18 @@ describe("public marketing copy makes no unverifiable scale claim", () => {
           expect(claim.test(value), `${key} claims scale: "${value}"`).toBe(false);
         }
       }
+    });
+  }
+});
+
+describe("the captions promise agrees with consented learning notes", () => {
+  for (const locale of LOCALES) {
+    it(`does not promise that nothing is stored in ${locale.tag}`, () => {
+      const copy = strings[locale.tag]["web.landing.ai.captions.body"];
+      expect(copy).not.toMatch(
+        /nothing is stored|no se guarda nada|rien n'est (?:stocké|conservé)/i,
+      );
+      expect(copy).toMatch(/consent|consentimiento/i);
     });
   }
 });

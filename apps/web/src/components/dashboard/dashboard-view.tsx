@@ -103,8 +103,8 @@ export type DashboardViewModel = {
   /**
    * Demo mode. Every navigation renders inert, because the failure this
    * prevents is specific: a reviewer clicks "Students", lands on the sign-in
-   * page, and concludes the demo is broken. The one exception is the
-   * WhatsApp share link, which composes a message rather than navigating.
+   * page, and concludes the demo is broken. Copying and sharing are disabled
+   * too: the fixture's booking link belongs to a teacher who does not exist.
    */
   readOnly?: boolean;
 };
@@ -204,13 +204,18 @@ export async function DashboardView(vm: DashboardViewModel) {
               for, and a permanently-complete five-item list is just furniture.
               GrowthChecklist keeps rendering it while there is a step to take. */}
           {!vm.growth.complete && (
-            <GrowthChecklist checklist={vm.growth} bookingUrl={vm.bookingUrl} locale={vm.locale} />
+            <GrowthChecklist
+              checklist={vm.growth}
+              bookingUrl={vm.bookingUrl}
+              locale={vm.locale}
+              readOnly={readOnly}
+            />
           )}
         </div>
 
         <aside className="min-w-0 space-y-6">
           {vm.cashFlow && vm.cashFlow.byCurrency.some((s) => s.totalPaidCents > 0) && (
-            <EarningsTile cashFlow={vm.cashFlow} />
+            <EarningsTile cashFlow={vm.cashFlow} readOnly={readOnly} />
           )}
           {!linkLeads && <BookingLinkCard vm={vm} t={t} readOnly={readOnly} />}
           <PaymentsStatus vm={vm} t={t} readOnly={readOnly} />
@@ -466,17 +471,21 @@ function BookingLinkCard({ vm, t, readOnly }: SectionProps) {
           {vm.bookingUrl}
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          <CopyLinkButton value={vm.bookingUrl} />
-          <Button asChild variant="secondary" size="sm">
-            <a
-              href={`https://wa.me/?text=${encodeURIComponent(
-                t("web.dashboard.home.whatsappShareText", { url: vm.bookingUrl }),
-              )}`}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              {t("web.dashboard.home.shareOnWhatsapp")}
-            </a>
+          <CopyLinkButton value={vm.bookingUrl} disabled={readOnly} />
+          <Button asChild={!readOnly} variant="secondary" size="sm" disabled={readOnly}>
+            {readOnly ? (
+              <span>{t("web.dashboard.home.shareOnWhatsapp")}</span>
+            ) : (
+              <a
+                href={`https://wa.me/?text=${encodeURIComponent(
+                  t("web.dashboard.home.whatsappShareText", { url: vm.bookingUrl }),
+                )}`}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {t("web.dashboard.home.shareOnWhatsapp")}
+              </a>
+            )}
           </Button>
           {/* Inert in demo mode. The booking page IS public, so linking it
               is tempting — but the demo's slug belongs to a teacher who does

@@ -5269,7 +5269,7 @@ export const fr = {
     "Chiffrement en transit, accès restreint et un avis de confidentialité en langage clair sur ce que nous conservons et pourquoi.",
   "web.about.trust.realTeacher.title": "Construit avec une vraie enseignante",
   "web.about.trust.realTeacher.body":
-    "Chaque fonctionnalité a été testée dans les cours réels d'une professeure en activité avant d'arriver à quiconque.",
+    "Construit autour des besoins et des retours d'une enseignante en activité.",
   "web.about.trust.globalPay.title": "Soyez payé où que vous soyez",
   "web.about.trust.globalPay.body":
     "Par carte via Stripe là où c'est disponible, ou par virement bancaire direct via Wise partout ailleurs — il y a toujours un moyen d'être payé.",
@@ -5480,7 +5480,7 @@ export const fr = {
   "web.landing.fit.abroad.body":
     "Stripe vous paie dans votre pays, aux tarifs de votre pays ; Wise vous atteint là où Stripe ne va pas ; et chacun voit l'heure du cours dans son propre fuseau.",
   "web.landing.quote.attribution": "Professeure d'espagnol sur SpiralClass, la première",
-  "web.landing.quote.context": "Ses cours ont façonné chaque fonction de cette page.",
+  "web.landing.quote.context": "Ses cours et ses retours contribuent à façonner SpiralClass.",
   "web.landing.pricing.title":
     "Gratuit pour commencer. Gratuit pour être payé, dans toutes les formules.",
   "web.landing.pricing.body":
@@ -5522,7 +5522,7 @@ export const fr = {
     "SpiralClass héberge le cours en direct et y ajoute une couche d'IA qu'aucune marketplace ne vous offre.",
   "web.landing.ai.captions.title": "Une salle de classe vidéo sous-titrée dans leur langue",
   "web.landing.ai.captions.body":
-    "Le cours a lieu dans SpiralClass, sans lien Zoom ni seconde application. Activez les sous-titres : vos mots s'affichent sur l'écran de votre élève pendant que vous parlez, puis traduits à la fin de la phrase. Les siens vous parviennent de la même façon. Tout se passe dans le navigateur et rien n'est conservé.",
+    "Le cours se déroule dans SpiralClass, sans lien Zoom ni seconde application. Activez les sous-titres : vos mots apparaissent sur l'écran de votre élève pendant que vous parlez, puis sont traduits à la fin de la phrase. Les siens vous reviennent de la même façon. Les sous-titres fonctionnent dans le navigateur ; SpiralClass n'enregistre pas l'audio. Avec le consentement de l'élève, le texte est conservé pour les notes d'apprentissage.",
   "web.landing.ai.srs.title": "Du vocabulaire qui revient avant d'être oublié",
   "web.landing.ai.srs.body":
     "Les mots que vous confirmez entrent dans la file de révision de l'élève, espacés pour que chacun revienne juste avant de s'échapper. Il voit ce qu'il améliore, dans sa propre application.",
@@ -5534,7 +5534,7 @@ export const fr = {
     "Google Agenda bidirectionnel et un flux iCal auquel s'abonner — vos cours cohabitent avec tout le reste de votre journée.",
   "web.landing.social.title": "Construit avec une enseignante en activité",
   "web.landing.social.body":
-    "Chaque fonction de cette page a servi dans de vrais cours avant d'atteindre qui que ce soit d'autre. Le code est public : vous pouvez vérifier comment sont traités les données de vos élèves et votre argent.",
+    "Construit autour des besoins et des retours d'une enseignante en activité. Le code est public : vous pouvez vérifier comment sont traités les données de vos élèves et votre argent.",
   "web.pricing.perk.remindersPushEmail": "Rappels par push et e-mail",
   "web.pricing.perk.unlimitedStudents": "Élèves illimités",
   "web.pricing.perk.unlimitedTemplates": "Modèles de forfait illimités",
