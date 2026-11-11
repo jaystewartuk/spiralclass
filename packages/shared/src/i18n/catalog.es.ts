@@ -5282,7 +5282,7 @@ export const esMX = {
     "Cifrado en tránsito, acceso restringido y un aviso de privacidad claro sobre qué guardamos y por qué.",
   "web.about.trust.realTeacher.title": "Construido con una maestra real",
   "web.about.trust.realTeacher.body":
-    "Cada función se probó en las clases reales de una maestra en activo antes de llegar a nadie más.",
+    "Hecho a partir de las necesidades y los comentarios de una profe en activo.",
   "web.about.trust.globalPay.title": "Cobra sin importar tu país",
   "web.about.trust.globalPay.body":
     "Con tarjeta vía Stripe donde está disponible, o transferencia directa vía Wise en el resto del mundo — siempre tienes una forma de cobrar.",
@@ -5493,7 +5493,7 @@ export const esMX = {
   "web.landing.fit.abroad.body":
     "Stripe te paga en tu país y con las tarifas de tu país, Wise te llega donde Stripe no, y cada quien ve la hora de la clase en su propia zona.",
   "web.landing.quote.attribution": "Profe de español en SpiralClass, la primera",
-  "web.landing.quote.context": "Sus clases dieron forma a cada función de esta página.",
+  "web.landing.quote.context": "Sus clases y comentarios ayudan a dar forma a SpiralClass.",
   "web.landing.pricing.title": "Gratis para empezar. Gratis para cobrar, en todos los planes.",
   "web.landing.pricing.body":
     "Un plan gratis por el tiempo que quieras, y Pro para la IA y los extras, con {days} días para probarlo y sin tarjeta. Las dos formas de cobro son gratis elijas lo que elijas.",
@@ -5534,7 +5534,7 @@ export const esMX = {
     "SpiralClass aloja la clase en vivo y le suma una capa de IA que ningún marketplace te da.",
   "web.landing.ai.captions.title": "Un salón de video con subtítulos en su idioma",
   "web.landing.ai.captions.body":
-    "La clase ocurre dentro de SpiralClass, sin enlace de Zoom ni segunda app. Activa los subtítulos y tus palabras aparecen en la pantalla de tu alumno mientras hablas, y traducidas cuando termina la frase. Las suyas te llegan igual. Funciona en el navegador y no se guarda nada.",
+    "La clase ocurre dentro de SpiralClass, sin enlace de Zoom ni segunda app. Activa los subtítulos y tus palabras aparecen en la pantalla de tu alumno mientras hablas, y traducidas cuando termina la frase. Las suyas te llegan igual. Los subtítulos funcionan en el navegador; SpiralClass no graba el audio. Con el consentimiento del alumno, el texto se guarda para las notas de aprendizaje.",
   "web.landing.ai.srs.title": "Vocabulario que vuelve antes de olvidarse",
   "web.landing.ai.srs.body":
     "Las palabras que confirmas entran en la cola de repaso del alumno, espaciadas para que cada una regrese justo antes de que se le escape. Él ve en qué está mejorando, en su propia app.",
@@ -5546,7 +5546,7 @@ export const esMX = {
     "Google Calendar en ambos sentidos y un feed iCal suscribible: tus clases viven junto a todo lo demás de tu día.",
   "web.landing.social.title": "Hecho con una profe en activo",
   "web.landing.social.body":
-    "Cada función de esta página se usó en clases reales antes de llegar a nadie más. El código es público: puedes revisar cómo se tratan los datos de tus alumnos y tu dinero.",
+    "Hecho a partir de las necesidades y los comentarios de una profe en activo. El código es público: puedes revisar cómo se tratan los datos de tus alumnos y tu dinero.",
   "web.pricing.perk.remindersPushEmail": "Recordatorios por push y correo",
   "web.pricing.perk.unlimitedStudents": "Alumnos ilimitados",
   "web.pricing.perk.unlimitedTemplates": "Plantillas de paquete ilimitadas",

@@ -9,7 +9,7 @@
 
 **A scheduling, payments and video platform for independent teachers of any
 subject.** It runs in production at [spiralclass.com](https://spiralclass.com)
-on live payment rails, with real teachers and their students on it, and this
+on live payment rails, with a teacher and her students using it, and this
 repository is the whole of it.
 
 A teacher signs up, sets her availability, publishes a booking page, and sells
@@ -21,10 +21,10 @@ anything.
 
 [![The SpiralClass teacher dashboard: today's classes down the left, monthly earnings and the booking link down the right. Rendered from invented fixture data, not a real teacher's account.](docs/assets/demo-teacher-dashboard.png)](https://spiralclass.com/demo)
 
-<sub>The teacher dashboard as it really renders, captured from
-[`spiralclass.com/demo`](https://spiralclass.com/demo) — a public page that
-draws the production component from invented data rather than opening a demo
-account ([D-142](docs/decisions/D-142.md)). No real person, class or figure
+<sub>The real teacher dashboard, captured locally from the
+[`/demo`](https://spiralclass.com/demo) fixture. The public page draws the
+production component from invented data rather than opening a demo account
+([D-142](docs/decisions/D-142.md)). No real person, class or figure
 appears in it.</sub>
 
 ---
@@ -55,7 +55,7 @@ appears in it.</sub>
 It is published as an honest record of how one engineer builds and runs a
 payments-handling, video-carrying SaaS product alone: the architecture, the
 decisions, the things that went wrong, and the mechanisms built so they would
-not go wrong twice. More than 25 decision records in
+not go wrong twice. The engineering decisions in
 [`docs/decisions/`](docs/decisions/README.md) are the most useful thing here —
 several of them reverse an earlier one and say why.
 
@@ -81,7 +81,7 @@ not have.
 | Payments               | Stripe Connect (Accounts v2, direct charges) and a Wise transfer rail with API reconciliation                                                                                                                                |
 | Video                  | Self-hosted [LiveKit](https://livekit.io) — WebRTC lessons; room-composite Egress recording exists and is off in production                                                                                                  |
 | Speech / AI            | Browser speech recognition with Deepgram as fallback (captions and transcripts), Google Cloud Translation, Anthropic Claude (lesson insights, material composition), Azure Speech (pronunciation), Google Vertex AI (images) |
-| Background jobs        | [Inngest](https://inngest.com) — 31 background functions                                                                                                                                                                     |
+| Background jobs        | [Inngest](https://inngest.com) — durable background functions                                                                                                                                                                |
 | Storage                | Cloudflare R2 (S3-compatible), signed via `aws4fetch`                                                                                                                                                                        |
 | Email                  | Resend, with Amazon SES as a swappable second provider                                                                                                                                                                       |
 | Observability          | Sentry, PostHog                                                                                                                                                                                                              |
@@ -96,15 +96,15 @@ graph TB
     WEB["Next.js web app<br/>teacher · student · public booking · admin"]
 
     subgraph app["apps/web — the only server"]
-        RSC["Server Components<br/>+ 72 server-action modules"]
-        API["62 route handlers<br/>by audience: teacher · student · public · internal"]
+        RSC["Server Components<br/>+ server actions"]
+        API["Route handlers<br/>by audience: teacher · student · public · internal"]
         MW["middleware.ts<br/>CSP nonce · session gate · ?ref= attribution"]
         LIB["src/lib/** — one folder per bounded concern<br/>payments · booking · cancellation · subscriptions<br/>auth · notifications · chat · homework · video"]
     end
 
     SH["packages/shared<br/>wire types · Zod validators · money<br/>pricing + entitlement config · i18n catalog"]
 
-    DB[("PostgreSQL / Neon<br/>82 models · 10 migrations")]
+    DB[("PostgreSQL / Neon<br/>Prisma schema · migrations")]
     JOBS["Inngest<br/>durable background execution"]
 
     subgraph external["External services"]
@@ -239,7 +239,7 @@ from the `PricingCurrencyProvider` context — never from a default.
 
 ### Database
 
-82 models, 10 migrations, 128 indexes, 23 unique constraints. Postgres via
+Postgres via
 Prisma, on Neon.
 
 **The squashed history is two migrations, and the split is deliberate.** The
@@ -411,7 +411,7 @@ pnpm test:e2e                # Playwright
 pnpm gate --allow-dirty      # the fast tier the pre-push hook will run
 ```
 
-There are more than 900 test files across five layers — unit, real-database
+Tests cover unit behaviour, real-database
 integration, Playwright end-to-end, visual regression and accessibility — plus a
 mutation spot-check that measures whether the unit suite would actually catch a
 defect, and a per-PR diff-coverage floor on new code. Coverage measures `src/lib/**`,
@@ -505,17 +505,17 @@ in [`infra/gcp-livekit/README.md`](infra/gcp-livekit/README.md).
 
 ## Documentation map
 
-| Where                                               | What                                                                                            |
-| --------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
-| [`docs/README.md`](docs/README.md)                  | The full map — every folder and what it is for                                                  |
-| [`docs/architecture/`](docs/architecture/README.md) | System design, the data model, the identity model                                               |
-| [`docs/decisions/`](docs/decisions/README.md)       | **More than 25 decision records.** Current policy, not history — several reverse an earlier one |
-| [`docs/features/`](docs/features/)                  | Canonical product behaviour, one document per feature                                           |
-| [`docs/development/`](docs/development/README.md)   | Setup, testing, the change workflow, i18n, analytics                                            |
-| [`docs/deployment/`](docs/deployment/README.md)     | Release, incident response, backup and restore, infrastructure runbooks                         |
-| [`docs/help/`](docs/help/README.md)                 | Customer-facing guides — the source for the in-app help centre                                  |
-| [`docs/security.md`](docs/security.md)              | What this public repository does and does not expose                                            |
-| [`CLAUDE.md`](CLAUDE.md)                            | The non-negotiable rules. Binds humans as much as agents                                        |
+| Where                                               | What                                                                                    |
+| --------------------------------------------------- | --------------------------------------------------------------------------------------- |
+| [`docs/README.md`](docs/README.md)                  | The full map — every folder and what it is for                                          |
+| [`docs/architecture/`](docs/architecture/README.md) | System design, the data model, the identity model                                       |
+| [`docs/decisions/`](docs/decisions/README.md)       | **Engineering decisions.** Current policy, not history — several reverse an earlier one |
+| [`docs/features/`](docs/features/)                  | Canonical product behaviour, one document per feature                                   |
+| [`docs/development/`](docs/development/README.md)   | Setup, testing, the change workflow, i18n, analytics                                    |
+| [`docs/deployment/`](docs/deployment/README.md)     | Release, incident response, backup and restore, infrastructure runbooks                 |
+| [`docs/help/`](docs/help/README.md)                 | Customer-facing guides — the source for the in-app help centre                          |
+| [`docs/security.md`](docs/security.md)              | What this public repository does and does not expose                                    |
+| [`CLAUDE.md`](CLAUDE.md)                            | The non-negotiable rules. Binds humans as much as agents                                |
 
 ## Known trade-offs and debt
 
