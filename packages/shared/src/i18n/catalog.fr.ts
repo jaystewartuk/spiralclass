@@ -616,6 +616,12 @@ export const fr = {
   "call.screenShareError": "Impossible de partager l'écran. Réessayez.",
   "call.flipCamera": "Changer de caméra",
   "call.flipCameraError": "Impossible de changer de caméra",
+  "call.micSilent":
+    "Votre microphone ne capte aucun son. L’autre personne ne vous entend probablement pas. Choisissez un autre microphone.",
+  "call.chooseMicrophone": "Choisir un microphone",
+  "call.microphoneNumber": "Microphone {number}",
+  "call.microphoneSwitchFailed":
+    "Impossible de changer de microphone. Vérifiez les autorisations du navigateur et réessayez.",
   "call.audioBlocked":
     "Vous n'entendez pas l'autre personne : votre navigateur a bloqué le son. Touchez ici pour l'activer.",
   "call.swapToMain": "Afficher ma caméra en plein écran",

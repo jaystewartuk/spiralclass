@@ -618,6 +618,12 @@ export const en = {
   "call.screenShareError": "Couldn't share your screen. Try again.",
   "call.flipCamera": "Flip camera",
   "call.flipCameraError": "Couldn't switch camera",
+  "call.micSilent":
+    "Your microphone is sending silence. The other person probably cannot hear you. Choose a different microphone.",
+  "call.chooseMicrophone": "Choose a microphone",
+  "call.microphoneNumber": "Microphone {number}",
+  "call.microphoneSwitchFailed":
+    "Could not change the microphone. Check browser permissions and try again.",
   "call.audioBlocked":
     "You can't hear the other person — your browser blocked the sound. Tap here to turn it on.",
   "call.swapToMain": "Show my camera full screen",
