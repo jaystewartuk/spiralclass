@@ -64,7 +64,7 @@ function PackageRow({
   pkg,
   scheduled,
   committed,
-  deletable,
+  deleteBlockedReason,
   teacherTimezone,
   locale,
   t,
@@ -72,7 +72,7 @@ function PackageRow({
   pkg: PackageWithTemplate;
   scheduled: number;
   committed: number;
-  deletable: boolean;
+  deleteBlockedReason?: string;
   teacherTimezone: string;
   locale: AppLocale;
   t: TFunction;
@@ -126,9 +126,9 @@ function PackageRow({
           </PackageDetailsSheet>
         </div>
 
-        <div className="flex shrink-0 items-center gap-2">
+        <div className="flex max-w-full flex-wrap items-start gap-2">
           {pausable && <PackagePauseButton packageId={pkg.id} status={pausable} />}
-          {deletable && <DeletePackageButton packageId={pkg.id} />}
+          <DeletePackageButton packageId={pkg.id} blockedReason={deleteBlockedReason} />
         </div>
       </div>
 
@@ -280,9 +280,12 @@ export async function PackagesTab({
                     pkg={pkg}
                     scheduled={scheduledByPackage.get(pkg.id) ?? 0}
                     committed={committedByPackage.get(pkg.id) ?? 0}
-                    deletable={
-                      (allBookingsByPackage.get(pkg.id) ?? 0) === 0 &&
-                      (paymentsByPackage.get(pkg.id) ?? 0) === 0
+                    deleteBlockedReason={
+                      (allBookingsByPackage.get(pkg.id) ?? 0) > 0
+                        ? t("web.action.teacherPackages.hasBookings")
+                        : (paymentsByPackage.get(pkg.id) ?? 0) > 0
+                          ? t("web.action.teacherPackages.hasPayment")
+                          : undefined
                     }
                     teacherTimezone={teacher.timezone}
                     locale={locale}

@@ -2633,7 +2633,7 @@ export const fr = {
   "web.dashboard.students.package.add": "Ajouter un forfait",
   "web.dashboard.students.package.recordExisting": "Enregistrer un forfait existant",
   "web.dashboard.students.package.recordExistingHint":
-    "Pour un élève que vous transférez : indiquez combien de cours il lui reste. Aucun paiement n'est prélevé — cela définit simplement son solde.",
+    "Enregistrez un forfait déjà payé en dehors de SpiralClass. Un nouveau forfait commence avec tous ses cours restants ; réduisez ce nombre uniquement pour les cours déjà utilisés. Aucun paiement n’est prélevé.",
   "web.dashboard.students.package.basedOn": "Basé sur (facultatif)",
   "web.dashboard.students.package.custom": "Personnalisé",
   "web.dashboard.students.package.totalClasses": "Total des cours",
@@ -7074,9 +7074,9 @@ export const fr = {
     "Forfait mis à jour — {remaining} cours restants sur {total}.",
   "web.action.invalidRequest": "Requête invalide.",
   "web.action.teacherPackages.hasBookings":
-    "Ce forfait comporte des cours réservés ou suivis : il ne peut donc pas être supprimé. Mettez-le plutôt en pause, ou annulez d'abord ses cours.",
+    "Ce forfait comporte un historique de cours, y compris les cours annulés : il ne peut donc pas être supprimé. Vous pouvez corriger son solde avec Modifier ou empêcher de nouvelles réservations avec Pause.",
   "web.action.teacherPackages.hasPayment":
-    "Ce forfait est associé à un paiement enregistré : il ne peut donc pas être supprimé. Remboursez plutôt le paiement.",
+    "Ce forfait est associé à un paiement enregistré : il ne peut donc pas être supprimé. L’historique des paiements est conservé même après un remboursement.",
   "web.action.audit.accidentalPackageDeleted":
     "Forfait créé par erreur, supprimé par le professeur.",
   "web.action.teacherStudents.teacherEmail":

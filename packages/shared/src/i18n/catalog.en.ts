@@ -2648,7 +2648,7 @@ export const en = {
   "web.dashboard.students.package.add": "Add package",
   "web.dashboard.students.package.recordExisting": "Record an existing package",
   "web.dashboard.students.package.recordExistingHint":
-    "For a student you're moving over: enter how many classes they have left. No payment is taken — this just sets their balance.",
+    "Record a package already paid for outside SpiralClass. A new package starts with all classes remaining; lower that number only for classes already used. No payment is taken.",
   "web.dashboard.students.package.basedOn": "Based on (optional)",
   "web.dashboard.students.package.custom": "Custom",
   "web.dashboard.students.package.totalClasses": "Total classes",
@@ -7022,9 +7022,9 @@ export const en = {
   "web.action.teacherPackages.updated": "Package updated — {remaining} of {total} classes left.",
   "web.action.invalidRequest": "Invalid request.",
   "web.action.teacherPackages.hasBookings":
-    "This package has classes booked or taken, so it can't be deleted. Pause it instead, or cancel its classes first.",
+    "This package has class history, including any cancelled classes, so it cannot be deleted. You can correct its balance with Edit or stop new bookings with Pause.",
   "web.action.teacherPackages.hasPayment":
-    "This package has a payment on record, so it can't be deleted. Refund the payment instead.",
+    "This package has a payment on record, so it cannot be deleted. Payment history is kept even after a refund.",
   "web.action.audit.accidentalPackageDeleted": "Accidental package deleted by the teacher.",
   "web.action.teacherStudents.teacherEmail":
     "This email belongs to a teacher account and can't be added as a student.",
