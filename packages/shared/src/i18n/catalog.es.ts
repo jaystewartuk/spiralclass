@@ -2676,7 +2676,7 @@ export const esMX = {
   "web.dashboard.students.package.add": "Agregar paquete",
   "web.dashboard.students.package.recordExisting": "Registrar un paquete existente",
   "web.dashboard.students.package.recordExistingHint":
-    "Para un alumno que estás pasando: indica cuántas clases le quedan. No se cobra nada — solo registra su saldo.",
+    "Registra un paquete ya pagado fuera de SpiralClass. Un paquete nuevo empieza con todas las clases restantes; reduce ese número solo si ya se usaron clases. No se cobra nada.",
   "web.dashboard.students.package.basedOn": "Basado en (opcional)",
   "web.dashboard.students.package.custom": "Personalizado",
   "web.dashboard.students.package.totalClasses": "Clases totales",
@@ -7044,9 +7044,9 @@ export const esMX = {
     "Paquete actualizado — {remaining} de {total} clases restantes.",
   "web.action.invalidRequest": "Solicitud inválida.",
   "web.action.teacherPackages.hasBookings":
-    "Este paquete tiene clases reservadas o tomadas, así que no se puede eliminar. Mejor pausa el paquete, o cancela sus clases primero.",
+    "Este paquete tiene historial de clases, incluidas las canceladas, así que no se puede eliminar. Puedes corregir su saldo con Editar o impedir nuevas reservas con Pausar.",
   "web.action.teacherPackages.hasPayment":
-    "Este paquete tiene un pago registrado, así que no se puede eliminar. Mejor reembolsa el pago.",
+    "Este paquete tiene un pago registrado, así que no se puede eliminar. El historial de pagos se conserva incluso después de un reembolso.",
   "web.action.audit.accidentalPackageDeleted": "Paquete creado por error eliminado por la profe.",
   "web.action.teacherStudents.teacherEmail":
     "Este correo pertenece a una cuenta de maestra y no se puede agregar como alumno.",
