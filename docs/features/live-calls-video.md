@@ -99,6 +99,23 @@ live captions and post-call transcription cannot run there, whatever
      and a ring while they are speaking — on the stage and in the corner
      tile.
 
+### Published microphone health
+
+While a microphone is published and another person is present, the speaker's
+browser checks the local sender's source level. A source that has never exceeded
+0.02 within 45 seconds shows a warning and a microphone picker beside the audio
+playback warning; an all-zero source warns immediately. These defaults separate
+the failed tablet's 0.005 peak from observed speech near 0.4. Once speech proves
+the track works, later listening silence does not warn. Mute, departure and a new
+MediaStreamTrack reset the observation. Missing stats mean unknown, not silence.
+A working microphone whose owner has never spoken cannot be distinguished from
+a failed microphone by levels alone; the warning therefore says “probably”.
+
+`call_mic_silent` records peak level, seconds observed and the device label when
+available; `call_mic_silent_recovered` records sound returning after a warning.
+No audio is recorded by this check. Thresholds and the pure detector live in
+`apps/web/src/lib/video/mic-health.ts`.
+
 ### Recording
 
 10. **Teacher-only, Pro-gated** — there is no student-facing start/stop
