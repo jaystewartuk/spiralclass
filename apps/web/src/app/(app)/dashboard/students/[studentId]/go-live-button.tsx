@@ -7,8 +7,16 @@ import { useT } from "@/components/locale-provider";
 
 // "Go live" for a silently-onboarded student: clears the notification hold so
 // confirmations, reminders and nudges start flowing. One-way and confirmed —
-// to silence a live student again the teacher archives them instead.
-export function GoLiveButton({ studentId }: { studentId: string }) {
+// to silence a live student again the teacher archives them instead. It lifts
+// the hold only: a student whose every category is off still hears nothing,
+// so the confirmation says so rather than promising notifications (#77).
+export function GoLiveButton({
+  studentId,
+  notificationsOff = false,
+}: {
+  studentId: string;
+  notificationsOff?: boolean;
+}) {
   const t = useT();
   const [state, formAction, pending] = useActionState<RosterActionState, FormData>(
     setStudentLiveAction,
@@ -20,7 +28,11 @@ export function GoLiveButton({ studentId }: { studentId: string }) {
       action={formAction}
       className="space-y-3"
       onSubmit={(e) => {
-        const message = t("web.dashboard.students.goLive.confirm");
+        const message = t(
+          notificationsOff
+            ? "web.dashboard.students.goLive.confirmNotificationsOff"
+            : "web.dashboard.students.goLive.confirm",
+        );
         if (!confirm(message)) e.preventDefault();
       }}
     >

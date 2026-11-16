@@ -2738,6 +2738,8 @@ export const en = {
     "Keep a student's legacy price for their future purchases.",
   "web.dashboard.students.goLive.confirm":
     "Go live with this student? They'll start receiving notifications (confirmations, reminders). Share their booking link once you're ready.",
+  "web.dashboard.students.goLive.confirmNotificationsOff":
+    "Go live with this student? Their notifications are off, so they still won't get confirmations or reminders until notifications are turned on in the Settings tab.",
   "web.dashboard.students.goLive.button": "Go live",
   "web.dashboard.students.notifications.label": "Notifications",
   "web.dashboard.students.notifications.on": "On",
@@ -4967,6 +4969,8 @@ export const en = {
   "web.notificationGap.paused":
     "{name}'s notifications are paused, so they will not be told about this. It still appears in their portal.",
   "web.notificationGap.turnOn": "Turn notifications on",
+  "web.notificationGap.studentOff":
+    "{name}'s notifications are off, so they will not get booking confirmations, class reminders or anything else you send them.",
   "web.notificationPrefs.category.expiryReminders": "Package reminders",
   "web.notificationPrefs.categoryHint.expiryReminders":
     "When a package is about to expire, and when you finish one.",
@@ -7039,6 +7043,8 @@ export const en = {
   "web.action.audit.studentWentLive": "Student went live — notifications now flow.",
   "web.action.teacherStudents.nowLive":
     "Student is live. They'll receive notifications from now on.",
+  "web.action.teacherStudents.nowLiveNotificationsOff":
+    "Student is live, but their notifications are still off, so they will not get booking confirmations or reminders. You can turn them on in the Settings tab.",
   "web.action.audit.wiseNotReceived": "Wise: payment not received",
   "web.action.invitations.sent": "Sent {count} invitations.",
   "web.action.invitations.sent_one": "Sent {count} invitation.",
