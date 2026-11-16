@@ -1,4 +1,5 @@
 import type { PrismaClient } from "@prisma/client";
+import type { StripeVerdict, UnconfirmedStripePayment } from "./settle-unconfirmed";
 
 // Slice 7a part 2 — abandoned-checkout cleanup.
 //
@@ -12,6 +13,15 @@ import type { PrismaClient } from "@prisma/client";
 // reconciles manually and bank transfers can take longer than card
 // charges. Either window expires → the package + its payments are
 // hard-deleted via the existing cascade.
+//
+// A card checkout is put to Stripe before it is deleted (#184). The seven-day
+// window used to assume every paid checkout would be flipped by a webhook
+// inside it; when every delivery failed, the only record of a real, charged
+// purchase was deleted. Now a Stripe payment with a session is deleted only
+// when Stripe reports that session expired unpaid — a paid one is settled by
+// the same check, and anything Stripe cannot confirm is kept for the next run.
+// A Stripe payment with no session id never reached Stripe, so there is
+// nothing to ask and nothing that could have been paid.
 //
 // Pure-handler-takes-deps split. Idempotent: a second run sees no
 // candidates and no-ops.
@@ -27,6 +37,12 @@ const DEFAULT_MAX_DELETIONS = 500;
 
 export type CleanupPendingDeps = {
   prisma: Pick<PrismaClient, "package">;
+  /**
+   * Asks Stripe what happened to a pending payment, settling it if it was
+   * paid (`askStripeAboutPendingPayment`). Required: a cleanup that forgets to
+   * ask is the bug this exists to prevent.
+   */
+  askStripe: (payment: UnconfirmedStripePayment) => Promise<StripeVerdict>;
   now?: () => Date;
   /** Upper bound on deletions per run (defaults to {@link DEFAULT_MAX_DELETIONS}). */
   maxDeletions?: number;
@@ -45,6 +61,12 @@ export type CleanupPendingOutcome = {
   skipped: number;
   /** Packages that failed to delete (transient DB errors); retried next run. */
   failed: number;
+  /**
+   * Candidates kept because Stripe did not confirm their session expired
+   * unpaid — it was paid (and is now settled), still open, awaiting an async
+   * transfer, or could not be asked.
+   */
+  keptForStripe: number;
 };
 
 export async function cleanupAbandonedPendingPackages(
@@ -81,14 +103,36 @@ export async function cleanupAbandonedPendingPackages(
         },
       },
     },
-    select: { id: true },
+    select: {
+      id: true,
+      teacher: { select: { stripeAccountId: true } },
+      payments: { select: { id: true, provider: true, stripeCheckoutSessionId: true } },
+    },
     take: maxDeletions,
   });
 
   let packagesDeleted = 0;
   let skipped = 0;
   let failed = 0;
+  let keptForStripe = 0;
   for (const pkg of candidates) {
+    let stripeSaysAbandoned = true;
+    for (const pay of pkg.payments) {
+      if (pay.provider !== "stripe" || !pay.stripeCheckoutSessionId) continue;
+      const verdict = await deps.askStripe({
+        id: pay.id,
+        stripeCheckoutSessionId: pay.stripeCheckoutSessionId,
+        stripeAccountId: pkg.teacher.stripeAccountId,
+      });
+      if (verdict !== "abandoned") {
+        stripeSaysAbandoned = false;
+        break;
+      }
+    }
+    if (!stripeSaysAbandoned) {
+      keptForStripe += 1;
+      continue;
+    }
     try {
       // Guarded delete (TOCTOU): a Wise confirm / auto-reconcile can land
       // between the scan above and this delete, flipping the package to
@@ -117,5 +161,6 @@ export async function cleanupAbandonedPendingPackages(
     packagesDeleted,
     skipped,
     failed,
+    keptForStripe,
   };
 }
