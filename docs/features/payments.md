@@ -135,6 +135,10 @@ for the same template with the same teacher
 - An open Stripe Checkout Session is **expired** on Stripe; its package is
   marked `expired` only if that call succeeds. If Stripe says the session
   already resolved, the package is left alone.
+- A checkout whose card was **declined** is superseded the same way: the
+  session stays open after a decline, so expiring it is what makes the old
+  checkout unpayable. A failed card payment with no recorded session is left
+  alone. A checkout with any paid or refunded payment is never superseded.
 - A pending Wise checkout is marked `expired`.
 - A Wise checkout the student has marked **sent** is never superseded. If one
   was superseded and its transfer is later confirmed, it is put back to
