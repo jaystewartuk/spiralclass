@@ -72,8 +72,21 @@ in `lib/invitations/constants.ts`.
   (`lib/invitations/token.ts`). Copying the link from the dashboard rotates the
   token, so earlier emailed links stop working.
 - The email is sent directly, not through the notification dispatcher, because
-  the recipient is not a user yet. If the send fails, the invitation is
-  discarded.
+  the recipient is not a user yet. Two ways it can fail:
+  - **The provider refuses the send.** The first send discards the invitation;
+    a resend tells the teacher it failed and changes nothing.
+  - **The provider accepts it and it later bounces** (or the address is on the
+    provider's suppression list). Each accepted send or resend writes a
+    `notifications` row (`templateName: "invitation"`, the student as
+    recipient, the invitation id in `metadata`) — directly, never through the
+    dispatcher, so no preference can stop the invite. The email delivery
+    webhook marks that row delivered or failed. A failed latest send shows on
+    the teacher's invitation list, naming the address it went to and asking
+    her to check it, and on
+    `/admin/notifications` without Retry: the dispatcher cannot rebuild the
+    link (only the token's hash is stored), so the fix is a corrected address
+    from the teacher's side. This needs the provider's delivery webhook; a
+    send through a provider without one stays "sent".
 - An email that is a teacher's login cannot be invited as a student.
 - **Accepting** requires signing in with the invited email; a mismatch is
   refused. Acceptance links the login to the existing roster entry (no new

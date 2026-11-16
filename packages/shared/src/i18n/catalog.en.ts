@@ -2620,6 +2620,8 @@ export const en = {
   "web.dashboard.invitations.linkCopied": "Invitation link copied.",
   "web.dashboard.invitations.empty": "No students yet. Add them to your roster to invite them.",
   "web.dashboard.invitations.noEmail": "no email",
+  "web.dashboard.invitations.notDelivered":
+    "The invitation to {email} didn't arrive. Check the address is right.",
   "web.dashboard.invitations.cancelConfirm": "Cancel this invitation? The link will stop working.",
   "web.dashboard.invitations.form.title": "Invite students",
   "web.dashboard.invitations.form.description":
@@ -7069,6 +7071,8 @@ export const en = {
   "web.action.admin.mfa.incorrectCode": "Incorrect code.",
   "web.action.admin.notificationNotFound": "Notification not found",
   "web.action.admin.notificationAlreadyInState": 'Already in "{status}" state',
+  "web.action.admin.notificationNotRetryable":
+    "This email was not sent by the queue and cannot be retried here. The teacher must correct the address and resend it.",
   "web.action.admin.requeued": "Re-queued",
   "web.action.admin.noRecipients": "No recipients",
   "web.action.admin.alreadyCanceled": "Already canceled",

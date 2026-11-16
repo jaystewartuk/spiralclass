@@ -7,6 +7,7 @@ import { DebouncedSearchInput } from "@/components/ui/debounced-search";
 import { FilterBar, FilterField, FilterSelect } from "@/components/ui/filter-bar";
 import { TableShell } from "@/components/ui/table";
 import { matchesNotificationFilters } from "@/lib/admin-filters";
+import { canAdminRetryNotification } from "@/lib/notifications/admin-retry";
 import { useDebouncedSubmit } from "@/lib/use-debounced-submit";
 import { useT } from "@/components/locale-provider";
 import { RetryButton } from "./retry-button";
@@ -166,9 +167,7 @@ export function NotificationsTable({
                   {t("web.admin.notifications.resendLink")}
                 </a>
               ) : null}
-              {n.status === "failed" || n.status === "queued" ? (
-                <RetryButton notificationId={n.id} />
-              ) : null}
+              {canAdminRetryNotification(n) ? <RetryButton notificationId={n.id} /> : null}
             </div>
           );
         },
