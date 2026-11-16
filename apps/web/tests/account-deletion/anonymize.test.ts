@@ -26,6 +26,7 @@ type FakeStudent = {
   phoneE164: string | null;
   authUserId: string | null;
   emailOptIn: boolean;
+  emailOptInAt?: Date | null;
   disabledAt: Date | null;
   disabledReason: string | null;
 };
@@ -570,6 +571,9 @@ describe("anonymizeMaturedDeletions", () => {
     expect(env.students[0].email).toBe("deleted+s1@spiralclass.invalid");
     expect(env.students[0].authUserId).toBeNull();
     expect(env.students[0].emailOptIn).toBe(false);
+    // Erasure withdraws email consent, so the consent record carries its date
+    // (#155) rather than a flipped flag with none.
+    expect(env.students[0].emailOptInAt).toEqual(now);
     expect(env.students[0].disabledAt).toEqual(now);
     // Contact-change audit rows hold pre-edit emails/numbers — they must
     // be purged, not just orphaned, when the student is anonymized.

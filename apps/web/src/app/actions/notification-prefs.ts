@@ -68,10 +68,22 @@ export async function saveNotificationPrefsAction(
 
   // Category prefs and email/push opt-in are mailbox-wide — they follow
   // the inbox owner, not a specific teacher–student link.
-  await prisma.student.updateMany({
-    where: { id: { in: identityIds } },
-    data: { notificationPrefs: prefs as object, emailOptIn, pushOptIn },
-  });
+  //
+  // `emailOptInAt` dates the consent: when the opt-in last changed to its
+  // current value, in either direction (#155). So it is stamped only on the
+  // rows this save actually flips — re-saving the form must not move the
+  // date a student consented or withdrew. The flip and the full write run
+  // together so no row is left flipped without its date.
+  await prisma.$transaction([
+    prisma.student.updateMany({
+      where: { id: { in: identityIds }, emailOptIn: !emailOptIn },
+      data: { emailOptIn, emailOptInAt: new Date() },
+    }),
+    prisma.student.updateMany({
+      where: { id: { in: identityIds } },
+      data: { notificationPrefs: prefs as object, emailOptIn, pushOptIn },
+    }),
+  ]);
 
   revalidateAfterAction("/my-classes/account");
   return { ok: true };
