@@ -23,3 +23,9 @@ export const INVITATION_NUDGE_AFTER_DAYS = 3;
 // URL path segment the emailed accept link lives under (web page + mobile deep
 // link both resolve `/i/<token>`). Kept short for tidy links.
 export const INVITATION_PATH_PREFIX = "/i";
+
+// `notifications.template_name` of the row each invitation send leaves behind
+// (issue #85). The row exists so the provider's delivery webhook has something
+// to mark delivered or bounced; the email itself never goes through the
+// dispatcher (the recipient is not a user yet), which has no template by this name.
+export const INVITATION_NOTIFICATION_TEMPLATE = "invitation";

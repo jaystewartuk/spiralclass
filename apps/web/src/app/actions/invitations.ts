@@ -198,6 +198,11 @@ export async function resendInvitationAction(
       locale: invitationEmailLocale(rotated.studentLocale, teacher.locale),
       teacherAvatarUrl: teacherPhotoPublicUrl(teacher.photoPath, teacher.updatedAt.getTime()),
       messagingEnabled: messagingBenefitEnabled(),
+      record: {
+        teacherId: teacher.id,
+        studentId: rotated.invitation.studentId,
+        invitationId: rotated.invitation.id,
+      },
     });
     await markInvitationSent(rotated.invitation.id, { resend: true });
   } catch {

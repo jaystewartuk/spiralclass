@@ -148,15 +148,23 @@ export async function sendInvitations(
       continue;
     }
     try {
-      await sendInvitationEmail({
-        to: invitee.email,
-        teacherName: teacher.name,
-        studentName: invitee.name,
-        rawToken: provisioned.rawToken,
-        locale: invitationEmailLocale(provisioned.studentLocale, teacher.locale),
-        teacherAvatarUrl: avatarUrl,
-        messagingEnabled,
-      });
+      await sendInvitationEmail(
+        {
+          to: invitee.email,
+          teacherName: teacher.name,
+          studentName: invitee.name,
+          rawToken: provisioned.rawToken,
+          locale: invitationEmailLocale(provisioned.studentLocale, teacher.locale),
+          teacherAvatarUrl: avatarUrl,
+          messagingEnabled,
+          record: {
+            teacherId: teacher.id,
+            studentId: provisioned.invitation.studentId,
+            invitationId: provisioned.invitation.id,
+          },
+        },
+        db,
+      );
       await markInvitationSent(provisioned.invitation.id, { resend: false }, db);
       summary.sent += 1;
       summary.sentInvitationIds.push(provisioned.invitation.id);

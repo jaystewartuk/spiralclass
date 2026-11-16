@@ -2604,6 +2604,8 @@ export const fr = {
   "web.dashboard.invitations.empty":
     "Aucun élève pour l'instant. Ajoutez-les à votre liste pour les inviter.",
   "web.dashboard.invitations.noEmail": "sans e-mail",
+  "web.dashboard.invitations.notDelivered":
+    "L'invitation à {email} n'est pas arrivée. Vérifiez que l'adresse est correcte.",
   "web.dashboard.invitations.cancelConfirm":
     "Annuler cette invitation ? Le lien cessera de fonctionner.",
   "web.dashboard.invitations.form.title": "Inviter des élèves",
@@ -7117,6 +7119,8 @@ export const fr = {
   "web.action.admin.mfa.incorrectCode": "Code incorrect.",
   "web.action.admin.notificationNotFound": "Notification introuvable",
   "web.action.admin.notificationAlreadyInState": "Déjà à l'état « {status} »",
+  "web.action.admin.notificationNotRetryable":
+    "Cet e-mail n'a pas été envoyé par la file d'attente et ne peut pas être relancé ici. L'enseignant doit corriger l'adresse et le renvoyer.",
   "web.action.admin.requeued": "Remise en file d'attente",
   "web.action.admin.noRecipients": "Aucun destinataire",
   "web.action.admin.alreadyCanceled": "Déjà annulé",

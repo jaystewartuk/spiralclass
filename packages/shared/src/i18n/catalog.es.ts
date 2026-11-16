@@ -2642,6 +2642,8 @@ export const esMX = {
   "web.dashboard.invitations.empty":
     "Aún no tienes alumnos. Agrégalos en tu listado para invitarlos.",
   "web.dashboard.invitations.noEmail": "sin correo",
+  "web.dashboard.invitations.notDelivered":
+    "La invitación a {email} no llegó. Revisa que la dirección sea correcta.",
   "web.dashboard.invitations.cancelConfirm":
     "¿Cancelar esta invitación? El enlace dejará de funcionar.",
   "web.dashboard.invitations.form.title": "Invitar alumnos",
@@ -7080,6 +7082,8 @@ export const esMX = {
   "web.action.admin.mfa.incorrectCode": "Código incorrecto.",
   "web.action.admin.notificationNotFound": "Notificación no encontrada",
   "web.action.admin.notificationAlreadyInState": 'Ya está en estado "{status}"',
+  "web.action.admin.notificationNotRetryable":
+    "Este correo no lo envió la cola y no se puede reintentar aquí. La profesora debe corregir la dirección y volver a enviarlo.",
   "web.action.admin.requeued": "Re-encolado",
   "web.action.admin.noRecipients": "No hay destinatarios",
   "web.action.admin.alreadyCanceled": "Ya está cancelado",
