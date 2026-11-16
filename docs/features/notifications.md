@@ -115,6 +115,17 @@ Chosen per template by whether `preferences.ts` gives it a category:
   back on from the student's page (`setStudentNotificationsAsTeacherAction`):
   off writes every category `false`; on clears the preferences back to the
   default (all on).
+- The two are independent, and going live lifts **only** the hold. A student
+  whose every category is stored off stays silent after Go live: no booking
+  confirmation, no reminder. Go live does not switch them on, because that
+  all-off map cannot be told apart from the student's own opt-out
+  ([D-204](../decisions/D-204.md)). Instead the teacher is told, in three
+  places: the Go live confirmation and its reply say notifications are still
+  off; the student's page shows a notice above the tabs, on every tab, linking
+  to the switch, for as long as she is live with everything off; and the
+  teacher's booking screen says when the student will not be told about the
+  class (booking updates off, or everything off). A confirmation suppressed
+  before notifications were turned on is not sent afterwards.
 - An archived pairing suppresses the same way the hold does, with the same
   sign-in exception.
 

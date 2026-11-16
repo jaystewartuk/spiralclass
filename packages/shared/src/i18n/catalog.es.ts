@@ -2761,6 +2761,8 @@ export const esMX = {
     "Mantén el precio histórico de un alumno para sus próximas compras.",
   "web.dashboard.students.goLive.confirm":
     "¿Activar a este alumno? Empezará a recibir notificaciones (confirmaciones, recordatorios). Comparte su enlace de reservas cuando estés lista.",
+  "web.dashboard.students.goLive.confirmNotificationsOff":
+    "¿Activar a este alumno? Sus notificaciones están desactivadas, así que seguirá sin recibir confirmaciones ni recordatorios hasta que se activen en la pestaña Ajustes.",
   "web.dashboard.students.goLive.button": "Activar alumno",
   "web.dashboard.students.notifications.label": "Notificaciones",
   "web.dashboard.students.notifications.on": "Activadas",
@@ -4974,6 +4976,8 @@ export const esMX = {
   "web.notificationGap.paused":
     "Las notificaciones de {name} están en pausa, así que no se le avisará de esto. Sí aparece en su portal.",
   "web.notificationGap.turnOn": "Activar notificaciones",
+  "web.notificationGap.studentOff":
+    "Las notificaciones de {name} están desactivadas, así que no recibirá confirmaciones de reserva, recordatorios de clase ni nada de lo que le envíes.",
   "web.notificationPrefs.category.expiryReminders": "Avisos de paquete",
   "web.notificationPrefs.categoryHint.expiryReminders":
     "Cuando un paquete está por vencer y cuando terminas uno.",
@@ -7055,6 +7059,8 @@ export const esMX = {
   "web.action.audit.studentWentLive": "Alumno activada — ahora recibe notificaciones.",
   "web.action.teacherStudents.nowLive":
     "Alumno activada. A partir de ahora recibirá notificaciones.",
+  "web.action.teacherStudents.nowLiveNotificationsOff":
+    "Alumno activado, pero sus notificaciones siguen desactivadas, así que no recibirá confirmaciones de clase ni recordatorios. Puedes activarlas en la pestaña Ajustes.",
   "web.action.audit.wiseNotReceived": "Wise: pago no recibido",
   "web.action.invitations.sent": "Se enviaron {count} invitaciones.",
   "web.action.invitations.sent_one": "Se envió {count} invitación.",

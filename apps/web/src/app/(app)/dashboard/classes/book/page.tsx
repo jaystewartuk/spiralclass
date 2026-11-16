@@ -6,6 +6,7 @@ import { PageHeader } from "@/components/ui/page-header";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
+import { NotificationGapNotice } from "@/components/notification-gap-notice";
 import { BookingMonthCalendar } from "@/components/calendar/booking-month-calendar";
 import { HardLink } from "@/components/calendar/hard-link";
 import { requireOnboardedTeacher } from "@/lib/auth";
@@ -172,7 +173,11 @@ export default async function TeacherBookPage({
   // Confirm the student is on this teacher's roster (tenant isolation).
   const link = await prisma.teacherStudent.findUnique({
     where: { teacherId_studentId: { teacherId: teacher.id, studentId } },
-    include: { student: { select: { id: true, name: true, email: true, timezone: true } } },
+    include: {
+      student: {
+        select: { id: true, name: true, email: true, timezone: true, notificationPrefs: true },
+      },
+    },
   });
   if (!link) notFound();
   const studentName = link.student.name;
@@ -349,6 +354,18 @@ export default async function TeacherBookPage({
         })}
         selectedName={selected.template?.name ?? t("web.dashboard.classes.book.package")}
         date={date}
+        t={t}
+      />
+
+      {/* Before the slot is picked, not after: a student with booking updates
+          off (or every notification off) gets no confirmation of this class,
+          and the teacher should know that while she can still message her
+          (#77, D-204). */}
+      <NotificationGapNotice
+        studentId={studentId}
+        studentName={studentName}
+        prefs={link.student.notificationPrefs as object | null}
+        category="booking_updates"
         t={t}
       />
 

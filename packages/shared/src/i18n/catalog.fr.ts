@@ -2724,6 +2724,8 @@ export const fr = {
     "Conservez le tarif historique d'un élève pour ses prochains achats.",
   "web.dashboard.students.goLive.confirm":
     "Activer cet élève ? Il commencera à recevoir des notifications (confirmations, rappels). Partagez son lien de réservation dès que vous êtes prête.",
+  "web.dashboard.students.goLive.confirmNotificationsOff":
+    "Activer cet élève ? Ses notifications sont désactivées : il ne recevra toujours ni confirmations ni rappels tant qu'elles ne seront pas activées dans l'onglet Paramètres.",
   "web.dashboard.students.goLive.button": "Activer",
   "web.dashboard.students.notifications.label": "Notifications",
   "web.dashboard.students.notifications.on": "Activées",
@@ -4956,6 +4958,8 @@ export const fr = {
   "web.notificationGap.paused":
     "Les notifications de {name} sont en pause : {name} ne sera pas prévenu·e de ceci. Cela apparaît quand même dans son espace.",
   "web.notificationGap.turnOn": "Activer les notifications",
+  "web.notificationGap.studentOff":
+    "Les notifications de {name} sont désactivées : {name} ne recevra ni confirmations de réservation, ni rappels de cours, ni rien de ce que vous lui envoyez.",
   "web.notificationPrefs.category.expiryReminders": "Rappels de forfait",
   "web.notificationPrefs.categoryHint.expiryReminders":
     "Quand un forfait est sur le point d'expirer, et quand vous en terminez un.",
@@ -7092,6 +7096,8 @@ export const fr = {
   "web.action.audit.studentWentLive": "Élève activé — les notifications sont désormais envoyées.",
   "web.action.teacherStudents.nowLive":
     "L'élève est activé. Il recevra désormais les notifications.",
+  "web.action.teacherStudents.nowLiveNotificationsOff":
+    "L'élève est activé, mais ses notifications restent désactivées : il ne recevra ni confirmations de cours ni rappels. Vous pouvez les activer dans l'onglet Paramètres.",
   "web.action.audit.wiseNotReceived": "Wise : paiement non reçu",
   "web.action.invitations.sent": "{count} invitations envoyées.",
   "web.action.invitations.sent_one": "{count} invitation envoyée.",
