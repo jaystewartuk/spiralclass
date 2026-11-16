@@ -354,6 +354,13 @@ No audio is recorded by this check. Thresholds and the pure detector live in
     tab, and its row in the picker says so before it is picked. Which bucket
     a file falls in is resolved server-side from its stored filename
     (`fileKind`), because there is no stored content type to ask.
+    The PDF renderer is pdf.js's **legacy** build (main module and worker),
+    because the modern one assumes JavaScript APIs that an iPhone a version
+    behind or an older Android Chrome lacks — there, every PDF fell back
+    to "open it outside the call" for the teacher while the student saw it
+    drawn. When a PDF cannot be drawn, the viewer still offers that link,
+    and sends `call_material_pdf_render_failed` with the error's name (never
+    its message, which can carry the signed URL).
 29. **A material that can be shown in the call can be opened on the student's
     screen; one that cannot, cannot.** The "for me / for the student / for
     both" choice is offered for exactly the materials the viewer renders, so
