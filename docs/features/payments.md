@@ -214,7 +214,20 @@ payment):
 
 - card, after 7 days; Wise, after 14 days;
 - never a Wise payment the student has marked sent;
+- never a card checkout whose Stripe session is not confirmed expired and
+  unpaid — Stripe is asked first, on the teacher's account;
 - re-checked at delete time, so a payment that settled after the scan is kept.
+
+## A card payment whose webhook never arrived
+
+`lib/payments/settle-unconfirmed.ts` asks Stripe, once a day, about every card
+payment still pending three days after checkout (past Stripe's webhook retry
+window). A paid session is settled by replaying `checkout.session.completed`
+through the webhook handler, so the package activates and the student and
+teacher are notified exactly as if the webhook had arrived; the guarded
+transition means a late real delivery cannot activate it twice. Each payment
+settled this way is logged as an error, because it means webhook delivery is
+broken.
 
 A teacher can also mark a pending Wise payment as failed
 (`failWisePaymentAction`) when the student will not pay.
