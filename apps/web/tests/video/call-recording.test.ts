@@ -39,6 +39,7 @@ const callRecordingFindFirst = vi.fn();
 const callRecordingUpdate = vi.fn(async (_a: unknown) => ({}));
 const bookingFindUnique = vi.fn();
 const teacherStudentFindUnique = vi.fn();
+const studentFindMany = vi.fn(async (_a: unknown): Promise<{ id: string }[]> => []);
 
 const { finalizeDanglingRecording, maybeStartLessonAudioCapture } =
   await import("@/lib/video/call-recording");
@@ -50,6 +51,7 @@ const prisma = {
   },
   booking: { findUnique: (...a: unknown[]) => bookingFindUnique(...(a as [])) },
   teacherStudent: { findUnique: (...a: unknown[]) => teacherStudentFindUnique(...(a as [])) },
+  student: { findMany: (...a: unknown[]) => studentFindMany(...(a as [unknown])) },
 } as never;
 
 beforeEach(() => {
@@ -89,7 +91,12 @@ describe("finalizeDanglingRecording", () => {
 });
 
 describe("maybeStartLessonAudioCapture", () => {
-  const booking = { id: "b1", teacherId: "t1", studentId: "s1" };
+  const booking = {
+    id: "b1",
+    teacherId: "t1",
+    studentId: "s1",
+    student: { id: "s1", email: "ana@example.com" },
+  };
   const consentedLink = { isMinor: false, insightsConsentAt: new Date(), guardianConsentAt: null };
 
   // The transcription gate (D-185). Before this, transcription-off only stopped the
@@ -126,7 +133,30 @@ describe("maybeStartLessonAudioCapture", () => {
     expect(startLessonAudioCaptures).toHaveBeenCalledWith(prisma, {
       bookingId: "b1",
       teacherId: "t1",
-      studentId: "s1",
+      studentIdentities: ["s1"],
+      room: "room-b1",
+    });
+  });
+
+  // #117: a student whose portal login is a sibling row of the booking's
+  // student joins as that row's id, so capture must know her by every id in
+  // the booking student's identity set. Consent stays the booking pair's (D-22).
+  it("hands capture the booking student's whole identity set, consent still read for the booking's own pair", async () => {
+    bookingFindUnique.mockResolvedValueOnce(booking);
+    teacherStudentFindUnique.mockResolvedValueOnce(consentedLink);
+    studentFindMany.mockResolvedValueOnce([{ id: "s1-sibling" }]);
+
+    await maybeStartLessonAudioCapture(prisma, "b1");
+
+    expect(teacherStudentFindUnique).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { teacherId_studentId: { teacherId: "t1", studentId: "s1" } },
+      }),
+    );
+    expect(startLessonAudioCaptures).toHaveBeenCalledWith(prisma, {
+      bookingId: "b1",
+      teacherId: "t1",
+      studentIdentities: ["s1", "s1-sibling"],
       room: "room-b1",
     });
   });
