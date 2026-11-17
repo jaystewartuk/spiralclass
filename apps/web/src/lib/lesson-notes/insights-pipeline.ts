@@ -3,6 +3,7 @@ import { localeEnglishName } from "@spiralclass/shared";
 
 import { logger } from "@/lib/logger";
 import { inngest as defaultInngest } from "@/lib/inngest/client";
+import { lessonLanguage } from "@/lib/transcription/language";
 import {
   generateInsights as defaultGenerate,
   InsightsUnavailableError,
@@ -80,7 +81,7 @@ export async function generateAndStoreInsights(
 
   const transcript = await prisma.lessonTranscript.findUnique({
     where: { bookingId },
-    select: { utterances: true, language: true, teacherId: true },
+    select: { utterances: true, teacherId: true },
   });
   if (!transcript) return { code: "skipped", reason: "no-transcript" };
 
@@ -89,7 +90,7 @@ export async function generateAndStoreInsights(
     select: {
       teacherId: true,
       student: { select: { name: true } },
-      teacher: { select: { locale: true, targetLanguage: true } },
+      teacher: { select: { locale: true, targetLanguage: true, teachingLanguage: true } },
       lessonNotes: {
         select: { audience: true, body: true, doneAt: true },
         orderBy: { position: "asc" },
@@ -124,21 +125,18 @@ export async function generateAndStoreInsights(
   try {
     insights = await deps.generate({
       studentName: booking.student.name,
-      // The language the STUDENT is graded in — her subject, not whatever tag
-      // the ASR vendor was handed. `transcript.language` is the ASR tag, and
-      // it is hardcoded to DEFAULT_LESSON_LANGUAGE ("es") upstream
-      // (transcription/pipeline.ts), so reading it here told the model every
-      // lesson on the platform was Spanish. That was invisible while the only
-      // teacher taught Spanish, and wrong for anyone else.
+      // The language the STUDENT is graded in — her subject (lessonLanguage:
+      // targetLanguage, else the language the class is taught in), read from
+      // the teacher and never from `transcript.language`. That tag was a
+      // constant "es" for every class until it was resolved per teacher, and
+      // a transcript written before then still carries it.
       //
-      // Deliberately `targetLanguage` and NOT `teachingLanguage`: the model is
+      // Deliberately the subject and NOT the language spoken: the model is
       // judging the student's output against the rules of the language she is
       // LEARNING. That is the opposite of the intro-video analysis, which tags
       // ASR with `teachingLanguage` because the only voice there is the
       // teacher's own (see LessonIntroVideoAnalysis.language in schema.prisma).
-      // The two coincide for a teacher of Spanish teaching in Spanish, which is
-      // what masked both bugs.
-      targetLanguage: booking.teacher.targetLanguage ?? transcript.language,
+      targetLanguage: lessonLanguage(booking.teacher),
       utterances,
       teacherCues,
       studentNotes,

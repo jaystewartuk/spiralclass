@@ -67,10 +67,14 @@ is on; read it rather than this page. No flag can be inferred from another.
 3. Claude produces `LessonInsight` rows (`source: "ai"`); the teacher confirms,
    edits or dismisses; the profile is recomputed.
 
-- **The transcript's language is always Spanish.** Every `LessonTranscript` is
-  stamped `DEFAULT_LESSON_LANGUAGE` (`"es"`, `lib/transcription/config.ts`),
-  and the brief and insights read it whatever the teacher teaches. It must come
-  from the booking before a teacher of another language relies on insights.
+- **The lesson's language is the teacher's own** (`lessonLanguage`,
+  `lib/transcription/language.ts`): her subject (`target_language`), else the
+  language she teaches in (`teaching_language`), never her `locale`. It tags
+  the `LessonTranscript`, and the brief and insights grade against it, read
+  from the teacher rather than from the stored tag (a transcript written
+  before this was resolved carries `"es"`). Each line's text is recognised in
+  the language its speaker speaks in that class, the same per-class answer the
+  captions use (`classSpokenLanguages`).
 - A transcript is kept while the teacher's account is open and deleted with it
   ([account settings](account-settings.md#account-deletion)).
   `Teacher.lessonAudioRetentionOptIn` applies only to the legacy audio path.

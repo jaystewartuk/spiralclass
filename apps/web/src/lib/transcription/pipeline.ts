@@ -2,7 +2,7 @@ import type { PrismaClient } from "@prisma/client";
 
 import { logger } from "@/lib/logger";
 import { inngest as defaultInngest } from "@/lib/inngest/client";
-import { DEFAULT_LESSON_LANGUAGE } from "./config";
+import { classSpokenLanguages, lessonLanguage } from "./language";
 import { mergeSpeakerSegment, normalizeTimeline } from "./merge";
 import type { TranscriptionProvider } from "./provider";
 import type { LessonAudioStore } from "./lesson-audio-store";
@@ -27,7 +27,7 @@ const log = logger({ surface: "lesson-transcription" });
 
 type Db = Pick<
   PrismaClient,
-  "lessonAudio" | "lessonTranscript" | "teacher" | "lessonPronunciation"
+  "booking" | "lessonAudio" | "lessonTranscript" | "teacher" | "lessonPronunciation"
 >;
 
 export type TranscriptionDeps = {
@@ -85,11 +85,23 @@ export async function processLessonAudioReady(
   if (!audio) return { code: "skipped", reason: "audio-not-found" };
   if (audio.status !== "ready") return { code: "skipped", reason: `status-${audio.status}` };
 
-  // 2. Mint a short-lived URL and transcribe (the vendor pulls the audio).
+  // 2. Mint a short-lived URL and transcribe (the vendor pulls the audio) in
+  //    the language this speaker speaks in this class — the same answer the
+  //    live captions use (classSpokenLanguages), never a constant.
+  const booking = await prisma.booking.findFirst({
+    where: { id: audio.bookingId, teacherId: audio.teacherId },
+    select: {
+      teacherLanguageOverride: true,
+      studentLanguageOverride: true,
+      teacher: { select: { targetLanguage: true, teachingLanguage: true } },
+      student: { select: { nativeLanguage: true } },
+    },
+  });
+  if (!booking) return { code: "skipped", reason: "booking-not-found" };
   const audioUrl = deps.store.presignedGetUrl(audio.storageKey);
   const result = await deps.provider.transcribe({
     audioUrl,
-    language: DEFAULT_LESSON_LANGUAGE,
+    language: classSpokenLanguages(booking)[audio.speaker as Speaker],
   });
 
   // 3. Merge this speaker's utterances into the booking's transcript (absolute
@@ -103,7 +115,7 @@ export async function processLessonAudioReady(
     egressStartMs: audio.startedAt.getTime(),
     result,
   });
-  const language = existing?.language ?? DEFAULT_LESSON_LANGUAGE;
+  const language = existing?.language ?? lessonLanguage(booking.teacher);
 
   await prisma.lessonTranscript.upsert({
     where: { bookingId: audio.bookingId },

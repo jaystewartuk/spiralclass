@@ -21,9 +21,8 @@ export type TranscriptionConfig = {
   apiKey: string;
 };
 
-// The lesson's target language. Spanish-first (D-185) — there is no per-lesson
-// target-language field yet, so default to Spanish until one is added.
-export const DEFAULT_LESSON_LANGUAGE = "es";
+// A lesson's language is resolved from the teacher and the booking, never a
+// constant: see language.ts.
 
 // Which vendor is configured, if any. Deepgram wins when both keys are present
 // (arbitrary, swappable — the bake-off picks the real default).
