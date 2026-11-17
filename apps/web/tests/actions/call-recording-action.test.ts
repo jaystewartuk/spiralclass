@@ -54,7 +54,13 @@ beforeEach(() => {
   vi.clearAllMocks();
   recordingEnabled.mockReturnValue(true);
   startRoomRecording.mockResolvedValue({ egressId: "eg1" });
-  bookingFindFirst.mockResolvedValue({ id: "b1", studentId: "s1" });
+  // A student row with no email has no siblings, so studentIdentityIds needs
+  // no student query here.
+  bookingFindFirst.mockResolvedValue({
+    id: "b1",
+    studentId: "s1",
+    student: { id: "s1", email: null },
+  });
   callRecordingFindFirst.mockResolvedValue(null);
   teacherStudentFindUnique.mockResolvedValue({
     isMinor: false,

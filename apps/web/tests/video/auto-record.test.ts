@@ -59,6 +59,9 @@ const teacherStudentFindUnique = vi.fn();
 const callRecordingFindFirst = vi.fn();
 const callRecordingCreate = vi.fn(async (_a: unknown) => ({}));
 const callRecordingUpdate = vi.fn(async (_a: unknown) => ({}));
+// studentIdentityIds (lib/students/identity.ts) runs for real: the booking's
+// student row's same-inbox siblings are what a linked login may join as.
+const studentFindMany = vi.fn(async (_a: unknown): Promise<{ id: string }[]> => []);
 
 const { maybeAutoStartRecording } = await import("@/lib/video/call-recording");
 
@@ -68,6 +71,7 @@ const prisma = {
     findFirst: (...a: unknown[]) => bookingFindFirst(...(a as [])),
   },
   teacher: { findUnique: (...a: unknown[]) => teacherFindUnique(...(a as [])) },
+  student: { findMany: (...a: unknown[]) => studentFindMany(...(a as [unknown])) },
   teacherStudent: { findUnique: (...a: unknown[]) => teacherStudentFindUnique(...(a as [])) },
   callRecording: {
     findFirst: (...a: unknown[]) => callRecordingFindFirst(...(a as [])),
@@ -76,13 +80,22 @@ const prisma = {
   },
 } as never;
 
-const BOOKING = { id: "b1", teacherId: "t1", studentId: "s1" };
+const BOOKING = {
+  id: "b1",
+  teacherId: "t1",
+  studentId: "s1",
+  student: { id: "s1", email: "ana@example.com" },
+};
 
 beforeEach(() => {
   vi.clearAllMocks();
   recordingEnabled.mockReturnValue(true);
   bookingFindUnique.mockResolvedValue(BOOKING);
-  bookingFindFirst.mockResolvedValue({ id: BOOKING.id, studentId: BOOKING.studentId });
+  bookingFindFirst.mockResolvedValue({
+    id: BOOKING.id,
+    studentId: BOOKING.studentId,
+    student: BOOKING.student,
+  });
   teacherFindUnique.mockResolvedValue({ autoRecordClasses: true });
   teacherStudentFindUnique.mockResolvedValue({
     isMinor: false,
@@ -91,6 +104,7 @@ beforeEach(() => {
   });
   callRecordingFindFirst.mockResolvedValue(null);
   listRoomParticipantIdentities.mockResolvedValue(["t1", "s1"]);
+  studentFindMany.mockResolvedValue([]);
   startRoomRecording.mockResolvedValue({ egressId: "eg1", storageKey: "k" });
   gateProFeature.mockResolvedValue({ ok: true });
 });
@@ -104,6 +118,28 @@ describe("maybeAutoStartRecording", () => {
         data: expect.objectContaining({ bookingId: "b1", teacherId: "t1", status: "recording" }),
       }),
     );
+  });
+
+  // #117: the student's portal login is linked to a sibling row of the
+  // booking's student (same inbox, another teacher's roster row), and she
+  // joins the call under THAT id. She is in the room; the class is recorded.
+  it("starts the recording when the student joined under a sibling identity of the booking's student", async () => {
+    studentFindMany.mockResolvedValue([{ id: "s1-sibling" }]);
+    listRoomParticipantIdentities.mockResolvedValue(["t1", "s1-sibling"]);
+    await maybeAutoStartRecording(prisma, "b1");
+    expect(startRoomRecording).toHaveBeenCalledOnce();
+    // And the insights capture it hands off to knows her by that id too.
+    expect(startLessonAudioCaptures).toHaveBeenCalledWith(
+      prisma,
+      expect.objectContaining({ studentIdentities: ["s1", "s1-sibling"] }),
+    );
+  });
+
+  it("does not count a stranger in the room as the student", async () => {
+    studentFindMany.mockResolvedValue([{ id: "s1-sibling" }]);
+    listRoomParticipantIdentities.mockResolvedValue(["t1", "someone-else"]);
+    await maybeAutoStartRecording(prisma, "b1");
+    expect(startRoomRecording).not.toHaveBeenCalled();
   });
 
   it("does nothing when the teacher has not opted in", async () => {

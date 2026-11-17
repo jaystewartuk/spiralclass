@@ -148,6 +148,12 @@ No audio is recorded by this check. Thresholds and the pure detector live in
       reconnect. It reuses `startBookingRecording`, so the Pro gate applies,
       and it never touches the student's insights consent. Both parties see
       the recording indicator either way.
+    - **Who counts as the student in the room**: a student joins as the id of
+      the Student row her login is linked to, which can be a same-inbox
+      sibling of the booking's `studentId` (`studentIdentityIds`). Auto-record
+      and the per-speaker capture both recognise her by that whole identity
+      set, never by the booking's `studentId` alone; consent is still read for
+      the booking's own teacher–student pair.
 
 ### Live captions
 
