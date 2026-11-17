@@ -2,7 +2,7 @@ import { Prisma } from "@prisma/client";
 import { currencyForTeacher, majorToMinorUnits } from "@spiralclass/shared";
 
 import { prisma } from "@/lib/prisma";
-import { normalizeDiscountCode } from ".";
+import { normalizeDiscountCode, redemptionCountsWhere } from ".";
 import { expiryInstant } from "./status";
 
 // Teacher-facing management core for discount codes (slice 2a): the create /
@@ -144,7 +144,7 @@ export async function listDiscountCodes(teacherId: string): Promise<DiscountCode
       expiresAt: true,
       _count: {
         select: {
-          redemptions: { where: { package: { status: { in: ["pending", "active"] } } } },
+          redemptions: { where: { package: redemptionCountsWhere(new Date()) } },
         },
       },
     },

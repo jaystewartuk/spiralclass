@@ -21,12 +21,20 @@ import { INSTRUMENT_READINESS_SELECT } from "@/lib/marketplace-ready";
 import { enqueuePaymentPendingTeacher } from "@/lib/notifications/enqueue";
 import { emitNotificationQueued } from "@/lib/notifications/events";
 import { supersedePendingCheckouts } from "@/lib/payments/supersede-pending";
-import { discountRejectMessage, resolveAndValidateDiscount } from "@/lib/discounts";
+import {
+  discountRejectMessage,
+  resolveAndValidateDiscount,
+  revalidateDiscountUnderLock,
+} from "@/lib/discounts";
 import {
   effectivePriceMinorUnits,
   grandfatheredPricesFor,
 } from "@/lib/payments/grandfathered-prices";
-import { referralRejectMessage, resolveReferralForCheckout } from "@/lib/referrals";
+import {
+  referralRejectMessage,
+  resolveReferralForCheckout,
+  revalidateReferralUnderLock,
+} from "@/lib/referrals";
 import { aliasServerUser, trackServerEvent } from "@/lib/analytics/posthog";
 import { attributionProperties, currentAttribution } from "@/lib/analytics/attribution";
 import { recordBookingStarted } from "@/lib/marketing/events";
@@ -46,6 +54,10 @@ const log = logger({ surface: "checkout" });
 function stripeUnavailableMessage(t: TFunction): string {
   return t("web.action.checkout.stripeUnavailable");
 }
+
+// Thrown inside the checkout transaction when the locked re-check refuses a
+// code the unlocked pre-check accepted; carries the buyer's localized message.
+class CodeNoLongerAvailable extends Error {}
 
 // Shared checkout core behind both purchase entry points:
 //   * the public funnel at /b/[slug]/buy (anonymous form → student upsert
@@ -417,8 +429,40 @@ export async function startCheckout(args: StartCheckoutArgs): Promise<StartCheck
   // generate the reference inside the same transaction so the unique
   // index can catch a collision atomically (vanishingly unlikely with
   // UUIDv4 entropy, but free to enforce).
-  const { paymentId, externalReference, packageId, paymentReference, teacherNotifId } =
-    await prisma.$transaction(async (tx) => {
+  let rows;
+  try {
+    rows = await prisma.$transaction(async (tx) => {
+      // The code was validated above, outside any lock, so a bad code fails
+      // before a row is written. That read cannot decide on its own: two
+      // checkouts at once both saw room and both took the last use (issue
+      // #74). Re-check with the code — or, for a referral, the buyer — locked,
+      // in the transaction that writes the redemption.
+      if (applied?.type === "promo") {
+        const check = await revalidateDiscountUnderLock(tx, {
+          codeId: applied.codeId,
+          teacherId: teacher.id,
+          studentId: student.id,
+          code: args.discountCode as string,
+          baseMinorUnits: basePriceMinorUnits,
+        });
+        if (!check.ok) throw new CodeNoLongerAvailable(discountRejectMessage(check.reason, t));
+      } else if (applied?.type === "referral") {
+        const check = await revalidateReferralUnderLock(tx, {
+          teacherId: teacher.id,
+          studentId: student.id,
+          studentEmail: student.email,
+          code: args.discountCode as string,
+          baseMinorUnits: basePriceMinorUnits,
+        });
+        if (!check.ok) {
+          throw new CodeNoLongerAvailable(
+            check.reason === "not_a_referral"
+              ? discountRejectMessage("not_found", t)
+              : referralRejectMessage(check.reason, t),
+          );
+        }
+      }
+
       const pkg = await tx.package.create({
         data: {
           teacherId: teacher.id,
@@ -513,6 +557,12 @@ export async function startCheckout(args: StartCheckoutArgs): Promise<StartCheck
         teacherNotifId,
       };
     });
+  } catch (err) {
+    // Rolled back before anything was written; the buyer is told why.
+    if (err instanceof CodeNoLongerAvailable) return { error: err.message };
+    throw err;
+  }
+  const { paymentId, externalReference, packageId, paymentReference, teacherNotifId } = rows;
 
   if (teacherNotifId) {
     await emitNotificationQueued({

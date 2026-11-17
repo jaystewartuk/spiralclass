@@ -8,6 +8,7 @@ import { getPreferredLocale, getT } from "@/lib/i18n";
 import { formatMinorUnits } from "@/lib/money";
 import { prisma } from "@/lib/prisma";
 import { publicUrl } from "@/lib/public-url";
+import { redemptionCountsWhere } from "@/lib/discounts";
 import {
   NO_TOTALS,
   compareForList,
@@ -61,15 +62,14 @@ export default async function DiscountsPage() {
     // took off, and what the student paid anyway. One extra query for both,
     // folded in a pure function (lib/discounts/status.ts) rather than in here.
     //
-    // The filter is the CHECKOUT's definition of a spent use — a redemption
-    // counts while its purchase is pending or active, so a refund frees it —
-    // and must stay identical to resolveAndValidateDiscount's, or the dashboard
-    // and the till disagree about whether a capped code has room.
+    // The filter is the CHECKOUT's definition of a spent use, imported rather
+    // than restated (redemptionCountsWhere), so the dashboard and the till
+    // cannot disagree about whether a capped code has room.
     prisma.discountRedemption.findMany({
       where: {
         teacherId: teacher.id,
         discountCode: { origin: "promo" },
-        package: { status: { in: ["pending", "active"] } },
+        package: redemptionCountsWhere(now),
       },
       select: {
         discountCodeId: true,
