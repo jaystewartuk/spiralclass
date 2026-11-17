@@ -1,4 +1,5 @@
 import type { Prisma, PrismaClient } from "@prisma/client";
+import type { ReminderMetadata } from "./clock-change";
 
 // Typed producers for the notifications table.
 //
@@ -72,6 +73,9 @@ export async function enqueueReminder(
     studentId: string;
     bookingId: string;
     which: "24h" | "1h" | "15m";
+    // Minutes a clock change moved this class on the student's clock since the
+    // previous one (lib/notifications/clock-change.ts). Stored only when non-zero.
+    clockShiftMinutes?: number;
   },
 ): Promise<string> {
   const templateName =
@@ -84,7 +88,14 @@ export async function enqueueReminder(
     channel: "push",
     templateName,
     status: "queued",
+    ...reminderMetadata(input.clockShiftMinutes),
   });
+}
+
+function reminderMetadata(clockShiftMinutes: number | undefined): {
+  metadata?: ReminderMetadata;
+} {
+  return clockShiftMinutes ? { metadata: { clockShiftMinutes } satisfies ReminderMetadata } : {};
 }
 
 // Teacher mirror of enqueueReminder: the same 24h/1h/5m pre-class reminders,
@@ -98,6 +109,7 @@ export async function enqueueReminderTeacher(
     teacherId: string;
     bookingId: string;
     which: "24h" | "1h" | "15m";
+    clockShiftMinutes?: number;
   },
 ): Promise<string> {
   const templateName =
@@ -114,6 +126,7 @@ export async function enqueueReminderTeacher(
     channel: "push",
     templateName,
     status: "queued",
+    ...reminderMetadata(input.clockShiftMinutes),
   });
 }
 

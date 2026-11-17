@@ -132,6 +132,17 @@ in `lib/invitations/constants.ts`.
   remembered in that browser for that pair of zones.
 - She can also change it on her account page, and her teacher from the contact
   card.
+- **Clock changes.** A class at the same time on the teacher's clock can move by
+  an hour on the student's clock when either country changes its clocks and the
+  other does not, or changes on another weekend. When the gap between their two
+  zones at a class differs from the gap at the previous class with the same
+  teacher (a canceled or moved class does not count), that class says so: on
+  the student's upcoming class card, on the row in the teacher's upcoming list,
+  and in both sides' reminders. Each reads it in their own language. Only that
+  first class after the change carries it. A student with no saved zone gets no
+  note, because a move worked out in a guessed zone may not be one she sees. The
+  teacher's list looks back at most 120 days for the previous class. The rule is
+  `packages/shared/src/clock-change.ts`.
 
 ## Error states
 

@@ -4951,6 +4951,16 @@ export const en = {
   "web.myClasses.timezoneNotice.switch": "Use {device} time",
   "web.myClasses.timezoneNotice.keep": "Keep {saved} time",
   "web.myClasses.timezoneNotice.switched": "Done — your class times now show in {device} time.",
+  // A clock change moved a class on one party's clock (issue 229). {amount}
+  // is a unit-formatted duration ("1 hour"), already in the reader's language.
+  "clockChange.student.later":
+    "The clocks have changed since your last class with {teacherName}: the same time on their clock is now {amount} later on yours.",
+  "clockChange.student.earlier":
+    "The clocks have changed since your last class with {teacherName}: the same time on their clock is now {amount} earlier on yours.",
+  "clockChange.teacher.later":
+    "The clocks have changed since {studentName}'s last class: the same time on your clock is now {amount} later on theirs.",
+  "clockChange.teacher.earlier":
+    "The clocks have changed since {studentName}'s last class: the same time on your clock is now {amount} earlier on theirs.",
   // Notification preferences (NotificationPrefsForm), shared by the teacher and
   // student screens. Read top to bottom these are the three layers a
   // notification passes through: the device, the account-level channel, and the

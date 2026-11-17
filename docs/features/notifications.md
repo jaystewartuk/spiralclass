@@ -133,6 +133,11 @@ Chosen per template by whether `preferences.ts` gives it a category:
 
 - Student and teacher each get reminders **24 hours, 1 hour and 15 minutes**
   before a class; the copy names the other person.
+- When a clock change since the pairing's previous class moved this one on the
+  student's clock, both reminders say so in one extra sentence
+  ([the student's timezone](student-management.md#the-students-timezone)).
+  The shift is measured when the reminder is queued and stored on it, so the
+  inbox shows the same sentence.
 - The scan runs **hourly** (`reminder-scan-cron`, [D-115](../decisions/D-115.md)):
   each scan schedules one wake for the exact moment the next reminder is due,
   so the 15-minute leg arrives at `start − 15m`. A class cancelled or moved

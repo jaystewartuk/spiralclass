@@ -52,6 +52,7 @@ export * from "./content/index";
 export * from "./i18n/index";
 export * from "./invitations";
 export * from "./dual-zone";
+export * from "./clock-change";
 export * from "./time-format";
 export * from "./profile-limits";
 export * from "./booking-url";

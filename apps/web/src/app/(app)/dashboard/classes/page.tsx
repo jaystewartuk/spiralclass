@@ -23,6 +23,8 @@ import {
 import { ClassList, FlatClassList, RecentRow, type ClassListItem } from "./class-list";
 import { ClassesToolbar } from "./classes-toolbar";
 import { DAY_PLAN_PATH } from "@/lib/lesson-notes/day-plan";
+import { loadTeacherListClockShifts } from "@/lib/clock-change-shifts";
+import { clockChangeNote } from "@spiralclass/shared";
 
 /**
  * The teacher's class roster.
@@ -76,6 +78,7 @@ const BOOKING_SELECT = {
   scheduledStart: true,
   scheduledEnd: true,
   status: true,
+  studentId: true,
   student: { select: { name: true, timezone: true } },
   package: { select: { classDurationMin: true, template: { select: { name: true } } } },
   // The materials chip answers one question: does this class have ANY material
@@ -185,7 +188,31 @@ export default async function TeacherClassesPage({
     ]);
 
   const hasMore = listRows.length > listTake - 1;
-  const items = listRows.slice(0, listTake - 1).map(toItem);
+  const pageRows = listRows.slice(0, listTake - 1);
+  // A clock change since a student's previous class moved this one on her clock
+  // (issue 229) — said on the row, so an early or late arrival is no surprise.
+  // Upcoming views only: on a past row it would describe a class already taught.
+  const clockShifts =
+    scope === "past"
+      ? new Map<string, number>()
+      : await loadTeacherListClockShifts(
+          prisma,
+          teacher,
+          pageRows.map((b) => ({
+            id: b.id,
+            studentId: b.studentId,
+            scheduledStart: b.scheduledStart,
+            status: b.status,
+            studentTimezone: b.student.timezone,
+          })),
+          now,
+        );
+  const items = pageRows.map((b) => ({
+    ...toItem(b),
+    clockChangeNote:
+      clockChangeNote(t, locale, "teacher", clockShifts.get(b.id) ?? 0, b.student.name.trim()) ??
+      undefined,
+  }));
   const justFinished = justFinishedRows.map(toItem);
   const recent = recentRows.map(toItem);
   const todayCount = weekStarts.filter((b) => b.scheduledStart < todayEnd).length;
