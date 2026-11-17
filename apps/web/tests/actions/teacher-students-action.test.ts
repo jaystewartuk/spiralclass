@@ -20,7 +20,10 @@ vi.mock("next/navigation", () => ({
 const state = {
   existingByEmail: null as null | { id: string },
   teacherEmailConflict: null as null | { id: string },
-  link: { onboardingHoldAt: new Date("2026-06-01") } as { onboardingHoldAt: Date | null } | null,
+  link: { onboardingHoldAt: new Date("2026-06-01"), student: { notificationPrefs: null } } as {
+    onboardingHoldAt: Date | null;
+    student: { notificationPrefs: unknown };
+  } | null,
 };
 
 const studentFindFirst = vi.fn(async () => state.existingByEmail);
@@ -62,9 +65,14 @@ const trackServerEvent = vi.fn();
 const flushAnalytics = vi.fn(async () => {});
 vi.mock("@/lib/analytics/posthog", () => ({ trackServerEvent, flushAnalytics }));
 
+// The teacher reads English here, so the returned copy can be asserted as words.
+vi.mock("@/lib/i18n", () => ({ getPreferredLocale: async () => "en" }));
+
 const revalidatePath = vi.fn();
 vi.mock("next/cache", () => ({ revalidatePath }));
 
+const { allDisabledPrefs } = await import("@/lib/notifications/preferences");
+const { createT } = await import("@/lib/i18n-translate");
 const { createStudentAction, setStudentLiveAction } =
   await import("@/app/actions/teacher-students");
 
@@ -91,7 +99,7 @@ beforeEach(() => {
   gateAddStudent.mockResolvedValue({ ok: true as const });
   state.existingByEmail = null;
   state.teacherEmailConflict = null;
-  state.link = { onboardingHoldAt: new Date("2026-06-01") };
+  state.link = { onboardingHoldAt: new Date("2026-06-01"), student: { notificationPrefs: null } };
 });
 
 describe("createStudentAction", () => {
@@ -204,7 +212,7 @@ describe("setStudentLiveAction", () => {
   });
 
   it("refuses a student that is already live", async () => {
-    state.link = { onboardingHoldAt: null };
+    state.link = { onboardingHoldAt: null, student: { notificationPrefs: null } };
     const res = await setStudentLiveAction(undefined, form({ studentId: SID }));
     expect(res).toHaveProperty("error");
     expect(tsUpdate).not.toHaveBeenCalled();
@@ -218,5 +226,30 @@ describe("setStudentLiveAction", () => {
       data: { onboardingHoldAt: null },
     });
     expect(writeOverride).toHaveBeenCalledWith(expect.objectContaining({ action: "go_live" }));
+  });
+
+  it("promises notifications only to a student whose notifications are on", async () => {
+    const res = await setStudentLiveAction(undefined, form({ studentId: SID }));
+    expect(res).toEqual({ ok: createT("en")("web.action.teacherStudents.nowLive") });
+  });
+
+  // #77: Go live cleared the hold and said "They'll receive notifications from
+  // now on" while every category was still stored off, so the booking
+  // confirmation two minutes later was suppressed and nothing said so. Go live
+  // must not switch them on (D-204: an all-off map cannot be told apart from a
+  // student's own opt-out), so it says plainly that she will receive nothing.
+  it("tells the teacher a student going live with every notification off will hear nothing", async () => {
+    state.link = {
+      onboardingHoldAt: new Date("2026-06-01"),
+      student: { notificationPrefs: allDisabledPrefs() },
+    };
+    const res = await setStudentLiveAction(undefined, form({ studentId: SID }));
+    expect(tsUpdate).toHaveBeenCalledTimes(1);
+    expect(res).toHaveProperty("ok");
+    const ok = (res as { ok: string }).ok;
+    expect(ok).not.toBe(createT("en")("web.action.teacherStudents.nowLive"));
+    expect(ok).toMatch(/notifications are still off/i);
+    // The stored preferences are the student's to change; Go live never writes them.
+    expect(tsUpdate.mock.calls[0][0]).not.toHaveProperty("data.student");
   });
 });

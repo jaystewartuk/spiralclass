@@ -175,6 +175,16 @@ export const CAPTIONS_ON_ATTRIBUTE = "captionsOn";
 // answer — never this attribute — is what says she has consented.
 export const CAPTIONS_CONSENT_ATTRIBUTE = "captionsConsent";
 
+// "1" while this browser's cloud fallback has given up on its own person's
+// speech, so the other participant can be told. The two browsers otherwise
+// agree that the fallback has the job, and neither would say anything.
+export const CAPTIONS_SPEECH_STOPPED_ATTRIBUTE = "captionsSpeechStopped";
+
+// The rate of the raw audio a browser streams when its MediaRecorder has no
+// format Deepgram can detect. The client resamples to it and the server names
+// it in the listen URL.
+export const CLOUD_PCM_SAMPLE_RATE = 16_000;
+
 // ---------------------------------------------------------------------------
 // Who recognises whom
 // ---------------------------------------------------------------------------

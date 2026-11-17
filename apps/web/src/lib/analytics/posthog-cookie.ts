@@ -16,8 +16,11 @@
 //
 // Cookie shape (posthog-js, default `cookie` persistence) — name is
 // `ph_<projectToken>_posthog`, value is URI-encoded JSON:
-//   { "distinct_id": "0190…", "$sesid": [1719…, "0190…", 1719…], … }
-// `$sesid` is [lastActivityTs, sessionId, sessionStartTs].
+//   { "distinct_id": "0190…", "$user_state": "anonymous", "$sesid": [1719…, "0190…", 1719…], … }
+// `$sesid` is [lastActivityTs, sessionId, sessionStartTs]. `$user_state` is
+// "anonymous" from init until `identify()` runs, then "identified": after
+// <PostHogIdentify> in the teacher app, the student portal or the admin
+// console, `distinct_id` is that signed-in person's own id.
 //
 // Everything here is best-effort: no cookie (first-ever request, ad-blocker,
 // cookies declined) simply yields nulls, and the caller falls back.
@@ -25,11 +28,18 @@
 export type PostHogClientIdentity = {
   distinctId: string | null;
   sessionId: string | null;
+  // True only when posthog-js says `distinct_id` is still its own anonymous
+  // id. Only such an id may be merged into another person (aliasServerUser):
+  // an identified one belongs to whoever is signed in on this browser, and a
+  // PostHog merge cannot be undone. A cookie with no `$user_state` is not
+  // anonymous — unknown is refused, never guessed.
+  anonymous: boolean;
 };
 
 export const EMPTY_POSTHOG_IDENTITY: PostHogClientIdentity = {
   distinctId: null,
   sessionId: null,
+  anonymous: false,
 };
 
 /** posthog-js derives its cookie name from the project token. */
@@ -57,7 +67,9 @@ export function parsePostHogCookie(raw: string | null | undefined): PostHogClien
     const sessionId =
       Array.isArray(sesid) && typeof sesid[1] === "string" && sesid[1].length > 0 ? sesid[1] : null;
 
-    return { distinctId, sessionId };
+    const anonymous = distinctId !== null && obj.$user_state === "anonymous";
+
+    return { distinctId, sessionId, anonymous };
   } catch {
     return EMPTY_POSTHOG_IDENTITY;
   }

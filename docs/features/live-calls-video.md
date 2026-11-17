@@ -99,6 +99,23 @@ live captions and post-call transcription cannot run there, whatever
      and a ring while they are speaking — on the stage and in the corner
      tile.
 
+### Published microphone health
+
+While a microphone is published and another person is present, the speaker's
+browser checks the local sender's source level. A source that has never exceeded
+0.02 within 45 seconds shows a warning and a microphone picker beside the audio
+playback warning; an all-zero source warns immediately. These defaults separate
+the failed tablet's 0.005 peak from observed speech near 0.4. Once speech proves
+the track works, later listening silence does not warn. Mute, departure and a new
+MediaStreamTrack reset the observation. Missing stats mean unknown, not silence.
+A working microphone whose owner has never spoken cannot be distinguished from
+a failed microphone by levels alone; the warning therefore says “probably”.
+
+`call_mic_silent` records peak level, seconds observed and the device label when
+available; `call_mic_silent_recovered` records sound returning after a warning.
+No audio is recorded by this check. Thresholds and the pure detector live in
+`apps/web/src/lib/video/mic-health.ts`.
+
 ### Recording
 
 10. **Teacher-only, Pro-gated** — there is no student-facing start/stop
@@ -131,6 +148,12 @@ live captions and post-call transcription cannot run there, whatever
       reconnect. It reuses `startBookingRecording`, so the Pro gate applies,
       and it never touches the student's insights consent. Both parties see
       the recording indicator either way.
+    - **Who counts as the student in the room**: a student joins as the id of
+      the Student row her login is linked to, which can be a same-inbox
+      sibling of the booking's `studentId` (`studentIdentityIds`). Auto-record
+      and the per-speaker capture both recognise her by that whole identity
+      set, never by the booking's `studentId` alone; consent is still read for
+      the booking's own teacher–student pair.
 
 ### Live captions
 
@@ -187,8 +210,10 @@ live captions and post-call transcription cannot run there, whatever
       through 30 seconds of speech on the call. The other browser then takes
       over, or the Deepgram fallback when there is none, and the failure is
       recorded with the browser's own name for itself.
-    - **When neither browser can — two phones.** Each person's own browser
-      records their call microphone track and streams it to Deepgram
+    - **When neither browser can — two phones, or a phone and Safari.** Each
+      person's own browser records their call microphone track (or, where it
+      cannot record a format Deepgram detects, as in Safari before 18.4,
+      captures it as raw 16 kHz samples) and streams it to Deepgram
       (Nova-3, with interim results for the words in progress, opted out of
       Deepgram's model training), and the
       transcript goes through the same translate-and-publish path. This is
@@ -202,7 +227,9 @@ live captions and post-call transcription cannot run there, whatever
       never reaches the browser. Grants are rate-limited per caller per class
       and per class per day, and each is logged. Without `DEEPGRAM_API_KEY`
       the fallback is off and two phones are told captions need one of them
-      on Chrome on a computer, as before.
+      on Chrome on a computer, as before. If a browser's stream gives up for
+      good, the other person is told their partner's speech has stopped
+      being captioned, and `call_captions_cloud_stopped` records why.
     - A line one browser recognises for its own speaker is published to the
       other participant over LiveKit's reliable data channel, addressed to
       them. A line a browser recognises from the other person is shown on
@@ -333,6 +360,13 @@ live captions and post-call transcription cannot run there, whatever
     tab, and its row in the picker says so before it is picked. Which bucket
     a file falls in is resolved server-side from its stored filename
     (`fileKind`), because there is no stored content type to ask.
+    The PDF renderer is pdf.js's **legacy** build (main module and worker),
+    because the modern one assumes JavaScript APIs that an iPhone a version
+    behind or an older Android Chrome lacks — there, every PDF fell back
+    to "open it outside the call" for the teacher while the student saw it
+    drawn. When a PDF cannot be drawn, the viewer still offers that link,
+    and sends `call_material_pdf_render_failed` with the error's name (never
+    its message, which can carry the signed URL).
 29. **A material that can be shown in the call can be opened on the student's
     screen; one that cannot, cannot.** The "for me / for the student / for
     both" choice is offered for exactly the materials the viewer renders, so

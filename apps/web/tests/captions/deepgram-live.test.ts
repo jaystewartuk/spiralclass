@@ -51,6 +51,15 @@ describe("deepgramLiveLanguage", () => {
 });
 
 describe("deepgramListenUrl", () => {
+  it("describes raw audio only when the browser is sending it", () => {
+    const raw = new URL(deepgramListenUrl("en", { pcm: true })).searchParams;
+    expect(raw.get("encoding")).toBe("linear16");
+    expect(raw.get("sample_rate")).toBe("16000");
+    expect(raw.get("channels")).toBe("1");
+    expect(raw.get("mip_opt_out")).toBe("true");
+    expect(new URL(deepgramListenUrl("en")).searchParams.has("encoding")).toBe(false);
+  });
+
   it("asks for Nova-3 finals only, formatted, in the given language, kept out of model training", () => {
     const url = new URL(deepgramListenUrl("es-419"));
     expect(`${url.protocol}//${url.host}${url.pathname}`).toBe("wss://api.deepgram.com/v1/listen");

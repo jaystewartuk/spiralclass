@@ -616,6 +616,12 @@ export const fr = {
   "call.screenShareError": "Impossible de partager l'écran. Réessayez.",
   "call.flipCamera": "Changer de caméra",
   "call.flipCameraError": "Impossible de changer de caméra",
+  "call.micSilent":
+    "Votre microphone ne capte aucun son. L’autre personne ne vous entend probablement pas. Choisissez un autre microphone.",
+  "call.chooseMicrophone": "Choisir un microphone",
+  "call.microphoneNumber": "Microphone {number}",
+  "call.microphoneSwitchFailed":
+    "Impossible de changer de microphone. Vérifiez les autorisations du navigateur et réessayez.",
   "call.audioBlocked":
     "Vous n'entendez pas l'autre personne : votre navigateur a bloqué le son. Touchez ici pour l'activer.",
   "call.swapToMain": "Afficher ma caméra en plein écran",
@@ -676,6 +682,10 @@ export const fr = {
   "call.notesExplain":
     "Les sous-titres de ce cours sont enregistrés sous forme de texte pour suggérer sur quoi travailler ensuite. Aucun audio n'est enregistré.",
   "call.notesLearnMore": "En savoir plus",
+  "call.captionsBrowserUnsupported":
+    "Les sous-titres ne fonctionnent pas dans ce navigateur. Essayez Chrome sur un ordinateur.",
+  "call.captionsOtherSpeechStopped":
+    "Les sous-titres de l'autre personne se sont arrêtés. Demandez-lui de rejoindre depuis Chrome sur un ordinateur.",
   "call.captionsStopped":
     "Les sous-titres se sont arrêtés sur cet appareil — vérifiez l'autorisation du micro.",
   "call.captionsServiceUnavailable":
@@ -2594,6 +2604,8 @@ export const fr = {
   "web.dashboard.invitations.empty":
     "Aucun élève pour l'instant. Ajoutez-les à votre liste pour les inviter.",
   "web.dashboard.invitations.noEmail": "sans e-mail",
+  "web.dashboard.invitations.notDelivered":
+    "L'invitation à {email} n'est pas arrivée. Vérifiez que l'adresse est correcte.",
   "web.dashboard.invitations.cancelConfirm":
     "Annuler cette invitation ? Le lien cessera de fonctionner.",
   "web.dashboard.invitations.form.title": "Inviter des élèves",
@@ -2629,7 +2641,7 @@ export const fr = {
   "web.dashboard.students.package.add": "Ajouter un forfait",
   "web.dashboard.students.package.recordExisting": "Enregistrer un forfait existant",
   "web.dashboard.students.package.recordExistingHint":
-    "Pour un élève que vous transférez : indiquez combien de cours il lui reste. Aucun paiement n'est prélevé — cela définit simplement son solde.",
+    "Enregistrez un forfait déjà payé en dehors de SpiralClass. Un nouveau forfait commence avec tous ses cours restants ; réduisez ce nombre uniquement pour les cours déjà utilisés. Aucun paiement n’est prélevé.",
   "web.dashboard.students.package.basedOn": "Basé sur (facultatif)",
   "web.dashboard.students.package.custom": "Personnalisé",
   "web.dashboard.students.package.totalClasses": "Total des cours",
@@ -2714,6 +2726,8 @@ export const fr = {
     "Conservez le tarif historique d'un élève pour ses prochains achats.",
   "web.dashboard.students.goLive.confirm":
     "Activer cet élève ? Il commencera à recevoir des notifications (confirmations, rappels). Partagez son lien de réservation dès que vous êtes prête.",
+  "web.dashboard.students.goLive.confirmNotificationsOff":
+    "Activer cet élève ? Ses notifications sont désactivées : il ne recevra toujours ni confirmations ni rappels tant qu'elles ne seront pas activées dans l'onglet Paramètres.",
   "web.dashboard.students.goLive.button": "Activer",
   "web.dashboard.students.notifications.label": "Notifications",
   "web.dashboard.students.notifications.on": "Activées",
@@ -4926,6 +4940,15 @@ export const fr = {
   "web.myClasses.timezoneNotice.keep": "Garder l'heure de {saved}",
   "web.myClasses.timezoneNotice.switched":
     "C'est fait : vos horaires s'affichent maintenant à l'heure de {device}.",
+  // Un changement d'heure a déplacé un cours sur l'horloge d'une des parties (issue 229).
+  "clockChange.student.later":
+    "L'heure a changé depuis votre dernier cours avec {teacherName} : la même heure sur son horloge tombe désormais {amount} plus tard sur la vôtre.",
+  "clockChange.student.earlier":
+    "L'heure a changé depuis votre dernier cours avec {teacherName} : la même heure sur son horloge tombe désormais {amount} plus tôt sur la vôtre.",
+  "clockChange.teacher.later":
+    "L'heure a changé depuis le dernier cours de {studentName} : la même heure sur votre horloge tombe désormais {amount} plus tard sur la sienne.",
+  "clockChange.teacher.earlier":
+    "L'heure a changé depuis le dernier cours de {studentName} : la même heure sur votre horloge tombe désormais {amount} plus tôt sur la sienne.",
   // Préférences de notification (NotificationPrefsForm), partagées par les
   // écrans enseignant et élève. De haut en bas, ce sont les trois couches que
   // traverse une notification : l'appareil, le canal du compte et le choix par
@@ -4946,6 +4969,8 @@ export const fr = {
   "web.notificationGap.paused":
     "Les notifications de {name} sont en pause : {name} ne sera pas prévenu·e de ceci. Cela apparaît quand même dans son espace.",
   "web.notificationGap.turnOn": "Activer les notifications",
+  "web.notificationGap.studentOff":
+    "Les notifications de {name} sont désactivées : {name} ne recevra ni confirmations de réservation, ni rappels de cours, ni rien de ce que vous lui envoyez.",
   "web.notificationPrefs.category.expiryReminders": "Rappels de forfait",
   "web.notificationPrefs.categoryHint.expiryReminders":
     "Quand un forfait est sur le point d'expirer, et quand vous en terminez un.",
@@ -5265,7 +5290,7 @@ export const fr = {
     "Chiffrement en transit, accès restreint et un avis de confidentialité en langage clair sur ce que nous conservons et pourquoi.",
   "web.about.trust.realTeacher.title": "Construit avec une vraie enseignante",
   "web.about.trust.realTeacher.body":
-    "Chaque fonctionnalité a été testée dans les cours réels d'une professeure en activité avant d'arriver à quiconque.",
+    "Construit autour des besoins et des retours d'une enseignante en activité.",
   "web.about.trust.globalPay.title": "Soyez payé où que vous soyez",
   "web.about.trust.globalPay.body":
     "Par carte via Stripe là où c'est disponible, ou par virement bancaire direct via Wise partout ailleurs — il y a toujours un moyen d'être payé.",
@@ -5476,7 +5501,7 @@ export const fr = {
   "web.landing.fit.abroad.body":
     "Stripe vous paie dans votre pays, aux tarifs de votre pays ; Wise vous atteint là où Stripe ne va pas ; et chacun voit l'heure du cours dans son propre fuseau.",
   "web.landing.quote.attribution": "Professeure d'espagnol sur SpiralClass, la première",
-  "web.landing.quote.context": "Ses cours ont façonné chaque fonction de cette page.",
+  "web.landing.quote.context": "Ses cours et ses retours contribuent à façonner SpiralClass.",
   "web.landing.pricing.title":
     "Gratuit pour commencer. Gratuit pour être payé, dans toutes les formules.",
   "web.landing.pricing.body":
@@ -5518,7 +5543,7 @@ export const fr = {
     "SpiralClass héberge le cours en direct et y ajoute une couche d'IA qu'aucune marketplace ne vous offre.",
   "web.landing.ai.captions.title": "Une salle de classe vidéo sous-titrée dans leur langue",
   "web.landing.ai.captions.body":
-    "Le cours a lieu dans SpiralClass, sans lien Zoom ni seconde application. Activez les sous-titres : vos mots s'affichent sur l'écran de votre élève pendant que vous parlez, puis traduits à la fin de la phrase. Les siens vous parviennent de la même façon. Tout se passe dans le navigateur et rien n'est conservé.",
+    "Le cours se déroule dans SpiralClass, sans lien Zoom ni seconde application. Activez les sous-titres : vos mots apparaissent sur l'écran de votre élève pendant que vous parlez, puis sont traduits à la fin de la phrase. Les siens vous reviennent de la même façon. Les sous-titres fonctionnent dans le navigateur ; SpiralClass n'enregistre pas l'audio. Avec le consentement de l'élève, le texte est conservé pour les notes d'apprentissage.",
   "web.landing.ai.srs.title": "Du vocabulaire qui revient avant d'être oublié",
   "web.landing.ai.srs.body":
     "Les mots que vous confirmez entrent dans la file de révision de l'élève, espacés pour que chacun revienne juste avant de s'échapper. Il voit ce qu'il améliore, dans sa propre application.",
@@ -5530,7 +5555,7 @@ export const fr = {
     "Google Agenda bidirectionnel et un flux iCal auquel s'abonner — vos cours cohabitent avec tout le reste de votre journée.",
   "web.landing.social.title": "Construit avec une enseignante en activité",
   "web.landing.social.body":
-    "Chaque fonction de cette page a servi dans de vrais cours avant d'atteindre qui que ce soit d'autre. Le code est public : vous pouvez vérifier comment sont traités les données de vos élèves et votre argent.",
+    "Construit autour des besoins et des retours d'une enseignante en activité. Le code est public : vous pouvez vérifier comment sont traités les données de vos élèves et votre argent.",
   "web.pricing.perk.remindersPushEmail": "Rappels par push et e-mail",
   "web.pricing.perk.unlimitedStudents": "Élèves illimités",
   "web.pricing.perk.unlimitedTemplates": "Modèles de forfait illimités",
@@ -7070,9 +7095,9 @@ export const fr = {
     "Forfait mis à jour — {remaining} cours restants sur {total}.",
   "web.action.invalidRequest": "Requête invalide.",
   "web.action.teacherPackages.hasBookings":
-    "Ce forfait comporte des cours réservés ou suivis : il ne peut donc pas être supprimé. Mettez-le plutôt en pause, ou annulez d'abord ses cours.",
+    "Ce forfait comporte un historique de cours, y compris les cours annulés : il ne peut donc pas être supprimé. Vous pouvez corriger son solde avec Modifier ou empêcher de nouvelles réservations avec Pause.",
   "web.action.teacherPackages.hasPayment":
-    "Ce forfait est associé à un paiement enregistré : il ne peut donc pas être supprimé. Remboursez plutôt le paiement.",
+    "Ce forfait est associé à un paiement enregistré : il ne peut donc pas être supprimé. L’historique des paiements est conservé même après un remboursement.",
   "web.action.audit.accidentalPackageDeleted":
     "Forfait créé par erreur, supprimé par le professeur.",
   "web.action.teacherStudents.teacherEmail":
@@ -7082,6 +7107,8 @@ export const fr = {
   "web.action.audit.studentWentLive": "Élève activé — les notifications sont désormais envoyées.",
   "web.action.teacherStudents.nowLive":
     "L'élève est activé. Il recevra désormais les notifications.",
+  "web.action.teacherStudents.nowLiveNotificationsOff":
+    "L'élève est activé, mais ses notifications restent désactivées : il ne recevra ni confirmations de cours ni rappels. Vous pouvez les activer dans l'onglet Paramètres.",
   "web.action.audit.wiseNotReceived": "Wise : paiement non reçu",
   "web.action.invitations.sent": "{count} invitations envoyées.",
   "web.action.invitations.sent_one": "{count} invitation envoyée.",
@@ -7107,6 +7134,8 @@ export const fr = {
   "web.action.admin.mfa.incorrectCode": "Code incorrect.",
   "web.action.admin.notificationNotFound": "Notification introuvable",
   "web.action.admin.notificationAlreadyInState": "Déjà à l'état « {status} »",
+  "web.action.admin.notificationNotRetryable":
+    "Cet e-mail n'a pas été envoyé par la file d'attente et ne peut pas être relancé ici. L'enseignant doit corriger l'adresse et le renvoyer.",
   "web.action.admin.requeued": "Remise en file d'attente",
   "web.action.admin.noRecipients": "Aucun destinataire",
   "web.action.admin.alreadyCanceled": "Déjà annulé",

@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   browserBrands,
   browserCanRecognizeDuringCall,
+  audioContextCtor,
   mediaRecorderCtor,
   recognitionEnvironment,
   speechRecognitionCtor,
@@ -93,6 +94,8 @@ describe("webSocketCtor / mediaRecorderCtor", () => {
     expect(mediaRecorderCtor({ MediaRecorder: MR })).toBe(MR);
     expect(webSocketCtor({})).toBeNull();
     expect(mediaRecorderCtor({ MediaRecorder: {} })).toBeNull();
+    expect(audioContextCtor({ AudioContext: MR })).toBe(MR);
+    expect(audioContextCtor({ AudioContext: {} })).toBeNull();
   });
 });
 

@@ -24,7 +24,7 @@ export type AiCallSite = {
 export const AI_CALL_SITES: readonly AiCallSite[] = [
   {
     file: "src/lib/lesson-notes/insights.ts",
-    model: "INSIGHTS_MODEL",
+    model: "anthropicSmallModel()",
     surfaces: ["lesson-insights"],
     evaluated: ["lesson-insights"],
   },
@@ -42,19 +42,19 @@ export const AI_CALL_SITES: readonly AiCallSite[] = [
   },
   {
     file: "src/lib/lesson-notes/summary.ts",
-    model: "SUMMARY_MODEL",
+    model: "anthropicSmallModel()",
     surfaces: ["lesson-summary"],
     evaluated: [],
   },
   {
     file: "src/lib/lesson-notes/brief.ts",
-    model: "BRIEF_MODEL",
+    model: "anthropicSmallModel()",
     surfaces: ["pre-class-brief"],
     evaluated: [],
   },
   {
     file: "src/lib/intro-video/coach.ts",
-    model: "INTRO_COACH_MODEL",
+    model: "anthropicSmallModel()",
     surfaces: ["intro-coach"],
     evaluated: [],
   },

@@ -13,6 +13,7 @@ import { logger } from "@/lib/logger";
 import { posthogRegionHosts } from "@/lib/analytics/posthog-region";
 import { sentryEnvironment } from "@/lib/sentry-environment";
 import type { AttributionProperties } from "@/lib/analytics/attribution";
+import type { PostHogClientIdentity } from "@/lib/analytics/posthog-cookie";
 import type { AppLocale } from "@spiralclass/shared";
 
 const log = logger({ surface: "analytics" });
@@ -356,6 +357,7 @@ export type ServerEvent = WithSessionId<
         // still measurable.
         scheme?: string;
         priceMinorUnits: number;
+        currency: string;
         // How many people the package was bought for (D-149) — 1, or 2 for a
         // package for two — so the two prices can be told apart in a funnel.
         seats?: number;
@@ -1407,9 +1409,18 @@ const aliasedThisProcess = new Set<string>();
  *
  * Verified against the 2026-07-29 production test purchase, whose funnel spanned
  * `019fafae…` (browser) and `e0fda820…` (student) with no link between them.
+ *
+ * Only an ANONYMOUS browser identity is ever merged. A browser where a teacher,
+ * an admin or another student is signed in carries that person's own id in the
+ * cookie (after <PostHogIdentify>), and aliasing it would fold the buyer into
+ * them for good — PostHog cannot split a person (issue #89). So this takes the
+ * parsed cookie identity rather than a bare id and checks its `anonymous` flag
+ * itself: no caller can hand it an identified id by mistake.
  */
-export function aliasServerUser(distinctId: string, anonymousId: string): void {
+export function aliasServerUser(distinctId: string, browser: PostHogClientIdentity): void {
   if (process.env.NODE_ENV === "test") return;
+  if (!browser.anonymous) return;
+  const anonymousId = browser.distinctId;
   // Nothing to merge, and PostHog rejects a self-alias.
   if (!anonymousId || anonymousId === distinctId) return;
 

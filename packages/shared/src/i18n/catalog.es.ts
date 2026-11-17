@@ -625,6 +625,12 @@ export const esMX = {
   "call.screenShareError": "No se pudo compartir la pantalla. Inténtalo de nuevo.",
   "call.flipCamera": "Cambiar cámara",
   "call.flipCameraError": "No se pudo cambiar la cámara",
+  "call.micSilent":
+    "Tu micrófono no está captando sonido. Es probable que la otra persona no te escuche. Elige otro micrófono.",
+  "call.chooseMicrophone": "Elige un micrófono",
+  "call.microphoneNumber": "Micrófono {number}",
+  "call.microphoneSwitchFailed":
+    "No se pudo cambiar el micrófono. Revisa los permisos del navegador e inténtalo de nuevo.",
   "call.audioBlocked":
     "No puedes escuchar a la otra persona: tu navegador bloqueó el sonido. Toca aquí para activarlo.",
   "call.swapToMain": "Mostrar mi cámara en pantalla completa",
@@ -684,6 +690,10 @@ export const esMX = {
   "call.notesExplain":
     "Los subtítulos de esta clase se guardan como texto para sugerir qué trabajar a continuación. No se graba audio.",
   "call.notesLearnMore": "Más información",
+  "call.captionsBrowserUnsupported":
+    "Los subtítulos no funcionan en este navegador. Prueba con Chrome en una computadora.",
+  "call.captionsOtherSpeechStopped":
+    "Se detuvieron los subtítulos de la otra persona. Pídele que entre desde Chrome en una computadora.",
   "call.captionsStopped":
     "Los subtítulos se detuvieron en este dispositivo — revisa el permiso del micrófono.",
   "call.captionsServiceUnavailable":
@@ -2632,6 +2642,8 @@ export const esMX = {
   "web.dashboard.invitations.empty":
     "Aún no tienes alumnos. Agrégalos en tu listado para invitarlos.",
   "web.dashboard.invitations.noEmail": "sin correo",
+  "web.dashboard.invitations.notDelivered":
+    "La invitación a {email} no llegó. Revisa que la dirección sea correcta.",
   "web.dashboard.invitations.cancelConfirm":
     "¿Cancelar esta invitación? El enlace dejará de funcionar.",
   "web.dashboard.invitations.form.title": "Invitar alumnos",
@@ -2666,7 +2678,7 @@ export const esMX = {
   "web.dashboard.students.package.add": "Agregar paquete",
   "web.dashboard.students.package.recordExisting": "Registrar un paquete existente",
   "web.dashboard.students.package.recordExistingHint":
-    "Para un alumno que estás pasando: indica cuántas clases le quedan. No se cobra nada — solo registra su saldo.",
+    "Registra un paquete ya pagado fuera de SpiralClass. Un paquete nuevo empieza con todas las clases restantes; reduce ese número solo si ya se usaron clases. No se cobra nada.",
   "web.dashboard.students.package.basedOn": "Basado en (opcional)",
   "web.dashboard.students.package.custom": "Personalizado",
   "web.dashboard.students.package.totalClasses": "Clases totales",
@@ -2751,6 +2763,8 @@ export const esMX = {
     "Mantén el precio histórico de un alumno para sus próximas compras.",
   "web.dashboard.students.goLive.confirm":
     "¿Activar a este alumno? Empezará a recibir notificaciones (confirmaciones, recordatorios). Comparte su enlace de reservas cuando estés lista.",
+  "web.dashboard.students.goLive.confirmNotificationsOff":
+    "¿Activar a este alumno? Sus notificaciones están desactivadas, así que seguirá sin recibir confirmaciones ni recordatorios hasta que se activen en la pestaña Ajustes.",
   "web.dashboard.students.goLive.button": "Activar alumno",
   "web.dashboard.students.notifications.label": "Notificaciones",
   "web.dashboard.students.notifications.on": "Activadas",
@@ -4946,6 +4960,15 @@ export const esMX = {
   "web.myClasses.timezoneNotice.keep": "Mantener hora de {saved}",
   "web.myClasses.timezoneNotice.switched":
     "Listo: tus horarios ahora se muestran en hora de {device}.",
+  // Un cambio de hora movió una clase en el reloj de una de las partes (issue 229).
+  "clockChange.student.later":
+    "Los relojes cambiaron desde tu última clase con {teacherName}: la misma hora en su reloj ahora es {amount} más tarde en el tuyo.",
+  "clockChange.student.earlier":
+    "Los relojes cambiaron desde tu última clase con {teacherName}: la misma hora en su reloj ahora es {amount} más temprano en el tuyo.",
+  "clockChange.teacher.later":
+    "Los relojes cambiaron desde la última clase de {studentName}: la misma hora en tu reloj ahora es {amount} más tarde en el suyo.",
+  "clockChange.teacher.earlier":
+    "Los relojes cambiaron desde la última clase de {studentName}: la misma hora en tu reloj ahora es {amount} más temprano en el suyo.",
   // Preferencias de avisos (NotificationPrefsForm), compartidas por las
   // pantallas de profe y alumno. De arriba abajo son las tres capas por las que
   // pasa un aviso: el dispositivo, el canal de la cuenta y la elección por
@@ -4964,6 +4987,8 @@ export const esMX = {
   "web.notificationGap.paused":
     "Las notificaciones de {name} están en pausa, así que no se le avisará de esto. Sí aparece en su portal.",
   "web.notificationGap.turnOn": "Activar notificaciones",
+  "web.notificationGap.studentOff":
+    "Las notificaciones de {name} están desactivadas, así que no recibirá confirmaciones de reserva, recordatorios de clase ni nada de lo que le envíes.",
   "web.notificationPrefs.category.expiryReminders": "Avisos de paquete",
   "web.notificationPrefs.categoryHint.expiryReminders":
     "Cuando un paquete está por vencer y cuando terminas uno.",
@@ -5278,7 +5303,7 @@ export const esMX = {
     "Cifrado en tránsito, acceso restringido y un aviso de privacidad claro sobre qué guardamos y por qué.",
   "web.about.trust.realTeacher.title": "Construido con una maestra real",
   "web.about.trust.realTeacher.body":
-    "Cada función se probó en las clases reales de una maestra en activo antes de llegar a nadie más.",
+    "Hecho a partir de las necesidades y los comentarios de una profe en activo.",
   "web.about.trust.globalPay.title": "Cobra sin importar tu país",
   "web.about.trust.globalPay.body":
     "Con tarjeta vía Stripe donde está disponible, o transferencia directa vía Wise en el resto del mundo — siempre tienes una forma de cobrar.",
@@ -5489,7 +5514,7 @@ export const esMX = {
   "web.landing.fit.abroad.body":
     "Stripe te paga en tu país y con las tarifas de tu país, Wise te llega donde Stripe no, y cada quien ve la hora de la clase en su propia zona.",
   "web.landing.quote.attribution": "Profe de español en SpiralClass, la primera",
-  "web.landing.quote.context": "Sus clases dieron forma a cada función de esta página.",
+  "web.landing.quote.context": "Sus clases y comentarios ayudan a dar forma a SpiralClass.",
   "web.landing.pricing.title": "Gratis para empezar. Gratis para cobrar, en todos los planes.",
   "web.landing.pricing.body":
     "Un plan gratis por el tiempo que quieras, y Pro para la IA y los extras, con {days} días para probarlo y sin tarjeta. Las dos formas de cobro son gratis elijas lo que elijas.",
@@ -5530,7 +5555,7 @@ export const esMX = {
     "SpiralClass aloja la clase en vivo y le suma una capa de IA que ningún marketplace te da.",
   "web.landing.ai.captions.title": "Un salón de video con subtítulos en su idioma",
   "web.landing.ai.captions.body":
-    "La clase ocurre dentro de SpiralClass, sin enlace de Zoom ni segunda app. Activa los subtítulos y tus palabras aparecen en la pantalla de tu alumno mientras hablas, y traducidas cuando termina la frase. Las suyas te llegan igual. Funciona en el navegador y no se guarda nada.",
+    "La clase ocurre dentro de SpiralClass, sin enlace de Zoom ni segunda app. Activa los subtítulos y tus palabras aparecen en la pantalla de tu alumno mientras hablas, y traducidas cuando termina la frase. Las suyas te llegan igual. Los subtítulos funcionan en el navegador; SpiralClass no graba el audio. Con el consentimiento del alumno, el texto se guarda para las notas de aprendizaje.",
   "web.landing.ai.srs.title": "Vocabulario que vuelve antes de olvidarse",
   "web.landing.ai.srs.body":
     "Las palabras que confirmas entran en la cola de repaso del alumno, espaciadas para que cada una regrese justo antes de que se le escape. Él ve en qué está mejorando, en su propia app.",
@@ -5542,7 +5567,7 @@ export const esMX = {
     "Google Calendar en ambos sentidos y un feed iCal suscribible: tus clases viven junto a todo lo demás de tu día.",
   "web.landing.social.title": "Hecho con una profe en activo",
   "web.landing.social.body":
-    "Cada función de esta página se usó en clases reales antes de llegar a nadie más. El código es público: puedes revisar cómo se tratan los datos de tus alumnos y tu dinero.",
+    "Hecho a partir de las necesidades y los comentarios de una profe en activo. El código es público: puedes revisar cómo se tratan los datos de tus alumnos y tu dinero.",
   "web.pricing.perk.remindersPushEmail": "Recordatorios por push y correo",
   "web.pricing.perk.unlimitedStudents": "Alumnos ilimitados",
   "web.pricing.perk.unlimitedTemplates": "Plantillas de paquete ilimitadas",
@@ -7034,9 +7059,9 @@ export const esMX = {
     "Paquete actualizado — {remaining} de {total} clases restantes.",
   "web.action.invalidRequest": "Solicitud inválida.",
   "web.action.teacherPackages.hasBookings":
-    "Este paquete tiene clases reservadas o tomadas, así que no se puede eliminar. Mejor pausa el paquete, o cancela sus clases primero.",
+    "Este paquete tiene historial de clases, incluidas las canceladas, así que no se puede eliminar. Puedes corregir su saldo con Editar o impedir nuevas reservas con Pausar.",
   "web.action.teacherPackages.hasPayment":
-    "Este paquete tiene un pago registrado, así que no se puede eliminar. Mejor reembolsa el pago.",
+    "Este paquete tiene un pago registrado, así que no se puede eliminar. El historial de pagos se conserva incluso después de un reembolso.",
   "web.action.audit.accidentalPackageDeleted": "Paquete creado por error eliminado por la profe.",
   "web.action.teacherStudents.teacherEmail":
     "Este correo pertenece a una cuenta de maestra y no se puede agregar como alumno.",
@@ -7045,6 +7070,8 @@ export const esMX = {
   "web.action.audit.studentWentLive": "Alumno activada — ahora recibe notificaciones.",
   "web.action.teacherStudents.nowLive":
     "Alumno activada. A partir de ahora recibirá notificaciones.",
+  "web.action.teacherStudents.nowLiveNotificationsOff":
+    "Alumno activado, pero sus notificaciones siguen desactivadas, así que no recibirá confirmaciones de clase ni recordatorios. Puedes activarlas en la pestaña Ajustes.",
   "web.action.audit.wiseNotReceived": "Wise: pago no recibido",
   "web.action.invitations.sent": "Se enviaron {count} invitaciones.",
   "web.action.invitations.sent_one": "Se envió {count} invitación.",
@@ -7070,6 +7097,8 @@ export const esMX = {
   "web.action.admin.mfa.incorrectCode": "Código incorrecto.",
   "web.action.admin.notificationNotFound": "Notificación no encontrada",
   "web.action.admin.notificationAlreadyInState": 'Ya está en estado "{status}"',
+  "web.action.admin.notificationNotRetryable":
+    "Este correo no lo envió la cola y no se puede reintentar aquí. La profesora debe corregir la dirección y volver a enviarlo.",
   "web.action.admin.requeued": "Re-encolado",
   "web.action.admin.noRecipients": "No hay destinatarios",
   "web.action.admin.alreadyCanceled": "Ya está cancelado",

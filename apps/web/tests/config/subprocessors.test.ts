@@ -84,6 +84,7 @@ const NOT_A_PROCESSOR: Record<string, string> = {
 
   // Credential halves of vendors already registered under another var.
   ANTHROPIC_MODEL: "A model name for Anthropic, which IS registered.",
+  ANTHROPIC_SMALL_MODEL: "A model name for Anthropic, which IS registered.",
   GEMINI_IMAGE_MODEL: "A model name for Google, which IS registered.",
   GEMINI_VERTEX_PROJECT_ID: "A GCP project id for Google, which IS registered.",
   GEMINI_VERTEX_LOCATION: "A Vertex AI region for Google, which IS registered.",

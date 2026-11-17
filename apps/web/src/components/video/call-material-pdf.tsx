@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { usePostHog } from "posthog-js/react";
 import { useT } from "@/components/locale-provider";
 
 // The in-call PDF renderer: a teacher's uploaded PDF drawn page-by-page into
@@ -47,6 +48,24 @@ import { useT } from "@/components/locale-provider";
 // pdfjs-dist is dynamically imported, so the ~1 MB of it stays out of every
 // bundle that never opens a PDF — including the call page itself, which loads
 // it only when a teacher or student actually picks one.
+//
+// THE LEGACY BUILD, MAIN MODULE AND WORKER BOTH (#126). The modern build
+// (`pdfjs-dist`, `build/*`) calls Map.prototype.getOrInsertComputed,
+// Math.sumPrecise, Uint8Array.fromBase64/toHex and others without polyfilling
+// them — APIs that reached iOS only in 18.2–26.2 and Chrome only in 140–147.
+// On an iPhone a version behind, or a Chrome 101 Android tablet, every PDF
+// threw inside pdf.js and showed "open it outside the call", while the student
+// on a current desktop Chrome saw the same file drawn. The legacy build
+// polyfills them; what it draws, and how (canvas only), is unchanged. Pinned,
+// and shown to render on an engine without those APIs, by
+// tests/components/call-material-pdf-build.test.ts.
+
+// Why the viewer fell back, as one PostHog property: the error's NAME only.
+// pdf.js puts the request URL in a fetch failure's message, and that URL is a
+// signed link to the teacher's file.
+function failureName(error: unknown): string {
+  return error instanceof Error && error.name ? error.name : "unknown";
+}
 
 // Re-render only when the column changes width by more than this. A canvas is
 // rasterised at a fixed pixel size, so every width change is a full re-render
@@ -60,6 +79,7 @@ function quantiseWidth(width: number): number {
 
 export function CallMaterialPdf({ url }: { url: string }) {
   const t = useT();
+  const posthog = usePostHog();
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [width, setWidth] = useState(0);
   const [state, setState] = useState<"loading" | "ready" | "failed">("loading");
@@ -90,7 +110,7 @@ export function CallMaterialPdf({ url }: { url: string }) {
 
     void (async () => {
       try {
-        const pdfjs = await import("pdfjs-dist");
+        const pdfjs = await import("pdfjs-dist/legacy/build/pdf.mjs");
         // The worker ships as a separate module asset; `new URL(...,
         // import.meta.url)` is what both webpack (next build) and Turbopack
         // (next dev) resolve into an emitted, same-origin URL — which is what
@@ -98,7 +118,7 @@ export function CallMaterialPdf({ url }: { url: string }) {
         // silently fall back to a main-thread "fake worker" that blocks the
         // call's own rendering while a page rasterises.
         pdfjs.GlobalWorkerOptions.workerSrc = new URL(
-          "pdfjs-dist/build/pdf.worker.min.mjs",
+          "pdfjs-dist/legacy/build/pdf.worker.min.mjs",
           import.meta.url,
         ).toString();
 
@@ -171,14 +191,22 @@ export function CallMaterialPdf({ url }: { url: string }) {
         }
         // A valid PDF with no pages at all: nothing was appended, so the
         // viewer would otherwise sit on "opening…" forever.
-        if (doc.numPages === 0) setState("failed");
-      } catch {
+        if (doc.numPages === 0) {
+          setState("failed");
+          posthog?.capture("call_material_pdf_render_failed", { errorName: "no_pages" });
+        }
+      } catch (error) {
         // Every failure lands here as one state: a network or CORS refusal on
         // the signed URL, an expired URL, a file that is not really a PDF. The
         // fallback below is the pre-existing behaviour (open it outside the
         // call), so nothing a teacher could do before stops working because
-        // this renderer could not.
-        if (!cancelled) setState("failed");
+        // this renderer could not. It is reported, because a fallback that
+        // said nothing is how #126 went unseen: the next browser gap shows up
+        // as one error name climbing.
+        if (!cancelled) {
+          setState("failed");
+          posthog?.capture("call_material_pdf_render_failed", { errorName: failureName(error) });
+        }
       }
     })();
 
@@ -187,7 +215,7 @@ export function CallMaterialPdf({ url }: { url: string }) {
       cleanup?.();
       el.replaceChildren();
     };
-  }, [url, width, t]);
+  }, [url, width, t, posthog]);
 
   return (
     <div>

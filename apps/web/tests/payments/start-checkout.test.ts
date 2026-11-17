@@ -36,7 +36,13 @@ const state = {
   // revoked key, a dead connected account or an outage.
   stripeThrows: null as string | null,
   sessionUrl: "https://checkout.stripe.com/c/pay/cs_test_1" as string | null,
-  created: {} as { pkg?: unknown; payment?: unknown; sessionUpdate?: unknown },
+  created: {} as {
+    pkg?: unknown;
+    payment?: unknown;
+    sessionUpdate?: unknown;
+    redemption?: unknown;
+    referral?: unknown;
+  },
 };
 
 const createCheckoutSession = vi.fn(async (_args: Record<string, unknown>) => {
@@ -66,6 +72,18 @@ vi.mock("@/lib/prisma", () => ({
           create: vi.fn(async ({ data }: { data: unknown }) => {
             state.created.payment = data;
             return { id: state.paymentId, externalReference: state.externalReference };
+          }),
+        },
+        discountRedemption: {
+          create: vi.fn(async ({ data }: { data: unknown }) => {
+            state.created.redemption = data;
+            return {};
+          }),
+        },
+        referral: {
+          create: vi.fn(async ({ data }: { data: unknown }) => {
+            state.created.referral = data;
+            return {};
           }),
         },
       };
@@ -115,6 +133,25 @@ vi.mock("@/lib/notifications/events", () => ({ emitNotificationQueued }));
 
 const supersedePendingCheckouts = vi.fn(async () => {});
 vi.mock("@/lib/payments/supersede-pending", () => ({ supersedePendingCheckouts }));
+
+// The code checks themselves are pinned against a real database
+// (tests/discounts/redemption-limits.integration.test.ts); here they are seams,
+// so the suite can drive the case the unlocked pre-check cannot see — a code
+// that had room when it was read and had none once its row was locked.
+const resolveAndValidateDiscount = vi.fn();
+const revalidateDiscountUnderLock = vi.fn();
+vi.mock("@/lib/discounts", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@/lib/discounts")>()),
+  resolveAndValidateDiscount,
+  revalidateDiscountUnderLock,
+}));
+const resolveReferralForCheckout = vi.fn();
+const revalidateReferralUnderLock = vi.fn();
+vi.mock("@/lib/referrals", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@/lib/referrals")>()),
+  resolveReferralForCheckout,
+  revalidateReferralUnderLock,
+}));
 
 const trackServerEvent = vi.fn();
 vi.mock("@/lib/analytics/posthog", () => ({ trackServerEvent, flushAnalytics: vi.fn() }));
@@ -330,6 +367,12 @@ describe("startCheckout — Stripe rail", () => {
     };
     expect(call.lineItem.currency).toBe("gbp");
     expect(call.lineItem.amountMinorUnits).toBe(800);
+    expect(trackServerEvent).toHaveBeenCalledWith(
+      expect.objectContaining({
+        name: "checkout_started",
+        properties: expect.objectContaining({ priceMinorUnits: 800, currency: "GBP" }),
+      }),
+    );
   });
 
   it("refuses a zero total (fully-discounted) on the card rail without crashing", async () => {
@@ -676,6 +719,92 @@ describe("startCheckout — Stripe is told the checkout's language", () => {
         name: "checkout_started",
         properties: expect.objectContaining({ locale: "fr" }),
       }),
+    );
+  });
+});
+
+// --- Issue #74: the code is re-checked under a lock -------------------------
+//
+// The pre-check reads the limits with no lock, so two checkouts at once both
+// saw room and both took the last use. The decision is now made again inside
+// the transaction that writes the redemption, and its refusal reaches the
+// buyer as the same localized message, with nothing written.
+
+describe("startCheckout — discount re-checked inside the transaction (#74)", () => {
+  const PROMO_OK = {
+    ok: true,
+    codeId: "code1",
+    discountMinorUnits: 30_000,
+    finalMinorUnits: 120_000,
+  };
+
+  it("refuses the code when the locked re-check finds the cap reached", async () => {
+    resolveAndValidateDiscount.mockResolvedValueOnce(PROMO_OK);
+    revalidateDiscountUnderLock.mockResolvedValueOnce({ ok: false, reason: "max_redemptions" });
+
+    const res = await startCheckout(args({ discountCode: "verano", locale: "en" }));
+
+    expect(res).toEqual({ error: "That code has reached its limit." });
+    expect(revalidateDiscountUnderLock).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({ codeId: "code1", studentId: "s1", baseMinorUnits: 150_000 }),
+    );
+    expect(state.created.pkg).toBeUndefined();
+    expect(state.created.redemption).toBeUndefined();
+    expect(createCheckoutSession).not.toHaveBeenCalled();
+  });
+
+  it("records the redemption when the locked re-check agrees", async () => {
+    resolveAndValidateDiscount.mockResolvedValueOnce(PROMO_OK);
+    revalidateDiscountUnderLock.mockResolvedValueOnce(PROMO_OK);
+
+    const res = await startCheckout(args({ discountCode: "verano" }));
+
+    expect(res).toHaveProperty("mode", "redirect");
+    expect(state.created.redemption).toEqual(
+      expect.objectContaining({ discountCodeId: "code1", amountMinorUnits: 30_000 }),
+    );
+  });
+
+  it("refuses a referral when the locked re-check finds a first purchase already made", async () => {
+    resolveAndValidateDiscount.mockResolvedValueOnce({ ok: false, reason: "not_found" });
+    resolveReferralForCheckout.mockResolvedValueOnce({
+      ok: true,
+      referralCodeId: "ref1",
+      ownerStudentId: "s2",
+      discountMinorUnits: 10_000,
+      finalMinorUnits: 140_000,
+    });
+    revalidateReferralUnderLock.mockResolvedValueOnce({ ok: false, reason: "already_redeemed" });
+
+    const res = await startCheckout(args({ discountCode: "amiga", locale: "en" }));
+
+    expect(res).toEqual({ error: "Referral codes only apply to your first purchase." });
+    expect(state.created.referral).toBeUndefined();
+  });
+
+  it("calls a referral code that vanished under the lock an invalid code", async () => {
+    resolveAndValidateDiscount.mockResolvedValueOnce({ ok: false, reason: "not_found" });
+    resolveReferralForCheckout.mockResolvedValueOnce({
+      ok: true,
+      referralCodeId: "ref1",
+      ownerStudentId: "s2",
+      discountMinorUnits: 10_000,
+      finalMinorUnits: 140_000,
+    });
+    revalidateReferralUnderLock.mockResolvedValueOnce({ ok: false, reason: "not_a_referral" });
+
+    const res = await startCheckout(args({ discountCode: "amiga", locale: "en" }));
+
+    expect(res).toEqual({ error: "That code isn't valid." });
+  });
+
+  it("still throws a database failure inside the transaction", async () => {
+    resolveAndValidateDiscount.mockResolvedValueOnce(PROMO_OK);
+    revalidateDiscountUnderLock.mockRejectedValueOnce(new Error("connection reset"));
+
+    await expect(startCheckout(args({ discountCode: "verano" }))).rejects.toThrow(
+      "connection reset",
     );
   });
 });

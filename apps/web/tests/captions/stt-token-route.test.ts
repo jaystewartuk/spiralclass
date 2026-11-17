@@ -134,6 +134,13 @@ describe("POST /api/captions/stt-token — happy path", () => {
 
   // The server, not the client, decides the language: a client that could
   // name one could stream anything it liked on the platform's account.
+  it("describes raw audio in the URL for a browser that says it is sending it", async () => {
+    const { status, body } = await call({ ...BODY, pcm: true });
+    expect(status).toBe(200);
+    expect(new URL(body.url).searchParams.get("encoding")).toBe("linear16");
+    expect(new URL((await call()).body.url).searchParams.has("encoding")).toBe(false);
+  });
+
   it("ignores any language or model the client sends", async () => {
     const { body } = await call({ ...BODY, language: "ja", model: "whisper", speaker: "student" });
     const url = new URL(body.url);
@@ -147,6 +154,7 @@ describe("POST /api/captions/stt-token — happy path", () => {
       bookingId: "b1",
       speaker: "teacher",
       language: "es-419",
+      pcm: false,
       ok: true,
     });
     expect(JSON.stringify(info.mock.calls)).not.toContain("jwt");

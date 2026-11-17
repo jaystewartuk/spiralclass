@@ -1,7 +1,7 @@
 import type { PrismaClient } from "@prisma/client";
 
 import { logger } from "@/lib/logger";
-import { DEFAULT_LESSON_LANGUAGE } from "@/lib/transcription/config";
+import { lessonLanguage } from "@/lib/transcription/language";
 import { profileSchema } from "./profile";
 import {
   generateBrief as defaultGenerate,
@@ -38,7 +38,7 @@ export async function getOrGenerateBrief(deps: BriefDeps, bookingId: string): Pr
       teacherId: true,
       studentId: true,
       student: { select: { name: true } },
-      teacher: { select: { locale: true } },
+      teacher: { select: { locale: true, targetLanguage: true, teachingLanguage: true } },
     },
   });
   if (!booking) return null;
@@ -66,7 +66,7 @@ export async function getOrGenerateBrief(deps: BriefDeps, bookingId: string): Pr
   try {
     generated = await deps.generate({
       studentName: booking.student.name,
-      language: DEFAULT_LESSON_LANGUAGE,
+      language: lessonLanguage(booking.teacher),
       profile: parsedProfile.data,
       outputLanguage: localeEnglishName(booking.teacher.locale),
     });

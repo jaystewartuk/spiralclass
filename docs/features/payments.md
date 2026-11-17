@@ -135,6 +135,10 @@ for the same template with the same teacher
 - An open Stripe Checkout Session is **expired** on Stripe; its package is
   marked `expired` only if that call succeeds. If Stripe says the session
   already resolved, the package is left alone.
+- A checkout whose card was **declined** is superseded the same way: the
+  session stays open after a decline, so expiring it is what makes the old
+  checkout unpayable. A failed card payment with no recorded session is left
+  alone. A checkout with any paid or refunded payment is never superseded.
 - A pending Wise checkout is marked `expired`.
 - A Wise checkout the student has marked **sent** is never superseded. If one
   was superseded and its transfer is later confirmed, it is put back to
@@ -144,6 +148,10 @@ for the same template with the same teacher
 
 - `Payment.status`: `pending → paid → refunded`, or `pending → failed`.
   `refunded` is terminal.
+- An unpaid checkout that expires naturally or is superseded still records
+  `Payment.status = failed`, through a distinct expiry transition. It sends
+  **no notice** and emits no `checkout_failed`: expiry is not a declined
+  payment attempt. A real failed attempt retains its failure notice and event.
 - Card is charge-or-fail. A settlement event reporting less than the expected
   amount, or a different currency, flips the payment to `failed`, not `paid`.
 - A non-positive expected amount at the flip-to-paid step throws rather than
@@ -210,7 +218,20 @@ payment):
 
 - card, after 7 days; Wise, after 14 days;
 - never a Wise payment the student has marked sent;
+- never a card checkout whose Stripe session is not confirmed expired and
+  unpaid — Stripe is asked first, on the teacher's account;
 - re-checked at delete time, so a payment that settled after the scan is kept.
+
+## A card payment whose webhook never arrived
+
+`lib/payments/settle-unconfirmed.ts` asks Stripe, once a day, about every card
+payment still pending three days after checkout (past Stripe's webhook retry
+window). A paid session is settled by replaying `checkout.session.completed`
+through the webhook handler, so the package activates and the student and
+teacher are notified exactly as if the webhook had arrived; the guarded
+transition means a late real delivery cannot activate it twice. Each payment
+settled this way is logged as an error, because it means webhook delivery is
+broken.
 
 A teacher can also mark a pending Wise payment as failed
 (`failWisePaymentAction`) when the student will not pay.

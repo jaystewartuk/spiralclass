@@ -30,6 +30,12 @@ export type RenderedPush = {
   deepLinkName?: string;
 };
 
+// A reminder whose class a clock change moved on one party's clock (issue 229)
+// says so on its own line, so the time it qualifies stays the first thing read.
+function withClockChangeNote(body: string, note: string | undefined): string {
+  return note ? `${body}\n${note}` : body;
+}
+
 export function renderPush<T extends TemplateName>(
   templateName: T,
   language: LanguageCode,
@@ -66,10 +72,13 @@ export function renderPush<T extends TemplateName>(
         title: t("push.reminder24h.title", { lead }),
         // No trailing period: classDateTime ends in the "p.m." abbreviation, so
         // an appended sentence period renders as a double period ("p.m..").
-        body: t("push.reminder24h.body", {
-          teacherName: v.teacherName,
-          classDateTime: v.classDateTime,
-        }),
+        body: withClockChangeNote(
+          t("push.reminder24h.body", {
+            teacherName: v.teacherName,
+            classDateTime: v.classDateTime,
+          }),
+          v.clockChangeNote,
+        ),
         deepLink: v.classPathSuffix ?? null,
       };
     }
@@ -87,10 +96,13 @@ export function renderPush<T extends TemplateName>(
         title: t("push.reminder24h.title", { lead }),
         // Teacher-voiced: names the student, not the teacher. No trailing period
         // — classDateTime ends in "p.m." (double-period otherwise).
-        body: t("push.reminder24hTeacher.body", {
-          studentName: v.studentName,
-          classDateTime: v.classDateTime,
-        }),
+        body: withClockChangeNote(
+          t("push.reminder24hTeacher.body", {
+            studentName: v.studentName,
+            classDateTime: v.classDateTime,
+          }),
+          v.clockChangeNote,
+        ),
         deepLink: v.classPathSuffix ?? null,
       };
     }

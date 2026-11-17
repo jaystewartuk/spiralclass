@@ -44,7 +44,7 @@ export type WebhookOutcome =
   | { code: "noop"; reason: string }
   | {
       code: "applied";
-      action: "flip-paid" | "flip-failed" | "flip-refunded";
+      action: "flip-paid" | "flip-failed" | "flip-expired" | "flip-refunded";
       paymentId: string;
       packageId: string;
     }
@@ -544,7 +544,8 @@ async function handleCheckoutSessionCompleted(
 // Unlike every other failure path there is usually no PaymentIntent to work
 // from, so this cannot delegate to the payment_intent transition: it resolves
 // the row by `client_reference_id` (always set at creation) and applies a
-// `failed` outcome with a null intent, which the state machine accepts.
+// distinct `expired` outcome. It still records the payment as failed, but
+// sends no failure notice or decline event: nothing was charged or declined.
 //
 // A session that expired AFTER being paid is not a failure — Stripe can expire
 // a completed session — so payment_status is checked before touching anything.
@@ -584,7 +585,7 @@ async function handleCheckoutSessionExpired(
   const now = (deps.now ?? (() => new Date()))();
   return await applyTransition(
     payment,
-    { kind: "failed", paymentIntentId: fresh.payment_intent ?? null, rail: "unknown" },
+    { kind: "expired", paymentIntentId: fresh.payment_intent ?? null, rail: "unknown" },
     fresh.id,
     deps,
     now,
@@ -778,6 +779,7 @@ async function applyTransition(
   // Notification ids to fan out as Inngest events after the tx commits.
   // flip-paid     → 2 rows: payment_received (student) + payment_received_teacher
   // flip-failed   → 1 row: payment_failed_student
+  // flip-expired  → no notifications (natural expiry or supersession)
   // flip-refunded → 2 rows: refund_issued_student + refund_issued_teacher
   const queuedNotificationIds: string[] = [];
   let emitPaymentPaid = false;
@@ -908,9 +910,8 @@ async function applyTransition(
     await maybeEmitFirstPayment(deps.prisma, payment.package.teacherId, payment.id);
   }
 
-  // Bottom-of-funnel drop-off: a card attempt that Stripe declined. Paired
-  // with checkout_started (method='stripe'), this is the explicit "card
-  // friction" signal feeding the OXXO/SPEI decision.
+  // Failed payment attempts (including settlement integrity failures), with
+  // their resolved rail. Expired/superseded sessions never emit this event.
   if (emitCheckoutFailed) {
     trackServerEvent({
       name: "checkout_failed",

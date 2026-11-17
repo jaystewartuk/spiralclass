@@ -8,6 +8,7 @@ import {
   CAPTIONS_CONSENT_ATTRIBUTE,
   CAPTIONS_ON_ATTRIBUTE,
   CAPTIONS_RECOGNIZER_ATTRIBUTE,
+  CAPTIONS_SPEECH_STOPPED_ATTRIBUTE,
   encodeCaption,
   type CallRole,
   type CaptionLine,
@@ -20,13 +21,14 @@ import {
   type RecognitionUnusableReason,
 } from "@/lib/captions/browser-captions";
 import {
+  audioContextCtor,
   browserCanRecognizeDuringCall,
   mediaRecorderCtor,
   speechRecognitionCtor,
   translatorApi,
   webSocketCtor,
 } from "@/lib/captions/recognition-environment";
-import { installOnDeviceModels } from "@/lib/captions/recognizer";
+import { installOnDeviceModels, type RecognizerStopReason } from "@/lib/captions/recognizer";
 
 // React + LiveKit wiring for live captions in the browser (D-185). Everything
 // that decides anything lives in browser-captions.ts; this hook only reads
@@ -59,6 +61,7 @@ export function useBrowserCaptions({
   teacherCaptionsOn,
   showLocal,
   onRecognitionUnusable,
+  onCloudStopped,
 }: {
   room: Room | null;
   bookingId: string | undefined;
@@ -70,6 +73,8 @@ export function useBrowserCaptions({
   showLocal: (line: CaptionLine) => void;
   // This browser stopped claiming it can recognise, and why.
   onRecognitionUnusable?: (reason: RecognitionUnusableReason) => void;
+  // This browser's cloud fallback gave up on its own person's speech.
+  onCloudStopped?: (reason: RecognizerStopReason) => void;
 }): {
   // The room's switch as this browser sees it.
   captionsOn: boolean;
@@ -88,6 +93,8 @@ export function useBrowserCaptions({
   session: CaptionSession | null;
   // Whether the other participant is in the room.
   otherPresent: boolean;
+  // The other person's browser could not caption them and has said so.
+  otherSpeechStopped: boolean;
   // The student just gave her captions consent from the call: re-read the
   // config here, and nudge the other browser to re-read it too, so both start
   // captioning her within seconds rather than at the next minute's poll.
@@ -110,13 +117,15 @@ export function useBrowserCaptions({
   const [refetchKey, setRefetchKey] = useState(0);
   const showLocalRef = useRef(showLocal);
   const onUnusableRef = useRef(onRecognitionUnusable);
+  const onCloudStoppedRef = useRef(onCloudStopped);
   // Latest values for callbacks that must stay stable: the toggle click reads
   // the session, the controller hands lines to whatever showLocal is now.
   useEffect(() => {
     sessionRef.current = session;
     showLocalRef.current = showLocal;
     onUnusableRef.current = onRecognitionUnusable;
-  }, [session, showLocal, onRecognitionUnusable]);
+    onCloudStoppedRef.current = onCloudStopped;
+  }, [session, showLocal, onRecognitionUnusable, onCloudStopped]);
 
   // Every room event that can change who is here, what they publish, or
   // what their attributes say.
@@ -238,6 +247,7 @@ export function useBrowserCaptions({
       Translator: translatorApi(window),
       WebSocket: webSocketCtor(window),
       MediaRecorder: mediaRecorderCtor(window),
+      AudioContext: audioContextCtor(window),
       fetch: (input, init) => fetch(input, init),
       publish: async (line) => {
         await room.localParticipant.publishData(encodeCaption(line), {
@@ -268,6 +278,12 @@ export function useBrowserCaptions({
           .setAttributes({ [CAPTIONS_RECOGNIZER_ATTRIBUTE]: "0" })
           .catch(() => {})
           .finally(() => setUnusable(true));
+      },
+      onCloudStopped: (reason) => {
+        if (reason) onCloudStoppedRef.current?.(reason);
+        void room.localParticipant
+          .setAttributes({ [CAPTIONS_SPEECH_STOPPED_ATTRIBUTE]: reason ? "1" : "0" })
+          .catch(() => {});
       },
     });
     controllerRef.current = controller;
@@ -331,6 +347,11 @@ export function useBrowserCaptions({
 
   const transcriptKept = Boolean(session?.transcriptCapture);
   const otherPresent = view?.remote != null;
+  const otherSpeechStopped = useMemo(() => {
+    const remote = room ? [...room.remoteParticipants.values()][0] : undefined;
+    return remote?.attributes?.[CAPTIONS_SPEECH_STOPPED_ATTRIBUTE] === "1";
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [room, roomVersion]);
 
   return {
     captionsOn,
@@ -340,6 +361,7 @@ export function useBrowserCaptions({
     transcriptKept,
     session,
     otherPresent,
+    otherSpeechStopped,
     consentGiven,
   };
 }

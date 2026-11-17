@@ -22,6 +22,9 @@ import {
 
 const TEACHER = "teacher-1";
 const STUDENT = "student-1";
+// The same inbox's other Student row (another teacher's roster row), which the
+// portal's linked login may be — and so may join the call as.
+const SIBLING = "student-1-sibling";
 const BOOKING = "booking-1";
 const ROOM = "class-booking-1";
 
@@ -102,10 +105,26 @@ beforeEach(() => vi.clearAllMocks());
 
 describe("speakerFor", () => {
   it("maps the booking's teacher and student ids; null otherwise", () => {
-    const booking = { teacherId: TEACHER, studentId: STUDENT };
+    const booking = { teacherId: TEACHER, studentIdentities: [STUDENT] };
     expect(speakerFor(TEACHER, booking)).toBe("teacher");
     expect(speakerFor(STUDENT, booking)).toBe("student");
     expect(speakerFor("someone-else", booking)).toBeNull();
+  });
+
+  // #117: a student joins the call as her LINKED row's id, which can be a
+  // sibling of the booking's studentId (studentIdentityIds). She is still the
+  // student, and nothing else is.
+  it("maps a sibling identity of the booking's student to the student", () => {
+    const booking = { teacherId: TEACHER, studentIdentities: [STUDENT, SIBLING] };
+    expect(speakerFor(SIBLING, booking)).toBe("student");
+    expect(speakerFor("someone-else", booking)).toBeNull();
+  });
+
+  // D-40: the teacher is never the student, even if her id somehow sat in the set.
+  it("never maps the teacher to the student", () => {
+    expect(speakerFor(TEACHER, { teacherId: TEACHER, studentIdentities: [TEACHER] })).toBe(
+      "teacher",
+    );
   });
 });
 
@@ -116,7 +135,7 @@ describe("startLessonAudioCaptures", () => {
 
     const started = await startLessonAudioCaptures(
       db as any,
-      { bookingId: BOOKING, teacherId: TEACHER, studentId: STUDENT, room: ROOM },
+      { bookingId: BOOKING, teacherId: TEACHER, studentIdentities: [STUDENT], room: ROOM },
       deps,
     );
 
@@ -132,6 +151,27 @@ describe("startLessonAudioCaptures", () => {
     }
   });
 
+  // #117: the booking belongs to one row, the student joined as its sibling.
+  it("captures a student who joined under a sibling identity of the booking's student", async () => {
+    const db = makeDb();
+    const deps = makeDeps({
+      listMicTracks: vi.fn(async () => [
+        { identity: TEACHER, trackId: "TR_teacher" },
+        { identity: SIBLING, trackId: "TR_student" },
+      ]),
+    });
+
+    const started = await startLessonAudioCaptures(
+      db as any,
+      { bookingId: BOOKING, teacherId: TEACHER, studentIdentities: [STUDENT, SIBLING], room: ROOM },
+      deps,
+    );
+
+    expect(started).toBe(2);
+    expect(db.rows.map((r) => r.speaker).sort()).toEqual(["student", "teacher"]);
+    expect(deps.startEgress).toHaveBeenCalledWith(ROOM, "TR_student", expect.any(String));
+  });
+
   it("skips participants that are neither the teacher nor the student", async () => {
     const db = makeDb();
     const deps = makeDeps({
@@ -143,7 +183,7 @@ describe("startLessonAudioCaptures", () => {
 
     const started = await startLessonAudioCaptures(
       db as any,
-      { bookingId: BOOKING, teacherId: TEACHER, studentId: STUDENT, room: ROOM },
+      { bookingId: BOOKING, teacherId: TEACHER, studentIdentities: [STUDENT], room: ROOM },
       deps,
     );
 
@@ -162,7 +202,7 @@ describe("startLessonAudioCaptures", () => {
 
     const started = await startLessonAudioCaptures(
       db as any,
-      { bookingId: BOOKING, teacherId: TEACHER, studentId: STUDENT, room: ROOM },
+      { bookingId: BOOKING, teacherId: TEACHER, studentIdentities: [STUDENT], room: ROOM },
       deps,
     );
 
@@ -187,7 +227,7 @@ describe("startLessonAudioCaptures", () => {
 
     const started = await startLessonAudioCaptures(
       db as any,
-      { bookingId: BOOKING, teacherId: TEACHER, studentId: STUDENT, room: ROOM },
+      { bookingId: BOOKING, teacherId: TEACHER, studentIdentities: [STUDENT], room: ROOM },
       deps,
     );
 

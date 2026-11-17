@@ -452,10 +452,24 @@ describe("anthropicModel", () => {
     expect(anthropicModel()).toBe("claude-sonnet-5");
   });
 
-  it("respects an explicit override", async () => {
+  it("respects an override naming a model the compose calls can run on", async () => {
+    setEnv(withBaseRequired({ ANTHROPIC_MODEL: "claude-opus-4-8" }));
+    const { anthropicModel } = await import("@/lib/env");
+    expect(anthropicModel()).toBe("claude-opus-4-8");
+  });
+
+  // Issue #30 / D-87: an override was unchecked, so ANTHROPIC_MODEL set to a
+  // pre-4.6 model 400'd every compose call. It now falls back to the default.
+  it("refuses an override that would 400 the effort-passing compose calls", async () => {
+    setEnv(withBaseRequired({ ANTHROPIC_MODEL: "claude-haiku-4-5" }));
+    const { anthropicModel } = await import("@/lib/env");
+    expect(anthropicModel()).toBe("claude-sonnet-5");
+  });
+
+  it("refuses an override it has no capability record for", async () => {
     setEnv(withBaseRequired({ ANTHROPIC_MODEL: "claude-custom-smart" }));
     const { anthropicModel } = await import("@/lib/env");
-    expect(anthropicModel()).toBe("claude-custom-smart");
+    expect(anthropicModel()).toBe("claude-sonnet-5");
   });
 
   // INVARIANT (D-87): every anthropicModel() call site in lib/ai/anthropic.ts
@@ -484,6 +498,41 @@ describe("anthropicModel", () => {
     setEnv(withBaseRequired({ ANTHROPIC_MODEL: undefined }));
     const { anthropicModel } = await import("@/lib/env");
     expect(EFFORT_CAPABLE_MODELS).toContain(anthropicModel());
+  });
+});
+
+describe("anthropicSmallModel", () => {
+  // D-87: the four short, structured surfaces (lesson summary, insights, brief,
+  // intro coach) run on Haiku for cost. Issue #30: they used to hardcode it, so
+  // moving them was a release; ANTHROPIC_SMALL_MODEL now moves all four.
+  it("defaults to claude-haiku-4-5 when unset", async () => {
+    setEnv(withBaseRequired({ ANTHROPIC_SMALL_MODEL: undefined }));
+    const { anthropicSmallModel } = await import("@/lib/env");
+    expect(anthropicSmallModel()).toBe("claude-haiku-4-5");
+  });
+
+  it("moves all four short surfaces with one variable", async () => {
+    setEnv(withBaseRequired({ ANTHROPIC_SMALL_MODEL: "claude-sonnet-5" }));
+    const { anthropicSmallModel } = await import("@/lib/env");
+    expect(anthropicSmallModel()).toBe("claude-sonnet-5");
+  });
+
+  it("is not moved by ANTHROPIC_MODEL", async () => {
+    setEnv(withBaseRequired({ ANTHROPIC_MODEL: "claude-opus-4-8" }));
+    const { anthropicSmallModel } = await import("@/lib/env");
+    expect(anthropicSmallModel()).toBe("claude-haiku-4-5");
+  });
+
+  it("refuses a model it has no capability record for", async () => {
+    setEnv(withBaseRequired({ ANTHROPIC_SMALL_MODEL: "claude-typo-4-5" }));
+    const { anthropicSmallModel } = await import("@/lib/env");
+    expect(anthropicSmallModel()).toBe("claude-haiku-4-5");
+  });
+
+  it("treats a blank value as unset", async () => {
+    setEnv(withBaseRequired({ ANTHROPIC_SMALL_MODEL: "" }));
+    const { anthropicSmallModel } = await import("@/lib/env");
+    expect(anthropicSmallModel()).toBe("claude-haiku-4-5");
   });
 });
 

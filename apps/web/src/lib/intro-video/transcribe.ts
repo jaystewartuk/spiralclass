@@ -21,8 +21,7 @@ import type { Utterance } from "@/lib/transcription/types";
 const log = logger({ surface: "intro-video-transcribe" });
 
 // Fallback ASR language when the teacher's row somehow carries none.
-// Spanish-first, matching the lesson pipeline's DEFAULT_LESSON_LANGUAGE and
-// `Teacher.teachingLanguage`'s own default.
+// Matches `Teacher.teachingLanguage`'s own column default.
 const DEFAULT_LANGUAGE = "es";
 
 // Two DIFFERENT language questions, answered from two different columns —

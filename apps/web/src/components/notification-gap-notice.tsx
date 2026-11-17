@@ -3,6 +3,7 @@ import { BellOff } from "lucide-react";
 import type { NotificationCategory } from "@spiralclass/shared";
 import { studentDetailHref } from "@/app/(app)/dashboard/students/[studentId]/student-detail-nav";
 import { CATEGORY_LABEL_KEYS } from "@/lib/notifications/category-labels";
+import { isNotificationsFullyDisabled } from "@/lib/notifications/preferences";
 import { studentNotificationGap } from "@/lib/notifications/student-gap";
 import type { TFunction } from "@/lib/i18n-translate";
 
@@ -60,6 +61,54 @@ export function NotificationGapNotice({
             </Link>
           </>
         )}
+      </p>
+    </div>
+  );
+}
+
+/**
+ * The same notice about the student as a whole, for the top of her page (#77).
+ *
+ * Go live lifts the onboarding hold and nothing else, so a student whose every
+ * category is stored off is "live" and still receives no confirmation, reminder
+ * or anything else. Go live cannot switch those on for her: the all-off map
+ * cannot be told apart from her own opt-out (D-204). This says so on every tab,
+ * where the Go live card stood, until someone turns them on. Renders nothing
+ * while the hold is on (the Go live card already says nothing is sent) or the
+ * pairing is archived (nothing is sent either way).
+ */
+export function StudentNotificationsOffNotice({
+  studentId,
+  studentName,
+  prefs,
+  onHold,
+  archived,
+  t,
+}: {
+  studentId: string;
+  studentName: string;
+  prefs: Partial<Record<string, unknown>> | null | undefined;
+  onHold: boolean;
+  archived: boolean;
+  t: TFunction;
+}) {
+  if (onHold || archived || !isNotificationsFullyDisabled(prefs)) return null;
+
+  return (
+    <div
+      role="note"
+      data-notification-gap="student_off"
+      className="flex items-start gap-2 rounded-md border border-warning/30 bg-warning-bg px-3 py-2 text-sm"
+    >
+      <BellOff className="mt-0.5 size-4 shrink-0" aria-hidden />
+      <p className="min-w-0">
+        {t("web.notificationGap.studentOff", { name: studentName })}{" "}
+        <Link
+          href={studentDetailHref(studentId, "settings")}
+          className="font-medium underline underline-offset-4"
+        >
+          {t("web.notificationGap.turnOn")}
+        </Link>
       </p>
     </div>
   );

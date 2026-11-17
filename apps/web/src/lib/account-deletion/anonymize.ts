@@ -312,6 +312,8 @@ async function anonymizeStudent(deps: AnonymizeDeps, studentId: string): Promise
         name: "Cuenta eliminada",
         phoneE164: null,
         emailOptIn: false,
+        // Erasure withdraws email consent; date it like any other change.
+        emailOptInAt: deps.now,
         // Sever the better-auth link so a re-sign-in cannot rejoin
         // this row. The `user` identity row itself is deleted manually by
         // an operator (the runbook in INCIDENT_RESPONSE.md is the

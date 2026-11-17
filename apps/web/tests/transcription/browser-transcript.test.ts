@@ -86,13 +86,20 @@ describe("lineToUtterance", () => {
 
 describe("appendBrowserTranscriptLine", () => {
   // Captures the SQL text and the bound values of the tagged-template query.
-  function fakeDb(rows: { inserted: boolean }[]) {
+  function fakeDb(
+    rows: { inserted: boolean }[],
+    teacher: { targetLanguage: string | null; teachingLanguage: string } = {
+      targetLanguage: "es",
+      teachingLanguage: "es",
+    },
+  ) {
     const calls: { sql: string; values: unknown[] }[] = [];
     const $queryRaw = vi.fn(async (strings: TemplateStringsArray, ...values: unknown[]) => {
       calls.push({ sql: strings.join("?"), values });
       return rows;
     });
-    return { db: { $queryRaw } as never, calls };
+    const findUnique = vi.fn(async (_args: unknown) => teacher);
+    return { db: { $queryRaw, teacher: { findUnique } } as never, calls, findUnique };
   }
   const line = {
     bookingId: "b1",
@@ -125,6 +132,30 @@ describe("appendBrowserTranscriptLine", () => {
       BROWSER_TRANSCRIPT_LIVE,
       "t1",
     ]);
+  });
+
+  // The tag was a constant "es" (DEFAULT_LESSON_LANGUAGE) for every class on
+  // the platform, so a French class was stored, briefed and graded as Spanish.
+  it("tags a French teacher's transcript French, from her own row, never Spanish", async () => {
+    const { db, calls, findUnique } = fakeDb([{ inserted: true }], {
+      targetLanguage: "fr",
+      teachingLanguage: "en",
+    });
+    await appendBrowserTranscriptLine(db, { ...line, text: "Bonjour" });
+    expect(findUnique).toHaveBeenCalledWith({
+      where: { id: "t1" },
+      select: { targetLanguage: true, teachingLanguage: true },
+    });
+    expect(calls[0]?.values[2]).toBe("fr");
+  });
+
+  it("tags it with the language she teaches in while her subject is unset", async () => {
+    const { db, calls } = fakeDb([{ inserted: true }], {
+      targetLanguage: null,
+      teachingLanguage: "de",
+    });
+    await appendBrowserTranscriptLine(db, line);
+    expect(calls[0]?.values[2]).toBe("de");
   });
 
   it("reports the first line of a class as the one that started the row", async () => {

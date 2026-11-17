@@ -118,7 +118,9 @@ platform (`apps/web/src/app/actions/teacher-packages.ts`):
 
 - She enters the **total** and the **remaining** classes; the app stores
   `classesUsed = total − remaining`, so the credit ledger treats it like a
-  bought package. Remaining greater than total is refused.
+  bought package. New entries default remaining to total until she edits it;
+  choosing a template resets both to its class count. Blank or missing balances
+  and remaining greater than total are refused; an explicit zero is allowed.
 - No Payment row is written. `pricePaidMinorUnits` is informational: the
   amount she typed, else the linked template's price, else 0.
 - A linked template must be hers and only supplies defaults.
@@ -128,7 +130,9 @@ platform (`apps/web/src/app/actions/teacher-packages.ts`):
 - She can **edit** an `active` or `paused` recorded package; remaining classes
   cannot drop below the bookings that already count against it.
 - She can **delete** one only if it has no bookings and no payments (a package
-  created by mistake); the audit row survives the delete.
+  created by mistake); the audit row survives the delete. Packages with history
+  show a disabled Delete action with the reason. Cancelling a class or refunding
+  a payment keeps that history and does not make the package deletable.
 
 ## Notifications
 

@@ -22,7 +22,7 @@ import { studentIdentityIds } from "@/lib/students/identity";
 import { PackageDetailsSheet } from "@/components/packages/package-details-sheet";
 import { ReferralShare } from "./referral-share";
 import { ClassesViewToggle } from "./classes-view-toggle";
-import { intlLocale } from "@spiralclass/shared";
+import { clockChangeNote, clockChangeShiftsByBooking, intlLocale } from "@spiralclass/shared";
 
 type OverrideSummary = {
   bookingId: string;
@@ -176,6 +176,21 @@ export default async function StudentPortalPage({
   // booking's teacher zone) stands in as the day-boundary reference.
   const dayGroupTz = studentTz ?? upcoming[0]?.teacher.timezone ?? "UTC";
   const upcomingGroups = groupBookingsByDay(upcoming, dayGroupTz, locale, now, t);
+  // A clock change in either country since the previous class with the same
+  // teacher moved this one on the student's clock (issue 229). `bookings` is
+  // the student's whole history, so every upcoming class has its reference. No
+  // saved zone means no note: the times are then shown in the teacher's zone,
+  // and a move computed there is not one the student will see.
+  const clockShifts = clockChangeShiftsByBooking(
+    bookings.map((b) => ({
+      id: b.id,
+      pairKey: b.teacherId,
+      scheduledStart: b.scheduledStart,
+      status: b.status,
+      teacherTz: b.teacher.timezone,
+    })),
+    (b) => ({ studentTz, teacherTz: b.teacherTz }),
+  );
 
   const toSummary = (p: (typeof packages)[number]): PackageSummary => ({
     id: p.id,
@@ -331,7 +346,19 @@ export default async function StudentPortalPage({
                       materials={
                         <MaterialsBadge hasMaterials={hasVisibleMaterials(b)} status={b.status} />
                       }
-                    />
+                    >
+                      {clockShifts.has(b.id) && (
+                        <p className="mt-2 rounded-md border border-warning/30 bg-warning-bg px-2 py-1 text-sm">
+                          {clockChangeNote(
+                            t,
+                            locale,
+                            "student",
+                            clockShifts.get(b.id) ?? 0,
+                            b.teacher.name.trim(),
+                          )}
+                        </p>
+                      )}
+                    </BookingCard>
                   ))}
                 </div>
               </div>

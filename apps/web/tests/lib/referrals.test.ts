@@ -1,8 +1,12 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import type { Prisma } from "@prisma/client";
 import { createT, previewRewardMinorUnits } from "@spiralclass/shared";
 import { computeDiscountMinorUnits } from "@/lib/discounts";
-import { resolveReferralForCheckout, referralRejectMessage } from "@/lib/referrals";
+import {
+  resolveReferralForCheckout,
+  referralRejectMessage,
+  revalidateReferralUnderLock,
+} from "@/lib/referrals";
 
 // Slice 2b — referral resolution at checkout (docs/features/referrals-discounts.md).
 // The DB-backed mint/qualify/clawback paths are covered by integration tests;
@@ -222,5 +226,39 @@ describe("previewRewardMinorUnits agrees with computeDiscountMinorUnits", () => 
         ),
       );
     }
+  });
+});
+
+// Issue #74: the first-purchase rule is re-checked inside the checkout
+// transaction with the buyer's row locked, so two checkouts at once cannot
+// both be her first. The race itself is pinned against Postgres in
+// tests/discounts/redemption-limits.integration.test.ts.
+describe("revalidateReferralUnderLock", () => {
+  it("locks the referred student before checking her first purchase", async () => {
+    const calls: string[] = [];
+    const base = fakeDb({
+      refCode: { id: "rc1", active: true, ownerStudentId: "owner", owner: { email: null } },
+      program,
+      priorReferralPackages: [{ packageId: "p1", status: "pending" }],
+    }) as unknown as Record<string, unknown>;
+    const db = {
+      ...base,
+      $queryRaw: vi.fn(async () => {
+        calls.push("lock");
+        return [];
+      }),
+      referral: {
+        findMany: async () => {
+          calls.push("read");
+          return [{ packageId: "p1" }];
+        },
+      },
+    } as unknown as Prisma.TransactionClient;
+    const { db: _unused, ...rest } = args(db);
+
+    const res = await revalidateReferralUnderLock(db, rest);
+
+    expect(res).toEqual({ ok: false, reason: "already_redeemed" });
+    expect(calls).toEqual(["lock", "read"]);
   });
 });

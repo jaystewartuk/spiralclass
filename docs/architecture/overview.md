@@ -270,3 +270,7 @@ variable, which is why a hosting move needs no application change.
 - [Multi-teacher students](multi-teacher-students.md) — the identity model
 - [ERD generation](ERD.md) — the live schema diagram
 - [Development workflow](../development/workflow.md) — how a change ships
+
+The current server inventory is 62 route handlers, 72 server-action modules and
+31 background functions. These counts are held to the tree by
+`scripts/readme-counts.mjs`.
