@@ -28,11 +28,10 @@ vi.mock("@/lib/transcription/provider", () => ({
 // getTranscriptionProvider above.
 const homeworkAudioTranscriptionEnabled = vi.fn(() => false);
 vi.mock("@/lib/transcription/config", () => ({
-  DEFAULT_LESSON_LANGUAGE: "es",
   homeworkAudioTranscriptionEnabled: () => homeworkAudioTranscriptionEnabled(),
 }));
 
-const TEACHER = { id: "t1" };
+const TEACHER = { id: "t1", targetLanguage: "es", teachingLanguage: "es" };
 
 const ATTEMPT = {
   id: "at1",
@@ -229,6 +228,21 @@ describe("requestHomeworkAiReview", () => {
         attachmentTexts: [{ fileName: "answer.mp3", text: "hola mundo" }],
       }),
     );
+  });
+
+  // The answer was sent to the vendor tagged "es" (DEFAULT_LESSON_LANGUAGE)
+  // whatever the teacher taught, so a French answer came back as noise.
+  it("recognises a spoken answer in the subject the teacher teaches, not Spanish", async () => {
+    homeworkAudioTranscriptionEnabled.mockReturnValue(true);
+    const transcribe = vi.fn(async () => ({ utterances: [{ text: "bonjour" }] }));
+    getTranscriptionProvider.mockReturnValue({ vendor: "deepgram", transcribe } as never);
+    resolveTeacherAttempt.mockResolvedValueOnce({
+      ...ATTEMPT,
+      files: [{ id: "f1", fileType: "audio/mpeg", fileName: "answer.mp3", storagePath: "p" }],
+    } as never);
+    const french = { id: "t1", targetLanguage: "fr", teachingLanguage: "en" };
+    await requestHomeworkAiReview(french as never, "at1", {}, "en");
+    expect(transcribe).toHaveBeenCalledWith(expect.objectContaining({ language: "fr" }));
   });
 
   it("surfaces not-configured when no Anthropic key is set", async () => {

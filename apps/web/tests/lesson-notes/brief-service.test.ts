@@ -23,6 +23,7 @@ function makeDb(
   opts: {
     profile?: { profile: unknown; updatedAt: Date } | null;
     existing?: { content: unknown; generatedAt: Date } | null;
+    teacher?: { locale: string; targetLanguage: string | null; teachingLanguage: string };
   } = {},
 ) {
   const upsert = vi.fn(async () => ({ generatedAt: new Date("2026-06-20T00:00:00Z") }));
@@ -32,7 +33,7 @@ function makeDb(
         teacherId: "t1",
         studentId: "s1",
         student: { name: "Mira" },
-        teacher: { locale: "en" },
+        teacher: opts.teacher ?? { locale: "en", targetLanguage: "es", teachingLanguage: "es" },
       })),
     },
     studentLearningProfile: {
@@ -87,6 +88,33 @@ describe("getOrGenerateBrief", () => {
     await getOrGenerateBrief({ prisma: db as any, generate }, "b1");
     expect(generate).toHaveBeenCalledTimes(1);
     expect(upsert).toHaveBeenCalledTimes(1);
+  });
+
+  // The brief was told "Target language: es" for every class on the platform
+  // (DEFAULT_LESSON_LANGUAGE), whatever the teacher taught.
+  it("briefs a teacher of French in French, not Spanish", async () => {
+    const { db } = makeDb({
+      existing: null,
+      teacher: { locale: "en", targetLanguage: "fr", teachingLanguage: "en" },
+    });
+    await getOrGenerateBrief({ prisma: db as any, generate }, "b1");
+    expect(generate).toHaveBeenCalledWith(expect.objectContaining({ language: "fr" }));
+    expect(db.booking.findUnique).toHaveBeenCalledWith(
+      expect.objectContaining({
+        select: expect.objectContaining({
+          teacher: { select: { locale: true, targetLanguage: true, teachingLanguage: true } },
+        }),
+      }),
+    );
+  });
+
+  it("falls back to the language she teaches in while her subject is unset", async () => {
+    const { db } = makeDb({
+      existing: null,
+      teacher: { locale: "en", targetLanguage: null, teachingLanguage: "de" },
+    });
+    await getOrGenerateBrief({ prisma: db as any, generate }, "b1");
+    expect(generate).toHaveBeenCalledWith(expect.objectContaining({ language: "de" }));
   });
 
   it("degrades to null when Claude isn't configured", async () => {

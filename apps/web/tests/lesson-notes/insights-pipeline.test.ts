@@ -17,7 +17,7 @@ function makeDb(
   opts: {
     transcript?: { utterances: unknown; language: string; teacherId: string } | null;
     booking?: boolean;
-    teacher?: { locale: string; targetLanguage: string | null };
+    teacher?: { locale: string; targetLanguage: string | null; teachingLanguage?: string };
     lessonNotes?: { audience: string; body: string; doneAt: Date | null }[];
     pronunciation?: { scores: unknown } | null;
   } = {},
@@ -43,7 +43,10 @@ function makeDb(
           : {
               teacherId: TEACHER,
               student: { name: "Mira" },
-              teacher: opts.teacher ?? { locale: "en", targetLanguage: "es" },
+              teacher: {
+                teachingLanguage: "es",
+                ...(opts.teacher ?? { locale: "en", targetLanguage: "es" }),
+              },
               lessonNotes: opts.lessonNotes ?? [
                 { audience: "teacher", body: "ser vs estar", doneAt: new Date() },
               ],
@@ -195,9 +198,10 @@ describe("generateAndStoreInsights", () => {
 });
 
 describe("the language the model is told to grade against", () => {
-  // transcript.language is the ASR tag, and transcription/pipeline.ts hardcodes
-  // it to DEFAULT_LESSON_LANGUAGE ("es") for every capture. Reading it here told
-  // the model that every lesson on a subject-agnostic platform was Spanish.
+  // transcript.language used to be a constant "es" (DEFAULT_LESSON_LANGUAGE)
+  // for every capture, and was this fallback's answer. A transcript written
+  // before that was fixed still carries "es", so the grading language is read
+  // from the teacher, never from the stored tag.
   it("comes from the teacher's own subject, not the ASR tag", async () => {
     const { db } = makeDb({ teacher: { locale: "en", targetLanguage: "fr" } });
     const generate = vi.fn(async () => oneInsight);
@@ -205,11 +209,13 @@ describe("the language the model is told to grade against", () => {
     expect(generate).toHaveBeenCalledWith(expect.objectContaining({ targetLanguage: "fr" }));
   });
 
-  it("falls back to the transcript tag when she has not set a subject", async () => {
-    const { db } = makeDb({ teacher: { locale: "en", targetLanguage: null } });
+  it("falls back to the language she teaches in, not a stale Spanish tag, while her subject is unset", async () => {
+    const { db } = makeDb({
+      teacher: { locale: "en", targetLanguage: null, teachingLanguage: "de" },
+    });
     const generate = vi.fn(async () => oneInsight);
     await generateAndStoreInsights(deps(db, generate), BOOKING);
-    expect(generate).toHaveBeenCalledWith(expect.objectContaining({ targetLanguage: "es" }));
+    expect(generate).toHaveBeenCalledWith(expect.objectContaining({ targetLanguage: "de" }));
   });
 
   // Her `locale` is what she READS; targetLanguage is what she TEACHES. Both

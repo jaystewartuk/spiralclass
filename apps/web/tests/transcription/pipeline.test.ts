@@ -20,7 +20,17 @@ type AudioRow = {
   startedAt: Date;
 };
 
-function makeDb(audio: AudioRow[], opts: { retentionOptIn?: boolean } = {}) {
+type BookingLanguages = {
+  teacherLanguageOverride: string | null;
+  studentLanguageOverride: string | null;
+  teacher: { targetLanguage: string | null; teachingLanguage: string };
+  student: { nativeLanguage: string };
+};
+
+function makeDb(
+  audio: AudioRow[],
+  opts: { retentionOptIn?: boolean; booking?: BookingLanguages } = {},
+) {
   const transcripts: Record<
     string,
     {
@@ -68,6 +78,17 @@ function makeDb(audio: AudioRow[], opts: { retentionOptIn?: boolean } = {}) {
     teacher: {
       findUnique: vi.fn(async () => ({ lessonAudioRetentionOptIn: opts.retentionOptIn ?? false })),
     },
+    booking: {
+      findFirst: vi.fn(
+        async () =>
+          opts.booking ?? {
+            teacherLanguageOverride: null,
+            studentLanguageOverride: null,
+            teacher: { targetLanguage: "es", teachingLanguage: "es" },
+            student: { nativeLanguage: "es" },
+          },
+      ),
+    },
   };
   return { db, transcripts };
 }
@@ -105,6 +126,61 @@ function audioRow(over: Partial<AudioRow> = {}): AudioRow {
 beforeEach(() => vi.clearAllMocks());
 
 describe("processLessonAudioReady", () => {
+  // Every file was sent to the vendor tagged "es" (DEFAULT_LESSON_LANGUAGE),
+  // so a class not in Spanish came back as a Spanish transcript of noise.
+  describe("the language each file is recognised in", () => {
+    const FRENCH_CLASS: BookingLanguages = {
+      teacherLanguageOverride: null,
+      studentLanguageOverride: null,
+      teacher: { targetLanguage: "fr", teachingLanguage: "fr" },
+      student: { nativeLanguage: "en" },
+    };
+
+    it("is the language each speaker speaks in this class, the same answer captions use", async () => {
+      const rows = [
+        audioRow({ id: "audio-s", speaker: "student" }),
+        audioRow({ id: "audio-t", speaker: "teacher" }),
+      ];
+      const { db, transcripts } = makeDb(rows, { booking: FRENCH_CLASS });
+      const deps = makeDeps(db);
+      await processLessonAudioReady(deps, {
+        bookingId: BOOKING,
+        audioId: "audio-t",
+        speaker: "teacher",
+        storageKey: rows[1].storageKey,
+      });
+      await processLessonAudioReady(deps, {
+        bookingId: BOOKING,
+        audioId: "audio-s",
+        speaker: "student",
+        storageKey: rows[0].storageKey,
+      });
+      const languages = vi.mocked(deps.provider.transcribe).mock.calls.map((c) => c[0].language);
+      expect(languages).toEqual(["fr", "en"]);
+      expect(db.booking.findFirst).toHaveBeenCalledWith(
+        expect.objectContaining({ where: { id: BOOKING, teacherId: TEACHER } }),
+      );
+      expect(transcripts[BOOKING].language).toBe("fr");
+    });
+
+    it("follows the class's own language override", async () => {
+      const rows = [audioRow({ id: "audio-t", speaker: "teacher" })];
+      const { db } = makeDb(rows, {
+        booking: { ...FRENCH_CLASS, teacherLanguageOverride: "it" },
+      });
+      const deps = makeDeps(db);
+      await processLessonAudioReady(deps, {
+        bookingId: BOOKING,
+        audioId: "audio-t",
+        speaker: "teacher",
+        storageKey: rows[0].storageKey,
+      });
+      expect(deps.provider.transcribe).toHaveBeenCalledWith(
+        expect.objectContaining({ language: "it" }),
+      );
+    });
+  });
+
   it("transcribes the first file but does not complete while the other is pending", async () => {
     const rows = [
       audioRow({ id: "audio-s", speaker: "student" }),
