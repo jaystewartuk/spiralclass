@@ -117,6 +117,23 @@ Handled automatically:
 > Keep `distinctId` equal to the row id the server uses (`teacher.id` /
 > `student.id` / admin actor id) or one user splits across two Persons.
 
+### Which identities may be aliased
+
+Checkout merges the browser into the buyer with `aliasServerUser`, so the
+public funnel's anonymous page views and the purchase events keyed on
+`student.id` count as one person. **Only an anonymous browser identity may be
+aliased** — one whose posthog-js cookie says `$user_state: "anonymous"`. Once
+`<PostHogIdentify>` has run, the cookie's `distinct_id` is the signed-in
+teacher's, admin's or student's own id, and aliasing it would fold the buyer
+into that person. PostHog cannot split a person, so the mistake is permanent.
+
+`aliasServerUser` takes the parsed cookie identity (`PostHogClientIdentity`
+from `@/lib/analytics/posthog-cookie`), not a bare id, and refuses anything
+not marked `anonymous`, including a cookie with no `$user_state`. Any new
+server-side alias goes through it. A teacher who books for a student from her
+own signed-in browser therefore leaves that checkout's browsing unjoined to the
+student. That costs one funnel row, where a merge would have cost both persons.
+
 ## Feature flags
 
 Create the flag in the PostHog dashboard, then read it.

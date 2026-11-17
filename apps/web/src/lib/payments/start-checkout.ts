@@ -526,10 +526,12 @@ export async function startCheckout(args: StartCheckoutArgs): Promise<StartCheck
   // everything from here keys on student.id. PostHog funnels group by person, so
   // without this the funnel reports 100% drop-off after the page view — which is
   // exactly what the 2026-07-29 production test purchase produced. Checkout is
-  // the first moment both ids are known. Best-effort and non-blocking.
+  // the first moment both ids are known. Best-effort and non-blocking. Only an
+  // anonymous browser is merged (aliasServerUser enforces it too): a teacher or
+  // admin signed in on this browser would otherwise absorb the buyer for good.
   const browserIdentity = await currentPostHogIdentity();
-  if (browserIdentity.distinctId) {
-    aliasServerUser(student.id, browserIdentity.distinctId);
+  if (browserIdentity.anonymous) {
+    aliasServerUser(student.id, browserIdentity);
   }
 
   // Top of the payment funnel. Fired for both rails before the redirect so

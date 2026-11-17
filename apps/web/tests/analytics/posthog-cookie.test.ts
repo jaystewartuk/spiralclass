@@ -27,12 +27,37 @@ describe("parsePostHogCookie", () => {
     // is index 1, not 0.
     const raw = cookieValue({
       distinct_id: "0190-person",
+      $user_state: "anonymous",
       $sesid: [1719000000000, "0190-session", 1719000000000],
     });
     expect(parsePostHogCookie(raw)).toEqual({
       distinctId: "0190-person",
       sessionId: "0190-session",
+      anonymous: true,
     });
+  });
+
+  // Only an anonymous id may be merged into a buyer (aliasServerUser). Once
+  // <PostHogIdentify> has run, distinct_id is the signed-in teacher's, admin's
+  // or student's own id, and merging it is permanent (issue #89).
+  it("says whether the distinct id is still anonymous, from posthog-js's $user_state", () => {
+    expect(
+      parsePostHogCookie(cookieValue({ distinct_id: "0190-anon", $user_state: "anonymous" })),
+    ).toMatchObject({ distinctId: "0190-anon", anonymous: true });
+    expect(
+      parsePostHogCookie(cookieValue({ distinct_id: "teacher-1", $user_state: "identified" })),
+    ).toMatchObject({ distinctId: "teacher-1", anonymous: false });
+  });
+
+  it("treats a cookie with no recognisable $user_state as not anonymous", () => {
+    // A merge cannot be undone, so unknown is refused rather than guessed.
+    for (const state of [undefined, "", "ANONYMOUS", 1, true]) {
+      expect(
+        parsePostHogCookie(cookieValue({ distinct_id: "p1", $user_state: state })).anonymous,
+      ).toBe(false);
+    }
+    // Anonymous with no id to merge is nothing to merge.
+    expect(parsePostHogCookie(cookieValue({ $user_state: "anonymous" })).anonymous).toBe(false);
   });
 
   it("reads a cookie that isn't URI-encoded", () => {
@@ -44,6 +69,7 @@ describe("parsePostHogCookie", () => {
     expect(parsePostHogCookie(cookieValue({ distinct_id: "p1" }))).toEqual({
       distinctId: "p1",
       sessionId: null,
+      anonymous: false,
     });
   });
 
