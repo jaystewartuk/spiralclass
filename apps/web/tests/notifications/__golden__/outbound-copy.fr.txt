@@ -32,6 +32,8 @@ body: Votre cours avec  a lieu le  · Il vous reste  cours
 subject: Rappel : cours demain avec ⟦teacherName⟧
 text: Bonjour, ici ⟦teacherName⟧. Petit rappel pour notre cours de demain, ⟦classDateTime⟧.
 
+⟦clockChangeNote⟧
+
 Rejoignez l'appel vidéo à l'heure du cours.
 
 Rejoindre l'appel vidéo : https://app.test/action
@@ -41,11 +43,12 @@ Ajouter au calendrier : https://calendar.test/add
 —
 Gérer les notifications : https://app.test/r/notif-settings/token
 Pour ne plus recevoir ces e-mails : https://app.test/r/email-uns/token
-html: Votre cours a lieu demain Cours demain — ⟦classDateTime⟧ SpiralClass Votre cours a lieu demain Bonjour, ici ⟦teacherName⟧. Petit rappel pour notre cours de demain, ⟦classDateTime⟧. Rejoignez l&#39;appel vidéo à l&#39;heure du cours. Rejoindre l&#39;appel vidéo Ajouter au calendrier Gérer les notifications · Se désabonner de ces e-mails Cours, paiements et rappels, sans charge mentale. Envoyé par SpiralClass · spiralclass.com
+html: Votre cours a lieu demain Cours demain — ⟦classDateTime⟧ SpiralClass Votre cours a lieu demain Bonjour, ici ⟦teacherName⟧. Petit rappel pour notre cours de demain, ⟦classDateTime⟧. ⟦clockChangeNote⟧ Rejoignez l&#39;appel vidéo à l&#39;heure du cours. Rejoindre l&#39;appel vidéo Ajouter au calendrier Gérer les notifications · Se désabonner de ces e-mails Cours, paiements et rappels, sans charge mentale. Envoyé par SpiralClass · spiralclass.com
 
 === reminder_24h · push · with every variable
 title: Rappel : Demain
 body: Cours avec ⟦teacherName⟧ le ⟦classDateTime⟧
+⟦clockChangeNote⟧
 
 === reminder_24h · email · with no variables
 subject: Rappel : cours demain avec 
@@ -62,6 +65,8 @@ body: Cours avec  le
 subject: Le cours avec ⟦teacherName⟧ commence dans 1 heure
 text: Bonjour, ici ⟦teacherName⟧. On se retrouve dans 1 heure, ⟦classDateTime⟧. Rejoignez l'appel vidéo à l'heure du cours.
 
+⟦clockChangeNote⟧
+
 Rejoindre l'appel vidéo : https://app.test/action
 
 Ajouter au calendrier : https://calendar.test/add
@@ -69,11 +74,12 @@ Ajouter au calendrier : https://calendar.test/add
 —
 Gérer les notifications : https://app.test/r/notif-settings/token
 Pour ne plus recevoir ces e-mails : https://app.test/r/email-uns/token
-html: Votre cours commence dans 1 heure Dans 1 heure — ⟦classDateTime⟧ SpiralClass Votre cours commence dans 1 heure Bonjour, ici ⟦teacherName⟧. On se retrouve dans 1 heure, ⟦classDateTime⟧. Rejoignez l&#39;appel vidéo à l&#39;heure du cours. Rejoindre l&#39;appel vidéo Ajouter au calendrier Gérer les notifications · Se désabonner de ces e-mails Cours, paiements et rappels, sans charge mentale. Envoyé par SpiralClass · spiralclass.com
+html: Votre cours commence dans 1 heure Dans 1 heure — ⟦classDateTime⟧ SpiralClass Votre cours commence dans 1 heure Bonjour, ici ⟦teacherName⟧. On se retrouve dans 1 heure, ⟦classDateTime⟧. ⟦clockChangeNote⟧ Rejoignez l&#39;appel vidéo à l&#39;heure du cours. Rejoindre l&#39;appel vidéo Ajouter au calendrier Gérer les notifications · Se désabonner de ces e-mails Cours, paiements et rappels, sans charge mentale. Envoyé par SpiralClass · spiralclass.com
 
 === reminder_1h · push · with every variable
 title: Rappel : Dans 1 heure
 body: Cours avec ⟦teacherName⟧ le ⟦classDateTime⟧
+⟦clockChangeNote⟧
 
 === reminder_1h · email · with no variables
 subject: Le cours avec  commence dans 1 heure
@@ -88,16 +94,19 @@ body: Cours avec  le
 subject: Le cours avec ⟦teacherName⟧ commence dans 15 minutes
 text: Bonjour, ici ⟦teacherName⟧. Votre cours commence dans 15 minutes, ⟦classDateTime⟧. Rejoignez l'appel vidéo à l'heure du cours.
 
+⟦clockChangeNote⟧
+
 Rejoindre l'appel vidéo : https://app.test/action
 
 —
 Gérer les notifications : https://app.test/r/notif-settings/token
 Pour ne plus recevoir ces e-mails : https://app.test/r/email-uns/token
-html: Votre cours commence dans 15 minutes Dans 15 minutes — ⟦classDateTime⟧ SpiralClass Votre cours commence dans 15 minutes Bonjour, ici ⟦teacherName⟧. Votre cours commence dans 15 minutes, ⟦classDateTime⟧. Rejoignez l&#39;appel vidéo à l&#39;heure du cours. Rejoindre l&#39;appel vidéo Gérer les notifications · Se désabonner de ces e-mails Cours, paiements et rappels, sans charge mentale. Envoyé par SpiralClass · spiralclass.com
+html: Votre cours commence dans 15 minutes Dans 15 minutes — ⟦classDateTime⟧ SpiralClass Votre cours commence dans 15 minutes Bonjour, ici ⟦teacherName⟧. Votre cours commence dans 15 minutes, ⟦classDateTime⟧. ⟦clockChangeNote⟧ Rejoignez l&#39;appel vidéo à l&#39;heure du cours. Rejoindre l&#39;appel vidéo Gérer les notifications · Se désabonner de ces e-mails Cours, paiements et rappels, sans charge mentale. Envoyé par SpiralClass · spiralclass.com
 
 === reminder_15m · push · with every variable
 title: Rappel : Dans 15 minutes
 body: Cours avec ⟦teacherName⟧ le ⟦classDateTime⟧
+⟦clockChangeNote⟧
 
 === reminder_15m · email · with no variables
 subject: Le cours avec  commence dans 15 minutes
@@ -112,6 +121,8 @@ body: Cours avec  le
 subject: Rappel : cours demain avec ⟦studentName⟧
 text: Rappel : votre cours avec ⟦studentName⟧ a lieu demain, ⟦classDateTime⟧.
 
+⟦clockChangeNote⟧
+
 Rejoignez l'appel vidéo à l'heure du cours.
 
 Rejoindre l'appel vidéo : https://app.test/action
@@ -121,11 +132,12 @@ Ajouter au calendrier : https://calendar.test/add
 —
 Gérer les notifications : https://app.test/r/notif-settings/token
 Pour ne plus recevoir ces e-mails : https://app.test/r/email-uns/token
-html: Votre cours a lieu demain Cours demain — ⟦classDateTime⟧ SpiralClass Votre cours a lieu demain Rappel : votre cours avec ⟦studentName⟧ a lieu demain, ⟦classDateTime⟧. Rejoignez l&#39;appel vidéo à l&#39;heure du cours. Rejoindre l&#39;appel vidéo Ajouter au calendrier Gérer les notifications · Se désabonner de ces e-mails Cours, paiements et rappels, sans charge mentale. Envoyé par SpiralClass · spiralclass.com
+html: Votre cours a lieu demain Cours demain — ⟦classDateTime⟧ SpiralClass Votre cours a lieu demain Rappel : votre cours avec ⟦studentName⟧ a lieu demain, ⟦classDateTime⟧. ⟦clockChangeNote⟧ Rejoignez l&#39;appel vidéo à l&#39;heure du cours. Rejoindre l&#39;appel vidéo Ajouter au calendrier Gérer les notifications · Se désabonner de ces e-mails Cours, paiements et rappels, sans charge mentale. Envoyé par SpiralClass · spiralclass.com
 
 === reminder_24h_teacher · push · with every variable
 title: Rappel : Demain
 body: Cours avec ⟦studentName⟧ le ⟦classDateTime⟧
+⟦clockChangeNote⟧
 
 === reminder_24h_teacher · email · with no variables
 subject: Rappel : cours demain avec 
@@ -140,6 +152,8 @@ body: Cours avec  le
 subject: Le cours avec ⟦studentName⟧ commence dans 1 heure
 text: Votre cours avec ⟦studentName⟧ commence dans 1 heure, ⟦classDateTime⟧.
 
+⟦clockChangeNote⟧
+
 Rejoignez l'appel vidéo à l'heure du cours.
 
 Rejoindre l'appel vidéo : https://app.test/action
@@ -149,11 +163,12 @@ Ajouter au calendrier : https://calendar.test/add
 —
 Gérer les notifications : https://app.test/r/notif-settings/token
 Pour ne plus recevoir ces e-mails : https://app.test/r/email-uns/token
-html: Votre cours commence dans 1 heure Dans 1 heure — ⟦classDateTime⟧ SpiralClass Votre cours commence dans 1 heure Votre cours avec ⟦studentName⟧ commence dans 1 heure, ⟦classDateTime⟧. Rejoignez l&#39;appel vidéo à l&#39;heure du cours. Rejoindre l&#39;appel vidéo Ajouter au calendrier Gérer les notifications · Se désabonner de ces e-mails Cours, paiements et rappels, sans charge mentale. Envoyé par SpiralClass · spiralclass.com
+html: Votre cours commence dans 1 heure Dans 1 heure — ⟦classDateTime⟧ SpiralClass Votre cours commence dans 1 heure Votre cours avec ⟦studentName⟧ commence dans 1 heure, ⟦classDateTime⟧. ⟦clockChangeNote⟧ Rejoignez l&#39;appel vidéo à l&#39;heure du cours. Rejoindre l&#39;appel vidéo Ajouter au calendrier Gérer les notifications · Se désabonner de ces e-mails Cours, paiements et rappels, sans charge mentale. Envoyé par SpiralClass · spiralclass.com
 
 === reminder_1h_teacher · push · with every variable
 title: Rappel : Dans 1 heure
 body: Cours avec ⟦studentName⟧ le ⟦classDateTime⟧
+⟦clockChangeNote⟧
 
 === reminder_1h_teacher · email · with no variables
 subject: Le cours avec  commence dans 1 heure
@@ -168,6 +183,8 @@ body: Cours avec  le
 subject: Le cours avec ⟦studentName⟧ commence dans 15 minutes
 text: Votre cours avec ⟦studentName⟧ commence dans 15 minutes, ⟦classDateTime⟧.
 
+⟦clockChangeNote⟧
+
 Rejoignez l'appel vidéo à l'heure du cours.
 
 Rejoindre l'appel vidéo : https://app.test/action
@@ -175,11 +192,12 @@ Rejoindre l'appel vidéo : https://app.test/action
 —
 Gérer les notifications : https://app.test/r/notif-settings/token
 Pour ne plus recevoir ces e-mails : https://app.test/r/email-uns/token
-html: Votre cours commence dans 15 minutes Dans 15 minutes — ⟦classDateTime⟧ SpiralClass Votre cours commence dans 15 minutes Votre cours avec ⟦studentName⟧ commence dans 15 minutes, ⟦classDateTime⟧. Rejoignez l&#39;appel vidéo à l&#39;heure du cours. Rejoindre l&#39;appel vidéo Gérer les notifications · Se désabonner de ces e-mails Cours, paiements et rappels, sans charge mentale. Envoyé par SpiralClass · spiralclass.com
+html: Votre cours commence dans 15 minutes Dans 15 minutes — ⟦classDateTime⟧ SpiralClass Votre cours commence dans 15 minutes Votre cours avec ⟦studentName⟧ commence dans 15 minutes, ⟦classDateTime⟧. ⟦clockChangeNote⟧ Rejoignez l&#39;appel vidéo à l&#39;heure du cours. Rejoindre l&#39;appel vidéo Gérer les notifications · Se désabonner de ces e-mails Cours, paiements et rappels, sans charge mentale. Envoyé par SpiralClass · spiralclass.com
 
 === reminder_15m_teacher · push · with every variable
 title: Rappel : Dans 15 minutes
 body: Cours avec ⟦studentName⟧ le ⟦classDateTime⟧
+⟦clockChangeNote⟧
 
 === reminder_15m_teacher · email · with no variables
 subject: Le cours avec  commence dans 15 minutes

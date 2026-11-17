@@ -37,6 +37,18 @@ describe("every model call site is in the registry", () => {
       expect(callSites, site.file).toContain(site.file);
     }
   });
+
+  // Issue #30: four surfaces once hardcoded their model, so a rollback was a
+  // release. Every call site now resolves its model through one of the two
+  // tier resolvers in lib/env.ts, and no model id is written in the file.
+  it("each call site resolves its model through a tier resolver, never a literal", () => {
+    for (const site of AI_CALL_SITES) {
+      expect(["anthropicModel()", "anthropicSmallModel()"], site.file).toContain(site.model);
+      const source = readFileSync(join(WEB, site.file), "utf8");
+      expect(source, `${site.file} calls ${site.model}`).toContain(site.model);
+      expect(source, `${site.file} names a model id`).not.toMatch(/"claude-[a-z0-9-]+"/);
+    }
+  });
 });
 
 describe("the unevaluated surfaces are a ratchet", () => {
@@ -114,15 +126,13 @@ describe("the runner", () => {
     expect(existsSync(join(WEB, "scripts/evals.ts"))).toBe(true);
   });
 
-  it("uses the production default model for the homework review surface", () => {
-    // The runner cannot import lib/env.ts (server logger), so it restates the
-    // default; this is what keeps the two from drifting.
+  it("reads the production default models rather than restating them", () => {
+    // lib/env.ts resolves both tiers through lib/ai/models.ts; the runner
+    // reads the same table, so an eval run measures what production sends.
     const runner = readFileSync(join(WEB, "scripts/evals.ts"), "utf8");
-    const env = readFileSync(join(SRC, "lib/env.ts"), "utf8");
-    const fromEnv = /ANTHROPIC_MODEL \?\? "([^"]+)"/.exec(env)?.[1];
-    const fromRunner = /HOMEWORK_REVIEW_DEFAULT_MODEL = "([^"]+)"/.exec(runner)?.[1];
-    expect(fromEnv).toBeTruthy();
-    expect(fromRunner).toBe(fromEnv);
+    expect(runner).toContain("HOMEWORK_REVIEW_DEFAULT_MODEL = MODEL_TIER_DEFAULTS.standard");
+    expect(runner).toContain("INSIGHTS_DEFAULT_MODEL = MODEL_TIER_DEFAULTS.small");
+    expect(runner, "no model id restated in the runner").not.toMatch(/"claude-[a-z0-9-]+"/);
   });
 
   it("is not a gate step — it spends money and scores rather than passes", () => {

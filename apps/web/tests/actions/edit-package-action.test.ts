@@ -101,6 +101,13 @@ beforeEach(() => {
 });
 
 describe("editManualPackageAction", () => {
+  it.each([null, "", "   "])("rejects a blank remaining balance (%j)", async (remaining) => {
+    const data = fd({ packageId: PKG_ID, classesTotal: "10" });
+    if (remaining !== null) data.set("classesRemaining", remaining);
+    expect(await editManualPackageAction(undefined, data)).toHaveProperty("error");
+    expect(packageUpdate).not.toHaveBeenCalled();
+  });
+
   it("rejects a non-uuid package id", async () => {
     const res = await editManualPackageAction(
       undefined,

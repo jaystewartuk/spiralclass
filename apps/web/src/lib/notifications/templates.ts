@@ -231,6 +231,9 @@ export type TemplateVariables = {
     calendarEndIso?: string;
     joinPathSuffix?: string;
     classPathSuffix?: string;
+    // "The clocks have changed since your last class…", already in the
+    // recipient's language; absent when nothing moved (lib/notifications/clock-change.ts).
+    clockChangeNote?: string;
   };
   reminder_1h: {
     teacherName: string;
@@ -239,12 +242,18 @@ export type TemplateVariables = {
     calendarEndIso?: string;
     joinPathSuffix?: string;
     classPathSuffix?: string;
+    // "The clocks have changed since your last class…", already in the
+    // recipient's language; absent when nothing moved (lib/notifications/clock-change.ts).
+    clockChangeNote?: string;
   };
   reminder_15m: {
     teacherName: string;
     classDateTime: string;
     joinPathSuffix?: string;
     classPathSuffix?: string;
+    // "The clocks have changed since your last class…", already in the
+    // recipient's language; absent when nothing moved (lib/notifications/clock-change.ts).
+    clockChangeNote?: string;
   };
   // Teacher-recipient reminders. Copy is teacher-voiced and names the STUDENT,
   // so these carry `studentName` instead of `teacherName`. `classPathSuffix` is
@@ -257,6 +266,9 @@ export type TemplateVariables = {
     calendarEndIso?: string;
     joinPathSuffix?: string;
     classPathSuffix?: string;
+    // "The clocks have changed since your last class…", already in the
+    // recipient's language; absent when nothing moved (lib/notifications/clock-change.ts).
+    clockChangeNote?: string;
   };
   reminder_1h_teacher: {
     studentName: string;
@@ -265,12 +277,18 @@ export type TemplateVariables = {
     calendarEndIso?: string;
     joinPathSuffix?: string;
     classPathSuffix?: string;
+    // "The clocks have changed since your last class…", already in the
+    // recipient's language; absent when nothing moved (lib/notifications/clock-change.ts).
+    clockChangeNote?: string;
   };
   reminder_15m_teacher: {
     studentName: string;
     classDateTime: string;
     joinPathSuffix?: string;
     classPathSuffix?: string;
+    // "The clocks have changed since your last class…", already in the
+    // recipient's language; absent when nothing moved (lib/notifications/clock-change.ts).
+    clockChangeNote?: string;
   };
   cancel_lt24h: {
     teacherName: string;

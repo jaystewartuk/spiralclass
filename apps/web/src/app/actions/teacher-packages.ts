@@ -26,7 +26,10 @@ import { gateProFeature, upgradeNudge } from "@/lib/subscriptions/enforce";
 
 export type ManualPackageState = { error?: string; ok?: string } | undefined;
 
-const intField = (max: number) => z.coerce.number().int().min(0).max(max);
+// FormData supplies strings. A missing/blank balance is not an explicit zero:
+// coercing it directly would silently mark every class as already used.
+const intField = (max: number) =>
+  z.string().trim().min(1).pipe(z.coerce.number().int().min(0).max(max));
 
 const manualPackageSchema = z
   .object({

@@ -618,6 +618,12 @@ export const en = {
   "call.screenShareError": "Couldn't share your screen. Try again.",
   "call.flipCamera": "Flip camera",
   "call.flipCameraError": "Couldn't switch camera",
+  "call.micSilent":
+    "Your microphone is sending silence. The other person probably cannot hear you. Choose a different microphone.",
+  "call.chooseMicrophone": "Choose a microphone",
+  "call.microphoneNumber": "Microphone {number}",
+  "call.microphoneSwitchFailed":
+    "Could not change the microphone. Check browser permissions and try again.",
   "call.audioBlocked":
     "You can't hear the other person — your browser blocked the sound. Tap here to turn it on.",
   "call.swapToMain": "Show my camera full screen",
@@ -676,6 +682,10 @@ export const en = {
   "call.notesExplain":
     "This class's captions are saved as text to suggest what to work on next. No audio is recorded.",
   "call.notesLearnMore": "Learn more",
+  "call.captionsBrowserUnsupported":
+    "Captions can't run in this browser. Try Chrome on a computer.",
+  "call.captionsOtherSpeechStopped":
+    "Captions of the other person have stopped. Ask them to join from Chrome on a computer.",
   "call.captionsStopped": "Captions stopped on this device — check the microphone permission.",
   "call.captionsServiceUnavailable":
     "Captions stopped on this device — the captioning service couldn't be reached.",
@@ -2610,6 +2620,8 @@ export const en = {
   "web.dashboard.invitations.linkCopied": "Invitation link copied.",
   "web.dashboard.invitations.empty": "No students yet. Add them to your roster to invite them.",
   "web.dashboard.invitations.noEmail": "no email",
+  "web.dashboard.invitations.notDelivered":
+    "The invitation to {email} didn't arrive. Check the address is right.",
   "web.dashboard.invitations.cancelConfirm": "Cancel this invitation? The link will stop working.",
   "web.dashboard.invitations.form.title": "Invite students",
   "web.dashboard.invitations.form.description":
@@ -2644,7 +2656,7 @@ export const en = {
   "web.dashboard.students.package.add": "Add package",
   "web.dashboard.students.package.recordExisting": "Record an existing package",
   "web.dashboard.students.package.recordExistingHint":
-    "For a student you're moving over: enter how many classes they have left. No payment is taken — this just sets their balance.",
+    "Record a package already paid for outside SpiralClass. A new package starts with all classes remaining; lower that number only for classes already used. No payment is taken.",
   "web.dashboard.students.package.basedOn": "Based on (optional)",
   "web.dashboard.students.package.custom": "Custom",
   "web.dashboard.students.package.totalClasses": "Total classes",
@@ -2728,6 +2740,8 @@ export const en = {
     "Keep a student's legacy price for their future purchases.",
   "web.dashboard.students.goLive.confirm":
     "Go live with this student? They'll start receiving notifications (confirmations, reminders). Share their booking link once you're ready.",
+  "web.dashboard.students.goLive.confirmNotificationsOff":
+    "Go live with this student? Their notifications are off, so they still won't get confirmations or reminders until notifications are turned on in the Settings tab.",
   "web.dashboard.students.goLive.button": "Go live",
   "web.dashboard.students.notifications.label": "Notifications",
   "web.dashboard.students.notifications.on": "On",
@@ -4937,6 +4951,16 @@ export const en = {
   "web.myClasses.timezoneNotice.switch": "Use {device} time",
   "web.myClasses.timezoneNotice.keep": "Keep {saved} time",
   "web.myClasses.timezoneNotice.switched": "Done — your class times now show in {device} time.",
+  // A clock change moved a class on one party's clock (issue 229). {amount}
+  // is a unit-formatted duration ("1 hour"), already in the reader's language.
+  "clockChange.student.later":
+    "The clocks have changed since your last class with {teacherName}: the same time on their clock is now {amount} later on yours.",
+  "clockChange.student.earlier":
+    "The clocks have changed since your last class with {teacherName}: the same time on their clock is now {amount} earlier on yours.",
+  "clockChange.teacher.later":
+    "The clocks have changed since {studentName}'s last class: the same time on your clock is now {amount} later on theirs.",
+  "clockChange.teacher.earlier":
+    "The clocks have changed since {studentName}'s last class: the same time on your clock is now {amount} earlier on theirs.",
   // Notification preferences (NotificationPrefsForm), shared by the teacher and
   // student screens. Read top to bottom these are the three layers a
   // notification passes through: the device, the account-level channel, and the
@@ -4957,6 +4981,8 @@ export const en = {
   "web.notificationGap.paused":
     "{name}'s notifications are paused, so they will not be told about this. It still appears in their portal.",
   "web.notificationGap.turnOn": "Turn notifications on",
+  "web.notificationGap.studentOff":
+    "{name}'s notifications are off, so they will not get booking confirmations, class reminders or anything else you send them.",
   "web.notificationPrefs.category.expiryReminders": "Package reminders",
   "web.notificationPrefs.categoryHint.expiryReminders":
     "When a package is about to expire, and when you finish one.",
@@ -5271,8 +5297,7 @@ export const en = {
   "web.about.trust.dataProtected.body":
     "Encryption in transit, restricted access, and a plain-language privacy notice about what we keep and why.",
   "web.about.trust.realTeacher.title": "Built with a real teacher",
-  "web.about.trust.realTeacher.body":
-    "Every feature was tested in a working teacher's real classes before it ever reached anyone else.",
+  "web.about.trust.realTeacher.body": "Built around a working teacher's needs and feedback.",
   "web.about.trust.globalPay.title": "Get paid, wherever you are",
   "web.about.trust.globalPay.body":
     "By card through Stripe where it's available, or direct bank transfer through Wise everywhere else — there's always a way to get paid.",
@@ -5480,7 +5505,7 @@ export const en = {
   "web.landing.fit.abroad.body":
     "Stripe pays you in your country at your country's rates, Wise reaches you where Stripe doesn't, and every class time is shown to each person in their own zone.",
   "web.landing.quote.attribution": "A Spanish teacher on SpiralClass, its first",
-  "web.landing.quote.context": "Her classes shaped every feature on this page.",
+  "web.landing.quote.context": "Her classes and feedback help shape SpiralClass.",
   "web.landing.pricing.title": "Free to start. Free to get paid, on every plan.",
   "web.landing.pricing.body":
     "A free plan for as long as you want it, and Pro for the AI and the extras, with {days} days to try it and no card. Both payment rails are free whatever you choose.",
@@ -5527,7 +5552,7 @@ export const en = {
     "SpiralClass hosts the live lesson and layers on AI no marketplace gives you.",
   "web.landing.ai.captions.title": "A video classroom with subtitles in their language",
   "web.landing.ai.captions.body":
-    "The class happens inside SpiralClass, no Zoom link, no second app. Turn on captions and your words appear on your student's screen as you speak, then translated when the sentence ends. Theirs come back to you the same way. It runs in the browser and nothing is stored.",
+    "The class happens inside SpiralClass, no Zoom link, no second app. Turn on captions and your words appear on your student's screen as you speak, then translated when the sentence ends. Theirs come back to you the same way. Captions run in the browser; SpiralClass does not record the audio. With the student's consent, caption text is kept for learning notes.",
   "web.landing.ai.srs.title": "Vocabulary that comes back before it's forgotten",
   "web.landing.ai.srs.body":
     "The words you confirm go into the student's own review queue, spaced so each one returns just before it would slip. They see what they're improving at, in their own app.",
@@ -5539,7 +5564,7 @@ export const en = {
     "Two-way Google Calendar and a subscribable iCal feed — your classes live alongside everything else in your day.",
   "web.landing.social.title": "Built with a working teacher",
   "web.landing.social.body":
-    "Every feature on this page was used in real classes before it reached anyone else. The code is public, so you can check how your students' data and your money are handled.",
+    "Built around a working teacher's needs and feedback. The code is public, so you can check how your students' data and your money are handled.",
   "web.pricing.perk.remindersPushEmail": "Push and email reminders",
   "web.pricing.perk.unlimitedStudents": "Unlimited students",
   "web.pricing.perk.unlimitedTemplates": "Unlimited package templates",
@@ -7019,9 +7044,9 @@ export const en = {
   "web.action.teacherPackages.updated": "Package updated — {remaining} of {total} classes left.",
   "web.action.invalidRequest": "Invalid request.",
   "web.action.teacherPackages.hasBookings":
-    "This package has classes booked or taken, so it can't be deleted. Pause it instead, or cancel its classes first.",
+    "This package has class history, including any cancelled classes, so it cannot be deleted. You can correct its balance with Edit or stop new bookings with Pause.",
   "web.action.teacherPackages.hasPayment":
-    "This package has a payment on record, so it can't be deleted. Refund the payment instead.",
+    "This package has a payment on record, so it cannot be deleted. Payment history is kept even after a refund.",
   "web.action.audit.accidentalPackageDeleted": "Accidental package deleted by the teacher.",
   "web.action.teacherStudents.teacherEmail":
     "This email belongs to a teacher account and can't be added as a student.",
@@ -7030,6 +7055,8 @@ export const en = {
   "web.action.audit.studentWentLive": "Student went live — notifications now flow.",
   "web.action.teacherStudents.nowLive":
     "Student is live. They'll receive notifications from now on.",
+  "web.action.teacherStudents.nowLiveNotificationsOff":
+    "Student is live, but their notifications are still off, so they will not get booking confirmations or reminders. You can turn them on in the Settings tab.",
   "web.action.audit.wiseNotReceived": "Wise: payment not received",
   "web.action.invitations.sent": "Sent {count} invitations.",
   "web.action.invitations.sent_one": "Sent {count} invitation.",
@@ -7054,6 +7081,8 @@ export const en = {
   "web.action.admin.mfa.incorrectCode": "Incorrect code.",
   "web.action.admin.notificationNotFound": "Notification not found",
   "web.action.admin.notificationAlreadyInState": 'Already in "{status}" state',
+  "web.action.admin.notificationNotRetryable":
+    "This email was not sent by the queue and cannot be retried here. The teacher must correct the address and resend it.",
   "web.action.admin.requeued": "Re-queued",
   "web.action.admin.noRecipients": "No recipients",
   "web.action.admin.alreadyCanceled": "Already canceled",

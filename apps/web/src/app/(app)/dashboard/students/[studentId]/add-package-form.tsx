@@ -40,6 +40,7 @@ export function AddPackageForm({
   const [open, setOpen] = useState(false);
   const [total, setTotal] = useState("");
   const [remaining, setRemaining] = useState("");
+  const [remainingEdited, setRemainingEdited] = useState(false);
   const [duration, setDuration] = useState("50");
   const [price, setPrice] = useState("");
   const { errors, setErrors, clearError } = useFieldErrors<"classesTotal" | "classesRemaining">();
@@ -57,6 +58,7 @@ export function AddPackageForm({
     // A fresh full package starts with every class remaining; the teacher
     // adjusts this down for a mid-package student.
     setRemaining(String(tpl.classCount));
+    setRemainingEdited(false);
     setDuration(String(tpl.classDurationMin));
     setPrice(tpl.pricePesos);
     setErrors({});
@@ -140,6 +142,10 @@ export function AddPackageForm({
             onChange={(e) => {
               setTotal(e.target.value);
               clearError("classesTotal");
+              if (!remainingEdited) {
+                setRemaining(e.target.value);
+                clearError("classesRemaining");
+              }
             }}
           />
           <FieldError id="pkg-total-error" message={errors.classesTotal} />
@@ -162,6 +168,7 @@ export function AddPackageForm({
             value={remaining}
             onChange={(e) => {
               setRemaining(e.target.value);
+              setRemainingEdited(true);
               clearError("classesRemaining");
             }}
           />

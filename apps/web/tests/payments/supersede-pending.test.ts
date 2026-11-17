@@ -10,6 +10,7 @@ type Pay = {
   id: string;
   provider: "stripe" | "manual_transfer";
   stripeCheckoutSessionId: string | null;
+  status?: "pending" | "failed";
   studentMarkedSentAt?: Date | null;
 };
 type Pkg = {
@@ -45,6 +46,7 @@ function fakeDeps(packages: Pkg[], opts: { expireThrowsFor?: Set<string> } = {})
             payments: p.payments.map((pay) => ({
               id: pay.id,
               provider: pay.provider,
+              status: pay.status ?? "pending",
               stripeCheckoutSessionId: pay.stripeCheckoutSessionId,
             })),
           }));
@@ -162,5 +164,41 @@ describe("supersedePendingCheckouts", () => {
     });
     expect(out.superseded).toBe(1);
     expect(getStripe).not.toHaveBeenCalled();
+  });
+
+  // Issue #74: a declined card is now superseded (its session is still open,
+  // so expiring it is what makes that safe). A failed card payment whose
+  // session id was never recorded cannot be expired, so it is left alone — a
+  // late payment on an expired package would never activate it.
+  it("expires a declined card checkout's session before superseding it", async () => {
+    const { deps, expired, updates } = fakeDeps([
+      {
+        id: "pkg5",
+        status: "pending",
+        payments: [
+          { id: "pay5", provider: "stripe", status: "failed", stripeCheckoutSessionId: "cs_dec" },
+        ],
+      },
+    ]);
+    const out = await supersedePendingCheckouts(PARAMS, deps);
+    expect(out.superseded).toBe(1);
+    expect(expired).toEqual(["cs_dec"]);
+    expect(updates).toEqual([{ id: "pkg5", status: "expired" }]);
+  });
+
+  it("leaves a failed card checkout alone when its session cannot be expired", async () => {
+    const { deps, updates, stripe } = fakeDeps([
+      {
+        id: "pkg6",
+        status: "pending",
+        payments: [
+          { id: "pay6", provider: "stripe", status: "failed", stripeCheckoutSessionId: null },
+        ],
+      },
+    ]);
+    const out = await supersedePendingCheckouts(PARAMS, deps);
+    expect(out.superseded).toBe(0);
+    expect(updates).toEqual([]);
+    expect(stripe.expireCheckoutSession).not.toHaveBeenCalled();
   });
 });

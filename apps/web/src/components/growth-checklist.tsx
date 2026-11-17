@@ -32,10 +32,12 @@ export function GrowthChecklist({
   checklist,
   bookingUrl,
   locale,
+  readOnly = false,
 }: {
   checklist: GrowthChecklistData;
   bookingUrl: string;
   locale: AppLocale;
+  readOnly?: boolean;
 }) {
   const posthog = usePostHog();
   const t = useT();
@@ -52,6 +54,7 @@ export function GrowthChecklist({
     });
 
   const onShare = async (step: ResolvedGrowthStep, channel: ShareChannel) => {
+    if (readOnly) return;
     track(step, channel);
     const text = shareText(bookingUrl, channel, locale);
     if (channel === "whatsapp") {
@@ -140,6 +143,7 @@ export function GrowthChecklist({
                       type="button"
                       variant="secondary"
                       size="sm"
+                      disabled={readOnly}
                       onClick={() => onShare(step, channel)}
                     >
                       {channel === "facebook" && copied
@@ -160,7 +164,8 @@ export function GrowthChecklist({
                   // verified only as a button fill — see the note in
                   // dashboard-view.tsx), and axe caught it here.
                   <Button
-                    asChild
+                    asChild={!readOnly}
+                    disabled={readOnly}
                     variant={step.done ? "ghost" : "outline"}
                     size="sm"
                     className={
@@ -169,9 +174,13 @@ export function GrowthChecklist({
                         : undefined
                     }
                   >
-                    <Link href={webNavHref(step.action.nav)} onClick={() => track(step)}>
-                      {step.ctaLabel}
-                    </Link>
+                    {readOnly ? (
+                      <span>{step.ctaLabel}</span>
+                    ) : (
+                      <Link href={webNavHref(step.action.nav)} onClick={() => track(step)}>
+                        {step.ctaLabel}
+                      </Link>
+                    )}
                   </Button>
                 )}
               </div>

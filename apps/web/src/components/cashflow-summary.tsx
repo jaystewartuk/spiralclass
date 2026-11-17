@@ -109,7 +109,13 @@ function soFarLabel(summary: CashFlowSummary, locale: string, t: TFunction): str
  * she was never here for. `tabular-nums` throughout, because these figures are
  * compared against themselves across visits.
  */
-export async function EarningsTile({ cashFlow }: { cashFlow: CashFlow }) {
+export async function EarningsTile({
+  cashFlow,
+  readOnly = false,
+}: {
+  cashFlow: CashFlow;
+  readOnly?: boolean;
+}) {
   const [t, locale] = await Promise.all([getT(), getPreferredLocale()]);
   const summary = cashFlow.primary;
   const previous = summary.months[1];
@@ -167,14 +173,19 @@ export async function EarningsTile({ cashFlow }: { cashFlow: CashFlow }) {
             dark mode. See the note in dashboard-view.tsx. */}
         {/* Only once there is a month to see: the history renders nothing
             until she has taught. */}
-        {summary.months.length > 0 && (
-          <Link
-            href="/payments#earned-by-month"
-            className="inline-block text-sm font-medium underline underline-offset-4"
-          >
-            {t("web.cashflow.seeByMonth")}
-          </Link>
-        )}
+        {summary.months.length > 0 &&
+          (readOnly ? (
+            <span className="inline-block text-sm font-medium underline underline-offset-4">
+              {t("web.cashflow.seeByMonth")}
+            </span>
+          ) : (
+            <Link
+              href="/payments#earned-by-month"
+              className="inline-block text-sm font-medium underline underline-offset-4"
+            >
+              {t("web.cashflow.seeByMonth")}
+            </Link>
+          ))}
       </CardContent>
     </Card>
   );

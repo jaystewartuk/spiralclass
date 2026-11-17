@@ -8,14 +8,19 @@ const log = logger({ surface: "reconcile-paid" });
 // When a Stripe payment settles, the webhook flips it to `paid` inside a
 // transaction and THEN emits `payment.paid` OUTSIDE that transaction, as a
 // best-effort try/catch (see webhook-handler.ts). That single event is the sole
-// trigger for the teacher-payout transfer, the single-class auto-book, the
-// referral reward, and the first-payment magic link. If the emit is lost — a
-// transient Inngest send failure the handler swallows, or a crash/timeout in the
-// post-commit window — the DB shows `paid` but none of those ran, the webhook
-// already returned 200 so Stripe never retries, and the sibling
-// `payment_intent.succeeded` event no-ops on the already-paid row. The teacher
-// is then silently never paid for a real, charged sale, with no retry path and
+// trigger for the single-class auto-book, the referral reward, and the
+// first-payment magic link. (It once also triggered a teacher-payout transfer;
+// D-143 removed it — the money settles on the teacher's own account.) If the
+// emit is lost — a transient Inngest send failure the handler swallows, or a
+// crash/timeout in the post-commit window — the DB shows `paid` but none of
+// those ran, the webhook already returned 200 so Stripe never retries, and the
+// sibling `payment_intent.succeeded` event no-ops on the already-paid row. The
+// student then never gets the class they picked, with no retry path and
 // (before this) no reconcile.
+//
+// This sweep only sees rows the webhook already flipped to `paid`. A payment
+// whose webhook never arrived at all is still `pending`, and
+// settle-unconfirmed.ts is its backstop.
 //
 // This sweep closes that hole. Because a lost emit takes ALL of the
 // `payment.paid` consumers down together, re-emitting re-drives every one of

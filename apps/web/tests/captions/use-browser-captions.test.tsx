@@ -143,6 +143,7 @@ function Harness(props: {
   role: "teacher" | "student";
   teacherCaptionsOn: boolean;
   onRecognitionUnusable?: (reason: string) => void;
+  onCloudStopped?: (reason: string) => void;
 }) {
   latest = useBrowserCaptions({
     room: props.room as never,
@@ -151,6 +152,7 @@ function Harness(props: {
     teacherCaptionsOn: props.teacherCaptionsOn,
     showLocal: (line) => shown.push(line),
     onRecognitionUnusable: props.onRecognitionUnusable,
+    onCloudStopped: props.onCloudStopped,
   });
   return null;
 }
@@ -566,6 +568,48 @@ describe("useBrowserCaptions — a consent given from the call", () => {
     const room = new FakeRoom("t1");
     await render({ room, role: "teacher", teacherCaptionsOn: true });
     expect(latest.otherPresent).toBe(false);
+  });
+});
+
+describe("useBrowserCaptions — a cloud stream that cannot run", () => {
+  async function phoneThatCannotStream(onCloudStopped = vi.fn()) {
+    Object.defineProperty(navigator, "userAgentData", {
+      value: { mobile: true, brands: [{ brand: "Chromium" }] },
+      configurable: true,
+    });
+    vi.stubGlobal("WebSocket", class {});
+    vi.stubGlobal(
+      "MediaRecorder",
+      Object.assign(function MediaRecorder() {}, { isTypeSupported: () => false }),
+    );
+    configReplies = [
+      { ok: true, enabled: true, session: SESSION("teacher", { cloudRecognition: true }) },
+    ];
+    const room = new FakeRoom("t1");
+    const other = new FakeParticipant("s1", { id: "s1-mic", readyState: "live" });
+    other.attributes.captionsAsr = "0";
+    room.join(other);
+    await render({ room, role: "teacher", teacherCaptionsOn: true, onCloudStopped });
+    await settle();
+    return { room, other, onCloudStopped };
+  }
+
+  it("tells the room and reports why, without asking for a token", async () => {
+    const { room, onCloudStopped } = await phoneThatCannotStream();
+    expect(onCloudStopped).toHaveBeenCalledWith("unsupported");
+    expect(room.localParticipant.attributes.captionsSpeechStopped).toBe("1");
+    expect(fetchMock.mock.calls.some(([u]) => u === "/api/captions/stt-token")).toBe(false);
+  });
+
+  it("reads the other browser's give-up, and only a real one", async () => {
+    const { room, other } = await phoneThatCannotStream();
+    expect(latest.otherSpeechStopped).toBe(false);
+    other.attributes.captionsSpeechStopped = "1";
+    act(() => room.emit("participantAttributesChanged"));
+    expect(latest.otherSpeechStopped).toBe(true);
+    other.attributes.captionsSpeechStopped = "0";
+    act(() => room.emit("participantAttributesChanged"));
+    expect(latest.otherSpeechStopped).toBe(false);
   });
 });
 

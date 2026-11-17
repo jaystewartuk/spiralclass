@@ -215,6 +215,16 @@ export async function buildStudentExport(
     exportedAt: new Date().toISOString(),
     subjectType: "student",
     subjectId: student.id,
-    data: student,
+    data: {
+      ...student,
+      // When her email opt-in last changed to its current value. Nothing
+      // wrote this before #155, and those rows cannot be backfilled, so a
+      // missing date says so rather than exporting a bare null.
+      emailOptInAt: student.emailOptInAt ?? EMAIL_OPT_IN_DATE_UNKNOWN,
+    },
   };
 }
+
+// The export is a machine-readable JSON file, not rendered copy, so this
+// marker is a stable value rather than a translated string.
+export const EMAIL_OPT_IN_DATE_UNKNOWN = "unknown";

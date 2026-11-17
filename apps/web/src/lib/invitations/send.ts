@@ -1,3 +1,4 @@
+import type { Prisma } from "@prisma/client";
 import { serverEnv } from "@/lib/env";
 import { getEmailClient } from "@/lib/email";
 import { renderBrandedEmailHtml, type EmailHtmlContent } from "@/lib/email/html-shell";
@@ -10,7 +11,8 @@ import {
   languageCodeToLocale,
 } from "@spiralclass/shared";
 import { benefitEmailLines } from "./benefits";
-import { INVITATION_PATH_PREFIX } from "./constants";
+import { prisma } from "@/lib/prisma";
+import { INVITATION_NOTIFICATION_TEMPLATE, INVITATION_PATH_PREFIX } from "./constants";
 
 const log = logger({ surface: "invitations" });
 
@@ -112,20 +114,46 @@ export function buildInvitationEmail(input: BuildInvitationEmailInput): BuiltEma
   };
 }
 
+// Who an invitation send belongs to, for the notifications row it leaves.
+export type InvitationSendRecord = {
+  teacherId: string;
+  // The roster student the invitation provisioned — the row's recipient.
+  studentId: string;
+  invitationId: string;
+};
+
+// The one write this needs, stated structurally so a test double need not
+// reimplement Prisma's overloaded client. The real client satisfies it.
+export type InvitationRecordDb = {
+  notification: {
+    create(args: { data: Prisma.NotificationUncheckedCreateInput }): Promise<unknown>;
+  };
+};
+
 // Build + send. The invite email is a one-off transactional send (like the
 // auth OTP), NOT routed through the notification dispatcher: the recipient has
 // no notification preferences yet (they aren't a platform user), and the invite
-// must go out regardless of any later opt-out. Throws on send failure so the
-// caller can surface it and NOT mark the invitation sent.
-export async function sendInvitationEmail(input: {
-  to: string;
-  teacherName: string;
-  studentName: string | null;
-  rawToken: string;
-  locale: string;
-  teacherAvatarUrl: string | null;
-  messagingEnabled: boolean;
-}): Promise<void> {
+// must go out regardless of any later opt-out. Throws on send failure so
+// the caller can surface it and NOT mark the invitation sent.
+//
+// After a successful send it writes a `notifications` row directly — never via
+// enqueue or the dispatcher, so no preference gate can stop the invite — so
+// the provider's delivery webhook can mark it delivered or bounced, and support
+// sees it on /admin/notifications (issue #85). Without that row a bounce was
+// dropped as `no-notification-row` and the invite read "sent" for ever.
+export async function sendInvitationEmail(
+  input: {
+    to: string;
+    teacherName: string;
+    studentName: string | null;
+    rawToken: string;
+    locale: string;
+    teacherAvatarUrl: string | null;
+    messagingEnabled: boolean;
+    record: InvitationSendRecord;
+  },
+  db: InvitationRecordDb = prisma,
+): Promise<{ providerMessageId: string }> {
   const languageCode = localeToLanguageCode(input.locale);
   const email = buildInvitationEmail({
     teacherName: input.teacherName,
@@ -146,4 +174,29 @@ export async function sendInvitationEmail(input: {
     log.error("invitation email send failed", undefined, { error: res.error });
     throw new Error("invitation-email-send-failed");
   }
+
+  // Best-effort: the email has already gone out. Throwing here would make the
+  // first-send caller discard an invitation the student is holding, or tell
+  // the teacher a resend failed when it did not.
+  try {
+    await db.notification.create({
+      data: {
+        teacherId: input.record.teacherId,
+        recipientType: "student",
+        recipientId: input.record.studentId,
+        channel: "email",
+        templateName: INVITATION_NOTIFICATION_TEMPLATE,
+        status: "sent",
+        sentAt: new Date(),
+        providerMessageId: res.providerMessageId,
+        languageCode,
+        metadata: { invitationId: input.record.invitationId },
+      },
+    });
+  } catch (err) {
+    log.error("invitation send record failed", err, {
+      invitationId: input.record.invitationId,
+    });
+  }
+  return { providerMessageId: res.providerMessageId };
 }

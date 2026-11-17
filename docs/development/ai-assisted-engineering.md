@@ -202,6 +202,20 @@ it returns. Otherwise it is decoration.**
 
 ## The shape of a session
 
+For a manually started backlog session, invoke `$work-backlog`. Its
+[instructions](../../.claude/skills/work-backlog/SKILL.md) select a live p1,
+resume unfinished work first, and stop at one tested PR for review. Codex
+discovers the same source through `.agents/skills/work-backlog/SKILL.md`; it is a tracked
+symlink, so fresh checkouts receive the workflow too. Opening the project alone
+does not start work, and this adds no schedule.
+
+To keep working across turns, use this bounded goal in Codex:
+
+```text
+/goal Use $work-backlog to take the next eligible p1 issue through a tested PR.
+Stop when the PR is ready for my review or you need a product decision.
+```
+
 The configuration is meant to produce this without anyone typing it:
 
 ```

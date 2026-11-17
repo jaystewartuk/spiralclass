@@ -145,7 +145,10 @@ apps/web/.auth/
 # Listed individually, NOT as a blanket `.claude/skills/` — that directory also
 # holds tracked project skills (e.g. pr) and future ones must not be
 # silently ignored.
-.agents/
+.agents/*
+!.agents/skills/
+.agents/skills/*
+!.agents/skills/work-backlog
 skills-lock.json
 .claude/skills/connect-recommend
 .claude/skills/connect-required-verification-information

@@ -40,7 +40,12 @@ import { listRoomParticipantAttributes } from "@/lib/video/room";
 
 const log = logger({ surface: "captions" });
 
-const bodySchema = z.object({ bookingId: z.string().min(1).max(64) });
+// `pcm`: this browser sends raw samples, because it cannot record a format
+// Deepgram detects by itself. It changes the URL's audio description only.
+const bodySchema = z.object({
+  bookingId: z.string().min(1).max(64),
+  pcm: z.boolean().optional(),
+});
 
 // A healthy stream takes one token per class; a reconnect takes another. An
 // hour of a phone dropping its connection every few minutes stays inside this.
@@ -62,7 +67,7 @@ export async function POST(req: Request): Promise<Response> {
 
   return handle(async () => {
     const participant = await requireApiCallParticipant(req);
-    const { bookingId } = await readJsonBody(req, bodySchema);
+    const { bookingId, pcm = false } = await readJsonBody(req, bodySchema);
 
     const access = await captionAccessFor(participant, bookingId);
     if (!access.ok) {
@@ -117,6 +122,7 @@ export async function POST(req: Request): Promise<Response> {
       bookingId,
       speaker,
       language,
+      pcm,
       ok: grant.ok,
       ...(grant.ok ? {} : { reason: grant.reason, status: grant.status }),
     });
@@ -125,7 +131,7 @@ export async function POST(req: Request): Promise<Response> {
     return {
       ok: true,
       token: grant.token,
-      url: deepgramListenUrl(language),
+      url: deepgramListenUrl(language, { pcm }),
       expiresInSeconds: grant.expiresInSeconds,
     } as const;
   });

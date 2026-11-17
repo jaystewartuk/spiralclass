@@ -27,6 +27,69 @@ export function computeDiscountMinorUnits(
   return Math.max(0, Math.min(baseMinorUnits, raw));
 }
 
+// How long after a card checkout is created it can still be paid. Stripe caps
+// a Checkout Session's life at 24 hours, and we never set it shorter; the
+// extra hour covers the gap between writing the Payment row and creating the
+// session. Past this, a `failed` card payment is final: the session that could
+// have retried it is gone.
+export const CHECKOUT_PAYABLE_WINDOW_MS = 25 * 60 * 60 * 1000;
+
+// THE definition of a purchase that still spends a discount use or a referral
+// first purchase (issue #74). Every counter — checkout, referral, the
+// teacher's dashboard, the refund clawback — imports this rather than restating
+// it, so the till and the dashboard cannot disagree.
+//
+// A purchase counts while it is `active`, or `pending` and still payable. The
+// webhook fails the Payment of an expired or declined card checkout but leaves
+// its Package `pending`, so `pending` alone kept those uses spent for good.
+// A `failed` payment is not proof the purchase is dead, though: a declined
+// card leaves the Checkout Session open, the student can try another card on
+// it, and the payment goes failed → paid (lib/payments/state.ts). So a pending
+// package stops counting only when every payment on it is a failed CARD
+// payment older than the payable window. A pending payment of any age keeps
+// counting — a bank transfer may be in flight (D-145) — and a failed manual
+// transfer already expires its package (failWisePaymentAction).
+export function redemptionCountsWhere(now: Date): Prisma.PackageWhereInput {
+  const payableSince = new Date(now.getTime() - CHECKOUT_PAYABLE_WINDOW_MS);
+  return {
+    status: { in: [PackageStatus.pending, PackageStatus.active] },
+    NOT: {
+      status: PackageStatus.pending,
+      // `some` guards Prisma's vacuous `every`: a package with no payment row
+      // at all keeps counting.
+      payments: {
+        some: {},
+        every: { status: "failed", provider: "stripe", createdAt: { lt: payableSince } },
+      },
+    },
+  };
+}
+
+// The limits re-checked inside the checkout transaction, with the code's row
+// locked. resolveAndValidateDiscount runs once before the transaction so a bad
+// code fails before any row is written; this is the check that decides. The
+// lock serialises every checkout of one code, and under READ COMMITTED each
+// count after it sees the redemptions the previous holder committed — so two
+// checkouts at once cannot both take the last use, by the total cap or by the
+// per-student limit.
+export async function revalidateDiscountUnderLock(
+  tx: Prisma.TransactionClient,
+  args: {
+    codeId: string;
+    teacherId: string;
+    studentId: string;
+    code: string;
+    baseMinorUnits: number;
+    now?: Date;
+  },
+): Promise<DiscountValidation> {
+  await tx.$queryRaw`SELECT 1 FROM discount_codes WHERE id = ${args.codeId}::uuid FOR UPDATE`;
+  const result = await resolveAndValidateDiscount({ ...args, db: tx });
+  // Resolved by its text again; it must still be the row that was locked.
+  if (result.ok && result.codeId !== args.codeId) return { ok: false, reason: "not_found" };
+  return result;
+}
+
 export type DiscountRejectReason =
   "not_found" | "inactive" | "expired" | "max_redemptions" | "per_student";
 
@@ -36,8 +99,9 @@ export type DiscountValidation =
 
 // Resolve a code for a (teacher, student) and decide whether it can apply to a
 // purchase of `baseMinorUnits`. Redemption limits are counted against redemptions
-// whose package is still pending/active — a refunded or superseded purchase
-// frees the use again, which is also what makes refund handling automatic.
+// whose purchase still counts (redemptionCountsWhere) — a refunded, superseded
+// or dead purchase frees the use again, which is also what makes refund
+// handling automatic.
 //
 // `db` accepts the PrismaClient or a transaction client; callers validate just
 // before the checkout transaction (read-only) so an invalid code fails before
@@ -77,9 +141,7 @@ export async function resolveAndValidateDiscount(args: {
   }
 
   // A redemption only "counts" while its purchase is live.
-  const livePackage = {
-    package: { status: { in: [PackageStatus.pending, PackageStatus.active] } },
-  };
+  const livePackage = { package: redemptionCountsWhere(now) };
 
   if (row.maxRedemptions != null) {
     const total = await args.db.discountRedemption.count({

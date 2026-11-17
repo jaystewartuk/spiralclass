@@ -1,7 +1,7 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { z } from "zod";
 import type { InsightCategory } from "@prisma/client";
-import { anthropicApiKey } from "@/lib/env";
+import { anthropicApiKey, anthropicSmallModel } from "@/lib/env";
 import type { StudentProfile } from "./profile";
 
 // AI pre-class brief — Phase F (the Phase F design,
@@ -11,13 +11,10 @@ import type { StudentProfile } from "./profile";
 // profile; mirrors insights.ts (pure prompt + forced-tool structured output +
 // degrade-gracefully). Teacher-only, Pro-gated upstream.
 
-// Haiku (D-87 — cost). Safe here because this is a short (max_tokens 1024),
-// structured forced-tool call that passes NO `output_config.effort` — `effort`
-// 400s on pre-4.6 models including Haiku 4.5, which is why the effort-passing
-// class-content compose path stayed on Sonnet 5. Adding `effort` here requires
-// moving this constant to an effort-capable model in the same change.
-// Hardcoded: ANTHROPIC_MODEL does NOT override this.
-export const BRIEF_MODEL = "claude-haiku-4-5";
+// Model: anthropicSmallModel() (lib/env.ts) — Haiku 4.5 by default (D-87 —
+// cost). A short (max_tokens 1024), structured forced-tool call that passes NO
+// `output_config.effort`, which is what the small tier's requirements in
+// lib/ai/models.ts encode.
 
 // Keep it a ~15-second read: at most three suggested cues.
 export const MAX_BRIEF_FOCUS = 3;
@@ -208,7 +205,7 @@ export async function generateBrief(input: BriefInput): Promise<{ brief: Brief; 
   const { system, user } = buildBriefPrompt(input);
 
   const response = await client.messages.create({
-    model: BRIEF_MODEL,
+    model: anthropicSmallModel(),
     max_tokens: 1024,
     system,
     messages: [{ role: "user", content: user }],

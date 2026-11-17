@@ -60,6 +60,7 @@ import {
   type TeacherNotificationPrefs,
 } from "./preferences";
 import { pushChannelForTemplate, renderPush } from "./push";
+import { reminderClockChangeNote } from "./clock-change";
 import {
   getWebPushClient,
   isWebPushConfigured,
@@ -1437,6 +1438,14 @@ export async function buildVariables(
           calendarEndIso,
           joinPathSuffix,
           classPathSuffix: `s/class/${booking.id}`,
+          // Only the reminders reach here (the confirmation and materials
+          // returned above); the shift was measured when the row was enqueued.
+          clockChangeNote: reminderClockChangeNote(
+            ctx.notification.metadata,
+            "student",
+            ctx.recipientLocale,
+            teacherName,
+          ),
         },
       };
     }
@@ -1477,6 +1486,12 @@ export async function buildVariables(
         // same terms as the student reminders (call available for this booking).
         joinPathSuffix: await callJoinSuffixTeacher(prisma, ctx.notification.teacherId, booking.id),
         classPathSuffix: `dashboard/classes/${booking.id}`,
+        clockChangeNote: reminderClockChangeNote(
+          ctx.notification.metadata,
+          "teacher",
+          ctx.recipientLocale,
+          studentName,
+        ),
       };
       if (t === "reminder_15m_teacher") {
         return { ok: true, variables: base };

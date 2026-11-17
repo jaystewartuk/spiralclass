@@ -75,6 +75,11 @@ export function InvitationsTable({ rows }: { rows: InvitationDashboardRow[] }) {
               <div className="truncate text-xs text-muted-foreground">
                 {row.email ?? t("web.dashboard.invitations.noEmail")}
               </div>
+              {row.undeliveredTo ? (
+                <p className="mt-1 text-xs break-words text-destructive">
+                  {t("web.dashboard.invitations.notDelivered", { email: row.undeliveredTo })}
+                </p>
+              ) : null}
             </div>
             <div className="flex flex-wrap items-center gap-2">
               <Badge variant={BADGE_VARIANT[row.state]}>

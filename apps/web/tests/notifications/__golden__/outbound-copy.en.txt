@@ -32,6 +32,8 @@ body: Your class with  is on  ·  classes left
 subject: Reminder: class tomorrow with ⟦teacherName⟧
 text: Hi, I'm ⟦teacherName⟧. Reminder for our class tomorrow, ⟦classDateTime⟧.
 
+⟦clockChangeNote⟧
+
 Join the video call at class time.
 
 Join video call: https://app.test/action
@@ -41,11 +43,12 @@ Add to calendar: https://calendar.test/add
 —
 Manage notification settings: https://app.test/r/notif-settings/token
 To stop receiving emails: https://app.test/r/email-uns/token
-html: Your class is tomorrow Class tomorrow — ⟦classDateTime⟧ SpiralClass Your class is tomorrow Hi, I&#39;m ⟦teacherName⟧. Reminder for our class tomorrow, ⟦classDateTime⟧. Join the video call at class time. Join video call Add to calendar Manage notification settings · Unsubscribe from these emails Classes, payments and reminders without the mental load. Sent by SpiralClass · spiralclass.com
+html: Your class is tomorrow Class tomorrow — ⟦classDateTime⟧ SpiralClass Your class is tomorrow Hi, I&#39;m ⟦teacherName⟧. Reminder for our class tomorrow, ⟦classDateTime⟧. ⟦clockChangeNote⟧ Join the video call at class time. Join video call Add to calendar Manage notification settings · Unsubscribe from these emails Classes, payments and reminders without the mental load. Sent by SpiralClass · spiralclass.com
 
 === reminder_24h · push · with every variable
 title: Reminder: Tomorrow
 body: Class with ⟦teacherName⟧ on ⟦classDateTime⟧
+⟦clockChangeNote⟧
 
 === reminder_24h · email · with no variables
 subject: Reminder: class tomorrow with 
@@ -62,6 +65,8 @@ body: Class with  on
 subject: Class with ⟦teacherName⟧ starts in 1 hour
 text: Hi, I'm ⟦teacherName⟧. See you in 1 hour, ⟦classDateTime⟧. Join the video call at class time.
 
+⟦clockChangeNote⟧
+
 Join video call: https://app.test/action
 
 Add to calendar: https://calendar.test/add
@@ -69,11 +74,12 @@ Add to calendar: https://calendar.test/add
 —
 Manage notification settings: https://app.test/r/notif-settings/token
 To stop receiving emails: https://app.test/r/email-uns/token
-html: Your class starts in 1 hour In 1 hour — ⟦classDateTime⟧ SpiralClass Your class starts in 1 hour Hi, I&#39;m ⟦teacherName⟧. See you in 1 hour, ⟦classDateTime⟧. Join the video call at class time. Join video call Add to calendar Manage notification settings · Unsubscribe from these emails Classes, payments and reminders without the mental load. Sent by SpiralClass · spiralclass.com
+html: Your class starts in 1 hour In 1 hour — ⟦classDateTime⟧ SpiralClass Your class starts in 1 hour Hi, I&#39;m ⟦teacherName⟧. See you in 1 hour, ⟦classDateTime⟧. ⟦clockChangeNote⟧ Join the video call at class time. Join video call Add to calendar Manage notification settings · Unsubscribe from these emails Classes, payments and reminders without the mental load. Sent by SpiralClass · spiralclass.com
 
 === reminder_1h · push · with every variable
 title: Reminder: In 1 hour
 body: Class with ⟦teacherName⟧ on ⟦classDateTime⟧
+⟦clockChangeNote⟧
 
 === reminder_1h · email · with no variables
 subject: Class with  starts in 1 hour
@@ -88,16 +94,19 @@ body: Class with  on
 subject: Class with ⟦teacherName⟧ starts in 15 minutes
 text: Hi, I'm ⟦teacherName⟧. Your class starts in 15 minutes, ⟦classDateTime⟧. Join the video call at class time.
 
+⟦clockChangeNote⟧
+
 Join video call: https://app.test/action
 
 —
 Manage notification settings: https://app.test/r/notif-settings/token
 To stop receiving emails: https://app.test/r/email-uns/token
-html: Your class starts in 15 minutes In 15 minutes — ⟦classDateTime⟧ SpiralClass Your class starts in 15 minutes Hi, I&#39;m ⟦teacherName⟧. Your class starts in 15 minutes, ⟦classDateTime⟧. Join the video call at class time. Join video call Manage notification settings · Unsubscribe from these emails Classes, payments and reminders without the mental load. Sent by SpiralClass · spiralclass.com
+html: Your class starts in 15 minutes In 15 minutes — ⟦classDateTime⟧ SpiralClass Your class starts in 15 minutes Hi, I&#39;m ⟦teacherName⟧. Your class starts in 15 minutes, ⟦classDateTime⟧. ⟦clockChangeNote⟧ Join the video call at class time. Join video call Manage notification settings · Unsubscribe from these emails Classes, payments and reminders without the mental load. Sent by SpiralClass · spiralclass.com
 
 === reminder_15m · push · with every variable
 title: Reminder: In 15 minutes
 body: Class with ⟦teacherName⟧ on ⟦classDateTime⟧
+⟦clockChangeNote⟧
 
 === reminder_15m · email · with no variables
 subject: Class with  starts in 15 minutes
@@ -112,6 +121,8 @@ body: Class with  on
 subject: Reminder: class tomorrow with ⟦studentName⟧
 text: Reminder: your class with ⟦studentName⟧ is tomorrow, ⟦classDateTime⟧.
 
+⟦clockChangeNote⟧
+
 Join the video call at class time.
 
 Join video call: https://app.test/action
@@ -121,11 +132,12 @@ Add to calendar: https://calendar.test/add
 —
 Manage notification settings: https://app.test/r/notif-settings/token
 To stop receiving emails: https://app.test/r/email-uns/token
-html: Your class is tomorrow Class tomorrow — ⟦classDateTime⟧ SpiralClass Your class is tomorrow Reminder: your class with ⟦studentName⟧ is tomorrow, ⟦classDateTime⟧. Join the video call at class time. Join video call Add to calendar Manage notification settings · Unsubscribe from these emails Classes, payments and reminders without the mental load. Sent by SpiralClass · spiralclass.com
+html: Your class is tomorrow Class tomorrow — ⟦classDateTime⟧ SpiralClass Your class is tomorrow Reminder: your class with ⟦studentName⟧ is tomorrow, ⟦classDateTime⟧. ⟦clockChangeNote⟧ Join the video call at class time. Join video call Add to calendar Manage notification settings · Unsubscribe from these emails Classes, payments and reminders without the mental load. Sent by SpiralClass · spiralclass.com
 
 === reminder_24h_teacher · push · with every variable
 title: Reminder: Tomorrow
 body: Class with ⟦studentName⟧ on ⟦classDateTime⟧
+⟦clockChangeNote⟧
 
 === reminder_24h_teacher · email · with no variables
 subject: Reminder: class tomorrow with 
@@ -140,6 +152,8 @@ body: Class with  on
 subject: Class with ⟦studentName⟧ starts in 1 hour
 text: Your class with ⟦studentName⟧ starts in 1 hour, ⟦classDateTime⟧.
 
+⟦clockChangeNote⟧
+
 Join the video call at class time.
 
 Join video call: https://app.test/action
@@ -149,11 +163,12 @@ Add to calendar: https://calendar.test/add
 —
 Manage notification settings: https://app.test/r/notif-settings/token
 To stop receiving emails: https://app.test/r/email-uns/token
-html: Your class starts in 1 hour In 1 hour — ⟦classDateTime⟧ SpiralClass Your class starts in 1 hour Your class with ⟦studentName⟧ starts in 1 hour, ⟦classDateTime⟧. Join the video call at class time. Join video call Add to calendar Manage notification settings · Unsubscribe from these emails Classes, payments and reminders without the mental load. Sent by SpiralClass · spiralclass.com
+html: Your class starts in 1 hour In 1 hour — ⟦classDateTime⟧ SpiralClass Your class starts in 1 hour Your class with ⟦studentName⟧ starts in 1 hour, ⟦classDateTime⟧. ⟦clockChangeNote⟧ Join the video call at class time. Join video call Add to calendar Manage notification settings · Unsubscribe from these emails Classes, payments and reminders without the mental load. Sent by SpiralClass · spiralclass.com
 
 === reminder_1h_teacher · push · with every variable
 title: Reminder: In 1 hour
 body: Class with ⟦studentName⟧ on ⟦classDateTime⟧
+⟦clockChangeNote⟧
 
 === reminder_1h_teacher · email · with no variables
 subject: Class with  starts in 1 hour
@@ -168,6 +183,8 @@ body: Class with  on
 subject: Class with ⟦studentName⟧ starts in 15 minutes
 text: Your class with ⟦studentName⟧ starts in 15 minutes, ⟦classDateTime⟧.
 
+⟦clockChangeNote⟧
+
 Join the video call at class time.
 
 Join video call: https://app.test/action
@@ -175,11 +192,12 @@ Join video call: https://app.test/action
 —
 Manage notification settings: https://app.test/r/notif-settings/token
 To stop receiving emails: https://app.test/r/email-uns/token
-html: Your class starts in 15 minutes In 15 minutes — ⟦classDateTime⟧ SpiralClass Your class starts in 15 minutes Your class with ⟦studentName⟧ starts in 15 minutes, ⟦classDateTime⟧. Join the video call at class time. Join video call Manage notification settings · Unsubscribe from these emails Classes, payments and reminders without the mental load. Sent by SpiralClass · spiralclass.com
+html: Your class starts in 15 minutes In 15 minutes — ⟦classDateTime⟧ SpiralClass Your class starts in 15 minutes Your class with ⟦studentName⟧ starts in 15 minutes, ⟦classDateTime⟧. ⟦clockChangeNote⟧ Join the video call at class time. Join video call Manage notification settings · Unsubscribe from these emails Classes, payments and reminders without the mental load. Sent by SpiralClass · spiralclass.com
 
 === reminder_15m_teacher · push · with every variable
 title: Reminder: In 15 minutes
 body: Class with ⟦studentName⟧ on ⟦classDateTime⟧
+⟦clockChangeNote⟧
 
 === reminder_15m_teacher · email · with no variables
 subject: Class with  starts in 15 minutes

@@ -12,6 +12,8 @@ import { getDualZoneTime } from "@/lib/date-display";
 import { getPreferredLocale, getT } from "@/lib/i18n";
 import { classProximity } from "@/lib/classes-list";
 import { parseMaterialsFilter, parseMaterialsGroupBy } from "@/lib/materials/student-materials";
+import { StudentNotificationsOffNotice } from "@/components/notification-gap-notice";
+import { isNotificationsFullyDisabled } from "@/lib/notifications/preferences";
 import { GoLiveButton } from "./go-live-button";
 import { StudentGlance, StudentIdentity, StudentTabNav } from "./student-detail-header";
 import { resolveStudentTab } from "./student-detail-nav";
@@ -253,10 +255,26 @@ export default async function TeacherStudentDetailPage({
             <CardDescription>{t("web.dashboard.students.notLiveCard.description")}</CardDescription>
           </CardHeader>
           <CardContent>
-            <GoLiveButton studentId={studentId} />
+            <GoLiveButton
+              studentId={studentId}
+              notificationsOff={isNotificationsFullyDisabled(
+                link.student.notificationPrefs as object | null,
+              )}
+            />
           </CardContent>
         </Card>
       )}
+
+      {/* Where the Go live card stood: a live student with every category off
+          is told nothing, and Go live does not change that (#77, D-204). */}
+      <StudentNotificationsOffNotice
+        studentId={studentId}
+        studentName={link.student.name}
+        prefs={link.student.notificationPrefs as object | null}
+        onHold={link.onboardingHoldAt != null}
+        archived={link.archivedAt != null}
+        t={t}
+      />
 
       <StudentTabNav studentId={studentId} active={tab} t={t} />
 

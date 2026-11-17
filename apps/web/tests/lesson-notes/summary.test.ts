@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { buildSummaryPrompt, SUMMARY_MODEL, type SummaryInput } from "@/lib/lesson-notes/summary";
+import { buildSummaryPrompt, type SummaryInput } from "@/lib/lesson-notes/summary";
 
 // The summary prompt is built purely (no network) so it can be asserted here.
-// What matters: the model default, that the student's name + both note columns
+// What matters: that the student's name + both note columns
 // reach the prompt, that "done" cues are marked, and that the recap is asked
 // for in the teacher's own language.
 
@@ -16,13 +16,6 @@ const base: SummaryInput = {
   studentNotes: [{ body: "homework: pages 4-6" }],
   language: "Spanish",
 };
-
-describe("SUMMARY_MODEL", () => {
-  // D-87: deliberately Haiku, not the latest/most-capable model — cost.
-  it("is the Haiku model chosen in D-87", () => {
-    expect(SUMMARY_MODEL).toBe("claude-haiku-4-5");
-  });
-});
 
 describe("buildSummaryPrompt", () => {
   it("includes the student, the date, and both note columns", () => {

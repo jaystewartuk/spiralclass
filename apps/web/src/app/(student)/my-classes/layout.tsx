@@ -14,7 +14,14 @@ export default async function MisClasesLayout({ children }: { children: React.Re
   const student = await getCurrentStudent();
   const photoUrl = student ? await studentPhotoUrl(student.photoPath) : null;
   return (
-    <>
+    // At least a screen tall, so the site footer the root layout renders after
+    // this shell always starts below the fold. Without it, every in-portal
+    // navigation swapped the page for its loading.tsx skeleton — shorter than
+    // the page — and the footer rose into view, then dropped back down when the
+    // content arrived: a layout shift of 0.3+ on the class page alone, beside
+    // "Join video call" (#90). The skeletons cannot match every page's height;
+    // the footer staying below the fold makes their height irrelevant.
+    <div className="min-h-dvh">
       <StudentNav
         localeToggle={<LanguagePicker variant="field" />}
         account={
@@ -29,6 +36,6 @@ export default async function MisClasesLayout({ children }: { children: React.Re
       {student && !student.timezone ? <CaptureTimezone /> : null}
       {student?.timezone ? <TimezoneMismatchNotice savedTimezone={student.timezone} /> : null}
       {children}
-    </>
+    </div>
   );
 }

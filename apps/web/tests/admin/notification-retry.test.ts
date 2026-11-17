@@ -13,6 +13,7 @@ type NotifRow = {
   id: string;
   teacherId: string;
   status: string;
+  templateName: string;
   error: string | null;
   failedAt: Date | null;
 };
@@ -24,6 +25,7 @@ function freshState(overrides: Partial<NotifRow> = {}) {
     id: NOTIF_ID,
     teacherId: TEACHER_ID,
     status: "failed",
+    templateName: "booking_confirmation",
     error: "boom",
     failedAt: new Date(),
     ...overrides,
@@ -88,6 +90,19 @@ describe("retryNotificationAction", () => {
     freshState({ status: "sent", error: null, failedAt: null });
     const res = await retryNotificationAction(undefined, form({ notificationId: NOTIF_ID }));
     expect(res?.error).toMatch(/sent/);
+    expect(emitMock).not.toHaveBeenCalled();
+  });
+
+  it("refuses to retry a bounced invitation, which the dispatcher cannot rebuild", async () => {
+    // Issue #85: an invitation row records a send made outside the dispatcher
+    // (the recipient is not a user yet). Re-queuing it would hand the dispatcher a template it does not
+    // have, under preference gates the invite skips on purpose, with no way to
+    // rebuild the accept link (only the token's hash is stored).
+    freshState({ status: "failed", templateName: "invitation" });
+    const res = await retryNotificationAction(undefined, form({ notificationId: NOTIF_ID }));
+    expect(res?.error).toBeTruthy();
+    expect(res?.ok).toBeUndefined();
+    expect(state.notif?.status).toBe("failed");
     expect(emitMock).not.toHaveBeenCalled();
   });
 

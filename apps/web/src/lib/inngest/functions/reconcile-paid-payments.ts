@@ -3,10 +3,10 @@ import { prisma } from "@/lib/prisma";
 import { enqueueEvent } from "@/lib/jobs/enqueue";
 import { reconcileStrandedPaidPayments } from "@/lib/payments/reconcile-paid";
 
-// Hourly (was */15 until D-115): re-drive the `payment.paid` fan-out (teacher transfer,
-// single-class auto-book, referral reward, magic link) for any Stripe payment
-// that settled but whose teacher-payout transfer never ran — the signal that the
-// webhook's best-effort post-commit emit was lost. Idempotent downstream; see
+// Hourly (was */15 until D-115): re-drive the `payment.paid` fan-out (single-class
+// auto-book, referral reward, magic link) for any paid payment whose picked
+// class was never booked — the signal that the webhook's best-effort
+// post-commit emit was lost. Idempotent downstream; see
 // lib/payments/reconcile-paid.ts for the failure mode this backstops.
 export const reconcilePaidPaymentsCronFn = inngest.createFunction(
   {

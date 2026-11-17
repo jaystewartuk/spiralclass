@@ -115,6 +115,17 @@ Chosen per template by whether `preferences.ts` gives it a category:
   back on from the student's page (`setStudentNotificationsAsTeacherAction`):
   off writes every category `false`; on clears the preferences back to the
   default (all on).
+- The two are independent, and going live lifts **only** the hold. A student
+  whose every category is stored off stays silent after Go live: no booking
+  confirmation, no reminder. Go live does not switch them on, because that
+  all-off map cannot be told apart from the student's own opt-out
+  ([D-204](../decisions/D-204.md)). Instead the teacher is told, in three
+  places: the Go live confirmation and its reply say notifications are still
+  off; the student's page shows a notice above the tabs, on every tab, linking
+  to the switch, for as long as she is live with everything off; and the
+  teacher's booking screen says when the student will not be told about the
+  class (booking updates off, or everything off). A confirmation suppressed
+  before notifications were turned on is not sent afterwards.
 - An archived pairing suppresses the same way the hold does, with the same
   sign-in exception.
 
@@ -122,6 +133,11 @@ Chosen per template by whether `preferences.ts` gives it a category:
 
 - Student and teacher each get reminders **24 hours, 1 hour and 15 minutes**
   before a class; the copy names the other person.
+- When a clock change since the pairing's previous class moved this one on the
+  student's clock, both reminders say so in one extra sentence
+  ([the student's timezone](student-management.md#the-students-timezone)).
+  The shift is measured when the reminder is queued and stored on it, so the
+  inbox shows the same sentence.
 - The scan runs **hourly** (`reminder-scan-cron`, [D-115](../decisions/D-115.md)):
   each scan schedules one wake for the exact moment the next reminder is due,
   so the 15-minute leg arrives at `start − 15m`. A class cancelled or moved

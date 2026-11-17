@@ -352,12 +352,37 @@ describe("flushAnalytics", () => {
 // group by person it reads as 100% drop-off after the page view. The
 // 2026-07-29 production test purchase produced exactly that: `019fafae…`
 // browsing, `e0fda820…` buying, nothing joining them.
+// The parsed posthog-js cookie of a visitor who has never been identified.
+function anon(distinctId: string) {
+  return { distinctId, sessionId: null, anonymous: true };
+}
+
 describe("aliasServerUser", () => {
+  // Issue #89: a browser where a teacher or admin is signed in holds HER id in
+  // the cookie. Merging the buyer into it is permanent — PostHog cannot split a
+  // person — so an identified identity is never aliased, whoever calls.
+  it("never merges into an identified browser identity", async () => {
+    vi.stubEnv("NODE_ENV", "production");
+    vi.stubEnv("POSTHOG_KEY", "phc-real-key");
+    const { aliasServerUser } = await importFresh();
+    aliasServerUser("student-1", { distinctId: "teacher-1", sessionId: null, anonymous: false });
+    expect(aliasMock).not.toHaveBeenCalled();
+  });
+
+  it("does nothing for a browser with no PostHog cookie", async () => {
+    vi.stubEnv("NODE_ENV", "production");
+    vi.stubEnv("POSTHOG_KEY", "phc-real-key");
+    const { aliasServerUser } = await importFresh();
+    const { EMPTY_POSTHOG_IDENTITY } = await import("@/lib/analytics/posthog-cookie");
+    aliasServerUser("student-1", EMPTY_POSTHOG_IDENTITY);
+    expect(aliasMock).not.toHaveBeenCalled();
+  });
+
   it("merges the anonymous id into the real one", async () => {
     vi.stubEnv("NODE_ENV", "production");
     vi.stubEnv("POSTHOG_KEY", "phc-real-key");
     const { aliasServerUser } = await importFresh();
-    aliasServerUser("student-1", "anon-browser-1");
+    aliasServerUser("student-1", anon("anon-browser-1"));
     expect(aliasMock).toHaveBeenCalledWith({
       distinctId: "student-1",
       alias: "anon-browser-1",
@@ -367,7 +392,7 @@ describe("aliasServerUser", () => {
   it("is a hard no-op under NODE_ENV=test, like every other helper here", async () => {
     vi.stubEnv("POSTHOG_KEY", "phc-real-key");
     const { aliasServerUser } = await importFresh();
-    aliasServerUser("student-1", "anon-browser-1");
+    aliasServerUser("student-1", anon("anon-browser-1"));
     expect(aliasMock).not.toHaveBeenCalled();
   });
 
@@ -375,7 +400,7 @@ describe("aliasServerUser", () => {
     vi.stubEnv("NODE_ENV", "production");
     vi.stubEnv("POSTHOG_KEY", "phc-real-key");
     const { aliasServerUser } = await importFresh();
-    aliasServerUser("same-id", "same-id");
+    aliasServerUser("same-id", anon("same-id"));
     expect(aliasMock).not.toHaveBeenCalled();
   });
 
@@ -383,7 +408,7 @@ describe("aliasServerUser", () => {
     vi.stubEnv("NODE_ENV", "production");
     vi.stubEnv("POSTHOG_KEY", "phc-real-key");
     const { aliasServerUser } = await importFresh();
-    aliasServerUser("student-1", "");
+    aliasServerUser("student-1", anon(""));
     expect(aliasMock).not.toHaveBeenCalled();
   });
 
@@ -391,11 +416,11 @@ describe("aliasServerUser", () => {
     vi.stubEnv("NODE_ENV", "production");
     vi.stubEnv("POSTHOG_KEY", "phc-real-key");
     const { aliasServerUser } = await importFresh();
-    aliasServerUser("student-1", "anon-1");
-    aliasServerUser("student-1", "anon-1");
+    aliasServerUser("student-1", anon("anon-1"));
+    aliasServerUser("student-1", anon("anon-1"));
     expect(aliasMock).toHaveBeenCalledTimes(1);
     // A genuinely different device/browser for the same buyer still merges.
-    aliasServerUser("student-1", "anon-2");
+    aliasServerUser("student-1", anon("anon-2"));
     expect(aliasMock).toHaveBeenCalledTimes(2);
   });
 
@@ -406,6 +431,6 @@ describe("aliasServerUser", () => {
       throw new Error("posthog network blip");
     });
     const { aliasServerUser } = await importFresh();
-    expect(() => aliasServerUser("student-1", "anon-1")).not.toThrow();
+    expect(() => aliasServerUser("student-1", anon("anon-1"))).not.toThrow();
   });
 });

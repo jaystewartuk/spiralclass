@@ -449,6 +449,12 @@ describe("handleStripeWebhook", () => {
       recipientType: "student",
       paymentId: PAYMENT_ID,
     });
+    expect(trackServerEventMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        name: "checkout_failed",
+        properties: expect.objectContaining({ paymentId: PAYMENT_ID, rail: "card" }),
+      }),
+    );
   });
 
   it("charge.refunded on a paid Payment flips it to refunded + queues refund_issued_student + refund_issued_teacher", async () => {
@@ -895,33 +901,49 @@ describe("handleStripeWebhook", () => {
   // report of the outcome. Four production rows sat `pending` for exactly this
   // reason, one of them for 1,300 pesos.
 
-  it("expired session flips the abandoned payment to failed", async () => {
-    const env = makeFakePrisma({ payments: [freshPayment()], teachers: [] });
-    const session: StripeCheckoutSession = {
-      id: "cs_EXPIRED",
-      status: "expired",
-      payment_status: "unpaid",
-      mode: "payment",
-      url: null,
-      client_reference_id: EXT_REF,
-      // The realistic shape: expired before Stripe ever attached an intent.
-      payment_intent: null,
-      customer: null,
-      metadata: null,
-      amount_total: 150_000,
-      currency: "mxn",
-    };
-    stripe.seedCheckoutSession(session);
+  it.each(["natural", "superseded"])(
+    "%s expiry sends no failure notice or decline event",
+    async (reason) => {
+      const payment = freshPayment();
+      if (reason === "superseded") payment.package.status = "expired";
+      const env = makeFakePrisma({ payments: [payment], teachers: [] });
+      const session: StripeCheckoutSession = {
+        id: "cs_EXPIRED",
+        status: "expired",
+        payment_status: "unpaid",
+        mode: "payment",
+        url: null,
+        client_reference_id: EXT_REF,
+        // The realistic shape: expired before Stripe ever attached an intent.
+        payment_intent: null,
+        customer: null,
+        metadata: null,
+        amount_total: 150_000,
+        currency: "mxn",
+      };
+      stripe.seedCheckoutSession(session);
 
-    const result = await handleStripeWebhook(
-      { id: "evt_exp", type: "checkout.session.expired", data: { object: session } },
-      { prisma: env.prisma as any, stripe },
-    );
+      const result = await handleStripeWebhook(
+        { id: "evt_exp", type: "checkout.session.expired", data: { object: session } },
+        { prisma: env.prisma as any, stripe },
+      );
 
-    expect(result.code).toBe("applied");
-    expect(env.payments[0].status).toBe("failed");
-    expect(env.payments[0].package.status).not.toBe("active");
-  });
+      expect(result.code).toBe("applied");
+      expect(result).toMatchObject({ action: "flip-expired" });
+      expect(env.payments[0].status).toBe("failed");
+      expect(env.payments[0].package.status).not.toBe("active");
+      expect(env.notifications).toHaveLength(0);
+      expect(trackServerEventMock).not.toHaveBeenCalled();
+
+      // A repeated expiry must remain silent too.
+      await handleStripeWebhook(
+        { id: "evt_exp_repeat", type: "checkout.session.expired", data: { object: session } },
+        { prisma: env.prisma as any, stripe },
+      );
+      expect(env.notifications).toHaveLength(0);
+      expect(trackServerEventMock).not.toHaveBeenCalled();
+    },
+  );
 
   it("a session that expires AFTER being paid is not treated as a failure", async () => {
     // Stripe can expire a session that already completed. The money arrived;
