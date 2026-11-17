@@ -1,6 +1,6 @@
 import Anthropic from "@anthropic-ai/sdk";
 import type { IntroCoachFeedback } from "@spiralclass/shared";
-import { anthropicApiKey } from "@/lib/env";
+import { anthropicApiKey, anthropicSmallModel } from "@/lib/env";
 
 // AI intro-video coach (Layer 3). Reviews the transcript of a teacher's
 // own public intro video and returns a warm overall take plus concrete
@@ -9,13 +9,10 @@ import { anthropicApiKey } from "@/lib/env";
 // summary.ts: the prompt is built purely (unit-tested, no network) and the
 // network call degrades via IntroCoachUnavailableError when no key is set.
 
-// Haiku (D-87 — cost). Safe here because this is a short (max_tokens 1024) call
-// that passes NO `output_config.effort` — `effort` 400s on pre-4.6 models
-// including Haiku 4.5, which is why the effort-passing class-content compose
-// path stayed on Sonnet 5. Adding `effort` here requires moving this constant
-// to an effort-capable model in the same change. Hardcoded: ANTHROPIC_MODEL
-// does NOT override this.
-export const INTRO_COACH_MODEL = "claude-haiku-4-5";
+// Model: anthropicSmallModel() (lib/env.ts) — Haiku 4.5 by default (D-87 —
+// cost). A short (max_tokens 1024) call that passes NO `output_config.effort`,
+// which 400s on pre-4.6 models; adding `effort` here means adding it to the
+// small tier's requirements in lib/ai/models.ts in the same change.
 
 // Raised when the platform has no Anthropic key configured, so the pipeline can
 // skip feedback (leaving the transcript intact) rather than throw.
@@ -98,7 +95,7 @@ export async function generateIntroCoachFeedback(
   const { system, user } = buildIntroCoachPrompt(input);
 
   const response = await client.messages.create({
-    model: INTRO_COACH_MODEL,
+    model: anthropicSmallModel(),
     max_tokens: 1024,
     system,
     messages: [{ role: "user", content: user }],

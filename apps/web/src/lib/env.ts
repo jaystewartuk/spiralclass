@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { logger } from "@/lib/logger";
+import { resolveTierModel, type ModelTier } from "@/lib/ai/models";
 
 const log = logger({ surface: "env" });
 
@@ -132,12 +133,18 @@ const serverSchema = z.object({
   // Anthropic API (AI post-class lesson summary + class-content compose, D-17).
   // Optional — missing key means the AI actions return a friendly error instead
   // of calling out, so dev + tests run without a key. Production sets it as a
-  // runtime secret. ANTHROPIC_MODEL optionally overrides the model (defaults to
-  // claude-sonnet-5 as of D-87); routed through the PLATFORM key only, never
-  // per-teacher. NOTE: this override reaches anthropicModel() ONLY — the four
-  // hardcoded lesson-notes/intro-coach constants ignore it entirely.
+  // runtime secret. Routed through the PLATFORM key only, never per-teacher.
+  // The two model vars each move one tier (D-87, lib/ai/models.ts), so a
+  // rollback is an env change rather than a release:
+  //   * ANTHROPIC_MODEL — compose, refine, podcast script, homework review,
+  //     acquisition content. Default claude-sonnet-5. Must accept `effort`.
+  //   * ANTHROPIC_SMALL_MODEL — lesson summary, insights, pre-class brief,
+  //     intro-video coach. Default claude-haiku-4-5.
+  // A value the capability table does not confirm for its tier is refused with
+  // a warning and the default is used; it never fails the parse.
   ANTHROPIC_API_KEY: blankAsAbsent(z.string().min(1).optional()),
   ANTHROPIC_MODEL: blankAsAbsent(z.string().min(1).optional()),
+  ANTHROPIC_SMALL_MODEL: blankAsAbsent(z.string().min(1).optional()),
   // ElevenLabs text-to-speech — renders a material's generated script into a
   // single-narrator podcast mp3. Optional, like ANTHROPIC_API_KEY: missing key
   // means the "Generate podcast" action is hidden/blocked, never a page break.
@@ -564,21 +571,45 @@ export function hasAnthropicCreds(): boolean {
   return Boolean(anthropicApiKey());
 }
 
-// The Claude model used for class-content compose. Overridable via env;
-// defaults to Sonnet 5 (D-87). Central so the action and tests never hardcode
-// it.
+// Each refused override is logged once per process, not once per call.
+const refusedModelOverrides = new Set<string>();
+
+function tierModel(tier: ModelTier, envVar: string, override: string | undefined): string {
+  const { model, refused } = resolveTierModel(tier, override);
+  if (refused && !refusedModelOverrides.has(`${envVar}=${refused.value}`)) {
+    refusedModelOverrides.add(`${envVar}=${refused.value}`);
+    log.warn("model override refused; using the tier default", {
+      envVar,
+      value: refused.value,
+      missing: refused.missing,
+      using: model,
+    });
+  }
+  return model;
+}
+
+// The Claude model for the standard tier: material compose, refine, podcast
+// script and the streamed variant (lib/ai/anthropic.ts, all passing
+// `output_config: { effort: "medium" }`), the homework review draft and
+// acquisition content (forced tool calls). ANTHROPIC_MODEL moves it; default
+// Sonnet 5 (D-87).
 //
-// ⚠️ MUST stay on a model that supports `output_config.effort`. Every call site
-// in lib/ai/anthropic.ts (generateMaterial, refineMaterial,
-// generatePodcastScript, generateMaterialStream) passes
-// `output_config: { effort: "medium" }`, which is REJECTED WITH A 400 on
-// pre-4.6 models — including claude-haiku-4-5. That is why the four short,
-// structured lesson-notes/intro-coach constants could go to Haiku for D-87 and
-// this one could not. The invariant is pinned by a test in
-// tests/lib/env.test.ts; a same-tier, cheaper model is fine as long as it
-// supports effort.
+// ⚠️ An override that does not accept `effort` — claude-haiku-4-5, any pre-4.6
+// model — would 400 every material generation, so resolveTierModel() refuses
+// it and the default is used. Pinned in tests/lib/env.test.ts and
+// lib/ai/models.test.ts.
 export function anthropicModel(): string {
-  return serverEnv().ANTHROPIC_MODEL ?? "claude-sonnet-5";
+  return tierModel("standard", "ANTHROPIC_MODEL", serverEnv().ANTHROPIC_MODEL);
+}
+
+// The Claude model for the small tier: the four short, structured calls —
+// lesson summary, lesson insights, pre-class brief (lib/lesson-notes/) and the
+// intro-video coach (lib/intro-video/coach.ts). None passes `effort`, which is
+// why they can run on Haiku 4.5 (D-87). ANTHROPIC_SMALL_MODEL moves all four.
+// Adding `effort` to one of those calls means adding "effort" to the small
+// tier's requirements in lib/ai/models.ts in the same change.
+export function anthropicSmallModel(): string {
+  return tierModel("small", "ANTHROPIC_SMALL_MODEL", serverEnv().ANTHROPIC_SMALL_MODEL);
 }
 
 // ElevenLabs text-to-speech, for material podcast generation. Sanitized the
