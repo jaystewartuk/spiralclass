@@ -1,20 +1,17 @@
 import Anthropic from "@anthropic-ai/sdk";
-import { anthropicApiKey } from "@/lib/env";
+import { anthropicApiKey, anthropicSmallModel } from "@/lib/env";
 
 // AI post-class lesson summary (docs/features/classes-lesson-content.md). Turns a
 // class's live notes — the teacher's private cues (with what got checked off)
 // and the student-facing instructions — into a short recap the teacher can skim
 // later. Teacher-only; never shown to the student. Pro-gated at the action.
 
-// Haiku (D-87 — cost). Summarization is a single, short request (max_tokens
-// 1024), so no extended thinking is needed. Haiku is safe HERE specifically
-// because this call passes NO `output_config.effort` — `effort` is rejected
-// with a 400 on pre-4.6 models including Haiku 4.5, which is why the
-// effort-passing class-content compose path (anthropicModel(), lib/ai/
-// anthropic.ts) stayed on Sonnet 5 instead. If you ever add `effort` here, you
-// must move this constant to an effort-capable model in the same change.
-// Hardcoded: ANTHROPIC_MODEL does NOT override this.
-export const SUMMARY_MODEL = "claude-haiku-4-5";
+// Model: anthropicSmallModel() (lib/env.ts) — Haiku 4.5 by default (D-87 —
+// cost), moved by ANTHROPIC_SMALL_MODEL together with the other short calls.
+// Summarization is a single, short request (max_tokens 1024), so no extended
+// thinking is needed. It passes NO `output_config.effort`, which 400s on
+// pre-4.6 models; adding `effort` here means adding it to the small tier's
+// requirements in lib/ai/models.ts in the same change.
 
 export type SummaryInput = {
   studentName: string;
@@ -71,7 +68,7 @@ export async function generateSummaryText(
   const { system, user } = buildSummaryPrompt(input);
 
   const response = await client.messages.create({
-    model: SUMMARY_MODEL,
+    model: anthropicSmallModel(),
     max_tokens: 1024,
     system,
     messages: [{ role: "user", content: user }],

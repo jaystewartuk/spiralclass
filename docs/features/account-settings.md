@@ -66,6 +66,10 @@ teaching- or learning-specific options.
   category with no stored channel list uses every channel.
 - Global email and push opt-in toggles sit beside the categories. The push
   toggle is disabled when the account has no registered browser.
+- A student's email opt-in carries its date: `emailOptInAt` is when the opt-in
+  last changed to its current value, in either direction — this form, the
+  unsubscribe link in an email footer, or account erasure. A save that leaves
+  the opt-in unchanged keeps the existing date.
 - Category lists, non-suppressible notices and the defaults for a new student
   are owned by [notifications](notifications.md#categories-and-preferences).
 - The student page also shows when reminders will arrive
@@ -92,6 +96,10 @@ teaching- or learning-specific options.
 - Student export (`buildStudentIdentityExport`): profile, consent flags, linked
   teachers, her own packages, payments and bookings — across every student row
   that shares her email (`studentComplianceIds`), not just one.
+- The email consent's date is exported as `emailOptInAt`, or `"unknown"` when
+  none was recorded: nothing wrote it before #155, and those dates cannot be
+  recovered. A student whose opt-in has never changed since her row was
+  created also has none.
 
 ### Account deletion
 

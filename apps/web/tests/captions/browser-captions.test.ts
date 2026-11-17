@@ -1065,6 +1065,39 @@ describe("BrowserCaptions — a browser that claims it can recognise and cannot"
     expect(statuses.at(-1)).toEqual({ uncaptioned: [], stopped: "unavailable" });
   });
 
+  it("says when its own person's cloud stream gives up, once", () => {
+    const onCloudStopped = vi.fn();
+    const { c } = setup({ onCloudStopped });
+    const noneCan = onATablet({ selfCapable: false, session: SESSION({ cloudRecognition: true }) });
+    c.sync(noneCan);
+    clouds[0].onStopped("unsupported");
+    c.sync(noneCan);
+    expect(onCloudStopped.mock.calls).toEqual([["unsupported"]]);
+  });
+
+  it("takes the give-up back when a browser that can recognise arrives", () => {
+    const onCloudStopped = vi.fn();
+    const { c, statuses } = setup({ onCloudStopped });
+    const session = SESSION({ cloudRecognition: true });
+    const noneCan = onATablet({ selfCapable: false, session });
+    c.sync(noneCan);
+    clouds[0].onStopped("unavailable");
+    c.sync({
+      ...noneCan,
+      room: { ...noneCan.room, remote: { ...noneCan.room.remote!, capable: true } },
+    });
+    expect(onCloudStopped).toHaveBeenLastCalledWith(null);
+    expect(statuses.at(-1)).toMatchObject({ stopped: null });
+  });
+
+  it("does not report a browser recogniser's give-up as a lost stream", () => {
+    const onCloudStopped = vi.fn();
+    const { c } = setup({ onCloudStopped });
+    c.sync(onATablet());
+    (recognizers.at(-1) as { onStopped(r: string): void }).onStopped("permission");
+    expect(onCloudStopped).not.toHaveBeenCalled();
+  });
+
   it("ignores speech after dispose", () => {
     const onUnusable = vi.fn();
     const { c } = setup({ onUnusable });

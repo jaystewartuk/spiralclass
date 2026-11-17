@@ -2,7 +2,7 @@ import Anthropic from "@anthropic-ai/sdk";
 import { z } from "zod";
 import type { InsightCategory } from "@prisma/client";
 import { languageName } from "@spiralclass/shared";
-import { anthropicApiKey } from "@/lib/env";
+import { anthropicApiKey, anthropicSmallModel } from "@/lib/env";
 
 // AI lesson insights — Phase C (the Phase C design,
 // D-185). The structured evolution of the free-text lesson_summaries: instead of
@@ -12,13 +12,10 @@ import { anthropicApiKey } from "@/lib/env";
 // summary.ts — pure prompt builder + a degrade-gracefully Claude call — but uses
 // a FORCED TOOL CALL so the model returns validated structure, not parseable prose.
 
-// Same model as the summary; a single short analysis request (max_tokens 2048).
-// Haiku (D-87 — cost). Safe here because this call passes NO
-// `output_config.effort` — `effort` 400s on pre-4.6 models including Haiku 4.5,
-// which is why the effort-passing class-content compose path stayed on Sonnet
-// 5. Adding `effort` here requires moving this constant to an effort-capable
-// model in the same change. Hardcoded: ANTHROPIC_MODEL does NOT override this.
-export const INSIGHTS_MODEL = "claude-haiku-4-5";
+// Same model as the summary — anthropicSmallModel(), Haiku 4.5 by default
+// (D-87 — cost); a single short analysis request (max_tokens 2048). It passes
+// NO `output_config.effort` and forces a tool call, which is what the small
+// tier's requirements in lib/ai/models.ts encode.
 
 // The five focus-area categories (matches the Prisma InsightCategory enum).
 export const INSIGHT_CATEGORIES = [
@@ -229,8 +226,8 @@ export function capPerCategory(insights: Insight[], max = MAX_INSIGHTS_PER_CATEG
 // Generate insights via Claude with a forced tool call. Throws
 // InsightsUnavailableError when no key is configured; lets SDK errors propagate.
 // `options.model` exists for the offline evals (scripts/evals.ts), which run
-// the same prompt against a candidate model before INSIGHTS_MODEL is changed
-// (D-201); the pipeline never passes it.
+// the same prompt against a candidate model before the small tier's default
+// is changed (D-201); the pipeline never passes it.
 export async function generateInsights(
   input: InsightsInput,
   options: { model?: string } = {},
@@ -242,7 +239,7 @@ export async function generateInsights(
   const { system, user } = buildInsightsPrompt(input);
 
   const response = await client.messages.create({
-    model: options.model ?? INSIGHTS_MODEL,
+    model: options.model ?? anthropicSmallModel(),
     max_tokens: 2048,
     system,
     messages: [{ role: "user", content: user }],

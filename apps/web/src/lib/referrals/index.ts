@@ -1,7 +1,11 @@
 import { type TFunction } from "@spiralclass/shared";
 import crypto from "node:crypto";
-import { PackageStatus, Prisma } from "@prisma/client";
-import { computeDiscountMinorUnits, normalizeDiscountCode } from "@/lib/discounts";
+import { Prisma } from "@prisma/client";
+import {
+  computeDiscountMinorUnits,
+  normalizeDiscountCode,
+  redemptionCountsWhere,
+} from "@/lib/discounts";
 
 // Student→student referrals (slice 2b, docs/features/referrals-discounts.md), built
 // on the discount-code primitive. A referrer's code resolves at checkout to the
@@ -76,6 +80,7 @@ export async function resolveReferralForCheckout(args: {
   studentEmail: string | null;
   code: string;
   baseMinorUnits: number;
+  now?: Date;
 }): Promise<ReferralCheckout> {
   const code = normalizeDiscountCode(args.code);
   const refCode = await args.db.referralCode.findUnique({
@@ -125,7 +130,7 @@ export async function resolveReferralForCheckout(args: {
     const live = await args.db.package.count({
       where: {
         id: { in: prior.map((p) => p.packageId) },
-        status: { in: [PackageStatus.pending, PackageStatus.active] },
+        ...redemptionCountsWhere(args.now ?? new Date()),
       },
     });
     if (live > 0) return { ok: false, reason: "already_redeemed" };
@@ -146,6 +151,18 @@ export async function resolveReferralForCheckout(args: {
     discountMinorUnits,
     finalMinorUnits: args.baseMinorUnits - discountMinorUnits,
   };
+}
+
+// The first-purchase rule re-checked inside the checkout transaction, with the
+// referred student's row locked: the rule is per student, so serialising her
+// checkouts is what stops two at once from both being her "first" purchase
+// (issue #74; the promo-code twin is revalidateDiscountUnderLock).
+export async function revalidateReferralUnderLock(
+  tx: Prisma.TransactionClient,
+  args: Omit<Parameters<typeof resolveReferralForCheckout>[0], "db">,
+): Promise<ReferralCheckout> {
+  await tx.$queryRaw`SELECT 1 FROM students WHERE id = ${args.studentId}::uuid FOR UPDATE`;
+  return resolveReferralForCheckout({ ...args, db: tx });
 }
 
 // Mint the referrer's reward: a single-use discount code reserved to them,
@@ -218,7 +235,7 @@ export async function voidReferralRewardForPayment(
   const redeemed = await db.discountRedemption.count({
     where: {
       discountCodeId: ref.referrerRewardCodeId,
-      package: { status: { in: [PackageStatus.pending, PackageStatus.active] } },
+      package: redemptionCountsWhere(new Date()),
     },
   });
   if (redeemed > 0) return { voided: false, alreadyRedeemed: true };

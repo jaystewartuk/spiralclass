@@ -14,10 +14,8 @@ import { trackServerEvent } from "@/lib/analytics/posthog";
 import type { AppLocale } from "@/lib/i18n";
 import { logger } from "@/lib/logger";
 import { mintSubmissionSignedUrl } from "@/lib/storage/homework-file";
-import {
-  DEFAULT_LESSON_LANGUAGE,
-  homeworkAudioTranscriptionEnabled,
-} from "@/lib/transcription/config";
+import { homeworkAudioTranscriptionEnabled } from "@/lib/transcription/config";
+import { lessonLanguage } from "@/lib/transcription/language";
 import { getTranscriptionProvider } from "@/lib/transcription/provider";
 import { resolveTeacherAttempt } from "./access";
 import {
@@ -121,7 +119,8 @@ export async function requestHomeworkAiReview(
       } else if (audioProvider) {
         const transcript = await audioProvider.transcribe({
           audioUrl: url,
-          language: DEFAULT_LESSON_LANGUAGE,
+          // Her answer is spoken in the subject she is learning.
+          language: lessonLanguage(teacher),
         });
         const text = transcript.utterances
           .map((u) => u.text)

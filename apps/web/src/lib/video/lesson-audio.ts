@@ -17,10 +17,12 @@ import {
 // unit-testable without LiveKit, R2, or Inngest.
 //
 // Speaker mapping: the join grant mints a participant identity equal to the
-// teacher/student user id (lib/video/provider.ts), so we map an egressed track
-// back to a speaker by comparing its participant identity to the booking's
-// teacherId/studentId. Unknown identities are skipped — there's no one to
-// attribute the audio to.
+// teacher's id, or to the id of the Student row the student is signed in as
+// (lib/video/provider.ts). That row need not be the booking's studentId — a
+// linked login acts across its inbox's sibling rows (studentIdentityIds) — so
+// the student is any id in the booking student's identity set, never the
+// booking's studentId alone (#117). Unknown identities are skipped — there's
+// no one to attribute the audio to.
 
 const log = logger({ surface: "lesson-audio" });
 
@@ -45,18 +47,21 @@ export type Speaker = "student" | "teacher";
 type StartArgs = {
   bookingId: string;
   teacherId: string;
-  studentId: string;
+  // Every id the booking's student may join the call as: the booking's own
+  // studentId and its same-inbox siblings (bookingStudentIdentities).
+  studentIdentities: readonly string[];
   room: string;
 };
 
 // Resolve a participant identity to a speaker role, or null if it's neither the
-// booking's teacher nor its student.
+// booking's teacher nor its student. The teacher is checked first: she is never
+// the student (D-40), whatever the identity set holds.
 export function speakerFor(
   identity: string,
-  booking: { teacherId: string; studentId: string },
+  booking: { teacherId: string; studentIdentities: readonly string[] },
 ): Speaker | null {
   if (identity === booking.teacherId) return "teacher";
-  if (identity === booking.studentId) return "student";
+  if (booking.studentIdentities.includes(identity)) return "student";
   return null;
 }
 

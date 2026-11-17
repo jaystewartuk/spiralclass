@@ -55,14 +55,19 @@ export async function supersedePendingCheckouts(
       templateId: params.templateId,
       status: "pending",
       // Only supersede when nothing on the package has settled — every
-      // payment must still be pending, and there must be at least one
-      // (the `some` clause guards against Prisma's vacuous-truth `every`,
-      // which would otherwise match a stray package with no payments).
+      // payment must be pending or failed, never paid or refunded, and there
+      // must be at least one (the `some` clause guards against Prisma's
+      // vacuous-truth `every`, which would otherwise match a stray package
+      // with no payments). `failed` is included because a declined card
+      // leaves its Checkout Session open and payable; without it the
+      // student's own declined checkout kept her discount code spent and
+      // her retry was refused (issue #74). Expiring that session below is
+      // what makes superseding it safe, exactly as for a pending one.
       // A student-marked-sent Wise payment means money may be in flight:
       // never supersede those (see module header).
       payments: {
-        some: { status: "pending" },
-        every: { status: "pending" },
+        some: { status: { in: ["pending", "failed"] } },
+        every: { status: { in: ["pending", "failed"] } },
         none: { studentMarkedSentAt: { not: null } },
       },
     },
@@ -73,7 +78,7 @@ export async function supersedePendingCheckouts(
       // would leave a live session able to take a late payment.
       teacher: { select: { stripeAccountId: true } },
       payments: {
-        select: { id: true, provider: true, stripeCheckoutSessionId: true },
+        select: { id: true, provider: true, status: true, stripeCheckoutSessionId: true },
       },
     },
   });
@@ -86,6 +91,13 @@ export async function supersedePendingCheckouts(
     // pay.
     let safeToExpire = true;
     for (const pay of pkg.payments) {
+      // A failed card payment proves a session existed (the webhook found it).
+      // Without its id we cannot expire it, so it might still take a retry —
+      // and a late payment on an expired package would never activate it.
+      if (pay.provider === "stripe" && pay.status === "failed" && !pay.stripeCheckoutSessionId) {
+        safeToExpire = false;
+        break;
+      }
       if (pay.provider === "stripe" && pay.stripeCheckoutSessionId) {
         try {
           await deps

@@ -9,7 +9,7 @@ import { accountDeletionHandler } from "@/lib/inngest/functions/account-deletion
 import { reconcileWiseStatements } from "@/lib/payments/wise-reconcile";
 import { wiseClientForTeacher } from "@/lib/wise/api";
 import { reconcileStrandedPaidPayments } from "@/lib/payments/reconcile-paid";
-import { cleanupAbandonedPendingPackages } from "@/lib/payments/cleanup-pending";
+import { runPendingCheckoutSweep } from "@/lib/inngest/functions/cleanup-pending-packages";
 import { sendTransferConfirmReminders } from "@/lib/payments/transfer-confirm-reminder";
 import { purgeExpiredMaterials } from "@/lib/storage/materials-purge";
 import { purgeExpiredGenerationBodies } from "@/lib/materials/generations";
@@ -127,7 +127,7 @@ export const cronJobs: JobDefinition[] = [
     queue: "cleanup-pending-packages-cron",
     cron: { pattern: "0 3 * * *" },
     handler: async () => {
-      await cleanupAbandonedPendingPackages({ prisma });
+      await runPendingCheckoutSweep();
     },
   },
   {

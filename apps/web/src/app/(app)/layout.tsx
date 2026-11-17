@@ -9,6 +9,7 @@ import { requireTeacher } from "@/lib/auth";
 import { teacherPhotoPublicUrl } from "@/lib/storage/teacher-photo";
 import { getTeacherInboxUnreadCount } from "@/lib/notifications/inbox-queries";
 import { SubscriptionBanner } from "./subscription-banner";
+import { cn } from "@/lib/utils";
 
 // Persistent shell for the teacher app: a sticky header with primary
 // navigation so teachers can move between Panel / Clases / Alumnos / Pagos /
@@ -60,8 +61,14 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       {/* The tablet sidebar (AppNav) is fixed-positioned beside this content,
         not in normal flow, so its width has to be reserved here explicitly —
         onOnboarding never renders that sidebar (AppNav returns null there),
-        so it never reserves space for it either. */}
-      <div className={onOnboarding ? undefined : TABLET_SIDEBAR_CONTENT_OFFSET_CLASS}>
+        so it never reserves space for it either.
+        min-h-dvh keeps the phone-width site footer below the fold, so it
+        cannot rise into view under a short loading.tsx skeleton and drop back
+        when the page arrives — the same layout shift the student portal
+        shell guards against (#90). */}
+      <div
+        className={cn("min-h-dvh", onOnboarding ? undefined : TABLET_SIDEBAR_CONTENT_OFFSET_CLASS)}
+      >
         {!onOnboarding && <SubscriptionBanner teacherId={teacher.id} />}
         {children}
       </div>

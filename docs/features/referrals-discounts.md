@@ -29,11 +29,22 @@ Managed at `/dashboard/discounts` (`apps/web/src/app/actions/discounts.ts`,
   (default 1), and an optional expiry date.
 - A teacher can deactivate and reactivate a code, and delete one that has never
   been redeemed.
-- **A redemption counts only while its package is `pending` or `active`.** A
-  refunded, superseded or expired purchase frees the use again.
-- The total limit is counted just before the checkout transaction, without a
-  lock, so a burst of simultaneous checkouts can exceed it slightly (bounded by
-  the checkout rate limits).
+- **A redemption counts only while its purchase can still be paid**
+  (`redemptionCountsWhere`, `lib/discounts/index.ts` — the one definition the
+  checkout, the referral rule and the dashboard all use). That is an `active`
+  package, or a `pending` one unless every payment on it is a failed card
+  payment more than 25 hours old. A refunded, superseded or expired purchase
+  frees the use again, and so does a card checkout that expired or was
+  declined once its Stripe session can no longer be paid (Stripe sessions last
+  at most 24 hours). A declined card counts until then, because the student
+  can try another card on the same session. An unpaid transfer counts however
+  old it is.
+- A student who comes back to the **same package** after a declined card gets
+  her code straight back: the new checkout supersedes the declined one
+  ([payments.md](payments.md#cross-rail-double-charge-guard)).
+- The limits are checked once before the checkout transaction, then again
+  inside it with the code's row locked, so simultaneous checkouts cannot take
+  more uses than the total or per-student limit allows.
 - Codes apply only to a student buying from her teacher
   ([payments.md](payments.md#pricing-at-checkout)), never to the teacher's own
   SpiralClass subscription checkout.
@@ -63,9 +74,11 @@ Configured at `/dashboard/referrals` (`saveReferralProgram`); off by default.
   refused when:
   - it is the student's own code, or the code owner's email matches hers
     (self-referral);
-  - she already has a referral with this teacher on a `pending` or `active`
-    package (one referred purchase per student per teacher; an abandoned or
-    superseded attempt does not count);
+  - she already has a referral with this teacher on a purchase that still
+    counts, by the same rule as a discount redemption (one referred purchase
+    per student per teacher; an abandoned, superseded or dead card attempt does
+    not count). It is re-checked inside the checkout transaction with her row
+    locked, so two checkouts at once cannot both be her first;
   - the program is off or the code is inactive (shown as an invalid code).
 - **The reward is minted only when the referred payment settles** (card paid,
   or Wise confirmed): the `grant-referral-reward` job qualifies the referral,

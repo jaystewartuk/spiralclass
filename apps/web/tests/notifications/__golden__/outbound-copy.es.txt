@@ -32,6 +32,8 @@ body: Tu clase con  es el  · Te quedan  clases
 subject: Recordatorio: clase mañana con ⟦teacherName⟧
 text: Hola, soy ⟦teacherName⟧. Te recuerdo nuestra clase mañana, ⟦classDateTime⟧.
 
+⟦clockChangeNote⟧
+
 Entra a la videollamada a la hora de tu clase.
 
 Entrar a la videollamada: https://app.test/action
@@ -41,11 +43,12 @@ Agregar a calendario: https://calendar.test/add
 —
 Configurar notificaciones: https://app.test/r/notif-settings/token
 Para dejar de recibir correos: https://app.test/r/email-uns/token
-html: Tu clase es mañana Clase mañana — ⟦classDateTime⟧ SpiralClass Tu clase es mañana Hola, soy ⟦teacherName⟧. Te recuerdo nuestra clase mañana, ⟦classDateTime⟧. Entra a la videollamada a la hora de tu clase. Entrar a la videollamada Agregar a calendario Configurar notificaciones · Dejar de recibir estos correos Clases, cobros y recordatorios sin la carga mental. Enviado por SpiralClass · spiralclass.com
+html: Tu clase es mañana Clase mañana — ⟦classDateTime⟧ SpiralClass Tu clase es mañana Hola, soy ⟦teacherName⟧. Te recuerdo nuestra clase mañana, ⟦classDateTime⟧. ⟦clockChangeNote⟧ Entra a la videollamada a la hora de tu clase. Entrar a la videollamada Agregar a calendario Configurar notificaciones · Dejar de recibir estos correos Clases, cobros y recordatorios sin la carga mental. Enviado por SpiralClass · spiralclass.com
 
 === reminder_24h · push · with every variable
 title: Recordatorio: Mañana
 body: Clase con ⟦teacherName⟧ el ⟦classDateTime⟧
+⟦clockChangeNote⟧
 
 === reminder_24h · email · with no variables
 subject: Recordatorio: clase mañana con 
@@ -62,6 +65,8 @@ body: Clase con  el
 subject: Tu clase con ⟦teacherName⟧ empieza en 1 hora
 text: Hola, soy ⟦teacherName⟧. Nos vemos en 1 hora, ⟦classDateTime⟧. Entra a la videollamada a la hora de tu clase.
 
+⟦clockChangeNote⟧
+
 Entrar a la videollamada: https://app.test/action
 
 Agregar a calendario: https://calendar.test/add
@@ -69,11 +74,12 @@ Agregar a calendario: https://calendar.test/add
 —
 Configurar notificaciones: https://app.test/r/notif-settings/token
 Para dejar de recibir correos: https://app.test/r/email-uns/token
-html: Tu clase empieza en 1 hora En 1 hora — ⟦classDateTime⟧ SpiralClass Tu clase empieza en 1 hora Hola, soy ⟦teacherName⟧. Nos vemos en 1 hora, ⟦classDateTime⟧. Entra a la videollamada a la hora de tu clase. Entrar a la videollamada Agregar a calendario Configurar notificaciones · Dejar de recibir estos correos Clases, cobros y recordatorios sin la carga mental. Enviado por SpiralClass · spiralclass.com
+html: Tu clase empieza en 1 hora En 1 hora — ⟦classDateTime⟧ SpiralClass Tu clase empieza en 1 hora Hola, soy ⟦teacherName⟧. Nos vemos en 1 hora, ⟦classDateTime⟧. ⟦clockChangeNote⟧ Entra a la videollamada a la hora de tu clase. Entrar a la videollamada Agregar a calendario Configurar notificaciones · Dejar de recibir estos correos Clases, cobros y recordatorios sin la carga mental. Enviado por SpiralClass · spiralclass.com
 
 === reminder_1h · push · with every variable
 title: Recordatorio: En 1 hora
 body: Clase con ⟦teacherName⟧ el ⟦classDateTime⟧
+⟦clockChangeNote⟧
 
 === reminder_1h · email · with no variables
 subject: Tu clase con  empieza en 1 hora
@@ -88,16 +94,19 @@ body: Clase con  el
 subject: Tu clase con ⟦teacherName⟧ empieza en 15 minutos
 text: Hola, soy ⟦teacherName⟧. Tu clase empieza en 15 minutos, ⟦classDateTime⟧. Entra a la videollamada a la hora de tu clase.
 
+⟦clockChangeNote⟧
+
 Entrar a la videollamada: https://app.test/action
 
 —
 Configurar notificaciones: https://app.test/r/notif-settings/token
 Para dejar de recibir correos: https://app.test/r/email-uns/token
-html: Tu clase empieza en 15 minutos En 15 minutos — ⟦classDateTime⟧ SpiralClass Tu clase empieza en 15 minutos Hola, soy ⟦teacherName⟧. Tu clase empieza en 15 minutos, ⟦classDateTime⟧. Entra a la videollamada a la hora de tu clase. Entrar a la videollamada Configurar notificaciones · Dejar de recibir estos correos Clases, cobros y recordatorios sin la carga mental. Enviado por SpiralClass · spiralclass.com
+html: Tu clase empieza en 15 minutos En 15 minutos — ⟦classDateTime⟧ SpiralClass Tu clase empieza en 15 minutos Hola, soy ⟦teacherName⟧. Tu clase empieza en 15 minutos, ⟦classDateTime⟧. ⟦clockChangeNote⟧ Entra a la videollamada a la hora de tu clase. Entrar a la videollamada Configurar notificaciones · Dejar de recibir estos correos Clases, cobros y recordatorios sin la carga mental. Enviado por SpiralClass · spiralclass.com
 
 === reminder_15m · push · with every variable
 title: Recordatorio: En 15 minutos
 body: Clase con ⟦teacherName⟧ el ⟦classDateTime⟧
+⟦clockChangeNote⟧
 
 === reminder_15m · email · with no variables
 subject: Tu clase con  empieza en 15 minutos
@@ -112,6 +121,8 @@ body: Clase con  el
 subject: Recordatorio: clase mañana con ⟦studentName⟧
 text: Te recuerdo tu clase con ⟦studentName⟧ mañana, ⟦classDateTime⟧.
 
+⟦clockChangeNote⟧
+
 Entra a la videollamada a la hora de tu clase.
 
 Entrar a la videollamada: https://app.test/action
@@ -121,11 +132,12 @@ Agregar a calendario: https://calendar.test/add
 —
 Configurar notificaciones: https://app.test/r/notif-settings/token
 Para dejar de recibir correos: https://app.test/r/email-uns/token
-html: Tu clase es mañana Clase mañana — ⟦classDateTime⟧ SpiralClass Tu clase es mañana Te recuerdo tu clase con ⟦studentName⟧ mañana, ⟦classDateTime⟧. Entra a la videollamada a la hora de tu clase. Entrar a la videollamada Agregar a calendario Configurar notificaciones · Dejar de recibir estos correos Clases, cobros y recordatorios sin la carga mental. Enviado por SpiralClass · spiralclass.com
+html: Tu clase es mañana Clase mañana — ⟦classDateTime⟧ SpiralClass Tu clase es mañana Te recuerdo tu clase con ⟦studentName⟧ mañana, ⟦classDateTime⟧. ⟦clockChangeNote⟧ Entra a la videollamada a la hora de tu clase. Entrar a la videollamada Agregar a calendario Configurar notificaciones · Dejar de recibir estos correos Clases, cobros y recordatorios sin la carga mental. Enviado por SpiralClass · spiralclass.com
 
 === reminder_24h_teacher · push · with every variable
 title: Recordatorio: Mañana
 body: Clase con ⟦studentName⟧ el ⟦classDateTime⟧
+⟦clockChangeNote⟧
 
 === reminder_24h_teacher · email · with no variables
 subject: Recordatorio: clase mañana con 
@@ -140,6 +152,8 @@ body: Clase con  el
 subject: Tu clase con ⟦studentName⟧ empieza en 1 hora
 text: Tu clase con ⟦studentName⟧ empieza en 1 hora, ⟦classDateTime⟧.
 
+⟦clockChangeNote⟧
+
 Entra a la videollamada a la hora de tu clase.
 
 Entrar a la videollamada: https://app.test/action
@@ -149,11 +163,12 @@ Agregar a calendario: https://calendar.test/add
 —
 Configurar notificaciones: https://app.test/r/notif-settings/token
 Para dejar de recibir correos: https://app.test/r/email-uns/token
-html: Tu clase empieza en 1 hora En 1 hora — ⟦classDateTime⟧ SpiralClass Tu clase empieza en 1 hora Tu clase con ⟦studentName⟧ empieza en 1 hora, ⟦classDateTime⟧. Entra a la videollamada a la hora de tu clase. Entrar a la videollamada Agregar a calendario Configurar notificaciones · Dejar de recibir estos correos Clases, cobros y recordatorios sin la carga mental. Enviado por SpiralClass · spiralclass.com
+html: Tu clase empieza en 1 hora En 1 hora — ⟦classDateTime⟧ SpiralClass Tu clase empieza en 1 hora Tu clase con ⟦studentName⟧ empieza en 1 hora, ⟦classDateTime⟧. ⟦clockChangeNote⟧ Entra a la videollamada a la hora de tu clase. Entrar a la videollamada Agregar a calendario Configurar notificaciones · Dejar de recibir estos correos Clases, cobros y recordatorios sin la carga mental. Enviado por SpiralClass · spiralclass.com
 
 === reminder_1h_teacher · push · with every variable
 title: Recordatorio: En 1 hora
 body: Clase con ⟦studentName⟧ el ⟦classDateTime⟧
+⟦clockChangeNote⟧
 
 === reminder_1h_teacher · email · with no variables
 subject: Tu clase con  empieza en 1 hora
@@ -168,6 +183,8 @@ body: Clase con  el
 subject: Tu clase con ⟦studentName⟧ empieza en 15 minutos
 text: Tu clase con ⟦studentName⟧ empieza en 15 minutos, ⟦classDateTime⟧.
 
+⟦clockChangeNote⟧
+
 Entra a la videollamada a la hora de tu clase.
 
 Entrar a la videollamada: https://app.test/action
@@ -175,11 +192,12 @@ Entrar a la videollamada: https://app.test/action
 —
 Configurar notificaciones: https://app.test/r/notif-settings/token
 Para dejar de recibir correos: https://app.test/r/email-uns/token
-html: Tu clase empieza en 15 minutos En 15 minutos — ⟦classDateTime⟧ SpiralClass Tu clase empieza en 15 minutos Tu clase con ⟦studentName⟧ empieza en 15 minutos, ⟦classDateTime⟧. Entra a la videollamada a la hora de tu clase. Entrar a la videollamada Configurar notificaciones · Dejar de recibir estos correos Clases, cobros y recordatorios sin la carga mental. Enviado por SpiralClass · spiralclass.com
+html: Tu clase empieza en 15 minutos En 15 minutos — ⟦classDateTime⟧ SpiralClass Tu clase empieza en 15 minutos Tu clase con ⟦studentName⟧ empieza en 15 minutos, ⟦classDateTime⟧. ⟦clockChangeNote⟧ Entra a la videollamada a la hora de tu clase. Entrar a la videollamada Configurar notificaciones · Dejar de recibir estos correos Clases, cobros y recordatorios sin la carga mental. Enviado por SpiralClass · spiralclass.com
 
 === reminder_15m_teacher · push · with every variable
 title: Recordatorio: En 15 minutos
 body: Clase con ⟦studentName⟧ el ⟦classDateTime⟧
+⟦clockChangeNote⟧
 
 === reminder_15m_teacher · email · with no variables
 subject: Tu clase con  empieza en 15 minutos

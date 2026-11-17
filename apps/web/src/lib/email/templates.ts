@@ -49,7 +49,10 @@ type TemplateRender = {
 
 export function renderEmail<T extends TemplateName>(input: RenderInput<T>): RenderedEmail {
   const t = createT(languageCodeToLocale(input.languageCode));
-  const rendered = buildTemplate(input);
+  const built = buildTemplate(input);
+  const rendered = CLOCK_CHANGE_TEMPLATES.has(input.templateName)
+    ? withClockChangeNote(built, input.variables)
+    : built;
   let body = rendered.textBody;
   const footerLines = [
     input.notificationSettingsUrl
@@ -67,6 +70,38 @@ export function renderEmail<T extends TemplateName>(input: RenderInput<T>): Rend
     appUrl: input.appUrl,
   });
   return { subject: rendered.subject, body, html };
+}
+
+// "The clocks have changed since your last class…" (issue 229). The reminder
+// variables carry it already rendered in the recipient's language; it goes
+// straight after the opening paragraph, where the class time is, so it is read
+// next to the time it qualifies rather than under the calendar link.
+const CLOCK_CHANGE_TEMPLATES: ReadonlySet<TemplateName> = new Set<TemplateName>([
+  "reminder_24h",
+  "reminder_1h",
+  "reminder_15m",
+  "reminder_24h_teacher",
+  "reminder_1h_teacher",
+  "reminder_15m_teacher",
+]);
+
+function withClockChangeNote(
+  rendered: TemplateRender,
+  variables: TemplateVariables[TemplateName],
+): TemplateRender {
+  const note = (variables as { clockChangeNote?: string }).clockChangeNote;
+  if (!note) return rendered;
+  const split = rendered.textBody.indexOf("\n\n");
+  const textBody =
+    split === -1
+      ? `${rendered.textBody}\n\n${note}`
+      : `${rendered.textBody.slice(0, split)}\n\n${note}${rendered.textBody.slice(split)}`;
+  const [first, ...rest] = rendered.html.paragraphs;
+  return {
+    ...rendered,
+    textBody,
+    html: { ...rendered.html, paragraphs: first === undefined ? [note] : [first, note, ...rest] },
+  };
 }
 
 function footerLine(t: TFunction, unsubscribeUrl: string): string {

@@ -10,6 +10,7 @@ import {
 } from "@/lib/video/recording";
 import { startLessonAudioCaptures, stopLessonAudioCaptures } from "@/lib/video/lesson-audio";
 import { listRoomParticipantIdentities } from "@/lib/video/room";
+import { studentIdentityIds } from "@/lib/students/identity";
 import { lessonInsightsConsentOk } from "@/lib/lesson-notes/consent";
 import { transcriptionEnabled } from "@/lib/transcription/config";
 import { logger } from "@/lib/logger";
@@ -17,6 +18,22 @@ import { logger } from "@/lib/logger";
 const log = logger({ surface: "call-recording" });
 
 export type RecordingResult = { ok: true } | { ok: false; reason: string };
+
+// Every LiveKit identity the booking's student may be in the room as (#117).
+// A student joins as the id of the Student row her portal login is linked to
+// (my-classes/[bookingId]/call), and that portal acts across the inbox's
+// sibling rows — so the booking can belong to a sibling of the row she joins
+// as. Recognising her by the booking's studentId alone silently skipped her
+// capture and her auto-record. This set says only WHO she is in the room;
+// what may be captured of her stays the booking pair's D-22 consent.
+async function bookingStudentIdentities(
+  prisma: PrismaClient,
+  student: { id: string; email: string | null },
+): Promise<string[]> {
+  return studentIdentityIds(student, prisma);
+}
+
+const BOOKING_STUDENT_SELECT = { select: { id: true, email: true } } as const;
 
 // Core for starting/stopping a booking's call recording, called by the web
 // server action (app/actions/call-recording.ts). Keeping it here means the
@@ -38,6 +55,7 @@ export async function startBookingRecording(
     select: {
       id: true,
       studentId: true,
+      student: BOOKING_STUDENT_SELECT,
       package: { select: { seats: true, partnerConsentAt: true } },
     },
   });
@@ -113,7 +131,7 @@ export async function startBookingRecording(
       await startLessonAudioCaptures(prisma, {
         bookingId: booking.id,
         teacherId,
-        studentId: booking.studentId,
+        studentIdentities: await bookingStudentIdentities(prisma, booking.student),
         room,
       });
     } catch (err) {
@@ -212,6 +230,7 @@ export async function maybeStartLessonAudioCapture(
       id: true,
       teacherId: true,
       studentId: true,
+      student: BOOKING_STUDENT_SELECT,
       package: { select: { seats: true, partnerConsentAt: true } },
     },
   });
@@ -237,7 +256,7 @@ export async function maybeStartLessonAudioCapture(
     await startLessonAudioCaptures(prisma, {
       bookingId: booking.id,
       teacherId: booking.teacherId,
-      studentId: booking.studentId,
+      studentIdentities: await bookingStudentIdentities(prisma, booking.student),
       room: classCallRoom(booking.id),
     });
   } catch (err) {
@@ -287,7 +306,7 @@ export async function maybeAutoStartRecording(
 
     const booking = await prisma.booking.findUnique({
       where: { id: bookingId },
-      select: { id: true, teacherId: true, studentId: true },
+      select: { id: true, teacherId: true, student: BOOKING_STUDENT_SELECT },
     });
     if (!booking) return;
 
@@ -305,10 +324,17 @@ export async function maybeAutoStartRecording(
     });
     if (existing) return;
 
-    // Condition 1.
+    // Condition 1. The student is recognised by her whole identity set, since
+    // she may join as a sibling row of the booking's student (#117); the
+    // teacher's own id never counts as her (D-40).
     const room = classCallRoom(booking.id);
     const present = await listRoomParticipantIdentities(room);
-    if (!present.includes(booking.teacherId) || !present.includes(booking.studentId)) return;
+    if (!present.includes(booking.teacherId)) return;
+    const studentIds = await bookingStudentIdentities(prisma, booking.student);
+    const studentPresent = present.some(
+      (identity) => identity !== booking.teacherId && studentIds.includes(identity),
+    );
+    if (!studentPresent) return;
 
     const result = await startBookingRecording(prisma, booking.teacherId, booking.id);
     if (result.ok) {

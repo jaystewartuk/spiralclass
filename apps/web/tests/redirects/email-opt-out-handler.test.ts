@@ -17,6 +17,7 @@ type StudentRow = {
   id: string;
   email: string | null;
   emailOptIn: boolean;
+  emailOptInAt?: Date | null;
 };
 
 type FakeState = {
@@ -68,6 +69,7 @@ function buildPrisma(state: FakeState) {
         let count = 0;
         for (const s of state.students.values()) {
           if (s.id === where.id?.not) continue;
+          if (where.emailOptIn !== undefined && s.emailOptIn !== where.emailOptIn) continue;
           if (
             s.email != null &&
             where.email?.equals != null &&
@@ -105,6 +107,29 @@ describe("applyEmailOptOut", () => {
     expect(state.students.get(STUDENT_ID)!.emailOptIn).toBe(false);
     expect(state.students.get(SIBLING_ID)!.emailOptIn).toBe(false);
     expect(state.students.get(UNRELATED_ID)!.emailOptIn).toBe(true);
+  });
+
+  // #155: the consent record had a flag and no date. An unsubscribe is the
+  // moment consent was withdrawn, on every row it silences.
+  it("stamps emailOptInAt with the withdrawal time on the target and its siblings", async () => {
+    const now = new Date("2026-11-16T10:00:00Z");
+    await applyEmailOptOut(
+      { prisma: buildPrisma(state), secret: SECRET, now: () => now },
+      token(now),
+    );
+    expect(state.students.get(STUDENT_ID)!.emailOptInAt).toEqual(now);
+    expect(state.students.get(SIBLING_ID)!.emailOptInAt).toEqual(now);
+    expect(state.students.get(UNRELATED_ID)!.emailOptInAt).toBeUndefined();
+  });
+
+  it("keeps the original withdrawal date when an already-unsubscribed row is clicked again", async () => {
+    const first = new Date("2026-11-16T10:00:00Z");
+    const later = new Date("2026-11-17T10:00:00Z");
+    const prisma = buildPrisma(state);
+    await applyEmailOptOut({ prisma, secret: SECRET, now: () => first }, token(first));
+    await applyEmailOptOut({ prisma, secret: SECRET, now: () => later }, token(later));
+    expect(state.students.get(STUDENT_ID)!.emailOptInAt).toEqual(first);
+    expect(state.students.get(SIBLING_ID)!.emailOptInAt).toEqual(first);
   });
 
   it("is idempotent on a second click", async () => {

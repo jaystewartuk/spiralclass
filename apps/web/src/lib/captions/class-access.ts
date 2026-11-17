@@ -12,6 +12,7 @@ import { flushAnalytics, trackServerEvent } from "@/lib/analytics/posthog";
 import { cloudCaptionsConfigured } from "@/lib/captions/config";
 import { captionsConsentOk } from "@/lib/captions/consent";
 import { lessonTranscriptCaptureOk } from "@/lib/transcription/browser-transcript";
+import { classSpokenLanguages } from "@/lib/transcription/language";
 
 // Class-booking caption language/consent resolution. Captions run in the
 // participants' browsers (D-185), and every fact a browser needs to caption a
@@ -52,10 +53,11 @@ function directionForBooking(
   booking: BookingWithLanguages,
   role: "teacher" | "student",
 ): CaptionDirection {
+  const spoken = classSpokenLanguages(booking);
   return resolveCaptionDirection({
     role,
-    teacherLanguage: booking.teacherLanguageOverride ?? booking.teacher.teachingLanguage,
-    studentLanguage: booking.studentLanguageOverride ?? booking.student.nativeLanguage,
+    teacherLanguage: spoken.teacher,
+    studentLanguage: spoken.student,
   });
 }
 

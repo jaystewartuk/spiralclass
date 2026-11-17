@@ -122,17 +122,18 @@ $0 because the repository is public ([D-157](../decisions/D-157.md)).
 Every call uses the **platform** key, never a teacher's.
 [D-87](../decisions/D-87.md) set the model per surface:
 
-| Surface                                         | Model                                          | Where                                                                                  |
-| ----------------------------------------------- | ---------------------------------------------- | -------------------------------------------------------------------------------------- |
-| Class-content and library compose               | `claude-sonnet-5` (override `ANTHROPIC_MODEL`) | `anthropicModel()` in `apps/web/src/lib/env.ts`                                        |
-| Lesson summary · insights · brief · intro coach | `claude-haiku-4-5`                             | constants in `apps/web/src/lib/lesson-notes/`, `apps/web/src/lib/intro-video/coach.ts` |
+| Surface                                         | Model                                                 | Where                                                |
+| ----------------------------------------------- | ----------------------------------------------------- | ---------------------------------------------------- |
+| Class-content and library compose               | `claude-sonnet-5` (override `ANTHROPIC_MODEL`)        | `anthropicModel()` in `apps/web/src/lib/env.ts`      |
+| Lesson summary · insights · brief · intro coach | `claude-haiku-4-5` (override `ANTHROPIC_SMALL_MODEL`) | `anthropicSmallModel()` in `apps/web/src/lib/env.ts` |
 
 > [!WARNING]
 > **Haiku 4.5 rejects `output_config.effort` with a 400.** The compose call
 > sites in `apps/web/src/lib/ai/anthropic.ts` pass `effort: "medium"`, so
-> compose cannot move to Haiku without dropping the parameter first (and the
-> guard in `apps/web/tests/lib/env.test.ts`). It has bitten twice: live
-> captions and the first draft of D-87.
+> compose cannot move to Haiku without dropping the parameter first. It has
+> bitten twice: live captions and the first draft of D-87. An
+> `ANTHROPIC_MODEL` naming such a model is now refused and the default used
+> (`apps/web/src/lib/ai/models.ts`).
 
 ## AI class-content compose ([D-17](../decisions/D-17.md))
 
@@ -193,8 +194,9 @@ read it from there.
   Re-derive from `cap × observed cost per generation × Pro teacher count`.
 - **Before the cap:** `max_tokens` and `effort` bound a single generation. The
   cheaper-model lever is nearly spent (D-87). `ANTHROPIC_MODEL` moves compose
-  with an environment change and no code change; the four Haiku surfaces are
-  constants and need a code change.
+  and `ANTHROPIC_SMALL_MODEL` the four Haiku surfaces, each with an
+  environment change and no code change, among the models
+  `apps/web/src/lib/ai/models.ts` confirms.
 
 ## When to start paying
 

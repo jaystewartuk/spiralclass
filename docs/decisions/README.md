@@ -36,7 +36,7 @@ they name what is still wrong.
   what that cost.
 
 **Context on scale.** This was built and operated by one person, with a
-handful of real teachers and their students on it. Decisions that would go to
+teacher and her students using it. Decisions that would go to
 legal, security review or a change-advisory board in a larger organisation were
 made by one person, in writing, here.
 

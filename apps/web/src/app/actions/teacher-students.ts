@@ -11,7 +11,10 @@ import { flushAnalytics, trackServerEvent } from "@/lib/analytics/posthog";
 import { teacherCreateStudentSchema } from "@/lib/validators";
 import { normalizeE164 } from "@/lib/phone";
 import { gateAddStudent, upgradeNudge } from "@/lib/subscriptions/enforce";
-import { defaultNewStudentNotificationPrefs } from "@/lib/notifications/preferences";
+import {
+  defaultNewStudentNotificationPrefs,
+  isNotificationsFullyDisabled,
+} from "@/lib/notifications/preferences";
 import { revalidateAfterAction } from "@/lib/revalidate";
 import { createT } from "@spiralclass/shared";
 
@@ -167,7 +170,7 @@ export async function setStudentLiveAction(
     where: {
       teacherId_studentId: { teacherId: teacher.id, studentId: parsed.data.studentId },
     },
-    select: { onboardingHoldAt: true },
+    select: { onboardingHoldAt: true, student: { select: { notificationPrefs: true } } },
   });
   if (!link) {
     return { error: t("web.action.studentNotInList") };
@@ -210,7 +213,14 @@ export async function setStudentLiveAction(
   await flushAnalytics();
 
   revalidateAfterAction(`/dashboard/students/${parsed.data.studentId}`);
+  // Going live lifts the hold and nothing else. A student whose every category
+  // is stored off still receives no confirmation or reminder, and Go live does
+  // not switch them on: that map cannot be told apart from a student's own
+  // opt-out (D-204). So the reply says which of the two the teacher now has
+  // rather than promising notifications that will not be sent (#77).
   return {
-    ok: t("web.action.teacherStudents.nowLive"),
+    ok: isNotificationsFullyDisabled(link.student.notificationPrefs as object | null)
+      ? t("web.action.teacherStudents.nowLiveNotificationsOff")
+      : t("web.action.teacherStudents.nowLive"),
   };
 }

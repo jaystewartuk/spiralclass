@@ -2,6 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { enqueueReminder, enqueueReminderTeacher } from "@/lib/notifications/enqueue";
 import { enqueueMaterialsForTiming } from "@/lib/notifications/materials";
 import { emitNotificationQueued } from "@/lib/notifications/events";
+import { reminderClockShiftMinutes } from "@/lib/notifications/clock-change";
 
 // Reminder dispatch core. Extracted from the former
 // lib/inngest/functions/schedule-reminders.ts when reminders moved from a
@@ -57,6 +58,14 @@ export async function maybeEnqueueReminder(input: {
   // whichever leg didn't land. Enqueued before the student early-return below
   // so a booking whose student reminder already exists still gets the teacher
   // one on a redelivery where only the student row was written.
+  // Whether a clock change moved this class on the student's clock since the
+  // pairing's previous one (issue 229). Both legs carry it, so the teacher is
+  // told the same thing her student is. Measured at most once per call, and only
+  // when a leg is actually about to be written.
+  let clockShift: number | undefined;
+  const clockShiftMinutes = async () =>
+    (clockShift ??= await reminderClockShiftMinutes(prisma, input));
+
   const teacherTemplateName = reminderTemplateNameTeacher(input.which);
   const existingTeacher = await prisma.notification.findFirst({
     where: {
@@ -73,6 +82,7 @@ export async function maybeEnqueueReminder(input: {
       teacherId: input.teacherId,
       bookingId: input.bookingId,
       which: input.which,
+      clockShiftMinutes: await clockShiftMinutes(),
     });
     await emitNotificationQueued({
       notificationId: teacherNotificationId,
@@ -103,6 +113,7 @@ export async function maybeEnqueueReminder(input: {
     studentId: input.studentId,
     bookingId: input.bookingId,
     which: input.which,
+    clockShiftMinutes: await clockShiftMinutes(),
   });
   await emitNotificationQueued({ notificationId, teacherId: input.teacherId });
 

@@ -1,5 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { cleanupAbandonedPendingPackages } from "@/lib/payments/cleanup-pending";
+import {
+  cleanupAbandonedPendingPackages,
+  type CleanupPendingDeps,
+} from "@/lib/payments/cleanup-pending";
+import type { StripeVerdict } from "@/lib/payments/settle-unconfirmed";
 
 const NOW = new Date("2026-04-26T00:00:00Z");
 const EIGHT_DAYS_AGO = new Date(NOW.getTime() - 8 * 24 * 60 * 60 * 1000);
@@ -12,6 +16,7 @@ type PaymentRow = {
   provider: "stripe" | "manual_transfer";
   createdAt: Date;
   studentMarkedSentAt?: Date | null;
+  stripeCheckoutSessionId?: string | null;
 };
 type PackageRow = {
   id: string;
@@ -56,7 +61,18 @@ function fakePrisma(state: FakeState) {
           if (p.status !== where.status) return false;
           return matchesEvery(p, where.payments?.every);
         });
-        return typeof take === "number" ? matched.slice(0, take) : matched;
+        const rows = typeof take === "number" ? matched.slice(0, take) : matched;
+        // The production select: the teacher's connected account, and each
+        // payment's rail + session so cleanup can ask Stripe before deleting.
+        return rows.map((p) => ({
+          id: p.id,
+          teacher: { stripeAccountId: "acct_TEACHER" },
+          payments: p.payments.map((pay, i) => ({
+            id: `${p.id}-pay-${i}`,
+            provider: pay.provider,
+            stripeCheckoutSessionId: pay.stripeCheckoutSessionId ?? null,
+          })),
+        }));
       }),
       deleteMany: vi.fn(async ({ where }: any) => {
         if (state.failDeleteIds?.has(where.id)) {
@@ -72,6 +88,13 @@ function fakePrisma(state: FakeState) {
       }),
     },
   } as any;
+}
+
+// The pre-#184 cases below concern the database predicate, not Stripe: their
+// payments carry no session id, so Stripe is never asked. A Stripe that always
+// answers "abandoned" keeps them meaning what they meant.
+function run(deps: Omit<CleanupPendingDeps, "askStripe"> & Partial<CleanupPendingDeps>) {
+  return cleanupAbandonedPendingPackages({ askStripe: async () => "abandoned", ...deps });
 }
 
 describe("cleanupAbandonedPendingPackages", () => {
@@ -91,12 +114,18 @@ describe("cleanupAbandonedPendingPackages", () => {
       },
     ];
 
-    const outcome = await cleanupAbandonedPendingPackages({
+    const outcome = await run({
       prisma: fakePrisma(state),
       now: () => NOW,
     });
 
-    expect(outcome).toEqual({ scanned: 1, packagesDeleted: 1, skipped: 0, failed: 0 });
+    expect(outcome).toEqual({
+      scanned: 1,
+      packagesDeleted: 1,
+      skipped: 0,
+      failed: 0,
+      keptForStripe: 0,
+    });
     expect(state.packages).toHaveLength(0);
   });
 
@@ -110,12 +139,18 @@ describe("cleanupAbandonedPendingPackages", () => {
       },
     ];
 
-    const outcome = await cleanupAbandonedPendingPackages({
+    const outcome = await run({
       prisma: fakePrisma(state),
       now: () => NOW,
     });
 
-    expect(outcome).toEqual({ scanned: 0, packagesDeleted: 0, skipped: 0, failed: 0 });
+    expect(outcome).toEqual({
+      scanned: 0,
+      packagesDeleted: 0,
+      skipped: 0,
+      failed: 0,
+      keptForStripe: 0,
+    });
     expect(state.packages).toHaveLength(1);
   });
 
@@ -130,7 +165,7 @@ describe("cleanupAbandonedPendingPackages", () => {
       },
     ];
 
-    const outcome = await cleanupAbandonedPendingPackages({
+    const outcome = await run({
       prisma: fakePrisma(state),
       now: () => NOW,
     });
@@ -149,12 +184,18 @@ describe("cleanupAbandonedPendingPackages", () => {
       },
     ];
 
-    const outcome = await cleanupAbandonedPendingPackages({
+    const outcome = await run({
       prisma: fakePrisma(state),
       now: () => NOW,
     });
 
-    expect(outcome).toEqual({ scanned: 1, packagesDeleted: 1, skipped: 0, failed: 0 });
+    expect(outcome).toEqual({
+      scanned: 1,
+      packagesDeleted: 1,
+      skipped: 0,
+      failed: 0,
+      keptForStripe: 0,
+    });
   });
 
   it("never touches active packages", async () => {
@@ -167,12 +208,18 @@ describe("cleanupAbandonedPendingPackages", () => {
       },
     ];
 
-    const outcome = await cleanupAbandonedPendingPackages({
+    const outcome = await run({
       prisma: fakePrisma(state),
       now: () => NOW,
     });
 
-    expect(outcome).toEqual({ scanned: 0, packagesDeleted: 0, skipped: 0, failed: 0 });
+    expect(outcome).toEqual({
+      scanned: 0,
+      packagesDeleted: 0,
+      skipped: 0,
+      failed: 0,
+      keptForStripe: 0,
+    });
     expect(state.packages).toHaveLength(1);
   });
 
@@ -186,7 +233,7 @@ describe("cleanupAbandonedPendingPackages", () => {
       },
     ];
 
-    const outcome = await cleanupAbandonedPendingPackages({
+    const outcome = await run({
       prisma: fakePrisma(state),
       now: () => NOW,
     });
@@ -206,10 +253,16 @@ describe("cleanupAbandonedPendingPackages", () => {
     ];
     const prisma = fakePrisma(state);
 
-    await cleanupAbandonedPendingPackages({ prisma, now: () => NOW });
-    const second = await cleanupAbandonedPendingPackages({ prisma, now: () => NOW });
+    await run({ prisma, now: () => NOW });
+    const second = await run({ prisma, now: () => NOW });
 
-    expect(second).toEqual({ scanned: 0, packagesDeleted: 0, skipped: 0, failed: 0 });
+    expect(second).toEqual({
+      scanned: 0,
+      packagesDeleted: 0,
+      skipped: 0,
+      failed: 0,
+      keptForStripe: 0,
+    });
   });
 
   it("continues past a failed delete and reports it instead of throwing", async () => {
@@ -235,12 +288,18 @@ describe("cleanupAbandonedPendingPackages", () => {
     ];
     state.failDeleteIds = new Set(["boom"]);
 
-    const outcome = await cleanupAbandonedPendingPackages({
+    const outcome = await run({
       prisma: fakePrisma(state),
       now: () => NOW,
     });
 
-    expect(outcome).toEqual({ scanned: 3, packagesDeleted: 2, skipped: 0, failed: 1 });
+    expect(outcome).toEqual({
+      scanned: 3,
+      packagesDeleted: 2,
+      skipped: 0,
+      failed: 1,
+      keptForStripe: 0,
+    });
     // The two healthy rows are gone; the failed one survives for the next run.
     expect(state.packages.map((p) => p.id)).toEqual(["boom"]);
   });
@@ -264,12 +323,18 @@ describe("cleanupAbandonedPendingPackages", () => {
       },
     ];
 
-    const outcome = await cleanupAbandonedPendingPackages({
+    const outcome = await run({
       prisma: fakePrisma(state),
       now: () => NOW,
     });
 
-    expect(outcome).toEqual({ scanned: 0, packagesDeleted: 0, skipped: 0, failed: 0 });
+    expect(outcome).toEqual({
+      scanned: 0,
+      packagesDeleted: 0,
+      skipped: 0,
+      failed: 0,
+      keptForStripe: 0,
+    });
     expect(state.packages).toHaveLength(1);
   });
 
@@ -295,9 +360,15 @@ describe("cleanupAbandonedPendingPackages", () => {
       return rows;
     });
 
-    const outcome = await cleanupAbandonedPendingPackages({ prisma, now: () => NOW });
+    const outcome = await run({ prisma, now: () => NOW });
 
-    expect(outcome).toEqual({ scanned: 1, packagesDeleted: 0, skipped: 1, failed: 0 });
+    expect(outcome).toEqual({
+      scanned: 1,
+      packagesDeleted: 0,
+      skipped: 1,
+      failed: 0,
+      keptForStripe: 0,
+    });
     // The now-active package survives — its classes aren't revoked.
     expect(state.packages.map((p) => p.id)).toEqual(["raced"]);
   });
@@ -312,13 +383,115 @@ describe("cleanupAbandonedPendingPackages", () => {
       ],
     }));
 
-    const outcome = await cleanupAbandonedPendingPackages({
+    const outcome = await run({
       prisma: fakePrisma(state),
       now: () => NOW,
       maxDeletions: 2,
     });
 
-    expect(outcome).toEqual({ scanned: 2, packagesDeleted: 2, skipped: 0, failed: 0 });
+    expect(outcome).toEqual({
+      scanned: 2,
+      packagesDeleted: 2,
+      skipped: 0,
+      failed: 0,
+      keptForStripe: 0,
+    });
     expect(state.packages).toHaveLength(3);
+  });
+});
+
+// #184: a card checkout whose webhook never arrived. The seven-day window
+// assumed a paid checkout would always be flipped by a webhook; when none came,
+// cleanup deleted the only record of a real, charged purchase.
+describe("cleanupAbandonedPendingPackages asks Stripe before deleting a card checkout", () => {
+  function stripeCheckout(id: string): PackageRow {
+    return {
+      id,
+      status: "pending",
+      createdAt: EIGHT_DAYS_AGO,
+      payments: [
+        {
+          status: "pending",
+          provider: "stripe",
+          createdAt: EIGHT_DAYS_AGO,
+          stripeCheckoutSessionId: `cs_${id}`,
+        },
+      ],
+    };
+  }
+
+  it.each<[StripeVerdict, string]>([
+    ["paid", "Stripe holds the money — it is settled, never deleted"],
+    ["unresolved", "Stripe could not confirm it expired unpaid — kept for the next run"],
+  ])("keeps the package when Stripe says %s (%s)", async (verdict) => {
+    const state: FakeState = { packages: [stripeCheckout("paid-no-webhook")] };
+    const askStripe = vi.fn(async () => verdict);
+
+    const outcome = await cleanupAbandonedPendingPackages({
+      prisma: fakePrisma(state),
+      now: () => NOW,
+      askStripe,
+    });
+
+    expect(outcome).toEqual({
+      scanned: 1,
+      packagesDeleted: 0,
+      skipped: 0,
+      failed: 0,
+      keptForStripe: 1,
+    });
+    expect(state.packages.map((p) => p.id)).toEqual(["paid-no-webhook"]);
+    // Asked on the teacher's own account (D-143), about this session.
+    expect(askStripe).toHaveBeenCalledWith({
+      id: "paid-no-webhook-pay-0",
+      stripeCheckoutSessionId: "cs_paid-no-webhook",
+      stripeAccountId: "acct_TEACHER",
+    });
+  });
+
+  it("deletes the package once Stripe confirms the session expired unpaid", async () => {
+    const state: FakeState = { packages: [stripeCheckout("never-paid")] };
+    const askStripe = vi.fn(async (): Promise<StripeVerdict> => "abandoned");
+
+    const outcome = await cleanupAbandonedPendingPackages({
+      prisma: fakePrisma(state),
+      now: () => NOW,
+      askStripe,
+    });
+
+    expect(outcome.packagesDeleted).toBe(1);
+    expect(askStripe).toHaveBeenCalledTimes(1);
+    expect(state.packages).toHaveLength(0);
+  });
+
+  it("does not ask Stripe about a checkout that never reached it, or about Wise", async () => {
+    const state: FakeState = {
+      packages: [
+        {
+          id: "no-session",
+          status: "pending",
+          createdAt: EIGHT_DAYS_AGO,
+          payments: [{ status: "pending", provider: "stripe", createdAt: EIGHT_DAYS_AGO }],
+        },
+        {
+          id: "wise",
+          status: "pending",
+          createdAt: FIFTEEN_DAYS_AGO,
+          payments: [
+            { status: "pending", provider: "manual_transfer", createdAt: FIFTEEN_DAYS_AGO },
+          ],
+        },
+      ],
+    };
+    const askStripe = vi.fn(async (): Promise<StripeVerdict> => "paid");
+
+    const outcome = await cleanupAbandonedPendingPackages({
+      prisma: fakePrisma(state),
+      now: () => NOW,
+      askStripe,
+    });
+
+    expect(askStripe).not.toHaveBeenCalled();
+    expect(outcome.packagesDeleted).toBe(2);
   });
 });

@@ -7,6 +7,7 @@ import { requireAdmin } from "@/lib/admin";
 import { writeOverride } from "@/lib/audit";
 import { getPreferredLocale } from "@/lib/i18n";
 import { emitNotificationQueued } from "@/lib/notifications/events";
+import { isDispatcherReplayable } from "@/lib/notifications/admin-retry";
 import { getEmailClient } from "@/lib/email";
 import { revalidateAfterAction } from "@/lib/revalidate";
 import { createT } from "@spiralclass/shared";
@@ -41,9 +42,12 @@ export async function retryNotificationAction(
 
   const existing = await prisma.notification.findUnique({
     where: { id: parsed.data.notificationId },
-    select: { id: true, status: true, teacherId: true },
+    select: { id: true, status: true, teacherId: true, templateName: true },
   });
   if (!existing) return { error: t("web.action.admin.notificationNotFound") };
+  if (!isDispatcherReplayable(existing.templateName)) {
+    return { error: t("web.action.admin.notificationNotRetryable") };
+  }
   if (existing.status === "sent" || existing.status === "delivered") {
     return {
       error: t("web.action.admin.notificationAlreadyInState", { status: existing.status }),

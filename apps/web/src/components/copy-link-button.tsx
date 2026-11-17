@@ -14,6 +14,7 @@ export function CopyLinkButton({
   toastMessage,
   iconOnly = false,
   className,
+  disabled = false,
 }: {
   value: string;
   label?: string;
@@ -27,6 +28,7 @@ export function CopyLinkButton({
   toastMessage?: string;
   iconOnly?: boolean;
   className?: string;
+  disabled?: boolean;
 }) {
   const [copied, setCopied] = useState(false);
   const t = useT();
@@ -34,6 +36,7 @@ export function CopyLinkButton({
   const resolvedToast = toastMessage ?? t("web.copyLinkButton.linkCopied");
 
   const onClick = async () => {
+    if (disabled) return;
     try {
       await navigator.clipboard.writeText(value);
       setCopied(true);
@@ -58,6 +61,7 @@ export function CopyLinkButton({
         variant="ghost"
         size="icon"
         onClick={onClick}
+        disabled={disabled}
         aria-label={ariaLabel ?? label ?? t("web.copyLinkButton.copyLink")}
         className={cn("shrink-0 text-muted-foreground hover:text-foreground", className)}
       >
@@ -76,6 +80,7 @@ export function CopyLinkButton({
       variant="outline"
       size="sm"
       onClick={onClick}
+      disabled={disabled}
       aria-label={ariaLabel}
       className={className}
     >

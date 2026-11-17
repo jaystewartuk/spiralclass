@@ -46,17 +46,22 @@ export async function applyEmailOptOut(
   // identity set, moderated rows included) stops receiving email — one
   // click must not leave a sibling row still mailing the address that
   // just unsubscribed. See lib/students/identity.ts for the scope rules.
+  //
+  // `emailOptInAt` records when consent was withdrawn (#155) — stamped only
+  // on a row this click actually flips, so a second click keeps the date of
+  // the first.
   await deps.prisma.student.update({
     where: { id: studentId },
-    data: { emailOptIn: false },
+    data: wasOptedIn ? { emailOptIn: false, emailOptInAt: now } : { emailOptIn: false },
   });
   if (before?.email) {
     await deps.prisma.student.updateMany({
       where: {
         email: { equals: before.email, mode: "insensitive" },
         id: { not: studentId },
+        emailOptIn: true,
       },
-      data: { emailOptIn: false },
+      data: { emailOptIn: false, emailOptInAt: now },
     });
   }
 

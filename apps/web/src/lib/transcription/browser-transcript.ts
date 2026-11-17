@@ -3,7 +3,8 @@ import type { Booking, PrismaClient } from "@prisma/client";
 import type { inngest as defaultInngest } from "@/lib/inngest/client";
 import { lessonInsightsConsentOk } from "@/lib/lesson-notes/consent";
 import { logger } from "@/lib/logger";
-import { DEFAULT_LESSON_LANGUAGE, browserTranscriptEnabled } from "./config";
+import { browserTranscriptEnabled } from "./config";
+import { lessonLanguage } from "./language";
 import { normalizeTimeline } from "./merge";
 import type { CallRole } from "@spiralclass/shared";
 import type { SpeakerUtterance } from "./types";
@@ -60,7 +61,7 @@ export const BROWSER_TRANSCRIPT_PROVIDER = "browser";
 // otherwise claim the silence.
 export const MAX_LINE_DURATION_MS = 60_000;
 
-type Db = Pick<PrismaClient, "$queryRaw" | "lessonTranscript" | "teacherStudent">;
+type Db = Pick<PrismaClient, "$queryRaw" | "lessonTranscript" | "teacher" | "teacherStudent">;
 type EventSender = Pick<typeof defaultInngest, "send">;
 
 // Whether this class's recognised lines are to be kept as its transcript: the
@@ -125,12 +126,20 @@ export function lineToUtterance(
 }
 
 export async function appendBrowserTranscriptLine(
-  db: Pick<Db, "$queryRaw">,
+  db: Pick<Db, "$queryRaw" | "teacher">,
   line: TranscriptLineInput,
 ): Promise<AppendOutcome> {
   const utterance = lineToUtterance(line, line.now ?? Date.now());
   if (!utterance.text) return { kept: false, started: false };
   const utterances = JSON.stringify([utterance]);
+  // The row's language is the teacher's own (language.ts), read from her row
+  // by primary key. It only lands on the INSERT — the first line of a class —
+  // but reading it every line keeps this one statement, not a read-then-write.
+  const teacher = await db.teacher.findUnique({
+    where: { id: line.teacherId },
+    select: { targetLanguage: true, teachingLanguage: true },
+  });
+  if (!teacher) return { kept: false, started: false };
   // One statement, so two browsers appending at once cannot lose a line, and
   // so a line for a finished class (provider no longer live) is a no-op. The
   // teacher_id in the update's WHERE is the tenant scope (D-175); the insert
@@ -141,7 +150,7 @@ export async function appendBrowserTranscriptLine(
     VALUES (
       ${line.bookingId}::uuid,
       ${line.teacherId}::uuid,
-      ${DEFAULT_LESSON_LANGUAGE},
+      ${lessonLanguage(teacher)},
       ${utterances}::jsonb,
       ${BROWSER_TRANSCRIPT_LIVE}
     )

@@ -475,7 +475,7 @@ their unset state is today's live behavior) into `config/env/*.runtime.env`
 instead, which is plain, version-controlled, and diff-reviewable: `CSP_ENFORCE`,
 `LESSON_INSIGHTS_TRANSCRIPTION_ENABLED`,
 `LESSON_INSIGHTS_PRONUNCIATION_ENABLED`, `LIVE_CAPTIONS_ENABLED`,
-`STRIPE_TAX_ENABLED` and `ANTHROPIC_MODEL`. See those files' comments for each
+`STRIPE_TAX_ENABLED`, `ANTHROPIC_MODEL` and `ANTHROPIC_SMALL_MODEL`. See those files' comments for each
 var's current default and what enabling it actually does — uncommenting one
 is a real behavior change on next deploy, review it like any other code
 change. `NEXT_PUBLIC_SUPPORT_WHATSAPP` is not in Infisical at all: it is

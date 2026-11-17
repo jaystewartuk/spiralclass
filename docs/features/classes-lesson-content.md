@@ -114,8 +114,9 @@ and that copy-forward carries.
 - One per booking; regenerating overwrites it.
 - Only once the class has started, and only with at least one note; both are
   explicit errors otherwise. Only text notes feed it.
-- Model is `SUMMARY_MODEL` (`claude-haiku-4-5`, `lib/lesson-notes/summary.ts`),
-  fixed regardless of any environment model override.
+- Model is `anthropicSmallModel()` (`claude-haiku-4-5` by default,
+  `lib/env.ts`), moved by `ANTHROPIC_SMALL_MODEL` together with insights, the
+  pre-class brief and the intro coach; `ANTHROPIC_MODEL` does not reach it.
 - No AI key → a "not available" message. An empty model reply is an explicit
   error.
 - Teacher-only; there is no student surface for it.
