@@ -4940,6 +4940,15 @@ export const fr = {
   "web.myClasses.timezoneNotice.keep": "Garder l'heure de {saved}",
   "web.myClasses.timezoneNotice.switched":
     "C'est fait : vos horaires s'affichent maintenant à l'heure de {device}.",
+  // Un changement d'heure a déplacé un cours sur l'horloge d'une des parties (issue 229).
+  "clockChange.student.later":
+    "L'heure a changé depuis votre dernier cours avec {teacherName} : la même heure sur son horloge tombe désormais {amount} plus tard sur la vôtre.",
+  "clockChange.student.earlier":
+    "L'heure a changé depuis votre dernier cours avec {teacherName} : la même heure sur son horloge tombe désormais {amount} plus tôt sur la vôtre.",
+  "clockChange.teacher.later":
+    "L'heure a changé depuis le dernier cours de {studentName} : la même heure sur votre horloge tombe désormais {amount} plus tard sur la sienne.",
+  "clockChange.teacher.earlier":
+    "L'heure a changé depuis le dernier cours de {studentName} : la même heure sur votre horloge tombe désormais {amount} plus tôt sur la sienne.",
   // Préférences de notification (NotificationPrefsForm), partagées par les
   // écrans enseignant et élève. De haut en bas, ce sont les trois couches que
   // traverse une notification : l'appareil, le canal du compte et le choix par

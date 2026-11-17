@@ -47,6 +47,11 @@ export type ClassListItem = {
   packageName: string | null;
   durationMin: number | null;
   hasMaterials: boolean;
+  /**
+   * Set when a clock change since this student's previous class moved this
+   * one on her clock (issue 229), already in the teacher's language.
+   */
+  clockChangeNote?: string;
 };
 
 type ListContext = {
@@ -192,6 +197,11 @@ async function ClassRow({
                 time: `${zoned.other.timeLabel} (${zoned.other.tzDisplay})`,
               })}
             </div>
+          )}
+          {item.clockChangeNote && (
+            <p className="mt-1 rounded-md border border-warning/30 bg-warning-bg px-2 py-1 text-sm">
+              {item.clockChangeNote}
+            </p>
           )}
         </div>
 

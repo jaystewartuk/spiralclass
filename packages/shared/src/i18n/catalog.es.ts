@@ -4960,6 +4960,15 @@ export const esMX = {
   "web.myClasses.timezoneNotice.keep": "Mantener hora de {saved}",
   "web.myClasses.timezoneNotice.switched":
     "Listo: tus horarios ahora se muestran en hora de {device}.",
+  // Un cambio de hora movió una clase en el reloj de una de las partes (issue 229).
+  "clockChange.student.later":
+    "Los relojes cambiaron desde tu última clase con {teacherName}: la misma hora en su reloj ahora es {amount} más tarde en el tuyo.",
+  "clockChange.student.earlier":
+    "Los relojes cambiaron desde tu última clase con {teacherName}: la misma hora en su reloj ahora es {amount} más temprano en el tuyo.",
+  "clockChange.teacher.later":
+    "Los relojes cambiaron desde la última clase de {studentName}: la misma hora en tu reloj ahora es {amount} más tarde en el suyo.",
+  "clockChange.teacher.earlier":
+    "Los relojes cambiaron desde la última clase de {studentName}: la misma hora en tu reloj ahora es {amount} más temprano en el suyo.",
   // Preferencias de avisos (NotificationPrefsForm), compartidas por las
   // pantallas de profe y alumno. De arriba abajo son las tres capas por las que
   // pasa un aviso: el dispositivo, el canal de la cuenta y la elección por
