@@ -36,20 +36,18 @@ import {
   buildAiReviewPrompt,
   parseAiReviewToolInput,
 } from "@/lib/homework/ai-review-prompt";
-import {
-  generateInsights,
-  INSIGHTS_MODEL,
-  parseInsightsToolInput,
-} from "@/lib/lesson-notes/insights";
+import { generateInsights, parseInsightsToolInput } from "@/lib/lesson-notes/insights";
+import { MODEL_TIER_DEFAULTS } from "@/lib/ai/models";
 import type { HomeworkAiReviewContent } from "@spiralclass/shared";
 
 const WEB_ROOT = resolve(import.meta.dirname, "..");
 const COMMITTED_CASES = join(WEB_ROOT, "evals", "cases");
 
-// The production default for anthropicModel() (lib/env.ts). Read here rather
-// than imported because lib/env.ts pulls the server logger; a drift between
-// the two is caught by the guard in tests/config/ai-evals.test.ts.
-export const HOMEWORK_REVIEW_DEFAULT_MODEL = "claude-sonnet-5";
+// The production defaults, from the pure module lib/env.ts resolves them
+// through. An env override is deliberately not read here: a run measures the
+// default unless --model names a candidate.
+export const HOMEWORK_REVIEW_DEFAULT_MODEL = MODEL_TIER_DEFAULTS.standard;
+export const INSIGHTS_DEFAULT_MODEL = MODEL_TIER_DEFAULTS.small;
 
 type Args = {
   cases: string[];
@@ -178,7 +176,7 @@ async function obtainOutput(
   }
   switch (c.surface) {
     case "lesson-insights": {
-      const model = args.model ?? INSIGHTS_MODEL;
+      const model = args.model ?? INSIGHTS_DEFAULT_MODEL;
       return { model, output: await generateInsights(c.input, { model }) };
     }
     case "homework-review": {
