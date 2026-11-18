@@ -369,10 +369,10 @@ describe("MaterialForm — Version History shows which revisions were AI edits",
         focusGroups: [],
         templates: [],
         revisions: [
-          { id: "r-ai", body: "# AI draft", source: "ai" as const, createdAt: new Date() },
+          { id: "r-ai", preview: "# AI draft", source: "ai" as const, createdAt: new Date() },
           {
             id: "r-manual",
-            body: "# Hand-edited",
+            preview: "# Hand-edited",
             source: "manual" as const,
             createdAt: new Date(),
           },
@@ -388,6 +388,12 @@ describe("MaterialForm — Version History shows which revisions were AI edits",
     const html = renderWithRevisions();
     expect(html).toContain("classContent.author.revisionSourceAi");
     expect(html).toContain("classContent.author.revisionSourceManual");
+  });
+
+  it("identifies each revision by the snippet the server sent", () => {
+    const html = renderWithRevisions();
+    expect(html).toContain("# AI draft");
+    expect(html).toContain("# Hand-edited");
   });
 
   it("still shows every revision's Restore control regardless of source", () => {

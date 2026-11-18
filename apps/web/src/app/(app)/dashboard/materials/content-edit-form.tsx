@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { MaterialForm, type ClassContentSource } from "@/components/materials/material-form";
+import type { MaterialRevisionSummary } from "@/lib/materials/revision-summary";
 import type { FocusGroup } from "@/components/focus-tags/focus-tag-select";
 import { useT } from "@/components/locale-provider";
 
@@ -15,7 +16,7 @@ import { useT } from "@/components/locale-provider";
 
 type LevelOption = { id: string; label: string };
 type Template = { id: string; label: string; body: string };
-type Revision = { id: string; body: string; source: ClassContentSource; createdAt: Date };
+type Revision = MaterialRevisionSummary;
 
 export function LibraryContentEditForm({
   material,

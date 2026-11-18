@@ -18,8 +18,6 @@ import {
   generateClassContentForBooking,
   generateLibraryMaterialForTeacher,
   getClassContentForBooking,
-  listClassContentRevisionsForBooking,
-  listLibraryMaterialRevisions,
   nextPositionInLevel,
   refineMaterialForTeacher,
   restoreClassContentRevisionForBooking,
@@ -29,7 +27,6 @@ import {
   saveMaterialAttachment,
   snapshotMaterialRevisionBeforeRefine,
   type ClassContentSource,
-  type MaterialRevisionRow,
 } from "@/lib/materials/handlers";
 import { removeUnreferencedMaterialImages } from "@/lib/materials/image-cleanup";
 import { syncLibraryMaterialFocusTags } from "@/lib/materials/tags";
@@ -493,28 +490,6 @@ export async function getMaterialPodcastStatusAction(
 }
 
 // ---------- version history (task 5), unified across both scopes ----------
-
-export async function listMaterialRevisionsFor(input: {
-  teacherId: string;
-  bookingId?: string | null;
-  materialId?: string | null;
-}): Promise<MaterialRevisionRow[]> {
-  if (input.bookingId) {
-    return (
-      (await listClassContentRevisionsForBooking({
-        teacherId: input.teacherId,
-        bookingId: input.bookingId,
-      })) ?? []
-    );
-  }
-  if (!input.materialId) return [];
-  return (
-    (await listLibraryMaterialRevisions({
-      teacherId: input.teacherId,
-      materialId: input.materialId,
-    })) ?? []
-  );
-}
 
 export type RestoreMaterialRevisionState =
   { error?: string; ok?: boolean; body?: string; source?: ClassContentSource } | undefined;

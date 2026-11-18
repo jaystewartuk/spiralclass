@@ -15,6 +15,7 @@ import {
 } from "@/lib/materials/handlers";
 import { listClassContentTemplates } from "@/lib/materials/templates";
 import { MaterialForm } from "@/components/materials/material-form";
+import { summarizeRevision } from "@/lib/materials/revision-summary";
 import { loadEntitlements } from "@/lib/subscriptions/service";
 
 // Dedicated surface for the heavy class-content editor (class-detail redesign
@@ -77,7 +78,7 @@ export default async function TeacherClassContentEditPage({
         levels={levels.map((l) => ({ id: l.id, label: l.label }))}
         focusGroups={focusGroups}
         templates={templates}
-        revisions={revisions ?? []}
+        revisions={(revisions ?? []).map(summarizeRevision)}
         aiEnabled={aiEnabled}
         isPro={isPro}
         podcastEnabled={podcastEnabled}
