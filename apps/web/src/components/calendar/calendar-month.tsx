@@ -77,7 +77,8 @@ export async function CalendarMonth({
   const monthPrefix = monthStr(year, month0);
   const monthCount = events.filter((e) => e.ymd.startsWith(monthPrefix)).length;
 
-  // The accessible name of each cell, e.g. "Mon, 5 May — 2 classes".
+  // Date/count prefix for each cell's name. The visible class times and names
+  // stay in the link's content rather than being replaced by an aria-label.
   const dayLabelFmt = new Intl.DateTimeFormat(intlLocale(locale), {
     timeZone: "UTC",
     weekday: "short",
@@ -130,10 +131,6 @@ export async function CalendarMonth({
                 key={g.ymd}
                 href={dayHref(g)}
                 aria-current={isSelected ? "date" : undefined}
-                aria-label={t("web.calendar.dayCellLabel", {
-                  day: dayLabelFmt.format(ymdToUtcNoon(g.ymd)),
-                  classes: countLabel,
-                })}
                 className={cn(
                   "relative flex min-h-cell flex-col p-1.5 text-left transition-colors sm:min-h-cell-lg sm:p-2",
                   // An INSET ring rather than the global outline. The grid is
@@ -154,6 +151,12 @@ export async function CalendarMonth({
                   isSelected && "z-10 ring-2 ring-primary ring-inset",
                 )}
               >
+                <span className="sr-only">
+                  {t("web.calendar.dayCellLabel", {
+                    day: dayLabelFmt.format(ymdToUtcNoon(g.ymd)),
+                    classes: countLabel,
+                  })}
+                </span>
                 <DayCell
                   dayNum={String(Number(g.ymd.slice(-2)))}
                   isToday={isToday}
