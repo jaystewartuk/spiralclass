@@ -362,7 +362,8 @@ disagree about what counts as an answer.
 
 ### Images
 
-Two independent features, for activities that need a picture (vocabulary,
+Two independent features (the second can also take a generated picture —
+see "Generated images"), for activities that need a picture (vocabulary,
 "describe this scene"):
 
 - **Inline preview of an image file attachment.** A material whose file is a
@@ -441,8 +442,38 @@ Rules:
   give the answer away.
 - AI generation draws one tense timeline when a material teaches a verb tense
   (`timeline` block), and never for anything else.
-- AI generation remains **text-only**: nothing in the prompt emits image
-  syntax, so a generated draft never references a picture that doesn't exist.
+- AI generation of a material remains **text-only**: nothing in the prompt
+  emits image syntax, so a generated draft never references a picture that
+  doesn't exist. A picture comes only from the teacher, uploaded or generated
+  (below).
+
+#### Generated images
+
+Beside **Image** in the add-block row, **Generate image** lets the teacher
+describe a picture instead of choosing a file
+(`POST /api/materials/images/generate`, `lib/materials/generate-image.ts`).
+
+- The result is stored through the upload path (`uploadMaterialImage`), so it
+  passes the same type and size checks, lives under the same purge-exempt
+  prefix and is freed by the same hard-delete sweep. In the body it is an
+  ordinary `material-image:` reference, and nothing downstream knows it was
+  generated.
+- The provider is the same image rail as social previews
+  (`lib/ai/image-gen.ts`, D-125). The control is offered only when that rail
+  has credentials (`materialImageGenerationAvailable`, passed to the editor
+  through `MaterialImageGenerationProvider`), and it needs no separate feature
+  flag.
+- The brief (`lib/materials/image-prompt.ts`) wraps the teacher's description
+  as written. It asks for a **realistic photograph** unless she asks for
+  another style, because adult learners found illustrations childish, and
+  for **no text in the image**, because a misspelt sign in a language class
+  is a wrong answer on the exercise. The description is 3–600 characters.
+- Pro-gated on `class_content`, like an upload. Throttled per teacher, to 6 in
+  ten minutes and 30 a day, before the provider is called. There is no
+  monthly ledger; the in-memory limiter resets on a cold start.
+- The caption starts empty, as it does for an upload. The description is not
+  copied into it, because in a "describe this picture" exercise it would be
+  the answer.
 
 ### Storage & uploads
 

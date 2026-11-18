@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { MaterialImageGenerationProvider } from "@/components/materials/image-generation-context";
+import { materialImageGenerationAvailable } from "@/lib/materials/generate-image";
 import { PageShell } from "@/components/ui/page-shell";
 import { PageHeader } from "@/components/ui/page-header";
 import {
@@ -318,122 +320,124 @@ export default async function LibraryPage({
   const pageParams = materialsPageParams(urlState);
 
   return (
-    <PageShell width="wide">
-      {header}
-      {searchSlot}
+    <MaterialImageGenerationProvider enabled={materialImageGenerationAvailable()}>
+      <PageShell width="wide">
+        {header}
+        {searchSlot}
 
-      {levels.length === 0 && noLevelsState}
+        {levels.length === 0 && noLevelsState}
 
-      <LibraryToolbar
-        urlState={urlState}
-        levels={levels}
-        focusGroups={focusGroups}
-        activeLevel={validLevel}
-        activeCategory={validCategory}
-        activeType={validType}
-        activeVisibility={validVisibility}
-        activeFilterCount={activeFilters.length}
-        visibilityLabel={visibilityLabel}
-        archivedCount={archivedCount}
-        total={total}
-        showFilters={!emptyLibrary}
-      />
+        <LibraryToolbar
+          urlState={urlState}
+          levels={levels}
+          focusGroups={focusGroups}
+          activeLevel={validLevel}
+          activeCategory={validCategory}
+          activeType={validType}
+          activeVisibility={validVisibility}
+          activeFilterCount={activeFilters.length}
+          visibilityLabel={visibilityLabel}
+          archivedCount={archivedCount}
+          total={total}
+          showFilters={!emptyLibrary}
+        />
 
-      {emptyLibrary ? (
-        levels.length > 0 && emptyLibraryState
-      ) : items.length === 0 ? (
-        view === "archived" ? (
-          <EmptyState
-            icon={Archive}
-            title={t("web.materials.noArchivedTitle")}
-            description={t("web.materials.noArchivedBody")}
-          />
-        ) : anyFilter ? (
-          <EmptyState
-            icon={FilterX}
-            title={t("web.materials.noResultsTitle")}
-            description={t("web.materials.noResultsBody")}
-            action={
-              <Button asChild variant="outline" size="sm">
-                <Link href={materialsClearFiltersHref(urlState)}>
-                  {t("web.materials.clearFilters")}
-                </Link>
-              </Button>
-            }
-          />
-        ) : mode.kind === "level" ? (
-          // An empty LEVEL, not an empty library — the library has materials,
-          // they are filed elsewhere. Saying "your library is empty" here
-          // (which it did) sends a teacher looking for materials she can see
-          // one click away.
-          <EmptyState
-            icon={Layers}
-            title={t("web.materials.emptyShelfTitle")}
-            description={t("web.materials.emptyShelfBody")}
-            action={addMaterial}
-          />
+        {emptyLibrary ? (
+          levels.length > 0 && emptyLibraryState
+        ) : items.length === 0 ? (
+          view === "archived" ? (
+            <EmptyState
+              icon={Archive}
+              title={t("web.materials.noArchivedTitle")}
+              description={t("web.materials.noArchivedBody")}
+            />
+          ) : anyFilter ? (
+            <EmptyState
+              icon={FilterX}
+              title={t("web.materials.noResultsTitle")}
+              description={t("web.materials.noResultsBody")}
+              action={
+                <Button asChild variant="outline" size="sm">
+                  <Link href={materialsClearFiltersHref(urlState)}>
+                    {t("web.materials.clearFilters")}
+                  </Link>
+                </Button>
+              }
+            />
+          ) : mode.kind === "level" ? (
+            // An empty LEVEL, not an empty library — the library has materials,
+            // they are filed elsewhere. Saying "your library is empty" here
+            // (which it did) sends a teacher looking for materials she can see
+            // one click away.
+            <EmptyState
+              icon={Layers}
+              title={t("web.materials.emptyShelfTitle")}
+              description={t("web.materials.emptyShelfBody")}
+              action={addMaterial}
+            />
+          ) : (
+            // The flat list, unfiltered, with nothing on it — so everything she
+            // has is on the archived shelf.
+            <EmptyState
+              icon={Archive}
+              title={t("web.materials.allArchivedTitle")}
+              description={t("web.materials.allArchivedBody")}
+              action={
+                <Button asChild variant="outline" size="sm">
+                  <Link href={materialsHref(urlState, { view: "archived" })}>
+                    {t("web.materials.seeArchived")}
+                  </Link>
+                </Button>
+              }
+            />
+          )
         ) : (
-          // The flat list, unfiltered, with nothing on it — so everything she
-          // has is on the archived shelf.
-          <EmptyState
-            icon={Archive}
-            title={t("web.materials.allArchivedTitle")}
-            description={t("web.materials.allArchivedBody")}
-            action={
-              <Button asChild variant="outline" size="sm">
-                <Link href={materialsHref(urlState, { view: "archived" })}>
-                  {t("web.materials.seeArchived")}
-                </Link>
-              </Button>
-            }
-          />
-        )
-      ) : (
-        <>
-          {/* The list's own heading. Never shown — the selected shelf chip
-              already says which shelf this is on screen — but it keeps the
-              outline h1 (page) - h2 (shelf) - h3 (material) rather than
-              jumping from the page title straight to a row, and gives a
-              screen reader a landmark to skip the toolbar with. */}
-          <h2 className="sr-only">
-            {mode.kind === "level"
-              ? (levelLabel.get(mode.levelId) ?? t("web.materials.pageTitle"))
-              : t("web.materials.allLevels")}
-          </h2>
-          <ul className="space-y-3">
-            {items.map((m) => (
-              <MaterialCard
-                key={m.id}
-                material={m}
-                levelLabel={levelLabel.get(m.levelId ?? "") ?? null}
-                visibilityLabel={visibilityLabel(m.visibility)}
-                view={view}
-                levels={levelOptions}
-                focusGroups={focusGroups}
-                templates={templates}
-                aiEnabled={aiEnabled}
-                isPro={isPro}
-                podcastEnabled={podcastEnabled}
-                dateLabel={addedFormatter.format(m.createdAt)}
-              />
-            ))}
-          </ul>
+          <>
+            {/* The list's own heading. Never shown — the selected shelf chip
+                already says which shelf this is on screen — but it keeps the
+                outline h1 (page) - h2 (shelf) - h3 (material) rather than
+                jumping from the page title straight to a row, and gives a
+                screen reader a landmark to skip the toolbar with. */}
+            <h2 className="sr-only">
+              {mode.kind === "level"
+                ? (levelLabel.get(mode.levelId) ?? t("web.materials.pageTitle"))
+                : t("web.materials.allLevels")}
+            </h2>
+            <ul className="space-y-3">
+              {items.map((m) => (
+                <MaterialCard
+                  key={m.id}
+                  material={m}
+                  levelLabel={levelLabel.get(m.levelId ?? "") ?? null}
+                  visibilityLabel={visibilityLabel(m.visibility)}
+                  view={view}
+                  levels={levelOptions}
+                  focusGroups={focusGroups}
+                  templates={templates}
+                  aiEnabled={aiEnabled}
+                  isPro={isPro}
+                  podcastEnabled={podcastEnabled}
+                  dateLabel={addedFormatter.format(m.createdAt)}
+                />
+              ))}
+            </ul>
 
-          <Pagination
-            state={pageState}
-            params={pageParams}
-            labels={{
-              showing: t("common.pagination.showing"),
-              of: t("common.pagination.of"),
-              noResults: t("common.pagination.noResults"),
-              page: t("common.pagination.page"),
-              prev: t("common.pagination.prev"),
-              next: t("common.pagination.next"),
-              navigation: t("common.pagination.navigation"),
-            }}
-          />
-        </>
-      )}
-    </PageShell>
+            <Pagination
+              state={pageState}
+              params={pageParams}
+              labels={{
+                showing: t("common.pagination.showing"),
+                of: t("common.pagination.of"),
+                noResults: t("common.pagination.noResults"),
+                page: t("common.pagination.page"),
+                prev: t("common.pagination.prev"),
+                next: t("common.pagination.next"),
+                navigation: t("common.pagination.navigation"),
+              }}
+            />
+          </>
+        )}
+      </PageShell>
+    </MaterialImageGenerationProvider>
   );
 }

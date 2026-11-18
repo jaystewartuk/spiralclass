@@ -21,6 +21,7 @@ import {
   Minus,
   Plus,
   Rows3,
+  Sparkles,
   Table,
   Trash2,
   Type,
@@ -96,7 +97,17 @@ import { Textarea } from "@/components/ui/textarea";
 import { IconButton } from "@/components/materials/icon-button";
 import { ICONS, MaterialDocument } from "@/components/materials/material-document";
 import { useT } from "@/components/locale-provider";
-import { MATERIAL_IMAGE_ACCEPT, uploadMaterialImageFile } from "@/lib/materials/upload-image";
+import { useMaterialImageGeneration } from "@/components/materials/image-generation-context";
+import {
+  MATERIAL_IMAGE_ACCEPT,
+  generateMaterialImageFromDescription,
+  uploadMaterialImageFile,
+} from "@/lib/materials/upload-image";
+import {
+  MATERIAL_IMAGE_DESCRIPTION_MAX,
+  MATERIAL_IMAGE_DESCRIPTION_MIN,
+  normalizeMaterialImageDescription,
+} from "@/lib/materials/image-prompt";
 import { cn } from "@/lib/utils";
 
 // The per-block editor (Phases 4–5 of the material-editing design).
@@ -1065,12 +1076,15 @@ function AddBlockRow({
   subdued?: boolean;
 }) {
   const t = useT();
+  const canGenerateImage = useMaterialImageGeneration();
   const [open, setOpen] = useState(false);
   const [calloutOpen, setCalloutOpen] = useState(false);
+  const [generateOpen, setGenerateOpen] = useState(false);
 
   function close() {
     setOpen(false);
     setCalloutOpen(false);
+    setGenerateOpen(false);
   }
 
   function choose(block: MaterialBlock) {
@@ -1143,7 +1157,25 @@ function AddBlockRow({
           if (block) choose(block);
         }}
       />
-      <Chip onClick={() => setCalloutOpen((v) => !v)}>
+      {/* Beside the upload, because it is the same block reached another way:
+          the teacher describes the picture instead of choosing a file. */}
+      {canGenerateImage && (
+        <Chip
+          onClick={() => {
+            setGenerateOpen((v) => !v);
+            setCalloutOpen(false);
+          }}
+        >
+          <Sparkles className="size-3.5" aria-hidden />
+          {t("material.editor.block.imageGenerate.cta")}
+        </Chip>
+      )}
+      <Chip
+        onClick={() => {
+          setCalloutOpen((v) => !v);
+          setGenerateOpen(false);
+        }}
+      >
         {t("material.editor.block.type.callout")}
         <ChevronRight
           className={cn("size-3.5 transition-transform", calloutOpen && "rotate-90")}
@@ -1158,6 +1190,14 @@ function AddBlockRow({
       >
         <X className="size-3.5" aria-hidden />
       </button>
+      {generateOpen && (
+        <GenerateImagePanel
+          onGenerated={(src) => {
+            const block = newImageBlock(src, "");
+            if (block) choose(block);
+          }}
+        />
+      )}
       {calloutOpen && (
         <div className="flex w-full flex-wrap gap-1.5 border-t pt-1.5">
           {CALLOUT_VARIANTS.map((variant) => {
@@ -1172,6 +1212,67 @@ function AddBlockRow({
           })}
         </div>
       )}
+    </div>
+  );
+}
+
+/** "Generate image": the teacher describes the picture, and the block is
+ * inserted only once a generated image is stored, the same rule the upload
+ * follows (`newImageBlock` has no empty state). The caption starts empty, as
+ * it does for an upload: in a "describe this picture" exercise, the
+ * description she typed here would be the answer. */
+function GenerateImagePanel({ onGenerated }: { onGenerated: (src: string) => void }) {
+  const t = useT();
+  const [description, setDescription] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const ready =
+    normalizeMaterialImageDescription(description).length >= MATERIAL_IMAGE_DESCRIPTION_MIN;
+
+  async function generate() {
+    if (!ready || busy) return;
+    setBusy(true);
+    setError(null);
+    const result = await generateMaterialImageFromDescription(
+      description,
+      t("material.editor.block.imageGenerate.failed"),
+    );
+    setBusy(false);
+    if ("error" in result) {
+      setError(result.error);
+      return;
+    }
+    onGenerated(result.src);
+  }
+
+  return (
+    <div className="w-full space-y-2 border-t pt-2">
+      <Textarea
+        value={description}
+        onChange={(e) => setDescription(e.target.value)}
+        maxLength={MATERIAL_IMAGE_DESCRIPTION_MAX}
+        rows={3}
+        disabled={busy}
+        aria-label={t("material.editor.block.imageGenerate.label")}
+        placeholder={t("material.editor.block.imageGenerate.placeholder")}
+        autoFocus
+      />
+      <p className="text-xs text-muted-foreground">
+        {t("material.editor.block.imageGenerate.help")}
+      </p>
+      <div className="flex flex-wrap items-center gap-2">
+        <Button type="button" size="sm" disabled={!ready || busy} onClick={generate}>
+          <Sparkles className="mr-1 size-3.5" aria-hidden />
+          {busy
+            ? t("material.editor.block.imageGenerate.busy")
+            : t("material.editor.block.imageGenerate.submit")}
+        </Button>
+        {error && (
+          <span role="alert" className="text-xs text-destructive">
+            {error}
+          </span>
+        )}
+      </div>
     </div>
   );
 }

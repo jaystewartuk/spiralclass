@@ -499,6 +499,24 @@ export const en = {
   "material.editor.block.imageReplace": "Replace image",
   "material.editor.block.imageUploading": "Uploading…",
   "material.editor.block.imageUploadFailed": "We couldn't upload that image.",
+  "material.editor.block.imageGenerate.cta": "Generate image",
+  "material.editor.block.imageGenerate.label": "Describe the image",
+  "material.editor.block.imageGenerate.placeholder":
+    "A woman ordering a coffee at a market stall in the morning",
+  "material.editor.block.imageGenerate.help":
+    "A sentence or two about the scene. It comes out as a realistic photo unless you ask for another style, never with writing in it, and takes up to a minute.",
+  "material.editor.block.imageGenerate.submit": "Generate",
+  "material.editor.block.imageGenerate.busy": "Generating, up to a minute…",
+  "material.editor.block.imageGenerate.unavailable":
+    "Image generation isn't available right now. You can still upload an image.",
+  "material.editor.block.imageGenerate.tooMany":
+    "You've generated a lot of images in a short time. Wait a few minutes and try again.",
+  "material.editor.block.imageGenerate.refused":
+    "The image service wouldn't draw that. Try describing the scene differently.",
+  "material.editor.block.imageGenerate.timedOut": "That took too long. Try again.",
+  "material.editor.block.imageGenerate.failed": "We couldn't generate that image. Try again.",
+  "material.editor.block.imageGenerate.describe":
+    "Describe the image in {min} to {max} characters.",
   "material.editor.block.imageMissing": "This image can't be shown.",
   "material.editor.block.type.timeline": "Timeline",
   "material.editor.block.timelineAxis": "Axis labels",
