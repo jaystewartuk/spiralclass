@@ -1242,26 +1242,6 @@ export async function saveLibraryContentMaterial(input: {
   return { ok: true, materialId: row.id };
 }
 
-// Version history for a library-scoped content material (mirrors
-// listClassContentRevisionsForBooking's booking-scoped counterpart). Null
-// when the material isn't the caller's own content material.
-export async function listLibraryMaterialRevisions(input: {
-  teacherId: string;
-  materialId: string;
-}): Promise<MaterialRevisionRow[] | null> {
-  const material = await prisma.libraryMaterial.findFirst({
-    where: {
-      id: input.materialId,
-      teacherId: input.teacherId,
-      bookingId: null,
-      body: { not: null },
-    },
-    select: { id: true },
-  });
-  if (!material) return null;
-  return listMaterialRevisions({ teacherId: input.teacherId, materialId: material.id });
-}
-
 export async function restoreLibraryMaterialRevision(input: {
   teacherId: string;
   materialId: string;

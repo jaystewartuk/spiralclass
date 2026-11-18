@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 // The unified material form's action-layer dispatch
 // (docs/features/library-materials.md): saveMaterialContentAction, generateMaterialDraftAction,
-// restoreMaterialRevisionAction, listMaterialRevisionsFor, and the library-scope
+// restoreMaterialRevisionAction and the library-scope
 // path of saveMaterialAttachmentAction all live in app/actions/library.ts and
 // route to lib/materials/handlers.ts by bookingId presence — booking-scope vs
 // library-scope. This file pins the FormData parsing and the dispatch itself
@@ -60,8 +60,6 @@ const generateLibraryMaterialForTeacher = vi.fn(async (..._a: any[]): Promise<Ge
   ok: true,
   body: "# Library draft",
 }));
-const listClassContentRevisionsForBooking = vi.fn(async (..._a: any[]) => [{ id: "r1" }]);
-const listLibraryMaterialRevisions = vi.fn(async (..._a: any[]) => [{ id: "r2" }]);
 const restoreClassContentRevisionForBooking = vi.fn(async (..._a: any[]): Promise<SaveResult> => ({
   ok: true,
   materialId: "content-1",
@@ -86,8 +84,6 @@ vi.mock("@/lib/materials/handlers", () => ({
   saveLibraryContentMaterial: (...a: any[]) => saveLibraryContentMaterial(...a),
   generateClassContentForBooking: (...a: any[]) => generateClassContentForBooking(...a),
   generateLibraryMaterialForTeacher: (...a: any[]) => generateLibraryMaterialForTeacher(...a),
-  listClassContentRevisionsForBooking: (...a: any[]) => listClassContentRevisionsForBooking(...a),
-  listLibraryMaterialRevisions: (...a: any[]) => listLibraryMaterialRevisions(...a),
   restoreClassContentRevisionForBooking: (...a: any[]) =>
     restoreClassContentRevisionForBooking(...a),
   restoreLibraryMaterialRevision: (...a: any[]) => restoreLibraryMaterialRevision(...a),
@@ -114,7 +110,6 @@ const {
   saveMaterialContentAction,
   generateMaterialDraftAction,
   restoreMaterialRevisionAction,
-  listMaterialRevisionsFor,
 } = await import("@/app/actions/library");
 
 function fd(entries: Record<string, string>): FormData {
@@ -282,34 +277,6 @@ describe("generateMaterialDraftAction — dispatch", () => {
     expect(generateClassContentForBooking).toHaveBeenCalledWith(
       expect.objectContaining({ continueFromMaterialIds: [] }),
     );
-  });
-});
-
-describe("listMaterialRevisionsFor — dispatch", () => {
-  it("lists booking revisions when bookingId is given", async () => {
-    const r = await listMaterialRevisionsFor({ teacherId: "t1", bookingId: "b1" });
-    expect(r).toEqual([{ id: "r1" }]);
-    expect(listClassContentRevisionsForBooking).toHaveBeenCalledWith({
-      teacherId: "t1",
-      bookingId: "b1",
-    });
-    expect(listLibraryMaterialRevisions).not.toHaveBeenCalled();
-  });
-
-  it("lists library revisions when only materialId is given", async () => {
-    const r = await listMaterialRevisionsFor({ teacherId: "t1", materialId: "lib-1" });
-    expect(r).toEqual([{ id: "r2" }]);
-    expect(listLibraryMaterialRevisions).toHaveBeenCalledWith({
-      teacherId: "t1",
-      materialId: "lib-1",
-    });
-  });
-
-  it("returns an empty list when neither is given", async () => {
-    const r = await listMaterialRevisionsFor({ teacherId: "t1" });
-    expect(r).toEqual([]);
-    expect(listClassContentRevisionsForBooking).not.toHaveBeenCalled();
-    expect(listLibraryMaterialRevisions).not.toHaveBeenCalled();
   });
 });
 

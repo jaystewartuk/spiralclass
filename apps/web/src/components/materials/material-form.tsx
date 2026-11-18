@@ -2,6 +2,7 @@
 
 import { useActionState, useEffect, useId, useMemo, useRef, useState, type FormEvent } from "react";
 import { AiChangeChip } from "@/components/materials/ai-change-chip";
+import { REVISIONS_SHOWN, type MaterialRevisionSummary } from "@/lib/materials/revision-summary";
 import { Copy, Check, Sparkles, Mic } from "lucide-react";
 import {
   intlLocale,
@@ -71,7 +72,7 @@ import {
 export type ContentType = "write" | "file" | "link";
 export type ClassContentSource = "manual" | "ai";
 type Template = { id: string; label: string; body: string };
-type Revision = { id: string; body: string; source: ClassContentSource; createdAt: Date };
+type Revision = MaterialRevisionSummary;
 type LevelOption = { id: string; label: string };
 
 // Lesson continuity: a previous class's material a teacher can pick as
@@ -1113,7 +1114,7 @@ export function MaterialForm({
           <Collapsible title={t("classContent.author.versionHistory")} defaultOpen={false}>
             <div className="space-y-2 rounded-md border bg-muted/40 p-3">
               <ul className="space-y-1.5">
-                {revisionList.slice(0, 10).map((r) => (
+                {revisionList.slice(0, REVISIONS_SHOWN).map((r) => (
                   <li key={r.id} className="flex items-center justify-between gap-2 text-sm">
                     <span className="min-w-0 flex-1 truncate text-muted-foreground">
                       {/* Which kind of change this revision undoes — without it,
@@ -1136,8 +1137,7 @@ export function MaterialForm({
                       </span>
                       {new Date(r.createdAt).toLocaleString()}
                       {" — "}
-                      {r.body.replace(/\s+/g, " ").trim().slice(0, 60) ||
-                        t("web.dashboard.classes.classContent.emptyRevision")}
+                      {r.preview || t("web.dashboard.classes.classContent.emptyRevision")}
                     </span>
                     <form action={restoreAction}>
                       {bookingId && <input type="hidden" name="bookingId" value={bookingId} />}
