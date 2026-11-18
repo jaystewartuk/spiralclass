@@ -5,6 +5,7 @@ import {
   classProximity,
   classesHref,
   normalizeClassSearch,
+  normalizeClassStudent,
   proximityLabel,
   resolveClassesScope,
 } from "@/lib/classes-list";
@@ -67,6 +68,31 @@ describe("classesHref", () => {
     // and then switching view keeps what was typed.
     expect(classesHref("materials", "Marcela")).toBe("/dashboard/classes?show=materials&q=Marcela");
     expect(classesHref("upcoming", "Alicia Moreno")).toBe("/dashboard/classes?q=Alicia+Moreno");
+  });
+
+  it("narrows to one student, the link the student page's All classes follows", () => {
+    const id = "5f0c2a1e-7b3d-4c8e-9a6f-1d2e3f4a5b6c";
+    expect(classesHref("past", "", id)).toBe(`/dashboard/classes?show=past&student=${id}`);
+    expect(classesHref("upcoming", "", id)).toBe(`/dashboard/classes?student=${id}`);
+  });
+});
+
+describe("normalizeClassStudent", () => {
+  const id = "5f0c2a1e-7b3d-4c8e-9a6f-1d2e3f4a5b6c";
+
+  it("accepts a student id", () => {
+    expect(normalizeClassStudent(id)).toBe(id);
+    expect(normalizeClassStudent(` ${id.toUpperCase()} `)).toBe(id);
+    expect(normalizeClassStudent([id, "other"])).toBe(id);
+  });
+
+  it("returns an empty string for anything that is not shaped like one", () => {
+    // A uuid column throws on a malformed value instead of matching nothing,
+    // so a hand-edited link must fall back to every student, not to an error.
+    expect(normalizeClassStudent(undefined)).toBe("");
+    expect(normalizeClassStudent("")).toBe("");
+    expect(normalizeClassStudent("Farid")).toBe("");
+    expect(normalizeClassStudent(`${id}' OR 1=1`)).toBe("");
   });
 });
 

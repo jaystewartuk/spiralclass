@@ -2400,6 +2400,8 @@ export const fr = {
   "web.dashboard.classes.list.search.placeholder": "Nom de l'élève",
   "web.dashboard.classes.list.search.submit": "Rechercher",
   "web.dashboard.classes.list.search.clear": "Effacer",
+  "web.dashboard.classes.list.student.showing": "Cours avec {name}",
+  "web.dashboard.classes.list.student.clear": "Tous les élèves",
   "web.dashboard.classes.list.liveNow": "En cours",
   "web.dashboard.classes.list.justFinished": "Vient de se terminer",
   "web.dashboard.classes.list.justFinishedHelp":

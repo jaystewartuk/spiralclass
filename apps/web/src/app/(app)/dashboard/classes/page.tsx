@@ -17,6 +17,7 @@ import { shiftDay } from "@/lib/calendar-grid";
 import {
   classesHref,
   normalizeClassSearch,
+  normalizeClassStudent,
   resolveClassesScope,
   type ClassesScope,
 } from "@/lib/classes-list";
@@ -125,6 +126,21 @@ export default async function TeacherClassesPage({
   const search = normalizeClassSearch(params.q);
   const now = new Date();
 
+  // ONE STUDENT'S CLASSES, from the student page's "All classes" link. The id
+  // is looked up on her own roster first, so an id that is not her student
+  // (a stale link, a hand-edited one) shows every class rather than an empty
+  // list that looks like lost history. The name is what the page shows for it.
+  const requestedStudent = normalizeClassStudent(params.student);
+  const studentLink = requestedStudent
+    ? await prisma.teacherStudent.findUnique({
+        where: { teacherId_studentId: { teacherId: teacher.id, studentId: requestedStudent } },
+        select: { student: { select: { name: true } } },
+      })
+    : null;
+  const student = studentLink
+    ? { id: requestedStudent, name: studentLink.student.name.trim() }
+    : null;
+
   // Calendar-day boundaries in the TEACHER's zone, not a ±24h offset from now:
   // "today" is a day on her wall clock, and a DST transition makes one of those
   // 23 or 25 hours long.
@@ -139,9 +155,12 @@ export default async function TeacherClassesPage({
   // facts about her week and are not. A search for a name that matches nothing
   // otherwise reports "Missing materials 0", which is a different claim from
   // the true one and the opposite of reassuring.
-  const searched = search
-    ? { ...mine, student: { name: { contains: search, mode: "insensitive" as const } } }
-    : mine;
+  // The student filter narrows it the same way, and for the same reason.
+  const searched: Prisma.BookingWhereInput = {
+    ...mine,
+    ...(student ? { studentId: student.id } : {}),
+    ...(search ? { student: { name: { contains: search, mode: "insensitive" as const } } } : {}),
+  };
   /** Scheduled and not yet over — the honest definition of "upcoming". */
   const stillAhead = { status: "scheduled" as const, scheduledEnd: { gte: now } };
 
@@ -270,6 +289,7 @@ export default async function TeacherClassesPage({
           <ClassesToolbar
             scope={scope}
             search={search}
+            student={student}
             needsMaterialsCount={needsMaterialsCount}
             t={t}
           />
@@ -299,7 +319,7 @@ export default async function TeacherClassesPage({
               the view, and a "Upcoming" title directly under an "Upcoming" tab
               is the same word twice. The day headings carry the structure. */}
           {items.length === 0 ? (
-            <ListEmptyState scope={scope} search={search} t={t} />
+            <ListEmptyState scope={scope} search={search} student={student} t={t} />
           ) : (
             <Card>
               <CardContent className="p-0">
@@ -398,12 +418,28 @@ export default async function TeacherClassesPage({
 function ListEmptyState({
   scope,
   search,
+  student,
   t,
 }: {
   scope: ClassesScope;
   search: string;
+  student: { id: string; name: string } | null;
   t: Awaited<ReturnType<typeof getT>>;
 }) {
+  if (student && !search) {
+    return (
+      <EmptyState
+        icon={CalendarDays}
+        title={t("web.dashboard.classes.list.empty.searchTitle", { query: student.name })}
+        action={
+          <Button asChild variant="outline" size="sm">
+            <Link href={classesHref(scope)}>{t("web.dashboard.classes.list.student.clear")}</Link>
+          </Button>
+        }
+      />
+    );
+  }
+
   if (search) {
     return (
       <EmptyState

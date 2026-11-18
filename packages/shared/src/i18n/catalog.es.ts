@@ -2446,6 +2446,8 @@ export const esMX = {
   "web.dashboard.classes.list.search.placeholder": "Nombre del alumno",
   "web.dashboard.classes.list.search.submit": "Buscar",
   "web.dashboard.classes.list.search.clear": "Limpiar",
+  "web.dashboard.classes.list.student.showing": "Clases con {name}",
+  "web.dashboard.classes.list.student.clear": "Todos los alumnos",
   "web.dashboard.classes.list.liveNow": "En curso",
   "web.dashboard.classes.list.justFinished": "Recién terminadas",
   "web.dashboard.classes.list.justFinishedHelp":

@@ -9,6 +9,7 @@ import { prisma } from "@/lib/prisma";
 import { formatZonedDateTime, getDualZoneTime, timezoneCityLabel } from "@/lib/date-display";
 import { bookingStatusMeta } from "@/lib/booking/status-display";
 import { profileSchema } from "@/lib/lesson-notes/profile";
+import { classesHref } from "@/lib/classes-list";
 import { skillLabel } from "@/lib/lesson-notes/skills";
 import type { AppLocale, TFunction } from "@/lib/i18n-translate";
 import { cn } from "@/lib/utils";
@@ -297,7 +298,7 @@ export async function OverviewTab({
           action={
             past.length > 0 ? (
               <Button asChild size="sm" variant="ghost" className="shrink-0">
-                <Link href="/dashboard/classes?show=past">
+                <Link href={classesHref("past", "", studentId)}>
                   {t("web.dashboard.students.overview.allClasses")}
                 </Link>
               </Button>

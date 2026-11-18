@@ -2426,6 +2426,8 @@ export const en = {
   "web.dashboard.classes.list.search.placeholder": "Student name",
   "web.dashboard.classes.list.search.submit": "Search",
   "web.dashboard.classes.list.search.clear": "Clear",
+  "web.dashboard.classes.list.student.showing": "Classes with {name}",
+  "web.dashboard.classes.list.student.clear": "All students",
   "web.dashboard.classes.list.liveNow": "Happening now",
   "web.dashboard.classes.list.justFinished": "Just finished",
   "web.dashboard.classes.list.justFinishedHelp":
