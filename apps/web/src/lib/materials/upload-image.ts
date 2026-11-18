@@ -1,6 +1,6 @@
 import { MATERIAL_IMAGE_CONTENT_TYPES } from "@spiralclass/shared";
 
-// Client-side half of the embedded-image upload: POST the file to
+// Client-side half of the embedded-image upload (and of generating one): POST the file to
 // /api/materials/images and hand back the `material-image:` src the block
 // editor writes into the document. Kept out of the component so the two web
 // call sites (the add-block chip and the replace-image button) share one
@@ -32,6 +32,33 @@ export async function uploadMaterialImageFile(
       // The server's message is already localized and specific ("larger than
       // 8 MB", the Pro nudge), so it wins over the generic caller-supplied
       // fallback whenever there is one.
+      return { error: payload?.message ?? fallbackError };
+    }
+    return { src: payload.src };
+  } catch {
+    return { error: fallbackError };
+  }
+}
+
+/** Ask the server to generate an image from the teacher's description. Same
+ * contract as an upload, `{ src }` or `{ error }`, so the editor inserts the
+ * result through the same path. */
+export async function generateMaterialImageFromDescription(
+  description: string,
+  fallbackError: string,
+): Promise<UploadedImage> {
+  try {
+    const res = await fetch("/api/materials/images/generate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ description }),
+    });
+    const payload = (await res.json().catch(() => null)) as {
+      ok?: boolean;
+      src?: string;
+      message?: string;
+    } | null;
+    if (!res.ok || !payload?.ok || !payload.src) {
       return { error: payload?.message ?? fallbackError };
     }
     return { src: payload.src };

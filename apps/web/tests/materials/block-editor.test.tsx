@@ -33,9 +33,15 @@ vi.mock("@/components/locale-provider", () => ({
 vi.mock("@/lib/materials/upload-image", () => ({
   MATERIAL_IMAGE_ACCEPT: "image/png",
   uploadMaterialImageFile: vi.fn(async () => ({ src: "material-image:t1/library/images/a.png" })),
+  generateMaterialImageFromDescription: vi.fn(async () => ({
+    src: "material-image:t1/library/images/generated.png",
+  })),
 }));
 
 const { SectionBlockEditor } = await import("@/components/materials/block-editor");
+const { MaterialImageGenerationProvider } =
+  await import("@/components/materials/image-generation-context");
+const { generateMaterialImageFromDescription } = await import("@/lib/materials/upload-image");
 const { editorSections, emptySectionEditorState } = await import("@spiralclass/shared");
 
 const EDIT_THIS = '[aria-label="material.editor.block.editThis"]';
@@ -578,6 +584,78 @@ describe("SectionBlockEditor", () => {
       const caption = container.querySelector('[aria-label="material.editor.block.imageAltLabel"]');
       expect(caption).not.toBeNull();
       expect(document.activeElement).toBe(caption);
+    });
+
+    // A teacher asked how to generate a picture inside a material; there was
+    // no control for it. It sits beside the upload, and only where the page
+    // says this deployment can generate.
+    function renderAdding(generationEnabled: boolean) {
+      act(() => {
+        root.render(
+          React.createElement(MaterialImageGenerationProvider, {
+            enabled: generationEnabled,
+            children: React.createElement(Harness, { initialMarkdown: "Some text.", onAction }),
+          }),
+        );
+      });
+      const add = Array.from(container.querySelectorAll("button")).findLast((b) =>
+        b.textContent?.includes("material.editor.block.add"),
+      )!;
+      act(() => add.click());
+    }
+
+    const generateChip = () =>
+      Array.from(container.querySelectorAll("button")).find((b) =>
+        b.textContent?.includes("material.editor.block.imageGenerate.cta"),
+      );
+
+    it("offers no Generate image where the page has not enabled it", () => {
+      renderAdding(false);
+      expect(generateChip()).toBeUndefined();
+    });
+
+    it("generates an image from a description and inserts it with an empty caption", async () => {
+      renderAdding(true);
+      act(() => generateChip()!.click());
+
+      const field = byLabel("material.editor.block.imageGenerate.label") as HTMLTextAreaElement;
+      const submit = () =>
+        Array.from(container.querySelectorAll("button")).find((b) =>
+          b.textContent?.includes("material.editor.block.imageGenerate.submit"),
+        )!;
+      // Nothing to send until there is something described.
+      expect(submit().disabled).toBe(true);
+
+      act(() => setValue(field, "Una familia cenando en un restaurante"));
+      await act(async () => submit().click());
+
+      expect(generateMaterialImageFromDescription).toHaveBeenCalledWith(
+        "Una familia cenando en un restaurante",
+        "material.editor.block.imageGenerate.failed",
+      );
+      // The caption stays empty: in a "describe this picture" exercise the
+      // description she typed would be the answer.
+      expect(lastMarkdown()).toContain("![](material-image:t1/library/images/generated.png)");
+    });
+
+    it("keeps the description and says why when generation fails", async () => {
+      vi.mocked(generateMaterialImageFromDescription).mockResolvedValueOnce({
+        error: "The image service wouldn't draw that.",
+      });
+      renderAdding(true);
+      act(() => generateChip()!.click());
+      const field = byLabel("material.editor.block.imageGenerate.label") as HTMLTextAreaElement;
+      act(() => setValue(field, "A busy street market"));
+      const submit = Array.from(container.querySelectorAll("button")).find((b) =>
+        b.textContent?.includes("material.editor.block.imageGenerate.submit"),
+      )!;
+      await act(async () => submit.click());
+
+      expect(container.querySelector('[role="alert"]')?.textContent).toBe(
+        "The image service wouldn't draw that.",
+      );
+      expect(field.value).toBe("A busy street market");
+      expect(onAction).not.toHaveBeenCalled();
     });
   });
 });

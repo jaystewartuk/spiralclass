@@ -506,6 +506,24 @@ export const esMX = {
   "material.editor.block.imageReplace": "Reemplazar imagen",
   "material.editor.block.imageUploading": "Subiendo…",
   "material.editor.block.imageUploadFailed": "No pudimos subir esa imagen.",
+  "material.editor.block.imageGenerate.cta": "Generar imagen",
+  "material.editor.block.imageGenerate.label": "Describe la imagen",
+  "material.editor.block.imageGenerate.placeholder":
+    "Una mujer pidiendo un café en un puesto del mercado por la mañana",
+  "material.editor.block.imageGenerate.help":
+    "Una o dos frases sobre la escena. Sale como una foto realista, salvo que pidas otro estilo, nunca con texto escrito, y tarda hasta un minuto.",
+  "material.editor.block.imageGenerate.submit": "Generar",
+  "material.editor.block.imageGenerate.busy": "Generando, hasta un minuto…",
+  "material.editor.block.imageGenerate.unavailable":
+    "La generación de imágenes no está disponible ahora. Puedes subir una imagen.",
+  "material.editor.block.imageGenerate.tooMany":
+    "Generaste muchas imágenes en poco tiempo. Espera unos minutos y vuelve a intentarlo.",
+  "material.editor.block.imageGenerate.refused":
+    "El servicio de imágenes no quiso dibujar eso. Prueba a describir la escena de otra manera.",
+  "material.editor.block.imageGenerate.timedOut": "Tardó demasiado. Vuelve a intentarlo.",
+  "material.editor.block.imageGenerate.failed":
+    "No pudimos generar esa imagen. Vuelve a intentarlo.",
+  "material.editor.block.imageGenerate.describe": "Describe la imagen en {min} a {max} caracteres.",
   "material.editor.block.imageMissing": "No se puede mostrar esta imagen.",
   "material.editor.block.type.timeline": "Línea de tiempo",
   "material.editor.block.timelineAxis": "Etiquetas del eje",

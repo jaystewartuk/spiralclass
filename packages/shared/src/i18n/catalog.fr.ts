@@ -496,6 +496,24 @@ export const fr = {
   "material.editor.block.imageReplace": "Remplacer l'image",
   "material.editor.block.imageUploading": "Envoi…",
   "material.editor.block.imageUploadFailed": "Nous n'avons pas pu envoyer cette image.",
+  "material.editor.block.imageGenerate.cta": "Générer une image",
+  "material.editor.block.imageGenerate.label": "Décrivez l'image",
+  "material.editor.block.imageGenerate.placeholder":
+    "Une femme qui commande un café à un étal du marché, le matin",
+  "material.editor.block.imageGenerate.help":
+    "Une ou deux phrases sur la scène. Le résultat est une photo réaliste, sauf si vous demandez un autre style, jamais avec du texte écrit, et prend jusqu'à une minute.",
+  "material.editor.block.imageGenerate.submit": "Générer",
+  "material.editor.block.imageGenerate.busy": "Génération en cours, jusqu'à une minute…",
+  "material.editor.block.imageGenerate.unavailable":
+    "La génération d'images n'est pas disponible pour le moment. Vous pouvez toujours téléverser une image.",
+  "material.editor.block.imageGenerate.tooMany":
+    "Vous avez généré beaucoup d'images en peu de temps. Attendez quelques minutes et réessayez.",
+  "material.editor.block.imageGenerate.refused":
+    "Le service d'images a refusé de dessiner cela. Essayez de décrire la scène autrement.",
+  "material.editor.block.imageGenerate.timedOut": "C'était trop long. Réessayez.",
+  "material.editor.block.imageGenerate.failed":
+    "Nous n'avons pas pu générer cette image. Réessayez.",
+  "material.editor.block.imageGenerate.describe": "Décrivez l'image en {min} à {max} caractères.",
   "material.editor.block.imageMissing": "Cette image ne peut pas être affichée.",
   "material.editor.block.type.timeline": "Frise chronologique",
   "material.editor.block.timelineAxis": "Étiquettes de l'axe",

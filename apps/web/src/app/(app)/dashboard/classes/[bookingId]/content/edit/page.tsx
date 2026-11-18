@@ -1,4 +1,6 @@
 import { notFound } from "next/navigation";
+import { MaterialImageGenerationProvider } from "@/components/materials/image-generation-context";
+import { materialImageGenerationAvailable } from "@/lib/materials/generate-image";
 import { PageShell } from "@/components/ui/page-shell";
 import { PageHeader } from "@/components/ui/page-header";
 import { BackLink } from "@/components/back-link";
@@ -65,26 +67,28 @@ export default async function TeacherClassContentEditPage({
     ]);
 
   return (
-    <PageShell width="default">
-      <BackLink href={`/dashboard/classes/${bookingId}`} label={booking.student.name} />
+    <MaterialImageGenerationProvider enabled={materialImageGenerationAvailable()}>
+      <PageShell width="default">
+        <BackLink href={`/dashboard/classes/${bookingId}`} label={booking.student.name} />
 
-      <header className="space-y-1">
-        <PageHeader title={t("web.dashboard.classes.detail.editContent")} />
-      </header>
+        <header className="space-y-1">
+          <PageHeader title={t("web.dashboard.classes.detail.editContent")} />
+        </header>
 
-      <MaterialForm
-        scope="booking"
-        bookingId={booking.id}
-        levels={levels.map((l) => ({ id: l.id, label: l.label }))}
-        focusGroups={focusGroups}
-        templates={templates}
-        revisions={(revisions ?? []).map(summarizeRevision)}
-        aiEnabled={aiEnabled}
-        isPro={isPro}
-        podcastEnabled={podcastEnabled}
-        existing={content ?? undefined}
-        continuationCandidates={continuationCandidates ?? []}
-      />
-    </PageShell>
+        <MaterialForm
+          scope="booking"
+          bookingId={booking.id}
+          levels={levels.map((l) => ({ id: l.id, label: l.label }))}
+          focusGroups={focusGroups}
+          templates={templates}
+          revisions={(revisions ?? []).map(summarizeRevision)}
+          aiEnabled={aiEnabled}
+          isPro={isPro}
+          podcastEnabled={podcastEnabled}
+          existing={content ?? undefined}
+          continuationCandidates={continuationCandidates ?? []}
+        />
+      </PageShell>
+    </MaterialImageGenerationProvider>
   );
 }
