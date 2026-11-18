@@ -1,5 +1,10 @@
 import { prisma } from "@/lib/prisma";
 import { CLASS_CONTENT_MAX_REVISIONS, type ClassContentSource } from "@/lib/materials/config";
+import {
+  REVISIONS_SHOWN,
+  summarizeRevision,
+  type MaterialRevisionSummary,
+} from "@/lib/materials/revision-summary";
 
 // Version history (task 5), generalized by the ClassContent/LibraryMaterial
 // merge from a per-booking log to a per-material one — a separate
@@ -63,4 +68,30 @@ export async function listMaterialRevisions(input: {
     select: { id: true, body: true, source: true, createdAt: true },
   });
   return rows.map((r) => ({ ...r, source: r.source as ClassContentSource }));
+}
+
+// The library shelf's version history, for every row on the page in ONE
+// query. It used to be two queries per row (an ownership check, then the
+// list), so a 24-row shelf cost 48 round trips on every level change. The
+// teacherId filter is the tenant scope; a material id that isn't hers simply
+// matches nothing. Rows per material are bounded by the storage cap, so the
+// unpaged read is bounded by ids × CLASS_CONTENT_MAX_REVISIONS.
+export async function listRevisionSummariesForMaterials(input: {
+  teacherId: string;
+  materialIds: string[];
+}): Promise<Map<string, MaterialRevisionSummary[]>> {
+  const byMaterial = new Map<string, MaterialRevisionSummary[]>();
+  if (input.materialIds.length === 0) return byMaterial;
+  const rows = await prisma.materialRevision.findMany({
+    where: { teacherId: input.teacherId, materialId: { in: input.materialIds } },
+    orderBy: { createdAt: "desc" },
+    select: { id: true, materialId: true, body: true, source: true, createdAt: true },
+  });
+  for (const r of rows) {
+    const list = byMaterial.get(r.materialId) ?? [];
+    if (list.length >= REVISIONS_SHOWN) continue;
+    list.push(summarizeRevision({ ...r, source: r.source as ClassContentSource }));
+    byMaterial.set(r.materialId, list);
+  }
+  return byMaterial;
 }

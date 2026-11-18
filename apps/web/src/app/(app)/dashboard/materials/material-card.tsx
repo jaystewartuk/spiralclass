@@ -18,7 +18,7 @@ import { SubmitButton } from "@/components/ui/submit-button";
 import { ClassContentMarkdown } from "@/components/class-content/class-content-markdown";
 import type { FocusGroup } from "@/components/focus-tags/focus-tag-select";
 import { setLibraryMaterialArchivedAction } from "@/app/actions/library";
-import type { MaterialRevisionRow } from "@/lib/materials/revisions";
+import type { MaterialRevisionSummary } from "@/lib/materials/revision-summary";
 import { getT } from "@/lib/i18n";
 import { LibraryEditForm } from "./edit-form";
 import { LibraryContentEditForm } from "./content-edit-form";
@@ -52,7 +52,7 @@ export type MaterialCardRow = {
   focusTags: { focusTag: { id: string; label: string } }[];
   viewUrl: string | null;
   hasAnswerKey: boolean;
-  revisions: MaterialRevisionRow[];
+  revisions: MaterialRevisionSummary[];
 };
 
 // The kind is a categorical axis, so it gets a categorical encoding — icon AND

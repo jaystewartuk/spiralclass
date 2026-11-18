@@ -42,7 +42,8 @@ import { LevelHub } from "./level-hub";
 import { AddMaterialSheet } from "./add-material-sheet";
 import { LibraryToolbar } from "./library-toolbar";
 import { MaterialCard } from "./material-card";
-import { listMaterialRevisionsFor } from "@/app/actions/library";
+import { listRevisionSummariesForMaterials } from "@/lib/materials/revisions";
+import type { MaterialRevisionSummary } from "@/lib/materials/revision-summary";
 
 // Teacher library management — reusable, level-tagged materials (bookingId:null;
 // per-class private materials live on the class page). A full-width,
@@ -259,7 +260,16 @@ export default async function LibraryPage({
   // Mint a fresh signed URL per file (bounded to this page) so the teacher can
   // preview her own items, and — for body items — load version history so the
   // inline editor can offer restore without a second round-trip once opened.
+  // The history is one query for the whole page and carries summaries, not
+  // bodies (lib/materials/revision-summary.ts says why).
   const storage = getStorageProvider();
+  const revisionsByMaterial =
+    view === "active"
+      ? await listRevisionSummariesForMaterials({
+          teacherId: teacher.id,
+          materialIds: rows.filter((m) => m.body).map((m) => m.id),
+        })
+      : new Map<string, MaterialRevisionSummary[]>();
   const items = await Promise.all(
     rows.map(async (m) => ({
       ...m,
@@ -268,10 +278,7 @@ export default async function LibraryPage({
       // live body at read time (the same parse the preview renderer runs), so
       // it can never go stale against an edit the way a stored flag would.
       hasAnswerKey: Boolean(m.body) && hasAnswerKey(parseMaterialDoc(m.body!)),
-      revisions:
-        view === "active" && m.body
-          ? await listMaterialRevisionsFor({ teacherId: teacher.id, materialId: m.id })
-          : [],
+      revisions: revisionsByMaterial.get(m.id) ?? [],
     })),
   );
 
