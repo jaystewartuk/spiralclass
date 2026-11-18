@@ -36,8 +36,8 @@ const MAX_DOTS = 4;
  *
  * So the preview is gone and the whole month view is now server-rendered with
  * no JavaScript. What replaced it is cheaper and works everywhere: the cell's
- * accessible name states the date and the class count, each chip carries a
- * `title` with its untruncated text, and reading a day in full is one click on
+ * accessible name includes the date, class count and visible chips; each chip
+ * carries a `title` with its untruncated text, and reading a day in full is one click on
  * the cell rather than a hover that only some people can perform.
  */
 export function DayCell({
@@ -57,6 +57,7 @@ export function DayCell({
   return (
     <div className="flex flex-1 flex-col gap-1.5">
       <span
+        aria-hidden
         className={cn(
           "inline-flex h-7 w-7 items-center justify-center self-start rounded-full text-sm tabular-nums",
           isToday && "bg-primary font-semibold text-primary-foreground",
@@ -99,7 +100,7 @@ export function DayCell({
       </div>
 
       {/* Too narrow for a chip: density dots. They are decoration — the cell's
-          own aria-label carries the count — so they are hidden from assistive
+          own date/count text carries the count — so they are hidden from assistive
           tech rather than each announcing a time nobody asked for. */}
       {events.length > 0 && (
         <div aria-hidden className="flex flex-wrap gap-1 sm:hidden">

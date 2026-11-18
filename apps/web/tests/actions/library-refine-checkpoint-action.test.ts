@@ -41,7 +41,6 @@ vi.mock("@/lib/materials/handlers", () => ({
   generateLibraryMaterialForTeacher: vi.fn(),
   getClassContentForBooking: vi.fn(),
   listClassContentRevisionsForBooking: vi.fn(),
-  listLibraryMaterialRevisions: vi.fn(),
   nextPositionInLevel: vi.fn(),
   refineMaterialForTeacher: vi.fn(),
   restoreClassContentRevisionForBooking: vi.fn(),

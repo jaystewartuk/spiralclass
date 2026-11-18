@@ -53,7 +53,6 @@ export function VocabReview({
       <button
         type="button"
         onClick={() => setFlipped((f) => !f)}
-        aria-label={t(flipped ? "progress.flashcard.showTerm" : "progress.flashcard.flip")}
         className="flex min-h-24 w-full flex-col items-center justify-center gap-1 rounded-lg border bg-muted/30 px-4 py-6 text-center transition-colors hover:bg-muted/50"
       >
         {flipped ? (
