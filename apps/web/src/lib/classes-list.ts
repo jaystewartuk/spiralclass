@@ -2,8 +2,9 @@
  * The decisions the teacher class list makes before it renders anything.
  *
  * Kept pure and out of the page so they are unit-testable: which of the three
- * views is being asked for, what the search box actually searched for, and
- * where a class sits relative to right now. The page owns the queries and the
+ * views is being asked for, what the search box actually searched for, which
+ * student the list is narrowed to, and where a class sits relative to right
+ * now. The page owns the queries and the
  * markup; none of that is decided here.
  */
 
@@ -50,11 +51,35 @@ export function normalizeClassSearch(raw: string | string[] | undefined): string
   return (value ?? "").trim().slice(0, CLASS_SEARCH_MAX_LENGTH);
 }
 
-/** The canonical URL for a view of the list, so no call site builds one by hand. */
-export function classesHref(scope: ClassesScope, search = ""): string {
+/** The shape of a student id (a Postgres uuid). */
+const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+/**
+ * A `?student=` value from the URL, narrowed to something shaped like a
+ * student id, or an empty string for "every student".
+ *
+ * This only checks the shape. The page still looks the id up on the
+ * teacher's own roster before it filters by it, and ignores an id that is not
+ * there. Checking the shape first keeps a hand-edited value from reaching a
+ * uuid column, where Postgres would throw instead of matching nothing.
+ */
+export function normalizeClassStudent(raw: string | string[] | undefined): string {
+  const value = (Array.isArray(raw) ? raw[0] : raw)?.trim() ?? "";
+  return UUID_PATTERN.test(value) ? value.toLowerCase() : "";
+}
+
+/**
+ * The canonical URL for a view of the list, so no call site builds one by hand.
+ *
+ * `student` narrows any view to one student's classes. It is the link the
+ * student page's "All classes" follows, so that link shows that student's
+ * classes and nobody else's.
+ */
+export function classesHref(scope: ClassesScope, search = "", student = ""): string {
   const params = new URLSearchParams();
   if (scope !== DEFAULT_CLASSES_SCOPE) params.set("show", scope);
   if (search) params.set("q", search);
+  if (student) params.set("student", student);
   const query = params.toString();
   return query ? `/dashboard/classes?${query}` : "/dashboard/classes";
 }

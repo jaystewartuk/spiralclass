@@ -22,15 +22,22 @@ import { cn } from "@/lib/utils";
  * page navigation mid-word, which takes the caret out of the field the person
  * is still typing in. Enter (or the button) is the whole interaction, it works
  * with JavaScript off, and the result is a URL she can bookmark.
+ *
+ * NARROWED TO ONE STUDENT (`student`, from the student page's "All classes"),
+ * the view links keep the narrowing, and a line above them names the student
+ * with a way back to everyone. A search drops it, because typing a name means
+ * she is looking for someone else.
  */
 export function ClassesToolbar({
   scope,
   search,
+  student,
   needsMaterialsCount,
   t,
 }: {
   scope: ClassesScope;
   search: string;
+  student: { id: string; name: string } | null;
   needsMaterialsCount: number;
   t: TFunction;
 }) {
@@ -41,71 +48,86 @@ export function ClassesToolbar({
   };
 
   return (
-    <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-      {/* `overflow-x-auto` rather than wrapping: three short labels fit every
+    <div className="space-y-3">
+      {student && (
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+          <h2 className="text-base font-semibold">
+            {t("web.dashboard.classes.list.student.showing", { name: student.name })}
+          </h2>
+          <Link
+            href={classesHref(scope, search)}
+            className="text-sm text-muted-foreground underline underline-offset-4 hover:text-foreground"
+          >
+            {t("web.dashboard.classes.list.student.clear")}
+          </Link>
+        </div>
+      )}
+      <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+        {/* `overflow-x-auto` rather than wrapping: three short labels fit every
           viewport this ships to, and a scroller keeps them on one line if a
           translation or a raised text size makes them not. */}
-      <nav
-        aria-label={t("web.dashboard.classes.list.viewsLabel")}
-        className="-mx-1 flex gap-1 self-start overflow-x-auto rounded-md bg-muted p-1"
-      >
-        {CLASSES_SCOPES.map((value) => {
-          const active = value === scope;
-          return (
-            <Link
-              key={value}
-              href={classesHref(value, search)}
-              aria-current={active ? "page" : undefined}
-              className={cn(
-                "flex items-center gap-2 rounded-sm px-3 py-1.5 text-sm font-medium whitespace-nowrap transition-colors",
-                active
-                  ? "bg-background text-foreground shadow-brand-sm"
-                  : "text-muted-foreground hover:text-foreground",
-              )}
-            >
-              {SCOPE_LABEL[value]}
-              {/* Only on the view whose count is a job to do. A "3" beside
+        <nav
+          aria-label={t("web.dashboard.classes.list.viewsLabel")}
+          className="-mx-1 flex gap-1 self-start overflow-x-auto rounded-md bg-muted p-1"
+        >
+          {CLASSES_SCOPES.map((value) => {
+            const active = value === scope;
+            return (
+              <Link
+                key={value}
+                href={classesHref(value, search, student?.id)}
+                aria-current={active ? "page" : undefined}
+                className={cn(
+                  "flex items-center gap-2 rounded-sm px-3 py-1.5 text-sm font-medium whitespace-nowrap transition-colors",
+                  active
+                    ? "bg-background text-foreground shadow-brand-sm"
+                    : "text-muted-foreground hover:text-foreground",
+                )}
+              >
+                {SCOPE_LABEL[value]}
+                {/* Only on the view whose count is a job to do. A "3" beside
                   "Upcoming" would be a number the list underneath already
                   shows; a "3" beside "Needs materials" is three classes she
                   has not prepared. */}
-              {value === "materials" && needsMaterialsCount > 0 && (
-                <Badge variant="warning">{needsMaterialsCount}</Badge>
-              )}
-            </Link>
-          );
-        })}
-      </nav>
+                {value === "materials" && needsMaterialsCount > 0 && (
+                  <Badge variant="warning">{needsMaterialsCount}</Badge>
+                )}
+              </Link>
+            );
+          })}
+        </nav>
 
-      <form method="get" className="flex items-center gap-2">
-        {/* Carries the current view across a search, so searching from "Past"
+        <form method="get" className="flex items-center gap-2">
+          {/* Carries the current view across a search, so searching from "Past"
             searches the past rather than silently dropping back to upcoming. */}
-        {scope !== "upcoming" && <input type="hidden" name="show" value={scope} />}
-        <div className="relative min-w-0 flex-1 lg:w-56 lg:flex-none">
-          <Search
-            className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground"
-            aria-hidden
-          />
-          <Input
-            type="search"
-            name="q"
-            defaultValue={search}
-            aria-label={t("web.dashboard.classes.list.search.label")}
-            placeholder={t("web.dashboard.classes.list.search.placeholder")}
-            className="pl-9"
-          />
-        </div>
-        {/* Default size, not `sm`: `Input` is h-11/h-10 and a `sm` button is
+          {scope !== "upcoming" && <input type="hidden" name="show" value={scope} />}
+          <div className="relative min-w-0 flex-1 lg:w-56 lg:flex-none">
+            <Search
+              className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground"
+              aria-hidden
+            />
+            <Input
+              type="search"
+              name="q"
+              defaultValue={search}
+              aria-label={t("web.dashboard.classes.list.search.label")}
+              placeholder={t("web.dashboard.classes.list.search.placeholder")}
+              className="pl-9"
+            />
+          </div>
+          {/* Default size, not `sm`: `Input` is h-11/h-10 and a `sm` button is
             h-10/h-9, so the control beside the field sat four pixels short of
             it on every viewport. */}
-        <Button type="submit" variant="secondary">
-          {t("web.dashboard.classes.list.search.submit")}
-        </Button>
-        {search && (
-          <Button asChild variant="ghost">
-            <Link href={classesHref(scope)}>{t("web.dashboard.classes.list.search.clear")}</Link>
+          <Button type="submit" variant="secondary">
+            {t("web.dashboard.classes.list.search.submit")}
           </Button>
-        )}
-      </form>
+          {search && (
+            <Button asChild variant="ghost">
+              <Link href={classesHref(scope)}>{t("web.dashboard.classes.list.search.clear")}</Link>
+            </Button>
+          )}
+        </form>
+      </div>
     </div>
   );
 }
