@@ -107,6 +107,7 @@ export async function detectAnomalies(now: Date): Promise<Anomaly[]> {
   }
 
   // 3. Moderation overrides in the window.
+  // tenancy-exempt: the hourly anomaly detector counts moderation overrides across every teacher by design.
   const overrides = await prisma.override.findMany({
     where: {
       createdAt: { gte: windowStart },
@@ -138,6 +139,7 @@ export async function detectAnomalies(now: Date): Promise<Anomaly[]> {
 
   // 4. Notification failure rate — early warning that Meta or Resend
   // changed something on their side.
+  // tenancy-exempt: the hourly anomaly detector counts failed notifications across every teacher by design.
   const failedNotifications = await prisma.notification.count({
     where: { status: "failed", failedAt: { gte: windowStart } },
   });
@@ -174,6 +176,7 @@ export async function detectAnomalies(now: Date): Promise<Anomaly[]> {
   // #4 above never catches it. This is the signal that was missing when the
   // 2026-07-07 FCM-credential outage silently downgraded every push to email.
   // Equivalent SQL: count(*) where metadata->>'pushError' is not null.
+  // tenancy-exempt: the hourly anomaly detector counts push-delivery failures across every teacher by design.
   const pushFailures = await prisma.notification.count({
     where: {
       createdAt: { gte: windowStart },
