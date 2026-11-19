@@ -109,7 +109,6 @@ export async function activateSubscription(
   let becameFounding = false;
   await deps.prisma.$transaction(async (tx) => {
     const createData = {
-      teacherId: input.teacherId,
       plan: input.plan,
       status: "active" as const,
       lockedPriceMinorUnits: input.lockedPriceMinorUnits,
@@ -152,7 +151,11 @@ export async function activateSubscription(
       select: { teacherId: true },
     });
     if (!existing) {
-      await tx.teacherSubscription.create({ data: createData });
+      // The row's tenant is named here rather than inside createData, so the
+      // tenancy guard (D-175) reads it at the call site.
+      await tx.teacherSubscription.create({
+        data: { teacherId: input.teacherId, ...createData },
+      });
       becameFounding = input.plan === "founding";
     } else if (input.plan === "founding") {
       const flip = await tx.teacherSubscription.updateMany({
@@ -393,8 +396,9 @@ export async function recordSubscriptionInvoice(
   // the commission base. amount − fee is the figure we commission on; do not
   // "fix" this to read bt.net.
   const netMinorUnits = input.amountMinorUnits - input.feeMinorUnits;
+  // The tenant is named at each create below rather than in here, so the
+  // tenancy guard (D-175) reads it at the call site.
   const data = {
-    teacherId: input.teacherId,
     periodStart: input.periodStart,
     periodEnd: input.periodEnd,
     amountMinorUnits: input.amountMinorUnits,
@@ -407,9 +411,15 @@ export async function recordSubscriptionInvoice(
     paidAt: input.paidAt ?? null,
   };
   if (input.stripeInvoiceId) {
+    // A redelivery matches on Stripe's invoice id alone, which is globally
+    // unique and was resolved to this teacher through her own billing
+    // account. It is deliberately not narrowed by teacherId: on a mismatch the
+    // upsert would fall through to the create and fail the unique constraint,
+    // so the webhook delivery would error and be retried rather than record
+    // the invoice. Only the create branch names the tenant.
     await deps.prisma.subscriptionInvoice.upsert({
       where: { stripeInvoiceId: input.stripeInvoiceId },
-      create: { ...data, stripeInvoiceId: input.stripeInvoiceId },
+      create: { teacherId: input.teacherId, ...data, stripeInvoiceId: input.stripeInvoiceId },
       update: {
         status: input.status,
         feeMinorUnits: input.feeMinorUnits,
@@ -418,7 +428,7 @@ export async function recordSubscriptionInvoice(
       },
     });
   } else {
-    await deps.prisma.subscriptionInvoice.create({ data });
+    await deps.prisma.subscriptionInvoice.create({ data: { teacherId: input.teacherId, ...data } });
   }
 }
 

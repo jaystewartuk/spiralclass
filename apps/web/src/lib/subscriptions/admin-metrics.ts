@@ -43,6 +43,7 @@ export type SubscriptionOverview = {
 export async function getSubscriptionOverview(
   now: Date = new Date(),
 ): Promise<SubscriptionOverview> {
+  // tenancy-exempt: the admin console's platform-wide subscription overview counts every teacher by design (D-25).
   const subs = await prisma.teacherSubscription.findMany({
     // An operator's test teacher is not a subscriber.
     where: { teacher: NOT_TEST_ACCOUNT },
@@ -141,6 +142,7 @@ export async function getWiseRenewalsDue(
   windowDays = 7,
 ): Promise<WiseRenewalDue[]> {
   const windowEnd = new Date(now.getTime() + windowDays * 24 * 60 * 60 * 1000);
+  // tenancy-exempt: the admin console's Wise renewal worklist lists every teacher due to pay, by design (D-25).
   const subs = await prisma.teacherSubscription.findMany({
     where: {
       status: { in: ["active", "past_due"] },

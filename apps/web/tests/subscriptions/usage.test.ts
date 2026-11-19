@@ -88,3 +88,53 @@ describe("loadPlanUsage", () => {
     expect(usage.templates).toEqual({ used: 30, limit: null, overLimit: false });
   });
 });
+
+// D-175 / #62: the two capped-resource counts are the plan gate's input, so a
+// count that reached another teacher's rows would refuse a teacher with room
+// (or wave through one without). This fake keeps rows for two teachers and
+// filters them the way Prisma does: an absent `teacherId` is no filter at all.
+describe("the capped-resource counts are scoped to the teacher", () => {
+  function twoTeacherPrisma() {
+    const students = [
+      ...Array.from({ length: 2 }, () => ({ teacherId: "t1", archivedAt: null })),
+      ...Array.from({ length: 5 }, () => ({ teacherId: "t2", archivedAt: null })),
+      { teacherId: "t1", archivedAt: new Date("2026-01-01T00:00:00Z") },
+    ];
+    const templates = [
+      { teacherId: "t2", archived: false },
+      { teacherId: "t2", archived: false },
+      { teacherId: "t1", archived: true },
+    ];
+    const matches = (row: Record<string, unknown>, where: Record<string, unknown>) =>
+      Object.entries(where).every(([k, v]) => v === undefined || row[k] === v);
+    return {
+      teacherSubscription: {
+        async findUnique() {
+          return FREE;
+        },
+      },
+      teacherStudent: {
+        async count({ where }: any) {
+          return students.filter((r) => matches(r, where)).length;
+        },
+      },
+      packageTemplate: {
+        async count({ where }: any) {
+          return templates.filter((r) => matches(r, where)).length;
+        },
+      },
+    } as any;
+  }
+
+  it("counts only the teacher's own active rows on the billing panel", async () => {
+    const usage = await loadPlanUsage("t1", entitlementsFor(FREE), twoTeacherPrisma());
+    expect(usage.students).toEqual({ used: 2, limit: 3, overLimit: false });
+    expect(usage.templates).toEqual({ used: 0, limit: 1, overLimit: false });
+  });
+
+  it("does not let another teacher's students or templates use up her Free cap", async () => {
+    const db = twoTeacherPrisma();
+    expect(await gateAddStudent("t1", db)).toEqual({ ok: true });
+    expect(await gateAddTemplate("t1", db)).toEqual({ ok: true });
+  });
+});
