@@ -44,6 +44,7 @@ truth — not a longer version of this one.
 | Which file should new code copy?     | [docs/development/exemplars.md](docs/development/exemplars.md)                             |
 | How is this repo worked with agents? | [docs/development/ai-assisted-engineering.md](docs/development/ai-assisted-engineering.md) |
 | What does publishing this expose?    | [docs/security.md](docs/security.md)                                                       |
+| Where is production's evidence?      | [docs/development/production-evidence.md](docs/development/production-evidence.md)         |
 
 **`docs/features/` owns product behaviour.** Nothing else restates a business
 rule; everything links to it. Hold what you write to the same rule.
