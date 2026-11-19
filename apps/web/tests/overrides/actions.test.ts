@@ -131,6 +131,10 @@ function freshState() {
   });
 }
 
+// Every booking/package write's `where`, in order, so a test can read which
+// tenant each statement named.
+const writeWheres: Array<{ op: string; where: Record<string, unknown> }> = [];
+
 const trackServerEventMock = vi.fn();
 const inngestSendMock = vi.fn();
 const revalidatePathMock = vi.fn();
@@ -185,9 +189,15 @@ vi.mock("@/lib/prisma", () => {
   function bookingFindUnique({ where }: any) {
     return snapshot(state.bookings.get(where.id) ?? null);
   }
+  // Prisma semantics for the tenant key on a write: absent (or `undefined`)
+  // is no filter at all; present must match the row. `update` throws
+  // (P2025) on a miss, `updateMany` reports `count: 0`.
+  const otherTenant = (row: { teacherId: string }, where: any) =>
+    where.teacherId !== undefined && row.teacherId !== where.teacherId;
   function bookingUpdate({ where, data }: any) {
+    writeWheres.push({ op: "booking.update", where });
     const b = state.bookings.get(where.id);
-    if (!b) throw new Error(`no booking ${where.id}`);
+    if (!b || otherTenant(b, where)) throw new Error(`no booking ${where.id}`);
     Object.assign(b, data);
     return b;
   }
@@ -209,8 +219,9 @@ vi.mock("@/lib/prisma", () => {
     return p;
   }
   function packageUpdateMany({ where, data }: any) {
+    writeWheres.push({ op: "package.updateMany", where });
     const p = state.packages.get(where.id);
-    if (!p) return { count: 0 };
+    if (!p || otherTenant(p, where)) return { count: 0 };
     // Honor the column-compared capacity guard (classesUsed < classesTotal),
     // modeled via the `fields.classesTotal` sentinel below.
     if (where.classesUsed?.lt === "classesTotal" && !(p.classesUsed < p.classesTotal)) {
@@ -238,8 +249,9 @@ vi.mock("@/lib/prisma", () => {
     return { count: 1 };
   }
   function bookingUpdateMany({ where, data }: any) {
+    writeWheres.push({ op: "booking.updateMany", where });
     const b = state.bookings.get(where.id);
-    if (!b) return { count: 0 };
+    if (!b || otherTenant(b, where)) return { count: 0 };
     // Status guard accepts either an exact string or a Prisma `{ in: [...] }`
     // filter (mark_no_show guards on both "scheduled" and "completed").
     if (where.status !== undefined) {
@@ -384,6 +396,7 @@ function form(entries: Record<string, string>) {
 
 beforeEach(() => {
   freshState();
+  writeWheres.length = 0;
   trackServerEventMock.mockClear();
   inngestSendMock.mockClear();
   enqueueMock.mockClear();
@@ -1084,5 +1097,131 @@ describe("toggleStudentArchive", () => {
     );
     expect(result?.error).toMatch(/no está/i);
     expect(state.overrides).toHaveLength(0);
+  });
+});
+
+// D-175 / #62: every booking and package write an override makes names the
+// signed-in teacher. Each one used to carry only an id, so it was safe only
+// because the lookup above it was scoped; now the statement itself refuses
+// another teacher's row. The booking ids come from that scoped lookup and the
+// package id from the booking row, so in a live flow the teacher always owns
+// both — a foreign package below stands in for corrupt data or a future caller
+// passing the wrong id.
+describe("override writes are scoped to the signed-in teacher", () => {
+  const FOREIGN_PACKAGE_ID = "88888888-8888-4888-8888-888888888888";
+
+  function seedForeignPackage(overrides: Partial<PackageRow> = {}) {
+    state.packages.set(FOREIGN_PACKAGE_ID, {
+      id: FOREIGN_PACKAGE_ID,
+      teacherId: OTHER_TEACHER_ID,
+      studentId: "99999999-9999-4999-8999-999999999999",
+      classesUsed: 3,
+      classesTotal: 10,
+      scheduleChangesUsed: 2,
+      expiresAt: null,
+      status: "active",
+      ...overrides,
+    });
+    state.bookings.get(BOOKING_ID)!.packageId = FOREIGN_PACKAGE_ID;
+  }
+
+  const wheres = (op: string) => writeWheres.filter((w) => w.op === op).map((w) => w.where);
+
+  it("mark complete: the booking flip names the teacher", async () => {
+    await markBookingComplete(undefined, form({ bookingId: BOOKING_ID, reason: "Clase dada" }));
+    expect(wheres("booking.updateMany")).toEqual([
+      expect.objectContaining({ id: BOOKING_ID, teacherId: TEACHER_ID }),
+    ]);
+  });
+
+  it("mark no-show: the booking flip names the teacher", async () => {
+    await markBookingNoShow(undefined, form({ bookingId: BOOKING_ID, reason: "No se conectó" }));
+    expect(wheres("booking.updateMany")).toEqual([
+      expect.objectContaining({ id: BOOKING_ID, teacherId: TEACHER_ID }),
+    ]);
+  });
+
+  it("restore: the booking flip and the capacity claim name the teacher", async () => {
+    state.bookings.get(BOOKING_ID)!.status = "canceled_by_student";
+    state.bookings.get(BOOKING_ID)!.countsAgainstPackage = false;
+    await restoreClass(undefined, form({ bookingId: BOOKING_ID, reason: "Cancelación por error" }));
+    expect(wheres("booking.updateMany")).toEqual([
+      expect.objectContaining({ id: BOOKING_ID, teacherId: TEACHER_ID }),
+    ]);
+    expect(wheres("package.updateMany")).toEqual([
+      expect.objectContaining({ id: PACKAGE_ID, teacherId: TEACHER_ID }),
+    ]);
+  });
+
+  it("restore never claims a class from another teacher's package", async () => {
+    state.bookings.get(BOOKING_ID)!.status = "canceled_by_student";
+    state.bookings.get(BOOKING_ID)!.countsAgainstPackage = false;
+    seedForeignPackage();
+
+    const result = await restoreClass(
+      undefined,
+      form({ bookingId: BOOKING_ID, reason: "Cancelación por error" }),
+    );
+
+    // The claim matches no row, which throws inside the transaction (rolling
+    // the flip back in Postgres): refused as "no classes left" rather than
+    // spending another teacher's package.
+    expect(result?.error).toMatch(/no tiene clases/i);
+    expect(state.packages.get(FOREIGN_PACKAGE_ID)?.classesUsed).toBe(3);
+    expect(state.overrides).toHaveLength(0);
+  });
+
+  it("waive: the booking flip and the class refund name the teacher", async () => {
+    state.bookings.get(BOOKING_ID)!.status = "canceled_by_student";
+    await waiveCancellation(undefined, form({ bookingId: BOOKING_ID, reason: "Emergencia real" }));
+    expect(wheres("booking.updateMany")).toEqual([
+      expect.objectContaining({ id: BOOKING_ID, teacherId: TEACHER_ID }),
+    ]);
+    expect(wheres("package.updateMany")).toEqual([
+      expect.objectContaining({ id: PACKAGE_ID, teacherId: TEACHER_ID }),
+    ]);
+  });
+
+  it("waive: the schedule-change restore names the teacher", async () => {
+    state.bookings.get(BOOKING_ID)!.status = "canceled_by_student";
+    state.bookings.get(BOOKING_ID)!.countsAgainstPackage = false;
+    state.packages.get(PACKAGE_ID)!.scheduleChangesUsed = 1;
+    await waiveCancellation(undefined, form({ bookingId: BOOKING_ID, reason: "Emergencia real" }));
+    expect(wheres("package.updateMany")).toEqual([
+      expect.objectContaining({ id: PACKAGE_ID, teacherId: TEACHER_ID }),
+    ]);
+  });
+
+  it("waive never refunds a class or a schedule change to another teacher's package", async () => {
+    state.bookings.get(BOOKING_ID)!.status = "canceled_by_student";
+    seedForeignPackage();
+    const refund = await waiveCancellation(
+      undefined,
+      form({ bookingId: BOOKING_ID, reason: "Emergencia real" }),
+    );
+    // Her own booking is still waived (the refund is floor-guarded and never
+    // blocks the waive); the other teacher's package is untouched.
+    expect(refund?.ok).toBeTruthy();
+    expect(state.packages.get(FOREIGN_PACKAGE_ID)?.classesUsed).toBe(3);
+
+    freshState();
+    state.bookings.get(BOOKING_ID)!.status = "canceled_by_student";
+    state.bookings.get(BOOKING_ID)!.countsAgainstPackage = false;
+    seedForeignPackage();
+    await waiveCancellation(undefined, form({ bookingId: BOOKING_ID, reason: "Emergencia real" }));
+    expect(state.packages.get(FOREIGN_PACKAGE_ID)?.scheduleChangesUsed).toBe(2);
+  });
+
+  it("class language: the booking update names the teacher", async () => {
+    await updateBookingLanguageOverrideAction(
+      undefined,
+      form({
+        bookingId: BOOKING_ID,
+        teacherLanguage: "fr",
+        studentLanguage: "de",
+        reason: "Practicing in French today",
+      }),
+    );
+    expect(wheres("booking.update")).toEqual([{ id: BOOKING_ID, teacherId: TEACHER_ID }]);
   });
 });

@@ -47,10 +47,19 @@ vi.mock("@/lib/analytics/posthog", () => ({
   flushAnalytics: vi.fn(async () => {}),
 }));
 
-const packageUpdate = vi.fn(async ({ data }: { data: Partial<PkgRow> }) => {
-  if (state.pkg) Object.assign(state.pkg, data);
-  return state.pkg;
-});
+// The teacher who owns `state.pkg`. The write follows Prisma: an absent (or
+// `undefined`) teacherId is no filter at all, a present one must match, and a
+// miss throws (P2025).
+let pkgOwner = "t1";
+const packageUpdate = vi.fn(
+  async ({ where, data }: { where: { id: string; teacherId?: string }; data: Partial<PkgRow> }) => {
+    if (!state.pkg || (where.teacherId !== undefined && where.teacherId !== pkgOwner)) {
+      throw new Error(`No record found for ${where.id}`);
+    }
+    Object.assign(state.pkg, data);
+    return state.pkg;
+  },
+);
 
 vi.mock("@/lib/prisma", () => ({
   prisma: {
@@ -95,6 +104,7 @@ function freshPkg(overrides: Partial<PkgRow> = {}) {
 
 beforeEach(() => {
   vi.clearAllMocks();
+  pkgOwner = "t1";
   freshPkg();
   state.committed = 0;
   state.overrides = [];
@@ -214,5 +224,27 @@ describe("editManualPackageAction", () => {
     );
     expect(res?.error).toMatch(/future/i);
     expect(packageUpdate).not.toHaveBeenCalled();
+  });
+});
+
+// D-175 / #62: the package write used to name only the id, so it was safe only
+// because the lookup above it was scoped. It now names the signed-in teacher,
+// so the statement itself refuses another teacher's package.
+describe("editManualPackageAction is scoped to the signed-in teacher", () => {
+  const editForm = () => fd({ packageId: PKG_ID, classesTotal: "10", classesRemaining: "5" });
+
+  it("the update names the teacher", async () => {
+    await editManualPackageAction(undefined, editForm());
+    expect(packageUpdate).toHaveBeenCalledWith(
+      expect.objectContaining({ where: { id: PKG_ID, teacherId: "t1" } }),
+    );
+  });
+
+  it("never edits another teacher's package, even if the lookup let it by", async () => {
+    // The lookup mock still returns the row, standing in for one that is later
+    // loosened or bypassed — the write is the last line.
+    pkgOwner = "t2";
+    await expect(editManualPackageAction(undefined, editForm())).rejects.toThrow(/No record found/);
+    expect(state.pkg?.classesUsed).toBe(4);
   });
 });

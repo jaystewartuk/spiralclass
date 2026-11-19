@@ -24,6 +24,7 @@ const state = {
 vi.mock("@/lib/auth", () => ({
   requireOnboardedTeacher: vi.fn(async () => ({ id: "t1" })),
 }));
+vi.mock("@/lib/i18n", () => ({ getPreferredLocale: vi.fn(async () => "en") }));
 const revalidatePathMock = vi.fn();
 vi.mock("next/cache", () => ({ revalidatePath: revalidatePathMock }));
 vi.mock("@/lib/analytics/posthog", () => ({ trackServerEvent: vi.fn(), flushAnalytics: vi.fn() }));
@@ -49,7 +50,27 @@ vi.mock("@/lib/notifications/events", () => ({
 }));
 
 const updateMany = vi.fn(async () => ({ count: 1 }));
-const del = vi.fn(async () => ({}));
+// The library rows the single-row writes act on, keyed by id → owning teacher.
+// `update`/`delete` follow Prisma: an absent (or `undefined`) teacherId is no
+// filter at all, a present one must match, and a miss throws (P2025).
+const libraryRows = new Map<string, { teacherId: string }>();
+function singleRowWrite(where: { id: string; teacherId?: string }) {
+  const row = libraryRows.get(where.id);
+  if (!row || (where.teacherId !== undefined && row.teacherId !== where.teacherId)) {
+    throw new Error(`No record found for ${where.id}`);
+  }
+  return row;
+}
+const del = vi.fn(async ({ where }: { where: { id: string; teacherId?: string } }) => {
+  singleRowWrite(where);
+  libraryRows.delete(where.id);
+  return {};
+});
+const update = vi.fn(async ({ where }: { where: { id: string; teacherId?: string } }) => {
+  singleRowWrite(where);
+  return { id: where.id };
+});
+const levelFindFirst = vi.fn(async () => ({ id: "L1" }));
 const upsert = vi.fn(async () => ({}));
 const itemDeleteMany = vi.fn(async () => ({ count: 1 }));
 const itemUpdateMany = vi.fn(async (_arg: { data: Record<string, unknown> }) => ({
@@ -60,6 +81,7 @@ vi.mock("@/lib/prisma", () => ({
   prisma: {
     libraryMaterial: {
       updateMany,
+      update,
       delete: del,
       findFirst: vi.fn(async ({ where }: { where: Record<string, unknown> }) => {
         // verifyAssignmentTargets material lookup uses id+teacherId
@@ -84,11 +106,13 @@ vi.mock("@/lib/prisma", () => ({
       findUnique: vi.fn(async () => state.existingAssignment),
     },
     teacherStudent: { findUnique: vi.fn(async () => state.link) },
+    level: { findFirst: levelFindFirst },
     $transaction: vi.fn(async (ops: unknown[]) => Promise.all(ops as Promise<unknown>[])),
   },
 }));
 
 const {
+  updateLibraryMaterialAction,
   setLibraryMaterialArchivedAction,
   deleteLibraryMaterialAction,
   assignLibraryMaterialAction,
@@ -109,6 +133,9 @@ beforeEach(() => {
   state.ownedMaterial = { id: "m1" };
   state.completedCount = 1;
   state.existingAssignment = null;
+  libraryRows.clear();
+  libraryRows.set("m1", { teacherId: "t1" });
+  libraryRows.set("mX", { teacherId: "t2" });
 });
 
 describe("setLibraryMaterialArchivedAction", () => {
@@ -130,7 +157,7 @@ describe("deleteLibraryMaterialAction", () => {
   it("frees the storage object before deleting the row", async () => {
     await deleteLibraryMaterialAction(form({ materialId: "m1" }));
     expect(removeMaterialObject).toHaveBeenCalledWith("t1/library/x.pdf");
-    expect(del).toHaveBeenCalledWith({ where: { id: "m1" } });
+    expect(del).toHaveBeenCalledWith({ where: { id: "m1", teacherId: "t1" } });
   });
 
   it("is a no-op when the material isn't the teacher's", async () => {
@@ -228,5 +255,45 @@ describe("setLibraryItemCompletedAction", () => {
     const data = itemUpdateMany.mock.calls[0][0].data as { completedBy: null; completedAt: null };
     expect(data.completedAt).toBeNull();
     expect(data.completedBy).toBeNull();
+  });
+});
+
+// D-175 / #62: the edit and the hard delete used to act on `{ id }` alone, so
+// they were safe only because the lookup above them was scoped. They now name
+// the signed-in teacher, so the statement itself refuses another teacher's row.
+// "The lookup handed back another teacher's row" below stands in for a lookup
+// that is later loosened or bypassed — the write is the last line.
+describe("library writes are scoped to the signed-in teacher", () => {
+  function editForm(materialId: string) {
+    return form({ materialId, levelId: "L1", visibility: "at_or_below" });
+  }
+
+  it("the edit names the teacher", async () => {
+    state.material = { id: "m1", storagePath: null, levelId: "L1" } as typeof state.material;
+    const res = await updateLibraryMaterialAction(undefined, editForm("m1"));
+    expect(res).toHaveProperty("ok");
+    expect(update).toHaveBeenCalledWith(
+      expect.objectContaining({ where: { id: "m1", teacherId: "t1" } }),
+    );
+  });
+
+  it("the edit never changes another teacher's material", async () => {
+    state.material = { id: "mX", storagePath: null, levelId: "L1" } as typeof state.material;
+    await expect(updateLibraryMaterialAction(undefined, editForm("mX"))).rejects.toThrow(
+      /No record found/,
+    );
+  });
+
+  it("the hard delete names the teacher", async () => {
+    await deleteLibraryMaterialAction(form({ materialId: "m1" }));
+    expect(del).toHaveBeenCalledWith({ where: { id: "m1", teacherId: "t1" } });
+  });
+
+  it("the hard delete never removes another teacher's material", async () => {
+    state.material = { id: "mX", storagePath: null };
+    await expect(deleteLibraryMaterialAction(form({ materialId: "mX" }))).rejects.toThrow(
+      /No record found/,
+    );
+    expect(libraryRows.has("mX")).toBe(true);
   });
 });

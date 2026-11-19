@@ -152,6 +152,7 @@ export type ReseedStatus =
 export async function getReseedStatusAction(queuedAtIso: string): Promise<ReseedStatus> {
   await requireAdmin("superadmin", "uat:run");
   const since = new Date(queuedAtIso);
+  // tenancy-exempt: polls the platform's own reseed audit row, which has no teacher (teacherId null); superadmin only.
   const row = await prisma.override.findFirst({
     where: {
       targetId: UAT_OVERRIDE_TARGET_IDS.reseedPreview,

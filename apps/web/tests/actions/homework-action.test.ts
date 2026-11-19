@@ -87,7 +87,13 @@ vi.mock("@/lib/prisma", () => ({
         if (!a || a.teacherId !== where.teacherId) return null;
         return { ...a };
       }),
+      // Prisma semantics: an absent (or `undefined`) teacherId is no filter at
+      // all, a present one must match, and a miss throws (P2025).
       delete: vi.fn(async ({ where }: any) => {
+        const a = state.assignments.get(where.id);
+        if (!a || (where.teacherId !== undefined && a.teacherId !== where.teacherId)) {
+          throw new Error(`No record found for ${where.id}`);
+        }
         state.assignments.delete(where.id);
       }),
     },
@@ -309,5 +315,46 @@ describe("createHomeworkFeedbackAction", () => {
     expect(revalidatePathMock.mock.calls.map((c) => c[0])).toEqual([
       `/dashboard/classes/${BOOKING_ID}/homework/a1`,
     ]);
+  });
+});
+
+// D-175 / #62: the assignment delete used to name only the id, so it was safe
+// only because resolveTeacherAssignment above it was scoped. It now names the
+// signed-in teacher, so the statement itself refuses another teacher's row.
+describe("deleteAssignmentAction is scoped to the signed-in teacher", () => {
+  function seed(teacherId: string) {
+    state.assignments.set("a-existing", {
+      id: "a-existing",
+      bookingId: BOOKING_ID,
+      teacherId,
+      title: "Essay",
+      instructions: null,
+      dueAt: null,
+      allowLateSubmission: true,
+      allowResubmission: false,
+    });
+  }
+
+  it("the delete names the teacher", async () => {
+    seed(TEACHER_ID);
+    const { prisma } = await import("@/lib/prisma");
+    await deleteAssignmentAction(form({ assignmentId: "a-existing", bookingId: BOOKING_ID }));
+    expect(prisma.assignment.delete).toHaveBeenCalledWith({
+      where: { id: "a-existing", teacherId: TEACHER_ID },
+    });
+  });
+
+  it("never deletes another teacher's assignment, even if the lookup let it by", async () => {
+    seed(OTHER_TEACHER_ID);
+    const { prisma } = await import("@/lib/prisma");
+    // The ownership lookup is forced to pass, standing in for one that is
+    // later loosened or bypassed — the delete is the last line.
+    vi.mocked(prisma.assignment.findFirst).mockResolvedValueOnce({
+      ...state.assignments.get("a-existing")!,
+    } as never);
+    await expect(
+      deleteAssignmentAction(form({ assignmentId: "a-existing", bookingId: BOOKING_ID })),
+    ).rejects.toThrow(/No record found/);
+    expect(state.assignments.has("a-existing")).toBe(true);
   });
 });

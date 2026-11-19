@@ -92,7 +92,40 @@ vi.mock("@/lib/homework/submission", () => ({
 }));
 
 const attemptCreate = vi.fn(async () => ({ id: "att-1" }));
-const fileUpdateMany = vi.fn(async () => ({ count: 1 }));
+
+// Submission files, id → the submission and the Student row that submission
+// belongs to. The writes follow Prisma: an absent relation filter is no filter
+// at all, a present `submission: { studentId }` must match the row's student;
+// a `delete` miss throws (P2025), an `updateMany` miss counts nothing.
+type FileRow = { submissionId: string; studentId: string; attemptId: string | null };
+const fileRows = new Map<string, FileRow>();
+type FileWhere = {
+  id?: string;
+  submissionId?: string;
+  attemptId?: null;
+  submission?: { studentId?: string };
+};
+const fileMatches = (row: FileRow, where: FileWhere) =>
+  where.submission?.studentId === undefined || row.studentId === where.submission.studentId;
+const fileUpdateMany = vi.fn(
+  async ({ where, data }: { where: FileWhere; data: { attemptId: string } }) => {
+    let count = 0;
+    for (const row of fileRows.values()) {
+      if (where.submissionId !== undefined && row.submissionId !== where.submissionId) continue;
+      if (where.attemptId === null && row.attemptId !== null) continue;
+      if (!fileMatches(row, where)) continue;
+      row.attemptId = data.attemptId;
+      count++;
+    }
+    return { count };
+  },
+);
+const fileDelete = vi.fn(async ({ where }: { where: FileWhere & { id: string } }) => {
+  const row = fileRows.get(where.id);
+  if (!row || !fileMatches(row, where)) throw new Error(`No record found for ${where.id}`);
+  fileRows.delete(where.id);
+  return {};
+});
 const submissionUpsert = vi.fn(async () => ({
   id: "s-1",
   status: "submitted",
@@ -121,7 +154,7 @@ vi.mock("@/lib/prisma", () => ({
         fileType: "application/pdf",
         fileSize: 1024,
       })),
-      delete: vi.fn(async () => ({})),
+      delete: fileDelete,
     },
   },
 }));
@@ -151,6 +184,11 @@ beforeEach(() => {
   };
   state.submission = null;
   state.fileCount = 0;
+  fileRows.clear();
+  fileRows.set("mine", { submissionId: "s-1", studentId: "student-1", attemptId: null });
+  // A row that is not this student's, under the same submission id — what a
+  // file id from someone else's hand-in would look like if a lookup let it by.
+  fileRows.set("theirs", { submissionId: "s-1", studentId: "student-2", attemptId: null });
 });
 
 describe("submitHomeworkAction", () => {
@@ -360,5 +398,46 @@ describe("removeHomeworkFileAction", () => {
       files: [{ id: "mine", storagePath: "hw/mine" }],
     };
     expect(await removeHomeworkFileAction("a-1", "mine")).toEqual({ ok: true });
+  });
+});
+
+// D-175 / #62: the student's two file writes used to name only a file id or a
+// submission id, so they were safe only because the submission they came from
+// was resolved under the caller's identity. Each now names the caller's own
+// Student row (a Student is per-teacher, so this is a tenant scope) through
+// the file's submission, and refuses a file that is not hers.
+describe("submission file writes are scoped to the signed-in student", () => {
+  const draft = (files: { id: string; storagePath: string }[]) => ({
+    id: "s-1",
+    status: "draft",
+    submittedAt: null,
+    textResponse: null,
+    files,
+  });
+
+  it("detaching a file names the student", async () => {
+    state.submission = draft([{ id: "mine", storagePath: "hw/mine" }]);
+    await removeHomeworkFileAction("a-1", "mine");
+    expect(fileDelete).toHaveBeenCalledWith({
+      where: { id: "mine", submission: { studentId: "student-1" } },
+    });
+  });
+
+  it("never detaches another student's file", async () => {
+    // The submission's file list is mocked to include it, standing in for a
+    // lookup that is later loosened — the delete is the last line.
+    state.submission = draft([{ id: "theirs", storagePath: "hw/theirs" }]);
+    await expect(removeHomeworkFileAction("a-1", "theirs")).rejects.toThrow(/No record found/);
+    expect(fileRows.has("theirs")).toBe(true);
+  });
+
+  it("the hand-in attributes only this student's files to the attempt", async () => {
+    await submitHomeworkAction("a-1", "Mi respuesta");
+    expect(fileUpdateMany).toHaveBeenCalledWith({
+      where: { submissionId: "s-1", submission: { studentId: "student-1" }, attemptId: null },
+      data: { attemptId: "att-1" },
+    });
+    expect(fileRows.get("mine")?.attemptId).toBe("att-1");
+    expect(fileRows.get("theirs")?.attemptId).toBeNull();
   });
 });

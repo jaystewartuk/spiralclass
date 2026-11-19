@@ -33,8 +33,10 @@ const log = logger({ surface: "overrides" });
 //   * set_custom_price          — teacher_students.custom_price_minor_units
 //
 // All actions filter by teacher_id (tenant isolation). Auth resolves teacher via
-// requireOnboardedTeacher (Supabase JWT); the booking/package/student
-// lookup re-verifies ownership before mutation.
+// requireOnboardedTeacher; the booking/package/student lookup re-verifies
+// ownership before mutation, and every booking/package write names
+// `teacher.id` again (D-175), so the statement itself refuses another
+// teacher's row — including a package id read off the booking.
 
 export type OverrideState = { error?: string; ok?: string } | undefined;
 
@@ -91,7 +93,7 @@ export async function markBookingComplete(
     // transaction, so a double-submit (or a second device) can reach here twice.
     // Guard the transition so the loser doesn't write a duplicate Override row.
     const flipped = await tx.booking.updateMany({
-      where: { id: booking.id, status: "scheduled" },
+      where: { id: booking.id, teacherId: teacher.id, status: "scheduled" },
       data: { status: "completed", completedAt: now },
     });
     if (flipped.count === 0) return false;
@@ -188,7 +190,7 @@ export async function markBookingNoShow(
     // either valid source status) so the loser doesn't write a duplicate
     // Override row or enqueue a second no-show notification to the student.
     const flipped = await tx.booking.updateMany({
-      where: { id: booking.id, status: { in: ["scheduled", "completed"] } },
+      where: { id: booking.id, teacherId: teacher.id, status: { in: ["scheduled", "completed"] } },
       data: { status: "no_show", completedAt: null },
     });
     if (flipped.count === 0) return null;
@@ -332,7 +334,7 @@ export async function restoreClass(
       // classes_used can never exceed classes_total (which would otherwise be a
       // raw CHECK-violation 500 instead of the friendly "no classes left").
       const flipped = await tx.booking.updateMany({
-        where: { id: booking.id, status: booking.status },
+        where: { id: booking.id, teacherId: teacher.id, status: booking.status },
         data: { status: "scheduled", countsAgainstPackage: true },
       });
       if (flipped.count === 0) {
@@ -342,6 +344,7 @@ export async function restoreClass(
         const claimed = await tx.package.updateMany({
           where: {
             id: booking.packageId,
+            teacherId: teacher.id,
             classesUsed: { lt: tx.package.fields.classesTotal },
           },
           data: { classesUsed: { increment: 1 } },
@@ -464,7 +467,7 @@ export async function waiveCancellation(
     // not decrement classes_used a second time (a double refund for one
     // waived class).
     const flipped = await tx.booking.updateMany({
-      where: { id: booking.id, status: "canceled_by_student" },
+      where: { id: booking.id, teacherId: teacher.id, status: "canceled_by_student" },
       data: { status: "canceled_by_teacher", countsAgainstPackage: false },
     });
     if (flipped.count === 0) return false;
@@ -476,7 +479,7 @@ export async function waiveCancellation(
       // upstream, not a reason to block the waive — skip the impossible
       // decrement and log loudly for follow-up.
       const refunded = await tx.package.updateMany({
-        where: { id: booking.packageId, classesUsed: { gt: 0 } },
+        where: { id: booking.packageId, teacherId: teacher.id, classesUsed: { gt: 0 } },
         data: { classesUsed: { decrement: 1 } },
       });
       if (refunded.count === 0) {
@@ -490,7 +493,7 @@ export async function waiveCancellation(
       // a stored value already at 0 (invariant broken upstream) skips the
       // decrement rather than raising a raw CHECK violation.
       const restored = await tx.package.updateMany({
-        where: { id: booking.packageId, scheduleChangesUsed: { gt: 0 } },
+        where: { id: booking.packageId, teacherId: teacher.id, scheduleChangesUsed: { gt: 0 } },
         data: { scheduleChangesUsed: { decrement: 1 } },
       });
       if (restored.count === 0) {
@@ -868,7 +871,7 @@ export async function updateBookingLanguageOverrideAction(
 
   await prisma.$transaction(async (tx) => {
     await tx.booking.update({
-      where: { id: booking.id },
+      where: { id: booking.id, teacherId: teacher.id },
       data: {
         teacherLanguageOverride: teacherLanguage,
         studentLanguageOverride: studentLanguage,

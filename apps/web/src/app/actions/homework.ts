@@ -117,7 +117,7 @@ export async function deleteAssignmentAction(formData: FormData): Promise<void> 
     select: { storagePath: true },
   });
 
-  await prisma.assignment.delete({ where: { id: assignment.id } });
+  await prisma.assignment.delete({ where: { id: assignment.id, teacherId: teacher.id } });
 
   await Promise.all(
     files.map(async (f) => {

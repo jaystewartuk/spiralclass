@@ -114,7 +114,7 @@ export async function failWisePaymentAction(formData: FormData): Promise<void> {
     // intentionally do NOT delete; the cleanup cron handles that path.
     if (payment.package.status === "pending") {
       await tx.package.update({
-        where: { id: payment.package.id },
+        where: { id: payment.package.id, teacherId: teacher.id },
         data: { status: "expired" },
       });
     }

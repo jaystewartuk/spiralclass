@@ -46,7 +46,17 @@ vi.mock("@/lib/analytics/posthog", () => ({
   flushAnalytics: vi.fn(async () => {}),
 }));
 
-const packageDelete = vi.fn(async () => ({}));
+// The teacher who owns `state.pkg`. The delete follows Prisma: an absent (or
+// `undefined`) teacherId is no filter at all, a present one must match, and a
+// miss throws (P2025).
+let pkgOwner = "t1";
+const packageDelete = vi.fn(async ({ where }: { where: { id: string; teacherId?: string } }) => {
+  if (!state.pkg || (where.teacherId !== undefined && where.teacherId !== pkgOwner)) {
+    throw new Error(`No record found for ${where.id}`);
+  }
+  state.pkg = null;
+  return {};
+});
 vi.mock("@/lib/prisma", () => ({
   prisma: {
     package: {
@@ -129,12 +139,34 @@ describe("deleteManualPackageAction", () => {
   it("deletes a clean package and writes an audit row", async () => {
     const res = await deleteManualPackageAction(undefined, fd());
     expect(res?.ok).toBeDefined();
-    expect(packageDelete).toHaveBeenCalledWith({ where: { id: PKG_ID } });
+    expect(packageDelete).toHaveBeenCalledWith({ where: { id: PKG_ID, teacherId: "t1" } });
     expect(state.overrides).toHaveLength(1);
     expect(state.overrides[0].action).toBe("delete_manual_package");
     expect(state.overrides[0].after).toBeNull();
     // One revalidation, for the student page this action is invoked from
     // (lib/revalidate.ts); the roster list refetches on navigation.
     expect(revalidatePath.mock.calls.map((c) => c[0])).toEqual(["/dashboard/students/s1"]);
+  });
+});
+
+// D-175 / #62: the package delete used to name only the id, so it was safe only
+// because the lookup above it was scoped. It now names the signed-in teacher,
+// so the statement itself refuses another teacher's package.
+describe("deleteManualPackageAction is scoped to the signed-in teacher", () => {
+  beforeEach(() => {
+    pkgOwner = "t1";
+  });
+
+  it("the delete names the teacher", async () => {
+    await deleteManualPackageAction(undefined, fd());
+    expect(packageDelete).toHaveBeenCalledWith({ where: { id: PKG_ID, teacherId: "t1" } });
+  });
+
+  it("never deletes another teacher's package, even if the lookup let it by", async () => {
+    // The lookup mock still returns the row, standing in for one that is later
+    // loosened or bypassed — the delete is the last line.
+    pkgOwner = "t2";
+    await expect(deleteManualPackageAction(undefined, fd())).rejects.toThrow(/No record found/);
+    expect(state.pkg).not.toBeNull();
   });
 });
