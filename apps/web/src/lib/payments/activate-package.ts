@@ -10,13 +10,19 @@ import { addMonthsEndOfDayInZone } from "@/lib/dates";
 // Sets status=active, locks `purchasedAt`, and computes `expiresAt` from the
 // template's `expirationMonths` (if any), end-of-day in the teacher's zone.
 // Idempotent: a non-pending package is left untouched.
+//
+// Both reads and writes name the package's teacher as well as its id (issue
+// #62, D-175). Each caller hands over the package it loaded through the
+// payment being settled, so `teacherId` is that row's own tenant and can only
+// fail to match if the caller passed the wrong package — in which case nothing
+// is activated rather than another teacher's package.
 export async function activatePackage(
   tx: Prisma.TransactionClient,
-  packageId: string,
+  pkgRef: { id: string; teacherId: string },
   now: Date,
 ): Promise<void> {
   const pkg = await tx.package.findUnique({
-    where: { id: packageId },
+    where: { id: pkgRef.id, teacherId: pkgRef.teacherId },
     include: {
       template: { select: { expirationMonths: true } },
       teacher: { select: { timezone: true } },
@@ -29,7 +35,7 @@ export async function activatePackage(
   const expiresAt = months ? addMonthsEndOfDayInZone(now, months, pkg.teacher.timezone) : null;
 
   await tx.package.update({
-    where: { id: packageId },
+    where: { id: pkgRef.id, teacherId: pkgRef.teacherId },
     data: { status: "active", purchasedAt: now, expiresAt },
   });
 

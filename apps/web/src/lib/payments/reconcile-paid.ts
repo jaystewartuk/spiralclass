@@ -121,6 +121,7 @@ export async function reconcileStrandedPaidPayments(
   const slotCandidates = stranded.filter((p) => p.package.intendedStartUtc !== null);
   const honoured = new Set<string>();
   if (slotCandidates.length > 0) {
+    // tenancy-exempt: a platform sweep across every teacher; each OR branch pins one package's own teacherId and studentId.
     const landed = await deps.prisma.booking.findMany({
       where: {
         status: { notIn: ["canceled_by_student", "canceled_by_teacher"] },

@@ -47,6 +47,13 @@ type FakeOverride = {
 function makeFakePrisma(payment: FakePayment) {
   const notifications: FakeNotification[] = [];
   const overrides: FakeOverride[] = [];
+  // Every package `where`, so the tenancy tests can pin which teacher each
+  // query names. A `where` that names another teacher does not match, as in
+  // Prisma (issue #62).
+  const packageWheres: Array<{ op: string; where: Record<string, unknown> }> = [];
+  const pkgMatches = (where: any) =>
+    where.id === payment.package.id &&
+    (where.teacherId === undefined || where.teacherId === payment.package.teacherId);
 
   const fake = {
     payment: {
@@ -76,7 +83,8 @@ function makeFakePrisma(payment: FakePayment) {
     },
     package: {
       findUnique: async (args: any) => {
-        if (args.where.id !== payment.package.id) return null;
+        packageWheres.push({ op: "findUnique", where: args.where });
+        if (!pkgMatches(args.where)) return null;
         return {
           ...payment.package,
           template: { expirationMonths: 1 },
@@ -84,12 +92,14 @@ function makeFakePrisma(payment: FakePayment) {
         };
       },
       update: async (args: any) => {
-        if (args.where.id !== payment.package.id) throw new Error("not found");
+        packageWheres.push({ op: "update", where: args.where });
+        if (!pkgMatches(args.where)) throw new Error("not found");
         Object.assign(payment.package, args.data);
         return payment.package;
       },
       updateMany: async (args: any) => {
-        if (args.where.id !== payment.package.id || payment.package.status !== args.where.status) {
+        packageWheres.push({ op: "updateMany", where: args.where });
+        if (!pkgMatches(args.where) || payment.package.status !== args.where.status) {
           return { count: 0 };
         }
         Object.assign(payment.package, args.data);
@@ -122,7 +132,7 @@ function makeFakePrisma(payment: FakePayment) {
     $transaction: async <T>(fn: (tx: any) => Promise<T>): Promise<T> => fn(fake),
   };
 
-  return { prisma: fake, notifications, overrides };
+  return { prisma: fake, notifications, overrides, packageWheres };
 }
 
 const TEACHER_ID = "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa";
@@ -362,5 +372,26 @@ describe("confirmTransferPayment", () => {
     expect(payment.status).toBe("paid");
     // emit was attempted both times; the catch swallowed the error.
     expect(emit).toHaveBeenCalledTimes(2);
+  });
+
+  // Issue #62 / D-175: every package query the confirm makes — the
+  // un-supersede and activatePackage's read and write — names the teacher the
+  // package belongs to, read from the same Payment → Package row.
+  it("touches the package only by id AND its own teacher, including the un-supersede", async () => {
+    payment.package.status = "expired";
+    const env = makeFakePrisma(payment);
+
+    const outcome = await confirmTransferPayment(
+      { paymentId: PAYMENT_ID, confirmedByTeacherId: TEACHER_ID },
+      { prisma: env.prisma as any, now: () => NOW, emit: vi.fn() },
+    );
+
+    expect(outcome.code).toBe("applied");
+    expect(payment.package.status).toBe("active");
+    expect(env.packageWheres).toEqual([
+      { op: "updateMany", where: { id: PACKAGE_ID, teacherId: TEACHER_ID, status: "expired" } },
+      { op: "findUnique", where: { id: PACKAGE_ID, teacherId: TEACHER_ID } },
+      { op: "update", where: { id: PACKAGE_ID, teacherId: TEACHER_ID } },
+    ]);
   });
 });

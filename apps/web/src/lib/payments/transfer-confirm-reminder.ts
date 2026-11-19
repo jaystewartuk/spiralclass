@@ -43,6 +43,7 @@ export async function sendTransferConfirmReminders(
   if (stuck.length === 0) return { ok: true, sent: 0, skipped: 0 };
 
   // Dedup: skip payments already reminded (notifications carry paymentId).
+  // tenancy-exempt: dedup for a platform sweep across every teacher, keyed on the payment ids that sweep just found.
   const prior = await prisma.notification.findMany({
     where: {
       templateName: "wise_confirm_reminder_teacher",
