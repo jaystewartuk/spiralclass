@@ -17,6 +17,8 @@ import type { Message } from "@prisma/client";
 import { logger } from "@/lib/logger";
 import { prisma } from "@/lib/prisma";
 import { deleteChatAudioObject } from "@/lib/storage/chat-audio";
+import { deleteChatFileObject } from "@/lib/storage/chat-file";
+import { deleteChatImageObject } from "@/lib/storage/chat-image";
 import { deleteChatVideoObject } from "@/lib/storage/chat-video";
 
 const log = logger({ surface: "chat-message-actions" });
@@ -149,50 +151,50 @@ export async function deleteChatMessage(scope: ThreadScope): Promise<ChatActionR
   // Best-effort media cleanup BEFORE nulling the paths — a failure is logged
   // (with the path, so the orphan can be swept by hand) and the delete
   // proceeds: an orphaned object is harmless, a tombstone that still points
-  // at live media is not.
-  if (message.voiceStoragePath) {
-    const removed = await deleteChatAudioObject(message.voiceStoragePath);
+  // at live media is not. Every attachment kind is listed here, so a new one
+  // cannot be added to the row and forgotten by the delete (#73).
+  const attachments = [
+    { kind: "voice", path: message.voiceStoragePath, remove: deleteChatAudioObject },
+    { kind: "video", path: message.videoStoragePath, remove: deleteChatVideoObject },
+    { kind: "image", path: message.imageStoragePath, remove: deleteChatImageObject },
+    { kind: "file", path: message.fileStoragePath, remove: deleteChatFileObject },
+  ];
+  for (const { kind, path, remove } of attachments) {
+    if (!path) continue;
+    const removed = await remove(path);
     if (!removed)
-      log.warn("voice object cleanup failed", {
-        messageId: message.id,
-        storagePath: message.voiceStoragePath,
-      });
-  }
-  if (message.videoStoragePath) {
-    const removed = await deleteChatVideoObject(message.videoStoragePath);
-    if (!removed)
-      log.warn("video object cleanup failed", {
-        messageId: message.id,
-        storagePath: message.videoStoragePath,
-      });
+      log.warn(`${kind} object cleanup failed`, { messageId: message.id, storagePath: path });
   }
 
-  // Conditional write, mirroring editChatMessage: a concurrent delete already
-  // tombstoned it → count 0, fall through and return the row as-is (idempotent).
-  await prisma.message.updateMany({
-    where: { id: message.id, deletedAt: null },
-    data: {
-      deletedAt: now,
-      body: null,
-      voiceStoragePath: null,
-      voiceDurationMs: null,
-      videoStoragePath: null,
-      videoDurationMs: null,
-    },
-  });
-  // The row is already known-authorized (the findFirst above) — apply the
-  // same tombstone locally instead of a second round-trip to re-read it. A
-  // concurrent delete winning the race in the tiny window above still leaves
-  // the row tombstoned either way, so this stays idempotent.
-  const updated: Message = {
-    ...message,
+  // The tombstone clears the body and every attachment column, including the
+  // descriptive ones (a document's name is content too).
+  const tombstone = {
     deletedAt: now,
     body: null,
     voiceStoragePath: null,
     voiceDurationMs: null,
     videoStoragePath: null,
     videoDurationMs: null,
-  };
+    imageStoragePath: null,
+    imageWidth: null,
+    imageHeight: null,
+    fileStoragePath: null,
+    fileName: null,
+    fileSizeBytes: null,
+    fileMimeType: null,
+  } satisfies Partial<Message>;
+
+  // Conditional write, mirroring editChatMessage: a concurrent delete already
+  // tombstoned it → count 0, fall through and return the row as-is (idempotent).
+  await prisma.message.updateMany({
+    where: { id: message.id, deletedAt: null },
+    data: tombstone,
+  });
+  // The row is already known-authorized (the findFirst above) — apply the
+  // same tombstone locally instead of a second round-trip to re-read it. A
+  // concurrent delete winning the race in the tiny window above still leaves
+  // the row tombstoned either way, so this stays idempotent.
+  const updated: Message = { ...message, ...tombstone };
 
   await retractChatNotifications(scope.teacherId, message.id);
   return { ok: true, message: updated };

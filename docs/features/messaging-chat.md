@@ -57,6 +57,9 @@ Nothing the client claims is trusted.
 
 - Sender only, any message type, within **60 hours** (`CHAT_DELETE_WINDOW_MS`).
 - Leaves a "message deleted" placeholder; text and media are cleared for good.
+  Every attachment kind (voice, video, photo, document) has its stored object
+  removed and its columns cleared, a document's name included, and a deleted
+  message never carries a link to an attachment, even one left on an older row.
   Deleting again is a no-op.
 
 ### Reactions

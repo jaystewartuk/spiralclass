@@ -17,6 +17,13 @@ type MessageRow = {
   voiceDurationMs: number | null;
   videoStoragePath: string | null;
   videoDurationMs: number | null;
+  imageStoragePath: string | null;
+  imageWidth: number | null;
+  imageHeight: number | null;
+  fileStoragePath: string | null;
+  fileName: string | null;
+  fileSizeBytes: number | null;
+  fileMimeType: string | null;
   createdAt: Date;
   readAt: Date | null;
   editedAt: Date | null;
@@ -34,6 +41,13 @@ function row(over: Partial<MessageRow> = {}): MessageRow {
     voiceDurationMs: null,
     videoStoragePath: null,
     videoDurationMs: null,
+    imageStoragePath: null,
+    imageWidth: null,
+    imageHeight: null,
+    fileStoragePath: null,
+    fileName: null,
+    fileSizeBytes: null,
+    fileMimeType: null,
     createdAt: new Date(Date.now() - 60_000), // 1 min ago — inside both windows
     readAt: null,
     editedAt: null,
@@ -74,6 +88,14 @@ const deleteChatVideoObject = vi.fn<(...a: unknown[]) => Promise<boolean>>(async
 vi.mock("@/lib/storage/chat-video", () => ({
   deleteChatVideoObject: (...a: unknown[]) => deleteChatVideoObject(...a),
 }));
+const deleteChatImageObject = vi.fn<(...a: unknown[]) => Promise<boolean>>(async () => true);
+vi.mock("@/lib/storage/chat-image", () => ({
+  deleteChatImageObject: (...a: unknown[]) => deleteChatImageObject(...a),
+}));
+const deleteChatFileObject = vi.fn<(...a: unknown[]) => Promise<boolean>>(async () => true);
+vi.mock("@/lib/storage/chat-file", () => ({
+  deleteChatFileObject: (...a: unknown[]) => deleteChatFileObject(...a),
+}));
 
 const { editChatMessage, deleteChatMessage } = await import("@/lib/chat/message-actions");
 
@@ -85,6 +107,8 @@ beforeEach(() => {
   notificationDeleteMany.mockResolvedValue({ count: 0 });
   deleteChatAudioObject.mockResolvedValue(true);
   deleteChatVideoObject.mockResolvedValue(true);
+  deleteChatImageObject.mockResolvedValue(true);
+  deleteChatFileObject.mockResolvedValue(true);
 });
 
 describe("editChatMessage", () => {
@@ -194,5 +218,85 @@ describe("deleteChatMessage", () => {
     expect(res.ok).toBe(true);
     expect(messageUpdateMany).not.toHaveBeenCalled();
     expect(messageFindFirst).toHaveBeenCalledTimes(1);
+  });
+
+  // #73: delete-for-everyone promised "text and any attached media permanently
+  // cleared", but only voice and video were — a deleted photo or document kept
+  // its storage path, so the other person could still open it.
+  const deleteScope = {
+    teacherId: "t1",
+    studentId: "s1",
+    messageId: "m1",
+    senderRole: "teacher" as const,
+  };
+
+  it("removes a deleted photo's stored object and clears every image field", async () => {
+    messageFindFirst.mockResolvedValueOnce(
+      row({
+        body: "my ID",
+        imageStoragePath: "t1/s1/photo.jpg",
+        imageWidth: 1200,
+        imageHeight: 800,
+      }),
+    );
+    const res = await deleteChatMessage(deleteScope);
+
+    expect(deleteChatImageObject).toHaveBeenCalledWith("t1/s1/photo.jpg");
+    const data = (messageUpdateMany.mock.calls[0]![0] as { data: Record<string, unknown> }).data;
+    expect(data).toMatchObject({ imageStoragePath: null, imageWidth: null, imageHeight: null });
+    expect(res.ok).toBe(true);
+    if (res.ok) {
+      expect(res.message.imageStoragePath).toBeNull();
+      expect(res.message.imageWidth).toBeNull();
+      expect(res.message.imageHeight).toBeNull();
+    }
+  });
+
+  it("removes a deleted document's stored object and clears every file field", async () => {
+    messageFindFirst.mockResolvedValueOnce(
+      row({
+        body: null,
+        fileStoragePath: "t1/s1/statement.pdf",
+        fileName: "bank-statement.pdf",
+        fileSizeBytes: 48_000,
+        fileMimeType: "application/pdf",
+      }),
+    );
+    const res = await deleteChatMessage(deleteScope);
+
+    expect(deleteChatFileObject).toHaveBeenCalledWith("t1/s1/statement.pdf");
+    const data = (messageUpdateMany.mock.calls[0]![0] as { data: Record<string, unknown> }).data;
+    expect(data).toMatchObject({
+      fileStoragePath: null,
+      fileName: null,
+      fileSizeBytes: null,
+      fileMimeType: null,
+    });
+    expect(res.ok).toBe(true);
+    if (res.ok) {
+      expect(res.message.fileStoragePath).toBeNull();
+      expect(res.message.fileName).toBeNull();
+      expect(res.message.fileSizeBytes).toBeNull();
+      expect(res.message.fileMimeType).toBeNull();
+    }
+  });
+
+  it("still tombstones and clears the fields when the object removal fails", async () => {
+    messageFindFirst.mockResolvedValueOnce(
+      row({ imageStoragePath: "t1/s1/a.jpg", fileStoragePath: "t1/s1/b.pdf", fileName: "b.pdf" }),
+    );
+    deleteChatImageObject.mockResolvedValueOnce(false);
+    deleteChatFileObject.mockResolvedValueOnce(false);
+    const res = await deleteChatMessage(deleteScope);
+
+    const data = (messageUpdateMany.mock.calls[0]![0] as { data: Record<string, unknown> }).data;
+    expect(data).toMatchObject({ imageStoragePath: null, fileStoragePath: null, fileName: null });
+    expect(res.ok).toBe(true);
+  });
+
+  it("touches no attachment storage for a text message", async () => {
+    await deleteChatMessage(deleteScope);
+    expect(deleteChatImageObject).not.toHaveBeenCalled();
+    expect(deleteChatFileObject).not.toHaveBeenCalled();
   });
 });

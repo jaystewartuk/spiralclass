@@ -32,10 +32,18 @@ function messageKind(
 }
 
 export async function toChatWireMessage(m: WireInput): Promise<ChatMessage> {
-  const voiceUrl = m.voiceStoragePath ? await mintChatAudioSignedUrl(m.voiceStoragePath) : null;
-  const videoUrl = m.videoStoragePath ? await mintChatVideoSignedUrl(m.videoStoragePath) : null;
-  const imageUrl = m.imageStoragePath ? await mintChatImageSignedUrl(m.imageStoragePath) : null;
-  const fileUrl = m.fileStoragePath ? await mintChatFileSignedUrl(m.fileStoragePath) : null;
+  // A deleted message carries no attachment, whatever its row still holds.
+  // deleteChatMessage clears the columns, but rows deleted before it cleared
+  // image and file paths (#73) still have them, and this is the one place
+  // every surface turns a path into a link.
+  const live = !m.deletedAt;
+  const voiceUrl =
+    live && m.voiceStoragePath ? await mintChatAudioSignedUrl(m.voiceStoragePath) : null;
+  const videoUrl =
+    live && m.videoStoragePath ? await mintChatVideoSignedUrl(m.videoStoragePath) : null;
+  const imageUrl =
+    live && m.imageStoragePath ? await mintChatImageSignedUrl(m.imageStoragePath) : null;
+  const fileUrl = live && m.fileStoragePath ? await mintChatFileSignedUrl(m.fileStoragePath) : null;
   const reactionRows =
     m.reactions ??
     (m.deletedAt
@@ -83,12 +91,12 @@ export async function toChatWireMessage(m: WireInput): Promise<ChatMessage> {
     videoUrl,
     videoDurationMs: m.videoDurationMs,
     imageUrl,
-    imageWidth: m.imageWidth,
-    imageHeight: m.imageHeight,
+    imageWidth: live ? m.imageWidth : null,
+    imageHeight: live ? m.imageHeight : null,
     fileUrl,
-    fileName: m.fileName,
-    fileSizeBytes: m.fileSizeBytes,
-    fileMimeType: m.fileMimeType,
+    fileName: live ? m.fileName : null,
+    fileSizeBytes: live ? m.fileSizeBytes : null,
+    fileMimeType: live ? m.fileMimeType : null,
     createdAt: m.createdAt.toISOString(),
     readAt: m.readAt?.toISOString() ?? null,
     editedAt: m.editedAt?.toISOString() ?? null,
