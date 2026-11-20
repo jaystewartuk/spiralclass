@@ -76,7 +76,12 @@ describe("sendInvitations", () => {
       }),
       db,
     );
-    expect(markInvitationSent).toHaveBeenCalledWith(INVITATION_ID, { resend: false }, db);
+    expect(markInvitationSent).toHaveBeenCalledWith(
+      TEACHER.id,
+      INVITATION_ID,
+      { resend: false },
+      db,
+    );
   });
 
   it("discards the invitation when the provider rejects the send", async () => {
@@ -94,7 +99,7 @@ describe("sendInvitations", () => {
       db,
     );
     expect(summary.failed).toBe(1);
-    expect(discardUnsentInvitation).toHaveBeenCalledWith(INVITATION_ID, db);
+    expect(discardUnsentInvitation).toHaveBeenCalledWith(TEACHER.id, INVITATION_ID, db);
     expect(markInvitationSent).not.toHaveBeenCalled();
   });
 });
@@ -122,6 +127,6 @@ describe("resendInvitationAction", () => {
         record: { teacherId: TEACHER.id, studentId: STUDENT_ID, invitationId: INVITATION_ID },
       }),
     );
-    expect(markInvitationSent).toHaveBeenCalledWith(INVITATION_ID, { resend: true });
+    expect(markInvitationSent).toHaveBeenCalledWith(TEACHER.id, INVITATION_ID, { resend: true });
   });
 });

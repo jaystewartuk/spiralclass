@@ -269,6 +269,20 @@ describe("acceptInvitation — the happy path", () => {
     );
   });
 
+  it("scopes the accept write to the invitation's teacher (#62)", async () => {
+    findUnique.mockResolvedValue(baseInvitation());
+
+    await acceptInvitation({ rawToken: RAW_TOKEN, user: USER }, fakeDb());
+
+    // The write names the tenant the token lookup resolved, so it can only
+    // ever mark that teacher's invitation accepted.
+    expect(invitationUpdateMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { id: "inv-1", teacherId: TEACHER_ID, status: "pending" },
+      }),
+    );
+  });
+
   it("refuses when the identity owns a Teacher account", async () => {
     // Teacher and Student are mutually exclusive.
     resolveLinkedStudent.mockResolvedValue({ status: "conflict" });

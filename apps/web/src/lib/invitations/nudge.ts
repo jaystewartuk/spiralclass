@@ -31,6 +31,8 @@ export async function sendPendingInviteNudges(deps: {
 
   // Candidate invitations: pending, sent long enough ago, not yet expired, not
   // yet nudged. Group by teacher in memory (volumes are small).
+  // tenancy-exempt: a daily cron sweeping every teacher's pending invitations;
+  // each stamp below is scoped to the one teacher whose digest was sent.
   const candidates = await prisma.studentInvitation.findMany({
     where: {
       status: "pending",
@@ -95,7 +97,7 @@ export async function sendPendingInviteNudges(deps: {
 
     // Stamp only after a successful send so a failed send retries next run.
     await prisma.studentInvitation.updateMany({
-      where: { id: { in: invitationIds }, status: "pending", reminderSentAt: null },
+      where: { id: { in: invitationIds }, teacherId, status: "pending", reminderSentAt: null },
       data: { reminderSentAt: now },
     });
     teachersNudged += 1;
