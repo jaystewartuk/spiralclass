@@ -118,19 +118,35 @@ function buildFakePrisma(state: {
   revokedWebSubIds?: string[];
   // Rows written to `verification` — one per sign-in link issued.
   verifications?: Array<{ identifier: string; value: string; expiresAt: Date }>;
+  // Every notification write's `where`, in order — lets a test assert that
+  // each one names the row's own teacher.
+  notificationWrites?: Array<{ op: "update" | "updateMany"; where: Record<string, unknown> }>;
+  // When set, the dispatcher's read of the row reports this teacher instead of
+  // the stored one — the only way to put a write's `teacherId` at odds with
+  // the row it targets, since in real code both come from the same row.
+  readAsTeacherId?: string;
 }) {
   return {
     notification: {
-      findUnique: async ({ where }: { where: { id: string } }) =>
-        state.notifications.get(where.id) ?? null,
+      findUnique: async ({ where }: { where: { id: string } }) => {
+        const row = state.notifications.get(where.id) ?? null;
+        if (!row || !state.readAsTeacherId) return row;
+        return { ...row, teacherId: state.readAsTeacherId };
+      },
+      // Honours `teacherId` the way Prisma does: a unique `where` that also
+      // names another teacher matches nothing, and `update` then throws.
       update: async ({
         where,
         data,
       }: {
-        where: { id: string };
+        where: { id: string; teacherId?: string };
         data: Partial<NotificationRow>;
       }) => {
-        const row = state.notifications.get(where.id)!;
+        state.notificationWrites?.push({ op: "update", where });
+        const row = state.notifications.get(where.id);
+        if (!row || (where.teacherId !== undefined && row.teacherId !== where.teacherId)) {
+          throw new Error("P2025: record to update not found");
+        }
         Object.assign(row, data);
         return row;
       },
@@ -140,11 +156,13 @@ function buildFakePrisma(state: {
         where,
         data,
       }: {
-        where: { id: string; status?: string };
+        where: { id: string; status?: string; teacherId?: string };
         data: Partial<NotificationRow>;
       }) => {
+        state.notificationWrites?.push({ op: "updateMany", where });
         const row = state.notifications.get(where.id);
         if (!row) return { count: 0 };
+        if (where.teacherId !== undefined && row.teacherId !== where.teacherId) return { count: 0 };
         if (where.status && row.status !== where.status) return { count: 0 };
         Object.assign(row, data);
         return { count: 1 };
@@ -1129,5 +1147,135 @@ describe("dispatchNotification", () => {
     // no keypair to send to don't make the recipient push-reachable, so no
     // misleading pushError is stamped on a row whose real channel was email.
     expect(row.metadata?.pushError).toBeUndefined();
+  });
+});
+
+// Issue #62 (tenancy guard): every write the dispatcher makes to a
+// notification row names the row's own teacher as well as its id, so a write
+// can never land on another teacher's notification. The teacher comes from the
+// row the dispatcher has just read, so on every real path the two agree.
+describe("dispatchNotification — notification writes name the row's teacher", () => {
+  const OTHER_TEACHER_ID = "99999999-9999-4999-8999-999999999999";
+  let email: ReturnType<typeof createStubEmailClient>;
+
+  beforeEach(() => {
+    email = createStubEmailClient();
+  });
+
+  function tracked(base: ReturnType<typeof freshState>) {
+    const writes: Array<{ op: "update" | "updateMany"; where: Record<string, unknown> }> = [];
+    return { state: { ...base, notificationWrites: writes }, writes };
+  }
+
+  function expectEveryWriteScoped(
+    writes: Array<{ op: string; where: Record<string, unknown> }>,
+    minimum: number,
+  ) {
+    expect(writes.length).toBeGreaterThanOrEqual(minimum);
+    for (const w of writes) {
+      expect(w.where).toMatchObject({ id: NOTIFICATION_ID, teacherId: TEACHER_ID });
+    }
+  }
+
+  it("email send: the claim, the channelsSent write and the sent flip all name the teacher", async () => {
+    const { state, writes } = tracked(freshState());
+    const outcome = await dispatchNotification(NOTIFICATION_ID, {
+      prisma: buildFakePrisma(state),
+      webPush: null,
+      email,
+      appUrl: "https://app.test",
+    });
+
+    expect(outcome.code).toBe("sent");
+    expect(writes.map((w) => w.op)).toEqual(["updateMany", "update", "update"]);
+    expectEveryWriteScoped(writes, 3);
+  });
+
+  it("push send: the push channelsSent write names the teacher", async () => {
+    const { state, writes } = tracked(withWebPushSubscription(freshState()));
+    const outcome = await dispatchNotification(NOTIFICATION_ID, {
+      prisma: buildFakePrisma(state),
+      webPush: createStubWebPushClient(),
+      email,
+      appUrl: "https://app.test",
+    });
+
+    expect(outcome.code).toBe("sent");
+    if (outcome.code !== "sent") throw new Error();
+    expect(outcome.channel).toBe("push");
+    expectEveryWriteScoped(writes, 3);
+  });
+
+  it("non-retryable push and email failures: both error writes and markFailed name the teacher", async () => {
+    const { state, writes } = tracked(withWebPushSubscription(freshState()));
+    email.failNext("hard bounce", false);
+    const outcome = await dispatchNotification(NOTIFICATION_ID, {
+      prisma: buildFakePrisma(state),
+      webPush: createStubWebPushClient({ "https://push.example/sub-1": "failed" }),
+      email,
+      appUrl: "https://app.test",
+    });
+
+    expect(outcome.code).toBe("failed");
+    const row = state.notifications.get(NOTIFICATION_ID)!;
+    expect(row.status).toBe("failed");
+    expect(row.metadata).toMatchObject({
+      pushError: expect.any(String),
+      emailError: "hard bounce",
+    });
+    // claim + pushError + emailError + markFailed
+    expect(writes).toHaveLength(4);
+    expectEveryWriteScoped(writes, 4);
+  });
+
+  it("a retryable failure releases the claim under the teacher", async () => {
+    const { state, writes } = tracked(freshState());
+    email.failNext("provider 503", true);
+    await expect(
+      dispatchNotification(NOTIFICATION_ID, {
+        prisma: buildFakePrisma(state),
+        webPush: null,
+        email,
+        appUrl: "https://app.test",
+      }),
+    ).rejects.toThrow(/email-retryable/);
+
+    expect(state.notifications.get(NOTIFICATION_ID)!.status).toBe("queued");
+    expect(writes.map((w) => w.op)).toEqual(["updateMany", "updateMany"]);
+    expectEveryWriteScoped(writes, 2);
+  });
+
+  it("markSuppressed names the teacher", async () => {
+    const { state, writes } = tracked(
+      freshState({ studentOverrides: { archivedAt: new Date("2026-01-01T00:00:00Z") } }),
+    );
+    const outcome = await dispatchNotification(NOTIFICATION_ID, {
+      prisma: buildFakePrisma(state),
+      webPush: null,
+      email,
+      appUrl: "https://app.test",
+    });
+
+    expect(outcome).toEqual({ code: "noop", reason: "preference-disabled" });
+    expect(state.notifications.get(NOTIFICATION_ID)!.status).toBe("suppressed");
+    expectEveryWriteScoped(writes, 2);
+  });
+
+  it("does not claim or send a row whose teacher is not the one it was read as", async () => {
+    // The stored row belongs to another teacher. With the claim scoped, it
+    // matches nothing: no send, and the other teacher's row is untouched.
+    const base = freshState();
+    base.notifications.get(NOTIFICATION_ID)!.teacherId = OTHER_TEACHER_ID;
+    const { state } = tracked(base);
+    const outcome = await dispatchNotification(NOTIFICATION_ID, {
+      prisma: buildFakePrisma({ ...state, readAsTeacherId: TEACHER_ID }),
+      webPush: null,
+      email,
+      appUrl: "https://app.test",
+    });
+
+    expect(outcome).toEqual({ code: "noop", reason: "claim-lost" });
+    expect(email.getSends()).toHaveLength(0);
+    expect(state.notifications.get(NOTIFICATION_ID)!.status).toBe("queued");
   });
 });

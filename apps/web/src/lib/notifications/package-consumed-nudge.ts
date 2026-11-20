@@ -50,6 +50,7 @@ export async function sendPackageConsumedNudges(
   // column comparison, hence the field reference). Disabled students are
   // skipped. Expiry date is irrelevant here: every class was used, so a
   // renewal nudge is appropriate whether or not time also ran out.
+  // tenancy-exempt: daily renewal-nudge cron sweeps every teacher's used-up packages
   const candidates = await prisma.package.findMany({
     where: {
       status: "active",
@@ -118,6 +119,7 @@ export async function sendPackageConsumedNudges(
   // Already-nudged set spans both variants: the teacher row is written
   // unconditionally, the student row only when prefs allow, so either one
   // marks the package as handled.
+  // tenancy-exempt: dedup for the cross-teacher cron sweep, keyed on globally unique package ids
   const priorNudges = await prisma.notification.findMany({
     where: {
       templateName: { in: ["package_consumed_student", "package_consumed_teacher"] },

@@ -49,6 +49,7 @@ export async function redispatchStaleQueuedNotifications(deps: {
   const newestQueuedAt = new Date(now.getTime() - graceMinutes * 60_000);
   const oldestQueuedAt = new Date(now.getTime() - maxAgeHours * 3_600_000);
 
+  // tenancy-exempt: backstop cron re-drives stuck queued notifications for every teacher
   const stale = await deps.prisma.notification.findMany({
     where: {
       status: "queued",

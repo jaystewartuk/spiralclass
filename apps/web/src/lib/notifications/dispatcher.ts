@@ -183,6 +183,7 @@ export async function dispatchNotification(
 ): Promise<DispatchOutcome> {
   const now = (deps.now ?? (() => new Date()))();
 
+  // tenancy-exempt: resolves the tenant from the notification id in the queued event
   const notification = await deps.prisma.notification.findUnique({
     where: { id: notificationId },
   });
@@ -198,7 +199,7 @@ export async function dispatchNotification(
   // queued so the Inngest retry re-processes; the terminal markFailed/markSent
   // writers overwrite `sending` on the permanent-failure / happy paths.
   const claim = await deps.prisma.notification.updateMany({
-    where: { id: notification.id, status: "queued" },
+    where: { id: notification.id, teacherId: notification.teacherId, status: "queued" },
     data: { status: "sending" },
   });
   if (claim.count === 0) {
@@ -208,7 +209,7 @@ export async function dispatchNotification(
     return await runClaimedDispatch(notification, now, deps);
   } catch (err) {
     await deps.prisma.notification.updateMany({
-      where: { id: notification.id, status: "sending" },
+      where: { id: notification.id, teacherId: notification.teacherId, status: "sending" },
       data: { status: "queued" },
     });
     throw err;
@@ -223,7 +224,7 @@ async function runClaimedDispatch(
   if (!isKnownTemplate(notification.templateName)) {
     return await markFailed(
       deps.prisma,
-      notification.id,
+      notification,
       now,
       `unknown-template:${notification.templateName}`,
     );
@@ -248,7 +249,7 @@ async function runClaimedDispatch(
     },
   });
   if (!teacher) {
-    return await markFailed(deps.prisma, notification.id, now, "teacher-not-found");
+    return await markFailed(deps.prisma, notification, now, "teacher-not-found");
   }
 
   // Two recipient shapes:
@@ -266,7 +267,7 @@ async function runClaimedDispatch(
   if (notification.recipientType !== "student" && !isTeacherRecipient) {
     return await markFailed(
       deps.prisma,
-      notification.id,
+      notification,
       now,
       `unsupported-recipient-type:${notification.recipientType}`,
     );
@@ -308,7 +309,7 @@ async function runClaimedDispatch(
 
   if (isTeacherRecipient) {
     if (!teacher.email) {
-      return await markFailed(deps.prisma, notification.id, now, "teacher-email-missing");
+      return await markFailed(deps.prisma, notification, now, "teacher-email-missing");
     }
     recipientId = teacher.id;
     recipientEmail = teacher.email;
@@ -364,7 +365,7 @@ async function runClaimedDispatch(
     if (!student) {
       return await markFailed(
         deps.prisma,
-        notification.id,
+        notification,
         now,
         "student-not-found-or-not-on-teacher",
       );
@@ -423,7 +424,7 @@ async function runClaimedDispatch(
     recipientLinkArchived &&
     !isTransactionalTemplate(templateName)
   ) {
-    return await markSuppressed(deps.prisma, notification.id, now, "link-archived");
+    return await markSuppressed(deps.prisma, notification, now, "link-archived");
   }
 
   // Silent-onboarding gate. The teacher has staged this student on her roster
@@ -436,7 +437,7 @@ async function runClaimedDispatch(
     recipientLinkOnboardingHold &&
     !isTransactionalTemplate(templateName)
   ) {
-    return await markSuppressed(deps.prisma, notification.id, now, "onboarding-hold");
+    return await markSuppressed(deps.prisma, notification, now, "onboarding-hold");
   }
 
   // Student notification-preference gate. Transactional templates (sign-in)
@@ -449,7 +450,7 @@ async function runClaimedDispatch(
     if (category && !isCategoryEnabled(studentPrefs, category)) {
       return await markSuppressed(
         deps.prisma,
-        notification.id,
+        notification,
         now,
         `preference-disabled:${category}`,
       );
@@ -467,7 +468,7 @@ async function runClaimedDispatch(
     if (category && !isCategoryEnabled(teacherPrefs, category)) {
       return await markSuppressed(
         deps.prisma,
-        notification.id,
+        notification,
         now,
         `preference-disabled:${category}`,
       );
@@ -492,9 +493,9 @@ async function runClaimedDispatch(
     // above: quiet, no Sentry alert (Sentry SPIRALCLASS-1Z was this reason
     // paging as a warning on every occurrence).
     if (built.reason.startsWith("booking-not-scheduled:")) {
-      return await markSuppressed(deps.prisma, notification.id, now, built.reason);
+      return await markSuppressed(deps.prisma, notification, now, built.reason);
     }
-    return await markFailed(deps.prisma, notification.id, now, built.reason);
+    return await markFailed(deps.prisma, notification, now, built.reason);
   }
 
   // Compute per-category channel restriction. Non-suppressible templates
@@ -516,12 +517,7 @@ async function runClaimedDispatch(
   });
 
   if (channels.length === 0) {
-    return await markFailed(
-      deps.prisma,
-      notification.id,
-      now,
-      "undeliverable:no_eligible_channels",
-    );
+    return await markFailed(deps.prisma, notification, now, "undeliverable:no_eligible_channels");
   }
 
   // Idempotency: on a Inngest retry, skip channels already delivered in the
@@ -598,7 +594,7 @@ async function runClaimedDispatch(
         });
         liveMeta = { ...liveMeta, pushError: result.error, pushErrorAt: now.toISOString() };
         await deps.prisma.notification.update({
-          where: { id: notification.id },
+          where: { id: notification.id, teacherId: notification.teacherId },
           data: { metadata: liveMeta as Prisma.InputJsonValue },
         });
         continue;
@@ -615,7 +611,7 @@ async function runClaimedDispatch(
         webPushDelivered: result.webPushDelivered,
       };
       await deps.prisma.notification.update({
-        where: { id: notification.id },
+        where: { id: notification.id, teacherId: notification.teacherId },
         data: { metadata: liveMeta as Prisma.InputJsonValue },
       });
       sent.push({ channel: "push", providerMessageId: result.providerMessageId });
@@ -651,7 +647,7 @@ async function runClaimedDispatch(
         });
         liveMeta = { ...liveMeta, emailError: result.error, emailErrorAt: now.toISOString() };
         await deps.prisma.notification.update({
-          where: { id: notification.id },
+          where: { id: notification.id, teacherId: notification.teacherId },
           data: { metadata: liveMeta as Prisma.InputJsonValue },
         });
         continue;
@@ -659,7 +655,7 @@ async function runClaimedDispatch(
       alreadySent.add("email");
       liveMeta = { ...liveMeta, channelsSent: [...alreadySent] };
       await deps.prisma.notification.update({
-        where: { id: notification.id },
+        where: { id: notification.id, teacherId: notification.teacherId },
         data: { metadata: liveMeta as Prisma.InputJsonValue },
       });
       sent.push({ channel: "email", providerMessageId: result.providerMessageId });
@@ -670,12 +666,7 @@ async function runClaimedDispatch(
   // Combine channels delivered in this run with any delivered in prior retries.
   const allDelivered = [...alreadySent];
   if (allDelivered.length === 0) {
-    return await markFailed(
-      deps.prisma,
-      notification.id,
-      now,
-      "undeliverable:no_eligible_channels",
-    );
+    return await markFailed(deps.prisma, notification, now, "undeliverable:no_eligible_channels");
   }
 
   // Primary channel = first delivered (push > email order preserved by
@@ -686,7 +677,7 @@ async function runClaimedDispatch(
     providerMessageId: "prior-retry",
   };
   await deps.prisma.notification.update({
-    where: { id: notification.id },
+    where: { id: notification.id, teacherId: notification.teacherId },
     data: {
       status: "sent",
       channel: primary.channel,
@@ -955,6 +946,7 @@ export async function sendChatEmailFallbackIfUnread(
 ): Promise<ChatEmailFallbackOutcome> {
   const now = (deps.now ?? (() => new Date()))();
 
+  // tenancy-exempt: resolves the tenant from the notification id in the queued event
   const notification = await deps.prisma.notification.findUnique({ where: { id: notificationId } });
   if (!notification) return { code: "skipped", reason: "not-found" };
   if (!isChatCascadeTemplate(notification.templateName))
@@ -992,7 +984,9 @@ export async function sendChatEmailFallbackIfUnread(
   // regardless of other unread traffic; (2) the unread count that gates the
   // email ignores tombstones, so a fully-retracted thread stays silent.
   if (typeof meta.messageId === "string") {
-    const original = await deps.prisma.message.findFirst({ where: { id: meta.messageId } });
+    const original = await deps.prisma.message.findFirst({
+      where: { id: meta.messageId, teacherId: notification.teacherId },
+    });
     if (!original || original.deletedAt) return { code: "skipped", reason: "message-deleted" };
   }
   const unread = await deps.prisma.message.count({
@@ -1173,7 +1167,7 @@ async function deliverFallbackEmail(
 
   const newChannelsSent = [...new Set([...channelsSent, "email"])];
   await deps.prisma.notification.update({
-    where: { id: notification.id },
+    where: { id: notification.id, teacherId: notification.teacherId },
     data: { metadata: { ...meta, channelsSent: newChannelsSent } as Prisma.InputJsonValue },
   });
   return { code: "sent", providerMessageId: result.providerMessageId };
@@ -1193,12 +1187,12 @@ function isKnownTemplate(name: string): name is TemplateName {
 // imported roster being off) doesn't page anyone.
 async function markSuppressed(
   prisma: Pick<PrismaClient, "notification">,
-  id: string,
+  row: { id: string; teacherId: string },
   now: Date,
   reason: string,
 ): Promise<DispatchOutcome> {
   await prisma.notification.update({
-    where: { id },
+    where: { id: row.id, teacherId: row.teacherId },
     // `suppressed`, not `failed`: deliberate non-delivery (opt-out, archived
     // link, onboarding hold) must not pollute delivery-failure dashboards.
     data: { status: "suppressed", error: reason, failedAt: now },
@@ -1208,10 +1202,11 @@ async function markSuppressed(
 
 async function markFailed(
   prisma: Pick<PrismaClient, "notification">,
-  id: string,
+  row: { id: string; teacherId: string },
   now: Date,
   reason: string,
 ): Promise<DispatchOutcome> {
+  const id = row.id;
   log.warn("notification failed", { notificationId: id, reason });
   // `undeliverable:*` reasons are terminal business outcomes, not faults: the
   // recipient has no channel we're allowed to use (every category off, or no
@@ -1231,7 +1226,7 @@ async function markFailed(
     });
   }
   await prisma.notification.update({
-    where: { id },
+    where: { id, teacherId: row.teacherId },
     data: { status: "failed", error: reason, failedAt: now },
   });
   return { code: "failed", reason };
@@ -2456,8 +2451,9 @@ export async function preloadBookings(
   const cache = new Map<string, LoadedBooking | null>();
   const ids = [...new Set(refs.map((r) => r.bookingId))];
   if (ids.length === 0) return cache;
+  const teacherIds = [...new Set(refs.map((r) => r.teacherId))];
   const rows = await prisma.booking.findMany({
-    where: { id: { in: ids } },
+    where: { id: { in: ids }, teacherId: { in: teacherIds } },
     select: { ...BOOKING_SELECT, teacherId: true },
   });
   const byId = new Map(rows.map((r) => [r.id, r]));
@@ -2684,8 +2680,9 @@ export async function preloadPackages(
   const cache = new Map<string, LoadedPackage | null>();
   const ids = [...new Set(refs.map((r) => r.packageId))];
   if (ids.length === 0) return cache;
+  const teacherIds = [...new Set(refs.map((r) => r.teacherId))];
   const rows = await prisma.package.findMany({
-    where: { id: { in: ids } },
+    where: { id: { in: ids }, teacherId: { in: teacherIds } },
     select: { ...PACKAGE_SELECT, teacherId: true },
   });
   const byId = new Map(rows.map((r) => [r.id, r]));

@@ -30,7 +30,13 @@ import type { ReminderMetadata } from "./clock-change";
 type Tx = Prisma.TransactionClient | PrismaClient;
 
 async function insert(tx: Tx, data: Prisma.NotificationUncheckedCreateInput): Promise<string> {
-  const row = await tx.notification.create({ data, select: { id: true } });
+  // `teacherId` is a required field of the input type already; it is named
+  // here so the tenancy guard can read it at the one place every producer
+  // writes through. Prisma receives exactly the same object.
+  const row = await tx.notification.create({
+    data: { ...data, teacherId: data.teacherId },
+    select: { id: true },
+  });
   return row.id;
 }
 

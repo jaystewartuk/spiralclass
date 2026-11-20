@@ -127,6 +127,7 @@ export async function scanDueReminders(deps: {
   // Upcoming scheduled bookings only: scheduledStart in (now, now+5d]. A class
   // that already started (scheduledStart <= now) is excluded, so no leg fires
   // after start; the auto-complete sweep transitions it out of `scheduled`.
+  // tenancy-exempt: reminder cron scans every teacher's upcoming scheduled bookings
   const bookings = await deps.prisma.booking.findMany({
     where: {
       status: "scheduled",

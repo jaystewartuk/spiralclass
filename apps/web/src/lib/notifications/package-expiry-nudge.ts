@@ -34,6 +34,7 @@ export async function sendPackageExpiryNudges(
 
   // A null expiresAt never satisfies the gte/lte bounds, so no-expiry
   // packages are excluded automatically. Disabled students are skipped.
+  // tenancy-exempt: daily expiry-nudge cron sweeps every teacher's expiring packages
   const candidates = await prisma.package.findMany({
     where: {
       status: "active",
@@ -84,6 +85,7 @@ export async function sendPackageExpiryNudges(
   );
   if (eligible.length === 0) return { ok: true, sent: 0, skipped: 0 };
 
+  // tenancy-exempt: dedup for the cross-teacher cron sweep, keyed on globally unique package ids
   const priorNudges = await prisma.notification.findMany({
     where: { templateName: "package_expiry_nudge" },
     select: { metadata: true },

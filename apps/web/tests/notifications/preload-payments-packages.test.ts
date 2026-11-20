@@ -118,7 +118,7 @@ describe("preloadPackages", () => {
 
     expect(findMany).toHaveBeenCalledTimes(1);
     const [args] = findMany.mock.calls[0] as unknown as [{ where: unknown }];
-    expect(args.where).toEqual({ id: { in: [PKG1, PKG2] } });
+    expect(args.where).toEqual({ id: { in: [PKG1, PKG2] }, teacherId: { in: [T1] } });
     expect(cache.get(packageCacheKey(T1, PKG1))?.id).toBe(PKG1);
     expect(cache.get(packageCacheKey(T1, PKG2))?.id).toBe(PKG2);
   });
@@ -127,6 +127,33 @@ describe("preloadPackages", () => {
     const prisma = { package: { findMany: vi.fn(async () => [packageRow(PKG1, T1)]) } } as any;
     const cache = await preloadPackages(prisma, [{ teacherId: T2, packageId: PKG1 }]);
     expect(cache.get(packageCacheKey(T2, PKG1))).toBeNull();
+  });
+
+  // Issue #62 (tenancy guard): the query itself names the refs' teachers, so
+  // another teacher's package is never read from the database at all, not
+  // only discarded afterwards.
+  it("names the refs' teachers in the query, so another teacher's package is never read", async () => {
+    const rows = [packageRow(PKG1, T1), packageRow(PKG2, T2)];
+    const findMany = vi.fn(async ({ where }: any) =>
+      // Like Prisma, an absent `teacherId` filter matches every teacher.
+      rows.filter(
+        (r) =>
+          where.id.in.includes(r.id) &&
+          (where.teacherId === undefined || where.teacherId.in.includes(r.teacherId)),
+      ),
+    );
+    const prisma = { package: { findMany } } as any;
+
+    const cache = await preloadPackages(prisma, [
+      { teacherId: T1, packageId: PKG1 },
+      { teacherId: T1, packageId: PKG2 }, // PKG2 is T2's
+    ]);
+
+    const [args] = findMany.mock.calls[0] as unknown as [{ where: unknown }];
+    expect(args.where).toEqual({ id: { in: [PKG1, PKG2] }, teacherId: { in: [T1] } });
+    expect(await findMany.mock.results[0]!.value).toEqual([packageRow(PKG1, T1)]);
+    expect(cache.get(packageCacheKey(T1, PKG1))?.id).toBe(PKG1);
+    expect(cache.get(packageCacheKey(T1, PKG2))).toBeNull();
   });
 
   it("no refs → no query", async () => {
