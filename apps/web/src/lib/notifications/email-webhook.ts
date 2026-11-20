@@ -142,6 +142,7 @@ export async function handleResendWebhook(
   // A row already `delivered` must not be dragged back by a late duplicate,
   // and a deliberate `suppressed` (our own opt-out handling) is not ours to
   // overwrite with a provider outcome.
+  // tenancy-exempt: resolves the row by the email provider's globally unique message id
   const res = await deps.prisma.notification.updateMany({
     where: { providerMessageId, status: { in: ["sent", "sending", "queued"] } },
     data:
@@ -151,6 +152,7 @@ export async function handleResendWebhook(
   });
 
   if (res.count === 0) {
+    // tenancy-exempt: resolves the row by the email provider's globally unique message id
     const existing = await deps.prisma.notification.findFirst({
       where: { providerMessageId },
       select: { status: true },

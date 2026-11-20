@@ -26,6 +26,7 @@ async function unsubmittedAssignmentCandidates(
   prisma: PrismaClient,
   dueAt: { gte: Date; lte: Date } | { lt: Date },
 ) {
+  // tenancy-exempt: daily homework reminder cron sweeps every teacher's assignments
   return prisma.assignment.findMany({
     where: {
       dueAt,
@@ -64,6 +65,7 @@ async function alreadyNudgedAssignmentIds(
   prisma: PrismaClient,
   templateName: "homework_due_soon_student" | "homework_overdue_student",
 ): Promise<Set<string>> {
+  // tenancy-exempt: dedup for the cross-teacher cron sweep, keyed on globally unique assignment ids
   const prior = await prisma.notification.findMany({
     where: { templateName },
     select: { metadata: true },

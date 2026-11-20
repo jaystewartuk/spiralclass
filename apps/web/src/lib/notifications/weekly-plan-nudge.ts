@@ -48,6 +48,7 @@ export async function sendWeeklyPlanNudges(
   const cutoff = new Date(now.getTime() - cadenceDays * DAY_MS);
   const limit = deps.limit ?? 500;
 
+  // tenancy-exempt: weekly cron lists every teacher with a saved, unarchived community
   const grouped = await prisma.teacherShareGroup.groupBy({
     by: ["teacherId"],
     where: { archivedAt: null },

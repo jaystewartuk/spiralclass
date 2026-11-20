@@ -55,6 +55,8 @@ function buildFakePrisma(state: {
     recipientType: string;
     recipientId: string;
   }[];
+  // Every message.findFirst / notification.update `where`, in order.
+  wheres?: Array<{ op: string; where: Record<string, unknown> }>;
 }) {
   const teacher = {
     id: TEACHER_ID,
@@ -82,14 +84,20 @@ function buildFakePrisma(state: {
     notification: {
       findUnique: async ({ where }: { where: { id: string } }) =>
         state.notifications.get(where.id) ?? null,
+      // Honours `teacherId` the way Prisma does: another teacher's row is not
+      // matched, and `update` then throws.
       update: async ({
         where,
         data,
       }: {
-        where: { id: string };
+        where: { id: string; teacherId?: string };
         data: Partial<NotificationRow>;
       }) => {
-        const row = state.notifications.get(where.id)!;
+        state.wheres?.push({ op: "notification.update", where });
+        const row = state.notifications.get(where.id);
+        if (!row || (where.teacherId !== undefined && row.teacherId !== where.teacherId)) {
+          throw new Error("P2025: record to update not found");
+        }
         Object.assign(row, data);
         return row;
       },
@@ -151,7 +159,17 @@ function buildFakePrisma(state: {
       updateMany: async () => ({ count: 0 }),
     },
     message: {
-      findFirst: async ({ where }: any) => state.messages.find((m) => m.id === where.id) ?? null,
+      findFirst: async ({ where }: any) => {
+        state.wheres?.push({ op: "message.findFirst", where });
+        return (
+          state.messages.find(
+            (m) =>
+              m.id === where.id &&
+              (where.teacherId === undefined || m.teacherId === where.teacherId) &&
+              (where.studentId === undefined || m.studentId === where.studentId),
+          ) ?? null
+        );
+      },
       count: async ({ where }: any) =>
         state.messages.filter(
           (m) =>
@@ -420,6 +438,97 @@ describe("sendChatEmailFallbackIfUnread", () => {
     );
 
     expect(outcome).toEqual({ code: "skipped", reason: "no-push-prior" });
+    expect(email.getSends()).toHaveLength(0);
+  });
+});
+
+// Issue #62 (tenancy guard): the fallback's lookup of the notification's own
+// message, and its channelsSent write, name the notification's teacher. Every
+// chat producer creates the message and the notification under the same
+// teacher, so on a real row they agree.
+describe("sendChatEmailFallbackIfUnread — scoped to the notification's teacher", () => {
+  const OTHER_TEACHER_ID = "99999999-9999-4999-8999-999999999999";
+  let email: ReturnType<typeof createStubEmailClient>;
+
+  beforeEach(() => {
+    email = createStubEmailClient();
+  });
+
+  function deps(prisma: unknown): DispatcherDeps {
+    return {
+      prisma: prisma as never,
+      webPush: createStubWebPushClient(),
+      email,
+      appUrl: "https://app.test",
+    };
+  }
+
+  function pushedRow(messageId: string): NotificationRow {
+    return chatRow({
+      status: "sent",
+      channel: "push",
+      metadata: { preview: "hola", messageId, channelsSent: ["push"] },
+    });
+  }
+
+  it("reads the message and records the email under the notification's teacher", async () => {
+    const wheres: Array<{ op: string; where: Record<string, unknown> }> = [];
+    const state = {
+      notifications: new Map([[NOTIFICATION_ID, pushedRow("mA")]]),
+      messages: [
+        {
+          id: "mA",
+          teacherId: TEACHER_ID,
+          studentId: STUDENT_ID,
+          senderRole: "teacher" as const,
+          readAt: null,
+        },
+      ],
+      wheres,
+    };
+
+    const outcome = await sendChatEmailFallbackIfUnread(
+      NOTIFICATION_ID,
+      deps(buildFakePrisma(state)),
+    );
+
+    expect(outcome.code).toBe("sent");
+    expect(wheres).toEqual([
+      { op: "message.findFirst", where: { id: "mA", teacherId: TEACHER_ID } },
+      { op: "notification.update", where: { id: NOTIFICATION_ID, teacherId: TEACHER_ID } },
+    ]);
+  });
+
+  it("does not treat another teacher's message as this notification's", async () => {
+    // metadata.messageId points at a live message in ANOTHER teacher's thread.
+    // Unscoped, that row was read and passed the deleted check. Scoped, it is
+    // not this notification's message, so the fallback fails closed.
+    const state = {
+      notifications: new Map([[NOTIFICATION_ID, pushedRow("mX")]]),
+      messages: [
+        {
+          id: "mX",
+          teacherId: OTHER_TEACHER_ID,
+          studentId: STUDENT_ID,
+          senderRole: "teacher" as const,
+          readAt: null,
+        },
+        {
+          id: "mB",
+          teacherId: TEACHER_ID,
+          studentId: STUDENT_ID,
+          senderRole: "teacher" as const,
+          readAt: null,
+        },
+      ],
+    };
+
+    const outcome = await sendChatEmailFallbackIfUnread(
+      NOTIFICATION_ID,
+      deps(buildFakePrisma(state)),
+    );
+
+    expect(outcome).toEqual({ code: "skipped", reason: "message-deleted" });
     expect(email.getSends()).toHaveLength(0);
   });
 });
