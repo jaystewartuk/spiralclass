@@ -290,7 +290,8 @@ are green, so a green promote means production is serving.
   the laptop — database first, because the Cloud Run script holds no database
   credential. Same scripts every way.
 
-Then watch the probes, Sentry and PostHog for about fifteen minutes.
+Then watch the probes, Sentry and PostHog for about fifteen minutes —
+[production-evidence.md](production-evidence.md) says how a session reads them.
 
 ### If something is wrong in production
 

@@ -2,7 +2,8 @@
 
 PostHog is the product analytics, session replay, feature flags, experiments,
 surveys and web-vitals platform. **Error tracking is Sentry's job, not
-PostHog's** — don't add `captureException` calls here.
+PostHog's** — don't add `captureException` calls here. Reading production usage,
+and the test-account filter it needs, is [production-evidence.md](production-evidence.md).
 
 ## Architecture at a glance
 
