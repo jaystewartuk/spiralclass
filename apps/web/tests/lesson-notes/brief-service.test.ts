@@ -29,12 +29,22 @@ function makeDb(
   const upsert = vi.fn(async () => ({ generatedAt: new Date("2026-06-20T00:00:00Z") }));
   const db = {
     booking: {
-      findUnique: vi.fn(async () => ({
-        teacherId: "t1",
-        studentId: "s1",
-        student: { name: "Mira" },
-        teacher: opts.teacher ?? { locale: "en", targetLanguage: "es", teachingLanguage: "es" },
-      })),
+      // Honours `teacherId` the way Prisma does: the one booking here, b1,
+      // belongs to t1, so a lookup scoped to any other teacher finds nothing.
+      findUnique: vi.fn(async ({ where }: { where: { id: string; teacherId?: string } }) =>
+        where.id === "b1" && (where.teacherId === undefined || where.teacherId === "t1")
+          ? {
+              teacherId: "t1",
+              studentId: "s1",
+              student: { name: "Mira" },
+              teacher: opts.teacher ?? {
+                locale: "en",
+                targetLanguage: "es",
+                teachingLanguage: "es",
+              },
+            }
+          : null,
+      ),
     },
     studentLearningProfile: {
       findUnique: vi.fn(async () =>
@@ -58,7 +68,7 @@ beforeEach(() => vi.clearAllMocks());
 describe("getOrGenerateBrief", () => {
   it("returns null when the student has no profile", async () => {
     const { db } = makeDb({ profile: null });
-    const res = await getOrGenerateBrief({ prisma: db as any, generate }, "b1");
+    const res = await getOrGenerateBrief({ prisma: db as any, generate }, "b1", "t1");
     expect(res).toBeNull();
     expect(generate).not.toHaveBeenCalled();
   });
@@ -67,7 +77,7 @@ describe("getOrGenerateBrief", () => {
     const { db, upsert } = makeDb({
       existing: { content: BRIEF, generatedAt: new Date("2026-06-19T00:00:00Z") }, // after profile.updatedAt (06-18)
     });
-    const res = await getOrGenerateBrief({ prisma: db as any, generate }, "b1");
+    const res = await getOrGenerateBrief({ prisma: db as any, generate }, "b1", "t1");
     expect(res?.brief).toEqual(BRIEF);
     expect(generate).not.toHaveBeenCalled();
     expect(upsert).not.toHaveBeenCalled();
@@ -77,7 +87,7 @@ describe("getOrGenerateBrief", () => {
     const { db, upsert } = makeDb({
       existing: { content: BRIEF, generatedAt: new Date("2026-06-17T00:00:00Z") }, // before profile.updatedAt (06-18)
     });
-    const res = await getOrGenerateBrief({ prisma: db as any, generate }, "b1");
+    const res = await getOrGenerateBrief({ prisma: db as any, generate }, "b1", "t1");
     expect(generate).toHaveBeenCalledTimes(1);
     expect(upsert).toHaveBeenCalledTimes(1);
     expect(res?.brief).toEqual(BRIEF);
@@ -85,7 +95,7 @@ describe("getOrGenerateBrief", () => {
 
   it("generates when there is no cached brief", async () => {
     const { db, upsert } = makeDb({ existing: null });
-    await getOrGenerateBrief({ prisma: db as any, generate }, "b1");
+    await getOrGenerateBrief({ prisma: db as any, generate }, "b1", "t1");
     expect(generate).toHaveBeenCalledTimes(1);
     expect(upsert).toHaveBeenCalledTimes(1);
   });
@@ -97,7 +107,7 @@ describe("getOrGenerateBrief", () => {
       existing: null,
       teacher: { locale: "en", targetLanguage: "fr", teachingLanguage: "en" },
     });
-    await getOrGenerateBrief({ prisma: db as any, generate }, "b1");
+    await getOrGenerateBrief({ prisma: db as any, generate }, "b1", "t1");
     expect(generate).toHaveBeenCalledWith(expect.objectContaining({ language: "fr" }));
     expect(db.booking.findUnique).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -113,7 +123,7 @@ describe("getOrGenerateBrief", () => {
       existing: null,
       teacher: { locale: "en", targetLanguage: null, teachingLanguage: "de" },
     });
-    await getOrGenerateBrief({ prisma: db as any, generate }, "b1");
+    await getOrGenerateBrief({ prisma: db as any, generate }, "b1", "t1");
     expect(generate).toHaveBeenCalledWith(expect.objectContaining({ language: "de" }));
   });
 
@@ -122,8 +132,27 @@ describe("getOrGenerateBrief", () => {
     const failing = vi.fn(async () => {
       throw new BriefUnavailableError("no key");
     });
-    const res = await getOrGenerateBrief({ prisma: db as any, generate: failing }, "b1");
+    const res = await getOrGenerateBrief({ prisma: db as any, generate: failing }, "b1", "t1");
     expect(res).toBeNull();
+    expect(upsert).not.toHaveBeenCalled();
+  });
+
+  // Tenant scoping (#62, D-175): the booking used to be read by id alone,
+  // correct only because the class page had already read it as the teacher's.
+  it("reads the booking scoped to the calling teacher", async () => {
+    const { db } = makeDb({ existing: null });
+    await getOrGenerateBrief({ prisma: db as any, generate }, "b1", "t1");
+    expect(db.booking.findUnique).toHaveBeenCalledWith(
+      expect.objectContaining({ where: { id: "b1", teacherId: "t1" } }),
+    );
+  });
+
+  it("briefs nothing from another teacher's booking", async () => {
+    const { db, upsert } = makeDb({ existing: null });
+    const res = await getOrGenerateBrief({ prisma: db as any, generate }, "b1", "t2");
+    expect(res).toBeNull();
+    expect(db.studentLearningProfile.findUnique).not.toHaveBeenCalled();
+    expect(generate).not.toHaveBeenCalled();
     expect(upsert).not.toHaveBeenCalled();
   });
 });

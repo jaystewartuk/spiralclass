@@ -374,7 +374,7 @@ export default async function TeacherClassDetailPage({
   // configured and the student has a profile (so only Pro lessons reach it).
   const brief =
     aiEnabled && status === "scheduled" && !isPastStart
-      ? await getOrGenerateBrief({ prisma, generate: generateBrief }, booking.id)
+      ? await getOrGenerateBrief({ prisma, generate: generateBrief }, booking.id, teacher.id)
       : null;
   // Past classes auto-complete at their end time; a no-show is a relabel of a
   // class that's already scheduled-and-started or completed (quota-neutral).
