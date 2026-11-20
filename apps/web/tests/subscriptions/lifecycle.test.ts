@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { activateSubscription, dropToFree, markPastDue } from "@/lib/subscriptions/lifecycle";
+import {
+  activateSubscription,
+  dropToFree,
+  markPastDue,
+  recordSubscriptionInvoice,
+} from "@/lib/subscriptions/lifecycle";
 import { entitlementsFor } from "@/lib/subscriptions/entitlements";
 import { makeFakePrisma, type FakeSub } from "./_fake-prisma";
 
@@ -227,5 +232,59 @@ describe("dropToFree", () => {
     );
     expect(fake.subs.get("t2")!.status).toBe("active");
     expect(fake.subs.get("t2")!.comped).toBe(true);
+  });
+});
+
+// D-175 / #62: the two `create`s in lifecycle.ts write a row whose only tenant
+// is the `teacherId` in its data. They name it at the call site, so these pin
+// that the row lands under the teacher being activated or billed and that
+// another teacher's subscription and invoices are left alone.
+describe("subscription writes are scoped to the teacher", () => {
+  it("a first activation creates the row under that teacher and leaves another teacher's alone", async () => {
+    const other = trialingSub("t2");
+    const fake = makeFakePrisma({ subs: [other] });
+    await activateSubscription(
+      { prisma: fake.db, now: () => NOW },
+      { teacherId: "t1", plan: "monthly", lockedPriceMinorUnits: 19_900 },
+    );
+    expect(fake.subs.get("t1")).toMatchObject({ teacherId: "t1", status: "active" });
+    expect(fake.subs.get("t2")).toEqual(other);
+  });
+
+  it("a manually recorded invoice is written under the teacher it was recorded for", async () => {
+    const fake = makeFakePrisma({});
+    await recordSubscriptionInvoice(
+      { prisma: fake.db, now: () => NOW },
+      {
+        teacherId: "t1",
+        manualPaymentRef: "wise-ref-1",
+        amountMinorUnits: 19_900,
+        feeMinorUnits: 0,
+        periodStart: NOW,
+        periodEnd: NOW,
+        status: "paid",
+        provider: "manual",
+      },
+    );
+    expect(fake.invoices).toHaveLength(1);
+    expect(fake.invoices[0]).toMatchObject({ teacherId: "t1", manualPaymentRef: "wise-ref-1" });
+  });
+
+  it("a Stripe invoice's first delivery creates it under the teacher it was resolved to", async () => {
+    const fake = makeFakePrisma({});
+    await recordSubscriptionInvoice(
+      { prisma: fake.db, now: () => NOW },
+      {
+        teacherId: "t1",
+        stripeInvoiceId: "in_1",
+        amountMinorUnits: 19_900,
+        feeMinorUnits: 700,
+        periodStart: NOW,
+        periodEnd: NOW,
+        status: "paid",
+      },
+    );
+    expect(fake.invoices).toHaveLength(1);
+    expect(fake.invoices[0]).toMatchObject({ teacherId: "t1", stripeInvoiceId: "in_1" });
   });
 });

@@ -80,6 +80,7 @@ export async function getFoundingCohortState(
 ): Promise<FoundingCohortState> {
   const [row, liveCount] = await Promise.all([
     tx.foundingCohort.findUnique({ where: { id: "default" } }),
+    // tenancy-exempt: the founding cohort is one platform-wide cap, so its live headcount counts founding subscriptions across every teacher.
     tx.teacherSubscription.count({ where: { plan: "founding" } }),
   ]);
   const headcount = Math.max(row?.headcount ?? 0, liveCount);

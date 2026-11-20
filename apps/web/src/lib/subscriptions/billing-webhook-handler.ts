@@ -97,6 +97,7 @@ async function resolveTeacherId(
   input: { customerId: string | null | undefined; metadataTeacherId?: string | null },
 ): Promise<string | null> {
   if (input.customerId) {
+    // tenancy-exempt: this lookup is how a signed billing webhook finds which teacher its acct_/cus_ id belongs to; no tenant is known before it.
     const sub = await deps.prisma.teacherSubscription.findFirst({
       where: { stripeCustomerId: input.customerId },
       select: { teacherId: true },

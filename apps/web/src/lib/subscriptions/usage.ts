@@ -1,7 +1,7 @@
 import type { Prisma, PrismaClient } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import type { Entitlements } from "./entitlements";
-import { ACTIVE_STUDENTS_WHERE, ACTIVE_TEMPLATES_WHERE } from "./enforce";
+import { ACTIVE_STUDENT, ACTIVE_TEMPLATE } from "./enforce";
 
 // What a teacher has USED of the two capped resources, for the "what your plan
 // covers" panel on the billing page.
@@ -51,8 +51,8 @@ export async function loadPlanUsage(
   tx: Tx = prisma,
 ): Promise<PlanUsage> {
   const [students, templates] = await Promise.all([
-    tx.teacherStudent.count({ where: ACTIVE_STUDENTS_WHERE(teacherId) }),
-    tx.packageTemplate.count({ where: ACTIVE_TEMPLATES_WHERE(teacherId) }),
+    tx.teacherStudent.count({ where: { teacherId, ...ACTIVE_STUDENT } }),
+    tx.packageTemplate.count({ where: { teacherId, ...ACTIVE_TEMPLATE } }),
   ]);
   return {
     students: usage(students, entitlements.studentLimit),

@@ -34,6 +34,7 @@ export async function runSubscriptionSweep(
   const lifecycleDeps = { prisma: deps.prisma, emit: deps.emit, now: () => now };
 
   // 1. Expired trials → Free.
+  // tenancy-exempt: the daily sweep finds expired trials across every teacher; each is then dropped under her own id.
   const expiredTrials = await deps.prisma.teacherSubscription.findMany({
     where: { status: "trialing", comped: false, trialEndsAt: { lte: now } },
     select: { teacherId: true },
@@ -44,6 +45,7 @@ export async function runSubscriptionSweep(
 
   // 2. past_due whose grace has elapsed → Free.
   const graceCutoff = new Date(now.getTime() - PAST_DUE_GRACE_DAYS * 24 * 60 * 60 * 1000);
+  // tenancy-exempt: the daily sweep finds lapsed past-due subscriptions across every teacher; each is then dropped under her own id.
   const lapsedPastDue = await deps.prisma.teacherSubscription.findMany({
     where: {
       status: "past_due",
@@ -61,6 +63,7 @@ export async function runSubscriptionSweep(
 
   // 3. Trials ending within TRIAL_ENDING_NOTICE_DAYS → one-time nudge.
   const noticeWindowEnd = new Date(now.getTime() + TRIAL_ENDING_NOTICE_DAYS * 24 * 60 * 60 * 1000);
+  // tenancy-exempt: the daily sweep finds trials ending soon across every teacher; each nudge is then sent under her own id.
   const endingSoon = await deps.prisma.teacherSubscription.findMany({
     where: {
       status: "trialing",

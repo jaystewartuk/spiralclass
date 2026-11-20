@@ -32,7 +32,7 @@ export type PlanLimit =
 
 export type GateResult = { ok: true } | { ok: false; limit: PlanLimit; cap?: number };
 
-// The two capped resources, as `where` clauses rather than inline counts.
+// The two capped resources' "active" filters, shared rather than inline.
 //
 // Extracted so the billing page's "2 of 3 students" panel (subscriptions/
 // usage.ts) counts the SAME rows this gate counts. A displayed number that
@@ -40,8 +40,12 @@ export type GateResult = { ok: true } | { ok: false; limit: PlanLimit; cap?: num
 // teacher is told she has room, refused when she uses it, and has no way to
 // know which of the two numbers is wrong. Exported rather than duplicated so
 // there is one definition of "active" per resource.
-export const ACTIVE_STUDENTS_WHERE = (teacherId: string) => ({ teacherId, archivedAt: null });
-export const ACTIVE_TEMPLATES_WHERE = (teacherId: string) => ({ teacherId, archived: false });
+//
+// The tenant is deliberately NOT inside these: each call site names
+// `teacherId` in its own `where` literal, so the tenancy guard (D-175) can
+// read the scope rather than trust a helper's return value.
+export const ACTIVE_STUDENT = { archivedAt: null } as const;
+export const ACTIVE_TEMPLATE = { archived: false } as const;
 
 // Block adding an ACTIVE student past the Free cap. "Active" = a non-archived
 // (teacher, student) link. Pro is unlimited.
@@ -49,7 +53,7 @@ export async function gateAddStudent(teacherId: string, tx: Tx = prisma): Promis
   const ent = await loadEntitlements(teacherId, new Date(), tx);
   if (ent.studentLimit === Number.POSITIVE_INFINITY) return { ok: true };
   const activeCount = await tx.teacherStudent.count({
-    where: ACTIVE_STUDENTS_WHERE(teacherId),
+    where: { teacherId, ...ACTIVE_STUDENT },
   });
   if (activeCount >= ent.studentLimit) {
     emitLimitHit(teacherId, "students");
@@ -63,7 +67,7 @@ export async function gateAddTemplate(teacherId: string, tx: Tx = prisma): Promi
   const ent = await loadEntitlements(teacherId, new Date(), tx);
   if (ent.templateLimit === Number.POSITIVE_INFINITY) return { ok: true };
   const count = await tx.packageTemplate.count({
-    where: ACTIVE_TEMPLATES_WHERE(teacherId),
+    where: { teacherId, ...ACTIVE_TEMPLATE },
   });
   if (count >= ent.templateLimit) {
     emitLimitHit(teacherId, "templates");
