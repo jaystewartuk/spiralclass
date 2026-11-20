@@ -18,6 +18,7 @@ type StepRunner = { run: <T>(id: string, fn: () => T | Promise<T>) => Promise<T>
 export async function autoCompleteSweepHandler({ step }: { step: StepRunner }) {
   const stale = await step.run("find-stale-bookings", async () => {
     const cutoff = new Date();
+    // tenancy-exempt: the hourly sweep finds overdue bookings across every teacher; each is then completed under its own teacherId.
     return prisma.booking.findMany({
       where: {
         status: "scheduled",

@@ -40,6 +40,14 @@ const state = {
   // When set, the next referral.update (the bind step) throws once —
   // simulating a crash between mint and bind.
   bindThrowsOnce: false,
+  // The teacher each referral code belongs to. A code is reachable only
+  // through `where` keys that match it, as in Prisma.
+  codeTeacher: { rc1: "t1" } as Record<string, string>,
+  // When set, the referral the handler reads names this teacher while the
+  // stored row names its own — the claim and the bind must then match nothing.
+  readTeacherOverride: null as string | null,
+  // Every `where` the claim and the bind were called with.
+  referralWrites: [] as Array<{ op: string; where: Record<string, unknown> }>,
 };
 
 function freshReferral(): ReferralRow {
@@ -72,12 +80,20 @@ const OWNER = {
 
 const fakePrisma: any = {
   referral: {
-    findUnique: async () => (state.referral ? { ...state.referral } : null),
+    findUnique: async () =>
+      state.referral
+        ? {
+            ...state.referral,
+            ...(state.readTeacherOverride ? { teacherId: state.readTeacherOverride } : {}),
+          }
+        : null,
     updateMany: async ({ where, data }: any) => {
+      state.referralWrites.push({ op: "updateMany", where });
       const r = state.referral;
       if (
         !r ||
         r.id !== where.id ||
+        (where.teacherId !== undefined && r.teacherId !== where.teacherId) ||
         !where.status.in.includes(r.status) ||
         r.referrerRewardCodeId !== null
       ) {
@@ -86,7 +102,16 @@ const fakePrisma: any = {
       Object.assign(r, data);
       return { count: 1 };
     },
-    update: async ({ data }: any) => {
+    update: async ({ where, data }: any) => {
+      state.referralWrites.push({ op: "update", where });
+      const r = state.referral;
+      if (
+        !r ||
+        r.id !== where.id ||
+        (where.teacherId !== undefined && r.teacherId !== where.teacherId)
+      ) {
+        throw new Error("Record to update not found");
+      }
       if (state.bindThrowsOnce) {
         state.bindThrowsOnce = false;
         throw new Error("connection lost");
@@ -97,7 +122,12 @@ const fakePrisma: any = {
   },
   referralProgram: { findUnique: async () => ({ ...PROGRAM, ...programOverride }) },
   referralCode: {
-    findUnique: async () => ({ ...OWNER, owner: { ...OWNER.owner, locale: ownerLocale } }),
+    findUnique: async ({ where }: any) => {
+      const teacherId = state.codeTeacher[where.id];
+      if (!teacherId) return null;
+      if (where.teacherId !== undefined && where.teacherId !== teacherId) return null;
+      return { ...OWNER, owner: { ...OWNER.owner, locale: ownerLocale } };
+    },
   },
   discountCode: {
     create: async ({ data }: any) => {
@@ -139,6 +169,9 @@ beforeEach(() => {
   state.referral = freshReferral();
   state.rewardCodes = [];
   state.bindThrowsOnce = false;
+  state.codeTeacher = { rc1: "t1" };
+  state.readTeacherOverride = null;
+  state.referralWrites = [];
   programOverride = {};
   ownerLocale = "es";
 });
@@ -199,5 +232,41 @@ describe("grantReferralRewardHandler", () => {
     const out = await runHandler();
     expect(out).toEqual({ skipped: "already-handled" });
     expect(state.rewardCodes).toHaveLength(0);
+  });
+});
+
+// D-175 / #62: the reward is minted under the teacher the Referral names, for
+// the student who owns the referral code. The code lookup, the claim and the
+// bind each name that teacher, so a code or a referral row belonging to
+// another teacher can never be the one that is rewarded or written.
+describe("the referral reward is scoped to the referral's teacher", () => {
+  it("does not reward through a referral code that belongs to another teacher", async () => {
+    state.referral!.referralCodeId = "rc-other";
+    state.codeTeacher = { rc1: "t1", "rc-other": "t2" };
+    const out = await runHandler();
+    expect(out).toEqual({ skipped: "no-owner" });
+    expect(state.rewardCodes).toHaveLength(0);
+    expect(state.referral).toMatchObject({ status: "attributed", referrerRewardCodeId: null });
+    expect(notifyReferrerReward).not.toHaveBeenCalled();
+  });
+
+  it("claims and binds the referral under the teacher it was read for", async () => {
+    await runHandler();
+    expect(state.referralWrites).toEqual([
+      { op: "updateMany", where: expect.objectContaining({ id: "ref1", teacherId: "t1" }) },
+      { op: "update", where: { id: "ref1", teacherId: "t1" } },
+    ]);
+  });
+
+  it("claims nothing when the stored row belongs to a different teacher than the one read", async () => {
+    // The row says t1; the handler is made to read it as t2, and the code is
+    // t2's too, so the claim is the only thing left to refuse. It must match
+    // no row rather than qualify another teacher's referral.
+    state.readTeacherOverride = "t2";
+    state.codeTeacher = { rc1: "t2" };
+    const out = await runHandler();
+    expect(out).toEqual({ skipped: "race-lost" });
+    expect(state.rewardCodes).toHaveLength(0);
+    expect(state.referral).toMatchObject({ status: "attributed", referrerRewardCodeId: null });
   });
 });

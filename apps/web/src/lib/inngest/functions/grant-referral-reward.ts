@@ -31,6 +31,7 @@ export async function grantReferralRewardHandler({
   const { paymentId } = event.data as { paymentId: string };
 
   return await step.run("qualify-and-mint", async () => {
+    // tenancy-exempt: resolves which teacher's referral a settled payment belongs to, by the globally unique payment id; every later query is scoped to ref.teacherId.
     const ref = await prisma.referral.findUnique({
       where: { paymentId },
       select: {
@@ -61,7 +62,7 @@ export async function grantReferralRewardHandler({
 
     // The referrer (code owner) gets the reward.
     const owner = await prisma.referralCode.findUnique({
-      where: { id: ref.referralCodeId },
+      where: { id: ref.referralCodeId, teacherId: ref.teacherId },
       select: {
         ownerStudentId: true,
         owner: { select: { email: true, name: true, locale: true, emailOptIn: true } },
@@ -83,6 +84,7 @@ export async function grantReferralRewardHandler({
       const claim = await tx.referral.updateMany({
         where: {
           id: ref.id,
+          teacherId: ref.teacherId,
           status: { in: ["attributed", "qualified"] },
           referrerRewardCodeId: null,
         },
@@ -101,7 +103,7 @@ export async function grantReferralRewardHandler({
       });
 
       await tx.referral.update({
-        where: { id: ref.id },
+        where: { id: ref.id, teacherId: ref.teacherId },
         data: { status: "rewarded", referrerRewardCodeId: minted.id },
       });
       return minted;
