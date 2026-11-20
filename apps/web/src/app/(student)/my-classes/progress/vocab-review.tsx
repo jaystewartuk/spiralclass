@@ -5,12 +5,15 @@ import { Button } from "@/components/ui/button";
 import { gradeVocabulary } from "@/app/actions/student-vocab";
 import type { Grade } from "@/lib/lesson-notes/srs";
 import { useT } from "@/components/locale-provider";
+import type { DueCard } from "@/lib/lesson-notes/student-progress";
 
-// Phase F, Half 2 (one-term-at-a-time review) + the flashcard study mode: the
-// SAME due queue, now shown as a flip card — tap to reveal the confirming
-// lesson's evidence/suggestion (attachVocabContext), then grade. Grading
-// reschedules the term via the SRS scheduler (server action) and advances
-// locally for a snappy pass; flip state resets per card.
+// Phase F, Half 2: the student's due queue, one term at a time. The card is the
+// term alone — she recalls what it means and how to use it, then grades
+// herself, and grading reschedules the term via the SRS scheduler (server
+// action) and advances locally for a snappy pass. There is no back to flip to:
+// the only text stored beside a term is the teacher's insight note, which is
+// written to the teacher and never shown here (#302,
+// docs/features/lesson-insights-reports.md, "What the student sees").
 const GRADE_KEY: Record<
   Grade,
   "progress.grade.again" | "progress.grade.hard" | "progress.grade.good" | "progress.grade.easy"
@@ -22,14 +25,9 @@ const GRADE_KEY: Record<
 };
 const GRADE_ORDER: Grade[] = ["again", "hard", "good", "easy"];
 
-export function VocabReview({
-  terms,
-}: {
-  terms: { id: string; term: string; context: string | null }[];
-}) {
+export function VocabReview({ terms }: { terms: DueCard[] }) {
   const t = useT();
   const [doneIds, setDoneIds] = useState<Set<string>>(new Set());
-  const [flipped, setFlipped] = useState(false);
   const [pending, startTransition] = useTransition();
 
   if (terms.length === 0) return null;
@@ -43,31 +41,16 @@ export function VocabReview({
   function grade(g: Grade) {
     startTransition(async () => {
       await gradeVocabulary(current.id, g);
-      setFlipped(false);
       setDoneIds((prev) => new Set(prev).add(current.id));
     });
   }
 
   return (
     <div className="space-y-3">
-      <button
-        type="button"
-        onClick={() => setFlipped((f) => !f)}
-        className="flex min-h-24 w-full flex-col items-center justify-center gap-1 rounded-lg border bg-muted/30 px-4 py-6 text-center transition-colors hover:bg-muted/50"
-      >
-        {flipped ? (
-          current.context ? (
-            <p className="text-sm">{current.context}</p>
-          ) : (
-            <p className="text-sm text-muted-foreground">{t("progress.flashcard.noContext")}</p>
-          )
-        ) : (
-          <p className="text-lg font-medium">{current.term}</p>
-        )}
-        <span className="text-xs text-muted-foreground">
-          {t(flipped ? "progress.flashcard.showTerm" : "progress.flashcard.flip")}
-        </span>
-      </button>
+      <div className="flex min-h-24 w-full flex-col items-center justify-center gap-1 rounded-lg border bg-muted/30 px-4 py-6 text-center">
+        <p className="text-lg font-medium">{current.term}</p>
+        <p className="text-xs text-muted-foreground">{t("progress.flashcard.recall")}</p>
+      </div>
       <div className="flex flex-wrap gap-2">
         {GRADE_ORDER.map((g) => (
           <Button key={g} size="sm" variant="outline" disabled={pending} onClick={() => grade(g)}>
