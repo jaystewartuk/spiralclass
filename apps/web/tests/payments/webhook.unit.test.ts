@@ -61,6 +61,9 @@ function makeFakePrisma(initial: {
     recipientType: string;
   }> = [];
   const teacherChargesUpdates: Array<{ id: string; charges: boolean; payouts: boolean }> = [];
+  const packageWheres: Array<Record<string, unknown>> = [];
+  const matchesPackage = (pkg: FakePayment["package"], where: any) =>
+    pkg.id === where.id && (where.teacherId === undefined || pkg.teacherId === where.teacherId);
 
   const fake = {
     payment: {
@@ -101,15 +104,22 @@ function makeFakePrisma(initial: {
       // activation audit) — this suite isn't about that signal.
       count: async () => 1,
     },
+    // Honours `teacherId` in a `where` the way Prisma does: a package that
+    // belongs to another teacher is not matched, and `update` throws for it as
+    // a real P2025 would. Every package `where` is recorded so the tenancy
+    // tests can pin which teacher each query names (issue #62).
     package: {
       findUnique: async (args: any) => {
-        const p = payments.find((x) => x.package.id === args.where.id);
+        packageWheres.push(args.where);
+        const p = payments.find((x) => matchesPackage(x.package, args.where));
         return p ? { ...p.package, template: { expirationMonths: null } } : null;
       },
       update: async (args: any) => {
-        const p = payments.find((x) => x.package.id === args.where.id);
-        if (p) Object.assign(p.package, args.data);
-        return p?.package;
+        packageWheres.push(args.where);
+        const p = payments.find((x) => matchesPackage(x.package, args.where));
+        if (!p) throw new Error("package not found");
+        Object.assign(p.package, args.data);
+        return p.package;
       },
     },
     teacher: {
@@ -178,7 +188,7 @@ function makeFakePrisma(initial: {
     $transaction: async <T>(fn: (tx: any) => Promise<T>): Promise<T> => fn(fake),
   };
 
-  return { prisma: fake, payments, notifications, teacherChargesUpdates };
+  return { prisma: fake, payments, notifications, teacherChargesUpdates, packageWheres };
 }
 
 const TEACHER_ID = "11111111-1111-1111-1111-111111111111";
@@ -1010,5 +1020,111 @@ describe("handleStripeWebhook", () => {
     expect(result.reason).toBe("async-failed-without-payment-intent");
     // Untouched — there was never a charge.
     expect(env.payments[0].status).toBe("pending");
+  });
+});
+
+// Issue #62 / D-175: every package write the webhook makes names the teacher
+// the package belongs to, taken from the same Payment → Package row the event
+// resolved — never from the event body. The fake above refuses a `where` that
+// names another teacher, so a wrong tenant fails these tests as loudly as it
+// would fail in Postgres.
+describe("handleStripeWebhook — package writes are scoped to the payment's teacher", () => {
+  let stripe: ReturnType<typeof createStubStripeClient>;
+  const SCOPED = { id: PACKAGE_ID, teacherId: TEACHER_ID };
+
+  beforeEach(() => {
+    stripe = createStubStripeClient();
+  });
+
+  it("a paid checkout activates the package by id AND teacher", async () => {
+    const env = makeFakePrisma({ payments: [freshPayment()], teachers: [] });
+    const session: StripeCheckoutSession = {
+      id: "cs_SCOPE",
+      status: "complete",
+      payment_status: "paid",
+      mode: "payment",
+      url: null,
+      client_reference_id: EXT_REF,
+      payment_intent: "pi_SCOPE",
+      customer: null,
+      metadata: null,
+      amount_total: 150_000,
+      currency: "mxn",
+    };
+    stripe.seedCheckoutSession(session);
+    stripe.seedPaymentIntent({
+      id: "pi_SCOPE",
+      status: "succeeded",
+      amount: 150_000,
+      amount_received: 150_000,
+      currency: "mxn",
+      payment_method_types: ["card"],
+      payment_method: "pm_SCOPE",
+      charges: { data: [{ id: "ch_SCOPE", payment_method_details: { type: "card" } }] },
+    });
+
+    const result = await handleStripeWebhook(
+      { id: "evt_scope_paid", type: "checkout.session.completed", data: { object: session } },
+      { prisma: env.prisma as any, stripe },
+    );
+
+    expect(result.code).toBe("applied");
+    expect(env.payments[0].package.status).toBe("active");
+    // activatePackage's read and its write.
+    expect(env.packageWheres).toEqual([SCOPED, SCOPED]);
+  });
+
+  it("charge.refunded revokes the package by id AND teacher", async () => {
+    const paid = freshPayment();
+    paid.status = "paid";
+    paid.providerPaymentId = "pi_SCOPE_REFUND";
+    paid.paidAt = new Date();
+    paid.package.status = "active";
+    const env = makeFakePrisma({ payments: [paid], teachers: [] });
+
+    const result = await handleStripeWebhook(
+      {
+        id: "evt_scope_refund",
+        type: "charge.refunded",
+        data: { object: { payment_intent: "pi_SCOPE_REFUND" } },
+      },
+      { prisma: env.prisma as any, stripe },
+    );
+
+    expect(result.code).toBe("applied");
+    expect(paid.package.status).toBe("refunded");
+    expect(env.packageWheres).toEqual([SCOPED]);
+  });
+
+  it("a lost dispute revokes the package by id AND teacher", async () => {
+    const paid = freshPayment();
+    paid.providerPaymentId = "pi_SCOPE_DISPUTE";
+    paid.status = "paid";
+    paid.package.status = "active";
+    const env = makeFakePrisma({ payments: [paid], teachers: [] });
+
+    const result = await handleStripeWebhook(
+      {
+        id: "evt_scope_dispute",
+        type: "charge.dispute.updated",
+        data: {
+          object: {
+            id: "dp_SCOPE",
+            charge: "ch_SCOPE",
+            payment_intent: "pi_SCOPE_DISPUTE",
+            amount: 150_000,
+            currency: "mxn",
+            reason: "fraudulent",
+            status: "lost",
+            is_charge_refundable: false,
+          },
+        },
+      },
+      { prisma: env.prisma as any, stripe },
+    );
+
+    expect(result.code).toBe("applied-dispute");
+    expect(paid.package.status).toBe("refunded");
+    expect(env.packageWheres).toEqual([SCOPED]);
   });
 });

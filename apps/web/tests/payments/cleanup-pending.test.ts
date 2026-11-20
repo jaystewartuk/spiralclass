@@ -20,12 +20,21 @@ type PaymentRow = {
 };
 type PackageRow = {
   id: string;
+  // Absent on the older fixtures; they belong to DEFAULT_TEACHER.
+  teacherId?: string;
   status: "pending" | "active" | "expired" | "refunded" | "paused";
   createdAt: Date;
   payments: PaymentRow[];
 };
 
-type FakeState = { packages: PackageRow[]; failDeleteIds?: Set<string> };
+type FakeState = {
+  packages: PackageRow[];
+  failDeleteIds?: Set<string>;
+  deleteWheres?: Array<Record<string, unknown>>;
+};
+
+const DEFAULT_TEACHER = "teacher_a";
+const teacherOf = (p: PackageRow) => p.teacherId ?? DEFAULT_TEACHER;
 
 // `where.payments.every` now carries an OR with provider-specific cutoffs,
 // plus a marked-sent exclusion. The fake walks all of these so the test
@@ -56,7 +65,7 @@ function matchesEvery(p: PackageRow, every: EveryClause | undefined): boolean {
 function fakePrisma(state: FakeState) {
   return {
     package: {
-      findMany: vi.fn(async ({ where, take }: any) => {
+      findMany: vi.fn(async ({ where, take, select }: any) => {
         const matched = state.packages.filter((p) => {
           if (p.status !== where.status) return false;
           return matchesEvery(p, where.payments?.every);
@@ -64,8 +73,12 @@ function fakePrisma(state: FakeState) {
         const rows = typeof take === "number" ? matched.slice(0, take) : matched;
         // The production select: the teacher's connected account, and each
         // payment's rail + session so cleanup can ask Stripe before deleting.
+        // `teacherId` comes back only when the query selects it, as in
+        // Prisma — a delete that relied on an unselected key would send
+        // `teacherId: undefined`, which is no filter at all.
         return rows.map((p) => ({
           id: p.id,
+          ...(select?.teacherId ? { teacherId: teacherOf(p) } : {}),
           teacher: { stripeAccountId: "acct_TEACHER" },
           payments: p.payments.map((pay, i) => ({
             id: `${p.id}-pay-${i}`,
@@ -75,10 +88,15 @@ function fakePrisma(state: FakeState) {
         }));
       }),
       deleteMany: vi.fn(async ({ where }: any) => {
+        state.deleteWheres?.push(where);
         if (state.failDeleteIds?.has(where.id)) {
           throw new Error(`simulated delete failure: ${where.id}`);
         }
-        const p = state.packages.find((x) => x.id === where.id);
+        // Honours `teacherId` the way Prisma does: another teacher's row with
+        // the same id is not matched.
+        const p = state.packages.find(
+          (x) => x.id === where.id && (!("teacherId" in where) || teacherOf(x) === where.teacherId),
+        );
         // Re-assert the guard at delete time (the TOCTOU re-check).
         if (!p || p.status !== where.status || !matchesEvery(p, where.payments?.every)) {
           return { count: 0 };
@@ -493,5 +511,36 @@ describe("cleanupAbandonedPendingPackages asks Stripe before deleting a card che
 
     expect(askStripe).not.toHaveBeenCalled();
     expect(outcome.packagesDeleted).toBe(2);
+  });
+
+  // Issue #62 / D-175: the sweep reads across every teacher on purpose, but
+  // each delete names the teacher the scanned package belongs to, so the
+  // statement that destroys a row can only reach the row it was decided for.
+  it("deletes each package by id AND the teacher the scan found it under", async () => {
+    const state: FakeState = { deleteWheres: [], packages: [] };
+    state.packages = [
+      {
+        id: "a-abandoned",
+        teacherId: "teacher_a",
+        status: "pending",
+        createdAt: EIGHT_DAYS_AGO,
+        payments: [{ status: "pending", provider: "stripe", createdAt: EIGHT_DAYS_AGO }],
+      },
+      {
+        id: "b-abandoned",
+        teacherId: "teacher_b",
+        status: "pending",
+        createdAt: EIGHT_DAYS_AGO,
+        payments: [{ status: "pending", provider: "stripe", createdAt: EIGHT_DAYS_AGO }],
+      },
+    ];
+
+    const outcome = await run({ prisma: fakePrisma(state), now: () => NOW });
+
+    expect(outcome.packagesDeleted).toBe(2);
+    expect(state.deleteWheres!.map((w) => [w.id, w.teacherId])).toEqual([
+      ["a-abandoned", "teacher_a"],
+      ["b-abandoned", "teacher_b"],
+    ]);
   });
 });

@@ -166,6 +166,7 @@ export async function reconcileWiseStatements(deps: ReconcileDeps): Promise<Reco
   // columns. This is the ONE place the credential columns are read — they are
   // deliberately absent from lib/payments/instruments.ts's INSTRUMENT_SELECT
   // so no page or wire response can ship them by accident.
+  // tenancy-exempt: the reconciler enumerates every teacher with Wise API credentials; each is then reconciled under her own id.
   const instruments = await deps.prisma.teacherPayoutInstrument.findMany({
     where: {
       kind: "wise",

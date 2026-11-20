@@ -85,6 +85,7 @@ export async function cleanupAbandonedPendingPackages(
   // The cutoff is provider-aware: Stripe rows past 7d, Wise past 14d.
   // We model this by requiring that *every* pending payment on the
   // package satisfies its provider-specific cutoff.
+  // tenancy-exempt: a platform sweep for abandoned checkouts across every teacher; each delete below names the row's own teacher.
   const candidates = await deps.prisma.package.findMany({
     where: {
       status: "pending",
@@ -105,6 +106,7 @@ export async function cleanupAbandonedPendingPackages(
     },
     select: {
       id: true,
+      teacherId: true,
       teacher: { select: { stripeAccountId: true } },
       payments: { select: { id: true, provider: true, stripeCheckoutSessionId: true } },
     },
@@ -143,6 +145,7 @@ export async function cleanupAbandonedPendingPackages(
       const res = await deps.prisma.package.deleteMany({
         where: {
           id: pkg.id,
+          teacherId: pkg.teacherId,
           status: "pending",
           payments: { every: { status: "pending", studentMarkedSentAt: null } },
         },

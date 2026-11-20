@@ -124,7 +124,7 @@ export async function supersedePendingCheckouts(
     if (!safeToExpire) continue;
 
     await deps.prisma.package.update({
-      where: { id: pkg.id },
+      where: { id: pkg.id, teacherId: params.teacherId },
       data: { status: "expired" },
     });
     superseded += 1;

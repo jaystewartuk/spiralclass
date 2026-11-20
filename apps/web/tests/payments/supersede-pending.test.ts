@@ -25,6 +25,7 @@ type Pkg = {
 function fakeDeps(packages: Pkg[], opts: { expireThrowsFor?: Set<string> } = {}) {
   const expired: string[] = [];
   const updates: Array<{ id: string; status: string }> = [];
+  const updateWheres: Array<Record<string, unknown>> = [];
   const prisma = {
     package: {
       // Mirror the real query: status=pending AND every payment pending AND
@@ -52,6 +53,7 @@ function fakeDeps(packages: Pkg[], opts: { expireThrowsFor?: Set<string> } = {})
           }));
       }),
       update: vi.fn(async ({ where, data }: any) => {
+        updateWheres.push(where);
         updates.push({ id: where.id, status: data.status });
         return {};
       }),
@@ -71,6 +73,7 @@ function fakeDeps(packages: Pkg[], opts: { expireThrowsFor?: Set<string> } = {})
     deps: { prisma: prisma as never, getStripe: () => stripe as never },
     expired,
     updates,
+    updateWheres,
     stripe,
   };
 }
@@ -200,5 +203,21 @@ describe("supersedePendingCheckouts", () => {
     expect(out.superseded).toBe(0);
     expect(updates).toEqual([]);
     expect(stripe.expireCheckoutSession).not.toHaveBeenCalled();
+  });
+
+  // Issue #62 / D-175: the expiry names the teacher whose checkout is being
+  // started — the same tenant the candidate scan was filtered by.
+  it("expires each superseded package by id AND the checkout's teacher", async () => {
+    const { deps, updateWheres } = fakeDeps([
+      {
+        id: "pkg_wise",
+        status: "pending",
+        payments: [{ id: "pay_wise", provider: "manual_transfer", stripeCheckoutSessionId: null }],
+      },
+    ]);
+
+    await supersedePendingCheckouts(PARAMS, deps);
+
+    expect(updateWheres).toEqual([{ id: "pkg_wise", teacherId: PARAMS.teacherId }]);
   });
 });

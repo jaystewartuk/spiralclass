@@ -164,11 +164,11 @@ export async function confirmTransferPayment(
     }
     if (unsupersede) {
       await tx.package.updateMany({
-        where: { id: payment.package.id, status: "expired" },
+        where: { id: payment.package.id, teacherId: payment.package.teacherId, status: "expired" },
         data: { status: "pending" },
       });
     }
-    await activatePackage(tx, payment.package.id, now);
+    await activatePackage(tx, payment.package, now);
     queuedNotificationIds.push(
       await enqueuePaymentReceived(tx, {
         teacherId: payment.package.teacherId,

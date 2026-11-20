@@ -61,6 +61,7 @@ const state: {
   emitted: string[];
   refundCalls: Array<{ paymentIntentId: string; reason?: string }>;
   refundShouldThrow: boolean;
+  packageWheres: Array<Record<string, unknown>>;
 } = {
   payments: new Map(),
   packages: new Map(),
@@ -69,6 +70,7 @@ const state: {
   emitted: [],
   refundCalls: [],
   refundShouldThrow: false,
+  packageWheres: [],
 };
 
 let teacherStripeAccount: string | null = STRIPE_ACCOUNT_ID;
@@ -87,6 +89,7 @@ function freshState() {
   state.emitted.length = 0;
   state.refundCalls.length = 0;
   state.refundShouldThrow = false;
+  state.packageWheres.length = 0;
   teacherStripeAccount = STRIPE_ACCOUNT_ID;
 
   state.payments.set(PAYMENT_ID, {
@@ -192,9 +195,14 @@ vi.mock("@/lib/prisma", () => {
     Object.assign(p, data);
     return { count: 1 };
   }
+  // Honours `teacherId` the way Prisma does (another teacher's row is not
+  // matched) and records each `where` for the tenancy test (issue #62).
   function packageUpdate({ where, data }: any) {
+    state.packageWheres.push(where);
     const pkg = state.packages.get(where.id);
-    if (!pkg) throw new Error(`no package ${where.id}`);
+    if (!pkg || (where.teacherId !== undefined && pkg.teacherId !== where.teacherId)) {
+      throw new Error(`no package ${where.id}`);
+    }
     Object.assign(pkg, data);
     return pkg;
   }
@@ -391,5 +399,19 @@ describe("refundPaymentAction — error paths", () => {
     expect(state.payments.get(PAYMENT_ID)?.status).toBe("paid");
     expect(state.packages.get(PACKAGE_ID)?.status).toBe("active");
     expect(state.overrides).toHaveLength(0);
+  });
+});
+
+// Issue #62 / D-175: the shared refund path revokes the package by id AND the
+// teacher the action loaded it under — the same teacher its payment lookup was
+// scoped to.
+describe("refundPaymentAction — tenancy", () => {
+  it("revokes the package by id AND its teacher", async () => {
+    await runAndCaptureRedirect(
+      form({ paymentId: PAYMENT_ID, reason: "Alumno no podrá tomar las clases" }),
+    );
+
+    expect(state.packages.get(PACKAGE_ID)?.status).toBe("refunded");
+    expect(state.packageWheres).toEqual([{ id: PACKAGE_ID, teacherId: TEACHER_ID }]);
   });
 });

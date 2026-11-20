@@ -261,8 +261,13 @@ async function handleDispute(
         data: { status: "refunded", refundedAt: now },
       });
       if (flipped.count === 0) return;
-      if (packageId) {
-        await tx.package.update({ where: { id: packageId }, data: { status: "refunded" } });
+      // packageId and lostTeacherId come from the same Payment → Package row,
+      // so they are set together; naming both scopes the write (issue #62).
+      if (packageId && lostTeacherId) {
+        await tx.package.update({
+          where: { id: packageId, teacherId: lostTeacherId },
+          data: { status: "refunded" },
+        });
       }
       // A lost dispute is money out the door like a refund — void any unredeemed
       // referral reward this payment earned (slice 2b).
@@ -806,7 +811,7 @@ async function applyTransition(
     });
     if (flipped.count === 0) return true;
     if (result.action === "flip-paid") {
-      await activatePackage(tx, payment.package.id, now);
+      await activatePackage(tx, payment.package, now);
       const id = await enqueuePaymentReceived(tx, {
         teacherId: payment.package.teacherId,
         studentId: payment.package.studentId,
@@ -832,7 +837,7 @@ async function applyTransition(
       emitCheckoutFailed = true;
     } else if (result.action === "flip-refunded") {
       await tx.package.update({
-        where: { id: payment.package.id },
+        where: { id: payment.package.id, teacherId: payment.package.teacherId },
         data: { status: "refunded" },
       });
       // Slice 2b: void the referrer's reward if this payment had qualified a

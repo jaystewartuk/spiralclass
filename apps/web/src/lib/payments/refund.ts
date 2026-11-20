@@ -72,8 +72,9 @@ export async function applyRefund(args: {
     });
     if (flipped.count === 0) return false;
 
+    // Scoped to the teacher the caller loaded the package under (issue #62).
     await tx.package.update({
-      where: { id: args.package.id },
+      where: { id: args.package.id, teacherId: args.package.teacherId },
       data: { status: "refunded" },
     });
 
