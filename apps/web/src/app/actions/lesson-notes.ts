@@ -22,7 +22,8 @@ const log = logger({ surface: "lesson-notes" });
 // cues and instructions. The Pro gate lands later on the live surfaces (present
 // mode, the realtime student panel), not here. Each action is tenant-scoped via
 // requireOnboardedTeacher() + a booking ownership check, mirroring the class
-// materials actions.
+// materials actions, and every single-note write names the teacher again
+// (D-175) so the statement itself refuses another teacher's note.
 
 const audienceSchema = z.enum(["teacher", "student"]);
 const MAX_BODY = 500;
@@ -201,7 +202,7 @@ export async function updateLessonNote(formData: FormData): Promise<void> {
   });
   if (!note) return;
 
-  await prisma.lessonNote.update({ where: { id: note.id }, data: { body } });
+  await prisma.lessonNote.update({ where: { id: note.id, teacherId: teacher.id }, data: { body } });
   revalidateAfterAction(notesPagePath(note.bookingId, formData));
 }
 
@@ -216,7 +217,7 @@ export async function deleteLessonNote(formData: FormData): Promise<void> {
   });
   if (!note) return;
 
-  await prisma.lessonNote.delete({ where: { id: note.id } });
+  await prisma.lessonNote.delete({ where: { id: note.id, teacherId: teacher.id } });
   revalidateAfterAction(notesPagePath(note.bookingId, formData));
 }
 
@@ -234,7 +235,7 @@ export async function toggleLessonNoteDone(formData: FormData): Promise<void> {
   if (!note) return;
 
   await prisma.lessonNote.update({
-    where: { id: note.id },
+    where: { id: note.id, teacherId: teacher.id },
     data: { doneAt: note.doneAt ? null : new Date() },
   });
   revalidateAfterAction(notesPagePath(note.bookingId, formData));
@@ -267,8 +268,14 @@ export async function moveLessonNote(formData: FormData): Promise<void> {
 
   // Plain swap — position has no unique constraint, so no temp value needed.
   await prisma.$transaction([
-    prisma.lessonNote.update({ where: { id: note.id }, data: { position: neighbour.position } }),
-    prisma.lessonNote.update({ where: { id: neighbour.id }, data: { position: note.position } }),
+    prisma.lessonNote.update({
+      where: { id: note.id, teacherId: teacher.id },
+      data: { position: neighbour.position },
+    }),
+    prisma.lessonNote.update({
+      where: { id: neighbour.id, teacherId: teacher.id },
+      data: { position: note.position },
+    }),
   ]);
   revalidateAfterAction(notesPagePath(note.bookingId, formData));
 }

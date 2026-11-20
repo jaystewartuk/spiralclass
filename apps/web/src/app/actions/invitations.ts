@@ -313,7 +313,10 @@ export async function acceptInvitationAction(
   if (!result.alreadyAccepted) {
     // Time-to-acceptance: minutes from the (first) send to now.
     const inv = await prisma.studentInvitation.findUnique({
-      where: { id: (await latestInvitationIdForAccept(result.teacherId, result.studentId)) ?? "" },
+      where: {
+        id: (await latestInvitationIdForAccept(result.teacherId, result.studentId)) ?? "",
+        teacherId: result.teacherId,
+      },
       select: { sentAt: true },
     });
     const minutesToAccept = inv?.sentAt

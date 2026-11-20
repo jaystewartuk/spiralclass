@@ -102,7 +102,7 @@ export async function updateStudentNote(
   }
 
   const note = await prisma.studentNote.findUnique({
-    where: { id: parsed.data.noteId },
+    where: { id: parsed.data.noteId, teacherId: teacher.id },
     select: { studentId: true },
   });
 
@@ -143,7 +143,7 @@ export async function deleteStudentNote(
     return { error: t("web.action.studentNotes.notFound") };
   }
 
-  await prisma.studentNote.delete({ where: { id: parsed.data.noteId } });
+  await prisma.studentNote.delete({ where: { id: parsed.data.noteId, teacherId: teacher.id } });
 
   trackServerEvent({
     name: "student_note_deleted",

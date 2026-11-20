@@ -368,7 +368,7 @@ export async function editManualPackageAction(
 
   await prisma.$transaction(async (tx) => {
     await tx.package.update({
-      where: { id: pkg.id },
+      where: { id: pkg.id, teacherId: teacher.id },
       data: {
         classesTotal: data.classesTotal,
         classesUsed: newClassesUsed,
@@ -511,7 +511,7 @@ export async function deleteManualPackageAction(
         after: null,
         actor: null,
       });
-      await tx.package.delete({ where: { id: pkg.id } });
+      await tx.package.delete({ where: { id: pkg.id, teacherId: teacher.id } });
     });
   } catch (err) {
     // A booking could be inserted between the guard check and the delete; the

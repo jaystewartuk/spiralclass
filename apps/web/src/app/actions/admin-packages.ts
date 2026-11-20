@@ -41,6 +41,7 @@ export async function cancelPackageAction(
     };
   }
 
+  // tenancy-exempt: admin console package override acts on any teacher's package by design (D-25); requireAdmin gates it.
   const pkg = await prisma.package.findUnique({
     where: { id: parsed.data.packageId },
     select: { id: true, status: true, teacherId: true },
@@ -49,6 +50,7 @@ export async function cancelPackageAction(
   if (pkg.status === "refunded") return { error: t("web.action.admin.alreadyCanceled") };
 
   await prisma.$transaction(async (tx) => {
+    // tenancy-exempt: admin console package override acts on any teacher's package by design (D-25); requireAdmin gates it.
     await tx.package.update({
       where: { id: pkg.id },
       data: { status: "refunded" },
@@ -101,6 +103,7 @@ export async function extendPackageExpirationAction(
     };
   }
 
+  // tenancy-exempt: admin console package override acts on any teacher's package by design (D-25); requireAdmin gates it.
   const pkg = await prisma.package.findUnique({
     where: { id: parsed.data.packageId },
     select: { id: true, expiresAt: true, teacherId: true },
@@ -117,6 +120,7 @@ export async function extendPackageExpirationAction(
   const next = addMonths(pkg.expiresAt, parsed.data.months);
 
   await prisma.$transaction(async (tx) => {
+    // tenancy-exempt: admin console package override acts on any teacher's package by design (D-25); requireAdmin gates it.
     await tx.package.update({
       where: { id: pkg.id },
       data: { expiresAt: next },

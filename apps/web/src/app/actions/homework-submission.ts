@@ -251,7 +251,11 @@ export async function removeHomeworkFileAction(
   const file = submission.files.find((f) => f.id === fileId);
   if (!file) return failed("not-found");
 
-  await prisma.homeworkSubmissionFile.delete({ where: { id: file.id } });
+  // Names the caller's own Student row through the file's submission (D-175),
+  // so the statement itself refuses a file that is not hers.
+  await prisma.homeworkSubmissionFile.delete({
+    where: { id: file.id, submission: { studentId } },
+  });
   const ok = await deleteSubmissionObject(file.storagePath);
   if (!ok) log.warn("submission object delete failed", { storagePath: file.storagePath });
 
@@ -327,7 +331,7 @@ export async function submitHomeworkAction(
       },
     });
     await tx.homeworkSubmissionFile.updateMany({
-      where: { submissionId: submission.id, attemptId: null },
+      where: { submissionId: submission.id, submission: { studentId }, attemptId: null },
       data: { attemptId: attempt.id },
     });
 

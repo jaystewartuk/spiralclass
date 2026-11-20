@@ -57,8 +57,25 @@ vi.mock("@/lib/lesson-notes/summary", () => ({
 
 const bookingFindFirst = vi.fn(async () => state.ownedBooking);
 const noteCreate = vi.fn(async () => ({ id: "n-new" }));
-const noteUpdate = vi.fn(async () => ({}));
-const noteDelete = vi.fn(async () => ({}));
+// The note rows the single-row writes act on, id → owning teacher. Prisma
+// semantics: an absent (or `undefined`) teacherId is no filter at all, a
+// present one must match, and a miss throws (P2025).
+const noteRows = new Map<string, { teacherId: string }>();
+function noteWrite(where: { id: string; teacherId?: string }) {
+  const row = noteRows.get(where.id);
+  if (!row || (where.teacherId !== undefined && row.teacherId !== where.teacherId)) {
+    throw new Error(`No record found for ${where.id}`);
+  }
+}
+const noteUpdate = vi.fn(async ({ where }: { where: { id: string; teacherId?: string } }) => {
+  noteWrite(where);
+  return {};
+});
+const noteDelete = vi.fn(async ({ where }: { where: { id: string; teacherId?: string } }) => {
+  noteWrite(where);
+  noteRows.delete(where.id);
+  return {};
+});
 // lessonNote.findFirst serves three call sites (last-position lookup in create,
 // note lookup in update/delete/toggle, note + neighbour lookup in move). The
 // `where` shape disambiguates which the action is asking for.
@@ -112,6 +129,9 @@ beforeEach(() => {
   state.lastNote = null;
   state.note = null;
   state.neighbour = null;
+  noteRows.clear();
+  for (const id of ["n1", "n2"]) noteRows.set(id, { teacherId: "t1" });
+  noteRows.set("nX", { teacherId: "t2" });
   gateProFeature.mockResolvedValue({ ok: true });
   generateSummaryText.mockResolvedValue({ body: "A tidy recap.", model: "claude-haiku-4-5" });
 });
@@ -209,7 +229,10 @@ describe("updateLessonNote", () => {
   it("updates a note the teacher owns", async () => {
     state.note = { id: "n1", bookingId: "b1" };
     await updateLessonNote(fd({ noteId: "n1", body: "edited" }));
-    expect(noteUpdate).toHaveBeenCalledWith({ where: { id: "n1" }, data: { body: "edited" } });
+    expect(noteUpdate).toHaveBeenCalledWith({
+      where: { id: "n1", teacherId: "t1" },
+      data: { body: "edited" },
+    });
   });
 });
 
@@ -227,7 +250,7 @@ describe("deleteLessonNote", () => {
   it("deletes a note the teacher owns", async () => {
     state.note = { id: "n1", bookingId: "b1" };
     await deleteLessonNote(fd({ noteId: "n1" }));
-    expect(noteDelete).toHaveBeenCalledWith({ where: { id: "n1" } });
+    expect(noteDelete).toHaveBeenCalledWith({ where: { id: "n1", teacherId: "t1" } });
   });
 });
 
@@ -246,7 +269,7 @@ describe("toggleLessonNoteDone", () => {
     state.note = { id: "n1", bookingId: "b1", doneAt: null };
     await toggleLessonNoteDone(fd({ noteId: "n1" }));
     expect(noteUpdate).toHaveBeenCalledWith({
-      where: { id: "n1" },
+      where: { id: "n1", teacherId: "t1" },
       data: { doneAt: expect.any(Date) },
     });
   });
@@ -254,7 +277,10 @@ describe("toggleLessonNoteDone", () => {
   it("un-checks an already-done cue (clears doneAt)", async () => {
     state.note = { id: "n1", bookingId: "b1", doneAt: new Date() };
     await toggleLessonNoteDone(fd({ noteId: "n1" }));
-    expect(noteUpdate).toHaveBeenCalledWith({ where: { id: "n1" }, data: { doneAt: null } });
+    expect(noteUpdate).toHaveBeenCalledWith({
+      where: { id: "n1", teacherId: "t1" },
+      data: { doneAt: null },
+    });
   });
 });
 
@@ -289,8 +315,14 @@ describe("moveLessonNote", () => {
     });
     const ops = transaction.mock.calls[0]![0] as unknown[];
     expect(ops).toHaveLength(2);
-    expect(noteUpdate).toHaveBeenCalledWith({ where: { id: "n2" }, data: { position: 0 } });
-    expect(noteUpdate).toHaveBeenCalledWith({ where: { id: "n1" }, data: { position: 1 } });
+    expect(noteUpdate).toHaveBeenCalledWith({
+      where: { id: "n2", teacherId: "t1" },
+      data: { position: 0 },
+    });
+    expect(noteUpdate).toHaveBeenCalledWith({
+      where: { id: "n1", teacherId: "t1" },
+      data: { position: 1 },
+    });
   });
 });
 
@@ -469,5 +501,44 @@ describe("which page a note action refreshes", () => {
     const res = await copyNotesFromLastClass(undefined, fd({ bookingId: "b2", from: "plan" }));
     expect(res?.ok).toBeTruthy();
     expect(revalidatePath).toHaveBeenCalledWith("/dashboard/classes/plan");
+  });
+});
+
+// D-175 / #62: edit, delete, toggle and reorder used to write `{ id }` alone,
+// so they were safe only because the note lookup (through the booking) was
+// scoped. Each write now names the signed-in teacher. "The lookup handed back
+// another teacher's note" below stands in for a lookup that is later loosened
+// or bypassed — the write is the last line.
+describe("note writes are scoped to the signed-in teacher", () => {
+  it("edit, delete and toggle each name the teacher", async () => {
+    state.note = { id: "n1", bookingId: "b1", doneAt: null };
+    await updateLessonNote(fd({ noteId: "n1", body: "edited" }));
+    await toggleLessonNoteDone(fd({ noteId: "n1" }));
+    await deleteLessonNote(fd({ noteId: "n1" }));
+    expect(noteUpdate.mock.calls.map((c) => c[0].where)).toEqual([
+      { id: "n1", teacherId: "t1" },
+      { id: "n1", teacherId: "t1" },
+    ]);
+    expect(noteDelete).toHaveBeenCalledWith({ where: { id: "n1", teacherId: "t1" } });
+  });
+
+  it("the reorder swap names the teacher on both rows", async () => {
+    state.note = { id: "n2", bookingId: "b1", audience: "teacher", position: 1 };
+    state.neighbour = { id: "n1", position: 0 };
+    await moveLessonNote(fd({ noteId: "n2", direction: "up" }));
+    expect(noteUpdate.mock.calls.map((c) => c[0].where)).toEqual([
+      { id: "n2", teacherId: "t1" },
+      { id: "n1", teacherId: "t1" },
+    ]);
+  });
+
+  it("never edits or deletes another teacher's note", async () => {
+    state.note = { id: "nX", bookingId: "b1", doneAt: null };
+    await expect(updateLessonNote(fd({ noteId: "nX", body: "edited" }))).rejects.toThrow(
+      /No record found/,
+    );
+    await expect(toggleLessonNoteDone(fd({ noteId: "nX" }))).rejects.toThrow(/No record found/);
+    await expect(deleteLessonNote(fd({ noteId: "nX" }))).rejects.toThrow(/No record found/);
+    expect(noteRows.has("nX")).toBe(true);
   });
 });

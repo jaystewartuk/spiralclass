@@ -662,7 +662,7 @@ export async function updateLibraryMaterialAction(
   const levelChanged = level.id !== material.levelId;
 
   await prisma.libraryMaterial.update({
-    where: { id: material.id },
+    where: { id: material.id, teacherId: teacher.id },
     data: {
       levelId: level.id,
       visibility: visibility.data,
@@ -729,7 +729,7 @@ export async function deleteLibraryMaterialAction(formData: FormData): Promise<v
     materialId: material.id,
     body: material.body,
   });
-  await prisma.libraryMaterial.delete({ where: { id: material.id } });
+  await prisma.libraryMaterial.delete({ where: { id: material.id, teacherId: teacher.id } });
   // A booking-scoped row renders on its class page instead of the
   // library list, and the delete is issued from whichever of the two the
   // teacher is looking at. One revalidation, for that page.

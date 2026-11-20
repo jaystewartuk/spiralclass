@@ -40,6 +40,7 @@ export async function retryNotificationAction(
     };
   }
 
+  // tenancy-exempt: admin console retry acts on any teacher's notification by design (D-25); requireAdmin gates it.
   const existing = await prisma.notification.findUnique({
     where: { id: parsed.data.notificationId },
     select: { id: true, status: true, teacherId: true, templateName: true },
@@ -54,6 +55,7 @@ export async function retryNotificationAction(
     };
   }
 
+  // tenancy-exempt: admin console retry acts on any teacher's notification by design (D-25); requireAdmin gates it.
   await prisma.notification.update({
     where: { id: existing.id },
     data: {

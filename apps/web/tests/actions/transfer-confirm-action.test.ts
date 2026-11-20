@@ -36,7 +36,16 @@ const confirmTransferPayment = vi.fn(async () => state.outcome);
 vi.mock("@/lib/payments/transfer-confirm", () => ({ confirmTransferPayment }));
 
 const paymentUpdate = vi.fn(async () => ({}));
-const packageUpdate = vi.fn(async () => ({}));
+// The teacher who owns pkg1. The write follows Prisma: an absent (or
+// `undefined`) teacherId is no filter at all, a present one must match, and a
+// miss throws (P2025).
+let pkgOwner = "t1";
+const packageUpdate = vi.fn(async ({ where }: { where: { id: string; teacherId?: string } }) => {
+  if (where.teacherId !== undefined && where.teacherId !== pkgOwner) {
+    throw new Error(`No record found for ${where.id}`);
+  }
+  return {};
+});
 const overrideCreate = vi.fn(async () => ({}));
 vi.mock("@/lib/prisma", () => ({
   prisma: {
@@ -77,6 +86,7 @@ async function redirectOf(run: () => Promise<unknown>): Promise<string> {
 beforeEach(() => {
   vi.clearAllMocks();
   callIsFail = false;
+  pkgOwner = "t1";
   state.owns = { id: "pay1" };
   state.outcome = { code: "paid" };
   state.failPayment = {
@@ -145,9 +155,34 @@ describe("failWisePaymentAction", () => {
       data: { status: "failed" },
     });
     expect(packageUpdate).toHaveBeenCalledWith({
-      where: { id: "pkg1" },
+      where: { id: "pkg1", teacherId: "t1" },
       data: { status: "expired" },
     });
     expect(overrideCreate).toHaveBeenCalled();
+  });
+});
+
+// D-175 / #62: expiring the pending package used to name only its id, so it
+// was safe only because the payment lookup above it was scoped to the teacher
+// through the package. It now names the signed-in teacher itself.
+describe("failWisePaymentAction is scoped to the signed-in teacher", () => {
+  beforeEach(() => {
+    callIsFail = true;
+  });
+
+  it("expiring the package names the teacher", async () => {
+    await redirectOf(() => failWisePaymentAction(fd()));
+    expect(packageUpdate).toHaveBeenCalledWith({
+      where: { id: "pkg1", teacherId: "t1" },
+      data: { status: "expired" },
+    });
+  });
+
+  it("never expires another teacher's package, even if the lookup let it by", async () => {
+    // The payment lookup mock still returns the row, standing in for one that
+    // is later loosened or bypassed — the write is the last line, and the
+    // whole transaction (payment flip and audit row included) rolls back.
+    pkgOwner = "t2";
+    await expect(failWisePaymentAction(fd())).rejects.toThrow(/No record found/);
   });
 });
