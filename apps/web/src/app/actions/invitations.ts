@@ -204,7 +204,7 @@ export async function resendInvitationAction(
         invitationId: rotated.invitation.id,
       },
     });
-    await markInvitationSent(rotated.invitation.id, { resend: true });
+    await markInvitationSent(teacher.id, rotated.invitation.id, { resend: true });
   } catch {
     return {
       error: t("web.action.invitations.sendFailed"),

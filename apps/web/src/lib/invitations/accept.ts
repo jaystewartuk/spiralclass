@@ -52,6 +52,8 @@ export async function acceptInvitation(
   if (!isWellFormedInvitationToken(input.rawToken)) return { status: "invalid" };
   const tokenHash = hashInvitationToken(input.rawToken);
 
+  // tenancy-exempt: the student holds only the token; this unique-hash lookup is
+  // where the tenant is learned, and every write after it names invitation.teacherId.
   const invitation = await db.studentInvitation.findUnique({
     where: { tokenHash },
     select: {
@@ -116,7 +118,7 @@ export async function acceptInvitation(
     // Mark accepted. Guard on status='pending' so a concurrent double-accept
     // only lands once (the second update matches zero rows).
     await tx.studentInvitation.updateMany({
-      where: { id: invitation.id, status: "pending" },
+      where: { id: invitation.id, teacherId: invitation.teacherId, status: "pending" },
       data: {
         status: "accepted",
         acceptedAt: new Date(),
@@ -154,6 +156,8 @@ export async function getInvitationLanding(
   db: PrismaClient = prisma,
 ): Promise<InvitationLandingInfo | null> {
   if (!isWellFormedInvitationToken(rawToken)) return null;
+  // tenancy-exempt: a signed-out visitor holds only the token; this unique-hash
+  // lookup is where the tenant is learned, and it writes nothing.
   const invitation = await db.studentInvitation.findUnique({
     where: { tokenHash: hashInvitationToken(rawToken) },
     select: {
