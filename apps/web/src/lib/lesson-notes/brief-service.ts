@@ -29,11 +29,17 @@ export type BriefDeps = {
 
 export type BriefResult = { brief: Brief; generatedAt: Date } | null;
 
-export async function getOrGenerateBrief(deps: BriefDeps, bookingId: string): Promise<BriefResult> {
+// `teacherId` is the signed-in teacher. A booking that is not hers is no
+// booking: no brief, and nothing generated.
+export async function getOrGenerateBrief(
+  deps: BriefDeps,
+  bookingId: string,
+  teacherId: string,
+): Promise<BriefResult> {
   const { prisma } = deps;
 
   const booking = await prisma.booking.findUnique({
-    where: { id: bookingId },
+    where: { id: bookingId, teacherId },
     select: {
       teacherId: true,
       studentId: true,

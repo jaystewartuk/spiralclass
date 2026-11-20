@@ -29,7 +29,7 @@ export async function gradeVocabularyFor(
 
   try {
     await prisma.vocabularyReview.update({
-      where: { id: review.id },
+      where: { id: review.id, studentId: { in: ids } },
       data: {
         intervalDays: next.intervalDays,
         easeFactor: next.easeFactor,

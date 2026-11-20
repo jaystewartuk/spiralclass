@@ -56,7 +56,7 @@ describe("confirmInsight", () => {
     expect(res).toEqual({ ok: true });
     expect(insightUpdate).toHaveBeenCalledWith(
       expect.objectContaining({
-        where: { id: "i1" },
+        where: { id: "i1", teacherId: "t1" },
         data: expect.objectContaining({ skill: "ser_vs_estar", dismissedAt: null }),
       }),
     );

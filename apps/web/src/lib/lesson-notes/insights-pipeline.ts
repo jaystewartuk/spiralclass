@@ -85,6 +85,8 @@ export async function generateAndStoreInsights(
   });
   if (!transcript) return { code: "skipped", reason: "no-transcript" };
 
+  // tenancy-exempt: a background job keyed by the transcript event's booking id;
+  // this read supplies the tenant, and every write after it uses booking.teacherId.
   const booking = await prisma.booking.findUnique({
     where: { id: bookingId },
     select: {

@@ -93,7 +93,7 @@ export async function confirmInsightFor(
   if (!owned) return { ok: false, reason: "not-found" };
   try {
     await prisma.lessonInsight.update({
-      where: { id: owned.id },
+      where: { id: owned.id, teacherId },
       data: {
         confirmedAt: new Date(),
         dismissedAt: null,
@@ -126,7 +126,7 @@ export async function editInsightFor(
 
   try {
     await prisma.lessonInsight.update({
-      where: { id: owned.id },
+      where: { id: owned.id, teacherId },
       data: {
         ...(summary !== undefined ? { summary } : {}),
         ...(suggestion !== undefined ? { suggestion: suggestion ?? null } : {}),
@@ -155,7 +155,7 @@ export async function dismissInsightFor(
   if (!owned) return { ok: false, reason: "not-found" };
   try {
     await prisma.lessonInsight.update({
-      where: { id: owned.id },
+      where: { id: owned.id, teacherId },
       data: { dismissedAt: new Date(), confirmedAt: null },
     });
     await recompute(prisma, teacherId, owned.studentId);
