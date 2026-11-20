@@ -146,9 +146,10 @@ export async function finalizeLessonAudio(
   args: FinalizeArgs,
   deps: LessonAudioDeps = defaultDeps,
 ): Promise<FinalizeResult> {
+  // tenancy-exempt: resolves the tenant from the signed webhook's unique egress id
   const row = await db.lessonAudio.findUnique({
     where: { egressId: args.egressId },
-    select: { id: true, bookingId: true, speaker: true, storageKey: true },
+    select: { id: true, bookingId: true, teacherId: true, speaker: true, storageKey: true },
   });
   if (!row) return { code: "ignored", reason: "untracked-egress" };
 
@@ -157,7 +158,7 @@ export async function finalizeLessonAudio(
   // Guarded flip: only a row still `recording` transitions, so concurrent or
   // replayed `egress_ended` deliveries can't double-apply (and can't re-emit).
   const updated = await db.lessonAudio.updateMany({
-    where: { id: row.id, status: "recording" },
+    where: { id: row.id, teacherId: row.teacherId, status: "recording" },
     data: {
       status: nextStatus,
       durationMs: args.durationMs ?? undefined,

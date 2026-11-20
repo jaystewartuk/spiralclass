@@ -155,7 +155,7 @@ describe("POST /api/livekit/webhook", () => {
     const json = await res.json();
     expect(json).toMatchObject({ code: "call-recording-finalized", failed: false });
     expect(callRecordingUpdate).toHaveBeenCalledWith({
-      where: { id: "rec-1" },
+      where: { id: "rec-1", teacherId: "teacher-9" },
       data: expect.objectContaining({ status: "completed" }),
     });
     expect(finalizeLessonAudio).not.toHaveBeenCalled();

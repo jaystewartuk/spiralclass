@@ -75,7 +75,10 @@ function makeDb() {
       ),
       updateMany: vi.fn(async ({ where, data }: any) => {
         const matches = rows.filter(
-          (r) => r.id === where.id && (where.status === undefined || r.status === where.status),
+          (r) =>
+            r.id === where.id &&
+            (where.status === undefined || r.status === where.status) &&
+            (where.teacherId === undefined || r.teacherId === where.teacherId),
         );
         for (const r of matches) Object.assign(r, data);
         return { count: matches.length };
@@ -308,6 +311,39 @@ describe("finalizeLessonAudio", () => {
 
     expect(result).toEqual({ code: "finalized", audioId: "audio-1", status: "failed" });
     expect(db.rows[0].status).toBe("failed");
+    expect(deps.inngest.send).not.toHaveBeenCalled();
+  });
+
+  // #62 (D-175): the guarded flip names the row's own teacher beside its id.
+  it("flips the row with a write scoped to its own teacher", async () => {
+    const db = makeDb();
+    seedRecording(db);
+    const deps = makeDeps();
+
+    await finalizeLessonAudio(db as any, { egressId: "EG_1", durationMs: 1, failed: false }, deps);
+
+    expect(db.lessonAudio.updateMany).toHaveBeenCalledWith({
+      where: { id: "audio-1", teacherId: TEACHER, status: "recording" },
+      data: expect.objectContaining({ status: "ready" }),
+    });
+  });
+
+  it("does not flip a row whose teacher is not the one it was read as", async () => {
+    const db = makeDb();
+    seedRecording(db);
+    db.rows[0].teacherId = "teacher-2";
+    // A read that reported the wrong teacher for the row: the write must not follow it.
+    db.lessonAudio.findUnique.mockResolvedValueOnce({ ...db.rows[0], teacherId: TEACHER });
+    const deps = makeDeps();
+
+    const result = await finalizeLessonAudio(
+      db as any,
+      { egressId: "EG_1", durationMs: 1, failed: false },
+      deps,
+    );
+
+    expect(result).toEqual({ code: "ignored", reason: "already-finalized" });
+    expect(db.rows[0].status).toBe("recording");
     expect(deps.inngest.send).not.toHaveBeenCalled();
   });
 

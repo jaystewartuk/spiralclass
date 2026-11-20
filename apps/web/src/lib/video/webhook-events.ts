@@ -25,6 +25,7 @@ async function trackCallEvent(
   build: (teacherId: string) => Parameters<typeof trackServerEvent>[0],
 ): Promise<void> {
   try {
+    // tenancy-exempt: resolves the tenant from the signed LiveKit webhook's room name
     const booking = await prisma.booking.findUnique({
       where: { id: bookingId },
       select: { teacherId: true },
@@ -71,13 +72,14 @@ export async function handleNormalizedEvent(
     // egressId is @unique, so findUnique is both correct and cheaper. A
     // lesson-audio egress still falls through to finalizeLessonAudio below,
     // because its id is not in this table at all.
+    // tenancy-exempt: resolves the tenant from the signed webhook's unique egress id
     const rec = await prisma.callRecording.findUnique({
       where: { egressId: event.providerRecordingId },
       select: { id: true, bookingId: true, teacherId: true, endedAt: true },
     });
     if (rec) {
       await prisma.callRecording.update({
-        where: { id: rec.id },
+        where: { id: rec.id, teacherId: rec.teacherId },
         data: {
           // The egress's own verdict is authoritative and CORRECTS the sweep,
           // which can only ever assume success — it has nothing better to go on.

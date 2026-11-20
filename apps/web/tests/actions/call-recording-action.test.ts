@@ -128,7 +128,7 @@ describe("startCallRecording — self-heals a stale recording row", () => {
     expect(stopRoomRecording).toHaveBeenCalledWith("eg_old");
     expect(callRecordingUpdate).toHaveBeenCalledWith(
       expect.objectContaining({
-        where: { id: "old" },
+        where: { id: "old", booking: { teacherId: "t1" } },
         data: expect.objectContaining({ status: "completed" }),
       }),
     );
