@@ -153,8 +153,13 @@ export async function applyReschedule(
       // transaction, so a double-submit could reach here twice. Guard the
       // transition with updateMany so the second pass can't release the row —
       // and therefore can't spend a second schedule-change unit.
+      //
+      // This and the two package queries below name `input.teacherId` (D-175).
+      // Both callers pass the old booking's own teacherId, id and packageId,
+      // so a live move always matches; a mismatched pair is refused instead of
+      // moving or charging another teacher's rows.
       const released = await tx.booking.updateMany({
-        where: { id: input.oldBookingId, status: "scheduled" },
+        where: { id: input.oldBookingId, teacherId: input.teacherId, status: "scheduled" },
         data: { status: "rescheduled", countsAgainstPackage: false },
       });
       if (released.count === 0) throw new RescheduleRaceError();
@@ -163,7 +168,7 @@ export async function applyReschedule(
       // the computed allowance so two concurrent reschedules on the *same*
       // package can't push scheduleChangesUsed past the budget.
       const pkg = await tx.package.findUnique({
-        where: { id: input.packageId },
+        where: { id: input.packageId, teacherId: input.teacherId },
         select: { classesTotal: true },
       });
       // A null package means it was deleted out from under this reschedule.
@@ -175,6 +180,7 @@ export async function applyReschedule(
         const spent = await tx.package.updateMany({
           where: {
             id: input.packageId,
+            teacherId: input.teacherId,
             scheduleChangesUsed: { lt: scheduleChangeBudget(pkg.classesTotal) },
           },
           data: { scheduleChangesUsed: { increment: 1 } },

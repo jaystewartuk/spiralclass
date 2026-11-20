@@ -36,8 +36,6 @@
   "lib/booking/auto-book-intended.ts": 1,
   "lib/booking/credit-ledger.ts": 1,
   "lib/calendar/google/sync.ts": 2,
-  "lib/cancellation/cancel-handler.ts": 5,
-  "lib/cancellation/reschedule-handler.ts": 3,
   "lib/captions/class-access.ts": 2,
   "lib/chat/message-actions.ts": 3,
   "lib/chat/reply.ts": 1,

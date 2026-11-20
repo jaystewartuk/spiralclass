@@ -127,8 +127,13 @@ export async function handleStudentCancel(
       // could reach here twice. Guard the status transition with updateMany so the
       // second pass is a no-op — otherwise classes_used would be decremented and a
       // schedule-change unit spent twice (over-refund / budget over-spend).
+      //
+      // Every write below names the booking's own teacher (D-175): the package
+      // id comes from the booking, and a package is only ever booked against by
+      // its own teacher, so the scope refuses a mismatched pair rather than
+      // refunding or charging another teacher's package.
       const flipped = await tx.booking.updateMany({
-        where: { id: booking.id, status: "scheduled" },
+        where: { id: booking.id, teacherId: booking.teacherId, status: "scheduled" },
         data: {
           status: "canceled_by_student",
           ...(decision.refundsClass ? { countsAgainstPackage: false } : {}),
@@ -146,6 +151,7 @@ export async function handleStudentCancel(
         const claimed = await tx.package.updateMany({
           where: {
             id: booking.packageId,
+            teacherId: booking.teacherId,
             scheduleChangesUsed: { lt: scheduleChangeBudget(booking.package.classesTotal) },
           },
           data: { scheduleChangesUsed: { increment: 1 } },
@@ -162,7 +168,7 @@ export async function handleStudentCancel(
         // block the cancel (the booking flip already succeeded), it just
         // skips the impossible decrement and logs loudly for follow-up.
         const refunded = await tx.package.updateMany({
-          where: { id: booking.packageId, classesUsed: { gt: 0 } },
+          where: { id: booking.packageId, teacherId: booking.teacherId, classesUsed: { gt: 0 } },
           data: { classesUsed: { decrement: 1 } },
         });
         if (refunded.count === 0) {
@@ -272,8 +278,10 @@ export async function handleTeacherCancel(
     // tabs, or a retried action) must not decrement classes_used twice.
     // `completed_at` is cleared so a forgiven past class doesn't keep its
     // auto-complete stamp.
+    // Both writes name the teacher (D-175), so her cancel can only ever
+    // return a class to a package she owns.
     const flipped = await tx.booking.updateMany({
-      where: { id: booking.id, status: booking.status },
+      where: { id: booking.id, teacherId: input.teacherId, status: booking.status },
       data: { status: "canceled_by_teacher", countsAgainstPackage: false, completedAt: null },
     });
     if (flipped.count === 0) return null;
@@ -282,7 +290,7 @@ export async function handleTeacherCancel(
     // comment in handleStudentCancel above) — a floor hit means the
     // invariant is already wrong upstream, not a reason to block the cancel.
     const refunded = await tx.package.updateMany({
-      where: { id: booking.packageId, classesUsed: { gt: 0 } },
+      where: { id: booking.packageId, teacherId: input.teacherId, classesUsed: { gt: 0 } },
       data: { classesUsed: { decrement: 1 } },
     });
     if (refunded.count === 0) {

@@ -171,6 +171,9 @@ function buildDeps(state: FakeState): {
       updateMany: vi.fn(async ({ where, data }: any) => {
         const b = state.bookings.get(where.id);
         if (!b) return { count: 0 };
+        // Prisma semantics: an absent (or `undefined`) teacherId is no filter
+        // at all; a present one must match the row.
+        if (where.teacherId !== undefined && b.teacherId !== where.teacherId) return { count: 0 };
         if (where.status && b.status !== where.status) return { count: 0 };
         Object.assign(b, data);
         return { count: 1 };
@@ -200,6 +203,7 @@ function buildDeps(state: FakeState): {
       updateMany: vi.fn(async ({ where, data }: any) => {
         const p = state.packages.get(where.id);
         if (!p) return { count: 0 };
+        if (where.teacherId !== undefined && p.teacherId !== where.teacherId) return { count: 0 };
         if (
           where.scheduleChangesUsed?.lt !== undefined &&
           !(p.scheduleChangesUsed < where.scheduleChangesUsed.lt)
@@ -277,6 +281,8 @@ function buildDeps(state: FakeState): {
         return null;
       }),
       update: tx.booking.update,
+      // Same mock the transaction uses, so a test can read the flip's WHERE.
+      updateMany: tx.booking.updateMany,
     },
     package: tx.package,
     notification: tx.notification,
@@ -655,5 +661,118 @@ describe("handleTeacherCancel", () => {
     expect(state.packages.get(PACKAGE_ID)?.classesUsed).toBe(0);
     expect(state.overrides).toHaveLength(1);
     expect(emitted.map((e) => e.name)).toEqual(["notification.queued", "booking.canceled"]);
+  });
+});
+
+// D-175 / #62: every write the cancel handlers make names the tenant it
+// belongs to. The booking flip and the package refund/budget writes used to
+// carry only an id, so they were safe only because the lookup above them was
+// scoped. Now the statement itself refuses another teacher's row — so a
+// package id that somehow pointed at another teacher's package (corrupt data,
+// or a future caller passing the wrong one) can no longer refund or charge it.
+describe("cancel writes are scoped to the booking's teacher", () => {
+  const OTHER_TEACHER_ID = "66666666-6666-4666-8666-666666666666";
+  const FOREIGN_PACKAGE_ID = "77777777-7777-4777-8777-777777777777";
+
+  // A booking whose packageId points at a package another teacher owns. No
+  // code path creates one (every insert copies the package's own teacherId),
+  // which is exactly why the write is where to refuse it.
+  function stateWithForeignPackage(): FakeState {
+    const s = freshState({ scheduledStart: new Date(Date.now() + 72 * 3600_000) });
+    s.packages.set(FOREIGN_PACKAGE_ID, {
+      id: FOREIGN_PACKAGE_ID,
+      teacherId: OTHER_TEACHER_ID,
+      studentId: OTHER_STUDENT_ID,
+      classesUsed: 3,
+      classesTotal: 10,
+      scheduleChangesUsed: 0,
+    });
+    s.bookings.get(BOOKING_ID)!.packageId = FOREIGN_PACKAGE_ID;
+    return s;
+  }
+
+  it("student ≥24h cancel: the booking flip, budget claim and refund all name the teacher", async () => {
+    const state = freshState({ scheduledStart: new Date(Date.now() + 72 * 3600_000) });
+    const { deps } = buildDeps(state);
+
+    const outcome = await handleStudentCancel(deps, {
+      bookingId: BOOKING_ID,
+      studentIds: [STUDENT_ID],
+    });
+
+    expect(outcome.code).toBe("ok");
+    const bookingWheres = vi
+      .mocked(deps.prisma.booking.updateMany)
+      .mock.calls.map((c) => c[0]?.where);
+    expect(bookingWheres).toEqual([
+      expect.objectContaining({ id: BOOKING_ID, teacherId: TEACHER_ID }),
+    ]);
+    const packageWheres = vi
+      .mocked(deps.prisma.package.updateMany)
+      .mock.calls.map((c) => c[0]?.where);
+    expect(packageWheres).toEqual([
+      expect.objectContaining({ id: PACKAGE_ID, teacherId: TEACHER_ID }),
+      expect.objectContaining({ id: PACKAGE_ID, teacherId: TEACHER_ID }),
+    ]);
+  });
+
+  it("student ≥24h cancel never charges or refunds another teacher's package", async () => {
+    const state = stateWithForeignPackage();
+    const { deps } = buildDeps(state);
+
+    const outcome = await handleStudentCancel(deps, {
+      bookingId: BOOKING_ID,
+      studentIds: [STUDENT_ID],
+    });
+
+    // The budget claim matches no row, which throws and rolls the transaction
+    // back: refused, rather than spending another teacher's budget.
+    expect(outcome.code).toBe("schedule-changes-exhausted");
+    expect(state.packages.get(FOREIGN_PACKAGE_ID)).toMatchObject({
+      classesUsed: 3,
+      scheduleChangesUsed: 0,
+    });
+  });
+
+  it("teacher cancel: the booking flip and the refund name the teacher", async () => {
+    const state = freshState();
+    const { deps } = buildDeps(state);
+
+    const outcome = await handleTeacherCancel(deps, {
+      bookingId: BOOKING_ID,
+      teacherId: TEACHER_ID,
+      reason: "Emergencia familiar",
+    });
+
+    expect(outcome.code).toBe("ok");
+    const bookingWheres = vi
+      .mocked(deps.prisma.booking.updateMany)
+      .mock.calls.map((c) => c[0]?.where);
+    expect(bookingWheres).toEqual([
+      expect.objectContaining({ id: BOOKING_ID, teacherId: TEACHER_ID }),
+    ]);
+    const packageWheres = vi
+      .mocked(deps.prisma.package.updateMany)
+      .mock.calls.map((c) => c[0]?.where);
+    expect(packageWheres).toEqual([
+      expect.objectContaining({ id: PACKAGE_ID, teacherId: TEACHER_ID }),
+    ]);
+  });
+
+  it("teacher cancel never refunds another teacher's package", async () => {
+    const state = stateWithForeignPackage();
+    const { deps } = buildDeps(state);
+
+    const outcome = await handleTeacherCancel(deps, {
+      bookingId: BOOKING_ID,
+      teacherId: TEACHER_ID,
+      reason: "Emergencia familiar",
+    });
+
+    // Her own booking is still cancelled (the refund is floor-guarded and
+    // never blocks the cancel); the other teacher's package is untouched.
+    expect(outcome.code).toBe("ok");
+    expect(state.bookings.get(BOOKING_ID)?.status).toBe("canceled_by_teacher");
+    expect(state.packages.get(FOREIGN_PACKAGE_ID)?.classesUsed).toBe(3);
   });
 });

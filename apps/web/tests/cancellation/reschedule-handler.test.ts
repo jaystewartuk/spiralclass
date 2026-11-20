@@ -42,6 +42,7 @@ type NotificationRow = {
 
 type PackageRow = {
   id: string;
+  teacherId: string;
   scheduleChangesUsed: number;
   classesTotal: number;
 };
@@ -87,7 +88,12 @@ function freshState(): FakeState {
         },
       ],
     ]),
-    packages: new Map([[PACKAGE_ID, { id: PACKAGE_ID, scheduleChangesUsed: 0, classesTotal: 8 }]]),
+    packages: new Map([
+      [
+        PACKAGE_ID,
+        { id: PACKAGE_ID, teacherId: TEACHER_ID, scheduleChangesUsed: 0, classesTotal: 8 },
+      ],
+    ]),
     notifications: [],
     overrides: [],
     nextBookingId: { value: 1 },
@@ -134,13 +140,21 @@ function buildDeps(
       updateMany: vi.fn(async ({ where, data }: any) => {
         const b = state.bookings.get(where.id);
         if (!b) return { count: 0 };
+        // Prisma semantics: an absent (or `undefined`) teacherId is no filter
+        // at all; a present one must match the row.
+        if (where.teacherId !== undefined && b.teacherId !== where.teacherId) return { count: 0 };
         if (where.status && b.status !== where.status) return { count: 0 };
         Object.assign(b, data);
         return { count: 1 };
       }),
     },
     package: {
-      findUnique: vi.fn(async ({ where }: any) => state.packages.get(where.id) ?? null),
+      findUnique: vi.fn(async ({ where }: any) => {
+        const p = state.packages.get(where.id);
+        if (!p) return null;
+        if (where.teacherId !== undefined && p.teacherId !== where.teacherId) return null;
+        return p;
+      }),
       update: vi.fn(async ({ where, data }: any) => {
         const p = state.packages.get(where.id);
         if (!p) throw new Error(`package ${where.id} missing`);
@@ -152,6 +166,7 @@ function buildDeps(
       updateMany: vi.fn(async ({ where, data }: any) => {
         const p = state.packages.get(where.id);
         if (!p) return { count: 0 };
+        if (where.teacherId !== undefined && p.teacherId !== where.teacherId) return { count: 0 };
         // Honor the `scheduleChangesUsed < budget` guard the handler applies.
         if (
           where.scheduleChangesUsed?.lt !== undefined &&
@@ -638,5 +653,77 @@ describe("applyReschedule — teacher-initiated", () => {
     expect(state.packages.get(PACKAGE_ID)?.scheduleChangesUsed).toBe(1);
     expect(outcome.teacherNotificationId).not.toBeNull();
     expect(state.overrides).toHaveLength(0);
+  });
+});
+
+// D-175 / #62: the release of the old booking and the package budget read
+// and spend each name the teacher the caller resolved the booking under. Both
+// callers pass the old booking's own `teacherId`, `packageId` and id together,
+// so in a live flow they always agree; the scope makes the statement refuse a
+// mismatched pair instead of moving or charging another teacher's rows.
+describe("applyReschedule — writes are scoped to the teacher", () => {
+  const OTHER_TEACHER_ID = "66666666-6666-4666-8666-666666666666";
+  const FOREIGN_PACKAGE_ID = "77777777-7777-4777-8777-777777777777";
+
+  const input = {
+    oldBookingId: OLD_BOOKING_ID,
+    teacherId: TEACHER_ID,
+    studentId: STUDENT_ID,
+    packageId: PACKAGE_ID,
+    oldScheduledStart: OLD_START,
+    oldRescheduleCount: 0,
+    newStartUtc: NEW_START,
+    newEndUtc: NEW_END,
+    bufferMin: 10,
+  };
+
+  it("the release, the package read and the budget spend all name the teacher", async () => {
+    const state = freshState();
+    const { deps } = buildDeps(state);
+
+    const outcome = await applyReschedule(deps, input);
+
+    expect(outcome.code).toBe("ok");
+    expect(vi.mocked(deps.prisma.booking.updateMany).mock.calls.map((c) => c[0]?.where)).toEqual([
+      expect.objectContaining({ id: OLD_BOOKING_ID, teacherId: TEACHER_ID }),
+    ]);
+    expect(vi.mocked(deps.prisma.package.findUnique).mock.calls.map((c) => c[0]?.where)).toEqual([
+      expect.objectContaining({ id: PACKAGE_ID, teacherId: TEACHER_ID }),
+    ]);
+    expect(vi.mocked(deps.prisma.package.updateMany).mock.calls.map((c) => c[0]?.where)).toEqual([
+      expect.objectContaining({ id: PACKAGE_ID, teacherId: TEACHER_ID }),
+    ]);
+  });
+
+  it("does not release another teacher's booking", async () => {
+    const state = freshState();
+    state.bookings.get(OLD_BOOKING_ID)!.teacherId = OTHER_TEACHER_ID;
+    const { deps } = buildDeps(state);
+
+    const outcome = await applyReschedule(deps, input);
+
+    expect(outcome.code).toBe("slot-conflict");
+    expect(state.bookings.get(OLD_BOOKING_ID)?.status).toBe("scheduled");
+    expect(state.bookings.size).toBe(1);
+    expect(state.notifications).toHaveLength(0);
+  });
+
+  it("does not read or charge another teacher's package", async () => {
+    const state = freshState();
+    state.packages.set(FOREIGN_PACKAGE_ID, {
+      id: FOREIGN_PACKAGE_ID,
+      teacherId: OTHER_TEACHER_ID,
+      scheduleChangesUsed: 0,
+      classesTotal: 8,
+    });
+    const { deps } = buildDeps(state);
+
+    const outcome = await applyReschedule(deps, { ...input, packageId: FOREIGN_PACKAGE_ID });
+
+    // Seen as missing, and the release of the old booking rolls back with it.
+    expect(outcome.code).toBe("package-not-found");
+    expect(state.packages.get(FOREIGN_PACKAGE_ID)?.scheduleChangesUsed).toBe(0);
+    expect(state.bookings.get(OLD_BOOKING_ID)?.status).toBe("scheduled");
+    expect(state.bookings.size).toBe(1);
   });
 });
