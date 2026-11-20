@@ -69,12 +69,12 @@ describe("finalizeDanglingRecording", () => {
   });
 
   it("stops the egress and marks the row completed when one is dangling", async () => {
-    callRecordingFindFirst.mockResolvedValueOnce({ id: "rec1", egressId: "eg1" });
+    callRecordingFindFirst.mockResolvedValueOnce({ id: "rec1", egressId: "eg1", teacherId: "t1" });
     await finalizeDanglingRecording(prisma, "b1");
     expect(stopRoomRecording).toHaveBeenCalledWith("eg1");
     expect(callRecordingUpdate).toHaveBeenCalledWith(
       expect.objectContaining({
-        where: { id: "rec1" },
+        where: { id: "rec1", teacherId: "t1" },
         data: expect.objectContaining({ status: "completed" }),
       }),
     );

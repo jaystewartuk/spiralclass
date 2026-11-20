@@ -94,7 +94,7 @@ export async function startBookingRecording(
       log.warn("reconcile: stop stale egress failed", { egressId: stale.egressId });
     }
     await prisma.callRecording.update({
-      where: { id: stale.id },
+      where: { id: stale.id, booking: { teacherId } },
       data: { status: "completed", endedAt: new Date() },
     });
     log.info("reconciled stale recording row before start", { bookingId: booking.id });
@@ -161,7 +161,7 @@ export async function stopBookingRecording(
     log.error("stop recording failed", err, { egressId: recording.egressId });
   }
   await prisma.callRecording.update({
-    where: { id: recording.id },
+    where: { id: recording.id, booking: { teacherId } },
     data: { status: "completed", endedAt: new Date() },
   });
 
@@ -224,6 +224,7 @@ export async function maybeStartLessonAudioCapture(
   const provider = getVideoProvider();
   if (!provider || !provider.recordingConfigured()) return;
 
+  // tenancy-exempt: resolves the tenant from the signed LiveKit webhook's room name
   const booking = await prisma.booking.findUnique({
     where: { id: bookingId },
     select: {
@@ -304,6 +305,7 @@ export async function maybeAutoStartRecording(
   try {
     if (!recordingEnabled()) return;
 
+    // tenancy-exempt: resolves the tenant from the signed LiveKit webhook's room name
     const booking = await prisma.booking.findUnique({
       where: { id: bookingId },
       select: { id: true, teacherId: true, student: BOOKING_STUDENT_SELECT },
@@ -360,7 +362,7 @@ export async function finalizeDanglingRecording(
 ): Promise<void> {
   const stale = await prisma.callRecording.findFirst({
     where: { bookingId, status: "recording" },
-    select: { id: true, egressId: true },
+    select: { id: true, egressId: true, teacherId: true },
   });
   if (!stale) return;
 
@@ -373,7 +375,7 @@ export async function finalizeDanglingRecording(
     });
   }
   await prisma.callRecording.update({
-    where: { id: stale.id },
+    where: { id: stale.id, teacherId: stale.teacherId },
     data: { status: "completed", endedAt: new Date() },
   });
   log.info("finalized dangling recording on room_finished", { bookingId });

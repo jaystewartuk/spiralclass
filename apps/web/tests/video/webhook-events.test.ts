@@ -83,7 +83,7 @@ describe("handleNormalizedEvent — recording_ended", () => {
       select: { id: true, bookingId: true, teacherId: true, endedAt: true },
     });
     expect(callRecordingUpdate).toHaveBeenCalledWith({
-      where: { id: "rec-1" },
+      where: { id: "rec-1", teacherId: "teacher-9" },
       data: expect.objectContaining({ status: "completed" }),
     });
     expect(finalizeLessonAudio).not.toHaveBeenCalled();
@@ -121,7 +121,7 @@ describe("handleNormalizedEvent — recording_ended", () => {
     // The sweep's timestamp is kept — it fired at room close, nearer the true
     // end of the recording than this upload-completion moment.
     expect(callRecordingUpdate).toHaveBeenCalledWith({
-      where: { id: "rec-swept" },
+      where: { id: "rec-swept", teacherId: "teacher-9" },
       data: { status: "completed", endedAt: sweptAt },
     });
     expect(trackServerEvent).toHaveBeenCalledWith(
@@ -147,9 +147,44 @@ describe("handleNormalizedEvent — recording_ended", () => {
 
     // The sweep can only ever assume success; the egress knows better.
     expect(callRecordingUpdate).toHaveBeenCalledWith({
-      where: { id: "rec-swept" },
+      where: { id: "rec-swept", teacherId: "teacher-9" },
       data: expect.objectContaining({ status: "failed" }),
     });
+  });
+
+  // #62 (D-175): the finalize write names the row's own teacher beside its id,
+  // so it cannot land on another teacher's recording.
+  it("does not finalize a row whose teacher is not the one it was read as", async () => {
+    const rows = [{ id: "rec-1", teacherId: "teacher-2", status: "recording" }];
+    callRecordingFindUnique.mockResolvedValueOnce({
+      id: "rec-1",
+      bookingId: "booking-9",
+      teacherId: "teacher-9",
+      endedAt: null,
+    });
+    callRecordingUpdate.mockImplementationOnce((async (args: {
+      where: { id: string; teacherId?: string };
+      data: { status: string };
+    }) => {
+      const row = rows.find(
+        (r) =>
+          r.id === args.where.id &&
+          (args.where.teacherId === undefined || r.teacherId === args.where.teacherId),
+      );
+      if (!row) throw Object.assign(new Error("Record to update not found."), { code: "P2025" });
+      row.status = args.data.status;
+      return row;
+    }) as never);
+
+    await handleNormalizedEvent(prisma, {
+      kind: "recording_ended",
+      room: null,
+      providerRecordingId: "EG_AV",
+      failed: false,
+      durationMs: null,
+    }).catch(() => undefined);
+
+    expect(rows[0].status).toBe("recording");
   });
 
   it("falls through to finalizeLessonAudio when no CallRecording row matches", async () => {

@@ -103,8 +103,5 @@
   "lib/subscriptions/sweep.ts": 3,
   "lib/subscriptions/usage.ts": 2,
   "lib/testimonials/store.ts": 1,
-  "lib/transcription/pipeline.ts": 3,
-  "lib/video/call-recording.ts": 5,
-  "lib/video/lesson-audio.ts": 2,
-  "lib/video/webhook-events.ts": 3
+  "lib/transcription/pipeline.ts": 3
 }
