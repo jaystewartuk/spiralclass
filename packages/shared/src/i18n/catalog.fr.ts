@@ -838,9 +838,8 @@ export const fr = {
   "progress.grade.hard": "Difficile",
   "progress.grade.good": "Bien",
   "progress.grade.easy": "Facile",
-  "progress.flashcard.flip": "Touchez pour retourner",
-  "progress.flashcard.showTerm": "Touchez pour voir le terme",
-  "progress.flashcard.noContext": "Pas encore de contexte supplémentaire pour ce terme.",
+  "progress.flashcard.recall":
+    "Dites ce que cela signifie, ou employez-le dans une phrase. Puis notez à quel point vous vous en souveniez.",
   "profile.title": "Profil d'apprentissage",
   "profile.help": "Ce qui revient au fil des cours de cet élève, à partir de vos points confirmés.",
   "profile.vocab": "Vocabulaire à réviser",

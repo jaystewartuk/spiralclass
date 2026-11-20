@@ -849,9 +849,8 @@ export const esMX = {
   "progress.grade.hard": "Difícil",
   "progress.grade.good": "Bien",
   "progress.grade.easy": "Fácil",
-  "progress.flashcard.flip": "Toca para voltear",
-  "progress.flashcard.showTerm": "Toca para ver el término",
-  "progress.flashcard.noContext": "Aún no hay contexto extra para este término.",
+  "progress.flashcard.recall":
+    "Di qué significa o úsalo en una frase. Luego califica qué tan bien lo recordaste.",
   "profile.title": "Perfil de aprendizaje",
   "profile.help": "Lo que se repite en las clases de este alumno, a partir de lo que confirmaste.",
   "profile.vocab": "Vocabulario por repasar",
