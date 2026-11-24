@@ -59,56 +59,36 @@ describe("control names", () => {
     expect(controlName(container.querySelector("button")!)).toContain("web.accountBadge.fallback");
   });
 
-  it("names a vocabulary card by its displayed term and its action", () => {
-    act(() =>
-      root.render(
-        <VocabReview terms={[{ id: "v1", term: "bonjour", context: "Bonjour, tout le monde." }]} />,
-      ),
-    );
-    const name = controlName(container.querySelector("button")!);
-    expect(name).toContain("bonjour");
-    expect(name).toContain("progress.flashcard.flip");
+  it("shows a vocabulary card as its term and a recall prompt, with no back to flip to", () => {
+    act(() => root.render(<VocabReview terms={[{ id: "v1", term: "bonjour" }]} />));
+    expect(container.textContent).toContain("bonjour");
+    expect(container.textContent).toContain("progress.flashcard.recall");
+    const buttons = [...container.querySelectorAll("button")].map((b) => b.textContent);
+    expect(buttons).toEqual([
+      "progress.grade.again",
+      "progress.grade.hard",
+      "progress.grade.good",
+      "progress.grade.easy",
+    ]);
   });
 
-  it("names the revealed context as well as the action to show the term again", () => {
-    act(() =>
-      root.render(
-        <VocabReview terms={[{ id: "v1", term: "bonjour", context: "Bonjour, tout le monde." }]} />,
-      ),
-    );
-    act(() => container.querySelector("button")!.click());
-    const name = controlName(container.querySelector("button")!);
-    expect(name).toContain("Bonjour, tout le monde.");
-    expect(name).toContain("progress.flashcard.showTerm");
-  });
-
-  it("names the empty-context fallback on a revealed card", () => {
-    act(() => root.render(<VocabReview terms={[{ id: "v1", term: "bonjour", context: null }]} />));
-    act(() => container.querySelector("button")!.click());
-    expect(controlName(container.querySelector("button")!)).toContain(
-      "progress.flashcard.noContext",
-    );
-  });
-
-  it("grades the current term and returns the next card to its front", async () => {
+  it("grades the current term and moves on to the next", async () => {
     act(() =>
       root.render(
         <VocabReview
           terms={[
-            { id: "v1", term: "bonjour", context: "Bonjour, tout le monde." },
-            { id: "v2", term: "salut", context: null },
+            { id: "v1", term: "bonjour" },
+            { id: "v2", term: "salut" },
           ]}
         />,
       ),
     );
-    act(() => container.querySelector("button")!.click());
     const good = [...container.querySelectorAll("button")].find(
       (button) => button.textContent === "progress.grade.good",
     )!;
     await act(async () => good.click());
     expect(gradeVocabulary).toHaveBeenCalledWith("v1", "good");
-    const name = controlName(container.querySelector("button")!);
-    expect(name).toContain("salut");
-    expect(name).toContain("progress.flashcard.flip");
+    expect(container.textContent).toContain("salut");
+    expect(container.textContent).not.toContain("bonjour");
   });
 });

@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import type { PrismaClient } from "@prisma/client";
 
-import { gradeVocabularyFor } from "./student-progress";
+import { DUE_CARDS_PER_VISIT, dueVocabularyFor, gradeVocabularyFor } from "./student-progress";
 
 // Tenant scoping of the VocabularyReview write in student-progress.ts (#62,
 // D-175). The grade used to be written by row id alone, correct only because
@@ -72,5 +72,46 @@ describe("gradeVocabularyFor writes only the signed-in student's review row", ()
     expect(res).toEqual({ ok: false, reason: "save-failed" });
     expect(rows[1]!.lastReviewedAt).toBeNull();
     expect(rows[1]!.intervalDays).toBe(0);
+  });
+});
+
+describe("dueVocabularyFor follows the progress-sharing switch (#302)", () => {
+  const now = new Date("2026-11-20T12:00:00Z");
+  function fakeDb() {
+    const findMany = vi.fn(async () => [{ id: "r1", term: "cansado" }]);
+    return { db: { vocabularyReview: { findMany } } as unknown as PrismaClient, findMany };
+  }
+
+  it("reads nothing when no pairing shares progress", async () => {
+    const { db, findMany } = fakeDb();
+    expect(await dueVocabularyFor(db, ["s1"], [], now)).toEqual([]);
+    expect(findMany).not.toHaveBeenCalled();
+  });
+
+  it("reads nothing for a student with no identities", async () => {
+    const { db, findMany } = fakeDb();
+    expect(await dueVocabularyFor(db, [], [{ teacherId: "t1", studentId: "s1" }], now)).toEqual([]);
+    expect(findMany).not.toHaveBeenCalled();
+  });
+
+  it("asks only for due terms from the shared pairings, and only for the term", async () => {
+    const { db, findMany } = fakeDb();
+    const cards = await dueVocabularyFor(
+      db,
+      ["s1", "s2"],
+      [{ teacherId: "t1", studentId: "s1" }],
+      now,
+    );
+    expect(cards).toEqual([{ id: "r1", term: "cansado" }]);
+    expect(findMany).toHaveBeenCalledWith({
+      where: {
+        studentId: { in: ["s1", "s2"] },
+        dueAt: { lte: now },
+        OR: [{ teacherId: "t1", studentId: "s1" }],
+      },
+      select: { id: true, term: true },
+      orderBy: { dueAt: "asc" },
+      take: DUE_CARDS_PER_VISIT,
+    });
   });
 });

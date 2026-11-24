@@ -155,7 +155,8 @@ SM-2 (`lib/lesson-notes/srs.ts`). Grades `again`, `hard`, `good`, `easy`.
 ## What the student sees
 
 - `LessonInsight`, `LessonPronunciation`, `LessonBrief` and the transcript are
-  **teacher-only, always**.
+  **teacher-only, always** — with one exception below: a confirmed vocabulary
+  finding's summary becomes a flashcard term while progress is shared.
 - The profile is teacher-only by default. Once **share progress** is on for
   the pairing (`TeacherStudent.shareProgress`, default off), the student sees a
   reframed view per teacher: skills as "improving" or "worth practising", with
@@ -163,7 +164,33 @@ SM-2 (`lib/lesson-notes/srs.ts`). Grades `again`, `hard`, `good`, `easy`.
   once on `/settings/booking-page` (`setProgressSharingAction`, which also sets
   `Teacher.shareProgressByDefault` for new pairings), or per student on the
   student page (Pro).
-- `VocabularyReview` is the student's own flashcard queue.
+- **Vocabulary flashcards follow the same switch.** The queue is seeded from a
+  shared profile's vocabulary list, and only terms from pairings that share
+  progress _right now_ are shown (`dueVocabularyFor`,
+  `lib/lesson-notes/student-progress.ts`). Turning sharing off hides that
+  teacher's cards at once; turning it back on brings them back with their
+  schedule intact. Grading is the student's own and stays scoped to her
+  identities.
+- **A card is the term and nothing else.** She recalls what it means and how
+  to use it, then grades herself; there is no back to flip to. The term is the
+  confirmed vocabulary finding's summary as the teacher left it — the one piece
+  of an insight the student sees, and only while progress is shared.
+
+Why the card has no back: the only text stored beside a term is the insight's
+`evidence` and `suggestion`, and neither is written for her. The insights
+prompt (`lib/lesson-notes/insights.ts`) writes the suggestion **to the
+teacher, in the teacher's reading language** (`locale`, which need not be one
+the student reads), as coaching ("drill _estar_ for states with her"). The
+evidence quotes the student's words as spoken, which for a vocabulary finding
+is usually the mistake, so showing it without the correction teaches the
+error. A teacher reads those notes
+believing them private. A learner-facing gloss would need its own field,
+written for the student and confirmed by the teacher; until one exists the
+card shows the term alone.
+
+Held by `apps/web/tests/lesson-notes/student-flashcards.test.ts` (the page),
+`apps/web/src/lib/lesson-notes/student-progress.test.ts` and
+`apps/web/tests/components/control-names.test.tsx` (the card).
 
 ## Surfaces
 
@@ -179,7 +206,8 @@ SM-2 (`lib/lesson-notes/srs.ts`). Grades `again`, `hard`, `good`, `easy`.
   category with Confirm, Edit, Dismiss and "add your own"; the speaking-time
   card; and the replay page (`/dashboard/classes/[bookingId]/replay`) with the
   transcript.
-- **Student**: "Your progress" (only if shared) and the vocabulary flashcards.
+- **Student**: "Your progress" and its vocabulary flashcards, both only while
+  the pairing shares progress.
 - **Admin** (`/admin/lesson-insights`, `superadmin`): stage counts and
   timestamps and stuck-capture detection — never content. A banner shows when
   the legacy audio transcription path is enabled.

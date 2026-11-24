@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { profileSchema, type StudentProfile } from "@/lib/lesson-notes/profile";
 import { seedVocabularyReviews } from "@/lib/lesson-notes/srs";
-import { attachVocabContext } from "@/lib/lesson-notes/vocab-context";
+import { dueVocabularyFor } from "@/lib/lesson-notes/student-progress";
 import { VocabReview } from "./vocab-review";
 
 // Phase F, Half 2: the student's
@@ -68,15 +68,9 @@ export default async function ProgressPage() {
     }
   }
 
-  const dueRows = ids.length
-    ? await prisma.vocabularyReview.findMany({
-        where: { studentId: { in: ids }, dueAt: { lte: now } },
-        select: { id: true, term: true, teacherId: true, studentId: true },
-        orderBy: { dueAt: "asc" },
-        take: 50,
-      })
-    : [];
-  const due = await attachVocabContext(prisma, dueRows);
+  // Flashcards follow the sharing switch like the rest of this page: due terms
+  // from shared pairings only, as the bare term (see dueVocabularyFor).
+  const due = await dueVocabularyFor(prisma, ids, shared, now);
 
   const teacherName = new Map(shared.map((s) => [s.teacherId, s.teacher.name]));
   const views = profiles

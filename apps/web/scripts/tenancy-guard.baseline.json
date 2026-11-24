@@ -37,7 +37,6 @@
   "lib/homework/feedback.ts": 2,
   "lib/lesson-notes/insights-pipeline.ts": 1,
   "lib/lesson-notes/srs.ts": 1,
-  "lib/lesson-notes/vocab-context.ts": 1,
   "lib/levels.ts": 3,
   "lib/library/engagement.ts": 1,
   "lib/library/library-queries.ts": 3,

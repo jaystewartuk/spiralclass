@@ -835,9 +835,8 @@ export const en = {
   "progress.grade.hard": "Hard",
   "progress.grade.good": "Good",
   "progress.grade.easy": "Easy",
-  "progress.flashcard.flip": "Tap to flip",
-  "progress.flashcard.showTerm": "Tap to show the term",
-  "progress.flashcard.noContext": "No extra context for this term yet.",
+  "progress.flashcard.recall":
+    "Say what it means, or use it in a sentence. Then grade how well you remembered it.",
   "profile.title": "Learning profile",
   "profile.help": "What recurs across this student's lessons, from your confirmed focus areas.",
   "profile.vocab": "Vocabulary to review",
