@@ -139,14 +139,17 @@ export async function provisionInvitation(
 // Mark an invitation as delivered (first send or resend). Bumps lastSentAt +
 // resendCount; stamps sentAt on the first send. Called after the email
 // provider confirms the send so a pending row always reflects a real delivery.
+// `teacherId` is the sending teacher: an invitation that is not hers is not
+// found (P2025), and nothing is stamped.
 export async function markInvitationSent(
+  teacherId: string,
   invitationId: string,
   opts: { resend: boolean } = { resend: false },
   db: Db = prisma,
 ): Promise<void> {
   const now = new Date();
   await db.studentInvitation.update({
-    where: { id: invitationId },
+    where: { id: invitationId, teacherId },
     data: {
       lastSentAt: now,
       ...(opts.resend ? { resendCount: { increment: 1 } } : { sentAt: now }),
@@ -156,13 +159,15 @@ export async function markInvitationSent(
 
 // Roll back a pending invitation whose delivery failed, so it doesn't linger as
 // a "pending" row that was never actually emailed (and so the partial unique
-// slot frees for a retry). Only deletes a still-pending, never-sent row.
+// slot frees for a retry). Only deletes a still-pending, never-sent row of the
+// sending teacher's.
 export async function discardUnsentInvitation(
+  teacherId: string,
   invitationId: string,
   db: Db = prisma,
 ): Promise<void> {
   await db.studentInvitation.deleteMany({
-    where: { id: invitationId, status: "pending", sentAt: null },
+    where: { id: invitationId, teacherId, status: "pending", sentAt: null },
   });
 }
 
@@ -197,7 +202,7 @@ export async function rotateInvitationForResend(
 
     const rawToken = generateInvitationToken();
     const updated = await tx.studentInvitation.update({
-      where: { id: invitation.id },
+      where: { id: invitation.id, teacherId },
       // Re-open expiry and clear any derived-expired state back to pending.
       data: {
         tokenHash: hashInvitationToken(rawToken),
@@ -236,7 +241,7 @@ export async function cancelInvitation(
   if (invitation.status === "accepted") return { status: "already_accepted" };
   if (invitation.status === "cancelled") return { status: "ok" };
   await db.studentInvitation.update({
-    where: { id: invitation.id },
+    where: { id: invitation.id, teacherId },
     data: { status: "cancelled", cancelledAt: new Date() },
   });
   return { status: "ok" };

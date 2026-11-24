@@ -165,7 +165,7 @@ export async function sendInvitations(
         },
         db,
       );
-      await markInvitationSent(provisioned.invitation.id, { resend: false }, db);
+      await markInvitationSent(teacher.id, provisioned.invitation.id, { resend: false }, db);
       summary.sent += 1;
       summary.sentInvitationIds.push(provisioned.invitation.id);
       results.push({
@@ -176,7 +176,7 @@ export async function sendInvitations(
     } catch {
       // Delivery failed — roll the never-sent row back so it doesn't show as a
       // ghost "pending" that was never emailed.
-      await discardUnsentInvitation(provisioned.invitation.id, db);
+      await discardUnsentInvitation(teacher.id, provisioned.invitation.id, db);
       summary.failed += 1;
     }
   }
