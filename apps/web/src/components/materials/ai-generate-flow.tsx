@@ -111,6 +111,8 @@ export function AiGenerateFlow({
 
   // ---------- review (streamed body + metadata + save) ----------
   const [body, setBody] = useState("");
+  // Keep the document render tied to the streamed or refined body.
+  const preview = useMemo(() => <ClassContentMarkdown body={body} />, [body]);
   const [streaming, setStreaming] = useState(false);
   const [streamError, setStreamError] = useState<string | null>(null);
   const streamAbort = useRef<AbortController | null>(null);
@@ -345,9 +347,7 @@ export function AiGenerateFlow({
                     <Sparkles className="size-3.5 text-primary" aria-hidden />
                     {t("web.materials.reviewBanner")}
                   </p>
-                  <div className="min-h-32 rounded-md border px-3 py-2">
-                    <ClassContentMarkdown body={body} />
-                  </div>
+                  <div className="min-h-32 rounded-md border px-3 py-2">{preview}</div>
                   <div className="space-y-2 rounded-md border bg-muted/40 p-3">
                     <div className="flex items-center gap-1.5">
                       <Sparkles className="size-4 text-primary" aria-hidden />
