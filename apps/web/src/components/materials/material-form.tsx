@@ -511,38 +511,32 @@ export function MaterialForm({
     setLastAiChange(null);
   }
 
-  // The body, as section cards the teacher can restructure directly — the
-  // raw-Markdown textarea is gone and, as of MATERIAL_EDITING phase 2,
-  // the read-only preview it left behind is an editor. Each card is rendered by
-  // the same MaterialDocument renderer the student sees, so this IS the preview;
-  // move/duplicate/delete/add and per-section AI refine ride on top of it, all
-  // through the shared section ops. Empty → nothing (the generate control
-  // carries the empty state). Contains no form controls that post, so it stays
-  // safe inside the save form.
-  const bodyEditor = body.trim() ? (
-    <MaterialEditor
-      body={body}
-      onChange={(next, opts) => {
-        // A section refine is AI-authored content, exactly like a
-        // whole-document one; a pure structural edit leaves the source as it is.
-        // No `lastAiChange` banner here — MaterialEditor already shows its own
-        // prominent "Undo AI change" affordance for a section refine, backed by
-        // its local undo stack; this would just be a second one saying the same
-        // thing. The Version History checkpoint still applies either way (`body`/
-        // `source` here are this render's PRE-refine closure, same as the
-        // whole-document effect above).
-        if (opts?.aiEdited) {
-          setSource("ai");
-          if (existing?.id) {
-            void snapshotRefineCheckpointAction({ materialId: existing.id, body, source });
-          }
-        }
-        setBody(next);
-      }}
-      canRefine={aiEnabled && isPro}
-      language={language}
-    />
-  ) : null;
+  // Keep the section editor out of metadata and instruction updates. It still
+  // re-renders when the document or the inputs to section refinement change.
+  const materialId = existing?.id;
+  const canRefineSection = aiEnabled && isPro;
+  const bodyEditor = useMemo(
+    () =>
+      body.trim() ? (
+        <MaterialEditor
+          body={body}
+          onChange={(next, opts) => {
+            if (opts?.aiEdited) {
+              setSource("ai");
+              // The section's own undo lives in MaterialEditor. Snapshot the
+              // pre-refine body and source for Version History as well.
+              if (materialId) {
+                void snapshotRefineCheckpointAction({ materialId, body, source });
+              }
+            }
+            setBody(next);
+          }}
+          canRefine={canRefineSection}
+          language={language}
+        />
+      ) : null,
+    [body, canRefineSection, language, materialId, source],
+  );
 
   // The body opens expanded in every case. It used to collapse when editing
   // an existing material "so Save is reachable without scrolling past a long
