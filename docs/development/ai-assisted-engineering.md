@@ -44,6 +44,12 @@ of truth, not a longer version of `CLAUDE.md`.** That is the same
 ([documentation standards](documentation.md)), applied to the file agents read
 most.
 
+Put portable operating rules in the repository where laptop and cloud sessions
+can find them. Record behaviour in the owning feature document, repeatable
+verification in the [testing guide](testing.md), and checkout or release
+instructions in the [workflow](workflow.md). Keep account details, personal
+preferences, and private evidence outside the public tree.
+
 **The budget is enforced.** `apps/web/tests/config/claude-md.test.ts` fails the
 gate if `CLAUDE.md` grows past its line and word ceiling, and the ceiling is a
 ratchet — lower it when the file gets tighter, never raise it to fit something
@@ -227,6 +233,12 @@ Change      →  small, in the folder that already owns the domain
 Verify      →  tests ship with the change; pnpm gate --allow-dirty
 Review      →  /pr — commit, push (the gate runs), open the PR, stop
 ```
+
+When investigating a defect, verify the user-visible result through the affected
+entry point. A configuration flag or provider status can establish one
+precondition. The actual page, browser interaction, or integration result
+establishes what the user experienced. If the evidence does not establish
+the cause, record the hypothesis and the evidence that would confirm it.
 
 The step that is easiest to skip is **Verify**, and it is the one made
 non-optional: the pre-push hook runs the gate whether or not anybody remembered

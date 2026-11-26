@@ -35,6 +35,19 @@ derives one from the last commit subject.
   gitflow: for a trunk feeding one preview and one production, `develop` and
   `release/*` are pure overhead.
 
+### Working in a fresh checkout
+
+Check the Node engine and pinned package manager in
+[`package.json`](../../package.json). Run `pnpm install --frozen-lockfile` in
+the worktree. If a gate step cannot spawn `pnpm`, first verify that the shell
+running the push sees the supported Node and pnpm versions on its `PATH`.
+
+When sessions share the repository, fetch `origin/main` before opening a PR or
+reworking a conflict. Use `git log --left-right origin/main...HEAD` to see both
+histories and `git diff origin/main HEAD -- <changed-paths>` to compare the
+current file contents. A three-dot diff starts at the merge base and can still
+show work that has independently landed on main.
+
 ## The gate
 
 **`scripts/ci/steps.mjs` is the single registry of what "green" means**, and
@@ -179,6 +192,10 @@ being pushed, and nothing leaves the machine if it is red. There is no separate
 On success it detaches a process that posts the `local-gate` status once the
 commit reaches origin.
 
+Keep commit and push commands separate from inspection commands. The checked-in
+shell guard checks the command line as a whole. A short option on a later search
+can look like a hook bypass on the preceding Git operation.
+
 ### 3. Open the pull request
 
 `pnpm pr` does steps 2 and 3 together: name the branch, push, open or update the
@@ -188,6 +205,11 @@ test fails if `open-pr.sh` grows a merge, a deploy or a gate bypass.
 Fill the PR template — summary, test plan, security checklist. Branch protection
 requires `local-gate` green **on the head commit**, so a later push re-blocks the
 PR until that commit is certified too.
+
+The local gate checks the branch, while the PR's runner counts the combined
+tree. If the documentation count check only fails on the PR after main has
+advanced, fetch and rebase, then run `node scripts/readme-counts.mjs --fix` and
+commit any resulting count correction before pushing again.
 
 **Read the PR's heavy run before merging.** It is deliberately _not_ a required
 check, so nothing stops you merging over a red one — but it is the only thing

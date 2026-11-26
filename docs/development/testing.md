@@ -128,6 +128,21 @@ _mechanism_ is dismantled, rather than if a function returns the wrong number.
 it was written for, keeps passing, and quietly protects something nobody needs
 any more. When you retire a thing, retire its guard in the same change.
 
+## Tests that create temporary Git repositories
+
+Git hooks can export `GIT_DIR`, `GIT_WORK_TREE`, `GIT_INDEX_FILE` and other
+repository settings. A test can pass in a terminal and still target the real
+checkout under the pre-push hook, even when its child process has a temporary
+working directory.
+
+When a test creates a disposable repository, strip all inherited `GIT_*`
+variables from the child environment. Set `GIT_CEILING_DIRECTORIES` to the
+scratch parent and give the fixture its own Git identity and config. After init,
+assert that `git rev-parse --absolute-git-dir` resolves to the fixture's
+`.git` before proceeding with any other mutation. The
+[local promotion test fixture](../../apps/web/tests/config/promote-on-green.test.ts)
+exercises this pattern with temporary repositories and a stubbed GitHub CLI.
+
 ## End-to-end, in detail
 
 The suite lives in `apps/web/tests/e2e/` and is driven by `scripts/ci/e2e.sh`.
@@ -190,6 +205,21 @@ The helpers, and the rules for which seeded fixtures a spec may mutate, are in
   here, and pinning that would encode "Inngest is absent" as an expectation.
 
 Those gaps are hand-checked against the `/admin/uat` runbook before a promote.
+
+## Rendered checks for UI changes
+
+Before opening a PR, use Chrome to exercise the final version of the affected
+flow against a local app with safe test data. Check both phone and desktop
+widths in the affected user's locale. Confirm the actual viewport width with
+`window.innerWidth` or Chrome's responsive device toolbar. Changing the outer
+window can leave the page at the same breakpoint. Check that the expected
+language is visible on the page.
+
+Recheck after the last UI edit. In the PR, record the path exercised, the
+widths and locale, and any interaction you could not verify. For performance
+reports, capture a baseline and a final measurement on the same path and
+describe the test conditions. For anything rendered in a live class, follow
+the two-person check below.
 
 ## The video call, by hand
 
