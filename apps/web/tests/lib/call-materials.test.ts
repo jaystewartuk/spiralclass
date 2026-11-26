@@ -73,6 +73,17 @@ const mintUrl = async (m: { storagePath: string | null; linkUrl: string | null }
 const deps = (db: PrismaClient) => ({ db, mintUrl, now: NOW });
 
 describe("getCallMaterials", () => {
+  it.each(["teacher", "student"] as const)(
+    "scopes the %s materials read to the booking teacher",
+    async (audience) => {
+      const db = fakeDb(null);
+      await getCallMaterials("b1", { audience, teacherId: "t1" }, deps(db));
+      expect(db.booking.findFirst).toHaveBeenCalledWith(
+        expect.objectContaining({ where: { id: "b1", teacherId: "t1" } }),
+      );
+    },
+  );
+
   it("maps each kind: content carries body (no url), file/link carry a url (no body)", async () => {
     const db = fakeDb({
       materials: [
@@ -81,7 +92,7 @@ describe("getCallMaterials", () => {
         { ...link("l1"), sendTiming: null },
       ],
     });
-    const out = await getCallMaterials("b1", { audience: "teacher" }, deps(db));
+    const out = await getCallMaterials("b1", { audience: "teacher", teacherId: "t1" }, deps(db));
     expect(out).toEqual([
       { id: "c1", label: "c1", kind: "content", body: "# c1", viewUrl: null, fileKind: null },
       {
@@ -110,7 +121,7 @@ describe("getCallMaterials", () => {
         { ...content("c1"), sendTiming: null },
       ],
     });
-    const out = await getCallMaterials("b1", { audience: "teacher" }, deps(db));
+    const out = await getCallMaterials("b1", { audience: "teacher", teacherId: "t1" }, deps(db));
     expect(out.map((m) => m.fileKind)).toEqual(["pdf", "image", "other", "other", null, null]);
   });
 
@@ -119,7 +130,7 @@ describe("getCallMaterials", () => {
       materials: [{ ...content("own"), sendTiming: null }],
       libraryMaterials: [{ sendTiming: "confirmation", material: file("lib") }],
     });
-    const out = await getCallMaterials("b1", { audience: "teacher" }, deps(db));
+    const out = await getCallMaterials("b1", { audience: "teacher", teacherId: "t1" }, deps(db));
     expect(out.map((m) => m.id)).toEqual(["own", "lib"]);
   });
 
@@ -128,7 +139,7 @@ describe("getCallMaterials", () => {
       // t_1h hasn't elapsed for a class 2 days out — a student wouldn't see it.
       materials: [{ ...file("early"), sendTiming: "t_1h" }],
     });
-    const out = await getCallMaterials("b1", { audience: "teacher" }, deps(db));
+    const out = await getCallMaterials("b1", { audience: "teacher", teacherId: "t1" }, deps(db));
     expect(out.map((m) => m.id)).toEqual(["early"]);
   });
 
@@ -139,7 +150,7 @@ describe("getCallMaterials", () => {
         { ...file("early"), sendTiming: "t_1h" }, // not elapsed (class 2 days out)
       ],
     });
-    const out = await getCallMaterials("b1", { audience: "student" }, deps(db));
+    const out = await getCallMaterials("b1", { audience: "student", teacherId: "t1" }, deps(db));
     expect(out.map((m) => m.id)).toEqual(["released"]);
   });
 
@@ -148,12 +159,16 @@ describe("getCallMaterials", () => {
       materials: [{ ...file("dup"), sendTiming: null }],
       libraryMaterials: [{ sendTiming: "confirmation", material: file("dup") }],
     });
-    const out = await getCallMaterials("b1", { audience: "teacher" }, deps(db));
+    const out = await getCallMaterials("b1", { audience: "teacher", teacherId: "t1" }, deps(db));
     expect(out.map((m) => m.id)).toEqual(["dup"]);
   });
 
   it("returns an empty list when the booking is not found", async () => {
-    const out = await getCallMaterials("missing", { audience: "teacher" }, deps(fakeDb(null)));
+    const out = await getCallMaterials(
+      "missing",
+      { audience: "teacher", teacherId: "t1" },
+      deps(fakeDb(null)),
+    );
     expect(out).toEqual([]);
   });
 });
@@ -187,7 +202,7 @@ describe("getCallMaterials answer-key filtering", () => {
   it("the teacher's copy keeps the answer key verbatim", async () => {
     const out = await getCallMaterials(
       "b1",
-      { audience: "teacher" },
+      { audience: "teacher", teacherId: "t1" },
       deps(
         fakeDb({
           materials: [answered("c1")],
@@ -200,7 +215,7 @@ describe("getCallMaterials answer-key filtering", () => {
   it("the student's copy has every answer callout cut out, at any depth", async () => {
     const out = await getCallMaterials(
       "b1",
-      { audience: "student" },
+      { audience: "student", teacherId: "t1" },
       deps(
         fakeDb({
           materials: [answered("c1")],
@@ -217,7 +232,7 @@ describe("getCallMaterials answer-key filtering", () => {
   it("strips attached library items too, not just booking-scoped rows", async () => {
     const out = await getCallMaterials(
       "b1",
-      { audience: "student" },
+      { audience: "student", teacherId: "t1" },
       deps(
         fakeDb({
           libraryMaterials: [
@@ -235,7 +250,7 @@ describe("getCallMaterials answer-key filtering", () => {
     // reintroduce the leak this test file exists to pin.
     const out = await getCallMaterials(
       "b1",
-      { audience: "student" },
+      { audience: "student", teacherId: "t1" },
       deps(
         fakeDb({
           materials: [answered("c1"), { ...file("f1"), sendTiming: null }, answered("c2")],
@@ -254,7 +269,7 @@ describe("getCallMaterials answer-key filtering", () => {
     const body = "# Lesson\n\n> [!tip]\n> Read it aloud.";
     const out = await getCallMaterials(
       "b1",
-      { audience: "student" },
+      { audience: "student", teacherId: "t1" },
       deps(
         fakeDb({
           materials: [{ ...content("c1", { body }), sendTiming: null }],
@@ -267,7 +282,7 @@ describe("getCallMaterials answer-key filtering", () => {
   it("keeps a material whose whole body was an answer key as an empty content material", async () => {
     const out = await getCallMaterials(
       "b1",
-      { audience: "student" },
+      { audience: "student", teacherId: "t1" },
       deps(
         fakeDb({
           materials: [{ ...content("c1", { body: "> [!answer]\n> 42" }), sendTiming: null }],

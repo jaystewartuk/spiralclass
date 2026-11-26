@@ -76,7 +76,7 @@ export async function recordClassMaterialUse(
   const widened = widenOpenedFor(prev, openedFor);
   if (widened !== prev) {
     await db.classMaterialUse.update({
-      where: { id: existing.id },
+      where: { id: existing.id, teacherId },
       data: { openedFor: widened },
     });
   }

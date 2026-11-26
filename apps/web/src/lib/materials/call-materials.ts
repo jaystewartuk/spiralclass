@@ -71,7 +71,7 @@ export type CallMaterialsAudience = "teacher" | "student";
 
 export async function getCallMaterials(
   bookingId: string,
-  opts: { audience: CallMaterialsAudience },
+  opts: { audience: CallMaterialsAudience; teacherId: string },
   deps?: Partial<CallMaterialsDeps>,
 ): Promise<CallMaterial[]> {
   const db = deps?.db ?? prisma;
@@ -79,7 +79,7 @@ export async function getCallMaterials(
   const isStudent = opts.audience === "student";
 
   const booking = await db.booking.findFirst({
-    where: { id: bookingId },
+    where: { id: bookingId, teacherId: opts.teacherId },
     select: {
       scheduledStart: true,
       materials: {

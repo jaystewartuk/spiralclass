@@ -43,14 +43,14 @@ export async function snapshotMaterialRevision(input: {
   });
 
   const excess = await prisma.materialRevision.findMany({
-    where: { materialId: input.materialId },
+    where: { teacherId: input.teacherId, materialId: input.materialId },
     orderBy: { createdAt: "desc" },
     skip: CLASS_CONTENT_MAX_REVISIONS,
     select: { id: true },
   });
   if (excess.length > 0) {
     await prisma.materialRevision.deleteMany({
-      where: { id: { in: excess.map((r) => r.id) } },
+      where: { teacherId: input.teacherId, id: { in: excess.map((r) => r.id) } },
     });
   }
 }
