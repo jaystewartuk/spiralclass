@@ -160,7 +160,7 @@ describe("restoreClassContentRevisionForBooking", () => {
     expect(r).toEqual({ ok: true, materialId: "m1" });
     expect(materialUpdate).toHaveBeenCalledWith(
       expect.objectContaining({
-        where: { id: "m1" },
+        where: { id: "m1", teacherId: "t1" },
         data: { body: "# Old draft", contentSource: "ai" },
       }),
     );

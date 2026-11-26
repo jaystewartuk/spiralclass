@@ -81,7 +81,10 @@ export default async function TeacherCallPage({
 
   // The teacher sees every material attached to the class in the in-call viewer
   // (no send-timing gate — releasing is a student-facing concern).
-  const materials = await getCallMaterials(booking.id, { audience: "teacher" });
+  const materials = await getCallMaterials(booking.id, {
+    audience: "teacher",
+    teacherId: teacher.id,
+  });
 
   return (
     <CallSessionBootstrap

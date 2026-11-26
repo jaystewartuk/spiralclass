@@ -53,12 +53,14 @@ describe("snapshotMaterialRevision", () => {
     });
     expect(findMany).toHaveBeenCalledWith(
       expect.objectContaining({
-        where: { materialId: "m1" },
+        where: { teacherId: "t1", materialId: "m1" },
         orderBy: { createdAt: "desc" },
         skip: 20,
       }),
     );
-    expect(deleteMany).toHaveBeenCalledWith({ where: { id: { in: ["r21", "r22"] } } });
+    expect(deleteMany).toHaveBeenCalledWith({
+      where: { teacherId: "t1", id: { in: ["r21", "r22"] } },
+    });
   });
 
   it("skips the prune query when nothing is past the cap", async () => {

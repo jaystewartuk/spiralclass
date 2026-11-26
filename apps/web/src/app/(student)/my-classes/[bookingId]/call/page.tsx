@@ -82,7 +82,10 @@ export default async function StudentCallPage({
   // every `> [!answer]` callout cut out of the bodies. `audience` decides both;
   // see getCallMaterials for why the answer cut has to happen here rather than
   // in the renderer (this array is serialized straight into her RSC payload).
-  const materials = await getCallMaterials(booking.id, { audience: "student" });
+  const materials = await getCallMaterials(booking.id, {
+    audience: "student",
+    teacherId: booking.teacherId,
+  });
 
   // No `canCaption` here — only the teacher's own call page renders the
   // captions toggle (see class-call.tsx's canCaption doc comment). Whether her

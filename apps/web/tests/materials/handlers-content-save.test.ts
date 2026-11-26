@@ -283,7 +283,7 @@ describe("saveClassContentForBooking", () => {
     expect(r).toEqual({ ok: true, materialId: "m1" });
     expect(materialUpdate).toHaveBeenCalledWith(
       expect.objectContaining({
-        where: { id: "m1" },
+        where: { id: "m1", teacherId: "t1" },
         data: { body: "# New", contentSource: "ai" },
       }),
     );
@@ -390,7 +390,10 @@ describe("generateClassContentForBooking", () => {
     expect(seed.vocabulary).toBe("basic");
     // And the choice is persisted as this class's override.
     expect(bookingUpdate).toHaveBeenCalledWith(
-      expect.objectContaining({ where: { id: "b1" }, data: { vocabularyOverride: "basic" } }),
+      expect.objectContaining({
+        where: { id: "b1", teacherId: "t1" },
+        data: { vocabularyOverride: "basic" },
+      }),
     );
   });
 
@@ -876,7 +879,9 @@ describe("saveLibraryContentMaterial", () => {
       locale: "en",
     });
     expect(r).toEqual({ ok: true, materialId: "m1" });
-    expect(materialUpdate).toHaveBeenCalledTimes(1);
+    expect(materialUpdate).toHaveBeenCalledWith(
+      expect.objectContaining({ where: { id: "m1", teacherId: "t1" } }),
+    );
     expect(materialCreate).not.toHaveBeenCalled();
     // The overwritten body is snapshotted so the edit is undoable.
     expect(revisionCreate).toHaveBeenCalledTimes(1);

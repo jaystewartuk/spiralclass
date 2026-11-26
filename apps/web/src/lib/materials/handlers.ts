@@ -206,7 +206,7 @@ export async function saveClassContentForBooking(input: {
 
   const row = existing
     ? await prisma.libraryMaterial.update({
-        where: { id: existing.id },
+        where: { id: existing.id, teacherId: input.teacherId },
         data: {
           body: validation.body,
           contentSource: input.source,
@@ -302,7 +302,6 @@ function continuationWhere(input: { teacherId: string; studentId: string; bookin
     id: { not: input.bookingId },
   };
   return {
-    teacherId: input.teacherId,
     archived: false,
     body: { not: null },
     OR: [
@@ -355,7 +354,7 @@ export async function listContinuationCandidatesForBooking(input: {
   };
 
   const materials = await prisma.libraryMaterial.findMany({
-    where: continuationWhere(scope),
+    where: { ...continuationWhere(scope), teacherId: input.teacherId },
     select: {
       id: true,
       label: true,
@@ -425,6 +424,7 @@ async function resolveContinuationMaterials(input: {
         studentId: input.studentId,
         bookingId: input.bookingId,
       }),
+      teacherId: input.teacherId,
     },
     select: { id: true, label: true, body: true },
   });
@@ -530,7 +530,7 @@ export async function generateClassContentForBooking(input: {
   let classVocabulary = booking.vocabularyOverride as MaterialVocabulary | null;
   if (input.vocabulary !== undefined) {
     await prisma.booking.update({
-      where: { id: booking.id },
+      where: { id: booking.id, teacherId: input.teacherId },
       data: { vocabularyOverride: input.vocabulary },
     });
     classVocabulary = input.vocabulary;
@@ -1181,7 +1181,7 @@ export async function saveLibraryContentMaterial(input: {
       });
     }
     const row = await prisma.libraryMaterial.update({
-      where: { id: existing.id },
+      where: { id: existing.id, teacherId: input.teacherId },
       data: {
         levelId: level.id,
         visibility: input.visibility,
