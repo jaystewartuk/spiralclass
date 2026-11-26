@@ -90,7 +90,7 @@ describe("tenancy guard — agreement with the static scanner", () => {
   // Two guards that share a vocabulary and drift apart are worse than one:
   // each would report clean on what the other stopped covering. So the overlap
   // is asserted rather than kept in step by hand.
-  it("derives the same tenant-owned models the scanner does", () => {
+  it("derives the same models with a direct teacher column as the scanner", () => {
     const fromSchema = tenantModels(); // camelCase client names, read from schema.prisma
     const fromDatamodel = new Set(
       [...TENANT_MODELS].map((m) => m[0].toLowerCase() + m.slice(1)), // dmmf gives PascalCase
@@ -99,7 +99,7 @@ describe("tenancy guard — agreement with the static scanner", () => {
     expect([...fromDatamodel].sort()).toEqual([...fromSchema].sort());
   });
 
-  it("treats the same combinators as non-constraining", () => {
+  it("keeps OR conservative in the runtime check", () => {
     expect([...NEGATING_KEYS].sort()).toEqual(["NOT", "OR", "isNot", "none"].sort());
   });
 });

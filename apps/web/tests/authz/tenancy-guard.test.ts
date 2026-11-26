@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 // The scanner lives in scripts/ (plain ESM, outside src/) so it stays out of
 // the coverage denominator; the test drives it here — the same shape as
@@ -6,6 +7,7 @@ import {
   collectFindings,
   loadBaseline,
   scanSource,
+  SCHEMA_PATH,
   tenantModels,
 } from "../../scripts/tenancy-guard.mjs";
 
@@ -154,6 +156,103 @@ describe("tenancy scoping ratchet", () => {
     expect(violations).toEqual([]);
     expect(exemptions.length).toBe(1);
     expect(exemptions[0].reason).toContain("D-25");
+  });
+
+  it("guards payment rows through the package that owns them", () => {
+    const schema = readFileSync(SCHEMA_PATH, "utf8");
+    const payment = /^model Payment\s*\{([\s\S]*?)^\}/m.exec(schema)?.[1];
+    expect(payment).toMatch(/^\s*packageId\s+String\s/m);
+    expect(payment).toMatch(
+      /^\s*package\s+Package\s+@relation\(fields: \[packageId\], references: \[id\]/m,
+    );
+    expect(scanSource("t.ts", "prisma.payment.findMany({})", models).violations).toEqual([
+      expect.objectContaining({ model: "payment", op: "findMany", evidence: "none" }),
+    ]);
+    for (const src of [
+      "prisma.payment.findMany({ where: { packageId } })",
+      "prisma.payment.findMany({ where: { package: { teacherId } } })",
+    ]) {
+      expect(scanSource("t.ts", src, models).violations, src).toEqual([]);
+    }
+  });
+
+  it("checks the upsert match even when the insert carries the teacher", () => {
+    const upsert = (where: string) =>
+      `prisma.booking.upsert({ where: ${where}, create: { teacherId }, update: {} })`;
+    expect(scanSource("t.ts", upsert("{ id }"), models).violations).toHaveLength(1);
+    expect(scanSource("t.ts", upsert("{ id, teacherId }"), models).violations).toEqual([]);
+  });
+
+  it("checks every readable createMany row and recognizes inline map callbacks", () => {
+    for (const rows of [
+      "items.map(({ name }) => ({ name, teacherId }))",
+      "items.map((item) => { return { item, teacherId }; })",
+      "[{ teacherId }, { teacherId }]",
+    ]) {
+      const src = `prisma.booking.createMany({ data: ${rows} })`;
+      expect(scanSource("t.ts", src, models).violations, src).toEqual([]);
+    }
+    for (const rows of [
+      "items.map(makeRow)",
+      "items.map((item) => ({ item }))",
+      "items.map((item) => ({ teacherId, ...item }))",
+      "items.map((item) => item.good ? { teacherId } : { item })",
+      "[{ teacherId }, {}]",
+    ]) {
+      const src = `prisma.booking.createManyAndReturn({ data: ${rows} })`;
+      expect(scanSource("t.ts", src, models).violations, src).toHaveLength(1);
+    }
+  });
+
+  it("reads scalar value lists without crediting them as tenant evidence", () => {
+    const filter = "action: { in: ['create', 'update'] }";
+    expect(
+      scanSource("t.ts", `prisma.booking.findMany({ where: { teacherId, ${filter} } })`, models)
+        .violations,
+    ).toEqual([]);
+    expect(
+      scanSource("t.ts", `prisma.booking.findMany({ where: { ${filter} } })`, models).violations[0]
+        .evidence,
+    ).toBe("none");
+  });
+
+  it("requires OR branches to share a definite tenant selector", () => {
+    const query = (branches: string) => `prisma.booking.findMany({ where: { OR: ${branches} } })`;
+    expect(
+      scanSource("t.ts", query("[{ teacherId, status: 'a' }, { teacherId, status: 'b' }]"), models)
+        .violations,
+    ).toEqual([]);
+    for (const branches of [
+      "[{ teacherId }, { studentId }]",
+      "[{ teacherId: 'a' }, { teacherId: 'b' }]",
+      "[{ teacherId }, { teacherId: undefined }]",
+      "[{ teacherId }, { teacherId: { not: teacherId } }]",
+      "[{ teacherId }, { teacherId, ...unsafeOverrides }]",
+      "[{ teacherId }, {}]",
+      "pairs",
+    ]) {
+      expect(scanSource("t.ts", query(branches), models).violations, branches).toHaveLength(1);
+    }
+  });
+
+  it("attaches multiline exemption comments to the immediately following call only", () => {
+    const source = [
+      "// tenancy-exempt: operator reads all tenants",
+      "// This second line explains why.",
+      "// This third line gives context.",
+      "prisma.booking.findMany({});",
+      "prisma.booking.findMany({});",
+    ].join("\n");
+    const { exemptions, violations } = scanSource("t.ts", source, models);
+    expect(exemptions.map((entry) => entry.line)).toEqual([4]);
+    expect(violations.map((entry) => entry.line)).toEqual([5]);
+
+    const separated = [
+      "// tenancy-exempt: operator reads all tenants",
+      "doSomethingElse();",
+      "prisma.booking.findMany({});",
+    ].join("\n");
+    expect(scanSource("t.ts", separated, models).violations).toHaveLength(1);
   });
 
   it("requires every exemption in the tree to say why it reads across tenants", () => {

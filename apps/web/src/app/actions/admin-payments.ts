@@ -47,6 +47,7 @@ export async function adminRefundPaymentAction(
     };
   }
 
+  // tenancy-exempt: Finance staff can look up the selected payment across all teachers (D-25).
   const payment = await prisma.payment.findUnique({
     where: { id: parsed.data.paymentId },
     include: {

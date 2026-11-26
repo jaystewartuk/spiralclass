@@ -87,12 +87,11 @@ function derivedScopeKeys(models) {
   return new Set([...models].map((m) => `${m}Id`));
 }
 
-// Combinators whose contents do NOT constrain the query as a whole. A
-// `teacherId` inside one branch of an OR still returns every row matched by
-// the other branch; `NOT`/`none` invert it outright.
-const NEGATING_KEYS = new Set(["OR", "NOT", "none", "isNot"]);
+// Negation can never establish a tenant. OR can do so only when every
+// alternative carries the same definite tenant selector.
+const NEGATING_KEYS = new Set(["NOT", "none", "isNot"]);
 
-const EXEMPT_DIRECTIVE = /tenancy-exempt:\s*(.*)$/;
+const EXEMPT_DIRECTIVE = /\/\/\s*tenancy-exempt:\s*(.*)$/;
 
 /** Tenant-owned models, derived from the schema rather than listed here — a
  * hand-maintained copy would drift silently and quietly stop guarding whatever
@@ -137,6 +136,51 @@ function propName(prop) {
   return null;
 }
 
+function propertyValue(prop) {
+  if (ts.isPropertyAssignment(prop)) return prop.initializer;
+  if (ts.isShorthandPropertyAssignment(prop)) return prop.name;
+  return null;
+}
+
+function isScalarLiteral(node) {
+  return (
+    ts.isStringLiteralLike(node) ||
+    ts.isNumericLiteral(node) ||
+    node.kind === ts.SyntaxKind.TrueKeyword ||
+    node.kind === ts.SyntaxKind.FalseKeyword ||
+    node.kind === ts.SyntaxKind.NullKeyword
+  );
+}
+
+// Only compare selectors with a statically identifiable value and no way for
+// another property in the same object to override the selector.
+function orBranchSelectors(branch) {
+  const selectors = new Set();
+  if (!ts.isObjectLiteralExpression(branch)) return selectors;
+  if (branch.properties.some((prop) => !propName(prop))) return selectors;
+  for (const key of SCOPE_KEYS) {
+    const properties = branch.properties.filter((prop) => propName(prop) === key);
+    if (properties.length !== 1) continue;
+    const value = propertyValue(properties[0]);
+    if (isVacuous(value)) continue;
+    if (ts.isStringLiteralLike(value)) selectors.add(`${key}:string:${value.text}`);
+    else if (ts.isIdentifier(value) || ts.isPropertyAccessExpression(value)) {
+      selectors.add(`${key}:expression:${value.getText()}`);
+    }
+  }
+  return selectors;
+}
+
+function orEvidence(value, negated, derived) {
+  if (ts.isArrayLiteralExpression(value) && !negated && value.elements.length > 0) {
+    const branches = value.elements.map(orBranchSelectors);
+    if ([...branches[0]].some((selector) => branches.every((branch) => branch.has(selector)))) {
+      return "scoped";
+    }
+  }
+  return scopeEvidence(value, true, derived);
+}
+
 /**
  * Walk a `where` / `data` object and report the strongest scope evidence in it.
  *
@@ -152,7 +196,7 @@ function propName(prop) {
  * the reason this scanner parses instead of matching text.
  */
 export function scopeEvidence(node, negated = false, derived = defaultDerivedKeys()) {
-  if (!node) return "none";
+  if (!node || isScalarLiteral(node)) return "none";
   // `where: someVariable` — no way to know, so say so rather than assume.
   if (!ts.isObjectLiteralExpression(node)) {
     return ts.isArrayLiteralExpression(node)
@@ -171,13 +215,12 @@ export function scopeEvidence(node, negated = false, derived = defaultDerivedKey
     const name = propName(prop);
     if (!name) continue;
 
-    const value = ts.isPropertyAssignment(prop)
-      ? prop.initializer
-      : // Shorthand `{ teacherId }` binds the key to the identifier of the
-        // same name, which is a real value, not a literal `undefined`.
-        ts.isShorthandPropertyAssignment(prop)
-        ? prop.name
-        : null;
+    const value = propertyValue(prop);
+
+    if (name === "OR" && value) {
+      found.push(orEvidence(value, negated, derived));
+      continue;
+    }
 
     if (SCOPE_KEYS.has(name)) {
       if (isVacuous(value)) found.push("vacuous");
@@ -260,28 +303,53 @@ function mergeEvidence(list) {
   return best;
 }
 
-/** The argument sub-objects that can carry a tenant scope, per operation. */
-function scopeCarriers(op, args) {
-  if (!args) return null;
+function mappedRow(node) {
+  if (!ts.isCallExpression(node) || !ts.isPropertyAccessExpression(node.expression)) return null;
+  if (node.questionDotToken || node.expression.questionDotToken) return null;
+  if (node.expression.name.text !== "map") return null;
+  const callback = node.arguments[0];
+  if (!callback || !ts.isArrowFunction(callback)) return null;
+  let returned = callback.body;
+  if (ts.isBlock(returned)) {
+    const onlyStatement = returned.statements.length === 1 && returned.statements[0];
+    if (!onlyStatement || !ts.isReturnStatement(onlyStatement)) return null;
+    returned = onlyStatement.expression;
+  }
+  while (returned && ts.isParenthesizedExpression(returned)) returned = returned.expression;
+  if (!returned || !ts.isObjectLiteralExpression(returned)) return null;
+  const names = returned.properties.map(propName);
+  if (names.includes(null) || new Set(names).size !== names.length) return null;
+  return returned;
+}
+
+function manyCreateEvidence(data, derived) {
+  if (!data) return "none";
+  if (ts.isArrayLiteralExpression(data)) {
+    const rows = data.elements.map((row) => scopeEvidence(row, false, derived));
+    const unreadable = rows.filter((evidence) => !ACCEPTED.has(evidence));
+    return mergeEvidence(unreadable.length > 0 ? unreadable : rows);
+  }
+  return scopeEvidence(mappedRow(data) ?? data, false, derived);
+}
+
+function queryEvidence(op, args, derived) {
+  if (!args) return "none";
   if (!ts.isObjectLiteralExpression(args)) return "opaque";
-  const pick = (name) => {
-    const prop = args.properties.find((p) => propName(p) === name);
-    if (!prop) return null;
-    return ts.isPropertyAssignment(prop)
-      ? prop.initializer
-      : ts.isShorthandPropertyAssignment(prop)
-        ? prop.name
-        : null;
-  };
-  if (CREATE_OPS.has(op)) return [pick("data")];
-  if (UPSERT_OPS.has(op)) return [pick("where"), pick("create")];
-  return [pick("where")];
+  const field = CREATE_OPS.has(op) ? "data" : "where";
+  const property = args.properties.find((prop) => propName(prop) === field);
+  const carrier = property ? propertyValue(property) : null;
+  if (op === "createMany" || op === "createManyAndReturn") {
+    return manyCreateEvidence(carrier, derived);
+  }
+  // For upsert, the insert cannot constrain the lookup that drives the update.
+  return scopeEvidence(carrier, false, derived);
 }
 
 function exemptionFor(lines, lineIndex) {
-  for (let i = lineIndex; i >= Math.max(0, lineIndex - 2); i--) {
-    const m = EXEMPT_DIRECTIVE.exec(lines[i] ?? "");
-    if (m) return m[1].trim();
+  for (let i = lineIndex; i >= 0; i--) {
+    if (i !== lineIndex && !lines[i].trimStart().startsWith("//")) break;
+    const match = EXEMPT_DIRECTIVE.exec(lines[i]);
+    if (match) return match[1].trim();
   }
   return null;
 }
@@ -307,15 +375,12 @@ export function scanSource(fileName, source, models = tenantModels()) {
     ) {
       const op = node.expression.name.text;
       const model = node.expression.expression.name.text;
-      if (PRISMA_OPS.has(op) && models.has(model)) {
+      // Payment has no teacherId of its own. Its required Package relation
+      // establishes ownership without adding a new generic derived scope key.
+      const tenantOwned = models.has(model) || (model === "payment" && models.has("package"));
+      if (PRISMA_OPS.has(op) && tenantOwned) {
         const line = sf.getLineAndCharacterOfPosition(node.getStart(sf)).line;
-        const carriers = scopeCarriers(op, node.arguments[0]);
-        const evidence =
-          carriers === "opaque"
-            ? "opaque"
-            : carriers === null
-              ? "none"
-              : mergeEvidence(carriers.map((c) => scopeEvidence(c, false, derived)));
+        const evidence = queryEvidence(op, node.arguments[0], derived);
 
         if (!ACCEPTED.has(evidence)) {
           const reason = exemptionFor(lines, line);

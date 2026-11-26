@@ -20,6 +20,7 @@ async function resolvePayment(input: { studentEmail?: string; paymentId?: string
     package: { select: { teacher: { select: { stripeAccountId: true } } } },
   } as const;
   if (input.paymentId) {
+    // tenancy-exempt: The operator-only Stripe check resolves a selected payment across teachers (D-25).
     return prisma.payment.findUnique({
       where: { id: input.paymentId },
       include: withTeacher,

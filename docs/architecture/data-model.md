@@ -34,8 +34,9 @@ the admin console does — says so at the call site with
 runtime guard **reports** in production and **throws** in development and test,
 unless `TENANCY_GUARD` says otherwise (`guardMode()` in `lib/tenancy/guard.ts`).
 
-Both treat a model as tenant-owned when it has a `teacherId` column. `students`
-has none — see the next section.
+Both checks cover models with a `teacherId` column. The static scanner also
+covers `Payment` through its required `Package` relation. Student ownership is
+described below.
 
 ## Identity: a student belongs to several teachers
 

@@ -17,6 +17,7 @@ export async function GET(req: NextRequest) {
     to: url.searchParams.get("to"),
   });
 
+  // tenancy-exempt: The finance-only export includes payments across all teachers (D-25).
   const rows = await prisma.payment.findMany({
     where,
     orderBy: { createdAt: "desc" },

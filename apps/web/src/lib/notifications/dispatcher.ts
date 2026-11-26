@@ -2604,6 +2604,7 @@ export async function preloadPayments(
   const cache = new Map<string, LoadedPayment | null>();
   const ids = [...new Set(refs.map((r) => r.paymentId))];
   if (ids.length === 0) return cache;
+  // tenancy-exempt: The dispatcher batches multiple teachers and checks each package owner before caching.
   const rows = await prisma.payment.findMany({
     where: { id: { in: ids } },
     select: {
