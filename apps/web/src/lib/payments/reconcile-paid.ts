@@ -93,6 +93,7 @@ export async function reconcileStrandedPaidPayments(
   const upper = new Date(now.getTime() - minAgeMs);
   const lower = new Date(now.getTime() - maxAgeMs);
 
+  // tenancy-exempt: The reconciliation job finds stranded payments across all teachers before emitting per-package events.
   const stranded = await deps.prisma.payment.findMany({
     where: {
       status: "paid",

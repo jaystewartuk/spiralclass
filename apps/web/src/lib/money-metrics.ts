@@ -275,6 +275,7 @@ export async function getGmvSeries(
   now: Date = new Date(),
 ): Promise<GmvCurrencySlice[]> {
   const months = recentMonths(now, monthsBack);
+  // tenancy-exempt: Admin gross volume aggregates payments across all teachers by currency.
   const payments = await prisma.payment.findMany({
     where: {
       status: "paid",

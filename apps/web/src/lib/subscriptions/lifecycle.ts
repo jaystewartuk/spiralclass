@@ -417,6 +417,7 @@ export async function recordSubscriptionInvoice(
     // upsert would fall through to the create and fail the unique constraint,
     // so the webhook delivery would error and be retried rather than record
     // the invoice. Only the create branch names the tenant.
+    // tenancy-exempt: Verified billing redeliveries match the globally unique Stripe invoice ID after resolving its billing account.
     await deps.prisma.subscriptionInvoice.upsert({
       where: { stripeInvoiceId: input.stripeInvoiceId },
       create: { teacherId: input.teacherId, ...data, stripeInvoiceId: input.stripeInvoiceId },

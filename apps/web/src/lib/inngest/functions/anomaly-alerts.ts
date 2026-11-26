@@ -72,6 +72,7 @@ export async function detectAnomalies(now: Date): Promise<Anomaly[]> {
   const anomalies: Anomaly[] = [];
 
   // 1. Refund spike (platform-wide).
+  // tenancy-exempt: The scheduled refund-spike check counts refunds across all teachers.
   const refundCount = await prisma.payment.count({
     where: { status: "refunded", refundedAt: { gte: windowStart } },
   });
@@ -86,6 +87,7 @@ export async function detectAnomalies(now: Date): Promise<Anomaly[]> {
 
   // 2. Per-teacher refund cluster — the signal we actually care about
   // for compromised-account detection. Group by package.teacher_id.
+  // tenancy-exempt: The scheduled refund-cluster check reads all teachers and groups by package owner.
   const refundsByTeacher = await prisma.payment.findMany({
     where: { status: "refunded", refundedAt: { gte: windowStart } },
     select: { package: { select: { teacherId: true } } },
@@ -153,6 +155,7 @@ export async function detectAnomalies(now: Date): Promise<Anomaly[]> {
   }
 
   // 5. Payment failure rate.
+  // tenancy-exempt: The scheduled failure-spike check counts failed payments across all teachers.
   const failedPayments = await prisma.payment.count({
     where: {
       status: "failed",

@@ -43,11 +43,13 @@ export default async function AdminOverviewPage() {
     prisma.teacher.count({ where: { onboardingCompleteAt: { not: null }, ...NOT_TEST_ACCOUNT } }),
     prisma.student.count({ where: NOT_TEST_ACCOUNT }),
     prisma.package.count({ where: { status: "active", ...REAL_PACKAGE_WHERE } }),
+    // tenancy-exempt: The admin dashboard sums paid payments across all teachers (D-25).
     prisma.payment.aggregate({
       where: { status: "paid", package: REAL_PACKAGE_WHERE },
       _sum: { amountMinorUnits: true },
       _count: { _all: true },
     }),
+    // tenancy-exempt: The admin dashboard counts refunds across all teachers (D-25).
     prisma.payment.count({ where: { status: "refunded", package: REAL_PACKAGE_WHERE } }),
     prisma.notification.count({ where: { status: "queued" } }),
     prisma.notification.count({ where: { status: "failed" } }),
@@ -59,6 +61,7 @@ export default async function AdminOverviewPage() {
       take: 5,
       select: { id: true, email: true, name: true, createdAt: true, onboardingCompleteAt: true },
     }),
+    // tenancy-exempt: The admin dashboard shows recent paid payments across all teachers (D-25).
     prisma.payment.findMany({
       where: { status: "paid" },
       orderBy: { paidAt: "desc" },

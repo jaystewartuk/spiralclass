@@ -186,6 +186,7 @@ async function handleDispute(
   let packageId: string | null = null;
   let studentId: string | null = null;
   if (dispute.payment_intent) {
+    // tenancy-exempt: The verified dispute event identifies the payment intent before the package owner is known.
     const payment = await deps.prisma.payment.findFirst({
       where: { providerPaymentId: dispute.payment_intent },
       select: {
@@ -211,6 +212,7 @@ async function handleDispute(
     dispute.status === "warning_closed" ||
     dispute.is_charge_refundable === false;
 
+  // tenancy-exempt: Verified dispute redeliveries match the globally unique Stripe dispute ID.
   await deps.prisma.dispute.upsert({
     where: { stripeDisputeId: dispute.id },
     create: {
@@ -482,6 +484,7 @@ async function handleCheckoutSessionCompleted(
     return { code: "no-payment-row", clientReferenceId: null };
   }
 
+  // tenancy-exempt: The verified checkout event resolves the owner from the payment reference and its package.
   const payment = await deps.prisma.payment.findFirst({
     where: { externalReference: clientRef },
     include: {
@@ -575,6 +578,7 @@ async function handleCheckoutSessionExpired(
   if (!clientRef) {
     return { code: "no-payment-row", clientReferenceId: null };
   }
+  // tenancy-exempt: The verified checkout event resolves the owner from the payment reference and its package.
   const payment = await deps.prisma.payment.findFirst({
     where: { externalReference: clientRef },
     include: {
@@ -663,6 +667,7 @@ async function handlePaymentIntentTransition(
   // when the session.completed event already landed) OR metadata
   // carries our external_reference UUID (always set on creation).
   const externalRef = (fresh.metadata ?? {})["external_reference"] ?? externalReferenceHint ?? null;
+  // tenancy-exempt: The verified PaymentIntent resolves the owner from its provider ID or checkout reference.
   const payment = await deps.prisma.payment.findFirst({
     where: {
       OR: [
@@ -720,6 +725,7 @@ async function handleChargeRefunded(
   if (!paymentIntentId) {
     return { code: "noop", reason: "charge-refunded-without-pi" };
   }
+  // tenancy-exempt: The verified refund event resolves the owner from its payment intent and package.
   const payment = await deps.prisma.payment.findFirst({
     where: { providerPaymentId: paymentIntentId },
     include: {

@@ -59,11 +59,14 @@ export default async function AdminPaymentsPage({
   const where = buildPaymentWhere({ q, status, from, to });
 
   const [grossPaidAgg, totalCount, statusCounts] = await Promise.all([
+    // tenancy-exempt: Finance staff see gross payments across all teachers in the filtered period (D-25).
     prisma.payment.aggregate({
       where: { ...where, status: "paid" },
       _sum: { amountMinorUnits: true },
     }),
+    // tenancy-exempt: Finance staff count payments across all teachers for pagination (D-25).
     prisma.payment.count({ where }),
+    // tenancy-exempt: Finance staff group payments across all teachers by status (D-25).
     prisma.payment.groupBy({ by: ["status"], where, _count: { _all: true } }),
   ]);
   const statusLabels: Record<PaymentStatus, string> = {
@@ -81,6 +84,7 @@ export default async function AdminPaymentsPage({
     STATUS_COLORS,
   );
   const pageState = resolvePage(params, totalCount, PAGE_SIZE);
+  // tenancy-exempt: Finance staff list payments across all teachers in the filtered period (D-25).
   const payments = await prisma.payment.findMany({
     where,
     orderBy,

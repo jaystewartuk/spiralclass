@@ -28,6 +28,7 @@ export async function sendTransferConfirmReminders(
 
   // Wise payments still pending, marked sent by the student long enough ago,
   // and never confirmed (teacher- or auto-).
+  // tenancy-exempt: The reminder job finds pending transfers across all teachers and groups them by owner.
   const stuck = await prisma.payment.findMany({
     where: {
       provider: "manual_transfer",
